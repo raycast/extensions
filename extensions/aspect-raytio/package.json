@@ -17,7 +17,19 @@
       "subtitle": "Calculate any aspect ratio",
       "description": "Calculate easily the aspect ratio for different sizes based on a width or height.",
       "keywords": ["aspect", "ratio", "calculate", "size", "width", "height"],
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "width",
+          "placeholder": "Width",
+          "type": "text"
+        },
+        {
+          "name": "height",
+          "placeholder": "Height",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {

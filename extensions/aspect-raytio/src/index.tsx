@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, LaunchProps, Form } from "@raycast/api";
 import DimensionsDropdown from "./dimensions-dropdown";
 import CreateCustomRatio from "./create-custom-ratio";
 import AspectRatiosList from "./aspect-ratios-list";
@@ -24,11 +24,14 @@ export type RatioType = {
 
 const defaultSize = 1920;
 
-export default function Command() {
-  const [sizeValue, setSizeValue] = useState(defaultSize);
-  const [basedDimension, setBasedDimension] = useState<BasedDimensions>(BasedDimensions.BASED_WIDTH);
+export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
+  const { width, height } = props.arguments;
+  const [sizeValue, setSizeValue] = useState(width || height || defaultSize);
   const [orientation, setOrientation] = useState<Orientations>(Orientations.LANDSCAPE);
   const [customRatios, setCustomRatios] = useState<RatioType[]>([]);
+  const [basedDimension, setBasedDimension] = useState<BasedDimensions>(
+    height ? BasedDimensions.BASED_HEIGHT : BasedDimensions.BASED_WIDTH,
+  );
 
   function handleDimensionChange(value: BasedDimensions) {
     setBasedDimension(value);
@@ -58,61 +61,67 @@ export default function Command() {
   }, [sizeValue]);
 
   return (
-    <List
-      navigationTitle={`Raytio for ${orientation}`}
-      searchBarPlaceholder="Width or Height"
-      searchBarAccessory={<DimensionsDropdown value={basedDimension} handleDimensionChange={handleDimensionChange} />}
-      onSearchTextChange={(text: string) => setSizeValue(Number(text))}
-    >
-      {!isNaN(Number(sizeValue)) ? (
-        <>
-          <AspectRatiosList
-            title="Defaults"
-            list={defaultRatios}
-            sizeValue={sizeValue}
-            basedDimension={basedDimension}
-            orientation={orientation}
-            handleOrientationChange={handleOrientationChange}
-          />
-          <AspectRatiosList
-            title="Custom"
-            list={customRatios}
-            sizeValue={sizeValue}
-            basedDimension={basedDimension}
-            orientation={orientation}
-            handleOrientationChange={handleOrientationChange}
-            handleDeleteItem={(id: string) => {
-              setCustomRatios(customRatios.filter((ratio: RatioType) => ratio.key !== id));
-            }}
-            handleDeleteAll={() => {
-              setCustomRatios([]);
-            }}
-          />
-          <List.Section title="Configuration">
-            <List.Item
-              title="Create New"
-              subtitle="Create Custom Ratio"
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Create New"
-                    target={
-                      <CreateCustomRatio
-                        totalCustomRatios={customRatios.length}
-                        onCreate={(ar: RatioType) => {
-                          setCustomRatios([...customRatios, ar]);
-                        }}
-                      />
-                    }
-                  />
-                </ActionPanel>
-              }
+    <>
+      <Form>
+        <Form.TextField id="width" title="Width" />
+        <Form.TextField id="height" title="Height" />
+      </Form>
+      <List
+        navigationTitle={`Raytio for ${orientation}`}
+        searchBarPlaceholder="Width or Height"
+        searchBarAccessory={<DimensionsDropdown value={basedDimension} handleDimensionChange={handleDimensionChange} />}
+        onSearchTextChange={(text: string) => setSizeValue(Number(text))}
+      >
+        {!isNaN(Number(sizeValue)) ? (
+          <>
+            <AspectRatiosList
+              title="Defaults"
+              list={defaultRatios}
+              sizeValue={sizeValue}
+              basedDimension={basedDimension}
+              orientation={orientation}
+              handleOrientationChange={handleOrientationChange}
             />
-          </List.Section>
-        </>
-      ) : (
-        <List.EmptyView title="Type only numbers with or without decimal values" description="e.g. 1920, 600.25" />
-      )}
-    </List>
+            <AspectRatiosList
+              title="Custom"
+              list={customRatios}
+              sizeValue={sizeValue}
+              basedDimension={basedDimension}
+              orientation={orientation}
+              handleOrientationChange={handleOrientationChange}
+              handleDeleteItem={(id: string) => {
+                setCustomRatios(customRatios.filter((ratio: RatioType) => ratio.key !== id));
+              }}
+              handleDeleteAll={() => {
+                setCustomRatios([]);
+              }}
+            />
+            <List.Section title="Configuration">
+              <List.Item
+                title="Create New"
+                subtitle="Create Custom Ratio"
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="Create New"
+                      target={
+                        <CreateCustomRatio
+                          totalCustomRatios={customRatios.length}
+                          onCreate={(ar: RatioType) => {
+                            setCustomRatios([...customRatios, ar]);
+                          }}
+                        />
+                      }
+                    />
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
+          </>
+        ) : (
+          <List.EmptyView title="Type only numbers with or without decimal values" description="e.g. 1920, 600.25" />
+        )}
+      </List>
+    </>
   );
 }
