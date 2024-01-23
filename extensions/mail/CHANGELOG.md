@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Fix] - 2024-01-23
+
+Fix an issue when the `Mark all as read` Command was opening to many Mail windows
+
 ## [Enhancement] - 2024-01-21
 
 Performance and UI feedback improvements to the `Mark all as read` Command

@@ -17,10 +17,12 @@ async function script(): Promise<void> {
       end repeat
   end repeat
 
-  set visible of every window to true
+  close every window
   activate
+  delay 1 -- Wait for a second to ensure Mail app is activated
+  tell application "System Events" to keystroke "0" using command down -- Command-0 is the typical shortcut to open main viewer window in Mail
 end tell
-`;
+  `;
 
   runAppleScript(script);
 }
