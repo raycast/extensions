@@ -1,11 +1,11 @@
-export interface CanvasValues {
+export interface ProjectValues {
   description?: string;
   url: string;
 }
 
-export interface CanvasDetails {
+export interface ProjectDetails {
   name: string;
   description?: string;
 }
 
-export const canvasURL = (id: string) => `https://www.tldraw.com/r/aycast_${id}`;
+export const projectURL = (id: string) => `https://www.tldraw.com/r/aycast_${id}`;

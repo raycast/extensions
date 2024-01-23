@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tldraw",
   "title": "tldraw",
-  "description": "Creates and persist tldraw canvases",
+  "description": "Creates and persists TLDraw projects",
   "icon": "tldraw-icon.png",
   "author": "zephraph",
   "categories": [
@@ -14,7 +14,7 @@
       "name": "create-project",
       "title": "Create a new project",
       "subtitle": "tldraw",
-      "description": "Creates a new TLDraw canvas",
+      "description": "Creates a new TLDraw project",
       "mode": "no-view",
       "arguments": [
         {

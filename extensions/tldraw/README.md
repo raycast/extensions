@@ -1,3 +1,3 @@
 # tldraw
 
-Creates and persist tldraw canvases
+Creates and persists TLDraw Projects

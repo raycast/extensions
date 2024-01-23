@@ -1,13 +1,13 @@
 import { ActionPanel, List, Action, LocalStorage, Form, showHUD, PopToRootType, Icon } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { CanvasValues } from "./shared";
+import { ProjectValues } from "./shared";
 
 export default function Command() {
   const { isLoading, data, revalidate } = usePromise(
     () =>
       LocalStorage.allItems().then((items) =>
         Object.entries(items).map(([name, props]) => [name, JSON.parse(props)]),
-      ) as Promise<[string, CanvasValues][]>,
+      ) as Promise<[string, ProjectValues][]>,
     [],
   );
   return (
@@ -21,9 +21,9 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser title="Open in Browser" url={url} />
-                <Action.CopyToClipboard title="Copy Canvas URL" content={url} />
+                <Action.CopyToClipboard title="Copy Project URL" content={url} />
                 <Action.Push
-                  title="Edit Canvas Details"
+                  title="Edit Project Details"
                   icon={Icon.Pencil}
                   target={
                     <Form
@@ -38,7 +38,7 @@ export default function Command() {
                               return Promise.all([
                                 LocalStorage.setItem(newName, JSON.stringify({ url, ...others })),
                                 revalidate(),
-                                showHUD(`Canvas "${newName}" Updated`, {
+                                showHUD(`Project "${newName}" Updated`, {
                                   clearRootSearch: true,
                                   popToRootType: PopToRootType.Immediate,
                                 }),
@@ -59,14 +59,14 @@ export default function Command() {
                   }
                 />
                 <Action
-                  title="Delete Canvas"
+                  title="Delete Project"
                   style={Action.Style.Destructive}
                   onAction={async () => {
                     await Promise.all([
                       LocalStorage.removeItem(name),
                       revalidate(),
-                      showHUD(`Canvas "${name}" Deleted`, { clearRootSearch: true }),
-                    ]).catch((error) => showFailureToast(error, { title: "Failed to delete canvas" }));
+                      showHUD(`Project "${name}" Deleted`, { clearRootSearch: true }),
+                    ]).catch((error) => showFailureToast(error, { title: "Failed to delete project" }));
                   }}
                 />
               </ActionPanel>
