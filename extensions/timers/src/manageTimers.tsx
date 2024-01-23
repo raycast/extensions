@@ -1,11 +1,27 @@
-import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchProps, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { useEffect } from "react";
 import useTimers from "./hooks/useTimers";
 import RenameView from "./RenameView";
 import CustomTimerView from "./startCustomTimer";
 import { formatDateTime, formatTime } from "./formatUtils";
+import { CommandLinkParams } from "./types";
+import { readCustomTimers, startTimer } from "./timerUtils";
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
+  if (props.launchContext?.timerID) {
+    const customTimers = readCustomTimers();
+    const ct = customTimers[props.launchContext.timerID];
+    if (ct == undefined) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "This custom timer no longer exists!",
+      });
+    } else {
+      startTimer(ct.timeInSeconds, ct.name, ct.selectedSound);
+      return;
+    }
+  }
+
   const {
     timers,
     customTimers,
@@ -27,6 +43,12 @@ export default function Command() {
 
   const runningIcon = { tag: { value: "Running", color: Color.Yellow } };
   const finishedIcon = { tag: { value: "Finished!", color: Color.Green } };
+
+  const createPresetLink = (ctID: string): string => {
+    const payload: CommandLinkParams = { timerID: ctID };
+    const encodedPayload = encodeURIComponent(JSON.stringify(payload));
+    return `raycast://extensions/ThatNerd/timers/manageTimers?context=${encodedPayload}`;
+  };
 
   return (
     <List isLoading={isLoading}>
@@ -96,7 +118,7 @@ export default function Command() {
                     title="Rename Timer"
                     onAction={() =>
                       push(
-                        <RenameView currentName={customTimers[ctID].name} originalFile={"customTimer"} ctID={ctID} />
+                        <RenameView currentName={customTimers[ctID].name} originalFile={"customTimer"} ctID={ctID} />,
                       )
                     }
                   />
@@ -107,6 +129,13 @@ export default function Command() {
                       key: "x",
                     }}
                     onAction={() => handleDeleteCT(ctID)}
+                  />
+                  <Action.CreateQuicklink
+                    quicklink={{
+                      name: customTimers[ctID].name,
+                      link: createPresetLink(ctID),
+                    }}
+                    title="Add Preset to Root Search"
                   />
                 </ActionPanel>
               }

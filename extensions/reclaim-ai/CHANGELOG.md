@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2024-01-18
+- Menu bar update for start / stop of habits: when starting or stopping a habit, the extension will now display a HUD giving the user immediate feedback that their action was successful. 
+
 ## [Fixes] - 2023-11-29
 
 - Fix duration string parsing so that task durations work correctly in more cases (RAI-9438)

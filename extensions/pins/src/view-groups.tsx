@@ -10,7 +10,7 @@ import {
   LocalStorage,
   showToast,
 } from "@raycast/api";
-import { setStorage, getStorage } from "./lib/utils";
+import { setStorage, getStorage } from "./lib/storage";
 import { Direction, StorageKey } from "./lib/constants";
 import { Group, deleteGroup, useGroups } from "./lib/Groups";
 import { Pin, usePins } from "./lib/Pins";

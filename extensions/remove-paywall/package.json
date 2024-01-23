@@ -21,6 +21,12 @@
       "mode": "no-view",
       "arguments": [
         {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (or selection/clipboard)",
+          "required": false
+        },
+        {
           "name": "service",
           "type": "dropdown",
           "placeholder": "Service",

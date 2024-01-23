@@ -10,8 +10,9 @@ export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>
     service = preferences.service;
   }
 
+  const urlArgument = props.arguments.url;
   try {
-    const url = await getUrl();
+    const url = await getUrl(urlArgument);
 
     if (typeof url !== "string") {
       throw url;

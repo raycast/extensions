@@ -1,21 +1,25 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, getPreferenceValues, Icon, List } from "@raycast/api";
-import { useBookmarks, useTags } from "./utils/hooks";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List } from "@raycast/api";
 import { useState } from "react";
-import { ReadState } from "./utils/types";
 import { capitalize } from "lodash";
-import ActionStyle = Alert.ActionStyle;
-
-const preferences = getPreferenceValues();
+import { ContentType, ReadState } from "./lib/api";
+import { View } from "./lib/oauth/view";
+import { preferences } from "./lib/preferences";
+import { useBookmarks } from "./lib/hooks/use-bookmarks";
+import { useTags } from "./lib/hooks/use-tags";
 
 interface SearchArguments {
   title: string;
 }
 
-export default function Search(props: { arguments: SearchArguments }) {
-  const [readState, setReadState] = useState(preferences.defaultFilter);
+function SearchBookmarks(props: { arguments?: SearchArguments }) {
+  const [state, setState] = useState(preferences.defaultFilter);
   const [tag, setTag] = useState<string>();
-  const [search, setSearch] = useState(props.arguments.title);
-  const tags = useTags();
+  const [contentType, setContentType] = useState<ContentType>();
+  const [search, setSearch] = useState(props.arguments?.title);
+  const [tagSearch, setTagSearch] = useState<string>();
+
+  const { tags } = useTags();
+
   const {
     bookmarks,
     addTag,
@@ -29,7 +33,8 @@ export default function Search(props: { arguments: SearchArguments }) {
   } = useBookmarks({
     search,
     tag,
-    state: readState,
+    contentType,
+    state: state,
   });
 
   return (
@@ -42,14 +47,20 @@ export default function Search(props: { arguments: SearchArguments }) {
       searchBarAccessory={
         <List.Dropdown
           storeValue
-          defaultValue={readState}
+          defaultValue={state}
           tooltip="Filter Bookmarks"
           onChange={(filter) => {
             if (tags.includes(filter)) {
-              setReadState(ReadState.All);
+              setState(ReadState.All);
+              setContentType(undefined);
               setTag(filter);
+            } else if (Object.values(ContentType).includes(filter as ContentType)) {
+              setState(ReadState.All);
+              setContentType(filter as ContentType);
+              setTag(undefined);
             } else {
-              setReadState(filter as ReadState);
+              setState(filter as ReadState);
+              setContentType(undefined);
               setTag(undefined);
             }
           }}
@@ -58,6 +69,11 @@ export default function Search(props: { arguments: SearchArguments }) {
             <List.Dropdown.Item icon={Icon.Tray} title="All" value={ReadState.All} />
             <List.Dropdown.Item icon={Icon.PlusCircle} title="Unread" value={ReadState.Unread} />
             <List.Dropdown.Item icon={Icon.CheckCircle} title="Archived" value={ReadState.Archive} />
+          </List.Dropdown.Section>
+          <List.Dropdown.Section title="Content Type">
+            <List.Dropdown.Item icon={Icon.Video} title="Video" value={ContentType.Video} />
+            <List.Dropdown.Item icon={Icon.Document} title="Article" value={ContentType.Article} />
+            <List.Dropdown.Item icon={Icon.Image} title="Image" value={ContentType.Image} />
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Tags">
             {tags.map((tag) => (
@@ -128,7 +144,7 @@ export default function Search(props: { arguments: SearchArguments }) {
                       },
                       primaryAction: {
                         title: "Delete",
-                        style: ActionStyle.Destructive,
+                        style: Alert.ActionStyle.Destructive,
                         onAction: () => deleteBookmark(bookmark.id),
                       },
                     });
@@ -173,19 +189,34 @@ export default function Search(props: { arguments: SearchArguments }) {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <ActionPanel.Submenu icon={Icon.Tag} title="Add Tag">
+                <ActionPanel.Submenu
+                  icon={Icon.Tag}
+                  title="Add Tag"
+                  onOpen={() => setTagSearch("")}
+                  onSearchTextChange={setTagSearch}
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                >
                   {tags
                     .filter((tag) => !bookmark.tags.includes(tag))
-                    .map((tag) => (
-                      <Action
-                        key={tag}
-                        title={capitalize(tag)}
-                        icon={Icon.Tag}
-                        onAction={() => addTag(bookmark.id, tag)}
-                      />
-                    ))}
+                    .map((tag) => {
+                      return (
+                        <Action
+                          key={tag}
+                          title={capitalize(tag)}
+                          icon={Icon.Tag}
+                          onAction={() => addTag(bookmark.id, tag)}
+                        />
+                      );
+                    })}
+                  {tagSearch && (
+                    <Action icon={Icon.Plus} title={tagSearch} onAction={() => addTag(bookmark.id, tagSearch)} />
+                  )}
                 </ActionPanel.Submenu>
-                <ActionPanel.Submenu icon={Icon.Tag} title="Remove Tag">
+                <ActionPanel.Submenu
+                  icon={Icon.Tag}
+                  title="Remove Tag"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                >
                   {bookmark.tags.map((tag) => (
                     <Action
                       key={tag}
@@ -201,5 +232,13 @@ export default function Search(props: { arguments: SearchArguments }) {
         />
       ))}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <SearchBookmarks />
+    </View>
   );
 }
