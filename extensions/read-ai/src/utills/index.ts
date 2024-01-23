@@ -59,33 +59,53 @@ export async function getCurrentCommandIdentifier() {
 /**
  * Splits the input text into sentences.
  * @description
- * This function processes the input text to extract individual sentences. It first identifies sentence boundaries by
- * looking for periods, exclamation marks, or question marks that are followed by a space or a newline character,
- * ensuring that these punctuation marks are not immediately preceded or followed by a digit to prevent incorrect
- * splitting at decimal points or within dates.
+ * This function processes the input text to extract individual sentences. It first checks if the text length is less than or equal to the minimum sentence length, if so it returns the text as is.
+ * If the text length is more than the minimum sentence length, it identifies sentence boundaries by looking for periods, exclamation marks, or question marks that are followed by a space or a newline character,
+ * ensuring that these punctuation marks are not immediately preceded or followed by a digit to prevent incorrect splitting at decimal points or within dates.
  *
- * After identifying the sentence boundaries, the function trims each sentence to remove any leading or trailing
- * whitespace. Sentences that are empty after trimming are discarded.
+ * After identifying the sentence boundaries, the function trims each sentence to remove any leading or trailing whitespace. Sentences that are empty after trimming are discarded.
  *
- * Additionally, if a sentence exceeds 100 characters in length, it is further split into smaller segments at comma
- * positions, provided that the commas are not immediately preceded or followed by a digit. This step helps to
+ * Additionally, if a sentence exceeds the ideal length, it is further split into smaller segments at comma positions, provided that the commas are not immediately preceded or followed by a digit. This step helps to
  * maintain a manageable sentence length for subsequent processing.
  *
  * @param {string} text - The input text to be split into sentences.
- * @returns {string[]} - An array of sentences derived from the input text, with each sentence trimmed and
- * potentially split at comma positions to ensure shorter lengths.
+ * @param {number} minSentenceLength - The minimum length of a sentence. Default is 50.
+ * @param {number} idealLength - The ideal length of a sentence. Default is 80.
+ * @returns {string[]} - An array of sentences derived from the input text, with each sentence trimmed and potentially split at comma positions to ensure shorter lengths.
  */
-export function splitSentences(text: string): string[] {
+export function splitSentences(text: string, minSentenceLength: number = 50, idealLength: number = 80): string[] {
+  if (text.length <= minSentenceLength) {
+    return [text];
+  }
+
   const sentenceEndRegex = /(?<=\D{10,})\.(?=\d)|(?<!\d)[.!?](?!\d)\s|\n/;
   const commaSplitRegex = /(?<!\d),(?!\d)\s*/;
 
   const sentences = text.split(sentenceEndRegex).map((s) => s.trim());
 
-  // Explicitly define the type of the accumulator as string[]
   return sentences.reduce<string[]>((acc, sentence) => {
-    if (sentence) {
-      const parts = sentence.length > 100 ? sentence.split(commaSplitRegex) : [sentence];
-      acc.push(...parts);
+    if (sentence.length <= idealLength) {
+      acc.push(sentence);
+    } else {
+      const subParts = sentence.split(commaSplitRegex);
+      let tempPart = "";
+
+      subParts.forEach((part) => {
+        if (tempPart.length + part.length < idealLength) {
+          tempPart += part + ", ";
+        } else {
+          if (tempPart.length >= minSentenceLength) {
+            acc.push(tempPart.trimEnd());
+            tempPart = part + ", ";
+          } else {
+            tempPart += part + ", ";
+          }
+        }
+      });
+
+      if (tempPart) {
+        acc.push(tempPart);
+      }
     }
     return acc;
   }, []);
