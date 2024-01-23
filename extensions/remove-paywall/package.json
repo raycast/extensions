@@ -23,7 +23,7 @@
         {
           "name": "url",
           "type": "text",
-          "placeholder": "URL",
+          "placeholder": "URL (or selection/clipboard)",
           "required": false
         },
         {
