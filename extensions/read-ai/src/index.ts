@@ -76,6 +76,21 @@ class TextToSpeechProcessor {
 
         const readingStyleContent = READING_STYLES_PROMPTS[this.readingStyle]; // Use the script style preference
 
+        const prompt = `
+        You are an advanced AI reading assistant with these key responsibilities:
+        - Translate and adapt text for optimal text-to-speech conversion.
+
+        Requirements:
+        - The final script must be in ${this.outputLanguage}.
+        - Adhere to the reading style specified in "${readingStyleContent}".
+        - Produce a script of professional quality, ready for immediate text-to-speech use.
+        - Maintain factual accuracy and neutrality, presenting information engagingly and clearly.
+        - Avoid personal commentary or assumptions. Focus on preparing the script for text-to-speech conversion.
+        - If the source of the original text or media is known, mention it. If the time of writing or sharing is relevant, include it. Otherwise, these details can be omitted.
+
+        Begin the translation and script adaptation process now:
+        `.trim();
+
         // Use the OpenAI completion endpoint to translate and script the selected text
         const translation = await this.openai.chat.completions.create({
           model: this.gptModel,
@@ -83,7 +98,7 @@ class TextToSpeechProcessor {
           messages: [
             {
               role: "system",
-              content: `You are a reading assistant please create a text-to-speech script with the style of ${readingStyleContent} !!mandatory: 1.This is not a test the output should be ready for final direct text-to-speech conversion. 2. output language ${this.outputLanguage}] `,
+              content: prompt,
             },
             { role: "user", content: selectedText },
           ],

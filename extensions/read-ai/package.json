@@ -131,7 +131,7 @@
       "title": "GPT Model",
       "description": "Choose the GPT model to use for text script generation",
       "required": true,
-      "default": "gpt-3.5-turbo-16k",
+      "default": "gpt-3.5-turbo",
       "label": "GPT Model",
       "data": [
         {
