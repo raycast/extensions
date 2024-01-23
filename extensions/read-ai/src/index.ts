@@ -3,8 +3,8 @@ import { OpenAI } from "openai";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
-import { LanguageCode, ScriptStyle, Voice, Preferences } from "./types";
-import { MIN_TEXT_QUE_SENTENCE_LENGTH, SCRIPT_STYLES_PROMPTS } from "./const";
+import { LanguageCode, readingStyle, Voice, Preferences } from "./types";
+import { MIN_TEXT_QUE_SENTENCE_LENGTH, READING_STYLES_PROMPTS } from "./const";
 import {
   cleanupTmpDir,
   execAsync,
@@ -24,7 +24,7 @@ class TextToSpeechProcessor {
   private gptModel: string;
   private subtitlesToggle: boolean;
   private outputLanguage: LanguageCode;
-  private scriptStyle: ScriptStyle; // 추가된 타입
+  private readingStyle: readingStyle; // 추가된 타입
 
   constructor(
     apiKey: string,
@@ -33,7 +33,7 @@ class TextToSpeechProcessor {
     gptModel: string,
     subtitlesToggle: boolean,
     outputLanguage: LanguageCode,
-    scriptStyle: ScriptStyle,
+    readingStyle: readingStyle,
   ) {
     this.openai = new OpenAI({ apiKey });
     this.voice = voice;
@@ -41,7 +41,7 @@ class TextToSpeechProcessor {
     this.gptModel = gptModel;
     this.subtitlesToggle = subtitlesToggle;
     this.outputLanguage = outputLanguage;
-    this.scriptStyle = scriptStyle;
+    this.readingStyle = readingStyle;
   }
 
   /**
@@ -54,7 +54,6 @@ class TextToSpeechProcessor {
    * @param {LanguageCode} [outputLanguage] - The language code for translation output.
    */
   public async processSelectedText() {
-    closeMainWindow();
     const currentIdentifier = Date.now().toString();
     await setCurrentCommandIdentifier(currentIdentifier);
 
@@ -71,11 +70,11 @@ class TextToSpeechProcessor {
 
         await showToast({
           style: Toast.Style.Animated,
-          title: `Writing a ${this.scriptStyle} script... 🔍`,
+          title: `Writing a ${this.readingStyle} script... 🔍`,
           message: "Please wait while the script is being written.",
         });
 
-        const scriptStyleContent = SCRIPT_STYLES_PROMPTS[this.scriptStyle]; // Use the script style preference
+        const readingStyleContent = READING_STYLES_PROMPTS[this.readingStyle]; // Use the script style preference
 
         // Use the OpenAI completion endpoint to translate and script the selected text
         const translation = await this.openai.chat.completions.create({
@@ -84,7 +83,7 @@ class TextToSpeechProcessor {
           messages: [
             {
               role: "system",
-              content: `Create a ${this.outputLanguage} ${scriptStyleContent}`,
+              content: `Create a ${this.outputLanguage} text-to-speech script with the style of ${readingStyleContent}`,
             },
             { role: "user", content: selectedText },
           ],
@@ -118,7 +117,7 @@ class TextToSpeechProcessor {
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Please select text first",
+        title: String(error),
         message: String(error),
       });
     }
@@ -177,6 +176,7 @@ class TextToSpeechProcessor {
     while (this.playAudioQueue.length > 0) {
       const activeIdentifier = await getCurrentCommandIdentifier();
       if (activeIdentifier !== currentIdentifier) {
+        closeMainWindow();
         console.log("🚫 🔇 A new task command has started. Stopping audio tasks");
         showToast({
           style: Toast.Style.Success,
@@ -250,6 +250,10 @@ class TextToSpeechProcessor {
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
+  const commandArgs = process.argv;
+  const commandName = commandArgs[2]; // 커맨드 이름을 얻습니다.
+  console.log("🚀 ~ Command ~ commandName:", commandName);
+
   const processor = new TextToSpeechProcessor(
     preferences.apiKey,
     preferences.defaultVoice,
@@ -257,7 +261,7 @@ export default async function Command() {
     preferences.gptModel,
     preferences.subtitlesToggle,
     preferences.outputLanguage,
-    preferences.scriptStyle,
+    preferences.readingStyle,
   );
   await processor.processSelectedText();
 }

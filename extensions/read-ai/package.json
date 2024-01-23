@@ -71,14 +71,18 @@
       ]
     },
     {
-      "name": "scriptStyle",
+      "name": "readingStyle",
       "type": "dropdown",
-      "title": "Script Style",
-      "description": "Select the script style for text-to-speech",
+      "title": "Reading Style",
+      "description": "Select the reading style for text-to-speech",
       "required": true,
-      "default": "concise",
-      "label": "Script Style",
+      "default": "autoDetect",
+      "label": "Reading Style",
       "data": [
+        {
+          "value": "autoDetect",
+          "title": "Auto Detect"
+        },
         {
           "value": "summary",
           "title": "Summary"
@@ -154,7 +158,7 @@
       "title": "Temperature",
       "description": "Adjust the creativity of the text-to-speech output",
       "required": true,
-      "default": "0.7",
+      "default": "1",
       "label": "Temperature",
       "data": [
         {

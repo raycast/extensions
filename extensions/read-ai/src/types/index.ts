@@ -1,6 +1,6 @@
-import { SCRIPT_STYLES_PROMPTS } from "../const/index";
+import { READING_STYLES_PROMPTS } from "../const/index";
 export type Voice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
-export type ScriptStyle = keyof typeof SCRIPT_STYLES_PROMPTS;
+export type readingStyle = keyof typeof READING_STYLES_PROMPTS;
 export type LanguageCode = string;
 
 export interface Preferences {
@@ -10,5 +10,5 @@ export interface Preferences {
   gptModel: string;
   subtitlesToggle: boolean;
   outputLanguage: LanguageCode;
-  scriptStyle: ScriptStyle;
+  readingStyle: readingStyle;
 }

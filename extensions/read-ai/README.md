@@ -5,6 +5,7 @@ Feeling too lazy to read? No worries, we've got you covered! This Raycast extens
 ## Features
 
 1. **Advanced Text-to-Speech**: Go beyond traditional text-to-speech with a range of reading styles. Choose to have your text read in a:
+   - Auto Detection Style: Automatically detects the most suitable reading style based on the content.
    - Summary Style: Provides a concise summary of the text.
    - Detailed Style: Offers a detailed explanation of the text.
    - Audio Book Style: Delivers a rich and immersive storytelling experience.
@@ -15,7 +16,6 @@ Feeling too lazy to read? No worries, we've got you covered! This Raycast extens
    - Podcast Style: Enjoy a conversational and engaging tone, akin to listening to a podcast.
    - Tweet Style: Perfect for reading out social media posts or short messages.
    - SparkNotes Style: Provides a quick and easy understanding of complex literature.
-   - And more!
 2. **Adapt to Content Type**: The extension intelligently adapts its reading style based on the type of content, enhancing comprehension and engagement.
 3. **Personalization and Accessibility**:
    - Custom Voice Selection: Choose from a variety of voices to find the one that best suits your listening preference, whether it's for casual listening or professional use.
@@ -47,7 +47,7 @@ Configure the extension in Raycast Preferences:
 
 - **API Key**: Your OpenAI API key.
 - **Default Voice**: The voice to be used for reading text.
-- **Script Style**: The style of the script for the TTS output.
+- **Reading Style**: The style of the reading for the TTS output.
 - **Temperature**: The creativity level for AI responses (affects translations).
 - **GPT Model**: The specific GPT model used for generating responses.
 - **Subtitles Toggle**: Enable or disable subtitles for spoken text.
