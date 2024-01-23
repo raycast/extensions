@@ -91,6 +91,7 @@ export default function RecommendedForm(props: { onSkip: () => void; onSuccess: 
         <Form.Dropdown.Item value="Others" title="Others" />
       </Form.Dropdown>
       <Form.Description text="Based on your selection, Tidyread will automatically generate sources to speed up your onboarding process." />
+      <Form.Description text="If you don't like it, feel free to `Skip` in `Actions`." />
     </Form>
   );
 }
