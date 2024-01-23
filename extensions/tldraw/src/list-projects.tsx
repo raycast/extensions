@@ -61,6 +61,7 @@ export default function Command() {
                 <Action
                   title="Delete Project"
                   style={Action.Style.Destructive}
+                  icon={Icon.Trash}
                   onAction={async () => {
                     await Promise.all([
                       LocalStorage.removeItem(name),
