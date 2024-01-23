@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "timecamp",
-  "title": "Timecamp",
-  "description": "Start and stop timecamp tasks.",
+  "title": "TimeCamp",
+  "description": "Start and stop TimeCamp tasks.",
   "icon": "timecamp-logo.png",
   "author": "iAmKevinCruz",
   "categories": [
@@ -13,6 +13,7 @@
     {
       "name": "index",
       "title": "Start/Stop Tasks",
+      "subtitle": "TimeCamp",
       "description": "Start/Stop tasks and edit active timer's notes",
       "mode": "view"
     }
