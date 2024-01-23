@@ -13,7 +13,8 @@
   "commands": [
     {
       "name": "cmd-connect",
-      "title": "Connect To Session",
+      "title": "Connect to Session",
+      "subtitle": "Sesh",
       "description": "Smart terminal session manager.",
       "icon": "command-icon.png",
       "mode": "view",
