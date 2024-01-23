@@ -46,7 +46,7 @@ export function SupertagCreateForm({ onCreate }: SuperTagCreateFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add supertag" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Supertag" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -74,7 +74,7 @@ export function CreateSupertagAction({
 }) {
   return (
     <Action.Push
-      title="Add supertag"
+      title="Add Supertag"
       target={<SupertagCreateForm {...props} />}
       icon={{ source: Icon.Tag, tintColor: Color.PrimaryText }}
       shortcut={shortcut ? { modifiers: ["cmd"], key: "n" } : undefined}

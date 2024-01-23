@@ -40,7 +40,7 @@ export function TargetNodeEditForm({ node }: TargetNodeEditFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit target node" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Edit Target Node" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -51,6 +51,6 @@ export function TargetNodeEditForm({ node }: TargetNodeEditFormProps) {
 
 export function EditTargetNodeAction(props: TargetNodeEditFormProps) {
   return (
-    <Action.Push title="Edit target node" target={<TargetNodeEditForm {...props} />} icon={{ source: Icon.Pencil }} />
+    <Action.Push title="Edit Target Node" target={<TargetNodeEditForm {...props} />} icon={{ source: Icon.Pencil }} />
   );
 }

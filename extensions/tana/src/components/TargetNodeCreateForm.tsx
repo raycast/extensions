@@ -63,7 +63,7 @@ export function CreateTargetNodeAction({
 }) {
   return (
     <Action.Push
-      title="Add target node"
+      title="Add Target Node"
       target={<TargetNodeCreateForm {...props} />}
       icon={Icon.Dot}
       shortcut={shortcut ? { modifiers: ["cmd"], key: "n" } : undefined}

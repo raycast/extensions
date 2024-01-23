@@ -61,13 +61,12 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/node": "^20.11.5",
-    "@types/react": "^18.2.48",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.4",
+    "react": "^18.2.0",
     "typescript": "^5.3.3"
   }
 }

@@ -42,7 +42,7 @@ export function SupertagEditForm({ node }: SuperTagEditFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit supertag" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Edit Supertag" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -62,5 +62,5 @@ export function SupertagEditForm({ node }: SuperTagEditFormProps) {
 }
 
 export function EditSupertagAction(props: SuperTagEditFormProps) {
-  return <Action.Push title="Edit supertag" target={<SupertagEditForm {...props} />} icon={{ source: Icon.Pencil }} />;
+  return <Action.Push title="Edit Supertag" target={<SupertagEditForm {...props} />} icon={{ source: Icon.Pencil }} />;
 }

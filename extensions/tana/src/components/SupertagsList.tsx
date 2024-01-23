@@ -28,7 +28,7 @@ export function SupertagsList() {
               <Action
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                title="Delete supertag"
+                title="Delete Supertag"
                 onAction={() => {
                   deleteSupertag(node.id);
                 }}

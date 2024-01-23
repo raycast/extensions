@@ -27,7 +27,7 @@ export function TargetNodesList() {
               <Action
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                title="Delete target node"
+                title="Delete Target Node"
                 onAction={() => {
                   deleteTargetNode(node.id);
                 }}

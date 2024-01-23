@@ -71,7 +71,7 @@ export function AddToNodeForm() {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create note" onSubmit={handleSubmit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create Note" onSubmit={handleSubmit} icon={Icon.Plus} />
           <CreateTargetNodeAction
             shortcut={false}
             onCreate={(node) => {
