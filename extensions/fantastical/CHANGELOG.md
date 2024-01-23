@@ -1,8 +1,9 @@
 # Fantastical Changelog
 
-## [Fix] - 2024-01-23
+## [Fixes] - 2024-01-23
 
 * Fix placeholder for the `Quickly Add Fantastical Event` command.
+* Fix keywords for finding the `Quickly Add Fantastical Event` command in Raycast.
 
 ## [Enhancement] - 2023-10-09
 
