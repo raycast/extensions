@@ -1,4 +1,5 @@
 export { getMe, type Me } from "./me";
+export { getMyOrganizations, type Organization } from "./organizations";
 export { getMyWorkspaces, type Workspace } from "./workspaces";
 export { getMyProjects, type Project } from "./projects";
 export { getMyClients, type Client } from "./clients";
