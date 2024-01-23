@@ -207,6 +207,7 @@
   "krzysztofzuraw/conventional-comments": "conventional-comments",
   "niemtec/conventional-commits": "conventional-commits",
   "nielsvanrijn/web-converter": "convert",
+  "mrnoisytiger/convert-3d-models": "convert-3d-models",
   "Atiipik/convert-px-to-vw-vh": "convert-px-to-vw-vh",
   "bengry/convert-typescript-to-javascript": "convert-typescript-to-javascript",
   "koinzhang/converter": "converter",

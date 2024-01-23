@@ -208,6 +208,7 @@
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/conventional-commits                     @niemtec @Lucria
 /extensions/convert                                  @nielsvanrijn
+/extensions/convert-3d-models                        @mrnoisytiger
 /extensions/convert-px-to-vw-vh                      @atiipik
 /extensions/convert-typescript-to-javascript         @bengry
 /extensions/converter                                @koinzhang @Saafo
