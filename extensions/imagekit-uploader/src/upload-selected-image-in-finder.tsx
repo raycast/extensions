@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Icon, LocalStorage, Detail } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  LocalStorage,
+  Detail,
+  openExtensionPreferences,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getFinderSelectedImages } from './common/utils/get-finder-selected-images';
 import fs from 'fs/promises';
@@ -13,6 +20,10 @@ import { getDetailImage } from './common/utils/imagekit';
 type StateType =
   | {
       status: 'initial' | 'no-selected-image' | 'canceled';
+    }
+  | {
+      status: 'error';
+      message: string;
     }
   | {
       status: 'succeed';
@@ -54,60 +65,80 @@ export default function Command() {
         return;
       }
 
-      const res = await imagekit.upload({
-        file: data,
-        fileName: `${hash}.${type}`,
-        useUniqueFileName: false,
-      });
+      try {
+        const res = await imagekit.upload({
+          file: data,
+          fileName: `${hash}.${type}`,
+          useUniqueFileName: false,
+        });
 
-      const {
-        fileId,
-        url,
-        size = data.length,
-        height = meta.height,
-        width = meta.height,
-        thumbnailUrl,
-      } = res;
+        const {
+          fileId,
+          url,
+          size = data.length,
+          height = meta.height,
+          width = meta.height,
+          thumbnailUrl,
+        } = res;
 
-      const newRecord: ImageMeta = {
-        fileId,
-        hash,
-        source: image,
-        from: 'finder',
-        format: type,
-        url,
-        size,
-        height,
-        width,
-        thumbnailUrl,
-        createdAt: Date.now(),
-      };
+        const newRecord: ImageMeta = {
+          fileId,
+          hash,
+          source: image,
+          from: 'finder',
+          format: type,
+          url,
+          size,
+          height,
+          width,
+          thumbnailUrl,
+          createdAt: Date.now(),
+        };
 
-      await LocalStorage.setItem(hash, JSON.stringify(newRecord));
+        await LocalStorage.setItem(hash, JSON.stringify(newRecord));
 
-      setState({
-        status: 'succeed',
-        cache: false,
-        image: newRecord,
-      });
+        setState({
+          status: 'succeed',
+          cache: false,
+          image: newRecord,
+        });
+      } catch (e) {
+        setState({
+          status: 'error',
+          message: `\
+# Failed to upload the image 
+
+ImageKit.io responded with error: \`${(e as Error).message}\`
+
+Please check out your preferences, make sure your settings are all right and try again.
+`,
+        });
+      }
     };
 
     load();
   }, []);
 
   const MARKDOWN_TEXT =
-    state.status === 'succeed'
-      ? `![Image Title](${getDetailImage(state.image.url, 360)})`
+    state.status === 'error'
+      ? state.message
+      : state.status === 'succeed'
+        ? `![Image Title](${getDetailImage(state.image.url, 360)})`
+        : state.status === 'initial'
+          ? '**uploading...**'
+          : 'No images selected in the Finder app';
+
+  const navigationTitle =
+    state.status === 'error'
+      ? 'Failed to upload'
       : state.status === 'initial'
-        ? '**uploading...**'
-        : 'No Image Selected';
+        ? 'Uploading'
+        : 'Uploaded successfully';
 
   return (
     <Detail
       markdown={MARKDOWN_TEXT}
-      navigationTitle={
-        state.status === 'initial' ? 'Uploading' : 'Uploaded successfully'
-      }
+      navigationTitle={navigationTitle}
       isLoading={state.status === 'initial'}
       metadata={
         state.status === 'succeed' ? (
@@ -129,6 +160,13 @@ export default function Command() {
               content={`![${path.basename(state.image.source)}](${
                 state.image.url
               })`}
+            />
+          </ActionPanel>
+        ) : state.status === 'error' ? (
+          <ActionPanel>
+            <Action
+              title="Open Extension Preferences"
+              onAction={openExtensionPreferences}
             />
           </ActionPanel>
         ) : null
