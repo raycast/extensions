@@ -22,6 +22,7 @@ export default function Command() {
           <List.Item
             key={ctID}
             title={customTimers[ctID].name}
+            subtitle={customTimers[ctID].name.length === 0 ? "Untitled" : ""}
             icon={Icon.Clock}
             accessories={[customTimers[ctID].showInMenuBar ? visibleTag : hiddenTag]}
             actions={
