@@ -16,7 +16,14 @@
       "title": "Aspect Raytio",
       "subtitle": "Calculate any aspect ratio",
       "description": "Calculate easily the aspect ratio for different sizes based on a width or height.",
-      "keywords": ["aspect", "ratio", "calculate", "size", "width", "height"],
+      "keywords": [
+        "aspect",
+        "ratio",
+        "calculate",
+        "size",
+        "width",
+        "height"
+      ],
       "mode": "view",
       "arguments": [
         {
@@ -33,7 +40,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.1"
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
