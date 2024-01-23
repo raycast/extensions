@@ -199,6 +199,8 @@ export default function Command(props: LaunchProps<{ draftValues: TodoValues }>)
 
 Shows a list of form items such as [Form.TextField](form.md#form.textfield), [Form.Checkbox](form.md#form.checkbox) or [Form.Dropdown](form.md#form.dropdown).
 
+Optionally add a [Form.LinkAccessory](form.md#form.linkaccessory) in the right-hand side of the navigation bar.
+
 #### Props
 
 <PropsTableFromJSDoc component="Form" />
@@ -545,6 +547,35 @@ export default function Command() {
 | ----- | ----------------------- | -------------------------------------------------------------------------- |
 | focus | <code>() => void</code> | Makes the item request focus.                                              |
 | reset | <code>() => void</code> | Resets the form item to its initial value, or `defaultValue` if specified. |
+
+#### Form.DatePicker.isFullDay
+
+A method that determines if a given date represents a full day or a specific time.
+
+```ts
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Event" onSubmit={(values) => {
+            if (Form.DatePicker.isFullDay(values.reminderDate)) {
+              // the event is for a full day
+            } else {
+              // the event is at a specific time
+            }
+          }} />
+        </ActionPanel>
+      }
+    >
+      <Form.DatePicker id="eventTitle" title="Title" />
+      <Form.DatePicker id="eventDate" title="Date" />
+    </Form>
+  );
+}
+```
 
 ### Form.Dropdown
 
@@ -1018,6 +1049,40 @@ export default function Command() {
 #### Props
 
 <PropsTableFromJSDoc component="Form.Description" />
+
+### Form.LinkAccessory
+
+A link that will be shown in the right-hand side of the navigation bar.
+
+#### Example
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      searchBarAccessory={
+        <Form.LinkAccessory
+          target="https://developers.raycast.com/api-reference/user-interface/form"
+          text="Open Documentation"
+        />
+      }
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" defaultValue="Steve" />
+    </Form>
+  );
+}
+```
+
+#### Props
+
+<PropsTableFromJSDoc component="Form.LinkAccessory" />
 
 ## Types
 

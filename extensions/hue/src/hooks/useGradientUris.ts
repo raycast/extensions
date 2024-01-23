@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createGradientPngUri } from "../helpers/createGradientUri";
-import { PngUri, PngUriCache, Id, Palette } from "../lib/types";
+import { Id, Palette, PngUri, PngUriCache } from "../lib/types";
 import { Cache } from "@raycast/api";
 
 const gradientCache = new Cache({ namespace: "hue-scene-gradients" });

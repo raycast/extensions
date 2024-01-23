@@ -1,9 +1,9 @@
-import { Color, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
+import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 import { State } from "@lib/haapi";
 
 import { ReactElement } from "react";
 import { MenuBarSubmenu } from "@components/menu";
-import { getFriendlyName } from "@lib/utils";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import {
   Forecast,
   getHumidityFromState,
@@ -16,8 +16,12 @@ import {
 } from "./utils";
 import { getIcon } from "../state/utils";
 
-function launchWeatherCommand() {
-  launchCommand({ name: "weather", type: LaunchType.UserInitiated });
+async function launchWeatherCommand() {
+  try {
+    await launchCommand({ name: "weather", type: LaunchType.UserInitiated });
+  } catch (error) {
+    showToast({ style: Toast.Style.Failure, title: getErrorMessage(error) || "Internal Error" });
+  }
 }
 
 export function WeatherWindSpeedMenubarItem(props: { state: State | undefined }): ReactElement | null {

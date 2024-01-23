@@ -1,5 +1,5 @@
 export enum ScrollBarValue {
-  AUTOMATIC = 1,
-  WHEN_SCROLLING = 2,
-  ALWAYS = 3,
+  AUTOMATIC = "Automatic",
+  WHEN_SCROLLING = "WhenScrolling",
+  ALWAYS = "Always",
 }

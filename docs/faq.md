@@ -23,3 +23,21 @@ Even though you write JS/TS code, everything is rendered natively in Raycast. Th
 Instead, we implemented a custom [reconciler](https://reactjs.org/docs/reconciliation.html) that converts your React component tree to a render tree that Raycast understands. The render tree is used natively to construct a view hierarchy that is backed by [Apple's AppKit](https://developer.apple.com/documentation/appkit/). This is similar to how [React Native](https://reactnative.dev) works.
 
 </details>
+
+<details>
+
+<summary>Can I import ESM packages in my extension?</summary>
+
+Yes, but you need to convert your extension to ESM.
+
+Quick steps:
+
+- Make sure you are using TypeScript 4.7 or later.
+- Add `"type": "module"` to your package.json.
+- Add `"module": "node16", "moduleResolution": "node16"` to your tsconfig.json.
+- Use only full relative file paths for imports: `import x from '.';` → `import x from './index.js';`.
+- Remove `namespace` usage and use `export` instead.
+- Use the [`node:` protocol](https://nodejs.org/api/esm.html#esm_node_imports) for Node.js built-in imports.
+- **You must use a `.js` extension in relative imports even though you're importing `.ts` files.**
+
+</details>

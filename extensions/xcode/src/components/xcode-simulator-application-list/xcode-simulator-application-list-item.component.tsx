@@ -6,11 +6,13 @@ import { XcodeSimulatorAppPrivacyAction } from "../../models/xcode-simulator/xco
 import { XcodeSimulatorAppPrivacyServiceType } from "../../models/xcode-simulator/xcode-simulator-app-privacy-service-type.model";
 import { XcodeSimulatorAppPrivacyServiceTypeName } from "../../shared/xcode-simulator-app-privacy-service-type-name";
 import { XcodeCleanupService } from "../../services/xcode-cleanup.service";
+import { XcodeSimulatorState } from "../../models/xcode-simulator/xcode-simulator-state.model";
+import { XcodeSimulatorSendPushNotificationForm } from "../xcode-simulator-list/xcode-simulator-send-push-notification-form.component";
 
 /**
  * Xcode Simulator Application List Item
  */
-export function XcodeSimulatorApplicationListItem(props: { application: XcodeSimulatorApplication }): JSX.Element {
+export function XcodeSimulatorApplicationListItem(props: { application: XcodeSimulatorApplication }) {
   return (
     <List.Item
       icon={{
@@ -27,18 +29,25 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
               .filter(Boolean)
               .join(" & ")}
           >
-            <Action.ShowInFinder title="Open Documents directory" path={props.application.sandBoxDocumentsPath} />
-            <Action.ShowInFinder title="Open Caches directory" path={props.application.sandBoxCachesPath} />
+            <Action.ShowInFinder title="Open Documents Directory" path={props.application.sandBoxDocumentsPath} />
+            <Action.ShowInFinder title="Open Caches Directory" path={props.application.sandBoxCachesPath} />
             <Action.ShowInFinder
-              title="Open Sandbox directory"
+              title="Open Sandbox Directory"
               path={props.application.sandBoxPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
             />
             <Action.ShowInFinder
-              title="Open Bundle directory"
+              title="Open Bundle Directory"
               path={props.application.bundlePath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
             />
+            {props.application.appGroupPath ? (
+              <Action.ShowInFinder
+                title="Open App Group Directory"
+                path={props.application.appGroupPath}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+              />
+            ) : undefined}
             {props.application.userDefaultsPlistPath ? (
               <Action.Open
                 icon={Icon.Document}
@@ -123,6 +132,21 @@ export function XcodeSimulatorApplicationListItem(props: { application: XcodeSim
               </ActionPanel.Submenu>
             ))}
           </ActionPanel.Section>
+          {props.application.simulator.state === XcodeSimulatorState.booted ? (
+            <ActionPanel.Section title="Push Notification">
+              <Action.Push
+                icon={Icon.AlarmRinging}
+                title="Send Push Notification"
+                target={
+                  <XcodeSimulatorSendPushNotificationForm
+                    simulator={props.application.simulator}
+                    preferredBundleIdentifier={props.application.bundleIdentifier}
+                  />
+                }
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
+            </ActionPanel.Section>
+          ) : undefined}
         </ActionPanel>
       }
     />

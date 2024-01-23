@@ -1,11 +1,12 @@
-import { Application, getApplications, Grid } from "@raycast/api";
+import { Application, getApplications, Grid, getPreferenceValues } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues, Icon } from "@raycast/api";
+import type { TeamFiles } from "./types";
+import { loadStarredFiles } from "./components/starFiles";
 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(
@@ -16,11 +17,21 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
+  const {
+    data: starredFiles,
+    isLoading: isLoadingStarredFiles,
+    error: starredFilesError,
+    revalidate: revalidateStarredFiles,
+  } = useCachedPromise(async () => {
+    const results = await loadStarredFiles();
+    return results;
+  }, []);
+
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
-  const isLoadingBlock = isLoading || isLoadingVisitedFiles;
+  const isLoadingBlock = isLoading || isLoadingVisitedFiles || isLoadingStarredFiles;
   const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
   const [desktopApp, setDesktopApp] = useState<Application>();
@@ -35,7 +46,7 @@ export default function Command() {
     setFilteredFiles(data);
   }, [data]);
 
-  if (error) {
+  if (error || starredFilesError) {
     return <ErrorView />;
   }
 
@@ -44,8 +55,18 @@ export default function Command() {
       if (value === "All") {
         setFilteredFiles(data);
         setIsFiltered(false);
+      } else if (value.includes("team=")) {
+        setFilteredFiles(data.filter((team) => team.name === value.split("=")[1]));
+        setIsFiltered(true);
       } else {
-        setFilteredFiles(data.filter((team) => team.name === value));
+        setFilteredFiles([
+          {
+            name: value.split("&$%")[0],
+            files: data
+              .filter((team) => team.name === value.split("&$%")[0])[0]
+              .files.filter((project) => project.name === value.split("&$%")[1]),
+          } as TeamFiles,
+        ]);
         setIsFiltered(true);
       }
     }
@@ -58,18 +79,25 @@ export default function Command() {
       tooltip={teamID.length > 1 ? "Teams" : "Projects"}
       defaultValue="All"
       onChange={handleDropdownChange}
-      storeValue
     >
       <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
-      {teamID.length > 1
-        ? data?.map((team) => (
-            <Grid.Dropdown.Item key={team.name} title={team.name} value={team.name} icon="team.svg" />
-          ))
-        : data?.map((team) =>
-            team.files.map((project) => (
-              <Grid.Dropdown.Item key={project.name} title={project.name} value={project.name} icon="project.svg" />
-            ))
-          )}
+      {teamID.length > 1 &&
+        data?.map((team) => (
+          <Grid.Dropdown.Item key={team.name} title={team.name} value={`team=${team.name}`} icon="team.svg" />
+        ))}
+
+      {data?.map((team) => (
+        <Grid.Dropdown.Section title={team.name} key={team.name}>
+          {team.files.map((project) => (
+            <Grid.Dropdown.Item
+              key={project.name}
+              title={project.name}
+              value={`${team.name}&$%${project.name}`}
+              icon="project.svg"
+            />
+          ))}
+        </Grid.Dropdown.Section>
+      ))}
     </Grid.Dropdown>
   );
 
@@ -80,6 +108,23 @@ export default function Command() {
       searchBarAccessory={filterDropdown()}
     >
       {!isFiltered && (
+        <Grid.Section key="starred-files" title="Starred Files">
+          {starredFiles?.map((file) => (
+            <FileGridItem
+              key={file.key + "-starred-file"}
+              file={file}
+              desktopApp={desktopApp}
+              extraKey={file.key + "-starred-file-item"}
+              revalidate={revalidateStarredFiles}
+              onVisit={visitFile}
+              starredFiles={starredFiles || []}
+              starredFilesCount={starredFiles.length || 0}
+            />
+          ))}
+        </Grid.Section>
+      )}
+
+      {!isFiltered && (
         <Grid.Section key="recent-files" title="Recent Files">
           {visitedFiles?.map((file) => (
             <FileGridItem
@@ -87,7 +132,10 @@ export default function Command() {
               file={file}
               desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
+              revalidate={revalidateStarredFiles}
               onVisit={visitFile}
+              starredFiles={starredFiles ?? []}
+              starredFilesCount={starredFiles?.length ?? 0}
             />
           ))}
         </Grid.Section>
@@ -106,7 +154,16 @@ export default function Command() {
               subtitle={team.name}
             >
               {project.files?.map((file) => (
-                <FileGridItem key={file.key + "-file"} file={file} desktopApp={desktopApp} onVisit={visitFile} />
+                <FileGridItem
+                  key={file.key + "-file"}
+                  searchkeywords={project.name}
+                  revalidate={revalidateStarredFiles}
+                  file={file}
+                  desktopApp={desktopApp}
+                  onVisit={visitFile}
+                  starredFiles={starredFiles ?? []}
+                  starredFilesCount={starredFiles?.length ?? 0}
+                />
               ))}
             </Grid.Section>
           ) : (
@@ -118,8 +175,8 @@ export default function Command() {
             >
               <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
             </Grid.Section>
-          )
-        )
+          ),
+        ),
       )}
     </Grid>
   );

@@ -1,7 +1,17 @@
 import { Color, Icon } from "@raycast/api";
 
+/**
+ * The default advanced settings for the extension.
+ */
 export const defaultAdvancedSettings = {
-  settingsVersion: 1.1,
+  /**
+   * The version of the settings. This is used to determine if the settings need to be migrated.
+   */
+  settingsVersion: 1.13,
+
+  /**
+   * Default values for newly created commands.
+   */
   commandDefaults: {
     name: "",
     prompt: "",
@@ -11,16 +21,17 @@ export const defaultAdvancedSettings = {
     useMetadata: false,
     acceptedFileExtensions: "",
     useAudioDetails: false,
-    useSoundClassification: true,
-    useSubjectClassification: true,
+    useSoundClassification: false,
+    useSubjectClassification: false,
     useRectangleDetection: false,
-    useBarcodeDetection: true,
+    useBarcodeDetection: false,
     useFaceDetection: false,
     outputKind: "detail",
     actionScript: "",
     showResponse: true,
     description: "",
-    useSaliencyAnalysis: true,
+    useSaliencyAnalysis: false,
+    useHorizonDetection: false,
     author: "",
     website: "",
     version: "1.0.0",
@@ -33,7 +44,12 @@ export const defaultAdvancedSettings = {
     useSpeech: false,
     speakResponse: false,
     showInMenuBar: true,
+    recordRuns: true,
   },
+
+  /**
+   * Default settings for newly added models.
+   */
   modelDefaults: {
     name: "",
     description: "",
@@ -51,6 +67,10 @@ export const defaultAdvancedSettings = {
     isDefault: false,
     temperature: "1.0",
   },
+
+  /**
+   * Default settings for newly created chats.
+   */
   chatDefaults: {
     icon: Icon.Message,
     iconColor: Color.Red,
@@ -62,12 +82,50 @@ export const defaultAdvancedSettings = {
     useConversationContext: true,
     allowAutonomy: false,
   },
+
+  /**
+   * Settings for the Placeholders System and for specific placeholders.
+   */
   placeholderSettings: {
+    /**
+     * Whether to process placeholders at all.
+     */
     processPlaceholders: true,
+
+    /**
+     * Whether to allow custom placeholders.
+     */
     allowCustomPlaceholders: true,
+
+    /**
+     * Whether to allow custom placeholders sourced from custom paths.
+     */
     allowCustomPlaceholderPaths: true,
+
+    /**
+     * Whether to use the user's shell environment when processing `{{shell:...}}` placeholders.
+     */
     useUserShellEnvironment: true,
   },
+
+  /**
+   * Settings for analyzing selected files.
+   */
+  fileAnalysisSettings: {
+    /**
+     * The number of sample frames to use when analyzing video files.
+     */
+    videoSampleCount: 15,
+
+    /**
+     * Whether to use the preview image when analyzing Keynote files vs. analyzing the image of each slide.
+     */
+    singlePreviewForKeynote: false,
+  },
+
+  /**
+   * Settings for actions throughout the extension.
+   */
   actionSettings: {
     RunCommandAction: {
       enabled: ["search-commands"],
@@ -114,8 +172,8 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd", "shift"],
       },
     },
-    CopyCommandJSONAction: {
-      enabled: ["search-commands"],
+    CopyJSONAction: {
+      enabled: ["search-commands", "manage-models", "chat"],
       shortcut: {
         key: "j",
         modifiers: ["cmd", "shift"],
@@ -136,7 +194,7 @@ export const defaultAdvancedSettings = {
       },
     },
     ToggleFavoriteAction: {
-      enabled: ["search-commands"],
+      enabled: ["search-commands", "manage-models", "chat"],
       shortcut: {
         key: "f",
         modifiers: ["cmd", "shift"],
@@ -161,20 +219,6 @@ export const defaultAdvancedSettings = {
       shortcut: {
         key: "d",
         modifiers: ["cmd"],
-      },
-    },
-    DeleteCommandAction: {
-      enabled: ["search-commands"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd"],
-      },
-    },
-    DeleteAllCommandsAction: {
-      enabled: ["search-commands"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd", "opt", "shift"],
       },
     },
     InstallAllCommandsAction: {
@@ -247,25 +291,18 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd", "shift"],
       },
     },
-    DeleteChatAction: {
-      enabled: ["search-commands", "discover-commands", "chat"],
+    DeleteAction: {
+      enabled: ["search-commands", "discover-commands", "chat", "manage-models"],
       shortcut: {
-        key: "d",
+        key: "x",
         modifiers: ["cmd"],
       },
     },
-    DeleteAllChatsAction: {
-      enabled: ["search-commands", "discover-commands", "chat"],
+    DeleteAllAction: {
+      enabled: ["search-commands", "discover-commands", "chat", "manage-models"],
       shortcut: {
-        key: "d",
+        key: "x",
         modifiers: ["cmd", "opt", "shift"],
-      },
-    },
-    ToggleModelFavoriteAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "f",
-        modifiers: ["cmd"],
       },
     },
     ToggleModelDefaultAction: {
@@ -282,29 +319,8 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd", "shift"],
       },
     },
-    DeleteModelAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd"],
-      },
-    },
-    DeleteAllModelsAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd", "opt", "shift"],
-      },
-    },
-    CopyModelJSONAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "j",
-        modifiers: ["cmd", "shift"],
-      },
-    },
-    CopyAllModelsJSONAction: {
-      enabled: ["manage-models"],
+    CopyAllJSONAction: {
+      enabled: ["manage-models", "chat"],
       shortcut: {
         key: "j",
         modifiers: ["cmd", "opt", "shift"],
@@ -324,5 +340,17 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd"],
       },
     },
+    ViewPreviousRunsAction: {
+      enabled: ["search-commands"],
+      shortcut: {
+        key: "p",
+        modifiers: ["cmd", "opt"],
+      },
+    },
   },
 };
+
+/**
+ * Interface for the advanced settings of the extension.
+ */
+export type AdvancedSettings = typeof defaultAdvancedSettings;

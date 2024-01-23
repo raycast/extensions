@@ -10,8 +10,6 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
       id={bookmark.RepositoryIdentifier}
       title={bookmark.Name}
       icon={{ source: "icon-folder.png", tintColor: Color.Blue }}
-      accessoryTitle={bookmark.getBranch}
-      accessoryIcon={{ source: "icon-branches.png", tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -32,6 +30,13 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
               application="iTerm"
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
+            <Action.Open
+              title="Open in Warp"
+              icon="icon-warp.png"
+              target={bookmark.getPath}
+              application="Warp"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -47,6 +52,12 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: bookmark.getBranch.name,
+          icon: { source: "icon-branches.png", tintColor: Color.PrimaryText },
+        },
+      ]}
     />
   );
 }

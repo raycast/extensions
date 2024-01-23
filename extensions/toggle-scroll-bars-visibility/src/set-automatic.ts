@@ -4,7 +4,7 @@ import { scrollBarLabel } from "./data/constants";
 import { setScrollBarsVisibility } from "./utils";
 
 export default async function main() {
-  await setScrollBarsVisibility(ScrollBarValue.AUTOMATIC);
+  setScrollBarsVisibility(ScrollBarValue.AUTOMATIC);
   const message = `Set scroll bars visibility to "${scrollBarLabel[ScrollBarValue.AUTOMATIC]}"`;
   await showHUD(message);
 }

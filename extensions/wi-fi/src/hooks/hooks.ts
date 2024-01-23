@@ -3,13 +3,13 @@ import wifi, { WiFiNetwork } from "node-wifi";
 import { LocalStorageKey } from "../utils/constants";
 import { WifiNetworkWithPassword, WifiPasswordCache } from "../types/types";
 import { getCurWifiStatus, uniqueWifiNetWork } from "../utils/common-utils";
-import { LocalStorage } from "@raycast/api";
+import { Cache, LocalStorage } from "@raycast/api";
 
 wifi.init({
   iface: null,
 });
 
-export const getWifiList = (refresh: number) => {
+export const useWifiList = (refresh: number) => {
   const [wifiPasswordCaches, setWifiPasswordCaches] = useState<WifiPasswordCache[]>([]);
   const [publicWifi, setPublicWifi] = useState<WiFiNetwork[]>([]);
   const [wifiWithPasswordList, setWifiWithPasswordList] = useState<WifiNetworkWithPassword[]>([]);
@@ -58,7 +58,7 @@ export const getWifiList = (refresh: number) => {
     setPublicWifi(
       allWifiList
         .filter((wifiItem) => wifiItem.security === "NONE")
-        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid),
     );
 
     const __allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
@@ -82,7 +82,7 @@ export const getWifiList = (refresh: number) => {
     setPublicWifi(
       _allWifiList
         .filter((wifiItem) => wifiItem.security === "NONE")
-        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid),
     );
     setLoading(false);
     if (_allWifiList.length > 0) {
@@ -104,7 +104,40 @@ export const getWifiList = (refresh: number) => {
   };
 };
 
-export const getWifiStatus = () => {
+export const useCurWifi = () => {
+  const cache = new Cache();
+  const curWifiCache = cache.get(LocalStorageKey.CUR_WIFI);
+  let _curWifiCache: WiFiNetwork | undefined = undefined;
+  if (typeof curWifiCache === "string" && curWifiCache != "") {
+    _curWifiCache = JSON.parse(curWifiCache);
+  }
+  const [curWifi, setCurWifi] = useState<WiFiNetwork | undefined>(_curWifiCache);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const _curWifiList = await wifi.getCurrentConnections();
+    const _curWifi = _curWifiList.length != 0 ? _curWifiList[0] : undefined;
+    setCurWifi(_curWifi);
+    if (_curWifi === undefined) {
+      cache.set(LocalStorageKey.CUR_WIFI, "");
+    } else {
+      cache.set(LocalStorageKey.CUR_WIFI, JSON.stringify(_curWifi));
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  return {
+    curWifi: curWifi,
+    loading: loading,
+  };
+};
+
+export const useWifiStatus = () => {
   const [wifiStatus, setWifiStatus] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {

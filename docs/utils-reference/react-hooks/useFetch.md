@@ -1,6 +1,10 @@
 # `useFetch`
 
-Hook which fetches the URL and returns the [AsyncState](#asyncstate) corresponding to the execution of the fetch. The last value will be kept between command runs.
+Hook which fetches the URL and returns the [AsyncState](#asyncstate) corresponding to the execution of the fetch.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useFetch` first returns the data from cache (stale), then sends the request (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 ## Signature
 

@@ -33,6 +33,12 @@
       "title": "Set Scroll Bars Visibility To \"Always\"",
       "description": "Sets scroll bars visibility to \"Always\".",
       "mode": "no-view"
+    },
+    {
+      "name": "view-current-value",
+      "title": "View Current Scroll Bars Visibility Value",
+      "description": "Views current scroll bars visibility value.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -50,8 +56,12 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "script:run": "cd script && swift run script",
+    "script:build": "cd script && swift build -c release --arch arm64 --arch x86_64 && npm run script:move",
+    "script:move": "cd script && cp .build/apple/Products/Release/script ../assets/scripts/set-scroll-bars-visibility",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions"
   }
 }

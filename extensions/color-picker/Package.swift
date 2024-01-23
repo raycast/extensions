@@ -6,7 +6,7 @@ let package = Package(
   name: "color-picker",
   platforms: [
     .macOS(.v10_15),
-],
+  ],
   targets: [
     .executableTarget(
       name: "color-picker",

@@ -58,12 +58,13 @@ export default function TranslateForm() {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Generals">
+            <Action.CopyToClipboard title="Copy Translated" content={translated?.translatedText ?? ""} />
+            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />
             <Action.CopyToClipboard
-              title="Copy Translated"
-              content={translated?.translatedText ?? ""}
-              icon={getLanguageFlag(toLangObj)}
+              title="Copy Pronunciation"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              content={translated?.pronunciationText ?? ""}
             />
-            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} icon={getLanguageFlag(fromLangObj)} />
             <Action.OpenInBrowser
               title="Open in Google Translate"
               shortcut={{ modifiers: ["opt"], key: "enter" }}
@@ -172,6 +173,7 @@ export default function TranslateForm() {
         value={translated?.translatedText ?? ""}
         placeholder="Translation"
       />
+      <Form.Description title="Pronunciation" text={translated?.pronunciationText ?? ""} />
     </Form>
   );
 }

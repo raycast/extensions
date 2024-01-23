@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tip-calculator",
   "title": "Tip Calculator",
-  "description": "Calculate the total per person based on the Bill, Tp %, and Number of People.",
+  "description": "Calculate the total per person based on the Bill, Tip %, and Number of People.",
+
   "icon": "command-icon.png",
   "author": "Vaibhav-Satishkumar",
   "contributors": [

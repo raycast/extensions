@@ -16,7 +16,6 @@ import { parseHTML } from "linkedom";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
-import { View } from "./components";
 import { useSearchPages } from "./hooks";
 import { appendToPage, createDatabasePage, getPageIcon } from "./utils/notion";
 
@@ -30,7 +29,7 @@ const getPageDetail = async (url: string) => {
     const content = parsedDocument?.textContent;
     return { title: document.title, content: content ?? "" };
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -69,7 +68,16 @@ function QuickCapture() {
 
         if (result && values.captureAs === "ai") {
           const summary = await AI.ask(
-            `Summarize the content surrounded by triple quotes. Give it a heading. Format the output as a Markdown.\n\n"""${result?.content}"""`,
+            `Summarize the page content surrounded by triple quotes. Please use the following template:
+
+# {Heading of the page}
+
+{Summary of the content describing what the page is about. Break it down in multiple paragraphs if necessary.}
+
+Here's the content:
+"""
+${result?.content}
+"""`,
           );
 
           content += `\n\n${summary}`;
@@ -167,9 +175,5 @@ function QuickCapture() {
 }
 
 export default function Command() {
-  return (
-    <View>
-      <QuickCapture />
-    </View>
-  );
+  return <QuickCapture />;
 }

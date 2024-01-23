@@ -1,5 +1,19 @@
 # TablePlus Changelog
 
+## [Update] - 2024-01-18
+
+- Added the possibility to select either environment or path to show in the Menu Bar
+
+## [Update] - 2023-08-30
+
+- Refacored the extension
+- Added preference to use either monochrome or default icon in menubar
+- Adeded option to open database in new tab or window
+
+## [Update] - 2023-08-25
+
+- Added menubar
+
 ## [Update] - 2023-04-27
 
 - Added the ability to search by group name

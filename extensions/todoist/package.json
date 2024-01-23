@@ -14,7 +14,8 @@
   "contributors": [
     "AnishDe12020",
     "kud",
-    "gerardcs"
+    "gerardcs",
+    "prince_yadav"
   ],
   "commands": [
     {
@@ -95,7 +96,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "Title/info (today 5pm p2)",
+          "placeholder": "Text (today 5pm p2)",
           "type": "text",
           "required": true
         },
@@ -205,12 +206,25 @@
       "mode": "view"
     },
     {
+      "name": "show-filters",
+      "title": "Show Filters",
+      "description": "Show your Todoist filters.",
+      "mode": "view"
+    },
+    {
       "name": "unfocus-current-task",
       "title": "Unfocus Current Task",
       "subtitle": "Todoist",
       "description": "Unfocus the current task in the menu bar.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "open-focused-task",
+      "title": "Open Focus Task",
+      "subtitle": "Todoist",
+      "description": "When a task is chosen as the focused one, you can open it directly using this command.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -224,7 +238,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0",
+    "@raycast/api": "^1.58.1",
     "@raycast/utils": "^1.8.0",
     "axios": "^1.4.0",
     "date-fns": "^2.30.0",

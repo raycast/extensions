@@ -70,11 +70,58 @@
       "interval": "5m",
       "preferences": [
         {
+          "name": "displayTodo",
+          "type": "checkbox",
+          "title": "Count",
+          "label": "Display To-Do",
+          "description": "When enabled, the first Things to-do wil be displayed in the menu bar.",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "shouldShowShortcuts",
           "type": "checkbox",
           "label": "Show Lists Shortcuts",
           "description": "When enabled, lists shortcuts (e.g today, upcoming, projects, areas, etc.) will be included in the menu bar.",
           "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "quick-add-todo",
+      "title": "Quick Add To-Do",
+      "subtitle": "Things",
+      "description": "Quickly add a new to-do in Things.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "default": true,
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "To-do",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "notes",
+          "placeholder": "Notes",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "checklist",
+          "placeholder": "Checklist items",
+          "type": "text",
           "required": false
         }
       ]

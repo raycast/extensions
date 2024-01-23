@@ -230,7 +230,7 @@ export async function updateTodo(id: string, todoParams: UpdateTodoParams) {
   );
 }
 
-export function handleError(error: unknown) {
+export function handleError(error: unknown, title?: string) {
   if (error instanceof Error && error.message === 'unauthorized') {
     showToast({
       style: Toast.Style.Failure,
@@ -250,7 +250,7 @@ export function handleError(error: unknown) {
 
   showToast({
     style: Toast.Style.Failure,
-    title: 'Something went wrong',
+    title: title ?? 'Something went wrong',
     message: error instanceof Error ? error.message : String(error),
   });
 }

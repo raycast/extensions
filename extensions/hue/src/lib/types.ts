@@ -9,6 +9,7 @@
 ///////////////////////
 // Non-Hue API types //
 ///////////////////////
+
 export type Id = string | number;
 export type Palette = string[];
 export type LightIcon = { iconPath: string; color: string };

@@ -1,5 +1,7 @@
 // codes from https://raw.githubusercontent.com/chubin/wttr.in/master/lib/constants.py
 
+import { Icon } from "@raycast/api";
+
 export function getWeatherCodeIcon(weatherCode: string | undefined): string {
   if (!weatherCode) {
     return "";
@@ -176,3 +178,27 @@ export const LOCALE = {
   zh: "zh_TW",
   zu: "zu_ZA",
 };
+
+export enum WeatherIcons {
+  Temperature = "temperature-16", // Icon.Temperature,
+  FeelsLike = "person-16", // Icon.Person,
+  UVIndex = "sun-16", // Icon.Sun,
+  Humidity = "humitidy.svg",
+  Wind = "wind.svg",
+  Visibility = "eye-16", // Icon.Eye,
+  Coordinate = "geopin-16", // Icon.Geopin,
+  Area = "building-16", //Icon.Building,
+  Region = "map-16", // Icon.Map,
+  Country = "pin-16", // Icon.Pin,
+  Sunrise = "sun-16", // Icon.Sun,
+  Sunset = "sunrise-16", // Icon.Sunrise,
+  SunHours = "clock-16", // Icon.Clock,
+  Pressure = "bar-code-16", // Icon.BarCode,
+  Moon = "moon-16", // Icon.Moon,
+  Moonrise = "moon-16", // Icon.Moon,
+  Moonset = "moonset.svg",
+  Rain = "raindrop-16", // Icon.Raindrop,
+  Cloud = "cloud-16", // Icon.Cloud,
+  Snow = "snowflake-16", // Icon.Snowflake,
+  Thunder = "bolt-16", // Icon.Bolt,
+}

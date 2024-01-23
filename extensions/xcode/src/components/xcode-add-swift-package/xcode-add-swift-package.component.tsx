@@ -8,7 +8,7 @@ import { XcodeService } from "../../services/xcode.service";
 /**
  * Xcode Add Swift Package
  */
-export function XcodeAddSwiftPackage(props: { url: string }): JSX.Element {
+export function XcodeAddSwiftPackage(props: { url: string }) {
   const navigation = useNavigation();
   return (
     <XcodeProjectList

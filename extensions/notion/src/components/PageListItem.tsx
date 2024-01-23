@@ -1,16 +1,40 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues, Color } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  open,
+  Image,
+  List,
+} from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
-import { deletePage, notionColorToTintColor, getPageIcon } from "../utils/notion";
+import {
+  DatabaseProperty,
+  deleteDatabase,
+  deletePage,
+  getPageIcon,
+  notionColorToTintColor,
+  Page,
+  PagePropertyType,
+  User,
+} from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
-import { DatabaseView, Page, DatabaseProperty, User, PagePropertyType } from "../utils/types";
+import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
-import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
+import { ActionEditPageProperty, ActionSetVisibleProperties } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
-import { CreateDatabaseForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+import { AppendToPageForm, CreatePageForm, DatabaseViewForm } from "./forms";
+
+function capitalize(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 type PageListItemProps = {
   page: Page;
@@ -58,7 +82,6 @@ export function PageListItem({
   }
 
   const lastEditedUser = users?.find((u) => u.id === page.last_edited_user);
-
   if (page.last_edited_time) {
     const date = new Date(page.last_edited_time);
     accessories.push({
@@ -71,7 +94,7 @@ export function PageListItem({
   }
 
   const quickEditProperties = databaseProperties?.filter((property) =>
-    ["checkbox", "select", "multi_select", "people"].includes(property.type),
+    ["checkbox", "status", "select", "multi_select", "status", "people"].includes(property.type),
   );
 
   const visiblePropertiesIds: string[] =
@@ -105,24 +128,48 @@ export function PageListItem({
     ),
   };
 
-  const openInNotionAction = (
-    <Action title="Open in Notion" icon="notion-logo.png" onAction={() => handleOnOpenPage(page, setRecentPage)} />
+  const { open_in } = getPreferenceValues<Preferences>();
+
+  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
+    handleOnOpenPage(page, setRecentPage),
   );
+  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
+    if (!page.url) return;
+    if (open_in?.name === "Notion") {
+      open(page.url);
+    } else open(page.url, open_in);
+    await setRecentPage(page);
+    closeMainWindow();
+  });
+
+  const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
+  let openInNotionDefaultAction;
+  let openInNotionAlternativeAction;
+  if (!isDefaultNotionActionApp) {
+    openInNotionDefaultAction = openInNotionBrowserAction;
+  } else {
+    openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;
+    openInNotionAlternativeAction = isDefaultNotionActionApp ? openInNotionBrowserAction : openInNotionAppAction;
+  }
 
   const actions = {
     raycast: openInRaycastAction[page.object],
-    notion: openInNotionAction,
+    notionDefaultOpen: openInNotionDefaultAction,
+    notionAltOpen: openInNotionAlternativeAction,
   };
+
+  const pageWord = capitalize(page.object);
 
   return (
     <List.Item
       title={title}
-      icon={{ value: icon, tooltip: page.object === "database" ? "Database" : "Page" }}
+      icon={{ value: icon, tooltip: pageWord }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
-            {actions[primaryAction]}
-            {actions[primaryAction === "notion" ? "raycast" : "notion"]}
+            {primaryAction === "notion" ? actions["notionDefaultOpen"] : actions["raycast"]}
+            {primaryAction === "notion" ? actions["raycast"] : actions["notionDefaultOpen"]}
+            {actions["notionAltOpen"]}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
@@ -156,27 +203,30 @@ export function PageListItem({
                 title="Create New Page"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
-                target={<CreateDatabaseForm databaseId={page.id} mutate={mutate} />}
+                target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
               />
             )}
 
             <ActionCreateQuicklink page={page} />
 
             <Action
-              title="Delete Page"
+              title={`Delete ${pageWord}`}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
               onAction={async () => {
                 if (
                   await confirmAlert({
-                    title: "Delete Page",
+                    title: `Delete ${pageWord}`,
                     icon: { source: Icon.Trash, tintColor: Color.Red },
-                    message:
-                      "Do you want to delete this page? Don't worry, you'll be able to restore it from Notion's trash.",
+                    message: `Do you want to delete this ${page.object}? Don't worry, you'll be able to restore it from Notion's trash.`,
                   })
                 ) {
-                  await deletePage(page.id);
+                  if (page.object === "database") {
+                    deleteDatabase(page.id);
+                  } else {
+                    deletePage(page.id);
+                  }
                   await removeRecentPage(page.id);
                   await mutate();
                 }
@@ -210,6 +260,7 @@ export function PageListItem({
                   });
                 }}
                 onUnselect={(propertyId: string) => {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                   const { [propertyId]: _, ...remainingProperties } = databaseView?.properties ?? {};
 
                   setDatabaseView({
@@ -224,7 +275,7 @@ export function PageListItem({
           {page.url ? (
             <ActionPanel.Section>
               <Action.CopyToClipboard
-                title="Copy Page URL"
+                title={`Copy ${pageWord} URL`}
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
@@ -237,12 +288,12 @@ export function PageListItem({
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               />
               <Action.Paste
-                title="Paste Page URL"
+                title={`Paste ${pageWord} URL`}
                 content={page.url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
               />
               <Action.CopyToClipboard
-                title="Copy Page Title"
+                title={`Copy ${pageWord} Title`}
                 content={title}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
@@ -253,6 +304,10 @@ export function PageListItem({
       accessories={accessories}
     />
   );
+}
+
+function createOpenInNotionAction(title: string, icon: Image.ImageLike | string, action: () => void) {
+  return <ActionPanel.Item title={`Open in ${title}`} icon={icon} onAction={action} />;
 }
 
 function getPropertyAccessory(

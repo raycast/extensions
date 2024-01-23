@@ -1,67 +1,26 @@
-import { useState } from "react";
-import { Icon, Form, List, useNavigation, Action, ActionPanel, confirmAlert, Alert } from "@raycast/api";
-import { iconMap, setStorage, getStorage } from "./lib/utils";
-import { StorageKey } from "./lib/constants";
-import { Group, deleteGroup, modifyGroup, useGroups } from "./lib/Groups";
+import {
+  Icon,
+  List,
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Alert,
+  getPreferenceValues,
+  Keyboard,
+  LocalStorage,
+  showToast,
+} from "@raycast/api";
+import { setStorage, getStorage } from "./lib/storage";
+import { Direction, StorageKey } from "./lib/constants";
+import { Group, deleteGroup, useGroups } from "./lib/Groups";
 import { Pin, usePins } from "./lib/Pins";
-
-/**
- * Form view for editing a group.
- * @param props.group The group to edit.
- * @param props.setGroups The function to call to update the list of groups.
- * @returns A form view.
- */
-const EditGroupView = (props: { group: Group; setGroups: (groups: Group[]) => void }) => {
-  const group = props.group;
-  const setGroups = props.setGroups;
-  const [nameError, setNameError] = useState<string | undefined>();
-  const { pop } = useNavigation();
-
-  const iconList = Object.keys(Icon);
-  iconList.unshift("None");
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.ChevronRight}
-            onSubmit={(values) => modifyGroup(group, values.nameField, values.iconField, pop, setGroups)}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        id="nameField"
-        title="Group Name"
-        placeholder="Enter the group name"
-        error={nameError}
-        onChange={() => (nameError !== undefined ? setNameError(undefined) : null)}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setNameError("Name cannot be empty!");
-          } else if (nameError !== undefined) {
-            setNameError(undefined);
-          }
-        }}
-        defaultValue={group.name}
-      />
-
-      <Form.Dropdown id="iconField" title="Group Icon" defaultValue={group.icon}>
-        {iconList.map((icon) => {
-          return (
-            <Form.Dropdown.Item
-              key={icon}
-              title={icon}
-              value={icon}
-              icon={icon in iconMap ? iconMap[icon] : Icon.Minus}
-            />
-          );
-        })}
-      </Form.Dropdown>
-    </Form>
-  );
-};
+import { addIDAccessory, addParentGroupAccessory, addSortingStrategyAccessory } from "./lib/accessories";
+import { getGroupIcon } from "./lib/icons";
+import GroupForm from "./components/GroupForm";
+import { InstallExamplesAction } from "./components/actions/InstallExamplesAction";
+import { useEffect, useState } from "react";
+import CopyGroupActionsSubmenu from "./components/actions/CopyGroupActionsSubmenu";
+import { ViewGroupsPreferences } from "./lib/preferences";
 
 /**
  * Action to create a new group. Opens a form view with blank/default fields.
@@ -74,56 +33,42 @@ const CreateNewGroupAction = (props: { setGroups: (groups: Group[]) => void }) =
     <Action.Push
       title="Create New Group"
       icon={Icon.PlusCircle}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
-      target={
-        <EditGroupView
-          group={{
-            name: "",
-            icon: "None",
-            id: -1,
-          }}
-          setGroups={setGroups}
-        />
-      }
+      shortcut={Keyboard.Shortcut.Common.New}
+      target={<GroupForm setGroups={setGroups} />}
     />
   );
 };
 
 /**
- * Moves a group up in the list of groups.
- * @param index The current index of the group.
+ * Moves a group up or down in the list of groups.
+ * @param index The index of the group to move.
+ * @param dir The direction to move the group in. One of {@link Direction}.
  * @param setGroups The function to call to update the list of groups.
  */
-const moveGroupUp = async (index: number, setGroups: React.Dispatch<React.SetStateAction<Group[]>>) => {
+const moveGroup = async (index: number, dir: Direction, setGroups: React.Dispatch<React.SetStateAction<Group[]>>) => {
   const storedGroups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
-  if (storedGroups.length > index) {
-    [storedGroups[index - 1], storedGroups[index]] = [storedGroups[index], storedGroups[index - 1]];
+  const mod = 1 - dir;
+  if (storedGroups.length > index + mod) {
+    [storedGroups[index - dir], storedGroups[index + mod]] = [storedGroups[index + mod], storedGroups[index - dir]];
     setGroups(storedGroups);
     await setStorage(StorageKey.LOCAL_GROUPS, storedGroups);
   }
 };
 
 /**
- * Moves a group down in the list of groups.
- * @param index The current index of the group.
- * @param setGroups The function to call to update the list of groups.
+ * Raycast command to view all pin groups in a list within the Raycast window.
  */
-const moveGroupDown = async (index: number, setGroups: React.Dispatch<React.SetStateAction<Group[]>>) => {
-  const storedGroups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
-  if (storedGroups.length > index + 1) {
-    [storedGroups[index], storedGroups[index + 1]] = [storedGroups[index + 1], storedGroups[index]];
-    setGroups(storedGroups);
-    await setStorage(StorageKey.LOCAL_GROUPS, storedGroups);
-  }
-};
-
-export default function Command() {
-  const { groups, setGroups } = useGroups();
+export default function ViewGroupsCommand() {
+  const { groups, setGroups, revalidateGroups } = useGroups();
   const { pins } = usePins();
-  const { push } = useNavigation();
+  const [examplesInstalled, setExamplesInstalled] = useState<LocalStorage.Value | undefined>(true);
+  const preferences = getPreferenceValues<ViewGroupsPreferences>();
 
-  const iconList = Object.keys(Icon);
-  iconList.unshift("None");
+  useEffect(() => {
+    Promise.resolve(LocalStorage.getItem(StorageKey.EXAMPLE_GROUPS_INSTALLED)).then((examplesInstalled) => {
+      setExamplesInstalled(examplesInstalled);
+    });
+  }, []);
 
   return (
     <List
@@ -132,33 +77,40 @@ export default function Command() {
       actions={
         <ActionPanel>
           <CreateNewGroupAction setGroups={setGroups as (groups: Group[]) => void} />
+          {!examplesInstalled || groups.length == 0 ? (
+            <InstallExamplesAction
+              setExamplesInstalled={setExamplesInstalled}
+              revalidateGroups={revalidateGroups}
+              kind="groups"
+            />
+          ) : null}
         </ActionPanel>
       }
     >
       <List.EmptyView title="No Groups Found" icon="no-view.png" />
       {((groups as Group[]) || []).map((group, index) => {
         const groupPins = pins.filter((pin: Pin) => pin.group == group.name);
+        const maxID = Math.max(...groups.map((group) => group.id));
+        const accessories: List.Item.Accessory[] = [];
+        if (preferences.showSortStrategy) addSortingStrategyAccessory(group, accessories);
+        if (preferences.showIDs) addIDAccessory(group, accessories, maxID);
+        if (preferences.showParentGroup) addParentGroupAccessory(group, accessories, groups);
+
         return (
           <List.Item
             title={group.name}
             subtitle={`${groupPins.length} pin${groupPins.length == 1 ? "" : "s"}`}
+            accessories={accessories}
             key={group.id}
-            icon={group.icon in iconMap ? iconMap[group.icon] : Icon.Minus}
+            icon={getGroupIcon(group)}
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Group Actions">
-                  <Action
+                  <Action.Push
                     title="Edit"
                     icon={Icon.Pencil}
-                    onAction={() =>
-                      push(<EditGroupView group={group} setGroups={setGroups as (groups: Group[]) => void} />)
-                    }
-                  />
-
-                  <Action.CopyToClipboard
-                    title="Copy Group Name"
-                    content={group.name}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    target={<GroupForm group={group} setGroups={setGroups as (groups: Group[]) => void} />}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
                   />
 
                   <Action
@@ -176,6 +128,7 @@ export default function Command() {
                       }
                     }}
                     style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                   />
                   <Action
                     title="Delete Group And Pins"
@@ -197,15 +150,37 @@ export default function Command() {
                       }
                     }}
                     style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                  />
+                  <Action
+                    title="Delete All Groups (Keep Pins)"
+                    icon={Icon.Trash}
+                    onAction={async () => {
+                      if (
+                        await confirmAlert({
+                          title: "Delete Group And Pins",
+                          message: "Are you sure?",
+                          primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                        })
+                      ) {
+                        const storedGroups = await getStorage(StorageKey.LOCAL_GROUPS);
+                        for (const group of storedGroups) {
+                          await deleteGroup(group, setGroups as (groups: Group[]) => void, false);
+                        }
+                        await showToast({ title: "Deleted All Groups" });
+                      }
+                    }}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                   />
 
                   {index > 0 ? (
                     <Action
                       title="Move Up"
                       icon={Icon.ArrowUp}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveUp}
                       onAction={async () => {
-                        await moveGroupUp(index, setGroups);
+                        await moveGroup(index, Direction.UP, setGroups);
                       }}
                     />
                   ) : null}
@@ -213,14 +188,40 @@ export default function Command() {
                     <Action
                       title="Move Down"
                       icon={Icon.ArrowDown}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveDown}
                       onAction={async () => {
-                        await moveGroupDown(index, setGroups);
+                        await moveGroup(index, Direction.DOWN, setGroups);
                       }}
                     />
                   ) : null}
                 </ActionPanel.Section>
                 <CreateNewGroupAction setGroups={setGroups as (groups: Group[]) => void} />
+                <Action.Push
+                  title="Create Subgroup"
+                  icon={Icon.Layers}
+                  target={
+                    <GroupForm
+                      group={{
+                        name: "",
+                        icon: group.icon,
+                        iconColor: group.iconColor,
+                        parent: group.id,
+                        sortStrategy: group.sortStrategy,
+                        id: -1,
+                      }}
+                      setGroups={setGroups as (groups: Group[]) => void}
+                    />
+                  }
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                />
+                {!examplesInstalled ? (
+                  <InstallExamplesAction
+                    setExamplesInstalled={setExamplesInstalled}
+                    revalidateGroups={revalidateGroups}
+                    kind="groups"
+                  />
+                ) : null}
+                <CopyGroupActionsSubmenu group={group} groups={groups} pins={pins} />
               </ActionPanel>
             }
           />

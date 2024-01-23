@@ -28,7 +28,7 @@ const FormParentDropdown = forwardRef(
         }
       },
       [query, epicsOnly],
-      { keepPreviousData: true }
+      { keepPreviousData: true },
     );
 
     return (
@@ -47,7 +47,7 @@ const FormParentDropdown = forwardRef(
         })}
       </Form.Dropdown>
     );
-  }
+  },
 );
 
 export default FormParentDropdown;

@@ -9,11 +9,11 @@ export function useMyRepositories() {
   const { github } = getGitHubClient();
   const viewer = useViewer();
 
+  const orgs = viewer?.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ");
+  const query = `user:@me ${orgs} archived:false sort:updated-desc`;
+
   return useCachedPromise(async () => {
-    const result = await github.searchRepositories({
-      query: `user:@me ${viewer?.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ")}`,
-      numberOfItems: 100,
-    });
+    const result = await github.searchRepositories({ query, numberOfItems: 100 });
 
     return result.search.nodes as ExtendedRepositoryFieldsFragment[];
   });
