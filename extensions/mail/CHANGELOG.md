@@ -2,7 +2,7 @@
 
 ## [Fix] - 2024-01-23
 
-Fix an issue when the `Mark all as read` Command was opening to many Mail windows
+Fix an issue when the `Mark all as read` Command was opening too many Mail windows
 
 ## [Enhancement] - 2024-01-21
 
