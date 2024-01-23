@@ -20,7 +20,7 @@
     {
       "name": "fan-add-event-editable",
       "title": "Add Fantastical Calendar Event",
-      "description": "add a new fantastical event",
+      "description": "Add a new fantastical event",
       "mode": "no-view",
       "arguments": [
         {
@@ -97,7 +97,7 @@
           "type": "text",
           "name": "add",
           "title": "Add Reminder",
-          "placeholder": "reminder",
+          "placeholder": "event",
           "required": true
         }
       ],
