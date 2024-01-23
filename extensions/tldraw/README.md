@@ -1,3 +1,3 @@
 # tldraw
 
-Creates and persists TLDraw Projects
+Creates and persists tldraw Projects
