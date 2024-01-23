@@ -6,7 +6,7 @@ import { Session } from "@supabase/supabase-js";
 
 // Update the service name here for testing different providers
 
-export default function Protected({ serviceName = "google", children }: ({ serviceName?: string, children: ReactNode })) {
+export default function Protected({ serviceName = "google", children }: { serviceName?: string; children: ReactNode }) {
   const service = getService(serviceName);
   const [session, setSession] = useState<Session | null>(null);
 
@@ -14,7 +14,10 @@ export default function Protected({ serviceName = "google", children }: ({ servi
     (async () => {
       try {
         await service.authorize();
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
         if (error) {
           showToast({ style: Toast.Style.Failure, title: String(error) });
         } else {

@@ -3,8 +3,6 @@ import fetch from "node-fetch";
 import { env } from "../env";
 import { supabase } from "../supabase";
 
-
-
 // Create an OAuth client ID via https://console.developers.google.com/apis/credentials
 // As application type choose "iOS" (required for PKCE)
 // As Bundle ID enter: com.raycast
@@ -23,8 +21,6 @@ export async function signOut() {
   await supabase.auth.signOut();
 }
 
-
-
 export async function authorize() {
   // Check if there are existing tokens and if they are valid
   let tokenSet = await client.getTokens();
@@ -32,11 +28,10 @@ export async function authorize() {
     await supabase.auth.signInWithIdToken({
       provider: "google",
       token: tokenSet!.idToken as string,
-      nonce: 'NONCE',
+      nonce: "NONCE",
     });
     return;
   } else if (tokenSet && tokenSet.refreshToken) {
-
     await client.setTokens(await refreshTokens(tokenSet.refreshToken));
     return;
   }
@@ -58,7 +53,7 @@ export async function authorize() {
   await supabase.auth.signInWithIdToken({
     provider: "google",
     token: tokenSet!.idToken as string,
-    nonce: 'NONCE',
+    nonce: "NONCE",
   });
 }
 
@@ -75,7 +70,6 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, authCode: st
     console.error("fetch tokens error:", await response.text());
     throw new Error(response.statusText);
   }
-
 
   return (await response.json()) as OAuth.TokenResponse;
 }
@@ -95,4 +89,3 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
 }
-

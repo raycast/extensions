@@ -3,9 +3,7 @@ type WithTimestamps = {
   createdAt: string | Date;
 };
 
-export const convertNotesTimeStamps = <T extends WithTimestamps>(
-  note: T
-) => {
+export const convertNotesTimeStamps = <T extends WithTimestamps>(note: T) => {
   return {
     ...note,
     updatedAt: new Date(note.updatedAt),
