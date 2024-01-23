@@ -70,7 +70,7 @@ class TextToSpeechProcessor {
 
         await showToast({
           style: Toast.Style.Animated,
-          title: `Writing a ${this.readingStyle} script... 🔍`,
+          title: `Writing a script... [${this.readingStyle} mode]🔍`,
           message: "Please wait while the script is being written.",
         });
 
