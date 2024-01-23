@@ -1,6 +1,6 @@
 # VivaPB
 
-VivaPB is a Vivaldi browser that opens up a incognito window with ease in mind
+VivaPB is a Vivaldi browser that opens up a incognito window with ease in mind. Must have Vivaldi Installed for it to work.
 
 ![Screenshot 1](https://github.com/codrkoaz/VivaPB/assets/51058620/e7430199-c200-4977-9020-ce692582ef98)
 ![Screenshot 3](https://github.com/codrkoaz/VivaPB/assets/51058620/f193d371-1fc5-4937-be8f-e5f482f2b401)
