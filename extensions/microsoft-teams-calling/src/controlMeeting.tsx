@@ -7,6 +7,7 @@ import {
   MeetingState,
   SingleMeetingState,
   UpdateMessage,
+  meetingClientFromPrefs,
 } from "./teams/meetingClient";
 import { useEffect, useState } from "react";
 
@@ -199,7 +200,7 @@ export default function Command() {
     );
 
   useEffect(() => {
-    const c: MeetingClient = new MeetingClient({
+    const c: MeetingClient = meetingClientFromPrefs({
       onConnected: () => {
         setClient(c);
         c.requestMeetingState();
