@@ -83,7 +83,7 @@ class TextToSpeechProcessor {
           messages: [
             {
               role: "system",
-              content: `You are a reading assistant please create a text-to-speech script with the style of ${readingStyleContent} !!important: 1.This is not a test the output should be ready for final direct text-to-speech conversion. 2. output language ${this.outputLanguage}] `,
+              content: `You are a reading assistant please create a text-to-speech script with the style of ${readingStyleContent} !!mandatory: 1.This is not a test the output should be ready for final direct text-to-speech conversion. 2. output language ${this.outputLanguage}] `,
             },
             { role: "user", content: selectedText },
           ],
