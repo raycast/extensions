@@ -21,6 +21,7 @@
     "stopwatch",
     "alert",
     "pom",
+    "pomodoro",
     "alarm",
     "clock"
   ],
@@ -85,7 +86,9 @@
       "title": "Start Custom Timer",
       "description": "Set a countdown for a custom amount of time.",
       "mode": "view",
-      "keywords": ["new"],
+      "keywords": [
+        "new"
+      ],
       "arguments": [
         {
           "name": "hours",
@@ -143,7 +146,10 @@
     {
       "name": "dismissTimerAlert",
       "title": "Dismiss Ringing Timer",
-      "keywords": ["Dismiss Timer Alert", "Alert"],
+      "keywords": [
+        "Dismiss Timer Alert",
+        "Alert"
+      ],
       "description": "Stop a ringing alert from a finished timer.",
       "mode": "no-view"
     },
@@ -165,6 +171,12 @@
       "title": "Stop Running Timer",
       "description": "Stop the running timer closest to completion.",
       "mode": "no-view"
+    },
+    {
+      "name": "configureMenubarPresets",
+      "title": "Configure Presets in Menu Bar",
+      "description": "Configure which presets to show in the Timers Menu Bar.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -224,24 +236,28 @@
       "default": true
     },
     {
-      "name": "showMenuBarItemWhen",
+      "name": "showMenuBarIconWhen",
       "type": "dropdown",
       "required": false,
-      "title": "Show Menu Bar Item When",
+      "title": "Show Menu Bar Icon When",
       "description": "When to show icon in menubar.",
-      "default": "Always",
+      "default": "always",
       "data": [
         {
-          "title": "Never",
-          "value": "never"
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "Only When Not Running",
+          "value": "onlyWhenNotRunning"
         },
         {
           "title": "Only When Running",
           "value": "onlyWhenRunning"
         },
         {
-          "title": "Always",
-          "value": "always"
+          "title": "Never",
+          "value": "never"
         }
       ]
     },
@@ -283,14 +299,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.1"
+    "@raycast/api": "^1.65.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "~20.8.10",
-    "@types/react": "^18.2.35",
-    "eslint": "^8.53.0",
-    "typescript": "^5.2.2"
+    "@types/node": "~20.11.5",
+    "@types/react": "^18.2.48",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
