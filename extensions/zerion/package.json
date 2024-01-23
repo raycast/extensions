@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "overview",
-      "title": "Overview",
+      "title": "View Overview",
       "subtitle": "Zerion",
       "description": "Overview a portofolio using an address or an ENS name",
       "mode": "no-view",
@@ -30,7 +30,7 @@
     },
     {
       "name": "collection",
-      "title": "Collection",
+      "title": "View Collection",
       "subtitle": "Zerion",
       "description": "See all NFTs from a collection",
       "mode": "no-view",
@@ -46,28 +46,28 @@
     {
       "name": "favorites",
       "subtitle": "Zerion",
-      "title": "Favorites",
+      "title": "View Favorites",
       "description": "Check your favorite assets",
       "mode": "no-view"
     },
     {
       "name": "top-gainers",
       "subtitle": "Zerion",
-      "title": "Top Gainers",
+      "title": "View Top Gainers",
       "description": "Daily top-performing assets",
       "mode": "no-view"
     },
     {
       "name": "top-losers",
       "subtitle": "Zerion",
-      "title": "Top Losers",
+      "title": "View Top Losers",
       "description": "Daily least-performing assets",
       "mode": "no-view"
     },
     {
       "name": "market",
       "subtitle": "Zerion",
-      "title": "Market",
+      "title": "View Market",
       "description": "Real-time market performance",
       "mode": "no-view"
     }
