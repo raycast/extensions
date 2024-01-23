@@ -4,7 +4,7 @@
 
 <h1 align="center">Splatoon</h1>
 
-![Header](./images/header.png)
+![Header](./metadata/splatoon-1.png)
 
 View Splatoon’s current schedules.
 
