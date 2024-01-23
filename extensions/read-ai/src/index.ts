@@ -70,7 +70,7 @@ class TextToSpeechProcessor {
 
         await showToast({
           style: Toast.Style.Animated,
-          title: `Writing a script... [${this.readingStyle} mode]🔍`,
+          title: `✍🏼 Writing a script... [${this.readingStyle} mode]`,
           message: "Please wait while the script is being written.",
         });
 
@@ -192,7 +192,7 @@ class TextToSpeechProcessor {
         if (this.subtitlesToggle) {
           showToast({
             style: Toast.Style.Animated,
-            title: text,
+            title: `💬 ${text}`,
             message: text,
           });
         }
