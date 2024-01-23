@@ -1,7 +1,7 @@
-import { AddToNodeForm } from "./components/AddToNodeForm";
+import { SupertagsList } from "./components/SupertagsList";
 import { useLoadInitialState } from "./state";
 
 export default function Command() {
   useLoadInitialState();
-  return <AddToNodeForm />;
+  return <SupertagsList />;
 }
