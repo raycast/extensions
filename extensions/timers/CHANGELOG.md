@@ -1,5 +1,7 @@
 # Timers Changelog
 
+## [Fix sorting and time subtitle in configureMenubarPresets] - 2024-01-23
+
 ## [Menu bar quality-of-life upgrades and configurability] - 2024-01-23
 
 - Rename "Show Menu Bar Item When" preference to "Show Menu Bar Icon When" to better reflect what it actually does

@@ -2,6 +2,7 @@ import useTimers from "./hooks/useTimers";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect } from "react";
 import useDefaultPresetVisibles from "./hooks/useDefaultPresetVisibles";
+import { formatTime } from "./formatUtils";
 
 export default function Command() {
   const { customTimers, isLoading, refreshTimers, handleToggleCTVisibility } = useTimers();
@@ -18,23 +19,27 @@ export default function Command() {
   return (
     <List isLoading={isLoading && isLoadingVisibles}>
       <List.Section title={"Custom Presets"}>
-        {Object.keys(customTimers).map((ctID) => (
-          <List.Item
-            key={ctID}
-            title={customTimers[ctID].name}
-            subtitle={customTimers[ctID].name.length === 0 ? "Untitled" : ""}
-            icon={Icon.Clock}
-            accessories={[customTimers[ctID].showInMenuBar ? visibleTag : hiddenTag]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={customTimers[ctID].showInMenuBar ? "Hide In Menu Bar" : "Show In Menu Bar"}
-                  onAction={() => handleToggleCTVisibility(ctID)}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {Object.keys(customTimers)
+          .sort((a, b) => {
+            return customTimers[a].timeInSeconds - customTimers[b].timeInSeconds;
+          })
+          .map((ctID) => (
+            <List.Item
+              key={ctID}
+              title={customTimers[ctID].name}
+              subtitle={formatTime(customTimers[ctID].timeInSeconds)}
+              icon={Icon.Clock}
+              accessories={[customTimers[ctID].showInMenuBar ? visibleTag : hiddenTag]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={customTimers[ctID].showInMenuBar ? "Hide In Menu Bar" : "Show In Menu Bar"}
+                    onAction={() => handleToggleCTVisibility(ctID)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
       </List.Section>
       <List.Section title={"Default Presets"}>
         {defaultPresets.map((defaultPreset) => (
