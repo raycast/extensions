@@ -29,6 +29,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.11.1",
     "imgbb-uploader": "^1.5.1",
     "imgur-uploader": "^4.2.1"
   },
