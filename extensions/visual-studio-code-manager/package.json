@@ -5,9 +5,7 @@
   "description": "quick search and open project in vscode ......",
   "icon": "command-icon.png",
   "author": "ninnka",
-  "contributors": [
-    "ninnka"
-  ],
+  "contributors": [],
   "categories": [
     "Developer Tools"
   ],
