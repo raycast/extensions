@@ -194,7 +194,7 @@
       "title": "Temperature",
       "description": "Adjust the creativity of the text-to-speech output",
       "required": true,
-      "default": "1",
+      "default": "0.6",
       "label": "Temperature",
       "data": [
         {

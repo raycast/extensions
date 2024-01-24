@@ -73,7 +73,7 @@ export async function getCurrentCommandIdentifier() {
  * @param {number} idealLength - The ideal length of a sentence. Default is 80.
  * @returns {string[]} - An array of sentences derived from the input text, with each sentence trimmed and potentially split at comma positions to ensure shorter lengths.
  */
-export function splitSentences(text: string, minSentenceLength: number = 60, idealLength: number = 100): string[] {
+export function splitSentences(text: string, minSentenceLength: number = 80, idealLength: number = 120): string[] {
   if (text.length <= minSentenceLength) {
     return [text];
   }
