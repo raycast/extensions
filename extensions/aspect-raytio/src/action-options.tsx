@@ -37,7 +37,7 @@ export default function ActionOptions(props: {
             icon={{ source: Icon.Ruler }}
             title={`Copy Width: ${width}`}
             content={width}
-            shortcut={{ modifiers: ["cmd"], key: "w" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
           />
         )}
         {basedDimension === BasedDimensions.BASED_WIDTH && (
@@ -45,14 +45,14 @@ export default function ActionOptions(props: {
             icon={{ source: Icon.Ruler }}
             title={`Copy Height: ${height}`}
             content={height}
-            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
           />
         )}
         <Action.CopyToClipboard
           icon={{ source: Icon.Maximize }}
           title={`Copy Full: ${width} × ${height}`}
           content={`${width} × ${height}`}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Orientation">
@@ -89,16 +89,18 @@ export default function ActionOptions(props: {
             }}
           />
         )}
-        <Action
-          icon={{ source: Icon.Important, tintColor: Color.Red }}
-          title="Delete All Custom Raytios"
-          onAction={async () => {
-            if (handleDeleteAll) {
-              handleDeleteAll();
-            }
-            await LocalStorage.clear();
-          }}
-        />
+        {totalCustomRatios > 0 && (
+          <Action
+            icon={{ source: Icon.Important, tintColor: Color.Red }}
+            title="Delete All Custom Raytios"
+            onAction={async () => {
+              if (handleDeleteAll) {
+                handleDeleteAll();
+              }
+              await LocalStorage.clear();
+            }}
+          />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
