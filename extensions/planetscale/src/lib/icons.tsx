@@ -1,6 +1,6 @@
 import { PlanetScaleColor } from "./colors";
 import { Branch, Database, DeployRequest } from "./api";
-import { titleCase } from "./raycast";
+import { titleCase } from "./utils";
 import { Color, Image } from "@raycast/api";
 
 export function getDeployRequestIcon(deployRequest: DeployRequest) {
@@ -8,6 +8,14 @@ export function getDeployRequestIcon(deployRequest: DeployRequest) {
     return {
       source: "deploy-deployed.svg",
       tintColor: PlanetScaleColor.Purple,
+      tooltip: titleCase(deployRequest.deployment_state),
+    };
+  }
+
+  if (deployRequest.deployment_state === "queued") {
+    return {
+      source: "deploy-closed.svg",
+      tintColor: PlanetScaleColor.Yellow,
       tooltip: titleCase(deployRequest.deployment_state),
     };
   }

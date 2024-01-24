@@ -1,8 +1,7 @@
 import { getPlanetScaleClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
-import { mutation } from "../error";
 import { showToast, Toast } from "@raycast/api";
-import { enrichToastWithURL } from "../raycast";
+import { enrichToastWithURL, mutation } from "../utils";
 
 export function useBranches(args: { organization?: string; database?: string }) {
   const pscale = getPlanetScaleClient();
@@ -29,7 +28,7 @@ export function useBranches(args: { organization?: string; database?: string }) 
   );
 
   const deleteBranch = mutation(async (branch: string) => {
-    const toast = await showToast({ style: Toast.Style.Animated, title: `Deleteting branch`, message: branch });
+    const toast = await showToast({ style: Toast.Style.Animated, title: `Deleting branch`, message: branch });
     await mutate(
       pscale.deleteABranch({
         organization: args.organization!,

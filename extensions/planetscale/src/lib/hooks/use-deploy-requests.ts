@@ -1,8 +1,7 @@
 import { getPlanetScaleClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
-import { mutation } from "../error";
 import { showToast, Toast } from "@raycast/api";
-import { enrichToastWithURL } from "../raycast";
+import { enrichToastWithURL, mutation } from "../utils";
 import { range } from "lodash";
 
 export function useDeployRequests(args: { organization?: string; database?: string }) {
@@ -71,6 +70,102 @@ export function useDeployRequests(args: { organization?: string; database?: stri
     toast.title = "Deploy request closed";
   });
 
+  const deployChanges = mutation(async (id: string) => {
+    const deployRequest = deployRequests.find((deployRequest) => deployRequest.id === id)!;
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Deploying changes`,
+      message: `#${deployRequest.number}${deployRequest.notes ? `: ${deployRequest.notes}` : ""}`,
+    });
+
+    await mutate(
+      pscale.queueADeployRequest({
+        organization: args.organization!,
+        database: args.database!,
+        number: deployRequest.number.toString(),
+      }),
+      {
+        optimisticUpdate: (deployRequests) => {
+          return deployRequests.map((r) => {
+            if (r.number === deployRequest.number) {
+              return {
+                ...r,
+                deployment_state: "queued",
+              };
+            }
+            return r;
+          });
+        },
+      },
+    );
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Changes deployed";
+  });
+
+  const revertChanges = mutation(async (id: string) => {
+    const deployRequest = deployRequests.find((deployRequest) => deployRequest.id === id)!;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Reverting changes`,
+      message: `#${deployRequest.number}${deployRequest.notes ? `: ${deployRequest.notes}` : ""}`,
+    });
+    await mutate(
+      pscale.completeARevert({
+        organization: args.organization!,
+        database: args.database!,
+        number: deployRequest.number.toString(),
+      }),
+      {
+        optimisticUpdate: (deployRequests) => {
+          return deployRequests.map((r) => {
+            if (r.number === deployRequest.number) {
+              return {
+                ...r,
+                deployment_state: "in_progress_revert",
+              };
+            }
+            return r;
+          });
+        },
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Changes reverted";
+  });
+
+  const skipRevertPeriod = mutation(async (id: string) => {
+    const deployRequest = deployRequests.find((deployRequest) => deployRequest.id === id)!;
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Skipping revert period",
+      message: `#${deployRequest.number}${deployRequest.notes ? `: ${deployRequest.notes}` : ""}`,
+    });
+    await mutate(
+      pscale.skipRevertPeriod({
+        organization: args.organization!,
+        database: args.database!,
+        number: deployRequest.number.toString(),
+      }),
+      {
+        optimisticUpdate: (deployRequests) => {
+          return deployRequests.map((r) => {
+            if (r.number === deployRequest.number) {
+              return {
+                ...r,
+                deployment_state: "complete",
+              };
+            }
+            return r;
+          });
+        },
+      },
+    );
+    toast.style = Toast.Style.Success;
+    toast.title = "Revert period skipped";
+  });
+
   const createDeployRequest = mutation(
     async (values: { branch: string; deploy: string; notes?: string; organization: string; database: string }) => {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating deploy request" });
@@ -93,5 +188,14 @@ export function useDeployRequests(args: { organization?: string; database?: stri
     await mutate();
   };
 
-  return { deployRequests, createDeployRequest, closeDeployRequest, deployRequestsLoading, refreshDeployRequests };
+  return {
+    deployRequests,
+    deployChanges,
+    revertChanges,
+    skipRevertPeriod,
+    createDeployRequest,
+    closeDeployRequest,
+    deployRequestsLoading,
+    refreshDeployRequests,
+  };
 }

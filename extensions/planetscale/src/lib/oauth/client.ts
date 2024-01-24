@@ -52,12 +52,15 @@ export async function fetchTokens(
     }),
   });
 
-  const tokens = await response.json();
+  const tokens = (await response.json()) as CreateOrRenewAnOauthTokenResponse;
 
-  // Store service token accesses to know which organizations and resources the user has access to
-  // await storeServiceTokenAccesses(tokens.service_token_accesses);
+  await storeServiceTokenAccesses(tokens.service_token_accesses);
 
-  return tokens as OAuth.TokenResponse;
+  return {
+    id_token: tokens.id,
+    access_token: tokens.token,
+    refresh_token: tokens.plain_text_refresh_token,
+  };
 }
 
 export async function logout() {
@@ -71,14 +74,12 @@ export async function logout() {
   await popToRoot();
 }
 
-// interface CreateOrRenewAnOauthTokenResponse {
-//   data: {
-//     id: string;
-//     token: string;
-//     plain_text_refresh_token: string;
-//     service_token_accesses: ServiceTokenAccessesItem[];
-//   };
-// }
+interface CreateOrRenewAnOauthTokenResponse {
+  id: string;
+  token: string;
+  plain_text_refresh_token: string;
+  service_token_accesses: ServiceTokenAccessesItem[];
+}
 
 interface ServiceTokenAccessesItem {
   id: string;

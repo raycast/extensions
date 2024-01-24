@@ -15,7 +15,15 @@ function SearchDeployRequests() {
   const [organization, setOrganization] = useSelectedOrganization();
   const [database, setDatabase] = useSelectedDatabase();
   const [showDeployRequestDetail, setShowDeployRequestDetail] = useCachedState("show-deploy-request-detail", true);
-  const { deployRequests, closeDeployRequest, deployRequestsLoading, refreshDeployRequests } = useDeployRequests({
+  const {
+    deployRequests,
+    revertChanges,
+    skipRevertPeriod,
+    deployChanges,
+    closeDeployRequest,
+    deployRequestsLoading,
+    refreshDeployRequests,
+  } = useDeployRequests({
     organization,
     database,
   });
@@ -94,7 +102,21 @@ function SearchDeployRequests() {
                       }}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                       onAction={async () => {
-                        await closeDeployRequest(deployRequest.id);
+                        const confirmed = await confirmAlert({
+                          primaryAction: {
+                            title: "Confirm",
+                            style: Alert.ActionStyle.Default,
+                          },
+                          icon: {
+                            source: "deploy-deployed.svg",
+                            tintColor: PlanetScaleColor.Purple,
+                          },
+                          title: "Deploy Changes",
+                          message: `Are you sure you want to deploy the changes of the request #${deployRequest.number} (${deployRequest.branch} -> ${deployRequest.into_branch})?`,
+                        });
+                        if (confirmed) {
+                          await deployChanges(deployRequest.id);
+                        }
                       }}
                     />
                     <Action
@@ -119,6 +141,60 @@ function SearchDeployRequests() {
                         });
                         if (confirmed) {
                           await closeDeployRequest(deployRequest.id);
+                        }
+                      }}
+                    />
+                  </>
+                ) : null}
+                {deployRequest.state === "open" && deployRequest.deployment_state === "complete_pending_revert" ? (
+                  <>
+                    <Action
+                      title="Skip Revert Period"
+                      icon={{
+                        source: "deploy-deployed.svg",
+                        tintColor: PlanetScaleColor.Purple,
+                      }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      onAction={async () => {
+                        const confirmed = await confirmAlert({
+                          primaryAction: {
+                            title: "Confirm",
+                            style: Alert.ActionStyle.Default,
+                          },
+                          icon: {
+                            source: "deploy-deployed.svg",
+                            tintColor: PlanetScaleColor.Purple,
+                          },
+                          title: "Deploy Changes",
+                          message: `Are you sure you want to skip the revert period of the request #${deployRequest.number} (${deployRequest.branch} -> ${deployRequest.into_branch})?`,
+                        });
+                        if (confirmed) {
+                          await skipRevertPeriod(deployRequest.id);
+                        }
+                      }}
+                    />
+                    <Action
+                      title="Revert Changes"
+                      icon={{
+                        source: "deploy-closed.svg",
+                        tintColor: PlanetScaleColor.Red,
+                      }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
+                      onAction={async () => {
+                        const confirmed = await confirmAlert({
+                          primaryAction: {
+                            title: "Confirm",
+                            style: Alert.ActionStyle.Destructive,
+                          },
+                          icon: {
+                            source: Icon.Trash,
+                            tintColor: Color.Red,
+                          },
+                          title: "Revert Changes",
+                          message: `Are you sure you want to revert the changes made by #${deployRequest.number} (${deployRequest.branch} -> ${deployRequest.into_branch})?`,
+                        });
+                        if (confirmed) {
+                          await revertChanges(deployRequest.id);
                         }
                       }}
                     />

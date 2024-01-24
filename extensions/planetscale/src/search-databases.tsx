@@ -75,7 +75,9 @@ function SearchDatabases() {
   const { organizations, organizationsLoading } = useOrganizations();
   return (
     <List isLoading={organizationsLoading} searchBarPlaceholder="Search databases">
-      {organizations?.map((organization) => <ListSection organization={organization.name} />)}
+      {organizations.map((organization) => (
+        <ListSection key={organization.id} organization={organization.name} />
+      ))}
     </List>
   );
 }

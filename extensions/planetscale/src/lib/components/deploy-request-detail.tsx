@@ -4,7 +4,7 @@ import { getDeployRequestIcon, getUserIcon } from "../icons";
 import { useDeployOperations } from "../hooks/use-deploy-operations";
 import { format as formatSQL } from "sql-formatter";
 import { PlanetScaleColor } from "../colors";
-import { titleCase } from "../raycast";
+import { titleCase } from "../utils";
 import { countBy } from "lodash";
 
 export function DeployRequestDetail({
@@ -49,12 +49,10 @@ export function DeployRequestDetail({
               text={titleCase(deployRequest.state)}
               color={getDeployRequestIcon(deployRequest).tintColor}
             />
-            {deployRequest.state === "open" ? (
-              <List.Item.Detail.Metadata.TagList.Item
-                text={titleCase(deployRequest.deployment_state)}
-                color={getDeployRequestIcon(deployRequest).tintColor}
-              />
-            ) : null}
+            <List.Item.Detail.Metadata.TagList.Item
+              text={titleCase(deployRequest.deployment_state)}
+              color={getDeployRequestIcon(deployRequest).tintColor}
+            />
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.TagList title="Schema changes">
             <List.Item.Detail.Metadata.TagList.Item
