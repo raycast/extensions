@@ -56,6 +56,7 @@ export default function Command() {
                       <Action icon={{ source: Icon.Eye }} title="Toggle Detail" onAction={() => setSearchText(url)} />
                       <Action
                         icon={{ source: Icon.Trash }}
+                        style={Action.Style.Destructive}
                         title="Remove From History"
                         onAction={() => handleRemoveCache(url)}
                         shortcut={{ modifiers: ["cmd"], key: "backspace" }}
