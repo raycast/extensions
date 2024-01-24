@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - 2024-01-25
+
+- Adds a preference to display additional item as subtitle in the list
+
 ## [Maintenance] - 2024-01-09
 
 - Add better error messages for reporting.
