@@ -261,7 +261,7 @@
       "description": "Maximum number of item pulls per RSS feed",
       "type": "textfield",
       "title": "Max Items Per RSS Feed",
-      "default": "10",
+      "default": "5",
       "required": false
     },
     {
@@ -270,6 +270,14 @@
       "type": "textfield",
       "title": "Max Summarize API Concurrency",
       "default": "3",
+      "required": false
+    },
+    {
+      "name": "retryDelay",
+      "description": "AI API request retry delay, default is 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can increase this value.",
+      "type": "textfield",
+      "title": "AI API Retry Delay",
+      "default": "30",
       "required": false
     },
     {

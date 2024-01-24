@@ -37,6 +37,7 @@ export interface Preferences {
   summarizePrompt?: string;
   maxItemsPerFeed?: number;
   maxApiConcurrency?: number;
+  retryDelay?: number;
   notificationTime?: string;
   autoGenDigest?: boolean;
   requestTimeout?: number;

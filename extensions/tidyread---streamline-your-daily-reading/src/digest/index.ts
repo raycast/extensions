@@ -2,7 +2,7 @@ import Parser from "rss-parser";
 import pLimit from "p-limit";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { load } from "cheerio";
-import { isXML, normalizeUrlForMarkdown, withTimeout } from "../utils/util";
+import { isXML, normalizeUrlForMarkdown, retry, withTimeout } from "../utils/util";
 import { DigestItem, Provider, SummarizeStatus } from "../types";
 import dayjs from "dayjs";
 import { uniqBy } from "lodash";
@@ -104,12 +104,21 @@ function ellipsisContent(content: string, maxLen: number): string {
 }
 
 // 对单个项目进行概述
-async function summarizeItem(item: RSSItem, provider: Provider, requestTimeout?: number): Promise<RSSItemWithStatus> {
+async function summarizeItem(
+  item: RSSItem,
+  provider: Provider,
+  requestTimeout?: number,
+  retryDelay?: number,
+): Promise<RSSItemWithStatus> {
   console.time(`summarize call for ${item.title} @${item.feed?.title}`);
   try {
     const needSummarize = item.content && item.content.length > MIN_SUMMARIZE_CHARACTER_LIMIT && provider.available;
     const summary = needSummarize
-      ? await withTimeout(provider.summarize(item.content!), requestTimeout ?? 20000)
+      ? await retry(
+          () => withTimeout(provider.summarize(item.content!), requestTimeout ?? 20000),
+          3,
+          retryDelay ?? 30 * 1000,
+        )
       : ellipsisContent(item.content || "", THRESHOLDS_FOR_TRUNCATION);
 
     return { ...item, summary: summary, status: needSummarize ? "summraized" : "raw" };
@@ -200,6 +209,7 @@ export async function genDigest(options: {
   translateTitles?: (titles: string[]) => Promise<string[]>;
   maxApiConcurrency?: number;
   requestTimeout?: number;
+  retryDelay?: number;
   itemLinkFormat?: (link: string, item: RSSItem) => string;
 }): Promise<{
   content: string;
@@ -235,7 +245,9 @@ export async function genDigest(options: {
 
   // 第四步：并发地对items进行概述
   const summarizedItems = await Promise.all(
-    formatedItems.map((item) => limit(() => summarizeItem(item, options.provider, options.requestTimeout))),
+    formatedItems.map((item) =>
+      limit(() => summarizeItem(item, options.provider, options.requestTimeout, options.retryDelay)),
+    ),
   );
 
   formatedItems = summarizedItems.map((item) => ({

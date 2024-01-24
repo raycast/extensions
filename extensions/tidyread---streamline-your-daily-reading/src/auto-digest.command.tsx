@@ -130,7 +130,7 @@ export default async function Command() {
   } else if (isAfter(now, preTime)) {
     // 若到了notificationTime的前10分钟，若没有当日digest，则开始生成digest；且反复重试
     if (!(await checkTodaysDigestExist())) {
-      await retry(handleGenDigest, 3, 5000);
+      await retry(handleGenDigest, 3, 10 * 1000);
     }
   }
 }

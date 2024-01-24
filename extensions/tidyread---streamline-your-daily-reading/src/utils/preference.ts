@@ -23,9 +23,11 @@ export function normalizePreference(): Required<Preferences> {
     summarizePrompt: (values.summarizePrompt || "").trim() || DEFAULT_PROMPT,
     maxItemsPerFeed: isNum(values.maxItemsPerFeed) ? +values.maxItemsPerFeed : 10,
     maxApiConcurrency: isNum(values.maxApiConcurrency) ? +values.maxApiConcurrency : 3,
+    // 默认重试延迟时间为30秒
+    retryDelay: isNum(values.retryDelay) ? +values.retryDelay * 1000 : 30 * 1000,
     notificationTime: values.notificationTime || "9am",
     autoGenDigest: values.autoGenDigest ?? false,
-    requestTimeout: isNum(values.requestTimeout) ? +values.requestTimeout * 1000 : 20000,
+    requestTimeout: isNum(values.requestTimeout) ? +values.requestTimeout * 1000 : 20 * 1000,
     enableItemLinkProxy: values.enableItemLinkProxy ?? true,
     writeFreelyEndpoint: values.writeFreelyEndpoint || "",
     writeFreelyAccount: values.writeFreelyAccount || "",
