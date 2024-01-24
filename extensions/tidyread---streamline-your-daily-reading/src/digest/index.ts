@@ -145,7 +145,7 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
     : `> **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the original excerpts.\n\n`;
   let digest = `${prefix}`;
 
-  digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have the RSS Link field filled out** can be summarized.\nThe content pulled by rss will be filtered according to the time span you provide, keeping only the content in the time span.\n\n## Summary\n`;
+  digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have a valid RSS Link** can be summarized.\nThe content pulled by rss will be filtered according to the \`Time Span\` you provide, keeping only the content in the time span.\n\n## Summary\n`;
 
   if (items.length === 0) {
     return `${digest}No RSS items remain after filtering.`;
@@ -153,6 +153,10 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
 
   for (const [index, item] of items.entries()) {
     digest += formatItemForDigest(item, `${index + 1}. `);
+  }
+
+  if (items.some((item) => item.status === "failedToSummarize")) {
+    digest += `## Why Some Articles Failed To Be Summarized By AI?\n\nYou can check out [this document](https://www.tidyread.info/docs/why-some-articles-fail-to-be-summarized) to understand why and how to fix it.\n\n`;
   }
 
   return digest;
