@@ -52,6 +52,28 @@
       "description": "Always use the last selected collection instead of All Bookmarks.",
       "default": false,
       "label": "Use always the last selected collection"
+    },
+    {
+      "name": "additionalItemToDisplayInList",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "link",
+          "title": "Link"
+        },
+        {
+          "value": "domain",
+          "title": "Domain"
+        },
+        {
+          "value": "none",
+          "title": "None"
+        }
+      ],
+      "title": "Additional Item to Display in List",
+      "description": "Select additional item to display as an subtitle in list.",
+      "default": "link"
     }
   ],
   "dependencies": {

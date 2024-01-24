@@ -80,6 +80,15 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
   const lastUpdatedDate = new Date(bookmark.lastUpdate);
   const createdDate = new Date(bookmark.created);
 
+  function subtitle() {
+    switch (preferences.additionalItemToDisplayInList) {
+      case "domain":
+        return bookmark.domain;
+      case "link":
+        return bookmark.link;
+    }
+  }
+
   function accessories() {
     const accessories = [];
 
@@ -94,6 +103,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
       icon={getFavicon(bookmark.link, { fallback: "raindrop-icon.png" })}
       key={bookmark._id}
       title={bookmark.title}
+      subtitle={subtitle()}
       accessories={accessories()}
       actions={
         <ActionPanel>
