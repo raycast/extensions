@@ -15,7 +15,7 @@ import {
   useNavigation,
   LaunchProps,
 } from "@raycast/api";
-import { bizGenDigest, categorizeSources } from "./utils/biz";
+import { addUtmSourceToUrl, bizGenDigest, categorizeSources } from "./utils/biz";
 import { NO_API_KEY, NO_FEEDS, matchError } from "./utils/error";
 import { getSources, getTodaysDigest } from "./store";
 import { capitalize } from "lodash";
@@ -97,7 +97,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
   };
 
   const openMultipleUrls = async (items: Source[]) => {
-    const urls = items.map((item) => item.url);
+    const urls = items.map((item) => addUtmSourceToUrl(item.url));
     await shell(`open ${urls.join(" ")}`);
   };
 
@@ -196,7 +196,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                 ])}
                 actions={
                   <CustomActionPanel>
-                    <Action.OpenInBrowser url={item.url} title="Open URL" />
+                    <Action.OpenInBrowser url={addUtmSourceToUrl(item.url)} title="Open URL" />
                     <Action
                       icon={Icon.ArrowNe}
                       title="Open All Today's Sources"
@@ -246,7 +246,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                 ])}
                 actions={
                   <CustomActionPanel>
-                    <Action.OpenInBrowser url={item.url} title="Open URL" />
+                    <Action.OpenInBrowser url={addUtmSourceToUrl(item.url)} title="Open URL" />
                     <Action
                       icon={Icon.ArrowNe}
                       title="Open All Other's Sources"

@@ -144,9 +144,9 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
           return parseOutput(translatedTitles);
         },
     itemLinkFormat: (link, item) => {
-      if (!tidyreadCloudAvailable || !enableItemLinkProxy) return link;
+      if (!tidyreadCloudAvailable || !enableItemLinkProxy) return addUtmSourceToUrl(link);
       const qstr = queryString.stringify({
-        source_link: link,
+        source_link: addUtmSourceToUrl(link),
         rss_link: item?.feed?.url,
         status: item?.status,
         interest,
@@ -191,4 +191,15 @@ export function isValidNotificationTime(time: string): boolean {
   const timeFormatRegex =
     /^([01]?[0-9]|2[0-3]):([0-5][0-9])$|^(1[0-2]|0?[1-9]):([0-5][0-9])([ap]m)$|^(1[0-2]|0?[1-9])([ap]m)$/;
   return timeFormatRegex.test(time);
+}
+
+export function addUtmSourceToUrl(url: string): string {
+  // 解析当前URL的查询参数
+  const parsedQuery = queryString.parseUrl(url);
+
+  // 添加或更新utm_source参数
+  parsedQuery.query["utm_source"] = "tidyread";
+
+  // 重新构建URL
+  return queryString.stringifyUrl(parsedQuery);
 }
