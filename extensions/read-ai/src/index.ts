@@ -3,8 +3,8 @@ import { OpenAI } from "openai";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
-import { LanguageCode, readingStyle, Voice, Preferences } from "./types";
-import { MIN_TEXT_QUE_SENTENCE_LENGTH, READING_STYLES_PROMPTS } from "./const";
+import { LanguageCode, readingStyle, Voice, Preferences, ScriptArguments } from "./types";
+import { READING_STYLES_PROMPTS } from "./const";
 import {
   cleanupTmpDir,
   execAsync,
@@ -12,6 +12,7 @@ import {
   setCurrentCommandIdentifier,
   splitSentences,
 } from "./utills";
+import { ChatCompletion } from "openai/resources/chat/completions";
 
 class TextToSpeechProcessor {
   private textToSpeechQueue: string[] = [];
@@ -96,7 +97,7 @@ class TextToSpeechProcessor {
         `.trim();
 
         // Use the OpenAI completion endpoint to translate and script the selected text
-        const translation = await this.openai.chat.completions.create({
+        const script: ChatCompletion = await this.openai.chat.completions.create({
           model: this.gptModel,
           temperature: this.temperature,
           messages: [
@@ -106,9 +107,71 @@ class TextToSpeechProcessor {
             },
             { role: "user", content: selectedText },
           ],
+          functions: [
+            {
+              name: "Generate_TTS_Script",
+              description: "Generate a script for text-to-speech.",
+              parameters: {
+                type: "object",
+                properties: {
+                  output_language: {
+                    description: "The language code for translation output.",
+                    type: "string",
+                    enum: [this.outputLanguage],
+                  },
+                  type: {
+                    description: "Identify the content and select the most appropriate content type.",
+                    type: "string",
+                    enum: [
+                      "literature", // Includes books, novels, poetry, essays, etc.
+                      "academic", // Includes research papers, theses, academic articles, etc.
+                      "journalism", // Includes news articles, reports, interviews, etc.
+                      "correspondence", // Includes letters, emails, memos, etc.
+                      "commercial", // Includes advertisements, brochures, business reports, etc.
+                      "legal", // Includes legal documents, contracts, legislation, etc.
+                      "technical", // Includes technical manuals, guides, documentation, etc.
+                      "governmental", // Includes policy documents, public records, etc.
+                      "multimedia", // Includes podcasts, presentations, lectures, etc.
+                      "social_media", // Includes tweets, blog posts, forum discussions, etc.
+                      "other",
+                    ],
+                  },
+                  title: {
+                    description: `Create a concise title in ${this.outputLanguage}, 20-60 characters, summarizing the content`,
+                    type: "string",
+                  },
+                  short_description: {
+                    description: `A short description of the content in ${this.outputLanguage} maximally 150 characters long`,
+                    type: "string",
+                  },
+                  author_or_source: {
+                    description: "The source of the original content, or the author of the content.",
+                    type: "string",
+                  },
+                  script: {
+                    description: `The script for text-to-speech in ${this.outputLanguage}`,
+                    type: "string",
+                  },
+                },
+                required: ["output_language", "script", "type", "author_or_source", "title", "short_description"],
+              },
+            },
+          ],
           // max_tokens: 60, // Adjust as needed
         });
-        selectedText = translation.choices[0].message.content as string;
+
+        const functionCallArgumentsString = script.choices[0].message.function_call?.arguments;
+
+        if (functionCallArgumentsString) {
+          const functionCallArguments = JSON.parse(functionCallArgumentsString) as ScriptArguments;
+          console.log(
+            "🚀 ~ TextToSpeechProcessor ~ processSelectedText ~ functionCallArguments:",
+            functionCallArguments,
+          );
+          selectedText = functionCallArguments.script;
+        } else {
+          throw new Error("No valid script found in the OpenAI response.");
+        }
 
         await showToast({
           style: Toast.Style.Success,
@@ -119,14 +182,7 @@ class TextToSpeechProcessor {
 
       const sentences = splitSentences(selectedText);
 
-      this.textToSpeechQueue = sentences.reduce((acc: string[], sentence: string) => {
-        if (acc.length === 0 || acc[acc.length - 1].length >= MIN_TEXT_QUE_SENTENCE_LENGTH) {
-          acc.push(sentence);
-        } else {
-          acc[acc.length - 1] += " " + sentence;
-        }
-        return acc;
-      }, []);
+      this.textToSpeechQueue = sentences;
 
       if (!this.isConverting) {
         console.log("Converting text to speech...");
