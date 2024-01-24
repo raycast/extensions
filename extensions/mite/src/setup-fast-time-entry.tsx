@@ -1,22 +1,31 @@
 import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { parse } from "valibot";
 import { useMite } from "./hooks/useMite";
+import { useStorageState } from "./hooks/useStorageState";
 import { TimeEntryPost, projects_schema, services_schema, time_entry_post_schema } from "./validations";
-import { useState } from "react";
 
 export default function Command() {
-  const [fast_time_entry, set_fast_time_entry] = useCachedState<TimeEntryPost | null>("fast-time-entry", null);
-  const [secodnary_fast_time_entry, set_secondary_fast_time_entry] = useCachedState<TimeEntryPost | null>(
-    "secondary-fast-time-entry",
+  const [fast_time_entry, set_fast_time_entry, { loading: ft_loading }] = useStorageState<TimeEntryPost | null>(
+    "fast-time-entry",
     null,
   );
+  const [secondary_fast_time_entry, set_secondary_fast_time_entry, { loading: sft_loading }] =
+    useStorageState<TimeEntryPost | null>("secondary-fast-time-entry", null);
 
   const [kind, set_kind] = useState<"primary" | "secondary">("primary");
 
-  const [minutes, set_minutes] = useState<string | undefined>(fast_time_entry?.time_entry.minutes.toString());
-  const [project, set_project] = useState<string | undefined>(fast_time_entry?.time_entry.project_id);
-  const [service, set_service] = useState<string | undefined>(fast_time_entry?.time_entry.service_id);
+  const [minutes, set_minutes] = useState<string | undefined>(fast_time_entry?.time_entry.minutes.toString() ?? "");
+  const [project, set_project] = useState<string | undefined>(fast_time_entry?.time_entry.project_id ?? "");
+  const [service, set_service] = useState<string | undefined>(fast_time_entry?.time_entry.service_id ?? "");
+
+  useEffect(() => {
+    if (!ft_loading && !sft_loading) {
+      set_minutes(fast_time_entry?.time_entry.minutes.toString() ?? "");
+      set_project(fast_time_entry?.time_entry.project_id ?? "");
+      set_service(fast_time_entry?.time_entry.service_id ?? "");
+    }
+  }, [ft_loading, sft_loading]);
 
   const projects = useMite(`/projects.json`, projects_schema);
   const services = useMite(`/services.json`, services_schema);
@@ -63,7 +72,7 @@ export default function Command() {
 
   return (
     <Form
-      isLoading={projects.isLoading}
+      isLoading={projects.isLoading || ft_loading || sft_loading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
@@ -78,7 +87,7 @@ export default function Command() {
       <Form.Dropdown
         onChange={(value) => {
           set_kind(value as "primary" | "secondary");
-          const time_entry = value === "primary" ? fast_time_entry : secodnary_fast_time_entry;
+          const time_entry = value === "primary" ? fast_time_entry : secondary_fast_time_entry;
           set_minutes(time_entry?.time_entry.minutes.toString());
           set_project(time_entry?.time_entry.project_id);
           set_service(time_entry?.time_entry.service_id);
@@ -86,6 +95,7 @@ export default function Command() {
         id="kind"
         title="Type"
         storeValue
+        value={kind}
       >
         <Form.Dropdown.Item value="primary" title="Primary" />
         <Form.Dropdown.Item value="secondary" title="Secondary" />
