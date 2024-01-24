@@ -184,6 +184,12 @@ export async function getUserProfile(): Promise<{ name: string; email: string }>
   return userProfile;
 }
 
+function formattedLocation(location: string | PlaceInterface): string {
+  return location && !(typeof location === "string")
+    ? `${location.displayName.text}: ${location.googleMapsUri}`
+    : location;
+}
+
 export async function enrichLocation(searchText: string | PlaceInterface): Promise<PlaceInterface> {
   const googlePlacesTextSearchResponse = await fetch("https://places.googleapis.com/v1/places:searchText", {
     method: "POST",
@@ -226,7 +232,7 @@ export async function createCalendarEvent(
       timeZone: timeZone,
     },
     recurrence: [calendarEventDetails.eventRecurrence],
-    location: calendarEventDetails.eventLocation,
+    location: formattedLocation(calendarEventDetails.eventLocation || ""),
     attendees: contacts.map((contact) => ({ email: contact.emailAddress })),
   };
 
