@@ -2,7 +2,7 @@
 
 This [Raycast](https://www.raycast.com/) extension allows you to check the availability of [InPost](https://inpost.co.uk/) parcel lockers in the UK quickly and easily.
 
-![Screenshot](screenshot.png?raw=true)
+![Screenshot](./metadata/screenshot.png?raw=true)
 
 With this extension, you can:
 
