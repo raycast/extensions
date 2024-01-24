@@ -83,10 +83,14 @@ class TextToSpeechProcessor {
         Requirements:
         - The final script must be in ${this.outputLanguage}.
         - Adhere to the reading style specified in "${readingStyleContent}".
-        - Produce a script of professional quality, ready for immediate text-to-speech use.
+        - Produce a script of professional quality, ready for immediate text-to-speech use this is not a draft.
         - If the source of the original text or media is known, mention it. If the time of writing or sharing is relevant, include it. Otherwise, these details can be omitted.
         - Maintain factual accuracy and neutrality, presenting information engagingly and clearly.
-        - Avoid personal commentary or assumptions. Focus on preparing the script for text-to-speech conversion.
+        - Focus on preparing the script for text-to-speech conversion.
+
+        Exclude the following:
+        - There's no requirement to separately state elements like the title, introduction, or body.
+        - Avoid personal commentary or assumptions.
 
         Begin the translation and script adaptation process now:
         `.trim();
