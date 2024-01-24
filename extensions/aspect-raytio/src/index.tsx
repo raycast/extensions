@@ -79,6 +79,7 @@ export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
               sizeValue={sizeValue}
               basedDimension={basedDimension}
               orientation={orientation}
+              totalCustomRatios={customRatios.length}
               handleOrientationChange={handleOrientationChange}
             />
             <AspectRatiosList
@@ -87,6 +88,7 @@ export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
               sizeValue={sizeValue}
               basedDimension={basedDimension}
               orientation={orientation}
+              totalCustomRatios={customRatios.length}
               handleOrientationChange={handleOrientationChange}
               handleNewCustomRatio={(ar: RatioType) => {
                 setCustomRatios([...customRatios, ar]);
@@ -95,7 +97,7 @@ export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
                 setCustomRatios(customRatios.filter((ratio: RatioType) => ratio.key !== id));
               }}
               handleDeleteAll={() => {
-                setCustomRatios([]);
+                if (customRatios.length > 0) setCustomRatios([]);
               }}
             />
           </>

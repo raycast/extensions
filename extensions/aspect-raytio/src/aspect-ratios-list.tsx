@@ -9,6 +9,7 @@ export default function AspectRatiosList(props: {
   sizeValue: number;
   basedDimension: BasedDimensions;
   orientation: Orientations;
+  totalCustomRatios: number;
   handleOrientationChange: () => void;
   handleNewCustomRatio?: (ar: RatioType) => void;
   handleDeleteItem?: (id: string) => void;
@@ -20,6 +21,7 @@ export default function AspectRatiosList(props: {
     sizeValue,
     basedDimension,
     orientation,
+    totalCustomRatios = 0,
     handleOrientationChange,
     handleNewCustomRatio,
     handleDeleteItem,
@@ -56,7 +58,7 @@ export default function AspectRatiosList(props: {
             actions={
               <ActionOptions
                 id={list[index].key}
-                totalCustomRatios={list.length}
+                totalCustomRatios={totalCustomRatios}
                 ratio={ratio}
                 width={orientation === Orientations.LANDSCAPE ? valueMinMax.max : valueMinMax.min}
                 height={orientation === Orientations.LANDSCAPE ? valueMinMax.min : valueMinMax.max}
