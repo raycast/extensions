@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.11.0
+
+- Added the [OAuth utils](./oauth/README.md).
+
 ### v1.10.1
 
 - Fix an issue where the values passed to the `reset` function of the `useForm` hook wouldn't be respected.
