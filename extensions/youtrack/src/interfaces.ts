@@ -9,11 +9,10 @@ export interface Issue {
   description?: string;
 }
 
-export interface Preferences {
-  instance: string;
-  token: string;
-  query: string;
-  maxIssues: string;
+export interface Project {
+  id: string;
+  shortName: string;
+  name: string;
 }
 
 export interface State {
