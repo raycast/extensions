@@ -1,25 +1,30 @@
 import { ActionPanel, Action, Icon, Color, LocalStorage } from "@raycast/api";
 import { BasedDimensions, Orientations, RatioType } from ".";
+import CreateCustomRatio from "./create-custom-ratio";
 
 export default function ActionOptions(props: {
   id: string | undefined;
+  totalCustomRatios: number;
   ratio: RatioType;
   width: number;
   height: number;
   basedDimension: BasedDimensions;
   orientation: Orientations;
   handleOrientationChange: () => void;
+  handleNewCustomRatio: (ar: RatioType) => void;
   handleDeleteItem?: (id: string) => void;
   handleDeleteAll?: () => void;
 }) {
   const {
     id,
+    totalCustomRatios = 0,
     ratio,
     width,
     height,
     basedDimension,
     orientation,
     handleOrientationChange,
+    handleNewCustomRatio,
     handleDeleteItem,
     handleDeleteAll,
   } = props;
@@ -58,7 +63,20 @@ export default function ActionOptions(props: {
           onAction={() => handleOrientationChange()}
         />
       </ActionPanel.Section>
-      <ActionPanel.Section title="Danger Zone">
+      <ActionPanel.Section title="Configuration">
+        <Action.Push
+          icon={{ source: Icon.Plus }}
+          title="Create New"
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          target={
+            <CreateCustomRatio
+              totalCustomRatios={totalCustomRatios}
+              onCreate={(ar: RatioType) => {
+                handleNewCustomRatio(ar);
+              }}
+            />
+          }
+        />
         {id && (
           <Action
             icon={{ source: Icon.Trash, tintColor: Color.Red }}

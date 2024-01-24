@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List, LaunchProps, Form } from "@raycast/api";
+import { List, LaunchProps, Form } from "@raycast/api";
 import DimensionsDropdown from "./dimensions-dropdown";
-import CreateCustomRatio from "./create-custom-ratio";
 import AspectRatiosList from "./aspect-ratios-list";
 import { useAllCustomRatios } from "../hooks/useCustomRatios";
 import { defaultRatios } from "../lib/default-ratios";
@@ -89,6 +88,9 @@ export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
               basedDimension={basedDimension}
               orientation={orientation}
               handleOrientationChange={handleOrientationChange}
+              handleNewCustomRatio={(ar: RatioType) => {
+                setCustomRatios([...customRatios, ar]);
+              }}
               handleDeleteItem={(id: string) => {
                 setCustomRatios(customRatios.filter((ratio: RatioType) => ratio.key !== id));
               }}
@@ -96,27 +98,6 @@ export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
                 setCustomRatios([]);
               }}
             />
-            <List.Section title="Configuration">
-              <List.Item
-                title="Create New"
-                subtitle="Create Custom Ratio"
-                actions={
-                  <ActionPanel>
-                    <Action.Push
-                      title="Create New"
-                      target={
-                        <CreateCustomRatio
-                          totalCustomRatios={customRatios.length}
-                          onCreate={(ar: RatioType) => {
-                            setCustomRatios([...customRatios, ar]);
-                          }}
-                        />
-                      }
-                    />
-                  </ActionPanel>
-                }
-              />
-            </List.Section>
           </>
         ) : (
           <List.EmptyView title="Type only numbers with or without decimal values" description="e.g. 1920, 600.25" />

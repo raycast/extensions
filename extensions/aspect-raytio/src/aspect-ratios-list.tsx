@@ -10,6 +10,7 @@ export default function AspectRatiosList(props: {
   basedDimension: BasedDimensions;
   orientation: Orientations;
   handleOrientationChange: () => void;
+  handleNewCustomRatio?: (ar: RatioType) => void;
   handleDeleteItem?: (id: string) => void;
   handleDeleteAll?: () => void;
 }) {
@@ -20,6 +21,7 @@ export default function AspectRatiosList(props: {
     basedDimension,
     orientation,
     handleOrientationChange,
+    handleNewCustomRatio,
     handleDeleteItem,
     handleDeleteAll,
   } = props;
@@ -54,12 +56,18 @@ export default function AspectRatiosList(props: {
             actions={
               <ActionOptions
                 id={list[index].key}
+                totalCustomRatios={list.length}
                 ratio={ratio}
                 width={orientation === Orientations.LANDSCAPE ? valueMinMax.max : valueMinMax.min}
                 height={orientation === Orientations.LANDSCAPE ? valueMinMax.min : valueMinMax.max}
                 basedDimension={basedDimension}
                 orientation={orientation}
                 handleOrientationChange={() => handleOrientationChange()}
+                handleNewCustomRatio={(ar: RatioType) => {
+                  if (handleNewCustomRatio) {
+                    handleNewCustomRatio(ar);
+                  }
+                }}
                 handleDeleteItem={handleDeleteItem ? (id: string) => handleDeleteItem(id) : undefined}
                 handleDeleteAll={handleDeleteAll ? () => handleDeleteAll() : undefined}
               />
