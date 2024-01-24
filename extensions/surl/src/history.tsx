@@ -24,8 +24,8 @@ export default function Command() {
     setItems(filteredItems);
   };
 
-  const handleRemoveCache = (url: string) => {
-    const newItems = cachedItems.filter((item) => item.url !== url);
+  const handleRemoveCache = (index: number) => {
+    const newItems = cachedItems.filter((_, i) => i !== index);
     setItems(newItems);
     cache.set(CACHE_KEY, JSON.stringify(newItems));
   };
@@ -42,7 +42,7 @@ export default function Command() {
       <List.Section title="History">
         {itemsCount > 0 ? (
           <>
-            {items.map(({ key, url }) => {
+            {items.map(({ key, url }, index) => {
               const shortenUrl = `${FRONTEND_ENDPOINT}/${key}`;
               return (
                 <List.Item
@@ -58,7 +58,7 @@ export default function Command() {
                         icon={{ source: Icon.Trash }}
                         style={Action.Style.Destructive}
                         title="Remove From History"
-                        onAction={() => handleRemoveCache(url)}
+                        onAction={() => handleRemoveCache(index)}
                         shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                       />
                     </ActionPanel>
