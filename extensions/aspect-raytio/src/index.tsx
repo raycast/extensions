@@ -81,6 +81,12 @@ export default function Command(props: LaunchProps<{ arguments: RatioType }>) {
               orientation={orientation}
               totalCustomRatios={customRatios.length}
               handleOrientationChange={handleOrientationChange}
+              handleNewCustomRatio={(ar: RatioType) => {
+                setCustomRatios([...customRatios, ar]);
+              }}
+              handleDeleteAll={() => {
+                if (customRatios.length > 0) setCustomRatios([]);
+              }}
             />
             <AspectRatiosList
               title="Custom"
