@@ -1,74 +1,42 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "iconify",
-  "title": "Iconify — Search Icons",
-  "description": "Search icons via Iconify",
-  "icon": "icon.png",
-  "author": "destiner",
-  "contributors": [
-    "kidonng",
-    "sxn",
-    "robert"
-  ],
+  "title": "Iconify - Icon Finder",
+  "description": "Iconify-based search capabilities",
+  "icon": "command-icon.png",
   "categories": [
-    "Design Tools",
-    "Developer Tools"
+    "Productivity",
+    "Developer Tools",
+    "Design Tools"
   ],
+  "author": "yveeven",
   "license": "MIT",
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "lint": "ray lint"
-  },
   "commands": [
     {
-      "name": "view-icons",
-      "title": "View Icons",
-      "subtitle": "Iconify",
-      "description": "View available icons",
+      "name": "index",
+      "title": "Search Icon",
+      "description": "Icon search in table view",
       "mode": "view"
-    },
-    {
-      "name": "search-icons",
-      "title": "Search All Icons",
-      "subtitle": "Iconify",
-      "description": "Search through all available icons",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "primaryAction",
-      "type": "dropdown",
-      "required": false,
-      "title": "Primary action",
-      "description": "Primary action to use",
-      "default": "paste",
-      "data": [
-        {
-          "title": "Paste to Active App",
-          "value": "paste"
-        },
-        {
-          "title": "Copy to Clipboard",
-          "value": "copy"
-        }
-      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.0",
-    "axios": "^0.26.1",
-    "react-hooks-global-state": "^2.1.0"
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@typescript-eslint/eslint-plugin": "^5.15.0",
-    "@typescript-eslint/parser": "^5.15.0",
-    "eslint": "^8.11.0",
-    "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.24.1",
-    "typescript": "^4.6.2"
+    "@iconify/types": "^2.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
