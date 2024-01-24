@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.11.1
+
+- Fixed Google OAuth configuration
+
 ### v1.11.0
 
 - Added the [OAuth utils](./oauth/README.md).
