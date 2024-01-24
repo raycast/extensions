@@ -91,6 +91,7 @@ export default function ActionOptions(props: {
         )}
         {totalCustomRatios > 0 && (
           <Action
+            style={Action.Style.Destructive}
             icon={{ source: Icon.Important, tintColor: Color.Red }}
             title="Delete All Custom Raytios"
             onAction={async () => {
