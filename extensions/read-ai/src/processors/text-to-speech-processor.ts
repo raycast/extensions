@@ -1,19 +1,19 @@
-import { getSelectedText, showToast, Toast, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import { getSelectedText, showToast, Toast, closeMainWindow } from "@raycast/api";
 import { OpenAI } from "openai";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
-import { LanguageCode, readingStyle, Voice, Preferences } from "./types";
-import { READING_STYLES_PROMPTS } from "./const";
+import { LanguageCode, readingStyle, Voice } from "../types";
+import { READING_STYLES_PROMPTS } from "../const";
 import {
-  cleanupTmpDir,
+  stopAllProcesses,
   execAsync,
   getCurrentCommandIdentifier,
   setCurrentCommandIdentifier,
   splitSentences,
-} from "./utills";
+} from "../utills";
 
-class TextToSpeechProcessor {
+export class TextToSpeechProcessor {
   private textToSpeechQueue: string[] = [];
   private playAudioQueue: { filePath: string; text: string }[] = [];
   private isPlaying = false;
@@ -25,6 +25,7 @@ class TextToSpeechProcessor {
   private subtitlesToggle: boolean;
   private outputLanguage: LanguageCode;
   private readingStyle: readingStyle; // 추가된 타입
+  public onScriptGenerated?: (script: string) => void;
 
   constructor(
     apiKey: string,
@@ -34,6 +35,7 @@ class TextToSpeechProcessor {
     subtitlesToggle: boolean,
     outputLanguage: LanguageCode,
     readingStyle: readingStyle,
+    onScriptGenerated?: (script: string) => void,
   ) {
     this.openai = new OpenAI({ apiKey });
     this.voice = voice;
@@ -42,6 +44,7 @@ class TextToSpeechProcessor {
     this.subtitlesToggle = subtitlesToggle;
     this.outputLanguage = outputLanguage;
     this.readingStyle = readingStyle;
+    this.onScriptGenerated = onScriptGenerated;
   }
 
   /**
@@ -58,14 +61,14 @@ class TextToSpeechProcessor {
     await setCurrentCommandIdentifier(currentIdentifier);
 
     // kill all afplay processes if any are running
-    await this.stopAllProcesses();
+    await stopAllProcesses();
 
     console.log("outputLanguage: ", this.outputLanguage);
 
     try {
       let selectedText = await getSelectedText();
 
-      if (this.outputLanguage) {
+      if (this.outputLanguage && selectedText) {
         console.log(this.outputLanguage, "Start writing script...");
 
         await showToast({
@@ -107,12 +110,18 @@ class TextToSpeechProcessor {
         });
 
         selectedText = script.choices[0].message.content as string;
+        console.log("🚀 ~ TextToSpeechProcessor ~ processSelectedText ~ selectedText:", selectedText);
 
         await showToast({
           style: Toast.Style.Success,
           title: "🎉 Script Writing Complete",
           message: "The script has been successfully written in English.",
         });
+
+        // Call the callback function to update the state once the script processing is complete.
+        if (this.onScriptGenerated) {
+          this.onScriptGenerated(selectedText);
+        }
       }
 
       const sentences = splitSentences(selectedText);
@@ -203,7 +212,6 @@ class TextToSpeechProcessor {
           showToast({
             style: Toast.Style.Animated,
             title: `💬 ${text}`,
-            message: text,
           });
         }
 
@@ -221,31 +229,13 @@ class TextToSpeechProcessor {
       }
       this.isPlaying = false;
     }
-  }
-
-  /**
-   * Method to stop all afplay processes.
-   */
-  public async stopAllProcesses() {
-    try {
-      // Check for existing afplay processes
-      const { stdout: pgrepStdout } = await execAsync("pgrep afplay");
-      if (pgrepStdout) {
-        // If afplay processes are found, kill them
-        const { stdout, stderr } = await execAsync("pkill afplay");
-        if (stderr) {
-          console.error(`stderr from pkill: ${stderr}`);
-        }
-        console.log(`stdout from pkill: ${stdout}`);
-      }
-    } catch (error: unknown) {
-      // Handle the case where no afplay processes are found
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-        console.error(`Error in stopAllProcesses: ${(error as Error).message}`);
-      }
+    if (!this.isConverting && this.playAudioQueue.length === 0) {
+      showToast({
+        style: Toast.Style.Success,
+        title: "🎉 Audio Playback Finished",
+        message: "All audio has been successfully played back.",
+      });
     }
-    // Attempting to clean up the temporary mp3 files
-    await cleanupTmpDir();
   }
 
   /**
@@ -256,22 +246,24 @@ class TextToSpeechProcessor {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
-}
 
-export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const commandArgs = process.argv;
-  const commandName = commandArgs[2]; // 커맨드 이름을 얻습니다.
-  console.log("🚀 ~ Command ~ commandName:", commandName);
+  // Add this method to the TextToSpeechProcessor class
+  public async stopProcessing() {
+    // Stop any ongoing audio playback
+    if (this.isPlaying) {
+      await stopAllProcesses();
+      this.isPlaying = false;
+    }
 
-  const processor = new TextToSpeechProcessor(
-    preferences.apiKey,
-    preferences.defaultVoice,
-    preferences.temperature,
-    preferences.gptModel,
-    preferences.subtitlesToggle,
-    preferences.outputLanguage,
-    preferences.readingStyle,
-  );
-  await processor.processSelectedText();
+    // Clear the queues
+    this.textToSpeechQueue = [];
+    this.playAudioQueue = [];
+
+    // Reset converting and playing flags
+    this.isConverting = false;
+    this.isPlaying = false;
+
+    // Optionally, you can also reset the onScriptGenerated callback if needed
+    // this.onScriptGenerated = undefined;
+  }
 }

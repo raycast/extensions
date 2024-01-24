@@ -11,11 +11,18 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Read Selected Text",
+      "name": "read-seleted-text-audio-only",
+      "title": "Read Selected Text | Background Audio",
       "subtitle": "Read AI - Text to Speech",
-      "description": "Converts highlighted text into spoken words with applied style presets",
+      "description": "listen to the seleted text with subtitles",
       "mode": "no-view"
+    },
+    {
+      "name": "read-seleted-text-script",
+      "title": "Read Selected Text | With Script",
+      "subtitle": "Read AI - Text to Speech",
+      "description": "Read and listen to the seleted text with script and subtitles",
+      "mode": "view"
     }
   ],
   "preferences": [

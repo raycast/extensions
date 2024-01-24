@@ -110,3 +110,34 @@ export function splitSentences(text: string, minSentenceLength: number = 80, ide
     return acc;
   }, []);
 }
+
+/**
+ * Method to stop all afplay processes.
+ */
+export async function stopAllProcesses() {
+  try {
+    // Check for existing afplay processes
+    const { stdout: pgrepStdout } = await execAsync("pgrep afplay");
+    if (pgrepStdout) {
+      // If afplay processes are found, kill them
+      const { stdout, stderr } = await execAsync("pkill afplay");
+      if (stderr) {
+        console.error(`stderr from pkill: ${stderr}`);
+      }
+      console.log(`stdout from pkill: ${stdout}`);
+    }
+  } catch (error: unknown) {
+    // Handle the case where no afplay processes are found
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.error(`Error in stopAllProcesses: ${(error as Error).message}`);
+    }
+  }
+  // Attempting to clean up the temporary mp3 files
+  await cleanupTmpDir();
+}
+
+export async function saveScriptToFile(script: string, currentIdentifier: string) {
+  const scriptFilePath = path.resolve(os.tmpdir(), `converted_script_${currentIdentifier}.txt`);
+  await fs.writeFile(scriptFilePath, script);
+  return scriptFilePath;
+}
