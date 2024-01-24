@@ -41,7 +41,7 @@ export default function AddNote() {
     validation: {
       description: (value) => {
         if (!value) {
-          return "The item is required";
+          return "Description is required";
         }
         if (value.length < 2) {
           return "Description must be at least 2 characters.";
@@ -74,7 +74,7 @@ export default function AddNote() {
         }
       >
         <Form.TextArea title="Note Content" placeholder="Note content..." {...itemProps.content} />
-        <Form.TextArea title="Note Description" placeholder="Note description..." {...itemProps.description} />
+        <Form.TextField title="Note Description" placeholder="Note description..." {...itemProps.description} />
       </Form>
     </Protected>
   );
