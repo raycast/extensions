@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Cache, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Cache } from "@raycast/api";
 import { useState } from "react";
 
 const FRONTEND_ENDPOINT = "https://surlapp.uk";
@@ -13,16 +13,7 @@ export default function Command() {
   const cache = new Cache();
   const cachedData = cache.get(CACHE_KEY);
   const cachedItems: Item[] = cachedData ? JSON.parse(cachedData) : [];
-  const itemsCount = cachedItems.length;
-
-  const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Item[]>(cachedItems);
-
-  const handleChangeText = (text: string) => {
-    setSearchText(text);
-    const filteredItems = cachedItems.filter((item) => item.url.toLowerCase().includes(text.toLowerCase()));
-    setItems(filteredItems);
-  };
 
   const handleRemoveCache = (index: number) => {
     const newItems = cachedItems.filter((_, i) => i !== index);
@@ -31,52 +22,31 @@ export default function Command() {
   };
 
   return (
-    <List
-      searchBarPlaceholder="Please enter search word"
-      isLoading={false}
-      searchText={searchText}
-      onSearchTextChange={handleChangeText}
-      isShowingDetail={false}
-      throttle
-    >
+    <List searchBarPlaceholder="Please enter search word" isLoading={false}>
       <List.Section title="History">
-        {itemsCount > 0 ? (
-          <>
-            {items.map(({ key, url }, index) => {
-              const shortenUrl = `${FRONTEND_ENDPOINT}/${key}`;
-              return (
-                <List.Item
-                  key={key}
-                  icon={{ source: Icon.SaveDocument }}
-                  title={url}
-                  accessories={[{ icon: Icon.CopyClipboard, text: `/${key}` }]}
-                  actions={
-                    <ActionPanel>
-                      <Action.CopyToClipboard content={shortenUrl} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-                      <Action
-                        icon={{ source: Icon.Trash }}
-                        style={Action.Style.Destructive}
-                        title="Remove From History"
-                        onAction={() => handleRemoveCache(index)}
-                        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-          </>
-        ) : (
-          <List.Item
-            title="No history"
-            subtitle="Please shorten the URL"
-            actions={
-              <ActionPanel>
-                <Action title="Close" icon={{ source: Icon.Check }} onAction={() => closeMainWindow()} />
-              </ActionPanel>
-            }
-          />
-        )}
+        {items.map(({ key, url }, index) => {
+          const shortenUrl = `${FRONTEND_ENDPOINT}/${key}`;
+          return (
+            <List.Item
+              key={key}
+              icon={{ source: Icon.SaveDocument }}
+              title={url}
+              accessories={[{ icon: Icon.CopyClipboard, text: `/${key}` }]}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard content={shortenUrl} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+                  <Action
+                    icon={{ source: Icon.Trash }}
+                    style={Action.Style.Destructive}
+                    title="Remove From History"
+                    onAction={() => handleRemoveCache(index)}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
     </List>
   );
