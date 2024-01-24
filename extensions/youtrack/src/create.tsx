@@ -11,6 +11,7 @@ import {
   openCommandPreferences,
   openExtensionPreferences,
   popToRoot,
+  showHUD,
   showToast,
 } from "@raycast/api";
 
@@ -221,7 +222,10 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         };
         toast.secondaryAction = {
           title: secondaryActionTitle,
-          onAction: () => Clipboard.copy(prefs.linkAs === "text" ? url : `[${idReadable}](${url})`),
+          onAction: async () => {
+            await showHUD("Copied URL to clipboard");
+            return Clipboard.copy(prefs.linkAs === "text" ? url : `[${idReadable}](${url})`);
+          },
           shortcut: {
             modifiers: ["cmd", "shift"],
             key: "c",
