@@ -8,19 +8,19 @@ Use [OAuthServiceOptions](#oauthserviceoptions) to configure the `OAuthService` 
 
 ```ts
 const client = new OAuth.PKCEClient({
-redirectMethod: OAuth.RedirectMethod.Web,
-providerName: "GitHub",
-providerIcon: "extension_icon.png",
-providerId: "github",
-description: "Connect your GitHub account",
+  redirectMethod: OAuth.RedirectMethod.Web,
+  providerName: "GitHub",
+  providerIcon: "extension_icon.png",
+  providerId: "github",
+  description: "Connect your GitHub account",
 });
 
 const github = new OAuthService({
-client,
-clientId: "7235fe8d42157f1f38c0",
-scopes: "notifications repo read:org read:user read:project",
-authorizeUrl: "https://github.oauth.raycast.com/authorize",
-tokenUrl: "https://github.oauth.raycast.com/token",
+  client,
+  clientId: "7235fe8d42157f1f38c0",
+  scopes: "notifications repo read:org read:user read:project",
+  authorizeUrl: "https://github.oauth.raycast.com/authorize",
+  tokenUrl: "https://github.oauth.raycast.com/token",
 });
 ```
 
@@ -140,24 +140,24 @@ Here's an example:
 
 ```ts
 export class CustomOAuthService extends OAuthService {
-constructor(options: ClientConstructor) {
-  super({
-    client: new OAuth.PKCEClient({
-      redirectMethod: OAuth.RedirectMethod.Web,
-      providerName: "PROVIDER_NAME",
-      providerIcon: "provider.png",
-      providerId: "PROVIDER-ID",
-      description: "Connect your {PROVIDER_NAME} account",
-    }),
-    clientId: "YOUR_CLIENT_ID",
-    authorizeUrl: "YOUR_AUTHORIZE_URL",
-    tokenUrl: "YOUR_TOKEN_URL",
-    scope: "YOUR_SCOPES"
-    extraParameters: {
-      actor: "user",
-    },
-  });
-}
+  constructor(options: ClientConstructor) {
+    super({
+      client: new OAuth.PKCEClient({
+        redirectMethod: OAuth.RedirectMethod.Web,
+        providerName: "PROVIDER_NAME",
+        providerIcon: "provider.png",
+        providerId: "PROVIDER-ID",
+        description: "Connect your {PROVIDER_NAME} account",
+      }),
+      clientId: "YOUR_CLIENT_ID",
+      authorizeUrl: "YOUR_AUTHORIZE_URL",
+      tokenUrl: "YOUR_TOKEN_URL",
+      scope: "YOUR_SCOPES"
+      extraParameters: {
+        actor: "user",
+      },
+    });
+  }
 }
 ```
 
