@@ -3,7 +3,7 @@
 Utility function designed for retrieving authorization tokens within a component. It ensures that your React components have the necessary authentication state, either through OAuth or a personal access token.
 
 {% hint style="info" %}
-`getAccessToken` **must** be used within components that are nested inside a component wrapped with [`withAccessToken`](utils-reference/oauth/withAccessToken.md). Otherwise, the function will fail with an error.
+`getAccessToken` **must** be used within components that are nested inside a component wrapped with [`withAccessToken`](./withAccessToken.md). Otherwise, the function will fail with an error.
 {% endhint %}
 
 ## Signature

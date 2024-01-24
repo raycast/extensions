@@ -2,7 +2,7 @@
 
 The `OAuthService` class is designed to abstract the OAuth authorization process using the PKCE (Proof Key for Code Exchange) flow, simplifying the integration with various OAuth providers such as Asana, GitHub, and others.
 
-Use [OAuthServiceOptions](#OAuthServiceOptions) to configure the `OAuthService` class.
+Use [OAuthServiceOptions](#oauthserviceoptions) to configure the `OAuthService` class.
 
 ## Example
 
