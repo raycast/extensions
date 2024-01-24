@@ -3,7 +3,7 @@ import { OpenAI } from "openai";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
-import { LanguageCode, readingStyle, Voice, Preferences, ScriptArguments } from "./types";
+import { LanguageCode, readingStyle, Voice, Preferences } from "./types";
 import { READING_STYLES_PROMPTS } from "./const";
 import {
   cleanupTmpDir,
@@ -12,7 +12,6 @@ import {
   setCurrentCommandIdentifier,
   splitSentences,
 } from "./utills";
-import { ChatCompletion } from "openai/resources/chat/completions";
 
 class TextToSpeechProcessor {
   private textToSpeechQueue: string[] = [];
@@ -79,11 +78,21 @@ class TextToSpeechProcessor {
 
         const prompt = `
         You are an advanced AI reading assistant with these key responsibilities:
-        - Translate and adapt text for optimal text-to-speech conversion and generate a script for the text-to-speech engine.
+        - Translate and adapt text for optimal text-to-speech conversion.
+
+        Requirements:
+        - The final script must be in ${this.outputLanguage}.
+        - Adhere to the reading style specified in "${readingStyleContent}".
+        - Produce a script of professional quality, ready for immediate text-to-speech use.
+        - If the source of the original text or media is known, mention it. If the time of writing or sharing is relevant, include it. Otherwise, these details can be omitted.
+        - Maintain factual accuracy and neutrality, presenting information engagingly and clearly.
+        - Avoid personal commentary or assumptions. Focus on preparing the script for text-to-speech conversion.
+
+        Begin the translation and script adaptation process now:
         `.trim();
 
         // Use the OpenAI completion endpoint to translate and script the selected text
-        const script: ChatCompletion = await this.openai.chat.completions.create({
+        const script = await this.openai.chat.completions.create({
           model: this.gptModel,
           temperature: this.temperature,
           messages: [
@@ -93,85 +102,11 @@ class TextToSpeechProcessor {
             },
             { role: "user", content: selectedText },
           ],
-          functions: [
-            {
-              name: "Generate_TTS_Script",
-              description: "Generate a script for text-to-speech.",
-              parameters: {
-                type: "object",
-                properties: {
-                  output_language: {
-                    description: "The language code for translation output.",
-                    type: "string",
-                    enum: [this.outputLanguage],
-                  },
-                  type: {
-                    description: "Identify the content and select the most appropriate content type.",
-                    type: "string",
-                    enum: [
-                      "literature", // Includes books, novels, poetry, essays, etc.
-                      "academic", // Includes research papers, theses, academic articles, etc.
-                      "journalism", // Includes news articles, reports, interviews, etc.
-                      "correspondence", // Includes letters, emails, memos, etc.
-                      "commercial", // Includes advertisements, brochures, business reports, etc.
-                      "legal", // Includes legal documents, contracts, legislation, etc.
-                      "technical", // Includes technical manuals, guides, documentation, etc.
-                      "governmental", // Includes policy documents, public records, etc.
-                      "multimedia", // Includes podcasts, presentations, lectures, etc.
-                      "social_media", // Includes tweets, blog posts, forum discussions, etc.
-                      "other",
-                    ],
-                  },
-                  title: {
-                    description: `Create a concise title in ${this.outputLanguage}, 20-60 characters, summarizing the content`,
-                    type: "string",
-                  },
-                  short_description: {
-                    description: `A short description of the content in ${this.outputLanguage} maximally 150 characters long`,
-                    type: "string",
-                  },
-                  author_or_source: {
-                    description: "The source of the original content, or the author of the content.",
-                    type: "string",
-                  },
-                  script: {
-                    description: `
-                    The script for text-to-speech in ${this.outputLanguage}
 
-                    Requirements:
-                    - The final script must be in ${this.outputLanguage}.
-                    - Provide brief introduction about the content, including a title, a short description, and the author or source or other important details in conversational tone in script before the detailed content.
-                    - Script must adhere to the reading style specified in "${readingStyleContent}".
-                    - Produce a script of professional quality, ready for immediate text-to-speech use this is not a draft.
-                    - If the source of the original text or media is known, mention it. If the time of writing or sharing is relevant, include it. Otherwise, these details can be omitted.
-                    - Maintain factual accuracy and neutrality, presenting information engagingly and clearly.
-
-                    Exclude the following:
-                    - There's no requirement to separately state elements like the title, introduction, or body.
-                    - Avoid personal commentary or assumptions.
-                    `.trim(),
-                    type: "string",
-                  },
-                },
-                required: ["output_language", "script", "type", "author_or_source", "title", "short_description"],
-              },
-            },
-          ],
           // max_tokens: 60, // Adjust as needed
         });
 
-        const functionCallArgumentsString = script.choices[0].message.function_call?.arguments;
-
-        if (functionCallArgumentsString) {
-          const functionCallArguments = JSON.parse(functionCallArgumentsString) as ScriptArguments;
-          console.log(
-            "🚀 ~ TextToSpeechProcessor ~ processSelectedText ~ functionCallArguments:",
-            functionCallArguments,
-          );
-          selectedText = functionCallArguments.script;
-        } else {
-          throw new Error("No valid script found in the OpenAI response.");
-        }
+        selectedText = script.choices[0].message.content as string;
 
         await showToast({
           style: Toast.Style.Success,
