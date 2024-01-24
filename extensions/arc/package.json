@@ -283,14 +283,16 @@
       "title": "Open Arc Release Notes",
       "subtitle": "Arc",
       "description": "Open the Arc release notes",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "boost-gallery",
       "title": "Open Arc Boost Gallery",
       "subtitle": "Arc",
       "description": "Open the Arc Boost Gallery",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

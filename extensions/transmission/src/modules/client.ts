@@ -35,6 +35,7 @@ export const useTorrent = ({ id }: { id: number }) => {
 export enum MutateTorrentAction {
   Start,
   Remove,
+  RemoveAndDeleteLocalData,
   Stop,
   StartAll,
   StopAll,
@@ -60,6 +61,10 @@ export const useMutateTorrent = () => {
         case MutateTorrentAction.Remove:
           updated = null;
           await transmission.remove([id]);
+          break;
+        case MutateTorrentAction.RemoveAndDeleteLocalData:
+          updated = null;
+          await transmission.remove([id], true);
           break;
         case MutateTorrentAction.StopAll:
           await transmission.stop(false);
@@ -101,6 +106,10 @@ export const useMutateTorrent = () => {
     start: useCallback((id: Torrent["id"]) => action({ id, action: MutateTorrentAction.Start }), [action]),
     stop: useCallback((id: Torrent["id"]) => action({ id, action: MutateTorrentAction.Stop }), [action]),
     remove: useCallback((id: Torrent["id"]) => action({ id, action: MutateTorrentAction.Remove }), [action]),
+    removeAndDeleteLocalData: useCallback(
+      (id: Torrent["id"]) => action({ id, action: MutateTorrentAction.RemoveAndDeleteLocalData }),
+      [action]
+    ),
     update: useCallback(
       (id: Torrent["id"], data: Partial<Torrent>) => action({ id, action: MutateTorrentAction.Update, data }),
       [action]
