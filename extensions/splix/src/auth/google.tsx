@@ -1,4 +1,4 @@
-import { OAuth } from "@raycast/api";
+import { OAuth, popToRoot } from "@raycast/api";
 import fetch from "node-fetch";
 import { env } from "../env";
 import { supabase } from "../supabase";
@@ -19,6 +19,7 @@ const client = new OAuth.PKCEClient({
 export async function signOut() {
   await client.removeTokens();
   await supabase.auth.signOut();
+  popToRoot();
 }
 
 export async function authorize() {
@@ -27,12 +28,18 @@ export async function authorize() {
   if (tokenSet && tokenSet.accessToken && !tokenSet.isExpired()) {
     await supabase.auth.signInWithIdToken({
       provider: "google",
-      token: tokenSet!.idToken as string,
+      token: tokenSet.idToken as string,
       nonce: "NONCE",
     });
     return;
   } else if (tokenSet && tokenSet.refreshToken) {
     await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+    tokenSet = await client.getTokens();
+    await supabase.auth.signInWithIdToken({
+      provider: "google",
+      token: tokenSet?.idToken as string,
+      nonce: "NONCE",
+    });
     return;
   }
 

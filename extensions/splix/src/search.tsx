@@ -19,7 +19,6 @@ export default function Search() {
       const { data, error } = await supabase.functions.invoke("search-notes", {
         body: JSON.stringify({ input: searchText }),
       });
-
       if (error || !data?.data) {
         setIsLoading(false);
         return;
@@ -39,7 +38,7 @@ export default function Search() {
         throttle
         actions={
           <ActionPanel title="Actions">
-            <Action.OpenInBrowser title="Go to Splix.app" icon={Icon.Globe} url={"https://splix.app"} />
+            <Action.OpenInBrowser title="Go to Splix.app" icon={Icon.Globe} url={"https://splix.app/dashboard"} />
             <Action title="Sign Out" icon={Icon.Logout} onAction={signOut} />
           </ActionPanel>
         }
@@ -71,6 +70,7 @@ function SearchListItem({ note }: { note: NoteWithContent }) {
       actions={
         <ActionPanel>
           <Action title="View Note Content" onAction={() => push(<NoteDetailView note={note} />)} />
+          <Action.OpenInBrowser title="Go to Splix.app" icon={Icon.Globe} url={"https://splix.app/dashboard"} />
         </ActionPanel>
       }
     />

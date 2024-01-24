@@ -1,22 +1,16 @@
-import { useState } from "react";
 import Protected from "./components/protected";
-import { Form, ActionPanel, Action, popToRoot, Toast, showToast, Icon } from "@raycast/api";
-import { createNoteSchema } from "./lib/schemas";
+import { Form, ActionPanel, Action, Toast, showToast, Icon } from "@raycast/api";
 import { supabase } from "./supabase";
 import { signOut } from "./auth/google";
+import { useForm } from "@raycast/utils";
+
+type AddNoteForm = {
+  content: string;
+  description: string;
+};
 
 export default function AddNote() {
-  const [descriptionError, setDescriptionError] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-  function dropDescriptionErrorIfNeeded() {
-    if (descriptionError && descriptionError.length > 0) {
-      setDescriptionError(undefined);
-    }
-  }
-
-  async function handleFormSubmit(values: { content: string; description: string }) {
-    setIsLoading(true);
-
+  async function addNote(values: { content: string; description: string }) {
     const formatedValues = {
       ...values,
       content: [
@@ -26,50 +20,61 @@ export default function AddNote() {
         },
       ],
     };
-    const validatedValues = createNoteSchema.parse(formatedValues);
+    reset(); // optimistic
+    showToast({ style: Toast.Style.Success, title: "Successfully added note" });
 
     const { error } = await supabase.functions.invoke("create-note", {
-      body: JSON.stringify(validatedValues),
+      body: JSON.stringify(formatedValues),
     });
-    setIsLoading(false);
     if (error) {
       showToast({ style: Toast.Style.Failure, title: "Failed to add note" });
+      setValue("content", values.content);
+      setValue("description", values.description);
       return;
     }
-    showToast({ style: Toast.Style.Success, title: "Successfully added note" });
-    popToRoot();
   }
+
+  const { handleSubmit, itemProps, reset, setValue } = useForm<AddNoteForm>({
+    onSubmit(values) {
+      addNote(values);
+    },
+    validation: {
+      description: (value) => {
+        if (!value) {
+          return "The item is required";
+        }
+        if (value.length < 2) {
+          return "Description must be at least 2 characters.";
+        }
+        if (value.length > 300) {
+          return "Description must be less than 300 characters.";
+        }
+      },
+      content: (value) => {
+        const maxByteSize = 5 * 1024 * 1024; // 10MB in bytes
+
+        const byteSize = new TextEncoder().encode(JSON.stringify(value)).byteLength;
+        if (byteSize >= maxByteSize) {
+          return `Note content must be less than ${maxByteSize / 1024 / 1024}MB.`;
+        }
+      },
+    },
+  });
+
   return (
     <Protected>
       <Form
-        isLoading={isLoading}
         enableDrafts
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Add Note" icon={Icon.Plus} onSubmit={handleFormSubmit} />
-            <Action.OpenInBrowser title="Go to Splix.app" icon={Icon.Globe} url={"https://splix.app"} />
+            <Action.SubmitForm title="Add Note" icon={Icon.Plus} onSubmit={handleSubmit} />
+            <Action.OpenInBrowser title="Go to Splix.app" icon={Icon.Globe} url={"https://splix.app/dashboard"} />
             <Action title="Sign Out" icon={Icon.Logout} onAction={signOut} />
           </ActionPanel>
         }
       >
-        <Form.TextArea id="content" title="Note Content" placeholder="Note content..." />
-        <Form.TextArea
-          id="description"
-          title="Note Description"
-          placeholder="Note description..."
-          error={descriptionError}
-          onChange={dropDescriptionErrorIfNeeded}
-          onBlur={(event) => {
-            if (!event.target.value) return;
-            if (event.target.value?.length < 2) {
-              setDescriptionError("Description must be at least 2 characters.");
-            } else if (event.target.value?.length > 300) {
-              setDescriptionError("Description must be less than 300 characters.");
-            } else {
-              dropDescriptionErrorIfNeeded();
-            }
-          }}
-        />
+        <Form.TextArea title="Note Content" placeholder="Note content..." {...itemProps.content} />
+        <Form.TextArea title="Note Description" placeholder="Note description..." {...itemProps.description} />
       </Form>
     </Protected>
   );
