@@ -1,0 +1,3 @@
+# visual-studio-code-manager
+
+quick search and open project in vscode ......
