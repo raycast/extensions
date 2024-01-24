@@ -61,5 +61,5 @@ After setting up your token you should be able to browse and create YouTrack iss
 ![browse](./metadata/youtrack-browse.png)
 ![details](./metadata/youtrack-browse-details.png)
 ![create](./metadata/youtrack-create.png)
-![draft](./metadata/youtrack-draft.png)
+![draft](./media/youtrack-draft.png)
 ![created-actions](./metadata/youtrack-created-actions.png)
