@@ -35,12 +35,12 @@ Note that the access token isn't injected into the wrapped component props. Inst
 {% tab title="view.tsx" %}
 
 ```tsx
-import { Detail } from "@raycast/api";
+import { List } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./oauth"
 
 function AuthorizedComponent(props) {
-  return <List ... />;
+  return // ...
 }
 
 export default withAccessToken({ authorize })(AuthorizedComponent);
@@ -51,7 +51,7 @@ export default withAccessToken({ authorize })(AuthorizedComponent);
 {% tab title="no-view.tsx" %}
 
 ```tsx
-import { Detail } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { authorize } from "./oauth"
 

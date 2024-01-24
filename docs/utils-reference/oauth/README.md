@@ -3,7 +3,7 @@
 Dealing with OAuth can be tedious. So we've built a set of utilities to make that task way easier. There's two part to our utilities:
 
 1. Authenticating with the service using [OAuthService](utils-reference/oauth/OAuthService.md) or some built-in providers (e.g GitHub with `OAuthService.github`)
-2. Bringing authentication to Raycast commands using [withAccessToken](utils-reference/oauth/withAccessToken.md) and [`getAccessToken`](utils-reference/oauth/withAccessToken.md#getAccessToken)
+2. Bringing authentication to Raycast commands using [withAccessToken](utils-reference/oauth/withAccessToken.md) and [`getAccessToken`](utils-reference/oauth/getAccessToken.md)
 
 Here are two different use-cases where you can use the utilities.
 

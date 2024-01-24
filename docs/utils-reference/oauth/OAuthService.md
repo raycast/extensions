@@ -164,6 +164,7 @@ constructor(options: ClientConstructor) {
 ## Types
 
 ### OAuthServiceOptions
+
 Here's an updated markdown table with a "Type" column:
 
 | Property Name | Description | Type |
