@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidyread---streamline-your-daily-reading",
   "title": "TidyRead - Streamline Your Daily Reading",
-  "description": "TidyRead: A Raycast Extension for controlled, efficient, and organized information intake, featuring an AI-powered digest for a modern reading experience. Details at https://tidyread.info.",
+  "description": "Enhance controlled, efficient, and organized information intake using an AI-powered digest from RSS feeds. More at https://tidyread.info.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "categories": [
@@ -16,7 +16,7 @@
     "digest",
     "summary",
     "rss",
-    "RSS",
+    "newsletter",
     "AI",
     "feed",
     "moonshot",
