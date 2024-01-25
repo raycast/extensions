@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "String 2 MD5 Hash",
+      "title": "Copy MD5 Hash",
       "description": "Generate MD5 hash from string",
       "mode": "view"
     }
