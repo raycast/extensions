@@ -62,7 +62,7 @@ const EventActionsList = ({ event }: { event: Event }) => {
         />
       ))}
       {event.reclaimManaged === true && (
-        <ActionPanel.Submenu title="Reschule Event" icon={Icon.ArrowClockwise}>
+        <ActionPanel.Submenu title="Reschedule Event" icon={Icon.ArrowClockwise}>
           <Action
             title="15min"
             onAction={() => {
