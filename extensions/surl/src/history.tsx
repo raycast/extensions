@@ -38,7 +38,7 @@ export default function Command() {
                   <Action
                     icon={{ source: Icon.Trash }}
                     style={Action.Style.Destructive}
-                    title="Remove From History"
+                    title="Remove from History"
                     onAction={() => handleRemoveCache(index)}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   />
