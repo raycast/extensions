@@ -3,6 +3,7 @@ import { List, Image, ActionPanel, Action } from "@raycast/api";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { useOrganizations, useWorkspaces } from "./hooks";
 import { Workspace } from "./api";
+import TagList from "./components/TagList";
 
 function ManageWorkspaces() {
   const { organizations, isLoadingOrganizations } = useOrganizations();
@@ -78,6 +79,15 @@ function ManageWorkspaces() {
                 <Action
                   title={`${isShoingDetails ? "Hide" : "Show"} Details`}
                   onAction={() => setIsShoingDetails((value) => !value)}
+                />
+                <Action.Push
+                  title="Manage Tags"
+                  shortcut={{ key: "t", modifiers: ["cmd", "shift"] }}
+                  target={
+                    <ExtensionContextProvider>
+                      <TagList workspace={workspace} isLoading={isLoadingWorkspaces} />
+                    </ExtensionContextProvider>
+                  }
                 />
               </ActionPanel>
             }
