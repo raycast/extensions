@@ -1,8 +1,7 @@
 # TidyRead - Streamline Your Daily Reading
 
 ## Introduction
-
-Designed to manage and schedule your daily reading which offers a modern reading experience through AI-Powered digest.
+Enhance controlled, efficient, and organized information intake using an AI-powered digest.
 
 Key Features:
 
@@ -18,45 +17,3 @@ For more information, visit [Tidyread](https://tidyread.info).
 ## Other Links
 
 - [Buy me a coffee](https://www.buymeacoffee.com/jaredliu)
-
-```json
-[
-  {
-    "title": "Tech",
-    "sources": [
-      {
-        "rssLink": "https://news.ycombinator.com/rss",
-        "timeSpan": "1",
-        "title": "Hacker News",
-        "schedule": "everyday",
-        "url": "https://news.ycombinator.com/",
-        "tags": ["Technology"],
-        "favicon": "https://news.ycombinator.com/y18.svg"
-      },
-      {
-        "url": "https://www.phdeck.com/",
-        "timeSpan": "1",
-        "schedule": "everyday",
-        "title": "PH Deck",
-        "rssLink": "https://www.producthunt.com/feed",
-        "tags": ["Product"],
-        "favicon": "https://www.phdeck.com/favicon.ico"
-      }
-    ]
-  },
-  {
-    "title": "Others",
-    "sources": [
-      {
-        "url": "https://www.nytimes.com/",
-        "tags": ["News"],
-        "rssLink": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
-        "title": "The New York Times",
-        "schedule": "everyday",
-        "favicon": "https://www.nytimes.com/vi-assets/static-assets/favicon-d2483f10ef688e6f89e23806b9700298.ico",
-        "timeSpan": "1"
-      }
-    ]
-  }
-]
-```
