@@ -1,11 +1,6 @@
 import { getPreferenceValues, updateCommandMetadata } from "@raycast/api";
 import fetch from "node-fetch";
 
-interface Preferences {
-  apiToken: string;
-  siteId: string;
-}
-
 type Data = {
   total: number;
 };

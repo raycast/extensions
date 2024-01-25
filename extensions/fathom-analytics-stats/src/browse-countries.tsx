@@ -4,11 +4,6 @@ import { useState } from "react";
 import PeriodDropdown from "./components/PeriodDropdown";
 import { countryMapping } from "./countryMapping";
 
-interface Preferences {
-  apiToken: string;
-  siteId: string;
-}
-
 type Referrer = {
   pageviews: string;
   country_code: string;

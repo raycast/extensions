@@ -3,11 +3,6 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import PeriodDropdown from "./components/PeriodDropdown";
 
-interface Preferences {
-  apiToken: string;
-  siteId: string;
-}
-
 type Page = {
   pageviews: string;
   pathname: string;

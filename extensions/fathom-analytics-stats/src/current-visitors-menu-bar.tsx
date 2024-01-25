@@ -1,11 +1,6 @@
 import { getPreferenceValues, MenuBarExtra, Icon, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-interface Preferences {
-  apiToken: string;
-  siteId: string;
-}
-
 type Page = {
   pathname: string;
   hostname: string;
