@@ -11,7 +11,7 @@ export default function Command() {
     `https://beta2.translate.ge/api/translate?from=${from}&to=${to}&str=${encodeURIComponent(searchText)}`,
     {
       parseResponse: parseFetchResponse,
-    }
+    },
   );
 
   return (
@@ -22,9 +22,7 @@ export default function Command() {
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((word) => (
-          <WordListItem key={word.id} word={word} />
-        ))}
+        {data?.map((word) => <WordListItem key={word.id} word={word} />)}
       </List.Section>
     </List>
   );
