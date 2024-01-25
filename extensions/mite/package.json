@@ -30,32 +30,32 @@
   "commands": [
     {
       "name": "time-entry",
-      "title": "Mite Add Today Entry",
-      "description": "create a new time entry for mite",
+      "title": "Add Today Entry",
+      "description": "Create a new time entry for mite",
       "mode": "view",
-      "subtitle": "new time entry for today"
+      "subtitle": "Mite"
     },
     {
       "name": "setup-fast-time-entry",
-      "title": "Mite Setup Fast Entry",
-      "description": "specify what your Fast time entry will be",
+      "title": "Setup Fast Entry",
+      "description": "Specify what your Fast time entry will be",
       "mode": "view",
-      "subtitle": "setup Primary or Secondary fast entry"
+      "subtitle": "Mite"
     },
     {
       "name": "fast-time-entry",
-      "title": "Mite Fast Entry",
-      "description": "create a new time entry for mite with the project and service you setup",
+      "title": "Create Fast Entry",
+      "description": "Create a new time entry for mite with the project and service you setup",
       "mode": "no-view",
-      "subtitle": "new time entry for today with Primary Fast entry",
+      "subtitle": "Mite",
       "interval": "1m"
     },
     {
       "name": "secondary-fast-time-entry",
-      "title": "Mite Secondary Fast Entry",
-      "description": "create a new time entry for mite with the project and service you setup as secondary",
+      "title": "Create Secondary Fast Entry",
+      "description": "Create a new time entry for mite with the project and service you setup as secondary",
       "mode": "no-view",
-      "subtitle": "new time entry for today with Secondary Fast entry",
+      "subtitle": "Mite",
       "interval": "1m"
     }
   ],
