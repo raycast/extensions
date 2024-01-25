@@ -2,7 +2,9 @@
 
 ## [Enhancements] - 2024-01-25
 
-- Adds a preference to display additional item as subtitle in the list
+- Adds a preference to display additional item and select display date in list.
+- Add icons by bookmark type(link, article, image, video, audio, document) in list.
+- Add tooltip for title as bookmark link in list.
 
 ## [Maintenance] - 2024-01-09
 
