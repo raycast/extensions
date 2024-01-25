@@ -1,12 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "raycast-extension-macro",
+      "identity" : "extensions-swift-tools",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/raycast/raycast-extension-macro",
+      "location" : "https://github.com/raycast/extensions-swift-tools",
       "state" : {
-        "revision" : "2717d007f704626e8ccf82d39725a44c00293fc1",
-        "version" : "0.1.0"
+        "revision" : "020a9eaa3c8ce18c32d127f6886809dd4907847c",
+        "version" : "1.0.0"
       }
     },
     {
@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax.git",
       "state" : {
-        "revision" : "ffa3cd6fc2aa62adbedd31d3efaf7c0d86a9f029",
-        "version" : "509.0.1"
+        "revision" : "64889f0c732f210a935a0ad7cda38f77f876262d",
+        "version" : "509.1.1"
       }
     }
   ],

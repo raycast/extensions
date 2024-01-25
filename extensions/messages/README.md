@@ -1,3 +1,3 @@
 # Messages
 
-Search and send Messages.
+Send quick messages.

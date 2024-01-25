@@ -30,8 +30,9 @@ export default function Command({
   draftValues,
   launchContext,
 }: LaunchProps<{ draftValues: Values; launchContext: { contactId: string; text: string } }>) {
-  const { data: contacts, isLoading } = useCachedPromise(() => {
-    return fetchAllContacts<Contact[]>();
+  const { data: contacts, isLoading } = useCachedPromise(async () => {
+    const contacts = await fetchAllContacts();
+    return contacts as Contact[];
   });
 
   const { itemProps, handleSubmit, values, reset, focus } = useForm<Values>({
@@ -121,7 +122,7 @@ export default function Command({
           return (
             <Form.Dropdown.Item
               key={i}
-              title={`${name} (${contact.phoneNumbers[0]})`}
+              title={`${name}`}
               icon={getAvatarIcon(name)}
               keywords={[contact.givenName, contact.familyName, ...contact.phoneNumbers, ...contact.emailAddresses]}
               value={contact.id}

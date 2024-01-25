@@ -1,10 +1,15 @@
 import Contacts
-import RaycastExtensionMacro
+import RaycastSwiftMacros
 
-#exportFunction(fetchAllContacts)
-import Contacts
+struct ContactItem: Codable {
+  let id: String
+  let givenName: String
+  let familyName: String
+  let phoneNumbers: [String]
+  let emailAddresses: [String]
+}
 
-func fetchAllContacts() -> [[String: Any]] {
+@raycast func fetchAllContacts() -> [ContactItem] {
   let keys =
     [
       CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey,
@@ -13,26 +18,22 @@ func fetchAllContacts() -> [[String: Any]] {
   let store = CNContactStore()
   let request = CNContactFetchRequest(keysToFetch: keys)
 
-  var contacts = [[String: Any]]()
+  var contacts: [ContactItem] = []
 
   do {
     try store.enumerateContacts(with: request) { (contact, stopPointer) in
-      var phoneNumbers = [Any]()
-      var emailAddresses = [Any]()
+      var phoneNumbers = [String]()
+      var emailAddresses = [String]()
       for phoneNumber in contact.phoneNumbers {
         phoneNumbers.append(phoneNumber.value.stringValue)
       }
       for emailAddress in contact.emailAddresses {
         emailAddresses.append(emailAddress.value as String)
       }
-      let contactDict: [String: Any] = [
-        "id": contact.identifier,
-        "givenName": contact.givenName,
-        "familyName": contact.familyName,
-        "phoneNumbers": phoneNumbers,
-        "emailAddresses": emailAddresses,
-      ]
-      contacts.append(contactDict)
+      contacts.append(
+        ContactItem(
+          id: contact.identifier, givenName: contact.givenName, familyName: contact.familyName,
+          phoneNumbers: phoneNumbers, emailAddresses: emailAddresses))
     }
 
   } catch {
@@ -40,9 +41,8 @@ func fetchAllContacts() -> [[String: Any]] {
   }
 
   let sortedContacts = contacts.sorted {
-    ($0["givenName"] as? String ?? "") < ($1["givenName"] as? String ?? "")
+    ($0.givenName) < ($1.givenName)
   }
 
   return sortedContacts
 }
-#handleFunctionCall()
