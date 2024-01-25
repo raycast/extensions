@@ -97,7 +97,37 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
     const accessories = [];
 
     bookmark.tags.forEach((tag) => accessories.push({ tag: `#${tag}` }));
-    accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+
+    switch (bookmark.type) {
+      case "link":
+        accessories.push({ icon: Icon.Link });
+        break;
+      case "article":
+        accessories.push({ icon: Icon.FountainTip });
+        break;
+      case "image":
+        accessories.push({ icon: Icon.Image });
+        break;
+      case "video":
+        accessories.push({ icon: Icon.Video });
+        break;
+      case "audio":
+        accessories.push({ icon: Icon.Music });
+        break;
+      case "document":
+        accessories.push({ icon: Icon.Document });
+        break;
+    }
+
+    switch (preferences.displayDate) {
+      case "lastUpdated":
+        accessories.push({ date: lastUpdatedDate, tooltip: lastUpdatedDate.toLocaleString() });
+        break;
+      case "created":
+        accessories.push({ date: createdDate, tooltip: createdDate.toLocaleString() });
+        break;
+    }
+
     return accessories;
   }
 
