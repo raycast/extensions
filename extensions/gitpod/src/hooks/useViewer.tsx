@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import { getGitHubClient } from "../api/githubClient";
+import { getGitHubClient } from "../helpers/withGithubClient";
 
 export function useViewer() {
   const { github } = getGitHubClient();

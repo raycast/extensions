@@ -12,7 +12,7 @@ import {
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../api/githubClient";
+import { getGitHubClient } from "../helpers/withGithubClient";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import PullRequestCommits from "./PullRequestCommits";

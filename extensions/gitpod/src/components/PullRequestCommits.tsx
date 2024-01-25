@@ -5,7 +5,7 @@ import { useMemo } from "react";
 
 import { PullRequestCommitFieldsFragment } from "../generated/graphql";
 import { getCheckStateAccessory } from "../helpers/pull-request";
-import { getGitHubClient } from "../api/githubClient";
+import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { PullRequest } from "./PullRequestActions";
 
