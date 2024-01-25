@@ -22,7 +22,7 @@ export const TargetLanguageList: React.VFC = () => {
                     title="Remove"
                     icon={Icon.Minus}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
                     onAction={() => {
                       const updated = targetLanguages.filter((l) => l != lang);
                       setTargetLanguages(updated.length === 0 ? ["en"] : updated);
