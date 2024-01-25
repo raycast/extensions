@@ -25,7 +25,6 @@ export class TextToSpeechProcessor {
   private subtitlesToggle: boolean;
   private outputLanguage: LanguageCode;
   private readingStyle: readingStyle; // 추가된 타입
-  private isCloseWindow?: boolean;
   public onScriptGenerated?: (script: string) => void;
 
   constructor(
@@ -46,7 +45,6 @@ export class TextToSpeechProcessor {
     this.subtitlesToggle = subtitlesToggle;
     this.outputLanguage = outputLanguage;
     this.readingStyle = readingStyle;
-    this.isCloseWindow = isCloseWindow;
     this.onScriptGenerated = onScriptGenerated;
   }
 
@@ -197,7 +195,7 @@ export class TextToSpeechProcessor {
   private async playAudio(currentIdentifier: string) {
     while (this.playAudioQueue.length > 0) {
       const activeIdentifier = await getCurrentCommandIdentifier();
-      if (activeIdentifier !== currentIdentifier && this.isCloseWindow) {
+      if (activeIdentifier !== currentIdentifier) {
         closeMainWindow();
         console.log("🚫 🔇 A new task command has started. Stopping audio tasks");
         showToast({

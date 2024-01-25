@@ -12,7 +12,6 @@ export default async function Command() {
     preferences.subtitlesToggle,
     preferences.outputLanguage,
     preferences.readingStyle,
-    true, // isCloseWindow
   );
   await processor.processSelectedText();
 }

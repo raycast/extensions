@@ -16,8 +16,7 @@ const ReadWithScript = () => {
     preferences.subtitlesToggle,
     preferences.outputLanguage,
     preferences.readingStyle,
-    false, // closing window
-    setScript,
+    true,
   );
 
   useEffect(() => {
