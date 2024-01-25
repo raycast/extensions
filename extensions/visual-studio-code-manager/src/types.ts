@@ -22,3 +22,7 @@ export enum VSCodeBuild {
   Insiders = "Code - Insiders",
   VSCodium = "VSCodium",
 }
+
+export interface CacheProjectEntity {
+  list: ProjectEntry[];
+}

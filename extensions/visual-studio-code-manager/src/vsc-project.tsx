@@ -5,10 +5,12 @@ import { existsSync } from "fs";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname, resolve } from "path";
-import { useState, Fragment, useEffect, useMemo } from "react";
+import { useState, Fragment, useMemo, useLayoutEffect } from "react";
 import tildify from "tildify";
 import { Preferences, ProjectEntry, VSCodeBuild } from "./types";
-import { searchProject } from "./search-project";
+import { allProject } from "./search-project";
+import recentProject from "./recent-project";
+import { openProjectInNewTab, openProjectInNewWindow } from "./open-in-iterm";
 
 const commandIconPath = resolve(__dirname, "assets/command-icon.png");
 
@@ -38,33 +40,67 @@ const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): Pro
   return projects.filter((project) => (selectedTag ? project.tags?.find((tag) => tag === selectedTag) : true));
 };
 
-export default function Command() {
-  const [projectList, setProjectList] = useState<any[]>([]);
+const p0 = recentProject.getRecentProject();
 
-  useEffect(() => {
-    const data = searchProject();
-    setProjectList(data.items);
+const p1 = allProject.getAllProject();
+
+const p3 = allProject.getRealTimeAllProject();
+
+export default function Command() {
+  const [projectList, setProjectList] = useState<ProjectEntry[]>([]);
+
+  const [recentProjectList, setRecentProjectList] = useState<ProjectEntry[]>([]);
+
+  useLayoutEffect(() => {
+    p0.then((data) => {
+      setRecentProjectList(data.list);
+    });
   }, []);
+
+  useLayoutEffect(() => {
+    p1.then((data) => {
+      setProjectList([...data.list]);
+      if (!data.list?.length) {
+        p3.then((list) => {
+          setProjectList([...list]);
+        });
+      }
+    });
+  }, []);
+
+  function onClickProjectItem() {
+    setRecentProjectList([...recentProject.rencentProjectList]);
+  }
 
   const elements = useMemo(() => {
     return filterProjectsByTag(projectList, "").map((project, index) => {
-      return <ProjectListItem key={project.rootPath + index} {...project} />;
+      return <ProjectListItem key={project.rootPath + index} projectItem={project} onClick={onClickProjectItem} />;
     });
   }, [projectList]);
 
+  const recentElements = useMemo(() => {
+    return filterProjectsByTag(recentProjectList, "").map((project, index) => {
+      return <ProjectListItem key={project.rootPath + index} projectItem={project} onClick={onClickProjectItem} />;
+    });
+  }, [recentProjectList]);
+
   return (
-    <List searchBarPlaceholder="Search projects ...">
-      {/* <List.Section title="Recent Projects">
-        <List.Item key={1} title="Test" />
-      </List.Section> */}
-      <List.Section title="All Projects">
+    <List
+      searchBarPlaceholder="Search projects ..."
+      isLoading={projectList.length || recentProjectList.length ? false : true}
+    >
+      <List.Section key="recent" title="Recent Projects">
+        <Fragment>{recentElements}</Fragment>
+      </List.Section>
+      <List.Section key="all" title="All Projects">
         <Fragment>{elements}</Fragment>
       </List.Section>
     </List>
   );
 }
 
-function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
+function ProjectListItem(props: { projectItem: ProjectEntry; onClick?: any }) {
+  const { name, rootPath, tags } = props.projectItem;
   const path = rootPath;
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
@@ -87,19 +123,44 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                   closeMainWindow();
                 }}
               />
-            ) : isNewWindow(path) ? (
-              <Action
-                title={`Open New Window`}
+            ) : (
+              <Action.Open
+                title={`Open in ${build}`}
                 icon="command-icon.png"
-                onAction={() => {
-                  exec("code -n");
+                target={path}
+                application={appKey}
+                onOpen={() => {
+                  recentProject.updateRecentJSON(props.projectItem);
+                  props.onClick?.();
                   closeMainWindow();
                 }}
               />
-            ) : (
-              <Action.Open title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
             )}
-            {terminalInstalled && !isNewWindow(path) && (
+            {terminalInstalled && isItermApp() && !isNewWindow(path) && (
+              <Action
+                title="Open in Terminal (New Window)"
+                key="terminal-new-window"
+                icon={{ fileIcon: terminalPath }}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                onAction={() => {
+                  openProjectInNewWindow({ command: `cd ${path}` });
+                  closeMainWindow();
+                }}
+              />
+            )}
+            {terminalInstalled && isItermApp() && !isNewWindow(path) && (
+              <Action
+                title="Open in Terminal (New Tab)"
+                key="terminal-new-tab"
+                icon={{ fileIcon: terminalPath }}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                onAction={() => {
+                  openProjectInNewTab({ command: `cd ${path}` });
+                  closeMainWindow();
+                }}
+              />
+            )}
+            {terminalInstalled && !isItermApp() && !isNewWindow(path) && (
               <Action.Open
                 title="Open in Terminal"
                 key="terminal"
@@ -168,6 +229,10 @@ function isRemoteProject(path: string): boolean {
 
 function isNewWindow(path: string) {
   return path === "-n";
+}
+
+function isItermApp() {
+  return terminalPath.includes("iTerm.app");
 }
 
 function parseRemoteURL(path: string): string {
