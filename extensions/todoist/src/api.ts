@@ -71,7 +71,7 @@ export type CachedDataParams = {
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
 };
 
-export async function syncRequest(params: Record<string, any>) {
+export async function syncRequest(params: Record<string, unknown>) {
   const todoistApi = getTodoistApi();
   const { data } = await todoistApi.post<SyncData>("/sync", params);
 
@@ -94,7 +94,6 @@ export async function getFilterTasks(query: string) {
     return data as Task[];
   } catch (error) {
     throw new Error("Error fetching filter tasks:" + error);
-    return [];
   }
 }
 

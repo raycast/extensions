@@ -15,7 +15,7 @@ export const config: NewTabSearchConfigs = {
 export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
   const { url } = props.arguments;
   const { fallbackText } = props;
-  const selectedText = await getSelectedText();
+  const selectedText = await getSelectedText().catch(() => ""); // Ignore error, it's fine if there's no selected text.
 
   const selectedTextAsSearch = `${config[newLittleArcPreferences.engine]}${encodeURIComponent(selectedText)}`;
 

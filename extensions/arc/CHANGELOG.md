@@ -1,5 +1,13 @@
 # Arc Changelog
 
+## [Update] - 2024-01-19
+
+- A few commands is now disabled by default  
+
+## [Fixes] - 2024-01-18
+
+- Fix #10204, opening little arc without selected text doesn't throw an error anymore.
+
 ## [Improvements] - 2024-01-16
 
 - If text is selected, the command `Open New Little Arc Window` will now open in a search for the selected text.

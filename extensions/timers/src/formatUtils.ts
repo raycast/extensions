@@ -2,7 +2,7 @@ const formatTime = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
   const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
   const secs = String(Math.floor(seconds % 60)).padStart(2, "0");
-  return `${hours}:${mins}:${secs}`;
+  return `${hours === 0 ? "" : hours + ":"}${mins}:${secs}`;
 };
 
 const formatDateTime = (d: Date) => {

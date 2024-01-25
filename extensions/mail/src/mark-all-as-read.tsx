@@ -3,12 +3,26 @@ import { runAppleScript } from "@raycast/utils";
 
 async function script(): Promise<void> {
   const script = `
-    tell application "Mail"
-      set visible of window 1 to false 
-      set read status of every message of every mailbox of every account where its read status = false to true
-      set visible of window 1 to true
-    end tell
-`;
+  tell application "Mail"
+	set visible of every window to false
+	
+	set allAccounts to every account
+	repeat with anAccount in allAccounts
+		set allMailboxes to every mailbox of anAccount
+		repeat with aMailbox in allMailboxes
+			set unreadMessages to (every message of aMailbox whose read status is false)
+			repeat with aMessage in unreadMessages
+				set read status of aMessage to true
+			end repeat
+		end repeat
+	end repeat
+	
+	close every window
+	activate
+	delay 1 -- Wait for a second to ensure Mail app is activated
+	tell application "System Events" to keystroke "0" using command down -- Command-0 is the typical shortcut to open main viewer window in Mail
+end tell
+  `;
 
   runAppleScript(script);
 }
@@ -16,9 +30,12 @@ async function script(): Promise<void> {
 export default async function MarkAllAsRead() {
   try {
     await script();
-    showHUD("Please note that it may take a while to update");
+    showHUD("Closing the Mail window for better performance, The window will reappear when this is done.");
   } catch (error) {
-    await showToast(Toast.Style.Failure, "Failed to mark all as read");
+    await showToast(Toast.Style.Failure, "Failed to mark all emails as read");
     console.error(error);
+    return;
   }
+
+  await showToast(Toast.Style.Success, "All emails marked as read");
 }
