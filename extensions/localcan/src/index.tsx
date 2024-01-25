@@ -4,7 +4,7 @@ import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@rayca
 import { useSQL } from "@raycast/utils";
 import type { Domain } from "./interface";
 import { databasePath, listQuery } from "./constants";
-import { groupDomains } from "./utils";
+import { getDomainURL, groupDomains } from "./utils";
 
 function ActiveDropdown(props: { onSelectionChange: (newValue: string) => void }) {
   const { onSelectionChange } = props;
@@ -48,7 +48,7 @@ export default function Command() {
                   key={index}
                   title={domain.domain}
                   subtitle={[
-                    `${domain.type_to}://${domain.domain_to}:${domain.port_to}`,
+                    domain.type_to ? `${domain.type_to}://${domain.domain_to}:${domain.port_to}` : domain.port,
                     ...(domain.tunnel_active && domain.tunnel_url ? [domain.tunnel_url] : []),
                   ].join(", ")}
                   icon={{
@@ -66,11 +66,11 @@ export default function Command() {
                   ]}
                   actions={
                     <ActionPanel>
-                      <Action.OpenInBrowser url={`${domain.type}://${domain.domain}`} />
+                      <Action.OpenInBrowser url={getDomainURL(domain)} />
                       {domain.tunnel_active && domain.tunnel_url ? (
                         <Action.OpenInBrowser url={`${domain.tunnel_url}`} title="Open Tunnel in Browser" />
                       ) : undefined}
-                      <Action.CopyToClipboard content={`${domain.type}://${domain.domain}`} />
+                      <Action.CopyToClipboard content={getDomainURL(domain)} />
                       {domain.tunnel_active && domain.tunnel_url ? (
                         <Action.CopyToClipboard content={`${domain.tunnel_url}`} title="Copy Tunnel to Clipboard" />
                       ) : undefined}

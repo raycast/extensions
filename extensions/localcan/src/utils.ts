@@ -21,3 +21,11 @@ export const groupDomains = (domains: Domain[], filter: string): DomainGroup[] =
     }, {}),
   );
 };
+
+export const getDomainURL = (domain: Domain) => {
+  if (domain.type_to) {
+    return `${domain.type}://${domain.domain}`;
+  } else {
+    return `${domain.type}://${domain.domain}:${domain.port}`;
+  }
+};
