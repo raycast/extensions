@@ -13,8 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Aspect Raytio",
-      "subtitle": "Calculate any aspect ratio",
+      "title": "Calculate Aspect Raytio",
       "description": "Calculate easily the aspect ratio for different sizes based on a width or height.",
       "keywords": [
         "aspect",
