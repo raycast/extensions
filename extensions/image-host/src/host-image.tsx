@@ -6,10 +6,6 @@ import { useState } from "react";
 
 const supportedExtensions = ["png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp", "heic"];
 
-type Preferences = {
-  apiKey: string;
-};
-
 interface FormValues {
   files: string[];
 }
@@ -64,7 +60,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.FilePicker allowMultipleSelection={false} {...itemProps.files} />
+      <Form.FilePicker allowMultipleSelection={false} title="Image" {...itemProps.files} />
 
       <Form.Description text="Choose an image to host (png, jpg, jpeg, gif, bmp, tiff, webp, heic)" />
     </Form>
