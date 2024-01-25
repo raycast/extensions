@@ -43,7 +43,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
       showToast(
         Toast.Style.Animated,
         "Generating Digest",
-        "This may take some time, depending on the response speed of the AI API and your setting.",
+        "This may take some time, depending on the response speed of the AI API and your setting. And it may fail if you deactivate the Raycast window for an unknown reason.",
       );
       await bizGenDigest(type);
       showToast(Toast.Style.Success, "Generating Success");

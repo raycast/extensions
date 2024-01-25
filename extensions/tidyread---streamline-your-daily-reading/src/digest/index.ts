@@ -113,13 +113,14 @@ async function summarizeItem(
   retryDelay?: number,
 ): Promise<RSSItemWithStatus> {
   console.time(`summarize call for ${item.title} @${item.feed?.title}`);
+  // console.log(`retry count: ${retryCount}, retry delay: ${retryDelay}`);
   try {
     const needSummarize = item.content && item.content.length > MIN_SUMMARIZE_CHARACTER_LIMIT && provider.available;
     const summary = needSummarize
       ? await retry(
           () => withTimeout(provider.summarize(item.content!), requestTimeout ?? 20000),
-          retryCount ?? 3,
-          retryDelay ?? 20 * 1000,
+          retryCount ?? 5,
+          retryDelay ?? 30 * 1000,
         )
       : ellipsisContent(item.content || "", THRESHOLDS_FOR_TRUNCATION);
 
