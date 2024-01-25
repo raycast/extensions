@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, openExtensionPreferences } from "@raycast/api";
-import { useScript, ScriptProvider } from "./contexts/script-context";
+import React from "react";
+import { Action, ActionPanel, Detail, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { TextToSpeechProcessor } from "./processors/text-to-speech-processor";
 
-const ReadWithScript = () => {
-  const { script, setScript } = useScript();
-  const [isLoading, setIsLoading] = useState(true);
-
+const Command = () => {
+  const [script, setScript] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const preferences = getPreferenceValues<Preferences>();
+
   const processor = new TextToSpeechProcessor(
     preferences.apiKey,
     preferences.defaultVoice,
@@ -16,20 +16,15 @@ const ReadWithScript = () => {
     preferences.subtitlesToggle,
     preferences.outputLanguage,
     preferences.readingStyle,
-    true,
+    (generatedScript: string) => fetchScript(generatedScript),
   );
 
+  const fetchScript = async (generatedScript: string) => {
+    setScript(generatedScript);
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    // Set the loading state to true before starting script processing.
-    setIsLoading(true);
-
-    // Set up a callback function to update the state once the script processing is complete.
-    processor.onScriptGenerated = (generatedScript) => {
-      setScript(generatedScript);
-      // Set the loading state to false once the script processing is complete.
-      setIsLoading(false);
-    };
-
     processor.processSelectedText();
   }, []);
 
@@ -50,7 +45,7 @@ const ReadWithScript = () => {
         )
       }
       isLoading={isLoading}
-      markdown={script}
+      markdown={script || ""}
       // metadata={
       //   script && (
       //     <Detail.Metadata>
@@ -69,11 +64,4 @@ const ReadWithScript = () => {
   );
 };
 
-// ScriptProvider로 ReadWithScript 컴포넌트를 감싸줍니다.
-const WrappedReadWithScript = () => (
-  <ScriptProvider>
-    <ReadWithScript />
-  </ScriptProvider>
-);
-
-export default WrappedReadWithScript;
+export default Command;

@@ -3,7 +3,6 @@ import { OpenAI } from "openai";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
-import { LanguageCode, readingStyle, Voice } from "../types";
 import { READING_STYLES_PROMPTS } from "../const";
 import {
   stopAllProcesses,
@@ -19,28 +18,27 @@ export class TextToSpeechProcessor {
   private isPlaying = false;
   private isConverting = false;
   private openai: OpenAI;
-  private voice: Voice;
-  private temperature: number;
-  private gptModel: string;
+  private voice: ExtensionPreferences["defaultVoice"];
+  private temperature: ExtensionPreferences["temperature"];
+  private gptModel: ExtensionPreferences["gptModel"];
   private subtitlesToggle: boolean;
-  private outputLanguage: LanguageCode;
-  private readingStyle: readingStyle; // 추가된 타입
+  private outputLanguage: ExtensionPreferences["outputLanguage"];
+  private readingStyle: ExtensionPreferences["readingStyle"];
   public onScriptGenerated?: (script: string) => void;
 
   constructor(
     apiKey: string,
-    voice: Voice,
-    temperature: string,
-    gptModel: string,
+    voice: ExtensionPreferences["defaultVoice"],
+    temperature: ExtensionPreferences["temperature"],
+    gptModel: ExtensionPreferences["gptModel"],
     subtitlesToggle: boolean,
-    outputLanguage: LanguageCode,
-    readingStyle: readingStyle,
-    isCloseWindow?: boolean,
+    outputLanguage: ExtensionPreferences["outputLanguage"],
+    readingStyle: ExtensionPreferences["readingStyle"],
     onScriptGenerated?: (script: string) => void,
   ) {
     this.openai = new OpenAI({ apiKey });
     this.voice = voice;
-    this.temperature = parseFloat(temperature);
+    this.temperature = temperature;
     this.gptModel = gptModel;
     this.subtitlesToggle = subtitlesToggle;
     this.outputLanguage = outputLanguage;
@@ -98,7 +96,7 @@ export class TextToSpeechProcessor {
         // Use the OpenAI completion endpoint to translate and script the selected text
         const script = await this.openai.chat.completions.create({
           model: this.gptModel,
-          temperature: this.temperature,
+          temperature: Number(this.temperature),
           messages: [
             {
               role: "system",
