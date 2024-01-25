@@ -1,6 +1,5 @@
 import React from "react";
 import { List, ActionPanel, Action, Form, useNavigation, showToast, Toast, open } from "@raycast/api";
-import { useStorage } from "./use-storage";
 import { getFavicon, usePromise } from "@raycast/utils";
 import { updateHostsFile, getCurrentlyBlockedHosts } from "./hosts-file";
 import { getStoredHosts, addHostToStorage, removeHostFromStorage } from "./storage";
@@ -57,11 +56,11 @@ export default function Command() {
       searchBarPlaceholder="Search or add a new host"
       actions={
         <ActionPanel>
-          <Action title="Add new host" onAction={addHostFromSearch} />
+          <Action title="Add New Host" onAction={addHostFromSearch} />
         </ActionPanel>
       }
     >
-      {(storedHosts.data || []).map((host, index) => (
+      {(storedHosts.data || []).map((host) => (
         <List.Item
           key={host}
           icon={getFavicon("https://" + host)}
@@ -70,12 +69,12 @@ export default function Command() {
           actions={
             <>
               <ActionPanel>
-                <Action title="Remove host" onAction={() => removeHost(host)} />
+                <Action title="Remove Host" onAction={() => removeHost(host)} />
                 <Action.Push
-                  title="Add new host"
+                  title="Add New Host"
                   target={<AddHostView onAdded={() => storedHosts.revalidate().catch(() => {})} />}
                 />
-                {blockingEnabled && <Action title="Sync all" onAction={sync} />}
+                {blockingEnabled && <Action title="Sync All" onAction={sync} />}
               </ActionPanel>
             </>
           }
