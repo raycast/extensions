@@ -1,3 +1,3 @@
 ## Surl
 
-Make your url shotern
+Make your URL shorter.
