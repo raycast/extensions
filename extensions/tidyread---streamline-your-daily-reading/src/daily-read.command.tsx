@@ -40,7 +40,11 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
 
   const handleGenDigest = async (type: "manual" | "auto" = "manual") => {
     try {
-      showToast(Toast.Style.Animated, "Generating Digest");
+      showToast(
+        Toast.Style.Animated,
+        "Generating Digest",
+        "This may take some time, depending on the response speed of the AI API and your setting.",
+      );
       await bizGenDigest(type);
       showToast(Toast.Style.Success, "Generating Success");
       await revalidate();

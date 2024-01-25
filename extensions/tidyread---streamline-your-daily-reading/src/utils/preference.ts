@@ -23,6 +23,7 @@ export function normalizePreference(): Required<Preferences> {
     summarizePrompt: (values.summarizePrompt || "").trim() || DEFAULT_PROMPT,
     maxItemsPerFeed: isNum(values.maxItemsPerFeed) ? +values.maxItemsPerFeed : 10,
     maxApiConcurrency: isNum(values.maxApiConcurrency) ? +values.maxApiConcurrency : 3,
+    retryCount: isNum(values.retryCount) ? +values.retryCount : 5,
     // 默认重试延迟时间为30秒
     retryDelay: isNum(values.retryDelay) ? +values.retryDelay * 1000 : 30 * 1000,
     notificationTime: values.notificationTime || "9am",

@@ -273,11 +273,19 @@
       "required": false
     },
     {
+      "name": "retryCount",
+      "description": "AI API request retry count, default is 5, it means that it will retry 5 times with `Retry Delay` intervals. If you encounter a `Rate Limit` error in digest, you can increase this value.",
+      "type": "textfield",
+      "title": "AI API Retry Count",
+      "default": "5",
+      "required": false
+    },
+    {
       "name": "retryDelay",
-      "description": "AI API request retry delay, default is 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can increase this value.",
+      "description": "AI API request retry delay, default is 20, means retry after 20 seconds. If you encounter a `Rate Limit` error, you can increase this value.",
       "type": "textfield",
       "title": "AI API Retry Delay",
-      "default": "30",
+      "default": "20",
       "required": false
     },
     {

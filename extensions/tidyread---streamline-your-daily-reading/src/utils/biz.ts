@@ -79,6 +79,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     httpProxy,
     enableItemLinkProxy,
     maxApiConcurrency,
+    retryCount,
     retryDelay,
     requestTimeout,
     maxItemsPerFeed,
@@ -131,6 +132,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     rssFeeds: feeds,
     httpProxy,
     maxApiConcurrency,
+    retryCount,
     retryDelay,
     requestTimeout,
     translateTitles: !preferredLanguage
