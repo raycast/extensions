@@ -1,6 +1,6 @@
 import fs from "fs";
 import { useMemo, useState } from "react";
-import { ActionPanel, Action, List, Icon, Color, showToast, Toast, useNavigation, Detail } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Detail } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import type { Domain } from "./interface";
 import { databasePath, listQuery } from "./constants";
