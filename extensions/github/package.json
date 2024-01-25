@@ -278,7 +278,7 @@
           "type": "checkbox",
           "required": false,
           "default": false,
-          "title": "Icon Counter Categories",
+          "title": "Icon Count Categories",
           "label": "Opened",
           "description": "Includes pull request you opened in the icon counter."
         },
