@@ -1,8 +1,8 @@
-import { getPlanetScaleClient } from "../oauth/view";
+import { usePlanetScaleClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
 
 export function useDatabases(args: { organization?: string }) {
-  const pscale = getPlanetScaleClient();
+  const pscale = usePlanetScaleClient();
 
   const { data: databases, isLoading: databasesLoading } = useCachedPromise(
     async (key, { organization }) => {

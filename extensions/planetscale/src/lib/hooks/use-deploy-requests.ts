@@ -1,11 +1,11 @@
-import { getPlanetScaleClient } from "../oauth/view";
+import { usePlanetScaleClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
 import { enrichToastWithURL, mutation } from "../utils";
 import { range } from "lodash";
 
 export function useDeployRequests(args: { organization?: string; database?: string }) {
-  const pscale = getPlanetScaleClient();
+  const pscale = usePlanetScaleClient();
 
   const {
     data: deployRequests,

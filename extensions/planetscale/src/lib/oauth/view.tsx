@@ -33,7 +33,7 @@ export function withPlanetScaleClient(component: JSX.Element) {
   return component;
 }
 
-export function getPlanetScaleClient(): PlanetScaleClient {
+export function usePlanetScaleClient(): PlanetScaleClient {
   if (!planetScaleClient) {
     throw new Error("getLinearClient must be used when authenticated");
   }

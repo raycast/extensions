@@ -1,9 +1,9 @@
-import { getPlanetScaleClient } from "../oauth/view";
+import { usePlanetScaleClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
 import { getServiceTokenAccesses } from "../oauth/client";
 
 export function useOrganizations() {
-  const pscale = getPlanetScaleClient();
+  const pscale = usePlanetScaleClient();
 
   const { data: organizations, isLoading: organizationsLoading } = useCachedPromise(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
