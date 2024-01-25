@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Use OAuth utils] - {PR_MERGE_DATE}
+
+Use new OAuth utils
+
 ## [Add Favorites command] - 2024-01-05
 
 - Add `Favorites` command to browse your Linear favorites right from Raycast.
