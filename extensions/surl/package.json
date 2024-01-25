@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "surl",
   "title": "Surl",
-  "description": "Make Your URL Shotern",
+  "description": "Make your URLs shorter",
   "icon": "surl.png",
   "author": "yama_fuji",
   "categories": [
@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Surl",
-      "subtitle": "Shorten Your URL",
+      "title": "Shorten URL",
+      "subtitle": "Surl",
       "description": "Make Your URL Shorten",
       "mode": "no-view",
       "arguments": [
@@ -28,7 +28,7 @@
     },
     {
       "name": "history",
-      "title": "History",
+      "title": "Show History",
       "subtitle": "Surl",
       "description": "History of Surl",
       "mode": "view"
