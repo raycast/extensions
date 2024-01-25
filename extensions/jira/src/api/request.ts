@@ -35,7 +35,7 @@ export async function request<T>(path: string, options: RequestOptions = { metho
         ...additionalHeaders,
       },
       ...rest,
-    }
+    },
   );
 
   if (response.ok) {

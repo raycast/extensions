@@ -17,7 +17,7 @@ export default function useStates(teamId?: string, config?: { execute?: boolean 
     {
       initialData: [],
       execute: config?.execute !== false,
-    }
+    },
   );
 
   return { states, isLoadingStates, statesError };

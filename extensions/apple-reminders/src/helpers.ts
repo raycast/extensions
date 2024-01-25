@@ -1,7 +1,7 @@
 import { Color, Icon } from "@raycast/api";
 import { addDays, format, isThisYear, isBefore, isSameDay, parseISO, startOfDay } from "date-fns";
 
-import { Priority } from "./hooks/useData";
+import { Location, Priority } from "./hooks/useData";
 
 export function parseDay(date?: string | null): Date {
   if (!date) {
@@ -23,6 +23,7 @@ export function isOverdue(date: string) {
 
 export function displayDueDate(dateString: string) {
   const date = new Date(dateString);
+
   if (isOverdue(dateString)) {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
@@ -50,6 +51,10 @@ export function displayDueDate(dateString: string) {
   return format(date, "dd MMMM yyy");
 }
 
+export function isFullDay(date: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
 export function getPriorityIcon(priority: Priority) {
   if (priority === "high") {
     return {
@@ -75,13 +80,18 @@ export function getPriorityIcon(priority: Priority) {
   return undefined;
 }
 
-export function truncateMiddle(str: string, maxLength = 45): string {
+export function getLocationDescription(location: Location) {
+  const radius = Intl.NumberFormat("en", { style: "unit", unit: "meter", unitDisplay: "long" }).format(
+    location.radius ? location.radius : 100,
+  );
+
+  return `${location.proximity === "enter" ? "Arriving at:" : "Leaving:"} ${location.address} (within ${radius})`;
+}
+
+export function truncate(str: string, maxLength = 45): string {
   if (str.length <= maxLength) {
     return str;
   }
 
-  const startIndex = Math.ceil(maxLength / 2) - 2;
-  const endIndex = str.length - (maxLength - startIndex - 3);
-
-  return str.substring(0, startIndex) + "…" + str.substring(endIndex);
+  return str.substring(0, maxLength) + "…";
 }

@@ -1,18 +1,29 @@
 import reminders from "swift:../swift/reminders";
 
-import { Priority, Reminder, List } from "./hooks/useData";
+import { Priority, Reminder, List, Location } from "./hooks/useData";
 
 export async function getData() {
   return await reminders.get<{ reminders: Reminder[]; lists: List[] }>();
 }
 
-export async function createReminder(reminder: {
+export type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+export type NewReminder = {
   title: string;
   listId?: string;
   notes?: string;
   dueDate?: string;
   priority?: string;
-}): Promise<Reminder> {
+  recurrence?: {
+    frequency: Frequency;
+    interval: number;
+    endDate?: string;
+  };
+  address?: string;
+  proximity?: string;
+  radius?: number;
+};
+
+export async function createReminder(reminder: NewReminder): Promise<Reminder> {
   const result = await reminders.create<Reminder>(reminder);
   return result;
 }
@@ -31,6 +42,10 @@ export async function setReminderPriority(reminderId: string, priority: Priority
 
 export async function setReminderDueDate(reminderId: string, dueDate: string | null) {
   return await reminders.setDueDate<{ status: string }>({ reminderId, dueDate });
+}
+
+export async function setLocation(reminderId: string, values: Location) {
+  return (await reminders.setLocation)<{ status: string }>({ reminderId, ...values });
 }
 
 export async function deleteReminder(reminderId: string) {

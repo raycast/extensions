@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tabler",
   "title": "Tabler",
-  "description": "Copy & Paste Tabler Icons",
   "icon": "extension_icon.png",
+  "description": "Copy & Paste Tabler Icons",
   "author": "zavbala",
   "categories": [
     "Web",

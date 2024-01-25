@@ -21,6 +21,14 @@ If you get response similar to (your version might be different):
 
 You should be good to go (it's important that you don't get response `zsh: command not found: tesseract`)
 
+## Tesseract Languages
+
+By default, Tesseract supports only English language, but you can install additional languages by running following command in your terminal:
+
+`brew install tesseract-lang`
+
+After installing additional languages, you need to update Easy OCR extension settings in Raycast, and set language you want to use by default.
+
 
 ## Possible problems
 If you get Tesseract not found error make sure it is installed by running `tesseract -v` in your terminal, and if it's installed, then you need to update its path in Raycast settings.

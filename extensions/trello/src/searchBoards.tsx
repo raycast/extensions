@@ -13,7 +13,7 @@ export default function BoardsList() {
       const sortedBoards = response
         .filter((a) => !a.closed)
         .sort(
-          (a, b) => new Date(a.dateLastActivity).getMilliseconds() - new Date(b.dateLastActivity).getMilliseconds()
+          (a, b) => new Date(a.dateLastActivity).getMilliseconds() - new Date(b.dateLastActivity).getMilliseconds(),
         );
       setAllBoards(sortedBoards);
       setBoards(sortedBoards);

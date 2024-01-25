@@ -1,5 +1,16 @@
 # Obsidian Changelog
 
+## [Fix Search Media HotKey bug] - 2024-01-26
+- Checks for defined `searchArgument` in MediaGrid value before filtering
+
+## [Copy Note Title action] - 2024-01-17
+- Add `Copy Note Title` action
+
+## [Bugfixes and cache behavior tweak] - 2023-11-19
+- Will now skip the cache if the value is an empty array
+- Fixes a bug where no default application crashes the extension
+- Fixes a bug where deleting the vault config path can't find the notes
+
 ## [New features and bugfixes] - 2023-10-12
 - Adds extension setting to open note in default application
 - Adds quick actions to the Random Note command

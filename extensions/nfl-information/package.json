@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nfl-information",
+  "title": "NFL",
+  "description": "Fetches the NFL Schedule, News, and Team News",
+  "icon": "nfl-logo.png",
+  "author": "kciarnie",
+  "categories": [
+    "Fun",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "nfl-schedule",
+      "title": "Weekly Schedule",
+      "subtitle": "NFL",
+      "description": "Fetches the schedule for the NFL Week",
+      "mode": "view"
+    },
+    {
+      "name": "nfl-news",
+      "title": "Latest News",
+      "subtitle": "NFL",
+      "description": "Fetches the latest NFL News",
+      "mode": "view"
+    },
+    {
+      "name": "nfl-team",
+      "title": "Team Information",
+      "subtitle": "NFL",
+      "description": "Fetches the latest news for a specific NFL Team",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.5",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

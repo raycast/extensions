@@ -1,5 +1,9 @@
 # Scaleway Changelog
 
+## [Chore] - 2023-12-20
+
+- Update header used by the client, update dependencies
+
 ## [Improvement] - 2023-10-24
 
 - Added block storage product entry

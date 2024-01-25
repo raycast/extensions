@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TrelloFetchResponse } from "./trelloResponse.model";
 import { returnBoards } from "./utils/fetchBoards";
@@ -23,6 +23,7 @@ export default function Command() {
   const [boardResults, setBoards] = useState<TrelloFetchResponse>([]);
   const [listResults, setLists] = useState<List[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState<boolean>(true);
   const currentBoardId = "";
 
@@ -74,7 +75,7 @@ export default function Command() {
       <Form.TextField id="name" title="Card name" placeholder="Enter text" />
       <Form.TextArea id="desc" title="Card description" placeholder="Enter multi-line text" />
       <Form.DatePicker id="due" title="Due date?" />
-      <Form.Dropdown id="idMember" title="Assign to me">
+      <Form.Dropdown id="idMember" title="Assign to">
         {members.map((member) => (
           <Form.Dropdown.Item key={member.id} value={member.id} title={member.username} />
         ))}

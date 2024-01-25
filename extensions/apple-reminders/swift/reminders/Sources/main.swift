@@ -1,9 +1,10 @@
-import Foundation
+import CoreLocation
 import EventKit
+import Foundation
 import RaycastExtensionMacro
 
 #exportFunction(get)
-func get() throws -> [String : Any] {
+func get() throws -> [String: Any] {
   let eventStore = EKEventStore()
   var remindersJson: [[String: Any]] = []
   var listsJson: [[String: Any]] = []
@@ -59,18 +60,18 @@ func get() throws -> [String : Any] {
 }
 
 #exportFunction(create)
-func create(_ values: [String: Any]) throws -> [String: Any] {
+func create(_ values: [String: Any]) async throws -> [String: Any] {
   let eventStore = EKEventStore()
   let reminder = EKReminder(eventStore: eventStore)
 
   if let title = values["title"] as? String {
-      reminder.title = title
+    reminder.title = title
   } else {
-      throw "Title is missing or not a string"
+    throw "Title is missing or not a string"
   }
 
   if let notes = values["notes"] as? String {
-      reminder.notes = notes
+    reminder.notes = notes
   }
 
   if let listId = values["listId"] as? String {
@@ -89,6 +90,7 @@ func create(_ values: [String: Any]) throws -> [String: Any] {
         [.year, .month, .day, .hour, .minute, .second],
         from: dueDate
       )
+      reminder.addAlarm(EKAlarm(absoluteDate: dueDate))
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
       reminder.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day],
@@ -115,16 +117,16 @@ func create(_ values: [String: Any]) throws -> [String: Any] {
 
       var recurrenceFrequency: EKRecurrenceFrequency
       switch frequency {
-        case "daily":
-          recurrenceFrequency = .daily
-        case "weekly":
-          recurrenceFrequency = .weekly
-        case "monthly":
-          recurrenceFrequency = .monthly
-        case "yearly":
-          recurrenceFrequency = .yearly
-        default:
-          throw "Invalid recurrence frequency"
+      case "daily":
+        recurrenceFrequency = .daily
+      case "weekly":
+        recurrenceFrequency = .weekly
+      case "monthly":
+        recurrenceFrequency = .monthly
+      case "yearly":
+        recurrenceFrequency = .yearly
+      default:
+        throw "Invalid recurrence frequency"
       }
 
       let recurrenceRule = EKRecurrenceRule(
@@ -138,8 +140,6 @@ func create(_ values: [String: Any]) throws -> [String: Any] {
     }
   }
 
-
-
   if let priorityString = values["priority"] as? String {
     switch priorityString {
     case "high":
@@ -150,6 +150,18 @@ func create(_ values: [String: Any]) throws -> [String: Any] {
       reminder.priority = Int(EKReminderPriority.low.rawValue)
     default:
       reminder.priority = Int(EKReminderPriority.none.rawValue)
+    }
+  }
+
+  if let address = values["address"] as? String {
+    let alarmValues = [
+      "address": address, "proximity": values["proximity"], "radius": values["radius"],
+    ]
+    do {
+      let alarm = try await createLocationAlarm(values: alarmValues)
+      reminder.addAlarm(alarm)
+    } catch {
+      // If the alarm cannot be created, we catch the error and continue without handling it (silent failure).
     }
   }
 
@@ -249,12 +261,20 @@ func setDueDate(_ values: [String: String]) throws {
     throw "No reminder found with the provided id"
   }
 
+  // Remove all alarms, otherwise overdue reminders won't be properly updated natively
+  if let alarms = item.alarms {
+    for alarm in alarms {
+      item.removeAlarm(alarm)
+    }
+  }
+
   if let dueDateString = values["dueDate"] {
     if dueDateString.contains("T"), let dueDate = isoDateFormatter.date(from: dueDateString) {
       item.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day, .hour, .minute, .second],
         from: dueDate
       )
+      item.addAlarm(EKAlarm(absoluteDate: dueDate))
     } else if let dueDate = dateOnlyFormatter.date(from: dueDateString) {
       item.dueDateComponents = Calendar.current.dateComponents(
         [.year, .month, .day],
@@ -284,6 +304,80 @@ func deleteReminder(_ reminderId: String) throws {
     try eventStore.remove(item, commit: true)
   } catch {
     throw "Error deleting reminder: \(error.localizedDescription)"
+  }
+}
+
+func createLocationAlarm(values: [String: Any]) async throws -> EKAlarm {
+  let geocoder = CLGeocoder()
+
+  guard let address = values["address"] as? String else {
+    throw "Address is missing"
+  }
+
+  let geocodedPlacemarks = try await geocoder.geocodeAddressString(address)
+  guard let placemark = geocodedPlacemarks.first, let location = placemark.location else {
+    throw "Address geocoding failed"
+  }
+
+  let structuredLocation = EKStructuredLocation(title: placemark.name ?? address)
+  structuredLocation.geoLocation = location
+
+  if let radius = values["radius"] as? Double {
+    structuredLocation.radius = radius
+  }
+
+  let alarm = EKAlarm()
+  alarm.structuredLocation = structuredLocation
+
+  if let proximity = values["proximity"] as? String {
+    switch proximity {
+    case "enter":
+      alarm.proximity = .enter
+    case "leave":
+      alarm.proximity = .leave
+    default:
+      throw "Invalid proximity value"
+    }
+  }
+
+  return alarm
+}
+
+#exportFunction(setLocation)
+func setLocation(values: [String: Any]) async throws {
+  guard let reminderId = values["reminderId"] as? String else {
+    throw "Reminder ID is missing"
+  }
+
+  let eventStore = EKEventStore()
+
+  guard let reminder = eventStore.calendarItem(withIdentifier: reminderId) as? EKReminder else {
+    throw "Reminder not found"
+  }
+
+  guard let address = values["address"] as? String else {
+    throw "Address is missing"
+  }
+
+  let alarmValues = [
+    "address": address,
+    "proximity": values["proximity"],
+    "radius": values["radius"],
+  ]
+
+  do {
+    let alarm = try await createLocationAlarm(values: alarmValues as [String: Any])
+
+    // Remove only location-based alarms otherwise the reminder in the native app won't be updated
+    if let alarms = reminder.alarms {
+      for alarm in alarms where alarm.isLocationAlarm {
+        reminder.removeAlarm(alarm)
+      }
+    }
+
+    reminder.addAlarm(alarm)
+    try eventStore.save(reminder, commit: true)
+  } catch {
   }
 }
 

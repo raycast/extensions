@@ -13,6 +13,6 @@ export default async function command() {
     await Clipboard.copy(getDistance);
     await showHUD("✅ Copied distance to clipboard");
   } catch (e) {
-    await showHUD("❌ Failed calculating distance");
+    await showHUD("❌ Failed to calculate distance");
   }
 }

@@ -25,7 +25,9 @@ function parseSSHConfig(configFilePath: string): ISSHConnection[] {
       }
       currentConnection = { id: connections.length.toString(), address: "", name: trimmedLine.substring(5), user: "" };
     } else if (currentConnection !== null) {
-      const [key, value] = trimmedLine.split(/\s+/, 2);
+      const whitespaceIndex = /\s+/.exec(trimmedLine)?.index ?? trimmedLine.length;
+      const key = trimmedLine.substring(0, whitespaceIndex);
+      const value = trimmedLine.substring(whitespaceIndex).trim();
 
       switch (key) {
         case "HostName":
@@ -43,8 +45,10 @@ function parseSSHConfig(configFilePath: string): ISSHConnection[] {
         case "HostNameKey":
           // Ignore this key
           break;
+        case "RemoteCommand":
+          currentConnection.command = value;
+          break;
         default:
-          currentConnection.name = key;
           break;
       }
     }
@@ -71,6 +75,10 @@ function saveSSHConfig(configFilePath: string, connections: ISSHConnection[]): v
 
     if (connection.sshKey) {
       configData += `  IdentityFile ${connection.sshKey}\n`;
+    }
+
+    if (connection.command) {
+      configData += `  RemoteCommand ${connection.command}\n`;
     }
 
     configData += "\n";

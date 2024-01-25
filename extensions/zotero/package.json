@@ -174,7 +174,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.0",
+    "@raycast/api": "^1.62.1",
     "citation-js": "^0.6.8",
     "fuse.js": "^6.6.2",
     "sql.js": "^1.8.0"

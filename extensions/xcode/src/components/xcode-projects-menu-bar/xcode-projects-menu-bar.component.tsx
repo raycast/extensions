@@ -6,7 +6,7 @@ import { XcodeProjectMenuBarService } from "../../services/xcode-project-menu-ba
 /**
  * Xcode Projects Menu Bar
  */
-export function XcodeProjectsMenuBar(): JSX.Element {
+export function XcodeProjectsMenuBar() {
   const menuBarList = usePromise(XcodeProjectMenuBarService.list);
   return (
     <MenuBarExtra

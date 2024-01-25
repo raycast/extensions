@@ -8,7 +8,7 @@ const DeleteAllAction = () => {
   const [, setTodoItems] = useAtom(todoAtom);
   return (
     <Action
-      title="Delete All Todos"
+      icon={{ source: Icon.Trash, tintColor: Color.Red }}
       onAction={async () => {
         await confirmAlert({
           title: "Delete All Todos",
@@ -26,7 +26,7 @@ const DeleteAllAction = () => {
       }}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       style={Action.Style.Destructive}
-      icon={{ source: Icon.Trash, tintColor: Color.Red }}
+      title="Delete All Todos"
     />
   );
 };
