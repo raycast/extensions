@@ -16,6 +16,7 @@ const ReadWithScript = () => {
     preferences.subtitlesToggle,
     preferences.outputLanguage,
     preferences.readingStyle,
+    false, // closing window
     setScript,
   );
 
@@ -30,14 +31,8 @@ const ReadWithScript = () => {
       setIsLoading(false);
     };
 
-    (async () => {
-      await processor.processSelectedText();
-    })();
-
-    return () => {
-      // processor.stopProcessing();
-    };
-  }, [setScript]);
+    processor.processSelectedText();
+  }, []);
 
   return (
     <Detail
