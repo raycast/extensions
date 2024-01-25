@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Allow to open Reminders app from the menu bar] - 2024-01-25
+
+- Add menu item that allows to open the Reminders app from the menu bar.
+
 ## [Fixes pop to root issue after creating reminders] - 2024-01-16
 
 - Fix an issue where `Create Reminder and Close Window` would stay on the `Create Reminder` screen after opening up Raycast again. Now, it should immediately pops to root after closing the window.
