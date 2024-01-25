@@ -13,15 +13,15 @@
   "commands": [
     {
       "name": "vsc-project",
-      "title": "vsc-project - Search and Open project",
-      "subtitle": "Visual Studio Code - Manager",
+      "title": "Search and Open project",
+      "subtitle": "vsc-project <Visual Studio Code - Manager>",
       "description": "Manager Visual Studio Code Project And Window",
       "mode": "view"
     },
     {
       "name": "vsc-new-window",
-      "title": "vsc-new-window - Open new window",
-      "subtitle": "Visual Studio Code - Manager",
+      "title": "Open new window",
+      "subtitle": "vsc-new-window <Visual Studio Code - Manager>",
       "description": "Manager Visual Studio Code Project And Window",
       "mode": "no-view"
     }
