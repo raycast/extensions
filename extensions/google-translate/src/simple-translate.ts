@@ -96,18 +96,3 @@ export async function doubleWayTranslate(text: string, options: LanguageCodeSet)
     ]);
   }
 }
-
-export async function multiWayTranslate(text: string, sourceLang: LanguageCode, targetLangs: LanguageCode[]) {
-  if (!text) {
-    return [];
-  }
-
-  return await Promise.all(
-    targetLangs.map((lang) =>
-      simpleTranslate(text, {
-        langFrom: sourceLang,
-        langTo: lang,
-      }),
-    ),
-  );
-}
