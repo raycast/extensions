@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Grid } from "@raycast/api";
+import { Action, ActionPanel, Icon, Grid } from "@raycast/api";
 
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
