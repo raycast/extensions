@@ -157,6 +157,13 @@ export default function SourceList() {
             },
             {
               tag: {
+                value: `${(item.tags || [])?.join?.(", ")}`,
+                color: Color.Blue,
+              },
+              show: item.tags?.length > 0,
+            },
+            {
+              tag: {
                 value: item.schedule === "custom" ? item.customDays?.join?.(", ") : capitalize(item.schedule),
                 color: Color.SecondaryText,
               },
