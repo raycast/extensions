@@ -136,7 +136,7 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
       id={String(bookmark._id)}
       icon={getFavicon(bookmark.link, { fallback: "raindrop-icon.png" })}
       key={bookmark._id}
-      title={bookmark.title}
+      title={{ value: bookmark.title, tooltip: bookmark.link }}
       subtitle={subtitle()}
       accessories={accessories()}
       actions={
