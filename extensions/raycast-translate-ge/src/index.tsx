@@ -38,6 +38,8 @@ async function parseFetchResponse(response: Response) {
       id: item.id,
       word: item[data.from],
       translation: item[data.to],
+      from: data.from,
+      to: data.to,
     }));
   } catch (err) {
     return [];
