@@ -21,7 +21,7 @@ function MyPullRequests() {
     >
       {sections.map((section) => {
         return (
-          <List.Section key={section.title} title={section.title} subtitle={section.subtitle}>
+          <List.Section key={section.type} title={section.type} subtitle={section.subtitle}>
             {section.pullRequests?.map((pullRequest) => {
               return (
                 <PullRequestListItem
