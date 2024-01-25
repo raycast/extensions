@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Select categories for My Pull Request Menu command] - 2024-01-25
+
+- Add preferences to include or not some categories of Pull Requests in the My Pull Requests menu bar command.
+- Add preferences to include or not some categories in the count of the My Pull Requests menu bar command.
+
 ## [Open vercel preview on pull requests] - 2023-12-18
 
 - If you have a vercel project, you can now open your preview directly from your pull request
