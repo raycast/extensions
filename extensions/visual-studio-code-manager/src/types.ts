@@ -11,12 +11,9 @@ export interface CachedProjectEntry {
 }
 
 export interface Preferences {
-  projectManagerDataPath: string;
-  groupProjectsByTag: boolean;
   terminalAppPath: string;
   gitClientAppPath: string;
   build: VSCodeBuild;
-  hideProjectsWithoutTag: boolean;
   projectDirPaths: string;
 }
 

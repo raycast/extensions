@@ -34,112 +34,11 @@ const STORAGE = `${homedir()}/Library/Application Support/${build}/User/globalSt
 
 const remotePrefix = "vscode-remote://";
 
-// function getProjectEntries(): ProjectEntry[] {
-//   const storagePath = getPreferencesPath() || STORAGE;
-//   const savedProjectsFile = `${storagePath}/projects.json`;
-//   const cachedProjectsFiles = [
-//     `${storagePath}/projects_cache_git.json`,
-//     `${storagePath}/projects_cache_any.json`,
-//     `${storagePath}/projects_cache_vscode.json`,
-//   ];
-
-//   let projectEntries: ProjectEntry[] = [];
-//   if (existsSync(savedProjectsFile)) {
-//     const savedProjects: ProjectEntry[] = JSON.parse(readFileSync(savedProjectsFile).toString());
-//     projectEntries.push(...savedProjects);
-//   }
-
-//   cachedProjectsFiles.forEach((cachedFile) => {
-//     if (existsSync(cachedFile)) {
-//       const cachedEntries: CachedProjectEntry[] = JSON.parse(readFileSync(cachedFile).toString());
-//       cachedEntries.forEach(({ name, fullPath }) => {
-//         if (projectEntries.find(({ rootPath }) => rootPath === fullPath)) {
-//           return;
-//         }
-//         projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
-//       });
-//     }
-//   });
-
-//   if (preferences.hideProjectsWithoutTag) {
-//     projectEntries = projectEntries.filter(({ tags }) => Array.isArray(tags) && tags.length);
-//   }
-
-//   return projectEntries;
-// }
-
-// function getProjectTags(projectEntries: ProjectEntry[]): string[] {
-//   return projectEntries?.reduce((tags: string[], project: ProjectEntry) => {
-//     project.tags?.forEach((tag) => {
-//       if (!tags.includes(tag)) {
-//         tags.push(tag);
-//       }
-//     });
-
-//     return tags.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-//   }, []);
-// }
-
 const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): ProjectEntry[] => {
   return projects.filter((project) => (selectedTag ? project.tags?.find((tag) => tag === selectedTag) : true));
 };
 
-// function getPreferencesPath(): string | undefined {
-//   const path = preferences.projectManagerDataPath;
-//   if (path && existsSync(path)) {
-//     const stat = lstatSync(path);
-//     if (stat.isDirectory()) {
-//       return path;
-//     }
-//     if (stat.isFile()) {
-//       return dirname(path);
-//     }
-//   }
-// }
-
-// function getSortedProjects(projects: ProjectEntry[]): ProjectEntry[] {
-//   const projectsToSort = [...projects];
-//   return projectsToSort.sort((a, b) => a.name.localeCompare(b.name));
-// }
-
-// function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectEntry[]> {
-//   const groupedProjects = new Map<string, ProjectEntry[]>();
-
-//   projects.forEach((project: ProjectEntry) => {
-//     const tags = project.tags?.length > 0 ? project.tags : ["[no tags]"];
-//     tags.forEach((tag) => {
-//       const projects: ProjectEntry[] = [];
-//       if (groupedProjects.has(tag)) {
-//         projects.push(...(groupedProjects.get(tag) || []));
-//       }
-//       projects.push(project);
-//       groupedProjects.set(tag, projects);
-//     });
-//   });
-
-//   return new Map([...groupedProjects.entries()].sort());
-// }
-
-// function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): ReactElement[] {
-//   const projectsGrouped = getProjectsGroupedByTag(projectEntries);
-//   const elements: ReactElement[] = [];
-//   projectsGrouped.forEach((value, key) => {
-//     elements.push(
-//       <List.Section key={key} title={key}>
-//         {value?.map((project, index) => <ProjectListItem key={project.rootPath + index} {...project} />)}
-//       </List.Section>,
-//     );
-//   });
-//   return elements;
-// }
-
 export default function Command() {
-  // const elements: ReactElement[] = [];
-  // const projectEntries = getProjectEntries();
-  // const projectTags = getProjectTags(projectEntries);
-
-  // const [selectedTag, setSelectedTag] = useState("");
-
   const [projectList, setProjectList] = useState<any[]>([]);
 
   useEffect(() => {
@@ -153,53 +52,11 @@ export default function Command() {
     });
   }, [projectList]);
 
-  // if (!projectEntries || projectEntries.length === 0) {
-  //   return (
-  //     <Detail
-  //       markdown="To use this extension, the Visual Studio Extension
-  //     [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)
-  //      is required."
-  //     />
-  //   );
-  // }
-
-  // const sortedProjects = getSortedProjects(projectEntries);
-
-  // if (preferences.groupProjectsByTag && !selectedTag) {
-  //   // don't group if filtering
-  //   const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
-  //   elements.push(...groupedProjects);
-  // } else {
-  //   filterProjectsByTag(sortedProjects, selectedTag).forEach((project, index) => {
-  //     elements.push(<ProjectListItem key={project.rootPath + index} {...project} />);
-  //   });
-  // }
-
-  // const handleChangeTag = (tag: string) => {
-  //   setSelectedTag(tag);
-  // };
-
   return (
-    <List
-      searchBarPlaceholder="Search projects ..."
-      // searchBarAccessory={
-      //   projectTags.length ? (
-      //     <List.Dropdown tooltip="Tags filter" onChange={handleChangeTag} defaultValue={undefined}>
-      //       <List.Dropdown.Section>
-      //         <List.Dropdown.Item key="0" title="All Tags" value={""} />
-      //       </List.Dropdown.Section>
-      //       <List.Dropdown.Section title="Tags">
-      //         {projectTags.map((tag, tagIndex) => (
-      //           <List.Dropdown.Item key={"tag-" + tagIndex} title={tag} value={tag} />
-      //         ))}
-      //       </List.Dropdown.Section>
-      //     </List.Dropdown>
-      //   ) : null
-      // }
-    >
-      <List.Section title="Recent Projects">
+    <List searchBarPlaceholder="Search projects ...">
+      {/* <List.Section title="Recent Projects">
         <List.Item key={1} title="Test" />
-      </List.Section>
+      </List.Section> */}
       <List.Section title="All Projects">
         <Fragment>{elements}</Fragment>
       </List.Section>

@@ -36,32 +36,6 @@
       "description": "example: /path/to/your/dir1;/path/to/your/dir2"
     },
     {
-      "name": "projectManagerDataPath",
-      "type": "textfield",
-      "required": false,
-      "default": "",
-      "title": "Path of the 'Projects Location' of the Project Manager",
-      "description": "Only used if you have moved the 'Projects Location', otherwise leave blank"
-    },
-    {
-      "name": "groupProjectsByTag",
-      "type": "checkbox",
-      "required": false,
-      "title": "Group projects...",
-      "default": true,
-      "label": "by tag",
-      "description": "Groups projects by tag instead of just showing"
-    },
-    {
-      "name": "hideProjectsWithoutTag",
-      "type": "checkbox",
-      "required": false,
-      "title": "Hide projects...",
-      "default": false,
-      "label": "without tag",
-      "description": "Hide projects without tag"
-    },
-    {
       "name": "terminalAppPath",
       "type": "textfield",
       "required": false,
