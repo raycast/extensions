@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, open, popToRoot, showToast, Toast } from "@raycast/api";
-import { capitalize } from "lodash";
 import { useEffect } from "react";
 import { useForm } from "@raycast/utils";
 import isUrl from "is-url";
 import { usePocketClient, View } from "./lib/oauth/view";
 import { useTags } from "./lib/hooks/use-tags";
+import { titleCase } from "./lib/utils";
 
 interface CreateBookmarkValues {
   url: string;
@@ -80,7 +80,7 @@ function CreateBookmark() {
       />
       <Form.TagPicker title="Tags" {...itemProps.tags}>
         {tags.map((tag) => (
-          <Form.TagPicker.Item key={tag} icon={Icon.Tag} title={capitalize(tag)} value={tag} />
+          <Form.TagPicker.Item key={tag} icon={Icon.Tag} title={titleCase(tag)} value={tag} />
         ))}
       </Form.TagPicker>
     </Form>
