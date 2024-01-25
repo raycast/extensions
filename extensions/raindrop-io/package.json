@@ -68,6 +68,14 @@
           "title": "Domain"
         },
         {
+          "value": "excerpt",
+          "title": "Excerpt"
+        },
+        {
+          "value": "note",
+          "title": "Note"
+        },
+        {
           "value": "none",
           "title": "None"
         }

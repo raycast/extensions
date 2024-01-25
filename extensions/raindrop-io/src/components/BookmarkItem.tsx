@@ -82,10 +82,14 @@ export default function BookmarkItem(props: { bookmark: Bookmark; revalidate: ()
 
   function subtitle() {
     switch (preferences.additionalItemToDisplayInList) {
-      case "domain":
-        return bookmark.domain;
       case "link":
         return bookmark.link;
+      case "domain":
+        return bookmark.domain;
+      case "excerpt":
+        return bookmark.excerpt;
+      case "note":
+        return bookmark.note;
     }
   }
 
