@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidyread---streamline-your-daily-reading",
   "title": "TidyRead - Streamline Your Daily Reading",
-  "description": "Designed to manage and schedule your daily reading which offers a modern reading experience through AI-Powered digest. \nVisit https://tidyread.info for more information.",
+  "description": "Enhance controlled, efficient, and organized information intake using an AI-powered digest from RSS feeds. More at https://tidyread.info.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "categories": [
@@ -16,7 +16,7 @@
     "digest",
     "summary",
     "rss",
-    "RSS",
+    "newsletter",
     "AI",
     "feed",
     "moonshot",
@@ -87,6 +87,7 @@
     "openai": "^4.24.2",
     "ordinal": "^1.0.3",
     "p-limit": "^4.0.0",
+    "query-string": "^8.1.0",
     "rss-parser": "^3.13.0",
     "url-metadata": "^3.3.1",
     "validator": "^13.11.0",
@@ -108,16 +109,16 @@
       "type": "dropdown",
       "required": false,
       "title": "AI Provider",
-      "default": "openai",
+      "default": "raycast",
       "description": "Choose API provider for summarizing",
       "data": [
         {
-          "value": "openai",
-          "title": "OpenAI"
-        },
-        {
           "value": "raycast",
           "title": "Raycast AI"
+        },
+        {
+          "value": "openai",
+          "title": "OpenAI"
         },
         {
           "value": "moonshot",
@@ -137,7 +138,7 @@
       "type": "dropdown",
       "required": false,
       "title": "API Model",
-      "default": "gpt-3.5-turbo-16k",
+      "default": "gpt-3.5-turbo-instruct",
       "description": "Choose an API model for your provider",
       "data": [
         {
@@ -260,7 +261,7 @@
       "description": "Maximum number of item pulls per RSS feed",
       "type": "textfield",
       "title": "Max Items Per RSS Feed",
-      "default": "10",
+      "default": "5",
       "required": false
     },
     {
@@ -269,6 +270,22 @@
       "type": "textfield",
       "title": "Max Summarize API Concurrency",
       "default": "3",
+      "required": false
+    },
+    {
+      "name": "retryCount",
+      "description": "AI API request retry count, default is 5, it means that it will retry 5 times with `Retry Delay` intervals. If you encounter a `Rate Limit` error in digest, you can increase this value.",
+      "type": "textfield",
+      "title": "AI API Retry Count",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "retryDelay",
+      "description": "AI API request retry delay, default is 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can increase this value.",
+      "type": "textfield",
+      "title": "AI API Retry Delay",
+      "default": "30",
       "required": false
     },
     {

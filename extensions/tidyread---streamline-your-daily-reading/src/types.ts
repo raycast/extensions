@@ -37,6 +37,8 @@ export interface Preferences {
   summarizePrompt?: string;
   maxItemsPerFeed?: number;
   maxApiConcurrency?: number;
+  retryCount?: number;
+  retryDelay?: number;
   notificationTime?: string;
   autoGenDigest?: boolean;
   requestTimeout?: number;
@@ -54,6 +56,13 @@ export interface ProviderOptions {
   summarizePrompt?: string;
   translatePrompt?: string | ((lang: string) => string);
 }
+
+export interface RecommendedSourcesFromInterest {
+  title: string;
+  sources: Source[];
+}
+
+export type RecommendedData = RecommendedSourcesFromInterest[];
 
 export abstract class Provider {
   available: boolean = true;

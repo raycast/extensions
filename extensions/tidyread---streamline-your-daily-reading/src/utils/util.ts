@@ -23,7 +23,11 @@ export function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<
   let timeoutHandle: NodeJS.Timeout;
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutHandle = setTimeout(() => {
-      reject(new Error(`Operation timed out after ${timeoutMs} ms`));
+      reject(
+        new Error(
+          `Operation timed out after ${timeoutMs} ms, you could try to set \`Http Proxy\` in \`Extensions Settings Page\` and try again`,
+        ),
+      );
     }, timeoutMs);
   });
 
@@ -90,4 +94,13 @@ export async function sleep(ms: number) {
 
 export function filterByShownStatus<T extends { show: boolean }>(items: T[]): Omit<T, "show">[] {
   return items.filter((item) => item.show).map((item) => omit(item, "show"));
+}
+
+export function reflect<T, P>(
+  promise: Promise<T>,
+  payload?: P,
+): Promise<{ payload?: P; status: "fulfilled" | "rejected"; value?: T; reason?: any }> {
+  return promise
+    .then((value) => ({ payload, status: "fulfilled" as const, value }))
+    .catch((reason) => Promise.reject({ payload, status: "rejected", reason }));
 }

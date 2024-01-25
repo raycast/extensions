@@ -1,12 +1,13 @@
 import { isAfter, subHours } from "date-fns";
+import queryString from "query-string";
 import { RSSItem, genDigest } from "../digest";
 import { PROVIDERS_MAP } from "../providers";
 import { Digest, Source } from "../types";
 import { normalizePreference } from "./preference";
-import { isToday } from "./util";
+import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
 import dayjs from "dayjs";
-import { addOrUpdateDigest, getSources } from "../store";
+import { addOrUpdateDigest, getComeFrom, getInterest, getSources } from "../store";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
 import { request } from "./request";
@@ -78,6 +79,8 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     httpProxy,
     enableItemLinkProxy,
     maxApiConcurrency,
+    retryCount,
+    retryDelay,
     requestTimeout,
     maxItemsPerFeed,
   } = preferences;
@@ -119,6 +122,9 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     .then(() => true)
     .catch(() => false);
 
+  const interest = await getInterest();
+  const comeFrom = await getComeFrom();
+
   // 主要逻辑
   const digest = await genDigest({
     title: digestTitle,
@@ -126,19 +132,29 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     rssFeeds: feeds,
     httpProxy,
     maxApiConcurrency,
+    retryCount,
+    retryDelay,
     requestTimeout,
     translateTitles: !preferredLanguage
       ? undefined
       : async (titles) => {
-          const translatedTitles = await provider.translate(JSON.stringify(titles), preferredLanguage);
+          const translatedTitles = await withTimeout(
+            provider.translate(JSON.stringify(titles), preferredLanguage),
+            requestTimeout,
+          );
           console.log("raw translated titles:", translatedTitles);
           return parseOutput(translatedTitles);
         },
     itemLinkFormat: (link, item) => {
-      if (!tidyreadCloudAvailable || !enableItemLinkProxy) return link;
-      return `https://tidyread.info/read?source_link=${encodeURIComponent(link)}&rss_link=${encodeURIComponent(
-        item?.feed?.url ?? "",
-      )}&status=${item?.status}`;
+      if (!tidyreadCloudAvailable || !enableItemLinkProxy) return addUtmSourceToUrl(link);
+      const qstr = queryString.stringify({
+        source_link: addUtmSourceToUrl(link),
+        rss_link: item?.feed?.url,
+        status: item?.status,
+        interest,
+        come_from: comeFrom,
+      });
+      return `https://tidyread.info/read?${qstr}`;
     },
   });
 
@@ -177,4 +193,15 @@ export function isValidNotificationTime(time: string): boolean {
   const timeFormatRegex =
     /^([01]?[0-9]|2[0-3]):([0-5][0-9])$|^(1[0-2]|0?[1-9]):([0-5][0-9])([ap]m)$|^(1[0-2]|0?[1-9])([ap]m)$/;
   return timeFormatRegex.test(time);
+}
+
+export function addUtmSourceToUrl(url: string): string {
+  // 解析当前URL的查询参数
+  const parsedQuery = queryString.parseUrl(url);
+
+  // 添加或更新utm_source参数
+  parsedQuery.query["utm_source"] = "tidyread";
+
+  // 重新构建URL
+  return queryString.stringifyUrl(parsedQuery);
 }

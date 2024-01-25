@@ -11,21 +11,28 @@ import {
   Keyboard,
   Form,
   ActionPanel,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Source } from "./types";
 import SourceForm from "./components/SourceForm";
 import { capitalize, omit } from "lodash";
-import { getSources, saveSources } from "./store";
-import { filterByShownStatus } from "./utils/util";
+import { getInterestsSelected, getSources, saveInterestsSelected, saveSources } from "./store";
+import { filterByShownStatus, sleep } from "./utils/util";
 import CustomActionPanel from "./components/CustomActionPanel";
 import SourcesJson from "./components/SourcesJson";
 import { validateSources } from "./utils/validate";
 import SharableLinkAction from "./components/SharableLinkAction";
+import { usePromise } from "@raycast/utils";
+import RecommendedForm from "./components/RecommendedForm";
 
 export default function SourceList() {
   const [sources, setSources] = useState<Source[]>();
+  const { data: interestsSelected, revalidate } = usePromise(getInterestsSelected);
   const { pop } = useNavigation();
+  const showInterestsSelectPanel =
+    !!sources && interestsSelected !== undefined && sources.length === 0 && interestsSelected === false;
 
   useEffect(() => {
     loadSources();
@@ -40,7 +47,13 @@ export default function SourceList() {
     const updatedItems = sources!.filter((item) => item.id !== itemToDelete.id);
     setSources(updatedItems);
     await saveSources(updatedItems);
-    showToast(Toast.Style.Success, "Source deleted");
+    showToast(Toast.Style.Success, "Source Deleted");
+  };
+
+  const handleDeleteAll = async () => {
+    setSources([]);
+    await saveSources([]);
+    showToast(Toast.Style.Success, "All Sources Deleted");
   };
 
   const batchImportActionNode = (
@@ -50,6 +63,9 @@ export default function SourceList() {
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       target={
         <Form
+          searchBarAccessory={
+            <Form.LinkAccessory target="https://tidyread.info/docs/batch-import-sources" text="Learn How To Import" />
+          }
           actions={
             <ActionPanel>
               <Action.SubmitForm
@@ -78,6 +94,32 @@ export default function SourceList() {
       }
     />
   );
+
+  if (showInterestsSelectPanel) {
+    return (
+      <RecommendedForm
+        onSkip={async () => {
+          await saveInterestsSelected(true);
+          revalidate();
+        }}
+        onSuccess={async (sources) => {
+          await saveInterestsSelected(true);
+          await sleep(500);
+          const now = Date.now();
+          await saveSources(sources.map((s, index) => ({ ...s, id: `${now + index}` })));
+          showToast(Toast.Style.Success, "Sources Generated");
+          await launchCommand({
+            name: "daily-read.command",
+            type: LaunchType.UserInitiated,
+            context: {
+              autoGenDigest: true,
+            },
+          });
+          // console.log("sources", sources);
+        }}
+      />
+    );
+  }
 
   return (
     <List isLoading={!sources}>
@@ -112,6 +154,13 @@ export default function SourceList() {
               icon: "./rssicon.svg",
               tooltip: "This source has a rss link which can be used for daily digest.",
               show: !!item.rssLink,
+            },
+            {
+              tag: {
+                value: `${(item.tags || [])?.join?.(", ")}`,
+                color: Color.Blue,
+              },
+              show: item.tags?.length > 0,
             },
             {
               tag: {
@@ -179,6 +228,26 @@ export default function SourceList() {
                       }
                     }}
                   />
+                  <Action
+                    style={Action.Style.Destructive}
+                    icon={Icon.DeleteDocument}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    title="Delete All Sources"
+                    onAction={async () => {
+                      const flag = await confirmAlert({
+                        title: "Delete All Sources",
+                        icon: Icon.Trash,
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Delete All",
+                        },
+                        message: "Confirm delete all sources permanently?",
+                      });
+                      if (flag) {
+                        handleDeleteAll();
+                      }
+                    }}
+                  />
                   <SharableLinkAction
                     actionTitle="Share Your Sources"
                     articleTitle="My Reading Sources"
@@ -190,13 +259,13 @@ export default function SourceList() {
                       )}\n\`\`\``;
                     }}
                   />
-                  {batchImportActionNode}
                   <Action.Push
                     title="Export All Sources"
                     icon="arrow-right-from-line.svg"
                     shortcut={{ modifiers: ["ctrl"], key: "e" }}
                     target={<SourcesJson />}
                   />
+                  {batchImportActionNode}
                   {item.rssLink && (
                     <Action.OpenInBrowser
                       shortcut={{ modifiers: ["cmd"], key: "l" }}

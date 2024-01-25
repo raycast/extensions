@@ -2,10 +2,11 @@ import Parser from "rss-parser";
 import pLimit from "p-limit";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { load } from "cheerio";
-import { isXML, normalizeUrlForMarkdown, withTimeout } from "../utils/util";
+import { isXML, normalizeUrlForMarkdown, retry, withTimeout } from "../utils/util";
 import { DigestItem, Provider, SummarizeStatus } from "../types";
 import dayjs from "dayjs";
 import { uniqBy } from "lodash";
+import { addUtmSourceToUrl } from "../utils/biz";
 // import { fetchMetadata } from "../utils/request";
 
 export interface Preferences {
@@ -104,12 +105,23 @@ function ellipsisContent(content: string, maxLen: number): string {
 }
 
 // 对单个项目进行概述
-async function summarizeItem(item: RSSItem, provider: Provider, requestTimeout?: number): Promise<RSSItemWithStatus> {
+async function summarizeItem(
+  item: RSSItem,
+  provider: Provider,
+  requestTimeout?: number,
+  retryCount?: number,
+  retryDelay?: number,
+): Promise<RSSItemWithStatus> {
   console.time(`summarize call for ${item.title} @${item.feed?.title}`);
+  // console.log(`retry count: ${retryCount}, retry delay: ${retryDelay}`);
   try {
     const needSummarize = item.content && item.content.length > MIN_SUMMARIZE_CHARACTER_LIMIT && provider.available;
     const summary = needSummarize
-      ? await withTimeout(provider.summarize(item.content!), requestTimeout ?? 20000)
+      ? await retry(
+          () => withTimeout(provider.summarize(item.content!), requestTimeout ?? 20000),
+          retryCount ?? 5,
+          retryDelay ?? 30 * 1000,
+        )
       : ellipsisContent(item.content || "", THRESHOLDS_FOR_TRUNCATION);
 
     return { ...item, summary: summary, status: needSummarize ? "summraized" : "raw" };
@@ -136,7 +148,7 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
     : `> **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the original excerpts.\n\n`;
   let digest = `${prefix}`;
 
-  digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have the RSS Link field filled out** can be summarized.\nThe content pulled by rss will be filtered according to the time span you provide, keeping only the content in the time span.\n\n## Summary\n`;
+  digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have a valid RSS Link** can be summarized.\nThe content pulled by rss will be filtered according to the \`Time Span\` you provide, keeping only the content in the time span.\n\n## Summary\n`;
 
   if (items.length === 0) {
     return `${digest}No RSS items remain after filtering.`;
@@ -146,14 +158,18 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
     digest += formatItemForDigest(item, `${index + 1}. `);
   }
 
+  if (items.some((item) => item.status === "failedToSummarize")) {
+    digest += `---\n\n## Why Some Articles Failed To Be Summarized By AI?\n\nYou can check out [this document](https://www.tidyread.info/docs/why-some-articles-fail-to-be-summarized) to understand why and how to fix it.\n\n`;
+  }
+
   return digest;
 }
 
 // 格式化单个项目以用于摘要
 function formatItemForDigest(item: RSSItemWithStatus, prefixStr?: string): string {
-  return `### ${prefixStr ?? ""}${item.title}  @(${item?.feed?.title})\n${
-    item.coverImage ? `![cover](${item.coverImage})\n\n` : ""
-  }${
+  return `### ${prefixStr ?? ""}${item.title}  @([${item?.feed?.title}](${addUtmSourceToUrl(
+    item?.feed?.url ?? "",
+  )}))\n${item.coverImage ? `![cover](${item.coverImage})\n\n` : ""}${
     item.summary || item.content?.substring(0, THRESHOLDS_FOR_TRUNCATION) + "..."
   }\n\n[Source Link](${normalizeUrlForMarkdown(item.link ?? "")})\n\n${
     item.status === "summraized" ? `\`AI Summarized\`  ` : ""
@@ -200,6 +216,8 @@ export async function genDigest(options: {
   translateTitles?: (titles: string[]) => Promise<string[]>;
   maxApiConcurrency?: number;
   requestTimeout?: number;
+  retryCount?: number;
+  retryDelay?: number;
   itemLinkFormat?: (link: string, item: RSSItem) => string;
 }): Promise<{
   content: string;
@@ -235,7 +253,11 @@ export async function genDigest(options: {
 
   // 第四步：并发地对items进行概述
   const summarizedItems = await Promise.all(
-    formatedItems.map((item) => limit(() => summarizeItem(item, options.provider, options.requestTimeout))),
+    formatedItems.map((item) =>
+      limit(() =>
+        summarizeItem(item, options.provider, options.requestTimeout, options.retryCount, options.retryDelay),
+      ),
+    ),
   );
 
   formatedItems = summarizedItems.map((item) => ({
