@@ -11,7 +11,7 @@ import {
 import { pluralize } from "../helpers";
 import { getPullRequestAuthor, getPullRequestReviewers, getPullRequestStatus } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { getGitHubClient } from "../api/githubClient";
 import { useViewer } from "../hooks/useViewer";
 
 import PullRequestActions from "./PullRequestActions";

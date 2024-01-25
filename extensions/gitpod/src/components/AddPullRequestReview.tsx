@@ -3,7 +3,7 @@ import { useForm, FormValidation } from "@raycast/utils";
 
 import { PullRequestReviewEvent } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { getGitHubClient } from "../api/githubClient";
 
 import { PullRequest } from "./PullRequestActions";
 
