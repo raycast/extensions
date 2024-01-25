@@ -1,11 +1,9 @@
-import { List, Toast, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { List } from "@raycast/api";
 import { ReactElement, useState } from "react";
 import { LanguageDropdown } from "./QuickTranslate/LanguageDropdown";
 import { QuickTranslateListItem } from "./QuickTranslate/QuickTranslateListItem";
 import { useDebouncedValue, useSourceLanguage, useTargetLanguages, useTextState } from "./hooks";
-import { LanguageCode, supportedLanguagesByCode } from "./languages";
-import { SimpleTranslateResult, simpleTranslate } from "./simple-translate";
+import { LanguageCode } from "./languages";
 
 export default function QuickTranslate(): ReactElement {
   const [sourceLanguage] = useSourceLanguage();
@@ -14,27 +12,13 @@ export default function QuickTranslate(): ReactElement {
   const [text, setText] = useTextState();
   const debouncedText = useDebouncedValue(text, 500).trim();
 
-  const translations = new Map<LanguageCode, { result: SimpleTranslateResult | undefined; isLoading: boolean }>();
+  const [loadingStates, setLoadingStates] = useState(new Map(targetLanguages.map((lang) => [lang, false])));
 
-  for (const targetLanguage of targetLanguages) {
-    const { data: result, isLoading: isLoading } = usePromise(
-      simpleTranslate,
-      [debouncedText, { langFrom: sourceLanguage, langTo: targetLanguage }],
-      {
-        onError(error) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: `Could not translate to ${supportedLanguagesByCode[targetLanguage].name}`,
-            message: error.toString(),
-          });
-        },
-      },
-    );
+  const isAnyLoading = Array.from(loadingStates.values()).some((isLoading) => isLoading);
 
-    translations.set(targetLanguage, { result, isLoading });
+  function setIsLoading(lang: LanguageCode, isLoading: boolean) {
+    setLoadingStates((prev) => new Map(prev).set(lang, isLoading));
   }
-
-  const isAnyLoading = Array.from(translations.values()).some((v) => v.isLoading);
 
   return (
     <List
@@ -53,8 +37,7 @@ export default function QuickTranslate(): ReactElement {
               languageSet={{ langFrom: sourceLanguage, langTo: targetLanguage }}
               isShowingDetail={isShowingDetail}
               setIsShowingDetail={setIsShowingDetail}
-              result={translations.get(targetLanguage)?.result}
-              isLoading={translations.get(targetLanguage)?.isLoading ?? false}
+              setIsLoading={(isLoading) => setIsLoading(targetLanguage, isLoading)}
             />
           ))
         : null}

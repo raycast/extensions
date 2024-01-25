@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
-import { SimpleTranslateResult } from "../simple-translate";
+import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
 
 export function QuickTranslateListItem(props: {
@@ -8,13 +9,29 @@ export function QuickTranslateListItem(props: {
   languageSet: LanguageCodeSet;
   isShowingDetail: boolean;
   setIsShowingDetail: (isShowingDetail: boolean) => void;
-  result: SimpleTranslateResult | undefined;
-  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
 }) {
   let langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
   const langTo = supportedLanguagesByCode[props.languageSet.langTo];
 
-  if (props.isLoading) {
+  const { data: result, isLoading: isLoading } = usePromise(simpleTranslate, [props.debouncedText, props.languageSet], {
+    onWillExecute() {
+      props.setIsLoading(true);
+    },
+    onData() {
+      props.setIsLoading(false);
+    },
+    onError(error) {
+      props.setIsLoading(false);
+      showToast({
+        style: Toast.Style.Failure,
+        title: `Could not translate to ${langTo.name}`,
+        message: error.toString(),
+      });
+    },
+  });
+
+  if (isLoading) {
     return (
       <List.Item
         title={`Translating to ${langTo.name}...`}
@@ -28,8 +45,6 @@ export function QuickTranslateListItem(props: {
     );
   }
 
-  const result = props.result;
-
   if (!result) {
     return null;
   }
@@ -39,6 +54,7 @@ export function QuickTranslateListItem(props: {
 
   return (
     <List.Item
+      key={langTo.code}
       title={result.translatedText}
       accessories={[
         {
