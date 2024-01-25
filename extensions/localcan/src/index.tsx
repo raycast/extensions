@@ -1,6 +1,6 @@
 import fs from "fs";
 import { useMemo, useState } from "react";
-import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, showToast, Toast, useNavigation, Detail } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import type { Domain } from "./interface";
 import { databasePath, listQuery } from "./constants";
@@ -20,8 +20,17 @@ function ActiveDropdown(props: { onSelectionChange: (newValue: string) => void }
 
 export default function Command() {
   if (!fs.existsSync(databasePath)) {
-    showToast(Toast.Style.Failure, "Error loading domains", "LocalCan database not found");
-    return;
+    return (
+      <Detail
+        markdown={"# LocalCan is not installed \n Install it at: [https://www.localcan.com](https://www.localcan.com)"}
+        navigationTitle="LocalCan not installed"
+        actions={
+          <ActionPanel title="Test">
+            <Action.OpenInBrowser url="https://www.localcan.com" title="Go to https://www.localcan.com" />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   const [filter, setFilter] = useState<string>("all");
