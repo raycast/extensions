@@ -1,6 +1,10 @@
 # Apple Reminders Changelog
 
-## [Bug fixes] - {PR_MERGE_DATE}
+## [Fix timezone bugs] - 2024-01-26
+
+- Fix multiple timezone issues that result in reminders not being displayed in the correct section or with incorrect dates.
+
+## [Bug fixes] - 2024-01-26
 
 - Fix a bug where it wasn't possible to remove the priority from a list item
 - Fix a bug where it wasn't possible to remove the due date from a list item

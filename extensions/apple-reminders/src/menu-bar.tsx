@@ -13,19 +13,7 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import {
-  addWeeks,
-  endOfWeek,
-  format,
-  isBefore,
-  isToday,
-  isTomorrow,
-  parseISO,
-  startOfDay,
-  startOfToday,
-  startOfTomorrow,
-  startOfWeek,
-} from "date-fns";
+import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
 import { useMemo } from "react";
 import {
   deleteReminder as apiDeleteReminder,
@@ -34,7 +22,7 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../swift/AppleReminders";
 
-import { getPriorityIcon, truncate } from "./helpers";
+import { getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
@@ -62,9 +50,8 @@ export default function Command() {
       if (!reminder.dueDate) {
         other.push(reminder);
       } else {
-        const dueDate = parseISO(reminder.dueDate);
-
-        if (isBefore(dueDate, startOfDay(new Date()))) {
+        const { dueDate } = reminder;
+        if (isOverdue(dueDate)) {
           overdue.push(reminder);
         } else if (isToday(dueDate)) {
           today.push(reminder);

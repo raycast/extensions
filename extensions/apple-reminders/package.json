@@ -149,6 +149,7 @@
     }
   ],
   "dependencies": {
+    "@date-fns/utc": "^1.1.1",
     "@raycast/api": "^1.66.0",
     "@raycast/utils": "^1.11.1",
     "date-fns": "^3.3.1",
