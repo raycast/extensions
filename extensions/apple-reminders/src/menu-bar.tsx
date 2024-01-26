@@ -36,6 +36,8 @@ import {
 import { getPriorityIcon, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
+const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
+
 export default function Command() {
   const { titleType, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
 
@@ -209,7 +211,7 @@ export default function Command() {
                 <MenuBarExtra.Item
                   title="Open Reminder"
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
-                  icon={{ fileIcon: "/System/Applications/Reminders.app" }}
+                  icon={{ fileIcon: REMINDERS_FILE_ICON }}
                 />
 
                 <MenuBarExtra.Item
@@ -342,6 +344,14 @@ export default function Command() {
           alternate={
             <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
           }
+        />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Reminders"
+          icon={{ fileIcon: REMINDERS_FILE_ICON }}
+          onAction={() => open("home", "com.apple.reminders")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>
