@@ -771,6 +771,16 @@ export class GitLab {
     return user;
   }
 
+  async getGroups(args = { searchText: "", searchIn: "" }): Promise<Group[]> {
+    const params: { [key: string]: string } = {};
+    if (args.searchText) {
+      params.search = args.searchText;
+      params.in = args.searchIn || "title";
+    }
+    const groupItems: Group[] = ((await this.fetch("groups", params)) as Group[]) || [];
+    return groupItems;
+  }
+
   async getUserGroups(
     params: { min_access_level?: string; search?: string; top_level_only?: boolean } = {}
   ): Promise<any> {

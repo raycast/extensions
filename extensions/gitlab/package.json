@@ -72,6 +72,13 @@
       "mode": "view"
     },
     {
+      "name": "group_search",
+      "title": "Search Groups",
+      "subtitle": "GitLab",
+      "description": "Search GitLab Groups",
+      "mode": "view"
+    },
+    {
       "name": "project_search",
       "title": "Search Projects",
       "subtitle": "GitLab",
