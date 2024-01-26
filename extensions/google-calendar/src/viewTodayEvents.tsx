@@ -45,7 +45,7 @@ export default function ViewTodayEvents() {
 
   const formatLocation = (location: string | undefined): string => {
     if (!location) {
-      return '';
+      return "";
     }
 
     const matchName = location.match(/^(.*?),/);
@@ -59,40 +59,45 @@ export default function ViewTodayEvents() {
     }
 
     return location;
-  }; 
+  };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   return (
     <List isLoading={loading}>
-      {events.sort((a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime())
+      {events
+        .sort((a, b) => new Date(a.start.dateTime).getTime() - new Date(b.start.dateTime).getTime())
         .map((event) => {
-          const eventColor = event.colorId ? colors.event[event.colorId]?.background : colors.calendar['primary']?.background || '#f6c026'; // Fallback to a specified yellow if no color found for primary calendar
+          const eventColor = event.colorId
+            ? colors.event[event.colorId]?.background
+            : colors.calendar["primary"]?.background || "#f6c026"; // Fallback to a specified yellow if no color found for primary calendar
 
           return (
             <List.Item
               key={event.id}
-              icon={{ source: Icon.CircleFilled, tintColor: eventColor || '#000000' }} // Fallback to black if no color found
+              icon={{ source: Icon.CircleFilled, tintColor: eventColor || "#000000" }} // Fallback to black if no color found
               title={`${formatTime(event.start.dateTime)} - ${formatTime(event.end.dateTime)}: ${event.summary}`}
               accessories={[...(event.location ? [{ icon: Icon.Pin, text: formatLocation(event.location) }] : [])]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink || '#'} />
+                  <Action.OpenInBrowser title="Open in Google Calendar" url={event.htmlLink || "#"} />
                   <Action title="Log Out" icon={Icon.Person} onAction={logoutAndClearToken} />
                 </ActionPanel>
               }
               detail={
-                <List.Item.Detail markdown={`
+                <List.Item.Detail
+                  markdown={`
 ---
-${event.description || ''}
-**Location**: ${event.location ? formatLocation(event.location) : 'No location'} 
-**Attendees**: ${event.attendees?.map((a) => a.email).join(", ") || ''}
+${event.description || ""}
+**Location**: ${event.location ? formatLocation(event.location) : "No location"} 
+**Attendees**: ${event.attendees?.map((a) => a.email).join(", ") || ""}
 [View Event](${event.htmlLink})
 ---
-`} />
+`}
+                />
               }
             />
           );
