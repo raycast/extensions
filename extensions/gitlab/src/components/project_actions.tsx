@@ -232,7 +232,7 @@ export function OpenProjectPipelinesPushAction(props: { project: Project }): JSX
   return (
     <Action.Push
       title="Pipelines"
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
       target={<PipelineList projectFullPath={props.project.fullPath} />}
     />
