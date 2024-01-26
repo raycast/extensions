@@ -36,6 +36,7 @@ const translateStatusMap = {
 };
 
 const pullItemsStatusMap = {
+  waiting: "waiting...",
   start: "pulling...",
   failed: "pull failed",
 };
@@ -64,7 +65,7 @@ export default function GenTodaysDigestPanel({
     "requestTimeout",
   ]);
   const [status, setStatus] = useState<"generating" | "success" | "failed">("generating");
-  const [pullItemsStatus, setPullItemsStatus] = useState<"start" | "success" | "failed">("start");
+  const [pullItemsStatus, setPullItemsStatus] = useState<"waiting" | "start" | "success" | "failed">("waiting");
   const [translateStatus, setTranslateStatus] = useState<"no-config" | "waiting" | "start" | "success" | "failed">(
     preferredLanguage ? "waiting" : "no-config",
   );
@@ -176,7 +177,7 @@ export default function GenTodaysDigestPanel({
       if (matchError(err, NO_FEEDS)) {
         showToast(Toast.Style.Failure, "Generating Failed");
         const markdown =
-          "No RSS link found in today's sources, please add some and try again. Press Enter to manage your sources.";
+          "No RSS link found in today's sources, please add some and try again. Press `Enter` to manage your sources. \n\nIf you don't know **how to find website's RSS link**, you can check this [doc](https://www.tidyread.info/docs/where-to-find-rss).";
 
         push(
           <Detail markdown={markdown} actions={<CustomActionPanel>{manageSourceListActionNode}</CustomActionPanel>} />,
