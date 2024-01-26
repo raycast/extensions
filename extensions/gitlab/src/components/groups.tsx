@@ -51,6 +51,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Group ID" content={group.id} />
+            <Action.CopyToClipboard title="Copy Group URL" content={group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push

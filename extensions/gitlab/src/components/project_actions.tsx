@@ -140,6 +140,10 @@ export function CopyProjectIDToClipboardAction(props: { project: Project }): JSX
   return <Action.CopyToClipboard title="Copy Project ID" content={props.project.id} />;
 }
 
+export function CopyProjectUrlToClipboardAction(props: { project: Project }): JSX.Element {
+  return <Action.CopyToClipboard title="Copy Project URL" content={props.project.web_url} />;
+}
+
 function CloneUrlList(props: { project: Project }): JSX.Element {
   return (
     <List navigationTitle="Copy Clone URL">
