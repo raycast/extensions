@@ -1,9 +1,6 @@
 import { LaunchProps, updateCommandMetadata } from "@raycast/api";
-import { getActiveCoordinator, getCoordinatorDevice, isPlaying, getSonos } from "./sonos";
-import { getActiveGroup } from "./storage";
-import { SonosDevice } from "@svrooij/sonos/lib";
+import { getActiveCoordinator,  isPlaying,  } from "./sonos";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
-import { countReset } from "console";
 
 function formatSubtitle({ playing, state }: { playing: boolean; state: SonosState }): string {
   const play = `▶︎`;
