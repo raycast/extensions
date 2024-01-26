@@ -27,6 +27,25 @@ export interface Digest {
   type: "manual" | "auto";
 }
 
+export interface RSSFeed {
+  title: string;
+  url: string;
+  filter?: (item: RSSItem) => boolean;
+  maxItems?: number;
+}
+
+export interface RSSItem {
+  link?: string;
+  title?: string;
+  pubDate?: string | number;
+  creator?: string;
+  summary?: string;
+  content?: string;
+  coverImage?: string;
+  feed?: RSSFeed;
+  [k: string]: any;
+}
+
 export interface Preferences {
   provider?: "openai" | "raycast" | "moonshot";
   apiKey?: string;
@@ -65,6 +84,65 @@ export interface RecommendedSourcesFromInterest {
 }
 
 export type RecommendedData = RecommendedSourcesFromInterest[];
+
+export type DigestStageStatus = "start" | "success" | "failed" | "processing";
+export type PullItemsStage =
+  | {
+      stageName: "pull_items";
+      status: "start";
+      data: null;
+    }
+  | {
+      stageName: "pull_items";
+      status: "success";
+      // 代表拉取到的items数量
+      data: number;
+    }
+  | {
+      stageName: "pull_items";
+      status: "failed";
+      data: null;
+    };
+
+export type TranslateTitlesStage =
+  | {
+      stageName: "translate_titles";
+      status: "start";
+      data: null;
+    }
+  | {
+      stageName: "translate_titles";
+      status: "success";
+      // 代表拉取到的items数量
+      data: null;
+    }
+  | {
+      stageName: "translate_titles";
+      status: "failed";
+      data: null;
+    };
+
+export type SummarizeItemStage =
+  | {
+      stageName: "summarize_item";
+      status: "start";
+      data: RSSItem;
+      type: "raw" | "ai";
+    }
+  | {
+      stageName: "summarize_item";
+      status: "success";
+      data: RSSItem;
+      type: "raw" | "ai";
+    }
+  | {
+      stageName: "summarize_item";
+      status: "failed";
+      data: RSSItem;
+      type: "raw" | "ai";
+    };
+
+export type DigestStage = PullItemsStage | TranslateTitlesStage | SummarizeItemStage;
 
 export abstract class Provider {
   available: boolean = true;

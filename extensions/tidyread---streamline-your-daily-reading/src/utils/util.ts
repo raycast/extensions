@@ -77,13 +77,26 @@ export default function formatDate(date: string | number | Date) {
   }
 }
 
-export function retry<T>(fn: () => Promise<T>, retries = 3, delay = 0, err = null): Promise<T> {
+export function retry<T>(
+  fn: () => Promise<T>,
+  retries = 3,
+  delay = 0,
+  stopOnError: (error: Error) => boolean = () => false, // 新增参数，判断是否是特定错误
+  err = null,
+): Promise<T> {
   if (!retries) {
     return Promise.reject(err);
   }
+
   return fn().catch((error: any) => {
+    // 检查是否遇到了特定错误
+    if (stopOnError(error)) {
+      return Promise.reject(error);
+    }
+
+    // 如果不是特定错误，继续重试
     return new Promise((resolve) => {
-      setTimeout(() => resolve(retry(fn, retries - 1, delay, error)), delay);
+      setTimeout(() => resolve(retry(fn, retries - 1, delay, stopOnError, error)), delay);
     });
   });
 }

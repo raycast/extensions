@@ -1,8 +1,8 @@
 import { isAfter, subHours } from "date-fns";
 import queryString from "query-string";
-import { RSSItem, genDigest } from "../digest";
+import { genDigest } from "../digest";
 import { PROVIDERS_MAP } from "../providers";
-import { Digest, Source } from "../types";
+import { Digest, DigestStage, RSSItem, Source } from "../types";
 import { normalizePreference } from "./preference";
 import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
@@ -50,13 +50,17 @@ function parseOutput(output: string): string[] {
   return targetLines;
 }
 
-export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Digest> {
+export async function bizGenDigest(
+  type: "manual" | "auto" = "auto",
+  onProgress?: (stage: DigestStage, err?: Error) => void,
+): Promise<Digest> {
   const preferences = normalizePreference();
   const {
     preferredLanguage,
     apiHost,
     apiKey,
     apiModel,
+    maxTokens,
     summarizePrompt,
     httpProxy,
     enableItemLinkProxy,
@@ -72,6 +76,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     apiHost,
     apiKey,
     apiModel,
+    maxTokens,
     httpProxy,
     summarizePrompt: summarizePrompt.replaceAll("{{lang}}", preferredLanguage || "language of the content"),
     translatePrompt: getTranslateTitlesPrompt(preferredLanguage || "language of the content"),
@@ -139,6 +144,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
       });
       return `https://tidyread.info/read?${qstr}`;
     },
+    onProgress,
   });
 
   // 写入存储

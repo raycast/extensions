@@ -138,7 +138,7 @@
       "type": "dropdown",
       "required": false,
       "title": "API Model",
-      "default": "gpt-3.5-turbo-instruct",
+      "default": "raycast-gpt-3.5-turbo-instruct",
       "description": "Choose an API model for your provider",
       "data": [
         {

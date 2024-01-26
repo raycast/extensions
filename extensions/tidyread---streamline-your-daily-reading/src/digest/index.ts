@@ -3,43 +3,20 @@ import pLimit from "p-limit";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { load } from "cheerio";
 import { isXML, normalizeUrlForMarkdown, retry, withTimeout } from "../utils/util";
-import { DigestItem, Provider, SummarizeStatus } from "../types";
+import {
+  DigestItem,
+  DigestStage,
+  Provider,
+  PullItemsStage,
+  RSSFeed,
+  RSSItem,
+  SummarizeItemStage,
+  SummarizeStatus,
+} from "../types";
 import dayjs from "dayjs";
 import { uniqBy } from "lodash";
 import { addUtmSourceToUrl } from "../utils/biz";
 // import { fetchMetadata } from "../utils/request";
-
-export interface Preferences {
-  provider?: "openai";
-  apiKey?: string;
-  apiModel?: string;
-  apiHost?: string;
-  httpProxy?: string;
-  summarizePrompt?: string;
-  maxItemsPerFeed?: number;
-  maxApiConcurrency?: number;
-  notificationTime?: string;
-  autoGenDigest?: boolean;
-}
-
-export interface RSSFeed {
-  title: string;
-  url: string;
-  filter?: (item: RSSItem) => boolean;
-  maxItems?: number;
-}
-
-export interface RSSItem {
-  link?: string;
-  title?: string;
-  pubDate?: string | number;
-  creator?: string;
-  summary?: string;
-  content?: string;
-  coverImage?: string;
-  feed?: RSSFeed;
-  [k: string]: any;
-}
 
 export type RSSItemWithStatus = RSSItem & {
   status: SummarizeStatus;
@@ -53,6 +30,7 @@ async function getAllFilteredItems(
   rssFeeds: RSSFeed[],
   httpProxy?: string,
   requestTimeout?: number,
+  onProgress?: (stage: PullItemsStage, err?: Error) => void,
 ): Promise<RSSItem[]> {
   const agent = httpProxy ? new HttpsProxyAgent(httpProxy) : undefined;
 
@@ -62,6 +40,12 @@ async function getAllFilteredItems(
     },
   });
   let allItems: RSSItem[] = [];
+
+  onProgress?.({
+    stageName: "pull_items",
+    status: "start",
+    data: null,
+  });
 
   for (const feed of rssFeeds) {
     try {
@@ -90,9 +74,23 @@ async function getAllFilteredItems(
       allItems = allItems.concat(filteredItems);
     } catch (error: any) {
       console.error(`Failed to parse RSS feed ${feed.url}: ${error.message}`);
+      onProgress?.(
+        {
+          stageName: "pull_items",
+          status: "failed",
+          data: null,
+        },
+        error,
+      );
       throw error;
     }
   }
+
+  onProgress?.({
+    stageName: "pull_items",
+    status: "success",
+    data: allItems.length,
+  });
 
   return allItems;
 }
@@ -111,21 +109,52 @@ async function summarizeItem(
   requestTimeout?: number,
   retryCount?: number,
   retryDelay?: number,
+  onProgress?: (stage: SummarizeItemStage, err?: Error) => void,
 ): Promise<RSSItemWithStatus> {
   // console.log(`retry count: ${retryCount}, retry delay: ${retryDelay}`);
+  const needSummarize = item.content && item.content.length > MIN_SUMMARIZE_CHARACTER_LIMIT && provider.available;
+
   try {
-    const needSummarize = item.content && item.content.length > MIN_SUMMARIZE_CHARACTER_LIMIT && provider.available;
+    onProgress?.({
+      stageName: "summarize_item",
+      status: "start",
+      data: item,
+      type: needSummarize ? "ai" : "raw",
+    });
+
     const summary = needSummarize
       ? await retry(
           () => withTimeout(provider.summarize(item.content!), requestTimeout ?? 30 * 1000),
           retryCount ?? 5,
           retryDelay ?? 30 * 1000,
+          (err) => {
+            // moonshot会出现high risk的错误，这种错误不需要重试
+            if (err.message.includes("high risk")) {
+              return true;
+            }
+
+            return false;
+          },
         )
       : ellipsisContent(item.content || "", THRESHOLDS_FOR_TRUNCATION);
+
+    onProgress?.({
+      stageName: "summarize_item",
+      status: "success",
+      data: item,
+      type: needSummarize ? "ai" : "raw",
+    });
 
     return { ...item, summary: summary, status: needSummarize ? "summraized" : "raw" };
   } catch (error: any) {
     console.error(`Failed to summarize: ${error.message}`);
+    onProgress?.({
+      stageName: "summarize_item",
+      status: "failed",
+      data: item,
+      type: needSummarize ? "ai" : "raw",
+    });
+
     return {
       ...item,
       summary: `> **Fail to summarize**, error is: \`${error.message}\`. Raw content is below:\n\n${ellipsisContent(
@@ -216,6 +245,7 @@ export async function genDigest(options: {
   retryCount?: number;
   retryDelay?: number;
   itemLinkFormat?: (link: string, item: RSSItem) => string;
+  onProgress?: (stage: DigestStage, err?: Error) => void;
 }): Promise<{
   content: string;
   items: DigestItem[];
@@ -224,11 +254,12 @@ export async function genDigest(options: {
   const now = Date.now();
   console.time(`gen digest ${now}`);
   const limit = pLimit(options.maxApiConcurrency ?? 3);
+  const { onProgress } = options;
 
   const rssFeeds = options.rssFeeds;
 
   // 第一步：获取并过滤所有RSS items
-  const allFilteredItems = await getAllFilteredItems(rssFeeds, options.httpProxy, options.requestTimeout);
+  const allFilteredItems = await getAllFilteredItems(rssFeeds, options.httpProxy, options.requestTimeout, onProgress);
 
   // 第二步：格式化rss item
   let formatedItems = (await formatRSSItems(allFilteredItems)) as RSSItemWithStatus[];
@@ -240,6 +271,11 @@ export async function genDigest(options: {
     if (options.translateTitles) {
       console.time("translate titles");
       try {
+        onProgress?.({
+          stageName: "translate_titles",
+          status: "start",
+          data: null,
+        });
         const translatedTitles = await options.translateTitles(formatedItems.map((item) => item.title || ""));
 
         console.log("translated titles success:", translatedTitles);
@@ -247,9 +283,22 @@ export async function genDigest(options: {
         formatedItems.forEach((item, index) => {
           item.title = translatedTitles[index] ?? item.title;
         });
+        onProgress?.({
+          stageName: "translate_titles",
+          status: "success",
+          data: null,
+        });
       } catch (err: any) {
+        onProgress?.(
+          {
+            stageName: "translate_titles",
+            status: "failed",
+            data: null,
+          },
+          err,
+        );
         console.error("translate titles failed", err);
-      } finally{
+      } finally {
         console.timeEnd("translate titles");
       }
     }
@@ -260,7 +309,14 @@ export async function genDigest(options: {
     translateTitles(),
     ...formatedItems.map((item) =>
       limit(() =>
-        summarizeItem(item, options.provider, options.requestTimeout, options.retryCount, options.retryDelay),
+        summarizeItem(
+          item,
+          options.provider,
+          options.requestTimeout,
+          options.retryCount,
+          options.retryDelay,
+          onProgress,
+        ),
       ),
     ),
   ]);
