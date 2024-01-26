@@ -933,6 +933,15 @@
           "value": "zu"
         }
       ]
+    },
+    {
+      "name": "autoInput",
+      "title": "Autofill Input",
+      "label": "Automatically fill input with selected text.",
+      "description": "When enabled, selected text from the foremost app will be automatically filled in the input field.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
     }
   ],
   "dependencies": {

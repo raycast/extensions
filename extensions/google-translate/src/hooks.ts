@@ -10,20 +10,23 @@ export const usePreferences = () => {
 };
 
 export const useTextState = () => {
+  const preferences = usePreferences();
   const [text, setText] = React.useState("");
   const textRef = React.useRef(text);
   textRef.current = text;
 
   React.useEffect(() => {
-    getSelectedText()
-      .then((cbText) => {
-        if (!textRef.current) {
-          setText(cbText ?? "");
-        }
-      })
-      .catch((err) => {
-        console.log("Error:", err);
-      });
+    if (preferences.autoInput) {
+      getSelectedText()
+        .then((cbText) => {
+          if (!textRef.current) {
+            setText(cbText ?? "");
+          }
+        })
+        .catch((err) => {
+          console.log("Error:", err);
+        });
+    }
   }, []);
 
   return [text, setText] as const;
