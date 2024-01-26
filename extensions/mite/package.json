@@ -21,7 +21,7 @@
     },
     {
       "name": "mite_api_key",
-      "description": "Your mite API Key, you can find it on My User > mite.api > Display API key",
+      "description": "Your mite API Key, you can find it on My User > mite.api > Allow API Access > Display API key (you need to save after to actually apply)",
       "type": "textfield",
       "required": true,
       "title": "Mite API key"
