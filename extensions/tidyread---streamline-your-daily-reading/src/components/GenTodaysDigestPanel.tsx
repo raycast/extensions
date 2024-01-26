@@ -22,12 +22,13 @@ import { pick } from "lodash";
 
 const navTitleMap = {
   generating: "Generating Digest",
-  success: "Digest Generated  ✅",
-  failed: "Digest Generation Failed  ❌",
+  success: "Digest Generated  🎉",
+  failed: "Digest Generation Failed  😩",
 };
 
 const translateStatusMap = {
-  "no-config": "no `Preferred Language` config found, view related [doc](https://tidyread.info/docs/ai-translate).",
+  "no-config":
+    "no <Preferred Language> config found, view related [doc](https://tidyread.info/docs/ai-translate) to know more.",
   waiting: "waiting...",
   start: "translating...",
   success: "success",
@@ -79,23 +80,23 @@ export default function GenTodaysDigestPanel({
   const md = `
   ${
     status === "failed"
-      ? `> **Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed).\n`
+      ? `> **Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed) to know more.\n`
       : ""
   }
-  \`Total Items\`  ${pullItemsStatus === "success" ? `**${total}**` : pullItemsStatusMap[pullItemsStatus]}\n
-  \`Translate Titles\`  ${translateStatusMap[translateStatus]}\n
+  📊 \`Total Items\`  ${pullItemsStatus === "success" ? `**${total}**` : pullItemsStatusMap[pullItemsStatus]}\n
+  🔄 \`Translate Titles\`  ${translateStatusMap[translateStatus]}\n
   ${
     sumarizeItemStatus === "start"
       ? `
-  \`Raw Content Items\`  **${rawItemsNum}**\n
-  \`Success AI Summarized Items\`  **${successItemsNum}**\n
-  \`Failed AI Summarized Items\`  **${failedItemsNum}**\n
+  📜 \`Raw Content Items\`  **${rawItemsNum}**\n
+  ✅ \`Success AI Summarized Items\`  **${successItemsNum}**\n
+  ❌ \`Failed AI Summarized Items\`  **${failedItemsNum}**\n
   `
       : ""
   }\n
-  \`Total Time\`  ${totalTime ? `**${totalTime}** s ${status === "failed" ? " ❌" : " ✅"}` : "--"}
+  ⌛ \`Total Time\`  ${totalTime ? `**${totalTime}** s` : "--"}
   
-  ### Tips
+  ### 💡 Tips
   - Can't stand manually generating? Check [this](https://tidyread.info/docs/automate-daily-digest) to free your hand.
   - Generating process is too slow? Check [this](https://tidyread.info/docs/why-digest-failed#excessive-execution-time) to speed up.
   `;

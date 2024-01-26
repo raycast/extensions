@@ -202,7 +202,7 @@
           "title": "raycast gpt-3.5-turbo"
         },
         {
-          "value": "gpt-4",
+          "value": "raycast-gpt-4",
           "title": "raycast gpt-4"
         },
         {
@@ -274,21 +274,21 @@
     },
     {
       "name": "maxApiConcurrency",
-      "description": "Maximum number of concurrent calls to the AI api for summarizing, default is 3",
+      "description": "Maximum number of concurrent calls to the AI api for summarizing",
       "type": "textfield",
       "title": "Max Summarize API Concurrency",
       "required": false
     },
     {
       "name": "retryCount",
-      "description": "AI API request retry count, default is 5, it means that it will retry 5 times with `Retry Delay` intervals. If you encounter a `Rate Limit` error in digest, you can increase this value.",
+      "description": "AI API request retry count. Assuming you set it to 5, it means that it will retry 5 times with `Retry Delay` intervals. If you encounter a `Rate Limit` error in digest, you can try to increase this value.",
       "type": "textfield",
       "title": "AI API Retry Count",
       "required": false
     },
     {
       "name": "retryDelay",
-      "description": "AI API request retry delay, default is 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can increase this value.",
+      "description": "AI API request retry delay. Assuming you set it to 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can try to increase this value.",
       "type": "textfield",
       "title": "AI API Retry Delay",
       "required": false

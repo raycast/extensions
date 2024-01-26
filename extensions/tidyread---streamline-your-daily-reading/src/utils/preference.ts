@@ -14,17 +14,17 @@ function isNum(value?: string) {
 const PROVIDER_CONFIG = {
   openai: {
     maxApiConcurrency: 10,
-    retryCount: 3,
+    retryCount: 2,
     retryDelay: 5,
   },
   raycast: {
     maxApiConcurrency: 5,
-    retryCount: 4,
+    retryCount: 3,
     retryDelay: 20,
   },
   moonshot: {
     maxApiConcurrency: 3,
-    retryCount: 3,
+    retryCount: 2,
     retryDelay: 5,
   },
 };

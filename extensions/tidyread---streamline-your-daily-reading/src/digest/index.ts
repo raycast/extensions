@@ -185,7 +185,7 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
   }
 
   if (items.some((item) => item.status === "failedToSummarize")) {
-    digest += `---\n\n## Why Some Articles Failed To Be Summarized By AI?\n\nYou can check out [this document](https://www.tidyread.info/docs/why-some-articles-fail-to-be-summarized) to understand why and how to fix it.\n\n`;
+    digest += `\n\n---\n\n### Why Some Articles Failed To Be Summarized By AI?\n\nYou can check out [this document](https://www.tidyread.info/docs/why-some-articles-fail-to-be-summarized) to understand why and how to fix it.\n\n`;
   }
 
   return digest;
