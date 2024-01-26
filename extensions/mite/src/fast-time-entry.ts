@@ -4,8 +4,9 @@ import { fetch_mite } from "./hooks/useMite";
 import { time_entry_schema } from "./validations";
 
 export default async function Command({ launchType }: LaunchProps) {
+  const time_entry_json = await LocalStorage.getItem("fast-time-entry");
   try {
-    const fast_time_entry = JSON.parse((await LocalStorage.getItem("fast-time-entry")) ?? "");
+    const fast_time_entry = JSON.parse(time_entry_json?.toString() ?? "null");
     const body = parse(time_entry_schema, fast_time_entry);
     if (launchType === LaunchType.Background) {
       if (body.time_entry.subtitle) {
@@ -32,7 +33,9 @@ export default async function Command({ launchType }: LaunchProps) {
     if (launchType === LaunchType.UserInitiated) {
       showToast({
         title: "Error",
-        message: "There was an error in the values of the form",
+        message: time_entry_json
+          ? "There was an error in the values of the form"
+          : "You need to first setup a fast entry",
         style: Toast.Style.Failure,
       });
     }

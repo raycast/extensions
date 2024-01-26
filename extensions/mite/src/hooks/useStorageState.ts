@@ -6,7 +6,7 @@ export function useStorageState<T>(key: string, initial_value: T) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     LocalStorage.getItem(key).then((value) => {
-      const actual = JSON.parse(value?.toString() ?? "");
+      const actual = JSON.parse(value?.toString() ?? "null");
       if (actual != undefined) {
         _setValue(actual);
         setLoading(false);
