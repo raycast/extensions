@@ -3,7 +3,7 @@
   "name": "sonos",
   "title": "sonos",
   "description": "Control your Sonos system",
-  "icon": "logo.png",
+  "icon": "sonos.png",
   "author": "AntonNiklasson",
   "categories": [
     "Media",

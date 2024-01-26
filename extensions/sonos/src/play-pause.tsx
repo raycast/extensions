@@ -1,5 +1,5 @@
 import { LaunchProps, updateCommandMetadata } from "@raycast/api";
-import { getActiveCoordinator,  isPlaying,  } from "./sonos";
+import { getActiveCoordinator, isPlaying } from "./sonos";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
 
 function formatSubtitle({ playing, state }: { playing: boolean; state: SonosState }): string {
