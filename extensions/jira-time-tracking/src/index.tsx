@@ -82,7 +82,7 @@ export default function Command() {
         const fetchIssues = async (project: string) => {
           const result = await getIssues(pageGot.current, project);
           const oldIssues = issueCache.get(project) ?? [];
-          setIssueCache(prev => new Map(prev).set(project, [...oldIssues, ...result.data]));
+          setIssueCache((prev) => new Map(prev).set(project, [...oldIssues, ...result.data]));
           pageTotal.current = result.total;
           showToast(Toast.Style.Animated, `Loading issues ${pageGot.current}/${pageTotal.current}`);
         };
@@ -101,7 +101,7 @@ export default function Command() {
     if (resetLength) {
       pageTotal.current = list.length + 1;
     }
-  }
+  };
 
   useEffect(() => {
     resetIssue(true);
@@ -154,19 +154,22 @@ Please check your permissions, jira account or credentials and try again.
         </ActionPanel>
       }
     >
-       <Form.Dropdown id="projectId" title="Project Id" onChange={setSelectedProject}>
-        {projects?.map((item) => (
-          <Form.Dropdown.Item key={item.key} value={item.key} title={item.name} />
-        ))}
+      <Form.Dropdown id="projectId" title="Project Id" onChange={setSelectedProject}>
+        {projects?.map((item) => <Form.Dropdown.Item key={item.key} value={item.key} title={item.name} />)}
       </Form.Dropdown>
       <Form.Dropdown id="issueId" title="Issue Key" defaultValue={selectedIssue?.key} onChange={handleSelectIssue}>
         {issues.map((item) => (
           <Form.Dropdown.Item key={item.key} value={item.key} title={`${item.key}: ${item.fields.summary}`} />
         ))}
       </Form.Dropdown>
-      <Form.DatePicker id="startedAt" title="Start Date"
+      <Form.DatePicker
+        id="startedAt"
+        title="Start Date"
         value={startedAt}
-        onChange={date => { date && setStartedAt(date) }} />
+        onChange={(date) => {
+          date && setStartedAt(date);
+        }}
+      />
       <Form.Separator />
       <Form.Dropdown id="hours" title="Hours" value={hours} onChange={setHours}>
         {Array(25)
@@ -196,6 +199,6 @@ Please check your permissions, jira account or credentials and try again.
         value={description}
         onChange={setDescription}
       />
-   </Form>
+    </Form>
   );
 }

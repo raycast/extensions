@@ -23,15 +23,15 @@ export const getIssues = async (begin: number, projectId?: string) => {
 
 const handlePaginationResp = (resp: unknown) => {
   return paginationValidator(resp) ? resp.total : 0;
-}
+};
 
 const handleProjectResp = (resp: unknown) => {
   return projectsValidator(resp) ? resp.values : [];
-}
+};
 
 const handleIssueResp = (resp: unknown) => {
   return issuesValidator(resp) ? resp.issues : [];
-}
+};
 
 export const postTimeLog = async (timeSpentSeconds: number, issueId: string, description: string, startedAt: Date) => {
   const body = JSON.stringify({

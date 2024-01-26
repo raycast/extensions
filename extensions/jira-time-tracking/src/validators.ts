@@ -18,7 +18,7 @@ export const issuesValidator = (body: unknown): body is IssueBody => {
 
 export const paginationValidator = (body: unknown): body is PaginationBody => {
   return typeof body === "object" && body !== null && "total" in body && "startAt" in body && "maxResults" in body;
-}
+};
 
 export const isJiraErrorResponseBody = (body: unknown): body is JiraErrorResponseBody =>
   typeof body === "object" && body !== null && ("message" in body || "messages" in body);
