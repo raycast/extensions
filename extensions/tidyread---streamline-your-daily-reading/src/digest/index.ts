@@ -243,6 +243,8 @@ export async function genDigest(options: {
     try {
       const translatedTitles = await options.translateTitles(formatedItems.map((item) => item.title || ""));
 
+      console.log("translated titles success:", translatedTitles);
+
       formatedItems.forEach((item, index) => {
         item.title = translatedTitles[index] ?? item.title;
       });

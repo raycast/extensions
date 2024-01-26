@@ -194,11 +194,11 @@
           "title": "gpt-4-32k-0613"
         },
         {
-          "value": "gpt-3.5-turbo-instruct",
+          "value": "raycast-gpt-3.5-turbo-instruct",
           "title": "raycast gpt-3.5-turbo-instruct"
         },
         {
-          "value": "gpt-3.5-turbo",
+          "value": "raycast-gpt-3.5-turbo",
           "title": "raycast gpt-3.5-turbo"
         },
         {
@@ -218,6 +218,14 @@
           "title": "moonshot-v1-128k"
         }
       ]
+    },
+    {
+      "name": "maxTokens",
+      "description": "Maximum number of tokens output for AI Summarizing. No need to set this value for Raycast AI.",
+      "type": "textfield",
+      "title": "Max Tokens",
+      "required": false,
+      "default": "200"
     },
     {
       "name": "preferredLanguage",
@@ -269,7 +277,6 @@
       "description": "Maximum number of concurrent calls to the AI api for summarizing, default is 3",
       "type": "textfield",
       "title": "Max Summarize API Concurrency",
-      "default": "3",
       "required": false
     },
     {
@@ -277,7 +284,6 @@
       "description": "AI API request retry count, default is 5, it means that it will retry 5 times with `Retry Delay` intervals. If you encounter a `Rate Limit` error in digest, you can increase this value.",
       "type": "textfield",
       "title": "AI API Retry Count",
-      "default": "5",
       "required": false
     },
     {
@@ -285,7 +291,6 @@
       "description": "AI API request retry delay, default is 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can increase this value.",
       "type": "textfield",
       "title": "AI API Retry Delay",
-      "default": "30",
       "required": false
     },
     {

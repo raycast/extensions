@@ -28,9 +28,10 @@ export interface Digest {
 }
 
 export interface Preferences {
-  provider?: "openai" | "raycast";
+  provider?: "openai" | "raycast" | "moonshot";
   apiKey?: string;
   apiModel?: string;
+  maxTokens?: number;
   apiHost?: string;
   preferredLanguage?: string;
   httpProxy?: string;
@@ -52,6 +53,7 @@ export interface ProviderOptions {
   apiKey?: string;
   apiHost?: string;
   apiModel?: string;
+  maxTokens?: number;
   httpProxy?: string;
   summarizePrompt?: string;
   translatePrompt?: string | ((lang: string) => string);
