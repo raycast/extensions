@@ -25,7 +25,7 @@ export default function CreateDeeplinkForm({ snippet }: { snippet: SnippetWithPa
         return;
       }
 
-      const context: ZLaunchContext =
+      const context =
         values.__type === "my"
           ? { type: "my", id: snippet.id, showForm: __showForm === "true", values: rest }
           : {
