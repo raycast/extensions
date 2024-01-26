@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ReactElement, useState } from "react";
 import { URL } from "url";
 import { XIcon } from "../../icon";
@@ -38,7 +38,7 @@ export function SearchUserListV2(): ReactElement {
       searchBarPlaceholder="Search Users by Name or Handle (e.g. @tonka_2000 or Michael Aigner)"
     >
       <ListItemSearch search={search} />
-      <List.EmptyView icon={XIcon()} title="Search for a User on X.com" />
+      <List.EmptyView icon={Icon.Person} title="Search for a User on X.com" />
     </List>
   );
 }
