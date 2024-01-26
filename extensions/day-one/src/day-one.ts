@@ -18,7 +18,7 @@ export async function isDayOneInstalled(): Promise<CLIState> {
     await exec("dayone2 --version");
     return "ready";
   } catch (error) {
-    if (error.toString().includes(`addPersistentStoreWithType`)) {
+    if (error instanceof Error && error.message.includes(`addPersistentStoreWithType`)) {
       return "out-of-sync";
     }
 
