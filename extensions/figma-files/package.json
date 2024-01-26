@@ -9,7 +9,7 @@
     "pernielsentikaer",
     "GLaDO8"
   ],
-  "version": "1.4.0",
+  "version": "1.5.0",
   "license": "MIT",
   "commands": [
     {
@@ -45,8 +45,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
-    "@raycast/utils": "^1.6.1",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.11.1",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
