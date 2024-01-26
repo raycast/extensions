@@ -82,7 +82,6 @@ class OpenaiProvider extends Provider {
     console.log("content to be translate:", content.length, content);
 
     try {
-      // console.time(`translate`)
       const resp = await this.client!.chat.completions.create({
         model: apiModel ?? "gpt-3.5-turbo",
         messages: [
@@ -90,7 +89,6 @@ class OpenaiProvider extends Provider {
           { role: "user", content },
         ],
       });
-      // console.timeEnd(`translate`)
       return resp.choices?.[0]?.message?.content ?? "";
     } catch (error) {
       console.error("Error translate content:", error);

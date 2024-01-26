@@ -295,10 +295,10 @@
     },
     {
       "name": "requestTimeout",
-      "description": "Timeout for each request, default is 20 seconds",
+      "description": "Timeout for each request, default is 30 seconds",
       "type": "textfield",
       "title": "Request Timeout",
-      "default": "20",
+      "default": "30",
       "required": false
     },
     {

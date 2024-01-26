@@ -4,6 +4,8 @@
 - openai api change to normal response instead of stream
 - improve translate prompt
 - change api config based on provider instead of same
+- translate and summarize in parallel
+- requestTimeout default to 30s
 
 ## [Onboarding Page] - 2024-01-24
 - add quickly generating sources by user interest

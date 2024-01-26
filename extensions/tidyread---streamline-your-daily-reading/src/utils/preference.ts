@@ -54,7 +54,7 @@ export function normalizePreference(): Required<Preferences> {
     retryDelay: isNum(values.retryDelay) ? +values.retryDelay * 1000 : defaultApiConfig.retryDelay * 1000,
     notificationTime: values.notificationTime || "9am",
     autoGenDigest: values.autoGenDigest ?? false,
-    requestTimeout: isNum(values.requestTimeout) ? +values.requestTimeout * 1000 : 20 * 1000,
+    requestTimeout: isNum(values.requestTimeout) ? +values.requestTimeout * 1000 : 30 * 1000,
     enableItemLinkProxy: values.enableItemLinkProxy ?? true,
     writeFreelyEndpoint: values.writeFreelyEndpoint || "",
     writeFreelyAccount: values.writeFreelyAccount || "",

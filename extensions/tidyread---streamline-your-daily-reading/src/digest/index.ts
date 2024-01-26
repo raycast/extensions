@@ -66,7 +66,7 @@ async function getAllFilteredItems(
   for (const feed of rssFeeds) {
     try {
       console.log("start to parse rss feed", feed.url);
-      const resp = await withTimeout(parser.parseURL(feed.url), requestTimeout ?? 20000);
+      const resp = await withTimeout(parser.parseURL(feed.url), requestTimeout ?? 30 * 1000);
 
       const filteredItems = await Promise.all(
         // 需要对相同title去重，有些rss质量不高，会出现重复的title不同link
@@ -112,13 +112,12 @@ async function summarizeItem(
   retryCount?: number,
   retryDelay?: number,
 ): Promise<RSSItemWithStatus> {
-  console.time(`summarize call for ${item.title} @${item.feed?.title}`);
   // console.log(`retry count: ${retryCount}, retry delay: ${retryDelay}`);
   try {
     const needSummarize = item.content && item.content.length > MIN_SUMMARIZE_CHARACTER_LIMIT && provider.available;
     const summary = needSummarize
       ? await retry(
-          () => withTimeout(provider.summarize(item.content!), requestTimeout ?? 20000),
+          () => withTimeout(provider.summarize(item.content!), requestTimeout ?? 30 * 1000),
           retryCount ?? 5,
           retryDelay ?? 30 * 1000,
         )
@@ -135,8 +134,6 @@ async function summarizeItem(
       )}`,
       status: "failedToSummarize",
     };
-  } finally {
-    console.timeEnd(`summarize call for ${item.title} @${item?.feed?.title}`);
   }
 }
 
@@ -239,28 +236,34 @@ export async function genDigest(options: {
   console.log(`${formatedItems.length} rss items found after filter`, formatedItems);
 
   // 第三步：翻译titles
-  if (options.translateTitles) {
-    try {
-      const translatedTitles = await options.translateTitles(formatedItems.map((item) => item.title || ""));
+  async function translateTitles() {
+    if (options.translateTitles) {
+      console.time("translate titles");
+      try {
+        const translatedTitles = await options.translateTitles(formatedItems.map((item) => item.title || ""));
 
-      console.log("translated titles success:", translatedTitles);
+        console.log("translated titles success:", translatedTitles);
 
-      formatedItems.forEach((item, index) => {
-        item.title = translatedTitles[index] ?? item.title;
-      });
-    } catch (err: any) {
-      console.error("translate titles failed", err);
+        formatedItems.forEach((item, index) => {
+          item.title = translatedTitles[index] ?? item.title;
+        });
+      } catch (err: any) {
+        console.error("translate titles failed", err);
+      } finally{
+        console.timeEnd("translate titles");
+      }
     }
   }
 
   // 第四步：并发地对items进行概述
-  const summarizedItems = await Promise.all(
-    formatedItems.map((item) =>
+  const [, ...summarizedItems] = await Promise.all([
+    translateTitles(),
+    ...formatedItems.map((item) =>
       limit(() =>
         summarizeItem(item, options.provider, options.requestTimeout, options.retryCount, options.retryDelay),
       ),
     ),
-  );
+  ]);
 
   formatedItems = summarizedItems.map((item) => ({
     ...item,
