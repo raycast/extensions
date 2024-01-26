@@ -26,6 +26,14 @@
       "subtitle": "Sonos",
       "description": "Pick one of the household groups to be the active group",
       "mode": "view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "Sonos",
+      "description": "Display the currently playing media in the menu bar",
+      "mode": "menu-bar",
+      "interval": "3s"
     }
   ],
   "dependencies": {

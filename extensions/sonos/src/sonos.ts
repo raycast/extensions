@@ -1,31 +1,57 @@
 import { useEffect, useState } from "react";
 import { SonosDevice, SonosManager } from "@svrooij/sonos";
 import { getActiveGroup } from "./storage";
+import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
 
-function isDefined<T>(value: T | undefined): value is T {
+export function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined;
 }
 
-export async function getSonos() {
-  const manager = new SonosManager();
-  await manager.InitializeWithDiscovery(10);
+export function formatPlayingState({ playing, state }: { playing: boolean; state: SonosState }): string {
+  const icon = playing ? `▶︎` : `⏸︎`;
 
-  return {
-    manager,
-  };
+  // This means some kind of track is playing
+  if (state.mediaInfo.CurrentURIMetaData === undefined) {
+    const track = state.positionInfo.TrackMetaData;
+
+    if (typeof track === "string") {
+      return `${icon} ${track}`;
+    }
+
+    return `${icon} ${track.Title} - ${track.Artist}`;
+  }
+
+  // This means some kind of radio is playing
+  const media = state.mediaInfo.CurrentURIMetaData;
+
+  if (typeof media === "string") {
+    return `${icon} ${media}`;
+  }
+
+  return `${icon} ${media.Title}`;
+}
+
+export async function getManager() {
+  const manager = new SonosManager();
+  await manager.InitializeWithDiscovery(3);
+
+  return manager;
 }
 
 export async function getActiveCoordinator(): Promise<SonosDevice | undefined> {
-  const group = await getActiveGroup();
-  const coordinator = await getCoordinatorDevice(group);
+  try {
+    const group = await getActiveGroup();
+    const coordinator = await getCoordinatorDevice(group);
 
-  return coordinator;
+    return coordinator;
+  } catch (error) {
+    return undefined;
+  }
 }
 
 export async function getAvailableGroups(): Promise<string[]> {
-  const { manager } = await getSonos();
-  const devices = manager.Devices;
-  const groups = devices.map((device) => device.GroupName).filter(isDefined);
+  const manager = await getManager();
+  const groups = manager.Devices.map((device) => device.GroupName).filter(isDefined);
   const uniqueGroups = new Set<string>(groups);
 
   return Array.from(uniqueGroups);
@@ -37,7 +63,7 @@ export async function isPlaying(device: SonosDevice) {
 }
 
 export async function getCoordinatorDevice(group: string | undefined): Promise<SonosDevice | undefined> {
-  const { manager } = await getSonos();
+  const manager = await getManager();
   const devices = manager.Devices;
   const availableGroups = await getAvailableGroups();
   const fallbackGroup = group === "" && availableGroups.length === 1 ? availableGroups[0] : null;
