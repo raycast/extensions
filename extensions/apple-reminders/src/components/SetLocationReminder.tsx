@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
+import { setLocation } from "swift:../../swift/AppleReminders";
 
-import { setLocation } from "../api";
 import { getLocationDescription } from "../helpers";
 import { List, Reminder } from "../hooks/useData";
 
@@ -14,14 +14,14 @@ export default function AddLocation({ reminder, mutate }: EditReminderProps) {
   const { pop } = useNavigation();
 
   const { itemProps, values, handleSubmit } = useForm<{ address: string; proximity: string; radius: string }>({
-    async onSubmit(values) {
+    async onSubmit({ address, proximity, radius }) {
       try {
-        const payload = { ...values, radius: parseInt(values.radius) };
-        await mutate(setLocation(reminder.id, payload));
+        const numberRadius = parseInt(radius);
+        await mutate(setLocation({ reminderId: reminder.id, address, proximity, radius: numberRadius }));
         await showToast({
           style: Toast.Style.Success,
           title: `Set location reminder`,
-          message: getLocationDescription(payload),
+          message: getLocationDescription({ address, proximity, radius: numberRadius }),
         });
 
         pop();

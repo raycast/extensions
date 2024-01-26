@@ -16,6 +16,7 @@ import { useCachedState } from "@raycast/utils";
 import {
   addWeeks,
   endOfWeek,
+  format,
   isBefore,
   isToday,
   isTomorrow,
@@ -26,13 +27,13 @@ import {
   startOfWeek,
 } from "date-fns";
 import { useMemo } from "react";
-
 import {
   deleteReminder as apiDeleteReminder,
+  setPriorityStatus,
   toggleCompletionStatus,
-  setReminderPriority,
-  setReminderDueDate,
-} from "./api";
+  setDueDate as setReminderDueDate,
+} from "swift:../swift/AppleReminders";
+
 import { getPriorityIcon, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
@@ -52,8 +53,10 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    const reminders = listId ? data?.reminders.filter((reminder) => reminder.list?.id === listId) : data?.reminders;
-    reminders?.forEach((reminder) => {
+    const reminders = listId
+      ? data?.reminders.filter((reminder: Reminder) => reminder.list?.id === listId)
+      : data?.reminders;
+    reminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
       if (!reminder.dueDate) {
@@ -91,7 +94,7 @@ export default function Command() {
 
   async function setPriority(reminderId: string, priority: Priority) {
     try {
-      await setReminderPriority(reminderId, priority);
+      await setPriorityStatus({ reminderId, priority });
       await mutate();
       await showToast({
         style: Toast.Style.Success,
@@ -108,7 +111,7 @@ export default function Command() {
 
   async function setDueDate(reminderId: string, date: Date | null) {
     try {
-      await setReminderDueDate(reminderId, date ? date.toISOString() : null);
+      await setReminderDueDate({ reminderId, dueDate: date ? format(date, "yyyy-MM-dd") : null });
       await mutate();
       await showToast({
         style: Toast.Style.Success,
