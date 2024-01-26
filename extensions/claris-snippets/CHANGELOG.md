@@ -1,4 +1,9 @@
-# Claris Snippets Changelog
+# FileMaker Snippets Changelog
+
+## [Deeplink Support] - 2024-01-26
+
+- Renamed extension to `FileMaker Snippets`
+- Added support for deeplinking to a specific snippet. Use deeplinks to share snippets with others using just a URL.
 
 ## [Fixes] - 2023-07-27
 
