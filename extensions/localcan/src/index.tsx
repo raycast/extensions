@@ -87,6 +87,7 @@ export default function Command() {
                         title="Open LocalCan"
                         target="LocalCan"
                         application="LocalCan"
+                        shortcut={{ modifiers: ["cmd"], key: "o" }}
                         icon={Icon.AppWindow}
                       />
                     </ActionPanel>
