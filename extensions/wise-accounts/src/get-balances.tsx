@@ -13,7 +13,7 @@ import {
 import { wiseReadApiToken } from "./helpers/preferences";
 import { Balance, fetchBalances } from "./api/balances";
 import { useCachedState } from "@raycast/utils";
-import {filterPreferedBalances} from './helpers/filterPreferedBalances';
+import { filterPreferedBalances } from "./helpers/filterPreferedBalances";
 
 export default function Command(props: LaunchProps<{ arguments: { profileId: string } }>) {
   const profileId = props.arguments.profileId;
@@ -50,62 +50,61 @@ export default function Command(props: LaunchProps<{ arguments: { profileId: str
   }
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {filterPreferedBalances(balances)
-        .map((balance) => (
-          <List.Item
-            key={balance.id}
-            title={`${balance.currency} ${balance.amount.value}`}
-            subtitle={balance.type}
-            icon={
-              balance.type === "STANDARD"
-                ? { source: `https://wise.com/web-art/assets/flags/${balance.currency.toLocaleLowerCase()}.svg` }
-                : Icon.Coins
-            }
-            accessories={[...(balance.name ? [{ tag: { value: balance.name, color: "#A2D6F9" } }] : [])]}
-            detail={
-              <List.Item.Detail
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Link
-                      text={"Wise.com"}
-                      title="Open In Browser"
-                      target={`https://wise.com/balances/${balance.id}`}
+      {filterPreferedBalances(balances).map((balance) => (
+        <List.Item
+          key={balance.id}
+          title={`${balance.currency} ${balance.amount.value}`}
+          subtitle={balance.type}
+          icon={
+            balance.type === "STANDARD"
+              ? { source: `https://wise.com/web-art/assets/flags/${balance.currency.toLocaleLowerCase()}.svg` }
+              : Icon.Coins
+          }
+          accessories={[...(balance.name ? [{ tag: { value: balance.name, color: "#A2D6F9" } }] : [])]}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Link
+                    text={"Wise.com"}
+                    title="Open In Browser"
+                    target={`https://wise.com/balances/${balance.id}`}
+                  />
+                  <List.Item.Detail.Metadata.Label title="ID" text={balance.id.toString()} />
+                  <List.Item.Detail.Metadata.TagList title="Type">
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={balance.type}
+                      color={balance.type === "STANDARD" ? "#A2D6F9" : "#F7B32B"}
                     />
-                    <List.Item.Detail.Metadata.Label title="ID" text={balance.id.toString()} />
-                    <List.Item.Detail.Metadata.TagList title="Type">
-                      <List.Item.Detail.Metadata.TagList.Item
-                        text={balance.type}
-                        color={balance.type === "STANDARD" ? "#A2D6F9" : "#F7B32B"}
-                      />
-                    </List.Item.Detail.Metadata.TagList>
-                    <List.Item.Detail.Metadata.Label
-                      title="Name"
-                      text={balance.name || "N/A"}
-                      icon={balance.icon?.type === "EMOJI" ? balance.icon?.value : ""}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Amount"
-                      text={`${balance.amount.currency} ${balance.amount.value}`}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Cash Amount"
-                      text={`${balance.cashAmount.currency} ${balance.cashAmount.value}`}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Reserved Amount"
-                      text={`${balance.reservedAmount.currency} ${balance.reservedAmount.value}`}
-                    />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`https://wise.com/balances/${balance.id}`} />
-              </ActionPanel>
-            }
-          />
-        ))}
+                  </List.Item.Detail.Metadata.TagList>
+                  <List.Item.Detail.Metadata.Label
+                    title="Name"
+                    text={balance.name || "N/A"}
+                    icon={balance.icon?.type === "EMOJI" ? balance.icon?.value : ""}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Amount"
+                    text={`${balance.amount.currency} ${balance.amount.value}`}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Cash Amount"
+                    text={`${balance.cashAmount.currency} ${balance.cashAmount.value}`}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Reserved Amount"
+                    text={`${balance.reservedAmount.currency} ${balance.reservedAmount.value}`}
+                  />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url={`https://wise.com/balances/${balance.id}`} />
+            </ActionPanel>
+          }
+        />
+      ))}
       {balances?.length === 0 && <List.EmptyView title="No balance found" />}
     </List>
   );
