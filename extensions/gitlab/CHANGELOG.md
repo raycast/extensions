@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Added Group Search] - 2024-01-26
+
+- Add `Search Groups` command
+- Update keyboard shortcut for project `Pipelines` command to `cmd`+`shift`+`P` to remove conflict with reserved shortcut for Raycast core
+
 ## [Fixed menubar colors] - 2023-08-08
 
 - Fixes the dynamic color for the GitLab Menu Bar command icons, specifically the Merge Request one.
