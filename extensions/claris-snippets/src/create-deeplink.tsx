@@ -37,7 +37,7 @@ export default function CreateDeeplinkForm({ snippet }: { snippet: SnippetWithPa
             };
 
       Clipboard.copy(
-        `raycast://extensions/eluce2/claris-snippets/view-snippets?context=${encodeURIComponent(
+        `raycast://extensions/eluce2/filemaker-snippets/view-snippets?context=${encodeURIComponent(
           JSON.stringify(context)
         )}`
       );
@@ -46,7 +46,7 @@ export default function CreateDeeplinkForm({ snippet }: { snippet: SnippetWithPa
     validation: { __type: FormValidation.Required },
   });
 
-  const importURL = `raycast://extensions/eluce2/claris-snippets/view-snippets?context=${encodeURIComponent(
+  const importURL = `raycast://extensions/eluce2/filemaker-snippets/view-snippets?context=${encodeURIComponent(
     JSON.stringify({
       type: "import",
       action: values.__action ?? "copy",

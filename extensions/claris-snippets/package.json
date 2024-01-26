@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "claris-snippets",
+  "name": "filemaker-snippets",
   "title": "FileMaker Snippets",
   "description": "Create and use snippets for FileMaker Pro",
   "icon": "command-icon.png",
