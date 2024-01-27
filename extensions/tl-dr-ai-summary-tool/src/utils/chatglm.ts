@@ -1,31 +1,15 @@
-import axios from "axios";
-import https from "https";
+import { debugableAxios } from "./httpclient";
 import { generateToken } from "./jwt";
 import { AxiosResponse } from "axios/index";
 import { ChatGlmOptions, ChatGlmResponse } from "../type";
 import { ZHIPU } from "./keys";
-import { environment } from "@raycast/api";
 import { Readable } from "stream";
-
-const ignoreSSL = axios.create({
-  httpsAgent: new https.Agent({
-    rejectUnauthorized: environment.isDevelopment ? false : true,
-  }),
-});
-// const proxy = environment.isDevelopment
-//   ? {
-//       host: "127.0.0.1",
-//       port: 9090,
-//     }
-//   : undefined;
-
-const proxy = undefined;
 
 export async function chatCompletion(
   messages: Array<{ role: string; content: string }>,
   opt: ChatGlmOptions = { useStream: false },
 ): Promise<string> {
-  return ignoreSSL
+  return debugableAxios()
     .post(
       opt.useStream ? ZHIPU.API_SSE_URL : ZHIPU.API_URL,
       {
@@ -36,7 +20,6 @@ export async function chatCompletion(
         headers: {
           Authorization: `${generateToken()}`,
         },
-        proxy: proxy,
         responseType: opt.useStream ? "stream" : "json",
       },
     )
@@ -65,9 +48,13 @@ export async function chatCompletion(
           }
           opt.streamListener && opt.streamListener(output, isFinish);
         });
-        return "流式输出中";
+        return "Loading...";
       } else {
         return response.data.data.choices[0].content;
       }
+    })
+    .catch((error) => {
+      console.error(error);
+      return "";
     });
 }

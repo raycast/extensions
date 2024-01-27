@@ -20,11 +20,8 @@ export function useChat(saved: ChatBox): ChatHook {
       timestamp: Date.now(),
       prompt: [],
     };
-    const history = [...messages, msg];
-    setMessages(history);
     let content = { title: question, content: question };
-    if (question.startsWith("http") && question.indexOf("weixin.qq.com") > -1) {
-      // console.log(`请求网页 ${question}`);
+    if (/^http(s)?:\/\//.test(question)) {
       content = await fetchContent(question);
       msg.prompt = [
         // { role: "user", content: "请阅读文字内容，并找到摘要。输出格式为：\n标题: {title}\n\n 摘要: {content}\n" },
@@ -41,27 +38,35 @@ export function useChat(saved: ChatBox): ChatHook {
       const previous = messages[messages.length - 1];
       msg.prompt = [
         ...(previous ? previous.prompt : []),
+        ...(previous ? [{ role: "assistant", content: previous.answer }] : []),
         {
           role: "user",
           content: content.content,
         },
       ];
     }
-
+    messages.push(msg);
+    setMessages([...messages]);
     if (FEATURE_STREAM) {
       const streamListener = (data: string, isFinish: boolean) => {
-        if (data.trim().indexOf("标题") == 0 || data.trim().indexOf("Title:") == 0) {
-          msg.question = data.split("\n")[0].replace("标题:", "").replace("标题：", "").replace("Title:", "");
+        const guessTitle = data.trim().slice(0, 50);
+
+        if (guessTitle.indexOf("标题") == 0 || /[tT]itle/.test(guessTitle)) {
+          msg.question = guessTitle.replace(/标题\s*([：:]?\s*)?\s*/g, "").replace(/title\s*(:\s*)?/gi, "");
+          msg.question = msg.question.trim().split("\n")[0].trim();
         }
         msg.answer = data;
-        setMessages([...history]);
+
         if (isFinish) {
-          const assistant = { role: "assistant", content: msg.answer };
-          msg.prompt.push(assistant);
           setLoading(false);
         }
+
+        setMessages([...messages]);
       };
-      await chatCompletion(msg.prompt, { useStream: true, streamListener: streamListener });
+      const res = await chatCompletion(msg.prompt, { useStream: true, streamListener: streamListener });
+      if (res == "") {
+        setLoading(false);
+      }
     } else {
       const detail = await chatCompletion(msg.prompt);
       if (detail.trim().indexOf("标题") == 0 || detail.trim().indexOf("Title:") == 0) {
@@ -69,7 +74,7 @@ export function useChat(saved: ChatBox): ChatHook {
       }
       msg.prompt.push({ role: "assistant", content: detail });
       msg.answer = detail;
-      setMessages(history);
+      setMessages([...messages]);
       setLoading(false);
     }
   }

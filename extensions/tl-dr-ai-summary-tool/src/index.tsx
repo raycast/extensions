@@ -60,7 +60,7 @@ If you don't have a key yet, please go to [https://open.bigmodel.cn/usercenter/a
     </ActionPanel>
   );
 
-  const sortedMessages = chatbox.messages.sort((a, b) => b.timestamp - a.timestamp);
+  const sortedMessages = [...chatbox.messages].sort((a, b) => b.timestamp - a.timestamp);
 
   return (
     <List

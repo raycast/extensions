@@ -1,11 +1,11 @@
-# WeChat Article Summarizer
+# Article Summarizer
 
-This Raycast extension provides a convenient way to interact with WeChat public account articles by generating summaries and enabling dialogues with the content. Additionally, it leverages AI to help solve everyday problems.
+This Raycast extension offers a versatile tool for interacting with a wide range of web articles by generating concise summaries and enabling interactive dialogues with the content. It integrates AI capabilities to assist with everyday inquiries and tasks, now with support for the ChatGLM API.
 
 ## Features
 
-- **Article Summarization**: Quickly read through the essence of WeChat public account articles without going through the entire content. This feature extracts the key points and presents a concise summary for a faster reading experience.
+- **Article Summarization**: Effortlessly grasp the core message of various web articles without the need to read through the full text. This feature identifies the main points and delivers a brief summary, allowing for a quicker and more efficient reading experience.
 
-- **Conversational Interaction**: Engage with the articles by having a conversation. Ask questions or express your thoughts, and the extension will facilitate an interactive dialogue with the article's content.
+- **Conversational Interaction**: Engage with web articles in a conversational manner. Pose questions or share your opinions, and the extension will provide an interactive dialogue, making the content more accessible and engaging.
 
-- **AI Problem Solving**: Utilize the power of AI to get assistance with daily challenges. Whether it's a question you're pondering or a practical problem, the extension can provide helpful insights and solutions.
+- **AI Problem Solving with ChatGLM API Support**: Harness the strength of AI, now enhanced with ChatGLM API integration, to seek assistance with daily questions or practical issues. The extension is designed to offer valuable insights and solutions, making it a powerful tool for problem-solving.
