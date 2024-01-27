@@ -1,7 +1,27 @@
-import { get } from "./togglClient";
+import { get, post, put, remove } from "./togglClient";
 
 export function getMyClients() {
   return get<Client[]>("/me/clients");
+}
+
+export function createClient(workspaceId: number, name: string) {
+  return post<Client>(`/workspaces/${workspaceId}/clients`, { wid: workspaceId, name });
+}
+
+export function updateClient(workspaceId: number, clientId: number, name: string) {
+  return put<Client>(`/workspaces/${workspaceId}/clients/${clientId}`, { wid: workspaceId, name });
+}
+
+export function deleteClient(workspaceId: number, clientId: number) {
+  return remove(`/workspaces/${workspaceId}/clients/${clientId}`);
+}
+
+export function archiveClient(workspaceId: number, clientId: number) {
+  return post(`/workspaces/${workspaceId}/clients/${clientId}/archive`);
+}
+
+export function restoreClient(workspaceId: number, clientId: number, restoreAllProjects: boolean) {
+  return post(`/workspaces/${workspaceId}/clients/${clientId}/restore`, { restore_all_projects: restoreAllProjects });
 }
 
 // https://developers.track.toggl.com/docs/api/clients#response
