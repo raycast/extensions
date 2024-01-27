@@ -136,7 +136,7 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
     .then((xmlFile) =>
       parseStringPromise(xmlFile, { attrkey: "_attr" }).then((result) => {
         return (
-          (result.application.component[0].option[0].map[0].entry ?? [])
+          ((result.application?.component[0].option[0].map ?? [])[0]?.entry ?? [])
             .map(
               // convert xmlJson object to array of recentEntries
               (recentEntry: xmlJson): recentEntry => {
@@ -168,6 +168,7 @@ export async function getRecentEntries(xmlFile: file, app: AppHistory): Promise<
       })
     )
     .catch((err) => {
+      console.error(err);
       showToast(Toast.Style.Failure, `Recent project lookup for "${app.title}" failed with error: \n\n ${err}`);
       return [];
     })
@@ -256,7 +257,7 @@ const shellFromChannel = (channel: Channel) => {
     return undefined;
   }
   const defaults = (channel.tool?.extensions ?? []).find((extension: Extension) => extension?.type === "shell");
-  return defaults?.baseName;
+  return defaults?.name;
 };
 
 const getReadFile = async (filePath: string) => {

@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
+import { setTitleAndNotes } from "swift:../../swift/AppleReminders";
 
-import { setTitleAndNotes } from "../api";
 import { List, Reminder } from "../hooks/useData";
 
 type EditReminderProps = {
@@ -15,7 +15,7 @@ export default function EditReminder({ reminder, mutate }: EditReminderProps) {
   const { itemProps, handleSubmit } = useForm<{ title: string; notes: string }>({
     async onSubmit(values) {
       try {
-        await mutate(setTitleAndNotes(reminder.id, values.title, values.notes), {
+        await mutate(setTitleAndNotes({ reminderId: reminder.id, title: values.title, notes: values.notes }), {
           optimisticUpdate(data) {
             if (!data) return;
 

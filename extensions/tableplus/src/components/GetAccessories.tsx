@@ -1,5 +1,6 @@
 import { preferences } from "../constants";
 import { Connection, tintColors } from "../interfaces";
+import { uppercaseText } from "../utils";
 
 export function GetAccessories(connection: Connection) {
   const accessories = [];
@@ -11,7 +12,7 @@ export function GetAccessories(connection: Connection) {
   accessories.push({
     tag: {
       color: tintColors[connection.Environment],
-      value: connection.Environment.charAt(0).toUpperCase() + connection.Environment.slice(1),
+      value: uppercaseText(connection.Environment),
     },
   });
 

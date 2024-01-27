@@ -2,7 +2,6 @@ import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 
 const clientId = "a4f97a37-75e8-4e64-b2e1-1235d3a1152a";
-const whoopRedirectUri = "https://raycast.com/redirect/extension";
 const scope = [
   "read:recovery",
   "read:cycles",
@@ -22,9 +21,7 @@ export const oauthClient = new OAuth.PKCEClient({
 });
 
 export async function authorize() {
-  console.log("🔑 Authorizing...");
   const existingTokens = await oauthClient.getTokens();
-  console.log("🍬 Tokens:", existingTokens);
 
   if (existingTokens?.accessToken) {
     if (existingTokens.refreshToken && existingTokens.isExpired()) {
@@ -36,15 +33,15 @@ export async function authorize() {
   }
 
   const authRequest = await oauthClient.authorizationRequest({
-    endpoint: "https://api.prod.whoop.com/oauth/oauth2/auth",
-    clientId: clientId,
-    scope: scope,
-    extraParameters: { redirect_uri: whoopRedirectUri },
+    endpoint: "https://whoop.oauth.raycast.com/authorize",
+    clientId,
+    scope,
   });
 
   const { authorizationCode } = await oauthClient.authorize(authRequest);
   const tokens = await fetchTokens(authRequest, authorizationCode);
   await oauthClient.setTokens(tokens);
+
   return tokens.access_token;
 }
 
@@ -52,46 +49,46 @@ export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
   authCode: string,
 ): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://www.joshallen.fyi/api/exchangeToken", {
+  const response = await fetch("https://whoop.oauth.raycast.com/token", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      client_id: clientId,
       code: authCode,
-      codeVerifier: authRequest.codeVerifier,
+      code_verifier: authRequest.codeVerifier,
+      grant_type: "authorization_code",
+      redirect_uri: authRequest.redirectURI,
     }),
   });
 
   if (!response.ok) {
-    const errorBody = await response.text();
-    console.error("Error response:", errorBody);
-    throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
-  return (await response.json()) as OAuth.TokenResponse;
+  const tokens = await response.json();
+
+  return tokens as OAuth.TokenResponse;
 }
 
 export async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://www.joshallen.fyi/api/refreshToken", {
+  const response = await fetch("https://whoop.oauth.raycast.com/refresh-token", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refreshToken }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: clientId,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token",
+    }),
   });
 
   if (!response.ok) {
-    const error = (await response.json()) as { error: string };
-    if (error.error === "invalid_grant") {
-      oauthClient.removeTokens();
-      authorize();
-    }
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while refreshing tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
-  const tokens = (await response.json()) as OAuth.TokenResponse;
-  tokens.refresh_token = tokens.refresh_token ?? refreshToken;
+  const tokenResponse = (await response.json()) as OAuth.TokenResponse;
+  tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
 
-  return tokens;
+  return tokenResponse;
 }

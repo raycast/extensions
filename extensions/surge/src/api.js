@@ -1,12 +1,32 @@
 import axios from "axios"
+import { getPreferenceValues } from "@raycast/api"
+import https from "https"
 
 export default function (xKey, port) {
+  const preferences = getPreferenceValues()
+  const host = preferences.host || "127.0.0.1"
+  const protocol = preferences.tls_enabled ? "https" : "http"
   const api = axios.create({
-    baseURL: `http://${xKey}@127.0.0.1:${port}`,
-    headers: { "X-Key": xKey }
+    baseURL: `${protocol}://${xKey}@${host}:${port}`,
+    headers: { "X-Key": xKey },
+    httpsAgent: new https.Agent({
+      rejectUnauthorized: false
+    })
   })
 
   return {
+    async isMacOSVersion() {
+      try {
+        await this.getSystemProxyStatus()
+        return true
+      } catch (err) {
+        if (err.response?.status === 404) {
+          return false
+        }
+        throw err
+      }
+    },
+
     getOutboundMode() {
       return api({
         method: "get",

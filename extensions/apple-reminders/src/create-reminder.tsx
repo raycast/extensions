@@ -10,13 +10,31 @@ import {
   useNavigation,
   getPreferenceValues,
   LaunchProps,
+  PopToRootType,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
+import { createReminder } from "swift:../swift/AppleReminders";
 
-import { Frequency, NewReminder, createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
+
+type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+export type NewReminder = {
+  title: string;
+  listId?: string;
+  notes?: string;
+  dueDate?: string;
+  priority?: string;
+  recurrence?: {
+    frequency: Frequency;
+    interval: number;
+    endDate?: string;
+  };
+  address?: string;
+  proximity?: string;
+  radius?: number;
+};
 
 type CreateReminderValues = {
   title: string;
@@ -183,7 +201,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />
           <Action.SubmitForm
             onSubmit={async (values) => {
-              await closeMainWindow();
+              await closeMainWindow({ popToRootType: PopToRootType.Immediate });
               await handleSubmit(values as CreateReminderValues);
             }}
             title="Create Reminder and Close Window"
