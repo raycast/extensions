@@ -1,8 +1,8 @@
 import { isAfter, subHours } from "date-fns";
 import queryString from "query-string";
-import { RSSItem, genDigest } from "../digest";
+import { genDigest } from "../digest";
 import { PROVIDERS_MAP } from "../providers";
-import { Digest, Source } from "../types";
+import { Digest, DigestStage, RSSItem, Source } from "../types";
 import { normalizePreference } from "./preference";
 import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
@@ -32,27 +32,7 @@ export function createAgent(): RequestOptions["agent"] | undefined {
 }
 
 function getTranslateTitlesPrompt(lang: string) {
-  return `
-  ## Target
-  Translate each title in the array.
-
-  ## Example
-  Input:
-  ['Title 1', 'Title 2', 'Title 3', ...]
-
-  Output:
-  1.Title 1
-  2.Title 2
-  3.Title 3
-  ...
-
-  ## Requirements
-  1. Directly output the translated titles, without any other content.
-  2. Each output title must be translated into language: ${lang}
-  3. Maintain the original order.
-  4. Each title should start on a new line, separated by a blank line, rather than any other separators.
-  5. Each title is prefixed with a serial number.
-  `;
+  return `Translate the following content into ${lang}, preserving the original line format and order.`;
 }
 
 function parseOutput(output: string): string[] {
@@ -63,18 +43,24 @@ function parseOutput(output: string): string[] {
     .filter((line) => line !== "");
 
   // 目标行
-  const targetLines = lines.filter((line) => line.match(/^\d+\s*?\./)).map((line) => line.replace(/^\d+\s*?\./, ""));
+  const targetLines = lines
+    // .filter((line) => line.match(/^\d+\s*?\./))
+    .map((line) => line.replace(/^\d+\s*?\./, ""));
 
   return targetLines;
 }
 
-export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Digest> {
+export async function bizGenDigest(
+  type: "manual" | "auto" = "auto",
+  onProgress?: (stage: DigestStage, err?: Error) => void,
+): Promise<Digest> {
   const preferences = normalizePreference();
   const {
     preferredLanguage,
     apiHost,
     apiKey,
     apiModel,
+    maxTokens,
     summarizePrompt,
     httpProxy,
     enableItemLinkProxy,
@@ -90,6 +76,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     apiHost,
     apiKey,
     apiModel,
+    maxTokens,
     httpProxy,
     summarizePrompt: summarizePrompt.replaceAll("{{lang}}", preferredLanguage || "language of the content"),
     translatePrompt: getTranslateTitlesPrompt(preferredLanguage || "language of the content"),
@@ -139,8 +126,9 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
       ? undefined
       : async (titles) => {
           const translatedTitles = await withTimeout(
-            provider.translate(JSON.stringify(titles), preferredLanguage),
-            requestTimeout,
+            provider.translate(titles.join("\n"), preferredLanguage),
+            // OpenAI需要的最长时间，比如30条内容会接近30秒
+            60000,
           );
           console.log("raw translated titles:", translatedTitles);
           return parseOutput(translatedTitles);
@@ -156,6 +144,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
       });
       return `https://tidyread.info/read?${qstr}`;
     },
+    onProgress,
   });
 
   // 写入存储

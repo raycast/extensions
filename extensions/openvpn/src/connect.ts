@@ -22,6 +22,7 @@ export default async function Command() {
   }
 
   const result = await runAppleScript(`
+    delay 2
     try
       tell application "System Events" to tell process "OpenVPN Connect" to tell menu bar item 1 of menu bar 2
         click
@@ -40,8 +41,7 @@ export default async function Command() {
   if (result === "error") {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Unable to use OpenVPN Connect",
-      message: "AppleScript is unable to use OpenVPN Connect Menu Bar.",
+      title: "Unable to use OpenVPN Connect Menu Bar",
     });
   }
 }

@@ -1,7 +1,8 @@
 # Arc Changelog
 
-## [Improvements] - 2024-01-26
+## [Update] - 2024-01-26
 
+- Update release notes url
 - Added Kagi as a search engine for the commands `Search Arc` and `Open New Little Arc Window`
 
 ## [Update] - 2024-01-19
