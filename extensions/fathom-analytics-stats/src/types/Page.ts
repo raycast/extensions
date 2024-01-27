@@ -1,4 +1,4 @@
 export type Page = {
-    pageviews: string;
-    pathname: string;
+  pageviews: string;
+  pathname: string;
 };

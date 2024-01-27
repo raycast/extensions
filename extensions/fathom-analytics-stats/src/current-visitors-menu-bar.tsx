@@ -5,7 +5,7 @@ import { LiveData } from "./types/LiveData";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
-  const { data, isLoading, error } = FathomRequest({
+  const { data, isLoading } = FathomRequest({
     endpoint: "/current_visitors",
   }) as {
     data: LiveData | undefined;

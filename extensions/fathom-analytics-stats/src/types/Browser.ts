@@ -1,4 +1,4 @@
 export type Browser = {
-    pageviews: string;
-    browser: string;
+  pageviews: string;
+  browser: string;
 };

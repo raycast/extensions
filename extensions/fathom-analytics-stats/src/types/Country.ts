@@ -1,4 +1,4 @@
 export type Country = {
-    pageviews: string;
-    country_code: string;
+  pageviews: string;
+  country_code: string;
 };
