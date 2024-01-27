@@ -1,30 +1,19 @@
-import { getPreferenceValues, List, Icon } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List, Icon } from "@raycast/api";
 import { useState } from "react";
 import PeriodDropdown from "./components/PeriodDropdown";
-
-type Page = {
-  pageviews: string;
-  pathname: string;
-};
-
-type Data = Page[];
+import FathomRequest from "./utils/api";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const [dateFrom, setDateFrom] = useState<string>("");
 
-  const { data, isLoading } = useFetch<Data>(
-    `https://api.usefathom.com/v1/aggregations?entity_id=${
-      preferences.siteId
-    }&entity=pageview&aggregates=pageviews&field_grouping=pathname&sort_by=pageviews:desc${dateFrom ? `&date_from=${dateFrom}` : ""}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${preferences.apiToken}`,
-      },
-    },
-  );
+  const { data, isLoading } = FathomRequest({
+    endpoint: '/aggregations',
+    entity: 'pageview',
+    aggregates: 'pageviews',
+    groupBy: 'pathname',
+    sortBy: 'pageviews:desc',
+    dateFrom: dateFrom,
+  });
 
   const totalPageviews = data?.reduce((total, page) => total + parseInt(page.pageviews), 0) || 0;
 
