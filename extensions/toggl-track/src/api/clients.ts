@@ -28,4 +28,6 @@ export function restoreClient(workspaceId: number, clientId: number, restoreAllP
 export interface Client {
   id: number;
   name: string;
+  archived: boolean;
+  wid: number;
 }
