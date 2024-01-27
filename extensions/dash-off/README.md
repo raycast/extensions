@@ -2,7 +2,7 @@
    <img src="https://github.com/raycast/extensions/assets/372831/ff641a3a-60c1-42a7-b510-80bb5846bb82">
  </p>
 
-The fastest way to dash off a quick email to yourself and others.
+The fastest way to dash off a quick email to yourself and others. Inspired by [Andrew Wilkinson's tweet](https://twitter.com/awilkinson/status/1748429141601579328).
 
 ## How to get a Gmail OAuth Client ID
 
