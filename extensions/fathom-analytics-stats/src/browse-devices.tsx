@@ -3,22 +3,13 @@ import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import PeriodDropdown from "./components/PeriodDropdown";
 
-type Referrer = {
-  pageviews: string;
-  device_type: string;
-};
-
-type Data = Referrer[];
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [dateFrom, setDateFrom] = useState<string>("");
 
   const { data, isLoading } = useFetch<Data>(
-    `https://api.usefathom.com/v1/aggregations?entity_id=${
-      preferences.siteId
-    }&entity=pageview&aggregates=pageviews&field_grouping=device_type&sort_by=pageviews:desc${
-      dateFrom ? `&date_from=${dateFrom}` : ""
+    `https://api.usefathom.com/v1/aggregations?entity_id=${preferences.siteId
+    }&entity=pageview&aggregates=pageviews&field_grouping=device_type&sort_by=pageviews:desc${dateFrom ? `&date_from=${dateFrom}` : ""
     }`,
     {
       method: "GET",

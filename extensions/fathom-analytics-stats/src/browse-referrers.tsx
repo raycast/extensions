@@ -1,61 +1,63 @@
-import { getPreferenceValues, List, Icon } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List, Icon, Detail, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import FathomRequest from "./utils/api";
 import PeriodDropdown from "./components/PeriodDropdown";
-
-type Referrer = {
-  pageviews: string;
-  referrer_hostname: string;
-};
-
-type Data = Referrer[];
+import { Referrer } from "./types/Referrer";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const [dateFrom, setDateFrom] = useState<string>("");
 
-  const { data, isLoading } = useFetch<Data>(
-    `https://api.usefathom.com/v1/aggregations?entity_id=${
-      preferences.siteId
-    }&entity=pageview&aggregates=pageviews&field_grouping=referrer_hostname&sort_by=pageviews:desc${
-      dateFrom ? `&date_from=${dateFrom}` : ""
-    }`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${preferences.apiToken}`,
-      },
-    },
-  );
+  const { data, isLoading, error } = FathomRequest({
+    endpoint: "/aggregations",
+    entity: "pageview",
+    aggregates: "pageviews",
+    groupBy: "referrer_hostname",
+    sortBy: "pageviews:desc",
+    dateFrom: dateFrom,
+  }) as {
+    data: Referrer[] | undefined;
+    isLoading: boolean;
+    error: { title: string; message: string; markdown: string } | undefined;
+  };
 
-  const totalPageviews = data?.reduce((total, page) => total + parseInt(page.pageviews), 0) || 0;
+  if (data) {
+    const totalPageviews = data?.reduce((total, page) => total + parseInt(page.pageviews), 0) || 0;
 
-  return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Choose a time period"
-      searchBarPlaceholder="Search referrers"
-      searchBarAccessory={<PeriodDropdown setDateFrom={setDateFrom} />}
-    >
-      {data?.map((referrer) => {
-        const relativePageviews = ((parseInt(referrer.pageviews) / totalPageviews) * 100).toFixed(1);
-        return (
-          <List.Item
-            key={referrer.referrer_hostname}
-            title={
-              referrer.referrer_hostname
-                ? referrer.referrer_hostname.toString().replace("https://", "").replace("www.", "")
-                : "Direct"
-            }
-            accessories={[
-              {
-                text: `${referrer.pageviews.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${relativePageviews}%)`,
-              },
-              { icon: Icon.TwoPeople },
-            ]}
-          />
-        );
-      })}
-    </List>
-  );
+    return (
+      <List
+        isLoading={isLoading}
+        navigationTitle="Choose a time period"
+        searchBarPlaceholder="Search referrers"
+        searchBarAccessory={<PeriodDropdown setDateFrom={setDateFrom} />}
+      >
+        {data?.map((referrer) => {
+          const relativePageviews = ((parseInt(referrer.pageviews) / totalPageviews) * 100).toFixed(1);
+          return (
+            <List.Item
+              key={referrer.referrer_hostname}
+              title={
+                referrer.referrer_hostname
+                  ? referrer.referrer_hostname.toString().replace("https://", "").replace("www.", "")
+                  : "Direct"
+              }
+              accessories={[
+                {
+                  text: `${referrer.pageviews.toLocaleString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} (${relativePageviews}%)`,
+                },
+                { icon: Icon.TwoPeople },
+              ]}
+            />
+          );
+        })}
+      </List>
+    );
+  } else if (error) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: error.title,
+      message: error.message,
+    });
+
+    return <Detail markdown={error.markdown} />;
+  }
 }

@@ -1,6 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import { Browser } from "../types/Browser";
+import { Country } from "../types/Country";
+import { Device } from "../types/Device";
+import { Page } from "../types/Page";
+import { Referrer } from "../types/Referrer";
+import { LiveData } from "../types/LiveData";
 
 type Request = {
   endpoint: string;
@@ -8,23 +14,16 @@ type Request = {
   aggregates?: string;
   groupBy?: string;
   sortBy?: string;
-  dateFrom: string;
+  dateFrom?: string;
 };
 
 type Response = {
-  data: Data | null | undefined;
+  data: Browser[] | Country[] | Device[] | Page[] | Referrer[] | LiveData[] | null;
   isLoading: boolean;
   error?: { title: string; message: string; markdown: string };
 };
 
-type Data = Page[];
-
-type Page = {
-  pageviews: string;
-  pathname: string;
-};
-
-export default function FathomRequest(request: Request): Response {
+export default function FathomRequest(request: Request) {
   const [errorTitle, setErrorTitle] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [errorMarkdown, setErrorMarkdown] = useState("");
@@ -60,7 +59,7 @@ export default function FathomRequest(request: Request): Response {
     url = `${BASE_URL}${request.endpoint}?site_id=${preferences.siteId}&detailed=true`;
   }
 
-  const { data, isLoading } = useFetch<Data>(url, {
+  const { data, isLoading } = useFetch<Response>(url, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${preferences.apiToken}`,

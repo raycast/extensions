@@ -1,36 +1,17 @@
 import { getPreferenceValues, MenuBarExtra, Icon, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-
-type Page = {
-  pathname: string;
-  hostname: string;
-  total: number;
-};
-
-type Referrer = {
-  referrer_hostname: string;
-  referrer_pathname: string;
-  total: number;
-};
-
-type Data = {
-  total: number;
-  content: Page[];
-  referrers: Referrer[];
-};
+import FathomRequest from "./utils/api";
+import { LiveData } from "./types/LiveData";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
-  const { data, isLoading } = useFetch<Data>(
-    `https://api.usefathom.com/v1/current_visitors?site_id=${preferences.siteId}&detailed=true`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${preferences.apiToken}`,
-      },
-    },
-  );
+  const { data, isLoading, error } = FathomRequest({
+    endpoint: "/current_visitors",
+  }) as {
+    data: LiveData | undefined;
+    isLoading: boolean;
+    error: { title: string; message: string; markdown: string } | undefined;
+  };
 
   if (!data) {
     return <MenuBarExtra isLoading={isLoading} />;

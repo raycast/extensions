@@ -1,7 +1,8 @@
 import { List, Icon, Detail, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import PeriodDropdown from "./components/PeriodDropdown";
 import FathomRequest from "./utils/api";
+import PeriodDropdown from "./components/PeriodDropdown";
+import { Page } from "./types/Page";
 
 export default function Command() {
   const [dateFrom, setDateFrom] = useState<string>("");
@@ -13,7 +14,11 @@ export default function Command() {
     groupBy: "pathname",
     sortBy: "pageviews:desc",
     dateFrom: dateFrom,
-  });
+  }) as {
+    data: Page[] | undefined;
+    isLoading: boolean;
+    error: { title: string; message: string; markdown: string } | undefined;
+  };
 
   if (data) {
     const totalPageviews = data?.reduce((total, page) => total + parseInt(page.pageviews), 0) || 0;
