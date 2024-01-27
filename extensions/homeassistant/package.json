@@ -388,8 +388,42 @@
       ]
     },
     {
-      "name": "entitymenu",
-      "title": "Entity Menu",
+      "name": "entitymenu01",
+      "title": "Entity Menu 1",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu02",
+      "title": "Entity Menu 2",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu03",
+      "title": "Entity Menu 3",
       "description": "Show a Single Entity directly in the Menubar",
       "mode": "menu-bar",
       "interval": "5m",

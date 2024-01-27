@@ -1,5 +1,5 @@
 import { State } from "@lib/haapi";
-import { ensureShort, getFriendlyName } from "@lib/utils";
+import { ensureShort, getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
 import { CoverMenubarItem } from "@components/cover/menu";
 import { PersonMenubarItem } from "@components/person/menu";
@@ -18,7 +18,8 @@ import { VacuumMenubarItem } from "@components/vacuum/menu";
 import { getStateValue, getIcon } from "./utils";
 import { InputButtonMenubarItem } from "@components/input_button/menu";
 import { AutomationMenubarItem } from "@components/automation/menu";
-import { MenuBarExtra } from "@raycast/api";
+import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { useHAStates } from "@components/hooks";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
@@ -119,4 +120,20 @@ export function MenuBarExtraEntity(props: { state: State | undefined; isLoading?
       <MenuBarItemConfigureCommand />
     </MenuBarExtra>
   );
+}
+
+function getEntityIDfromPreferences() {
+  const prefs = getPreferenceValues();
+  const result = prefs.entity as string | undefined;
+  return result ?? "";
+}
+
+export default function SingleEntityMenuBarExtra() {
+  const { states, error, isLoading } = useHAStates();
+  if (error) {
+    return <MenuBarExtra title="?" icon={Icon.Warning} tooltip={getErrorMessage(error)} />;
+  }
+  const entityID = getEntityIDfromPreferences();
+  const entity = states?.find((state) => state.entity_id === entityID);
+  return <MenuBarExtraEntity state={entity} isLoading={isLoading} />;
 }
