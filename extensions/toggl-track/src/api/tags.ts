@@ -5,11 +5,11 @@ export function getMyTags() {
 }
 
 export function createTag(workspaceId: number, name: string) {
-  return post<Tag[]>(`/workspaces/${workspaceId}/tags`, { workspace_id: workspaceId, name });
+  return post<Tag>(`/workspaces/${workspaceId}/tags`, { workspace_id: workspaceId, name });
 }
 
 export function updateTag(workspaceId: number, tagId: number, name: string) {
-  return put<Tag[]>(`/workspaces/${workspaceId}/tags/${tagId}`, { workspace_id: workspaceId, name });
+  return put<Tag>(`/workspaces/${workspaceId}/tags/${tagId}`, { workspace_id: workspaceId, name });
 }
 
 export function deleteTag(workspaceId: number, tagId: number) {
