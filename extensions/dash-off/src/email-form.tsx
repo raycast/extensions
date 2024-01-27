@@ -42,9 +42,7 @@ function EmailMe() {
         message: "Sending email",
       });
       const [toAddress, ...restAddresses] = addresses;
-      console.log("------");
-      console.log(subject, body, toAddress, restAddresses);
-      console.log("------");
+
       await sendEmail(subject, body, toAddress, restAddresses);
       showHUD("Email sent!");
       popToRoot();
