@@ -2,7 +2,7 @@
 
 ## [Bug Fixes] - 2024-01-27
 
-Fixed a bug where OpenVPN would not start because of minimize flag.
+Fixed a bug where OpenVPN would not start because of minimize flag. UI now shows up and a short delay was added to wait for the UI to be ready for AppleScript.
 
 ## [Bug Fixes] - 2023-12-27
 
