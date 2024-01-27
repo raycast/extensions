@@ -73,15 +73,15 @@
       "mode": "view"
     },
     {
-      "name": "todayTimeline",
-      "title": "Today's Timeline",
-      "description": "Search or add to today's timeline.",
+      "name": "dailyNote",
+      "title": "Daily Note",
+      "description": "Search or add to daily note.",
       "mode": "view"
     },
     {
       "name": "listFiles",
-      "title": "Search Timelines",
-      "description": "Search timelines from specified folder.",
+      "title": "Search Notes",
+      "description": "Search notes from specified folder.",
       "mode": "view"
     }
   ],

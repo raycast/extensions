@@ -2,8 +2,8 @@
 
 ## [New Commands] - 2024-01-24
 
-- Add "Today's Timeline" command
-- Add "Search Timelines" command
+- Add "Daily Note" command
+- Add "Search Notes" command
 
 ## [Published Version] - 2021-01-26
 

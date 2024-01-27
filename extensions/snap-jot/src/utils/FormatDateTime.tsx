@@ -15,10 +15,6 @@ export function formatDateTime(date: Date, format: string, is12: boolean = false
     A: is12 ? ampm : "",
   };
 
-  console.log(
-    "prefix",
-    format.replace(/YYYY|YY|MM|DD|HH|mm|ss|A/g, (match) => tokens[match]),
-  );
   return format.replace(/YYYY|YY|MM|DD|HH|mm|ss|A/g, (match) => tokens[match]);
 }
 

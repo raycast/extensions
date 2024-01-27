@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { useState } from "react";
 
-interface ShowTimelineProps {
+interface ShowNoteProps {
   filePath: string;
 }
 
@@ -35,18 +35,14 @@ export default function Command() {
   const files = readFiles().reverse();
 
   return (
-    <List searchBarPlaceholder="Search Timelines">
+    <List searchBarPlaceholder="Search Notes">
       {files.map((file) => (
         <List.Item
           key={file.path}
           title={file.name}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Content"
-                icon={Icon.ChevronRight}
-                target={<ShowTimeline filePath={file.path} />}
-              />
+              <Action.Push title="View Content" icon={Icon.ChevronRight} target={<ShowNote filePath={file.path} />} />
             </ActionPanel>
           }
         />
@@ -55,7 +51,7 @@ export default function Command() {
   );
 }
 
-function ShowTimeline(props: ShowTimelineProps) {
+function ShowNote(props: ShowNoteProps) {
   const fileContent = fs.readFileSync(props.filePath, "utf-8");
   const bulletPoints = fileContent
     .split("\n")
@@ -65,7 +61,7 @@ function ShowTimeline(props: ShowTimelineProps) {
   const filteredBulletPoints = bulletPoints.filter((point) => point.toLowerCase().includes(searchText.toLowerCase()));
 
   return (
-    <List onSearchTextChange={setSearchText} throttle={true}>
+    <List searchBarPlaceholder="Search Memos" onSearchTextChange={setSearchText} throttle={true}>
       {filteredBulletPoints.map((point, index) => (
         <List.Item
           key={index}

@@ -49,7 +49,7 @@ export default function Command() {
     fs.writeFileSync(filePath, newContent);
     setBulletPoints(getBulletPoints(newContent, prefixPattern));
     setSearchText("");
-    showToast(Toast.Style.Success, "Added to Today's Timeline.");
+    showToast(Toast.Style.Success, "Memo Saved");
   };
 
   // Insert new bullet point at the top or bottom of the file
@@ -64,10 +64,10 @@ export default function Command() {
   };
 
   // Delete bullet point at the specified index
-  const deleteEntry = async (index: number) => {
+  const deleteMemo = async (index: number) => {
     const isConfirmed = await confirmAlert({
       title: "Confirm Deletion",
-      message: "Are you sure you want to delete this entry?",
+      message: "Are you sure you want to delete this memo?",
       primaryAction: {
         title: "Delete",
       },
@@ -91,7 +91,7 @@ export default function Command() {
         .join("\n");
       const appendUpdatedContent = removeBulletPoints + updatedContent + "\n";
       updateFileContent(appendUpdatedContent);
-      showToast(Toast.Style.Success, "Entry Deleted.");
+      showToast(Toast.Style.Success, "Memo Deleted");
     }
   };
 
@@ -102,13 +102,13 @@ export default function Command() {
 
   return (
     <List
-      searchBarPlaceholder="Search or Add to Timeline"
+      searchBarPlaceholder="Search or Add to Daily Note"
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         searchText.trim() ? (
           <ActionPanel>
-            <Action title="Add to Timeline" icon={Icon.PlusCircle} onAction={() => appendBulletPoint()} />
+            <Action title="Add to Daily Note" icon={Icon.PlusCircle} onAction={() => appendBulletPoint()} />
           </ActionPanel>
         ) : undefined
       }
@@ -126,10 +126,10 @@ export default function Command() {
                     target={<Detail markdown={point.replace(/^- /, "")} />}
                   />
                   <Action
-                    title="Delete Entry"
+                    title="Delete Memo"
                     icon={Icon.MinusCircle}
                     style={Action.Style.Destructive}
-                    onAction={() => deleteEntry(index)}
+                    onAction={() => deleteMemo(index)}
                   />
                   <Action.Open title="Open File" target={filePath} />
                 </ActionPanel>
@@ -138,10 +138,10 @@ export default function Command() {
           ))
         : searchText.trim() && (
             <List.Item
-              title="Add to Timeline"
+              title="Add to Daily Note"
               actions={
                 <ActionPanel>
-                  <Action title="Add to Timeline" icon={Icon.PlusCircle} onAction={() => appendBulletPoint()} />
+                  <Action title="Add to Daily Note" icon={Icon.PlusCircle} onAction={() => appendBulletPoint()} />
                 </ActionPanel>
               }
             />
@@ -153,7 +153,7 @@ export default function Command() {
 // Helper function to get bullet points from file content
 function getBulletPoints(content: string, prefixPattern: RegExp) {
   const lines = content.split("\n").filter((line) => prefixPattern.test(line));
-  return lines.reverse(); // Display Today's Timeline in reverse order.
+  return lines.reverse(); // Display Daily Note in reverse order.
 }
 
 // Helper function to escape regex special characters
