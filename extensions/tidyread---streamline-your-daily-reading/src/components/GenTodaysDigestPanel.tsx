@@ -19,6 +19,7 @@ import { NO_API_KEY, NO_FEEDS, matchError } from "../utils/error";
 import DigestDetail from "./DigestDetail";
 import dayjs from "dayjs";
 import { pick } from "lodash";
+import { formatSeconds } from "../utils/util";
 
 const navTitleMap = {
   generating: "Generating Digest",
@@ -81,7 +82,7 @@ export default function GenTodaysDigestPanel({
   const md = `
   ${
     status === "failed"
-      ? `> **Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed) to know more.\n`
+      ? `> ❗**Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed) to know more.\n`
       : ""
   }
   📊 \`Total Items\`  ${pullItemsStatus === "success" ? `**${total}**` : pullItemsStatusMap[pullItemsStatus]}\n
@@ -95,7 +96,7 @@ export default function GenTodaysDigestPanel({
   `
       : ""
   }\n
-  ⌛ \`Total Time\`  ${totalTime ? `**${totalTime}** s` : "--"}
+  ⌛ \`Total Time\`  ${totalTime ? `**${formatSeconds(totalTime)}**` : "--"}
   
   ### 💡 Tips
   - Can't stand manually generating? Check [this](https://tidyread.info/docs/automate-daily-digest) to free your hand.

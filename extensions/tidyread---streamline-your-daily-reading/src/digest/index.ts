@@ -82,7 +82,7 @@ async function getAllFilteredItems(
         },
         error,
       );
-      throw error;
+      throw new Error(`Failed to parse RSS feed ${feed.url}: ${error.message}`);
     }
   }
 
@@ -145,7 +145,11 @@ async function summarizeItem(
       type: needSummarize ? "ai" : "raw",
     });
 
-    return { ...item, summary: summary, status: needSummarize ? "summraized" : "raw" };
+    // 如果开新对象，外部并发的titles赋值会无效
+    return Object.assign(item, {
+      summary: summary,
+      status: needSummarize ? ("summraized" as const) : ("raw" as const),
+    });
   } catch (error: any) {
     console.error(`Failed to summarize: ${error.message}`);
     onProgress?.({
@@ -155,14 +159,13 @@ async function summarizeItem(
       type: needSummarize ? "ai" : "raw",
     });
 
-    return {
-      ...item,
-      summary: `> **Fail to summarize**, error is: \`${error.message}\`. Raw content is below:\n\n${ellipsisContent(
-        item.content || "",
-        THRESHOLDS_FOR_TRUNCATION,
-      )}`,
-      status: "failedToSummarize",
-    };
+    // 如果开新对象，外部并发的titles赋值会无效
+    return Object.assign(item, {
+      summary: `> ❗ **Failed to summarize**, error is: \`${
+        error.message
+      }\`. Raw content is below:\n\n${ellipsisContent(item.content || "", THRESHOLDS_FOR_TRUNCATION)}`,
+      status: "failedToSummarize" as const,
+    });
   }
 }
 
@@ -171,7 +174,7 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
   // const prefix = `# ${title}  \`at ${dayjs(time).format('HH:mm')}\`\n\n`;
   const prefix = provider.available
     ? ``
-    : `> **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the original excerpts.\n\n`;
+    : `> 💡 **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the original excerpts.\n\n`;
   let digest = `${prefix}`;
 
   digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have a valid RSS Link** can be summarized.\nThe content pulled by rss will be filtered according to the \`Time Span\` you provide, keeping only the content in the time span.\n\n## Summary\n`;
@@ -185,7 +188,7 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
   }
 
   if (items.some((item) => item.status === "failedToSummarize")) {
-    digest += `\n\n---\n\n### Why Some Articles Failed To Be Summarized By AI?\n\nYou can check out [this document](https://www.tidyread.info/docs/why-some-articles-fail-to-be-summarized) to understand why and how to fix it.\n\n`;
+    digest += `\n\n---\n\n### 🚧 Why Some Articles Failed To Be Summarized By AI?\n\nYou can check out [this document](https://www.tidyread.info/docs/why-some-articles-fail-to-be-summarized) to understand why and how to fix it.\n\n`;
   }
 
   return digest;
@@ -198,7 +201,7 @@ function formatItemForDigest(item: RSSItemWithStatus, prefixStr?: string): strin
   )}))\n${item.coverImage ? `![cover](${item.coverImage})\n\n` : ""}${
     item.summary || item.content?.substring(0, THRESHOLDS_FOR_TRUNCATION) + "..."
   }\n\n[Source Link](${normalizeUrlForMarkdown(item.link ?? "")})\n\n${
-    item.status === "summraized" ? `\`AI Summarized\`  ` : ""
+    item.status === "summraized" ? `\`✨AI Summarized\`  ` : ""
   }${["raw", "failedToSummarize"].includes(item.status) ? `\`Raw Content\`  ` : ""}\`Pub Time: ${dayjs(
     item.pubDate,
   ).format("YYYY-MM-DD HH:mm")}\`  \`Creator: ${item.creator ?? "none"}\`\n\n`;

@@ -77,6 +77,16 @@ export default function formatDate(date: string | number | Date) {
   }
 }
 
+export function formatSeconds(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds}s`;
+  } else {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}min ${remainingSeconds}s`;
+  }
+}
+
 export function retry<T>(
   fn: () => Promise<T>,
   retries = 3,
