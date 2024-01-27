@@ -4,6 +4,8 @@
 
 The fastest way to dash off a quick email to yourself and others. Inspired by [Andrew Wilkinson's tweet](https://twitter.com/awilkinson/status/1748429141601579328).
 
+**Please note:** This extension only supports Gmail accounts.
+
 ## Commands
 
 - **Compose Email:** This command gives you more control over the recepients, subject and body of the email. By default, it will pre-select the default receipients in the Extesions Preferences and use the default subject line.
