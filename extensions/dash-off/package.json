@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dash-off",
   "title": "Dash Off",
-  "description": "The fastest way to email yourself",
+  "description": "The fastest way to dash off a quick email to yourself and others",
   "icon": "command-icon.png",
   "author": "peduarte",
   "categories": [
