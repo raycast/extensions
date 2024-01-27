@@ -86,6 +86,7 @@ export default function Command() {
                 />
               ) : (
                 <Action.OpenInBrowser
+                  icon={Icon.AppWindowList}
                   title="Add to Calendar"
                   url={`https://calendar.google.com/calendar/u/0/r/eventedit?text=${
                     contest.name
