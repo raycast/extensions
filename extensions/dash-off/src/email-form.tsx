@@ -102,8 +102,8 @@ function EmailMe() {
       <Form.TextArea
         autoFocus
         id="note"
-        title="Note"
-        placeholder="You're gonna love this!"
+        title="Message"
+        placeholder="A quick reminder to myself"
         value={body}
         onChange={setBody}
       />
