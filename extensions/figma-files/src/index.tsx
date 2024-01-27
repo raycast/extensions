@@ -8,7 +8,7 @@ import { useCachedPromise } from "@raycast/utils";
 import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
 
-export default function Command({ launchContext } : Readonly<LaunchProps<{launchContext: { query: string}}>>) {
+export default function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
