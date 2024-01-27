@@ -386,6 +386,23 @@
           "placeholder": "cover.mycover1,cover.bath*"
         }
       ]
+    },
+    {
+      "name": "entitymenu",
+      "title": "Entity Menu",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
     }
   ],
   "preferences": [
