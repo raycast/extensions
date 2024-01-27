@@ -9,9 +9,9 @@ const baseUrl = "https://api.track.toggl.com/api/v9";
 const authHeader = { Authorization: `Basic ${base64encode(`${togglApiToken}:api_token`)}` };
 
 export const get = <T>(endpoint: string) => togglFetch<T>("GET", endpoint);
-export const post = <T = void>(endpoint: string, body: unknown) => togglFetch<T>("POST", endpoint, body);
-export const patch = <T = void>(endpoint: string, body: unknown) => togglFetch<T>("PATCH", endpoint, body);
-export const put = <T = void>(endpoint: string, body: unknown) => togglFetch<T>("PUT", endpoint, body);
+export const post = <T = void>(endpoint: string, body?: unknown) => togglFetch<T>("POST", endpoint, body);
+export const patch = <T = void>(endpoint: string, body?: unknown) => togglFetch<T>("PATCH", endpoint, body);
+export const put = <T = void>(endpoint: string, body?: unknown) => togglFetch<T>("PUT", endpoint, body);
 export const remove = (endpoint: string) => togglFetch("DELETE", endpoint);
 
 async function togglFetch<T>(method: string, endpoint: string, body?: unknown): Promise<T>;
