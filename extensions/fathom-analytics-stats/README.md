@@ -31,7 +31,7 @@ Note that `Current Visitors` and `Current Visitors Menu Bar` are refreshed every
 ## Setup
 1. Sign in to your Fathom account.
 2. Obtain an API token [here](https://app.usefathom.com/api) and site ID from Fathom your site settings.
-3. Add the API token and site ID to the extension preferences in Raycast.
+3. Add the API token and site ID to the extension preferences in Raycast. If you have selected a site-specific API token, make sure you choose the correct site you want to view in the extension.
 
 ## Usage
 1. Open Raycast.
@@ -39,7 +39,7 @@ Note that `Current Visitors` and `Current Visitors Menu Bar` are refreshed every
 3. Select a command and press `Enter` to execute it.
 
 ## Troubleshooting
-For now, Fathom's API is rate limited to 10 requests per minute on aggregations — for the commands, and currents — for the menu bar. If you exceed this limit, you will receive a (nicely designed) toast error. If you receive this error, please wait a minute before trying again.
+For now, Fathom's API is rate limited to 10 requests per minute on aggregations — for the commands, and currents — for the menu bar. If you exceed this limit, you will an error. If you receive this error, please wait a minute before trying again.
 
 Also, the `aggregation` API endpoint is only accurate on data from March 2021. Learn more about it [here](https://usefathom.com/api#aggregation).
 

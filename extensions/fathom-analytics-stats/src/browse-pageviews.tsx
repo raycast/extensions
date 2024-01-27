@@ -48,5 +48,7 @@ export default function Command() {
       title: error.title,
       message: error.message,
     });
+
+    return <Detail markdown={error.markdown} />;
   }
 }
