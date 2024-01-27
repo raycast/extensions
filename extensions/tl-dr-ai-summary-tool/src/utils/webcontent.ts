@@ -64,6 +64,7 @@ export async function fetchContent(url: string) {
       if (!content) {
         // remove unused attributes
         $("*").each((index, element) => {
+          // @ts-expect-error attribs is safe to use
           const attributes = element.attribs;
           for (const attr in attributes) {
             if (attr !== "id" && attr !== "content") {
