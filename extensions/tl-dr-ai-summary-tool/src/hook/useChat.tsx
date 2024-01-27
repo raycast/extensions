@@ -37,8 +37,17 @@ export function useChat(saved: ChatBox): ChatHook {
       // 对文章进行提问
       const previous = messages[messages.length - 1];
       msg.prompt = [
-        ...(previous ? previous.prompt : []),
-        ...(previous ? [{ role: "assistant", content: previous.answer }] : []),
+        ...(previous
+          ? previous.prompt
+          : [
+              {
+                role: "user",
+                content: "You are an artificial intelligence assistant, please try to answer my questions in English.",
+              },
+            ]),
+        ...(previous
+          ? [{ role: "assistant", content: previous.answer }]
+          : [{ role: "assistant", content: "Sure. How can I help you." }]),
         {
           role: "user",
           content: content.content,
