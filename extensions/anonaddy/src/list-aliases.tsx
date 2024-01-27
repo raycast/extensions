@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import {
   Action,
   ActionPanel,
@@ -10,21 +12,19 @@ import {
   showHUD,
 } from "@raycast/api";
 
-import { useEffect, useState } from "react";
-import { deleteAlias } from "./utils/delete";
-import { aliasObject, listAllAliases } from "./utils/list";
-import { toggleAlias } from "./utils/toggle";
+import * as api from "./api/alias";
+import type { Alias } from "./api/alias";
 
 const ListAliases = () => {
   const [loading, setLoading] = useState(true);
-  const [filteredList, filterList] = useState<aliasObject[]>([]);
+  const [filteredList, filterList] = useState<Alias[]>([]);
 
   useEffect(() => {
     init();
   }, []);
 
   const init = async () => {
-    const allAliases = await listAllAliases();
+    const allAliases = await api.get();
 
     filterList(allAliases);
     setLoading(false);
@@ -65,11 +65,11 @@ const ListAliases = () => {
                   <Action
                     title="Activate"
                     onAction={async () => {
-                      const success = await toggleAlias(alias.id, true);
+                      try {
+                        await api.toggle(alias.id, true);
 
-                      if (success) {
                         showHUD("✅ Alias activated");
-                      } else {
+                      } catch (error) {
                         showHUD("❌ Error activating alias");
                       }
                     }}
@@ -79,12 +79,12 @@ const ListAliases = () => {
                   <Action
                     title="Deactivate"
                     onAction={async () => {
-                      const success = await toggleAlias(alias.id, false);
+                      try {
+                        await api.toggle(alias.id, false);
 
-                      if (success) {
                         showHUD("✅ Alias deactivated");
                         popToRoot();
-                      } else {
+                      } catch (error) {
                         showHUD("❌ Error deactivating alias");
                       }
                     }}
@@ -102,12 +102,12 @@ const ListAliases = () => {
                     });
 
                     if (choice) {
-                      const success = await deleteAlias(alias.id);
+                      try {
+                        await api.remove(alias.id);
 
-                      if (success) {
                         showHUD("✅ Alias deleted");
                         popToRoot();
-                      } else {
+                      } catch (error) {
                         showHUD("❌ Error deleting alias");
                       }
                     }

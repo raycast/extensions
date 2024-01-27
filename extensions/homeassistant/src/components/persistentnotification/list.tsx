@@ -1,4 +1,4 @@
-import { showToast, Toast, MenuBarExtra, Icon } from "@raycast/api";
+import { showToast, Toast, MenuBarExtra, Icon, open } from "@raycast/api";
 import { callService } from "home-assistant-js-websocket";
 import { getHAWSConnection, ha } from "@lib/common";
 import { ensureShort, getErrorMessage } from "@lib/utils";

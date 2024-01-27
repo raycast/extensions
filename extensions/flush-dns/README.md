@@ -2,4 +2,4 @@
 
 Flush the DNS cache
 
-Works in MacOS 10.6 - 13.*
+Works in MacOS 10.6 - 14.*

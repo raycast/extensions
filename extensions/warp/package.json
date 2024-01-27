@@ -5,6 +5,11 @@
   "description": "Open Warp tabs/windows and launch configurations.",
   "icon": "extension-icon.png",
   "author": "joetannenbaum",
+  "contributors": [
+    "danulqua",
+    "theRubberDuckiee",
+    "hakob_nersesian"
+  ],
   "owner": "warpdotdev",
   "access": "public",
   "categories": [

@@ -1,5 +1,13 @@
 # Tmux Sessioner Changelog
 
+## [v0.0.4] - 2024-01-19
+### Fixed
+- `Change Default Terminal` wil be launched automatically when there isn't one selected.
+
+## [v0.0.3] - 2023-09-05
+### Fixed
+- Change the filtering of the terminal app to use bundle ID, in order to support systems in other languages.
+
 ## [v0.0.2] - 2021-06-20
 ### Added
 - Support WezTerm Terminal 🖥️

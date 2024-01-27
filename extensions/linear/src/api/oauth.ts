@@ -18,7 +18,7 @@ export async function authorize() {
   }
 
   const authRequest = await oauthClient.authorizationRequest({
-    endpoint: "https://linear.oauth-proxy.raycast.com/authorize",
+    endpoint: "https://linear.oauth.raycast.com/authorize",
     clientId,
     scope: "read write",
     extraParameters: { actor: "user" },
@@ -33,9 +33,9 @@ export async function authorize() {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
-  const response = await fetch("https://linear.oauth-proxy.raycast.com/token", {
+  const response = await fetch("https://linear.oauth.raycast.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -48,7 +48,8 @@ export async function fetchTokens(
   });
 
   if (!response.ok) {
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokens = await response.json();

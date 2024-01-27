@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useTask } from "./hooks/useTask";
+import { useUser } from "./hooks/useUser";
 import { Task, TaskStatus } from "./types/task";
-import { TIME_BLOCK_IN_MINUTES, formatStrDuration } from "./utils/dates";
+import { TIME_BLOCK_IN_MINUTES, formatPriority, formatPriorityIcon, formatStrDuration } from "./utils/dates";
 
 type DropdownStatus = "OPEN" | "DONE";
 
@@ -44,28 +45,34 @@ const StatusDropdown = (props: StatusDropdownProps) => {
 
 // Main Function
 function TaskList() {
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { currentUser } = useUser();
+  const defaults = useMemo(
+    () => ({
+      schedulerVersion: currentUser?.features.scheduler || 14,
+    }),
+    [currentUser]
+  );
 
-  const { getAllTasks, addTime, updateTask, doneTask } = useTask();
+  const { useFetchTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
 
-  // Get tasks via API
-  useEffect(() => {
-    const getTasks = async () => {
-      try {
-        setIsLoading(true);
-        const tasks = await getAllTasks();
-        setTasks(tasks ? tasks : []);
-      } catch (error) {
-        console.error("Error while fetching tasks", error);
-      } finally {
-        setIsLoading(false);
+  const { data: tasksData, isLoading } = useFetchTasks();
+  const tasks = useMemo(() => tasksData ?? [], [tasksData]);
+
+  const handleUpdatePriority = async (task: Task, priority: string) => {
+    await showToast(Toast.Style.Animated, "Updating priority...");
+    try {
+      task.priority = priority;
+      const updatedPriority = await updateTask(task);
+      if (updatedPriority) {
+        showToast(Toast.Style.Success, `Updated priority successfully!`);
+      } else {
+        throw new Error("Update task priority failed.");
       }
-    };
-
-    void getTasks();
-  }, []);
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error while updating priority", message: String(error) });
+    }
+  };
 
   // Add time to task function
   const handleAddTime = async (task: Task, time: number) => {
@@ -88,7 +95,22 @@ function TaskList() {
     try {
       const setTaskDone = await doneTask(task);
       if (setTaskDone) {
-        showToast(Toast.Style.Success, `Marked "${task.title}" done!`);
+        showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
+      } else {
+        throw new Error("Update task request failed.");
+      }
+    } catch (error) {
+      showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+    }
+  };
+
+  // Set task to incomplete
+  const handleIncompleteTask = async (task: Task) => {
+    await showToast(Toast.Style.Animated, "Updating task...");
+    try {
+      const setTaskDone = await incompleteTask(task);
+      if (setTaskDone) {
+        showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
       } else {
         throw new Error("Update task request failed.");
       }
@@ -119,9 +141,9 @@ function TaskList() {
   // Filter tasks by status
   const filteredTasks = useMemo(() => {
     if (selectedStatus === "DONE") {
-      return tasks.filter((task) => task.status === "ARCHIVED" || task.status === "COMPLETE");
+      return tasks.filter((task) => task.status === "ARCHIVED");
     }
-    return tasks.filter((task) => task.status !== "ARCHIVED" && task.status !== "COMPLETE");
+    return tasks.filter((task) => task.status !== "ARCHIVED");
   }, [tasks, selectedStatus]);
 
   // Group tasks by status
@@ -140,6 +162,36 @@ function TaskList() {
 
   const getListAccessories = (task: Task) => {
     const list = [];
+
+    if (defaults.schedulerVersion > 14) {
+      if (task.onDeck) {
+        list.push({
+          tag: {
+            value: "",
+            color: Color.Green,
+          },
+          tooltip: "Remove from Up Next",
+          icon: Icon.ArrowNe,
+        });
+      } else {
+        list.push({
+          tag: {
+            value: "",
+            color: Color.SecondaryText,
+          },
+          tooltip: "Send to Up Next",
+          icon: Icon.ArrowNe,
+        });
+      }
+      list.push({
+        tag: {
+          value: "",
+          color: Color.PrimaryText,
+        },
+        tooltip: "Priority: " + formatPriority(task.priority),
+        icon: formatPriorityIcon(task.priority),
+      });
+    }
 
     if (task.status !== "ARCHIVED" && task.snoozeUntil) {
       list.push({
@@ -206,7 +258,7 @@ function TaskList() {
     >
       {Object.entries(groupedTasks)
         .sort(([statusA], [statusB]) => {
-          const statusOrder: TaskStatus[] = ["NEW", "IN_PROGRESS", "SCHEDULED", "COMPLETE", "CANCELLED", "ARCHIVED"];
+          const statusOrder: TaskStatus[] = ["IN_PROGRESS", "SCHEDULED", "NEW", "COMPLETE", "CANCELLED", "ARCHIVED"];
           return statusOrder.indexOf(statusA as TaskStatus) - statusOrder.indexOf(statusB as TaskStatus);
         })
         .map(([status, tasks]) => {
@@ -236,11 +288,61 @@ function TaskList() {
                     <ActionPanel>
                       {task.status !== "ARCHIVED" && (
                         <>
+                          {defaults.schedulerVersion > 14 && (
+                            <ActionPanel.Submenu
+                              title="Change Priority"
+                              icon={{ source: Icon.Signal1 }}
+                              shortcut={{ modifiers: ["cmd"], key: "i" }}
+                            >
+                              <Action
+                                icon={{ source: Icon.FullSignal }}
+                                title="Critical"
+                                onAction={() => {
+                                  const priority = "P1";
+                                  handleUpdatePriority(task, priority);
+                                }}
+                              />
+
+                              <Action
+                                icon={{ source: Icon.Signal3 }}
+                                title="High Priority"
+                                onAction={() => {
+                                  const priority = "P2";
+                                  handleUpdatePriority(task, priority);
+                                }}
+                              />
+
+                              <Action
+                                icon={{ source: Icon.Signal2 }}
+                                title="Medium Priority"
+                                onAction={() => {
+                                  const priority = "P3";
+                                  handleUpdatePriority(task, priority);
+                                }}
+                              />
+                              <Action
+                                icon={{ source: Icon.Signal1 }}
+                                title="Low Priority"
+                                onAction={() => {
+                                  const priority = "P1";
+                                  handleUpdatePriority(task, priority);
+                                }}
+                              />
+                            </ActionPanel.Submenu>
+                          )}
                           <ActionPanel.Submenu
                             title="Add Time"
                             icon={{ source: Icon.Stopwatch }}
                             shortcut={{ modifiers: ["cmd"], key: "t" }}
                           >
+                            <Action
+                              icon={{ source: Icon.Circle }}
+                              title="Add 15min"
+                              onAction={() => {
+                                const time = 15;
+                                handleAddTime(task, time);
+                              }}
+                            />
                             <Action
                               icon={{ source: Icon.CircleProgress25 }}
                               title="Add 30min"
@@ -286,7 +388,7 @@ function TaskList() {
                           />
                           <Action
                             icon={Icon.Checkmark}
-                            title="Mark as done"
+                            title="Mark as Done"
                             onAction={() => {
                               handleDoneTask(task);
                             }}
@@ -298,6 +400,15 @@ function TaskList() {
                         url={`https://app.reclaim.ai/tasks/${task.id}`}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                       />
+                      {task.status === "ARCHIVED" && (
+                        <Action
+                          icon={Icon.Undo}
+                          title="Mark Incomplete"
+                          onAction={() => {
+                            handleIncompleteTask(task);
+                          }}
+                        />
+                      )}
                     </ActionPanel>
                   }
                 />

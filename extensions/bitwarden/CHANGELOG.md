@@ -1,5 +1,18 @@
 # Bitwarden Changelog
 
+## [Error handling] - 2023-11-30
+
+- Improved error handling
+- Fix "not logged in" error when locking the vault
+
+## [Fix] - 2023-09-08
+
+- Fixed irregular identity table
+
+## [Fix] - 2023-08-29
+
+- Fixed crash in Logout command
+
 ## [Improvements] - 2023-08-15
 
 - Adds ability to paste TOTP code into active application

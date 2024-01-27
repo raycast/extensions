@@ -22,7 +22,7 @@ export function ScriptEditInBrowserAction(props: { state: State }): JSX.Element 
   const s = props.state;
   if (s.entity_id.startsWith("script")) {
     const editId = s.entity_id.substring("script.".length);
-    const url = ha.urlJoin(`config/script/edit/${editId}`);
+    const url = ha.navigateUrl(`config/script/edit/${editId}`);
     return (
       <Action.OpenInBrowser url={url} title="Edit" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "e" }} />
     );
@@ -33,7 +33,7 @@ export function ScriptEditInBrowserAction(props: { state: State }): JSX.Element 
 export function ScriptDebugInBrowserAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
   if (s.entity_id.startsWith("script")) {
-    const url = ha.urlJoin(`config/script/trace/${s.entity_id}`);
+    const url = ha.navigateUrl(`config/script/trace/${s.entity_id}`);
     return <Action.OpenInBrowser url={url} title="Debug" icon={Icon.Bug} shortcut={{ modifiers: ["cmd"], key: "d" }} />;
   }
   return null;

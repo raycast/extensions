@@ -18,15 +18,36 @@ export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
   const gpt = useChatGPT();
-  const { useAzure, azureDeployment } = getConfiguration();
+  const { useAzure } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
 
   useEffect(() => {
     if (!useAzure) {
-      gpt.listModels().then((res) => {
-        const models = res.data.data;
-        setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
-      });
+      gpt.models
+        .list()
+        .then((res) => {
+          const models = res.data;
+          setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
+        })
+        .catch(async (err) => {
+          console.error(err);
+          if (!(err instanceof Error || err.message)) {
+            return;
+          }
+          await showToast(
+            err.message.includes("401")
+              ? {
+                  title: "Could not authenticate to API",
+                  message: "Please ensure that your API token is valid",
+                  style: Toast.Style.Failure,
+                }
+              : {
+                  title: "Error",
+                  message: err.message,
+                  style: Toast.Style.Failure,
+                }
+          );
+        });
     }
   }, [gpt]);
 

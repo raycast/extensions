@@ -1,5 +1,33 @@
 # Things Changelog
 
+## [Minor improvements] - 2023-10-31
+
+- Use the Things flat icon in the menu bar and actions to make it stand out
+- Add a preference to hide the top Things to-do in the menu bar
+
+## [Quick Add To-Do using natural language processing (NLP)] - 2023-09-05
+
+Ever wanted to add a new to-do to Things with plain, natural text? Well, it's possible now with the new `Quick Add To-Do` command. Just type in your to-do text, maybe set some notes and checklist items and you're good to go. 
+
+Under the hood, it'll analyze and process your text to extract these parameters:
+- The title
+- The start date
+- The project or area the to-do belongs to
+- The heading within a project to add to.
+- The deadline
+- The different tags
+- If it's completed or canceled
+
+Here are some examples:
+- Book flights today in my Trips list
+- Add milk to my groceries list for tomorrow with Errand tag
+- Respond to mails
+- Buy a new car by the end of the year
+- Collect dry cleaning this evening at 6PM
+- Fix landing page this friday in bugs heading of Revamp Homepage project
+- Add a completed task called “Ship feature” to my Work list
+- Respond to mails by this week-end
+
 ## [Big update] - 2023-08-11
 
 A big update has been released for the Things extension. Here's what's new:

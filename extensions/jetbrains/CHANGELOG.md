@@ -1,5 +1,22 @@
 # Jetbrains Changelog
 
+## [Shell Script Fixes] - 2024-01-23
+
+- Use correct script name from config
+- Better handling of missing scripts 
+
+## [Toolbox 2.0 Updates] - 2023-07-22
+
+- Post release 2.0 fixes
+- General fixes for different installation paths
+- Icon fixes
+- Handle apps that don't work properly
+- Handle apps that are broken by 2.0 installation
+
+## [Rider tweak] - 2023-07-22
+
+- Small tweak for Rider on Toolbox 2.0
+
 ## [JetBrains Toolbox 2.0 Support] - 2023-07-04
 
 - Update to support new Toolbox 2.0 release

@@ -2,8 +2,14 @@ import { ActionPanel, Icon, showToast, Action, Image, Keyboard, Toast } from "@r
 import { formatDistanceToNow } from "date-fns";
 
 import { useUsers } from "../../hooks";
-import { getPropertyIcon, notionColorToTintColor, patchPage } from "../../utils/notion";
-import { DatabaseProperty, DatabasePropertyOption, PagePropertyType } from "../../utils/types";
+import {
+  getPropertyIcon,
+  notionColorToTintColor,
+  patchPage,
+  PagePropertyType,
+  DatabaseProperty,
+  DatabasePropertyOption,
+} from "../../utils/notion";
 
 export function ActionEditPageProperty(props: {
   databaseProperty: DatabaseProperty;
@@ -76,6 +82,35 @@ export function ActionEditPageProperty(props: {
                   setPageProperty({ [databaseProperty.id]: { select: { id: opt.id } } });
                 } else {
                   setPageProperty({ [databaseProperty.id]: { select: null } });
+                }
+              }}
+            />
+          ))}
+        </ActionPanel.Submenu>
+      );
+    }
+
+    case "status": {
+      const value = pageProperty && "status" in pageProperty ? pageProperty.status?.id : null;
+      return (
+        <ActionPanel.Submenu title={title} icon={icon} shortcut={shortcut}>
+          {(options as DatabasePropertyOption[])?.map((opt) => (
+            <Action
+              key={opt.id}
+              icon={
+                (opt.icon ? opt.icon : opt.id !== "_select_null_")
+                  ? {
+                      source: opt.icon ? opt.icon : value === opt.id ? Icon.Checkmark : Icon.Circle,
+                      tintColor: notionColorToTintColor(opt.color),
+                    }
+                  : undefined
+              }
+              title={(opt.name ? opt.name : "Untitled") + (opt.icon && value === opt.id ? "  ✓" : "")}
+              onAction={() => {
+                if (opt.id && opt.id !== "_select_null_") {
+                  setPageProperty({ [databaseProperty.id]: { status: { id: opt.id } } });
+                } else {
+                  setPageProperty({ [databaseProperty.id]: { status: null } });
                 }
               }}
             />

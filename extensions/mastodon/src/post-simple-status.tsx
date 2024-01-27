@@ -24,15 +24,16 @@ export interface CommandProps extends LaunchProps {
 export default function SimpleCommand({ children, draftValues, launchContext }: CommandProps) {
   const { handleSubmit, latestStatus, openActionText, itemProps, focus } = useSubmitStatus(draftValues, launchContext);
 
-  const { username, getUsername } = useMe();
-  if (username.length === 0) getUsername();
+  const { username, getUsername, isLoading } = useMe();
 
   useEffect(() => {
+    getUsername();
     itemProps.sensitive.value ? focus("spoiler_text") : focus("status");
   }, [itemProps.sensitive.value]);
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title={"Toot"} icon={Icon.Upload} />

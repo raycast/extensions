@@ -1,5 +1,5 @@
-import { List, Toast, showToast } from "@raycast/api";
-import { GMailMessageListItem } from "./components/message/list";
+import { LaunchProps, List, Toast, showToast } from "@raycast/api";
+import { GMailMessageListItem, QueryListDropdown } from "./components/message/list";
 import { useState } from "react";
 import { generateQuery, getGMailMessages } from "./lib/gmail";
 import { isMailUnread } from "./components/message/utils";
@@ -9,9 +9,11 @@ import { useLabels } from "./components/message/hooks";
 import { GMailContext } from "./components/context";
 import View from "./components/view";
 import { getGMailClient } from "./lib/withGmailClient";
+import { useMessageListSelection } from "./components/selection/hooks";
 
-function MessageRootCommand() {
-  const [searchText, setSearchText] = useState<string>();
+function MessageRootCommand(props: LaunchProps<{ arguments: Arguments.Mails }>) {
+  const defaultQuery = props.arguments.query && props.arguments.query.length > 0 ? props.arguments.query : undefined;
+  const [searchText, setSearchText] = useState<string | undefined>(defaultQuery);
   const query = generateQuery({ baseQuery: ["-is:draft", "label=INBOX"], userQuery: searchText });
   const { gmail } = getGMailClient();
   const { isLoading, data, error, revalidate } = useCachedPromise(
@@ -23,6 +25,7 @@ function MessageRootCommand() {
   );
   const { labels } = useLabels();
   const [showDetails, setShowDetails] = useCachedState("show-details", false, { cacheNamespace: "mails" });
+  const { selectionController } = useMessageListSelection(data?.map((m) => m.data));
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
   }
@@ -34,11 +37,28 @@ function MessageRootCommand() {
     return parts.join("/");
   };
 
+  const hideLabelIDs = ["TRASH", "DRAFT", "SPAM", "INBOX"];
+
   const unread = data?.filter((m) => isMailUnread(m.data));
   const rest = data?.filter((m) => !isMailUnread(m.data));
   return (
     <GMailContext.Provider value={labels}>
-      <List isLoading={isLoading} onSearchTextChange={setSearchText} isShowingDetail={showDetails} throttle>
+      <List
+        isLoading={isLoading}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        isShowingDetail={showDetails}
+        searchBarAccessory={
+          <QueryListDropdown
+            defaultName="Inbox"
+            defaultValue={defaultQuery}
+            labels={labels}
+            setSearchText={setSearchText}
+            hideLabelIDs={hideLabelIDs}
+          />
+        }
+        throttle
+      >
         <List.Section
           title="Unread"
           subtitle={unread !== undefined && unread.length > 0 ? unread?.length.toString() : undefined}
@@ -52,6 +72,10 @@ function MessageRootCommand() {
               onDetailsShownChanged={setShowDetails}
               allUnreadMessages={unread.map((u) => u.data)}
               showUnreadAccessory={false}
+              searchText={searchText}
+              setSearchText={setSearchText}
+              query={query}
+              selectionController={selectionController}
             />
           ))}
         </List.Section>
@@ -63,6 +87,10 @@ function MessageRootCommand() {
               onRevalidate={revalidate}
               detailsShown={showDetails}
               onDetailsShownChanged={setShowDetails}
+              searchText={searchText}
+              setSearchText={setSearchText}
+              query={query}
+              selectionController={selectionController}
             />
           ))}
         </List.Section>
@@ -77,10 +105,10 @@ function MessageRootCommand() {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Mails }>) {
   return (
     <View>
-      <MessageRootCommand />
+      <MessageRootCommand {...props} />
     </View>
   );
 }

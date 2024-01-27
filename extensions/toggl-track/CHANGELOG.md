@@ -1,5 +1,19 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-01-15
+
+- Remove `refresh` action.
+- Fix project dropdown in time entry form.
+- Fix today's duration timer.
+
+## [Refactor] - 2024-01-04
+
+- Refactor extension to use updated Raycast utilities.
+
+## [New Feature] - 2023-02-28
+
+- Add ability to choose a [project task](https://support.toggl.com/en/articles/2220738-tasks) when creating a new time entry.
+
 ## [Enhancements] - 2023-07-05
 
 - New preference that allows archived projects to be hidden (default: true).

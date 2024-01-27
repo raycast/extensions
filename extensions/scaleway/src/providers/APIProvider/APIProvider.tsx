@@ -4,15 +4,20 @@
 // it's was remove inside raycast https://developers.raycast.com/changelog#1.46.0-2023-01-18
 import 'cross-fetch/polyfill'
 import {
-  Account,
   AppleSilicon,
   BareMetal,
+  Block,
+  Cockpit,
   Container,
+  DocumentDB,
   Domain,
   Function,
   IAM,
   IOT,
+  IPAM,
+  IPFS,
   Instance,
+  Jobs,
   K8S,
   LB,
   MNQ,
@@ -24,8 +29,10 @@ import {
   VPC,
   VPCGW,
   Webhosting,
-  createClient,
+  createAdvancedClient,
   enableConsoleLogger,
+  withProfile,
+  withUserAgent,
 } from '@scaleway/sdk'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
@@ -34,9 +41,11 @@ import { getPreferenceUser } from './helpers'
 const clientSetting = getPreferenceUser()
 
 type APIContextValue = {
-  accountV2alpha1: Account.v2alpha1.API
-  appleSiliconV1alpha1: AppleSilicon.v1alpha1.API
+  appleSiliconV1Alpha1: AppleSilicon.v1alpha1.API
+  blockV1Alpha1: Block.v1alpha1.API
+  cockpitV1Beta1: Cockpit.v1beta1.API
   containerV1Beta1: Container.v1beta1.API
+  documentDBV1Beta1: DocumentDB.v1beta1.API
   domainRegistrarV2beta1: Domain.v2beta1.RegistrarAPI
   domainV2beta1: Domain.v2beta1.API
   elasticMetalV1: BareMetal.v1.API
@@ -44,6 +53,9 @@ type APIContextValue = {
   iamV1alpha1: IAM.v1alpha1.API
   instanceV1: Instance.v1.API
   iotV1: IOT.v1.API
+  ipamV1: IPAM.v1.API
+  ipfsV1Alpha1: IPFS.v1alpha1.API
+  jobsV1alpha1: Jobs.v1alpha1.API
   k8sV1: K8S.v1.API
   loadbalancerV1: LB.v1.ZonedAPI
   mnqV1alpha1: MNQ.v1alpha1.API
@@ -52,9 +64,9 @@ type APIContextValue = {
   redisV1: Redis.v1.API
   registryV1: Registry.v1.API
   relationalDatabaseV1: RDB.v1.API
+  secretManager: Secret.v1alpha1.API
   transactionalEmailV1alpha1: TransactionalEmail.v1alpha1.API
   webhostingV1alpha1: Webhosting.v1alpha1.API
-  secretManager: Secret.v1alpha1.API
 }
 
 const APIContext = createContext<APIContextValue | undefined>(undefined)
@@ -72,14 +84,16 @@ export const useAPI = () => {
 
 export const APIProvider = ({ children }: APIProviderProps) => {
   const apis = useMemo(() => {
-    const client = createClient(clientSetting)
+    const client = createAdvancedClient(withProfile(clientSetting), withUserAgent('Raycast'))
 
     enableConsoleLogger('debug')
 
     return {
-      accountV2alpha1: new Account.v2alpha1.API(client),
-      appleSiliconV1alpha1: new AppleSilicon.v1alpha1.API(client),
+      appleSiliconV1Alpha1: new AppleSilicon.v1alpha1.API(client),
+      blockV1Alpha1: new Block.v1alpha1.API(client),
+      cockpitV1Beta1: new Cockpit.v1beta1.API(client),
       containerV1Beta1: new Container.v1beta1.API(client),
+      documentDBV1Beta1: new DocumentDB.v1beta1.API(client),
       domainRegistrarV2beta1: new Domain.v2beta1.RegistrarAPI(client),
       domainV2beta1: new Domain.v2beta1.API(client),
       elasticMetalV1: new BareMetal.v1.API(client),
@@ -87,6 +101,9 @@ export const APIProvider = ({ children }: APIProviderProps) => {
       iamV1alpha1: new IAM.v1alpha1.API(client),
       instanceV1: new Instance.v1.API(client),
       iotV1: new IOT.v1.API(client),
+      ipamV1: new IPAM.v1.API(client),
+      ipfsV1Alpha1: new IPFS.v1alpha1.API(client),
+      jobsV1alpha1: new Jobs.v1alpha1.API(client),
       k8sV1: new K8S.v1.API(client),
       loadbalancerV1: new LB.v1.ZonedAPI(client),
       mnqV1alpha1: new MNQ.v1alpha1.API(client),
@@ -95,9 +112,9 @@ export const APIProvider = ({ children }: APIProviderProps) => {
       redisV1: new Redis.v1.API(client),
       registryV1: new Registry.v1.API(client),
       relationalDatabaseV1: new RDB.v1.API(client),
+      secretManager: new Secret.v1alpha1.API(client),
       transactionalEmailV1alpha1: new TransactionalEmail.v1alpha1.API(client),
       webhostingV1alpha1: new Webhosting.v1alpha1.API(client),
-      secretManager: new Secret.v1alpha1.API(client),
     }
   }, [])
 

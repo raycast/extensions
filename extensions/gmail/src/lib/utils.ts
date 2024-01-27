@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
 export function getErrorMessage(error: unknown): string {
@@ -26,4 +27,24 @@ export function ensureShortText(text: string, options?: { maxLength?: number }) 
     return text.slice(0, maxLength - 4) + " ...";
   }
   return text;
+}
+
+export async function toastifiedPromiseCall(args: {
+  onCall: () => Promise<void>;
+  title: string;
+  finishTitle: string;
+  onAfterCall?: () => void;
+}) {
+  try {
+    const toast = await showToast({ style: Toast.Style.Animated, title: args.title });
+    await args.onCall();
+    toast.style = Toast.Style.Success;
+    toast.title = args.finishTitle;
+
+    if (args.onAfterCall) {
+      args.onAfterCall();
+    }
+  } catch (error) {
+    showToast({ style: Toast.Style.Failure, title: "Error", message: getErrorMessage(error) });
+  }
 }

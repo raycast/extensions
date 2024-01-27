@@ -30,7 +30,12 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);
       startTimer(timeInSeconds, timerName, values.selectedSound);
       if (values.willBeSaved)
-        createCustomTimer({ name: values.name, timeInSeconds: timeInSeconds, selectedSound: values.selectedSound });
+        createCustomTimer({
+          name: values.name,
+          timeInSeconds: timeInSeconds,
+          selectedSound: values.selectedSound,
+          showInMenuBar: true,
+        });
     }
   };
 

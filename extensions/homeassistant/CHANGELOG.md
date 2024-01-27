@@ -1,5 +1,22 @@
 # Home Assistant Changelog
 
+## [Update] - 2024-01-19
+
+- Make use of cache for faster loading of entities
+
+## [Companion] - 2023-12-22
+
+- Add support for Home Assistant Companion app
+
+## [New Logo] - 2023-09-30
+
+- Use the new Home Assistant logo
+
+## [Fix] - 2023-09-10
+
+- Notifications could not be opened from the Menubar and instead throw an error
+- Fix possible crashes when commands are not enable
+
 ## [Fix] - 2023-08-15
 
 - Updates from HACS will be shown in the menu regardless of the update entity states

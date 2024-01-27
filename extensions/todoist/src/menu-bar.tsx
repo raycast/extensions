@@ -58,7 +58,7 @@ function MenuBar(props: MenuBarProps) {
       });
     }
     return data?.items.filter((t) => t.due?.date) ?? [];
-  }, [data, upcomingDays, view, filter]);
+  }, [data, upcomingDays, view]);
 
   useEffect(() => {
     const isFocusedTaskInTasks = data?.items?.some((t) => t.id === focusedTask.id);
@@ -82,7 +82,7 @@ function MenuBar(props: MenuBarProps) {
     } else if (filterTasks) {
       return filterTasks.length > 0 ? filterTasks.length.toString() : "🎉";
     }
-  }, [focusedTask, tasks, hideMenuBarCount, filterTasks]);
+  }, [focusedTask, tasks, hideMenuBarCount, filterTasks, view]);
 
   let taskView = tasks && <UpcomingView tasks={tasks} data={data} setData={setData} />;
   if (view === "today") {
@@ -93,7 +93,13 @@ function MenuBar(props: MenuBarProps) {
 
   return (
     <MenuBarExtra
-      icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
+      icon={{
+        source: { light: "icon.png", dark: "icon@dark.png" },
+        tintColor: {
+          light: "",
+          dark: "#E5E5E5",
+        },
+      }}
       isLoading={isLoading || isLoadingFilter}
       title={menuBarExtraTitle}
     >

@@ -1,7 +1,6 @@
-import fs from "fs";
 import fetch from "node-fetch";
 import path from "path";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import tempy, { FileOptions } from "tempy";
 
 export default async function copyFileToClipboard(url: string, name?: string) {

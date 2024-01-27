@@ -1,16 +1,8 @@
-import { ResultView } from "./api/main";
-import { getPreferenceValues } from "@raycast/api";
-import { OllamaApiGenerateRequestBody } from "./api/types";
-
-const preferences = getPreferenceValues();
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const body = {
-    model: preferences.ollamaFriendlyModel,
-    prompt: "",
-    system:
-      "Act as a writer. Make the following text more friendly while keeping the core idea.\n\nOutput only with the modified text.\n",
-  } as OllamaApiGenerateRequestBody;
-
-  return ResultView(body, true);
+  const c = "friendly";
+  const p =
+    "Act as a writer. Make the following text more friendly while keeping the core idea.\n\nOutput only with the modified text.\n";
+  return <AnswerView command={c} prompt={p} />;
 }

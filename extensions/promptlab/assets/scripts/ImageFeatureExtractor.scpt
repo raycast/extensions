@@ -1,5 +1,6 @@
 #@osa-lang:AppleScript
 use framework "Vision"
+use scripting additions
 
 on trim(theText)
 	set theString to current application's NSString's stringWithString:theText
@@ -15,7 +16,8 @@ on run (argv)
 	set useFaceDetection to item 6 of argv is "true"
 	set useRectangleDetection to item 7 of argv is "true"
 	set useSaliencyAnalysis to item 8 of argv is "true"
-	set confidenceThreshold to item 9 of argv as number
+	set useHorizonDetection to item 9 of argv is "true"
+	set confidenceThreshold to item 10 of argv as number
 	set promptText to ""
 	set imageData to current application's NSMutableDictionary's alloc()'s init()
 
@@ -31,12 +33,13 @@ on run (argv)
 		set faceRequest to current application's VNDetectFaceRectanglesRequest's alloc()'s init()
 		set rectRequest to current application's VNDetectRectanglesRequest's alloc()'s init()
 		set saliencyRequest to current application's VNGenerateAttentionBasedSaliencyImageRequest's alloc()'s init()
+		set horizonRequest to current application's VNDetectHorizonRequest's alloc()'s init()
 		rectRequest's setMaximumObservations:0
 
 		if theImage's |size|()'s width > 200 and theImage's |size|()'s height > 200 then
-			requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, rectRequest, saliencyRequest} |error|:(missing value)
+			requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, rectRequest, saliencyRequest, horizonRequest} |error|:(missing value)
 		else
-			requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, saliencyRequest} |error|:(missing value)
+			requestHandler's performRequests:{textRequest, classificationRequest, barcodeRequest, animalRequest, faceRequest, saliencyRequest, horizonRequest} |error|:(missing value)
 		end if
 
 		-- Extract raw text results
@@ -185,6 +188,23 @@ on run (argv)
 				set promptText to promptText & "<Number of faces: " & numFaces & ">"
 			end if
 		end if
+
+		if useHorizonDetection then
+			set horizonAngle to missing value
+			set horizonResults to horizonRequest's results()
+			if horizonResults's |count|() > 0 then
+				set horizonAngle to (horizonResults's firstObject()'s angle()) * 180 / pi
+			end if
+
+			if horizonAngle is not missing value then
+				set theScript to "" & horizonAngle & ".toFixed(2)"
+				set theAngle to run script theScript in "JavaScript"
+				imageData's setValue:((theAngle as text) & " degrees") forKey:"imageHorizon"
+				set promptText to promptText & "<Angle of the horizon: " & theAngle & " degrees>"
+			end if
+		end if
+	on error err
+		return err
 	end try
 
 	imageData's setValue:promptText forKey:"stringValue"

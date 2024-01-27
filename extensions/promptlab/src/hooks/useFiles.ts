@@ -1,7 +1,9 @@
-import { runAppleScript } from "run-applescript";
-import { CommandOptions, ERRORTYPE, ExtensionPreferences } from "../utils/types";
+import { ERRORTYPE } from "../lib/common/types";
+import { Model } from "../lib/models/types";
+import { ExtensionPreferences } from "../lib/preferences/types";
+import { CommandOptions } from "../lib/commands/types";
 import { useEffect, useState } from "react";
-import { environment, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import path from "path";
 import * as fs from "fs";
 import {
@@ -9,10 +11,21 @@ import {
   imageFileExtensions,
   textFileExtensions,
   videoFileExtensions,
+  spreadsheetFileExtensions,
 } from "../data/file-extensions";
-import { ScriptRunner, execScript } from "../utils/scripts";
-import { getAudioDetails, getImageDetails } from "../utils/file-utils";
-import { filterString } from "../utils/context-utils";
+import { ScriptRunner, execScript } from "../lib/scripts";
+import { getAudioDetails, getImageDetails, unzipToTemp } from "../lib/files/file-utils";
+import { filterString } from "../lib/context-utils";
+import mammoth from "mammoth";
+import xlsx from "xlsx";
+import pptxTextParser from "pptx-text-parser";
+import { loadAdvancedSettingsSync } from "../lib/storage-utils";
+import { useAdvancedSettings } from "./useAdvancedSettings";
+import { useModels } from "./useModels";
+import { defaultAdvancedSettings } from "../data/default-advanced-settings";
+import { exec, execSync } from "child_process";
+import * as os from "os";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * The maximum length of a file's read content string. This value is divided across all selected files.
@@ -57,7 +70,22 @@ const isTextFile = (filepath: string) => {
   );
 };
 
-export async function getFileContent(filePath: string, options?: CommandOptions) {
+const isOfficeFile = (filepath: string) => {
+  const officeFileExtensions = ["doc", "docx", "ppt", "pptx"];
+  return officeFileExtensions.includes(path.extname(filepath).slice(1).toLowerCase());
+};
+
+const isSpreadsheet = (filepath: string) => {
+  return spreadsheetFileExtensions.includes(path.extname(filepath).slice(1).toLowerCase());
+};
+
+export async function getFileContent(
+  filePath: string,
+  options?: CommandOptions,
+  index?: number,
+  maxCharacters?: number,
+  settings?: typeof defaultAdvancedSettings,
+) {
   const options_ =
     options == undefined
       ? {
@@ -72,19 +100,44 @@ export async function getFileContent(filePath: string, options?: CommandOptions)
         }
       : options;
 
-  const currentData = { contents: `{File ${path.basename(filePath)}}:\n` };
+  if (maxCharacters == undefined) {
+    const items = await LocalStorage.allItems();
+    const modelObjs: Model[] = Object.entries(items)
+      .filter(([key]) => key.startsWith("--model-"))
+      .map(([, value]) => JSON.parse(value))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    let model = options?.model ? modelObjs.find((m) => m.name == options.model) : undefined;
+    if (!model) model = modelObjs.find((m) => m.isDefault) || modelObjs[0];
+    maxCharacters = model ? parseInt(model.lengthLimit) : 3000;
+  }
+
+  if (settings == undefined) {
+    settings = loadAdvancedSettingsSync();
+  }
+
+  const currentData = {
+    contents: `{${index == undefined ? "" : `File #${index + 1} - `}${path.basename(filePath)}}:\n`,
+  };
 
   const filepath = filePath.toLowerCase();
+  if (isTextFile(filepath)) addTextFileDetails(filepath, currentData);
+
   if (isTrueDirectory(filepath)) addDirectoryDetails(filepath, currentData);
   else if (isApp(filepath)) await addAppDetails(filepath, currentData, options_);
   else if (isPDF(filepath)) await addPDFDetails(filepath, currentData, options_);
-  else if (isVideoFile(filepath)) await addVideoDetails(filepath, currentData, options_);
+  else if (isVideoFile(filepath)) await addVideoDetails(filepath, currentData, options_, settings);
   else if (isAudioFile(filepath)) await addAudioDetails(filepath, currentData, options_);
   else if (isImageFile(filepath)) await addImageDetails(filepath, currentData, options_);
   else if (isTextFile(filepath)) addTextFileDetails(filepath, currentData);
-  else attemptAddRawText(filepath, currentData);
+  else if (isOfficeFile(filepath)) await addOfficeDetails(filepath, currentData);
+  else if (isSpreadsheet(filepath)) await addSpreadsheetDetails(filepath, currentData);
+  else if (filepath.endsWith(".pages")) await addPagesDetails(filepath, currentData);
+  else if (filepath.endsWith(".key")) await addKeynoteDetails(filepath, currentData, settings);
+  else if (!isTextFile(filepath)) attemptAddRawText(filepath, currentData);
 
   if (options_.useMetadata) addMetadataDetails(filepath, currentData);
+  currentData.contents = filterString(currentData.contents, maxCharacters);
   return currentData;
 }
 
@@ -93,6 +146,8 @@ export const useFiles = (options: CommandOptions) => {
   const [fileContents, setFileContents] = useState<{ [key: string]: string; contents: string }>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<number>();
+  const { models } = useModels();
+  const { advancedSettings, revalidateAdvancedSettings } = useAdvancedSettings();
 
   const loadSelection = async () => {
     if (!options.minNumFiles)
@@ -117,7 +172,7 @@ export const useFiles = (options: CommandOptions) => {
         }
         return acc;
       },
-      { paths: [] as string[], csv: "" }
+      { paths: [] as string[], csv: "" },
     );
 
     maxCharacters = maxCharacters / selection.paths.length;
@@ -133,42 +188,20 @@ export const useFiles = (options: CommandOptions) => {
       return;
     }
 
+    await revalidateAdvancedSettings();
+
+    let model = options.model ? models.find((m) => m.name == options.model) : undefined;
+    if (!model) model = models.find((m) => m.isDefault) || models[0];
+    const maxCharacters = model ? parseInt(model.lengthLimit) : 3000;
+
     const fileData: { [key: string]: string; contents: string } = {
       contents: "",
     };
     for (const [index, filepath] of selection.paths.entries()) {
       // Init. file contents with file name as header
-      const currentData = { contents: `{File ${index + 1} - ${path.basename(filepath)}}:\n` };
-
-      // If the file is too large, just return the metadata
-      try {
-        if (
-          fs.lstatSync(filepath).size > 10000000 &&
-          !videoFileExtensions.includes(path.extname(filepath).slice(1).toLowerCase())
-        ) {
-          addMetadataDetails(filepath, currentData);
-          currentData.contents = fileData.contents + "\n" + currentData.contents;
-          Object.assign(fileData, currentData);
-          continue;
-        }
-
-        if (isTextFile(filepath)) addTextFileDetails(filepath, currentData);
-
-        if (isTrueDirectory(filepath)) addDirectoryDetails(filepath, currentData);
-        else if (isApp(filepath)) await addAppDetails(filepath, currentData, options);
-        else if (isPDF(filepath)) await addPDFDetails(filepath, currentData, options);
-        else if (isVideoFile(filepath)) await addVideoDetails(filepath, currentData, options);
-        else if (isAudioFile(filepath)) await addAudioDetails(filepath, currentData, options);
-        else if (isImageFile(filepath)) await addImageDetails(filepath, currentData, options);
-        else if (!isTextFile(filepath)) attemptAddRawText(filepath, currentData);
-
-        if (options.useMetadata) addMetadataDetails(filepath, currentData);
-
-        currentData.contents = fileData.contents + "\n" + currentData.contents;
-        Object.assign(fileData, currentData);
-      } catch (e) {
-        console.error(e);
-      }
+      const currentData = await getFileContent(filepath, options, index, maxCharacters, advancedSettings);
+      fileData.contents = filterString(fileData.contents + "\n" + currentData.contents, maxCharacters);
+      Object.assign(fileData, currentData);
     }
 
     setFileContents(fileData);
@@ -189,6 +222,77 @@ export const useFiles = (options: CommandOptions) => {
   return { selectedFiles, fileContents, isLoading, error, revalidate };
 };
 
+const iWorkOptions = {
+  useBarcodeDetection: true,
+  useFaceDetection: true,
+  useHorizonDetection: true,
+  useSaliencyAnalysis: true,
+  useRectangleDetection: true,
+  useSubjectClassification: true,
+};
+
+const addPagesDetails = async (filepath: string, currentData: { [key: string]: string; contents: string }) => {
+  currentData.contents += `<This is a Pages document. Here are details about it.>`;
+  const zipPath = path.join(os.tmpdir(), `${path.basename(filepath, ".pages")}.zip`);
+  execSync(`cp "${filepath}" "${zipPath}"`);
+  const dirPath = await unzipToTemp(zipPath);
+  if (!dirPath) return;
+
+  const imageFile = path.join(dirPath, "preview.jpg");
+  await addImageDetails(imageFile, currentData, iWorkOptions);
+  exec(`rm -rf "${dirPath}"`, (err) => {
+    if (err) console.error(err);
+  });
+};
+
+const addKeynoteDetails = async (
+  filepath: string,
+  currentData: { [key: string]: string; contents: string },
+  settings: typeof defaultAdvancedSettings,
+) => {
+  currentData.contents += `<This is a Keynote slideshow. Here are details about it.>`;
+  const zipPath = path.join(os.tmpdir(), `${path.basename(filepath, ".key")}.zip`);
+  if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+  execSync(`cp "${filepath}" "${zipPath}"`);
+  const dirPath = await unzipToTemp(zipPath);
+  if (!dirPath) return;
+
+  const dataDir = path.join(dirPath, "Data");
+  if (settings.fileAnalysisSettings && settings.fileAnalysisSettings.singlePreviewForKeynote) {
+    const imageFile = path.join(dirPath, "preview.jpg");
+    await addImageDetails(imageFile, currentData, iWorkOptions);
+  } else {
+    console.log("wo");
+    const filenames = fs.readdirSync(dataDir);
+    for (const filename of filenames) {
+      if (filename.startsWith("st-")) {
+        await addImageDetails(path.join(dataDir, filename), currentData, iWorkOptions);
+      }
+    }
+  }
+
+  exec(`rm -rf "${dirPath}"`, (err) => {
+    if (err) console.error(err);
+  });
+};
+
+const addSpreadsheetDetails = async (filepath: string, currentData: { [key: string]: string; contents: string }) => {
+  const text = Object.values(xlsx.readFile(filepath).Sheets)
+    .map((sheet) => xlsx.utils.sheet_to_csv(sheet, { FS: ", " }))
+    .join("\n\n");
+  currentData.contents += text;
+};
+
+const addOfficeDetails = async (filepath: string, currentData: { [key: string]: string; contents: string }) => {
+  let text = "";
+  if (filepath.endsWith(".docx")) {
+    text = (await mammoth.extractRawText({ path: filepath })).value;
+  } else if (filepath.endsWith(".pptx")) {
+    text = await pptxTextParser(filepath, "text");
+  }
+  currentData.contents += text;
+};
+
 const addDirectoryDetails = (filepath: string, currentData: { [key: string]: string; contents: string }) => {
   const children = fs.readdirSync(filepath);
   currentData.contents += `This is a folder containing the following files: ${children.join(", ")}`;
@@ -197,21 +301,18 @@ const addDirectoryDetails = (filepath: string, currentData: { [key: string]: str
 const addAppDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   /* Gets the metadata, plist, and scripting dictionary information about an application (.app). */
   let appDetails = "";
 
   // Include plist information
-  const plist = filterString(
-    (
-      await runAppleScript(`use framework "Foundation"
+  const plist = (
+    await runAppleScript(`use framework "Foundation"
   set theURL to current application's NSURL's fileURLWithPath:"${filepath}Contents/Info.plist"
   set theDict to current application's NSDictionary's dictionaryWithContentsOfURL:theURL |error|:(missing value)
   return theDict's |description|() as text`)
-    ).replaceAll(/\s+/g, " "),
-    maxCharacters / 2
-  );
+  ).replaceAll(/\s+/g, " ");
 
   // Include general application-focused instructions
   if (options.useMetadata) {
@@ -224,16 +325,17 @@ const addAppDetails = async (
     if (child.toLowerCase().endsWith("sdef")) {
       // Include scripting dictionary information & associated instruction
       const sdef = fs.readFileSync(`${filepath}Contents/Resources/${child}`).toString();
-      appDetails += `AppleScript Scripting Dictionary: ###${filterString(sdef, maxCharacters / 2)}###`;
+      appDetails += `AppleScript Scripting Dictionary: ###${sdef}###`;
     }
   });
+  currentData.contents += appDetails;
   return appDetails;
 };
 
 const addPDFDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const pdfText = await ScriptRunner.PDFTextExtractor(filepath, preferences.pdfOCR, 3, options.useMetadata || false);
@@ -245,32 +347,33 @@ const addPDFDetails = async (
 const addVideoDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
+  settings: typeof defaultAdvancedSettings,
 ) => {
   const videoFeatureExtractor = path.resolve(environment.assetsPath, "scripts", "VideoFeatureExtractor.scpt");
-  const videoDetails = filterString(
-    await execScript(
-      videoFeatureExtractor,
-      [
-        filepath,
-        options.useAudioDetails || false,
-        options.useSubjectClassification || false,
-        options.useFaceDetection || false,
-        options.useRectangleDetection || false,
-      ],
-      "JavaScript"
-    ).data
-  );
+  const videoDetails = await execScript(
+    videoFeatureExtractor,
+    [
+      filepath,
+      options.useAudioDetails || false,
+      options.useSubjectClassification || false,
+      options.useFaceDetection || false,
+      options.useRectangleDetection || false,
+      options.useHorizonDetection || false,
+      settings.fileAnalysisSettings.videoSampleCount,
+    ],
+    "JavaScript",
+  ).data;
   currentData.contents += videoDetails;
 };
 
 const addAudioDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   if (options.useAudioDetails) {
-    const transcription = await ScriptRunner.AudioTranscriber(filepath, maxCharacters);
+    const transcription = await ScriptRunner.AudioTranscriber(filepath, 5000);
     const audioDetails = filterString(transcription);
     currentData.contents += `<Spoken audio: """${audioDetails}"""`;
     currentData["audioTranscription"] = audioDetails;
@@ -284,10 +387,10 @@ const addAudioDetails = async (
 const addImageDetails = async (
   filepath: string,
   currentData: { [key: string]: string; contents: string },
-  options: CommandOptions
+  options: CommandOptions,
 ) => {
   const imageDetails = await getImageDetails(filepath, options);
-  const imageVisionInstructions = filterString(imageDetails.stringValue);
+  const imageVisionInstructions = imageDetails.stringValue;
   currentData.contents += imageVisionInstructions;
   Object.assign(currentData, imageDetails);
 };
@@ -296,7 +399,7 @@ const addTextFileDetails = (filepath: string, currentData: { [key: string]: stri
   try {
     if (fs.lstatSync(filepath).size > 10000000) return;
     const rawText = fs.readFileSync(filepath, "utf8");
-    const text = filterString(rawText);
+    const text = rawText;
     const instruction = `\n<Text of the file: ###${text}###>`;
     currentData.contents += instruction;
   } catch (err) {
@@ -308,7 +411,7 @@ const attemptAddRawText = (filepath: string, currentData: { [key: string]: strin
   try {
     if (fs.lstatSync(filepath).size > 10000000) return;
     const rawText = fs.readFileSync(filepath, "utf8");
-    const text = filterString(rawText);
+    const text = rawText;
     const instruction = `\n<Raw text of the file: ###${text}###>`;
     currentData.contents += instruction;
   } catch (err) {
@@ -319,7 +422,7 @@ const attemptAddRawText = (filepath: string, currentData: { [key: string]: strin
 const addMetadataDetails = (filepath: string, currentData: { [key: string]: string; contents: string }) => {
   try {
     const rawMetadata = JSON.stringify(fs.lstatSync(filepath));
-    const metadata = filterString(rawMetadata);
+    const metadata = rawMetadata;
     const instruction = `\n<Metadata of the file: ###${metadata}###>`;
     currentData.contents += instruction;
   } catch (err) {

@@ -5,11 +5,12 @@
 Figma file search helps you quickly open a Figma file from anywhere on your mac. It's packed with features like,
 
 1. Browsing multiple teams of the same organisation
-2. Support for opening a specific branch of a file
-3. Support for opening a specific page of a file
-4. Menu Bar command for quick access to files
+2. Starring files to the top for quick access to frequently accessed figma files
+3. Support for opening a specific branch of a file
+4. Support for opening a specific page of a file
+5. Menu Bar command for quick access to files
 
-Note - Currently, this extension only works with team accounts. Drafts are not supported due to a Figma API limitation.
+Note - Currently, this extension only works with team accounts. Draft files are not supported due to a Figma API limitation.
 
 ## Setting up the Extension
 

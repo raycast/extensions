@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, Clipboard } from "@raycast/api";
+import fileUriToPath from "file-uri-to-path";
 
-import { storeClipboardToTemp } from "./lib/util";
 import { uploadImage } from "./lib/cloudinary";
 import type { Asset } from "./types/asset";
 
@@ -16,10 +16,18 @@ export default function main() {
       setLoading(true);
 
       try {
-        const filePath = storeClipboardToTemp();
+        const { file } = await Clipboard.read();
+
+        if (typeof file === "undefined") {
+          throw new Error("Missing image data.");
+        }
+
+        const filePath = fileUriToPath(file);
+
         const resource = await uploadImage(filePath);
         setAsset(resource as Asset);
       } catch (e) {
+        console.log(e);
         displayError("Failed to upload clipboard data to Cloudinary");
       }
 

@@ -1,18 +1,21 @@
-<p align="center">
-  <img src="assets/command-icon.png" height="128">
-  <h1 align="center">Mis Comics MX</h1>
-</p>
+## Manga Mexico
 
-### Browsing through the latest manga publications by Mexican editors
+### Description
 
-A [Raycast](https://raycast.com/) extension to see all collections published in Mexico: mangas, comics and other collectibles in one place [Mis Comics MX](https://miscomics.com.mx/).
+Discover the vibrant world of Japanese manga and American & European comics effortlessly with the **Manga Mexico** extension. Dive into the latest releases and explore extensive collections from Mexican publishers, all conveniently in one place.
 
-Choose between 2 commands:
-  - Latest Publication: See the current month's releases.
-  - Browse Publications: Browse through all manga collections published in Mexico.
+### Features
 
----
+1. **Latest Publication:** Stay Up-to-Date with Ease.
+   Stay in the loop with the latest manga and comic releases from Mexico. With a simple command, you can instantly access a curated list of this month's publications. Say goodbye to the hassle of searching the web or typing names into search engines.
 
-No more of having to go to the site and search or typing the name on a search engine. Enjoy!
+2. **Browse Publications:** Explore the Rich World of Japanese Manga.
+   Immerse yourself in the diverse world of manga, comics, and collectibles. Use this command to effortlessly browse through an extensive catalog of collections published in Mexico. Whether you're a seasoned fan or a newcomer, you'll find something captivating to explore.
 
-_This extension is not endorsed by or affiliated with Mis Comics MX._
+### Disclaimer
+
+Keep in mind that the original website is managed by a compact and dedicated team of individuals. As a consequence of this limited staffing, it is possible that the information presented on the site may contain inaccuracies or errors.
+
+The prices shown correspond to those at launch. **May not be representative of the current prices.**
+
+_This extension is independently developed and is not officially endorsed by or affiliated with [Mis Comics MX](https://miscomics.com.mx/). Enjoy the convenience of exploring Mexican manga and comics at your fingertips, courtesy of **[Manga Mexico](https://www.raycast.com/mrolivo/manga-calendar)**._

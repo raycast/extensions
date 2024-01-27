@@ -6,6 +6,7 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
+  Keyboard,
 } from '@raycast/api'
 import tinyRelativeDate from 'tiny-relative-date'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
@@ -33,11 +34,11 @@ interface PackageListItemProps {
 export interface Preferences {
   defaultOpenAction: 'openRepository' | 'openHomepage' | 'npmPackagePage'
   historyCount: string
+  showLinkToSearchResultsInListView: boolean
 }
 
 export const PackageListItem = ({
   result,
-  searchTerm,
   setHistory,
   isFavorited,
   handleFaveChange,
@@ -89,6 +90,18 @@ export const PackageListItem = ({
           onOpen={handleAddToHistory}
         />
       ) : null,
+    npmPackagePage: (
+      <Action.OpenInBrowser
+        key="npmPackagePage"
+        url={pkg.links.npm}
+        title="Open Npm Package Page"
+        icon={{
+          source: 'command-icon.png',
+        }}
+        onOpen={handleAddToHistory}
+        shortcut={Keyboard.Shortcut.Common.Open}
+      />
+    ),
     changelogPackagePage: changelogUrl ? (
       <Action.OpenInBrowser
         key="openChangelog"
@@ -96,17 +109,6 @@ export const PackageListItem = ({
         title="Open Changelog"
       />
     ) : null,
-    npmPackagePage: (
-      <Action.OpenInBrowser
-        key="npmPackagePage"
-        url={pkg.links.npm}
-        title="npm Package Page"
-        icon={{
-          source: 'command-icon.png',
-        }}
-        onOpen={handleAddToHistory}
-      />
-    ),
     skypackPackagePage: (
       <Action.OpenInBrowser
         url={`https://www.skypack.dev/view/${pkg.name}`}
@@ -118,13 +120,15 @@ export const PackageListItem = ({
   }
 
   const accessories: List.Item.Accessory[] = [
-    {
-      icon: Icon.Tag,
-      tooltip: pkg?.keywords?.length ? pkg.keywords.join(', ') : '',
-    },
+    pkg?.keywords?.length
+      ? {
+          icon: Icon.Tag,
+          tooltip: pkg.keywords.join(', '),
+        }
+      : {},
   ]
   if (!isViewingFavorites) {
-    accessories.unshift(
+    accessories.push(
       {
         text: `v${pkg.version}`,
         tooltip: `Latest version`,
@@ -135,7 +139,7 @@ export const PackageListItem = ({
       },
     )
     if (isFavorited) {
-      accessories.unshift({
+      accessories.push({
         icon: Icon.Star,
       })
     }
@@ -168,12 +172,6 @@ export const PackageListItem = ({
                 return action
               })
               .filter(Boolean)}
-            {searchTerm ? (
-              <Action.OpenInBrowser
-                url={`https://www.npmjs.com/search?q=${searchTerm}`}
-                title="npm Search Results"
-              />
-            ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section title="Actions">
             {isFavorited ? (

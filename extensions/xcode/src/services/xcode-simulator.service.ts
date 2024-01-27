@@ -112,6 +112,15 @@ export class XcodeSimulatorService {
   }
 
   /**
+   * Restart XcodeSimulator
+   * @param xcodeSimulator The XcodeSimulator to restart
+   */
+  static async restart(xcodeSimulator: XcodeSimulator): Promise<void> {
+    await XcodeSimulatorService.shutdown(xcodeSimulator);
+    await XcodeSimulatorService.boot(xcodeSimulator);
+  }
+
+  /**
    * Perform a XcodeSimulator AppAction
    * @param action The XcodeSimulatorAppAction
    * @param bundleIdentifier The bundle identifier of the application
@@ -194,5 +203,36 @@ export class XcodeSimulatorService {
       // Silently launch Simulator application
       XcodeSimulatorService.launchSimulatorApplication();
     });
+  }
+
+  /**
+   * Sends a push notification to a Xcode Simulator
+   * @param xcodeSimulator The Xcode Simulator
+   * @param bundleIdentifier The bundle identifier of the app
+   * @param payloadPath The path of the push notification payload
+   */
+  static async sendPushNotification(
+    xcodeSimulator: XcodeSimulator,
+    bundleIdentifier: string,
+    payloadPath: string
+  ): Promise<void> {
+    return execAsync(`xcrun simctl push ${xcodeSimulator.udid} ${bundleIdentifier} ${payloadPath}`).then();
+  }
+
+  /**
+   * Rename XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to rename
+   * @param name The new simulator name
+   */
+  static async rename(xcodeSimulator: XcodeSimulator, name: string): Promise<void> {
+    return execAsync(`xcrun simctl rename ${xcodeSimulator.udid} '${name}' `).then();
+  }
+
+  /**
+   * Rename XcodeSimulator
+   * @param xcodeSimulator The Xcode Simulator to trigger iCloud Sync to
+   */
+  static async triggerIcloudSync(xcodeSimulator: XcodeSimulator): Promise<void> {
+    return execAsync(`xcrun simctl icloud_sync ${xcodeSimulator.udid}`).then();
   }
 }

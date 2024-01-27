@@ -15,7 +15,7 @@ function useFrecencySorting<T>(
     sortUnvisited?: (a: T, b: T) => number;
   }
 ): {
-  sortedData: T[];
+  data: T[];
   visitItem: (item: T) => Promise<void>;
   resetRanking: (item: T) => Promise<void>;
 };

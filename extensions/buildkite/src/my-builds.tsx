@@ -1,54 +1,32 @@
 import { List } from "@raycast/api";
-import { Build, BuildListItem } from "./components/BuildListItem";
-import { Pager } from "./utils/types";
-import { useQuery } from "./utils/useQuery";
+import { useCachedPromise } from "@raycast/utils";
+import { getBuildkiteClient } from "./api/withBuildkiteClient";
+import { BuildListItem } from "./components/BuildListItem";
+import View from "./components/View";
+import { truthy } from "./utils/truthy";
 
-interface QueryResponse {
-  viewer: {
-    user: {
-      builds: Pager<Build>;
-    };
-  };
-}
-
-const QUERY = `
-query {
-  viewer {
-    user {
-      builds(first: 20) {
-        edges {
-          node {
-            id
-            branch
-            createdAt
-            message
-            number
-            state
-            url
-            pipeline {
-              name
-            }
-          }
-        }
-      }
-    }
-  }
-}
-`;
-
-export default function MyBuilds() {
-  const { data, isLoading } = useQuery<QueryResponse>({
-    query: QUERY,
-    errorMessage: "Could not load builds",
-  });
-
-  const builds = data?.viewer.user.builds.edges ?? [];
+function MyBuilds() {
+  const buildkite = getBuildkiteClient();
+  const { data, isLoading } = useCachedPromise(
+    async () => {
+      const result = await buildkite.myBuilds();
+      return result.viewer?.user?.builds?.edges?.map((edge) => edge?.node).filter(truthy);
+    },
+    [],
+    { keepPreviousData: true },
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter builds by name...">
-      {builds.map(({ node }) => (
-        <BuildListItem key={node.id} build={node} />
-      ))}
+      {data?.map((node) => <BuildListItem key={node.id} build={node} />)}
     </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <View>
+      <MyBuilds />
+    </View>
   );
 }

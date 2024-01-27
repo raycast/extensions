@@ -9,11 +9,11 @@ type base = {
   apiKey: string;
   indexName: string;
   homepage: string;
+  lang?: string;
 };
 
 export type TAlgolia = base & {
   appId: string;
-  lang?: string;
   searchParameters?: object;
   type: "algolia";
 };

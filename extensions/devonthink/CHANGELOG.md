@@ -1,5 +1,9 @@
 # DEVONthink Changelog
 
+## [Update] - 2023-09-04
+
+- Limit number of results the extension returns to avoid the extension crash
+
 ## [Update] - 2023-05-10
 
 - Add two more actions — copy item link and copy link as markdown
