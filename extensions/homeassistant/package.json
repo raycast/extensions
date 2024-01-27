@@ -496,7 +496,7 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.66.0",
     "@raycast/utils": "^1.5.2",
     "home-assistant-js-websocket": "^8.1.0",
     "javascript-time-ago": "^2.5.9",
