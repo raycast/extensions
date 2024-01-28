@@ -1,0 +1,100 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phosphor-icons",
+  "title": "Phosphor Icons",
+  "description": "Search, preview, and copy Phosphor Icons to your clipboard.",
+  "version": "1.0.0",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-phosphor-icons",
+      "title": "Search Phosphor Icons",
+      "description": "Search, preview, and copy Phosphor Icons to your clipboard.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "view",
+      "title": "View",
+      "description": "The view to display the icons in.",
+      "type": "dropdown",
+      "default": "grid",
+      "required": false,
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ]
+    },
+    {
+      "name": "grid-columns",
+      "title": "Grid Columns",
+      "description": "The number of columns to display in the grid. Only applies to the grid view.",
+      "type": "dropdown",
+      "default": "8",
+      "required": false,
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@phosphor-icons/core": "^2.0.6",
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "1.11.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "8.51.0",
+    "prettier": "3.2.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
