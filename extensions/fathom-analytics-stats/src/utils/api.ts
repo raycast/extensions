@@ -36,7 +36,7 @@ export default function FathomRequest(request: Request) {
       setErrorTitle("Bad credentials");
       setErrorMessage("Please check your API token and side ID");
       setErrorMarkdown(
-        `# Bad credentials. \n Please check your API token and site ID. \n ## Setup \n 1. Sign in to your Fathom account. \n 2. Obtain an API token [here](https://app.usefathom.com/api) and site ID from Fathom your site settings. \n 3. Add the API token and site ID to the extension preferences in Raycast. Also, if you have selected a site-specific API token, make sure you choose the correct site you want to view in the extension.`,
+        `# Bad credentials \n Please check your API token and site ID. \n ## Setup \n 1. Sign in to your Fathom account. \n 2. Obtain an API token [here](https://app.usefathom.com/api) and site ID from Fathom your site settings. \n 3. Add the API token and site ID to the extension preferences in Raycast. Also, if you have selected a site-specific API token, make sure you choose the correct site you want to view in the extension.`,
       );
     } else if (error.message === "Too Many Requests") {
       setErrorTitle("Too many requests");

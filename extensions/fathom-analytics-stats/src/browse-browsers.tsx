@@ -48,12 +48,14 @@ export default function Command() {
       </List>
     );
   } else if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: error.title,
-      message: error.message,
-    });
+    if (error.title != "") {
+      showToast({
+        style: Toast.Style.Failure,
+        title: error.title,
+        message: error.message,
+      });
 
-    return <Detail markdown={error.markdown} />;
+      return <Detail markdown={error.markdown} />;
+    }
   }
 }
