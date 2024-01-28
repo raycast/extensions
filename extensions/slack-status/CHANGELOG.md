@@ -1,5 +1,10 @@
 # Slack Status Changelog
 
+## [Launch Context] - 2024-01-27
+
+- The extension's `setStatus` command now supports launch context.
+- Users can now create Quicklinks to launch their favorite status presets via the `presetName` context param.
+
 ## [OAuth + AI] - 2023-11-14
 
 - The extension uses now OAuth for easier authentication. Personal access tokens are still supported via a non-required preference.
