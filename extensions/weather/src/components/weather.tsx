@@ -105,7 +105,11 @@ export function DayListItem(props: { day: WeatherData; title: string }): JSX.Ele
       ]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
+          <Action.Push
+            title="Show Details"
+            icon={Icon.List}
+            target={<DayList day={data} title={`${props.title} - ${wd}`} />}
+          />
         </ActionPanel>
       }
     />
