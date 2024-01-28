@@ -1,15 +1,17 @@
 import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
+import { Stream } from "openai/streaming";
 import { useCallback, useMemo, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
+
 import { Chat, ChatHook, Model } from "../type";
 import { chatTransfomer } from "../utils";
+
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
 import { useProxy } from "./useProxy";
-import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
-import { Stream } from "openai/streaming";
 
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);

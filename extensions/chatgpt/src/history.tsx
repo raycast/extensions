@@ -1,5 +1,6 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
+
 import { DestructiveAction, TextToSpeechAction } from "./actions";
 import { CopyActionSection } from "./actions/copy";
 import { PreferencesActionSection } from "./actions/preferences";
