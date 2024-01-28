@@ -57,7 +57,7 @@ export function useModel(): ModelHook {
           setFetching(false);
         });
     }
-  }, [gpt, isFetching]);
+  }, [gpt]);
 
   useEffect(() => {
     (async () => {
