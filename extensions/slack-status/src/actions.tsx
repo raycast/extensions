@@ -17,7 +17,7 @@ import { getCodeForEmoji, getEmojiForCode } from "./emojis";
 import { StatusForm } from "./form";
 import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
-import { showToastWithPromise } from "./utils";
+import { setStatusToPreset, showToastWithPromise } from "./utils";
 
 // Status Actions
 
@@ -41,13 +41,13 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
               optimisticUpdate() {
                 return {};
               },
-            },
+            }
           ),
           {
             loading: "Clearing status...",
             success: "Cleared status",
             error: "Failed clearing status",
-          },
+          }
         );
       }}
     />
@@ -78,7 +78,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               }. 
 
               Your suggested Slack status:`,
-              { creativity: "low" },
+              { creativity: "low" }
             );
 
             const parsedAnswer = JSON.parse(answer);
@@ -106,7 +106,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
                 optimisticUpdate() {
                   return profile;
                 },
-              },
+              }
             );
 
             return parsedAnswer;
@@ -118,7 +118,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               message: `${value.emoji} ${value.text}`,
             }),
             error: "Failed setting status with AI",
-          },
+          }
         );
       }}
     />
@@ -132,38 +132,10 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
       title="Set Status"
       icon={Icon.Pencil}
       onAction={async () => {
-        showToastWithPromise(
-          async () => {
-            let expiration = 0;
-            if (props.preset.defaultDuration > 0) {
-              const expirationDate = new Date();
-              expirationDate.setMinutes(expirationDate.getMinutes() + props.preset.defaultDuration);
-              expiration = Math.floor(expirationDate.getTime() / 1000);
-            }
-
-            const profile: Profile = {
-              status_emoji: props.preset.emojiCode,
-              status_text: props.preset.title,
-              status_expiration: expiration,
-            };
-
-            await props.mutate(
-              slack.users.profile.set({
-                profile: JSON.stringify(profile),
-              }),
-              {
-                optimisticUpdate() {
-                  return profile;
-                },
-              },
-            );
-          },
-          {
-            loading: "Setting status...",
-            success: "Set status",
-            error: "Failed setting status",
-          },
-        );
+        setStatusToPreset({
+          ...props,
+          slack,
+        });
       }}
     />
   );
@@ -209,14 +181,14 @@ export function SetStatusWithDuration(props: {
                       optimisticUpdate() {
                         return profile;
                       },
-                    },
+                    }
                   );
                 },
                 {
                   loading: "Setting status with duration...",
                   success: "Set status with duration",
                   error: "Failed setting status with duration",
-                },
+                }
               );
             }}
           />
@@ -264,7 +236,7 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
                     optimisticUpdate() {
                       return profile;
                     },
-                  },
+                  }
                 );
 
                 pop();
@@ -273,7 +245,7 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
                 loading: "Setting custom status...",
                 success: "Set custom status",
                 error: "Failed setting custom status",
-              },
+              }
             );
           }}
         />

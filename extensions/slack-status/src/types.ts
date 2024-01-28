@@ -15,3 +15,7 @@ export type FormValues = {
   statusText: string;
   duration: string;
 };
+
+export interface CommandLinkParams {
+  presetName: string;
+}

@@ -1,5 +1,5 @@
-import { ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, showHUD } from "@raycast/api";
+import { useMemo, useState } from "react";
 import {
   ClearStatusAction,
   CreateStatusPresetAction,
@@ -14,8 +14,10 @@ import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { withOAuthSession } from "./oauth";
 import { usePresets } from "./presets";
-import { SlackOAuthSessionConfig, useSlackProfile } from "./slack";
-import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
+import { SlackOAuthSessionConfig, useSlack, useSlackProfile } from "./slack";
+import { CommandLinkParams } from "./types";
+import { getStatusIcon, getStatusSubtitle, getStatusTitle, setStatusToPreset } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 const preferences: Preferences = getPreferenceValues();
 
@@ -25,10 +27,27 @@ const slackOAuthConfig = new SlackOAuthSessionConfig({
   defaultAccessToken: preferences.accessToken,
 });
 
-function StatusList() {
+function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data, mutate } = useSlackProfile();
   const [presets, setPresets] = usePresets();
+  const slack = useSlack();
+
+  useMemo(() => {
+    if (props.launchContext?.presetName) {
+      const presetName = props.launchContext.presetName;
+      const presetToLaunch = presets.find((p) => p.title === props.launchContext?.presetName);
+      if (!presetToLaunch) {
+        console.error("No preset found with name: ", presetName);
+        showFailureToast(new Error(`Could not find \"${presetName}\" preset`), { title: "No preset found" });
+      } else {
+        setStatusToPreset({ preset: presetToLaunch, slack, mutate });
+        closeMainWindow();
+        return;
+      }
+      return;
+    }
+  }, [slack]);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} filtering>
