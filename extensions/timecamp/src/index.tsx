@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigation, getPreferenceValues, Icon, List, ActionPanel, Action, Color, Form } from "@raycast/api";
+import { useFetch, useCachedState } from "@raycast/utils";
 import fetch from "node-fetch";
 
-interface TaskResponse {
+interface TasksResponse {
   [key: string]: Task;
 }
 
@@ -15,7 +16,7 @@ type Task = {
   display_name?: string;
   color?: string;
   timer_info?: TimerInfo;
-  breadcrumb: Crumb[];
+  breadcrumb?: Crumb[];
 };
 
 type Crumb = {
@@ -35,21 +36,6 @@ type TimerInfo = {
   browser_plugin_button_hash?: string;
 };
 
-type TimerStart = {
-  new_timer_id: number | string;
-  entry_id: number | string;
-  name: string;
-  note: string | null;
-  stopped_timer?: string | number;
-  elapsed?: string | number;
-};
-
-type TimerStop = {
-  elapsed: number | string;
-  entry_id: number | string;
-  entry_time: number | string;
-};
-
 type TimerEntryNoteFormProps = {
   activeTask: Task;
   setActiveTask: (task: Task | null) => void;
@@ -67,41 +53,44 @@ const preferences = getPreferenceValues<Preferences>();
 const token = preferences.timecamp_api_token;
 
 function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormProps) {
+  const { mutate } = useFetch("https://app.timecamp.com/third_party/api/entries", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    execute: false,
+  });
   const { pop } = useNavigation();
-  const updateNote = async (entryId: number | string, noteString: string, close: boolean) => {
-    const url = "https://app.timecamp.com/third_party/api/entries";
-    const options = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: `{"id":${entryId},"note":"${noteString}"}`,
-    };
 
+  const updateNote = async (entryId: number | string, noteString: string) => {
     try {
-      type Data = {
-        note: string;
-        entry_id: number | string;
-        user_id: number | string;
-        date: string;
-        task_id: number | string;
-        start_time_hour: string;
-        end_time_hour: string;
-      };
-      const response = await fetch(url, options);
-      const data = (await response.json()) as Data;
-      if (data && data.note == noteString && close) {
-        const tempTask = activeTask;
-        if (tempTask.timer_info) {
-          tempTask.timer_info.note = data.note;
-        }
-        setActiveTask(tempTask);
-        pop();
-      }
-    } catch (error) {
-      console.error(error);
+      await mutate(
+        fetch("https://app.timecamp.com/third_party/api/entries", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id: entryId, note: noteString }),
+        }),
+        {
+          optimisticUpdate() {
+            const tempTask = activeTask;
+            if (tempTask.timer_info) {
+              tempTask.timer_info.note = noteString;
+            }
+            setActiveTask(tempTask);
+            pop();
+          },
+          rollbackOnError: true,
+          shouldRevalidateAfter: false,
+        },
+      );
+    } catch (err) {
+      console.log("error updating task: ", err);
     }
   };
 
@@ -113,7 +102,7 @@ function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormPro
           <Action.SubmitForm
             title="Save Edits"
             onSubmit={(values: FormData) =>
-              updateNote(activeTask.timer_info ? activeTask.timer_info.entry_id : "", values.note, true)
+              updateNote(activeTask.timer_info ? activeTask.timer_info.entry_id : "", values.note)
             }
           />
         </ActionPanel>
@@ -133,9 +122,20 @@ function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormPro
 type ActiveTaskItemProps = {
   activeTask: Task;
   setActiveTask: (task: Task | null) => void;
+  setSelectedItemId: (itemId: string) => void;
 };
-const ActiveTaskItem = ({ activeTask, setActiveTask }: ActiveTaskItemProps) => {
-  const [timer, setTimer] = useState<string>("00:00:00");
+const ActiveTaskItem = ({ activeTask, setActiveTask, setSelectedItemId }: ActiveTaskItemProps) => {
+  const [timer, setTimer] = useCachedState<string>("timer", "00:00:00");
+  const { mutate } = useFetch("https://app.timecamp.com/third_party/api/timer", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: '{"action":"status"}',
+    execute: false,
+  });
 
   useEffect(() => {
     const startTimeDate = new Date(activeTask.timer_info ? activeTask.timer_info.start_time : "");
@@ -161,25 +161,29 @@ const ActiveTaskItem = ({ activeTask, setActiveTask }: ActiveTaskItemProps) => {
   }, [activeTask]);
 
   async function stopTask(task: Task) {
-    const url = "https://app.timecamp.com/third_party/api/timer";
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: `{"action":"stop","task_id":"${task.task_id}"}`,
-    };
-
     try {
-      const response = await fetch(url, options);
-      const data = (await response.json()) as TimerStop;
-      if (data.entry_id) {
-        setActiveTask(null);
-      }
-    } catch (error) {
-      console.error(error);
+      await mutate(
+        fetch("https://app.timecamp.com/third_party/api/timer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ action: "stop", task_id: task.task_id }),
+        }),
+        {
+          shouldRevalidateAfter: false,
+          optimisticUpdate() {
+            setActiveTask(null);
+            setTimer("00:00:00");
+            setSelectedItemId("");
+          },
+          rollbackOnError: true,
+        },
+      );
+    } catch (err) {
+      console.log("error stopping task: ", err);
     }
   }
 
@@ -214,144 +218,117 @@ const ActiveTaskItem = ({ activeTask, setActiveTask }: ActiveTaskItemProps) => {
 };
 
 export default function Command() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const [tasks, setTasks] = useCachedState<Task[]>("tasks", []);
+  const [activeTask, setActiveTask] = useCachedState<Task | null>("activeTask", null);
+  const [selectedItemId, setSelectedItemId] = useCachedState<string>("selectedItemId", "");
+  const { isLoading } = useFetch("https://app.timecamp.com/third_party/api/tasks?status=active", {
+    method: "GET",
+    headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+    keepPreviousData: true,
+    initialData: tasks,
+    onData: curateTasks,
+  });
+  const { mutate: mutateActiveTask } = useFetch("https://app.timecamp.com/third_party/api/timer", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: '{"action":"status"}',
+    keepPreviousData: true,
+    initialData: activeTask,
+    onData: getActiveTask,
+  });
 
-  useEffect(() => {
-    if (tasks.length == 0) {
-      const fetchData = async () => {
-        const url = "https://app.timecamp.com/third_party/api/tasks?status=active";
-        const options = {
-          method: "GET",
-          headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-        };
+  function curateTasks(data: TasksResponse) {
+    const filteredData: Task[] = [];
 
-        try {
-          const response = await fetch(url, options);
-          const data = (await response.json()) as TaskResponse;
-          const filteredData: Task[] = [];
+    // find the last level of every task and build the heirchy in the task.display_name
+    const processChildTasks = (parentTaskId: string | number, displayName: string) => {
+      for (const key in data) {
+        const task = data[key];
+        if (task.name.includes("ARCHIVED")) continue;
 
-          // find the last level of every task and build the heirchy in the task.display_name
-          const processChildTasks = (parentTaskId: string | number, displayName: string) => {
-            for (const key in data) {
-              const task = data[key];
-              if (task.name.includes("ARCHIVED")) continue;
-
-              if (task.parent_id == parentTaskId) {
-                const newDisplayName = displayName ? `${displayName} / ${task.name}` : task.name;
-                if (task.hasChildren) {
-                  processChildTasks(task.task_id, newDisplayName);
-                } else {
-                  task.display_name = newDisplayName;
-                  filteredData.push(task);
-                }
-              }
-            }
-          };
-
-          for (const key in data) {
-            const task = data[key];
-            if (task.name.includes("ARCHIVED")) continue;
-
-            if (task.level == 1) {
-              if (task.hasChildren) {
-                processChildTasks(task.task_id, task.name);
-              } else {
-                task.display_name = task.name;
-                filteredData.push(task);
-              }
-            }
+        if (task.parent_id == parentTaskId) {
+          const newDisplayName = displayName ? `${displayName} / ${task.name}` : task.name;
+          if (task.hasChildren) {
+            processChildTasks(task.task_id, newDisplayName);
+          } else {
+            task.display_name = newDisplayName;
+            filteredData.push(task);
           }
-          setTasks(filteredData);
-        } catch (error) {
-          console.error(error);
         }
-      };
+      }
+    };
 
-      fetchData();
-      getActiveTask();
+    for (const key in data) {
+      const task = data[key];
+      if (task.name.includes("ARCHIVED")) continue;
+
+      if (task.level == 1) {
+        if (task.hasChildren) {
+          processChildTasks(task.task_id, task.name);
+        } else {
+          task.display_name = task.name;
+          filteredData.push(task);
+        }
+      }
     }
-  }, [activeTask]);
+    setTasks(filteredData);
+  }
 
   async function startTask(task: Task) {
-    const url = "https://app.timecamp.com/third_party/api/timer";
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: `{"action":"start","task_id":"${task.task_id}"}`,
-    };
-
     try {
-      const response = await fetch(url, options);
-      const data = (await response.json()) as TimerStart;
-      if (data.new_timer_id) {
-        getActiveTask();
-      }
-    } catch (error) {
-      console.error(error);
+      await mutateActiveTask(
+        fetch("https://app.timecamp.com/third_party/api/timer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ action: "start", task_id: task.task_id }),
+        }),
+        {
+          shouldRevalidateAfter: true,
+        },
+      );
+    } catch (err) {
+      console.log("error starting task: ", err);
     }
   }
 
-  async function getTasks(taskId: number | string) {
-    const url = `https://app.timecamp.com/third_party/api/tasks?status=active${taskId ? "&task_id=" + taskId : ""}`;
-    const options = {
-      method: "GET",
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  async function getActiveTask() {
-    const url = "https://app.timecamp.com/third_party/api/timer";
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: '{"action":"status"}',
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const data = (await response.json()) as TimerInfo;
-
-      if (data && data.isTimerRunning) {
-        const taskFetch = (await getTasks(data.task_id)) as Task;
-        taskFetch.breadcrumb.forEach((crumb: Crumb) => {
-          taskFetch.display_name = taskFetch.display_name ? `${taskFetch.display_name} / ${crumb.name}` : crumb.name;
-        });
-        taskFetch.timer_info = data;
-        setActiveTask(taskFetch);
-        setSelectedItemId(taskFetch.task_id.toString());
+  function getActiveTask(data: TimerInfo) {
+    if (data) {
+      if (data.isTimerRunning) {
+        const findTask = tasks.find((task: Task) => task.task_id == data.task_id);
+        if (findTask) {
+          findTask.timer_info = data;
+          setActiveTask(findTask);
+          setSelectedItemId(findTask.task_id.toString());
+        }
+      } else if (!data.isTimerRunning) {
+        setActiveTask(null);
+        setSelectedItemId("");
       }
-    } catch (error) {
-      console.error(error);
     }
   }
 
   return (
-    <List filtering={{ keepSectionOrder: true }} selectedItemId={selectedItemId} searchBarPlaceholder="Search Task">
+    <List
+      isLoading={isLoading}
+      filtering={{ keepSectionOrder: true }}
+      selectedItemId={selectedItemId}
+      searchBarPlaceholder="Search Task"
+    >
       {activeTask ? (
         <List.Section title="Active Timer">
-          <ActiveTaskItem activeTask={activeTask} setActiveTask={setActiveTask} />
+          <ActiveTaskItem activeTask={activeTask} setActiveTask={setActiveTask} setSelectedItemId={setSelectedItemId} />
         </List.Section>
       ) : null}
       <List.Section title="Tasks">
-        {tasks.map((task: Task) => {
+        {(tasks || []).map((task: Task) => {
           if (activeTask && activeTask.task_id == task.task_id) return null;
 
           return (
