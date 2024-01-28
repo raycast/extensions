@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Better Sentence Case] - 2024-01-28
+- Sentence case now handles punctuation better
+
 ## [Manual Refresh] - 2023-11-27
 - Added a manual refresh action to refresh the selected text/clipboard
 
