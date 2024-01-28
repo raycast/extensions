@@ -42,12 +42,14 @@ export function useChat(saved: ChatBox): ChatHook {
           : [
               {
                 role: "user",
-                content: "You are an artificial intelligence assistant, please try to answer my questions in English.",
+                content: `You are an artificial intelligence assistant, please try to answer my questions in English. 
+                I will ask you some questions about a web article. 
+                If I forget to give you the URL or any page content, please be sure to remind me to enter the URL first.`,
               },
             ]),
         ...(previous
           ? [{ role: "assistant", content: previous.answer }]
-          : [{ role: "assistant", content: "Sure. How can I help you." }]),
+          : [{ role: "assistant", content: "Sure. Please send me the URL of the article you want to discuss" }]),
         {
           role: "user",
           content: content.content,
