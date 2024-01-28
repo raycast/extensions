@@ -512,3 +512,17 @@ export function getHourlyThunder(hour: Hourly | undefined) {
   const valueAndUnit = `${valueText} ${unit}`;
   return { value, unit, valueAndUnit };
 }
+
+/**
+ * Convert the  given time to the user preferences time
+ * @param text Can be 12 or 24 hour time like 11:00 PM, 11:00 AM or 11:00
+ * @returns
+ */
+export function convertToTimeString(text: string) {
+  const t = text.trim();
+  if (t.endsWith("AM") || t.endsWith("PM")) {
+    const d = new Date("1/1/2000 " + t);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return t;
+}
