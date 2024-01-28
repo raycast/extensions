@@ -2,6 +2,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Model, ModelHook } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
+import { useProxy } from "./useProxy";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -18,13 +19,14 @@ export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
   const gpt = useChatGPT();
+  const proxy = useProxy();
   const { useAzure } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
 
   useEffect(() => {
     if (!useAzure) {
       gpt.models
-        .list()
+        .list({ httpAgent: proxy })
         .then((res) => {
           const models = res.data;
           setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
