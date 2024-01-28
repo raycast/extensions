@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { List, ActionPanel, Action, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, confirmAlert, Alert } from "@raycast/api";
 import { useTags } from "../hooks";
-import { Workspace, Tag, deleteTag } from "../api";
+import { Workspace, deleteTag } from "../api";
 import TagForm from "./TagForm";
+import { withToast, Verb } from "../helpers/withToast";
 
 interface TagListProps {
   workspace: Workspace;
@@ -18,27 +19,6 @@ export default function TagList({ workspace, isLoading }: TagListProps) {
     () => !workspace.only_admins_may_create_tags || workspace.role == "admin" || workspace.role == "projectlead",
     [workspace],
   );
-
-  async function handleTagDelete(tag: Tag) {
-    if (
-      await confirmAlert({
-        title: "Are You Sure?",
-        message: "Deleting this tag will permanently remove it from all time entries.",
-      })
-    ) {
-      const toast = await showToast({ title: "Deleting Tag", style: Toast.Style.Animated });
-      try {
-        await deleteTag(tag.workspace_id, tag.id);
-        revalidateTags();
-        toast.style = Toast.Style.Success;
-        toast.title = "Tag deleted";
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Couldn't deleted tag";
-        if (error instanceof Error) toast.message = error.message;
-      }
-    }
-  }
 
   return (
     <List isLoading={isLoading || isLoadingTags}>
@@ -62,7 +42,23 @@ export default function TagList({ workspace, isLoading }: TagListProps) {
                     icon={Icon.Trash}
                     shortcut={{ key: "x", modifiers: ["ctrl"] }}
                     style={Action.Style.Destructive}
-                    onAction={() => handleTagDelete(tag)}
+                    onAction={async () => {
+                      if (
+                        await confirmAlert({
+                          title: "Delete Tag",
+                          primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                          message: "Deleting this tag will permanently remove it from all time entries.",
+                        })
+                      )
+                        await withToast({
+                          noun: "Tag",
+                          verb: Verb.Delete,
+                          action: async () => {
+                            await deleteTag(tag.workspace_id, tag.id);
+                            revalidateTags();
+                          },
+                        });
+                    }}
                   />
                 </ActionPanel.Section>
                 <Action.Push
