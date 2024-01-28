@@ -50,4 +50,14 @@ export const Verb = {
   Edit: {
     presentTense: "Edit",
   },
+  Archive: {
+    presentTense: "Archive",
+    progressiveTense: "Archiving",
+    pastTense: "Archived",
+  },
+  Restore: {
+    presentTense: "Restore",
+    progressiveTense: "Restoring",
+    pastTense: "Restored",
+  },
 } as const satisfies Record<string, VerbOptions>;
