@@ -3,7 +3,7 @@
   "name": "images-compression",
   "title": "Images Compression",
   "description": "Compress the selected images in Finder with Zipic.",
-  "icon": "icon.png",
+  "icon": "zipic-icon.png",
   "author": "okooo5km",
   "categories": [
     "Applications"
@@ -16,7 +16,7 @@
       "subtitle": "Zipic",
       "description": "Compress the selected images in Finder with Zipic.",
       "mode": "no-view",
-      "icon": "icon.png"
+      "icon": "zipic-icon.png"
     }
   ],
   "dependencies": {

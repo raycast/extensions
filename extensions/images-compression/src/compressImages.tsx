@@ -25,8 +25,7 @@ export default async function main() {
     } else {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Warning",
-        message: "No Finder items selected",
+        title: "Warning! No Finder items selected",
       });
     }
   } catch (e) {
