@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, showToast, Toast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { createContact, deleteContact, getAudiences, getContacts, updateContact } from "./utils/api";
 import {
@@ -78,6 +78,22 @@ export default function Audiences() {
     setIsLoadingContacts(false);
   }
 
+  async function confirmAndDelete(audienceId: string, contact: Contact) {
+    if (
+      await confirmAlert({
+        title: `Delete '${contact.email}'?`,
+        message: `id: ${contact.id}`,
+        primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+      })
+    ) {
+      const response = await deleteContact(audienceId, contact.id);
+      if (!("statusCode" in response)) {
+        await showToast(Toast.Style.Success, "Deleted Domain");
+        await getContactsFromApi(audienceId);
+      }
+    }
+  }
+
   return error ? (
     <ErrorComponent error={error} />
   ) : (
@@ -122,8 +138,7 @@ export default function Audiences() {
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={async () => {
-                    await deleteContact(audience.id, contact.id);
-                    await getContactsFromApi(audience.id);
+                    await confirmAndDelete(audience.id, contact);
                   }}
                 />
               )}
