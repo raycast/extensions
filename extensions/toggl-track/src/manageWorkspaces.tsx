@@ -4,6 +4,7 @@ import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { useOrganizations, useWorkspaces } from "./hooks";
 import { Workspace } from "./api";
 import TagList from "./components/TagList";
+import ClientList from "./components/ClientList";
 
 function ManageWorkspaces() {
   const { organizations, isLoadingOrganizations } = useOrganizations();
@@ -86,6 +87,14 @@ function ManageWorkspaces() {
                   target={
                     <ExtensionContextProvider>
                       <TagList workspace={workspace} isLoading={isLoadingWorkspaces} />
+                    </ExtensionContextProvider>
+                  }
+                />
+                <Action.Push
+                  title="Manage Clients"
+                  target={
+                    <ExtensionContextProvider>
+                      <ClientList workspace={workspace} isLoading={isLoadingWorkspaces} />
                     </ExtensionContextProvider>
                   }
                 />
