@@ -9,10 +9,15 @@ type IconGridProps = {
    * The number of columns to display.
    */
   columns: number;
+
+  /**
+   * Whether or not the grid is loading.
+   */
+  isLoading: boolean;
 };
 
 export default function IconGrid(props: IconGridProps) {
-  const { columns } = props;
+  const { columns, isLoading } = props;
   const [selectedWeight, setSelectedWeight] = useCachedState<string>("weight", "regular");
 
   return (
@@ -20,6 +25,7 @@ export default function IconGrid(props: IconGridProps) {
       searchBarPlaceholder={`Search ${icons.length} icons...`}
       columns={columns}
       searchBarAccessory={<WeightSelector onChange={setSelectedWeight} defaultValue="regular" />}
+      isLoading={isLoading}
     >
       <Grid.EmptyView icon={"no-view.png"} title="No Icons Found" description="Try a different query." />
       {icons.map((icon) => (

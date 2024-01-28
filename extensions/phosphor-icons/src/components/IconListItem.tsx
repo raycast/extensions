@@ -19,8 +19,7 @@ export default function IconListItem(props: IconListItemProps) {
   const { icon, selectedWeight } = props;
 
   const svgPath = path.join(
-    environment.assetsPath,
-    "phosphor-icons",
+    environment.supportPath,
     selectedWeight,
     `${icon.name}${selectedWeight !== "regular" ? `-${selectedWeight}` : ``}.svg`,
   );
