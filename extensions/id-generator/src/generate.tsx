@@ -7,7 +7,7 @@ export default function Command() {
 
   const handleGenerateUUID = () => {
     const generatedUUID = uuidv4();
-    setUuid(generatedUUID); 
+    setUuid(generatedUUID);
     Clipboard.copy(generatedUUID);
     showToast(Toast.Style.Success, "Copied UUID", generatedUUID);
   };
@@ -21,7 +21,6 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      
       <Form.TextField
         id="uuid"
         title="Generated UUID:"
