@@ -1,5 +1,15 @@
-import React, { useEffect } from "react";
-import { useNavigation, getPreferenceValues, Icon, List, ActionPanel, Action, Color, Form } from "@raycast/api";
+import React, { useState, useEffect } from "react";
+import {
+  useNavigation,
+  getPreferenceValues,
+  closeMainWindow,
+  Icon,
+  List,
+  ActionPanel,
+  Action,
+  Color,
+  Form,
+} from "@raycast/api";
 import { useFetch, useCachedState } from "@raycast/utils";
 import fetch from "node-fetch";
 
@@ -77,20 +87,21 @@ function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormPro
           body: JSON.stringify({ id: entryId, note: noteString }),
         }),
         {
-          optimisticUpdate() {
+          async optimisticUpdate() {
             const tempTask = activeTask;
             if (tempTask.timer_info) {
               tempTask.timer_info.note = noteString;
             }
             setActiveTask(tempTask);
             pop();
+            await closeMainWindow({ clearRootSearch: true });
           },
           rollbackOnError: true,
           shouldRevalidateAfter: false,
         },
       );
     } catch (err) {
-      console.log("error updating task: ", err);
+      console.error("error updating task: ", err);
     }
   };
 
@@ -183,7 +194,7 @@ const ActiveTaskItem = ({ activeTask, setActiveTask, setSelectedItemId }: Active
         },
       );
     } catch (err) {
-      console.log("error stopping task: ", err);
+      console.error("error stopping task: ", err);
     }
   }
 
@@ -221,6 +232,8 @@ export default function Command() {
   const [tasks, setTasks] = useCachedState<Task[]>("tasks", []);
   const [activeTask, setActiveTask] = useCachedState<Task | null>("activeTask", null);
   const [selectedItemId, setSelectedItemId] = useCachedState<string>("selectedItemId", "");
+  const [startedTask, setStartedTask] = useState(false);
+  const { push } = useNavigation();
   const { isLoading } = useFetch("https://app.timecamp.com/third_party/api/tasks?status=active", {
     method: "GET",
     headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
@@ -240,6 +253,13 @@ export default function Command() {
     initialData: activeTask,
     onData: getActiveTask,
   });
+
+  useEffect(() => {
+    if (activeTask && startedTask) {
+      push(<TimerEntryNoteForm activeTask={activeTask} setActiveTask={setActiveTask} />);
+      setStartedTask(false); // Reset the flag
+    }
+  }, [activeTask, startedTask]);
 
   function curateTasks(data: TasksResponse) {
     const filteredData: Task[] = [];
@@ -294,8 +314,10 @@ export default function Command() {
           shouldRevalidateAfter: true,
         },
       );
+      setStartedTask(true);
     } catch (err) {
-      console.log("error starting task: ", err);
+      console.error("error starting task: ", err);
+      setStartedTask(false);
     }
   }
 

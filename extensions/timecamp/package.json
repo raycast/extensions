@@ -23,6 +23,7 @@
       "name": "timecamp_api_token",
       "description": "Get your programming API token from https://app.timecamp.com/app#/settings/users/me",
       "type": "textfield",
+      "placeholder": "1e6472fe62db7421db0fc80472",
       "required": true,
       "title": "API Token"
     }
