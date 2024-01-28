@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, showHUD } from "@raycast/api";
+import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { useMemo, useState } from "react";
 import {
   ClearStatusAction,
@@ -39,7 +39,7 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
       const presetToLaunch = presets.find((p) => p.title === props.launchContext?.presetName);
       if (!presetToLaunch) {
         console.error("No preset found with name: ", presetName);
-        showFailureToast(new Error(`Could not find \"${presetName}\" preset`), { title: "No preset found" });
+        showFailureToast(new Error(`Could not find "${presetName}" preset`), { title: "No preset found" });
       } else {
         setStatusToPreset({ preset: presetToLaunch, slack, mutate });
         closeMainWindow();
