@@ -18,6 +18,7 @@ export const DEFAULT_MODEL: Model = {
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
   const proxy = useProxy();
   const { useAzure } = getConfiguration();
@@ -49,9 +50,12 @@ export function useModel(): ModelHook {
                   style: Toast.Style.Failure,
                 }
           );
+        })
+        .finally(() => {
+          setFetching(false);
         });
     }
-  }, [gpt]);
+  }, [gpt, isFetching]);
 
   useEffect(() => {
     (async () => {
@@ -124,7 +128,7 @@ export function useModel(): ModelHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear }),
-    [data, isLoading, option, add, update, remove, clear]
+    () => ({ data, isLoading, option, add, update, remove, clear, isFetching }),
+    [data, isLoading, option, add, update, remove, clear, isFetching]
   );
 }
