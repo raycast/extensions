@@ -68,6 +68,24 @@
       "required": false,
       "default": "",
       "description": "Default query when search bar is empty. Same content as in the search bar."
+    },
+    {
+      "name": "clockformat",
+      "description": "Clock Format",
+      "type": "dropdown",
+      "title": "Clock Format",
+      "default": "12h",
+      "required": false,
+      "data": [
+        {
+          "title": "12 Hours",
+          "value": "12h"
+        },
+        {
+          "title": "24 Hours",
+          "value": "24h"
+        }
+      ]
     }
   ],
   "dependencies": {
