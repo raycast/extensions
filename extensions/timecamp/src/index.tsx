@@ -74,7 +74,7 @@ function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormPro
   });
   const { pop } = useNavigation();
 
-  const updateNote = async (entryId: number | string, noteString: string) => {
+  const updateNote = async (entryId: number | string, noteString: string, close: boolean) => {
     try {
       await mutate(
         fetch("https://app.timecamp.com/third_party/api/entries", {
@@ -94,7 +94,9 @@ function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormPro
             }
             setActiveTask(tempTask);
             pop();
-            await closeMainWindow({ clearRootSearch: true });
+            if (close) {
+              await closeMainWindow({ clearRootSearch: true });
+            }
           },
           rollbackOnError: true,
           shouldRevalidateAfter: false,
@@ -111,9 +113,16 @@ function TimerEntryNoteForm({ activeTask, setActiveTask }: TimerEntryNoteFormPro
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Save Edits"
+            title="Save Edits & Close Window"
             onSubmit={(values: FormData) =>
-              updateNote(activeTask.timer_info ? activeTask.timer_info.entry_id : "", values.note)
+              updateNote(activeTask.timer_info ? activeTask.timer_info.entry_id : "", values.note, true)
+            }
+          />
+          <Action.SubmitForm
+            title="Save Edits"
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            onSubmit={(values: FormData) =>
+              updateNote(activeTask.timer_info ? activeTask.timer_info.entry_id : "", values.note, false)
             }
           />
         </ActionPanel>
@@ -298,7 +307,7 @@ export default function Command() {
     setTasks(filteredData);
   }
 
-  async function startTask(task: Task) {
+  async function startTask(task: Task, editNote: boolean) {
     try {
       await mutateActiveTask(
         fetch("https://app.timecamp.com/third_party/api/timer", {
@@ -314,7 +323,9 @@ export default function Command() {
           shouldRevalidateAfter: true,
         },
       );
-      setStartedTask(true);
+      if (editNote) {
+        setStartedTask(true);
+      }
     } catch (err) {
       console.error("error starting task: ", err);
       setStartedTask(false);
@@ -361,7 +372,12 @@ export default function Command() {
               title={task.display_name ? task.display_name : task.name}
               actions={
                 <ActionPanel title="Inactive Task">
-                  <Action title="Start Task" onAction={() => startTask(task)} />
+                  <Action title="Start Task & Edit Note" onAction={() => startTask(task, true)} />
+                  <Action
+                    title="Start Task"
+                    onAction={() => startTask(task, false)}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  />
                 </ActionPanel>
               }
             />
