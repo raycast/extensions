@@ -152,7 +152,6 @@ export const LANGS = [
   "Cython",
   "D",
   "DASL",
-  "DASL",
   "Dart",
   "DataFlex",
   "Datalog",
@@ -326,7 +325,6 @@ export const LANGS = [
   "KRL",
   "KUKA",
   "KRYPTON",
-  "ksh",
   "L",
   "L# .NET",
   "LabVIEW",
@@ -708,5 +706,5 @@ export const LANGS = [
   "Z notation",
   "Zeno",
   "ZOPL",
-  "ZPL",
-];
+  "ZPL"
+]
