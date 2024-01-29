@@ -1,8 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import fetch from "cross-fetch";
-import { useEffect } from 'react'
-
+import { useEffect } from "react";
 
 export const enum PveVmStatus {
   running = "running",
