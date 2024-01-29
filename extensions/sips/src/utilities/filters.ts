@@ -8,7 +8,7 @@
  * Last modified  : 2023-07-dd 00:44:28
  */
 
-import { runAppleScript } from "run-applescript";
+import { runAppleScript, runAppleScriptSync } from "run-applescript";
 
 import { Filter } from "./types";
 
@@ -25,12 +25,13 @@ const initializeFilterScript = (source: string, destination: string, CIFilterNam
     use framework "Quartz"
     use framework "PDFKit"
 
+    set res to ""
     set thePDF to missing value
     applyFilter("${source}", "${destination}")
     on applyFilter(sourcePath, destinationPath)
         global thePDF
         set repeatCount to 1
-        if "${source}" ends with ".pdf" then
+        if "${source}" ends with ".pdf" and "${destination}" is not "" then
             set thePDF to current application's PDFDocument's alloc()'s initWithURL:(current application's |NSURL|'s fileURLWithPath:sourcePath)
             set pageCount to thePDF's pageCount()
             set repeatCount to pageCount
@@ -84,6 +85,28 @@ const saveImageScript = `on saveImage(imageToSave, sourcePath, destinationPath, 
       theResultData's writeToFile:destinationPath atomically:false
     end if
 end saveImage`;
+
+export const getFilterThumbnail = (filter: Filter, source: string) => {
+  return runAppleScriptSync(`${initializeFilterScript(source, "", filter.CIFilterName)}
+    set theCIImage to current application's CIImage's imageWithData:(theImage's TIFFRepresentation())
+    theFilter's setValue:theCIImage forKey:"inputImage"
+    ${baseFilterResultScript}
+  end repeat
+  end applyFilter
+  
+  on saveImage(imageToSave, sourcePath, destinationPath, iter)
+       global res
+        -- Saves an NSImage to the supplied file path
+        set theTIFFData to imageToSave's TIFFRepresentation()
+        set theBitmapImageRep to current application's NSBitmapImageRep's imageRepWithData:theTIFFData
+        set theImageProperties to current application's NSDictionary's dictionaryWithObject:1 forKey:(current application's NSImageCompressionFactor)
+        set theResultData to theBitmapImageRep's representationUsingType:(current application's NSPNGFileType) |properties|:(missing value)
+        set base64String to (theResultData's base64EncodedStringWithOptions:0) as text
+        set res to "data:image/png;base64," & base64String
+  end saveImage
+  
+  return res`);
+};
 
 /**
  * The concluding part of the ASObjC script that applies a filter to an image. Joins all the parts of the script together and runs it.
