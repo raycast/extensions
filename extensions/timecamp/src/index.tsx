@@ -308,6 +308,8 @@ export default function Command() {
   }
 
   async function startTask(task: Task, editNote: boolean) {
+    setActiveTask(null);
+    setStartedTask(false);
     try {
       await mutateActiveTask(
         fetch("https://app.timecamp.com/third_party/api/timer", {
@@ -328,7 +330,6 @@ export default function Command() {
       }
     } catch (err) {
       console.error("error starting task: ", err);
-      setStartedTask(false);
     }
   }
 
