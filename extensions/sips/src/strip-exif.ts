@@ -106,6 +106,16 @@ async function getExifToolLocation() {
   ) {
     await setExifToolLocation();
   }
+
+  if (initialLocation === ExifToolLocation.ON_PATH) {
+    try {
+      execSync("exiftool -ver");
+      return ExifToolLocation.ON_PATH;
+    } catch (error) {
+      await setExifToolLocation();
+    }
+  }
+
   return await LocalStorage.getItem("exifToolLocation");
 }
 
