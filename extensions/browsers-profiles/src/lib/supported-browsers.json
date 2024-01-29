@@ -54,7 +54,7 @@
       "type": "CHROMIUM",
       "title": "Microsoft Edge Canary",
       "path": "/Library/Application Support/Microsoft Edge Canary",
-      "icon": "edge.png"
+      "icon": "edge-canary.png"
     }
   ],
   "firefox": [
