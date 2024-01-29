@@ -1,6 +1,5 @@
 import { List, LocalStorage } from "@raycast/api";
-import React, { useEffect } from "react";
-
+import { useEffect } from "react";
 import { ChangeModelProp } from "../../type";
 
 export const ModelDropdown = (props: ChangeModelProp) => {
