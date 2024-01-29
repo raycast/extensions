@@ -706,5 +706,5 @@ export const LANGS = [
   "Z notation",
   "Zeno",
   "ZOPL",
-  "ZPL"
-]
+  "ZPL",
+];
