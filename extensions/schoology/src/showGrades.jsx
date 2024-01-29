@@ -8,6 +8,7 @@ import {
   Toast,
   Action,
   popToRoot,
+  environment,
   Image,
   Detail,
 } from "@raycast/api";
@@ -295,7 +296,7 @@ function getChartUrl(grades, categories) {
             data: dataPoints,
             fill: false,
             borderColor: "red", // Set the line color
-            pointBorderColor: "blue", // Make the point border the same color as the points
+            pointBorderColor: environment.appearance === "dark" ? "rgb(144, 238, 144)" : "blue", // Make the point border the same color as the points
             pointBackgroundColor: "blue", // Color the points
             lineTension: 0.3,
             borderWidth: 3,
@@ -312,23 +313,23 @@ function getChartUrl(grades, categories) {
               ticks: {
                 min: minGrade, // Set the minimum value of the y-axis
                 max: maxGrade, // Set the maximum value of the y-axis
-                fontColor: "black", // Make the text black
+                fontColor: environment.appearance === "dark" ? "white" : "black", // Make the text white if environment appearance is dark, otherwise make it black
                 callback: function (value) {
                   return value + "%"; // Append '%' to the y-axis labels
                 },
               },
               gridLines: {
-                color: "black", // Make the axes black
+                color: environment.appearance === "dark" ? "white" : "black", // Make the axes black
               },
             },
           ],
           xAxes: [
             {
               ticks: {
-                fontColor: "black", // Make the text black
+                fontColor: environment.appearance === "dark" ? "white" : "black", // Make the text white if environment appearance is dark, otherwise make it black
               },
               gridLines: {
-                color: "black", // Make the axes black
+                color: environment.appearance === "dark" ? "white" : "black", // Make the axes black
               },
             },
           ],
@@ -376,7 +377,7 @@ async function gradesInBrowser({ grades, categories }) {
   const minGrade = Math.floor(Math.min(...dataPoints) / 10) * 10; // Round down to the nearest 10
   const maxGrade = Math.ceil(Math.max(...dataPoints) / 10) * 10; // Round up to the nearest 10
   const shadowOffset = 2; // Adjust this to change the shadow offset
-  const shadowColor = "rgba(0, 0, 0, 0.2)"; // Adjust this to change the shadow color
+  const shadowColor = "white"; // Adjust this to change the shadow color
 
   const dataPointsShadow = dataPoints.map((point, index) => {
     // Create a shadow effect by offsetting the data points and using a lower opacity
