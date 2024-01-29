@@ -23,14 +23,14 @@ export default async function Command() {
   const cycleCollection = await getCycleCollection({ limit: 1 });
   const sleepCollection = await getSleepCollection({ limit: 1 });
 
-  const recovery = recoveryCollection?.records?.[0].score?.recovery_score;
-  const strain = formatStrain(cycleCollection?.records?.[0].score?.strain);
-  const hrv = Math.round(recoveryCollection?.records?.[0].score?.hrv_rmssd_milli || 0);
-  const restingHeartRate = formatHeartRate(recoveryCollection?.records?.[0].score?.resting_heart_rate);
+  const recovery = recoveryCollection?.records?.[0]?.score?.recovery_score || 0;
+  const strain = formatStrain(cycleCollection?.records?.[0]?.score?.strain) || 0;
+  const hrv = Math.round(recoveryCollection?.records?.[0]?.score?.hrv_rmssd_milli || 0);
+  const restingHeartRate = formatHeartRate(recoveryCollection?.records?.[0]?.score?.resting_heart_rate) || 0;
 
-  const cals = calcCals(cycleCollection?.records?.[0].score?.kilojoule);
+  const cals = calcCals(cycleCollection?.records?.[0]?.score?.kilojoule) || 0;
 
-  const sleepPerformancePercentage = sleepCollection?.records?.[0].score?.sleep_performance_percentage || 0;
+  const sleepPerformancePercentage = sleepCollection?.records?.[0]?.score?.sleep_performance_percentage || 0;
 
   const subtitleComponents = [];
 

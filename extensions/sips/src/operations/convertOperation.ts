@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-dd 00:19:37
- * Last modified  : 2023-07-dd 00:19:37
+ * Last modified  : 2024-01-27 13:31:19
  */
 
 import { execSync } from "child_process";
@@ -79,9 +79,10 @@ export default async function convert(sourcePaths: string[], desiredType: string
         );
       }
     } else if (originalType.toLowerCase() == "webp") {
-      // WebP -> Desired Format
+      // WebP -> PNG -> Desired Format
       execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
       execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
+      execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${newPath}"`);
     } else if (originalType.toLowerCase() == "pdf") {
       // PDF -> Desired Format
       const itemName = path.basename(item);

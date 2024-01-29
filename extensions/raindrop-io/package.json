@@ -8,7 +8,8 @@
   "author": "lardissone",
   "contributors": [
     "shubham",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "sh-cho"
   ],
   "license": "MIT",
   "commands": [
@@ -52,6 +53,58 @@
       "description": "Always use the last selected collection instead of All Bookmarks.",
       "default": false,
       "label": "Use always the last selected collection"
+    },
+    {
+      "name": "additionalItemToDisplayInList",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "link",
+          "title": "Link"
+        },
+        {
+          "value": "domain",
+          "title": "Domain"
+        },
+        {
+          "value": "excerpt",
+          "title": "Excerpt"
+        },
+        {
+          "value": "note",
+          "title": "Note"
+        },
+        {
+          "value": "none",
+          "title": "None"
+        }
+      ],
+      "title": "Additional Item to Display in List",
+      "description": "Select additional item to display as an subtitle in list.",
+      "default": "link"
+    },
+    {
+      "name": "displayDate",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "lastUpdated",
+          "title": "Last Updated"
+        },
+        {
+          "value": "created",
+          "title": "Created"
+        },
+        {
+          "value": "none",
+          "title": "None"
+        }
+      ],
+      "title": "Display Date",
+      "description": "Select date to display in list.",
+      "default": "lastUpdated"
     }
   ],
   "dependencies": {

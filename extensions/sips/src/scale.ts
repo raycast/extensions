@@ -5,13 +5,14 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:56:29
- * Last modified  : 2023-07-06 15:48:08
+ * Last modified  : 2023-07-18 18:48:52
  */
 
 import { showToast, Toast } from "@raycast/api";
 
 import scale from "./operations/scaleOperation";
-import { cleanup, getSelectedImages, showErrorToast } from "./utilities/utils";
+import { getSelectedImages } from "./utilities/utils";
+import runOperation from "./operations/runOperation";
 
 export default async function Command(props: { arguments: { scaleFactor: string } }) {
   const { scaleFactor } = props.arguments;
@@ -23,21 +24,11 @@ export default async function Command(props: { arguments: { scaleFactor: string 
   }
 
   const selectedImages = await getSelectedImages();
-  if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
-    return;
-  }
-
-  const toast = await showToast({ title: "Scaling in progress...", style: Toast.Style.Animated });
-
-  const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-  try {
-    await scale(selectedImages, scaleNumber);
-    toast.title = `Scaled ${selectedImages.length.toString()} ${pluralized}`;
-    toast.style = Toast.Style.Success;
-  } catch (error) {
-    await showErrorToast(`Failed to scale ${selectedImages.length.toString()} ${pluralized}`, error as Error, toast);
-  } finally {
-    await cleanup();
-  }
+  await runOperation({
+    operation: () => scale(selectedImages, scaleNumber),
+    selectedImages,
+    inProgressMessage: "Scaling in progress...",
+    successMessage: "Scaled",
+    failureMessage: "Failed to scale",
+  });
 }

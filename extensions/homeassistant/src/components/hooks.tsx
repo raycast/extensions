@@ -2,6 +2,7 @@ import { Connection, entitiesColl, subscribeEntities } from "home-assistant-js-w
 import { useEffect, useRef, useState } from "react";
 import { getHAWSConnection } from "../lib/common";
 import { State } from "@lib/haapi";
+import { useCachedState } from "@raycast/utils";
 
 interface EntityRegistryEntry {
   device_id?: string | null;
@@ -41,21 +42,13 @@ export function useHAStates(): {
   error?: Error;
   isLoading: boolean;
 } {
-  const [states, setStates] = useState<State[]>();
+  const [states, setStates] = useCachedState<State[]>("states");
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const hawsRef = useRef<Connection>();
 
   useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
     async function fetchData() {
-      if (didUnmount) {
-        return;
-      }
-
       setIsLoading(true);
       setError(undefined);
 
@@ -69,16 +62,14 @@ export function useHAStates(): {
             console.log("incoming entities changes");
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const haStates = Object.entries(entities).map(([k, v]) => v as State);
-            if (!didUnmount) {
-              console.log("set new entities");
-              if (haStates.length > 0) {
-                // Home Assistant often send empty states array in the beginning of an connection. This cause empty state flickering in raycast.
-                const filteredStates = haStates.filter((s) => entityRegistry.isUserVisible(s.entity_id));
-                setStates(filteredStates);
-                setIsLoading(false);
-              } else {
-                console.log("ignore empty states callback");
-              }
+            console.log("set new entities");
+            if (haStates.length > 0) {
+              // Home Assistant often send empty states array in the beginning of an connection. This cause empty state flickering in raycast.
+              const filteredStates = haStates.filter((s) => entityRegistry.isUserVisible(s.entity_id));
+              setStates(filteredStates);
+              setIsLoading(false);
+            } else {
+              console.log("ignore empty states callback");
             }
           });
           hawsRef.current = con;
@@ -88,19 +79,13 @@ export function useHAStates(): {
         }
         //eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (!didUnmount) {
-          const err = e instanceof Error ? e : new Error(e);
-          setError(err);
-          setIsLoading(false);
-        }
+        const err = e instanceof Error ? e : new Error(e);
+        setError(err);
+        setIsLoading(false);
       }
     }
 
     fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
   }, []);
 
   return { states, error, isLoading };

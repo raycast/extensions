@@ -8,9 +8,46 @@ export async function request(url: URL | string, options?: RequestInit, timeout?
     fetch(url, {
       ...options,
       agent: createAgent(),
+    }).catch((err: any) => {
+      if (err.message.includes("connect ECONNREFUSED")) {
+        throw new Error("Please check if your proxy is connected properly");
+      }
+
+      throw err;
     }),
     timeout ?? 20000,
   );
+}
+
+export async function fetchHeadContent(url: string): Promise<string | null> {
+  const response = await request(url);
+
+  // 确保响应是文本类型
+  if (!response.headers.get("content-type")?.includes("text/html")) {
+    console.log("Response is not HTML text");
+    return null;
+  }
+
+  return new Promise((resolve, reject) => {
+    let content = "";
+    response.body?.on?.("data", (chunk: Buffer) => {
+      content += chunk.toString();
+      // 检查是否包含 </head>
+      if (content.includes("</head>")) {
+        response.body!.pause(); // 停止接收数据
+        resolve(content.split("</head>")[0] + "</head>");
+      }
+    });
+
+    response.body?.on?.("error", (err: Error) => {
+      reject(err);
+    });
+
+    response.body?.on?.("end", () => {
+      // 如果没有找到 </head>，则返回已接收的全部内容
+      resolve(content);
+    });
+  });
 }
 
 interface Metadata {
@@ -25,9 +62,11 @@ interface Metadata {
 }
 
 export async function fetchMetadata(url: string): Promise<Metadata> {
-  const response = await request(url);
-  const body = await response.text();
-  const $ = load(body);
+  // const response = await request(url);
+  // 如果用这种方式，当文本内容过大时（比如2M），会导致内存溢出，导致页面崩溃
+  // const body = await response.text();
+  const body = await fetchHeadContent(url);
+  const $ = load(body || "");
 
   const title = $("title").text();
   let favicon = $('link[rel="icon"], link[rel="shortcut icon"]').attr("href") ?? "";
@@ -54,10 +93,11 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
   return { title, favicon, coverImageUrl: coverImageUrl ?? "" };
 }
 
+// 可能在获取url的时候报错
 export async function isValidRSSLink(url: string): Promise<boolean> {
   if (!isURL(url)) return false;
 
-  const response = await request(url);
+  const response = await request(url, undefined, 20 * 1000);
   const contentType = response.headers.get("content-type");
   const text = await response.text();
 

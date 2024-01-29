@@ -91,3 +91,27 @@ export async function getWriteFreelyAccessToken() {
   const token = await LocalStorage.getItem<string>("writefreelyAccessToken");
   return token;
 }
+
+export async function saveInterestsSelected(selected: boolean) {
+  await LocalStorage.setItem("interestsSelected", selected);
+}
+
+export async function getInterestsSelected() {
+  return (await LocalStorage.getItem<boolean>("interestsSelected")) || false;
+}
+
+export async function saveInterest(interest: string) {
+  await LocalStorage.setItem("interest", interest);
+}
+
+export async function getInterest() {
+  return await LocalStorage.getItem<string>("interest");
+}
+
+export async function saveComeFrom(from: string) {
+  await LocalStorage.setItem("comeFrom", from);
+}
+
+export async function getComeFrom() {
+  return await LocalStorage.getItem<string>("comeFrom");
+}
