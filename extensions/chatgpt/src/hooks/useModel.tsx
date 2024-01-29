@@ -54,6 +54,8 @@ export function useModel(): ModelHook {
         .finally(() => {
           setFetching(false);
         });
+    } else {
+      setFetching(false);
     }
   }, [gpt]);
 
