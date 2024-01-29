@@ -1,5 +1,14 @@
 # raycast-ollama Changelog
 
+## [BugFix] - 2024-01-24
+
+- Fixed `Cannot read properties of undefined (reading 'split')` caused by API route '/api/show' responding with empty 'parameters' value for some models.
+
+## [BugFix] - 2024-01-12
+
+- **Command 'Improve Writing'**: fixed error 'Preferred model is not configured in LocalStorage'.
+- Fixed typo on error code 'Prefered model is not configured in LocalStorage'.
+
 ## [Improvement] - 2024-01-11
 
 - **Command 'Translate'**: now is required to specify the destination language.

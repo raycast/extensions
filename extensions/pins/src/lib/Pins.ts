@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-04 17:37:42
- * Last modified  : 2023-11-01 00:43:50
+ * Last modified  : 2024-01-13 01:07:48
  */
 
 import { useCachedState } from "@raycast/utils";
@@ -25,7 +25,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SORT_FN, StorageKey, SORT_STRATEGY } from "./constants";
-import { getStorage, runCommand, runCommandInTerminal, setStorage } from "./utils";
+import { runCommand, runCommandInTerminal } from "./utils";
 import { ExtensionPreferences } from "./preferences";
 import * as fs from "fs";
 import * as os from "os";
@@ -33,6 +33,7 @@ import path from "path";
 import { Group } from "./Groups";
 import { PLApplicator } from "placeholders-toolkit";
 import PinsPlaceholders from "./placeholders";
+import { getStorage, setStorage } from "./storage";
 
 /**
  * A pin object.
@@ -122,6 +123,11 @@ export type Pin = {
    * User-defined notes for the pin.
    */
   notes?: string;
+
+  /**
+   * The tooltip to display when hovering over the pin.
+   */
+  tooltip?: string;
 };
 
 /**
@@ -145,6 +151,7 @@ export const PinKeys = [
   "averageExecutionTime",
   "tags",
   "notes",
+  "tooltip",
 ];
 
 /**
@@ -204,7 +211,7 @@ export const usePins = () => {
   };
 
   useEffect(() => {
-    Promise.resolve(revalidatePins());
+    revalidatePins();
   }, []);
 
   return {
@@ -240,7 +247,7 @@ export const openPin = async (
       await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
     } else {
       const targetRaw = pin.url.startsWith("~") ? pin.url.replace("~", os.homedir()) : pin.url;
-      const target = await PLApplicator.applyToString(targetRaw, { context, allPlaceholders: PinsPlaceholders });
+      const target = await PLApplicator.bulkApply(targetRaw, { context, allPlaceholders: PinsPlaceholders });
 
       if (target != "") {
         const isPath = pin.url.startsWith("/") || pin.url.startsWith("~");
@@ -304,6 +311,7 @@ export const openPin = async (
     pin.iconColor,
     pin.tags,
     pin.notes,
+    pin.tooltip,
     pin.averageExecutionTime
       ? Math.round((pin.averageExecutionTime * (pin.timesOpened || 0) + timeElapsed) / ((pin.timesOpened || 0) + 1))
       : timeElapsed,
@@ -424,6 +432,7 @@ export const modifyPin = async (
   iconColor: string | undefined,
   tags: string[] | undefined,
   notes: string | undefined,
+  tooltip: string | undefined,
   averageExecutionTime: number | undefined,
   pop: () => void,
   setPins: React.Dispatch<React.SetStateAction<Pin[]>>,
@@ -459,6 +468,7 @@ export const modifyPin = async (
         iconColor: iconColor,
         tags: tags,
         notes: notes,
+        tooltip: tooltip,
         averageExecutionTime: averageExecutionTime,
       } as Pin;
     } else {
@@ -491,6 +501,7 @@ export const modifyPin = async (
       iconColor: iconColor,
       tags: tags,
       notes: notes,
+      tooltip: tooltip,
       averageExecutionTime: averageExecutionTime,
     });
   }
@@ -660,7 +671,7 @@ export const calculatePinFrequencyPercentile = (pin: Pin, pins: Pin[]) => {
   const pinIndex = pinsSortedByFrequency.findIndex(
     (p) => p.id == pin.id || (p.timesOpened || 0) >= (pin.timesOpened || 0),
   );
-  return Math.round((pinIndex / pinsSortedByFrequency.length) * 100);
+  return Math.round((pinIndex / (pinsSortedByFrequency.length - 1)) * 100);
 };
 
 /**
@@ -670,11 +681,13 @@ export const calculatePinFrequencyPercentile = (pin: Pin, pins: Pin[]) => {
  * @returns The percentile of the pin's execution time compared to all other pins.
  */
 export const calculatePinExecutionTimePercentile = (pin: Pin, pins: Pin[]) => {
-  const pinsSortedByExecutionTime = pins.sort((a, b) => (a.averageExecutionTime || 0) - (b.averageExecutionTime || 0));
+  const pinsSortedByExecutionTime = pins
+    .filter((p) => p.averageExecutionTime != undefined)
+    .sort((a, b) => (a.averageExecutionTime || 0) - (b.averageExecutionTime || 0));
   const pinIndex = pinsSortedByExecutionTime.findIndex(
     (p) => p.id == pin.id || (p.averageExecutionTime || 0) >= (pin.averageExecutionTime || 0),
   );
-  return Math.round((pinIndex / pinsSortedByExecutionTime.length) * 100);
+  return Math.round((1 - pinIndex / (pinsSortedByExecutionTime.length - 1)) * 100);
 };
 
 /**
@@ -791,7 +804,13 @@ export const getPinStatistics = (pin: Pin, pins: Pin[], format: "string" | "obje
   const frequencyPercentile = calculatePinFrequencyPercentile(pin, pins);
   const timesUsedText = `Times Used: ${
     pin?.timesOpened
-      ? `${pin.timesOpened} ${frequencyPercentile > 0 ? `(More than ${frequencyPercentile}% of Other Pins)` : ``}`
+      ? `${pin.timesOpened} ${
+          frequencyPercentile > 0
+            ? frequencyPercentile === 100
+              ? `(Most Used Pin)`
+              : `(More than ${frequencyPercentile}% of Other Pins)`
+            : `(Least Used Pin)`
+        }`
       : 0
   }`;
 
@@ -801,7 +820,11 @@ export const getPinStatistics = (pin: Pin, pins: Pin[], format: "string" | "obje
 
   const executionTimePercentile = calculatePinExecutionTimePercentile(pin, pins);
   const averageExecutionTimeText = `Average Execution Time: ${averageExecutionTime}${
-    executionTimePercentile > 0 ? ` (Faster than ${executionTimePercentile}% of Other Pins)` : ``
+    executionTimePercentile > 0
+      ? executionTimePercentile === 100
+        ? ` (Fastest Pin)`
+        : ` (Faster than ${executionTimePercentile}% of Other Pins)`
+      : ` (Slowest Pin)`
   }`;
 
   const placeholdersUsedText = `Placeholders Used: ${placeholdersSummary}`;

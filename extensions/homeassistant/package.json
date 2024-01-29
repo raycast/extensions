@@ -6,7 +6,8 @@
   "author": "tonka3000",
   "contributors": [
     "altrdev",
-    "rspeicher"
+    "rspeicher",
+    "amuelli"
   ],
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",

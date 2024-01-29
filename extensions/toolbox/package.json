@@ -8,7 +8,8 @@
   "contributors": [
     "Saafo",
     "pernielsentikaer",
-    "yakitrak"
+    "yakitrak",
+    "Podles"
   ],
   "license": "MIT",
   "categories": [
@@ -56,7 +57,8 @@
     "js-yaml": "^4.1.0",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
-    "sql-formatter": "^4.0.2",
+    "prettier": "^3.2.4",
+    "sql-formatter": "^15.0.2",
     "vkbeautify": "^0.99.3"
   },
   "devDependencies": {

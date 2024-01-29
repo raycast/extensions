@@ -5,7 +5,7 @@ import { environment } from "@raycast/api";
 import { darken, mix } from "polished";
 
 const colors =
-  environment.theme === "light"
+  environment.appearance === "light"
     ? {
         gray: "#C8CAC9",
         accent: "#007DD7",

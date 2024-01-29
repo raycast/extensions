@@ -1,5 +1,10 @@
 # YouTrack Changelog
 
+## [Update] -  2024-01-21
+
+* Add 'Create Issue' command
+* BREAKING CHANGE: 'Browse Issues' preferences moved from global to per-command scope
+
 ## [Bugfixes] -  2023-07-22
 
 * Fix user avatar render issues

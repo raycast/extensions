@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Fix RemoteCommand parsing] - 2024-01-18
+
+- Fixed a bug where a remote command of a connection was not correctly parsed if the remote command contains multiple spaces.
+
 ## [Fix] 2024-01-11
 
 - SSH Config Parsing: Fix a bug where wildcard entries like `Host *` defined in `~/.ssh/config` would show up as connections.

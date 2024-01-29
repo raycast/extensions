@@ -14,25 +14,25 @@
   "license": "MIT",
   "packageManager": "npm@9.2.0",
   "dependencies": {
-    "@raycast/api": "1.60.1",
+    "@raycast/api": "1.63.0",
     "@scaleway/configuration-loader": "1.0.0",
-    "@scaleway/sdk": "2.0.0-alpha.15",
+    "@scaleway/sdk": "2.3.0",
     "@scaleway/use-dataloader": "4.0.0",
     "base64-js": "1.5.1",
     "cross-fetch": "4.0.0",
     "react": "18.2.0"
   },
   "devDependencies": {
-    "@scaleway/eslint-config-react": "3.15.28",
+    "@scaleway/eslint-config-react": "3.16.3",
     "@scaleway/tsconfig": "1.1.1",
-    "@types/node": "18.14.6",
-    "@types/react": "18.2.31",
-    "@typescript-eslint/eslint-plugin": "6.8.0",
-    "@typescript-eslint/parser": "6.8.0",
-    "eslint": "8.52.0",
-    "eslint-config-prettier": "9.0.0",
-    "prettier": "3.0.3",
-    "typescript": "5.2.2"
+    "@types/node": "20.10.5",
+    "@types/react": "18.2.45",
+    "@typescript-eslint/eslint-plugin": "6.15.0",
+    "@typescript-eslint/parser": "6.15.0",
+    "eslint": "8.56.0",
+    "eslint-config-prettier": "9.1.0",
+    "prettier": "3.1.1",
+    "typescript": "5.3.3"
   },
   "commands": [
     {

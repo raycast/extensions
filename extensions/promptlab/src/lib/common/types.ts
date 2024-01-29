@@ -1,62 +1,41 @@
 /**
  * A Raycast extension.
  */
-export type Extension = {
-  /**
-   * The title of the extension as it appears in Raycast.
-   */
-  title: string;
+export type Extension = NamedObject &
+  TitledObject &
+  DescribableObject & {
+    /**
+     * The path to the extension's directory.
+     */
+    path: string;
 
-  /**
-   * The name of the extension as defined in the extension's package.json.
-   */
-  name: string;
+    /**
+     * The author of the extension as defined in the extension's package.json.
+     */
+    author: string;
 
-  /**
-   * The path to the extension's directory.
-   */
-  path: string;
+    /**
+     * The description of the extension as defined in the extension's package.json.
+     */
+    description: string;
 
-  /**
-   * The author of the extension as defined in the extension's package.json.
-   */
-  author: string;
-
-  /**
-   * The description of the extension as defined in the extension's package.json.
-   */
-  description: string;
-
-  /**
-   * The list of commands belonging to the extension.
-   */
-  commands: ExtensionCommand[];
-};
+    /**
+     * The list of commands belonging to the extension.
+     */
+    commands: ExtensionCommand[];
+  };
 
 /**
  * A Raycast extension command.
  */
-export type ExtensionCommand = {
-  /**
-   * The title of the command as it appears in Raycast.
-   */
-  title: string;
-
-  /**
-   * The name of the command as defined in the extension's package.json.
-   */
-  name: string;
-
-  /**
-   * The description of the command as defined in the extension's package.json.
-   */
-  description: string;
-
-  /**
-   * The link to run the command.
-   */
-  deeplink: string;
-};
+export type ExtensionCommand = NamedObject &
+  TitledObject &
+  DescribableObject & {
+    /**
+     * The link to run the command.
+     */
+    deeplink: string;
+  };
 
 /**
  * Checks if a value is true in either a boolean or string form.
@@ -81,4 +60,46 @@ export const ERRORTYPE = {
  */
 export type JSONObject = {
   [key: string]: string | JSONObject | JSONObject[] | string[];
+};
+
+export type IdentifiableObject = {
+  /**
+   * The unique ID of the object.
+   */
+  id: string;
+};
+
+export type NamedObject = {
+  /**
+   * The name of the object.
+   */
+  name: string;
+};
+
+export type TitledObject = {
+  /**
+   * The title of the object.
+   */
+  title: string;
+};
+
+export type DescribableObject = {
+  /**
+   * A description of the object.
+   */
+  description: string;
+};
+
+export type VersionedObject = {
+  /**
+   * The version of the object.
+   */
+  version: string;
+};
+
+export type FavoritableObject = {
+  /**
+   * Whether the object is favorited.
+   */
+  favorited?: boolean;
 };

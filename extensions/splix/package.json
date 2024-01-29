@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "splix",
+  "title": "Splix",
+  "description": "Raycast interface for Splix (https://splix.app) to supercharge your productivity.",
+  "icon": "splix.png",
+  "author": "splix.app",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Note",
+      "subtitle": "Splix",
+      "description": "Search for a note in Splix",
+      "mode": "view"
+    },
+    {
+      "name": "add-note",
+      "title": "Add Note",
+      "subtitle": "Splix",
+      "description": "Adds a note to Splix",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "@raycast/utils": "^1.10.1",
+    "@supabase/supabase-js": "^2.39.3",
+    "node-fetch": "^3.3.2",
+    "remark-slate": "^1.8.6",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
