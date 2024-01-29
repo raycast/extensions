@@ -91,6 +91,7 @@ const useFetchFixtures = (teamId: string, selectFields: SelectFields) => {
         name: fixtureData.name,
         starting_at: new Date(fixtureData.starting_at),
         league: {
+          id: league.id,
           name: league.name,
           image_path: league.image_path,
         },
