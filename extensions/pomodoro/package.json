@@ -9,7 +9,8 @@
     "pernielsentikaer",
     "brodelp",
     "susan_thapa",
-    "mikikiv"
+    "mikikiv",
+    "MartinGonzalez"
   ],
   "keywords": [
     "pomodoro",
@@ -360,11 +361,21 @@
       "description": "Shows time on the Menu Bar",
       "default": true,
       "label": "Show time on Menu Bar"
+    },
+    {
+      "name": "enableConfetti",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Confetti",
+      "description": "Shows confetti when interval finishes",
+      "default": false,
+      "label": "Shows confetti when interval finishes"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/utils": "^1.10.1",
+    "@types/node-fetch": "^2.6.11"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
