@@ -1,17 +1,19 @@
+import type { ToggleItem } from "./types";
 import { get } from "./togglClient";
-import { Page } from "./types";
 
-export async function getMyTasks() {
-  const tasks = await get<Page<Task[]>>("/me/tasks");
-  return tasks.data ?? [];
+export function getMyTasks() {
+  return get<Task[]>("/me/tasks");
 }
 
-// https://developers.track.toggl.com/docs/api/tasks/index.html#response
-export interface Task {
+/** @see {@link https://developers.track.toggl.com/docs/api/tasks#response Toggl Api} */
+export interface Task extends ToggleItem {
   active: boolean;
-  id: number;
+  estimated_seconds: number | null;
   name: string;
   project_id: number;
-  workspace_id: number;
+  recurring: boolean;
+  tracked_seconds: number;
+  /** Task assignee */
   user_id: number | null;
+  workspace_id: number;
 }

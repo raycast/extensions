@@ -20,8 +20,6 @@ function ListView() {
     [isLoadingTimeEntries, isLoadingRunningTimeEntry, isLoadingProjects],
   );
 
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
-
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
     (acc, timeEntry) =>
       acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
@@ -52,7 +50,7 @@ function ListView() {
     await showToast(Toast.Style.Animated, "Starting timer...");
     try {
       await createTimeEntry({
-        projectId: timeEntry.project_id,
+        projectId: timeEntry.project_id ?? undefined,
         workspaceId: timeEntry.workspace_id,
         description: timeEntry.description,
         tags: timeEntry.tags,
@@ -102,14 +100,14 @@ function ListView() {
           {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
             <List.Item
               key={timeEntry.id}
-              keywords={[timeEntry.description, getProjectById(timeEntry.project_id)?.name || ""]}
+              keywords={[timeEntry.description, timeEntry.project_name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={timeEntry.billable ? "$" : ""}
               accessories={[
-                { text: getProjectById(timeEntry?.project_id)?.name },
-                { icon: { source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color } },
+                { text: timeEntry.project_name },
+                { icon: { source: Icon.Dot, tintColor: timeEntry.project_color } },
               ]}
-              icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.project_id)?.color }}
+              icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
                   <Action.SubmitForm
