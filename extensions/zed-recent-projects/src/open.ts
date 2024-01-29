@@ -23,9 +23,7 @@ export default async function openWithZed() {
 
     const finderItems = await getSelectedFinderItems();
     if (finderItems.length === 0) {
-      console.log("Test");
       const currentPath = await getCurrentFinderPath();
-      console.log(currentPath);
       if (currentPath) {
         selectedItems = [{ path: currentPath }];
       } else {
