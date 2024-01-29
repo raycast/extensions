@@ -19,7 +19,7 @@
     },
     {
       "name": "defaultAddresses",
-      "title": "Default Recipient(s)",
+      "title": "Send To",
       "description": "The default recipient's email addresses, If multiple, comma separate them",
       "type": "textfield",
       "required": true,
@@ -27,7 +27,7 @@
     },
     {
       "name": "defaultSubject",
-      "title": "Default Subect",
+      "title": "Default Subject",
       "description": "The default subject line",
       "type": "textfield",
       "required": true,

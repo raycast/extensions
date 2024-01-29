@@ -41,7 +41,18 @@ function EmailMe() {
         title: "Sending...",
         message: "Sending email",
       });
-      const [toAddress, ...restAddresses] = addresses;
+
+      const [firstAddress, ...restAddresses] = addresses;
+
+      const toAddress = firstAddress ? firstAddress : additionalAddresses[0];
+
+      if (!toAddress) {
+        return await showToast({
+          style: Toast.Style.Failure,
+          title: "Missing recipient",
+          message: "Specify at least one recipient",
+        });
+      }
 
       await sendEmail(subject, body, toAddress, restAddresses);
       showHUD("Email sent!");
