@@ -15,17 +15,6 @@
     "dancannon"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "closeWindowOnAction",
-      "title": "Close window on action",
-      "description": "Close the Raycast window after performing an action",
-      "type": "checkbox",
-      "label": "Enabled",
-      "default": false,
-      "required": false
-    }
-  ],
   "commands": [
     {
       "name": "update",
