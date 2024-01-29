@@ -3,7 +3,7 @@
   "name": "hubspot-link-sharer",
   "title": "HubSpot Link Sharer",
   "description": "Uses the hubspot app link in the clipboard and returns a sharable link back",
-  "icon": "command-icon.png",
+  "icon": "hubspot-logo.png",
   "author": "carterm",
   "license": "MIT",
   "commands": [
