@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dub",
-  "title": "dub",
+  "title": "Dub Short Link",
   "description": "Creates short url using dub.co",
   "icon": "dub_logo.png",
   "author": "adelowo",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "create",
-      "title": "create",
+      "title": "Create",
       "description": "Creates a new link",
       "mode": "view",
       "arguments": [
