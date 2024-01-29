@@ -13,7 +13,6 @@
     {
       "name": "index",
       "title": "Highlight Block",
-      "subtitle": "Generate a GitHub Highlight Block",
       "description": "Replaces selected text or clipboard content with a GitHub-flavored markdown highlight block using one of the predefined styles accepted by GitHub.",
       "mode": "no-view",
       "arguments": [
