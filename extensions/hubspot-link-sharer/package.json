@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "HubSpot Link Sharer",
-      "description": "Uses the hubspot app link in the clipboard and returns a sharable link back",
+      "description": "Uses theubspot app link in the clipboard and returns a sharable link back",
       "mode": "no-view"
     }
   ],

@@ -7,9 +7,9 @@ export default async function main() {
       console.log(link);
       const matches = link.match(/\d+/);
       if (matches !== null) {
-        var firstNumber = matches[0];
-        var newLink = link.replace("/" + firstNumber, "");
-        var finalLink = newLink.replace(".com", ".com/l");
+        let firstNumber = matches[0];
+        let newLink = link.replace("/" + firstNumber, "");
+        let finalLink = newLink.replace(".com", ".com/l");
         console.log(finalLink);
         await Clipboard.copy(finalLink);
         await showHUD("Copied sharable link to clipboard");
