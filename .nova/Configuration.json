@@ -1,0 +1,10 @@
+{
+  "eablokker.tabsSidebar.config.customKindGroupsOrder" : [
+    "typescript",
+    "json"
+  ],
+  "eablokker.tabsSidebar.config.customTabOrder" : [
+    "\/Users\/samspencer\/Projects\/Raycast\/extensions\/github-highlight-blocks\/src\/index.ts",
+    "\/Users\/samspencer\/Projects\/Raycast\/extensions\/github-highlight-blocks\/package.json"
+  ]
+}
