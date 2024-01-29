@@ -19,15 +19,15 @@ function parseSSHConfig(configFilePath: string): ISSHConnection[] {
       continue;
     }
 
-    if (trimmedLine.startsWith("Host ")) {
+    if (trimmedLine.startsWith("Host ") && trimmedLine !== "Host *") {
       if (currentConnection !== null) {
         connections.push(currentConnection);
       }
       currentConnection = { id: connections.length.toString(), address: "", name: trimmedLine.substring(5), user: "" };
     } else if (currentConnection !== null) {
-      const whitespaceIndex = /\s+/.exec(trimmedLine)?.index ?? trimmedLine.length;
-      const key = trimmedLine.substring(0, whitespaceIndex);
-      const value = trimmedLine.substring(whitespaceIndex).trim();
+      const firstSpaceIndex = trimmedLine.indexOf(" ");
+      const key = trimmedLine.substring(0, firstSpaceIndex);
+      const value = trimmedLine.substring(firstSpaceIndex + 1);
 
       switch (key) {
         case "HostName":
