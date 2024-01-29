@@ -1,5 +1,8 @@
 # Raycast Browsers Profiles
 
+## [Developer Edition] - 2024-01-29
+- Added Developer Editions of Chrome, Edge, and Firefox
+
 ## [Added Firefox Nightly] - 2022-12-05
 
 ## [Initial Version] - 2022-06-11
