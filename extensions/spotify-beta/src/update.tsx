@@ -5,7 +5,7 @@ export default function Update() {
     <List>
       <List.EmptyView
         icon={Icon.Info}
-        title="Update Spotify Player"
+        title="Update the Spotify Player Extension"
         description="Thanks for helping test Spotify Player Beta. This version of this extension is no longer supported, please update to the latest version."
         actions={
           <ActionPanel>
