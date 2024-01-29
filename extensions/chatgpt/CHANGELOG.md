@@ -1,5 +1,13 @@
 # Changelog
 
+## [Fix] - 2024-1-19
+
+- Fix: Azure API 401 error
+
+## [Chore] - 2024-01-11
+
+- Migrate openai v3 to v4
+
 ## [Fix] - 2024-01-01
 
 - Fix: Markdown output being truncated when streaming enabled with json parse error

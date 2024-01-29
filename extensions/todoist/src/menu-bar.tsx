@@ -93,7 +93,13 @@ function MenuBar(props: MenuBarProps) {
 
   return (
     <MenuBarExtra
-      icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
+      icon={{
+        source: { light: "icon.png", dark: "icon@dark.png" },
+        tintColor: {
+          light: "",
+          dark: "#E5E5E5",
+        },
+      }}
       isLoading={isLoading || isLoadingFilter}
       title={menuBarExtraTitle}
     >

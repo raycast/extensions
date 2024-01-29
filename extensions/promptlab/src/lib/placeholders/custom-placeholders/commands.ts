@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
+import { filterString } from "../../context-utils";
 import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
-import { filterString } from "../../../utils/context-utils";
 
 /**
  * Placeholder for the comma-separated list of names of all installed PromptLab commands.
