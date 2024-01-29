@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonos",
-  "title": "sonos",
+  "title": "Sonos",
   "description": "Control your Sonos system",
   "icon": "sonos.png",
   "author": "AntonNiklasson",
@@ -22,7 +22,7 @@
     },
     {
       "name": "set-group",
-      "title": "Set active group",
+      "title": "Set Active Group",
       "subtitle": "Sonos",
       "description": "Pick one of the household groups to be the active group",
       "mode": "view"
