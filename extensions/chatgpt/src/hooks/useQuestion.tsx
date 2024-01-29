@@ -1,6 +1,5 @@
 import { getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
 import { QuestionHook } from "../type";
 
 export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: boolean }): QuestionHook {

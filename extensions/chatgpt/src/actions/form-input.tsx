@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
-
 import { QuestionFormProps } from "../type";
 import { QuestionForm } from "../views/question/form";
 

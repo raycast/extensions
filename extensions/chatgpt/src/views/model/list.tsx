@@ -1,5 +1,4 @@
 import { List } from "@raycast/api";
-
 import { Model } from "../../type";
 
 export const ModelListView = ({

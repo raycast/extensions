@@ -1,6 +1,5 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
 import { Chat, HistoryHook } from "../type";
 
 export function useHistory(): HistoryHook {
