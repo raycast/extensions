@@ -10,7 +10,7 @@ export function DisplayFile({ file }: { file: ParsedFilePath & { id: string } })
       subtitle={file.locationName}
       keywords={
         [file.fileName, file.local ? file.path : file.host, !file.local && file.locationName].filter(
-          Boolean,
+          Boolean
         ) as string[]
       }
       accessories={[file.local && !file.exists ? { icon: Icon.Warning } : {}]}

@@ -51,7 +51,7 @@ async function readPlist(): Promise<FileMakerPrefs> {
       }
       return acc;
     },
-    { favorites: [], recentFiles: [] } as Omit<FileMakerPrefs, "exists">,
+    { favorites: [], recentFiles: [] } as Omit<FileMakerPrefs, "exists">
   );
 
   return { ...data, exists: true };

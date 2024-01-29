@@ -38,13 +38,31 @@
       "subtitle": "FileMaker Snippets",
       "description": "Manage where your snippets are stored",
       "mode": "view"
+    },
+    {
+      "name": "recents",
+      "title": "Search Recent Files",
+      "subtitle": "FileMaker Pro",
+      "icon": "FM12App512.png",
+      "description": "View recent files from FileMaker Pro",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Search Favorite Files",
+      "subtitle": "FileMaker Pro",
+      "icon": "FM12App512.png",
+      "description": "View favorited files from FileMaker Pro",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.4.8",
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.11.1",
     "@total-typescript/ts-reset": "^0.4.2",
+    "bplist-parser": "^0.3.2",
     "lodash": "^4.17.21",
+    "plist": "^3.1.0",
     "run-applescript": "^6.0.0",
     "uuid": "^8.3.2",
     "xml2js": "^0.5.0",

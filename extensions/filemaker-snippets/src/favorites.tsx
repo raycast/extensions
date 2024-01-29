@@ -6,7 +6,9 @@ export default function Command() {
   const { data, isLoading } = useFileMakerPrefs();
   return (
     <List isLoading={isLoading}>
-      {data?.favorites.map((item, i) => <DisplayFile file={{ ...item, id: `${item.raw}-${i}` }} />)}
+      {data?.favorites.map((item, i) => (
+        <DisplayFile file={{ ...item, id: `${item.raw}-${i}` }} />
+      ))}
     </List>
   );
 }

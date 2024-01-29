@@ -1,5 +1,9 @@
 # FileMaker Snippets Changelog
 
+## [Recents and Favorites] - 2024-01-29
+
+- Added new commands to search recent/favorite FileMaker files
+
 ## [Deeplink Support] - 2024-01-26
 
 - Renamed extension to `FileMaker Snippets`

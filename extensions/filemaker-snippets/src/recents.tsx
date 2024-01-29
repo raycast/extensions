@@ -8,7 +8,9 @@ export default function Command() {
     <List isLoading={isLoading}>
       {data?.recentFiles
         .filter((o) => (o.local ? o.exists : true))
-        .map((item, i) => <DisplayFile file={{ ...item, id: `${item.raw}-${i}` }} />)}
+        .map((item, i) => (
+          <DisplayFile file={{ ...item, id: `${item.raw}-${i}` }} />
+        ))}
     </List>
   );
 }
