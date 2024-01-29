@@ -1,20 +1,15 @@
 import { MenuBarExtra } from "@raycast/api";
-import { getActiveCoordinator, isPlaying, formatPlayingState } from "./sonos";
+import { isPlaying, formatPlayingState, getLatestState } from "./sonos";
 import { useEffect, useState } from "react";
 
 export default function Command() {
   const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function run() {
-      const coordinator = await getActiveCoordinator();
-
-      if (coordinator === undefined) {
-        return null;
-      }
-
-      const state = await coordinator.GetState();
-      const playing = await isPlaying(coordinator);
+      const state = await getLatestState();
+      const playing = await isPlaying();
 
       const title = formatPlayingState({
         playing,
@@ -22,10 +17,11 @@ export default function Command() {
       });
 
       setTitle(title);
+      setLoading(false);
     }
 
     run();
   }, []);
 
-  return <MenuBarExtra isLoading={title === ""} title={title}></MenuBarExtra>;
+  return <MenuBarExtra isLoading={loading} title={title} />;
 }

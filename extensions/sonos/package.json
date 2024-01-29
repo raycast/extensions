@@ -29,7 +29,7 @@
     },
     {
       "name": "now-playing",
-      "title": "Now Playing",
+      "title": "Show Now Playing",
       "subtitle": "Sonos",
       "description": "Display the currently playing media in the menu bar",
       "mode": "menu-bar",

@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { SonosDevice, SonosManager } from "@svrooij/sonos";
-import { getActiveGroup } from "./storage";
+import * as storage from "./storage";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
-
-export function isDefined<T>(value: T | undefined): value is T {
-  return value !== undefined;
-}
+import { CoordinatorNotFoundError, isDefined } from "./utils";
 
 export function formatPlayingState({ playing, state }: { playing: boolean; state: SonosState }): string {
   const icon = playing ? `▶︎` : `⏸︎`;
@@ -31,22 +28,38 @@ export function formatPlayingState({ playing, state }: { playing: boolean; state
   return `${icon} ${media.Title}`;
 }
 
+let manager: SonosManager | null = null;
+
 export async function getManager() {
-  const manager = new SonosManager();
-  await manager.InitializeWithDiscovery(3);
+  if (manager === null) {
+    manager = new SonosManager();
+    await manager.InitializeWithDiscovery(3);
+  }
 
   return manager;
 }
 
-export async function getActiveCoordinator(): Promise<SonosDevice | undefined> {
-  try {
-    const group = await getActiveGroup();
-    const coordinator = await getCoordinatorDevice(group);
+export async function getLatestState(): Promise<SonosState> {
+  const storedState = await storage.getState();
 
-    return coordinator;
-  } catch (error) {
-    return undefined;
+  if (storedState === null) {
+    const coordinator = await getActiveCoordinator();
+
+    if (coordinator === undefined) {
+      throw CoordinatorNotFoundError;
+    }
+
+    const state = await storage.storeState(coordinator);
+
+    return state.sonosState;
   }
+
+  return storedState.sonosState;
+}
+
+export async function isPlaying() {
+  const state = await getLatestState();
+  return state.transportState === "PLAYING";
 }
 
 export async function getAvailableGroups(): Promise<string[]> {
@@ -57,12 +70,18 @@ export async function getAvailableGroups(): Promise<string[]> {
   return Array.from(uniqueGroups);
 }
 
-export async function isPlaying(device: SonosDevice) {
-  const state = await device.GetState();
-  return state.transportState === "PLAYING";
+export async function getActiveCoordinator(): Promise<SonosDevice | undefined> {
+  try {
+    const group = await storage.getActiveGroup();
+    const coordinator = await getGroupCoordinator(group);
+
+    return coordinator;
+  } catch (error) {
+    return undefined;
+  }
 }
 
-export async function getCoordinatorDevice(group: string | undefined): Promise<SonosDevice | undefined> {
+export async function getGroupCoordinator(group: string | undefined): Promise<SonosDevice | undefined> {
   const manager = await getManager();
   const devices = manager.Devices;
   const availableGroups = await getAvailableGroups();
@@ -87,7 +106,7 @@ export function useSonos() {
       const groups = await getAvailableGroups();
       setAvailableGroups(groups);
 
-      const activeGroup = await getActiveGroup();
+      const activeGroup = await storage.getActiveGroup();
       setActiveGroup(activeGroup);
     }
 
