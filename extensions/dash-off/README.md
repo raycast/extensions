@@ -48,3 +48,7 @@ You need to create your own OAuth Client ID to be able to use this extension.
 8. Copy and paste the shown Client ID into the Preferences of this extension
 
 Now you should be able to send emails from Gmail with Raycast.
+
+---
+
+Dash Off use and transfer to any other app of information received from G[oogle APIs will adhere to Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes), including the Limited Use requirements.
