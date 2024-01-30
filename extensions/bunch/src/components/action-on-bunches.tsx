@@ -71,7 +71,7 @@ export function ActionOnBunches(props: {
                   await open(encodeURI(`x-bunch://close/${openBunches.join(",")}`));
                   await showHUD("Close bunches: " + openBunches.join(", "));
                   setRefresh(Date.now());
-                }
+                },
               ).then();
             }}
           />
@@ -102,7 +102,7 @@ export function ActionOnBunches(props: {
                   } catch (e) {
                     await showToast(Style.Failure, String(e));
                   }
-                }
+                },
               ).then();
             }}
           />

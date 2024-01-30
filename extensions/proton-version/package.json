@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proton-version",
   "title": "Proton Version",
-  "description": "Get the latest default and beta version number of Proton products",
+  "description": "Keep track of the lastest version of Proton products",
   "icon": "command_icon.png",
   "author": "flavien.bonvin",
   "contributors": [
@@ -24,6 +24,12 @@
       "name": "proton-version-beta",
       "title": "Proton Version Beta",
       "description": "Get beta Proton web products version number",
+      "mode": "view"
+    },
+    {
+      "name": "proton-version-bridge",
+      "title": "Proton Bridge Version",
+      "description": "Get Proton Bridge version number",
       "mode": "view"
     }
   ],

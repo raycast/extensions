@@ -1,5 +1,13 @@
 # TickTick Changelog
 
+## [Fixed] - 2024-01-22
+
+- Resolve the issue of the 'Auto Fill with AI' executing too frequently.
+
+## [Added] - 2024-01-09
+
+- Add `dueDate` and `startDate` to task detail view.
+
 ## [Fixed spelling error] - 2023-11-27
 
 ## [Added] - 2023-11-14

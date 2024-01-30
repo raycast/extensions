@@ -80,6 +80,21 @@ query milestonesForRepository($owner: String!, $name: String!) {
   }
 }
 
+query commentsForPullRequest($owner: String!, $name: String!, $number: Int!) {
+  repository(owner: $owner, name: $name) {
+    pullRequest(number: $number) {
+      comments(first: 100) {
+        nodes {
+          author {
+            login
+          }
+          body
+        }
+      }
+    }
+  }
+}
+
 query dataForRepository($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
     defaultBranchRef {

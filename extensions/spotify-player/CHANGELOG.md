@@ -1,8 +1,11 @@
 # Spotify Player Changelog
 
-## [Feature] - 2023-12-14
+## [Feature] - 2024-01-30
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
+
+## [Fix Current Track Like State] - 2023-12-31
+- Fix showing the like/disliked state of the current track
 
 ## [Feature & Optimisation] - 2023-12-02
 
