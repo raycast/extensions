@@ -372,9 +372,23 @@ export async function getComments(issueId: string) {
   return data.issue.comments.nodes;
 }
 
+export type Attachment = {
+  id: string;
+  title: string;
+  subtitle: string;
+  source?: {
+    imageUrl?: string;
+  };
+  url: string;
+  updatedAt: string;
+};
+
 export type IssueDetailResult = IssueResult &
   Pick<Issue, "description" | "dueDate"> & {
-    relations: {
+    attachments?: {
+      nodes: Attachment[];
+    };
+    relations?: {
       nodes: [
         Pick<IssueRelation, "id" | "type"> & {
           relatedIssue: Pick<Issue, "identifier" | "title"> & {
@@ -393,6 +407,16 @@ export async function getIssueDetail(issueId: string) {
       query($issueId: String!) {
         issue(id: $issueId) {
           ${IssueFragment}
+          attachments {
+            nodes {
+              id
+              title
+              subtitle
+              source
+              url
+              updatedAt
+            }
+          }
           description
           relations {
             nodes {

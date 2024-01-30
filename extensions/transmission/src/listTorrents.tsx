@@ -174,9 +174,13 @@ export default function TorrentList() {
               }
               showToast(Toast.Style.Success, `Torrent ${torrent.name} resumed`);
             }}
-            onRemove={async (torrent) => {
+            onRemove={async (torrent, deleteLocalData) => {
               try {
-                await mutateTorrent.remove(torrent.id);
+                if (deleteLocalData) {
+                  await mutateTorrent.removeAndDeleteLocalData(torrent.id);
+                } else {
+                  await mutateTorrent.remove(torrent.id);
+                }
               } catch (error: any) {
                 console.error(error);
                 showToast(Toast.Style.Failure, `Could not start torrent: ${torrent.name}`);
@@ -219,7 +223,7 @@ function TorrentListItem({
   onStart: (torrent: Torrent) => Promise<void>;
   onStartAll: (torrent: Torrent) => Promise<void>;
   onStopAll: (torrent: Torrent) => Promise<void>;
-  onRemove: (torrent: Torrent) => Promise<void>;
+  onRemove: (torrent: Torrent, deleteLocalData?: boolean) => Promise<void>;
   onToggleDetail: () => void;
   isShowingDetail: boolean;
   rateDownload: string;
@@ -318,7 +322,7 @@ function TorrentListItem({
               <Action
                 title="Delete Local Data"
                 shortcut={{ key: "backspace", modifiers: ["cmd", "shift"] }}
-                onAction={() => onRemove(torrent)}
+                onAction={() => onRemove(torrent, true)}
               />
             </ActionPanel.Submenu>
             {isLocalTransmission() ? (

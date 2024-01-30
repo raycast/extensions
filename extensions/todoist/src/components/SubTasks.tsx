@@ -13,7 +13,7 @@ export default function SubTasks({ parentTask }: { parentTask: Task }) {
 
   const subTasks = useMemo(
     () => data?.items.filter((item) => item.parent_id === parentTask.id) || [],
-    [data, parentTask.id]
+    [data, parentTask.id],
   );
 
   // Pop to the previous screen if there are no sub-tasks left

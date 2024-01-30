@@ -27,6 +27,7 @@ import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
+import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
 import { getMacOSDefaultBrowser } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
@@ -109,6 +110,7 @@ export default function Command() {
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
+  const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
 
   const arc = useArcBookmarks(hasArc);
@@ -122,6 +124,7 @@ export default function Command() {
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
   const safari = useSafariBookmarks(hasSafari);
+  const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
@@ -140,6 +143,7 @@ export default function Command() {
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
       ...safari.bookmarks,
+      ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
     ]
       .map((item) => {
@@ -186,6 +190,7 @@ export default function Command() {
     edgeDev.bookmarks,
     firefox.bookmarks,
     safari.bookmarks,
+    sidekick.bookmarks,
     vivaldi.bookmarks,
     frecencies,
     setBookmarks,
@@ -204,6 +209,7 @@ export default function Command() {
       ...edgeDev.folders,
       ...firefox.folders,
       ...safari.folders,
+      ...sidekick.folders,
       ...vivaldi.folders,
     ];
 
@@ -220,6 +226,7 @@ export default function Command() {
     edgeDev.folders,
     firefox.folders,
     safari.folders,
+    sidekick.folders,
     vivaldi.folders,
     setFolders,
   ]);
@@ -329,6 +336,9 @@ export default function Command() {
     if (hasSafari) {
       safari.mutate();
     }
+    if (hasSidekick) {
+      sidekick.mutate();
+    }
     if (hasVivaldi) {
       vivaldi.mutate();
     }
@@ -384,6 +394,7 @@ export default function Command() {
         edgeDev.isLoading ||
         firefox.isLoading ||
         safari.isLoading ||
+        sidekick.isLoading ||
         vivaldi.isLoading
       }
       searchBarPlaceholder="Search by title, domain name, or folder name"
