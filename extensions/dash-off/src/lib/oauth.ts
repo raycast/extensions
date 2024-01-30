@@ -15,10 +15,10 @@ export function OAuthClientId() {
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.AppURI,
-  providerName: "Google",
-  providerIcon: "google-logo.png",
-  providerId: "google",
-  description: "Connect your Google account",
+  providerName: "Gmail",
+  providerIcon: "gmail-logo.png",
+  providerId: "gmail",
+  description: "Connect your Gmail account",
 });
 
 export async function authorize(): Promise<void> {
