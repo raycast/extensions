@@ -1,8 +1,10 @@
 # Claris Snippets
 
-Create and use snippets for Claris (FileMaker) Pro.
+Create and use snippets for FileMaker Pro.
 
 This extension uses FmClipTools to capture transform the FileMaker clipboard data to FM Objects, saving the XML representation of the snippet to a file on disk. You can specify multiple folders on your computer on which to save your snippets, allowing you to share collections of snippets with other developers, or sync that folder with a team using a cloud service like Dropbox or Google Drive.
+
+Additionally, this extension has bonus commands for searching and quickly launching your Favorite and Recent files as recognized by the FileMaker Pro application.
 
 ## How to use
 

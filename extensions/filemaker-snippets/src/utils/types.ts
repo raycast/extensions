@@ -65,8 +65,21 @@ export const ZLocation = z.object({
 });
 export type Location = z.infer<typeof ZLocation>;
 
-export const zLaunchContext = z.object({
-  id: z.string(),
-  showForm: z.boolean().default(true),
-  values: z.record(z.string(), z.string()).default({}),
-});
+export const zLaunchContext = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("my"), // a user to copy their own snippets
+    id: z.string(),
+    showForm: z.boolean().default(true),
+    values: z.record(z.string(), z.string()).default({}),
+  }),
+  z.object({
+    type: z.literal("import"),
+    snippet: z
+      .string()
+      .url()
+      .or(ZSnippet.omit({ locId: true })),
+    action: z.enum(["import", "copy"]).default("import"),
+    showForm: z.boolean().default(true),
+    values: z.record(z.string(), z.string()).default({}),
+  }),
+]);

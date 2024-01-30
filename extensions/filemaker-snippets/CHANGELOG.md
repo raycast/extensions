@@ -1,4 +1,13 @@
-# Claris Snippets Changelog
+# FileMaker Snippets Changelog
+
+## [Recents and Favorites] - 2024-01-29
+
+- Added new commands to search recent/favorite FileMaker files
+
+## [Deeplink Support] - 2024-01-26
+
+- Renamed extension to `FileMaker Snippets`
+- Added support for deeplinking to a specific snippet. Use deeplinks to share snippets with others using just a URL.
 
 ## [Fixes] - 2023-07-27
 
