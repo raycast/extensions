@@ -1,5 +1,8 @@
 # Spotify Player Changelog
 
+## [Fix Current Track Like State] - 2023-12-31
+- Fix showing the like/disliked state of the current track
+
 ## [Feature & Optimisation] - 2023-12-02
 
 - Added `Select Device` command to select the device to play music on.

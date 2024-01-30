@@ -248,6 +248,37 @@ export const moveImageResultsToFinalDestination = async (imagePaths: string[]) =
   }
 };
 
+export const getWebPBinaryPath = async () => {
+  const cpuType = os.cpus()[0].model.includes("Apple") ? "arm" : "x86";
+
+  if (cpuType == "arm") {
+    // Make sure the arm binaries are executable
+    execSync(`chmod +x ${environment.assetsPath}/webp/arm/dwebp`);
+    execSync(`chmod +x ${environment.assetsPath}/webp/arm/cwebp`);
+    // Remove x86 binaries if they exist
+    if (fs.existsSync(`${environment.assetsPath}/webp/x86/dwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/x86/dwebp`);
+    }
+    if (fs.existsSync(`${environment.assetsPath}/webp/x86/cwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/x86/cwebp`);
+    }
+    return [`${environment.assetsPath}/webp/arm/dwebp`, `${environment.assetsPath}/webp/arm/cwebp`];
+  } else {
+    // Make sure the x86 binaries are executable
+    execSync(`chmod +x ${environment.assetsPath}/webp/x86/dwebp`);
+    execSync(`chmod +x ${environment.assetsPath}/webp/x86/cwebp`);
+
+    // Remove arm binaries if they exist
+    if (fs.existsSync(`${environment.assetsPath}/webp/arm/dwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/arm/dwebp`);
+    }
+    if (fs.existsSync(`${environment.assetsPath}/webp/arm/cwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/arm/cwebp`);
+    }
+    return [`${environment.assetsPath}/webp/x86/dwebp`, `${environment.assetsPath}/webp/x86/cwebp`];
+  }
+};
+
 /**
  * Executes a SIPS command on a WebP image, using a temporary PNG in the process.
  *
@@ -280,35 +311,10 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
     iter++;
   }
 
-  const cpuType = os.cpus()[0].model.includes("Apple") ? "arm" : "x86";
-
-  if (cpuType == "arm") {
-    // Make sure the arm binaries are executable
-    execSync(`chmod +x ${environment.assetsPath}/webp/arm/dwebp`);
-    execSync(`chmod +x ${environment.assetsPath}/webp/arm/cwebp`);
-    // Remove x86 binaries if they exist
-    if (fs.existsSync(`${environment.assetsPath}/webp/x86/dwebp`)) {
-      await fs.promises.rm(`${environment.assetsPath}/webp/x86/dwebp`);
-    }
-    if (fs.existsSync(`${environment.assetsPath}/webp/x86/cwebp`)) {
-      await fs.promises.rm(`${environment.assetsPath}/webp/x86/cwebp`);
-    }
-  } else {
-    // Make sure the x86 binaries are executable
-    execSync(`chmod +x ${environment.assetsPath}/webp/x86/dwebp`);
-    execSync(`chmod +x ${environment.assetsPath}/webp/x86/cwebp`);
-
-    // Remove arm binaries if they exist
-    if (fs.existsSync(`${environment.assetsPath}/webp/arm/dwebp`)) {
-      await fs.promises.rm(`${environment.assetsPath}/webp/arm/dwebp`);
-    }
-    if (fs.existsSync(`${environment.assetsPath}/webp/arm/cwebp`)) {
-      await fs.promises.rm(`${environment.assetsPath}/webp/arm/cwebp`);
-    }
-  }
+  const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
 
   execSync(
-    `${environment.assetsPath}/webp/${cpuType}/dwebp "${webpPath}" -o "${tmpPath}" && ${command} "${tmpPath}" && ${environment.assetsPath}/webp/${cpuType}/cwebp "${tmpPath}" -o "${newPath}" ; rm "${tmpPath}"`
+    `${dwebpPath} "${webpPath}" -o "${tmpPath}" && ${command} "${tmpPath}" && ${cwebpPath} "${tmpPath}" -o "${newPath}" ; rm "${tmpPath}"`
   );
   return newPath;
 };
