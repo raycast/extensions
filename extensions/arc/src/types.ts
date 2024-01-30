@@ -6,8 +6,7 @@ export type HistoryEntry = {
 };
 
 export type Tab = {
-  windowId: number;
-  tabId: number;
+  id: string;
   url: string;
   title: string;
   location: TabLocation;
@@ -18,6 +17,15 @@ export type TabLocation = "topApp" | "pinned" | "unpinned";
 export type Space = {
   id: string;
   title?: string;
+};
+
+export type NewTabSearchConfigs = {
+  google: string;
+  duckduckgo: string;
+  bing: string;
+  yahoo: string;
+  ecosia: string;
+  kagi: string;
 };
 
 export type SearchConfig = {
@@ -32,6 +40,7 @@ export type SearchConfigs = {
   bing: SearchConfig;
   yahoo: SearchConfig;
   ecosia: SearchConfig;
+  kagi: SearchConfig;
 };
 
 export type Suggestion = {

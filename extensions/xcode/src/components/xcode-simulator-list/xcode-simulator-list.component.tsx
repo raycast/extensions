@@ -6,7 +6,7 @@ import { XcodeSimulatorListItem } from "./xcode-simulator-list-item.component";
 import { useState } from "react";
 import { XcodeSimulatorStateFilter } from "../../models/xcode-simulator/xcode-simulator-state-filter.model";
 
-export function XcodeSimulatorList(): JSX.Element {
+export function XcodeSimulatorList() {
   const [simulatorStateFilter, setSimulatorStateFilter] = useState<XcodeSimulatorStateFilter>(
     XcodeSimulatorStateFilter.all
   );

@@ -76,7 +76,7 @@ const unpauseStopwatch = (swToUnpause: string) => {
           pauseElapsed: s.pauseElapsed + secondsBetweenDates({ d2: s.lastPaused }),
           lastPaused: "----",
         }
-      : s
+      : s,
   );
   writeFileSync(SWPATH, JSON.stringify(swStore));
 };

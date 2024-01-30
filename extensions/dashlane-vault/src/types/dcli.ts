@@ -72,7 +72,7 @@ export interface VaultNoteDto {
   id: string;
   lastBackupTime?: string;
   secured?: "true" | "false";
-  title: string;
+  title?: string;
   type: string;
   updateDate?: string;
   userModificationDatetime?: string;

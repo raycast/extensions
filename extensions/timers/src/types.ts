@@ -30,10 +30,11 @@ export interface CustomTimer {
   name: string;
   timeInSeconds: number;
   selectedSound: string;
+  showInMenuBar: boolean;
 }
 
 export interface Preferences {
-  showMenuBarItemWhen: "never" | "onlyWhenRunning" | "always";
+  showMenuBarIconWhen: "never" | "onlyWhenRunning" | "onlyWhenNotRunning" | "always";
   selectedSound: string;
   ringContinuously: boolean;
   copyOnSwStop: boolean;
@@ -70,4 +71,14 @@ export interface SoundData {
   title: string;
   icon: Icon;
   value: string;
+}
+
+export interface CommandLinkParams {
+  timerID: string;
+}
+
+export interface DefaultTimerPreset {
+  key: string;
+  title: string;
+  seconds: number;
 }

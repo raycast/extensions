@@ -1,62 +1,78 @@
 import { OllamaApiTags, OllamaApiDelete, OllamaApiPull, OllamaApiShow, OllamaApiShowParseModelfile } from "../ollama";
 import {
-  OllamaApiTagsExtended,
-  OllamaApiTagsModelExtended,
+  OllamaApiShowModelfile,
+  OllamaApiShowResponse,
   OllamaApiTagsResponse,
   OllamaApiTagsResponseModel,
 } from "../types";
 import * as React from "react";
 import { Form, Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
+import { getProgressIcon, usePromise } from "@raycast/utils";
 
 /**
  * Return JSX element for managing Ollama models.
  * @returns {JSX.Element} Raycast Model View.
  */
 export function ModelView(): JSX.Element {
-  const ModelsOnRegistry: string[] = [] as string[];
-  const [Models, setModels]: [
-    OllamaApiTagsExtended | undefined,
-    React.Dispatch<React.SetStateAction<OllamaApiTagsExtended | undefined>>
-  ] = React.useState();
-  const [isLoading, setIsLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
+  const {
+    data: InstalledModels,
+    isLoading: IsLoadingInstalledModels,
+    revalidate: RevalidateInstalledModels,
+  } = usePromise(OllamaApiTags, [], {
+    onError: async (error) => {
+      await showToast({ style: Toast.Style.Failure, title: "Error", message: error.message });
+    },
+  });
+  const {
+    data: InstalledModelsShow,
+    isLoading: IsLoadingInstalledModelsShow,
+    revalidate: RevalidateInstalledModelsShow,
+  } = usePromise(GetInstalledModelsShow, [InstalledModels], {
+    execute: false,
+    onError: async (error) => {
+      await showToast({ style: Toast.Style.Failure, title: "Error", message: error.message });
+    },
+  });
+  const [Download, setDownload]: [Map<string, number>, React.Dispatch<React.SetStateAction<Map<string, number>>>] =
+    React.useState(new Map());
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
-  const [showForm, setShowForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
-  async function fetchAvailableModels(): Promise<void> {
-    setIsLoading(true);
-    const models = await OllamaApiTags()
-      .then(async (models): Promise<OllamaApiTagsExtended> => {
-        const info = models.models.map(async (model): Promise<OllamaApiTagsModelExtended> => {
-          const show = await OllamaApiShow(model.name)
-            .then((data) => OllamaApiShowParseModelfile(data))
-            .catch(() => undefined);
-          return {
-            name: model.name,
-            size: model.size,
-            modified_at: model.modified_at,
-            download: model.download,
-            modelfile: show,
-          } as OllamaApiTagsModelExtended;
-        });
-        return { models: await Promise.all(info) } as OllamaApiTagsExtended;
-      })
-      .catch(async (err) => {
-        await showToast({ style: Toast.Style.Failure, title: err.message });
+  /**
+   * Retrive detail from each model tag.
+   * @param {OllamaApiTagsResponse | undefined} tags
+   * @returns {Promise<Map<string, OllamaApiShowResponse>>}
+   */
+  async function GetInstalledModelsShow(
+    tags: OllamaApiTagsResponse | undefined
+  ): Promise<Map<string, OllamaApiShowResponse>> {
+    const map: Map<string, OllamaApiShowResponse> = new Map();
+
+    if (tags)
+      tags.models.forEach(async (tag) => {
+        const show = await OllamaApiShow(tag.name);
+        map.set(tag.name, show);
       });
-    if (models) setModels(models);
-    setIsLoading(false);
+
+    return map;
   }
 
+  /**
+   * Delete Model
+   * @param {string} name
+   */
   function deleteModel(name: string): void {
     OllamaApiDelete(name)
       .then(async () => {
-        await fetchAvailableModels();
+        RevalidateInstalledModels();
         await showToast({ style: Toast.Style.Success, title: "Model Deleted." });
       })
       .catch(async (err) => await showToast({ style: Toast.Style.Failure, title: err.message }));
   }
 
+  /**
+   * Pull Model
+   * @param {string} name
+   */
   async function pullModel(name: string): Promise<void> {
     const e = await OllamaApiPull(name).catch(async (err): Promise<undefined> => {
       await showToast({ style: Toast.Style.Failure, title: err.message });
@@ -64,183 +80,125 @@ export function ModelView(): JSX.Element {
     });
 
     if (e) {
-      let index: number | undefined;
-      setShowForm(false);
-      setModels((prevState) => {
-        index = prevState?.models.push({ name: name, size: 0, modified_at: "" });
-        index = (index as number) - 1;
-        return prevState;
-      });
+      setShowPullModelForm(false);
       e.on("message", async (data) => {
         await showToast({ style: Toast.Style.Animated, title: data });
       });
       e.on("downloading", (data: number) => {
-        const prevDownload = Models?.models[index as number].download?.toFixed(2);
+        if (!Download.has(name)) setDownload((prevState) => new Map(prevState.set(name, data)));
         const currentDownload = data.toFixed(2);
-        if (currentDownload !== prevDownload)
-          setModels((prevState) => {
-            const newState = prevState;
-            if (newState?.models[index as number]) newState.models[index as number].download = Number(currentDownload);
-            return { ...prevState, ...(newState as OllamaApiTagsResponse) };
-          });
+        if (currentDownload !== Download.get(name)?.toFixed(2))
+          setDownload((prevState) => new Map(prevState.set(name, data)));
       });
       e.on("done", async () => {
-        await fetchAvailableModels();
+        RevalidateInstalledModels();
+        setDownload((prevState) => {
+          prevState.delete(name);
+          return new Map(prevState);
+        });
         await showToast({ style: Toast.Style.Success, title: "Model Downloaded." });
       });
       e.on("error", async (data) => {
-        await fetchAvailableModels();
+        setDownload((prevState) => {
+          prevState.delete(name);
+          return new Map(prevState);
+        });
         await showToast({ style: Toast.Style.Failure, title: data });
       });
     }
   }
 
-  function ModelDetail(item: OllamaApiTagsModelExtended): JSX.Element {
+  /**
+   * Model Detail.
+   * @param {OllamaApiTagsResponseModel} props.tags
+   * @param {Map<string, OllamaApiShowResponse> | undefined} props.show
+   * @returns {JSX.Element}
+   */
+  function ModelDetail(prop: {
+    tag: OllamaApiTagsResponseModel;
+    show: Map<string, OllamaApiShowResponse> | undefined;
+  }): JSX.Element {
+    let show: OllamaApiShowResponse | undefined = undefined;
+    let modelfile: OllamaApiShowModelfile | undefined;
+
+    if (prop.show) show = prop.show.get(prop.tag.name);
+    if (show) modelfile = OllamaApiShowParseModelfile(show);
+
     return (
       <List.Item.Detail
         metadata={
           <List.Item.Detail.Metadata>
-            <List.Item.Detail.Metadata.Label title="Model Name" icon={Icon.Box} text={item.name} />
+            <List.Item.Detail.Metadata.Label title="Format" text={prop.tag.details.format} />
+            <List.Item.Detail.Metadata.Label title="Family" text={prop.tag.details.family} />
+            {prop.tag.details.families && prop.tag.details.families.length > 0 && (
+              <List.Item.Detail.Metadata.TagList title="Families">
+                {prop.tag.details.families.map((f) => (
+                  <List.Item.Detail.Metadata.TagList.Item text={f} />
+                ))}
+              </List.Item.Detail.Metadata.TagList>
+            )}
+            <List.Item.Detail.Metadata.Label title="Parameter Size" text={prop.tag.details.parameter_size} />
+            <List.Item.Detail.Metadata.Label title="Quantization Level" text={prop.tag.details.quantization_level} />
+            <List.Item.Detail.Metadata.Label title="Modified At" icon={Icon.Calendar} text={prop.tag.modified_at} />
             <List.Item.Detail.Metadata.Label
-              title="Model Size"
+              title="Size"
               icon={Icon.HardDrive}
-              text={`${(item.size / 1e9).toPrecision(2).toString()} GB`}
+              text={`${(prop.tag.size / 1e9).toPrecision(2).toString()} GB`}
             />
-            <List.Item.Detail.Metadata.Label title="Model Modified At" icon={Icon.Calendar} text={item.modified_at} />
-            {item.modelfile ? <List.Item.Detail.Metadata.Separator /> : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label title="FROM" icon={Icon.Box} text={item.modelfile.from} />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER mirostat"
-                text={String(item.modelfile.parameter.mirostat)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER mirostat_eta"
-                text={String(item.modelfile.parameter.mirostat_eta)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER mirostat_tau"
-                text={String(item.modelfile.parameter.mirostat_tau)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER num_ctx"
-                text={String(item.modelfile.parameter.num_ctx)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER num_gpu"
-                text={String(item.modelfile.parameter.num_gpu)}
-              />
-            ) : null}
-            {item.modelfile?.parameter.num_thread ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER num_thread"
-                text={String(item.modelfile.parameter.num_thread)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER repeat_last_n"
-                text={String(item.modelfile.parameter.repeat_last_n)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER repeat_penalty"
-                text={String(item.modelfile.parameter.repeat_penalty)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER temperature"
-                text={String(item.modelfile.parameter.temperature)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label title="PARAMETER seed" text={String(item.modelfile.parameter.seed)} />
-            ) : null}
-            {item.modelfile
-              ? item.modelfile.parameter.stop.map((item, index) => (
-                  <List.Item.Detail.Metadata.Label
-                    key={"PARAMETER stop " + index}
-                    title="PARAMETER stop"
-                    text={String(item)}
+            <List.Item.Detail.Metadata.Separator />
+            {show && <List.Item.Detail.Metadata.Label title="System Prompt" text={show.system} />}
+            {show && <List.Item.Detail.Metadata.Label title="Template" text={show.template} />}
+            <List.Item.Detail.Metadata.Separator />
+            {modelfile && (
+              <List.Item.Detail.Metadata.TagList title="Parameters">
+                {Object.keys(modelfile.parameter).map((p, i) => (
+                  <List.Item.Detail.Metadata.TagList.Item
+                    text={`${p} ${modelfile && Object.values(modelfile?.parameter)[i]}`}
                   />
-                ))
-              : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label title="PARAMETER tfs_z" text={String(item.modelfile.parameter.tfs_z)} />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label
-                title="PARAMETER num_predict"
-                text={String(item.modelfile.parameter.num_predict)}
-              />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label title="PARAMETER top_k" text={String(item.modelfile.parameter.top_k)} />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label title="PARAMETER top_p" text={String(item.modelfile.parameter.top_p)} />
-            ) : null}
-            {item.modelfile ? (
-              <List.Item.Detail.Metadata.Label title="TEMPLATE" text={String(item.modelfile.template)} />
-            ) : null}
-            {item.modelfile?.system ? (
-              <List.Item.Detail.Metadata.Label title="SYSTEM" text={String(item.modelfile.system)} />
-            ) : null}
-            {item.modelfile?.adapter ? (
-              <List.Item.Detail.Metadata.Label title="SYSTEM_VERSION" text={String(item.modelfile.adapter)} />
-            ) : null}
-            {item.modelfile?.license ? (
-              <List.Item.Detail.Metadata.Label title="SYSTEM_VERSION" text={String(item.modelfile.license)} />
-            ) : null}
+                ))}
+              </List.Item.Detail.Metadata.TagList>
+            )}
+            <List.Item.Detail.Metadata.Separator />
+            {show && <List.Item.Detail.Metadata.Label title="License" text={show.license} />}
           </List.Item.Detail.Metadata>
         }
       />
     );
   }
 
-  function ActionOllama(item: OllamaApiTagsResponseModel): JSX.Element {
+  /**
+   * Model Action Menu.
+   * @param {OllamaApiTagsResponseModel} props.model
+   * @returns {JSX.Element}
+   */
+  function ModelAction(prop: { model: OllamaApiTagsResponseModel }): JSX.Element {
     return (
       <ActionPanel>
         <ActionPanel.Section title="Ollama">
-          <Action
-            title="Toggle Detail"
-            icon={Icon.Eye}
-            onAction={() => setShowDetail((prevState) => !prevState)}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Model Name"
-            content={item.name as string}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <Action title="Pull Model" icon={Icon.Download} onAction={() => setShowForm(true)} />
-          <Action title="Delete Model" icon={Icon.Trash} onAction={() => deleteModel(item.name)} />
+          {InstalledModels && InstalledModelsShow && (
+            <Action
+              title={showDetail ? "Hide Detail" : "Show Detail"}
+              icon={showDetail ? Icon.EyeDisabled : Icon.Eye}
+              onAction={() => setShowDetail((prevState) => !prevState)}
+              shortcut={{ modifiers: ["cmd"], key: "y" }}
+            />
+          )}
+          <Action.CopyToClipboard title="Copy Model Name" content={prop.model.name as string} />
+          <Action title="Pull Model" icon={Icon.Download} onAction={() => setShowPullModelForm(true)} />
+          <Action title="Delete Model" icon={Icon.Trash} onAction={() => deleteModel(prop.model.name)} />
         </ActionPanel.Section>
       </ActionPanel>
     );
   }
 
   React.useEffect(() => {
-    fetchAvailableModels();
-  }, []);
+    if (InstalledModels) RevalidateInstalledModelsShow();
+  }, [InstalledModels]);
 
-  React.useEffect(() => {
-    //if (showForm && ModelsOnRegistry.length === 0) fetchRegistry();
-  }, [showForm]);
+  const [showPullModelForm, setShowPullModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+    React.useState(false);
 
-  if (showForm)
+  if (showPullModelForm)
     return (
       <Form
         actions={
@@ -248,55 +206,44 @@ export function ModelView(): JSX.Element {
             <Action.SubmitForm
               title="Pull Model"
               onSubmit={async (values) => {
-                await pullModel(values.Model);
+                await pullModel(values.model);
               }}
             />
           </ActionPanel>
         }
       >
-        {ModelsOnRegistry.length === undefined || ModelsOnRegistry.length === 0 ? (
-          <Form.TextField id="Model" title="Model Name" placeholder="Model Name" />
-        ) : null}
-        {ModelsOnRegistry.length && ModelsOnRegistry.length > 0 ? (
-          <Form.Dropdown id="Model" title="Model Name">
-            {ModelsOnRegistry.map((item) => {
-              return <Form.Dropdown.Item key={item} title={item} value={item} />;
-            })}
-          </Form.Dropdown>
-        ) : null}
+        <Form.TextField id="model" title="Model Name" placeholder="Model Name" />
       </Form>
     );
 
   return (
     <List
-      isLoading={isLoading}
-      isShowingDetail={Models && Models.models.length > 0 && showDetail}
+      isLoading={IsLoadingInstalledModels || IsLoadingInstalledModelsShow}
+      isShowingDetail={showDetail}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Ollama">
-            <Action title="Pull Model" icon={Icon.Download} onAction={() => setShowForm(true)} />
+            <Action title="Pull Model" icon={Icon.Download} onAction={() => setShowPullModelForm(true)} />
           </ActionPanel.Section>
         </ActionPanel>
       }
     >
-      {Models &&
-        Models.models.map((item) => {
+      {InstalledModels &&
+        InstalledModels.models.map((item) => {
           return (
             <List.Item
               title={item.name}
-              icon={(() => {
-                if (item.download) {
-                  return getProgressIcon(item.download);
-                }
-                return Icon.Box;
-              })()}
+              icon={Icon.Box}
               key={item.name}
               id={item.name}
-              actions={ActionOllama(item)}
-              detail={ModelDetail(item)}
+              actions={<ModelAction model={item} />}
+              detail={<ModelDetail tag={item} show={InstalledModelsShow} />}
             />
           );
         })}
+      {[...Download.keys()].map((d) => {
+        return <List.Item title={d} icon={getProgressIcon(Download.get(d) as number)} key={d} id={d} />;
+      })}
     </List>
   );
 }
