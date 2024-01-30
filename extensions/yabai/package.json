@@ -26,15 +26,9 @@
       ]
     },
     {
-      "name": "start",
-      "title": "Start Yabai",
-      "description": "This command will start Yabai using `yabai --start-service`.",
-      "mode": "no-view"
-    },
-    {
-      "name": "stop",
-      "title": "Stop Yabai",
-      "description": "This command will stop Yabai using `yabai --stop-service`.",
+      "name": "toggle",
+      "title": "Toggle Yabai",
+      "description": "This command will start Yabai using `yabai --start-service` or stop it using `yabai --stop-service`.",
       "mode": "no-view"
     },
     {
