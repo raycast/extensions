@@ -29,7 +29,7 @@ const ApplicationsDropdown = ({
   );
 };
 
-const SearchApplications = () => {
+const SearchActionsView = () => {
   const [selectedApp, setSelectedApp] = useState<PersistedApp | undefined>(undefined);
   // TODO: Save selected app in cache
   const {
@@ -77,4 +77,4 @@ const SearchApplications = () => {
   );
 };
 
-export default SearchApplications;
+export default SearchActionsView;

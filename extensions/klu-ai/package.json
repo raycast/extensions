@@ -8,9 +8,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-applications",
-      "title": "Search Applications",
-      "description": "",
+      "name": "search-actions",
+      "title": "Search Actions",
+      "description": "Search Actions",
       "mode": "view"
     }
   ],
