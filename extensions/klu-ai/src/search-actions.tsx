@@ -1,3 +1,3 @@
-import SearchActionsView from "@/views/search-actions";
+import ActionsView from "@/views/actions-view";
 
-export default SearchActionsView;
+export default ActionsView;
