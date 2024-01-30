@@ -1,75 +1,9 @@
-import { PersistedAction, PersistedApp } from "@kluai/core";
+import { PersistedApp } from "@kluai/core";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
-import klu from "./libs/klu";
 import { intlFormatDistance } from "date-fns";
-
-const useApplications = () => {
-  const hook = useCachedPromise(
-    async () => {
-      const data = await klu.workspaces.getCurrent();
-      const remoteApps = await klu.workspaces.getApps(data.projectGuid);
-
-      return remoteApps
-        .sort((a, b) => {
-          if (a.name < b.name) {
-            return -1;
-          }
-          if (a.name > b.name) {
-            return 1;
-          }
-          return 0;
-        })
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-    },
-    [],
-    {
-      keepPreviousData: true,
-      initialData: [],
-    },
-  );
-
-  return hook;
-};
-
-const useActions = (actionGuid: string) => {
-  const hook = useCachedPromise(
-    async (actionGuid: string) => {
-      const data = await klu.apps.getActions(actionGuid);
-
-      interface Action extends PersistedAction {
-        modelName: string | undefined;
-      }
-
-      const actions = data.map(async (_) => {
-        const action: Action = {
-          ..._,
-          modelName: undefined,
-        };
-
-        const { modelId } = await klu.actions.get(_.guid);
-        const { llm } = await klu.models.get(modelId);
-
-        action.modelName = llm;
-
-        return action;
-      });
-
-      const newActions = await Promise.all(actions);
-
-      return newActions;
-    },
-    [actionGuid],
-    {
-      execute: actionGuid !== undefined,
-      keepPreviousData: true,
-      initialData: [],
-    },
-  );
-
-  return hook;
-};
+import { useState } from "react";
+import useActions from "./hooks/use-actions";
+import useApplications from "./hooks/use-applications";
 
 const ApplicationsDropdown = ({
   applications,
@@ -98,16 +32,21 @@ const ApplicationsDropdown = ({
 const SearchApplications = () => {
   const [selectedApp, setSelectedApp] = useState<PersistedApp | undefined>(undefined);
   // TODO: Save selected app in cache
-  const { data, isLoading } = useApplications();
+  const {
+    data: { apps },
+    isLoading: isAppsLoading,
+  } = useApplications();
 
-  const { data: actions, isLoading: isActionsLoading } = useActions(selectedApp?.guid ?? data[0].guid);
+  const { data: actions, isLoading: isActionsLoading } = useActions(selectedApp ? selectedApp.guid : apps[0].guid);
+
+  const isLoading = isAppsLoading || isActionsLoading;
 
   return (
     <List
       searchBarPlaceholder="Search actions"
-      isLoading={isLoading || isActionsLoading}
+      isLoading={isLoading}
       navigationTitle="Results"
-      searchBarAccessory={<ApplicationsDropdown applications={data} onChange={setSelectedApp} />}
+      searchBarAccessory={<ApplicationsDropdown applications={apps} onChange={setSelectedApp} />}
     >
       {actions.map((a) => (
         <List.Item
