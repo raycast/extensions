@@ -54,7 +54,7 @@ export function getTextForExpiration(expirationTimestamp: number) {
 
 export function showToastWithPromise<T>(
   promiseOrFn: Promise<T> | (() => Promise<T>),
-  toasts: { loading: string; success: string | ((value: T) => Omit<Toast.Options, "style">); error?: string }
+  toasts: { loading: string; success: string | ((value: T) => Omit<Toast.Options, "style">); error?: string },
 ) {
   const promise = typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
 
@@ -161,13 +161,13 @@ export function setStatusToPreset({
           optimisticUpdate() {
             return profile;
           },
-        }
+        },
       );
     },
     {
       loading: "Setting status...",
       success: `Set status to ${preset.title}`,
       error: "Failed setting status",
-    }
+    },
   );
 }
