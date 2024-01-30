@@ -20,7 +20,7 @@ const ActionSkillList = ({ guid, onChange }: { guid: string; onChange: (value: A
 
   return (
     <List
-      searchBarPlaceholder="Search data"
+      searchBarPlaceholder="Search skill"
       isLoading={isLoading}
       navigationTitle="Results"
       searchBarAccessory={<ActionViewDropdown onChange={onChange} />}

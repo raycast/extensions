@@ -28,15 +28,20 @@ export const ActionViewDropdown = ({ onChange }: { onChange: (value: ActionViewS
 const ActionView = ({ guid }: { guid: string }) => {
   const [state, setState] = useState<ActionViewState>("Data");
 
+  const props = {
+    guid,
+    onChange: setState,
+  };
+
   switch (state) {
     case "Version":
-      return <ActionVersionList guid={guid} onChange={setState} />;
+      return <ActionVersionList {...props} />;
     case "Context":
-      return <ActionContextList guid={guid} onChange={setState} />;
+      return <ActionContextList {...props} />;
     case "Skill":
-      return <ActionSkillList guid={guid} onChange={setState} />;
+      return <ActionSkillList {...props} />;
     default:
-      return <ActionDataList guid={guid} onChange={setState} />;
+      return <ActionDataList {...props} />;
   }
 };
 
