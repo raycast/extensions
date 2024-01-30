@@ -11,6 +11,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true
   }
 }
