@@ -410,6 +410,7 @@
       "description": "Show a Single Entity directly in the Menubar",
       "mode": "menu-bar",
       "interval": "5m",
+      "disabledByDefault": true,
       "preferences": [
         {
           "name": "entity",
@@ -427,6 +428,7 @@
       "description": "Show a Single Entity directly in the Menubar",
       "mode": "menu-bar",
       "interval": "5m",
+      "disabledByDefault": true,
       "preferences": [
         {
           "name": "entity",
