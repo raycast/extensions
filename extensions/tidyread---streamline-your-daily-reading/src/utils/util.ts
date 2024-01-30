@@ -127,3 +127,28 @@ export function reflect<T, P>(
     .then((value) => ({ payload, status: "fulfilled" as const, value }))
     .catch((reason) => Promise.reject({ payload, status: "rejected", reason }));
 }
+
+export function extractDomain(urlString: string) {
+  const parsedUrl = new URL(urlString);
+  const hostname = parsedUrl.hostname; // 获取完整主机名，例如 "www.baidu.com"
+
+  // 分割主机名并提取域名部分
+  const parts = hostname.split(".");
+  const domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
+
+  return domain;
+}
+
+/**
+ * 执行一个函数并在出错时返回null。跟lodash attempt类似，不过失败是返回null
+ *
+ * @param fn 要执行的函数。
+ * @returns 函数的返回值或null（如果执行失败）。
+ */
+export const silent = <T>(fn: () => T): T | null => {
+  try {
+    return fn();
+  } catch (error) {
+    return null;
+  }
+};

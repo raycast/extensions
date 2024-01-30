@@ -1,5 +1,10 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## [Add Search RSS Page] - 2024-01-30
+- add search rss page
+- fix default maxItemsPerFeed 10 => 5
+
+
 ## [Improving Digest Speed] - 2024-01-26
 
 - add progress display for generating digest

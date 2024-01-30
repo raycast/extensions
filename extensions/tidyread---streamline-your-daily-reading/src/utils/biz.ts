@@ -1,8 +1,9 @@
 import { isAfter, subHours } from "date-fns";
 import queryString from "query-string";
+import fetch from "node-fetch";
 import { genDigest } from "../digest";
 import { PROVIDERS_MAP } from "../providers";
-import { Digest, DigestStage, RSSItem, Source } from "../types";
+import { Digest, DigestStage, RSSItem, RawFeed, Source } from "../types";
 import { normalizePreference } from "./preference";
 import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
@@ -10,7 +11,7 @@ import dayjs from "dayjs";
 import { addOrUpdateDigest, getComeFrom, getInterest, getSources } from "../store";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
-import { request } from "./request";
+import Parser from "rss-parser";
 
 export const categorizeSources = (items: Source[]): { todayItems: Source[]; otherItems: Source[] } => {
   const today = new Date();
@@ -105,7 +106,7 @@ export async function bizGenDigest(
   const digestTitle = `${dayjs().format("YYYY-MM-DD")} Digest`;
 
   // 判断tidyread是否可访问，如果不可访问，则使用原始链接
-  const tidyreadCloudAvailable = await request("https://www.tidyread.info/read")
+  const tidyreadCloudAvailable = await withTimeout(fetch("https://www.tidyread.info/read"), 20 * 1000)
     .then(() => true)
     .catch(() => false);
 
@@ -193,4 +194,15 @@ export function addUtmSourceToUrl(url: string): string {
 
   // 重新构建URL
   return queryString.stringifyUrl(parsedQuery);
+}
+
+const parser = new Parser({
+  requestOptions: {
+    agent: createAgent(),
+    timeout: normalizePreference().requestTimeout ?? 30 * 1000,
+  },
+});
+
+export function parseRSS(url: string): Promise<RawFeed> {
+  return parser.parseURL(url) as Promise<RawFeed>;
 }

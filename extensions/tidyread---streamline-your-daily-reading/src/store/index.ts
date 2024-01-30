@@ -11,6 +11,12 @@ export const saveSources = async (items: Source[]) => {
   await LocalStorage.setItem("sources", JSON.stringify(items));
 };
 
+export const addSource = async (item: Omit<Source, "id">): Promise<void> => {
+  const items = await getSources();
+  items.push({ id: `${Date.now()}`, ...item });
+  await saveSources(items);
+};
+
 export const getDigests = async (): Promise<Digest[]> => {
   const itemsJson = await LocalStorage.getItem<string>("digests");
   return itemsJson ? JSON.parse(itemsJson) : [];

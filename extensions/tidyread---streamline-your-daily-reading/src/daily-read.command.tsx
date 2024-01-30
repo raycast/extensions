@@ -85,7 +85,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
       {itemsLength === 0 ? (
         <List.EmptyView
           actions={<CustomActionPanel>{manageSourceListActionNode}</CustomActionPanel>}
-          title="No Sources Found"
+          title="No Source Found"
           description="Go to manage your sources"
         />
       ) : (
@@ -138,7 +138,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                       value: `${(item.tags || [])?.join?.(", ")}`,
                       color: Color.Blue,
                     },
-                    show: item.tags?.length > 0,
+                    show: (item.tags || [])?.length > 0,
                   },
                   {
                     tag: {
@@ -188,7 +188,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                       value: `${(item.tags || [])?.join?.(", ")}`,
                       color: Color.Blue,
                     },
-                    show: item.tags?.length > 0,
+                    show: (item.tags || [])?.length > 0,
                   },
                   {
                     tag: {

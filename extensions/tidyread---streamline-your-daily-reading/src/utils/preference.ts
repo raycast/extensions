@@ -47,7 +47,7 @@ export function normalizePreference(): Required<Preferences> {
     preferredLanguage: values.preferredLanguage || "",
     httpProxy: values.httpProxy || "",
     summarizePrompt: (values.summarizePrompt || "").trim() || DEFAULT_PROMPT,
-    maxItemsPerFeed: isNum(values.maxItemsPerFeed) ? +values.maxItemsPerFeed : 10,
+    maxItemsPerFeed: isNum(values.maxItemsPerFeed) ? +values.maxItemsPerFeed : 5,
     maxApiConcurrency: isNum(values.maxApiConcurrency) ? +values.maxApiConcurrency : defaultApiConfig.maxApiConcurrency,
     retryCount: isNum(values.retryCount) ? +values.retryCount : defaultApiConfig.retryCount,
     // 默认重试延迟时间为30秒

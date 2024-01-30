@@ -8,9 +8,13 @@ export interface Source {
   rssLink?: string;
   // Time span of the content pulled by rss, default is 1 day
   timeSpan?: string;
-  tags: string[];
+  tags?: string[];
   favicon?: string;
 }
+
+export type SourceWithStatus = Source & {
+  status?: "success" | "failed";
+};
 
 export type SummarizeStatus = "summraized" | "failedToSummarize" | "raw";
 
@@ -44,6 +48,13 @@ export interface RSSItem {
   coverImage?: string;
   feed?: RSSFeed;
   [k: string]: any;
+}
+
+export interface RawFeed {
+  title: string;
+  link: string;
+  feedUrl: string;
+  items: RSSItem[];
 }
 
 export interface Preferences {

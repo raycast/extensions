@@ -69,7 +69,7 @@ export default function SourceList() {
           actions={
             <ActionPanel>
               <Action.SubmitForm
-                title="Save Source"
+                title="Save"
                 onSubmit={async (values) => {
                   try {
                     const newSources = JSON.parse(values.sources) as Source[];
@@ -127,19 +127,13 @@ export default function SourceList() {
         <List.EmptyView
           actions={
             <CustomActionPanel>
-              <Action.Push
+              <Action
                 title="Add Source"
                 shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.Plus}
-                target={
-                  <SourceForm
-                    navigationTitle="Add Source"
-                    onSuccess={async () => {
-                      pop();
-                      loadSources();
-                    }}
-                  ></SourceForm>
-                }
+                onAction={async () => {
+                  await launchCommand({ name: "add-source.command", type: LaunchType.UserInitiated });
+                }}
               />
               {batchImportActionNode}
             </CustomActionPanel>
@@ -160,7 +154,7 @@ export default function SourceList() {
                 value: `${(item.tags || [])?.join?.(", ")}`,
                 color: Color.Blue,
               },
-              show: item.tags?.length > 0,
+              show: (item.tags || [])?.length > 0,
             },
             {
               tag: {
@@ -194,19 +188,13 @@ export default function SourceList() {
                       ></SourceForm>
                     }
                   />
-                  <Action.Push
+                  <Action
                     title="Add Source"
                     icon={Icon.Plus}
                     shortcut={Keyboard.Shortcut.Common.New}
-                    target={
-                      <SourceForm
-                        navigationTitle="Add Source"
-                        onSuccess={async () => {
-                          pop();
-                          loadSources();
-                        }}
-                      ></SourceForm>
-                    }
+                    onAction={async () => {
+                      await launchCommand({ name: "add-source.command", type: LaunchType.UserInitiated });
+                    }}
                   />
                   <Action
                     style={Action.Style.Destructive}
