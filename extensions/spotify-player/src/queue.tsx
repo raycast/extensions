@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { View } from "./components/View";
+import TrackListItem from "./components/TrackListItem";
+import EpisodeListItem from "./components/EpisodeListItem";
 import { useQueue } from "./hooks/useQueue";
 import { getErrorMessage } from "./helpers/getError";
-import { ImageObject } from "./helpers/spotify.api";
 
 function Queue() {
   const { queueData, queueError, queueIsLoading, queueRevalidate } = useQueue();
@@ -49,26 +50,13 @@ function Queue() {
 
   return (
     <List isLoading={queueIsLoading}>
-      {queueData.map((queueItem) => {
-        let subtitle: string | undefined = undefined;
-        let iconImages: ImageObject[] | undefined = undefined;
-        if (queueItem.type == "track") {
-          subtitle = queueItem?.artists?.map((a) => a.name).join(", ");
-          if (queueItem.album?.images) iconImages = queueItem.album.images;
-        } else if (queueItem.type == "episode") {
-          if (queueItem.images) iconImages = queueItem.show.images;
-          else if (queueItem.show?.images) iconImages = queueItem.show.images;
-        }
-
-        return (
-          <List.Item
-            key={queueItem.id}
-            title={queueItem.name ?? "Unknown"}
-            subtitle={subtitle}
-            icon={iconImages ? { source: iconImages[iconImages.length - 1]?.url } : undefined}
-          />
-        );
-      })}
+      {queueData.map((queueItem, i) =>
+        queueItem.type == "episode" ? (
+          <EpisodeListItem episode={queueItem} key={`${queueItem.id}-${i}`} />
+        ) : (
+          <TrackListItem track={queueItem} album={queueItem.album} key={`${queueItem.id}-${i}`} />
+        ),
+      )}
     </List>
   );
 }
