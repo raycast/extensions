@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-01-29
+
+Added confetti parameter to display confetti after interval completes
+
 ## [Enhancement] - 2024-01-26
 
 Added starting of next interval based on previous interval
