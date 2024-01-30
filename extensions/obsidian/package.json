@@ -568,17 +568,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.0",
+    "@raycast/api": "^1.66.0",
     "@types/uuid": "^8.3.4",
+    "luxon": "^3.4.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.52",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^8.42.0",
     "prettier": "^2.8.8",
+    "react": "^18.2.0",
     "typescript": "^4.5.4"
   },
   "scripts": {
