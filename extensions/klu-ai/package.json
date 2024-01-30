@@ -1,21 +1,34 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "klu-ai",
-  "title": "Klu AI",
+  "title": "Klu",
   "description": "",
-  "icon": "command-icon.png",
+  "icon": "spark.png",
   "author": "abielzulio",
   "license": "MIT",
   "commands": [
     {
-      "name": "search-actions",
-      "title": "Search Actions",
+      "name": "search-applications",
+      "title": "Search Applications",
       "description": "",
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "API Key",
+      "description": "Enter your Klu's workspace API",
+      "type": "password",
+      "title": "API",
+      "required": true
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.66.1"
+    "@kluai/core": "^0.0.53",
+    "@raycast/api": "^1.66.1",
+    "@raycast/utils": "^1.11.1",
+    "date-fns": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
