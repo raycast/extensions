@@ -156,7 +156,7 @@ function RecentEntries() {
             key={"entry-" + entry.id}
             id={"entry-" + entry.id.toString()}
             icon={{ source: Icon.Dot, tintColor: entry.color }}
-            title={entry.breadcrumbs ? `${entry.breadcrumbs} / ${entry.name}` : entry.name}
+            title={entry.breadcrumps ? `${entry.breadcrumps} / ${entry.name}` : entry.name}
             subtitle={entry.description}
             actions={
               <ActionPanel title="Recent Entries">

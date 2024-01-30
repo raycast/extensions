@@ -23,21 +23,18 @@ export default function Command() {
     initialData: tasks,
     onData: curateTasks,
   });
-  const { mutate: mutateActiveTask } = useFetch(
-    "https://app.timecamp.com/third_party/api/timer",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: '{"action":"status"}',
-      keepPreviousData: true,
-      initialData: activeTask,
-      onData: getActiveTask,
+  const { mutate: mutateActiveTask } = useFetch("https://app.timecamp.com/third_party/api/timer", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
     },
-  );
+    body: '{"action":"status"}',
+    keepPreviousData: true,
+    initialData: activeTask,
+    onData: getActiveTask,
+  });
 
   useEffect(() => {
     if (activeTask && startedTask) {

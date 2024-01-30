@@ -59,4 +59,5 @@ export type Entry = {
   project_id?: number;
   project_name?: string;
   breadcrumbs?: string;
+  breadcrumps?: string;
 };
