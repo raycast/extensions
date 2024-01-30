@@ -13,9 +13,9 @@ import * as fs from "fs";
 import * as os from "os";
 import path from "path";
 
-import { environment, getPreferenceValues } from "@raycast/api";
+import { environment, getPreferenceValues, open } from "@raycast/api";
 
-import { convertPDF, convertSVG, moveImageResultsToFinalDestination } from "../utilities/utils";
+import { convertPDF, convertSVG, getWebPBinaryPath, moveImageResultsToFinalDestination } from "../utilities/utils";
 import { ExtensionPreferences } from "../utilities/preferences";
 import { ImageResultHandling } from "../utilities/enums";
 
@@ -56,8 +56,8 @@ export default async function convert(sourcePaths: string[], desiredType: string
 
     if (desiredType === "WEBP") {
       // Input Format -> WebP
-      execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
-      execSync(`${environment.assetsPath}/webp/cwebp "${item}" -o "${newPath}"`);
+      const [, cwebpPath] = await getWebPBinaryPath();
+      execSync(`${cwebpPath} "${item}" -o "${newPath}"`);
     } else if (originalType.toLowerCase() == "svg") {
       // SVG -> NSBitmapImageRep -> Desired Format
       convertSVG(desiredType, item, newPath);
@@ -67,8 +67,8 @@ export default async function convert(sourcePaths: string[], desiredType: string
       if (originalType.toLowerCase() == "webp") {
         // WebP -> PNG -> BMP -> SVG
         const pngPath = `${environment.supportPath}/tmp.png`;
-        execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
-        execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${pngPath}"`);
+        const [dwebpPath] = await getWebPBinaryPath();
+        execSync(`${dwebpPath} "${item}" -o "${pngPath}"`);
         execSync(
           `sips --setProperty format "bmp" "${pngPath}" --out "${bmpPath}" && ${environment.assetsPath}/potrace/potrace -s --tight -o "${newPath}" "${bmpPath}"; rm "${bmpPath}"; rm "${pngPath}"`
         );
@@ -80,8 +80,8 @@ export default async function convert(sourcePaths: string[], desiredType: string
       }
     } else if (originalType.toLowerCase() == "webp") {
       // WebP -> PNG -> Desired Format
-      execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
-      execSync(`${environment.assetsPath}/webp/dwebp "${item}" -o "${newPath}"`);
+      const [dwebpPath] = await getWebPBinaryPath();
+      execSync(`${dwebpPath} "${item}" -o "${newPath}"`);
       execSync(`sips --setProperty format ${desiredType.toLowerCase()} "${newPath}"`);
     } else if (originalType.toLowerCase() == "pdf") {
       // PDF -> Desired Format

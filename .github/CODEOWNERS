@@ -160,7 +160,6 @@
 /extensions/cinemas-nos                              @DiogoFerrer
 /extensions/circle-ci                                @qeude @kudrykv @jesse-c
 /extensions/citation-generator                       @AbhinavPalacharla
-/extensions/claris-snippets                          @eluce2
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029 @thomaslombart @lukaszmtw @erics118
 /extensions/clear-clipboard                          @d3caf
@@ -370,6 +369,7 @@
 /extensions/figma-files                              @michaelwschultz @pernielsentikaer @GLaDO8
 /extensions/filamentphp-doc-seach                    @aurawindsurfing
 /extensions/file-manager                             @erics118 @BalliAsghar @urwrstkn8mare @fengtianze
+/extensions/filemaker-snippets                       @eluce2
 /extensions/filezilla                                @naqet
 /extensions/finary                                   @jetaix
 /extensions/finderutils                              @edrf12
@@ -869,7 +869,7 @@
 /extensions/podcasts-now                             @cloudy9101
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
-/extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp @susonthapa @mikikiv
+/extensions/pomodoro                                 @KELiON @pernielsentikaer @brodelp @susonthapa @mikikiv @MartinGonzalez
 /extensions/popicons                                 @lucaschultz
 /extensions/porkbun                                  @xmok
 /extensions/port-manager                             @lucaschultz @Sheraff
@@ -1005,7 +1005,7 @@
 /extensions/saved-items                              @sunny0826
 /extensions/savvycal                                 @keturiosakys @pernielsentikaer @derrickreimer @vimtor
 /extensions/scaleway                                 @philibea @flozdra
-/extensions/schoology                                @Visual-Studio-Coder
+/extensions/schoology                                @Visual-Studio-Coder @Visual-Studio-Coder @Visual-Studio-Coder @Visual-Studio-Coder
 /extensions/scrapbox-search                          @zett-8
 /extensions/scrcpy                                   @zcfan @bxb100
 /extensions/screen-math                              @hcancelik
