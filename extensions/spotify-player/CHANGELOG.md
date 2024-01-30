@@ -1,8 +1,12 @@
 # Spotify Player Changelog
 
-## [New Command] - 2023-12-26
+## [New Command] - 2023-01-30
 
 - New `Queue` command allowing the user to view songs/epsiodes in the queue.
+
+## [Fix Current Track Like State] - 2023-12-31
+
+- Fix showing the like/disliked state of the current track
 
 ## [Feature & Optimisation] - 2023-12-02
 

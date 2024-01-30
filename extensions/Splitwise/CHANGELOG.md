@@ -1,11 +1,15 @@
 # Splitwise Changelog
 
-## [Fixed Bugs] - 2023-19-12
+## [Fixed Bug] - 2024-01-04
+
+- Updated `Add Expense` command to work with supported API endpoint
+
+## [Fixed Bugs] - 2023-12-19
 
 - Fixed issue: `TypeError: Cannot read properties of undefined (reading 'name')`.
 - Improved optimistic update for expense deletion.
 
-## [New Features] - 2023-29-09
+## [New Features] - 2023-09-29
 
 - Added new command `List Expenses` which allows to list all expenses, edit, and delete them
 - Added 'Reload' and 'Open in Browser' to `Add Expense` command

@@ -55,7 +55,7 @@ export default function EnterPassword(props: {
                     newWifiWithPassword.push({ ssid: wifiNetWork.ssid, password: password });
                   }
                   await LocalStorage.setItem(LocalStorageKey.WIFI_PASSWORD, JSON.stringify(newWifiWithPassword));
-                  await showHUD(`Connected to ${wifiNetWork.ssid} successfully`);
+                  await showHUD(`🛜 Connected to ${wifiNetWork.ssid} successfully`);
                   await toast.hide();
                   await popToRoot();
                 } else {

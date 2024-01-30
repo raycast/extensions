@@ -1,37 +1,37 @@
-import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { CopyCommandsActionsMenu } from "./actions/CopyCommandsActionMenu";
 import CopyInfoActionsMenu from "./actions/CopyInfoActionsMenu";
 import KillActions from "./actions/KillActions";
 import KillAllActions from "./actions/KillAllActions";
-import KillParentActions, { isProcessWithKillableParent } from "./actions/KillParentActions";
+import KillParentActions from "./actions/KillParentActions";
 import { ShowInFinderActionMenu } from "./actions/ShowInFinderActionMenu";
 import Toasts from "./feedback/Toasts";
+import { useNamedPorts } from "./hooks/useNamedPorts";
 import useProcesses from "./hooks/useProcesses";
+import { getProcessAccessories } from "./utilities/getProcessAccessories";
 
 export default function Command() {
-  const [processes, reloadProcesses] = useProcesses();
+  const { processes, revalidateProcesses, isLoadingProcesses } = useProcesses();
+  const { getNamedPort } = useNamedPorts();
+
   const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", false);
 
   return (
-    <List
-      isShowingDetail={isShowingDetail}
-      isLoading={processes.length === 0}
-      navigationTitle="Kill Port"
-      searchBarPlaceholder="Search Open Ports"
-    >
-      {processes.map((p) => (
+    <List isShowingDetail={isShowingDetail} isLoading={isLoadingProcesses} searchBarPlaceholder="Search Open Ports">
+      {processes?.map((p) => (
         <List.Item
           key={p.pid}
           title={p.name ?? "Untitled Process"}
           subtitle={isShowingDetail ? "" : p.user ?? ""}
-          keywords={p.portInfo?.map((i) => `${i.port}`).concat(p.portInfo?.map((i) => `${i.host}`))}
+          keywords={p.portInfo
+            ?.map((i) => `${i.port}`)
+            .concat(p.portInfo?.map((i) => `${i.host}`))
+            .concat(p.portInfo?.map((i) => `${i.name}`))}
           detail={
             <List.Item.Detail
               metadata={
                 <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Info" />
-                  <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Name" text={p.name} />
                   <List.Item.Detail.Metadata.Label title="User" text={`${p.user} (${p.uid})`} />
                   <List.Item.Detail.Metadata.Label title="PID" text={`${p.pid}`} />
@@ -41,12 +41,24 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Label title="Parent Path" text={p.parentPath} />
                   )}
                   <List.Item.Detail.Metadata.Label title="Protocol" text={`${p.protocol}`} />
-                  <List.Item.Detail.Metadata.Label title="" />
-                  <List.Item.Detail.Metadata.Label title="Ports" />
-                  <List.Item.Detail.Metadata.Separator />
-                  {p.portInfo?.map((i, index) => (
-                    <List.Item.Detail.Metadata.Label key={index} title={i.host} text={`${i.port}`} />
-                  ))}
+                  {p.portInfo && (
+                    <List.Item.Detail.Metadata.TagList title="Ports">
+                      {p.portInfo.map((i, index) => {
+                        const name = getNamedPort(i.port)?.name;
+                        if (name !== undefined) {
+                          return (
+                            <List.Item.Detail.Metadata.TagList.Item
+                              key={index}
+                              text={`${i.port} (${name})`}
+                              color={Color.Green}
+                            />
+                          );
+                        }
+
+                        return <List.Item.Detail.Metadata.TagList.Item key={index} text={`${i.port}`} />;
+                      })}
+                    </List.Item.Detail.Metadata.TagList>
+                  )}
                 </List.Item.Detail.Metadata>
               }
             />
@@ -55,39 +67,37 @@ export default function Command() {
             <ActionPanel>
               <KillActions
                 process={p}
-                onKilled={async () => {
-                  await showToast(Toasts.KillProcess.Success(p));
-                  await reloadProcesses();
+                onKilled={() => {
+                  showToast(Toasts.KillProcess.Success(p));
+                  revalidateProcesses();
                 }}
-                onError={async (err) => {
-                  await showToast(Toasts.KillProcess.Error(err));
-                  await reloadProcesses();
+                onError={(err) => {
+                  showToast(Toasts.KillProcess.Error(err));
+                  revalidateProcesses();
                 }}
               />
               <KillAllActions
                 process={p}
-                onKilled={async () => {
-                  await showToast(Toasts.KillProcess.Success(p));
-                  await reloadProcesses();
+                onKilled={() => {
+                  showToast(Toasts.KillProcess.Success(p));
+                  revalidateProcesses();
                 }}
-                onError={async (err) => {
-                  await showToast(Toasts.KillProcess.Error(err));
-                  await reloadProcesses();
+                onError={(err) => {
+                  showToast(Toasts.KillProcess.Error(err));
+                  revalidateProcesses();
                 }}
               />
-              {isProcessWithKillableParent(p) && (
-                <KillParentActions
-                  process={p}
-                  onKilled={async () => {
-                    await showToast(Toasts.KillProcess.Success(p));
-                    await reloadProcesses();
-                  }}
-                  onError={async (err) => {
-                    await showToast(Toasts.KillProcess.Error(err));
-                    await reloadProcesses();
-                  }}
-                />
-              )}
+              <KillParentActions
+                process={p}
+                onKilled={() => {
+                  showToast(Toasts.KillProcess.Success(p));
+                  revalidateProcesses();
+                }}
+                onError={async (err) => {
+                  showToast(Toasts.KillProcess.Error(err));
+                  revalidateProcesses();
+                }}
+              />
               <Action
                 title="Show Details"
                 icon={Icon.QuestionMark}
@@ -97,18 +107,10 @@ export default function Command() {
               <ShowInFinderActionMenu process={p} />
               <CopyInfoActionsMenu process={p} />
               <CopyCommandsActionsMenu process={p} />
-              <Action title="Reload" onAction={reloadProcesses} icon={Icon.ArrowClockwise} />
+              <Action title="Reload" onAction={revalidateProcesses} icon={Icon.ArrowClockwise} />
             </ActionPanel>
           }
-          accessories={
-            isShowingDetail
-              ? []
-              : [
-                  {
-                    text: [...new Set(p.portInfo?.map((i) => `${i.port}`))].join(", "),
-                  },
-                ]
-          }
+          accessories={isShowingDetail ? undefined : getProcessAccessories(p)}
         />
       ))}
     </List>

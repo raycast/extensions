@@ -5,7 +5,7 @@ import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import useGradients from "./hooks/useGradientUris";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./helpers/arrayExtensions";
 import { getColorsFromScene } from "./helpers/hueResources";
 
@@ -28,7 +28,7 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
     setPalettes(new Map<Id, Palette>(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])));
   }, [scenes]);
 
-  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   if (props.group !== undefined) {
@@ -67,8 +67,8 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
   } else {
     return (
       <Grid isLoading={isLoading} aspectRatio="16/9" filtering={{ keepSectionOrder: true }}>
-        {groupTypes.map((groupType: Group[]): JSX.Element[] => {
-          return groupType.map((group: Group): JSX.Element => {
+        {groupTypes.map((groupType: Group[]): React.JSX.Element[] => {
+          return groupType.map((group: Group): React.JSX.Element => {
             const groupScenes =
               scenes
                 .filter((scene: Scene) => scene.group.rid === group.id)
@@ -102,7 +102,7 @@ function Group(props: {
   return (
     <Grid.Section key={props.group.id} title={props.group.metadata.name}>
       {props.scenes.map(
-        (scene: Scene): JSX.Element => (
+        (scene: Scene): React.JSX.Element => (
           <Scene
             key={scene.id}
             group={props.group}

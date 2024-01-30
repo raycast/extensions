@@ -56,6 +56,7 @@ export function requestCaiyunTextTranslate(queryWordInfo: QueryWordInfo): Promis
       "x-authorization": "token " + AppKeyStore.caiyunToken,
     },
   };
+
   return new Promise((resolve, reject) => {
     axios
       .post(url, params, config)

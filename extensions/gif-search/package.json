@@ -6,13 +6,20 @@
   "icon": "command-icon.png",
   "author": "josephschmitt",
   "contributors": [
-    "tm.wrnr"
+    "tm.wrnr",
+    "j3lte"
   ],
   "license": "MIT",
   "categories": [
     "Media",
     "Fun",
     "Web"
+  ],
+  "keywords": [
+    "Tenor",
+    "Giphy",
+    "Finer",
+    "clips"
   ],
   "commands": [
     {
