@@ -7,7 +7,8 @@
   "author": "garrett",
   "contributors": [
     "RSO",
-    "vette"
+    "vette",
+    "emlez"
   ],
   "license": "MIT",
   "commands": [
@@ -56,6 +57,10 @@
             {
               "title": "Midnight",
               "value": "midnight"
+            },
+            {
+              "title": "Mono",
+              "value": "mono"
             },
             {
               "title": "Raindrop",
