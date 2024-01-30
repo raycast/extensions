@@ -3,8 +3,8 @@
   "apis": [
     {
       "identifier": "pscale",
-      "source": "@pscale/v1.0#a81qse1nlraopop1",
-      "integrity": "sha512-5vckG9NoJYv33BYwkCvGfgY10v0TWpG1b0xbbJqtCMqylGro3zRD3rZblYGo4ow+DqwugugbMZA6Udj8LCcmTg==",
+      "source": "@pscale/v1.0#1uotglrsbdjt2",
+      "integrity": "sha512-B/hsZQ4V9hon6U+mcAIFNXmSDj27CC7SM8Mwb/QJLGmYndra7b/XQlxcdMxhORagQwhOWGHxWvwFTQMgxsgHrw==",
       "installerVersion": "6.1.1"
     }
   ]

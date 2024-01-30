@@ -1,5 +1,5 @@
 import { FormValidation, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps } from "@raycast/api";
 import { isEmpty, sample } from "lodash";
 import { useState } from "react";
 import { View } from "./lib/oauth/view";
@@ -20,15 +20,13 @@ const placeholderBranchNames = [
   "107-create-indices-aaron-suggested",
 ];
 
-export function CreateBranch(
-  props:
-    | {
-        organization: string;
-        database: string;
-        branch: string;
-      }
-    | object,
-) {
+interface CreateBranchProps extends Partial<LaunchProps> {
+  organization?: string;
+  database?: string;
+  branch?: string;
+}
+
+export function CreateBranch(props: CreateBranchProps) {
   const [placeholderBranchName] = useState(() => sample(placeholderBranchNames));
 
   const { itemProps, values, handleSubmit, reset } = useForm<CreateBranchForm>({
@@ -37,10 +35,10 @@ export function CreateBranch(
       parent: FormValidation.Required,
       database: FormValidation.Required,
     },
-    initialValues: {
+    initialValues: props.draftValues ?? {
       name: "",
-      parent: "branch" in props ? props.branch : "",
-      database: "organization" in props ? `${props.organization}-${props.database}` : "",
+      parent: props.branch,
+      database: props.organization ? `${props.organization}-${props.database}` : "",
     },
     async onSubmit(values) {
       const [organization, database] = values.database.split("-");
@@ -61,7 +59,7 @@ export function CreateBranch(
 
   return (
     <Form
-      enableDrafts={!props}
+      enableDrafts={!props.organization}
       isLoading={branchesLoading}
       navigationTitle="Create Branch"
       actions={
@@ -89,10 +87,10 @@ export function CreateBranch(
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   return (
     <View>
-      <CreateBranch />
+      <CreateBranch {...props} />
     </View>
   );
 }

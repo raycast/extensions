@@ -5938,6 +5938,10 @@
                             "type": "string",
                             "description": "The name of the branch the deploy request was created from"
                           },
+                          "branch_id": {
+                            "type": "string",
+                            "description": "The id of the branch the deploy request was created from"
+                          },
                           "branch_deleted": {
                             "type": "boolean",
                             "description": "Whether or not the deploy request branch was deleted"
@@ -6054,6 +6058,7 @@
                           "actor",
                           "closed_by",
                           "branch",
+                          "branch_id",
                           "branch_deleted",
                           "branch_deleted_by",
                           "branch_deleted_at",
@@ -6201,6 +6206,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -6405,6 +6414,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -6533,6 +6543,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -6737,6 +6751,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -6882,6 +6897,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -7086,6 +7105,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -7214,6 +7234,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -7330,6 +7354,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -7473,6 +7498,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -7589,6 +7618,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -7716,6 +7746,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -7832,6 +7866,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -7959,6 +7994,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -8075,6 +8114,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -8202,6 +8242,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -8318,6 +8362,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -8758,6 +8803,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -8874,6 +8923,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
@@ -9263,6 +9313,10 @@
                       "type": "string",
                       "description": "The name of the branch the deploy request was created from"
                     },
+                    "branch_id": {
+                      "type": "string",
+                      "description": "The id of the branch the deploy request was created from"
+                    },
                     "branch_deleted": {
                       "type": "boolean",
                       "description": "Whether or not the deploy request branch was deleted"
@@ -9379,6 +9433,7 @@
                     "actor",
                     "closed_by",
                     "branch",
+                    "branch_id",
                     "branch_deleted",
                     "branch_deleted_by",
                     "branch_deleted_at",
