@@ -1,5 +1,5 @@
 import { FormValidation, useForm } from "@raycast/utils";
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps } from "@raycast/api";
 import { useEffect } from "react";
 import { isEmpty } from "lodash";
 import { View } from "./lib/oauth/view";
@@ -15,21 +15,21 @@ interface CreateDeployRequestForm {
   database: string;
 }
 
-interface CreateDeployRequestProps {
-  organization: string;
-  database: string;
+interface CreateDeployRequestProps extends Partial<LaunchProps> {
+  organization?: string;
+  database?: string;
   branch?: string;
 }
 
-export function CreateDeployRequest(props: CreateDeployRequestProps | object) {
+export function CreateDeployRequest(props: CreateDeployRequestProps) {
   const { itemProps, values, handleSubmit, setValue, reset } = useForm<CreateDeployRequestForm>({
     validation: {
       branch: FormValidation.Required,
       deploy: FormValidation.Required,
     },
-    initialValues: {
-      branch: "branch" in props ? props.branch : undefined,
-      database: "organization" in props ? `${props.organization}-${props.database}` : undefined,
+    initialValues: props.draftValues ?? {
+      branch: props.branch,
+      database: props.organization ? `${props.organization}-${props.database}` : undefined,
     },
     async onSubmit(values) {
       const [organization, database] = values.database.split("-");
@@ -62,7 +62,7 @@ export function CreateDeployRequest(props: CreateDeployRequestProps | object) {
 
   return (
     <Form
-      enableDrafts={!props}
+      enableDrafts={!props.organization}
       isLoading={branchesLoading}
       navigationTitle={
         values.branch && values.deploy
@@ -106,10 +106,10 @@ export function CreateDeployRequest(props: CreateDeployRequestProps | object) {
   );
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
   return (
     <View>
-      <CreateDeployRequest />
+      <CreateDeployRequest {...props} />
     </View>
   );
 }
