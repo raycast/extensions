@@ -24,7 +24,7 @@
     "hobhouse",
     "bkeys818",
     "jatindotdev",
-    "bjarn-hau"
+    "the-devbear"
   ],
   "license": "MIT",
   "preferences": [
@@ -158,7 +158,8 @@
       "title": "Add Playing Song to Playlist",
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "next",

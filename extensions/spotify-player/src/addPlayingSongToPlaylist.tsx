@@ -68,7 +68,7 @@ function AddToPlaylistCommand() {
     >
       <ListOrGridSection type={"list"} title="Playlists">
         {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id || playlist.collaborative)
+          ?.filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => (
             <PlaylistItem
               type={"list"}
