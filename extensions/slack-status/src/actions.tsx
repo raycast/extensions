@@ -41,13 +41,13 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
               optimisticUpdate() {
                 return {};
               },
-            }
+            },
           ),
           {
             loading: "Clearing status...",
             success: "Cleared status",
             error: "Failed clearing status",
-          }
+          },
         );
       }}
     />
@@ -78,7 +78,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               }. 
 
               Your suggested Slack status:`,
-              { creativity: "low" }
+              { creativity: "low" },
             );
 
             const parsedAnswer = JSON.parse(answer);
@@ -106,7 +106,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
                 optimisticUpdate() {
                   return profile;
                 },
-              }
+              },
             );
 
             return parsedAnswer;
@@ -118,7 +118,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               message: `${value.emoji} ${value.text}`,
             }),
             error: "Failed setting status with AI",
-          }
+          },
         );
       }}
     />
@@ -181,14 +181,14 @@ export function SetStatusWithDuration(props: {
                       optimisticUpdate() {
                         return profile;
                       },
-                    }
+                    },
                   );
                 },
                 {
                   loading: "Setting status with duration...",
                   success: "Set status with duration",
                   error: "Failed setting status with duration",
-                }
+                },
               );
             }}
           />
@@ -236,7 +236,7 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
                     optimisticUpdate() {
                       return profile;
                     },
-                  }
+                  },
                 );
 
                 pop();
@@ -245,7 +245,7 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
                 loading: "Setting custom status...",
                 success: "Set custom status",
                 error: "Failed setting custom status",
-              }
+              },
             );
           }}
         />
