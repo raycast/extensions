@@ -11,6 +11,7 @@ export default function Command() {
     `https://beta2.translate.ge/api/translate?from=${from}&to=${to}&str=${encodeURIComponent(searchText)}`,
     {
       parseResponse: parseFetchResponse,
+      execute: searchText.length > 0,
     },
   );
 
