@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { SonosDevice, SonosManager } from "@svrooij/sonos";
 import * as storage from "./storage";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
-import { CoordinatorNotFoundError, isDefined } from "./utils";
+import { isDefined } from "./utils";
+import { Toast, showToast } from "@raycast/api";
 
-export function formatPlayingState({ playing, state }: { playing: boolean; state: SonosState }): string {
+export async function formatPlayingState(state: SonosState | null): Promise<string | null> {
+  const playing = await isPlaying();
   const icon = playing ? `▶︎` : `⏸︎`;
+
+  if (state === null) {
+    return null;
+  }
 
   // This means some kind of track is playing
   if (state.mediaInfo.CurrentURIMetaData === undefined) {
@@ -39,14 +45,19 @@ export async function getManager() {
   return manager;
 }
 
-export async function getLatestState(): Promise<SonosState> {
+export async function getLatestState(): Promise<SonosState | null> {
   const storedState = await storage.getState();
 
   if (storedState === null) {
     const coordinator = await getActiveCoordinator();
 
     if (coordinator === undefined) {
-      throw CoordinatorNotFoundError;
+      await showToast({
+        title: "No explicit group set",
+        style: Toast.Style.Failure,
+      });
+
+      return null;
     }
 
     const state = await storage.storeState(coordinator);
@@ -59,7 +70,7 @@ export async function getLatestState(): Promise<SonosState> {
 
 export async function isPlaying() {
   const state = await getLatestState();
-  return state.transportState === "PLAYING";
+  return state?.transportState === "PLAYING";
 }
 
 export async function getAvailableGroups(): Promise<string[]> {
@@ -85,7 +96,7 @@ export async function getGroupCoordinator(group: string | undefined): Promise<So
   const manager = await getManager();
   const devices = manager.Devices;
   const availableGroups = await getAvailableGroups();
-  const fallbackGroup = group === "" && availableGroups.length === 1 ? availableGroups[0] : null;
+  const fallbackGroup = group === undefined && availableGroups.length === 1 ? availableGroups[0] : null;
 
   const member = devices.find((device) => device.GroupName === (fallbackGroup ?? group));
   const coordinator = member?.Coordinator;

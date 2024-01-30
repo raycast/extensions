@@ -1,33 +1,26 @@
-import { LaunchProps, updateCommandMetadata } from "@raycast/api";
-import { getActiveCoordinator, isPlaying, formatPlayingState } from "./sonos";
+import { LaunchProps, LaunchType, launchCommand, updateCommandMetadata } from "@raycast/api";
+import { formatPlayingState, getLatestState, getActiveCoordinator } from "./core/sonos";
 
 export default async function Command({ launchType }: LaunchProps) {
+  const state = await getLatestState();
   const coordinator = await getActiveCoordinator();
 
   if (coordinator === undefined) {
-    return null;
-  }
-
-  const playing = await isPlaying(coordinator);
-  const state = await coordinator.GetState();
-
-  if (launchType === "background") {
-    const subtitle = formatPlayingState({
-      playing,
-      state,
+    await launchCommand({
+      name: "set-group",
+      type: LaunchType.UserInitiated,
     });
+  } else {
+    const title = await formatPlayingState(state);
 
-    updateCommandMetadata({
-      subtitle,
-    });
-  } else if (launchType === "userInitiated") {
-    await coordinator.TogglePlayback();
+    if (title !== null) {
+      updateCommandMetadata({
+        subtitle: title,
+      });
+    }
 
-    updateCommandMetadata({
-      subtitle: formatPlayingState({
-        playing: !playing,
-        state,
-      }),
-    });
+    if (launchType === LaunchType.UserInitiated) {
+      await coordinator.TogglePlayback();
+    }
   }
 }

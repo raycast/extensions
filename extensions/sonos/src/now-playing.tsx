@@ -1,27 +1,8 @@
 import { MenuBarExtra } from "@raycast/api";
-import { isPlaying, formatPlayingState, getLatestState } from "./sonos";
-import { useEffect, useState } from "react";
+import { useSerializedState } from "./core/hooks";
 
 export default function Command() {
-  const [title, setTitle] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { title, loading } = useSerializedState();
 
-  useEffect(() => {
-    async function run() {
-      const state = await getLatestState();
-      const playing = await isPlaying();
-
-      const title = formatPlayingState({
-        playing,
-        state,
-      });
-
-      setTitle(title);
-      setLoading(false);
-    }
-
-    run();
-  }, []);
-
-  return <MenuBarExtra isLoading={loading} title={title} />;
+  return <MenuBarExtra isLoading={loading} title={title ?? ""} />;
 }

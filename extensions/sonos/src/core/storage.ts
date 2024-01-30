@@ -10,19 +10,20 @@ const STATE_KEY = "state";
 const STATE_TTL = 3000;
 
 export async function getActiveGroup(): Promise<string | undefined> {
-  const value = await LocalStorage.getItem(keys.activeGroup);
-
-  // If the value is something unexpected, reset it.
-  if (typeof value !== "string") {
-    setActiveGroup("");
+  try {
+    const group = await LocalStorage.getItem<string>(keys.activeGroup);
+    return group;
+  } catch (error) {
     return undefined;
   }
-
-  return value;
 }
 
 export async function setActiveGroup(group: string | undefined) {
-  await LocalStorage.setItem(keys.activeGroup, group || "");
+  try {
+    await LocalStorage.setItem(keys.activeGroup, group || "");
+  } catch (error) {
+    return undefined;
+  }
 }
 
 type StorageStatePayload = {
@@ -31,14 +32,9 @@ type StorageStatePayload = {
 };
 
 export async function getState(): Promise<StorageStatePayload | null> {
-  const raw = await LocalStorage.getItem(STATE_KEY);
-
-  if (typeof raw !== "string" || raw === "") {
-    return null;
-  }
-
   try {
-    const state = JSON.parse(raw);
+    const raw = await LocalStorage.getItem<string>(STATE_KEY);
+    const state = JSON.parse(raw || "");
 
     if (state.timestamp + STATE_TTL < Date.now()) {
       return null;

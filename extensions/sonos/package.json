@@ -29,11 +29,39 @@
     },
     {
       "name": "now-playing",
-      "title": "Show Now Playing",
+      "title": "Now Playing",
       "subtitle": "Sonos",
-      "description": "Display the currently playing media in the menu bar",
+      "description": "Show the currently playing media in the menu bar",
       "mode": "menu-bar",
-      "interval": "3s"
+      "interval": "4s"
+    },
+    {
+      "name": "increase-volume",
+      "title": "Increase Volume",
+      "subtitle": "Sonos",
+      "description": "Increase volume in the active group",
+      "mode": "no-view"
+    },
+    {
+      "name": "decrease-volume",
+      "title": "Decrease Volume",
+      "subtitle": "Sonos",
+      "description": "Decrease volume in the active group",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "subtitle": "Sonos",
+      "description": "Skip to the next track in the active group",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "subtitle": "Sonos",
+      "description": "Skip to the previous track in the active group",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
