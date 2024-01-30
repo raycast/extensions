@@ -1,4 +1,4 @@
-import { environment, List, MenuBarExtra, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, environment, List, MenuBarExtra, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import React, { useMemo, useState } from "react";
 
@@ -7,14 +7,24 @@ import { User } from "../api/users";
 
 import { getErrorMessage } from "./errors";
 
+type Site = {
+  id: string;
+  url: string;
+  name: string;
+  scopes: string[];
+  avatarUrl: string;
+};
+
 type JiraCredentials = {
   cloudId: string;
   siteUrl: string;
   authorizationHeader: string;
   myself: User;
+  sites: Site[];
 };
 
 let jiraCredentials: JiraCredentials | null = null;
+let userSelectedSite: boolean = false;
 
 export function withJiraCredentials(component: JSX.Element) {
   const [x, forceRerender] = useState(0);
@@ -33,7 +43,7 @@ export function withJiraCredentials(component: JSX.Element) {
           },
         });
 
-        const sites = (await sitesResponse.json()) as { id: string; url: string }[];
+        const sites = (await sitesResponse.json()) as Site[];
 
         if (sites && sites.length > 0) {
           const site = sites[0];
@@ -49,12 +59,14 @@ export function withJiraCredentials(component: JSX.Element) {
           const myself = (await myselfResponse.json()) as User;
 
           jiraCredentials = {
+            sites,
             cloudId: site.id,
             siteUrl: site.url,
             authorizationHeader,
             myself,
           };
         }
+        console.log(jiraCredentials);
 
         forceRerender(x + 1);
       } catch (error) {
@@ -66,6 +78,50 @@ export function withJiraCredentials(component: JSX.Element) {
       }
     })();
   }, []);
+
+  if (jiraCredentials && jiraCredentials.sites.length > 1 && !userSelectedSite) {
+    // if we have multiple sites, we need to show a list to select the site
+    const { sites } = jiraCredentials;
+
+    if (sites.length === 1) {
+      // if we only have one site, we can just select it
+      jiraCredentials = {
+        ...jiraCredentials,
+        cloudId: sites[0].id,
+        siteUrl: sites[0].url,
+      };
+      userSelectedSite = true;
+    }
+
+    // map the sites to a list of items
+    return (
+      <List>
+        {sites.map((site) => (
+          <List.Item
+            key={site.id}
+            title={site.name}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Select"
+                  onAction={() => {
+                    // @ts-expect-error we know that jiraCredentials is not null
+                    jiraCredentials = {
+                      ...jiraCredentials,
+                      cloudId: site.id,
+                      siteUrl: site.url,
+                    };
+                    userSelectedSite = true;
+                    forceRerender(x + 1);
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List>
+    );
+  }
 
   if (!jiraCredentials) {
     if (environment.commandMode === "view") {
@@ -80,6 +136,12 @@ export function withJiraCredentials(component: JSX.Element) {
   }
 
   return React.cloneElement(component, { query: query });
+}
+
+// TODO: Make this accessible from the UI
+// Allow a user to reselect a site
+export function reSelectSite() {
+  userSelectedSite = false;
 }
 
 export function getJiraCredentials() {
