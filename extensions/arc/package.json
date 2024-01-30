@@ -99,6 +99,10 @@
             {
               "title": "Ecosia",
               "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
             }
           ]
         }
@@ -214,6 +218,10 @@
             {
               "title": "Ecosia",
               "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
             }
           ]
         },

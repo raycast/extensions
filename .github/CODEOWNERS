@@ -636,6 +636,7 @@
 /extensions/list-randomizer                          @quuu
 /extensions/liveblocks                               @andreaselia
 /extensions/lobsters                                 @dev99problems
+/extensions/localcan                                 @ajzbc
 /extensions/lodash                                   @vimtor
 /extensions/logitech-litra                           @timrogers
 /extensions/logseq                                   @futantan @sawhney17 @hadret
@@ -791,7 +792,7 @@
 /extensions/onenote                                  @alewandows
 /extensions/ones                                     @k8scat
 /extensions/open-camera-menu-bar                     @peduarte
-/extensions/open-graph                               @davidho0403 @ridemountainpig @tmwrnr
+/extensions/open-graph                               @1weiho @ridemountainpig @tmwrnr
 /extensions/open-in-android-studio                   @3llomi
 /extensions/open-in-json-hero                        @ericallam @ivanovart
 /extensions/open-in-sublime-text                     @anfalas
@@ -1089,6 +1090,7 @@
 /extensions/splatoon                                 @marcbouchenoire
 /extensions/splix                                    @cwooldridge1
 /extensions/spoiler-converter                        @Visual-Studio-Coder @varunsatish2017
+/extensions/spotify-beta                             @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq
 /extensions/spotify-player                           @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @bkeys818 @jatindotdev
 /extensions/spryker-docs                             @DinisEsteves
@@ -1122,7 +1124,7 @@
 /extensions/surge                                    @ysj151215 @Hopsken
 /extensions/surl                                     @fujiyamaorange
 /extensions/svelte-docs                              @paoloricciuti
-/extensions/svgl                                     @davidho0403
+/extensions/svgl                                     @1weiho
 /extensions/svgo                                     @kaichii @kgrhartlage
 /extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg @dehesa @pernielsentikaer
@@ -1177,6 +1179,7 @@
 /extensions/tinyfaces-nft                            @peduarte
 /extensions/tinypng                                  @kawamataryo
 /extensions/tip-calculator                           @Visual-Studio-Coder @pernielsentikaer
+/extensions/tl-dr-ai-summary-tool                    @crazygo
 /extensions/tldr                                     @pomdtr
 /extensions/tldraw                                   @zephraph
 /extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart @j3lte

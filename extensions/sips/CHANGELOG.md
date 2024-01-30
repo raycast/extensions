@@ -1,5 +1,11 @@
 # Image Modification Changelog
 
+## [Strip EXIF Data] - 2024-01-28
+
+- Added "Strip EXIF Data" command
+- Improved selection detection when Finder/Path Finder is not the frontmost application
+- Fixed bug where converting from WebP to anything but PNG would change the file extension but not the file format
+
 ## [Bug Fix] - 2023-10-05
 
 - Fixed a bug where the "Convert Images" command failed for image paths containing dots. (#8549)

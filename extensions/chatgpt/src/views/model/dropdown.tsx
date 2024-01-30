@@ -1,15 +1,35 @@
-import { List } from "@raycast/api";
+import { List, LocalStorage } from "@raycast/api";
+import { useEffect } from "react";
 import { ChangeModelProp } from "../../type";
 
 export const ModelDropdown = (props: ChangeModelProp) => {
   const { models, onModelChange, selectedModel } = props;
   const separateDefaultModel = models.filter((x) => x.id !== "default");
   const defaultModel = models.find((x) => x.id === "default");
+
+  // it should same as `DropDown.storeValue`
+  useEffect(() => {
+    (async () => {
+      const selectModel = await LocalStorage.getItem<string>("select_model");
+      onModelChange(selectModel ?? "default");
+    })();
+  }, [onModelChange]);
+
+  useEffect(() => {
+    (async () => {
+      await LocalStorage.setItem("select_model", selectedModel);
+    })();
+  }, [selectedModel]);
+
+  /**
+   * fix https://github.com/raycast/extensions/issues/10391#issuecomment-19131903
+   *
+   * we can't use `DropDown.storeValue`, because it will reset `selectedModel` to default when the component rerender.
+   */
   return (
     <List.Dropdown
       tooltip="Select Model"
-      storeValue={true}
-      defaultValue={selectedModel}
+      value={selectedModel}
       onChange={(id) => {
         onModelChange(id);
       }}
