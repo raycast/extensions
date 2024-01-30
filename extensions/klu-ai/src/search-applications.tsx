@@ -1,34 +1,17 @@
-import { PersistedApp } from "@kluai/core";
+import { PersistedAction, PersistedApp } from "@kluai/core";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { intlFormatDistance } from "date-fns";
+import { useState } from "react";
 import klu from "./libs/klu";
+import { intlFormatDistance } from "date-fns";
 
-const SearchApplications = () => {
-  const { data, isLoading } = useCachedPromise(
+const useApplications = () => {
+  const hook = useCachedPromise(
     async () => {
       const data = await klu.workspaces.getCurrent();
       const remoteApps = await klu.workspaces.getApps(data.projectGuid);
 
-      interface App extends PersistedApp {
-        actionsCount: number;
-      }
-
-      const apps = remoteApps.map(async (_) => {
-        const app: App = {
-          ..._,
-          actionsCount: 0,
-        };
-
-        const actions = await klu.apps.getActions(_.guid);
-        app.actionsCount = actions.length;
-
-        return app;
-      });
-
-      const sortedApps = await Promise.all(apps);
-
-      return sortedApps
+      return remoteApps
         .sort((a, b) => {
           if (a.name < b.name) {
             return -1;
@@ -46,9 +29,87 @@ const SearchApplications = () => {
       initialData: [],
     },
   );
+
+  return hook;
+};
+
+const useActions = (actionGuid: string) => {
+  const hook = useCachedPromise(
+    async (actionGuid: string) => {
+      const data = await klu.apps.getActions(actionGuid);
+
+      interface Action extends PersistedAction {
+        modelName: string | undefined;
+      }
+
+      const actions = data.map(async (_) => {
+        const action: Action = {
+          ..._,
+          modelName: undefined,
+        };
+
+        const { modelId } = await klu.actions.get(_.guid);
+        const { llm } = await klu.models.get(modelId);
+
+        action.modelName = llm;
+
+        return action;
+      });
+
+      const newActions = await Promise.all(actions);
+
+      return newActions;
+    },
+    [actionGuid],
+    {
+      execute: actionGuid !== undefined,
+      keepPreviousData: true,
+      initialData: [],
+    },
+  );
+
+  return hook;
+};
+
+const ApplicationsDropdown = ({
+  applications,
+  onChange,
+}: {
+  applications: PersistedApp[];
+  onChange: (value: PersistedApp) => void;
+}) => {
   return (
-    <List searchBarPlaceholder="Search applications" isLoading={isLoading} navigationTitle="Results">
-      {data.map((a) => (
+    <List.Dropdown
+      tooltip="Select an application"
+      onChange={(id) => {
+        const app = applications.find((_) => _.guid === id);
+        if (applications.length === 0) return;
+        if (app === undefined || !app) return onChange(applications[0]);
+        onChange(app);
+      }}
+    >
+      {applications.map((app) => (
+        <List.Dropdown.Item key={app.guid} value={app.guid} title={app.name} icon={Icon.AppWindowGrid2x2} />
+      ))}
+    </List.Dropdown>
+  );
+};
+
+const SearchApplications = () => {
+  const [selectedApp, setSelectedApp] = useState<PersistedApp | undefined>(undefined);
+  // TODO: Save selected app in cache
+  const { data, isLoading } = useApplications();
+
+  const { data: actions, isLoading: isActionsLoading } = useActions(selectedApp?.guid ?? data[0].guid);
+
+  return (
+    <List
+      searchBarPlaceholder="Search actions"
+      isLoading={isLoading || isActionsLoading}
+      navigationTitle="Results"
+      searchBarAccessory={<ApplicationsDropdown applications={data} onChange={setSelectedApp} />}
+    >
+      {actions.map((a) => (
         <List.Item
           key={a.guid}
           id={a.guid}
@@ -56,8 +117,9 @@ const SearchApplications = () => {
           subtitle={a.description}
           accessories={[
             {
-              icon: Icon.AppWindowGrid2x2,
-              text: `${a.actionsCount.toString()} actions`,
+              icon: Icon.Gear,
+              text: a.modelName,
+              tooltip: "Model",
             },
             {
               icon: Icon.Clock,
