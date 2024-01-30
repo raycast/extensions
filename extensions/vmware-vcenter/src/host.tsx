@@ -25,6 +25,11 @@ const cache = new Cache();
 export default function Command(): JSX.Element {
   const { data: Server, revalidate: RevalidateServer, isLoading: IsLoadingServer } = usePromise(GetServer);
   const {
+    data: ServerLocalStorage,
+    revalidate: RevalidateServerLocalStorage,
+    isLoading: IsLoadingServerLocalStorage,
+  } = usePromise(GetServerLocalStorage);
+  const {
     data: ServerSelected,
     revalidate: RevalidateServerSelected,
     isLoading: IsLoadingServerSelected,
@@ -104,6 +109,7 @@ export default function Command(): JSX.Element {
       await LocalStorage.removeItem("server_selected");
     }
     RevalidateServer();
+    RevalidateServerLocalStorage();
     RevalidateServerSelected();
   }
 
@@ -150,16 +156,22 @@ export default function Command(): JSX.Element {
           <Action title="Refresh" icon={Icon.Repeat} onAction={GetHosts} shortcut={{ modifiers: ["cmd"], key: "r" }} />
         )}
         <ActionPanel.Section title="vCenter Server">
-          <Action
-            title="Add Server"
-            icon={Icon.NewDocument}
-            onAction={() => {
-              SetShowServerView(true);
-            }}
-          />
-          {ServerSelected !== "All" && (
-            <Action title="Edit Server" icon={Icon.Pencil} onAction={() => SetShowServerViewEdit(true)} />
+          {!IsLoadingServerLocalStorage && (
+            <Action
+              title="Add Server"
+              icon={Icon.NewDocument}
+              onAction={() => {
+                SetShowServerView(true);
+              }}
+            />
           )}
+          {ServerSelected !== "All" &&
+            !IsLoadingServerLocalStorage &&
+            ServerLocalStorage &&
+            !IsLoadingServerSelected &&
+            ServerSelected && (
+              <Action title="Edit Server" icon={Icon.Pencil} onAction={() => SetShowServerViewEdit(true)} />
+            )}
           {ServerSelected !== "All" && (
             <Action title="Delete Server" icon={Icon.DeleteDocument} onAction={DeleteSelectedServer} />
           )}
@@ -186,12 +198,16 @@ export default function Command(): JSX.Element {
   React.useEffect(() => {
     if (!ShowServerView || !ShowServerViewEdit) {
       RevalidateServer();
+      RevalidateServerLocalStorage();
       RevalidateServerSelected();
     }
   }, [ShowServerView, ShowServerViewEdit]);
 
-  if (ShowServerView) return <ServerView SetShowView={SetShowServerView} />;
-  if (ShowServerViewEdit && Server) return <ServerView server={ServerSelected} SetShowView={SetShowServerViewEdit} />;
+  if (ShowServerView) return <ServerView SetShowView={SetShowServerView} Server={ServerLocalStorage} />;
+  if (ShowServerViewEdit && ServerLocalStorage && ServerSelected)
+    return (
+      <ServerView SetShowView={SetShowServerViewEdit} Server={ServerLocalStorage} ServerSelected={ServerSelected} />
+    );
 
   return (
     <List
