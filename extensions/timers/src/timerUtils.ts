@@ -7,6 +7,7 @@ import { CustomTimer, Preferences, Timer } from "./types";
 import { formatTime, secondsBetweenDates } from "./formatUtils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
+const DEFAULT_PRESET_VISIBLES_FILE = environment.supportPath + "/defaultPresetVisibles.json";
 
 const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
   const prefs = getPreferenceValues<Preferences>();
@@ -118,7 +119,12 @@ function createCustomTimer(newTimer: CustomTimer) {
 
 function readCustomTimers() {
   ensureCTFileExists();
-  return JSON.parse(readFileSync(DATAPATH, "utf8"));
+  const res: Record<string, CustomTimer> = JSON.parse(readFileSync(DATAPATH, "utf8"));
+  return Object.fromEntries(
+    Object.entries(res).map(([ctID, timer]) =>
+      timer.showInMenuBar === undefined ? [ctID, { ...timer, showInMenuBar: true }] : [ctID, timer],
+    ),
+  );
 }
 
 function renameCustomTimer(ctID: string, newName: string) {
@@ -135,6 +141,39 @@ function deleteCustomTimer(ctID: string) {
   writeFileSync(DATAPATH, JSON.stringify(customTimers));
 }
 
+function toggleCustomTimerMenubarVisibility(ctID: string) {
+  ensureCTFileExists();
+  const customTimers = JSON.parse(readFileSync(DATAPATH, "utf8"));
+  const currentVisibility = customTimers[ctID].showInMenuBar;
+  customTimers[ctID].showInMenuBar = currentVisibility === undefined ? false : !currentVisibility;
+  writeFileSync(DATAPATH, JSON.stringify(customTimers));
+}
+
+const readDefaultPresetVisibles = (): Record<string, boolean> => {
+  if (!existsSync(DEFAULT_PRESET_VISIBLES_FILE)) {
+    const defaultPresetVisibles = {
+      "2M": true,
+      "5M": true,
+      "10M": true,
+      "15M": true,
+      "30M": true,
+      "45M": true,
+      "60M": true,
+      "90M": true,
+    };
+    writeFileSync(DEFAULT_PRESET_VISIBLES_FILE, JSON.stringify(defaultPresetVisibles));
+    return defaultPresetVisibles;
+  }
+  const res: Record<string, boolean> = JSON.parse(readFileSync(DEFAULT_PRESET_VISIBLES_FILE, "utf8"));
+  return res;
+};
+
+const toggleDefaultPresetVisibility = (key: string) => {
+  const data: Record<string, boolean> = JSON.parse(readFileSync(DEFAULT_PRESET_VISIBLES_FILE, "utf8"));
+  data[key] = !data[key];
+  writeFileSync(DEFAULT_PRESET_VISIBLES_FILE, JSON.stringify(data));
+};
+
 export {
   checkForOverlyLoudAlert,
   createCustomTimer,
@@ -144,6 +183,9 @@ export {
   readCustomTimers,
   renameTimer,
   renameCustomTimer,
+  toggleCustomTimerMenubarVisibility,
   startTimer,
   stopTimer,
+  readDefaultPresetVisibles,
+  toggleDefaultPresetVisibility,
 };

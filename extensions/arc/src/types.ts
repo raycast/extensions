@@ -19,6 +19,15 @@ export type Space = {
   title?: string;
 };
 
+export type NewTabSearchConfigs = {
+  google: string;
+  duckduckgo: string;
+  bing: string;
+  yahoo: string;
+  ecosia: string;
+  kagi: string;
+};
+
 export type SearchConfig = {
   search: string;
   suggestions: string | null;
@@ -31,6 +40,7 @@ export type SearchConfigs = {
   bing: SearchConfig;
   yahoo: SearchConfig;
   ecosia: SearchConfig;
+  kagi: SearchConfig;
 };
 
 export type Suggestion = {

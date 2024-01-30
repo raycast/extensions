@@ -1,5 +1,10 @@
 # Pocket Changelog
 
+## [Tag Improvements] - 2024-01-25
+- Show tag icon in the `Search Bookmarks` command
+- Improve tag creation caching and performance
+- Title case tags in the `Search Bookmarks` command
+
 ## [OAuth & Improvements] - 2024-01-14
 - Add OAuth integration for Pocket
 - Improve titles for specific open commands

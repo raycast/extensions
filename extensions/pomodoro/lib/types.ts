@@ -41,3 +41,8 @@ export type Interval = {
   length: number;
   type: IntervalType;
 };
+
+export type IntervalExecutor = {
+  title: string,
+  onStart: () => void
+}

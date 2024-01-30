@@ -27,3 +27,11 @@ export enum ImageResultHandling {
   SaveToDownloads = "saveToDownloads",
   SaveToDesktop = "saveToDesktop",
 }
+
+/**
+ * The place to look for the ExifTool binary.
+ */
+export enum ExifToolLocation {
+  ON_PATH = "path",
+  SUPPORT_DIR = "support",
+}

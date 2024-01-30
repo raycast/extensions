@@ -2,8 +2,8 @@ import { usePocketClient } from "../oauth/view";
 import { useCachedPromise } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
 import { ReadState } from "../api";
-import { capitalize } from "lodash";
 import { useTags } from "./use-tags";
+import { titleCase } from "../utils";
 
 interface UseBookmarksOptions {
   state: ReadState;
@@ -16,7 +16,7 @@ interface UseBookmarksOptions {
 export function useBookmarks({ state, tag: selectedTag, contentType, search, count }: UseBookmarksOptions) {
   const pocket = usePocketClient();
 
-  const { refreshTags } = useTags();
+  const { registerTag } = useTags();
 
   const { data, isLoading, mutate, revalidate } = useCachedPromise(
     async (url, options) => pocket.getBookmarks(options),
@@ -97,10 +97,12 @@ export function useBookmarks({ state, tag: selectedTag, contentType, search, cou
     toast.message = bookmark?.title;
   }
 
-  async function addTag(id: string, tag: string) {
+  async function addTag(id: string, _tag: string) {
+    const tag = _tag.toLowerCase();
+    registerTag(tag);
     const toast = await showToast({
       title: "Tagging bookmark",
-      message: capitalize(tag),
+      message: titleCase(tag),
       style: Toast.Style.Animated,
     });
     await mutate(pocket.addTag(id, tag), {
@@ -110,13 +112,12 @@ export function useBookmarks({ state, tag: selectedTag, contentType, search, cou
     });
     toast.title = "Tag added correctly";
     toast.style = Toast.Style.Success;
-    await refreshTags();
   }
 
   async function removeTag(id: string, tag: string) {
     const toast = await showToast({
       title: "Removing tag",
-      message: capitalize(tag),
+      message: titleCase(tag),
       style: Toast.Style.Animated,
     });
     await mutate(pocket.removeTag(id, tag), {
@@ -130,7 +131,6 @@ export function useBookmarks({ state, tag: selectedTag, contentType, search, cou
     });
     toast.title = "Tag removed correctly";
     toast.style = Toast.Style.Success;
-    await refreshTags();
   }
 
   return {

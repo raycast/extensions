@@ -1,5 +1,20 @@
 # Changelog
 
+## [Fix] - 2024-01-28
+
+- Fix: Proxy not working
+- Fix: Fetching model data lag entered the form view
+- Fix: Switching from "Ask Question" to "Full Text Input", the model change didn't work
+- Chore: Add react hook lint
+
+## [Fix] - 2024-01-19
+
+- Fix: Azure API 401 error
+
+## [Chore] - 2024-01-11
+
+- Migrate openai v3 to v4
+
 ## [Fix] - 2024-01-01
 
 - Fix: Markdown output being truncated when streaming enabled with json parse error

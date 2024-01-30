@@ -126,3 +126,8 @@ export async function validateURL(url: string) {
 
   return true;
 }
+
+export function isURL(value: string): boolean {
+  const urlPattern = /^(?:(?:https?|ftp):\/\/)?(?:\w+\.)+\w{2,}|localhost[:?\d]*(?:\/|$)/;
+  return urlPattern.test(value);
+}

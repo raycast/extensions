@@ -1,8 +1,5 @@
-import { Color } from "@raycast/api";
+import { Task } from "../api";
 
-import { Filter, Task } from "../api";
-
-import { getColorByKey } from "./colors";
 import { sortByDate } from "./sortBy";
 
 export function getFilterUrl(id: string) {

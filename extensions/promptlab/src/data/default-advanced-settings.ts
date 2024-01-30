@@ -1,10 +1,13 @@
 import { Color, Icon } from "@raycast/api";
 
+/**
+ * The default advanced settings for the extension.
+ */
 export const defaultAdvancedSettings = {
   /**
    * The version of the settings. This is used to determine if the settings need to be migrated.
    */
-  settingsVersion: 1.12,
+  settingsVersion: 1.13,
 
   /**
    * Default values for newly created commands.
@@ -41,6 +44,7 @@ export const defaultAdvancedSettings = {
     useSpeech: false,
     speakResponse: false,
     showInMenuBar: true,
+    recordRuns: true,
   },
 
   /**
@@ -168,8 +172,8 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd", "shift"],
       },
     },
-    CopyCommandJSONAction: {
-      enabled: ["search-commands"],
+    CopyJSONAction: {
+      enabled: ["search-commands", "manage-models", "chat"],
       shortcut: {
         key: "j",
         modifiers: ["cmd", "shift"],
@@ -190,7 +194,7 @@ export const defaultAdvancedSettings = {
       },
     },
     ToggleFavoriteAction: {
-      enabled: ["search-commands"],
+      enabled: ["search-commands", "manage-models", "chat"],
       shortcut: {
         key: "f",
         modifiers: ["cmd", "shift"],
@@ -215,20 +219,6 @@ export const defaultAdvancedSettings = {
       shortcut: {
         key: "d",
         modifiers: ["cmd"],
-      },
-    },
-    DeleteCommandAction: {
-      enabled: ["search-commands"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd"],
-      },
-    },
-    DeleteAllCommandsAction: {
-      enabled: ["search-commands"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd", "opt", "shift"],
       },
     },
     InstallAllCommandsAction: {
@@ -301,25 +291,18 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd", "shift"],
       },
     },
-    DeleteChatAction: {
-      enabled: ["search-commands", "discover-commands", "chat"],
+    DeleteAction: {
+      enabled: ["search-commands", "discover-commands", "chat", "manage-models"],
       shortcut: {
-        key: "d",
+        key: "x",
         modifiers: ["cmd"],
       },
     },
-    DeleteAllChatsAction: {
-      enabled: ["search-commands", "discover-commands", "chat"],
+    DeleteAllAction: {
+      enabled: ["search-commands", "discover-commands", "chat", "manage-models"],
       shortcut: {
-        key: "d",
+        key: "x",
         modifiers: ["cmd", "opt", "shift"],
-      },
-    },
-    ToggleModelFavoriteAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "f",
-        modifiers: ["cmd"],
       },
     },
     ToggleModelDefaultAction: {
@@ -336,29 +319,8 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd", "shift"],
       },
     },
-    DeleteModelAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd"],
-      },
-    },
-    DeleteAllModelsAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "d",
-        modifiers: ["cmd", "opt", "shift"],
-      },
-    },
-    CopyModelJSONAction: {
-      enabled: ["manage-models"],
-      shortcut: {
-        key: "j",
-        modifiers: ["cmd", "shift"],
-      },
-    },
-    CopyAllModelsJSONAction: {
-      enabled: ["manage-models"],
+    CopyAllJSONAction: {
+      enabled: ["manage-models", "chat"],
       shortcut: {
         key: "j",
         modifiers: ["cmd", "opt", "shift"],
@@ -378,5 +340,17 @@ export const defaultAdvancedSettings = {
         modifiers: ["cmd"],
       },
     },
+    ViewPreviousRunsAction: {
+      enabled: ["search-commands"],
+      shortcut: {
+        key: "p",
+        modifiers: ["cmd", "opt"],
+      },
+    },
   },
 };
+
+/**
+ * Interface for the advanced settings of the extension.
+ */
+export type AdvancedSettings = typeof defaultAdvancedSettings;
