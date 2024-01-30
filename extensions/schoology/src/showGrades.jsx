@@ -229,7 +229,9 @@ function getChartUrl(grades, categories) {
     let totalWeights = 0;
 
     categories.forEach((category) => {
-      const categoryGrades = gradesUpToIndex.filter((grade) => grade.category_id === category.id && grade.grade !== null);
+      const categoryGrades = gradesUpToIndex.filter(
+        (grade) => grade.category_id === category.id && grade.grade !== null
+      );
       const categoryPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
       const categoryMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
       const categoryWeight = category.weight ? category.weight / 100 : 1 / categories.length;
@@ -346,33 +348,35 @@ async function gradesInBrowser({ grades, categories }) {
   grades.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
   const dataPoints = grades.map((grade, index) => {
-      const gradesUpToIndex = grades.slice(0, index + 1).filter((grade) => grade.exception !== 1 && grade.grade !== null);
+    const gradesUpToIndex = grades.slice(0, index + 1).filter((grade) => grade.exception !== 1 && grade.grade !== null);
 
-      let totalPoints = 0;
-      let totalMaxPoints = 0;
-      let overallGrade = 0;
-      let totalWeights = 0;
+    let totalPoints = 0;
+    let totalMaxPoints = 0;
+    let overallGrade = 0;
+    let totalWeights = 0;
 
-      categories.forEach((category) => {
-        const categoryGrades = gradesUpToIndex.filter((grade) => grade.category_id === category.id && grade.grade !== null);
-        const categoryPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
-        const categoryMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
-        const categoryWeight = category.weight ? category.weight / 100 : 1 / categories.length;
+    categories.forEach((category) => {
+      const categoryGrades = gradesUpToIndex.filter(
+        (grade) => grade.category_id === category.id && grade.grade !== null
+      );
+      const categoryPoints = categoryGrades.reduce((total, grade) => total + grade.grade, 0);
+      const categoryMaxPoints = categoryGrades.reduce((total, grade) => total + grade.max_points, 0);
+      const categoryWeight = category.weight ? category.weight / 100 : 1 / categories.length;
 
-        if (categoryMaxPoints > 0) {
-          const categoryGrade = categoryPoints / categoryMaxPoints;
-          overallGrade += categoryGrade * categoryWeight;
-          totalWeights += categoryWeight;
-        }
+      if (categoryMaxPoints > 0) {
+        const categoryGrade = categoryPoints / categoryMaxPoints;
+        overallGrade += categoryGrade * categoryWeight;
+        totalWeights += categoryWeight;
+      }
 
-        totalPoints += categoryPoints;
-        totalMaxPoints += categoryMaxPoints;
-      });
-
-      overallGrade = totalWeights > 0 ? overallGrade / totalWeights : 0;
-
-      return overallGrade * 100;
+      totalPoints += categoryPoints;
+      totalMaxPoints += categoryMaxPoints;
     });
+
+    overallGrade = totalWeights > 0 ? overallGrade / totalWeights : 0;
+
+    return overallGrade * 100;
+  });
 
   const minGrade = Math.floor(Math.min(...dataPoints) / 10) * 10; // Round down to the nearest 10
   const maxGrade = Math.ceil(Math.max(...dataPoints) / 10) * 10; // Round up to the nearest 10
