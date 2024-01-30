@@ -46,6 +46,7 @@ export function withJiraCredentials(component: JSX.Element) {
         const sites = (await sitesResponse.json()) as Site[];
 
         if (sites && sites.length > 0) {
+          userSelectedSite = false;
           const site = sites[0];
           const authorizationHeader = `Bearer ${accessToken}`;
 
@@ -79,7 +80,7 @@ export function withJiraCredentials(component: JSX.Element) {
     })();
   }, []);
 
-  if (jiraCredentials && jiraCredentials.sites.length > 1 && !userSelectedSite) {
+  if (jiraCredentials && jiraCredentials.sites.length >= 1 && !userSelectedSite) {
     // if we have multiple sites, we need to show a list to select the site
     const { sites } = jiraCredentials;
 
@@ -91,11 +92,13 @@ export function withJiraCredentials(component: JSX.Element) {
         siteUrl: sites[0].url,
       };
       userSelectedSite = true;
+      forceRerender(x + 1);
+      return;
     }
 
     // map the sites to a list of items
     return (
-      <List>
+      <List navigationTitle="Select a Jira Site" searchBarPlaceholder="Search Sites">
         {sites.map((site) => (
           <List.Item
             key={site.id}
@@ -103,7 +106,7 @@ export function withJiraCredentials(component: JSX.Element) {
             actions={
               <ActionPanel>
                 <Action
-                  title="Select"
+                  title="Select This Site"
                   onAction={() => {
                     // @ts-expect-error we know that jiraCredentials is not null
                     jiraCredentials = {
