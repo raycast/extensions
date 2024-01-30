@@ -27,7 +27,10 @@ const useApplications = () => {
     [],
     {
       keepPreviousData: true,
-      initialData: [],
+      initialData: {
+        apps: [],
+        workspaceId: "",
+      },
     },
   );
 
