@@ -2,7 +2,7 @@
 
 ## [Update] - 2024-01-27
 
-- Add Single Entity Menu Command
+- Add three Single Entity Menu Commands, two disabled by default
 
 ## [Update] - 2024-01-19
 
