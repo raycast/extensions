@@ -10,12 +10,19 @@
     "Design Tools"
   ],
   "author": "yveeven",
+  "contributors": [
+    "kidonng",
+    "sxn",
+    "robert",
+    "destiner"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Search Icon",
-      "description": "Icon search in table view",
+      "subtitle": "Iconify",
+      "description": "Search Iconify icons",
       "mode": "view"
     }
   ],
