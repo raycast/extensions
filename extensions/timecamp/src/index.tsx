@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigation, getPreferenceValues, showToast, Toast, Icon, List, ActionPanel, Action } from "@raycast/api";
-import { useFetch, useCachedState } from "@raycast/utils";
+import { useFetch, useCachedState, useFrecencySorting } from "@raycast/utils";
 import fetch from "node-fetch";
 import ActiveTaskItem from "./components/ActiveTaskItem.tsx";
 import TimerEntryNoteForm from "./components/TimeEntryNoteForm.tsx";
 import RecentEntries from "./components/RecentEntries.tsx";
-import type { Task, Preferences, TimerInfo, TasksResponse, Entry } from "./types.ts";
+import type { Task, Preferences, TimerInfo, TasksResponse } from "./types.ts";
 
 const preferences = getPreferenceValues<Preferences>();
 const token = preferences.timecamp_api_token;
@@ -34,6 +34,10 @@ export default function Command() {
     keepPreviousData: true,
     initialData: activeTask,
     onData: getActiveTask,
+  });
+  const { data: sortedTasks, visitItem: visitTask } = useFrecencySorting(tasks, {
+    namespace: "tasks",
+    key: (task: Task) => task.task_id.toString(),
   });
 
   useEffect(() => {
@@ -80,9 +84,10 @@ export default function Command() {
     setTasks(filteredData);
   }
 
-  async function startTask(task: Task | Entry, editNote: boolean) {
+  async function startTask(task: Task, editNote: boolean) {
     setActiveTask(null);
     setStartedTask(false);
+    visitTask(task);
 
     try {
       await mutateActiveTask(
@@ -147,7 +152,7 @@ export default function Command() {
       <RecentEntries />
 
       <List.Section title="Tasks">
-        {(tasks || []).map((task: Task) => {
+        {(sortedTasks || []).map((task: Task) => {
           if (activeTask && activeTask.task_id == task.task_id) return null;
 
           return (

@@ -126,7 +126,16 @@ function RecentEntries() {
   }
 
   function initRecentEntries(data: Entry[]) {
-    const curatedData = data.reverse();
+    data.reverse();
+    const curatedData: Entry[] = [];
+    for (let i = 0; i < data.length; i++) {
+      const entry: Entry = data[i];
+      if (!curatedData.find((item: Entry) => item.description === entry.description)) {
+        curatedData.push(entry);
+      }
+
+      if (curatedData.length >= 4) break;
+    }
     setRecentEntries(curatedData);
   }
 
@@ -148,9 +157,7 @@ function RecentEntries() {
 
   return recentEntries.length > 0 ? (
     <List.Section title="Recent">
-      {(recentEntries || []).map((entry: Entry, index: number) => {
-        if (index > 3) return;
-
+      {(recentEntries || []).map((entry: Entry) => {
         return (
           <List.Item
             key={"entry-" + entry.id}
