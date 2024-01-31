@@ -209,7 +209,7 @@ export function formatItemForDigest(item: RSSItemWithStatus, prefixStr?: string,
     item.summary || addEllipsis(item.content || "", THRESHOLDS_FOR_TRUNCATION)
   }\n\n[Source Link](${normalizeUrlForMarkdown(item.link ?? "")})\n\n${
     item.status === "summraized" ? `\`✨AI Summarized\`  ` : ""
-  }${["raw", "failedToSummarize"].includes(item?.status ?? "") ? `\`Raw Content\`  ` : ""}\`Pub Time: ${dayjs(
+  }${["raw", "failedToSummarize"].includes(item?.status ?? "") ? `\`Raw Content\`  ` : ""}\`Pub Date: ${dayjs(
     item.pubDate,
   ).format("YYYY-MM-DD HH:mm")}\`  \`Creator: ${item.creator ?? "none"}\`\n\n`;
 }
