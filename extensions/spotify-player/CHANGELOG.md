@@ -1,5 +1,13 @@
 # Spotify Player Changelog
 
+## [Improvement] - 2024-01-30
+
+- Increase the stale data time from 10 minutes to 2 hours
+
+## [Fix Current Track Like State] - 2023-12-31
+
+- Fix showing the like/disliked state of the current track
+
 ## [Feature & Optimisation] - 2023-12-02
 
 - Added `Select Device` command to select the device to play music on.

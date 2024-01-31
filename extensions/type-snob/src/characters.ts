@@ -395,6 +395,11 @@ const miscChars: Character[] = [
     keywords: ["wave", "squiggle"],
     html: "&#x3030;",
   },
+  {
+    label: "Zero-width space",
+    value: "​",
+    html: "&#x200B;",
+  },
 ];
 
 export const characterSections: Array<{

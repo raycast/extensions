@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Fix] - 2023-12-20
+
+- Fix the title of ReadingListNonSync may possibly be null
+
 ## [Update] - 2023-04-24
 
 - Adds a "Search Bookmarks" command to search all non-reading list bookmarks.

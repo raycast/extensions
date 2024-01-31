@@ -11,7 +11,7 @@ import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@r
 import { StorageKey, SORT_STRATEGY } from "./lib/constants";
 import { Group } from "./lib/Groups";
 import { Pin } from "./lib/Pins";
-import { getStorage, setStorage } from "./lib/utils";
+import { getStorage, setStorage } from "./lib/storage";
 
 /**
  * Updates the ID of each pin/group such that there are no duplicates. The first item will have ID 0, the second 1, etc.
@@ -133,6 +133,9 @@ const importCSVData = async (data: string[][], importMethod: string) => {
       const timesOpenedIndex = fieldNames.indexOf("timesOpened");
       const dateCreatedIndex = fieldNames.indexOf("dateCreated");
       const iconColorIndex = fieldNames.indexOf("iconColor");
+      const tagsIndex = fieldNames.indexOf("tags");
+      const notesIndex = fieldNames.indexOf("notes");
+      const tooltipIndex = fieldNames.indexOf("tooltip");
       const averageExecutionTimeIndex = fieldNames.indexOf("averageExecutionTime");
 
       return {
@@ -148,6 +151,15 @@ const importCSVData = async (data: string[][], importMethod: string) => {
         timesOpened: timesOpenedIndex == -1 ? undefined : parseInt(row[timesOpenedIndex]),
         dateCreated: dateCreatedIndex == -1 ? undefined : row[dateCreatedIndex],
         iconColor: iconColorIndex == -1 ? undefined : row[iconColorIndex],
+        tags:
+          tagsIndex == -1
+            ? undefined
+            : row[tagsIndex]
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter((tag) => tag.length > 0),
+        notes: notesIndex == -1 ? undefined : row[notesIndex],
+        tooltip: tooltipIndex == -1 ? undefined : row[tooltipIndex],
         averageExecutionTime: averageExecutionTimeIndex == -1 ? undefined : parseInt(row[averageExecutionTimeIndex]),
       };
     });

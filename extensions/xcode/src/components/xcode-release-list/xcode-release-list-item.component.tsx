@@ -5,7 +5,7 @@ import { XcodeReleaseListItemDetail } from "./xcode-release-list-item-detail.com
 /**
  * Xcode Release List Item
  */
-export function XcodeReleaseListItem(props: { release: XcodeRelease }): JSX.Element {
+export function XcodeReleaseListItem(props: { release: XcodeRelease }) {
   return (
     <List.Item
       icon={icon(props.release)}
