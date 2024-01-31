@@ -7,7 +7,8 @@
   "author": "garrett",
   "contributors": [
     "RSO",
-    "vette"
+    "vette",
+    "emlez"
   ],
   "license": "MIT",
   "commands": [
@@ -56,6 +57,10 @@
             {
               "title": "Midnight",
               "value": "midnight"
+            },
+            {
+              "title": "Mono",
+              "value": "mono"
             },
             {
               "title": "Raindrop",
@@ -119,6 +124,7 @@
     "js-base64": "^3.7.2",
     "node-fetch": "^3.2.0",
     "open": "^8.4.0",
+    "prettier": "^3.2.4",
     "run-applescript": "^6.0.0",
     "tempy": "^2.0.0",
     "url-safe-base64": "^1.1.1"
