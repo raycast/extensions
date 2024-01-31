@@ -66,7 +66,14 @@ export default function RSSPlainListView(props: {
         />
       }
       {(data || []).map((item) => {
-        return <RSSListItem item={item} selected={item.url === selectId} actions={<>{manuallyAddActionNode}</>} />;
+        return (
+          <RSSListItem
+            key={item.url}
+            item={item}
+            selected={item.url === selectId}
+            actions={<>{manuallyAddActionNode}</>}
+          />
+        );
       })}
     </List>
   );
