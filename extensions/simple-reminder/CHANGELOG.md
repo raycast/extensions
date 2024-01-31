@@ -1,5 +1,9 @@
 # Simple Reminder Changelog
 
+## [Fix] - 2023-11-24
+
+- Optimized import to reduce build size
+
 ## [Improved input parsing] - 2023-10-30
 
 - Improve the input parsing by the user

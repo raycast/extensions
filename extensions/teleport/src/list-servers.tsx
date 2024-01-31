@@ -1,7 +1,8 @@
-import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { useCachedPromise } from "@raycast/utils";
-import { getServersList, getServerCommand } from "./utils";
+import { appleScriptTerminalCommand, connectToServerCommand, serversList } from "./utils";
+import { useMemo, useState } from "react";
+import { useFavorite } from "./hooks/use-favorite";
 
 async function open(name: string) {
   const toast = await showToast({
@@ -10,22 +11,9 @@ async function open(name: string) {
   });
 
   const prefs = getPreferenceValues();
-  const terminal = prefs.terminal.name;
+
   try {
-    const command = getServerCommand(name, prefs.username);
-
-    await runAppleScript(`
-            tell application "Finder" to activate
-            tell application "${terminal}" to activate
-            tell application "System Events" to tell process "${terminal}" to keystroke "t" using command down
-            tell application "System Events" to tell process "${terminal}"
-                delay 0.5
-                keystroke "${command}"
-                delay 0.5
-                key code 36
-            end tell  
-        `);
-
+    await runAppleScript(appleScriptTerminalCommand(prefs.terminal.name, connectToServerCommand(name, prefs.username)));
     toast.style = Toast.Style.Success;
     toast.title = "Success !";
   } catch (err) {
@@ -34,26 +22,71 @@ async function open(name: string) {
   }
 }
 
+interface Item {
+  spec: { hostname: string };
+}
+
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(getServersList);
+  const { data, isLoading } = serversList();
+  const [searchText, setSearchText] = useState("");
+  const { list, toggleFavorite } = useFavorite<string>("servers");
+  let results = useMemo(() => JSON.parse(data || "[]") || [], [data]);
+
+  if (searchText.length > 0) {
+    results = results.filter((item: Item) => item.spec.hostname.toLowerCase().includes(searchText.toLowerCase()));
+  }
 
   return (
-    <List isLoading={isLoading}>
-      {data?.map((item: { spec: { hostname: string } }, index: number) => {
-        const hostname = item.spec.hostname;
+    <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
+      {results
+        .sort((itemA: Item, itemB: Item) => {
+          if (list.has(itemA.spec.hostname) && list.has(itemB.spec.hostname)) {
+            return itemA.spec.hostname.localeCompare(itemB.spec.hostname);
+          }
 
-        return (
-          <List.Item
-            key={hostname + index}
-            title={hostname}
-            actions={
-              <ActionPanel>
-                <Action title="Open" onAction={() => open(hostname)} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+          if (list.has(itemA.spec.hostname)) {
+            return -1;
+          }
+
+          if (list.has(itemB.spec.hostname)) {
+            return 1;
+          }
+
+          return itemA.spec.hostname.localeCompare(itemB.spec.hostname);
+        })
+        .map((item: Item, index: number) => {
+          const hostname = item.spec.hostname;
+
+          return (
+            <List.Item
+              key={hostname + index}
+              icon={{ source: Icon.Dot, tintColor: Color.Green }}
+              title={hostname}
+              accessories={[
+                {
+                  icon: list.has(hostname)
+                    ? {
+                        source: Icon.Star,
+                        tintColor: Color.Yellow,
+                      }
+                    : undefined,
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action title="Open" icon={Icon.Terminal} onAction={() => open(hostname)} />
+                  <Action
+                    title={list.has(hostname) ? "Unfavorite" : "Favorite"}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                    icon={Icon.Star}
+                    onAction={() => toggleFavorite(hostname)}
+                  />
+                  <Action.CopyToClipboard content={hostname} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }

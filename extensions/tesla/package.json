@@ -115,6 +115,27 @@
       "subtitle": "Tesla",
       "description": "Flash the lights",
       "mode": "view"
+    },
+    {
+      "name": "tires",
+      "title": "Tire Pressure",
+      "subtitle": "Tesla",
+      "description": "Get the pressure for your tires",
+      "mode": "view"
+    },
+    {
+      "name": "startDefrost",
+      "title": "Start Defrosting",
+      "subtitle": "Tesla",
+      "description": "Start defrosting",
+      "mode": "view"
+    },
+    {
+      "name": "stopDefrost",
+      "title": "Stop Defrosting",
+      "subtitle": "Tesla",
+      "description": "Stop defrosting",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -133,6 +154,40 @@
       "title": "VIN",
       "description": "Your Car's VIN",
       "placeholder": "VIN"
+    },
+    {
+      "name": "temperature",
+      "type": "dropdown",
+      "required": true,
+      "title": "Temperature Type",
+      "description": "Fahrenheit or Celsius",
+      "data": [
+        {
+          "title": "Fahrenheit",
+          "value": "fahrenheit"
+        },
+        {
+          "title": "Celsius",
+          "value": "celsius"
+        }
+      ]
+    },
+    {
+      "name": "distance",
+      "type": "dropdown",
+      "required": true,
+      "title": "Distance Type",
+      "description": "Miles or Kilometers",
+      "data": [
+        {
+          "title": "Miles",
+          "value": "miles"
+        },
+        {
+          "title": "Kilometers",
+          "value": "km"
+        }
+      ]
     }
   ],
   "dependencies": {

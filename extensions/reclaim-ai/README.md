@@ -20,3 +20,18 @@ Reclaim.ai is an AI scheduling app that automatically finds the best time for yo
 1. On the right, paste your API key into the Reclaim.ai API key field
 
 Learn more about using the Reclaim Raycast extension [here](https://help.reclaim.ai/en/articles/8136585-raycast-extension-overview).
+
+## Contributors
+
+A big thank you to the people who have contributed to the Raycast extension for Reclaim.ai!
+
+- [maximilianzuern](https://github.com/maximilianzuern)
+- [shkreios](https://github.com/shkreios)
+- [webergnr](https://github.com/webergnr)
+- and [the development team at Reclaim.ai](https://github.com/orgs/reclaim-ai/people)
+
+#### Why aren't these contributors listed in the `package.json` `"contributors"` field?
+
+The Raycast Bot automatically adds all people in the `"contributors"` field as CODEOWNERS of the extension.
+In order to maintain the quality of the Raycast extension for Reclaim.ai we prefer to have only current Reclaim.ai
+employees and contractors as CODEOWNERS.

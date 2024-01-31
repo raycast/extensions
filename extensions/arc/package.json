@@ -29,10 +29,11 @@
     "ankitchouhan1020",
     "pernielsentikaer",
     "danpalmer",
-    "hugivar",
     "danulqua",
     "rgrunberg",
-    "Vaibhav-Satishkumar"
+    "tleo19",
+    "loris",
+    "bdsqqq"
   ],
   "commands": [
     {
@@ -65,11 +66,45 @@
       "preferences": [
         {
           "name": "url",
-          "title": "URL",
-          "description": "The URL to open in the new tab",
+          "title": "Default URL",
+          "description": "The URL to open in the new tab if no argument is provided",
           "type": "textfield",
           "required": false,
           "default": "https://google.com"
+        },
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used when opening mini arc with a non-url argument",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            }
+          ]
         }
       ],
       "arguments": [
@@ -100,7 +135,24 @@
       "title": "Open New Incognito Window",
       "subtitle": "Arc",
       "description": "Create and open a new incognito window",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new window",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-tab",
@@ -166,6 +218,10 @@
             {
               "title": "Ecosia",
               "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
             }
           ]
         },
@@ -229,6 +285,22 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "release-notes",
+      "title": "Open Arc Release Notes",
+      "subtitle": "Arc",
+      "description": "Open the Arc release notes",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "boost-gallery",
+      "title": "Open Arc Boost Gallery",
+      "subtitle": "Arc",
+      "description": "Open the Arc Boost Gallery",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

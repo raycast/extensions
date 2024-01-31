@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openvpn",
+  "title": "OpenVPN",
+  "description": "This extension allows you to connect and disconnect from an OpenVPN using applescript to control OpenVPN client.",
+  "icon": "command-icon.png",
+  "author": "benekuehn",
+  "categories": [
+    "Security",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "connect",
+      "title": "Connect OpenVPN",
+      "description": "Connect to a VPN using applescript to control OpenVPN Client.",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect OpenVPN",
+      "description": "Disconnect to a VPN using applescript to control OpenVPN Client.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

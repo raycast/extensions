@@ -41,7 +41,7 @@ export function useSubmitStatus(draftValues: Partial<StatusRequest> | undefined,
           value.files?.map(async (file: string) => {
             const { id } = await apiServer.uploadAttachment({ file, description: value.description });
             return id;
-          }) ?? []
+          }) ?? [],
         );
 
         const newStatus: Partial<StatusRequest> = {

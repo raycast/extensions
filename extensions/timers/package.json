@@ -16,67 +16,88 @@
     "Productivity",
     "System"
   ],
+  "keywords": [
+    "timer",
+    "stopwatch",
+    "alert",
+    "pom",
+    "pomodoro",
+    "alarm",
+    "clock"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "start2MinuteTimer",
       "title": "Start 2 Minute Timer",
       "description": "Set a countdown for 2 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start5MinuteTimer",
       "title": "Start 5 Minute Timer",
       "description": "Set a countdown for 5 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start10MinuteTimer",
       "title": "Start 10 Minute Timer",
       "description": "Set a countdown for 10 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start15MinuteTimer",
       "title": "Start 15 Minute Timer",
       "description": "Set a countdown for 15 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start25MinuteTimer",
       "title": "Start 25 Minute Timer",
       "description": "Set a countdown for 25 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start30MinuteTimer",
       "title": "Start 30 Minute Timer",
       "description": "Set a countdown for 30 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start45MinuteTimer",
       "title": "Start 45 Minute Timer",
       "description": "Set a countdown for 45 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start60MinuteTimer",
       "title": "Start 60 Minute Timer",
       "description": "Set a countdown for 60 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "start90MinuteTimer",
       "title": "Start 90 Minute Timer",
       "description": "Set a countdown for 90 minutes.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "startCustomTimer",
       "title": "Start Custom Timer",
       "description": "Set a countdown for a custom amount of time.",
       "mode": "view",
+      "keywords": [
+        "new"
+      ],
       "arguments": [
         {
           "name": "hours",
@@ -133,7 +154,11 @@
     },
     {
       "name": "dismissTimerAlert",
-      "title": "Dismiss Timer Alert",
+      "title": "Dismiss Ringing Timer",
+      "keywords": [
+        "Dismiss Timer Alert",
+        "Alert"
+      ],
       "description": "Stop a ringing alert from a finished timer.",
       "mode": "no-view"
     },
@@ -148,6 +173,18 @@
       "name": "previewAlertSounds",
       "title": "Preview Alert Sounds",
       "description": "Play samples of different alert sound effects.",
+      "mode": "view"
+    },
+    {
+      "name": "stopRunningTimer",
+      "title": "Stop Running Timer",
+      "description": "Stop the running timer closest to completion.",
+      "mode": "no-view"
+    },
+    {
+      "name": "configureMenubarPresets",
+      "title": "Configure Presets in Menu Bar",
+      "description": "Configure which presets to show in the Timers Menu Bar.",
       "mode": "view"
     }
   ],
@@ -208,24 +245,28 @@
       "default": true
     },
     {
-      "name": "showMenuBarItemWhen",
+      "name": "showMenuBarIconWhen",
       "type": "dropdown",
       "required": false,
-      "title": "Show Menu Bar Item When",
+      "title": "Show Menu Bar Icon When",
       "description": "When to show icon in menubar.",
-      "default": "Always",
+      "default": "always",
       "data": [
         {
-          "title": "Never",
-          "value": "never"
+          "title": "Always",
+          "value": "always"
+        },
+        {
+          "title": "Only When Not Running",
+          "value": "onlyWhenNotRunning"
         },
         {
           "title": "Only When Running",
           "value": "onlyWhenRunning"
         },
         {
-          "title": "Always",
-          "value": "always"
+          "title": "Never",
+          "value": "never"
         }
       ]
     },
@@ -267,18 +308,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8"
+    "@raycast/api": "^1.65.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.48",
-    "eslint": "^7.32.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~20.11.5",
+    "@types/react": "^18.2.48",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "lint-fix": "ray lint --fix"
   }
 }

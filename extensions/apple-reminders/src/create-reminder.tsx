@@ -1,10 +1,40 @@
-import { ActionPanel, Action, Form, Icon, showToast, Toast, open, closeMainWindow, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  open,
+  closeMainWindow,
+  useNavigation,
+  getPreferenceValues,
+  LaunchProps,
+  PopToRootType,
+} from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
+import { createReminder } from "swift:../swift/AppleReminders";
 
-import { createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
+
+type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+export type NewReminder = {
+  title: string;
+  listId?: string;
+  notes?: string;
+  dueDate?: string;
+  priority?: string;
+  recurrence?: {
+    frequency: Frequency;
+    interval: number;
+    endDate?: string;
+  };
+  address?: string;
+  proximity?: string;
+  radius?: number;
+};
 
 type CreateReminderValues = {
   title: string;
@@ -15,22 +45,37 @@ type CreateReminderValues = {
   isRecurring: boolean;
   frequency: string;
   interval: string;
+  address: string;
+  proximity: string;
+  radius: string;
 };
 
 type CreateReminderFormProps = {
+  draftValues?: CreateReminderValues;
   listId?: string;
   mutate?: MutatePromise<{ reminders: Reminder[]; lists: List[] } | undefined>;
 };
 
-export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) {
+export function CreateReminderForm({ draftValues, listId, mutate }: CreateReminderFormProps) {
   const { pop } = useNavigation();
   const { data } = useData();
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
-  const { itemProps, handleSubmit, reset, focus, values } = useForm<CreateReminderValues>({
+  const { selectDefaultList } = getPreferenceValues<Preferences.CreateReminder>();
+  const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
     initialValues: {
-      listId: listId ?? defaultList?.id ?? "",
+      title: draftValues?.title ?? "",
+      notes: draftValues?.notes ?? "",
+      dueDate: draftValues?.dueDate,
+      priority: draftValues?.priority,
+      listId: listId ?? draftValues?.listId ?? (selectDefaultList ? defaultList?.id : ""),
+      isRecurring: draftValues?.isRecurring ?? false,
+      frequency: draftValues?.frequency,
+      interval: draftValues?.interval,
+      address: draftValues?.address,
+      proximity: draftValues?.proximity,
+      radius: draftValues?.radius,
     },
     validation: {
       title: FormValidation.Required,
@@ -39,20 +84,14 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
         if (!value) return "Interval is required";
         if (isNaN(Number(value))) return "Interval must be a number";
       },
+      radius: (value) => {
+        if (!values.address) return;
+        if (isNaN(Number(value))) return "Interval must be a number";
+      },
     },
     async onSubmit(values) {
       try {
-        const payload: {
-          title: string;
-          listId?: string;
-          notes?: string;
-          dueDate?: string;
-          priority?: string;
-          recurrence?: {
-            frequency: string;
-            interval: number;
-          };
-        } = {
+        const payload: NewReminder = {
           title: values.title,
           listId: values.listId,
         };
@@ -69,13 +108,25 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
 
         if (values.isRecurring) {
           payload.recurrence = {
-            frequency: values.frequency,
+            frequency: values.frequency as Frequency,
             interval: Number(values.interval),
           };
         }
 
         if (values.priority) {
           payload.priority = values.priority;
+        }
+
+        if (values.address) {
+          payload.address = values.address;
+
+          if (values.proximity) {
+            payload.proximity = values.proximity;
+          }
+
+          if (values.radius) {
+            payload.radius = parseInt(values.radius);
+          }
         }
 
         const reminder = await createReminder(payload);
@@ -99,13 +150,10 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
           pop();
         }
 
-        reset({
-          title: "",
-          notes: "",
-          dueDate: null,
-          priority: "",
-          listId: "",
-        });
+        setValue("title", "");
+        setValue("notes", "");
+        setValue("address", "");
+        setValue("radius", "");
 
         focus("title");
       } catch (error) {
@@ -153,19 +201,20 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />
           <Action.SubmitForm
             onSubmit={async (values) => {
-              await closeMainWindow();
+              await closeMainWindow({ popToRootType: PopToRootType.Immediate });
               await handleSubmit(values as CreateReminderValues);
             }}
             title="Create Reminder and Close Window"
           />
         </ActionPanel>
       }
+      enableDrafts={!listId}
     >
       <Form.TextField {...itemProps.title} title="Title" placeholder="New Reminder" />
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Add some notes" />
       <Form.Separator />
 
-      <Form.DatePicker {...itemProps.dueDate} title="Due Date" min={new Date()} />
+      <Form.DatePicker {...itemProps.dueDate} title="Due Date" />
       {values.dueDate ? (
         <>
           <Form.Checkbox {...itemProps.isRecurring} label="Is Recurring" />
@@ -177,11 +226,32 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
                 <Form.Dropdown.Item title="Monthly" value="monthly" />
                 <Form.Dropdown.Item title="Yearly" value="yearly" />
               </Form.Dropdown>
-              <Form.TextField {...itemProps.interval} title="Interval" defaultValue="1" />
+              <Form.TextField {...itemProps.interval} title="Interval" placeholder="1" />
               <Form.Description text={recurrenceDescription} />
               <Form.Separator />
             </>
           ) : null}
+        </>
+      ) : null}
+
+      <Form.TextField {...itemProps.address} title="Location" placeholder="Address" />
+
+      {values.address ? (
+        <>
+          <Form.Dropdown
+            {...itemProps.proximity}
+            title="Proximity"
+            info="Whether you want to trigger the reminder when arriving at the place or when leaving it"
+          >
+            <Form.Dropdown.Item title="Arriving" value="enter" />
+            <Form.Dropdown.Item title="Leaving" value="leave" />
+          </Form.Dropdown>
+          <Form.TextField
+            {...itemProps.radius}
+            title="Radius"
+            placeholder="100"
+            info="The minimum distance in meters from the place that would trigger the reminder"
+          />
         </>
       ) : null}
 
@@ -191,6 +261,7 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
         <Form.Dropdown.Item title="Medium" value="medium" icon={getPriorityIcon("medium")} />
         <Form.Dropdown.Item title="Low" value="low" icon={getPriorityIcon("low")} />
       </Form.Dropdown>
+
       <Form.Dropdown {...itemProps.listId} title="List" storeValue>
         {data?.lists.map((list) => {
           return (
@@ -207,6 +278,6 @@ export function CreateReminderForm({ listId, mutate }: CreateReminderFormProps) 
   );
 }
 
-export default function Command() {
-  return <CreateReminderForm />;
+export default function Command({ draftValues }: LaunchProps<{ draftValues: CreateReminderValues }>) {
+  return <CreateReminderForm draftValues={draftValues} />;
 }

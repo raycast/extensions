@@ -58,7 +58,7 @@ export const useWifiList = (refresh: number) => {
     setPublicWifi(
       allWifiList
         .filter((wifiItem) => wifiItem.security === "NONE")
-        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid),
     );
 
     const __allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
@@ -82,7 +82,7 @@ export const useWifiList = (refresh: number) => {
     setPublicWifi(
       _allWifiList
         .filter((wifiItem) => wifiItem.security === "NONE")
-        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
+        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid),
     );
     setLoading(false);
     if (_allWifiList.length > 0) {

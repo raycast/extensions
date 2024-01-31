@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pins",
   "title": "Pins",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Create pins for paths and URLs and display them in the menu bar",
   "keywords": [
     "pin",
@@ -110,6 +110,28 @@
           "required": false
         },
         {
+          "name": "groupDisplaySetting",
+          "type": "dropdown",
+          "title": "Group Display",
+          "description": "Specifies how to display groups in the menu dropdown. \"Submenu\" will show groups as submenus of the main menu. \"Section\" will show groups as sections in the main menu. \"None\" will not show groups in the main menu (all pins will be listed in one section).",
+          "default": "submenu",
+          "required": false,
+          "data": [
+            {
+              "title": "Submenus",
+              "value": "submenus"
+            },
+            {
+              "title": "Subsections",
+              "value": "subsections"
+            },
+            {
+              "title": "None",
+              "value": "none"
+            }
+          ]
+        },
+        {
           "name": "rightClickAction",
           "type": "dropdown",
           "title": "Right Click Action",
@@ -122,8 +144,16 @@
               "value": "open"
             },
             {
+              "title": "Edit",
+              "value": "edit"
+            },
+            {
               "title": "Delete",
               "value": "delete"
+            },
+            {
+              "title": "Copy",
+              "value": "copy"
             }
           ]
         }
@@ -217,6 +247,14 @@
           "type": "checkbox",
           "label": "Show Last Opened",
           "description": "Whether to an indicator on the most recently opened pin",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showTags",
+          "type": "checkbox",
+          "label": "Show Tags",
+          "description": "Whether to show tags for each pin",
           "default": true,
           "required": false
         }
@@ -388,11 +426,12 @@
   ],
   "dependencies": {
     "@iarna/toml": "^2.2.5",
-    "@raycast/api": "^1.60.1",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
     "@types/papaparse": "^5.3.8",
     "@types/xml-js": "^1.0.0",
     "papaparse": "^5.4.1",
+    "placeholders-toolkit": "^0.1.5",
     "xml-js": "^1.6.11",
     "yaml": "^2.3.2"
   },

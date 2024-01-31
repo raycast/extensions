@@ -1,5 +1,13 @@
 # Notion Changelog
 
+## [Open Notion page improvement] - 2024-01-02
+
+- Add the ability to open Notion in the browser of your choice or in the Notion app.
+
+## [Add alternate open action] - 2023-12-03
+
+- Add an action that alternates with the primary open action. For example, if the primary action is set to open in Notion, the alternate action will open in the browser, and vice versa.
+
 ## [Fixes] - 2023-10-12
 
 - Fix duplicated recent and searched pages sometimes showing

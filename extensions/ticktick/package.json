@@ -6,13 +6,36 @@
   "author": "appest",
   "contributors": [
     "viduycheung",
-    "Alireza"
+    "Alireza",
+    "yakitrak"
   ],
   "license": "MIT",
   "categories": [
     "Productivity"
   ],
   "preferences": [
+    {
+      "name": "defaultTitle",
+      "description": "Default title for new task.",
+      "defaultValue": "none",
+      "title": "Default Title",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "Selection",
+          "value": "selection"
+        }
+      ]
+    },
     {
       "name": "defaultDate",
       "type": "dropdown",
@@ -116,6 +139,7 @@
     "@raycast/utils": "^1.8.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
+    "moment-timezone": "^0.5.44",
     "run-applescript": "^6.0.0",
     "similarity": "^1.2.1"
   },
@@ -137,6 +161,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

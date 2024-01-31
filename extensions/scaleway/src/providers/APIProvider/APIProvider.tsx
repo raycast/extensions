@@ -17,6 +17,7 @@ import {
   IPAM,
   IPFS,
   Instance,
+  Jobs,
   K8S,
   LB,
   MNQ,
@@ -28,8 +29,10 @@ import {
   VPC,
   VPCGW,
   Webhosting,
-  createClient,
+  createAdvancedClient,
   enableConsoleLogger,
+  withProfile,
+  withUserAgent,
 } from '@scaleway/sdk'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useMemo } from 'react'
@@ -52,6 +55,7 @@ type APIContextValue = {
   iotV1: IOT.v1.API
   ipamV1: IPAM.v1.API
   ipfsV1Alpha1: IPFS.v1alpha1.API
+  jobsV1alpha1: Jobs.v1alpha1.API
   k8sV1: K8S.v1.API
   loadbalancerV1: LB.v1.ZonedAPI
   mnqV1alpha1: MNQ.v1alpha1.API
@@ -80,7 +84,7 @@ export const useAPI = () => {
 
 export const APIProvider = ({ children }: APIProviderProps) => {
   const apis = useMemo(() => {
-    const client = createClient(clientSetting)
+    const client = createAdvancedClient(withProfile(clientSetting), withUserAgent('Raycast'))
 
     enableConsoleLogger('debug')
 
@@ -99,6 +103,7 @@ export const APIProvider = ({ children }: APIProviderProps) => {
       iotV1: new IOT.v1.API(client),
       ipamV1: new IPAM.v1.API(client),
       ipfsV1Alpha1: new IPFS.v1alpha1.API(client),
+      jobsV1alpha1: new Jobs.v1alpha1.API(client),
       k8sV1: new K8S.v1.API(client),
       loadbalancerV1: new LB.v1.ZonedAPI(client),
       mnqV1alpha1: new MNQ.v1alpha1.API(client),

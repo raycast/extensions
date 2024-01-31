@@ -1,15 +1,26 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { ActionPanel, Icon, List, Action, Image, confirmAlert, getPreferenceValues, Color } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  open,
+  Image,
+  List,
+} from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
 import {
-  deletePage,
-  notionColorToTintColor,
-  getPageIcon,
+  DatabaseProperty,
   deleteDatabase,
+  deletePage,
+  getPageIcon,
+  notionColorToTintColor,
   Page,
   PagePropertyType,
-  DatabaseProperty,
   User,
 } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
@@ -17,9 +28,9 @@ import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
-import { ActionSetVisibleProperties, ActionEditPageProperty } from "./actions";
+import { ActionEditPageProperty, ActionSetVisibleProperties } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
-import { CreatePageForm, DatabaseViewForm, AppendToPageForm } from "./forms";
+import { AppendToPageForm, CreatePageForm, DatabaseViewForm } from "./forms";
 
 function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -117,13 +128,34 @@ export function PageListItem({
     ),
   };
 
-  const openInNotionAction = (
-    <Action title="Open in Notion" icon="notion-logo.png" onAction={() => handleOnOpenPage(page, setRecentPage)} />
+  const { open_in } = getPreferenceValues<Preferences>();
+
+  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
+    handleOnOpenPage(page, setRecentPage),
   );
+  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
+    if (!page.url) return;
+    if (open_in?.name === "Notion") {
+      open(page.url);
+    } else open(page.url, open_in);
+    await setRecentPage(page);
+    closeMainWindow();
+  });
+
+  const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
+  let openInNotionDefaultAction;
+  let openInNotionAlternativeAction;
+  if (!isDefaultNotionActionApp) {
+    openInNotionDefaultAction = openInNotionBrowserAction;
+  } else {
+    openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;
+    openInNotionAlternativeAction = isDefaultNotionActionApp ? openInNotionBrowserAction : openInNotionAppAction;
+  }
 
   const actions = {
     raycast: openInRaycastAction[page.object],
-    notion: openInNotionAction,
+    notionDefaultOpen: openInNotionDefaultAction,
+    notionAltOpen: openInNotionAlternativeAction,
   };
 
   const pageWord = capitalize(page.object);
@@ -135,8 +167,9 @@ export function PageListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
-            {actions[primaryAction]}
-            {actions[primaryAction === "notion" ? "raycast" : "notion"]}
+            {primaryAction === "notion" ? actions["notionDefaultOpen"] : actions["raycast"]}
+            {primaryAction === "notion" ? actions["raycast"] : actions["notionDefaultOpen"]}
+            {actions["notionAltOpen"]}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
@@ -227,6 +260,7 @@ export function PageListItem({
                   });
                 }}
                 onUnselect={(propertyId: string) => {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
                   const { [propertyId]: _, ...remainingProperties } = databaseView?.properties ?? {};
 
                   setDatabaseView({
@@ -270,6 +304,10 @@ export function PageListItem({
       accessories={accessories}
     />
   );
+}
+
+function createOpenInNotionAction(title: string, icon: Image.ImageLike | string, action: () => void) {
+  return <ActionPanel.Item title={`Open in ${title}`} icon={icon} onAction={action} />;
 }
 
 function getPropertyAccessory(

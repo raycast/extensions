@@ -1,14 +1,15 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { ToggleChatFavoriteAction } from "./ToggleChatFavoriteAction";
 import { ExportChatAction } from "./ExportChatAction";
-import { DeleteAllChatsAction, DeleteChatAction } from "./DeleteChatActions";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 import ChatSettingsForm from "../ChatSettingsForm";
 import { CopyChatActionsSection } from "./CopyChatActions";
-import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/actions";
 import { AdvancedActionSubmenu } from "../../actions/AdvancedActionSubmenu";
 import ContextSettingsActionSection from "./ContextSettingsActionSection";
-import { Chat, ChatManager } from "../../../utils/types";
+import { Chat, ChatManager } from "../../../lib/chats/types";
+import ToggleFavoriteAction from "../../actions/ToggleFavoriteAction";
+import DeleteAction from "../../actions/DeleteAction";
+import DeleteAllAction from "../../actions/DeleteAllAction";
 
 /**
  * Actions panel for the Chat command.
@@ -76,14 +77,8 @@ export const ChatActionPanel = (props: {
       />
 
       {anyActionsEnabled(
-        [
-          "ChatSettingsAction",
-          "ToggleChatFavoriteAction",
-          "ExportChatAction",
-          "DeleteChatAction",
-          "DeleteAllChatsAction",
-        ],
-        settings
+        ["ChatSettingsAction", "ToggleFavoriteAction", "ExportChatAction", "DeleteAction", "DeleteAllAction"],
+        settings,
       ) ? (
         <ActionPanel.Section title="Chat Actions">
           {chat && isActionEnabled("ChatSettingsAction", settings) ? (
@@ -97,20 +92,16 @@ export const ChatActionPanel = (props: {
             />
           ) : null}
 
-          {isActionEnabled("ToggleChatFavoriteAction", settings) ? (
-            <ToggleChatFavoriteAction chat={chat} chats={chats} setCurrentChat={setCurrentChat} settings={settings} />
+          {chat ? (
+            <ToggleFavoriteAction object={chat} settings={settings} revalidateObjects={chats.revalidate} />
           ) : null}
 
           {chat && isActionEnabled("ExportChatAction", settings) ? (
             <ExportChatAction chat={chat} chats={chats} settings={settings} />
           ) : null}
 
-          {chat && isActionEnabled("DeleteChatAction", settings) ? (
-            <DeleteChatAction chat={chat} chats={chats} setCurrentChat={setCurrentChat} settings={settings} />
-          ) : null}
-          {chats.chats.length > 0 && isActionEnabled("DeleteAllChatsAction", settings) ? (
-            <DeleteAllChatsAction chats={chats} setCurrentChat={setCurrentChat} settings={settings} />
-          ) : null}
+          {chat ? <DeleteAction object={chat} settings={settings} revalidateObjects={chats.revalidate} /> : null}
+          <DeleteAllAction objects={chats.chats} settings={settings} revalidateObjects={chats.revalidate} />
         </ActionPanel.Section>
       ) : null}
 

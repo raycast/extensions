@@ -12,7 +12,8 @@
     "cb372",
     "Davidwalser",
     "henrik-dmg",
-    "spacedog"
+    "spacedog",
+    "JakeMoosey"
   ],
   "categories": [
     "Security"
@@ -68,6 +69,10 @@
         {
           "title": "Copy Password",
           "value": "copy-password"
+        },
+        {
+          "title": "Copy One-time Password",
+          "value": "copy-one-time-password"
         }
       ],
       "default": "open-in-1password",
@@ -94,6 +99,10 @@
         {
           "title": "Copy Password",
           "value": "copy-password"
+        },
+        {
+          "title": "Copy One-time Password",
+          "value": "copy-one-time-password"
         }
       ],
       "default": "open-in-browser",

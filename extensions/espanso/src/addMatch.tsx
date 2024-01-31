@@ -1,12 +1,9 @@
-import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Toast, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { homedir } from "os";
-import { join } from "path";
-import { appendMatchToFile, formatMatch, getAndSortTargetFiles } from "./utils";
+import { useEffect, useState } from "react";
 import { EspansoMatch } from "./types";
+import { appendMatchToFile, formatMatch, getAndSortTargetFiles, getEspansoConfig } from "./utils";
 
-const matchFilesDirectory: string = join(homedir(), "Library/Application Support/espanso/match");
-const sortedMatchFiles: { file: string; mtime: number }[] = getAndSortTargetFiles(matchFilesDirectory);
 export interface Values {
   trigger: string;
   replace: string;
@@ -14,6 +11,28 @@ export interface Values {
 }
 
 export default function Command() {
+  const [matchFilesDirectory, setMatchFilesDirectory] = useState<string>("null");
+  const [sortedMatchFiles, setSortedMatchFiles] = useState<{ file: string; mtime: number }[]>([]);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { match: matchFilesDirectory } = await getEspansoConfig();
+        const sortedMatchFiles: { file: string; mtime: number }[] = getAndSortTargetFiles(matchFilesDirectory);
+        setMatchFilesDirectory(matchFilesDirectory);
+        setSortedMatchFiles(sortedMatchFiles);
+      } catch (err) {
+        setError(err instanceof Error ? err : null);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (error) {
+    return <Detail markdown={error.message} />;
+  }
+
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit(values) {
       const { matchFile } = values;

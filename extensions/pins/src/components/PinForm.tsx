@@ -25,6 +25,8 @@ import { createNewPin, getPins, getPinStatistics, modifyPin, Pin } from "../lib/
 import { ExtensionPreferences } from "../lib/preferences";
 import CopyPinActionsSubmenu from "./actions/CopyPinActionsSubmenu";
 import DeletePinAction from "./actions/DeletePinAction";
+import { PLApplicator } from "placeholders-toolkit";
+import PinsPlaceholders from "../lib/placeholders";
 
 /**
  * Form for creating/editing a new pin.
@@ -38,6 +40,7 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
   const { groups } = useGroups();
   const { pop } = useNavigation();
   const [applications, setApplications] = useState<Application[]>([]);
+  const [placeholderTooltip, setPlaceholderTooltip] = useState<string>("");
   const [urlError, setUrlError] = useState<string | undefined>();
   const [shortcutError, setShortcutError] = useState<string | undefined>();
   const [values, setValues] = useState<Record<string, unknown>>({
@@ -54,9 +57,77 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
 
   const preferences = getPreferenceValues<ExtensionPreferences>();
 
+  /**
+   * Get the list of applications that can be used to open the target.
+   * @param target The target to open.
+   * @returns A tuple containing the preferred application and the list of all relevant applications.
+   */
+  const getMatchingApplications = async (target: string): Promise<[string, Application[]]> => {
+    let [app, apps] = [values.application as string, [] as Application[]];
+    try {
+      apps = await getApplications(target);
+      if (!apps.find((app) => app.name === "Terminal")) {
+        apps.push({
+          name: "Terminal",
+          path: "/System/Applications/Utilities/Terminal.app",
+          bundleId: "com.apple.Terminal",
+        });
+      }
+    } catch (error) {
+      const allApplications = await getApplications();
+      if (target.match(/^[a-zA-Z0-9]*?:.*/g)) {
+        // Target is URL-like, so use the preferred browser if one is set
+        const preferredBrowser = preferences.preferredBrowser ? preferences.preferredBrowser : { name: "Safari" };
+        const browser = allApplications.find((app) => app.name == preferredBrowser.name);
+        if (browser) {
+          apps = [browser, ...allApplications.filter((app) => app.name != preferredBrowser.name)];
+          if (app == undefined || app == "None") {
+            app = browser.path;
+          }
+        } else {
+          apps = allApplications;
+        }
+      } else {
+        app = "None";
+        apps = allApplications;
+      }
+    }
+    setApplications(apps);
+    return [app, apps];
+  };
+
+  /**
+   * Update the placeholder tooltip based on the current target.
+   * @param target The target to check for placeholders.
+   */
+  const updatePlaceholderTooltip = async (target: string) => {
+    let detectedPlaceholders = await PLApplicator.checkForPlaceholders(target, { allPlaceholders: PinsPlaceholders });
+    detectedPlaceholders = detectedPlaceholders.filter(
+      (placeholder) =>
+        target.match(placeholder.regex) != undefined ||
+        target.match(new RegExp(`(?<![a-zA-z])${placeholder.name.replaceAll("+", "\\+")}(?! ?[a-zA-z])`)) != undefined,
+    );
+    setPlaceholderTooltip(
+      detectedPlaceholders.length > 0
+        ? `\n\nDetected Placeholders:\n${detectedPlaceholders
+            .map(
+              (placeholder) =>
+                `${placeholder.hintRepresentation}: ${placeholder.description}\nExample: ${placeholder.example}`,
+            )
+            .join("\n\n")}`
+        : "",
+    );
+  };
+
   return (
     <Form
       navigationTitle={pin ? `Edit Pin: ${pin.name}` : "New Pin"}
+      searchBarAccessory={
+        <Form.LinkAccessory
+          text="Placeholders Guide"
+          target={`file://${path.resolve(environment.assetsPath, "placeholders_guide.md")}`}
+        />
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -95,7 +166,7 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                   values.nameField,
                   values.urlField,
                   values.iconField,
-                  values.groupField,
+                  values.groupField || "None",
                   values.openWithField,
                   values.dateField,
                   values.execInBackgroundField,
@@ -105,6 +176,12 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                   pin.timesOpened,
                   pin.dateCreated ? new Date(pin.dateCreated) : new Date(),
                   values.iconColorField,
+                  (values.tagsField as string)
+                    .split(",")
+                    .map((tag) => tag.trim())
+                    .filter((tag) => tag.length > 0),
+                  values.notesField,
+                  values.tooltipField,
                   pin.averageExecutionTime,
                   pop,
                   setPins,
@@ -121,6 +198,11 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
                   values.fragmentField,
                   { modifiers: values.modifiersField, key: values.keyField },
                   values.iconColorField,
+                  (values.tagsField as string)
+                    .split(",")
+                    .map((tag) => tag.trim())
+                    .filter((tag) => tag.length > 0),
+                  values.notesField,
                 );
                 if (setPins) {
                   setPins(await getPins());
@@ -153,42 +235,19 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
         id="urlField"
         title="Target"
         placeholder="Filepath, URL, or Terminal command to pin"
-        info="The target URL, path, script, or text of the pin. Placeholders can be used to insert dynamic values into the target. See the Placeholders Guide (⌘G) for more information."
+        info={`The target URL, path, script, or text of the pin. Placeholders can be used to insert dynamic values into the target. See the Placeholders Guide (⌘G) for more information.${placeholderTooltip}`}
         error={urlError}
         onChange={async (value) => {
           if (value.startsWith("~")) {
             value = value.replace("~", os.homedir());
           }
 
-          let app = values.application;
-
-          try {
-            setApplications(await getApplications(value));
-          } catch (error) {
-            const allApplications = await getApplications();
-            if (value.match(/^[a-zA-Z0-9]*?:.*/g)) {
-              const preferredBrowser = preferences.preferredBrowser ? preferences.preferredBrowser : { name: "Safari" };
-              const browser = allApplications.find((app) => app.name == preferredBrowser.name);
-              if (browser) {
-                setApplications([browser, ...allApplications.filter((app) => app.name != preferredBrowser.name)]);
-                if (values.application == undefined || values.application == "None") {
-                  app = browser.path;
-                }
-              } else {
-                setApplications(allApplications);
-              }
-            } else {
-              setApplications(allApplications);
-              app = "None";
-            }
-          }
-
+          const [app] = await getMatchingApplications(value);
+          await updatePlaceholderTooltip(value);
           setValues({ ...values, url: value, application: app });
 
           if (urlError !== undefined) {
             setUrlError(undefined);
-          } else {
-            null;
           }
         }}
         onBlur={(event) => {
@@ -317,6 +376,30 @@ export const PinForm = (props: { pin?: Pin; setPins?: React.Dispatch<React.SetSt
           })}
         </Form.Dropdown>
       ) : null}
+
+      <Form.TextField
+        id="tagsField"
+        title="Tags"
+        info="The comma-separated list of tags associated with the pin. Tags can be used to filter pins in the 'View Pins' command."
+        defaultValue={pin ? pin.tags?.join(", ") : ""}
+      />
+
+      <Form.Separator />
+
+      <Form.TextField
+        id="tooltipField"
+        title="Tooltip"
+        info="The tooltip that is displayed when hovering over the pin in the menu bar dropdown."
+        defaultValue={pin ? pin.tooltip : undefined}
+      />
+
+      <Form.TextArea
+        id="notesField"
+        title="Notes"
+        info="Any additional notes about the pin. Notes are displayed in the 'View Pins' command. Markdown is supported."
+        defaultValue={pin ? pin.notes : undefined}
+        enableMarkdown={true}
+      />
 
       <Form.Separator />
 

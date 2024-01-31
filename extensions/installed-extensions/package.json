@@ -6,7 +6,8 @@
   "icon": "extension-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "erics118"
+    "erics118",
+    "tonka3000"
   ],
   "categories": [
     "Fun"
@@ -58,12 +59,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
+    "@raycast/api": "^1.62.0",
     "@raycast/utils": "^1.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "18.18.4",
+    "@types/node": "^20.8.10",
     "@types/react": "18.2.33",
     "eslint": "^8.52.0",
     "prettier": "^3.0.3",

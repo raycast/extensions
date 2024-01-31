@@ -69,22 +69,30 @@
       "required": true,
       "title": "API Token",
       "type": "textfield"
+    },
+    {
+      "name": "closedboards",
+      "title": "Include closed boards",
+      "required": false,
+      "type": "checkbox",
+      "default": false,
+      "description": "Include closed board in list",
+      "label": "Include closed boards"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3"
+    "@raycast/api": "^1.63.0"
   },
   "devDependencies": {
-    "@types/node": "~18.11.18",
-    "@types/react": "^18.0.26",
-    "@typescript-eslint/eslint-plugin": "^5.48.1",
-    "@typescript-eslint/parser": "^5.48.1",
-    "eslint": "^8.31.0",
-    "eslint-config-prettier": "^8.6.0",
-    "node-fetch": "^3.3.0",
-    "prettier": "2.8.2",
-    "react-devtools": "^4.27.1",
-    "typescript": "^4.9.4"
+    "@types/node": "~20.10.4",
+    "@types/react": "^18.2.43",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "node-fetch": "^3.3.2",
+    "prettier": "3.1.1",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
