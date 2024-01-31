@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Fix] - 2024-01-31
+
+- Fixed a bug that caused launching the Spotify app to not work properly
+- Modified the device selection preference for playback
+
 ## [Improvement] - 2024-01-30
 
 - Increase the stale data time from 10 minutes to 2 hours
