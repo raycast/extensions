@@ -26,7 +26,7 @@ export function withGmailAuth(component: JSX.Element) {
     } else if (environment.commandMode === "menu-bar") {
       return <MenuBarExtra isLoading />;
     } else {
-      console.error("`withGoogleAuth` is only supported in `view` and `menu-bar` mode");
+      console.error("`withGmailAuth` is only supported in `view` and `menu-bar` mode");
       return null;
     }
   }

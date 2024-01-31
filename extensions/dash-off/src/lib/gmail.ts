@@ -15,12 +15,9 @@ export async function getSenderEmailAddress() {
 }
 
 export async function sendEmail(subject: string, body: string, toAddress: string, BCCAddresses: string[]) {
-  const url = `https://gmail.googleapis.com/gmail/v1/users/me/messages/send`;
-
-  const fromAddress = await getSenderEmailAddress();
-
   const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString("base64")}?=`;
 
+  const fromAddress = await getSenderEmailAddress();
   const messageParts = [
     `From: Raycast Dash Off <${fromAddress}>`,
     `To: ${toAddress}`,
@@ -41,7 +38,7 @@ export async function sendEmail(subject: string, body: string, toAddress: string
     .replace(/\//g, "_")
     .replace(/=+$/, "");
 
-  const response = await fetch(url, {
+  const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${getOAuthToken()}`,
