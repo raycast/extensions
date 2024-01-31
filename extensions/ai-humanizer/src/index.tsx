@@ -28,7 +28,6 @@ export default function Command() {
   }
 
   const handleSubmit = async (values: Values) => {
-    console.log(values);
     setLoading(true);
     setHumanizedText((await humanize(values.originalText)) || "");
     setLoading(false);
@@ -44,9 +43,9 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea autoFocus={true} id="originalText" title="Original text" />
+      <Form.TextArea autoFocus={true} id="originalText" title="Original Text" />
       <Form.Separator />
-      <Form.TextArea id="humanizedText" title="Humanized text" value={humanizedText} />
+      <Form.TextArea id="humanizedText" title="Humanized Text" value={humanizedText} />
     </Form>
   );
 }

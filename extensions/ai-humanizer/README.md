@@ -9,7 +9,7 @@ This Raycast extension allows you to easily humanize text using an AI-powered se
 - **Humanization**: Utilize an external API to humanize the provided text.
 - **Clipboard Integration**: Copy the humanized text to the clipboard effortlessly.
 
-![example](assets/example.png)
+![example](metadata/ai-humanizer-1.png)
 
 Enjoy humanizing your text with this Raycast extension!
 
