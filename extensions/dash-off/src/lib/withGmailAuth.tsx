@@ -34,6 +34,10 @@ export function withGmailAuth(component: JSX.Element) {
   return component;
 }
 
+export async function setGmailToken() {
+  token = await authorize();
+}
+
 export function getOAuthToken(): string {
   if (!token) {
     throw new Error("getOAuthToken must be used when authenticated");
