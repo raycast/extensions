@@ -329,7 +329,7 @@
       "name": "queue",
       "title": "Queue",
       "subtitle": "Spotify",
-      "description": "See your queue and remove any tracks or episodes from it.",
+      "description": "See your queue.",
       "mode": "view",
       "disabledByDefault": true
     }
