@@ -5,6 +5,7 @@
 - add redirect route to improve onboarding experience
 - improve gen digest panel
 - add some feedback iamges in degest
+- change metadata images
 - fix default maxItemsPerFeed 10 => 5
 
 
