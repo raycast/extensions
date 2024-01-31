@@ -1,4 +1,4 @@
-import { showToast, LocalStorage, showHUD } from "@raycast/api";
+import { showToast, LocalStorage, showHUD, updateCommandMetadata } from "@raycast/api";
 import { updateHostsFile, getCurrentlyBlockedHosts } from "./hosts-file";
 
 export default async function Command() {
@@ -8,6 +8,7 @@ export default async function Command() {
       // Toggle off
       await updateHostsFile([]);
       showHUD("Disabled Website Blocker");
+      updateCommandMetadata({ subtitle: "Deactivated" });
     } else {
       // Toggle on
       const storage = await LocalStorage.getItem<string>("hosts");
@@ -15,6 +16,7 @@ export default async function Command() {
       if (hosts.length) {
         await updateHostsFile(hosts);
         showHUD("Enabled Website Blocker");
+        updateCommandMetadata({ subtitle: "Enabled" });
       } else {
         showHUD("Please add websites before enabling Website Blocker");
       }

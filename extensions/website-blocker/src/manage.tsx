@@ -1,5 +1,5 @@
 import React from "react";
-import { List, ActionPanel, Action, Form, useNavigation, showToast, Toast, open } from "@raycast/api";
+import { List, ActionPanel, Action, Form, useNavigation, showToast, Toast, open, Icon } from "@raycast/api";
 import { getFavicon, usePromise } from "@raycast/utils";
 import { updateHostsFile, getCurrentlyBlockedHosts } from "./hosts-file";
 import { getStoredHosts, addHostToStorage, removeHostFromStorage } from "./storage";
@@ -53,10 +53,15 @@ export default function Command() {
       searchText={searchText}
       filtering
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search or add a new host"
+      searchBarPlaceholder="Search or add a new host (e.g.: news.ycombinator.com)"
       actions={
         <ActionPanel>
-          <Action title="Add New Host" onAction={addHostFromSearch} />
+          <Action
+            title="Add New Host"
+            icon={Icon.NewDocument}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={addHostFromSearch}
+          />
         </ActionPanel>
       }
     >
@@ -67,16 +72,22 @@ export default function Command() {
           title={host}
           accessories={!blockingEnabled || currentBlocked.data?.includes(host) ? [] : [{ text: "🔄 Needs Sync" }]}
           actions={
-            <>
-              <ActionPanel>
-                <Action title="Remove Host" onAction={() => removeHost(host)} />
-                <Action.Push
-                  title="Add New Host"
-                  target={<AddHostView onAdded={() => storedHosts.revalidate().catch(() => {})} />}
-                />
-                {blockingEnabled && <Action title="Sync All" onAction={sync} />}
-              </ActionPanel>
-            </>
+            <ActionPanel>
+              <Action.Push
+                title="Add New Host"
+                icon={Icon.NewDocument}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                target={<AddHostView onAdded={() => storedHosts.revalidate().catch(() => {})} />}
+              />
+              <Action
+                title="Remove Host"
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                icon={Icon.Trash}
+                onAction={() => removeHost(host)}
+              />
+              {blockingEnabled && <Action title="Sync All" icon={Icon.RotateClockwise} onAction={sync} />}
+            </ActionPanel>
           }
         />
       ))}
