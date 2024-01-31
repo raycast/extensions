@@ -52,6 +52,4 @@ export async function sendEmail(subject: string, body: string, toAddress: string
   if (!response.ok) {
     throw new Error(`Error in sendEmail: ${response.statusText}`);
   }
-
-  console.log("Email sent successfully");
 }

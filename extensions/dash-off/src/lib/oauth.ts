@@ -34,8 +34,7 @@ export async function authorize(): Promise<string> {
   const authRequest = await client.authorizationRequest({
     endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     clientId,
-    scope:
-      "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+    scope: "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email",
   });
   const { authorizationCode } = await client.authorize(authRequest);
 
