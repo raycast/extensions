@@ -50,7 +50,7 @@ export default function RSSPlainListView(props: {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search Source"
+      searchBarPlaceholder="Search source, or press `⌘ + Enter` to manually add"
       isShowingDetail
       searchBarAccessory={searchBarAccessory}
       // selectedItemId={selectId}

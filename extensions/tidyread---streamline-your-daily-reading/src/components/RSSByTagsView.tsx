@@ -41,7 +41,7 @@ export default function RSSByTagsView(props: { searchBarAccessory: List.Props["s
     <Grid
       columns={6}
       inset={Grid.Inset.Large}
-      searchBarPlaceholder="Search Tag"
+      searchBarPlaceholder="Search tag"
       isLoading={isLoading}
       searchBarAccessory={searchBarAccessory}
     >
