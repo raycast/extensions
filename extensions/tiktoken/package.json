@@ -14,14 +14,14 @@
     {
       "name": "encode",
       "title": "Encode",
-      "subtitle": "encode with tiktoken",
+      "subtitle": "Tiktoken",
       "description": "use tiktoken to encode selected text with default encoding",
       "mode": "view"
     },
     {
       "name": "decode",
       "title": "Decode",
-      "subtitle": "decode with tiktoken",
+      "subtitle": "Tiktoken",
       "description": "use tiktoken to decode a number list with default encoding",
       "mode": "view"
     }
