@@ -71,12 +71,12 @@
       "default": "newWindow"
     },
     {
-      "name": "onlyName",
+      "name": "onlyname",
       "type": "checkbox",
       "required": false,
-      "label": "Only use name",
+      "label": "Only use Host",
       "title": "Only use Host, no other parameters",
-      "description": "Only use Host, no other parameters",
+      "description": "Only use Host, no other parameters. e.g., `ssh Host`",
       "default": false
     }
   ],

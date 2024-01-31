@@ -7,12 +7,12 @@ import { getConnections, saveConnections } from "./storage.api";
 interface Preferences {
   terminal: string;
   openin: string;
-  onlyName: boolean;
+  onlyname: boolean;
 }
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
 export const openIn = preferences["openin"];
-export const onlyName = preferences["onlyName"];
+export const onlyName = preferences["onlyname"];
 
 async function runTerminal(item: ISSHConnection) {
   let command;
@@ -285,6 +285,7 @@ function Action({
 }
 
 function getSubtitle(item: ISSHConnection) {
-  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${item.sshKey ? " SSH Key: " + item.sshKey : ""
-    } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
+  return `${item.user ? item.user + "@" : ""}${item.address}${item.port ? " Port: " + item.port : ""}${
+    item.sshKey ? " SSH Key: " + item.sshKey : ""
+  } ${item.command ? ' Command: "' + item.command + '"' : ""}`;
 }
