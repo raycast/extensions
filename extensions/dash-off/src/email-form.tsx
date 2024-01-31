@@ -82,7 +82,7 @@ function EmailMe() {
         <Form.Checkbox
           key={address}
           id={address}
-          title={index === 0 ? `Default Recepients` : ``}
+          title={index === 0 ? `Default Recipients` : ``}
           label={address}
           value={addresses.includes(address)}
           onChange={(checked) => {
