@@ -99,6 +99,7 @@ export default function RSSListItem(props: {
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Title" text={item.title} />
+              {item.description && <List.Item.Detail.Metadata.Label title="Description" text={item.description} />}
               <List.Item.Detail.Metadata.Link title="URL" text={item.url!} target={item.url!} />
               <List.Item.Detail.Metadata.Link title="RSS Link" text={item.rssLink!} target={item.rssLink!} />
               <List.Item.Detail.Metadata.TagList title="Tags">

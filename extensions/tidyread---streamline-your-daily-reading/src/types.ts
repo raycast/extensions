@@ -10,6 +10,7 @@ export interface Source {
   timeSpan?: string;
   tags?: string[];
   favicon?: string;
+  description?: string;
 }
 
 export type SourceWithStatus = Source & {
