@@ -28,10 +28,8 @@ export default async function EmailMe() {
       await sendEmail(defaultSubject, selectedText, toAddress, BCCAddresses);
       showHUD("Email sent!");
     } catch (error) {
-      console.log(error);
-      const err = error as unknown as { response: { body: string } };
-      if (err.response) {
-        return showHUD(`Email failed: ${err.response.body}`);
+      if (error) {
+        return showHUD(`${error}`);
       }
     }
   } catch (error) {
