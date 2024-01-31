@@ -1,7 +1,8 @@
 import React from "react";
 import { Cache, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { formatHours, stopTimer, useCompany, useMyTimeEntries } from "./services/harvest";
+import { formatHours, useCompany, useMyTimeEntries } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
+import { writeFileSync, rmSync, existsSync, mkdirSync } from "fs";
 
 const cache = new Cache();
 
@@ -12,7 +13,7 @@ export function getCurrentTimerFromCache() {
 }
 
 export default function MenuBar() {
-  const { data, isLoading, revalidate } = useMyTimeEntries();
+  const { data, isLoading } = useMyTimeEntries();
   const [cacheLoading, setCacheLoading] = React.useState(true);
   const { data: company, isLoading: companyLoading } = useCompany();
 
@@ -25,6 +26,7 @@ export default function MenuBar() {
     callbackURLStart?: string;
     callbackURLStop?: string;
     showTimerInMenuBar?: boolean;
+    statusFolder?: string;
   }>();
 
   React.useEffect(() => {
@@ -36,8 +38,10 @@ export default function MenuBar() {
       }
       if (found) {
         cache.set("running", JSON.stringify(found));
+        setStatusFile(found);
       } else {
         cache.remove("running");
+        setStatusFile(null);
       }
       setCacheLoading(false);
     }
@@ -87,4 +91,17 @@ export default function MenuBar() {
       /> */}
     </MenuBarExtra>
   );
+}
+
+function setStatusFile(timeEntry: HarvestTimeEntry | null) {
+  const { statusFolder } = getPreferenceValues<{ statusFolder?: string }>();
+  if (!statusFolder) return;
+  if (!existsSync(statusFolder)) mkdirSync(statusFolder);
+  const statusFile = `${statusFolder}/currentTimer.json`;
+
+  if (timeEntry) {
+    writeFileSync(statusFile, JSON.stringify(timeEntry));
+  } else {
+    if (existsSync(statusFile)) rmSync(statusFile);
+  }
 }

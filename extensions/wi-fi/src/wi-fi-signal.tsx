@@ -19,40 +19,45 @@ export default function WifiSignal() {
             title={"Wi-Fi"}
             subtitle={curWifi?.ssid}
             icon={Icon.Wifi}
-            onAction={() => {
-              Clipboard.copy(curWifi?.ssid + "").then(() => showHUD("Wi-Fi Copied"));
+            onAction={async () => {
+              await Clipboard.copy(curWifi?.ssid + "");
+              await showHUD("🛜 Wi-Fi Copied");
             }}
           />
           <MenuBarExtra.Item
             title={"Quality"}
             subtitle={curWifi?.quality.toString()}
             icon={Icon.LevelMeter}
-            onAction={() => {
-              Clipboard.copy(curWifi?.quality + "").then(() => showHUD("Quality Copied"));
+            onAction={async () => {
+              await Clipboard.copy(curWifi?.quality + "");
+              await showHUD("📶 Quality Copied");
             }}
           />
           <MenuBarExtra.Item
             title={"Security"}
             subtitle={curWifi?.security}
             icon={Icon.Lock}
-            onAction={() => {
-              Clipboard.copy(curWifi?.security + "").then(() => showHUD("Security Copied"));
+            onAction={async () => {
+              await Clipboard.copy(curWifi?.security + "");
+              await showHUD("🔐 Security Copied");
             }}
           />
           <MenuBarExtra.Item
             title={"Channel"}
             subtitle={curWifi?.channel.toString()}
             icon={Icon.Livestream}
-            onAction={() => {
-              Clipboard.copy(curWifi?.channel + "").then(() => showHUD("Channel Copied"));
+            onAction={async () => {
+              await Clipboard.copy(curWifi?.channel + "");
+              await showHUD("🔃 Channel Copied");
             }}
           />
           <MenuBarExtra.Item
             title={"Frequency"}
             subtitle={curWifi?.frequency.toString()}
             icon={Icon.Heartbeat}
-            onAction={() => {
-              Clipboard.copy(curWifi?.frequency + "").then(() => showHUD("Frequency Copied"));
+            onAction={async () => {
+              await Clipboard.copy(curWifi?.frequency + "");
+              await showHUD("✳️ Frequency Copied");
             }}
           />
         </MenuBarExtra.Section>

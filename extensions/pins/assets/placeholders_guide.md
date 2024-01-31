@@ -3,8 +3,8 @@
 ------------------------
 
 Author: Stephen Kaplan _(HelloImSteven)_ <br />
-Last Updated: 2023-11-01 <br />
-Pins Version: 1.5.0
+Last Updated: 2024-01-12 <br />
+Pins Version: 1.7.0
 
 ------------------------
 
@@ -28,9 +28,11 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | ----- | ----- |
 | `{{AI:...}}` or <br /> `{{AI:...}}` or <br /> `{{askAI:...}}` | The response to a Raycast AI query. Requires Raycast Pro. You can specify the model and creativity using `{{AI model="..." creativity=[decimal]}}`. The default model is `gpt-3.5-turbo` and the default creativity is `1.0`. The model must be either `gpt-3.5-turbo` or `text-davinci-003`. Creativity must be between `0.0` and `1.0`. |
 | `{{alert:...}}` | Displays an alert with the specified text. Specify an optional message and timeout using `{{alert timeout=[number] title="...":...}}`. The default timeout is 10 seconds. |
-| `{{dialog:...}}` | Displays a dialog with the specified text. Specify an optional title and timeout using `{{dialog timeout=[number] title="...":Message}}`. The default timeout is 30 seconds. You can accept input by providing `input=true` before the timeout, e.g. `{{dialog input=true timeout=5:Enter a number}}`. |
 | `{{as:...}}` or <br /> `{{AS:..}}` | The return value of an AppleScript script. |
-| `{{clipboardText}}` or <br /> `{{clipboard}}` | The current text content of the clipboard. |
+| `{{chooseApplication}}` | A quoted POSIX path of an application selected by the user in a file dialog. Use `{{chooseApplication multiple=true}}` to allow the user to select multiple applications. |
+| `{{chooseFile}}` | A quoted POSIX path of a file selected by the user in a file dialog. Use `{{chooseFile multiple=true}}` to allow the user to select multiple files. |
+| `{{chooseFolder}}` | A quoted POSIX path of a folder selected by the user in a file dialog. Use `{{chooseFolder multiple=true}}` to allow the user to select multiple folders. |
+| `{{clipboardText}}` or <br /> `{{clipboard}}` | The current text content of the clipboard. Use `{{clipboardText offsets=[1, 2, 3, n]}}` or `{{clipboardText offsets=[1..n]}}` to get previous clipboard entries. |
 | `{{copy:...}}` | Copies the specified text to the clipboard. |
 | `{{currentAppBundleID}}` or <br /> `{{currentAppID}}` or <br /> `{{currentApplicationBundleID}}` or <br /> `{{currentApplicationID}}` | The bundle ID of the frontmost application. |
 | `{{currentAppName}}` or <br /> `{{currentApp}}` or <br /> `{{currentApplicationName}}` or <br /> `{{currentApplication}}` | The name of the frontmost application. |
@@ -41,6 +43,7 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{date}}` or <br /> `{{currentDate}}` | The current date. Use `{{date format="..."}}` to specify a custom date format. Defaults to `MMMM d, yyyy`. |
 | `{{day}}` or <br /> `{{dayName}}` or <br /> `{{currentDay}}` or <br /> `{{currentDayName}}` | The current weekday, e.g. "Monday". Defaults to en-US locale. Use format `{{day locale="xx-XX"}}` to specify a different locale. |
 | `{{delete [name]}}` | Deletes the persistent variable with the specified name. |
+| `{{dialog:...}}` | Displays a dialog with the specified text. Specify an optional title and timeout using `{{dialog timeout=[number] title="...":Message}}`. The default timeout is 30 seconds. You can accept input by providing `input=true` before the timeout, e.g. `{{dialog input=true timeout=5:Enter a number}}`. |
 | `{{file:...}}` | The text content of a path at the specified path. The path can be absolute or relative to the user's home directory using `~/`. |
 | `{{get [name]}}` | Gets the value of the persistent variable with the specified name. |
 | `{{groupNames}}` | The comma-separated list of names of all groups. Specify an amount of groups to randomly select using `{{groupNames amount=[number]}}`. |
@@ -78,73 +81,43 @@ Placeholders allow pins to be more dynamic and context-aware. You can use placeh
 | `{{usedUUIDs}}` | The list of UUIDs previously used by the `{{uuid}}` placeholder since Pins' LocalStorage was last reset. |
 | `{{user}}` or <br /> `{{username}}` | The current user's system username. |
 | `{{uuid}}` or <br /> `{{UUID}}` | A unique UUID generated at runtime. |
+| `{{write to="[path]":...}}` | Writes the provided text to the file at the specified path. The path can be absolute or relative to the user's home directory using `~/`. Use `{{write to="[path]" append=true:...}}` to append the text to the file instead of overwriting it. Specify an optional end token using `{{write to="[path]" end="...":...}}`. The default end token is `\n\n`. |
 
 > **Note**
 > Placeholders are case-sensitive unless otherwise noted.
 
 ## Placeholder Precedence
 
-Placeholders are evaluated in the following order, from first to last:
+Placeholders are evaluated in order of precedence, rather than in the order they appear in a prompt. Precedence has been decided based on several factors, including how fast a placeholder executes, how often it is likely to be used, how likely it is to be used in combination with other placeholders, etc. As such, there are no concrete rules for placeholder precedence, but the following general guidelines apply:
 
-| Category | Placeholder |
-| -------- | ----------- |
-| Directive | `{{reset [name]}}` |
-| Directive | `{{get [name]}}` |
-| Directive | `{{delete [name]}}` |
-| Directive | `{{input}}` |
-| Dropdown | `{{shortcut:...}}` |
-| Information | `{{clipboardText}}` |
-| Information | `{{selectedText}}` |
-| Information | `{{selectedFiles}}` |
-| Information | `{{selectedFileContents}}` |
-| Information | `{{currentAppName}}` |
-| Information | `{{currentAppPath}}` |
-| Information | `{{currentAppBundleID}}` |
-| Information | `{{currentDirectory}}` |
-| Information | `{{currentURL}}` |
-| Information | `{{currentTabText}}` |
-| Information | `{{user}}` |
-| Information | `{{homedir}}` |
-| Information | `{{hostname}}` |
-| Information | `{{shortcuts}}` |
-| Information | `{{date}}` |
-| Information | `{{day}}` |
-| Information | `{{time}}` |
-| Information | `{{timezone}}` |
-| Information | `{{systemLanguage}}` |
-| Information | `{{previousApp}}` |
-| Information | `{{uuid}}` |
-| Information | `{{usedUUIDs}}` |
-| Information | `{{previousPinName}}` |
-| Information | `{{previousPinTarget}}` |
-| Information | `{{pinNames}}` |
-| Information | `{{pinTargets}}` |
-| Information | `{{pins}}` |
-| Information | `{{pinStatistics}}` |
-| Information | `{{groupNames}}` |
-| Information | `{{groups}}` |
-| Script | `{{url:...}}`** |
-| Script | `{{file:...}}` |
-| Directive | `{{set [name]:...}}` |
-| Directive | `{{AI:...}}` |
-| Directive | `{{copy:...}}` |
-| Directive | `{{paste:...}}` |
-| Directive | `{{type:...}}` |
-| Directive | `{{alert:...}}` |
-| Directive | `{{dialog:...}}` |
-| Directive | `{{say:...}}` |
-| Directive | `{{toast:...}}` |
-| Script | `{{as:...}}` |
-| Script | `{{jxa:...}}` |
-| Script | `{{shell:...}}` |
-| Script | `{{js:...}}` |
-| Directive | `{{ignore:...}}` |
+- Placeholders that execute quickly are given higher precedence than those that execute slowly.
+- Directives that don't accept content are given higher precedence than other placeholders.
+- Directives that accept content are given lower precedence than other placeholders.
+- Information placeholders are given higher precedence than script placeholders.
+- Placeholders more likely to be used are given higher precedence than those less likely to be used.
+- Placeholders that are likely to be used in combination with other placeholders as their contents are given lower precedence than those that are not.
+- The `{{js:...}}` placeholder is given the lowest precedence of all script placeholders.
+- The order of precedence for extension placeholders such as `{{csv:...:...}}` is determined first by their category (e.g. text files, images, videos, audio, PDFs, in that order), then alphabetically.
+- Custom placeholders are given the highest precedence of all placeholders.
 
 > **Note**
-> Precedence may change slightly in future versions of Pins. However, script placeholders will always be evaluated after information placeholders. `{{js:...}}` and `{{ignore}}` placeholders will always be evaluated last.
+> Higher precedence means earlier evaluation.
+
+The precedence order of individual placeholders can be difficult to conceptualize and predict; the best to find out is to try it out yourself. Here are some examples of how precedence works in practice:
+
+- The order of most information placeholders, e.g. `{{currentDirectory}}`, `{{user}}`, `{{time}}`, etc., does not generally matter, as they either do not accept content or parameters, or it is unlikely that you'll want to use the output of another placeholder as input to them.
+- `{{todayReminders}}` has higher precedence than `{{yearReminders}}` because it executes faster and is more likely to be used.
+- `{{get [name]}}` has higher precedence than most other placeholders because it is unlikely that you will want to use it in combination with other placeholders, and it executes quickly.
+- `{{set [name]:...}}` has lower precedence than most other placeholders because it is likely that you will want to use the output of another placeholder as input to it.
+- `{{csv:...:...}}` has higher precedence than `{{jsx:...:...}}` because it occurs earlier in the alphabet.
+- `{{csv:...:...}}` has higher precedence than `{{avi:...:...}}` because text files have higher precedence than videos, as they are more likely to be used.
+- `{{csv:...:...}}` has higher precedence than `{{as:...}}` because it is more likely that you'd want to conditionally execute AppleScript code rather than conditionally include a script's output.
+- `{{as:...}}` and `{{jxa:...}}` have higher precedence than `{{shell:...}}` because it is easier to use AppleScript and JXA to execute shell commands than the other way around.
+- `{{url:...}}` has higher precedence than `{{prompt:...}}` or `{{shortcut:...}}` because it is more likely that you will want to use the contents of a URL in a prompt/as shortcut input than the other way around.
+- `{{ignore:...}}` has lower precedence than `{{js:...}}` because it is more likely that you will want to use the output of a JavaScript placeholder as input to `{{ignore:...}}` than the other way around, and you can call the `ignore(content)` function in JavaScript to achieve the same result.
 
 > **Note**
-> **Since URL placeholders involve significant processing, they are treated as script placeholders.
+> Precedence is **not** guaranteed to remain the same in future versions of Pins. The guidelines above are _likely_ to remain true, but even that is not guaranteed. Any changes to precedence will be documented in the release notes.
 
 ## JavaScript Placeholder Reference
 
@@ -196,7 +169,8 @@ This code, which can be set as a Pin target, interweaves several placeholders to
 ## Resources
 
 - [Pins GitHub Repository](https://github.com/SKaplanOfficial/Raycast-Pins)
-- [PromptLab Placeholders Guide](https://github.com/SKaplanOfficial/Raycast-PromptLab#placeholders) **NOTE: Pins supports only a subset of the PromptLab placeholders.**
+- [PromptLab Placeholders Guide](https://github.com/SKaplanOfficial/Raycast-PromptLab#placeholders)
 - [Raycast Manual](https://manual.raycast.com)
 - [Date Field Symbol Table](http://www.unicode.org/reports/tr35/tr35-31/tr35-dates.html#Date_Field_Symbol_Table) - Official Unicode documentation for date format symbols. Useful for customizing the `{{date}}` and `{{time}}` placeholders. Pins follows this standard.
 - [Raycast Custom Date Format Reference](https://manual.raycast.com/snippets/reference-for-supported-alphabets-in-custom-date-format) - Straight forward reference for customizing the `{{date}}` and `{{time}}` placeholders; however, there may be some differences between how Raycast and Pins handle these symbols.
+- [Placeholders API Documentation](https://skaplanofficial.github.io/Placeholders-Toolkit/)

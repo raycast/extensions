@@ -26,7 +26,7 @@
 - [x] Automatically detect the input language and automatically query the preferred language.
 - [x] Provide word-rich query information, including basic translation, pronunciation, the types of exams that include the word, multiple parts of speech and explanations, forms and tenses, web translations, and web phrases.
 - [x] Support automatic query selected text, enabled by default.
-- [x] Support screenshot OCR transalte.
+- [x] Support screenshot OCR translate.
 - [x] Support to open the [Eudic Dictionary](https://apps.apple.com/us/app/eudic-%E6%AC%A7%E8%B7%AF%E8%AF%8D%E5%85%B8/id434350458?l=zh&mt=12) and quickly look up words, if installed on your Mac.
 - [x] Support automatic playback of word pronunciation. Use `Cmd + S` to play the pronunciation of words manually.
 - [x] Support Youdao Text to Speech(TTS).

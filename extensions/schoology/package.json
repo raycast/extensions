@@ -2,12 +2,26 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "schoology",
   "title": "Schoology",
-  "description": "This extension will help you view your grades and course lists quickly using Raycast.",
+  "description": "View your courselists, grades, and individual assignments quickly using Raycast.",
   "icon": "command-icon.png",
   "author": "Vaibhav-Satishkumar",
   "categories": [
     "Other",
     "Productivity"
+  ],
+  "keywords": [
+    "schoology",
+    "grades",
+    "courses",
+    "classes",
+    "LMS",
+    "Learning",
+    "GPA",
+    "Raycast",
+    "Vaibhav",
+    "Satishkumar",
+    "Vaibhav-Satishkumar",
+    "School"
   ],
   "license": "MIT",
   "commands": [
