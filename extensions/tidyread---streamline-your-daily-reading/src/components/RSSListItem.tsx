@@ -98,8 +98,14 @@ export default function RSSListItem(props: {
           markdown={markdown}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label title="URL" text={item.url} />
-              <List.Item.Detail.Metadata.Label title="RSS Link" text={item.rssLink!} />
+              <List.Item.Detail.Metadata.Label title="Title" text={item.title} />
+              <List.Item.Detail.Metadata.Link title="URL" text={item.url!} target={item.url!} />
+              <List.Item.Detail.Metadata.Link title="RSS Link" text={item.rssLink!} target={item.rssLink!} />
+              <List.Item.Detail.Metadata.TagList title="Tags">
+                {(item.tags || []).map((tag) => (
+                  <List.Item.Detail.Metadata.TagList.Item text={tag} color="#458AEE" />
+                ))}
+              </List.Item.Detail.Metadata.TagList>
               {item.favicon && <List.Item.Detail.Metadata.Label title="Favicon" icon={item.favicon} />}
             </List.Item.Detail.Metadata>
           }
