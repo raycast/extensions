@@ -64,6 +64,7 @@ export default function Command() {
         cacheLastSearch(spotifyLink, spotifyContent);
       } catch (error) {
         console.error(error);
+        setSpotifyContent(undefined);
         showToast(Toast.Style.Failure, "Error", (error as Error).message);
       }
 
@@ -75,13 +76,17 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       const clipboardText = await Clipboard.readText();
+      const lastSearch = getLastSearch();
 
-      if (clipboardText && SPOTIFY_LINK_REGEX.test(clipboardText)) {
+      if (
+        clipboardText &&
+        SPOTIFY_LINK_REGEX.test(clipboardText) &&
+        !(lastSearch && lastSearch.spotifyLink === clipboardText)
+      ) {
         await fetchSpotifyContent(clipboardText);
         return;
       }
 
-      const lastSearch = getLastSearch();
       if (lastSearch) {
         setSpotifyContent(lastSearch.spotifyContent);
         setSearchText(lastSearch.spotifyLink);
@@ -127,7 +132,7 @@ export default function Command() {
               }
             />
           </List.Section>
-          <List.Section title="Listen on">
+          <List.Section title={spotifyContent.links.length > 0 ? "Listen on" : "Results"}>
             {spotifyContent.links.length === 0 && (
               <List.Item key="no-links" icon={Icon.Info} title="Not available on other platforms" />
             )}
@@ -137,7 +142,7 @@ export default function Command() {
                 icon={Icon.Link}
                 title={spotifyContentLinksTitles[type as SpotifyContentLinkType]}
                 subtitle={url}
-                accessories={[{ text: isVerified ? "Verified" : "" }]}
+                accessories={[{ icon: isVerified ? Icon.CheckCircle : null }]}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser url={url} />
