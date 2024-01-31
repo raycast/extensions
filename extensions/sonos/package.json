@@ -18,7 +18,7 @@
       "subtitle": "Sonos",
       "description": "Toggle the playback state of the active group",
       "mode": "no-view",
-      "interval": "3s"
+      "interval": "5s"
     },
     {
       "name": "set-group",
@@ -32,8 +32,7 @@
       "title": "Now Playing",
       "subtitle": "Sonos",
       "description": "Show the currently playing media in the menu bar",
-      "mode": "menu-bar",
-      "interval": "4s"
+      "mode": "menu-bar"
     },
     {
       "name": "increase-volume",
