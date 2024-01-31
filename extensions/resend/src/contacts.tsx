@@ -102,7 +102,13 @@ export default function Audiences() {
       searchBarAccessory={<AudienceDropdown audiences={audiences} setAudience={setAudience} />}
       actions={
         <ActionPanel>
-          {audience && <Action.Push title="Create Contact" target={<CreateContact audience={audience} />} />}
+          {audience && (
+            <Action.Push
+              title="Create Contact"
+              icon={Icon.Plus}
+              target={<CreateContact audience={audience} getContactsFromApi={getContactsFromApi} />}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -121,7 +127,11 @@ export default function Audiences() {
           actions={
             <ActionPanel>
               {audience && (
-                <Action.Push title="Create Contact" icon={Icon.Plus} target={<CreateContact audience={audience} />} />
+                <Action.Push
+                  title="Create Contact"
+                  icon={Icon.Plus}
+                  target={<CreateContact audience={audience} getContactsFromApi={getContactsFromApi} />}
+                />
               )}
               {audience && (
                 <Action.Push
@@ -185,8 +195,8 @@ export function AudienceDropdown(props: { audiences: Audience[]; setAudience: (a
   );
 }
 
-function CreateContact(props: { audience: Audience }) {
-  const { audience } = props;
+function CreateContact(props: { audience: Audience; getContactsFromApi: (audienceId: string) => void }) {
+  const { audience, getContactsFromApi } = props;
 
   const { handleSubmit, itemProps } = useForm<CreateContactRequestForm>({
     validation: {
@@ -195,6 +205,7 @@ function CreateContact(props: { audience: Audience }) {
     async onSubmit(values: CreateContactRequestForm) {
       const contact = await createContact(audience.id, values);
       if (!("statusCode" in contact)) {
+        getContactsFromApi(audience.id);
         showToast(Toast.Style.Success, "Created Contact", contact.email);
       } else {
         showToast(Toast.Style.Failure, "Error", contact.message);
@@ -210,9 +221,9 @@ function CreateContact(props: { audience: Audience }) {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Email" {...itemProps.email} />
-      <Form.TextField title="First Name" {...itemProps.first_name} />
-      <Form.TextField title="Last Name" {...itemProps.last_name} />
+      <Form.TextField title="Email" {...itemProps.email} placeholder="john.doe@example.com" />
+      <Form.TextField title="First Name" {...itemProps.first_name} placeholder="John" />
+      <Form.TextField title="Last Name" {...itemProps.last_name} placeholder="Doe" />
       <Form.Checkbox label="Unsubscribed" {...itemProps.unsubscribed} />
     </Form>
   );
@@ -249,9 +260,9 @@ function UpdateContact(props: { contact: Contact; audience: Audience }) {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Email" {...itemProps.email} />
-      <Form.TextField title="First Name" {...itemProps.first_name} />
-      <Form.TextField title="Last Name" {...itemProps.last_name} />
+      <Form.TextField title="Email" {...itemProps.email} placeholder="john.doe@example.com" />
+      <Form.TextField title="First Name" {...itemProps.first_name} placeholder="John" />
+      <Form.TextField title="Last Name" {...itemProps.last_name} placeholder="Doe" />
       <Form.Checkbox label="Unsubscribed" {...itemProps.unsubscribed} />
     </Form>
   );
