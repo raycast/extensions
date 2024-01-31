@@ -1,4 +1,4 @@
-import { Action, Color, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
+import { Action, Color, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
 import { RawFeed, SourceWithStatus } from "../types";
 import { extractDomain, filterByShownStatus, silent } from "../utils/util";
 import { ReactNode, useEffect, useMemo, useState } from "react";
@@ -59,6 +59,7 @@ export default function RSSListItem(props: {
         <CustomActionPanel>
           <Action
             title="Add This"
+            icon={Icon.Plus}
             onAction={async () => {
               showToast(Toast.Style.Animated, "Adding Source...");
 

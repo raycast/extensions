@@ -25,7 +25,7 @@ export function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<
     timeoutHandle = setTimeout(() => {
       reject(
         new Error(
-          `Operation timed out after ${timeoutMs} ms, you could try to set \`Http Proxy\` in \`Extensions Settings Page\` and try again`,
+          `Operation timed out after ${timeoutMs} ms, you could try to set "Http Proxy" in "Extensions Settings Page" and try again`,
         ),
       );
     }, timeoutMs);

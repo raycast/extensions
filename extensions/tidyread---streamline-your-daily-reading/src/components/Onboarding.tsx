@@ -18,7 +18,7 @@ interface FormData {
   comeFrom: "X(Twitter)" | "Raycast Store" | "Search Engine" | "Social Media" | "Others";
 }
 
-export default function RecommendedForm(props: { onSkip: () => void; onSuccess: (payload: Source[]) => void }) {
+export default function Onboarding(props: { onSkip: () => void; onSuccess: (payload: Source[]) => void }) {
   const { onSkip, onSuccess } = props;
   const { data } = usePromise(
     async () => {
@@ -64,6 +64,7 @@ export default function RecommendedForm(props: { onSkip: () => void; onSuccess: 
 
   return (
     <Form
+      navigationTitle="Onboarding"
       actions={
         <ActionPanel>
           <Action.SubmitForm icon="send-horizontal.svg" title="Submit" onSubmit={handleSubmit} />

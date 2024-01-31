@@ -8,7 +8,14 @@ import { normalizePreference } from "./preference";
 import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
 import dayjs from "dayjs";
-import { addOrUpdateDigest, getComeFrom, getInterest, getSources } from "../store";
+import {
+  addDigestGenerationCount,
+  addOrUpdateDigest,
+  getComeFrom,
+  getDigestGenerationCount,
+  getInterest,
+  getSources,
+} from "../store";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
 import Parser from "rss-parser";
@@ -49,6 +56,21 @@ function parseOutput(output: string): string[] {
     .map((line) => line.replace(/^\d+\s*?\./, ""));
 
   return targetLines;
+}
+
+async function getFeedbackContent() {
+  const count = await getDigestGenerationCount();
+
+  // 当第三次生成简报时，提示用户反馈
+  if (count === 2) {
+    return `> Hi there! 👋 We've noticed you've been enjoying our Digest feature. Your opinion matters to us! 🌟 Could you spare a moment to share your feedback? It'll help us make Tidyread even better for you. Just click [here](https://tally.so/r/w4r61X) to tell us what you think. Thank you for helping us grow! 🚀\n\n![thanku](./thanku_1.svg)\n\n---\n\n`;
+  }
+
+  if (count === 30) {
+    return `> Hello there! 👋  Wow, you've used our Digest feature 30 times already! And we're thrilled to have you on board. We'd love to hear your thoughts! Your feedback is invaluable in shaping the future of Tidyread. Please take a moment to share your experience with us [here](https://tally.so/r/w4r61X). Your voice makes a big difference! Thank you for being a part of our growing community! 🚀\n\n![thanku](./thanku_2.svg)\n\n---\n\n`;
+  }
+
+  return "";
 }
 
 export async function bizGenDigest(
@@ -148,12 +170,17 @@ export async function bizGenDigest(
     onProgress,
   });
 
+  const feedbackContent = await getFeedbackContent();
+
   // 写入存储
   const finalDigest = await addOrUpdateDigest({
     ...digest,
+    content: feedbackContent + digest.content,
     type,
     title: digestTitle,
   });
+
+  await addDigestGenerationCount();
 
   console.log("digest content:", finalDigest.content);
 

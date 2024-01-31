@@ -35,6 +35,7 @@ export default function RSSPlainListView(props: {
   const manuallyAddActionNode = (
     <Action.Push
       title="Manually Add"
+      icon="hand.svg"
       target={
         <SourceForm
           onSuccess={async () => {
@@ -61,7 +62,7 @@ export default function RSSPlainListView(props: {
         <List.EmptyView
           actions={<CustomActionPanel>{manuallyAddActionNode}</CustomActionPanel>}
           title="No Source Found"
-          description="Press `Enter` to add a source manually."
+          description="Press `Enter` to add a source manually"
         />
       }
       {(data || []).map((item) => {

@@ -128,7 +128,9 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
 
   return (
     <Form
-      searchBarAccessory={<Form.LinkAccessory target="https://tidyread.info/docs/where-to-find-rss" text="🤔 How To Find RSS?" />}
+      searchBarAccessory={
+        <Form.LinkAccessory target="https://tidyread.info/docs/where-to-find-rss" text="🤔 How To Find RSS?" />
+      }
       actions={
         <CustomActionPanel>
           <Action.SubmitForm icon={Icon.SaveDocument} title="Save" onSubmit={handleSubmit} />

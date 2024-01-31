@@ -102,6 +102,7 @@ export async function saveInterestsSelected(selected: boolean) {
   await LocalStorage.setItem("interestsSelected", selected);
 }
 
+// 发现打印出来是1，而非true
 export async function getInterestsSelected() {
   return (await LocalStorage.getItem<boolean>("interestsSelected")) || false;
 }
@@ -120,4 +121,13 @@ export async function saveComeFrom(from: string) {
 
 export async function getComeFrom() {
   return await LocalStorage.getItem<string>("comeFrom");
+}
+
+export async function getDigestGenerationCount() {
+  return (await LocalStorage.getItem<number>("digestGenerationCount")) ?? 0;
+}
+
+export async function addDigestGenerationCount() {
+  const count = (await getDigestGenerationCount()) ?? 0;
+  await LocalStorage.setItem("digestGenerationCount", count + 1);
 }

@@ -2,7 +2,7 @@ import Parser from "rss-parser";
 import pLimit from "p-limit";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { load } from "cheerio";
-import { isXML, normalizeUrlForMarkdown, retry, withTimeout } from "../utils/util";
+import { isXML, normalizeUrlForMarkdown, retry, sleep, withTimeout } from "../utils/util";
 import {
   DigestItem,
   DigestStage,
@@ -174,10 +174,10 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
   // const prefix = `# ${title}  \`at ${dayjs(time).format('HH:mm')}\`\n\n`;
   const prefix = provider.available
     ? ``
-    : `> 💡 **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the original excerpts.\n\n`;
+    : `> 💡 **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the raw content. Check [the doc](https://www.tidyread.info/docs/empowered-with-ai) to learn how to config.\n\n`;
   let digest = `${prefix}`;
 
-  digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have a valid RSS Link** can be summarized.\nThe content pulled by rss will be filtered according to the \`Time Span\` you provide, keeping only the content in the time span.\n\n## Summary\n`;
+  digest += `## Introduction\nTidyread generated a flat summary of the content from all the sources today. **Only sources that have a valid RSS Link** can be summarized. Check [the doc](https://www.tidyread.info/docs/where-to-find-rss) to know where to find RSS.\n\n## Summary\n`;
 
   if (items.length === 0) {
     return `${digest}No RSS items remain after filtering.`;
@@ -318,16 +318,18 @@ export async function genDigest(options: {
   const [, ...summarizedItems] = await Promise.all([
     translateTitles(),
     ...formatedItems.map((item) =>
-      limit(() =>
-        summarizeItem(
+      limit(async () => {
+        // 避免translateTitles失败
+        await sleep(100);
+        return summarizeItem(
           item,
           options.provider,
           options.requestTimeout,
           options.retryCount,
           options.retryDelay,
           onProgress,
-        ),
-      ),
+        );
+      }),
     ),
   ]);
 

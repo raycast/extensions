@@ -35,9 +35,9 @@
   "commands": [
     {
       "name": "manage-source-list.command",
-      "title": "Manage Source List",
+      "title": "Manage Sources",
       "subtitle": "TidyRead",
-      "description": "Manage your read sources, including adding, editing, deleting, and scheduling.",
+      "description": "Manage your reading sources, including adding, editing, deleting, and scheduling.",
       "mode": "view"
     },
     {

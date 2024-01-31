@@ -1,4 +1,4 @@
-import { updateCommandMetadata } from "@raycast/api";
+import { LaunchType, Toast, environment, showToast, updateCommandMetadata } from "@raycast/api";
 import { sendNotification } from "./utils/notify";
 import { normalizePreference } from "./utils/preference";
 import * as chrono from "chrono-node";
@@ -70,6 +70,11 @@ async function handleSuccess() {
 export default async function Command() {
   const sources = await getSources();
   const { todayItems } = categorizeSources(sources);
+  const { notificationTime } = normalizePreference();
+
+  if (environment.launchType === LaunchType.UserInitiated) {
+    showToast(Toast.Style.Success, `Activited!🥳 Your daily digest will automatically generate at ${notificationTime}`);
+  }
 
   // 若没有当日read，则无需通知
   if (todayItems.length === 0) return;
@@ -95,7 +100,6 @@ export default async function Command() {
     console.log("notified: false");
   }
 
-  const { notificationTime } = normalizePreference();
   const now = new Date();
   const formattedTime = !isValidNotificationTime(notificationTime)
     ? chrono.parseDate("9am", now)

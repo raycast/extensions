@@ -29,10 +29,6 @@ const PROVIDER_CONFIG = {
   },
 };
 
-function formatApiModel(pref: Preferences) {
-  return pref.provider === "raycast" ? (pref.apiModel ?? "").replace("raycast-", "") : pref?.apiModel;
-}
-
 export function normalizePreference(): Required<Preferences> {
   const values = getPreferenceValues();
 
@@ -41,7 +37,7 @@ export function normalizePreference(): Required<Preferences> {
   return {
     provider: values.provider ?? "openai",
     apiKey: values.apiKey || "",
-    apiModel: formatApiModel(values) || "",
+    apiModel: values.apiModel || "",
     maxTokens: isNum(values.maxTokens) ? +values.maxTokens : 200,
     apiHost: values.apiHost || "",
     preferredLanguage: values.preferredLanguage || "",

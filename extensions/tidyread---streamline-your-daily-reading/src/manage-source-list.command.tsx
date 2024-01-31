@@ -25,7 +25,7 @@ import SourcesJson from "./components/SourcesJson";
 import { validateSources } from "./utils/validate";
 import SharableLinkAction from "./components/SharableLinkAction";
 import { usePromise } from "@raycast/utils";
-import RecommendedForm from "./components/RecommendedForm";
+import Onboarding from "./components/Onboarding";
 
 export default function SourceList() {
   const [sources, setSources] = useState<Source[]>();
@@ -97,7 +97,7 @@ export default function SourceList() {
 
   if (showInterestsSelectPanel) {
     return (
-      <RecommendedForm
+      <Onboarding
         onSkip={async () => {
           await saveInterestsSelected(true);
           revalidate();
@@ -240,7 +240,7 @@ export default function SourceList() {
                     actionTitle="Share Your Sources"
                     articleTitle="My Reading Sources"
                     articleContent={() => {
-                      return `You can batch import the sources into your [Tidyread](https://tidyread.info) in 'Manage Source List' Command.\n\n\`\`\`json\n${JSON.stringify(
+                      return `You can batch import the sources into your [Tidyread](https://tidyread.info) in 'Manage Sources' Command.\n\n\`\`\`json\n${JSON.stringify(
                         sources!.map((s) => omit(s, ["id"])),
                         null,
                         4,
