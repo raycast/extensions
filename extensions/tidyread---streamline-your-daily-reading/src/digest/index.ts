@@ -177,10 +177,10 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
     : `> 💡 **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the raw content. Check [the doc](https://www.tidyread.info/docs/empowered-with-ai) to learn how to config.\n\n`;
   let digest = `${prefix}`;
 
-  digest += `## Introduction\nTidyread generated a flat summary of the content from all the sources today. **Only sources that have a valid RSS Link** can be summarized. Check [the doc](https://www.tidyread.info/docs/where-to-find-rss) to know where to find RSS.\n\n## Summary\n`;
+  digest += `## Introduction\nTidyread generated a flat summary of the content from all the sources today. **Only sources that have a valid [RSS](https://meganesulli.com/blog/how-rss-works/) Link** can be summarized. Check [the doc](https://www.tidyread.info/docs/where-to-find-rss) to know where to find RSS.\n\n## Summary\n`;
 
   if (items.length === 0) {
-    return `${digest}No RSS items remain after filtering.`;
+    return `${digest}No [RSS](https://meganesulli.com/blog/how-rss-works/) items remain after filtering.`;
   }
 
   for (const [index, item] of items.entries()) {
