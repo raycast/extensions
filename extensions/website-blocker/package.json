@@ -5,6 +5,9 @@
   "description": "Block websites by changing your hosts file",
   "icon": "command-icon.png",
   "author": "gersomvg",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Web"
