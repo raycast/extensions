@@ -1,4 +1,4 @@
-# Timecamp
+# TimeCamp
 
 ## What You'll Need
 You will need to get your Timecamp API token. You can find this token at [here](https://app.timecamp.com/app#/settings/users/me), usually under the subheading `Your programming API token:`.
