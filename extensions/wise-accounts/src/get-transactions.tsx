@@ -109,7 +109,7 @@ export default function Command(props: LaunchProps<{ arguments: { profileId: str
           }
         />
       ))}
-      {transactions?.length === 0 && <List.EmptyView title="No Transaction found" />}
+      {transactions?.length === 0 && <List.EmptyView title="No Transaction Found" />}
     </List>
   );
 }
