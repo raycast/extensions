@@ -38,6 +38,8 @@ You need to create your own OAuth Client ID to be able to use this extension.
 7. in `Developer Contact Info` type your own email address
 8. Press `Save and Continue`
 
+> Note: You don't need to publish OAuth App. It's only for your own use.
+
 ### Create Credentials
 
 1. Click on `Credentials` on the left panel
