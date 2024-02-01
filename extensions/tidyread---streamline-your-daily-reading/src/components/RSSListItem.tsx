@@ -46,7 +46,7 @@ export default function RSSListItem(props: {
   }, [selected]);
 
   const keywords = useMemo(() => {
-    return [silent(() => extractDomain(item.url!))].filter(Boolean) as string[];
+    return [item.description, silent(() => extractDomain(item.url!))].filter(Boolean) as string[];
   }, [item]);
 
   return (
@@ -109,8 +109,8 @@ export default function RSSListItem(props: {
               <List.Item.Detail.Metadata.Link title="URL" text={item.url!} target={item.url!} />
               <List.Item.Detail.Metadata.Link title="RSS Link" text={item.rssLink!} target={item.rssLink!} />
               <List.Item.Detail.Metadata.TagList title="Tags">
-                {(item.tags || []).map((tag) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={tag} color={Color.Blue} />
+                {(item.tags || []).map((tag, index) => (
+                  <List.Item.Detail.Metadata.TagList.Item key={index} text={tag} color={Color.Blue} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
               <List.Item.Detail.Metadata.TagList title="Active Status">
