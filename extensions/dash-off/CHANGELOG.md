@@ -2,7 +2,8 @@
 
 ## [Update] - 2024-02-01
 
-- Update the instructions for creating the Google OAuth Consent
+- Update the instructions for creating the Google OAuth Consent in README
+- Update Google Consent disclaimer in README
 
 ## [Fix] - 2024-01-31
 
