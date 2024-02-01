@@ -33,8 +33,10 @@ You need to create your own OAuth Client ID to be able to use this extension.
 2. Click on `OAuth consent screen` on the left side
 3. Check `External` and click `Create`
 4. In `App Name` type `Raycast Dash Off`
-5. In `User Support Mail` and in `Developer Contact Info` type/select your own email address
-6. Press `Save and Continue`
+5. In `User Support Mail` select your own email address
+6. In `User Support Mail` type your own email address (the same Gmail account you'll use to signin with)
+7. in `Developer Contact Info` type your own email address
+8. Press `Save and Continue`
 
 ### Create Credentials
 
