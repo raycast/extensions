@@ -1,6 +1,6 @@
 # Zoom Changelog
 
-## [Use OAuth Utils] - {PR_MERGE_DATE}
+## [Use OAuth Utils] - 2024-02-01
 
 Use new OAuth utils
 
