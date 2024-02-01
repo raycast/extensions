@@ -25,3 +25,9 @@ export function connectToSession(session: string): Promise<void> {
     });
   });
 }
+
+export function isTmuxRunning(): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    exec(`tmux ls`, { env }, (error, _, stderr) => resolve(!(error || stderr)));
+  });
+}
