@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "toggleCommand",
+      "name": "toggle",
       "title": "Toggle Menu Bar",
       "description": "Toggle auto hide/show menu bar between two options of your choice.",
       "mode": "no-view"
