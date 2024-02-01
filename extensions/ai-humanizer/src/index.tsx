@@ -39,13 +39,17 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Humanize" icon={Icon.Wand} onSubmit={handleSubmit} />
-          <Action.CopyToClipboard content={humanizedText} />
+          {humanizedText.length > 0 && <Action.CopyToClipboard content={humanizedText} />}
         </ActionPanel>
       }
     >
       <Form.TextArea autoFocus={true} id="originalText" title="Original Text" />
-      <Form.Separator />
-      <Form.TextArea id="humanizedText" title="Humanized Text" value={humanizedText} />
+      {humanizedText && (
+        <>
+          <Form.Separator />
+          <Form.TextArea id="humanizedText" onChange={() => {}} title="Humanized Text" value={humanizedText} />
+        </>
+      )}
     </Form>
   );
 }
