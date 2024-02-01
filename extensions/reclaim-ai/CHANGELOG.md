@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-01-31
+- Removed top-level Join Meeting command, deferring instead to My Calendar → Choose Event → Join meeting.
+
 ## [Fixes] - 2024-01-27
 - Misspelling fixes.
 
