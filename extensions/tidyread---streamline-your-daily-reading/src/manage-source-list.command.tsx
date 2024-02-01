@@ -120,7 +120,19 @@ export default function SourceList() {
           await saveInterestsSelected(true);
           await sleep(500);
           const now = Date.now();
-          await saveSources(sources.map((s, index) => ({ ...s, id: `${now + index}` })));
+          await saveSources(
+            sources.map((s, index) => ({
+              schedule: "everyday",
+              timeSpan: "1",
+              title: s.title!,
+              url: s.url!,
+              rssLink: s.rssLink,
+              favicon: s.favicon,
+              tags: s.tags ?? [],
+              customDays: [],
+              id: `${now + index}`,
+            })),
+          );
           showToast(Toast.Style.Success, "Sources Generated");
           await launchCommand({
             name: "daily-read.command",

@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useForm, usePromise } from "@raycast/utils";
 import { saveComeFrom, saveInterest } from "../store"; // Assuming these functions are defined in utils/storage
-import { request } from "../utils/request"; // Import from your utils/request
-import { Source } from "../types";
+import { requestWithFallback } from "../utils/request"; // Import from your utils/request
+import { ExternalSource } from "../types";
 
 // Type definition for recommendation data
 export interface RecommendedSourcesFromInterest {
   title: string;
-  sources: Source[];
+  sources: ExternalSource[];
 }
 
 export type RecommendedData = RecommendedSourcesFromInterest[];
@@ -18,11 +18,14 @@ interface FormData {
   comeFrom: "X(Twitter)" | "Raycast Store" | "Search Engine" | "Social Media" | "Others";
 }
 
-export default function Onboarding(props: { onSkip: () => void; onSuccess: (payload: Source[]) => void }) {
+export default function Onboarding(props: { onSkip: () => void; onSuccess: (payload: ExternalSource[]) => void }) {
   const { onSkip, onSuccess } = props;
   const { data } = usePromise(
     async () => {
-      return await request("https://tidyread-pub.s3.us-west-2.amazonaws.com/recommended_data.json").then((res) => {
+      return await requestWithFallback(
+        "https://raw.githubusercontent.com/DophinL/tidyread-cloud/main/data/recommended_data.json",
+        "https://tidyread-pub.s3.us-west-2.amazonaws.com/recommended_data.json",
+      ).then((res) => {
         return res.json() as unknown as RecommendedData;
       });
     },
