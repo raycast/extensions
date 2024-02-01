@@ -64,7 +64,10 @@ export default function SourceList() {
       target={
         <Form
           searchBarAccessory={
-            <Form.LinkAccessory target="https://tidyread.info/docs/batch-import-sources" text="Learn How To Import" />
+            <Form.LinkAccessory
+              target="https://tidyread.info/docs/batch-import-sources"
+              text="🤔 Learn How To Import"
+            />
           }
           actions={
             <ActionPanel>
@@ -72,11 +75,22 @@ export default function SourceList() {
                 title="Save"
                 onSubmit={async (values) => {
                   try {
-                    const newSources = JSON.parse(values.sources) as Source[];
+                    const newSources = JSON.parse(values.sources) as Partial<Source>[];
                     showToast(Toast.Style.Animated, "Validating sources json");
                     await validateSources(newSources);
                     const now = Date.now();
-                    await saveSources([...sources!, ...newSources.map((s, index) => ({ ...s, id: `${now + index}` }))]);
+                    await saveSources([
+                      ...sources!,
+                      ...newSources.map(
+                        (s, index) =>
+                          ({
+                            schedule: "everyday",
+                            timeSpan: "1",
+                            ...s,
+                            id: `${now + index}`,
+                          }) as Source,
+                      ),
+                    ]);
                     showToast(Toast.Style.Success, "Sources imported");
                     pop();
                     loadSources();
@@ -139,7 +153,7 @@ export default function SourceList() {
             </CustomActionPanel>
           }
           title="No Source Found"
-          description="Add your first source, or press ⌘ + Enter to import sources from json."
+          description="Press `Enter` to add your first source, or press `⌘ + Enter` to batch import"
         />
       ) : (
         (sources || []).map((item, index) => {

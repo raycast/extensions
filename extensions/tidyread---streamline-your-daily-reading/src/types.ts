@@ -7,7 +7,7 @@ export interface Source {
   customDays?: string[];
   rssLink?: string;
   // Time span of the content pulled by rss, default is 1 day
-  timeSpan?: string;
+  timeSpan: string;
   tags?: string[];
   favicon?: string;
   description?: string;
