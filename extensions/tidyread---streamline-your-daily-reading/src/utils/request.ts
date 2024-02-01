@@ -97,7 +97,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
 export async function isValidRSSLink(url: string): Promise<boolean> {
   if (!isURL(url)) return false;
 
-  const response = await request(url, undefined, 10000);
+  const response = await request(url, undefined, 20 * 1000);
   const contentType = response.headers.get("content-type");
   const text = await response.text();
 

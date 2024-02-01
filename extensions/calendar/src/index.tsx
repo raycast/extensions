@@ -37,7 +37,7 @@ export default function main() {
         row += week
           .map((day) => {
             const dayString = day.getMonth() === date.getMonth() ? day.getDate().toString() : " ";
-            const todayMarker = day.toDateString() === today ? "**• " : " ";
+            const todayMarker = day.toDateString() === today && dayString !== " " ? "**• " : " ";
             return `${todayMarker}${dayString}${todayMarker !== " " ? "**" : ""} |`;
           })
           .join("");

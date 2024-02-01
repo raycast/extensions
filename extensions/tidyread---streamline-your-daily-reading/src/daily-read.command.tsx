@@ -4,19 +4,15 @@ import { filterByShownStatus, shell, sleep } from "./utils/util";
 import {
   Action,
   Color,
-  Detail,
   Icon,
   Keyboard,
   LaunchType,
   List,
-  Toast,
   launchCommand,
-  showToast,
   useNavigation,
   LaunchProps,
 } from "@raycast/api";
-import { addUtmSourceToUrl, bizGenDigest, categorizeSources } from "./utils/biz";
-import { NO_API_KEY, NO_FEEDS, matchError } from "./utils/error";
+import { addUtmSourceToUrl, categorizeSources } from "./utils/biz";
 import { getSources, getTodaysDigest } from "./store";
 import { capitalize } from "lodash";
 import { usePromise } from "@raycast/utils";
@@ -24,6 +20,7 @@ import DigestListItem from "./components/DigestListItem";
 import DigestDetail from "./components/DigestDetail";
 import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
+import GenTodaysDigestPanel from "./components/GenTodaysDigestPanel";
 
 export default function DailyReadCommand(props: LaunchProps<{ launchContext: { autoGenDigest: boolean } }>) {
   const autoGenDigest = props?.launchContext?.autoGenDigest ?? false;
@@ -38,55 +35,11 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
     loadSources();
   }, []);
 
-  const handleGenDigest = async (type: "manual" | "auto" = "manual") => {
-    try {
-      showToast(
-        Toast.Style.Animated,
-        "Generating Digest",
-        "This may take some time, depending on the response speed of the AI API and your setting. And it may fail if you deactivate the Raycast window for an unknown reason.",
-      );
-      await bizGenDigest(type);
-      showToast(Toast.Style.Success, "Generating Success");
-      await revalidate();
-    } catch (err: any) {
-      if (matchError(err, NO_API_KEY)) {
-        showToast(Toast.Style.Failure, "Generating Failed");
-        const markdown = "API key not found. Press Enter to update it in command preferences and try again.";
-
-        push(<Detail markdown={markdown} actions={<CustomActionPanel />} />);
-        return;
-      }
-
-      if (matchError(err, NO_FEEDS)) {
-        showToast(Toast.Style.Failure, "Generating Failed");
-        const markdown =
-          "No RSS link found in today's sources, please add some and try again. Press Enter to manage your sources.";
-
-        push(
-          <Detail markdown={markdown} actions={<CustomActionPanel>{manageSourceListActionNode}</CustomActionPanel>} />,
-        );
-        return;
-      }
-
-      if (matchError(err, "ECONNRESET")) {
-        showToast(Toast.Style.Failure, "Network Error", "Check your network and try again.");
-        return;
-      }
-
-      if (matchError(err, "timed out")) {
-        showToast(Toast.Style.Failure, "Request Timeout", "Check your network, or add http proxy and try again.");
-        return;
-      }
-
-      showToast(Toast.Style.Failure, "Error", err.message);
-    }
-  };
-
   useEffect(() => {
     async function fn() {
       if (autoGenDigest) {
         await sleep(500);
-        await handleGenDigest("auto");
+        push(<GenTodaysDigestPanel onSuccess={revalidate} />);
       }
     }
 
@@ -109,7 +62,9 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
     <Action
       title={todaysDigest ? "Regenerate Today's Digest" : "Generate Today's Digest"}
       icon={Icon.Stars}
-      onAction={handleGenDigest}
+      onAction={() => {
+        push(<GenTodaysDigestPanel onSuccess={revalidate} />);
+      }}
       shortcut={{ modifiers: ["cmd"], key: "d" }}
     />
   );
@@ -129,12 +84,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
     <List isLoading={!todayItems && !otherItems}>
       {itemsLength === 0 ? (
         <List.EmptyView
-          actions={
-            <CustomActionPanel>
-              {manageSourceListActionNode}
-              {generateDigestActionNode}
-            </CustomActionPanel>
-          }
+          actions={<CustomActionPanel>{manageSourceListActionNode}</CustomActionPanel>}
           title="No Sources Found"
           description="Go to manage your sources"
         />

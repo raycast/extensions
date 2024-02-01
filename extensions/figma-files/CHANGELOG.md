@@ -1,5 +1,8 @@
 # Figma Files Changelog
 
+## [Adds support for Quicklinks] - 2024-01-26
+- Include context in your Quicklink to search Figma on launch. For example, `raycast://extensions/michaelschultz/figma-files-raycast-extension/index/?context=%7B%22query%22%3A%22{Query}%22%7D` will search your query on launch.
+
 ## [End of the year clean up] - 2023-12-20
 
 - Updates dependencies

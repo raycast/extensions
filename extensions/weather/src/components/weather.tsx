@@ -8,6 +8,7 @@ import {
   Weather,
   WeatherConditions,
   WeatherData,
+  convertToTimeString,
   getAreaValues,
   getCurrentCloudCover,
   getCurrentFeelLikeTemperature,
@@ -104,7 +105,11 @@ export function DayListItem(props: { day: WeatherData; title: string }): JSX.Ele
       ]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
+          <Action.Push
+            title="Show Details"
+            icon={Icon.List}
+            target={<DayList day={data} title={`${props.title} - ${wd}`} />}
+          />
         </ActionPanel>
       }
     />
@@ -219,8 +224,16 @@ function SunItem(props: { data: Weather | undefined }) {
       title="Sun"
       icon={WeatherIcons.Sunrise}
       accessories={[
-        { icon: WeatherIcons.Sunrise, text: s.sunrise, tooltip: `Sunrise ${s.sunrise}` },
-        { icon: WeatherIcons.Sunset, text: s.sunset, tooltip: `Sunset ${s.sunset}` },
+        {
+          icon: WeatherIcons.Sunrise,
+          text: convertToTimeString(s.sunrise),
+          tooltip: `Sunrise ${convertToTimeString(s.sunrise)}`,
+        },
+        {
+          icon: WeatherIcons.Sunset,
+          text: convertToTimeString(s.sunset),
+          tooltip: `Sunset ${convertToTimeString(s.sunset)}`,
+        },
       ]}
     />
   );
@@ -237,10 +250,14 @@ function MoonItem(props: { data: Weather | undefined }) {
       subtitle={m.moonPhase}
       icon={WeatherIcons.Moon}
       accessories={[
-        { icon: WeatherIcons.Moonrise, text: m.moonrise, tooltip: `Moonrise ${m.moonrise}` },
+        {
+          icon: WeatherIcons.Moonrise,
+          text: convertToTimeString(m.moonrise),
+          tooltip: `Moonrise ${convertToTimeString(m.moonrise)}`,
+        },
         {
           icon: { source: WeatherIcons.Moonset, tintColor: Color.SecondaryText },
-          text: m.moonset,
+          text: convertToTimeString(m.moonset),
           tooltip: `Moonset ${m.moonset}`,
         },
       ]}

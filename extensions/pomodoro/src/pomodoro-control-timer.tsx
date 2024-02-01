@@ -6,11 +6,13 @@ import {
   continueInterval,
   createInterval,
   getCurrentInterval,
+  getNextIntervalExecutor,
   isPaused,
   pauseInterval,
   preferences,
   resetInterval,
 } from "../lib/intervals";
+import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
 import { GiphyResponse } from "../lib/types";
 
 const createAction = (action: () => void) => () => {
@@ -109,6 +111,16 @@ const EndOfInterval = () => {
   let markdownImage;
   let usingGiphy = false;
 
+  if (preferences.enableConfetti) {
+    exec("open raycast://extensions/raycast/raycast/confetti", function (err, stdout, stderr) {
+      if (err) {
+        // handle error
+        console.error(err);
+        return;
+      }
+    });
+  }
+
   if (preferences.sound) {
     exec(`afplay /System/Library/Sounds/${preferences.sound}.aiff -v 10 && $$`);
   }
@@ -133,6 +145,8 @@ const EndOfInterval = () => {
     markdownImage = `![${"You did it!"}](${preferences.completionImage})`;
   }
 
+  const executor = getNextIntervalExecutor();
+
   return (
     <Detail
       navigationTitle={`Interval completed`}
@@ -140,17 +154,22 @@ const EndOfInterval = () => {
       actions={
         <ActionPanel title="Start Next Interval">
           <Action
-            title="Focus"
+            title={executor.title}
+            onAction={createAction(executor.onStart)}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+          <Action
+            title={FocusText}
             onAction={createAction(() => createInterval("focus"))}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
           <Action
-            title="Short Break"
+            title={ShortBreakText}
             onAction={createAction(() => createInterval("short-break"))}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           <Action
-            title="Long Break"
+            title={LongBreakText}
             onAction={createAction(() => createInterval("long-break"))}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           />
