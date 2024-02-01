@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hubspot",
   "title": "HubSpot",
-  "description": "Search Hubspot Contacts and Deals",
+  "description": "Search Hubspot Contacts, Companies and Deals",
   "icon": "extension_icon.png",
   "author": "harisvsulaiman",
   "contributors": [
     "pernielsentikaer",
     "6farer",
-    "patricklenz"
+    "patricklenz",
+    "yuanming"
   ],
   "license": "MIT",
   "categories": [
@@ -39,6 +40,13 @@
       "mode": "view"
     },
     {
+      "name": "companies",
+      "title": "Search Companies",
+      "subtitle": "HubSpot",
+      "description": "Search HubSpot Companies",
+      "mode": "view"
+    },
+    {
       "name": "deals",
       "title": "Search Deals",
       "subtitle": "HubSpot",
@@ -61,19 +69,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.66.0",
     "@raycast/utils": "^1.4.11",
     "@types/lodash": "^4.14.191",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-prettier": "^9.1.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
