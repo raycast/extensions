@@ -1,5 +1,9 @@
 # Dash Off Changelog
 
+## [Fix] - 2024-02-01
+
+- Fixed typo in description.
+
 ## [Update] - 2024-02-01
 
 - Update the instructions for creating the Google OAuth Consent in README
