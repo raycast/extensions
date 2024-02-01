@@ -1,5 +1,5 @@
 import { Action, Color, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
-import { RawFeed, SourceWithStatus } from "../types";
+import { RawFeed, ExternalSource } from "../types";
 import { extractDomain, filterByShownStatus, silent } from "../utils/util";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { parseRSS } from "../utils/biz";
@@ -17,7 +17,7 @@ function filterItems(feed: RawFeed) {
 }
 
 export default function RSSListItem(props: {
-  item: Partial<SourceWithStatus>;
+  item: Partial<ExternalSource>;
   selected: boolean;
   actions?: ReactNode | null;
 }) {
@@ -86,6 +86,11 @@ export default function RSSListItem(props: {
       }
       accessories={filterByShownStatus([
         {
+          icon: "inactive.svg",
+          tooltip: "This source is inactive",
+          show: item.activeStatus === "inactive",
+        },
+        {
           tag: {
             value: `${(item.tags || [])?.join?.(", ")}`,
             color: Color.Blue,
@@ -98,16 +103,22 @@ export default function RSSListItem(props: {
           markdown={markdown}
           metadata={
             <List.Item.Detail.Metadata>
+              {item.favicon && <List.Item.Detail.Metadata.Label title="Favicon" icon={item.favicon} />}
               <List.Item.Detail.Metadata.Label title="Title" text={item.title} />
               {item.description && <List.Item.Detail.Metadata.Label title="Description" text={item.description} />}
               <List.Item.Detail.Metadata.Link title="URL" text={item.url!} target={item.url!} />
               <List.Item.Detail.Metadata.Link title="RSS Link" text={item.rssLink!} target={item.rssLink!} />
               <List.Item.Detail.Metadata.TagList title="Tags">
                 {(item.tags || []).map((tag) => (
-                  <List.Item.Detail.Metadata.TagList.Item text={tag} color="#458AEE" />
+                  <List.Item.Detail.Metadata.TagList.Item text={tag} color={Color.Blue} />
                 ))}
               </List.Item.Detail.Metadata.TagList>
-              {item.favicon && <List.Item.Detail.Metadata.Label title="Favicon" icon={item.favicon} />}
+              <List.Item.Detail.Metadata.TagList title="Active Status">
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={item?.activeStatus === "inactive" ? "Inactive" : "Active"}
+                  color={item?.activeStatus === "inactive" ? Color.Orange : Color.Green}
+                />
+              </List.Item.Detail.Metadata.TagList>
             </List.Item.Detail.Metadata>
           }
         />

@@ -1,12 +1,12 @@
 import { Action, Grid, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { SourceWithStatus } from "../types";
-import { CATEGORIES_MAP } from "../const";
+import { ExternalSource } from "../types";
+import { CATEGORIES_EMOJI_MAP, CATEGORIES_WEIGHT_MAP } from "../const";
 import CustomActionPanel from "./CustomActionPanel";
 import RSSPlainListView from "./RSSPlainListView";
 import { requestWithFallback } from "../utils/request";
 
-const extractUniqueTags = (items: SourceWithStatus[]): string[] => {
+const extractUniqueTags = (items: ExternalSource[]): string[] => {
   const tagsSet = new Set<string>();
 
   items.forEach((item) => {
@@ -30,8 +30,10 @@ export default function RSSByTagsView(props: { searchBarAccessory: List.Props["s
     )
       .then((res) => res.json())
       .then((res) => {
-        const resp = res as SourceWithStatus[];
-        return extractUniqueTags(resp.filter((item) => item.status !== "failed"));
+        const resp = res as ExternalSource[];
+        return extractUniqueTags(resp.filter((item) => item.available ?? true)).sort(
+          (a, b) => (CATEGORIES_WEIGHT_MAP[b] ?? 1) - (CATEGORIES_WEIGHT_MAP[a] ?? 1),
+        );
       })) as string[];
 
     return resp;
@@ -55,7 +57,7 @@ export default function RSSByTagsView(props: { searchBarAccessory: List.Props["s
           id={val}
           key={val}
           title={val}
-          content={CATEGORIES_MAP[val]}
+          content={CATEGORIES_EMOJI_MAP[val] ?? "💡"}
         />
       ))}
     </Grid>

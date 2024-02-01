@@ -1,7 +1,7 @@
 import { Action, LaunchType, List, launchCommand, popToRoot } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { requestWithFallback } from "../utils/request";
-import { SourceWithStatus } from "../types";
+import { ExternalSource } from "../types";
 import RSSListItem from "./RSSListItem";
 import { useState } from "react";
 import CustomActionPanel from "./CustomActionPanel";
@@ -21,13 +21,14 @@ export default function RSSPlainListView(props: {
     )
       .then((res) => res.json())
       .then((res) => {
-        const resp = res as SourceWithStatus[];
+        const resp = res as ExternalSource[];
         return resp
-          .filter((item) => item.status !== "failed")
+          .filter((item) => item.available ?? true)
           .filter((item) => {
             return props.filterByTag ? (item.tags || []).includes(props.filterByTag) : true;
-          });
-      })) as Partial<SourceWithStatus>[];
+          })
+          .sort((a, b) => (b.weight ?? 1) - (a.weight ?? 1));
+      })) as Partial<ExternalSource>[];
 
     return resp;
   });

@@ -7,14 +7,20 @@ export interface Source {
   customDays?: string[];
   rssLink?: string;
   // Time span of the content pulled by rss, default is 1 day
-  timeSpan: string;
+  timeSpan?: string;
   tags?: string[];
   favicon?: string;
   description?: string;
 }
 
-export type SourceWithStatus = Source & {
-  status?: "success" | "failed";
+export type ExternalSource = Pick<Source, "url" | "title" | "description" | "favicon" | "rssLink" | "tags"> & {
+  available?: boolean;
+  // 权重
+  weight?: number;
+  // 活跃度分数 0 - 100
+  activeScore?: number;
+  // 活跃状态
+  activeStatus?: "active" | "lowActive" | "inactive";
 };
 
 export type SummarizeStatus = "summraized" | "failedToSummarize" | "raw";
