@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Show requested reviews on my pull requests menu bar] - 2024-02-01
+
+- If you enable the `Show requested reviews on my pull requests menu bar` option, you will now see the number of requested reviews on your pull requests menu bar.
+
 ## [Open vercel preview on pull requests] - 2023-12-18
 
 - If you have a vercel project, you can now open your preview directly from your pull request
