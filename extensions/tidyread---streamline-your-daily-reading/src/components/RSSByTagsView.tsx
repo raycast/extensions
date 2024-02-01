@@ -25,6 +25,7 @@ export default function RSSByTagsView(props: { searchBarAccessory: List.Props["s
 
   const { data, isLoading } = useCachedPromise(async () => {
     const resp = (await requestWithFallback(
+      // "http://127.0.0.1:8080/rss.json",
       "https://raw.githubusercontent.com/DophinL/tidyread-cloud/main/data/rss.json",
       "https://tidyread-pub.s3.us-west-2.amazonaws.com/rss.json",
     )

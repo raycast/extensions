@@ -1,4 +1,5 @@
 export const CATEGORIES = [
+  { value: "Academic", emoji: "🎓", weight: 80 },
   { value: "AI", emoji: "✨", weight: 100 },
   { value: "Arts", emoji: "🎨" },
   { value: "Automotive", emoji: "🚗" },

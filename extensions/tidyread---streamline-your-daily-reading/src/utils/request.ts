@@ -63,11 +63,6 @@ export async function fetchHeadContent(url: string): Promise<string | null> {
 interface Metadata {
   title: string;
   favicon: string;
-}
-
-interface Metadata {
-  title: string;
-  favicon: string;
   coverImageUrl: string;
 }
 
