@@ -13,7 +13,7 @@ The fastest way to dash off a quick email to yourself and others. Inspired by [A
 
 ## How to get a Gmail OAuth Client ID
 
-You need to create your own OAuth Client ID to be able to use this extension.
+At the moment you need to create your own OAuth Client ID to be able to use this extension. However, we've submitted a request to Google to get this extension verified and published. Once this is done, you'll be able to use this extension without creating your own OAuth Client ID.
 
 ### Project
 
