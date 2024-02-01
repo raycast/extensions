@@ -9,6 +9,7 @@ const useApplications = () => {
 
       const data = {
         apps: apps
+          .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
           .sort((a, b) => {
             if (a.name < b.name) {
               return -1;
@@ -17,8 +18,7 @@ const useApplications = () => {
               return 1;
             }
             return 0;
-          })
-          .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+          }),
         workspaceId: workspace.projectGuid,
       };
 
