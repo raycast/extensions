@@ -38,7 +38,7 @@ const ActionsView = () => {
     isLoading: isAppsLoading,
   } = useApplications();
 
-  const { data: actions, isLoading: isActionsLoading } = useActions(selectedApp ? selectedApp.guid : apps[0].guid);
+  const { data: actions, isLoading: isActionsLoading } = useActions(selectedApp ? selectedApp?.guid : apps[0].guid);
 
   const isLoading = isAppsLoading || isActionsLoading;
 
@@ -49,7 +49,9 @@ const ActionsView = () => {
       searchBarPlaceholder="Search actions"
       isLoading={isLoading}
       navigationTitle="Results"
-      searchBarAccessory={<ApplicationsDropdown applications={apps} onChange={setSelectedApp} />}
+      searchBarAccessory={
+        apps.length > 0 ? <ApplicationsDropdown applications={apps} onChange={setSelectedApp} /> : undefined
+      }
     >
       {actions.map((a) => (
         <List.Item
