@@ -28,7 +28,7 @@ export function humanizeInteger(value: number): string {
 export async function fetchWithRetry(
   url: string,
   limit = 2,
-  validate?: (response: string) => boolean
+  validate?: (response: string) => boolean,
 ): Promise<string> {
   let retryCount = 0;
 

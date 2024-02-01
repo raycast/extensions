@@ -18,11 +18,11 @@ export default function MovieDetails(props: MovieDetailsProps) {
   const { data, isLoading, revalidate } = useCachedPromise(
     fetchMovieDetails,
     [qualifier],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   const [showMetadata, setShowMetadata] = useCachedState(
     "metaDataVisibility",
-    true
+    true,
   );
 
   const status = data?.status;
@@ -172,7 +172,7 @@ function Metadata(props: MetadataProps) {
               />
             ))}
           </Detail.Metadata.TagList>
-        ))
+        )),
       )}
       <Detail.Metadata.Separator />
 

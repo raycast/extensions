@@ -17,7 +17,7 @@ export default function SearchMoviesPage(props: SearchMoviesPageProps) {
   const { data, isLoading } = useCachedPromise(
     fetchMoviesByTitle,
     [searchQuery],
-    { execute: searchQuery.length > 0 }
+    { execute: searchQuery.length > 0 },
   );
 
   return (

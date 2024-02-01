@@ -3,7 +3,7 @@
   "name": "letterboxd",
   "title": "Letterboxd",
   "description": "Search for movies on Letterboxd",
-  "icon": "letterboxd-mac-icon.png",
+  "icon": "icon.png",
   "author": "rafael_garcia",
   "categories": [
     "Media"

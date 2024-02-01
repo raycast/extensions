@@ -68,7 +68,7 @@ export const enum POSTER_SIZE {
 
 export async function fetchPosterUrl(
   letterboxdId: string,
-  posterSize: POSTER_SIZE
+  posterSize: POSTER_SIZE,
 ): Promise<string> {
   const posterUrl = `${LETTERBOXD_URL_BASE}/ajax/poster/film/${letterboxdId}/${posterSize}`;
   const posterResponse = await fetchWithRetry(posterUrl);
@@ -82,7 +82,7 @@ export async function fetchPosterUrl(
 }
 
 export const fetchMoviesByTitle = async (
-  title: string
+  title: string,
 ): Promise<ApiResponse<Movie[]>> => {
   const url = getSearchPageUrl(title, SEARCH_TYPE.FILMS);
 
@@ -97,7 +97,7 @@ export const fetchMoviesByTitle = async (
     const posterUrls: string[] = await Promise.all(
       movies.map((movie) => {
         return fetchPosterUrl(movie.letterboxdId, POSTER_SIZE.THUMBNAIL);
-      })
+      }),
     );
     movies.forEach((movie, index) => {
       const posterUrl = posterUrls[index];
@@ -237,7 +237,7 @@ async function fetchMovieStats(letterboxdId: string): Promise<MovieStatistics> {
 }
 
 async function fetchRatingHistogram(
-  letterboxdId: string
+  letterboxdId: string,
 ): Promise<MovieRatingHistogram> {
   const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/rating-histogram/`;
   const ratingResponse = await fetchWithRetry(ratingUrl);
@@ -257,7 +257,7 @@ async function fetchRatingHistogram(
           }
           const ratingTooltip = $("a").attr("title") ?? "";
           const match = ratingTooltip.match(
-            /([\d,]+)\s(.*)\sratings\s\((\d+)%\)/
+            /([\d,]+)\s(.*)\sratings\s\((\d+)%\)/,
           );
           if (match) {
             return {
@@ -305,7 +305,7 @@ async function fetchRatingHistogram(
 }
 
 export async function fetchMovieDetails(
-  urlPath: string
+  urlPath: string,
 ): Promise<ApiResponse<MovieDetails>> {
   const cacheKey = urlPath.split("?")[0];
   const cachedResponse = getFromCache<MovieDetails>(cacheKey);
@@ -321,7 +321,7 @@ export async function fetchMovieDetails(
     const data: MovieDetails = extractEntitiesFromMovieDetailsPage(
       response,
       url,
-      letterboxdId
+      letterboxdId,
     );
 
     const posterUrlPromise = fetchPosterUrl(letterboxdId, POSTER_SIZE.HERO);
@@ -351,7 +351,7 @@ function array(str: string | string[] | undefined): string[] {
 function extractEntitiesFromMovieDetailsPage(
   html: string,
   url: string,
-  letterboxId: string
+  letterboxId: string,
 ): MovieDetails {
   const {
     title,
