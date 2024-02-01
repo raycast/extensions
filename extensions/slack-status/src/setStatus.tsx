@@ -2,6 +2,8 @@ import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceVal
 import { useMemo, useState } from "react";
 import {
   ClearStatusAction,
+  CopyDeeplinkPresetAction,
+  CreateQuicklinkPresetAction,
   CreateStatusPresetAction,
   DeleteStatusPresetAction,
   EditStatusPresetAction,
@@ -93,6 +95,8 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
                       setPresets(presets.map((p) => (p === preset ? editedPreset : p)));
                     }}
                   />
+                  <CreateQuicklinkPresetAction preset={preset} />
+                  <CopyDeeplinkPresetAction preset={preset} />
                   <DeleteStatusPresetAction onDelete={() => setPresets(presets.filter((p) => p !== preset))} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

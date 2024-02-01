@@ -2,11 +2,13 @@ import {
   AI,
   Action,
   ActionPanel,
+  Alert,
   Icon,
   Keyboard,
   Toast,
   clearSearchBar,
   confirmAlert,
+  environment,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -288,6 +290,31 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
   );
 }
 
+function createLink(preset: SlackStatusPreset) {
+  const contextPreset = encodeURIComponent(JSON.stringify({ presetName: preset.title }));
+  return `raycast://extensions/petr/${environment.extensionName}/setStatus?context=${contextPreset}`;
+}
+
+export function CreateQuicklinkPresetAction(props: { preset: SlackStatusPreset }) {
+  const link = createLink(props.preset);
+
+  return (
+    <Action.CreateQuicklink
+      title="Create Quicklink"
+      quicklink={{ link: link, name: props.preset.title }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    />
+  );
+}
+
+export function CopyDeeplinkPresetAction(props: { preset: SlackStatusPreset }) {
+  const link = createLink(props.preset);
+
+  return (
+    <Action.CopyToClipboard title="Copy Deeplink" content={link} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+  );
+}
+
 export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
   return (
     <Action
@@ -301,6 +328,10 @@ export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
           title: "Delete preset?",
           message: "Are you sure you want to delete this preset permanently?",
           rememberUserChoice: true,
+          primaryAction: {
+            title: "Confirm",
+            style: Alert.ActionStyle.Destructive,
+          },
         });
 
         if (!confirmed) {
