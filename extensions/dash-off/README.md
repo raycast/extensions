@@ -8,8 +8,8 @@ The fastest way to dash off a quick email to yourself and others. Inspired by [A
 
 ## Commands
 
-- **Compose Email:** This command gives you more control over the recepients, subject and body of the email. By default, it will pre-select the default receipients in the Extesions Preferences and use the default subject line.
-- **Just Send:** This command will use your text selection as the body of the email and send it to the default receipients in the Extesions Preferences, using the default subject line.
+- **Compose Email:** This command gives you more control over the recipients, subject and body of the email. By default, it will pre-select the default recipients in the Extensions Preferences and use the default subject line.
+- **Just Send:** This command will use your text selection as the body of the email and send it to the default recipients in the Extensions Preferences, using the default subject line.
 
 ## How to get a Gmail OAuth Client ID
 
@@ -18,7 +18,7 @@ At the moment you need to create your own OAuth Client ID to be able to use this
 ### Project
 
 1. Go to [Google Developers Console](https://console.developers.google.com)
-2. Select an exising project or create a new one
+2. Select an existing project or create a new one
 
 ⚠️ Make sure that you logged in with the Google Account which will be associated with your new OAuth key
 
