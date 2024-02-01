@@ -4,10 +4,7 @@
   "title": "Pipedrive Search",
   "description": "Search Pipedrive deals, people and organizations",
   "icon": "command-icon.png",
-  "author": "stephendolan",
-  "contributors": [
-    "ahp"
-  ],
+  "author": "ahp",
   "license": "MIT",
   "commands": [
     {
