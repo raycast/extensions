@@ -17,7 +17,7 @@ export default async () => {
     selectedText = await getSelectedText();
   } catch (e) {
     await showHUD(
-      "❌ Screenshot generation failed. Please make sure you've selected the text you want to take a screenshot of."
+      "❌ Screenshot generation failed. Please make sure you've selected the text you want to take a screenshot of.",
     );
     return;
   }

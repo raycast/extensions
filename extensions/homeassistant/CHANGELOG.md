@@ -1,5 +1,17 @@
 # Home Assistant Changelog
 
+## [Update] - 2024-01-27
+
+- Add three Single Entity Menu Commands, two disabled by default
+
+## [Update] - 2024-01-19
+
+- Make use of cache for faster loading of entities
+
+## [Companion] - 2023-12-22
+
+- Add support for Home Assistant Companion app
+
 ## [New Logo] - 2023-09-30
 
 - Use the new Home Assistant logo

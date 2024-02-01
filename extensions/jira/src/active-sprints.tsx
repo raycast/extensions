@@ -14,10 +14,10 @@ export function ActiveSprints() {
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
-  const jql = `sprint in openSprints() AND project = ${cachedProject?.key} ORDER BY updated DESC`;
+  const jql = `sprint in openSprints() AND project = '${cachedProject?.key}' ORDER BY updated DESC`;
 
   const { issues, isLoading: isLoadingIssues, mutate } = useIssues(jql, { execute: cachedProject?.key !== "" });
 

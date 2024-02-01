@@ -27,7 +27,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
           key={containerInfo.Id}
           title={containerName(containerInfo)}
           subtitle={containerInfo.Image}
-          accessoryTitle={containerInfo.State}
+          accessories={[{ text: { value: containerInfo.State } }]}
           icon={
             isContainerRunning(containerInfo)
               ? { source: 'icon-container-running.png', tintColor: Color.Green }

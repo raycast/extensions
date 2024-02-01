@@ -437,7 +437,7 @@ export function walkFilesHelper(dirPath: string, exFolders: string[], fileEnding
     const next = fs.statSync(dirPath + "/" + file);
     if (
       next.isDirectory() &&
-      validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile", configFileName])
+      validFile(file, [".git", ".obsidian", ".trash", ".excalidraw", ".mobile", configFileName].filter(Boolean))
     ) {
       arrayOfFiles = walkFilesHelper(dirPath + "/" + file, exFolders, fileEndings, arrayOfFiles);
     } else {
@@ -446,7 +446,7 @@ export function walkFilesHelper(dirPath: string, exFolders: string[], fileEnding
         file !== ".md" &&
         !file.includes(".excalidraw") &&
         !dirPath.includes(".obsidian") &&
-        !dirPath.includes(configFileName) &&
+        !dirPath.includes(configFileName || ".obsidian") &&
         validFolder(dirPath, exFolders)
       ) {
         arrayOfFiles.push(path.join(dirPath, "/", file));

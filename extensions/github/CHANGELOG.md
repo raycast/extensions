@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Open vercel preview on pull requests] - 2023-12-18
+
+- If you have a vercel project, you can now open your preview directly from your pull request
+
 ## [Mark notification as read without opening it] - 2023-11-16
 
 - You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.

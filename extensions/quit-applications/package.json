@@ -7,7 +7,8 @@
   "author": "mackopes",
   "contributors": [
     "jrnxf",
-    "3llomi"
+    "3llomi",
+    "sxn"
   ],
   "categories": [
     "System",
@@ -23,12 +24,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
+    "@types/node": "^20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",

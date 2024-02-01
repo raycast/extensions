@@ -30,6 +30,13 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
               application="iTerm"
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
+            <Action.Open
+              title="Open in Warp"
+              icon="icon-warp.png"
+              target={bookmark.getPath}
+              application="Warp"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -47,7 +54,7 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
       }
       accessories={[
         {
-          text: bookmark.getBranch,
+          text: bookmark.getBranch.name,
           icon: { source: "icon-branches.png", tintColor: Color.PrimaryText },
         },
       ]}

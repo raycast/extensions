@@ -1,23 +1,46 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  LaunchProps,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import * as React from "react";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
 import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 
-const DEFAULT_BIBLE_VERSION_ABBR = "NLT";
+type Preferences = Preferences.BibleSearch;
 
-type Preferences = {
-  enterToSearch: boolean;
-  oneVersePerLine: boolean;
-  includeVerseNumbers: boolean;
-  includeCopyright: boolean;
-  includeReferences: boolean;
-};
-
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.BibleSearch }>) {
   const prefs = getPreferenceValues<Preferences>();
-  const [query, setQuery] = React.useState({ search: "", version: DEFAULT_BIBLE_VERSION_ABBR });
+  const { ref = "", version = prefs.defaultBibleVersion } = props.arguments;
+  const [query, setQuery] = React.useState({ search: ref, version: version.trim().toUpperCase() });
   const [isLoading, setIsLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
+
+  React.useEffect(() => {
+    async function setSelectedTextAsQuery() {
+      try {
+        const selectedText = await getSelectedText();
+        if (selectedText) {
+          const { ref, version } = parseReference(selectedText);
+          setQuery((old) => ({ ...old, search: ref, version: version || old.version }));
+        }
+      } catch (error) {
+        /* empty */
+      }
+    }
+
+    const isArgsEmpty =
+      Object.keys(props.arguments).length === 0 || (props.arguments.ref === "" && props.arguments.version === "");
+    if (isArgsEmpty) {
+      setSelectedTextAsQuery();
+    }
+  }, []);
 
   const performSearch = React.useCallback(async () => {
     if (query.search === "") {
@@ -73,11 +96,11 @@ export default function Command() {
         <List.Dropdown
           tooltip="Select Bible Version"
           onChange={(version) => setQuery((old) => ({ ...old, version }))}
-          storeValue
-          defaultValue={query.version}
+          value={query.version || undefined}
+          defaultValue={prefs.defaultBibleVersion}
         >
-          {bibleVersions.map((v) => (
-            <List.Dropdown.Item title={v[0]} value={v[1]} key={v[1]} />
+          {bibleVersions.map(([name, abbreviation]) => (
+            <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
           ))}
         </List.Dropdown>
       }
@@ -166,4 +189,28 @@ function getContentsOfLastParenthesis(version: string): string {
     return version; // no parentheses found, return the whole string
   }
   return version.slice(lastOpenParenIndex + 1, lastCloseParenIndex);
+}
+
+/**
+ * Simple parser for bible references.
+ *
+ * Parses "John 3:16 NIV" into { ref: "John 3:16", version: "NIV" }
+ * Parses "John3:16 (NIV)" into { ref: "John 3:16", version: "NIV" }
+ * Parses "John 3:16" into { ref: "John 3:16", version: undefined }
+ * Parses "John3:16 (ZZZZ)" into { ref: "John 3:16 (ZZZZ)", version: undefined }
+ */
+function parseReference(reference: string): { ref: string; version: string | undefined } {
+  const trimmedReference = reference.trim();
+  const lastWord = trimmedReference.split(" ").pop();
+  const version = lastWord ? parseVersionAbbreviation(lastWord, bibleVersions) : undefined;
+  const refWithoutVersion = lastWord && version ? trimmedReference.slice(0, -lastWord.length).trim() : trimmedReference;
+  return { ref: refWithoutVersion, version };
+}
+
+function parseVersionAbbreviation(maybeVersionAbbrev: string, validVersions: typeof bibleVersions): string | undefined {
+  maybeVersionAbbrev = maybeVersionAbbrev
+    .replace(/[()[\]]/gi, "") // remove brackets and parentheses
+    .toUpperCase();
+  const isVersion = validVersions.some(([, abbreviation]) => abbreviation === maybeVersionAbbrev);
+  return isVersion ? maybeVersionAbbrev : undefined;
 }

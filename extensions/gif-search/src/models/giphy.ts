@@ -46,9 +46,12 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
   const slug = slugify(title);
 
   const isGiphyClip = giphyResp.type === "video";
-  const gif_url = giphyResp.images.fixed_height.url;
+  const gif_url = giphyResp.images.original.url;
   const download_url = isGiphyClip
-    ? giphyResp.video?.assets["720p"]?.url ?? giphyResp.video?.assets["360p"].url ?? gif_url
+    ? giphyResp.video?.assets["1080p"]?.url ??
+      giphyResp.video?.assets["720p"]?.url ??
+      giphyResp.video?.assets["360p"].url ??
+      gif_url
     : gif_url;
   const isMP4 = /\.mp4(\?|$)/.test(download_url);
 

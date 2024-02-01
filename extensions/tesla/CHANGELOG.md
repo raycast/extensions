@@ -1,5 +1,15 @@
 # Tesla Changelog
 
+## [Cybertruck + QoL] - 2023-12-09
+
+- Added Cybertruck default/white/black car image options
+- Added Tire Pressure command
+- Added start and stop defrost commands
+
+## [Celsius and Kilometers Support] - 2023-11-19
+
+- Added Celsius and Kilometers option to extension preferences
+
 ## [New Additions] - 2023-09-09
 
 - Refactored to use the Tessie API instead of Teslascope
