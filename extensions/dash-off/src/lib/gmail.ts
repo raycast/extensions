@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
 import { getOAuthToken } from "./withGmailAuth";
 
-export async function getSenderEmailAddress() {
+async function getSenderEmailAddress() {
   const response = await fetch("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
     headers: {
       Authorization: `Bearer ${getOAuthToken()}`,

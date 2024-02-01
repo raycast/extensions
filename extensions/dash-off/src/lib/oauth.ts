@@ -6,7 +6,7 @@ const clientIds = {
   production: "294480066767-1pk79i9blrm0tgva3c0p3a35j6f4upm6.apps.googleusercontent.com",
 };
 
-export const clientId = clientIds.internal;
+export const clientId = clientIds.production;
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.AppURI,
@@ -38,7 +38,6 @@ export async function authorize(): Promise<string> {
   });
   const { authorizationCode } = await client.authorize(authRequest);
 
-  // await client.setTokens(await fetchTokens(authRequest, authorizationCode));
   const tokens = await fetchTokens(authRequest, authorizationCode);
   await client.setTokens(tokens);
 

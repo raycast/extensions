@@ -54,7 +54,9 @@ function EmailMe() {
         });
       }
 
-      await sendEmail(subject, body, toAddress, restAddresses);
+      const bccAddresses = [...restAddresses, ...additionalAddresses];
+
+      await sendEmail(subject, body, toAddress, bccAddresses);
       showHUD("Email sent!");
       popToRoot();
     } catch (error) {
