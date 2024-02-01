@@ -2,7 +2,17 @@
 
 ## [Unreleased]
 
-## [0.1.1] - 2024-02-31
+## [0.1.2] - 2024-02-01
+
+### Added
+
+- Add "Plan task" action for notification created from task
+
+### Fixed
+
+- Fix "Complete task" action
+
+## [0.1.1] - 2024-02-01
 
 ### Added
 

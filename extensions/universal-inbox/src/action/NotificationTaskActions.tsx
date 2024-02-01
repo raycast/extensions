@@ -1,24 +1,13 @@
-import { Notification, getNotificationHtmlUrl } from "../notification";
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { deleteNotification, snoozeNotification, unsubscribeFromNotification } from "./NotificationActions";
+import { Notification, getNotificationHtmlUrl, isNotificationBuiltFromTask } from "../notification";
+import { Action, ActionPanel, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { useMemo, ReactElement } from "react";
+import { PlanTask } from "./PlanTask";
+import { handleErrors } from "../api";
+import { TaskStatus } from "../task";
 import { Page } from "../types";
-
-function deleteNotification(notification: Notification) {
-  console.log(`Deleting notification ${notification.id}`);
-}
-
-function unsubscribeFromNotification(notification: Notification) {
-  console.log(`Unsubcribing from notification ${notification.id}`);
-}
-
-function snoozeNotification(notification: Notification) {
-  console.log(`Snoozing notification ${notification.id}`);
-}
-
-function completeTask(notification: Notification) {
-  console.log(`Completing task ${notification.id}`);
-}
+import fetch from "node-fetch";
 
 interface NotificationTaskActionsProps {
   notification: Notification;
@@ -26,7 +15,7 @@ interface NotificationTaskActionsProps {
   mutate: MutatePromise<Page<Notification> | undefined>;
 }
 
-export function NotificationTaskActions({ notification, detailsTarget }: NotificationTaskActionsProps) {
+export function NotificationTaskActions({ notification, detailsTarget, mutate }: NotificationTaskActionsProps) {
   const notificationHtmlUrl = useMemo(() => {
     return getNotificationHtmlUrl(notification);
   }, [notification]);
@@ -39,26 +28,71 @@ export function NotificationTaskActions({ notification, detailsTarget }: Notific
         title="Delete Notification"
         icon={Icon.Trash}
         shortcut={{ modifiers: ["ctrl"], key: "d" }}
-        onAction={() => deleteNotification(notification)}
+        onAction={() => deleteNotification(notification, mutate)}
       />
       <Action
         title="Unsubscribe From Notification"
         icon={Icon.BellDisabled}
         shortcut={{ modifiers: ["ctrl"], key: "u" }}
-        onAction={() => unsubscribeFromNotification(notification)}
+        onAction={() => unsubscribeFromNotification(notification, mutate)}
       />
       <Action
         title="Snooze"
         icon={Icon.Clock}
         shortcut={{ modifiers: ["ctrl"], key: "s" }}
-        onAction={() => snoozeNotification(notification)}
+        onAction={() => snoozeNotification(notification, mutate)}
       />
       <Action
         title="Complete Task"
         icon={Icon.Calendar}
         shortcut={{ modifiers: ["ctrl"], key: "c" }}
-        onAction={() => completeTask(notification)}
+        onAction={() => completeTask(notification, mutate)}
+      />
+      <Action.Push
+        title="Plan Task..."
+        icon={Icon.Calendar}
+        shortcut={{ modifiers: ["ctrl"], key: "t" }}
+        target={<PlanTask notification={notification} mutate={mutate} />}
       />
     </ActionPanel>
   );
+}
+
+async function completeTask(notification: Notification, mutate: MutatePromise<Page<Notification> | undefined>) {
+  if (!isNotificationBuiltFromTask(notification) || !notification.task) {
+    return;
+  }
+
+  const preferences = getPreferenceValues<UniversalInboxPreferences>();
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Marking task as Done" });
+  try {
+    await mutate(
+      handleErrors(
+        fetch(`${preferences.universalInboxBaseUrl}/api/tasks/${notification.task.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: TaskStatus.Done }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${preferences.apiKey}`,
+          },
+        }),
+      ),
+      {
+        optimisticUpdate(page) {
+          if (page) {
+            page.content = page.content.filter((n) => n.id !== notification.id);
+          }
+          return page;
+        },
+      },
+    );
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Task successfully marked as Done";
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to mark task as Done";
+    toast.message = (error as Error).message;
+    throw error;
+  }
 }

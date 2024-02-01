@@ -62,28 +62,33 @@ export function NotificationActions({ notification, detailsTarget, mutate }: Not
   );
 }
 
-async function deleteNotification(notification: Notification, mutate: MutatePromise<Page<Notification> | undefined>) {
+export async function deleteNotification(
+  notification: Notification,
+  mutate: MutatePromise<Page<Notification> | undefined>,
+) {
   const preferences = getPreferenceValues<UniversalInboxPreferences>();
   const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting notification" });
   try {
     if (isNotificationBuiltFromTask(notification) && notification.task) {
       await mutate(
-        fetch(`${preferences.universalInboxBaseUrl}/api/tasks/${notification.task.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ status: TaskStatus.Deleted }),
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${preferences.apiKey}`,
+        handleErrors(
+          fetch(`${preferences.universalInboxBaseUrl}/api/tasks/${notification.task.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: TaskStatus.Deleted }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${preferences.apiKey}`,
+            },
+          }),
+          {
+            optimisticUpdate(page) {
+              if (page) {
+                page.content = page.content.filter((n) => n.id !== notification.id);
+              }
+              return page;
+            },
           },
-        }),
-        {
-          optimisticUpdate(page) {
-            if (page) {
-              page.content = page.content.filter((n) => n.id !== notification.id);
-            }
-            return page;
-          },
-        },
+        ),
       );
     } else {
       await mutate(
@@ -118,7 +123,7 @@ async function deleteNotification(notification: Notification, mutate: MutateProm
   }
 }
 
-async function unsubscribeFromNotification(
+export async function unsubscribeFromNotification(
   notification: Notification,
   mutate: MutatePromise<Page<Notification> | undefined>,
 ) {
@@ -156,7 +161,10 @@ async function unsubscribeFromNotification(
   }
 }
 
-async function snoozeNotification(notification: Notification, mutate: MutatePromise<Page<Notification> | undefined>) {
+export async function snoozeNotification(
+  notification: Notification,
+  mutate: MutatePromise<Page<Notification> | undefined>,
+) {
   const preferences = getPreferenceValues<UniversalInboxPreferences>();
   const toast = await showToast({ style: Toast.Style.Animated, title: "Snoozing notification" });
   try {
