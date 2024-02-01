@@ -13,7 +13,7 @@ const ActionDataList = ({ guid, onChange }: { guid: string; onChange: (value: Ac
     [guid],
     {
       execute: guid.length !== 0,
-      keepPreviousData: true,
+      /*       keepPreviousData: true, */
       initialData: [],
     },
   );
@@ -23,21 +23,70 @@ const ActionDataList = ({ guid, onChange }: { guid: string; onChange: (value: Ac
       searchBarPlaceholder="Search data"
       isLoading={isLoading}
       navigationTitle="Results"
+      isShowingDetail
       searchBarAccessory={<ActionViewDropdown onChange={onChange} />}
     >
       {data.map((a) => (
         <List.Item
           key={a.guid}
           id={a.guid}
-          title={a.input ?? ""}
-          subtitle={a.output}
-          accessories={[
-            {
-              icon: Icon.Clock,
-              text: intlFormatDistance(new Date(a.updatedAt), new Date()),
-              tooltip: "Last updated",
-            },
-          ]}
+          title={a.input && a.input?.length > 0 ? a.input?.trim() : "No input given"}
+          detail={
+            <List.Item.Detail
+              markdown={`${a.output ?? "No response"}`}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Source" text={a.metadata?.source?.toString()} />
+                  {a.metadata?.generationCost ? (
+                    <List.Item.Detail.Metadata.Label
+                      title="Generation cost"
+                      text={`$${a.metadata?.generationCost?.toString()}`}
+                    />
+                  ) : null}
+                  {a.latency ? (
+                    <List.Item.Detail.Metadata.Label
+                      title="Latency"
+                      text={`${a.latency?.toString()} ms`}
+                      icon={Icon.Bolt}
+                    />
+                  ) : null}
+                  <List.Item.Detail.Metadata.Label
+                    title="Created at"
+                    text={intlFormatDistance(new Date(a.createdAt), new Date())}
+                    icon={Icon.Clock}
+                  />
+                  {a.numInputTokens && a.metadata?.inputCost ? (
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Input token"
+                        text={a.numInputTokens?.toString()}
+                        icon={Icon.Coins}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Input cost"
+                        text={`$${a.metadata?.inputCost?.toString()}`}
+                      />
+                    </>
+                  ) : null}
+                  {a.numOutputTokens && a.metadata?.outputCost ? (
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Output token"
+                        text={a.numOutputTokens?.toString()}
+                        icon={Icon.Coins}
+                      />
+                      <List.Item.Detail.Metadata.Label
+                        title="Output cost"
+                        text={`$${a.metadata?.outputCost?.toString()}`}
+                      />
+                    </>
+                  ) : null}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
         />
       ))}
     </List>
