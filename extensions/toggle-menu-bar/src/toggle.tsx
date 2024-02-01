@@ -1,5 +1,5 @@
 import { getPreferenceValues, closeMainWindow } from "@raycast/api";
-import { runToggleScript as runToggleScript } from "./scriptRunner";
+import { runToggleScript } from "./scriptRunner";
 
 interface Preferences {
   closeWindow: boolean;
