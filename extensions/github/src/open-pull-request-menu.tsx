@@ -26,6 +26,11 @@ function getMaxPullRequestsPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxitems" });
 }
 
+function displayRequestReviewsPreference() {
+  const prefs = getPreferenceValues();
+  return prefs.showrequested == undefined ? false : prefs.showrequested;
+}
+
 function getCheckStateEmoji(pr: PullRequestFieldsFragment): string | null {
   const checkState = pr.commits.nodes ? pr.commits.nodes[0]?.commit.statusCheckRollup?.state : null;
   switch (checkState) {
@@ -61,11 +66,67 @@ function OpenPullRequestMenu() {
     { keepPreviousData: true },
   );
 
+  const { data: rvRequestedData, isLoading: isLoadingReviewRequested } = useCachedPromise(
+    async () => {
+      if (!displayRequestReviewsPreference()) {
+        return null;
+      }
+
+      const result = await github.searchPullRequests({
+        query: `is:open is:pr review-requested:@me archived:false `,
+        numberOfItems: 50,
+      });
+
+      return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
+    },
+    [],
+    { keepPreviousData: true },
+  );
+
+  const amountOfMyPullRequests = data?.length ?? 0;
+  const amountOfReviewRequested = rvRequestedData?.length ?? 0;
+  const totalPullRequests = amountOfMyPullRequests + amountOfReviewRequested;
+
+  const renderRequestedReviews = () => {
+    if (!displayRequestReviewsPreference() || rvRequestedData?.length == 0) {
+      return null;
+    }
+
+    return (
+      <>
+        <MenuBarSection title="Review Requested">
+          <MenuBarItem
+            title="Open Requested Reviews"
+            icon={Icon.Terminal}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => launchMyPullRequestsCommand()}
+          />
+        </MenuBarSection>
+        <MenuBarSection
+          maxChildren={getMaxPullRequestsPreference()}
+          moreElement={(hidden) => (
+            <MenuBarItem title={`... ${hidden} more`} onAction={() => launchMyPullRequestsCommand()} />
+          )}
+        >
+          {rvRequestedData?.map((i) => (
+            <MenuBarItem
+              key={i.id}
+              title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
+              icon="pull-request.svg"
+              tooltip={i.repository.nameWithOwner}
+              onAction={() => open(i.permalink)}
+            />
+          ))}
+        </MenuBarSection>
+      </>
+    );
+  };
+
   return (
     <MenuBarRoot
-      title={displayTitlePreference() ? `${data?.length}` : undefined}
+      title={displayTitlePreference() ? `${totalPullRequests}` : undefined}
       icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingReviewRequested}
       tooltip="GitHub My Open Pull Requests"
     >
       <MenuBarSection title="My Pull Requests">
@@ -98,6 +159,7 @@ function OpenPullRequestMenu() {
           );
         })}
       </MenuBarSection>
+      {renderRequestedReviews()}
       <MenuBarSection>
         <MenuBarItemConfigureCommand />
       </MenuBarSection>
