@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Use OAuth utils] - 2024-01-25
+## [Use OAuth utils] - 2024-02-01
 
 - Use new OAuth utils
 
