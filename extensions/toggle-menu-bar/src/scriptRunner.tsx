@@ -1,5 +1,5 @@
 import { spawnSync } from "child_process";
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 interface OptionData {
@@ -77,6 +77,8 @@ export async function runToggleScript(optionOne: string, optionTwo: string): Pro
   } else {
     await applyToggleOption(optionOne);
   }
+
+  await updateCommandMetadata({ subtitle: `Status: ${getCurrentSystemOption().title}` });
 }
 
 const compareOptions = (option: string, currentOption: OptionData): boolean => {

@@ -1,9 +1,10 @@
 # Toggle Menu Bar Changelog
 
-## [Refactor with new features] - 2024-1-31
+## [Refactor with new features] - 2024-02-01
 
 - Optimized code for better readability.
 - Possibility to switch between all available system options.
+- The current option applied will appear in the extension subtitle.
 
 ## [Troubleshooting added] - 2023-1-30
 
