@@ -53,8 +53,9 @@ function EmailMe() {
           message: "Specify at least one recipient",
         });
       }
+      const bccAddresses = [...restAddresses, ...additionalAddresses];
 
-      await sendEmail(subject, body, toAddress, restAddresses);
+      await sendEmail(subject, body, toAddress, bccAddresses);
       showHUD("Email sent!");
       popToRoot();
     } catch (error) {
