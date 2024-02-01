@@ -4,6 +4,7 @@
 
 - Update the instructions for creating the Google OAuth Consent in README
 - Update Google Consent disclaimer in README
+- Added a message about waiting for Google Verification in README
 
 ## [Fix] - 2024-01-31
 
