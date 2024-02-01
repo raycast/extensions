@@ -33,8 +33,12 @@ You need to create your own OAuth Client ID to be able to use this extension.
 2. Click on `OAuth consent screen` on the left side
 3. Check `External` and click `Create`
 4. In `App Name` type `Raycast Dash Off`
-5. In `User Support Mail` and in `Developer Contact Info` type/select your own email address
-6. Press `Save and Continue`
+5. In `User Support Mail` select your own email address
+6. Go to `Test Users` and add the Gmail email address you'll use with this extension
+7. in `Developer Contact Info` type your own email address
+8. Press `Save and Continue`
+
+> Note: You don't need to publish OAuth App. It's only for your own use.
 
 ### Create Credentials
 
@@ -51,4 +55,4 @@ Now you should be able to send emails from Gmail with Raycast.
 
 ---
 
-Dash Off use and transfer to any other app of information received from G[oogle APIs will adhere to Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes), including the Limited Use requirements.
+Dash Off use and transfer to any other app of information received from [Google APIs will adhere to Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes), including the Limited Use requirements.

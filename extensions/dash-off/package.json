@@ -5,6 +5,9 @@
   "description": "The fastest way to dash off a quick email to yourself and others",
   "icon": "command-icon.png",
   "author": "peduarte",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Productivity"
   ],

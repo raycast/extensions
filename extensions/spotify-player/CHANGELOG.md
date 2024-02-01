@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [New Command] - 2023-01-31
+
+- New `Queue` command allowing the user to view songs/epsiodes in the queue.
+
 ## [Fix] - 2024-01-31
 
 - Fixed a bug that caused launching the Spotify app to not work properly
