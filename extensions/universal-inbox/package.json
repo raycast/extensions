@@ -5,8 +5,6 @@
   "description": "Manage your notifications in a single Universal Inbox",
   "icon": "ui-logo-transparent.png",
   "author": "dax42",
-  "owner": "universal-inbox",
-  "access": "public",
   "version": "0.1.1",
   "categories": [
     "Productivity"
