@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Icon } from "@raycast/api";
 import { useState } from "react";
 
 import axios from "axios";
@@ -38,7 +38,7 @@ export default function Command() {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Humanize" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Humanize" icon={Icon.Wand} onSubmit={handleSubmit} />
           <Action.CopyToClipboard content={humanizedText} />
         </ActionPanel>
       }
