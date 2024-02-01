@@ -1,5 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import tepi, { APIError } from "trilium-etapi";
 
 type Values = {
@@ -77,39 +78,36 @@ async function addNote(attrs: Values) {
 
 export default function Command() {
   const [parentNotes, setParentNotes] = useState<NoteAttributes[]>([]);
-  const [defaultParentNoteId, setDefaultParentNoteId] = useState<string>("");
+
+  const { handleSubmit, itemProps, setValue, reset } = useForm<Values>({
+    initialValues: {
+      title: "",
+      content: "",
+      parentNoteId: "",
+    },
+    onSubmit: async (values) => {
+      await addNote(values);
+      showToast({ title: "Note Created", message: `Title: ${values.title}` });
+      reset();
+    },
+    validation: {
+      title: (value) => (!value?.trim() ? "Note title is required." : undefined),
+      content: (value) => (!value?.trim() ? "Note content is required." : undefined),
+      parentNoteId: (value) => (!value ? "Parent note is required." : undefined),
+    },
+  });
 
   useEffect(() => {
     async function loadParentNotes() {
       const fetchedData = await fetchParentNotes();
       if (fetchedData) {
         setParentNotes(fetchedData.childNotes);
-        setDefaultParentNoteId(fetchedData.mainNotesFolderId);
+        setValue("parentNoteId", fetchedData.mainNotesFolderId);
       }
     }
 
     loadParentNotes();
   }, []);
-
-  function handleSubmit(values: Values) {
-    const trimmedTitle = values.title.trim();
-    const trimmedContent = values.content.trim();
-
-    if (!trimmedTitle || !trimmedContent) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Validation Error",
-        message: !trimmedTitle ? "Note title is required." : "Note content is required.",
-      });
-      return;
-    }
-    addNote({
-      title: values.title,
-      content: values.content,
-      parentNoteId: values.parentNoteId,
-    });
-    showToast({ title: "Created note", message: values.title });
-  }
 
   return (
     <Form
@@ -120,9 +118,9 @@ export default function Command() {
       }
     >
       <Form.Description text="Create a new note in Trilium." />
-      <Form.TextField id="title" title="Note title" placeholder="Enter the note's title" />
-      <Form.TextArea id="content" title="Note" placeholder="Enter the note's content" />
-      <Form.Dropdown id="parentNoteId" title="Parent Note" defaultValue={defaultParentNoteId}>
+      <Form.TextField {...itemProps.title} title="Note Title" placeholder="Enter the note's title" />
+      <Form.TextArea {...itemProps.content} title="Note Content" placeholder="Enter the note's content" />
+      <Form.Dropdown {...itemProps.parentNoteId} title="Parent Note">
         {parentNotes.map((note) => (
           <Form.Dropdown.Item key={note.id} value={note.id} title={note.title} />
         ))}
