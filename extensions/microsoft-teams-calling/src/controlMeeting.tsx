@@ -142,7 +142,8 @@ const sections: Section[] = [
 ];
 const allItems = sections.map((section) => section.items).flat();
 
-const isItemEnabled = (item: Item, state: State) => (state.state.isInMeeting || state.permissions.canPair) && state.permissions[item.permission];
+const isItemEnabled = (item: Item, state: State) =>
+  (state.state.isInMeeting || state.permissions.canPair) && state.permissions[item.permission];
 const itemContent = (item: Item, state: State): Image.ImageLike => {
   const iconName = item.state && !state.state[item.state] && item.iconInactive ? item.iconInactive : item.icon;
   return { source: iconName };

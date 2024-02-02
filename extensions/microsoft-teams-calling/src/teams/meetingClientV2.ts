@@ -149,10 +149,12 @@ export class MeetingClientV2 implements MeetingClient {
   }
 
   private convertUpdateMessageToV1(msg: UpdateMessageV2): UpdateMessage {
-    const meetingState: MeetingState | undefined = msg.meetingUpdate.meetingState ? {
-      ...msg.meetingUpdate.meetingState,
-      isCameraOn: msg.meetingUpdate.meetingState.isVideoOn,
-    } : undefined;
+    const meetingState: MeetingState | undefined = msg.meetingUpdate.meetingState
+      ? {
+          ...msg.meetingUpdate.meetingState,
+          isCameraOn: msg.meetingUpdate.meetingState.isVideoOn,
+        }
+      : undefined;
     return {
       ...msg,
       meetingUpdate: {
