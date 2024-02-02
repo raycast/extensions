@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transfer-sh_upload",
-  "title": "transfer.sh Upload",
+  "title": "Transfer.sh Upload",
   "description": "Allows you to upload a file directly to a transfer.sh instance",
   "icon": "upload-dark.png",
   "author": "PandaDEV",
@@ -48,9 +48,14 @@
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "eslint": "^8.56.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -8,14 +8,14 @@ import {
   Clipboard,
 } from "@raycast/api";
 import path from "path";
-import { pipeline } from "stream";
+import { pipeline, PassThrough } from "stream";
 import { promisify } from "util";
 
 interface Preferences {
   serverUrl: string;
 }
 
-export default async function Command() {
+export default async function Command(): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
 
   try {
@@ -37,7 +37,7 @@ export default async function Command() {
     const fileSizeInBytes = stats.size;
     const fileStream = fs.createReadStream(filePath);
 
-    let uploadedBytes = 0; // Initialize uploaded bytes counter
+    let uploadedBytes = 0;
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -47,14 +47,12 @@ export default async function Command() {
 
     const pipelinePromise = promisify(pipeline);
 
-    // Create a PassThrough stream to monitor upload progress
-    const { PassThrough } = require("stream");
     const monitorStream = new PassThrough();
 
     monitorStream.on("data", (chunk: any) => {
       uploadedBytes += chunk.length;
       const uploadPercentage = Math.round(
-        (uploadedBytes / fileSizeInBytes) * 100
+        (uploadedBytes / fileSizeInBytes) * 100,
       );
       toast.message = `${uploadPercentage}%`;
     });
@@ -73,7 +71,7 @@ export default async function Command() {
     // After upload completes, handle the server's response or perform additional actions as needed
     // Clipboard.copy(responseUrl); // Adjust this line based on your actual response handling
     const response = await uploadStream;
-    Clipboard.copy(response.body);
+    await Clipboard.copy(response.body);
 
     await showToast({
       style: Toast.Style.Success,
