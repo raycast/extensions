@@ -1,13 +1,13 @@
 import { PersistedAction, PersistedApp } from "@kluai/core";
-import { environment } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useCallback } from "react";
 import klu from "../libs/klu";
 import useAbortController from "./use-abort";
+import { useSelectedApplication } from "./use-application";
 import useApplications from "./use-applications";
 
 const useActions = () => {
-  const [selectedApp, setSelectedApp] = useCachedState<PersistedApp | undefined>(environment.extensionName, undefined);
+  const { selectedApp, setSelectedApp } = useSelectedApplication();
 
   const abortable = useAbortController();
 
