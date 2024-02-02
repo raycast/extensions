@@ -38,6 +38,7 @@
       "name": "increase-volume",
       "title": "Increase Volume",
       "subtitle": "Sonos",
+      "disabledByDefault": true,
       "description": "Increase volume in the active group",
       "mode": "no-view"
     },
@@ -45,6 +46,7 @@
       "name": "decrease-volume",
       "title": "Decrease Volume",
       "subtitle": "Sonos",
+      "disabledByDefault": true,
       "description": "Decrease volume in the active group",
       "mode": "no-view"
     },
