@@ -333,6 +333,14 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "subtitle": "Spotify",
+      "description": "See your queue.",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

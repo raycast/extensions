@@ -50,7 +50,7 @@ const accessToken = await oauthService.authorize();
 
 ### Built-in Services
 
-Some services are exposed by default to make it easy to authenticate with them. Here's the full list:
+We expose by default some services using `OAuthService` to make it easy to authenticate with them:
 
 - [Asana](#asana)
 - [GitHub](#github)
@@ -60,13 +60,13 @@ Some services are exposed by default to make it easy to authenticate with them. 
 - [Slack](#slack)
 - [Zoom](#zoom)
 
-These services are all instances of `OAuthService` with the default options being set. However, you're free to configure your own client ID, and URLs for a specific service.
+Some of these services already have a default client configured so that you only have to specify the permission scopes.
 
 #### Asana
 
 ```tsx
 const asana = OAuthService.asana({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
+  clientId: 'custom-client-id', // Optional: If omitted, defaults to Raycast's client ID for Asana
   scope: 'default', // Specify the scopes your application requires
   personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
 });
@@ -76,7 +76,7 @@ const asana = OAuthService.asana({
 
 ```tsx
 const github = OAuthService.github({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
+  clientId: 'custom-client-id', // Optional: If omitted, defaults to Raycast's client ID for GitHub
   scope: 'repo user', // Specify the scopes your application requires
   personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
 });
@@ -84,9 +84,15 @@ const github = OAuthService.github({
 
 #### Google
 
+{% hint style="info" %}
+Google has verification processes based on the required scopes for your extension. Therefore, you need to configure your own client for it.
+{% endhint %}
+
 ```tsx
 const google = OAuthService.google({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
+  clientId: 'custom-client-id',
+  authorizeUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenUrl: 'https://oauth2.googleapis.com/token',
   scope: 'https://www.googleapis.com/auth/drive.readonly', // Specify the scopes your application requires
   personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
 });
@@ -94,10 +100,16 @@ const google = OAuthService.google({
 
 #### Jira
 
+{% hint style="info" %}
+Jira requires scopes to be enabled manually in the OAuth app settings. Therefore, you need to configure your own client for it.
+{% endhint %}
+
 ```tsx
 const jira = OAuthService.jira({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: 'read:jira-user read:jira-work', // Specify the scopes your application requires
+  clientId: 'custom-client-id',
+  authorizeUrl: 'https://auth.atlassian.com/authorize',
+  tokenUrl: 'https://api.atlassian.com/oauth/token',
+  scope: 'read:jira-user read:jira-work offline_access', // Specify the scopes your application requires
   personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
 });
 ```
@@ -106,7 +118,7 @@ const jira = OAuthService.jira({
 
 ```tsx
 const linear = OAuthService.linear({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
+  clientId: 'custom-client-id', // Optional: If omitted, defaults to Raycast's client ID for Linear
   scope: 'read write', // Specify the scopes your application requires
   personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
 });
@@ -116,7 +128,7 @@ const linear = OAuthService.linear({
 
 ```tsx
 const slack = OAuthService.slack({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
+  clientId: 'custom-client-id', // Optional: If omitted, defaults to Raycast's client ID for Slack
   scope: 'emoji:read', // Specify the scopes your application requires
   personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
 });
@@ -124,10 +136,16 @@ const slack = OAuthService.slack({
 
 #### Zoom
 
+{% hint style="info" %}
+Zoom requires scopes to be enabled manually in the OAuth app settings. Therefore, you need to configure your own client for it.
+{% endhint %}
+
 ```tsx
 const zoom = OAuthService.zoom({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: '', // Specify the scopes your application requires
+  clientId: 'custom-client-id',
+  authorizeUrl: 'https://zoom.us/oauth/authorize',
+  tokenUrl: 'https://zoom.us/oauth/token',
+  scope: 'meeting:write', // Specify the scopes your application requires
   personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
 });
 ```

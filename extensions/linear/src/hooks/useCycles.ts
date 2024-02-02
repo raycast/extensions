@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export default function useCycles(teamId?: string, config?: { execute?: boolean }) {
   const { linearClient } = getLinearClient();

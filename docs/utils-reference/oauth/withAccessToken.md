@@ -5,11 +5,11 @@ Higher-order function fetching an authorization token to then access it. This ma
 ## Signature
 
 ```tsx
-function withAccessToken<T>(
+function withAccessToken<T = any>(
   options: WithAccessTokenParameters,
-): <U extends (() => Promise<void> | void) | React.ComponentType<T>>(
+): <U extends WithAccessTokenComponentOrFn<T>>(
   fnOrComponent: U,
-) => U extends () => Promise<void> | void ? Promise<void> : React.FunctionComponent<T>;
+) => U extends (props: T) => Promise<void> | void ? Promise<void> : React.FunctionComponent<T>;
 ```
 
 ### Arguments
@@ -60,6 +60,30 @@ async function AuthorizedCommand() {
 }
 
 export default withAccessToken({ authorize })(AuthorizedCommand);
+```
+
+{% endtab %}
+
+{% tab title="onAuthorize.tsx" %}
+
+```tsx
+import { OAuthService } from "@raycast/utils";
+import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
+
+let linearClient: LinearClient | null = null;
+
+const linear = OAuthService.linear({
+  scope: "read write",
+  onAuthorize({ token }) {
+    linearClient = new LinearClient({ accessToken: token });
+  },
+});
+
+function MyIssues() {
+  return // ...
+}
+
+export default withAccessToken(linear)(View);
 ```
 
 {% endtab %}

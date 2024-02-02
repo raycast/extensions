@@ -1,5 +1,13 @@
 # Linear Changelog
 
+## [Use OAuth utils] - 2024-02-01
+
+- Use new OAuth utils
+
+## [Fix projects search not working] - 2024-01-30
+
+- The projects search was not working in case there were no roadmaps available. This is now fixed.
+
 ## [Add Favorites command] - 2024-01-05
 
 - Add `Favorites` command to browse your Linear favorites right from Raycast.
