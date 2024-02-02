@@ -1,5 +1,9 @@
 # Jira Search Self Hosted Changelog
 
+## [Update] - 2024-02-02
+
+Added new `Search My Issues` command that loads only issues assigned to user owning token added to preferences. 
+
 ## [Update] - 2023-09-07
 
 Updated dependencies
