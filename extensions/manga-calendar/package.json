@@ -13,12 +13,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Latest Publications",
-      "description": "See the current month's releases.",
-      "mode": "view"
-    },
-    {
       "name": "manga",
       "title": "Browse Mangas Published",
       "description": "Browse through all manga collections published in Mexico.",
