@@ -23,8 +23,8 @@
       "mode": "view"
     },
     {
-      "name": "my-issues",
-      "title": "Search My Issues",
+      "name": "open-issues",
+      "title": "Open Issues",
       "subtitle": "Jira Search (Self-Hosted)",
       "description": "Search Jira issues assinged to current user by text, type and project",
       "mode": "view"

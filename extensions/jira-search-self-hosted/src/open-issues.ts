@@ -104,6 +104,7 @@ function buildJql(query: string, assignee: string): string {
     inClause("issueType", issueTypes),
     inClause("status", statuus),
     inClause("assignee", [assignee]),
+    "statusCategory != Done",
     ...textTerms.map((term) => `text~"${term}*"`),
   ];
 
