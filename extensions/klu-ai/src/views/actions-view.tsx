@@ -1,10 +1,8 @@
-import useActions from "@/hooks/use-actions";
-import useApplications from "@/hooks/use-applications";
 import { PersistedApp } from "@kluai/core";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { intlFormatDistance } from "date-fns";
-import { useState } from "react";
 import ActionView from "./action/action-view";
+import useActions from "@/hooks/use-actions";
 
 const ApplicationsDropdown = ({
   applications,
@@ -31,16 +29,11 @@ const ApplicationsDropdown = ({
 };
 
 const ActionsView = () => {
-  const [selectedApp, setSelectedApp] = useState<PersistedApp | undefined>(undefined);
-  // TODO: Save selected app in cache
   const {
-    data: { apps },
-    isLoading: isAppsLoading,
-  } = useApplications();
-
-  const { data: actions, isLoading: isActionsLoading } = useActions(selectedApp ? selectedApp?.guid : apps[0].guid);
-
-  const isLoading = isAppsLoading || isActionsLoading;
+    data: { apps, actions },
+    isLoading,
+    onChangeApp: setSelectedApp,
+  } = useActions();
 
   const { push } = useNavigation();
 

@@ -1,17 +1,22 @@
 import { useCachedPromise } from "@raycast/utils";
 import klu from "../libs/klu";
-import { PersistedAction } from "@kluai/core";
+import { PersistedAction, PersistedApp } from "@kluai/core";
+import { useCallback, useState } from "react";
 
-const useActions = (actionGuid: string) => {
+const useActions = () => {
+  const [selectedApp, setSelectedApp] = useState<PersistedApp | undefined>(undefined);
+
   const hook = useCachedPromise(
-    async (actionGuid: string) => {
-      const data = await klu.apps.getActions(actionGuid);
+    async (selectedApp?: string) => {
+      const workspace = await klu.workspaces.getCurrent();
+      const apps = await klu.workspaces.getApps(workspace.projectGuid);
+      const actions = await klu.apps.getActions(selectedApp ?? apps[0].guid);
 
       interface Action extends PersistedAction {
         modelName: string | undefined;
       }
 
-      const actions = data.map(async (_) => {
+      const newActions = actions.map(async (_) => {
         const action: Action = {
           ..._,
           modelName: undefined,
@@ -25,19 +30,42 @@ const useActions = (actionGuid: string) => {
         return action;
       });
 
-      const newActions = await Promise.all(actions);
+      const data = {
+        apps: apps
+          .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+          .sort((a, b) => {
+            if (a.name < b.name) {
+              return -1;
+            }
+            if (a.name > b.name) {
+              return 1;
+            }
+            return 0;
+          }),
+        workspaceId: workspace.projectGuid,
+        actions: await Promise.all(newActions),
+      };
 
-      return newActions;
+      return data;
     },
-    [actionGuid],
+    [selectedApp?.guid],
     {
-      execute: actionGuid.length !== 0,
       keepPreviousData: true,
-      initialData: [],
+      initialData: {
+        apps: [],
+        workspaceId: "",
+        actions: [],
+      },
     },
   );
 
-  return hook;
+  const onChangeApp = useCallback((app: PersistedApp) => {
+    if (app.guid === selectedApp?.guid) return;
+    setSelectedApp(app);
+    hook.revalidate();
+  }, []);
+
+  return { ...hook, onChangeApp };
 };
 
 export default useActions;
