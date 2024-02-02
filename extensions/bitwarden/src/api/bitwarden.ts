@@ -13,6 +13,7 @@ import {
   EnsureCliBinError,
   ManuallyThrownError,
   NotLoggedInError,
+  tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
 import { join } from "path";
@@ -48,9 +49,17 @@ type ExecProps = {
 const { supportPath } = environment;
 
 const cliInfo = {
+  Δ: "1", // changing this forces a new bin download for people that had a failed one
   version: "2023.10.0",
   sha256: "c129b1806bb00806676298198fb54d540561e2c06d66016f0836e31b1bd65e72",
   downloadPage: "https://github.com/bitwarden/clients/releases",
+  paths: {
+    arm64: "/opt/homebrew/bin/bw",
+    x64: "/usr/local/bin/bw",
+    get downloadedBin() {
+      return join(environment.supportPath, cliInfo.binFilename);
+    },
+  },
   get binFilename() {
     return `bw-${this.version}`;
   },
@@ -64,21 +73,10 @@ const cliInfo = {
 
 const BinDownloadLogger = (() => {
   /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
-   but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard.
+   but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
    Although, the plan is to discontinue this method, if there's a better way of logging errors in the issues dashboard
    or there are no crashes reported with the bin download after some time. */
-
-  const filePath = join(environment.supportPath, "bw-bin-download-error.log");
-  function tryExec<T>(fn: () => T): T extends void ? T : T | undefined;
-  function tryExec<T, F>(fn: () => T, fallbackValue?: F): T | F;
-  function tryExec<T, F>(fn: () => T, fallbackValue?: F): T | F | undefined {
-    try {
-      return fn();
-    } catch {
-      return fallbackValue;
-    }
-  }
-
+  const filePath = join(environment.supportPath, `bw-bin-download-error-${cliInfo.Δ}.log`);
   return {
     logError: (error: any) => tryExec(() => writeFileSync(filePath, error?.message ?? "Unexpected error")),
     clearError: () => tryExec(() => unlinkSync(filePath)),
@@ -100,9 +98,9 @@ export class Bitwarden {
     const serverUrl = getServerUrlPreference();
 
     if (!BinDownloadLogger.hasError()) {
-      this.cliPath = cliPathPref || join(environment.supportPath, cliInfo.binFilename);
+      this.cliPath = cliPathPref || cliInfo.paths.downloadedBin;
     } else {
-      this.cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
+      this.cliPath = process.arch == "arm64" ? cliInfo.paths.arm64 : cliInfo.paths.x64;
     }
 
     this.env = {
@@ -163,8 +161,10 @@ export class Bitwarden {
     } catch (error) {
       toast.message = error instanceof EnsureCliBinError ? error.message : "Please try again";
       toast.style = Toast.Style.Failure;
-      await execa("rm", ["-rf", zipPath, this.cliPath]);
+      await tryExec(() => execa("rm", ["-rf", zipPath, this.cliPath]));
       BinDownloadLogger.logError(error);
+
+      if (error instanceof Error) throw new EnsureCliBinError(`${error.name}: ${error.message}`, error.stack);
       throw error;
     }
   }
