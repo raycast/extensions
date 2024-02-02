@@ -1,11 +1,12 @@
-import { useCachedPromise } from "@raycast/utils";
 import { PersistedAction, PersistedApp } from "@kluai/core";
-import { useCallback, useState } from "react";
+import { environment } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCallback } from "react";
 import klu from "../libs/klu";
 import useWorkspace from "./use-workspace";
 
 const useActions = () => {
-  const [selectedApp, setSelectedApp] = useState<PersistedApp | undefined>(undefined);
+  const [selectedApp, setSelectedApp] = useCachedState<PersistedApp | undefined>(environment.extensionName, undefined);
 
   const { data: workspace, isLoading: isWorkspaceLoading } = useWorkspace();
 
