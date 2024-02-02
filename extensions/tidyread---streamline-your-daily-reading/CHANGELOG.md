@@ -1,5 +1,15 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## [Add Search RSS Page] - 2024-01-30
+- add search rss page
+- add generate digest in background
+- add redirect route to improve onboarding experience
+- add some feedback iamges in degest
+- improve gen digest panel
+- change metadata images
+- fix default maxItemsPerFeed 10 => 5
+
+
 ## [Improving Digest Speed] - 2024-01-26
 
 - add progress display for generating digest

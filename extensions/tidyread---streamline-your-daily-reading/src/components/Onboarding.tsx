@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import { useForm, usePromise } from "@raycast/utils";
 import { saveComeFrom, saveInterest } from "../store"; // Assuming these functions are defined in utils/storage
-import { request } from "../utils/request"; // Import from your utils/request
-import { Source } from "../types";
+import { requestWithFallback } from "../utils/request"; // Import from your utils/request
+import { ExternalSource } from "../types";
 
 // Type definition for recommendation data
 export interface RecommendedSourcesFromInterest {
   title: string;
-  sources: Source[];
+  sources: ExternalSource[];
 }
 
 export type RecommendedData = RecommendedSourcesFromInterest[];
@@ -18,11 +18,14 @@ interface FormData {
   comeFrom: "X(Twitter)" | "Raycast Store" | "Search Engine" | "Social Media" | "Others";
 }
 
-export default function RecommendedForm(props: { onSkip: () => void; onSuccess: (payload: Source[]) => void }) {
+export default function Onboarding(props: { onSkip: () => void; onSuccess: (payload: ExternalSource[]) => void }) {
   const { onSkip, onSuccess } = props;
   const { data } = usePromise(
     async () => {
-      return await request("https://tidyread-pub.s3.us-west-2.amazonaws.com/recommended_data.json").then((res) => {
+      return await requestWithFallback(
+        "https://raw.githubusercontent.com/DophinL/tidyread-cloud/main/data/recommended_data.json",
+        "https://tidyread-pub.s3.us-west-2.amazonaws.com/recommended_data.json",
+      ).then((res) => {
         return res.json() as unknown as RecommendedData;
       });
     },
@@ -64,6 +67,7 @@ export default function RecommendedForm(props: { onSkip: () => void; onSuccess: 
 
   return (
     <Form
+      navigationTitle="Onboarding"
       actions={
         <ActionPanel>
           <Action.SubmitForm icon="send-horizontal.svg" title="Submit" onSubmit={handleSubmit} />
@@ -90,8 +94,8 @@ export default function RecommendedForm(props: { onSkip: () => void; onSuccess: 
         <Form.Dropdown.Item value="Social Media" title="Social Media" />
         <Form.Dropdown.Item value="Others" title="Others" />
       </Form.Dropdown>
-      <Form.Description text="Based on your selection, Tidyread will automatically generate sources to speed up your onboarding process." />
-      <Form.Description text="If you don't like it, feel free to `Skip` in `Actions`." />
+      <Form.Description text="🚀 Based on your selection, Tidyread will automatically generate sources to speed up your onboarding process." />
+      <Form.Description text="🤔 If you don't like it, feel free to `Skip` in `Actions`." />
     </Form>
   );
 }

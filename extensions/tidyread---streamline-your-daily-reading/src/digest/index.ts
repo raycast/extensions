@@ -2,7 +2,7 @@ import Parser from "rss-parser";
 import pLimit from "p-limit";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { load } from "cheerio";
-import { isXML, normalizeUrlForMarkdown, retry, withTimeout } from "../utils/util";
+import { isXML, normalizeUrlForMarkdown, retry, sleep, withTimeout } from "../utils/util";
 import {
   DigestItem,
   DigestStage,
@@ -19,7 +19,7 @@ import { addUtmSourceToUrl } from "../utils/biz";
 // import { fetchMetadata } from "../utils/request";
 
 export type RSSItemWithStatus = RSSItem & {
-  status: SummarizeStatus;
+  status?: SummarizeStatus;
 };
 
 const MIN_SUMMARIZE_CHARACTER_LIMIT = 100;
@@ -174,13 +174,13 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
   // const prefix = `# ${title}  \`at ${dayjs(time).format('HH:mm')}\`\n\n`;
   const prefix = provider.available
     ? ``
-    : `> 💡 **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the original excerpts.\n\n`;
+    : `> 💡 **Your AI Provider has not been configured correctly**. When it is configured, each item will be summarized by AI, otherwise it will only get the raw content. Check [the doc](https://www.tidyread.info/docs/empowered-with-ai) to learn how to config.\n\n`;
   let digest = `${prefix}`;
 
-  digest += `## Introduction\n[Tidyread](https://tidyread.info) generated a flat summary of the content from all the sources today. **Only sources that have a valid RSS Link** can be summarized.\nThe content pulled by rss will be filtered according to the \`Time Span\` you provide, keeping only the content in the time span.\n\n## Summary\n`;
+  digest += `## Introduction\nTidyread generated a flat summary of the content from all the sources today. **Only sources that have a valid [RSS](https://meganesulli.com/blog/how-rss-works/) Link** can be summarized. Check [the doc](https://www.tidyread.info/docs/where-to-find-rss) to know where to find RSS.\n\n## Summary\n`;
 
   if (items.length === 0) {
-    return `${digest}No RSS items remain after filtering.`;
+    return `${digest}No [RSS](https://meganesulli.com/blog/how-rss-works/) items remain after filtering.`;
   }
 
   for (const [index, item] of items.entries()) {
@@ -194,15 +194,22 @@ function generateDigestTemplate(provider: Provider, items: RSSItemWithStatus[]):
   return digest;
 }
 
+function addEllipsis(content: string, maxLen: number): string {
+  if (content.length > maxLen) {
+    return content.substring(0, maxLen) + "...";
+  }
+  return content;
+}
+
 // 格式化单个项目以用于摘要
-function formatItemForDigest(item: RSSItemWithStatus, prefixStr?: string): string {
-  return `### ${prefixStr ?? ""}${item.title}  @([${item?.feed?.title}](${addUtmSourceToUrl(
-    item?.feed?.url ?? "",
-  )}))\n${item.coverImage ? `![cover](${item.coverImage})\n\n` : ""}${
-    item.summary || item.content?.substring(0, THRESHOLDS_FOR_TRUNCATION) + "..."
+export function formatItemForDigest(item: RSSItemWithStatus, prefixStr?: string, ignoreFeed?: boolean): string {
+  return `### ${prefixStr ?? ""}${item.title}  ${
+    ignoreFeed ? "" : `@([${item?.feed?.title}](${addUtmSourceToUrl(item?.feed?.url ?? "")}))`
+  }\n${item.coverImage ? `![cover](${item.coverImage})\n\n` : ""}${
+    item.summary || addEllipsis(item.content || "", THRESHOLDS_FOR_TRUNCATION)
   }\n\n[Source Link](${normalizeUrlForMarkdown(item.link ?? "")})\n\n${
     item.status === "summraized" ? `\`✨AI Summarized\`  ` : ""
-  }${["raw", "failedToSummarize"].includes(item.status) ? `\`Raw Content\`  ` : ""}\`Pub Time: ${dayjs(
+  }${["raw", "failedToSummarize"].includes(item?.status ?? "") ? `\`Raw Content\`  ` : ""}\`Pub Date: ${dayjs(
     item.pubDate,
   ).format("YYYY-MM-DD HH:mm")}\`  \`Creator: ${item.creator ?? "none"}\`\n\n`;
 }
@@ -218,7 +225,7 @@ function extractTextFromXML(xml: string): string {
 }
 
 // 格式化RSS Items，对content进行判断，如果是xml，则提取其中text
-async function formatRSSItems(items: RSSItem[]): Promise<RSSItem[]> {
+export async function formatRSSItems(items: RSSItem[]): Promise<RSSItem[]> {
   return Promise.all(
     items.map(async (item) => {
       const content = (item.content || "").replace("&lt;", "<").replace("&gt;", ">");
@@ -311,16 +318,18 @@ export async function genDigest(options: {
   const [, ...summarizedItems] = await Promise.all([
     translateTitles(),
     ...formatedItems.map((item) =>
-      limit(() =>
-        summarizeItem(
+      limit(async () => {
+        // 避免translateTitles失败
+        await sleep(100);
+        return summarizeItem(
           item,
           options.provider,
           options.requestTimeout,
           options.retryCount,
           options.retryDelay,
           onProgress,
-        ),
-      ),
+        );
+      }),
     ),
   ]);
 
@@ -335,7 +344,7 @@ export async function genDigest(options: {
   return {
     content: generateDigestTemplate(options.provider, formatedItems),
     items: formatedItems.map((item) => ({
-      status: item.status,
+      status: item.status!,
     })),
     createAt: Date.now(),
   };
