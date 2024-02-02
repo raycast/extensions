@@ -80,15 +80,15 @@ export async function deleteNotification(
               Authorization: `Bearer ${preferences.apiKey}`,
             },
           }),
-          {
-            optimisticUpdate(page) {
-              if (page) {
-                page.content = page.content.filter((n) => n.id !== notification.id);
-              }
-              return page;
-            },
-          },
         ),
+        {
+          optimisticUpdate(page) {
+            if (page) {
+              page.content = page.content.filter((n) => n.id !== notification.id);
+            }
+            return page;
+          },
+        },
       );
     } else {
       await mutate(

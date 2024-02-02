@@ -1,12 +1,12 @@
 import { deleteNotification, snoozeNotification, unsubscribeFromNotification } from "./NotificationActions";
 import { Notification, getNotificationHtmlUrl, isNotificationBuiltFromTask } from "../notification";
 import { Action, ActionPanel, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Page, UniversalInboxPreferences } from "../types";
 import { MutatePromise } from "@raycast/utils";
 import { useMemo, ReactElement } from "react";
 import { PlanTask } from "./PlanTask";
 import { handleErrors } from "../api";
 import { TaskStatus } from "../task";
-import { Page } from "../types";
 import fetch from "node-fetch";
 
 interface NotificationTaskActionsProps {
