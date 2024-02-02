@@ -5,7 +5,7 @@ Dealing with OAuth can be tedious. So we've built a set of utilities to make tha
 1. Authenticating with a service using [OAuthService](./OAuthService.md) or built-in providers (e.g GitHub with `OAuthService.github`)
 2. Bringing authentication to Raycast commands using [withAccessToken](./withAccessToken.md) and [`getAccessToken`](./getAccessToken.md)
 
-`OAuthService`, `withAccessToken`, and `getAccessToken` are designed to work together. You'll find below two different use-cases for which you can use these utils.
+`OAuthService`, `withAccessToken`, and `getAccessToken` are designed to work together. You'll find below different use-cases for which you can use these utils.
 
 ## Using a built-in provider
 
@@ -56,5 +56,35 @@ function AuthorizedComponent(props: LaunchProps) {
   return <Detail markdown={`Access token: ${token}`} />;
 }
 
-export default withAccessToken({ authorize: provider.authorize })(AuthorizedComponent);
+export default withAccessToken(provider)(AuthorizedComponent);
+```
+
+## Using `onAuthorize` to initialize an SDK or similar
+
+This example is useful in cases where you want to initialize a third-party client and share it throughout your codebase.
+
+```tsx
+import { OAuthService } from "@raycast/utils";
+import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
+
+let linearClient: LinearClient | null = null;
+
+export const linear = OAuthService.linear({
+  scope: "read write",
+  onAuthorize({ token }) {
+    linearClient = new LinearClient({ accessToken: token });
+  },
+});
+
+export function withLinearClient<T>(Component: React.ComponentType<T>) {
+  return withAccessToken<T>(linear)(Component);
+}
+
+export function getLinearClient(): { linearClient: LinearClient; graphQLClient: LinearGraphQLClient } {
+  if (!linearClient) {
+    throw new Error("No linear client initialized");
+  }
+
+  return { linearClient, graphQLClient: linearClient.client };
+}
 ```
