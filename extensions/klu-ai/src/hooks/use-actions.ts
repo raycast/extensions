@@ -3,10 +3,13 @@ import { environment } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useCallback } from "react";
 import klu from "../libs/klu";
+import useAbortController from "./use-abort";
 import useApplications from "./use-applications";
 
 const useActions = () => {
   const [selectedApp, setSelectedApp] = useCachedState<PersistedApp | undefined>(environment.extensionName, undefined);
+
+  const abortable = useAbortController();
 
   const { data: apps, isLoading: isAppsLoading } = useApplications();
 
@@ -45,11 +48,17 @@ const useActions = () => {
       execute: !isAppsLoading,
       keepPreviousData: true,
       initialData: [],
+      abortable: abortable.ref,
     },
   );
 
   const onChangeApp = useCallback((app: PersistedApp) => {
     if (app.guid === selectedApp?.guid) return;
+    if (abortable.ref.current.signal) {
+      abortable.abort();
+    }
+    abortable.renew();
+
     setSelectedApp(app);
     hook.revalidate();
   }, []);
