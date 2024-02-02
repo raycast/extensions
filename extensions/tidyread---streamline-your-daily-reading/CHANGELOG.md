@@ -2,6 +2,7 @@
 
 ## [Add Search RSS Page] - 2024-01-30
 - add search rss page
+- add generate digest in background
 - add redirect route to improve onboarding experience
 - improve gen digest panel
 - add some feedback iamges in degest

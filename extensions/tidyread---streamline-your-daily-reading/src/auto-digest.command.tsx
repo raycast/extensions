@@ -1,4 +1,4 @@
-import { LaunchType, Toast, environment, showToast, updateCommandMetadata } from "@raycast/api";
+import { LaunchProps, LaunchType, Toast, environment, showToast, updateCommandMetadata } from "@raycast/api";
 import { sendNotification } from "./utils/notify";
 import { normalizePreference } from "./utils/preference";
 import * as chrono from "chrono-node";
@@ -67,7 +67,8 @@ async function handleSuccess() {
   });
 }
 
-export default async function Command() {
+export default async function Command(props: LaunchProps<{ launchContext: { regenerate: boolean } }>) {
+  const regenerate = props?.launchContext?.regenerate ?? false;
   const sources = await getSources();
   const { todayItems } = categorizeSources(sources);
   const { notificationTime } = normalizePreference();
@@ -113,7 +114,7 @@ export default async function Command() {
 
     console.log("todaysDigestExist:", todaysDigestExist);
 
-    if (!todaysDigestExist) {
+    if (!todaysDigestExist || regenerate) {
       await handleGenDigest(async () => {
         await handleSuccess();
       }, true);

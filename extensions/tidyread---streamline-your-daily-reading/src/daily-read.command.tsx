@@ -22,6 +22,7 @@ import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
 import GenTodaysDigestPanel from "./components/GenTodaysDigestPanel";
 import RedirectRoute from "./components/RedirectRoute";
+import GenDigestInBGAction from "./components/GenDigestInBGAction";
 
 export default function DailyReadCommand(props: LaunchProps<{ launchContext: { autoGenDigest: boolean } }>) {
   const autoGenDigest = props?.launchContext?.autoGenDigest ?? false;
@@ -105,6 +106,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                           target={<DigestDetail digest={todaysDigest} />}
                         />
                         {generateDigestActionNode}
+                        <GenDigestInBGAction onSuccess={revalidate} autoFocus />
                         <SharableLinkAction
                           actionTitle="Share This Digest"
                           articleTitle={todaysDigest.title}
@@ -119,7 +121,12 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                 <List.Item
                   title={"Your digest for today has not been generated yet"}
                   subtitle="press Enter to generate"
-                  actions={<CustomActionPanel>{generateDigestActionNode}</CustomActionPanel>}
+                  actions={
+                    <CustomActionPanel>
+                      {generateDigestActionNode}
+                      <GenDigestInBGAction onSuccess={revalidate} />
+                    </CustomActionPanel>
+                  }
                 />
               )}
             </List.Section>
@@ -161,6 +168,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                       />
                       {manageSourceListActionNode}
                       {generateDigestActionNode}
+                      <GenDigestInBGAction onSuccess={revalidate} />
                       {item.rssLink && (
                         <Action.OpenInBrowser
                           shortcut={{ modifiers: ["cmd"], key: "l" }}

@@ -7,6 +7,7 @@ import {
   LaunchType,
   Toast,
   launchCommand,
+  popToRoot,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -20,6 +21,7 @@ import DigestDetail from "./DigestDetail";
 import dayjs from "dayjs";
 import { pick } from "lodash";
 import { formatSeconds } from "../utils/util";
+import GenDigestInBGAction from "./GenDigestInBGAction";
 
 const navTitleMap = {
   generating: "Generating Digest",
@@ -101,6 +103,8 @@ export default function GenTodaysDigestPanel({
   `;
 
   const md = `
+  > 👋 If you don't want to wait here, you can generate in background by pressing \`⌘ + B\`.\n\n
+  ---\n\n
   ${
     status === "failed"
       ? `> ❗**Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed) to know more.\n`
@@ -250,6 +254,12 @@ export default function GenTodaysDigestPanel({
             />
           )}
           {status === "failed" && <Action title="Retry" onAction={retry}></Action>}
+          <GenDigestInBGAction
+            autoFocus
+            onClick={async () => {
+              await popToRoot();
+            }}
+          />
           {status !== "generating" && (
             <>
               <Action.CopyToClipboard title="Copy Content" content={md} />
