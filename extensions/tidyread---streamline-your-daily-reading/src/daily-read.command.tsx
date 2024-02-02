@@ -124,7 +124,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
                   actions={
                     <CustomActionPanel>
                       {generateDigestActionNode}
-                      <GenDigestInBGAction onSuccess={revalidate} />
+                      <GenDigestInBGAction autoFocus onSuccess={revalidate} />
                     </CustomActionPanel>
                   }
                 />
