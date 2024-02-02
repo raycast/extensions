@@ -1,5 +1,9 @@
 # Comics Calendar Changelog
 
+## Major Update - 2024-02-02
+
+- `Current month schedule` command was temporarily removed. This is due to errors on the website where the data is retrieved from.
+
 ## Major Update - 2024-01-26
 
 - Added
