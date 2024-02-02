@@ -46,7 +46,6 @@ const useActions = () => {
     [selectedApp?.guid],
     {
       execute: !isAppsLoading,
-      keepPreviousData: true,
       initialData: [],
       abortable: abortable.ref,
     },
@@ -58,7 +57,6 @@ const useActions = () => {
       abortable.abort();
     }
     abortable.renew();
-
     setSelectedApp(app);
     hook.revalidate();
   }, []);
