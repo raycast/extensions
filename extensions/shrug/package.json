@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Insert a shrug",
+      "title": "Insert a Shrug",
       "description": "Inserts a shrug into the current cursor position.",
       "mode": "no-view"
     }
