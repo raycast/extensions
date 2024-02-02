@@ -73,12 +73,12 @@ const ActiveTaskItem = ({ activeTask, setActiveTask, setSelectedItemId }: Active
   }
 
   // ellipse title & subtitle if too long to not overlap the accessories
-  let truncated: boolean = false;
+  let truncated = false;
   let title: string = activeTask.display_name ? activeTask.display_name : activeTask.name;
   let subtitle: string = activeTask.timer_info ? activeTask.timer_info.note : "";
   const subtitleUnchanged: string = subtitle;
   const titleUnchanged: string = title;
-  const maxLength = 80;
+  const maxLength = 75;
 
   if ((title + subtitle).length > maxLength) {
     truncated = true;
