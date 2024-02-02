@@ -349,7 +349,7 @@ John`,
   },
   {
     id: "ask-question",
-    title: "Ask Question",
+    title: "Ask a Question",
     prompt:
       "Rewrite the following text as a concise and friendly message, phrased as a question. This should be written in a way that it can be sent in a chat application like Slack." +
       generateSelection("Text", "Question"),
