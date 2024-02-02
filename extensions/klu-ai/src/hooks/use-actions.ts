@@ -1,28 +1,33 @@
 import { useCachedPromise } from "@raycast/utils";
-import klu from "../libs/klu";
 import { PersistedAction, PersistedApp } from "@kluai/core";
 import { useCallback, useState } from "react";
+import klu from "../libs/klu";
+import useWorkspace from "./use-workspace";
 
 const useActions = () => {
   const [selectedApp, setSelectedApp] = useState<PersistedApp | undefined>(undefined);
 
-  const hook = useCachedPromise(
-    async (selectedApp?: string) => {
-      const workspace = await klu.workspaces.getCurrent();
-      const apps = await klu.workspaces.getApps(workspace.projectGuid);
-      const actions = await klu.apps.getActions(selectedApp ?? apps[0].guid);
+  const { data: workspace, isLoading: isWorkspaceLoading } = useWorkspace();
 
+  const hook = useCachedPromise(
+    async (workspaceProjectGuid: string, selectedAppGuid?: string) => {
+      const apps = await klu.workspaces.getApps(workspaceProjectGuid);
+      const actions = await klu.apps.getActions(selectedAppGuid ?? apps[0].guid);
+
+      if (!selectedAppGuid) {
+        setSelectedApp(apps[0]);
+      }
       interface Action extends PersistedAction {
         modelName: string | undefined;
       }
 
-      const newActions = actions.map(async (_) => {
+      const newActions = actions.map(async (a) => {
         const action: Action = {
-          ..._,
+          ...a,
           modelName: undefined,
         };
 
-        const { modelId } = await klu.actions.get(_.guid);
+        const { modelId } = await klu.actions.get(a.guid);
         const { llm } = await klu.models.get(modelId);
 
         action.modelName = llm;
@@ -42,18 +47,17 @@ const useActions = () => {
             }
             return 0;
           }),
-        workspaceId: workspace.projectGuid,
         actions: await Promise.all(newActions),
       };
 
       return data;
     },
-    [selectedApp?.guid],
+    [workspace.projectGuid, selectedApp?.guid],
     {
+      execute: !!selectedApp || !isWorkspaceLoading || !workspace.projectGuid,
       keepPreviousData: true,
       initialData: {
         apps: [],
-        workspaceId: "",
         actions: [],
       },
     },
@@ -65,7 +69,7 @@ const useActions = () => {
     hook.revalidate();
   }, []);
 
-  return { ...hook, onChangeApp };
+  return { ...hook, isLoading: isWorkspaceLoading || hook.isLoading, onChangeApp };
 };
 
 export default useActions;

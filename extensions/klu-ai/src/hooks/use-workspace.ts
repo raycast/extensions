@@ -1,0 +1,23 @@
+import klu from "@/libs/klu";
+import { useCachedPromise } from "@raycast/utils";
+
+const useWorkspace = () => {
+  const hook = useCachedPromise(
+    async () => {
+      const workspace = await klu.workspaces.getCurrent();
+
+      return workspace;
+    },
+    [],
+    {
+      keepPreviousData: true,
+      initialData: {
+        workspace: undefined,
+      },
+    },
+  );
+
+  return hook;
+};
+
+export default useWorkspace;
