@@ -3,64 +3,48 @@ import { environment } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { useCallback } from "react";
 import klu from "../libs/klu";
-import useWorkspace from "./use-workspace";
+import useApplications from "./use-applications";
 
 const useActions = () => {
   const [selectedApp, setSelectedApp] = useCachedState<PersistedApp | undefined>(environment.extensionName, undefined);
 
-  const { data: workspace, isLoading: isWorkspaceLoading } = useWorkspace();
+  const { data: apps, isLoading: isAppsLoading } = useApplications();
 
   const hook = useCachedPromise(
-    async (workspaceProjectGuid: string, selectedAppGuid?: string) => {
-      const apps = await klu.workspaces.getApps(workspaceProjectGuid);
+    async (selectedAppGuid?: string) => {
       const actions = await klu.apps.getActions(selectedAppGuid ?? apps[0].guid);
 
       if (!selectedAppGuid) {
         setSelectedApp(apps[0]);
       }
+
       interface Action extends PersistedAction {
         modelName: string | undefined;
       }
 
-      const newActions = actions.map(async (a) => {
-        const action: Action = {
-          ...a,
-          modelName: undefined,
-        };
+      const newActions = actions
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .map(async (a) => {
+          const action: Action = {
+            ...a,
+            modelName: undefined,
+          };
 
-        const { modelId } = await klu.actions.get(a.guid);
-        const { llm } = await klu.models.get(modelId);
+          const { modelId } = await klu.actions.get(a.guid);
+          const { llm } = await klu.models.get(modelId);
 
-        action.modelName = llm;
+          action.modelName = llm;
 
-        return action;
-      });
+          return action;
+        });
 
-      const data = {
-        apps: apps
-          .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-          .sort((a, b) => {
-            if (a.name < b.name) {
-              return -1;
-            }
-            if (a.name > b.name) {
-              return 1;
-            }
-            return 0;
-          }),
-        actions: await Promise.all(newActions),
-      };
-
-      return data;
+      return await Promise.all(newActions);
     },
-    [workspace.projectGuid, selectedApp?.guid],
+    [selectedApp?.guid],
     {
-      execute: !!selectedApp || !isWorkspaceLoading || !workspace.projectGuid,
+      execute: !isAppsLoading,
       keepPreviousData: true,
-      initialData: {
-        apps: [],
-        actions: [],
-      },
+      initialData: [],
     },
   );
 
@@ -70,7 +54,7 @@ const useActions = () => {
     hook.revalidate();
   }, []);
 
-  return { ...hook, isLoading: isWorkspaceLoading || hook.isLoading, onChangeApp };
+  return { ...hook, isLoading: isAppsLoading || hook.isLoading, onChangeApp };
 };
 
 export default useActions;

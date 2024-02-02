@@ -1,8 +1,9 @@
+import useActions from "@/hooks/use-actions";
+import useApplications from "@/hooks/use-applications";
 import { PersistedApp } from "@kluai/core";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { intlFormatDistance } from "date-fns";
 import ActionView from "./action/action-view";
-import useActions from "@/hooks/use-actions";
 
 const ApplicationsDropdown = ({
   applications,
@@ -29,11 +30,9 @@ const ApplicationsDropdown = ({
 };
 
 const ActionsView = () => {
-  const {
-    data: { apps, actions },
-    isLoading,
-    onChangeApp: setSelectedApp,
-  } = useActions();
+  const { data: apps } = useApplications();
+
+  const { data: actions, isLoading, onChangeApp: setSelectedApp } = useActions();
 
   const { push } = useNavigation();
 
