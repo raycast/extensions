@@ -102,9 +102,11 @@ export default function GenTodaysDigestPanel({
   }\n
   `;
 
+  const genBgGuide = `> 👋 If you don't want to wait here, you can generate in background by pressing \`⌘ + B\`.\n\n
+  ---\n\n`;
+
   const md = `
-  > 👋 If you don't want to wait here, you can generate in background by pressing \`⌘ + B\`.\n\n
-  ---\n\n
+  ${status === "generating" ? genBgGuide : ""}
   ${
     status === "failed"
       ? `> ❗**Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed) to know more.\n`
