@@ -6,7 +6,12 @@ let linearClient: LinearClient | null = null;
 export const linear = OAuthService.linear({
   scope: "read write",
   onAuthorize({ token }) {
-    linearClient = new LinearClient({ accessToken: token });
+    linearClient = new LinearClient({
+      accessToken: token,
+      headers: {
+        "public-file-urls-expire-in": "60",
+      },
+    });
   },
 });
 
