@@ -96,7 +96,7 @@ export function VaultProvider(props: VaultProviderProps) {
     }
   }
 
-  async function setCurrentFolder(folderOrId: Nullable<string | Folder>) {
+  function setCurrentFolder(folderOrId: Nullable<string | Folder>) {
     setCurrentFolderId(typeof folderOrId === "string" ? folderOrId : folderOrId?.id);
   }
 

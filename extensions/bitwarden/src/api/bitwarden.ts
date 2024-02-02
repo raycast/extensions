@@ -63,15 +63,26 @@ const cliInfo = {
 } as const;
 
 const BinDownloadLogger = (() => {
-  // The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
-  // but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard.
-  // This can be removed in the future, if there are no crashes reported with the bin download or if there's a better way
-  // of logging errors in the issues dashboard.
+  /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
+   but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard.
+   Although, the plan is to discontinue this method, if there's a better way of logging errors in the issues dashboard
+   or there are no crashes reported with the bin download after some time. */
+
   const filePath = join(environment.supportPath, "bw-bin-download-error.log");
+  function tryExec<T>(fn: () => T): T extends void ? T : T | undefined;
+  function tryExec<T, F>(fn: () => T, fallbackValue?: F): T | F;
+  function tryExec<T, F>(fn: () => T, fallbackValue?: F): T | F | undefined {
+    try {
+      return fn();
+    } catch {
+      return fallbackValue;
+    }
+  }
+
   return {
-    logError: (error: any) => writeFileSync(filePath, error?.message ?? "Unexpected error"),
-    clearError: () => unlinkSync(filePath),
-    hasError: () => existsSync(filePath),
+    logError: (error: any) => tryExec(() => writeFileSync(filePath, error?.message ?? "Unexpected error")),
+    clearError: () => tryExec(() => unlinkSync(filePath)),
+    hasError: () => tryExec(() => existsSync(filePath), false),
   };
 })();
 
