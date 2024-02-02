@@ -45,7 +45,7 @@
       "title": "API Token (Classic Teams)",
       "description": "Get this from your Teams client in Settings → Privacy → Manage API (Only required for Classic Teams)",
       "type": "textfield",
-      "required": true
+      "required": false
     },
     {
       "name": "apiVersion",

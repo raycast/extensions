@@ -6,6 +6,7 @@ import {
   MeetingClient,
   MeetingClientProps,
   MeetingPermissions,
+  MeetingState,
   QueryMeetingStateAction,
   ReactAction,
   ToggleBackgroundBlurAction,
@@ -48,7 +49,7 @@ export interface ParametersV2 {
 interface UpdateMessageV2 {
   apiVersion: string;
   meetingUpdate: {
-    meetingState: MeetingStateV2;
+    meetingState?: MeetingStateV2;
     meetingPermissions: MeetingPermissions;
   };
 }
@@ -148,12 +149,17 @@ export class MeetingClientV2 implements MeetingClient {
   }
 
   private convertUpdateMessageToV1(msg: UpdateMessageV2): UpdateMessage {
-    //Status message in V2 has the isCameraOn attribute renamed to isVideoOn
-    const statusMessageV1: UpdateMessage = msg as unknown as UpdateMessage;
-    if (msg.meetingUpdate.meetingState) {
-      statusMessageV1.meetingUpdate.meetingState.isCameraOn = msg.meetingUpdate.meetingState.isVideoOn;
-    }
-    return statusMessageV1;
+    const meetingState: MeetingState | undefined = msg.meetingUpdate.meetingState ? {
+      ...msg.meetingUpdate.meetingState,
+      isCameraOn: msg.meetingUpdate.meetingState.isVideoOn,
+    } : undefined;
+    return {
+      ...msg,
+      meetingUpdate: {
+        ...msg.meetingUpdate,
+        meetingState,
+      },
+    };
   }
 
   public sendAction(action: MeetingAction) {

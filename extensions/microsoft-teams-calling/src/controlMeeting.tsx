@@ -142,7 +142,7 @@ const sections: Section[] = [
 ];
 const allItems = sections.map((section) => section.items).flat();
 
-const isItemEnabled = (item: Item, state: State) => state.state.isInMeeting && state.permissions[item.permission];
+const isItemEnabled = (item: Item, state: State) => (state.state.isInMeeting || state.permissions.canPair) && state.permissions[item.permission];
 const itemContent = (item: Item, state: State): Image.ImageLike => {
   const iconName = item.state && !state.state[item.state] && item.iconInactive ? item.iconInactive : item.icon;
   return { source: iconName };
@@ -182,7 +182,7 @@ export default function Command() {
   const [meetingState, setMeetingState] = useState<State>();
   const updateState = (msg: UpdateMessage) =>
     setMeetingState({
-      state: msg.meetingUpdate.meetingState,
+      state: msg.meetingUpdate.meetingState ?? emptyState.state, // <<-- Use the empty state if undefined
       permissions: msg.meetingUpdate.meetingPermissions,
     });
   const availableItems = meetingState ? allItems.filter((item) => isItemEnabled(item, meetingState)) : [];

@@ -14,6 +14,7 @@ export interface MeetingPermissions {
   canToggleShareTray: boolean;
   canToggleChat: boolean;
   canStopSharing: boolean;
+  canPair?: boolean; //only available in V2
 }
 
 export type MeetingPermission = keyof MeetingPermissions;
@@ -30,7 +31,7 @@ export interface MeetingState {
 export interface UpdateMessage {
   apiVersion: string;
   meetingUpdate: {
-    meetingState: MeetingState;
+    meetingState?: MeetingState;
     meetingPermissions: MeetingPermissions;
   };
 }
