@@ -1,0 +1,249 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tts",
+  "title": "TTS",
+  "description": "text to tts speech",
+  "icon": "audio-fill.png",
+  "author": "xiaobili",
+  "owner": "billyjr",
+  "access": "public",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tts-microsoft",
+      "title": "TTS-Microsoft",
+      "subtitle": "tts-microsoft",
+      "description": "create tts speech by microsoft",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "data": [
+            {
+              "value": "zh-HK-HiuGaaiNeural",
+              "title": "Microsoft HiuGaai Online (Natural) - Chinese (Cantonese Traditional)"
+            },
+            {
+              "value": "zh-HK-HiuMaanNeural",
+              "title": "Microsoft HiuMaan Online (Natural) - Chinese (Hong Kong)"
+            },
+            {
+              "value": "zh-HK-WanLungNeural",
+              "title": "Microsoft WanLung Online (Natural) - Chinese (Hong Kong)"
+            },
+            {
+              "value": "zh-CN-XiaoxiaoNeural",
+              "title": "Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)"
+            },
+            {
+              "value": "zh-CN-XiaoyiNeural",
+              "title": "Microsoft Xiaoyi Online (Natural) - Chinese (Mainland)"
+            },
+            {
+              "value": "zh-CN-YunjianNeural",
+              "title": "Microsoft Yunjian Online (Natural) - Chinese (Mainland)"
+            },
+            {
+              "value": "zh-CN-YunxiNeural",
+              "title": "Microsoft Yunxi Online (Natural) - Chinese (Mainland)"
+            },
+            {
+              "value": "zh-CN-YunxiaNeural",
+              "title": "Microsoft Yunxia Online (Natural) - Chinese (Mainland)"
+            },
+            {
+              "value": "zh-CN-YunyangNeural",
+              "title": "Microsoft Yunyang Online (Natural) - Chinese (Mainland)"
+            },
+            {
+              "value": "zh-CN-liaoning-XiaobeiNeural",
+              "title": "Microsoft Xiaobei Online (Natural) - Chinese (Northeastern Mandarin)"
+            },
+            {
+              "value": "zh-TW-HsiaoChenNeural",
+              "title": "Microsoft HsiaoChen Online (Natural) - Chinese (Taiwan)"
+            },
+            {
+              "value": "zh-TW-YunJheNeural",
+              "title": "Microsoft YunJhe Online (Natural) - Chinese (Taiwan)"
+            },
+            {
+              "value": "zh-TW-HsiaoYuNeural",
+              "title": "Microsoft HsiaoYu Online (Natural) - Chinese (Taiwan)"
+            },
+            {
+              "value": "zh-CN-shaanxi-XiaoniNeural",
+              "title": "Microsoft Xiaoni Online (Natural) - Chinese (Xi'an)"
+            },
+            {
+              "value": "en-HK-SamNeural",
+              "title": "Microsoft Sam Online (Natural) - English (Hong Kong)"
+            },
+            {
+              "value": "en-US-AvaNeural",
+              "title": "Microsoft Ava Online (Natural) - English (United States)"
+            },
+            {
+              "value": "en-US-AndrewNeural",
+              "title": "Microsoft Andrew Online (Natural) - English (United States)"
+            }
+          ],
+          "description": "语音名称，支持中文、英文",
+          "name": "voice",
+          "title": "Voice",
+          "type": "dropdown",
+          "defaultValue": "zh-CN-XiaoxiaoNeural",
+          "default": "zh-CN-XiaoxiaoNeural",
+          "required": false
+        },
+        {
+          "description": "服务器地址，不填写则使用默认地址",
+          "name": "server",
+          "title": "Server",
+          "type": "textfield",
+          "defaultValue": "http://localhost:5000",
+          "default": "http://localhost:5000",
+          "required": false
+        },
+        {
+          "description": "文件保存路径，不填写则使用默认路径",
+          "name": "directory",
+          "title": "Directory",
+          "type": "directory",
+          "defaultValue": "~/Downloads",
+          "default": "~/Downloads",
+          "required": true
+        },
+        {
+          "description": "是否打开文件夹，不填写则使用默认值",
+          "label": "是否打开文件夹",
+          "name": "open",
+          "title": "Open",
+          "type": "checkbox",
+          "defaultValue": false,
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "tts-openai",
+      "title": "TTS-OpenAI",
+      "subtitle": "tts-openai",
+      "description": "create tts speech by openai",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "description": "语音名称，支持中文、英文",
+          "name": "voice",
+          "title": "Voice",
+          "type": "dropdown",
+          "defaultValue": "alloy",
+          "default": "alloy",
+          "required": false,
+          "data": [
+            {
+              "value": "alloy",
+              "title": "Alloy"
+            },
+            {
+              "value": "echo",
+              "title": "Echo"
+            },
+            {
+              "value": "fable",
+              "title": "Fable"
+            },
+            {
+              "value": "onyx",
+              "title": "Onyx"
+            },
+            {
+              "value": "nova",
+              "title": "Nova"
+            },
+            {
+              "value": "shimmer",
+              "title": "Shimmer"
+            }
+          ]
+        },
+        {
+          "description": "服务器地址，不填写则使用默认地址",
+          "name": "server",
+          "title": "Server",
+          "type": "textfield",
+          "defaultValue": "https://openkey.cloud",
+          "default": "https://openkey.cloud",
+          "required": false
+        },
+        {
+          "description": "OpenAI API Key",
+          "name": "api_key",
+          "title": "API Key",
+          "type": "textfield",
+          "required": true
+        },
+        {
+          "description": "语音模式，默认为tts-1-hd",
+          "name": "mode",
+          "title": "Mode",
+          "type": "textfield",
+          "defaultValue": "tts-1-hd",
+          "default": "tts-1-hd",
+          "required": false
+        },
+        {
+          "description": "文件格式，默认为mp3",
+          "name": "format",
+          "title": "Format",
+          "type": "textfield",
+          "defaultValue": "mp3",
+          "default": "mp3",
+          "required": false
+        },
+        {
+          "description": "文件保存路径，不填写则使用默认路径",
+          "name": "directory",
+          "title": "Directory",
+          "type": "directory",
+          "defaultValue": "~/Downloads",
+          "default": "~/Downloads",
+          "required": false
+        },
+        {
+          "description": "是否打开文件夹，不填写则使用默认值",
+          "label": "是否打开文件夹",
+          "name": "open",
+          "title": "Open",
+          "type": "checkbox",
+          "defaultValue": false,
+          "default": false,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "axios": "^1.6.7",
+    "js-base64": "^3.7.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.6",
+    "@types/react": "18.2.48",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
