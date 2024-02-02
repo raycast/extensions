@@ -158,13 +158,16 @@ function RecentEntries() {
   return recentEntries.length > 0 ? (
     <List.Section title="Recent">
       {(recentEntries || []).map((entry: Entry) => {
+        const title: string = entry.breadcrumps ? `${entry.breadcrumps} / ${entry.name}` : entry.name;
+        const subtitle: string = entry.description;
+
         return (
           <List.Item
             key={"entry-" + entry.id}
             id={"entry-" + entry.id.toString()}
             icon={{ source: Icon.Dot, tintColor: entry.color }}
-            title={entry.breadcrumps ? `${entry.breadcrumps} / ${entry.name}` : entry.name}
-            subtitle={entry.description}
+            title={title}
+            subtitle={subtitle}
             actions={
               <ActionPanel title="Recent Entries">
                 <Action title="Resume Task & Close Window" onAction={() => startTimer(entry, true)} />
