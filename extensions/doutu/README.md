@@ -3,7 +3,7 @@
   <h1 align="center">DouTu Extension for Raycast</h1>
 </p>
 
-🌟 A picture fight during working hours. Summon your friends with quirky pictures and a variety of motion image!
+🌟 A picture fight during working hours. Summon your friends with quirky pictures and a variety of GIF image!
 
 ## Features
 
