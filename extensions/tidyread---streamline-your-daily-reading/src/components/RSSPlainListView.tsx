@@ -61,9 +61,14 @@ export default function RSSPlainListView(props: {
     >
       {
         <List.EmptyView
-          actions={<CustomActionPanel>{manuallyAddActionNode}</CustomActionPanel>}
+          actions={
+            <CustomActionPanel>
+              {manuallyAddActionNode}
+              <Action.OpenInBrowser title="Request A New Source" url="https://tally.so/r/wkEoz6"></Action.OpenInBrowser>
+            </CustomActionPanel>
+          }
           title="No Source Found"
-          description="Press `Enter` to add a source manually"
+          description="Press `Enter` to add a source manually. Or Press `⌘ + Enter` to request a new source"
         />
       }
       {(data || []).map((item) => {

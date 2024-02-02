@@ -89,7 +89,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
           <List.EmptyView
             actions={<CustomActionPanel>{manageSourceListActionNode}</CustomActionPanel>}
             title="No Source Found"
-            description="Go to manage your sources"
+            description="Press `Enter` to manage your sources"
           />
         ) : (
           <>

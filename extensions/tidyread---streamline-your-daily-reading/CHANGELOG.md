@@ -4,8 +4,8 @@
 - add search rss page
 - add generate digest in background
 - add redirect route to improve onboarding experience
-- improve gen digest panel
 - add some feedback iamges in degest
+- improve gen digest panel
 - change metadata images
 - fix default maxItemsPerFeed 10 => 5
 
