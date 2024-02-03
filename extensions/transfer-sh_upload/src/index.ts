@@ -49,7 +49,7 @@ export default async function Command(): Promise<void> {
 
     const monitorStream = new PassThrough();
 
-    monitorStream.on("data", (chunk: any) => {
+    monitorStream.on("data", (chunk) => {
       uploadedBytes += chunk.length;
       const uploadPercentage = Math.round(
         (uploadedBytes / fileSizeInBytes) * 100,
@@ -69,7 +69,7 @@ export default async function Command(): Promise<void> {
     await pipelinePromise(fileStream, monitorStream);
 
     // After upload completes, handle the server's response or perform additional actions as needed
-    // Clipboard.copy(responseUrl); // Adjust this line based on your actual response handling
+    // Clipboard.copy(responseUrl) // Adjust this line based on your actual response handling
     const response = await uploadStream;
     await Clipboard.copy(response.body);
 

@@ -19,7 +19,7 @@
       "title": "Upload File",
       "subtitle": "Upload to transfer.sh instance",
       "description": "Uploads the selcted file from a finder window to a transfer.sh instance",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "preferences": [
