@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cyberchef",
   "title": "CyberChef",
-  "description": "Template for submitting a form",
+  "description": "The Cyber Swiss Army Knife - a web app for encryption, encoding, compression and data analysis",
   "icon": "command-icon.png",
   "author": "mblode",
   "categories": [
