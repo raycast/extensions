@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { List, Image, ActionPanel, Action } from "@raycast/api";
+import { List, Image, ActionPanel, Action, Icon } from "@raycast/api";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { useOrganizations, useWorkspaces } from "./hooks";
 import { Workspace } from "./api";
@@ -40,7 +40,7 @@ function ManageWorkspaces() {
     >
       {filteredWorkspaces.length == 0 && <List.EmptyView title="No Workspaces Found" />}
       {filteredWorkspaces.map((workspace) => {
-        const organization = organizations.find((org) => org.id === workspace.organization_id)!;
+        const organization = organizations.find((org) => org.id === workspace.organization_id);
         const subscription = workspace.business_ws ? "Premium" : workspace.premium ? "Starter" : "Free";
         const role = formatRoleText(workspace.role);
         const logoUrl = workspace.logo_url == defaultWorkspaceLogoUrl ? undefined : workspace.logo_url;
@@ -54,7 +54,7 @@ function ManageWorkspaces() {
         return (
           <List.Item
             title={workspace.name}
-            subtitle={organizations.find((org) => org.id === workspace.organization_id)?.name}
+            subtitle={organization?.name}
             key={workspace.id}
             icon={
               workspace.logo_url == "https://assets.track.toggl.com/images/workspace.jpg"
@@ -67,10 +67,8 @@ function ManageWorkspaces() {
                 markdown={logoUrl ? `![${workspace.name} Logo](${logoUrl})` : undefined}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Organization" text={organization.name} />
-                    <List.Item.Detail.Metadata.Separator />
+                    {organization && <List.Item.Detail.Metadata.Label title="Organization" text={organization.name} />}
                     <List.Item.Detail.Metadata.Label title="Subscription" text={subscription} />
-                    <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Role" text={role} />
                   </List.Item.Detail.Metadata>
                 }
@@ -80,33 +78,42 @@ function ManageWorkspaces() {
               <ActionPanel>
                 <Action
                   title={`${isShoingDetails ? "Hide" : "Show"} Details`}
+                  icon={Icon.Info}
                   onAction={() => setIsShoingDetails((value) => !value)}
                 />
-                <Action.Push
-                  title="Manage Projects"
-                  target={
-                    <ExtensionContextProvider>
-                      <ProjectList {...{ organization, workspace }} isLoading={isLoadingWorkspaces} />
-                    </ExtensionContextProvider>
-                  }
-                />
-                <Action.Push
-                  title="Manage Tags"
-                  shortcut={{ key: "t", modifiers: ["cmd", "shift"] }}
-                  target={
-                    <ExtensionContextProvider>
-                      <TagList workspace={workspace} isLoading={isLoadingWorkspaces} />
-                    </ExtensionContextProvider>
-                  }
-                />
-                <Action.Push
-                  title="Manage Clients"
-                  target={
-                    <ExtensionContextProvider>
-                      <ClientList workspace={workspace} isLoading={isLoadingWorkspaces} />
-                    </ExtensionContextProvider>
-                  }
-                />
+                {organization && (
+                  <Action.OpenInBrowser
+                    url={`https://track.toggl.com/organizations/${organization.id}/workspaces/${workspace.id}`}
+                  />
+                )}
+                <ActionPanel.Section>
+                  {organization && (
+                    <Action.Push
+                      title="Manage Projects"
+                      target={
+                        <ExtensionContextProvider>
+                          <ProjectList {...{ organization, workspace }} isLoading={isLoadingWorkspaces} />
+                        </ExtensionContextProvider>
+                      }
+                    />
+                  )}
+                  <Action.Push
+                    title="Manage Tags"
+                    target={
+                      <ExtensionContextProvider>
+                        <TagList workspace={workspace} isLoading={isLoadingWorkspaces} />
+                      </ExtensionContextProvider>
+                    }
+                  />
+                  <Action.Push
+                    title="Manage Clients"
+                    target={
+                      <ExtensionContextProvider>
+                        <ClientList workspace={workspace} isLoading={isLoadingWorkspaces} />
+                      </ExtensionContextProvider>
+                    }
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
