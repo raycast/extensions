@@ -7,7 +7,7 @@
 ## Major Update - 2024-01-26
 
 - Added
-  - **[New]**Comic browse command
+  - **[New]** Comic browse command
   - New entries to `.gitignore` file
 
 - Changed
