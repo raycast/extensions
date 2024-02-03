@@ -101,7 +101,8 @@ export default function Command() {
   }
 
   async function handleSubmit(values: FormValues) {
-    let { hostUrl, username, password } = getPreferenceValues<Preferences>();
+    const { username, password } = getPreferenceValues<Preferences>();
+    let { hostUrl } = getPreferenceValues<Preferences>();
 
     if (!hostUrl.startsWith("https://") && !hostUrl.startsWith("http://")) {
       hostUrl = `https://${hostUrl}`;
