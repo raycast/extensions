@@ -1,4 +1,20 @@
 {
   "printWidth": 120,
-  "singleQuote": false
+  "singleQuote": false,
+  "importOrder": [
+    "<THIRD_PARTY_MODULES>",
+    "^@raycast/(.*)$",
+    "^@/api/$",
+    "^@/context/$",
+    "^@/hooks/$",
+    "^@/utils/$",
+    "^@/pages/$",
+    "^@/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports"
+  ]
 }
