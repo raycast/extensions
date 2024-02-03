@@ -1,0 +1,230 @@
+import { useMemo, useState, Dispatch, SetStateAction } from "react";
+import { List, ActionPanel, Action, Icon, Color, confirmAlert, Alert } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import dayjs from "dayjs";
+import { useProjects, useClients } from "../hooks";
+import { Organization, Workspace, Project, updateProject, deleteProject } from "../api";
+import ProjectForm from "./ProjectForm";
+import { withToast, Verb } from "../helpers/withToast";
+import { formatSeconds } from "../helpers/formatSeconds";
+
+interface ProjectListProps {
+  organization: Organization;
+  workspace: Workspace;
+  isLoading: boolean;
+}
+
+export default function ProjectList({ organization, workspace, isLoading }: ProjectListProps) {
+  const { projects, isLoadingProjects, revalidateProjects } = useProjects();
+  const { clients, isLoadingClients } = useClients();
+
+  const [statusVisibily, setStatusVisibilty] = useCachedState("projectVisibilyByStatus", statusVisibilyDefault);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+
+  const filteredProjects = useMemo(
+    () => projects.filter((project) => statusVisibily[project.status] && project.workspace_id === workspace.id),
+    [projects, statusVisibily],
+  );
+
+  const canModifyProject =
+    !workspace.only_admins_may_create_projects || workspace.role == "admin" || workspace.role == "projectlead";
+
+  return (
+    <List
+      isLoading={isLoading || isLoadingProjects || isLoadingClients}
+      isShowingDetail={isShowingDetail}
+      actions={
+        <ActionPanel>
+          <ProjectVisibiltyAction {...{ statusVisibily, setStatusVisibilty }} />
+        </ActionPanel>
+      }
+    >
+      {filteredProjects.map((project) => {
+        const client = project.client_id ? clients.find((client) => client.id == project.client_id) : undefined;
+        return (
+          <List.Item
+            key={project.id}
+            title={project.name}
+            subtitle={isShowingDetail ? undefined : client?.name}
+            accessories={
+              isShowingDetail
+                ? undefined
+                : [{ icon: { source: Icon.Dot, tintColor: project.color } }, { tag: project.status }]
+            }
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action
+                    title={`${isShowingDetail ? "Close" : "Show"} Details`}
+                    icon={Icon.Info}
+                    onAction={() => setIsShowingDetail((current) => !current)}
+                  />
+                  {canModifyProject && (
+                    <>
+                      <Action.Push
+                        title="Edit Project"
+                        icon={Icon.Pencil}
+                        shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
+                        target={<ProjectForm {...{ workspace, project, clients, revalidateProjects }} />}
+                      />
+                      <Action
+                        title={`${project.status === "archived" ? "Restore" : "Archive"} Project`}
+                        icon={project.status === "archived" ? Icon.Undo : Icon.Tray}
+                        onAction={() =>
+                          withToast({
+                            verb: project.status === "archived" ? Verb.Restore : Verb.Archive,
+                            noun: "Project",
+                            action: async () => {
+                              await updateProject(project.workspace_id, project.id, {
+                                active: project.status === "archived",
+                              });
+                              revalidateProjects();
+                            },
+                          })
+                        }
+                      />
+                      <ActionPanel.Submenu
+                        title="Delete Project..."
+                        icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                        shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                      >
+                        <Action
+                          title="Delete Only Project"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          onAction={() =>
+                            withToast({
+                              verb: Verb.Delete,
+                              noun: "Project",
+                              action: async () => {
+                                if (
+                                  await confirmAlert({
+                                    title: "Delete Project",
+                                    primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                                    message: "Are you sure you'd like to delete this project?",
+                                  })
+                                ) {
+                                  await deleteProject(project.workspace_id, project.id, "unassign");
+                                  revalidateProjects();
+                                }
+                              },
+                            })
+                          }
+                        />
+                        <Action
+                          title="Delete Project and Associated Time Entries"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          onAction={() =>
+                            withToast({
+                              verb: Verb.Delete,
+                              noun: "Project",
+                              action: async () => {
+                                if (
+                                  await confirmAlert({
+                                    title: "Delete Project",
+                                    primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                                    message:
+                                      "Are you sure you'd like to delete this project and all associated time entries?",
+                                  })
+                                ) {
+                                  await deleteProject(project.workspace_id, project.id, "delete");
+                                  revalidateProjects();
+                                }
+                              },
+                            })
+                          }
+                        />
+                      </ActionPanel.Submenu>
+                    </>
+                  )}
+                </ActionPanel.Section>
+                {canModifyProject && (
+                  <Action.Push
+                    title="New Project"
+                    icon={Icon.Plus}
+                    shortcut={{ key: "n", modifiers: ["cmd"] }}
+                    target={<ProjectForm {...{ workspace, clients, revalidateProjects }} />}
+                  />
+                )}
+                <ProjectVisibiltyAction {...{ statusVisibily, setStatusVisibilty }} />
+              </ActionPanel>
+            }
+            detail={
+              <List.Item.Detail
+                isLoading={isLoading}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    {organization && <List.Item.Detail.Metadata.Label title="Organization" text={organization.name} />}
+                    {workspace && <List.Item.Detail.Metadata.Label title="Workspace" text={workspace.name} />}
+                    <List.Item.Detail.Metadata.Label
+                      title="Color"
+                      text={project.color}
+                      icon={{ source: Icon.Dot, tintColor: project.color }}
+                    />
+                    {client && <List.Item.Detail.Metadata.Label title="Client" text={client.name} />}
+                    <List.Item.Detail.Metadata.Label
+                      title="Start Date"
+                      text={dayjs(project.start_date).format("M/D/YY")}
+                    />
+                    {project.end_date && (
+                      <List.Item.Detail.Metadata.Label
+                        title="End Date"
+                        text={dayjs(project.end_date).format("M/D/YY")}
+                      />
+                    )}
+                    {project.actual_seconds && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Total Hours"
+                        text={formatSeconds(project.actual_seconds)}
+                      />
+                    )}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+          />
+        );
+      })}
+    </List>
+  );
+}
+
+type StatusVisibily = Record<Project["status"], boolean>;
+const statusVisibilyDefault: StatusVisibily = {
+  active: true,
+  archived: false,
+  ended: true,
+  upcoming: true,
+  deleted: false,
+};
+const statuses = ["active", "ended", "upcoming", "archived"] as const;
+
+function ProjectVisibiltyAction({
+  statusVisibily,
+  setStatusVisibilty,
+}: {
+  statusVisibily: StatusVisibily;
+  setStatusVisibilty: Dispatch<SetStateAction<StatusVisibily>>;
+}) {
+  return (
+    <ActionPanel.Submenu
+      title="Show/Hide Projects..."
+      icon={Icon.Eye}
+      shortcut={{ key: "h", modifiers: ["cmd", "shift"] }}
+    >
+      {statuses.map((status) => {
+        const isVisible = statusVisibily[status];
+        const capitalized = status[0].toUpperCase() + status.slice(1);
+        return (
+          <Action
+            key={status}
+            title={`${isVisible ? "Hide" : "Show"} ${capitalized} Projects`}
+            icon={isVisible ? Icon.Eye : Icon.EyeDisabled}
+            onAction={() => setStatusVisibilty((obj) => ({ ...obj, [status]: !isVisible }))}
+          />
+        );
+      })}
+    </ActionPanel.Submenu>
+  );
+}
