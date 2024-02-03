@@ -1,5 +1,7 @@
-import parsedGithubRepoUrl, { Result } from 'parse-github-url'
-import parsedGitlabRepoUrl, { ParseGitlabUrl } from 'gitlab-url-parse'
+import type { Result } from 'parse-github-url'
+import parsedGithubRepoUrl from 'parse-github-url'
+import type { ParseGitlabUrl } from 'gitlab-url-parse'
+import parsedGitlabRepoUrl from 'gitlab-url-parse'
 
 interface ParseRepoUrlResponse {
   owner: string | null | undefined
@@ -21,20 +23,20 @@ export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
   const parsedRepo = isGithubRepo
     ? parsedGithubRepoUrl(repoUrl)
     : isGitlabRepo
-    ? parsedGitlabRepoUrl(repoUrl)
-    : null
+      ? parsedGitlabRepoUrl(repoUrl)
+      : null
 
   return {
     owner: isGithubRepo
       ? (parsedRepo as Result).owner
       : isGitlabRepo
-      ? (parsedRepo as ParseGitlabUrl).user
-      : null,
+        ? (parsedRepo as ParseGitlabUrl).user
+        : null,
     name: isGithubRepo
       ? (parsedRepo as Result).name
       : isGitlabRepo
-      ? (parsedRepo as ParseGitlabUrl).project
-      : null,
+        ? (parsedRepo as ParseGitlabUrl).project
+        : null,
     type: isGithubRepo ? 'github' : isGitlabRepo ? 'gitlab' : undefined,
   }
 }

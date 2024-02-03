@@ -3,8 +3,8 @@ import {
   removeItemFromHistory,
   removeAllItemsFromHistory,
   getHistory,
-} from './utils/history-storage'
-import type { HistoryItem } from './utils/history-storage'
+} from '../utils/history-storage'
+import type { HistoryItem } from '../utils/history-storage'
 import { useId } from 'react'
 
 interface HistoryListItemProps {
