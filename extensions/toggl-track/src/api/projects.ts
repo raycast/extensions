@@ -1,10 +1,64 @@
 import type { ToggleItem } from "./types";
-import { get } from "./togglClient";
-import { hideArchivedProjects } from "../helpers/preferences";
+import { get, post, put, remove } from "./togglClient";
 
 export async function getMyProjects(): Promise<Project[]> {
-  const projects = (await get<Project[]>("/me/projects")) || [];
-  return hideArchivedProjects ? projects.filter((p) => p.active) : projects;
+  return get<Project[]>("/me/projects?include_archived=true");
+}
+
+export function createProject(workspaceId: number, options: ProjectOptions) {
+  return post<Project>(`/workspaces/${workspaceId}/projects`, options);
+}
+
+export function updateProject(workspaceId: number, projectId: number, options: Partial<ProjectOptions>) {
+  return put<Project>(`/workspaces/${workspaceId}/projects/${projectId}`, options);
+}
+
+export function deleteProject(workspaceId: number, projectId: number, deletionMode: "delete" | "unassign") {
+  return remove(`/workspaces/${workspaceId}/projects/${projectId}?teDeletionMode=${deletionMode}`);
+}
+
+export interface ProjectOptions {
+  name: string;
+  /** HEX value of the project color. */
+  color: string;
+  is_private: boolean;
+  /** Start date of the project timeframe in `YYYY-MM-DD` format. */
+  start_date: string;
+  /** End date of the project timeframe in `YYYY-MM-DD` format. */
+  end_date?: string;
+  client_id?: number;
+  client_name?: string;
+  active?: boolean;
+
+  // --- Requires at least Starter subscription --- //
+  template?: boolean;
+  template_id?: number;
+  recurring?: boolean;
+  recurring_parameters?:
+    | {
+        custom_period: number;
+        period: "custom";
+        project_start_date: string;
+      }
+    | {
+        period: "weekly" | "monthly" | "quarterly" | "yearly";
+        project_start_date: string;
+      };
+  estimated_hours?: number;
+  /** Whether estimates are based on task hours. */
+  auto_estimates?: boolean;
+  billable?: boolean;
+  /** Hourly rate, premium feature */
+  rate?: number;
+  /** Project currency */
+  currency?: string;
+
+  /**
+   * Project fixed fee, premium feature
+   *
+   * Requires a Premium or Enterprise subscription
+   */
+  fixed_fee?: number;
 }
 
 /** @see {@link https://developers.track.toggl.com/docs/api/projects#response-8 Toggl Api} */
@@ -55,6 +109,6 @@ interface RecurringParameters {
   estimated_seconds: number;
   parameter_end_date: string | null;
   parameter_start_date: string;
-  period: string;
+  period: "custom" | "weekly" | "monthly" | "quarterly" | "yearly";
   project_start_date: string;
 }
