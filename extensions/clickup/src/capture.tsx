@@ -14,13 +14,19 @@ interface FormValues {
 export default function QuickCapture() {
   // Error message for the primary TextArea
   const [textErrorMessage, setTextErrorMessage] = useState<string | undefined>();
-  const [task, setTask] = useState<TaskItem | undefined>(undefined);
 
   // Clear the text error message
   const clearTextErrorMessage = () => setTextErrorMessage(undefined);
 
   const handleSubmit = async (formValues: FormValues) => {
-    if (!formValues.name) return setTextErrorMessage("Required");
+    if (!formValues.name) {
+      return setTextErrorMessage("Required");
+    }
+
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Creating task...",
+    });
 
     try {
       const res = await ClickUpClient<TaskItem>(`/list/${preferences.listId}/task`, "POST", {
@@ -34,6 +40,10 @@ export default function QuickCapture() {
       if (res.status != 200) {
         throw new Error(`Failed to fetch with status code: ${res.status}`);
       }
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Task created successfully";
+
       popToRoot();
     } catch (error) {
       console.log(error);
@@ -56,12 +66,7 @@ export default function QuickCapture() {
         onChange={clearTextErrorMessage}
       />
       <Form.Separator />
-      <Form.TextArea
-        id="description"
-        placeholder="Description"
-        error={textErrorMessage}
-        onChange={clearTextErrorMessage}
-      />
+      <Form.TextArea id="description" placeholder="Description" />
       <Form.DatePicker title="Due Date" id="dueDate" />
       <Form.Dropdown id="priority" title="Priority" defaultValue="3">
         <Form.Dropdown.Item value="1" title="Urgent" icon="🔴" />
