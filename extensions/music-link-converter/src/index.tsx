@@ -43,8 +43,8 @@ function matchesSongUrlLink(potentialSongUrl: string | undefined): boolean {
     potentialSongUrl.startsWith("https://music.youtube.com/") ||
     potentialSongUrl.startsWith("https://music.amazon.com/") ||
     potentialSongUrl.startsWith("https://www.youtube.com/") ||
-    potentialSongUrl.startsWith("https://deezer.com/") ||
-    potentialSongUrl.startsWith("https://soundcloud.com/") ||
+    potentialSongUrl.startsWith("https://www.deezer.com/") ||
+    potentialSongUrl.startsWith("https://www.soundcloud.com/") ||
     potentialSongUrl.startsWith("https://listen.tidal.com/") ||
     potentialSongUrl.startsWith("https://play.anghami.com/")
   );
