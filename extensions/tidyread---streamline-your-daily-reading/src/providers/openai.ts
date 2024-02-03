@@ -22,13 +22,7 @@ class OpenaiProvider extends Provider {
   }
 
   async summarize(content: string): Promise<string> {
-    const {
-      // httpProxy,
-      // apiHost,
-      // apiKey,
-      apiModel,
-      summarizePrompt,
-    } = this.options;
+    const { apiModel, maxTokens, summarizePrompt } = this.options;
 
     // return new Promise((resolve, reject) => {
     //   sendMessageToChatGPT({
@@ -62,17 +56,16 @@ class OpenaiProvider extends Provider {
     console.log("content to be sum:", content);
 
     try {
-      const stream = await this.client!.beta.chat.completions.stream({
-        model: apiModel ?? "gpt-3.5-turbo-16k",
+      const resp = await this.client!.chat.completions.create({
+        model: apiModel ?? "gpt-3.5-turbo",
         messages: [
           { role: "system", content: summarizePrompt! },
           { role: "user", content: content },
         ],
-        stream: true,
+        max_tokens: maxTokens,
       });
-      const chatCompletion = await stream.finalChatCompletion();
-      // console.log('choooo', chatCompletion.choices)
-      return chatCompletion.choices?.[0]?.message?.content ?? "";
+
+      return resp.choices?.[0]?.message?.content ?? "";
     } catch (error) {
       console.error("Error summarizing content:", error);
       throw error;
@@ -86,19 +79,17 @@ class OpenaiProvider extends Provider {
     const prompt = typeof translatePrompt === "function" ? translatePrompt(lang) : translatePrompt || "";
 
     console.log("prompt is:", prompt);
-    console.log("content to be sum:", content);
+    console.log("content to be translate:", content.length, content);
 
     try {
-      const stream = await this.client!.beta.chat.completions.stream({
-        model: apiModel ?? "gpt-3.5-turbo-16k",
+      const resp = await this.client!.chat.completions.create({
+        model: apiModel ?? "gpt-3.5-turbo",
         messages: [
           { role: "system", content: prompt! },
-          { role: "user", content: content },
+          { role: "user", content },
         ],
-        stream: true,
       });
-      const chatCompletion = await stream.finalChatCompletion();
-      return chatCompletion.choices?.[0]?.message?.content ?? "";
+      return resp.choices?.[0]?.message?.content ?? "";
     } catch (error) {
       console.error("Error translate content:", error);
       throw error;

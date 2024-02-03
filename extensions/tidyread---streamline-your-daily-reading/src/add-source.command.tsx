@@ -1,13 +1,10 @@
-import { LaunchType, launchCommand } from "@raycast/api";
-import SourceForm from "./components/SourceForm";
+import RSSSearch from "./components/RSSSearch";
+import RedirectRoute from "./components/RedirectRoute";
 
 export default function CreateSourceForm() {
   return (
-    <SourceForm
-      onSuccess={async () => {
-        // don't have to handle error here, because it will be handled in SourceForm
-        await launchCommand({ name: "manage-source-list.command", type: LaunchType.UserInitiated });
-      }}
-    />
+    <RedirectRoute>
+      <RSSSearch />
+    </RedirectRoute>
   );
 }

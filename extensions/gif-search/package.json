@@ -15,6 +15,12 @@
     "Fun",
     "Web"
   ],
+  "keywords": [
+    "Tenor",
+    "Giphy",
+    "Finer",
+    "clips"
+  ],
   "commands": [
     {
       "name": "search",

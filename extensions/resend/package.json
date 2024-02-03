@@ -5,6 +5,9 @@
   "description": "Manage API Keys and Domains, and Send Emails using Resend",
   "icon": "resend.png",
   "author": "xmok",
+  "contributors": [
+    "alexs"
+  ],
   "categories": [
     "Communication",
     "Developer Tools"
@@ -40,6 +43,13 @@
       "title": "Emails",
       "subtitle": "Resend",
       "description": "View Logged Emails and Send A New Email",
+      "mode": "view"
+    },
+    {
+      "name": "contacts",
+      "title": "Contacts",
+      "subtitle": "Resend",
+      "description": "View, create, update and delete contacts from your audiences.",
       "mode": "view"
     }
   ],

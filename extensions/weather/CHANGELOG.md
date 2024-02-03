@@ -1,5 +1,9 @@
 # Weather Changelog
 
+## [Clock Format] - 2024-01-28
+
+- Add Support for the 24h clock format. The clock format can be changed in the settings.
+
 ## [Feels Like] - 2023-08-25
 
 - Upgrade to 1.57
