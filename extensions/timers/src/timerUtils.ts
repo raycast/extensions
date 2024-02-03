@@ -9,6 +9,15 @@ import { formatTime, secondsBetweenDates } from "./formatUtils";
 const DATAPATH = environment.supportPath + "/customTimers.json";
 const DEFAULT_PRESET_VISIBLES_FILE = environment.supportPath + "/defaultPresetVisibles.json";
 
+const silentFileDeletion = (fp: string) => {
+  try {
+    unlinkSync(fp);
+  } catch (err) {
+    // only throw if it's not a "file doesn't exist" error
+    if (err instanceof Error && !err.message.includes("ENOENT")) throw err;
+  }
+};
+
 const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
   const prefs = getPreferenceValues<Preferences>();
   if (parseFloat(prefs.volumeSetting) > 5.0) {
@@ -65,8 +74,8 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
 function stopTimer(timerFile: string) {
   const timerFilePath = environment.supportPath + "/" + timerFile;
   const dismissFile = timerFilePath.replace(".timer", ".dismiss");
-  unlinkSync(timerFilePath);
-  unlinkSync(dismissFile);
+  silentFileDeletion(timerFilePath);
+  silentFileDeletion(dismissFile);
 }
 
 function getTimers() {
