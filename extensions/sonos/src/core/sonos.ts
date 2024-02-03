@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { SonosDevice, SonosManager } from "@svrooij/sonos";
 import * as storage from "./storage";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
@@ -106,26 +105,4 @@ export async function getGroupCoordinator(group: string | undefined): Promise<So
   }
 
   return coordinator;
-}
-
-export function useSonos() {
-  const [activeGroup, setActiveGroup] = useState<string>();
-  const [availableGroups, setAvailableGroups] = useState<string[]>();
-
-  useEffect(() => {
-    async function run() {
-      const groups = await getAvailableGroups();
-      setAvailableGroups(groups);
-
-      const activeGroup = await storage.getActiveGroup();
-      setActiveGroup(activeGroup);
-    }
-
-    run();
-  }, []);
-
-  return {
-    availableGroups: availableGroups,
-    activeGroup,
-  };
 }

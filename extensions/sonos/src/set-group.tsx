@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, popToRoot, showToast } from "@raycast/api";
-import { useSonos } from "./core/sonos";
 import { setActiveGroup } from "./core/storage";
+import { useSonos } from "./core/hooks";
 
 export default function SetActiveGroupCommand() {
   const { availableGroups, activeGroup } = useSonos();
