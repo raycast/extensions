@@ -1,0 +1,399 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cyberchef",
+  "title": "CyberChef",
+  "description": "Template for submitting a form",
+  "icon": "command-icon.png",
+  "author": "mblode",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "to-base64",
+      "title": "Base64 encode",
+      "description": "Base64 is a notation for encoding arbitrary byte data using a restricted set of symbols that can be conveniently used by humans and processed by computers. This operation encodes raw data into an ASCII Base64 string. e.g. hello becomes aGVsbG8=",
+      "mode": "view"
+    },
+    {
+      "name": "from-base64",
+      "title": "Base64 decode",
+      "description": "Base64 is a notation for encoding arbitrary byte data using a restricted set of symbols that can be conveniently used by humans and processed by computers. This operation decodes data from an ASCII Base64 string back into its raw format. e.g. aGVsbG8= becomes hello",
+      "mode": "view"
+    },
+    {
+      "name": "csv-to-json",
+      "title": "CSV to JSON",
+      "description": "Converts a CSV file to JSON format.",
+      "mode": "view"
+    },
+    {
+      "name": "json-to-csv",
+      "title": "JSON to CSV",
+      "description": "Converts JSON data to a CSV based on the definition in RFC 4180.",
+      "mode": "view"
+    },
+    {
+      "name": "jwt-decode",
+      "title": "JWT decode",
+      "description": "Decodes a JSON Web Token without checking whether the provided secret / private key is valid. Use 'JWT Verify' to check if the signature is valid as well.",
+      "mode": "view"
+    },
+    {
+      "name": "url-encode",
+      "title": "URL encode",
+      "description": "Encodes problematic characters into percent-encoding, a format supported by URIs/URLs. e.g. = becomes %3d",
+      "mode": "view"
+    },
+    {
+      "name": "url-decode",
+      "title": "URL decode",
+      "description": "Converts URI/URL percent-encoded characters back to their raw values. e.g. %3d becomes =",
+      "mode": "view"
+    },
+    {
+      "name": "generate-uuid",
+      "title": "Generate UUID",
+      "description": "Generates an RFC 4122 version 4 compliant Universally Unique Identifier (UUID), also known as a Globally Unique Identifier (GUID). A version 4 UUID relies on random numbers, in this case generated using window.crypto if available and falling back to Math.random if not.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-qr-code",
+      "title": "Generate QR code",
+      "description": "Generates a Quick Response (QR) code from the input text. A QR code is a type of matrix barcode (or two-dimensional barcode) first designed in 1994 for the automotive industry in Japan. A barcode is a machine-readable optical label that contains information about the item to which it is attached.",
+      "mode": "view"
+    },
+    {
+      "name": "generate-lorem-ipsum",
+      "title": "Generate Lorem Ipsum",
+      "description": "Generate varying length lorem ipsum placeholder text.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-area",
+      "title": "Convert area",
+      "description": "Converts a unit of area to another format.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-mass",
+      "title": "Convert mass",
+      "description": "Converts a unit of mass to another format.",
+      "mode": "view"
+    },
+    {
+      "name": "parse-colour-code",
+      "title": "Parse colour code",
+      "description": "Converts a colour code in a standard format to other standard formats and displays the colour itself. Example inputs: #d9edf7 or rgba(217,237,247,1) or hsla(200,65%,91%,1) or cmyk(0.12, 0.04, 0.00, 0.03)",
+      "mode": "view"
+    },
+    {
+      "name": "unescape-string",
+      "title": "Unescape string",
+      "description": "Unescapes characters in a string that have been escaped. For example, Don\\'t stop me now becomes Don't stop me now.",
+      "mode": "view"
+    },
+    {
+      "name": "escape-string",
+      "title": "Escape string",
+      "description": "Escapes special characters in a string so that they do not cause conflicts. For example, Don't stop me now becomes Don\\'t stop me now.",
+      "mode": "view"
+    },
+    {
+      "name": "pseudo",
+      "title": "Pseudo-random number generator",
+      "description": "A cryptographically-secure pseudo-random number generator (PRNG). This operation uses the browser's built-in crypto.getRandomValues() method if available. If this cannot be found, it falls back to a Fortuna-based PRNG algorithm.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-speed",
+      "title": "Convert speed",
+      "description": "Converts a unit of speed to another format.",
+      "mode": "view"
+    },
+    {
+      "name": "convert-distance",
+      "title": "Convert distance",
+      "description": "Converts a unit of distance to another format.",
+      "mode": "view"
+    },
+    {
+      "name": "to-upper-case",
+      "title": "To upper case",
+      "description": "Converts the input string to upper case, optionally limiting scope to only the first character in each word, sentence or paragraph.",
+      "mode": "view"
+    },
+    {
+      "name": "regular-expression",
+      "title": "Regular expression",
+      "description": "Define your own regular expression (regex) to search the input data with, optionally choosing from a list of pre-defined patterns. Supports extended regex syntax including the 'dot matches all' flag, named capture groups, full unicode coverage (including \\p{} categories and scripts as well as astral codes) and recursive matching.",
+      "mode": "view"
+    },
+    {
+      "name": "find-replace",
+      "title": "Find/replace",
+      "description": "Replaces all occurrences of the first string with the second. Includes support for regular expressions (regex), simple strings and extended strings (which support \\n, \\r, \\t, \\b, \\f and escaped hex bytes using \\x notation, e.g. \\x00 for a null byte).",
+      "mode": "view"
+    },
+    {
+      "name": "pad-lines",
+      "title": "Pad lines",
+      "description": "Add the specified number of the specified character to the beginning or end of each line",
+      "mode": "view"
+    },
+    {
+      "name": "sort",
+      "title": "Sort",
+      "description": "Alphabetically sorts strings separated by the specified delimiter.",
+      "mode": "view"
+    },
+    {
+      "name": "count-occurrences",
+      "title": "Count occurrences",
+      "description": "Counts the number of times the provided string occurs in the input.",
+      "mode": "view"
+    },
+    {
+      "name": "unique",
+      "title": "Unique",
+      "description": "Removes duplicate strings from the input.",
+      "mode": "view"
+    },
+    {
+      "name": "tail",
+      "title": "Tail",
+      "description": "Like the UNIX tail utility. Gets the last n lines. Optionally you can select all lines after line n by entering a negative value for n. The delimiter can be changed so that instead of lines, fields (i.e. commas) are selected instead.",
+      "mode": "view"
+    },
+    {
+      "name": "head",
+      "title": "Head",
+      "description": "Like the UNIX head utility. Gets the first n lines. You can select all but the last n lines by entering a negative value for n. The delimiter can be changed so that instead of lines, fields (i.e. commas) are selected instead.",
+      "mode": "view"
+    },
+    {
+      "name": "split",
+      "title": "Split",
+      "description": "Splits a string into sections around a given delimiter.",
+      "mode": "view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Shuffle",
+      "description": "Randomly reorders input elements.",
+      "mode": "view"
+    },
+    {
+      "name": "reverse",
+      "title": "Reverse",
+      "description": "Reverses the input string.",
+      "mode": "view"
+    },
+    {
+      "name": "to-table",
+      "title": "To table",
+      "description": "Data can be split on different characters and rendered as an HTML, ASCII or Markdown table with an optional header row. Supports the CSV (Comma Separated Values) file format by default. Change the cell delimiter argument to \t to support TSV (Tab Separated Values) or | for PSV (Pipe Separated Values). You can enter as many delimiters as you like. Each character will be treat as a separate possible delimiter.",
+      "mode": "view"
+    },
+    {
+      "name": "add-line-numbers",
+      "title": "Add line numbers",
+      "description": "Adds line numbers to the output.",
+      "mode": "view"
+    },
+    {
+      "name": "remove-line-numbers",
+      "title": "Remove line numbers",
+      "description": "Removes line numbers from the output if they can be trivially detected.",
+      "mode": "view"
+    },
+    {
+      "name": "swap-case",
+      "title": "Swap case",
+      "description": "Converts uppercase letters to lowercase ones, and lowercase ones to uppercase ones.",
+      "mode": "view"
+    },
+    {
+      "name": "to-lower-case",
+      "title": "To lower case",
+      "description": "Converts every character in the input to lower case.",
+      "mode": "view"
+    },
+    {
+      "name": "remove-whitespace",
+      "title": "Remove whitespace",
+      "description": "Optionally removes all spaces, carriage returns, line feeds, tabs and form feeds from the input data.",
+      "mode": "view"
+    },
+    {
+      "name": "translate-date-time-format",
+      "title": "Translate DateTime format",
+      "description": "Parses a datetime string in one format and re-writes it in another.",
+      "mode": "view"
+    },
+    {
+      "name": "get-time",
+      "title": "Get time",
+      "description": "Generates a timestamp showing the amount of time since the UNIX epoch (1970-01-01 00:00:00 UTC). Uses the W3C High Resolution Time API.",
+      "mode": "view"
+    },
+    {
+      "name": "to-unix-timestamp",
+      "title": "To UNIX timestamp",
+      "description": "Parses a datetime string in UTC and returns the corresponding UNIX timestamp. e.g. Mon 1 January 2001 11:00:00 becomes 978346800. A UNIX timestamp is a 32-bit value representing the number of seconds since January 1, 1970 UTC (the UNIX epoch).",
+      "mode": "view"
+    },
+    {
+      "name": "from-unix-timestamp",
+      "title": "From UNIX timestamp",
+      "description": "Converts a UNIX timestamp to a datetime string. e.g. 978346800 becomes Mon 1 January 2001 11:00:00 UTC. A UNIX timestamp is a 32-bit value representing the number of seconds since January 1, 1970 UTC (the UNIX epoch).",
+      "mode": "view"
+    },
+    {
+      "name": "parse-date-time",
+      "title": "Parse DateTime",
+      "description": "Parses a DateTime string in your specified format and displays it in whichever timezone you choose",
+      "mode": "view"
+    },
+    {
+      "name": "extract-file-paths",
+      "title": "Extract file paths",
+      "description": "Extracts anything that looks like a Windows or UNIX file path.",
+      "mode": "view"
+    },
+    {
+      "name": "extract-dates",
+      "title": "Extract dates",
+      "description": "Extracts dates in the following formats: yyyy-mm-dd or dd/mm/yyyy or mm/dd/yyyy. Dividers can be any of /, -, . or space",
+      "mode": "view"
+    },
+    {
+      "name": "extract-email-addresses",
+      "title": "Extract email addresses",
+      "description": "Extracts all email addresses from the input.",
+      "mode": "view"
+    },
+    {
+      "name": "extract-domains",
+      "title": "Extract domains",
+      "description": "Extracts fully qualified domain names. Note that this will not include paths. Use Extract URLs to find entire URLs.",
+      "mode": "view"
+    },
+    {
+      "name": "extract-ip-addresses",
+      "title": "Extract IP addresses",
+      "description": "Extracts all IPv4 and IPv6 addresses.",
+      "mode": "view"
+    },
+    {
+      "name": "generic-code-beautify",
+      "title": "Generic code beautify",
+      "description": "Attempts to pretty print C-style languages such as C, C++, C#, Java, PHP, JavaScript etc.",
+      "mode": "view"
+    },
+    {
+      "name": "md5",
+      "title": "MD5",
+      "description": "MD5 (Message-Digest 5) is a widely used hash function. It has been used in a variety of security applications and is also commonly used to check the integrity of files.",
+      "mode": "view"
+    },
+    {
+      "name": "syntax-highlighter",
+      "title": "Syntax highlighter",
+      "description": "Adds syntax highlighting to a range of source code languages. Note that this will not indent the code. Use one of the 'Beautify' operations for that.",
+      "mode": "view"
+    },
+    {
+      "name": "render-markdown",
+      "title": "Render markdown",
+      "description": "Renders input Markdown as HTML. HTML rendering is disabled to avoid XSS.",
+      "mode": "view"
+    },
+    {
+      "name": "javascript-minify",
+      "title": "JavaScript minify",
+      "description": "Compresses JavaScript code.",
+      "mode": "view"
+    },
+    {
+      "name": "javascript-beautify",
+      "title": "JavaScript beautify",
+      "description": "Parses and pretty prints valid JavaScript code. Also works with JavaScript Object Notation (JSON).",
+      "mode": "view"
+    },
+    {
+      "name": "json-beautify",
+      "title": "JSON beautify",
+      "description": "Indents and pretty prints JavaScript Object Notation (JSON) code.",
+      "mode": "view"
+    },
+    {
+      "name": "json-minify",
+      "title": "JSON minify",
+      "description": "Compresses JavaScript Object Notation (JSON) code.",
+      "mode": "view"
+    },
+    {
+      "name": "sql-beautify",
+      "title": "SQL beautify",
+      "description": "Indents and prettifies Structured Query Language (SQL) code.",
+      "mode": "view"
+    },
+    {
+      "name": "css-beautify",
+      "title": "CSS beautify",
+      "description": "Indents and prettifies Cascading Style Sheets (CSS) code.",
+      "mode": "view"
+    },
+    {
+      "name": "css-minify",
+      "title": "CSS minify",
+      "description": "Compresses Cascading Style Sheets (CSS) code.",
+      "mode": "view"
+    },
+    {
+      "name": "diff",
+      "title": "Diff",
+      "description": "Compares two inputs (separated by the specified delimiter) and highlights the differences between them.",
+      "mode": "view"
+    },
+    {
+      "name": "to-snake-case",
+      "title": "To snake case",
+      "description": "Converts the input string to snake case. Snake case is all lower case with underscores as word boundaries. e.g. this_is_snake_case",
+      "mode": "view"
+    },
+    {
+      "name": "to-kebab-case",
+      "title": "To kebab case",
+      "description": "Converts the input string to kebab case. Kebab case is all lower case with dashes as word boundaries. e.g. this-is-kebab-case",
+      "mode": "view"
+    },
+    {
+      "name": "to-camel-case",
+      "title": "To camel case",
+      "description": "Converts the input string to camel case. Camel case is all lower case except letters after word boundaries which are uppercase. e.g. thisIsCamelCase",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "query-string": "^8.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
