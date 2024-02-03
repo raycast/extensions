@@ -155,6 +155,7 @@ export default function ProjectList({ organization, workspace, isLoading }: Proj
                 isLoading={isLoading}
                 metadata={
                   <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="ID" text={workspace.id.toString()} />
                     {organization && <List.Item.Detail.Metadata.Label title="Organization" text={organization.name} />}
                     {workspace && <List.Item.Detail.Metadata.Label title="Workspace" text={workspace.name} />}
                     <List.Item.Detail.Metadata.Label

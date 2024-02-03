@@ -67,6 +67,7 @@ function ManageWorkspaces() {
                 markdown={logoUrl ? `![${workspace.name} Logo](${logoUrl})` : undefined}
                 metadata={
                   <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="ID" text={workspace.id.toString()} />
                     {organization && <List.Item.Detail.Metadata.Label title="Organization" text={organization.name} />}
                     <List.Item.Detail.Metadata.Label title="Subscription" text={subscription} />
                     <List.Item.Detail.Metadata.Label title="Role" text={role} />
