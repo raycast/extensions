@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 
 import { useResult } from "@/hooks/use-result";
-
-import type { Result } from "../types";
+import type { Result } from "@/types";
 
 const contentBlobURL = "https://github.com/mdn/content/blob/main";
 const translatedContentBlobURL = "https://github.com/mdn/translated-content/blob/main";
