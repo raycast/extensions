@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidyread---streamline-your-daily-reading",
   "title": "TidyRead - Streamline Your Daily Reading",
-  "description": "Enhance controlled, efficient, and organized information intake using an AI-powered digest from RSS feeds. More at https://tidyread.info.",
+  "description": "An AI-powered digest tool based on RSS feeds. Enhance controlled, efficient, and organized information intake. More at https://tidyread.info.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "categories": [
@@ -35,9 +35,9 @@
   "commands": [
     {
       "name": "manage-source-list.command",
-      "title": "Manage Source List",
+      "title": "Manage Sources",
       "subtitle": "TidyRead",
-      "description": "Manage your read sources, including adding, editing, deleting, and scheduling.",
+      "description": "Manage your reading sources, including adding, editing, deleting, and scheduling.",
       "mode": "view"
     },
     {

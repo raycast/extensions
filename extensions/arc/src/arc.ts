@@ -92,6 +92,9 @@ export async function findTab(url: string) {
 function runAppleScriptActionOnTab(tab: Tab, action: string, activate = false) {
   return runAppleScript(`
     tell application "Arc"
+    if (count of windows) is 0 then
+    make new window
+  end if
       set tabIndex to 1
       repeat with aTab in every tab of first window
         if id of aTab is "${tab.id}" then

@@ -5,20 +5,20 @@ Higher-order function fetching an authorization token to then access it. This ma
 ## Signature
 
 ```tsx
-function withAccessToken<T>(
+function withAccessToken<T = any>(
   options: WithAccessTokenParameters,
-): <U extends (() => Promise<void> | void) | React.ComponentType<T>>(
+): <U extends WithAccessTokenComponentOrFn<T>>(
   fnOrComponent: U,
-) => U extends () => Promise<void> | void ? Promise<void> : React.FunctionComponent<T>;
+) => U extends (props: T) => Promise<void> | void ? Promise<void> : React.FunctionComponent<T>;
 ```
 
 ### Arguments
 
 `options` is an object containing:
-- `options.authorize` is a function that initiates the OAuth token retrieval process. It returns a promise that resolves to an access token.
-- `options.personalAccessToken` is an optional string that represents an already obtained personal access token. When `options.personalAccessToken` is provided, it uses that token. Otherwise, it calls `options.authorize` to fetch an OAuth token asynchronously.
-- `options.client` is an optional instance of a PKCE Client that you can create using Raycast API. This client is used to return the `idToken` as part of the `onAuthorize` callback below.
-- `options.onAuthorize` is an optional callback function that is called once the user has been properly logged in through OAuth. This function is called with the `token`, its type (whether it comes from an OAuth flow or if it's a personal access token) and an `idToken` if `options.client` is provided and if it's returned in the initial token set.
+- `options.authorize`: a function that initiates the OAuth token retrieval process. It returns a promise that resolves to an access token.
+- `options.personalAccessToken`: an optional string that represents an already obtained personal access token. When `options.personalAccessToken` is provided, it uses that token. Otherwise, it calls `options.authorize` to fetch an OAuth token asynchronously.
+- `options.client`: an optional instance of a PKCE Client that you can create using Raycast API. This client is used to return the `idToken` as part of the `onAuthorize` callback below.
+- `options.onAuthorize`: an optional callback function that is called once the user has been properly logged in through OAuth. This function is called with the `token`, its type (`oauth` if it comes from an OAuth flow or `personal` if it's a personal access token), and `idToken` if it's returned from `options.client`'s initial token set.
 
 ### Return
 
@@ -29,7 +29,6 @@ Note that the access token isn't injected into the wrapped component props. Inst
 {% endhint %}
 
 ## Example
-
 
 {% tabs %}
 {% tab title="view.tsx" %}
@@ -63,6 +62,30 @@ export default withAccessToken({ authorize })(AuthorizedCommand);
 ```
 
 {% endtab %}
+
+{% tab title="onAuthorize.tsx" %}
+
+```tsx
+import { OAuthService } from "@raycast/utils";
+import { LinearClient, LinearGraphQLClient } from "@linear/sdk";
+
+let linearClient: LinearClient | null = null;
+
+const linear = OAuthService.linear({
+  scope: "read write",
+  onAuthorize({ token }) {
+    linearClient = new LinearClient({ accessToken: token });
+  },
+});
+
+function MyIssues() {
+  return // ...
+}
+
+export default withAccessToken(linear)(View);
+```
+
+{% endtab %}
 {% endtabs %}
 
 ## Types
@@ -84,4 +107,10 @@ type WithAccessTokenParameters = {
   personalAccessToken?: string;
   onAuthorize?: (params: OnAuthorizeParams) => void;
 };
+```
+
+### WithAccessTokenComponentOrFn
+
+```ts
+type WithAccessTokenComponentOrFn<T = any> = ((params: T) => Promise<void> | void) | React.ComponentType<T>;
 ```

@@ -111,6 +111,16 @@ const EndOfInterval = () => {
   let markdownImage;
   let usingGiphy = false;
 
+  if (preferences.enableConfetti) {
+    exec("open raycast://extensions/raycast/raycast/confetti", function (err, stdout, stderr) {
+      if (err) {
+        // handle error
+        console.error(err);
+        return;
+      }
+    });
+  }
+
   if (preferences.sound) {
     exec(`afplay /System/Library/Sounds/${preferences.sound}.aiff -v 10 && $$`);
   }
