@@ -1,9 +1,14 @@
-import { Action, ActionPanel, Icon, List, popToRoot, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, popToRoot, showToast } from "@raycast/api";
 import { setActiveGroup } from "./core/storage";
 import { useSonos } from "./core/hooks";
+import { NoSystemContent } from "./core/utils";
 
 export default function SetActiveGroupCommand() {
-  const { availableGroups, activeGroup } = useSonos();
+  const { availableGroups, activeGroup, systemDetected } = useSonos();
+
+  if (!systemDetected) {
+    return <Detail isLoading={false} markdown={NoSystemContent} />;
+  }
 
   return (
     <List filtering={false} navigationTitle="Which group would you like to control?">

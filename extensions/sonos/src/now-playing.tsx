@@ -1,8 +1,8 @@
 import { MenuBarExtra } from "@raycast/api";
-import { useSerializedState } from "./core/hooks";
+import { useCurrentState } from "./core/hooks";
 
 export default function Command() {
-  const { title, loading } = useSerializedState();
+  const { title, loading } = useCurrentState();
 
   return <MenuBarExtra isLoading={loading} title={title ?? ""} />;
 }

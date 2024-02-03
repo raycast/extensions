@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { formatPlayingState, getAvailableGroups, getLatestState } from "./sonos";
 import * as storage from "./storage";
 
-export function useSerializedState() {
+export function useCurrentState() {
   const [title, setTitle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,14 +27,19 @@ export function useSerializedState() {
 export function useSonos() {
   const [activeGroup, setActiveGroup] = useState<string>();
   const [availableGroups, setAvailableGroups] = useState<string[]>();
+  const [systemDetected, setSystemDetected] = useState<boolean>(true);
 
   useEffect(() => {
     async function run() {
-      const groups = await getAvailableGroups();
-      setAvailableGroups(groups);
+      try {
+        const groups = await getAvailableGroups();
+        const activeGroup = await storage.getActiveGroup();
 
-      const activeGroup = await storage.getActiveGroup();
-      setActiveGroup(activeGroup);
+        setAvailableGroups(groups);
+        setActiveGroup(activeGroup);
+      } catch (error) {
+        setSystemDetected(false);
+      }
     }
 
     run();
@@ -43,5 +48,6 @@ export function useSonos() {
   return {
     availableGroups: availableGroups,
     activeGroup,
+    systemDetected,
   };
 }
