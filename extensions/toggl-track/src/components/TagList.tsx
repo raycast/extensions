@@ -15,10 +15,8 @@ export default function TagList({ workspace, isLoading }: TagListProps) {
 
   const filteredTags = useMemo(() => tags.filter((tag) => tag.workspace_id === workspace.id), [tags]);
 
-  const canModifyTag = useMemo(
-    () => !workspace.only_admins_may_create_tags || workspace.role == "admin" || workspace.role == "projectlead",
-    [workspace],
-  );
+  const canModifyTags =
+    !workspace.only_admins_may_create_tags || workspace.role == "admin" || workspace.role == "projectlead";
 
   return (
     <List isLoading={isLoading || isLoadingTags}>
@@ -28,7 +26,7 @@ export default function TagList({ workspace, isLoading }: TagListProps) {
           title={tag.name}
           key={tag.id}
           actions={
-            canModifyTag ? (
+            canModifyTags ? (
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action.Push

@@ -21,10 +21,8 @@ export default function ClientList({ workspace, isLoading }: ClientListProps) {
     [clients, showArchived],
   );
 
-  const canModifyClients = useMemo(
-    () => !workspace.only_admins_may_create_projects || workspace.role == "admin" || workspace.role == "projectlead",
-    [workspace],
-  );
+  const canModifyClients =
+    !workspace.only_admins_may_create_projects || workspace.role == "admin" || workspace.role == "projectlead";
 
   return (
     <List

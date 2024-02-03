@@ -16,10 +16,7 @@ function ListView() {
   const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
   const { projects, isLoadingProjects } = useProjects();
 
-  const isLoading = useMemo(
-    () => isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingProjects,
-    [isLoadingTimeEntries, isLoadingRunningTimeEntry, isLoadingProjects],
-  );
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingProjects;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
     (acc, timeEntry) =>
