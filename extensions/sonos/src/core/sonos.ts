@@ -3,7 +3,6 @@ import * as storage from "./storage";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
 import { isDefined } from "./utils";
 import { Toast, showToast } from "@raycast/api";
-import { log } from "console";
 
 export async function formatPlayingState(state: SonosState | null): Promise<string | null> {
   const playing = await isPlaying();
