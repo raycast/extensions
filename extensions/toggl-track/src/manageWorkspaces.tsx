@@ -5,6 +5,7 @@ import { useOrganizations, useWorkspaces } from "./hooks";
 import { Workspace } from "./api";
 import TagList from "./components/TagList";
 import ClientList from "./components/ClientList";
+import ProjectList from "./components/ProjectList";
 
 function ManageWorkspaces() {
   const { organizations, isLoadingOrganizations } = useOrganizations();
@@ -39,7 +40,7 @@ function ManageWorkspaces() {
     >
       {filteredWorkspaces.length == 0 && <List.EmptyView title="No Workspaces Found" />}
       {filteredWorkspaces.map((workspace) => {
-        const orgName = organizations.find((org) => org.id === workspace.organization_id)?.name;
+        const organization = organizations.find((org) => org.id === workspace.organization_id)!;
         const subscription = workspace.business_ws ? "Premium" : workspace.premium ? "Starter" : "Free";
         const role = formatRoleText(workspace.role);
         const logoUrl = workspace.logo_url == defaultWorkspaceLogoUrl ? undefined : workspace.logo_url;
@@ -66,7 +67,7 @@ function ManageWorkspaces() {
                 markdown={logoUrl ? `![${workspace.name} Logo](${logoUrl})` : undefined}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    {orgName && <List.Item.Detail.Metadata.Label title="Organization" text={orgName} />}
+                    <List.Item.Detail.Metadata.Label title="Organization" text={organization.name} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Subscription" text={subscription} />
                     <List.Item.Detail.Metadata.Separator />
@@ -80,6 +81,14 @@ function ManageWorkspaces() {
                 <Action
                   title={`${isShoingDetails ? "Hide" : "Show"} Details`}
                   onAction={() => setIsShoingDetails((value) => !value)}
+                />
+                <Action.Push
+                  title="Manage Projects"
+                  target={
+                    <ExtensionContextProvider>
+                      <ProjectList {...{ organization, workspace }} isLoading={isLoadingWorkspaces} />
+                    </ExtensionContextProvider>
+                  }
                 />
                 <Action.Push
                   title="Manage Tags"
