@@ -15,7 +15,7 @@ interface Preferences {
   serverUrl: string;
 }
 
-export default async function Command(): Promise<void> {
+export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   try {
