@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
-import { exec, execSync } from "child_process";
+import { exec } from "child_process";
 import { randomUUID } from "crypto";
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { extname } from "path";
 import { CustomTimer, Preferences, Timer } from "./types";
 import { formatTime, secondsBetweenDates } from "./formatUtils";
@@ -64,11 +64,9 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
 
 function stopTimer(timerFile: string) {
   const timerFilePath = environment.supportPath + "/" + timerFile;
-  const deleteTimerCmd = `if [ -f "${timerFilePath}" ]; then rm "${timerFilePath}"; else echo "Timer deleted"; fi`;
   const dismissFile = timerFilePath.replace(".timer", ".dismiss");
-  const deleteDismissCmd = `if [ -f "${dismissFile}" ]; then rm "${dismissFile}"; else echo "Timer deleted"; fi`;
-  execSync(deleteTimerCmd);
-  execSync(deleteDismissCmd);
+  unlinkSync(timerFilePath);
+  unlinkSync(dismissFile);
 }
 
 function getTimers() {
