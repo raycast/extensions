@@ -198,7 +198,7 @@
     },
     {
       "name": "add-line-numbers",
-      "title": "Add line numbers",
+      "title": "Add Line Numbers",
       "description": "Adds line numbers to the output.",
       "mode": "view"
     },
@@ -228,7 +228,7 @@
     },
     {
       "name": "translate-date-time-format",
-      "title": "Translate DateTime format",
+      "title": "Translate DateTime Format",
       "description": "Parses a datetime string in one format and re-writes it in another.",
       "mode": "view"
     },
