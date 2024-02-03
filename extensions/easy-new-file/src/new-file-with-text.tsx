@@ -14,7 +14,7 @@ export default async () => {
       fileType,
       finalSaveDirectory,
       inputText,
-      isEmpty(inputText) ? "" : inputText.substring(0, 10)
+      isEmpty(inputText) ? "" : inputText.replaceAll(".", "_").substring(0, 10),
     );
     switch (createdActions) {
       case "no": {
@@ -30,12 +30,12 @@ export default async () => {
     }
 
     await showHUD(
-      `${createdFile.fileName}${
+      `📄 ${createdFile.fileName}${
         isEmpty(inputText) ? " with empty content" : " " + inputText.substring(0, 10)
-      } created in ${finalSaveDirectory}`
+      } created in ${finalSaveDirectory}`,
     );
   } catch (e) {
-    await showHUD(String(e));
+    await showHUD("❌ " + String(e));
     console.error(String(e));
   }
 };

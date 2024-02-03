@@ -1,4 +1,4 @@
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function useUsers() {
@@ -10,7 +10,7 @@ export default function useUsers() {
       return users.nodes;
     },
     [],
-    { initialData: [] }
+    { initialData: [] },
   );
 
   return { users: data, usersError: error, isLoadingUsers: (!data && !error) || isLoading };

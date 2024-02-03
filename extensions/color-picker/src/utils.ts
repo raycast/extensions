@@ -1,27 +1,8 @@
-import { environment, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
-import { execa, ExecaError } from "execa";
-import { chmod } from "fs/promises";
-import { join } from "path";
+import { getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
 import { Color, HistoryItem } from "./types";
 import convert from "color-convert";
 
 const preferences: Preferences = getPreferenceValues();
-
-export async function pickColor() {
-  const command = join(environment.assetsPath, "color-picker");
-  await chmod(command, "755");
-
-  try {
-    const { stdout } = await execa(command);
-    return JSON.parse(stdout) as Color;
-  } catch (error) {
-    if ((error as ExecaError).stdout === "No color selected") {
-      return undefined;
-    } else {
-      throw error;
-    }
-  }
-}
 
 export function getFormattedColor(color: Color) {
   switch (preferences.colorFormat) {

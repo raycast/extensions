@@ -1,31 +1,21 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Preferences, Tab } from "./interfaces";
-import { getOpenTabs } from "./actions";
+import { useState } from "react";
+import { Preferences } from "./interfaces";
 import { ChromeListItems } from "./components";
+import { useTabSearch } from "./hooks/useTabSearch";
 
 export default function Command() {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
-  const [tabs, setTabs] = useState<Tab[]>([]);
-
-  async function getTabs() {
-    setTabs(await getOpenTabs(useOriginalFavicon));
-  }
-
-  useEffect(() => {
-    getTabs().then();
-  }, []);
+  const [searchText, setSearchText] = useState("");
+  const { data, errorView, isLoading } = useTabSearch(searchText);
 
   return (
-    <List isLoading={tabs.length === 0}>
-      {tabs.map((tab) => (
-        <ChromeListItems.TabList
-          key={tab.key()}
-          tab={tab}
-          useOriginalFavicon={useOriginalFavicon}
-          onTabClosed={getTabs}
-        />
-      ))}
-    </List>
+    errorView ?? (
+      <List isLoading={isLoading} onSearchTextChange={setSearchText}>
+        {data.map((tab) => (
+          <ChromeListItems.TabList key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
+        ))}
+      </List>
+    )
   );
 }

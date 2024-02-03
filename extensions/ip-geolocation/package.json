@@ -5,6 +5,9 @@
   "description": "Show local and public IPv4/IPv6 address.\nQuery geolocation for any IP address or domain.",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "foof"
+  ],
   "categories": [
     "Developer Tools",
     "Web"

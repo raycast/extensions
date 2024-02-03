@@ -1,5 +1,5 @@
 import { ProjectMilestone } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type MilestoneResult = Pick<
   ProjectMilestone,
@@ -41,7 +41,7 @@ export async function getMilestones(projectId?: string) {
           }
         }
       `,
-      { projectId }
+      { projectId },
     );
 
     return data?.project.projectMilestones.nodes;

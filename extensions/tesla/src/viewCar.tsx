@@ -13,8 +13,10 @@ import { useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 import ChangeImage from "./changeImage";
+import { Distance } from "./types/Distance";
 import { Info } from "./types/Info";
 import { BASE_URL } from "./utils/constants";
+import { getDistance } from "./utils/utils";
 
 const boolToString = (value: boolean): string => (value ? "On" : "Off");
 
@@ -27,6 +29,8 @@ interface ViewCarProps {
     | "flash"
     | "enable_sentry"
     | "disable_sentry"
+    | "start_max_defrost"
+    | "stop_max_defrost"
     | "start_climate"
     | "stop_climate"
     | "vent_windows"
@@ -38,11 +42,28 @@ interface ViewCarProps {
   loadingMessage?: string;
 }
 
+type TemperatureType = "fahrenheit" | "celsius";
+
+const tempConversion = (celsius: number, tempType: TemperatureType) => {
+  if (tempType === "fahrenheit") {
+    return Math.round((celsius * 9) / 5 + 32);
+  } else {
+    return celsius;
+  }
+};
+
 export default function ViewCar(props: ViewCarProps) {
-  const preferences = getPreferenceValues<{ tessieApiKey: string; VIN: string }>();
+  const preferences = getPreferenceValues<{
+    tessieApiKey: string;
+    VIN: string;
+    temperature: TemperatureType;
+    distance: Distance;
+  }>();
 
   const API_KEY = preferences.tessieApiKey;
   const VIN = preferences.VIN;
+  const tempType = preferences.temperature;
+  const distanceType = preferences.distance;
 
   // Load saved image
   const [image, setImage] = useState<string | undefined>(undefined);
@@ -141,8 +162,9 @@ ${formatCarModelName(data.vehicle_config.car_type)} v${data.vehicle_state.car_ve
   const climate =
     boolToString(data.climate_state.is_climate_on) +
     " - " +
-    Math.round(((data.climate_state.inside_temp ?? 0) * 9) / 5 + 32) +
-    "°F Inside";
+    tempConversion(data.climate_state.inside_temp ?? 0, tempType) +
+    (tempType === "fahrenheit" ? "°F" : "°C") +
+    " Inside";
 
   const security = `Sentry ${boolToString(data.vehicle_state.sentry_mode)} (${
     data.vehicle_state.locked ? "Locked" : "Unlocked"
@@ -182,7 +204,10 @@ ${formatCarModelName(data.vehicle_config.car_type)} v${data.vehicle_state.car_ve
           <Detail.Metadata.Label
             title="Battery"
             text={{
-              value: `${data.charge_state.battery_level}% - ${data.charge_state.battery_range} miles`,
+              value: `${data.charge_state.battery_level}% - ${getDistance(
+                data.charge_state.battery_range,
+                distanceType
+              ).toFixed(2)} ${preferences.distance}`,
               color: chargeState == "Charging" ? Color.Green : Color.PrimaryText,
             }}
           />
@@ -198,7 +223,10 @@ ${formatCarModelName(data.vehicle_config.car_type)} v${data.vehicle_state.car_ve
           />
           <Detail.Metadata.Label title="Climate" text={climate} />
           <Detail.Metadata.Label title="Security" text={security} />
-          <Detail.Metadata.Label title="Odometer" text={`${data.vehicle_state.odometer.toLocaleString()} miles`} />
+          <Detail.Metadata.Label
+            title="Odometer"
+            text={`${getDistance(data.vehicle_state.odometer, distanceType).toLocaleString()} ${distanceType}`}
+          />
         </Detail.Metadata>
       }
       actions={

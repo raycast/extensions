@@ -61,7 +61,7 @@ const documentation = {
     },
     {
       url: "https://docs.cypress.io/guides/core-concepts/retry-ability",
-      title: "Rety-ability",
+      title: "Retry-ability",
     },
     {
       url: "https://docs.cypress.io/guides/core-concepts/interacting-with-elements",

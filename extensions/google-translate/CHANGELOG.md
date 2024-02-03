@@ -1,5 +1,17 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2024-01-26
+
+ - Added "Autofill Input" preference to allow users to disable the autofill selected text feature
+
+## [Feature] - 2024-01-20
+
+ - Added new "Quick Translate" command
+
+## [Enhancement] - 2023-11-15
+
+ - Added Copy Pronunciation keyboard shortcut
+
 ## [Enhancement] - 2023-08-31
 
  - Added pronunciation for Translate and Translate Form

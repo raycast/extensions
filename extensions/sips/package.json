@@ -17,7 +17,7 @@
     "rotate",
     "sips"
   ],
-  "version": "1.5.0",
+  "version": "1.7.0",
   "icon": "command-icon.png",
   "author": "HelloImSteven",
   "contributors": [
@@ -93,13 +93,20 @@
       "name": "flip-horizontally",
       "title": "Flip Images Horizontally",
       "description": "Flip the selected images horizontally",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "reverse",
+        "mirror"
+      ]
     },
     {
       "name": "flip-vertically",
       "title": "Flip Images Vertically",
       "description": "Flip the selected images vertically",
-      "mode": "no-view"
+      "mode": "no-view",
+      "keywords": [
+        "mirror"
+      ]
     },
     {
       "name": "rotate",
@@ -133,6 +140,9 @@
           "default": "degrees",
           "required": false
         }
+      ],
+      "keywords": [
+        "turn"
       ]
     },
     {
@@ -310,6 +320,10 @@
           "default": true,
           "required": false
         }
+      ],
+      "keywords": [
+        "change",
+        "transform"
       ]
     },
     {
@@ -344,6 +358,12 @@
           "type": "text",
           "required": true
         }
+      ],
+      "keywords": [
+        "rescale",
+        "enlarge",
+        "shrink",
+        "size"
       ]
     },
     {
@@ -374,13 +394,21 @@
           "default": "#FFFFFF",
           "required": false
         }
+      ],
+      "keywords": [
+        "border",
+        "outline"
       ]
     },
     {
       "name": "apply-filter",
       "title": "Apply Image Filter",
       "description": "Apply filters to images using Apple's CIFilters",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "effect",
+        "style"
+      ]
     },
     {
       "name": "optimize",
@@ -401,6 +429,17 @@
       "title": "Create New Image",
       "description": "Create a new image by specifying its dimensions, color, and pattern.",
       "mode": "view"
+    },
+    {
+      "name": "strip-exif",
+      "title": "Strip EXIF Data",
+      "description": "Remove EXIF data from images",
+      "keywords": [
+        "exif",
+        "metadata",
+        "remove"
+      ],
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -408,11 +447,13 @@
     "@raycast/utils": "^1.4.18",
     "mathjs": "^11.8.2",
     "run-applescript": "^6.1.0",
-    "svgo": "^3.0.2"
+    "svgo": "^3.0.2",
+    "tar": "^6.2.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
+    "@types/tar": "^6.1.11",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

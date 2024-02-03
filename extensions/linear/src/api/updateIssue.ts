@@ -1,6 +1,6 @@
 import { Issue } from "@linear/sdk";
 
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type UpdateIssuePayload = {
   title: string;
@@ -45,7 +45,7 @@ export async function updateIssue(issueId: Issue["id"], payload: UpdateIssuePayl
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueUpdate.success };

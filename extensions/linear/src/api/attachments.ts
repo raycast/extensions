@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { UploadFile } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { fileTypeFromFile } from "file-type";
 
 export async function uploadFile(filePath: string) {
@@ -31,7 +31,7 @@ export async function uploadFile(filePath: string) {
           }
         }
       }
-    `
+    `,
   );
 
   const uploadFile = data?.fileUpload.uploadFile;
@@ -84,7 +84,7 @@ export async function createAttachment(payload: CreateAttachmentPayload) {
           }
         }
       }
-    `
+    `,
   );
 
   return { success: data?.attachmentCreate.success, id: data?.attachmentCreate.attachment.id };

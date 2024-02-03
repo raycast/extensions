@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Device, getStatus, getErrorDetails, getDevices, ErrorDetails } from "./shared";
 
-function MyDeviceList() {
+export default function MyDeviceList() {
   const [devices, setDevices] = useState<Device[]>();
   const [error, setError] = useState<ErrorDetails>();
   useEffect(() => {
@@ -89,8 +89,4 @@ function MyDeviceList() {
       )}
     </List>
   );
-}
-
-export default function Command() {
-  return <MyDeviceList />;
 }

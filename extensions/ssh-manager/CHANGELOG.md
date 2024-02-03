@@ -1,5 +1,18 @@
 # ssh-manager Changelog
 
+## [Fix RemoteCommand parsing] - 2024-01-18
+
+- Fixed a bug where a remote command of a connection was not correctly parsed if the remote command contains multiple spaces.
+
+## [Fix] 2024-01-11
+
+- SSH Config Parsing: Fix a bug where wildcard entries like `Host *` defined in `~/.ssh/config` would show up as connections.
+- SSH Config Parsing: Fix a bug where RemoteCommand in SSH configurations was incorrectly parsed, leading to incomplete commands being sent to the terminal.
+
+## [Fix] - 2023-11-22
+
+- Fixed a bug where a connection with a remote command did not work properly while saving.
+
 ## [Modify hosts from  ~/.ssh/config] - 2023-09-20
 
 - This change adds the ability to view/modify ssh hosts from ~/.ssh/config file in addition to localStorage

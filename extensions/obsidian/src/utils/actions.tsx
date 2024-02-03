@@ -96,6 +96,13 @@ export function CopyNoteAction(props: { note: Note }) {
   );
 }
 
+export function CopyNoteTitleAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard title="Copy Note Title" content={note.title} shortcut={{ modifiers: ["opt"], key: "t" }} />
+  );
+}
+
 export function PasteNoteAction(props: { note: Note }) {
   const { note } = props;
   return <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />;
@@ -166,9 +173,15 @@ export function OpenInDefaultAppAction(props: { note: Note; notes: Note[]; vault
   const { note } = props;
   const [defaultApp, setDefaultApp] = useState<string>("Default App");
   useEffect(() => {
-    getDefaultApplication(note.path).then((app) => setDefaultApp(app.name));
+    getDefaultApplication(note.path)
+      .then((app) => setDefaultApp(app.name))
+      .catch((err) => {
+        console.error(err);
+        setDefaultApp("");
+      });
   }, [note.path]);
 
+  if (!defaultApp) return null;
   return <Action.Open title={`Open in ${defaultApp}`} target={note.path} icon={Icon.AppWindow} />;
 }
 
@@ -317,6 +330,7 @@ export function NoteActions(props: { notes: Note[]; note: Note; vault: Vault }) 
       <AppendToNoteAction note={note} vault={vault} />
       <AppendSelectedTextToNoteAction note={note} vault={vault} />
       <CopyNoteAction note={note} />
+      <CopyNoteTitleAction note={note} />
       <PasteNoteAction note={note} />
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />

@@ -36,7 +36,6 @@ export default function SizeSelectionActionPanel(props: { width: number; height:
       <Action
         title={`Create ${width}x${height} Placeholder`}
         icon={Icon.Image}
-        shortcut={{ modifiers: ["cmd"], key: "p" }}
         onAction={async () => {
           const destinations = getDestinationPaths([path.join(os.tmpdir(), `${width}x${height}.png`)], true);
           const toast = await showToast({ title: "Creating Placeholder...", style: Toast.Style.Animated });

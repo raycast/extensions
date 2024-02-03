@@ -9,6 +9,7 @@ import { Font } from "./types";
 import * as utils from "./utils";
 
 const FontVariantsView = (props: { font: Font }) => {
+  const { font } = props;
   const [selectedVariants, setSelectedVariants] = useState<string[]>([]);
 
   const handleToggleVariantInSelectedVariants = (variant: string) => {
@@ -16,16 +17,15 @@ const FontVariantsView = (props: { font: Font }) => {
   };
 
   const handleCopyHTMLContent = (mode: string) => {
-    return utils.generateHTMLContent(props.font, selectedVariants, mode);
+    return utils.generateHTMLContent(font, selectedVariants, mode);
   };
 
   const handleCopiedHTML = () => {
     popToRoot({ clearSearchBar: true });
   };
-
   return (
-    <List searchBarPlaceholder="Search variant..." navigationTitle="Font Variants">
-      {props.font.variants.map((variant, variantIndex) => {
+    <List searchBarPlaceholder={`Search ${font.family} variant...`} navigationTitle={`Font Variants: ${font.family}`}>
+      {font.variants.map((variant, variantIndex) => {
         return (
           <List.Item
             icon={
@@ -37,27 +37,27 @@ const FontVariantsView = (props: { font: Font }) => {
             title={utils.friendlyFontVariant(variant)}
             actions={
               <ActionPanel>
-                <ActionPanel.Section title={`Google Fonts: ${startCase(props.font.family)}`}>
+                <ActionPanel.Section title={`Google Fonts: ${startCase(font.family)}`}>
                   <Action
                     title={selectedVariants.includes(variant) ? "De-Select Variant" : "Select Variant"}
                     icon={selectedVariants.includes(variant) ? Icon.Circle : Icon.CircleProgress100}
                     onAction={() => handleToggleVariantInSelectedVariants(variant)}
                   />
-                  {
-                    <Action.CopyToClipboard
-                      title="Copy HTML: @import"
-                      content={handleCopyHTMLContent("import")}
-                      onCopy={handleCopiedHTML}
-                    />
-                  }
-                  {
-                    <Action.CopyToClipboard
-                      title="Copy HTML: <link>"
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                      content={handleCopyHTMLContent("link")}
-                      onCopy={handleCopiedHTML}
-                    />
-                  }
+                  <Action.CopyToClipboard
+                    title="Copy HTML: @import"
+                    content={handleCopyHTMLContent("import")}
+                    onCopy={handleCopiedHTML}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy HTML: <link>"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    content={handleCopyHTMLContent("link")}
+                    onCopy={handleCopiedHTML}
+                  />
+                  <Action.OpenInBrowser
+                    title={`Download Family`}
+                    url={utils.generateGoogleFontsURL(font, "download")}
+                  />
                 </ActionPanel.Section>
               </ActionPanel>
             }

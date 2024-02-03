@@ -1,5 +1,19 @@
 # shadcn/ui Changelog
 
+## [Update to shadcn/ui January 2024 version] - 2024-01-15
+
+- Added Remix Dark Mode to Search Documentation
+- Added "Open in Github" Action to Search Examples
+- Changed Copy Add Component [Pnpm] to cmd + ctrl + p (Was reserved by Raycast)
+- Added constant for Error Toast Options
+- Updated Search Examples to use useCachedPromise
+
+## [Update to shadcn/ui November 2023 version] - 2023-11-11
+
+- Added a couple missing documentation links
+- Updated "Add Component" commands to use @latest
+- Added support for Bun to "Add Component" commands
+
 ## [Update to shadcn/ui August 2023 version] - 2023-08-19
 
 - Update README.md - updated header and add badges

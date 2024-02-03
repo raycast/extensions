@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
-import { IssueResult, getProjectIssues } from "../api/getIssues";
+import { getProjectIssues } from "../api/getIssues";
 
 import useIssues from "../hooks/useIssues";
 
@@ -30,7 +30,7 @@ export default function ProjectIssues({ projectId, priorities, me, users }: Proj
       return [];
     }
 
-    if (milestone === "") {
+    if (!milestone || !milestones || milestones.length < 1) {
       return issues;
     }
 

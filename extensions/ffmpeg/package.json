@@ -6,9 +6,10 @@
   "icon": "command-icon.png",
   "author": "RenderCoder",
   "contributors": [
-    "blekmus"
+    "blekmus",
+    "truls_aagedal"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "categories": [
     "Media",
     "Developer Tools",
@@ -38,7 +39,7 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

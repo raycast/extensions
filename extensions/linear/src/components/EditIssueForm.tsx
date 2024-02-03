@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast, Color } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Toast, useNavigation, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 

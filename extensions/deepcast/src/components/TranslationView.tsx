@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import { SourceLanguage, source_languages } from "../utils";
 
-export const TranslationView = (props: { translation: string | null; sourceLanguage: string }) => {
+export const TranslationView = (props: { translation: string | null; sourceLanguage?: string }) => {
   const translation = props.translation;
   const sourceLanguage = source_languages[props.sourceLanguage as SourceLanguage] ?? "unknown language";
   const sourceLanguageMessage = `Translated from ${sourceLanguage}`;
@@ -13,9 +13,9 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
       navigationTitle={sourceLanguageMessage}
       markdown={translation}
       actions={
-        <ActionPanel title="What to do with Translation">
+        <ActionPanel>
           <Action.CopyToClipboard title="Copy to Clipboard" content={translation} />
-          <Action.Paste title="Paste to Active App" content={translation} />
+          <Action.Paste title="Paste in Frontmost App" content={translation} />
         </ActionPanel>
       }
     />
