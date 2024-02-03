@@ -37,6 +37,7 @@ export default function ProjectForm({ workspace, project, clients, revalidatePro
         message: project?.name,
         action: async () => {
           const options: ProjectOptions = {
+            active: project?.active ?? true,
             name,
             color,
             is_private: isPrivate,
