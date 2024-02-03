@@ -1,4 +1,4 @@
-import got from 'got';
+import got from "got";
 import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast } from "@raycast/api";
 
 interface Preferences {
@@ -12,36 +12,31 @@ type FormValues = {
 };
 
 export default function Command() {
-
   // https://github.com/go-shiori/shiori/blob/master/docs/API.md#log-in
-  async function login(
-    apiEndpoint: string,
-    username: string,
-    password: string
-  ): Promise<string> {
+  async function login(apiEndpoint: string, username: string, password: string): Promise<string> {
     const apiUrl = `${apiEndpoint}/login`;
-    const { body } = await got.post(apiUrl, {
+    const { body } = (await got.post(apiUrl, {
       json: {
         username,
-        password
+        password,
       },
       responseType: "json",
-    }) as {
+    })) as {
       body: {
         session: string;
         account: {
           id: number;
           username: string;
           owner: boolean;
-        }
-      }
+        };
+      };
     };
 
     return body.session;
   }
 
   // https://github.com/go-shiori/shiori/blob/master/docs/API.md#add-bookmark
-  // 
+  //
   // sample request
   // {
   //   "url": "https://interesting_cool_article.com",
@@ -51,7 +46,7 @@ export default function Command() {
   //   "title": "Cool Interesting Article",
   //   "excerpt": "An interesting and cool article indeed!"
   // }
-  // 
+  //
   // sample response
   //   {
   //     "id": 827,
@@ -82,8 +77,8 @@ export default function Command() {
     // tags: string[]
   ): Promise<number> {
     const apiUrl = `${apiEndpoint}/bookmarks`;
-    console.log("addBookmark: " + apiUrl + " " + session + "; " + url)
-    const { body } = await got.post(apiUrl, {
+    console.log("addBookmark: " + apiUrl + " " + session + "; " + url);
+    const { body } = (await got.post(apiUrl, {
       headers: {
         "X-Session-Id": session,
       },
@@ -92,10 +87,10 @@ export default function Command() {
         // tags: tags.map((tag) => ({ name: tag })),
       },
       responseType: "json",
-    }) as {
+    })) as {
       body: {
         id: number;
-      }
+      };
     };
     return body.id;
   }
@@ -116,7 +111,7 @@ export default function Command() {
     // TODO: migrate to API v1 after released
     // TODO: cache session token and login only necessary
 
-    let session
+    let session;
     try {
       session = await login(apiEndpoint, username, password);
     } catch (error) {
@@ -129,7 +124,7 @@ export default function Command() {
 
     try {
       // polish url - protocol is required (at least in API pre-v1)
-      let bookmarkUrl = values.url
+      let bookmarkUrl = values.url;
       if (!bookmarkUrl.startsWith("https://") && !bookmarkUrl.startsWith("http://")) {
         bookmarkUrl = `https://${bookmarkUrl}`;
       }
