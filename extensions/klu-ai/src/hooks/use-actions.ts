@@ -65,6 +65,7 @@ const useActions = () => {
     abortable.abort();
     abortable.renew();
     setSelectedApp(app);
+    hook.revalidate();
   }, []);
 
   return { ...hook, isLoading: isAppsLoading || hook.isLoading, onChangeApp };
