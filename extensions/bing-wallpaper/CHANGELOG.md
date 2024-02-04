@@ -1,5 +1,10 @@
 # Bing Wallpaper Changelog
 
+## [Fix error] - {PR_MERGE_DATE}
+
+- Fix network request errors
+- Optimize wallpaper information display
+
 ## [Update grid layout] - 2022-10-15
 
 - Update grid layout
