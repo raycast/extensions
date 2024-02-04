@@ -224,6 +224,10 @@ export function addUtmSourceToUrl(url: string): string {
 }
 
 const parser = new Parser({
+  headers: {
+    // 否则有些服务会返回 406 错误码
+    Accept: "application/rss+xml, application/xml, text/xml",
+  },
   requestOptions: {
     agent: createAgent(),
     timeout: normalizePreference().requestTimeout ?? 30 * 1000,

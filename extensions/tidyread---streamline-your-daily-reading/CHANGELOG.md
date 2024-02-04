@@ -1,5 +1,8 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## [Support Categorized Digest And Fix Some Edge Case Bugs] - 2024-01-30
+- fix: RSS pull 406 error code
+
 ## [Add Search RSS Page] - 2024-01-30
 - add search rss page
 - add generate digest in background

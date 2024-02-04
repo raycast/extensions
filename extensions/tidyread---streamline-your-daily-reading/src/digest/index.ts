@@ -35,8 +35,13 @@ async function getAllFilteredItems(
   const agent = httpProxy ? new HttpsProxyAgent(httpProxy) : undefined;
 
   const parser = new Parser({
+    headers: {
+      // 否则有些服务会返回 406 错误码
+      Accept: "application/rss+xml, application/xml, text/xml",
+    },
     requestOptions: {
       agent,
+      timeout: requestTimeout ?? 30 * 1000,
     },
   });
   let allItems: RSSItem[] = [];
@@ -50,7 +55,13 @@ async function getAllFilteredItems(
   for (const feed of rssFeeds) {
     try {
       console.log("start to parse rss feed", feed.url);
-      const resp = await withTimeout(parser.parseURL(feed.url), requestTimeout ?? 30 * 1000);
+      const resp = await parser.parseURL(feed.url);
+
+      // console.log(
+      //   "rss feed parsed",
+      //   resp.items.map((item) => [item.summary, item.content]),
+      //   "items found",
+      // );
 
       const filteredItems = await Promise.all(
         // 需要对相同title去重，有些rss质量不高，会出现重复的title不同link
