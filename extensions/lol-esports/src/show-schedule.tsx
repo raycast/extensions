@@ -40,24 +40,28 @@ export default function ShowSchedule() {
         return (
           <List.Section key={time} title={title}>
             {events.map((event) => {
-              let icon: Image.ImageLike = { source: Icon.Calendar, tintColor: Color.SecondaryText };
+              let icon: List.Item.Props["icon"];
               switch (event.state) {
                 case "completed":
                   icon = {
                     source: Icon.CheckCircle,
                     tintColor: Color.Green,
+                    tooltip: "Finished",
                   };
                   break;
                 case "inProgress":
                   icon = {
                     source: Icon.Livestream,
                     tintColor: Color.Red,
+                    tooltip: "Live",
                   };
                   break;
                 case "unstarted":
+                default:
                   icon = {
                     source: Icon.Calendar,
                     tintColor: Color.SecondaryText,
+                    tooltip: "Scheduled",
                   };
                   break;
               }
