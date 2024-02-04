@@ -1,5 +1,9 @@
 # ChatGPT Quick Actions Changelog
 
+## [Fix] - 2024-02-01
+
+ - Fixes "Preview" action description typo.
+
 ## [New models] - 2023-06-13
 
  - Adds support for the following models: `gpt-3.5-turbo-16k`, `gpt-4-32k-0613`.

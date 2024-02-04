@@ -11,7 +11,8 @@ export const useGetPath = () => {
   useEffect(() => {
     if (!path.cached) {
       getApplications().then((res) => {
-        const joplinpath = res.filter((app) => app.bundleId === JoplinBundleId)[0].path;
+        const joplinApp = res.filter((app) => app.bundleId === JoplinBundleId)[0];
+        const joplinpath = joplinApp ? joplinApp.path : "/Applications/Joplin.app";
         setPath(() => ({ cached: true, path: joplinpath }));
       });
     }

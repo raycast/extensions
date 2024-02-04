@@ -21,6 +21,7 @@ import {
 import { getWeatherCodeIcon, WeatherIcons } from "./icons";
 import {
   Area,
+  convertToTimeString,
   getAreaValues,
   getCurrentCloudCover,
   getCurrentFeelLikeTemperature,
@@ -306,13 +307,13 @@ function SunMenubarSection(props: { data: Weather | undefined }) {
       )}
       <MenuBarExtra.Item
         title="Sunrise"
-        subtitle={sun.sunrise}
+        subtitle={convertToTimeString(sun.sunrise)}
         icon={WeatherIcons.Sunrise}
         onAction={launchWeatherCommand}
       />
       <MenuBarExtra.Item
         title="Sunset"
-        subtitle={sun.sunset}
+        subtitle={convertToTimeString(sun.sunset)}
         icon={WeatherIcons.Sunset}
         onAction={launchWeatherCommand}
       />
@@ -330,14 +331,14 @@ function MoonMenubarSection(props: { data: Weather | undefined }) {
     <MenuBarExtra.Section title="Moon">
       <MenuBarExtra.Item
         title="Moonrise"
-        subtitle={moon.moonrise}
+        subtitle={convertToTimeString(moon.moonrise)}
         tooltip={phase}
         icon={WeatherIcons.Moonrise}
         onAction={launchWeatherCommand}
       />
       <MenuBarExtra.Item
         title="Moonset"
-        subtitle={moon.moonset}
+        subtitle={convertToTimeString(moon.moonset)}
         tooltip={phase}
         icon={WeatherIcons.Moonset}
         onAction={launchWeatherCommand}

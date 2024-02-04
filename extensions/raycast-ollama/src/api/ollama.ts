@@ -167,7 +167,7 @@ export async function OllamaApiShow(model: string): Promise<OllamaApiShowRespons
 export function OllamaApiShowParseModelfile(show: OllamaApiShowResponse): OllamaApiShowModelfile {
   const modelfile = show.modelfile;
   const template = show.template;
-  const parameters = show.parameters.split("\n");
+  const parameters = show.parameters ? show.parameters.split("\n") : [];
 
   const from = modelfile.match(/^FROM[ ]+([a-zA-Z0-9:./]+)\n/m)?.[1];
 

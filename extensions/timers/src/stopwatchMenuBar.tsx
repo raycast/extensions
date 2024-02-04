@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
 import { formatTime } from "./formatUtils";
 import { Preferences, Stopwatch } from "./types";
+import { formatMenuBarIcon, formatMenuBarTitle, shortCircuitMenuBar } from "./menuBarUtils";
 
 export default function Command() {
   const { stopwatches, isLoading, refreshSWes, handlePauseSW, handleStartSW, handleStopSW, handleUnpauseSW } =
@@ -18,22 +19,7 @@ export default function Command() {
     refreshSWes();
   }
   const prefs = getPreferenceValues<Preferences>();
-  if (
-    (stopwatches == undefined || stopwatches.length == 0 || stopwatches.length == undefined) &&
-    prefs.showMenuBarItemWhen !== "always"
-  ) {
-    return null;
-  }
-
-  const getSWMenuBarTitle = () => {
-    if (stopwatches === undefined || stopwatches?.length === 0 || stopwatches.length == undefined) {
-      return undefined;
-    } else if (prefs.showTitleInMenuBar) {
-      return `${stopwatches[0].name}: ~${formatTime(stopwatches[0].timeElapsed)}`;
-    } else {
-      return `~${formatTime(stopwatches[0].timeElapsed)}`;
-    }
-  };
+  if (shortCircuitMenuBar<Stopwatch>(stopwatches, prefs)) return null;
 
   const swTitleSuffix = (sw: Stopwatch) => {
     return sw.lastPaused === "----" ? " elapsed" : " (paused)";
@@ -41,9 +27,9 @@ export default function Command() {
 
   return (
     <MenuBarExtra
-      icon={prefs.showMenuBarItemWhen !== "never" ? Icon.Stopwatch : undefined}
+      icon={formatMenuBarIcon<Stopwatch>(stopwatches, prefs, Icon.Stopwatch)}
       isLoading={isLoading}
-      title={getSWMenuBarTitle()}
+      title={formatMenuBarTitle<Stopwatch>(stopwatches, prefs)}
     >
       <MenuBarExtra.Item title="Click running stopwatch to pause" />
       {stopwatches?.map((sw) => (

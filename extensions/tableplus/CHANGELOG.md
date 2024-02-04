@@ -1,5 +1,13 @@
 # TablePlus Changelog
 
+## [Fix] - 2024-01-02
+
+- Fixed, so connections without an environment don't show an empty tag.
+
+## [Update] - 2024-01-18
+
+- Added the possibility to select either environment or path to show in the Menu Bar
+
 ## [Update] - 2023-08-30
 
 - Refacored the extension
