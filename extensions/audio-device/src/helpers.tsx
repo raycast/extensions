@@ -12,7 +12,7 @@ import {
   Action,
   Keyboard,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   AudioDevice,
   getInputDevices,
@@ -25,41 +25,7 @@ import {
   TransportType,
 } from "./audio-device";
 import { createDeepLink } from "./utils";
-
-type UseAudioDevicesResponse = {
-  isLoading: boolean;
-  data: {
-    devices: AudioDevice[];
-    current: AudioDevice;
-  };
-};
-
-export function useAudioDevices(type: "input" | "output") {
-  const [isLoading, setIsLoading] = useState(true);
-  const [audioDevices, setAudioDevices] = useState<UseAudioDevicesResponse["data"]>();
-
-  useEffect(() => {
-    const fetchDevices = async () => {
-      const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
-      const current = await (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice());
-
-      return {
-        devices,
-        current,
-      };
-    };
-
-    fetchDevices()
-      .then(setAudioDevices)
-      .catch((err) => showToast(Toast.Style.Failure, `There was an error fetching the audio devices.`, err.message))
-      .finally(() => setIsLoading(false));
-  }, [type]);
-
-  return {
-    isLoading,
-    data: audioDevices,
-  };
-}
+import { usePromise } from "@raycast/utils";
 
 type DeviceListProps = {
   type: "input" | "output";
@@ -128,6 +94,21 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
           );
         })}
     </List>
+  );
+}
+
+function useAudioDevices(type: "input" | "output") {
+  return usePromise(
+    async (type) => {
+      const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
+      const current = await (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice());
+
+      return {
+        devices,
+        current,
+      };
+    },
+    [type]
   );
 }
 

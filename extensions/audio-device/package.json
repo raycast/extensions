@@ -82,9 +82,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.12.0",
     "@spotxyz/macos-audio-devices": "1.5.0",
     "execa": "^6.0.0",
-    "react-use": "^17.3.2",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
