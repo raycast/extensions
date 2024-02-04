@@ -18,14 +18,14 @@ declare namespace Preferences {
   /** App Layout - Set the layout of the app items. */
   "layout": "Grid" | "List",
   /** App Item Coloums - Set the number of columns of the app items. (Only works with Grid layout) */
-  "columns"?: "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8",
+  "columns": "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8",
   /** App Item Inset - Set the inset of the app items. (Only works with Grid layout) */
-  "itemInset"?: "" | "sm" | "md" | "lg"
+  "itemInset": "" | "sm" | "md" | "lg"
 }
   /** Preferences accessible in the `auto-quit-app-menubar` command */
   export type AutoQuitAppMenubar = ExtensionPreferences & {
   /** Refresh Interval - Set the refresh interval for auto-quit app extensions. */
-  "refreshInterval"?: "5" | "10" | "15" | "20"
+  "refreshInterval": "5" | "10" | "15" | "20"
 }
 }
 
@@ -35,3 +35,4 @@ declare namespace Arguments {
   /** Arguments passed to the `auto-quit-app-menubar` command */
   export type AutoQuitAppMenubar = {}
 }
+

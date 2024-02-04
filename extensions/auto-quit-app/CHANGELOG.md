@@ -1,5 +1,9 @@
 # Auto Quit App Changelog
 
+## [Fix crash] - {PR_MERGE_DATE}
+
+- Fix potential crash issues
+
 ## [Support More Apps] - 2023-05-15
 
 - Now you can set any app to quit automatically
