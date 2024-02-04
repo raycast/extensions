@@ -77,9 +77,9 @@ const ActionsView = () => {
             }
           />
         ))
-      ) : !isLoading ? (
+      ) : (
         <List.EmptyView icon={Icon.Tray} title="No action is found" />
-      ) : null}
+      )}
     </List>
   );
 };
