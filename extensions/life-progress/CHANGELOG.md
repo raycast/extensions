@@ -1,5 +1,10 @@
 # Life Progress Changelog
 
+## [Fix error] - {PR_MERGE_DATE}
+
+- Fix network request errors
+- Optimize the metadata presentation of the command
+
 ## [Optimize UI display] - 2024-01-19
 
 - Display date progress information in the Life Progress command subtitle
