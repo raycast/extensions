@@ -4,16 +4,32 @@ import dayjs from "dayjs";
 import { Workspace, Project, Client, updateProject, createProject, ProjectOptions } from "../api";
 import { withToast, Verb } from "../helpers/withToast";
 
-interface ProjectFormProps {
-  project?: Project;
-  workspace: Workspace;
-  clients: Client[];
-  revalidateProjects: () => void;
-}
+type ProjectFormProps =
+  | {
+      project: Project;
+      projectWorkspace: Workspace;
+      workspaces?: never;
+      clients: Client[];
+      revalidateProjects: () => void;
+    }
+  | {
+      project?: never;
+      projectWorkspace?: never;
+      workspaces: Workspace[];
+      clients: Client[];
+      revalidateProjects: () => void;
+    };
 
-export default function ProjectForm({ workspace, project, clients, revalidateProjects }: ProjectFormProps) {
+export default function ProjectForm({
+  workspaces,
+  projectWorkspace,
+  project,
+  clients,
+  revalidateProjects,
+}: ProjectFormProps) {
   const { pop } = useNavigation();
 
+  const [workspace, setWorkspace] = useState(projectWorkspace ?? workspaces[0]);
   const [startDate, setStartDate] = useState<Date | null | undefined>(
     project ? new Date(project.start_date) : new Date(),
   );
@@ -25,7 +41,15 @@ export default function ProjectForm({ workspace, project, clients, revalidatePro
   const [colorError, setColorError] = useState<string>();
   const [startDateError, setStartDateError] = useState<string>();
 
-  function handleSubmit({ name, color, isPrivate, clientIdString, startDate, endDate }: ProjectFormValues) {
+  function handleSubmit({
+    workspaceId,
+    name,
+    color,
+    isPrivate,
+    clientIdString,
+    startDate,
+    endDate,
+  }: ProjectFormValues) {
     if (!name?.trim()) setNameError("Required!");
     if (!color || hexColorRegex.test(color)) setColorError(undefined);
     if (!startDate) setStartDateError("Required!");
@@ -46,7 +70,7 @@ export default function ProjectForm({ workspace, project, clients, revalidatePro
             end_date: endDate ? dayjs(endDate).format("YYYY-MM-DD") : undefined,
           };
           if (project) await updateProject(project.workspace_id, project.id, options);
-          else await createProject(workspace.id, options);
+          else await createProject(parseInt(workspaceId), options);
           revalidateProjects();
           pop();
         },
@@ -61,6 +85,18 @@ export default function ProjectForm({ workspace, project, clients, revalidatePro
         </ActionPanel>
       }
     >
+      {!project && (
+        <Form.Dropdown
+          id="workspaceId"
+          title="Workspace"
+          value={workspace.id.toString()}
+          onChange={(idStr) => setWorkspace(workspaces.find((ws) => ws.id == parseInt(idStr))!)}
+        >
+          {workspaces.map((workspace) => (
+            <Form.Dropdown.Item key={workspace.id} title={workspace.name} value={workspace.id.toString()} />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.TextField
         id="name"
         title="Name"
@@ -93,9 +129,11 @@ export default function ProjectForm({ workspace, project, clients, revalidatePro
       />
       <Form.Dropdown id="clientIdString" title="Client" defaultValue={project?.client_id?.toString()}>
         <Form.Dropdown.Item title="None" value="" />
-        {clients.map((client) => (
-          <Form.Dropdown.Item key={client.id} value={client.id.toString()} title={client.name} />
-        ))}
+        {clients
+          .filter((cleint) => cleint.wid == workspace.id)
+          .map((client) => (
+            <Form.Dropdown.Item key={client.id} value={client.id.toString()} title={client.name} />
+          ))}
       </Form.Dropdown>
       <Form.Separator />
       <Form.DatePicker
@@ -132,6 +170,7 @@ export default function ProjectForm({ workspace, project, clients, revalidatePro
 }
 
 interface ProjectFormValues {
+  workspaceId: string;
   name: string;
   color: string;
   isPrivate: boolean;
