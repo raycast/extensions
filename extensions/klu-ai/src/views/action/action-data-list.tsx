@@ -1,6 +1,6 @@
 import { APP_URL } from "@/constants/url";
 import { useSelectedApplication } from "@/hooks/use-application";
-import useWorkspace from "@/hooks/use-workspace";
+import { useCurrentWorkspace } from "@/hooks/use-workspace";
 import klu from "@/libs/klu";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
@@ -23,7 +23,7 @@ const ActionDataList = ({ guid, onChange }: { guid: string; onChange: (value: Ac
     },
   );
 
-  const { data: workspace } = useWorkspace();
+  const { workspace } = useCurrentWorkspace();
 
   return (
     <List

@@ -1,7 +1,20 @@
 import klu from "@/libs/klu";
-import { useCachedPromise } from "@raycast/utils";
+import { PersistedWorkspace } from "@kluai/core";
+import { environment } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+
+export const useCurrentWorkspace = () => {
+  const [workspace, setWorkspace] = useCachedState<PersistedWorkspace | undefined>(
+    `${environment.extensionName}-current-workspace`,
+    undefined,
+  );
+
+  return { workspace, setWorkspace };
+};
 
 const useWorkspace = () => {
+  const { setWorkspace } = useCurrentWorkspace();
+
   const hook = useCachedPromise(
     async () => {
       const workspace = await klu.workspaces.getCurrent();
@@ -11,6 +24,10 @@ const useWorkspace = () => {
     [],
     {
       keepPreviousData: true,
+      onData: (data) => {
+        setWorkspace(data);
+        return;
+      },
     },
   );
 

@@ -1,10 +1,13 @@
 import { useCachedPromise } from "@raycast/utils";
 import klu from "../libs/klu";
+import { useCurrentWorkspace } from "./use-workspace";
 
 const useApplications = () => {
+  const { setWorkspace } = useCurrentWorkspace();
   const hook = useCachedPromise(
     async () => {
       const workspace = await klu.workspaces.getCurrent();
+      setWorkspace(workspace);
       const apps = await klu.workspaces.getApps(workspace.projectGuid);
       return apps;
     },
