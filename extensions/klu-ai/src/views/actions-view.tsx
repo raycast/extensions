@@ -7,7 +7,7 @@ import { intlFormatDistance } from "date-fns";
 import ActionView from "./action/action-view";
 
 const ApplicationsDropdown = ({ applications }: { applications: PersistedApp[] }) => {
-  const { selectedApp, setSelectedApp } = useSelectedApplication();
+  const { setSelectedApp } = useSelectedApplication();
   return (
     <List.Dropdown
       tooltip="Select an application"
@@ -17,7 +17,7 @@ const ApplicationsDropdown = ({ applications }: { applications: PersistedApp[] }
         if (app === undefined || !app) return setSelectedApp(applications[0]);
         setSelectedApp(app);
       }}
-      defaultValue={selectedApp?.guid ?? applications[0]?.guid}
+      storeValue
     >
       {applications.map((app) => (
         <List.Dropdown.Item key={app.guid} value={app.guid} title={app.name} icon={Icon.AppWindowGrid2x2} />

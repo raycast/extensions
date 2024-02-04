@@ -12,6 +12,7 @@ export const ActionViewDropdown = ({ onChange }: { onChange: (value: ActionViewS
   return (
     <List.Dropdown
       tooltip="Select a view"
+      storeValue
       onChange={(id) => {
         const view = ACTION_VIEW_STATE.find((_) => _ === id);
         if (view === undefined || !view) return onChange(ACTION_VIEW_STATE[0]);
