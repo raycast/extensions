@@ -90,6 +90,14 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         onAction={() => openNewTab(SupportedBrowsers.Orion, url)}
       />
     ),
+    [SupportedBrowsers.Sidekick]: (
+      <ActionPanel.Item
+        title={"Open in Sidekick"}
+        icon={"sidekick-logo.png"}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        onAction={() => openNewTab(SupportedBrowsers.Sidekick, url)}
+      />
+    ),
   };
   return (
     <ActionPanel>
@@ -117,6 +125,7 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         {actions[SupportedBrowsers.Opera]}
         {actions[SupportedBrowsers.Iridium]}
         {actions[SupportedBrowsers.Orion]}
+        {actions[SupportedBrowsers.Sidekick]}
       </ActionPanel.Section>
     </ActionPanel>
   );

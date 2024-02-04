@@ -1,6 +1,6 @@
 # Browser History Extension
 
-Search and open Google Chrome, Mozilla Firefox, Safari, Microsoft Edge, Brave, Vivaldi, Arc, Opera, Iridium and Orion tabs from search query based on browser history from all browsers.
+Search and open Google Chrome, Mozilla Firefox, Safari, Microsoft Edge, Brave, Vivaldi, Arc, Opera, Iridium, Orion and Sidekick tabs from search query based on browser history from all browsers.
 
 You can configure which browser's history results come first and which browsers to appear in the list.
 

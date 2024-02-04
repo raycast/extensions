@@ -29,6 +29,9 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
     case SupportedBrowsers.Orion:
       appName = "Orion";
       break;
+    case SupportedBrowsers.Sidekick:
+      appName = "Sidekick";
+      break;
     default:
       throw new Error(`Unsupported browser: ${browser}`);
   }
