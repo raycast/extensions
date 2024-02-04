@@ -11,7 +11,7 @@ export default async function Command() {
   await runAppleScript(`
 activate application "Finder"
 tell application "System Events"
-    set visible of processes where name is not "Finder" to false
+    keystroke "h" using {command down, option down}
 end tell
 tell application "Finder" to set collapsed of windows to true
   `);
