@@ -9,7 +9,6 @@ const useAbortController = () => {
   };
 
   const abort = () => {
-    if (ref.current.signal.aborted) return;
     ref.current?.abort();
   };
 

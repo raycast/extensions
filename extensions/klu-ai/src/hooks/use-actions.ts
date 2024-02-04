@@ -1,5 +1,5 @@
 import { PersistedAction, PersistedApp } from "@kluai/core";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useCallback } from "react";
 import klu from "../libs/klu";
 import useAbortController from "./use-abort";
@@ -15,9 +15,11 @@ const useActions = () => {
 
   const hook = useCachedPromise(
     async (selectedAppGuid?: string) => {
-      const actions = await klu.apps.getActions(selectedAppGuid ?? apps[0].guid);
+      if (selectedAppGuid === undefined || apps === undefined) return [];
 
-      if (!selectedAppGuid) {
+      const actions = await klu.apps.getActions(selectedAppGuid);
+
+      if (selectedApp === undefined) {
         setSelectedApp(apps[0]);
       }
 
@@ -43,22 +45,25 @@ const useActions = () => {
 
       return await Promise.all(newActions);
     },
-    [selectedApp?.guid],
+    [selectedApp ? selectedApp.guid : apps?.[0].guid],
     {
-      execute: !isAppsLoading,
+      execute: !isAppsLoading || !selectedApp || !apps,
       initialData: [],
       abortable: abortable.ref,
+      onError: (error) => {
+        showFailureToast(error);
+        abortable.abort();
+        abortable.renew();
+      },
     },
   );
 
   const onChangeApp = useCallback((app: PersistedApp) => {
-    if (app.guid === selectedApp?.guid) return;
-    if (abortable.ref.current.signal) {
-      abortable.abort();
-    }
+    if (!selectedApp) return;
+    if (app.guid === selectedApp.guid) return;
+    abortable.abort();
     abortable.renew();
     setSelectedApp(app);
-    hook.revalidate();
   }, []);
 
   return { ...hook, isLoading: isAppsLoading || hook.isLoading, onChangeApp };

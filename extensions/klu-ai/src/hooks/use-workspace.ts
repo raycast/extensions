@@ -11,9 +11,6 @@ const useWorkspace = () => {
     [],
     {
       keepPreviousData: true,
-      initialData: {
-        workspace: undefined,
-      },
     },
   );
 

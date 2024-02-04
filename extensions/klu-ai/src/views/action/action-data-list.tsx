@@ -47,11 +47,11 @@ const ActionDataList = ({ guid, onChange }: { guid: string; onChange: (value: Ac
               </ActionPanel.Section>
               <ActionPanel.Section title="Link">
                 <Action.OpenInBrowser
-                  url={`${APP_URL}/${workspace.slug.toLocaleLowerCase()}/apps/${selectedApp?.id}/data?action=${guid}&guid=${a.guid}`}
+                  url={`${APP_URL}/${workspace?.slug.toLocaleLowerCase()}/apps/${selectedApp?.id}/data?action=${guid}&guid=${a.guid}`}
                 />
                 <Action.CopyToClipboard
                   title="Copy Link"
-                  content={`${APP_URL}/${workspace.slug.toLocaleLowerCase()}/apps/${selectedApp?.id}/data?action=${guid}&guid=${a.guid}`}
+                  content={`${APP_URL}/${workspace?.slug.toLocaleLowerCase()}/apps/${selectedApp?.id}/data?action=${guid}&guid=${a.guid}`}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section title="Miscellaneous">

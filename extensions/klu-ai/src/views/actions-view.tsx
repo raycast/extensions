@@ -1,4 +1,5 @@
 import useActions from "@/hooks/use-actions";
+import { useSelectedApplication } from "@/hooks/use-application";
 import useApplications from "@/hooks/use-applications";
 import { PersistedApp } from "@kluai/core";
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
@@ -12,6 +13,7 @@ const ApplicationsDropdown = ({
   applications: PersistedApp[];
   onChange: (value: PersistedApp) => void;
 }) => {
+  const { selectedApp } = useSelectedApplication();
   return (
     <List.Dropdown
       tooltip="Select an application"
@@ -21,6 +23,7 @@ const ApplicationsDropdown = ({
         if (app === undefined || !app) return onChange(applications[0]);
         onChange(app);
       }}
+      defaultValue={selectedApp?.guid ?? applications[0]?.guid}
     >
       {applications.map((app) => (
         <List.Dropdown.Item key={app.guid} value={app.guid} title={app.name} icon={Icon.AppWindowGrid2x2} />
@@ -30,11 +33,13 @@ const ApplicationsDropdown = ({
 };
 
 const ActionsView = () => {
-  const { data: apps } = useApplications();
+  const { data: apps, isLoading: isAppsLoading } = useApplications();
 
-  const { data: actions, isLoading, onChangeApp: setSelectedApp } = useActions();
+  const { data: actions, isLoading: isActionsLoading, onChangeApp: setSelectedApp } = useActions();
 
   const { push } = useNavigation();
+
+  const isLoading = isAppsLoading || isActionsLoading;
 
   return (
     <List
@@ -42,43 +47,47 @@ const ActionsView = () => {
       isLoading={isLoading}
       navigationTitle="Results"
       searchBarAccessory={
-        apps.length > 0 ? <ApplicationsDropdown applications={apps} onChange={setSelectedApp} /> : undefined
+        apps && apps.length > 0 ? <ApplicationsDropdown applications={apps} onChange={setSelectedApp} /> : undefined
       }
     >
-      {actions.map((a) => (
-        <List.Item
-          key={a.guid}
-          id={a.guid}
-          title={a.name}
-          subtitle={a.description}
-          accessories={[
-            {
-              icon: Icon.Gear,
-              text: a.modelName
-                ? a.modelName.length > 20
-                  ? `${a.modelName?.slice(0, 20)}...`
-                  : a.modelName
-                : "No model",
-              tooltip: "Model",
-            },
-            {
-              icon: Icon.Clock,
-              text: intlFormatDistance(new Date(a.updatedAt), new Date()),
-              tooltip: "Last updated",
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open"
-                icon={{ source: Icon.Globe }}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-                onAction={() => push(<ActionView guid={a.guid} />)}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {actions.length > 0 ? (
+        actions.map((a) => (
+          <List.Item
+            key={a.guid}
+            id={a.guid}
+            title={a.name}
+            subtitle={a.description}
+            accessories={[
+              {
+                icon: Icon.Gear,
+                text: a.modelName
+                  ? a.modelName.length > 20
+                    ? `${a.modelName?.slice(0, 20)}...`
+                    : a.modelName
+                  : "No model",
+                tooltip: "Model",
+              },
+              {
+                icon: Icon.Clock,
+                text: intlFormatDistance(new Date(a.updatedAt), new Date()),
+                tooltip: "Last updated",
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Open"
+                  icon={{ source: Icon.Globe }}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  onAction={() => push(<ActionView guid={a.guid} />)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      ) : !isLoading ? (
+        <List.EmptyView icon={Icon.Tray} title="No action is found" />
+      ) : null}
     </List>
   );
 };
