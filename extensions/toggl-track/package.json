@@ -35,6 +35,12 @@
       "title": "Manage Tags",
       "description": "A list of all the tags you have access to.",
       "mode": "view"
+    },
+    {
+      "name": "manageClients",
+      "title": "Manage Clients",
+      "description": "A list of all the clients you have access to.",
+      "mode": "view"
     }
   ],
   "preferences": [
