@@ -78,19 +78,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.46.0",
-    "execa": "^6.0.0",
+    "@raycast/api": "^1.66.0",
     "@spotxyz/macos-audio-devices": "1.5.0",
+    "execa": "^6.0.0",
     "react-use": "^17.3.2",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
