@@ -8,7 +8,8 @@
     "mathieudutour",
     "mike182uk",
     "FezVrasta",
-    "rcruzper"
+    "rcruzper",
+    "thomas"
   ],
   "license": "MIT",
   "commands": [
@@ -31,14 +32,16 @@
       "title": "Set Output Device to Favourite",
       "subtitle": "Audio Device",
       "description": "Sets the active audio output device to the favourite specified in the preferences",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "toggle-favourites",
       "title": "Toggle Favourites",
       "subtitle": "Audio Device",
       "description": "Toggle the active audio output device between the favourites specified in the preferences",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
