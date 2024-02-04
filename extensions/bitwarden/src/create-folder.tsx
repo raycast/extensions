@@ -1,7 +1,7 @@
 import { Form, Action, showHUD, ActionPanel, showToast, Toast, popToRoot } from "@raycast/api";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import { SessionProvider } from "./context/session";
+import { SessionProvider } from "~/context/session";
 import { FormValidation, useForm } from "@raycast/utils";
 
 const CreateFolderCommand = () => (
