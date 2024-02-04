@@ -49,6 +49,7 @@ const useActions = () => {
     {
       execute: !isAppsLoading || !selectedApp || !apps,
       initialData: [],
+      keepPreviousData: true,
       abortable: abortable.ref,
       onError: (error) => {
         showFailureToast(error);
