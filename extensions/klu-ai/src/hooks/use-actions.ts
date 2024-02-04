@@ -1,6 +1,5 @@
-import { PersistedAction, PersistedApp } from "@kluai/core";
-import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { useCallback } from "react";
+import { PersistedAction } from "@kluai/core";
+import { useCachedPromise } from "@raycast/utils";
 import klu from "../libs/klu";
 import { useSelectedApplication } from "./use-application";
 import useApplications from "./use-applications";
@@ -15,8 +14,6 @@ const useActions = () => {
       if (selectedAppGuid === undefined || apps === undefined) return [];
 
       const actions = await klu.apps.getActions(selectedAppGuid);
-
-      console.log("fetch", selectedAppGuid);
 
       if (selectedApp === undefined) {
         setSelectedApp(apps[0]);
@@ -49,17 +46,10 @@ const useActions = () => {
       execute: !isAppsLoading || !apps,
       initialData: [],
       keepPreviousData: true,
-      onError: (error) => {
-        showFailureToast(error);
-      },
     },
   );
 
-  const onChangeApp = useCallback((app: PersistedApp) => {
-    setSelectedApp(app);
-  }, []);
-
-  return { ...hook, isLoading: isAppsLoading || hook.isLoading, onChangeApp };
+  return { ...hook, isLoading: isAppsLoading || hook.isLoading };
 };
 
 export default useActions;

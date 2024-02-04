@@ -6,22 +6,16 @@ import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { intlFormatDistance } from "date-fns";
 import ActionView from "./action/action-view";
 
-const ApplicationsDropdown = ({
-  applications,
-  onChange,
-}: {
-  applications: PersistedApp[];
-  onChange: (value: PersistedApp) => void;
-}) => {
-  const { selectedApp } = useSelectedApplication();
+const ApplicationsDropdown = ({ applications }: { applications: PersistedApp[] }) => {
+  const { selectedApp, setSelectedApp } = useSelectedApplication();
   return (
     <List.Dropdown
       tooltip="Select an application"
       onChange={(id) => {
         const app = applications.find((_) => _.guid === id);
         if (applications.length === 0) return;
-        if (app === undefined || !app) return onChange(applications[0]);
-        onChange(app);
+        if (app === undefined || !app) return setSelectedApp(applications[0]);
+        setSelectedApp(app);
       }}
       defaultValue={selectedApp?.guid ?? applications[0]?.guid}
     >
@@ -35,7 +29,7 @@ const ApplicationsDropdown = ({
 const ActionsView = () => {
   const { data: apps, isLoading: isAppsLoading } = useApplications();
 
-  const { data: actions, isLoading: isActionsLoading, onChangeApp: setSelectedApp } = useActions();
+  const { data: actions, isLoading: isActionsLoading } = useActions();
 
   const { push } = useNavigation();
 
@@ -46,9 +40,7 @@ const ActionsView = () => {
       searchBarPlaceholder="Search actions"
       isLoading={isLoading}
       navigationTitle="Results"
-      searchBarAccessory={
-        apps && apps.length > 0 ? <ApplicationsDropdown applications={apps} onChange={setSelectedApp} /> : undefined
-      }
+      searchBarAccessory={apps && apps.length > 0 ? <ApplicationsDropdown applications={apps} /> : undefined}
     >
       {actions.length > 0 ? (
         actions.map((a) => (
