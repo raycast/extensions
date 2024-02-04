@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { List } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { useWorkspaces, useTags, useGroups } from "./hooks";
 import type { Workspace } from "./api";
 import TagListItem from "./components/TagListItem";
+import TagForm from "./components/TagForm";
 
 function ManageTags() {
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -12,9 +13,19 @@ function ManageTags() {
 
   const [searchFilter, setSearchFilter] = useState<Workspace>();
 
+  const SharedActions = (
+    <Action.Push
+      title="Create New Tag"
+      icon={Icon.Plus}
+      shortcut={{ key: "n", modifiers: ["cmd", "shift"] }}
+      target={<TagForm {...{ workspaces, revalidateTags }} />}
+    />
+  );
+
   return (
     <List
       isLoading={isLoadingWorkspaces || isLoadingTags}
+      actions={<ActionPanel>{SharedActions}</ActionPanel>}
       searchBarAccessory={
         workspaces.length < 2 ? undefined : (
           <List.Dropdown
@@ -36,7 +47,7 @@ function ManageTags() {
           {groupedTags[searchFilter.id]?.length == 0 && <List.EmptyView title="No Tags Found" />}
           <List.Section key={searchFilter.id} title={searchFilter.name}>
             {groupedTags[searchFilter.id]?.map((tag) => (
-              <TagListItem workspace={searchFilter} key={tag.id} {...{ tag, revalidateTags, workspaces }} />
+              <TagListItem workspace={searchFilter} key={tag.id} {...{ tag, revalidateTags, SharedActions }} />
             ))}
           </List.Section>
         </>
@@ -46,7 +57,7 @@ function ManageTags() {
           {workspaces.map((workspace) => (
             <List.Section key={workspace.id} title={workspace.name}>
               {groupedTags[workspace.id]?.map((tag) => (
-                <TagListItem workspace={workspace} key={tag.id} {...{ tag, revalidateTags, workspaces }} />
+                <TagListItem workspace={workspace} key={tag.id} {...{ tag, revalidateTags, SharedActions }} />
               ))}
             </List.Section>
           ))}

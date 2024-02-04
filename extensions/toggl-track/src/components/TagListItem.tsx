@@ -7,10 +7,10 @@ interface TagListProps {
   workspace: Workspace;
   tag: Tag;
   revalidateTags: () => void;
-  workspaces: Workspace[];
+  SharedActions: React.ReactNode;
 }
 
-export default function TagListItem({ workspace, tag, revalidateTags, workspaces }: TagListProps) {
+export default function TagListItem({ workspace, tag, revalidateTags, SharedActions }: TagListProps) {
   const canModifyTags =
     !workspace.only_admins_may_create_tags || workspace.role == "admin" || workspace.role == "projectlead";
   return (
@@ -24,7 +24,7 @@ export default function TagListItem({ workspace, tag, revalidateTags, workspaces
                 title="Rename Tag"
                 icon={Icon.Pencil}
                 shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
-                target={<TagForm {...{ tag, workspaces, revalidateTags }} />}
+                target={<TagForm {...{ tag, revalidateTags }} />}
               />
               <Action
                 title="Delete Tag"
@@ -50,12 +50,7 @@ export default function TagListItem({ workspace, tag, revalidateTags, workspaces
                 }}
               />
             </ActionPanel.Section>
-            <Action.Push
-              title="Create New Tag"
-              icon={Icon.Plus}
-              shortcut={{ key: "n", modifiers: ["cmd", "shift"] }}
-              target={<TagForm {...{ workspaces, revalidateTags }} />}
-            />
+            {SharedActions}
           </ActionPanel>
         ) : undefined
       }

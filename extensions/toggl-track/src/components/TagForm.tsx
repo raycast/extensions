@@ -2,11 +2,17 @@ import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
 import { Workspace, Tag, updateTag, createTag } from "../api";
 import { withToast, Verb } from "../helpers/withToast";
 
-interface TagFormProps {
-  tag?: Tag;
-  workspaces: Workspace[];
-  revalidateTags: () => void;
-}
+type TagFormProps =
+  | {
+      tag: Tag;
+      workspaces?: never;
+      revalidateTags: () => void;
+    }
+  | {
+      tag?: never;
+      workspaces: Workspace[];
+      revalidateTags: () => void;
+    };
 
 export default function TagForm({ tag, workspaces, revalidateTags }: TagFormProps) {
   const { pop } = useNavigation();
