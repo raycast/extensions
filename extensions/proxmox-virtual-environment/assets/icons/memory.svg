@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xmlns="http://www.w3.org/2000/svg"
+    width="100"
+    height="100"
+    version="1.1"
+>
+
+    <g fill="none" stroke="#000" stroke-width="7" shape-rendering="crispEdges">
+        <rect x="3.0" y="25" rx="0" ry="0" width="94" height="40"/> <!-- outer dimm PCB border -->
+
+        <g stroke-width="0"> <!-- dimm chips -->
+            <rect x="12.5" y="35" rx="0" ry="0" width="20" height="20" fill="black"/>
+            <rect x="40.0" y="35" rx="0" ry="0" width="20" height="20" fill="black"/>
+            <rect x="67.5" y="35" rx="0" ry="0" width="20" height="20" fill="black"/>
+        </g>
+
+        <g stroke-width="8"> <!-- pins -->
+            <path d="m10,67 v+10"/>
+            <path d="m26,67 v+10"/>
+            <path d="m42,67 v+10"/>
+            <path d="m58,67 v+10"/>
+            <path d="m74,67 v+10"/>
+            <path d="m90,67 v+10"/>
+        </g>
+    </g>
+</svg>
