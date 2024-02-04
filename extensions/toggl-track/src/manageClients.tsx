@@ -63,7 +63,7 @@ export default function ClientList() {
               <ClientListItem
                 workspace={searchFilter}
                 key={client.id}
-                {...{ client, revalidateClients, workspaces, SharedActions }}
+                {...{ client, revalidateClients, SharedActions }}
               />
             ))}
           </List.Section>
@@ -77,7 +77,7 @@ export default function ClientList() {
                 <ClientListItem
                   workspace={workspace}
                   key={client.id}
-                  {...{ client, revalidateClients, workspaces, SharedActions }}
+                  {...{ client, revalidateClients, SharedActions }}
                 />
               ))}
             </List.Section>
