@@ -81,14 +81,10 @@ export async function getAvailableGroups(): Promise<string[]> {
 }
 
 export async function getActiveCoordinator(): Promise<SonosDevice | undefined> {
-  try {
-    const group = await storage.getActiveGroup();
-    const coordinator = await getGroupCoordinator(group);
+  const group = await storage.getActiveGroup();
+  const coordinator = await getGroupCoordinator(group);
 
-    return coordinator;
-  } catch (error) {
-    return undefined;
-  }
+  return coordinator;
 }
 
 export async function getGroupCoordinator(group: string | undefined): Promise<SonosDevice | undefined> {

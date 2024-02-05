@@ -1,10 +1,21 @@
 import { LaunchProps, LaunchType, launchCommand, showHUD, updateCommandMetadata } from "@raycast/api";
 import { formatPlayingState, getLatestState, getActiveCoordinator } from "./core/sonos";
+import { SonosDevice } from "@svrooij/sonos/lib";
+import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
+import { handleCommandError } from "./core/utils";
 
 export default async function Command({ launchType }: LaunchProps) {
-  const state = await getLatestState();
-  const coordinator = await getActiveCoordinator();
   const userInitiated = launchType === LaunchType.UserInitiated;
+  let state: SonosState | null;
+  let coordinator: SonosDevice | undefined;
+
+  try {
+    state = await getLatestState();
+    coordinator = await getActiveCoordinator();
+  } catch (error) {
+    await handleCommandError(error);
+    return;
+  }
 
   if (!coordinator && userInitiated) {
     await showHUD("Failed to resolve coordinator, choose an explicit group first");

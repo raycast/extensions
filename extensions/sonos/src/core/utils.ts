@@ -1,5 +1,19 @@
+import { showToast, Toast } from "@raycast/api";
+
 export class CoordinatorNotFoundError extends Error {}
 
+export async function handleCommandError(error: unknown): Promise<boolean> {
+  if (error instanceof Error && error.message.includes("No players found")) {
+    await showToast({
+      title: "No Sonos system detected",
+      style: Toast.Style.Failure,
+    });
+
+    return true;
+  }
+
+  return false;
+}
 export function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined;
 }

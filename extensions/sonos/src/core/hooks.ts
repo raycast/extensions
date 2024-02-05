@@ -8,11 +8,16 @@ export function useCurrentState() {
 
   useEffect(() => {
     async function run() {
-      const state = await getLatestState();
-      const title = await formatPlayingState(state);
+      try {
+        const state = await getLatestState();
+        const title = await formatPlayingState(state);
 
-      setTitle(title);
-      setLoading(false);
+        setTitle(title);
+        setLoading(false);
+      } catch (error) {
+        setTitle("🔇 No Sonos system detected");
+        setLoading(false);
+      }
     }
 
     run();
