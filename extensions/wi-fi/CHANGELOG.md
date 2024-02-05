@@ -1,6 +1,6 @@
 # Wi-Fi Changelog
 
-## [Fix crash] - {PR_MERGE_DATE}
+## [Fix crash] - 2024-02-05
 
 - Fix potential crash issues
 - Fix the issue of menu bar icon not updating
