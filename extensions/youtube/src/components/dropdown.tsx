@@ -9,7 +9,7 @@ export function FilterDropdown({
 }) {
   return (
     <ListOrGridDropdown tooltip="Filter" onChange={onChange} defaultValue={defaultValue}>
-      <ListOrGridDropdownSection title="Order">
+      <ListOrGridDropdownSection title="Sorted By">
         <ListOrGridDropdownItem title="Relevance" value="relevance" />
         <ListOrGridDropdownItem title="Date" value="date" />
         <ListOrGridDropdownItem title="View Count" value="viewCount" />
