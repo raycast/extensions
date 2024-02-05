@@ -43,11 +43,11 @@ function CreateFolderComponent() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Folder" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Folder" onSubmit={handleSubmit} icon={Icon.NewFolder} />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Folder Name" placeholder="eg: Personal, Work" autoFocus={true} {...itemProps.name} />
+      <Form.TextField title="Folder Name" placeholder="eg: Personal, Work" autoFocus {...itemProps.name} />
     </Form>
   );
 }
