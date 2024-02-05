@@ -1,6 +1,6 @@
 # Life Progress Changelog
 
-## [Fix error] - {PR_MERGE_DATE}
+## [Fix error] - 2024-02-05
 
 - Fix network request errors
 - Optimize the metadata presentation of the command
