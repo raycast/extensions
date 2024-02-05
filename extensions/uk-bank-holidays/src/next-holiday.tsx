@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { ActionPanel, Action, Detail } from "@raycast/api";
+import { updateCommandMetadata, environment } from "@raycast/api";
 import fetch from "node-fetch";
 
 type Event = {
@@ -27,33 +26,16 @@ async function fetchNextBankHoliday() {
   return nextHoliday;
 }
 
-export default function Command() {
-  const [nextHoliday, setNextHoliday] = useState<Event | null>(null);
+export default async function Command() {
+  console.log("launchType", environment.launchType);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const holidayData = await fetchNextBankHoliday();
-      setNextHoliday(holidayData);
-    };
+  const nextHoliday = await fetchNextBankHoliday();
 
-    fetchData();
-  }, []);
-
-  return nextHoliday ? (
-    <Detail
-      markdown={`# ${nextHoliday.title}\n\n${new Date(nextHoliday.date).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })}`}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Event Date" content={nextHoliday.date} />
-          <Action.OpenInBrowser url={`https://www.gov.uk/bank-holidays`} />
-        </ActionPanel>
-      }
-    />
-  ) : (
-    <Detail isLoading={true} />
-  );
+  await updateCommandMetadata({
+    subtitle: `${nextHoliday.title}, ${new Date(nextHoliday.date).toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })}`,
+  });
 }

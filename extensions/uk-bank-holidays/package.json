@@ -19,9 +19,10 @@
     },
     {
       "name": "next-holiday",
-      "title": "Show Next UK Bank Holiday",
-      "description": "Show Next UK Bank Holiday",
-      "mode": "view"
+      "title": "Next UK Bank Holiday",
+      "description": "Next UK Bank Holiday",
+      "mode": "no-view",
+      "interval": "12h"
     }
   ],
   "dependencies": {

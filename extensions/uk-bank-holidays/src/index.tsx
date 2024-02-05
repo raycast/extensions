@@ -43,7 +43,7 @@ export default function Command() {
         <List.Item
           key={holiday.date}
           title={holiday.title}
-          subtitle={new Date(holiday.date).toLocaleDateString("en-US", {
+          subtitle={new Date(holiday.date).toLocaleDateString("en-GB", {
             year: "numeric",
             month: "long",
             day: "numeric",
