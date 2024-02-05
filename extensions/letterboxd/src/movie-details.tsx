@@ -1,7 +1,7 @@
 import React from "react";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { AsyncStatus, fetchMovieDetails } from "./letterboxd-api";
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { STRINGS } from "./strings";
 import { MovieDetails, Review } from "./types";
 import { ErrorScreen } from "./components/error-screen";
@@ -18,11 +18,7 @@ export default function MovieDetails(props: MovieDetailsProps) {
   const { data, isLoading, revalidate } = useCachedPromise(
     fetchMovieDetails,
     [qualifier],
-    { keepPreviousData: true },
-  );
-  const [showMetadata, setShowMetadata] = useCachedState(
-    "metaDataVisibility",
-    true,
+    { keepPreviousData: true }
   );
 
   const status = data?.status;
@@ -38,15 +34,10 @@ export default function MovieDetails(props: MovieDetailsProps) {
       isLoading={isLoading}
       navigationTitle={movieTitle}
       markdown={markdown}
-      metadata={<Metadata show={showMetadata} movie={details} />}
+      metadata={<Metadata show={true} movie={details} />}
       actions={
         <ActionPanel>
           {details?.url && <Action.OpenInBrowser url={details.url} />}
-          <Action
-            icon={Icon.AppWindowSidebarRight}
-            title={STRINGS.toggleMetadata}
-            onAction={() => setShowMetadata(!showMetadata)}
-          />
         </ActionPanel>
       }
     />
@@ -172,7 +163,7 @@ function Metadata(props: MetadataProps) {
               />
             ))}
           </Detail.Metadata.TagList>
-        )),
+        ))
       )}
       <Detail.Metadata.Separator />
 
