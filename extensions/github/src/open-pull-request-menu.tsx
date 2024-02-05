@@ -61,6 +61,17 @@ function OpenPullRequestMenu() {
     { keepPreviousData: true },
   );
 
+  // Create list of unique repositories
+  const repos = [...new Set(data?.map((i) => i.repository.nameWithOwner))];
+
+  // TODO: Use a preference to switch between showing all PRs and showing PRs by repo
+  // TODO: Refactor the pull request MenuBarItem
+  // TODO: Figure out how to handle the empty state when pull requests are sorted by repo.
+  // TODO: Figure out how/if to handle the max number of items preference when pull requests are sorted by repo.
+  //       Should they be sorted by repo first and then limited to the max number of items, or should the max number
+  //       of items be applied to the entire list of pull requests and then sorted by repo? The former would show a
+  //       ton more repos than the setting, but the latter would likely result in empty repos.
+
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${data?.length}` : undefined}
@@ -76,28 +87,34 @@ function OpenPullRequestMenu() {
           onAction={() => launchMyPullRequestsCommand()}
         />
       </MenuBarSection>
-      <MenuBarSection
-        maxChildren={getMaxPullRequestsPreference()}
-        moreElement={(hidden) => (
-          <MenuBarItem title={`... ${hidden} more`} onAction={() => launchMyPullRequestsCommand()} />
-        )}
-        emptyElement={<MenuBarItem title="No Pull Requests" />}
-      >
-        {data?.map((i) => {
-          // GitHub had an outage on Nov. 3rd that caused the returned PRs to be null
-          // This corrupted the cache so let's check first if there's a PR before rendering
-          if (!i) return null;
-          return (
-            <MenuBarItem
-              key={i.id}
-              title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
-              icon="pull-request.svg"
-              tooltip={i.repository.nameWithOwner}
-              onAction={() => open(i.permalink)}
-            />
-          );
-        })}
-      </MenuBarSection>
+
+      {/* Show pull requests by repo */}
+      {repos.map((repo) => (
+        <MenuBarSection maxChildren={getMaxPullRequestsPreference()} key={repo} title={repo}>
+          {data
+            ?.filter((pr) => repo === pr.repository.nameWithOwner)
+            .map((i) => {
+              // GitHub had an outage on Nov. 3rd that caused the returned PRs to be null
+              // This corrupted the cache so let's check first if there's a PR before rendering
+              if (!i) return null;
+              return (
+                <MenuBarItem
+                  key={i.id}
+                  title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
+                  icon="pull-request.svg"
+                  tooltip={i.repository.nameWithOwner}
+                  onAction={() => open(i.permalink)}
+                />
+              );
+            })}
+        </MenuBarSection>
+      ))}
+      {/* Since the empty state is built for listing all pull requests in one MenuBarSection,
+          we introduce an empty one here in case there are no pull requests available. */}
+      {data?.length === 0 && <MenuBarSection emptyElement={<MenuBarItem title="No Pull Requests" />} />}
+
+      {/* List all pull requests */}
+
       <MenuBarSection>
         <MenuBarItemConfigureCommand />
       </MenuBarSection>
