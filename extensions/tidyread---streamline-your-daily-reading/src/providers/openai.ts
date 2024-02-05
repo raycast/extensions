@@ -3,11 +3,20 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import { Provider, ProviderOptions } from "../types";
 // import { sendMessageToChatGPT } from "../utils/gpt";
 
+// function normalizeModel(name?: string) {
+//   if (!name) return "gpt-3.5-turbo";
+//   if (!name.startsWith("gpt")) return "gpt-3.5-turbo";
+//   return name;
+// }
+
 class OpenaiProvider extends Provider {
   protected client: OpenAI | null;
 
   constructor(options: ProviderOptions) {
-    super(options);
+    super({
+      ...options,
+      // apiModel: normalizeModel(options?.apiModel),
+    });
 
     if (!options.apiKey) {
       this.available = false;
