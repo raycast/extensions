@@ -5,6 +5,9 @@
   "description": "This is a Youdao translation extension with simple interaction",
   "icon": "command-icon.png",
   "author": "xeric",
+  "contributors": [
+    "mricefox"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -46,7 +49,7 @@
       "type": "dropdown",
       "required": true,
       "title": "First Language",
-      "default": "zh-CHS",
+      "default": "auto",
       "data": [
         {
           "title": "🇺🇳 Auto",
@@ -503,7 +506,7 @@
       "name": "to_language",
       "type": "dropdown",
       "required": true,
-      "default": "en",
+      "default": "auto",
       "data": [
         {
           "title": "🇺🇳 Auto",
@@ -958,20 +961,20 @@
       "description": "Second language"
     },
     {
-      "name": "is_search_clipboard",
-      "type": "checkbox",
-      "label": "Search Clipboard Content by default",
-      "required": false,
-      "title": "Clipboard Support",
-      "description": "by default search with content copied in Clipboard if there's no selection or input"
-    },
-    {
       "name": "is_using_modern_web",
       "type": "checkbox",
       "label": "Use Modern Translation page of Youdao",
       "required": false,
       "title": "Modern Translation Page",
-      "description": "by default use Youdao mobile page, check it to show tranlsation page in a modern web page"
+      "description": "by default use Youdao mobile page, check it to show translation page in a modern web page"
+    },
+    {
+      "name": "max_input_length",
+      "type": "textfield",
+      "required": false,
+      "title": "The maximum length of an input",
+      "description": "The maximum length of words and sentences in an input",
+      "default": "500"
     }
   ],
   "dependencies": {

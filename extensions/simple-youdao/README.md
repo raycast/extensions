@@ -25,19 +25,8 @@ If you want to specify the language, you need to define them in `Command Configu
 ## Some enhancements
 
 * Support direct Argument input for translation
-
-* the content to translate supports with below order:
-
-  * Selection content in your most front window
-
-  * Clipboard content
-
-  * User input
-
-* show phonetic on translated content
-
-* Use `ctrl+Return` to pronounce the original words
-* Use `shift+Return` to pronounce the translated words
+* Show phonetic on translated content
+* Use `cmd+Return` to pronounce the original words
 
 ## About YouDao AppKey and AppSecret
 You can get Youdao Translate APP Key&Secret at https://ai.youdao.com/console/

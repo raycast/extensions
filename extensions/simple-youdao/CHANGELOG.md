@@ -1,5 +1,11 @@
 # Youdao Changelog
 
+## [Update] - 2024-02-05
+
+- Delete translate clipboard or selection content to improve fluency of input
+- Support config max input length
+- Use macOS 'say' command to pronounce firstly to reduce latency
+
 ## [Update] - 2023-12-21
 
 - Added translation extension argument support
