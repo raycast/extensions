@@ -23,7 +23,7 @@ export function NotificationTaskActions({ notification, detailsTarget, mutate }:
   return (
     <ActionPanel>
       <Action.OpenInBrowser url={notificationHtmlUrl} />
-      <Action.Push title="Show Details" target={detailsTarget} />
+      <Action.Push title="Show Details" icon={Icon.AppWindowSidebarRight} target={detailsTarget} />
       <Action
         title="Delete Notification"
         icon={Icon.Trash}
@@ -44,7 +44,7 @@ export function NotificationTaskActions({ notification, detailsTarget, mutate }:
       />
       <Action
         title="Complete Task"
-        icon={Icon.Calendar}
+        icon={Icon.CheckCircle}
         shortcut={{ modifiers: ["ctrl"], key: "c" }}
         onAction={() => completeTask(notification, mutate)}
       />

@@ -27,7 +27,7 @@ export function NotificationActions({ notification, detailsTarget, mutate }: Not
   return (
     <ActionPanel>
       <Action.OpenInBrowser url={notificationHtmlUrl} />
-      <Action.Push title="Show Details" target={detailsTarget} />
+      <Action.Push title="Show Details" icon={Icon.AppWindowSidebarRight} target={detailsTarget} />
       <Action
         title="Delete Notification"
         icon={Icon.Trash}

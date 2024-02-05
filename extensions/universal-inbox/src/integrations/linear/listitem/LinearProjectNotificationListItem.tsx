@@ -1,7 +1,7 @@
+import { getLinearNotificationReasonAccessory, getLinearUserAccessory } from "../accessories";
 import { LinearProjectNotification, LinearProjectState, LinearProject } from "../types";
 import { NotificationActions } from "../../../action/NotificationActions";
 import { LinearProjectPreview } from "../preview/LinearProjectPreview";
-import { getLinearUserAccessory } from "../accessories";
 import { Notification } from "../../../notification";
 import { MutatePromise } from "@raycast/utils";
 import { List, Color } from "@raycast/api";
@@ -23,8 +23,10 @@ export function LinearProjectNotificationListItem({
 
   const state = getLinearProjectStateAccessory(linearProjectNotification.project);
   const lead = getLinearUserAccessory(linearProjectNotification.project.lead);
+  const reason = getLinearNotificationReasonAccessory(linearProjectNotification.type);
 
   const accessories: List.Item.Accessory[] = [
+    reason,
     state,
     lead,
     {

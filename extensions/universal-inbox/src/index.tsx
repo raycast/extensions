@@ -1,5 +1,5 @@
+import { Action, ActionPanel, Detail, Icon, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { GoogleMailNotificationListItem } from "./integrations/google-mail/listitem/GoogleMailNotificationListItem";
-import { Action, ActionPanel, Detail, List, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { TodoistNotificationListItem } from "./integrations/todoist/listitem/TodoistNotificationListItem";
 import { GithubNotificationListItem } from "./integrations/github/listitem/GithubNotificationListItem";
 import { LinearNotificationListItem } from "./integrations/linear/listitem/LinearNotificationListItem";
@@ -23,7 +23,7 @@ export default function Command() {
         markdown={"API key incorrect. Please update it in extension preferences and try again."}
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />

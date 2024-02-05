@@ -1,7 +1,7 @@
 import { LinearWorkflowStateType, LinearIssueNotification, LinearWorkflowState } from "../types";
+import { getLinearNotificationReasonAccessory, getLinearUserAccessory } from "../accessories";
 import { NotificationActions } from "../../../action/NotificationActions";
 import { LinearIssuePreview } from "../preview/LinearIssuePreview";
-import { getLinearUserAccessory } from "../accessories";
 import { Notification } from "../../../notification";
 import { MutatePromise } from "@raycast/utils";
 import { Page } from "../../../types";
@@ -19,12 +19,17 @@ export function LinearIssueNotificationListItem({
   linearIssueNotification,
   mutate,
 }: LinearIssueNotificationListItemProps) {
-  const subtitle = `${linearIssueNotification.issue.team.name} #${linearIssueNotification.issue.identifier}`;
+  const projectSubtitle = linearIssueNotification.issue.project
+    ? `/ ${linearIssueNotification.issue.project.name} `
+    : "";
+  const subtitle = `${linearIssueNotification.issue.team.name} ${projectSubtitle}#${linearIssueNotification.issue.identifier}`;
 
   const state = getLinearIssueStateAccessory(linearIssueNotification.issue.state);
   const assignee = getLinearUserAccessory(linearIssueNotification.issue.assignee);
+  const reason = getLinearNotificationReasonAccessory(linearIssueNotification.type);
 
   const accessories: List.Item.Accessory[] = [
+    reason,
     state,
     assignee,
     {

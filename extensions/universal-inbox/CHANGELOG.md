@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.1.3] - 2024-02-05
+
+### Added
+
+- Display Linear notification reason
+- Display Linear project on notification item
+- Add missing action icons
+
 ## [0.1.2] - 2024-02-01
 
 ### Added
