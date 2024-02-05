@@ -29,13 +29,14 @@ const spotifyContentTypesTitles = {
 };
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [spotifyContent, setSpotifyContent] = useState<SpotifyContent>();
 
   const fetchSpotifyContent = useCallback(
     async (spotifyLink: string) => {
       setSearchText(spotifyLink);
+      setSpotifyContent(undefined);
 
       if (!SPOTIFY_LINK_REGEX.test(spotifyLink)) {
         return;
@@ -90,8 +91,10 @@ export default function Command() {
         setSpotifyContent(lastSearch.spotifyContent);
         setSearchText(lastSearch.spotifyLink);
       }
+
+      setIsLoading(false);
     })();
-  }, [fetchSpotifyContent]);
+  }, [fetchSpotifyContent, setIsLoading, setSearchText, setSpotifyContent]);
 
   return (
     <List
