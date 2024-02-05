@@ -43,8 +43,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.65.1",
-    "node-fetch": "^3.3.2",
-    "react-dom": "^18.2.0"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.5",
@@ -54,7 +53,6 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "react": "^18.2.0",
-    "react-devtools": "^4.28.4",
     "typescript": "^5.3.3"
   },
   "scripts": {
