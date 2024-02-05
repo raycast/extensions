@@ -26,7 +26,6 @@ export default function Command() {
     return (
       <List
         isLoading={isLoading}
-        navigationTitle="Choose a time period"
         searchBarPlaceholder="Search referrers"
         searchBarAccessory={<PeriodDropdown setDateFrom={setDateFrom} />}
       >
