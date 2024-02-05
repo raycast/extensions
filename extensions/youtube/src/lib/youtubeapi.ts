@@ -257,6 +257,7 @@ export async function getVideos(videoIds: string[]): Promise<Video[]> {
             publishedAt: r.snippet?.publishedAt || "?",
             channelId: r.snippet?.channelId || "",
             channelTitle: r.snippet?.channelTitle || "?",
+
             thumbnails: {
               default: {
                 url: r.snippet?.thumbnails?.default?.url || undefined,
