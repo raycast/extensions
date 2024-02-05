@@ -1,6 +1,7 @@
 # Let Me Google That Changelog
 
-## [Replace Spaces with Plus] - 2024-02-05
-- Fixed an issue by using .replace(/ /g, '+') to replace spaces with plus signs.
+## [Fix] - 2024-02-05
+
+- Fixed an issue where the URL was not encoded correctly.
 
 ## [Initial Version] - 2023-06-28
