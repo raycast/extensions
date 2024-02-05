@@ -1,7 +1,7 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
 import type { Checklist } from "../types";
 
-function CloseChecklistAction(props: {
+export function CloseChecklistAction(props: {
   checklists: [Checklist[], React.Dispatch<React.SetStateAction<Checklist[]>>];
   checklist: Checklist;
 }) {
@@ -30,5 +30,3 @@ function CloseChecklistAction(props: {
     />
   );
 }
-
-export default CloseChecklistAction;

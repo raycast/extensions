@@ -2,15 +2,13 @@ import { Action, Icon, Keyboard } from "@raycast/api";
 import { shareableChecklist } from "../lib/util";
 import { Checklist } from "../types";
 
-function ShareChecklistAction(props: { checklist: Checklist }) {
+export function ShareChecklistAction(props: { checklist: Checklist }) {
   return (
     <Action.CopyToClipboard
       icon={Icon.Link}
-      title="Share Quest"
+      title="Share Checklist"
       content={JSON.stringify(shareableChecklist(props.checklist))}
       shortcut={Keyboard.Shortcut.Common.Copy}
     />
   );
 }
-
-export default ShareChecklistAction;

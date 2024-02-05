@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { generateClipboardExport } from "../lib/util";
 import { Checklist, TasksFilter } from "../types";
 
-function ViewChecklist(props: {
+export function ViewChecklist(props: {
   checklist: Checklist;
   checklists: [Checklist[], React.Dispatch<React.SetStateAction<Checklist[]>>];
 }) {
@@ -109,5 +109,3 @@ function ViewChecklist(props: {
     </List>
   );
 }
-
-export default ViewChecklist;

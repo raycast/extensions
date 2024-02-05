@@ -1,8 +1,8 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
-import CreateChecklistForm from "../components/createChecklist";
+import { CreateChecklistForm } from "../components/create-checklist";
 import type { Checklist } from "../types";
 
-function EditChecklistAction(props: { onCreate: (checklist: Omit<Checklist, "id">) => void; checklist: Checklist }) {
+export function EditChecklistAction(props: { onCreate: (checklist: Checklist) => void; checklist: Checklist }) {
   return (
     <Action.Push
       icon={Icon.Pencil}
@@ -14,5 +14,3 @@ function EditChecklistAction(props: { onCreate: (checklist: Omit<Checklist, "id"
     />
   );
 }
-
-export default EditChecklistAction;

@@ -1,16 +1,14 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
-import CreateChecklistForm from "../components/createChecklist";
+import { CreateChecklistForm } from "../components/create-checklist";
 import type { Checklist } from "../types";
 
-function CreateChecklistAction(props: { onCreate: (checklist: Omit<Checklist, "id">) => void }) {
+export function CreateChecklistAction(props: { onCreate: (checklist: Checklist) => void }) {
   return (
     <Action.Push
       icon={Icon.Pencil}
-      title="Create Quest"
+      title="Create Checklist"
       shortcut={Keyboard.Shortcut.Common.New}
       target={<CreateChecklistForm onCreate={props.onCreate} actionLabel="Create Checklist" />}
     />
   );
 }
-
-export default CreateChecklistAction;
