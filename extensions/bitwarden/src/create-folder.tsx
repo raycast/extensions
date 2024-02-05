@@ -27,11 +27,13 @@ function CreateFolderComponent() {
       try {
         const { error } = await bitwarden.createFolder(formData.name);
         if (error) throw error;
-        await showHUD(`${formData.name} folder created`);
-        await popToRoot();
+        toast.style = Toast.Style.Success;
+        toast.title = "Folder created";
+        toast.message = formData.name;
       } catch (error) {
-        toast.title = "Failed to create folder";
         toast.style = Toast.Style.Failure;
+        toast.title = "Failed to create folder";
+        toast.message = undefined;
       }
     },
     validation: {
