@@ -54,7 +54,7 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
         showToast(
           Toast.Style.Failure,
           `Error!`,
-          `There was an error setting the active ${type} audio device to ${device.name}`
+          `There was an error setting the active ${type} audio device to ${device.name}`,
         );
       }
     })();
@@ -108,7 +108,7 @@ function useAudioDevices(type: "input" | "output") {
         current,
       };
     },
-    [type]
+    [type],
   );
 }
 

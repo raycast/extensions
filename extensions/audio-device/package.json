@@ -85,6 +85,7 @@
     "@raycast/utils": "^1.12.0",
     "@spotxyz/macos-audio-devices": "1.5.0",
     "execa": "^6.0.0",
+    "prettier": "^3.2.5",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
