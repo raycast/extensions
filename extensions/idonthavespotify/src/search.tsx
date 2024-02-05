@@ -29,8 +29,8 @@ const spotifyContentTypesTitles = {
 };
 
 export default function Command() {
+  const [isLoading, setIsLoading] = useState<boolean>();
   const [searchText, setSearchText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [spotifyContent, setSpotifyContent] = useState<SpotifyContent>();
 
   const fetchSpotifyContent = useCallback(
@@ -83,8 +83,7 @@ export default function Command() {
         SPOTIFY_LINK_REGEX.test(clipboardText) &&
         !(lastSearch && lastSearch.spotifyLink === clipboardText)
       ) {
-        await fetchSpotifyContent(clipboardText);
-        return;
+        return await fetchSpotifyContent(clipboardText);
       }
 
       if (lastSearch) {
