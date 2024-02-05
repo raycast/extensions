@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "copy-personal-zoom-link",
+  "title": "Copy Personal Zoom Link",
+  "description": "Personal zoom extension",
+  "icon": "command-icon.png",
+  "author": "louiskraemer",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-personal-zoom-link",
+      "title": "Copy Personal Zoom Link",
+      "description": "Copy the link from my personal zoom meeting in the clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "0.0.0"
+}
