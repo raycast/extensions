@@ -3,16 +3,38 @@ import { useState, useEffect } from "react";
 import { getErrorMessage } from "../lib/utils";
 import { searchVideos, getVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { VideoItem } from "./video";
-import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
+import {
+  ListOrGrid,
+  ListOrGridDropdown,
+  ListOrGridDropdownItem,
+  ListOrGridDropdownSection,
+  ListOrGridEmptyView,
+  ListOrGridSection,
+} from "./listgrid";
 import { getPinnedVideos, getRecentVideos } from "./recent_videos";
 import { Preferences } from "../lib/types";
+
+function FilterDropdown({ onChange }: { onChange?: (value: string) => void }) {
+  return (
+    <ListOrGridDropdown tooltip="Filter" onChange={onChange}>
+      <ListOrGridDropdownSection title="Order">
+        <ListOrGridDropdownItem title="Relevance" value="relevance" />
+        <ListOrGridDropdownItem title="Date" value="date" />
+        <ListOrGridDropdownItem title="View count" value="viewCount" />
+        <ListOrGridDropdownItem title="Rating" value="rating" />
+        <ListOrGridDropdownItem title="Video Count" value="videoCount" />
+      </ListOrGridDropdownSection>
+    </ListOrGridDropdown>
+  );
+}
 
 export function SearchVideoList({ channelId, searchQuery }: { channelId?: string; searchQuery?: string | undefined }) {
   const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
+  const [order, setOrder] = useState<string>();
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(
-    async () => (searchText ? await searchVideos(searchText, channelId) : undefined),
-    [searchText],
+    async () => (searchText ? await searchVideos(searchText, channelId, { order: order }) : undefined),
+    [searchText, order],
   );
   if (error) {
     showToast(Toast.Style.Failure, "Could Not Search Videos", getErrorMessage(error));
@@ -37,6 +59,7 @@ export function SearchVideoList({ channelId, searchQuery }: { channelId?: string
     <ListOrGrid
       isLoading={isLoading}
       columns={griditemsize}
+      searchBarAccessory={<FilterDropdown onChange={setOrder} />}
       aspectRatio={"4/3"}
       onSearchTextChange={setSearchText}
       throttle={true}

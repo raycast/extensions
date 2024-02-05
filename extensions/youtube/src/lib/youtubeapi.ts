@@ -183,13 +183,15 @@ async function fetchAndInjectVideoStats(videos: Video[]) {
   }
 }
 
+export interface SearchOptions {
+  order?: string;
+}
+
 async function search(
   query: string,
   type: SearchType,
   channedId?: string | undefined,
-  options?: {
-    order?: string;
-  },
+  options?: SearchOptions,
 ): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
   const data = await youtubeClient.search.list({
     q: query,
@@ -202,8 +204,12 @@ async function search(
   return data;
 }
 
-export async function searchVideos(query: string, channedId?: string | undefined): Promise<Video[]> {
-  const data = await search(query, SearchType.video, channedId);
+export async function searchVideos(
+  query: string,
+  channedId?: string | undefined,
+  options?: SearchOptions,
+): Promise<Video[]> {
+  const data = await search(query, SearchType.video, channedId, options);
   const items = data?.data.items;
   const result: Video[] = [];
   if (items) {
@@ -267,8 +273,8 @@ export async function getVideos(videoIds: string[]): Promise<Video[]> {
   return [];
 }
 
-export async function searchChannels(query: string): Promise<Channel[]> {
-  const data = await search(query, SearchType.channel);
+export async function searchChannels(query: string, options?: SearchOptions): Promise<Channel[]> {
+  const data = await search(query, SearchType.channel, undefined, options);
   const items = data?.data.items;
   const channelIds: string[] = [];
   const result: Channel[] = [];
