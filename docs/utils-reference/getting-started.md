@@ -16,9 +16,22 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.12.2
+
+- Fixed types for `OAuthService.slack`.
+
+### v1.12.1
+
+- Fixed the refresh flow of `OAuthService` that would return outdated tokens.
+
+### v1.12.0
+
+- Removed some default OAuth clientIDs that could not work with generic scopes.
+- Fixed `withAccessToken` when used in no-view commands.
+
 ### v1.11.1
 
-- Fixed Google OAuth configuration
+- Fixed Google OAuth configuration.
 
 ### v1.11.0
 
