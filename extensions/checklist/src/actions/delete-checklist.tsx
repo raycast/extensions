@@ -1,6 +1,6 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
 
-function DeleteChecklistAction(props: { onDelete: () => void }) {
+export function DeleteChecklistAction(props: { onDelete: () => void }) {
   return (
     <Action
       icon={Icon.Trash}
@@ -11,5 +11,3 @@ function DeleteChecklistAction(props: { onDelete: () => void }) {
     />
   );
 }
-
-export default DeleteChecklistAction;

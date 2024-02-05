@@ -1,8 +1,8 @@
 import { Action, Icon } from "@raycast/api";
-import ViewChecklist from "../components/viewChecklist";
+import { ViewChecklist } from "../components/view-checklist";
 import type { Checklist } from "../types";
 
-function StartChecklistAction(props: {
+export function StartChecklistAction(props: {
   checklist: Checklist;
   checklists: [Checklist[], React.Dispatch<React.SetStateAction<Checklist[]>>];
   title: string;
@@ -15,5 +15,3 @@ function StartChecklistAction(props: {
     />
   );
 }
-
-export default StartChecklistAction;

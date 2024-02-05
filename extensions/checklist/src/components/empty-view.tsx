@@ -1,8 +1,8 @@
 import { ActionPanel, List } from "@raycast/api";
 import { Checklist } from "../types";
-import CreateChecklistAction from "../actions/createChecklist";
+import { CreateChecklistAction } from "../actions/create-checklist";
 
-function EmptyView(props: { checklists: Checklist[]; onCreate: (checklist: Omit<Checklist, "id">) => void }) {
+export function EmptyView(props: { checklists: Checklist[]; onCreate: (checklist: Checklist) => void }) {
   return (
     <List.EmptyView
       icon="🥳"
@@ -16,5 +16,3 @@ function EmptyView(props: { checklists: Checklist[]; onCreate: (checklist: Omit<
     />
   );
 }
-
-export default EmptyView;

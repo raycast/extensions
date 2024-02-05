@@ -1,7 +1,7 @@
 import type { Checklist } from "../types";
 import { nanoid } from "nanoid";
 
-const exampleQuests: Checklist[] = [
+const exampleChecklists: Checklist[] = [
   {
     id: nanoid(),
     title: "Review Pull Requests",
@@ -84,4 +84,4 @@ const exampleQuests: Checklist[] = [
   },
 ];
 
-export default exampleQuests;
+export default exampleChecklists;

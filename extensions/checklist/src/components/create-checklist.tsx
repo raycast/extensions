@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Keyboard } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Keyboard, showHUD } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { checkClipboardContent } from "../lib/util";
 import { Checklist } from "../types";
+import { nanoid } from "nanoid";
 
-function CreateChecklistForm(props: {
-  onCreate: (checklist: Omit<Checklist, "id">) => void;
+export function CreateChecklistForm(props: {
+  onCreate: (checklist: Checklist) => void;
   checklist?: Checklist;
   actionLabel: string;
 }) {
@@ -15,25 +16,35 @@ function CreateChecklistForm(props: {
   const [tasks, setTasks] = useState<string[]>(checklist?.tasks.map((task) => task.name) ?? [""]);
 
   useEffect(() => {
-    checkClipboardContent().then(async (_checklist) => {
-      if (_checklist) {
+    async function _checkClipboardContent() {
+      const { checklist } = await checkClipboardContent();
+      if (checklist) {
         await showToast({
           style: Toast.Style.Success,
           title: "Imported from clipboard!",
         });
-        setTitle(_checklist.title);
-        setTasks(_checklist.tasks.map((task) => task.name));
+        setTitle(checklist.title);
+        setTasks(checklist.tasks.map((task) => task.name));
       }
-    });
+    }
+
+    _checkClipboardContent();
   }, []);
 
   const handleSubmit = useCallback(
-    ({ title, ...tasks }: { title: string }) => {
+    async ({ title, ...tasks }: { title: string }) => {
       const _tasks = Object.entries(tasks)
         .map(([_, value]) => value)
         .filter((value) => value !== "") as string[];
 
+      /** Checklists without tasks should not work. */
+      if (_tasks.length === 0) {
+        await showToast({ title: "Please add at least one task", style: Toast.Style.Failure });
+        return;
+      }
+
       onCreate({
+        id: checklist?.id ?? nanoid(),
         title,
         tasks: _tasks.map((task) => ({ name: task, isCompleted: false })),
         progress: 0,
@@ -95,5 +106,3 @@ function CreateChecklistForm(props: {
     </Form>
   );
 }
-
-export default CreateChecklistForm;
