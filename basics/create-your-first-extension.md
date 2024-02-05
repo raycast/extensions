@@ -32,7 +32,7 @@ To make changes to your extension, open the `./src/index.tsx` file in your exten
 
 ## Use your extension
 
-Now, you can press `⌃` `C` in your terminal to stop `npm run dev`. The extension stays in Raycast, and you can find its commands in the root when searching for the extension name "Hello World" or the command name "Render Markdown".
+Now, you can press `⌃` `C` in your terminal to stop `npm run dev`. The extension stays in Raycast, and you can find its commands in the root when searching for the extension name "Hello World" or the command name "Show Detail".
 
 ![Find your extension in the root search](../.gitbook/assets/hello-world-2.png)
 
