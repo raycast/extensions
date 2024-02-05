@@ -1,4 +1,4 @@
-import { Color, Icon, Image, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { chain } from "lodash";
 import { format as formatDate, isThisYear, isToday, isTomorrow, isYesterday } from "date-fns";
