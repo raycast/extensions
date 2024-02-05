@@ -21,7 +21,7 @@
           "name": "layout",
           "type": "dropdown",
           "description": "Set the layout of the app items.",
-          "required": true,
+          "required": false,
           "title": "App Layout",
           "default": "Grid",
           "data": [
@@ -142,18 +142,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.1",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.66.2",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.9.3"
+    "@types/node": "20.11.16",
+    "@types/react": "18.2.52",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
