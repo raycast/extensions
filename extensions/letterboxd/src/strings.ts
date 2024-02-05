@@ -1,8 +1,8 @@
 export const STRINGS = {
-  searchMoviesPlaceholder: "Search movies",
-  showDetails: "Show details",
+  searchMoviesPlaceholder: "Search Movies",
+  showDetails: "Show Details",
   copyUrl: "Copy URL",
-  copyTitle: "Copy title",
+  copyTitle: "Copy Title",
   releasedLabel: "Released",
   somethingWentWrong: "Something went wrong",
   tryAgain: "Please try again",
@@ -10,7 +10,7 @@ export const STRINGS = {
   directorLabel: "Director",
   stats: "Statistics",
   languageLabel: "Language",
-  toggleMetadata: "Toggle metadata",
+  toggleMetadata: "Toggle Metadata",
   genresLabel: "Genres",
   releasesLabel: "Releases",
 };
