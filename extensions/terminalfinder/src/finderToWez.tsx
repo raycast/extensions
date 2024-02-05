@@ -23,7 +23,7 @@ export default async () => {
 
   try {
     const result = await runAppleScript(script);
-    
+
     if (result === "Finder is not running" || result === "No Finder window open") {
       await showToast(Toast.Style.Failure, result);
     } else {
