@@ -1,6 +1,6 @@
 # Menubar Weather Changelog
 
-## [Fix error] - {PR_MERGE_DATE}
+## [Fix error] - 2024-02-05
 
 - Fix json parsing errors
 - Add dates as subheadings in weather forecasts
