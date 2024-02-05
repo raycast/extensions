@@ -1,6 +1,6 @@
 # Deno Deploy
 
-View amd modify your [Deno Deploy](https://deno.com/deploy) projects.
+View and modify your [Deno Deploy](https://deno.com/deploy) projects.
 
 > This extension is not affiliated with [Deno](https://deno.com/) or [Deno Deploy](https://deno.com/deploy).
 
