@@ -6,9 +6,9 @@
   "icon": "sonos.png",
   "author": "AntonNiklasson",
   "categories": [
+    "Applications",
     "Media",
-    "Fun",
-    "Other"
+    "Fun"
   ],
   "license": "MIT",
   "commands": [
