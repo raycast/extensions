@@ -54,6 +54,7 @@
       "name": "next-track",
       "title": "Next Track",
       "subtitle": "Sonos",
+      "disabledByDefault": true,
       "description": "Skip to the next track in the active group",
       "mode": "no-view"
     },
@@ -61,6 +62,7 @@
       "name": "previous-track",
       "title": "Previous Track",
       "subtitle": "Sonos",
+      "disabledByDefault": true,
       "description": "Skip to the previous track in the active group",
       "mode": "no-view"
     }
