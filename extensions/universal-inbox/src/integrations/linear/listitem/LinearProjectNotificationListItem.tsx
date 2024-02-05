@@ -6,7 +6,7 @@ import { Notification } from "../../../notification";
 import { MutatePromise } from "@raycast/utils";
 import { List, Color } from "@raycast/api";
 import { Page } from "../../../types";
-import { match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 
 interface LinearProjectNotificationListItemProps {
   notification: Notification;
@@ -19,7 +19,13 @@ export function LinearProjectNotificationListItem({
   linearProjectNotification,
   mutate,
 }: LinearProjectNotificationListItemProps) {
-  const subtitle = linearProjectNotification.project.name;
+  const subtitle = match(linearProjectNotification.project)
+    .with({ name: P.select(), icon: P.nullish }, (project_name) => `${project_name}`)
+    .with(
+      { name: P.select("project_name"), icon: P.select("icon") },
+      ({ project_name, icon }) => `${icon} ${project_name}`,
+    )
+    .otherwise(() => "");
 
   const state = getLinearProjectStateAccessory(linearProjectNotification.project);
   const lead = getLinearUserAccessory(linearProjectNotification.project.lead);

@@ -5,8 +5,8 @@ import { LinearIssuePreview } from "../preview/LinearIssuePreview";
 import { Notification } from "../../../notification";
 import { MutatePromise } from "@raycast/utils";
 import { Page } from "../../../types";
+import { match, P } from "ts-pattern";
 import { List } from "@raycast/api";
-import { match } from "ts-pattern";
 
 interface LinearIssueNotificationListItemProps {
   notification: Notification;
@@ -19,10 +19,18 @@ export function LinearIssueNotificationListItem({
   linearIssueNotification,
   mutate,
 }: LinearIssueNotificationListItemProps) {
-  const projectSubtitle = linearIssueNotification.issue.project
-    ? `/ ${linearIssueNotification.issue.project.name} `
-    : "";
-  const subtitle = `${linearIssueNotification.issue.team.name} ${projectSubtitle}#${linearIssueNotification.issue.identifier}`;
+  const projectSubtitle = match(linearIssueNotification.issue.project)
+    .with({ name: P.select(), icon: P.nullish }, (project_name) => `/ ${project_name}`)
+    .with(
+      { name: P.select("project_name"), icon: P.select("icon") },
+      ({ project_name, icon }) => `/ ${icon} ${project_name}`,
+    )
+    .otherwise(() => "");
+  const teamSubtitle = match(linearIssueNotification.issue.team)
+    .with({ name: P.select(), icon: P.nullish }, (team_name) => `${team_name}`)
+    .with({ name: P.select("team_name"), icon: P.select("icon") }, ({ team_name, icon }) => `${icon} ${team_name}`)
+    .otherwise(() => "");
+  const subtitle = `${teamSubtitle} ${projectSubtitle} #${linearIssueNotification.issue.identifier}`;
 
   const state = getLinearIssueStateAccessory(linearIssueNotification.issue.state);
   const assignee = getLinearUserAccessory(linearIssueNotification.issue.assignee);

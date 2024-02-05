@@ -15,7 +15,6 @@ export function getLinearUserAccessory(user?: LinearUser): List.Item.Accessory {
 
 export function getLinearNotificationReasonAccessory(notification_type: string): List.Item.Accessory {
   const reason = match(notification_type)
-    .with("")
     .with("issueAddedToTriage", () => "Added To Triage")
     .with("issueAddedToView", () => "Added To View")
     .with("issueAssignedToYou", () => "Assigned To You")
