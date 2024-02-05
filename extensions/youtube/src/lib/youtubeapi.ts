@@ -187,6 +187,9 @@ async function search(
   query: string,
   type: SearchType,
   channedId?: string | undefined,
+  options?: {
+    order?: string;
+  },
 ): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
   const data = await youtubeClient.search.list({
     q: query,
@@ -194,6 +197,7 @@ async function search(
     type: [type],
     maxResults: maxPageResults,
     channelId: channedId,
+    order: options?.order ?? "relevance",
   });
   return data;
 }
