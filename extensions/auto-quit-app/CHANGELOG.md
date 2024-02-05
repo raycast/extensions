@@ -1,6 +1,6 @@
 # Auto Quit App Changelog
 
-## [Fix crash] - {PR_MERGE_DATE}
+## [Fix crash] - 2024-02-05
 
 - Fix potential crash issues
 
