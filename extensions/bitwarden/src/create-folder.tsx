@@ -23,7 +23,7 @@ function CreateFolderComponent() {
 
   const { handleSubmit, itemProps } = useForm<FormData>({
     onSubmit: async (formData) => {
-      const toast = await showToast({ title: "Creating Folder", style: Toast.Style.Animated });
+      const toast = await showToast({ title: "Creating Folder...", style: Toast.Style.Animated });
       try {
         const { error } = await bitwarden.createFolder(formData.name);
         if (error) throw error;
