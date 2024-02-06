@@ -77,21 +77,15 @@ interface PullRequestMenuBarSectionProps {
   children: ReactNode;
   title?: string;
   emptyTitle: string;
-  maxChildren: number;
-  onMoreAction: () => void;
 }
 
-const PullRequestMenuBarSection = ({
-  children,
-  title,
-  emptyTitle,
-  maxChildren,
-  onMoreAction,
-}: PullRequestMenuBarSectionProps) => (
+const PullRequestMenuBarSection = ({ children, title, emptyTitle }: PullRequestMenuBarSectionProps) => (
   <MenuBarSection
     title={title}
-    maxChildren={maxChildren}
-    moreElement={(hidden) => <MenuBarItem title={`... ${hidden} more`} onAction={onMoreAction} />}
+    maxChildren={getMaxPullRequestsPreference()}
+    moreElement={(hidden) => (
+      <MenuBarItem title={`... ${hidden} more`} onAction={() => launchMyPullRequestsCommand()} />
+    )}
     emptyElement={<MenuBarItem title={emptyTitle} />}
   >
     {children}
@@ -142,23 +136,13 @@ function OpenPullRequestMenu() {
       {organizeByRepoPreference() === true ? (
         // User has chosen to organize by repo
         repos.map((repo) => (
-          <PullRequestMenuBarSection
-            onMoreAction={() => launchMyPullRequestsCommand()}
-            emptyTitle="No Pull Requests in this Repository"
-            maxChildren={getMaxPullRequestsPreference()}
-            key={repo}
-            title={repo}
-          >
+          <PullRequestMenuBarSection emptyTitle="No Pull Requests in this Repository" key={repo} title={repo}>
             {data?.filter((pr) => repo === pr.repository.nameWithOwner).map((i) => <PullRequestMenuBarItem i={i} />)}
           </PullRequestMenuBarSection>
         ))
       ) : (
-        // User has chosen list all PRs without organization
-        <PullRequestMenuBarSection
-          onMoreAction={() => launchMyPullRequestsCommand()}
-          emptyTitle="No Pull Requests"
-          maxChildren={getMaxPullRequestsPreference()}
-        >
+        // List all PRs in one section
+        <PullRequestMenuBarSection emptyTitle="No Pull Requests">
           {data?.map((i) => <PullRequestMenuBarItem i={i} />)}
         </PullRequestMenuBarSection>
       )}
