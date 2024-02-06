@@ -74,7 +74,7 @@ const PullRequestMenuBarItem = ({ i }: PullRequestMenuBarItemProps) => {
 };
 
 interface PullRequestMenuBarSectionProps {
-  children: ReactNode;
+  children?: ReactNode;
   title?: string;
   emptyTitle: string;
 }
@@ -139,6 +139,9 @@ function OpenPullRequestMenu() {
           {data?.map((i) => <PullRequestMenuBarItem i={i} />)}
         </PullRequestMenuBarSection>
       )}
+
+      {/* Handle empty state when organized by repo */}
+      {organizeByRepoPreference() && data?.length === 0 && <PullRequestMenuBarSection emptyTitle="No Pull Requests" />}
 
       <MenuBarSection>
         <MenuBarItemConfigureCommand />
