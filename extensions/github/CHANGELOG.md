@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Change cancelled workflow run status icon color] - 2023-12-18
+
+- Change cancelled workflow run status icon color to be in line with GitHub's UI
+
 ## [Open vercel preview on pull requests] - 2023-12-18
 
 - If you have a vercel project, you can now open your preview directly from your pull request
