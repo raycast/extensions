@@ -2,6 +2,7 @@ import klu from "@/libs/klu";
 import { PersistedWorkspace } from "@kluai/core";
 import { environment } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 
 export const useCurrentWorkspace = () => {
   const [workspace, setWorkspace] = useCachedState<PersistedWorkspace | undefined>(
@@ -31,7 +32,7 @@ const useWorkspace = () => {
     },
   );
 
-  return hook;
+  return useMemo(() => hook, [hook]);
 };
 
 export default useWorkspace;

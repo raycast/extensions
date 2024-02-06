@@ -3,6 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import klu from "../libs/klu";
 import { useSelectedApplication } from "./use-application";
 import useApplications from "./use-applications";
+import { useMemo } from "react";
 
 const useActions = () => {
   const { selectedApp, setSelectedApp } = useSelectedApplication();
@@ -49,7 +50,7 @@ const useActions = () => {
     },
   );
 
-  return { ...hook, isLoading: isAppsLoading || hook.isLoading };
+  return useMemo(() => ({ ...hook, isLoading: isAppsLoading || hook.isLoading }), [hook, isAppsLoading]);
 };
 
 export default useActions;

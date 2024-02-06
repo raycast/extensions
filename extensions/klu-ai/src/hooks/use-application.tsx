@@ -1,6 +1,7 @@
 import { PersistedApp } from "@kluai/core";
 import { environment } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { useMemo } from "react";
 
 export const useSelectedApplication = () => {
   const [selectedApp, setSelectedApp] = useCachedState<PersistedApp | undefined>(
@@ -8,5 +9,5 @@ export const useSelectedApplication = () => {
     undefined,
   );
 
-  return { selectedApp, setSelectedApp };
+  return useMemo(() => ({ selectedApp, setSelectedApp }), [selectedApp, setSelectedApp]);
 };
