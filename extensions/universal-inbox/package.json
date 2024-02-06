@@ -32,6 +32,7 @@
     {
       "name": "index",
       "title": "List Notifications",
+      "subtitle": "Universal Inbox",
       "description": "List Universal Inbox notifications",
       "mode": "view"
     }
