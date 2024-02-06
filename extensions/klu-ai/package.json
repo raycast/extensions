@@ -12,6 +12,12 @@
       "title": "Search Actions",
       "description": "Search Actions",
       "mode": "view"
+    },
+    {
+      "name": "send-prompt",
+      "title": "Send Prompt",
+      "description": "Send Prompt",
+      "mode": "view"
     }
   ],
   "preferences": [

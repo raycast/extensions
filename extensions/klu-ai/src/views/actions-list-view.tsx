@@ -5,6 +5,7 @@ import { PersistedApp } from "@kluai/core";
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { intlFormatDistance } from "date-fns";
 import ActionView from "./action/action-view";
+import PromptFormView from "./action/action-prompt-form";
 
 const ApplicationsDropdown = ({ applications }: { applications: PersistedApp[] }) => {
   const { setSelectedApp } = useSelectedApplication();
@@ -77,6 +78,12 @@ const ActionsListView = () => {
                   title="Open Action"
                   icon={{ source: Icon.ArrowRightCircle }}
                   onAction={() => push(<ActionView guid={a.guid} />)}
+                />
+                <Action
+                  title="Send an Input"
+                  icon={{ source: Icon.TextInput }}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  onAction={() => push(<PromptFormView guid={a.guid} variables={a.meta_data.variables} />)}
                 />
               </ActionPanel>
             }
