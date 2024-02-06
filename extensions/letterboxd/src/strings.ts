@@ -1,0 +1,16 @@
+export const STRINGS = {
+  searchMoviesPlaceholder: "Search Movies",
+  showDetails: "Show Details",
+  copyUrl: "Copy URL",
+  copyTitle: "Copy Title",
+  releasedLabel: "Released",
+  somethingWentWrong: "Something went wrong",
+  tryAgain: "Please try again",
+  retry: "Retry",
+  directorLabel: "Director",
+  stats: "Statistics",
+  languageLabel: "Language",
+  toggleMetadata: "Toggle Metadata",
+  genresLabel: "Genres",
+  releasesLabel: "Releases",
+};
