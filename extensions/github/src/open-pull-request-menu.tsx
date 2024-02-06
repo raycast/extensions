@@ -11,6 +11,7 @@ import {
 import View from "./components/View";
 import { PullRequestFieldsFragment } from "./generated/graphql";
 import { getGitHubClient } from "./helpers/withGithubClient";
+import { FC, ReactNode } from "react";
 
 async function launchMyPullRequestsCommand(): Promise<void> {
   return launchCommand({ name: "my-pull-requests", type: LaunchType.UserInitiated });
@@ -51,6 +52,50 @@ function joinArray(ar: (string | null | undefined)[], separator: string): string
   const d = ar?.filter((e) => e);
   return d?.join(separator) || "";
 }
+
+interface PullRequestMenuBarItemProps {
+  i: PullRequestFieldsFragment;
+}
+
+const PullRequestMenuBarItem = ({ i }: PullRequestMenuBarItemProps) => {
+  // GitHub had an outage on Nov. 3rd that caused the returned PRs to be null
+  // This corrupted the cache so let's check first if there's a PR before rendering
+  if (!i) return null;
+  return (
+    <MenuBarItem
+      key={i.id}
+      title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
+      icon="pull-request.svg"
+      tooltip={i.repository.nameWithOwner}
+      onAction={() => open(i.permalink)}
+    />
+  );
+};
+
+interface PullRequestMenuBarSectionProps {
+  children: ReactNode;
+  title?: string;
+  emptyTitle: string;
+  maxChildren: number;
+  onMoreAction: () => void;
+}
+
+const PullRequestMenuBarSection = ({
+  children,
+  title,
+  emptyTitle,
+  maxChildren,
+  onMoreAction,
+}: PullRequestMenuBarSectionProps) => (
+  <MenuBarSection
+    title={title}
+    maxChildren={maxChildren}
+    moreElement={(hidden) => <MenuBarItem title={`... ${hidden} more`} onAction={onMoreAction} />}
+    emptyElement={<MenuBarItem title={emptyTitle} />}
+  >
+    {children}
+  </MenuBarSection>
+);
 
 function OpenPullRequestMenu() {
   const { github } = getGitHubClient();
@@ -93,33 +138,30 @@ function OpenPullRequestMenu() {
         />
       </MenuBarSection>
 
-      {/* Show pull requests by repo */}
-      {organizeByRepoPreference() === true
-        ? repos.map((repo) => (
-            <MenuBarSection maxChildren={getMaxPullRequestsPreference()} key={repo} title={repo}>
-              {data
-                ?.filter((pr) => repo === pr.repository.nameWithOwner)
-                .map((i) => {
-                  // GitHub had an outage on Nov. 3rd that caused the returned PRs to be null
-                  // This corrupted the cache so let's check first if there's a PR before rendering
-                  if (!i) return null;
-                  return (
-                    <MenuBarItem
-                      key={i.id}
-                      title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
-                      icon="pull-request.svg"
-                      tooltip={i.repository.nameWithOwner}
-                      onAction={() => open(i.permalink)}
-                    />
-                  );
-                })}
-            </MenuBarSection>
-          ))
-        : data?.length === 0 && <MenuBarSection emptyElement={<MenuBarItem title="No Pull Requests" />} />}
-      {/* Since the empty state is built for listing all pull requests in one MenuBarSection,
-          we introduce an empty one here in case there are no pull requests available. */}
-
-      {/* List all pull requests */}
+      {organizeByRepoPreference() === true ? (
+        // User has chosen to organize by repo
+        repos.map((repo) => (
+          <PullRequestMenuBarSection
+            onMoreAction={() => launchMyPullRequestsCommand()}
+            emptyTitle="No Pull Requests in this Repository"
+            maxChildren={getMaxPullRequestsPreference()}
+            key={repo}
+            title={repo}
+          >
+            {data?.filter((pr) => repo === pr.repository.nameWithOwner).map((i) => <PullRequestMenuBarItem i={i} />)}
+          </PullRequestMenuBarSection>
+        ))
+      ) : (
+        // User has chosen list all PRs without organization
+        <PullRequestMenuBarSection
+          onMoreAction={() => launchMyPullRequestsCommand()}
+          emptyTitle="No Pull Requests"
+          maxChildren={getMaxPullRequestsPreference()}
+        >
+          {data?.map((i) => <PullRequestMenuBarItem i={i} />)}
+        </PullRequestMenuBarSection>
+      )}
+      {data?.length === 0 && <MenuBarSection emptyElement={<MenuBarItem title="No Pull Requests" />} />}
 
       <MenuBarSection>
         <MenuBarItemConfigureCommand />
