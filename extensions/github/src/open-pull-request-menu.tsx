@@ -63,7 +63,6 @@ const PullRequestMenuBarItem = ({ i }: PullRequestMenuBarItemProps) => {
   if (!i) return null;
   return (
     <MenuBarItem
-      key={i.id}
       title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
       icon="pull-request.svg"
       // When organizing by repo, tooltip is superfluous
@@ -130,13 +129,15 @@ function OpenPullRequestMenu() {
         // Organize PRs by repository
         repos.map((repo) => (
           <PullRequestMenuBarSection emptyTitle="No Pull Requests in this Repository" key={repo} title={repo}>
-            {data?.filter((pr) => repo === pr.repository.nameWithOwner).map((i) => <PullRequestMenuBarItem i={i} />)}
+            {data
+              ?.filter((pr) => repo === pr.repository.nameWithOwner)
+              .map((i) => <PullRequestMenuBarItem key={i.id} i={i} />)}
           </PullRequestMenuBarSection>
         ))
       ) : (
         // List all PRs in one section
         <PullRequestMenuBarSection emptyTitle="No Pull Requests">
-          {data?.map((i) => <PullRequestMenuBarItem i={i} />)}
+          {data?.map((i) => <PullRequestMenuBarItem key={i.id} i={i} />)}
         </PullRequestMenuBarSection>
       )}
 
