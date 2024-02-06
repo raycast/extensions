@@ -102,8 +102,9 @@ function FillForm(props: FriendOrGroupProps) {
 
   const { handleSubmit, itemProps } = useForm<ExpenseParams>({
     onSubmit: (values) => {
-      const share = Number(values.cost) / 2;
-      const adjustedShare = Math.floor(share * 100) / 100;
+      const totalCost = Number(values.cost);
+      const share = Math.ceil((totalCost * 100) / 2) / 100;
+      const adjustedShare = totalCost - share
 
       const paramsJson: ExpenseParams = {
         description: values.description,
