@@ -1,7 +1,7 @@
-import { LaunchType, launchCommand } from "@raycast/api";
+import { LaunchType } from "@raycast/api";
 import { getActiveCoordinator } from "./core/sonos";
 import { SonosDevice } from "@svrooij/sonos/lib";
-import { handleCommandError } from "./core/utils";
+import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
 export default async function Command() {
   let coordinator: SonosDevice | undefined;
@@ -14,9 +14,10 @@ export default async function Command() {
   }
 
   if (coordinator === undefined) {
-    await launchCommand({
+    await tryLaunchCommand({
       name: "set-group",
       type: LaunchType.UserInitiated,
+      failureMessage: `Failed to launch "Set Active Group" automatically`,
     });
   } else {
     await coordinator.SetRelativeGroupVolume(2);

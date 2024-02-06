@@ -1,6 +1,30 @@
-import { showToast, Toast } from "@raycast/api";
+import { launchCommand, showToast, Toast } from "@raycast/api";
 
 export class CoordinatorNotFoundError extends Error {}
+
+type TryLaunchCommandOptions = Parameters<typeof launchCommand>[0] & {
+  failureMessage?: string;
+};
+
+export async function tryLaunchCommand({ name, type, failureMessage }: TryLaunchCommandOptions): Promise<boolean> {
+  try {
+    await launchCommand({
+      name,
+      type,
+    });
+
+    return true;
+  } catch (error) {
+    if (failureMessage !== undefined) {
+      await showToast({
+        title: failureMessage,
+        style: Toast.Style.Failure,
+      });
+    }
+
+    return false;
+  }
+}
 
 export async function handleCommandError(error: unknown): Promise<boolean> {
   if (error instanceof Error && error.message.includes("No players found")) {

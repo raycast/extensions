@@ -2,7 +2,7 @@ import { LaunchProps, LaunchType, launchCommand, showHUD, updateCommandMetadata 
 import { formatPlayingState, getLatestState, getActiveCoordinator } from "./core/sonos";
 import { SonosDevice } from "@svrooij/sonos/lib";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
-import { handleCommandError } from "./core/utils";
+import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
 export default async function Command({ launchType }: LaunchProps) {
   const userInitiated = launchType === LaunchType.UserInitiated;
@@ -18,11 +18,10 @@ export default async function Command({ launchType }: LaunchProps) {
   }
 
   if (!coordinator && userInitiated) {
-    await showHUD("Failed to resolve coordinator, choose an explicit group first");
-
-    await launchCommand({
+    await tryLaunchCommand({
       name: "set-group",
       type: LaunchType.UserInitiated,
+      failureMessage: `Failed to launch "Set Active Group" automatically`,
     });
   } else {
     if (coordinator && userInitiated) {
@@ -36,14 +35,10 @@ export default async function Command({ launchType }: LaunchProps) {
         subtitle: title,
       });
 
-      try {
-        await launchCommand({
-          name: "now-playing",
-          type: LaunchType.Background,
-        });
-      } catch (error) {
-        // This means the menu bar command hasn't been loaded yet. We just ignore that here.
-      }
+      await tryLaunchCommand({
+        name: "now-playing",
+        type: LaunchType.Background,
+      });
     }
   }
 }
