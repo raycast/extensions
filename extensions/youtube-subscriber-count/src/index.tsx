@@ -14,7 +14,7 @@ type Data = {
 };
 
 export default function Command() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const youtubeApiKey = preferences.youtubeApiKey;
   const youtubeChannelId = preferences.youtubeChannelId;
   const celebrationThreshold = preferences.celebrationThreshold;
