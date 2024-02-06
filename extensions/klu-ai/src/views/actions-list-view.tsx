@@ -2,7 +2,7 @@ import useActions from "@/hooks/use-actions";
 import { useSelectedApplication } from "@/hooks/use-application";
 import useApplications from "@/hooks/use-applications";
 import { PersistedApp } from "@kluai/core";
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { intlFormatDistance } from "date-fns";
 import ActionView from "./action/action-view";
 
@@ -20,13 +20,13 @@ const ApplicationsDropdown = ({ applications }: { applications: PersistedApp[] }
       storeValue
     >
       {applications.map((app) => (
-        <List.Dropdown.Item key={app.guid} value={app.guid} title={app.name} icon={Icon.AppWindowGrid2x2} />
+        <List.Dropdown.Item key={app.guid} value={app.guid} title={app.name} icon={Icon.Folder} />
       ))}
     </List.Dropdown>
   );
 };
 
-const ActionsView = () => {
+const ActionsListView = () => {
   const { data: apps, isLoading: isAppsLoading } = useApplications();
 
   const { data: actions, isLoading: isActionsLoading } = useActions();
@@ -51,6 +51,12 @@ const ActionsView = () => {
             subtitle={a.description}
             accessories={[
               {
+                tag: {
+                  value: a.status,
+                  color: a.status === "ACTIVE" ? Color.Green : undefined,
+                },
+              },
+              {
                 icon: Icon.Gear,
                 text: a.modelName
                   ? a.modelName.length > 20
@@ -66,11 +72,10 @@ const ActionsView = () => {
               },
             ]}
             actions={
-              <ActionPanel>
+              <ActionPanel title={a.name}>
                 <Action
-                  title="Open"
-                  icon={{ source: Icon.Globe }}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  title="Open Action"
+                  icon={{ source: Icon.ArrowRightCircle }}
                   onAction={() => push(<ActionView guid={a.guid} />)}
                 />
               </ActionPanel>
@@ -84,4 +89,4 @@ const ActionsView = () => {
   );
 };
 
-export default ActionsView;
+export default ActionsListView;

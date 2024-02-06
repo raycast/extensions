@@ -1,3 +1,3 @@
-import ActionsView from "@/views/actions-view";
+import ActionsListView from "@/views/actions-list-view";
 
-export default ActionsView;
+export default ActionsListView;
