@@ -30,24 +30,34 @@ const ActionVersionList = ({ guid, onChange }: { guid: string; onChange: (value:
           key={a.guid}
           id={a.guid}
           title={a.guid}
-          accessories={[
-            {
-              tag: {
-                value: a.environment,
-                color:
-                  a.environment === "Production"
-                    ? Color.Green
-                    : a.environment === "Staging"
-                      ? Color.Orange
-                      : Color.Yellow,
-              },
-            },
-            {
-              icon: Icon.Clock,
-              text: intlFormatDistance(new Date(a.updatedAt), new Date()),
-              tooltip: "Last updated",
-            },
-          ]}
+          accessories={
+            a.environment
+              ? [
+                  {
+                    tag: {
+                      value: a.environment,
+                      color:
+                        a.environment === "Production"
+                          ? Color.Green
+                          : a.environment === "Staging"
+                            ? Color.Yellow
+                            : Color.Orange,
+                    },
+                  },
+                  {
+                    icon: Icon.Clock,
+                    text: intlFormatDistance(new Date(a.updatedAt), new Date()),
+                    tooltip: "Last updated",
+                  },
+                ]
+              : [
+                  {
+                    icon: Icon.Clock,
+                    text: intlFormatDistance(new Date(a.updatedAt), new Date()),
+                    tooltip: "Last updated",
+                  },
+                ]
+          }
           actions={
             <ActionPanel title={a.guid}>
               <ActionPanel.Section title="Copy">
