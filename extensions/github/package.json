@@ -222,6 +222,14 @@
           "label": "Show Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "organizebyrepo",
+          "description": "Organize Pull Requests by Repository",
+          "type": "checkbox",
+          "required": false,
+          "label": "Organize by Repository",
+          "title": "Organization"
         }
       ]
     }
