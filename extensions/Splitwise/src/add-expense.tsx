@@ -3,7 +3,7 @@ import { useForm, FormValidation } from "@raycast/utils";
 
 import { Entity, ExpenseParams, FriendOrGroupProps } from "./types/friends_groups.types";
 import { getFriends, getGroups, postExpense } from "./hooks/useFriends_Groups";
-
+import { GetCurrentUser } from "./hooks/useCurrentUser";
 import { getCurrency_code } from "./utils/utils";
 
 export default function Command() {
@@ -94,22 +94,29 @@ export default function Command() {
 
 function FillForm(props: FriendOrGroupProps) {
   const { pop } = useNavigation();
+  const currentUserID = GetCurrentUser()?.id as number; // FETCH CURRENT USER ID
 
-  const { handleSubmit, itemProps } = useForm<{
-    description: string;
-    date: Date | null;
-    cost: string;
-    currency_code: string;
-  }>({
+  const { handleSubmit, itemProps } = useForm<ExpenseParams>({
     onSubmit: (values) => {
+      const share = Number(values.cost) / 2;
+      const adjustedShare = Math.floor(share * 100) / 100;
+
       const paramsJson: ExpenseParams = {
         description: values.description,
         date: values.date,
         cost: values.cost,
         currency_code: values.currency_code,
-        split_equally: true,
+        ...(props.friend ? {
+          "users__0__user_id": currentUserID,
+          "users__0__paid_share": values.cost,
+          "users__0__owed_share": share.toString(),
+          "users__1__user_id": props.friend.id,
+          "users__1__owed_share": adjustedShare.toString()
+        } : {
+          "group_id": props.group.id,
+          "split_equally": true
+        })
       };
-      props.friend ? (paramsJson["friend_id"] = props.friend.id) : (paramsJson["group_id"] = props.group.id);
       postExpense(paramsJson).then(() => pop());
     },
     validation: {
