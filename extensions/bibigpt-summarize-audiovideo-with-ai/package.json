@@ -19,10 +19,32 @@
       "preferences": [
         {
           "name": "apiTokenUrl",
-          "description": "请输入 API Token链接",
+          "description": "Please enter the API Token URL",
           "type": "textfield",
           "required": true,
           "title": "API Token URL"
+        },
+        {
+          "name": "outputLanguage",
+          "description": "Please slelect the language for the summary",
+          "type": "dropdown",
+          "required": true,
+          "title": "Output Language",
+          "default": "en-US",
+          "data": [
+            {"title": "English", "value": "en-US"},
+            {"title": "中文", "value": "zh-CN"},
+            {"title": "繁體中文", "value": "zh-TW"},
+            {"title": "日本語", "value": "ja-JP"},
+            {"title": "Italiano", "value": "it-IT"},
+            {"title": "Deutsch", "value": "de-DE"},
+            {"title": "Español", "value": "es-ES"},
+            {"title": "Français", "value": "fr-FR"},
+            {"title": "Nederlands", "value": "nl-NL"},
+            {"title": "한국어", "value": "ko-KR"},
+            {"title": "ភាសាខ្មែរ", "value": "km-KH"},
+            {"title": "हिंदी", "value": "hi-IN"}
+          ]
         }
       ]
     }

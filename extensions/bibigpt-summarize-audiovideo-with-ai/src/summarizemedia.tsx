@@ -54,6 +54,7 @@ function Command() {
     await showToast(Toast.Style.Animated, "Summarizing...");
     try {
       const apiTokenUrl = getPreferenceValues().apiTokenUrl;
+      const outputLanguage = getPreferenceValues().outputLanguage;
       const response = await fetch(apiTokenUrl, {
         method: "POST",
         headers: {
@@ -62,6 +63,9 @@ function Command() {
         body: JSON.stringify({
           url: url,
           includeDetail: false,
+          promptConfig: {
+            outputLanguage: outputLanguage
+          }
         }),
       });
 
