@@ -1,5 +1,6 @@
 import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { ReactNode } from "react";
 
 import {
   MenuBarItem,
@@ -11,7 +12,6 @@ import {
 import View from "./components/View";
 import { PullRequestFieldsFragment } from "./generated/graphql";
 import { getGitHubClient } from "./helpers/withGithubClient";
-import { FC, ReactNode } from "react";
 
 async function launchMyPullRequestsCommand(): Promise<void> {
   return launchCommand({ name: "my-pull-requests", type: LaunchType.UserInitiated });
@@ -110,13 +110,6 @@ function OpenPullRequestMenu() {
   // Create list of unique repositories
   const repos = [...new Set(data?.map((i) => i.repository.nameWithOwner))];
 
-  // TODO: Refactor the pull request MenuBarItem
-  // TODO: Figure out how to handle the empty state when pull requests are sorted by repo.
-  // TODO: Figure out how/if to handle the max number of items preference when pull requests are sorted by repo.
-  //       Should they be sorted by repo first and then limited to the max number of items, or should the max number
-  //       of items be applied to the entire list of pull requests and then sorted by repo? The former would show a
-  //       ton more repos than the setting, but the latter would likely result in empty repos.
-
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${data?.length}` : undefined}
@@ -133,8 +126,8 @@ function OpenPullRequestMenu() {
         />
       </MenuBarSection>
 
-      {organizeByRepoPreference() === true ? (
-        // User has chosen to organize by repo
+      {organizeByRepoPreference() ? (
+        // Organize PRs by repository
         repos.map((repo) => (
           <PullRequestMenuBarSection emptyTitle="No Pull Requests in this Repository" key={repo} title={repo}>
             {data?.filter((pr) => repo === pr.repository.nameWithOwner).map((i) => <PullRequestMenuBarItem i={i} />)}
@@ -146,7 +139,6 @@ function OpenPullRequestMenu() {
           {data?.map((i) => <PullRequestMenuBarItem i={i} />)}
         </PullRequestMenuBarSection>
       )}
-      {data?.length === 0 && <MenuBarSection emptyElement={<MenuBarItem title="No Pull Requests" />} />}
 
       <MenuBarSection>
         <MenuBarItemConfigureCommand />
