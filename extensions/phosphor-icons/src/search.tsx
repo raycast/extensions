@@ -34,7 +34,13 @@ const SearchIconsCommand = () => {
       searchBarPlaceholder="Search icons by name, category or tag"
       onSearchTextChange={debounce(setSearch, 1000)}
       searchBarAccessory={
-        <Grid.Dropdown tooltip="Select Weight" storeValue={true} defaultValue={weight} onChange={setWeight}>
+        <Grid.Dropdown
+          tooltip="Select Icon Weight"
+          placeholder="Icon Weight"
+          storeValue={true}
+          defaultValue={weight}
+          onChange={setWeight}
+        >
           {weights.map((type) => (
             <Grid.Dropdown.Item key={type} title={upperFirst(type)} value={type} />
           ))}
