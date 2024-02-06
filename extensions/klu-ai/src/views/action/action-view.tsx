@@ -1,9 +1,9 @@
-import { useState } from "react";
-import ActionVersionList from "./action-version-list";
-import ActionDataList from "./action-data-list";
-import { List } from "@raycast/api";
+import { useActionState } from "@/hooks/use-action";
+import { Icon, List } from "@raycast/api";
 import ActionContextList from "./action-context-list";
+import ActionDataList from "./action-data-list";
 import ActionSkillList from "./action-skill-list";
+import ActionVersionList from "./action-version-list";
 
 export const ACTION_VIEW_STATE = ["Data", "Version", "Skill", "Context"] as const;
 export type ActionViewState = (typeof ACTION_VIEW_STATE)[number];
@@ -20,7 +20,7 @@ export const ActionViewDropdown = ({ onChange }: { onChange: (value: ActionViewS
       }}
     >
       {ACTION_VIEW_STATE.map((view) => (
-        <List.Dropdown.Item key={view} value={view} title={view} />
+        <List.Dropdown.Item key={view} value={view} title={view} icon={Icon.Window} />
       ))}
     </List.Dropdown>
   );
