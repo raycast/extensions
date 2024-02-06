@@ -1,9 +1,5 @@
 # Espanso Changelog
 
-## [Tired Developer] - 2024-02-06
-
-- Removed a forgotten console.log.
-
 ## [Improvements] - 2024-02-06
 
 - Improved user experience with enhanced syntax and better error handling.
@@ -11,6 +7,7 @@
 - Enhanced application robustness and performance.
 - Introduced more user control by adding enable and disable functionality.
 - Streamlined application functions for efficiency.
+- Removed a forgotten console.log.
 
 ## [Search Matches Improvements] - 2023-11-04
 
