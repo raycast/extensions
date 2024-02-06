@@ -229,7 +229,8 @@
           "type": "checkbox",
           "required": false,
           "label": "Organize by Repository",
-          "title": "Organization"
+          "title": "Organization",
+          "default": false
         }
       ]
     }
