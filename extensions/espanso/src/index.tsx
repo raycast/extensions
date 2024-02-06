@@ -30,8 +30,6 @@ export default function Command() {
 
         const combinedMatches: NormalizedEspansoMatch[] = [...userMatches, ...packageMatches];
 
-        console.log(combinedMatches);
-
         const sortedMatches = sortMatches(combinedMatches);
 
         setItems(sortedMatches);
