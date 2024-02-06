@@ -96,14 +96,14 @@ export default function Command() {
                           <List.Item.Detail.Metadata.TagList.Item
                             text={
                               Number(user.owed_share) === 0
-                                ? `${user.user.first_name} paid ${Number(user.paid_share).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code).symbol}`
-                                : `${user.user.first_name} paid ${Number(user.paid_share).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code).symbol} and owes ${Number(
-                                    user.owed_share
-                                  ).toFixed(2)} ${getCurrency_code(expense.currency_code).symbol}`
+                                ? `${user.user.first_name} paid ${Number(user.paid_share).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
+                                : `${user.user.first_name} paid ${Number(user.paid_share).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  } and owes ${Number(user.owed_share).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
                             }
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Green}
@@ -119,12 +119,12 @@ export default function Command() {
                           <List.Item.Detail.Metadata.TagList.Item
                             text={
                               expense.payment === true
-                                ? `${user.user.first_name} received ${(Number(user.net_balance) * -1).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code).symbol}`
-                                : `${user.user.first_name} owes ${(Number(user.net_balance) * -1).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code).symbol}`
+                                ? `${user.user.first_name} received ${(Number(user.net_balance) * -1).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
+                                : `${user.user.first_name} owes ${(Number(user.net_balance) * -1).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
                             }
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Red}

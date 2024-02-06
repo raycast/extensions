@@ -34,9 +34,9 @@ export default function Command() {
               friend.balance.length > 0
                 ? {
                     tag: {
-                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${getCurrency_code(
-                        friend.balance[0].currency_code
-                      ).symbol}`,
+                      value: `${Number(friend.balance[0].amount).toFixed(2)} ${
+                        getCurrency_code(friend.balance[0].currency_code).symbol
+                      }`,
                       color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
                     },
                   }
@@ -95,7 +95,7 @@ export default function Command() {
 function FillForm(props: FriendOrGroupProps) {
   const { pop } = useNavigation();
   const currentUser = GetCurrentUser(); // fetch current user details
-  
+
   const defaultCurrency = String(currentUser?.default_currency);
   const { symbol: defaultSymbol, emoji: defaultEmoji } = getCurrency_code(defaultCurrency);
   const currencyCodes = ["USD", "EUR", "GBP", "JPY", "AUD"];
@@ -104,23 +104,25 @@ function FillForm(props: FriendOrGroupProps) {
     onSubmit: (values) => {
       const totalCost = Number(values.cost);
       const share = Math.ceil((totalCost * 100) / 2) / 100;
-      const adjustedShare = totalCost - share
+      const adjustedShare = totalCost - share;
 
       const paramsJson: ExpenseParams = {
         description: values.description,
         date: values.date,
         cost: values.cost,
         currency_code: values.currency_code,
-        ...(props.friend ? {
-          "users__0__user_id": currentUser?.id,
-          "users__0__paid_share": values.cost,
-          "users__0__owed_share": share.toString(),
-          "users__1__user_id": props.friend.id,
-          "users__1__owed_share": adjustedShare.toString()
-        } : {
-          "group_id": props.group.id,
-          "split_equally": true
-        })
+        ...(props.friend
+          ? {
+              users__0__user_id: currentUser?.id,
+              users__0__paid_share: values.cost,
+              users__0__owed_share: share.toString(),
+              users__1__user_id: props.friend.id,
+              users__1__owed_share: adjustedShare.toString(),
+            }
+          : {
+              group_id: props.group.id,
+              split_equally: true,
+            }),
       };
       postExpense(paramsJson).then(() => pop());
     },
@@ -151,15 +153,18 @@ function FillForm(props: FriendOrGroupProps) {
       <Form.TextField title="Description" {...itemProps.description} />
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
       <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
-        <Form.Dropdown.Item key={defaultCurrency} value={defaultCurrency} title={`${defaultCurrency} (${defaultSymbol})`} icon={defaultEmoji} />
+        <Form.Dropdown.Item
+          key={defaultCurrency}
+          value={defaultCurrency}
+          title={`${defaultCurrency} (${defaultSymbol})`}
+          icon={defaultEmoji}
+        />
         {currencyCodes
-          .filter(code => code !== defaultCurrency)
-          .map(code => {
+          .filter((code) => code !== defaultCurrency)
+          .map((code) => {
             const { symbol, emoji } = getCurrency_code(code);
-            return (
-              <Form.Dropdown.Item key={code} value={code} title={`${code} (${symbol})`} icon={emoji} />
-            );
-        })}
+            return <Form.Dropdown.Item key={code} value={code} title={`${code} (${symbol})`} icon={emoji} />;
+          })}
       </Form.Dropdown>
       <Form.TextField
         title="Cost"
