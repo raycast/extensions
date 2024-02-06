@@ -47,6 +47,7 @@ const ActionPromptView = () => {
           return <Form.Dropdown.Item key={a.guid} value={a.guid} title={a.name} />;
         })}
       </Form.Dropdown>
+      <Form.Separator />
     </>
   );
 
