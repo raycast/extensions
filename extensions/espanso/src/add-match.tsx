@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Detail, Form, Toast, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { EspansoMatch } from "./types";
-import { appendMatchToFile, formatMatch, getAndSortTargetFiles, getEspansoConfig } from "./utils";
+import { EspansoMatch } from "./lib/types";
+import { appendMatchToFile, formatMatch, getAndSortTargetFiles, getEspansoConfig } from "./lib/utils";
 
 export interface Values {
   trigger: string;
@@ -29,10 +29,6 @@ export default function Command() {
     fetchData();
   }, []);
 
-  if (error) {
-    return <Detail markdown={error.message} />;
-  }
-
   const { handleSubmit, itemProps } = useForm<Values>({
     onSubmit(values) {
       const { matchFile } = values;
@@ -56,6 +52,11 @@ export default function Command() {
       replace: FormValidation.Required,
     },
   });
+
+  if (error) {
+    return <Detail markdown={error.message} />;
+  }
+
   return (
     <Form
       actions={
