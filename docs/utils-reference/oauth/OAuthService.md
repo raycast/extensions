@@ -202,6 +202,8 @@ const zoom = OAuthService.zoom({
 | onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
 | extraParameters | The extra parameters you may need for the authorization request | `Record<string, string>` |
 | bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
+| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
 
 ### ProviderOptions
 
@@ -214,6 +216,9 @@ const zoom = OAuthService.zoom({
 | refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
 | personalAccessToken | A personal token if the provider supports it | `string` |
 | onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
+| bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
+| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
 
 ### ProviderWithDefaultClientOptions
 
@@ -226,3 +231,6 @@ const zoom = OAuthService.zoom({
 | refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
 | personalAccessToken | A personal token if the provider supports it | `string` |
 | onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
+| bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
+| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
