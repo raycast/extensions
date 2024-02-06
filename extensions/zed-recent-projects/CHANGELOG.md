@@ -1,5 +1,9 @@
 # zed-recent-projects Changelog
 
+## [Zed Preview Support] - 2024-02-06
+
+- Added preference for choosing to run commands using Zed or Zed Preview.
+
 ## ["Open With Zed" Command Update] - 2024-01-26
 
 - `Open With Zed` command opens the current Finder folder if nothing is selected.
