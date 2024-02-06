@@ -42,7 +42,7 @@ const ActionPromptView = () => {
           return <Form.Dropdown.Item key={a.guid} value={a.guid} title={a.name} />;
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="action" title="Action" defaultValue={selectedAction?.guid} onChange={onChangeAction}>
+      <Form.Dropdown id="action" title="Action" onChange={onChangeAction}>
         {actions?.map((a) => {
           return <Form.Dropdown.Item key={a.guid} value={a.guid} title={a.name} />;
         })}
