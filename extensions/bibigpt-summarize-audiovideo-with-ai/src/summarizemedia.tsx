@@ -64,8 +64,8 @@ function Command() {
           url: url,
           includeDetail: false,
           promptConfig: {
-            outputLanguage: outputLanguage
-          }
+            outputLanguage: outputLanguage,
+          },
         }),
       });
 
