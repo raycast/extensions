@@ -129,7 +129,7 @@ function FillForm(props: FriendOrGroupProps) {
       cost: (input) => {
         // check if input is integer or float with 1 or 2 decimal places
         if (!input?.match(/^\d+(\.\d{1,2})?$/)) {
-          return "Decimal value (2 places)";
+          return "max. 2 decimals";
         }
       },
     },
