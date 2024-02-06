@@ -43,11 +43,19 @@
       "name": "celebrationThreshold",
       "description": "Celebration subscribers threshold. If you enter 10, it means when you get 10 subscribers it shows the celebration confetti (enter 0 to disable celebration)",
       "required": true,
-      "default": "5",
+      "default": "0",
       "identifier": "celebrationThreshold",
       "title": "Celebration subscribers threshold",
       "type": "textfield",
       "placeholder": "Enter your celebration subscribers threshold"
+    },
+    {
+      "name": "localeFormat",
+      "description": "Format the subscriber count",
+      "type": "checkbox",
+      "required": false,
+      "title": "Formatting Options",
+      "label": "Yes, Format Subscriber Count"
     }
   ],
   "dependencies": {
