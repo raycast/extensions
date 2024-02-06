@@ -45,7 +45,6 @@ export type ExpenseParams = {
   date: Date | null;
   cost: string;
   currency_code: string;
-  friend_id?: number;
   group_id?: number;
   split_equally?: boolean;
   users__0__user_id?: number;

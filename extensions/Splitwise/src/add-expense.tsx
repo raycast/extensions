@@ -94,7 +94,7 @@ export default function Command() {
 
 function FillForm(props: FriendOrGroupProps) {
   const { pop } = useNavigation();
-  const currentUserID = GetCurrentUser()?.id as number; // FETCH CURRENT USER ID
+  const currentUser = GetCurrentUser(); // fetch current user details
 
   const { handleSubmit, itemProps } = useForm<ExpenseParams>({
     onSubmit: (values) => {
@@ -107,7 +107,7 @@ function FillForm(props: FriendOrGroupProps) {
         cost: values.cost,
         currency_code: values.currency_code,
         ...(props.friend ? {
-          "users__0__user_id": currentUserID,
+          "users__0__user_id": currentUser?.id,
           "users__0__paid_share": values.cost,
           "users__0__owed_share": share.toString(),
           "users__1__user_id": props.friend.id,
