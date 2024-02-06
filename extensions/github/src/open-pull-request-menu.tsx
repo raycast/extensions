@@ -107,7 +107,7 @@ function OpenPullRequestMenu() {
   );
 
   // Create list of unique repositories
-  const repos = [...new Set(data?.map((i) => i.repository.nameWithOwner))];
+  const repos = organizeByRepoPreference() && [...new Set(data?.map((i) => i.repository.nameWithOwner))];
 
   return (
     <MenuBarRoot
