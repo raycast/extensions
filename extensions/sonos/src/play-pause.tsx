@@ -1,7 +1,7 @@
-import { LaunchProps, LaunchType, launchCommand, showHUD, updateCommandMetadata } from "@raycast/api";
-import { formatPlayingState, getLatestState, getActiveCoordinator } from "./core/sonos";
+import { LaunchProps, LaunchType, updateCommandMetadata } from "@raycast/api";
 import { SonosDevice } from "@svrooij/sonos/lib";
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
+import { formatPlayingState, getActiveCoordinator, getLatestState } from "./core/sonos";
 import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
 export default async function Command({ launchType }: LaunchProps) {

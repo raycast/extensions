@@ -1,6 +1,6 @@
 import { LaunchType, Toast, showToast } from "@raycast/api";
-import { getActiveCoordinator } from "./core/sonos";
 import { SonosDevice } from "@svrooij/sonos/lib";
+import { getActiveCoordinator } from "./core/sonos";
 import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
 export default async function Command() {

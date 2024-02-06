@@ -1,8 +1,8 @@
-import { SonosDevice, SonosManager } from "@svrooij/sonos";
-import * as storage from "./storage";
-import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
-import { isDefined } from "./utils";
 import { Toast, showToast } from "@raycast/api";
+import { SonosDevice, SonosManager } from "@svrooij/sonos";
+import { SonosState } from "@svrooij/sonos/lib/models/sonos-state";
+import * as storage from "./storage";
+import { isDefined } from "./utils";
 
 export async function formatPlayingState(state: SonosState | null): Promise<string | null> {
   const playing = await isPlaying();
