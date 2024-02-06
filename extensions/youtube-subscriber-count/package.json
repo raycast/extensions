@@ -54,6 +54,7 @@
       "description": "Format the subscriber count",
       "type": "checkbox",
       "required": false,
+      "default": true,
       "title": "Formatting Options",
       "label": "Yes, Format Subscriber Count"
     }
