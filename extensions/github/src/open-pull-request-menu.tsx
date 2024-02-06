@@ -66,7 +66,7 @@ const PullRequestMenuBarItem = ({ i }: PullRequestMenuBarItemProps) => {
       title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
       icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
       // When organizing by repo, tooltip is superfluous
-      tooltip={!organizeByRepoPreference() && i.repository.nameWithOwner}
+      tooltip={organizeByRepoPreference() ? undefined : i.repository.nameWithOwner}
       onAction={() => open(i.permalink)}
     />
   );
