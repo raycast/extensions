@@ -20,12 +20,17 @@ export default function Command() {
   const pasteTitle = `Paste to ${application?.name}`;
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+
         const packageMatches = getMatches(packageFilesDirectory, { packagePath: true });
+
         const userMatches = getMatches(matchFilesDirectory);
-        const combinedMatches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
+
+        const combinedMatches: NormalizedEspansoMatch[] = [...userMatches, ...packageMatches];
+
+        console.log(combinedMatches);
 
         const sortedMatches = sortMatches(combinedMatches);
 
@@ -35,7 +40,7 @@ export default function Command() {
         setError(err instanceof ProcessOutput ? err : null);
         setIsLoading(false);
       }
-    }
+    };
 
     fetchData();
   }, []);

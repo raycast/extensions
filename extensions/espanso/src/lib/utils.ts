@@ -54,9 +54,11 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
 
   for (const matchFile of matchFiles) {
     const content = fse.readFileSync(matchFile);
-    const matchesObj: { matches: EspansoMatch[] } = YAML.parse(content.toString());
+
+    const { matches = [] }: { matches?: EspansoMatch[] } = YAML.parse(content.toString()) || {};
+
     finalMatches.push(
-      ...matchesObj.matches.flatMap((obj: EspansoMatch) => {
+      ...matches.flatMap((obj: EspansoMatch) => {
         if ("trigger" in obj) {
           const { trigger, replace, label } = obj;
           return [{ triggers: [trigger], replace, label }];
