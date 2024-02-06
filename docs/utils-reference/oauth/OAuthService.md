@@ -38,8 +38,8 @@ Initiates the OAuth authorization process or refreshes existing tokens if necess
 
 ##### Signature
 
-```typescript
-authorize(): Promise<string>;
+```ts
+OAuthService.authorize(): Promise<string>;
 ```
 
 ##### Example
@@ -50,7 +50,7 @@ const accessToken = await oauthService.authorize();
 
 ### Built-in Services
 
-Some services are exposed by default to make it easy to authenticate with them. Here's the full list:
+Some services are exposed as static properties in `OAuthService` to make it easy to authenticate with them:
 
 - [Asana](#asana)
 - [GitHub](#github)
@@ -60,112 +60,135 @@ Some services are exposed by default to make it easy to authenticate with them. 
 - [Slack](#slack)
 - [Zoom](#zoom)
 
-These services are all instances of `OAuthService` with the default options being set. However, you're free to configure your own client ID, and URLs for a specific service.
+Asana, GitHub, Linear, and Slack already have an OAuth app configured by Raycast so that you can use them right of the box by specifing only the permission scopes. You are still free to create an OAuth app for them if you want.
+
+Google, Jira and Zoom don't have an OAuth app configured by Raycast so you'll have to create one if you want to use them.
+
+Use [ProviderOptions](#provideroptions) or [ProviderWithDefaultClientOptions](#providerwithdefaultclientoptions) to configure these built-in services.
 
 #### Asana
 
+##### Signature
+
+```ts
+OAuthService.asana: (options: ProviderWithDefaultClientOptions) => OAuthService
+```
+
+##### Example
+
 ```tsx
-const asana = OAuthService.asana({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: 'default', // Specify the scopes your application requires
-  personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
-});
+const asana = OAuthService.asana({ scope: 'default' })
 ```
 
 #### GitHub
 
+##### Signature
+
+```ts
+OAuthService.github: (options: ProviderWithDefaultClientOptions) => OAuthService
+```
+
+##### Example
+
 ```tsx
-const github = OAuthService.github({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: 'repo user', // Specify the scopes your application requires
-  personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
-});
+const github = OAuthService.github({ scope: 'repo user' })
 ```
 
 #### Google
 
+Google has verification processes based on the required scopes for your extension. Therefore, you need to configure your own client for it.
+
+##### Signature
+
+```ts
+OAuthService.google: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
 ```tsx
 const google = OAuthService.google({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: 'https://www.googleapis.com/auth/drive.readonly', // Specify the scopes your application requires
-  personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
+  clientId: 'custom-client-id',
+  authorizeUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenUrl: 'https://oauth2.googleapis.com/token',
+  scope: 'https://www.googleapis.com/auth/drive.readonly',
 });
 ```
 
 #### Jira
 
+Jira requires scopes to be enabled manually in the OAuth app settings. Therefore, you need to configure your own client for it.
+
+##### Signature
+
+```ts
+OAuthService.jira: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
 ```tsx
 const jira = OAuthService.jira({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: 'read:jira-user read:jira-work', // Specify the scopes your application requires
-  personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
+  clientId: 'custom-client-id',
+  authorizeUrl: 'https://auth.atlassian.com/authorize',
+  tokenUrl: 'https://api.atlassian.com/oauth/token',
+  scope: 'read:jira-user read:jira-work offline_access'
 });
 ```
 
 #### Linear
 
+##### Signature
+
+```ts
+OAuthService.linear: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
 ```tsx
-const linear = OAuthService.linear({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: 'read write', // Specify the scopes your application requires
-  personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
-});
+const linear = OAuthService.linear({ scope: 'read write' })
 ```
 
 #### Slack
 
+##### Signature
+
+```ts
+OAuthService.slack: (options: ProviderWithDefaultClientOptions) => OAuthService
+```
+
+##### Example
+
 ```tsx
-const slack = OAuthService.slack({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: 'emoji:read', // Specify the scopes your application requires
-  personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
-});
+const slack = OAuthService.slack({ scope: 'emoji:read' })
 ```
 
 #### Zoom
 
-```tsx
-const zoom = OAuthService.zoom({
-  clientId: 'custom-client-id', // Optional: If omitted, defaults to a pre-configured client ID
-  scope: '', // Specify the scopes your application requires
-  personalAccessToken: 'personal-access-token', // Optional: For accessing the API directly
-});
-```
+Zoom requires scopes to be enabled manually in the OAuth app settings. Therefore, you need to configure your own client for it.
 
-## Subclassing
-
-You can subclass `OAuthService` to create a tailored service for other OAuth providers by setting predefined defaults.
-
-Here's an example:
+##### Signature
 
 ```ts
-export class CustomOAuthService extends OAuthService {
-  constructor(options: ClientConstructor) {
-    super({
-      client: new OAuth.PKCEClient({
-        redirectMethod: OAuth.RedirectMethod.Web,
-        providerName: "PROVIDER_NAME",
-        providerIcon: "provider.png",
-        providerId: "PROVIDER-ID",
-        description: "Connect your {PROVIDER_NAME} account",
-      }),
-      clientId: "YOUR_CLIENT_ID",
-      authorizeUrl: "YOUR_AUTHORIZE_URL",
-      tokenUrl: "YOUR_TOKEN_URL",
-      scope: "YOUR_SCOPES"
-      extraParameters: {
-        actor: "user",
-      },
-    });
-  }
-}
+OAuthService.zoom: (options: ProviderOptions) => OAuthService
+```
+
+##### Example
+
+```tsx
+const zoom = OAuthService.zoom({
+  clientId: 'custom-client-id',
+  authorizeUrl: 'https://zoom.us/oauth/authorize',
+  tokenUrl: 'https://zoom.us/oauth/token',
+  scope: 'meeting:write',
+  personalAccessToken: 'personal-access-token',
+});
 ```
 
 ## Types
 
 ### OAuthServiceOptions
-
-Here's an updated markdown table with a "Type" column:
 
 | Property Name | Description | Type |
 |---------------|-------------|------|
@@ -176,5 +199,38 @@ Here's an updated markdown table with a "Type" column:
 | tokenUrl<mark style="color:red;">*</mark> | The URL to exchange the authorization code for an access token | `string` |
 | refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
 | personalAccessToken | A personal token if the provider supports it | `string` |
+| onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
 | extraParameters | The extra parameters you may need for the authorization request | `Record<string, string>` |
 | bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
+| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+
+### ProviderOptions
+
+| Property Name | Description | Type |
+|---------------|-------------|------|
+| clientId<mark style="color:red;">*</mark> | The app's client ID | `string` |
+| scope<mark style="color:red;">*</mark> | The scope of the access requested from the provider | `string` |
+| authorizeUrl<mark style="color:red;">*</mark> | The URL to start the OAuth flow | `string` |
+| tokenUrl<mark style="color:red;">*</mark> | The URL to exchange the authorization code for an access token | `string` |
+| refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
+| personalAccessToken | A personal token if the provider supports it | `string` |
+| onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
+| bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
+| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+
+### ProviderWithDefaultClientOptions
+
+| Property Name | Description | Type |
+|---------------|-------------|------|
+| scope<mark style="color:red;">*</mark> | The scope of the access requested from the provider | `string` |
+| clientId | The app's client ID | `string` |
+| authorizeUrl | The URL to start the OAuth flow | `string` |
+| tokenUrl | The URL to exchange the authorization code for an access token | `string` |
+| refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
+| personalAccessToken | A personal token if the provider supports it | `string` |
+| onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
+| bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
+| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |

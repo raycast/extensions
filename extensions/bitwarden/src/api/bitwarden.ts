@@ -253,6 +253,20 @@ export class Bitwarden {
     }
   }
 
+  async createFolder(name: string): Promise<MaybeError> {
+    try {
+      const folder = await this.getTemplate("folder");
+      folder.name = name;
+      const encodedFolder = await this.encode(JSON.stringify(folder));
+      await this.exec(["create", "folder", encodedFolder]);
+      return { result: undefined };
+    } catch (execError) {
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
   async getTotp(id: string): Promise<MaybeError<string>> {
     try {
       // this could return something like "Not found." but checks for totp code are done before calling this function
@@ -285,6 +299,17 @@ export class Bitwarden {
       if (errorMessage === "Vault is locked.") return "locked";
       return "unauthenticated";
     }
+  }
+
+  async getTemplate(type: string): Promise<any> {
+    const { stdout } = await this.exec(["get", "template", type]);
+    const template = JSON.parse(stdout);
+    return template;
+  }
+
+  async encode(input: any): Promise<string> {
+    const { stdout } = await this.exec(["encode"], { input });
+    return stdout;
   }
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {

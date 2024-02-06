@@ -25,6 +25,7 @@ export type NewTabSearchConfigs = {
   bing: string;
   yahoo: string;
   ecosia: string;
+  kagi: string;
 };
 
 export type SearchConfig = {
@@ -39,6 +40,7 @@ export type SearchConfigs = {
   bing: SearchConfig;
   yahoo: SearchConfig;
   ecosia: SearchConfig;
+  kagi: SearchConfig;
 };
 
 export type Suggestion = {

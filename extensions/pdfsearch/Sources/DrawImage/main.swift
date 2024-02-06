@@ -2,9 +2,9 @@ import PDFKit
 
 /// Creates an rendered image of a pdf page with highlighted text
 /// - Parameters:
-///   - pdfDocument: 
-///   - pageIndex: Page to render the text in
-///   - highlightRanges: 
+///   - pdfDocument: PDF document page is contained in
+///   - pageIndex: Index of page to render
+///   - highlightRanges: Range of selection in the page to highlight
 func createHighlightedImage(from pdfDocument: PDFDocument, pageIndex: Int, range: NSRange) throws -> URL {
     guard let page = pdfDocument.page(at: pageIndex) else {
         fatalError("Could not get page!")

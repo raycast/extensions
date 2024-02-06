@@ -10,6 +10,7 @@ export const config: NewTabSearchConfigs = {
   bing: "https://www.bing.com/search?q=",
   yahoo: "https://search.yahoo.com/search?p=",
   ecosia: "https://www.ecosia.org/search?q=",
+  kagi: "https://kagi.com/search?q=",
 };
 
 export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {

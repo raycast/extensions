@@ -1,4 +1,4 @@
-export const colors = ["candy", "breeze", "crimson", "falcon", "meadow", "midnight", "raindrop", "sunset"];
+export const colors = ["candy", "breeze", "crimson", "falcon", "meadow", "midnight", "mono", "raindrop", "sunset"];
 
 export const languages = [
   { label: "Auto-Detect", value: "auto" },

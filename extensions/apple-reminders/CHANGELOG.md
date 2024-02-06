@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Fix Invalid time value error] - 2024-01-31
+
+Fix an error that occurs in "My Reminders" when a reminder does not have any due dates, but the list is grouped by due dates.
+
 ## [Fix timezone bugs] - 2024-01-26
 
 - Fix multiple timezone issues that result in reminders not being displayed in the correct section or with incorrect dates.

@@ -17,7 +17,7 @@ import { optimize as svgoOptimize } from "svgo";
 
 import { environment, getPreferenceValues } from "@raycast/api";
 
-import { getDestinationPaths, moveImageResultsToFinalDestination } from "../utilities/utils";
+import { getDestinationPaths, getWebPBinaryPath, moveImageResultsToFinalDestination } from "../utilities/utils";
 import { ExtensionPreferences } from "../utilities/preferences";
 import { ImageResultHandling } from "../utilities/enums";
 
@@ -53,7 +53,7 @@ const optimizeJPEG = (jpegPath: string, newPath: string, amount: number) => {
  * @param amount The amount of compression to apply to the JPEG image.
  * @returns The path of the optimized WebP image.
  */
-const optimizeWEBP = (webpPath: string, amount: number) => {
+const optimizeWEBP = async (webpPath: string, amount: number) => {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const jpegPath = `${environment.supportPath}/tmp.jpeg`;
 
@@ -81,9 +81,11 @@ const optimizeWEBP = (webpPath: string, amount: number) => {
   execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
   execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
 
-  execSync(`${environment.assetsPath}/webp/dwebp "${webpPath}" -o "${jpegPath}"`);
+  const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
+
+  execSync(`${dwebpPath} "${webpPath}" -o "${jpegPath}"`);
   optimizeJPEG(jpegPath, newPath, amount);
-  execSync(`${environment.assetsPath}/webp/cwebp "${jpegPath}" -o "${newPath}"; rm "${jpegPath}"`);
+  execSync(`${cwebpPath} "${jpegPath}" -o "${newPath}"; rm "${jpegPath}"`);
   return newPath;
 };
 
@@ -140,7 +142,7 @@ export default async function optimize(sourcePaths: string[], amount: number) {
   for (const imgPath of sourcePaths) {
     if (imgPath.toLowerCase().endsWith("webp")) {
       // Convert to JPEG, optimize, and restore to WebP
-      resultPaths.push(optimizeWEBP(imgPath, amount));
+      resultPaths.push(await optimizeWEBP(imgPath, amount));
     } else if (imgPath.toLowerCase().endsWith("svg")) {
       // Optimize SVG using SVGO
       resultPaths.push(optimizeSVG(imgPath));

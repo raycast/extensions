@@ -29,4 +29,3 @@ declare namespace Arguments {
   export type SearchDocs = {}
 }
 
-

@@ -45,6 +45,27 @@ export class TextToSpeechProcessor {
     this.readingStyle = readingStyle;
     this.onScriptGenerated = onScriptGenerated;
   }
+  // New method to handle text directly
+  public async processTextDirectly(text: string) {
+    // Use a unique identifier for the current process
+    const currentIdentifier = Date.now().toString();
+    await setCurrentCommandIdentifier(currentIdentifier);
+
+    // Stop any currently playing audio
+    await stopAllProcesses();
+
+    // Split the text into sentences and add them to the queue
+    const sentences = splitSentences(text);
+    this.textToSpeechQueue = sentences;
+
+    // Start converting text to speech if not already doing so
+    if (!this.isConverting) {
+      await this.convertTextToSpeech(currentIdentifier);
+    }
+
+    // Wait for the queues to empty before finishing
+    await this.waitForQueuesToEmpty();
+  }
 
   /**
    * Initializes the TextToSpeechProcessor with the provided configuration.
@@ -58,6 +79,12 @@ export class TextToSpeechProcessor {
   public async processSelectedText() {
     const currentIdentifier = Date.now().toString();
     await setCurrentCommandIdentifier(currentIdentifier);
+
+    const activeIdentifier = await getCurrentCommandIdentifier();
+    if (activeIdentifier !== currentIdentifier) {
+      console.log("🚫 💬 A new command task has started. Stopping current text-to-speech task");
+      return; // Exit the loop if a new command has started
+    }
 
     // kill all afplay processes if any are running
     await stopAllProcesses();
@@ -88,7 +115,7 @@ export class TextToSpeechProcessor {
         - Produce a script of professional quality, ready for immediate text-to-speech use.
         - If the source of the original text or media is known, mention it. If the time of writing or sharing is relevant, include it. Otherwise, these details can be omitted.
         - Maintain factual accuracy and neutrality, presenting information engagingly and clearly.
-        - Avoid personal commentary or assumptions. Focus on preparing the script for text-to-speech conversion.
+        - Avoid assumptions. Focus on preparing the script for text-to-speech conversion.
 
         Begin the translation and script adaptation process now:
         `.trim();
