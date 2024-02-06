@@ -36,7 +36,7 @@ export default function Command() {
                     tag: {
                       value: `${Number(friend.balance[0].amount).toFixed(2)} ${getCurrency_code(
                         friend.balance[0].currency_code
-                      )}`,
+                      ).symbol}`,
                       color: Number(friend.balance[0].amount) < 0 ? Color.Red : Color.Green,
                     },
                   }
@@ -95,6 +95,10 @@ export default function Command() {
 function FillForm(props: FriendOrGroupProps) {
   const { pop } = useNavigation();
   const currentUser = GetCurrentUser(); // fetch current user details
+  
+  const defaultCurrency = String(currentUser?.default_currency);
+  const { symbol: defaultSymbol, emoji: defaultEmoji } = getCurrency_code(defaultCurrency);
+  const currencyCodes = ["USD", "EUR", "GBP", "JPY", "AUD"];
 
   const { handleSubmit, itemProps } = useForm<ExpenseParams>({
     onSubmit: (values) => {
@@ -146,10 +150,15 @@ function FillForm(props: FriendOrGroupProps) {
       <Form.TextField title="Description" {...itemProps.description} />
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
       <Form.Dropdown title="Currency Code" {...itemProps.currency_code}>
-        <Form.Dropdown.Item value="USD" title={`USD (${getCurrency_code("USD")})`} icon="💵" />
-        <Form.Dropdown.Item value="EUR" title={`EUR (${getCurrency_code("EUR")})`} icon="💶" />
-        <Form.Dropdown.Item value="GBP" title={`GBP (${getCurrency_code("GBP")})`} icon="💷" />
-        <Form.Dropdown.Item value="JPY" title={`JPY (${getCurrency_code("JPY")})`} icon="💴" />
+        <Form.Dropdown.Item key={defaultCurrency} value={defaultCurrency} title={`${defaultCurrency} (${defaultSymbol})`} icon={defaultEmoji} />
+        {currencyCodes
+          .filter(code => code !== defaultCurrency)
+          .map(code => {
+            const { symbol, emoji } = getCurrency_code(code);
+            return (
+              <Form.Dropdown.Item key={code} value={code} title={`${code} (${symbol})`} icon={emoji} />
+            );
+        })}
       </Form.Dropdown>
       <Form.TextField
         title="Cost"
