@@ -7,6 +7,7 @@
 - Enhanced application robustness and performance.
 - Introduced more user control by adding enable and disable functionality.
 - Streamlined application functions for efficiency.
+- Removed a forgotten console.log.
 
 ## [Search Matches Improvements] - 2023-11-04
 
