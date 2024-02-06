@@ -27,7 +27,7 @@ export const ActionViewDropdown = ({ onChange }: { onChange: (value: ActionViewS
 };
 
 const ActionView = ({ guid }: { guid: string }) => {
-  const [state, setState] = useState<ActionViewState>("Data");
+  const { state, setState } = useActionState(guid);
 
   const props = {
     guid,
