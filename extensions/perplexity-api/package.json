@@ -49,6 +49,7 @@
       "title": "Compose Reponse",
       "subtitle": "Perplexity AI",
       "description": "Crafting an Email Response",
+      "disabledByDefault": true,
       "mode": "view",
       "icon": "perplexity.png",
       "arguments": [
@@ -78,6 +79,7 @@
       "name": "comment",
       "title": "Add Comments to Code",
       "description": "Add comments to code",
+      "disabledByDefault": true,
       "icon": "perplexity.png",
       "mode": "view"
     },
@@ -86,6 +88,7 @@
       "title": "Change Tone to Friendly",
       "icon": "perplexity.png",
       "description": "Change tone of selected text to friendly",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -93,6 +96,7 @@
       "title": "Change Tone to Casual",
       "icon": "perplexity.png",
       "description": "Change tone of selected text to casual",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -100,6 +104,15 @@
       "title": "Change Tone to Professional",
       "icon": "perplexity.png",
       "description": "Change tone of selected text to professional",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "academic",
+      "title": "Change Tone to Academic",
+      "icon": "perplexity.png",
+      "description": "Change tone of selected text to academic",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -107,6 +120,7 @@
       "title": "Find Synonyms",
       "icon": "perplexity.png",
       "description": "Find synonyms of selected word",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -114,6 +128,7 @@
       "title": "Task Generator",
       "icon": "perplexity.png",
       "description": "Break down a project into tasks",
+      "disabledByDefault": true,
       "mode": "view"
     },
     {
@@ -149,6 +164,7 @@
       "title": "Translate Text",
       "icon": "perplexity.png",
       "description": "Translate selected text",
+      "disabledByDefault": true,
       "mode": "view",
       "arguments": [
         {
