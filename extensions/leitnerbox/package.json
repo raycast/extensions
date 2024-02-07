@@ -1,14 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "leitnerbox",
-  "title": "LeitnerBox",
-  "description": "",
-  "icon": "command-icon.png",
+  "title": "Leitner Box",
+  "description": "This is a simple extension that use the concept of a learning process called leitner box",
+  "icon": "leitner-icon.png",
   "author": "gzyannick",
-  "categories": [
-    "Applications",
-    "Fun"
-  ],
+  "categories": ["Applications", "Fun"],
   "license": "MIT",
   "commands": [
     {
@@ -27,7 +24,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0"
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.12.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
