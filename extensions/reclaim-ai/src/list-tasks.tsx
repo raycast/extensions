@@ -43,7 +43,6 @@ const StatusDropdown = (props: StatusDropdownProps) => {
   );
 };
 
-// Main Function
 function TaskList() {
   const [selectedStatus, setSelectedStatus] = useState<DropdownStatus | undefined>();
   const { currentUser } = useUser();
@@ -57,7 +56,9 @@ function TaskList() {
   const { useFetchTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
 
   const { data: tasksData, isLoading } = useFetchTasks();
-  const tasks = useMemo(() => tasksData ?? [], [tasksData]);
+  // const tasks = useMemo(() => tasksData ?? [], [tasksData]);
+  // const tasks = tasksData ?? [];
+  const [tasks, setTasks] = useState<Task[]>(tasksData ?? []);
 
   // Add time to task function
   const handleAddTime = async (task: Task, time: number) => {
@@ -104,23 +105,24 @@ function TaskList() {
     }
   };
 
-  // Update due date
-    const handleUpdateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
+  // Update tasks
+  const handleUpdateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
     await showToast(Toast.Style.Animated, `Updating '${task.title}'...`);
     try {
       const updatedTask = await updateTask(task, payload);
-      if (updatedTask) {
-        showToast(Toast.Style.Success, `Updated '${task.title}'!`);
-      } else {
-        throw new Error(`Updating failed!`);
-      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
         title: `Error while updating '${task.title}'!`,
         message: String(error),
       });
+      return;
     }
+    // optimistic update
+    setTasks((prevTasks) =>
+      prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t))
+    );
+    showToast(Toast.Style.Success, `Updated '${task.title}'!`);
   };
 
   // Filter tasks by status
