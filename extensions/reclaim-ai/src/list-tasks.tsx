@@ -105,15 +105,14 @@ function TaskList() {
   };
 
   // Update due date
-  // const handleUpdateTask = async (task: Partial<Task>) => {
     const handleUpdateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
     await showToast(Toast.Style.Animated, `Updating '${task.title}'...`);
     try {
       const updatedTask = await updateTask(task, payload);
       if (updatedTask) {
-        showToast(Toast.Style.Success, `Updated '${task.title}' successfully!`);
+        showToast(Toast.Style.Success, `Updated '${task.title}'!`);
       } else {
-        throw new Error(`Updating failed for task: ${task.title}`);
+        throw new Error(`Updating failed!`);
       }
     } catch (error) {
       showToast({
@@ -161,25 +160,16 @@ function TaskList() {
     }
 
     if (defaults.schedulerVersion > 14) {
-      // if (task.onDeck) {
-      //   list.push({
-      //     tag: {
-      //       value: "",
-      //       color: Color.Green,
-      //     },
-      //     tooltip: "Remove from Up Next",
-      //     icon: Icon.ArrowNe,
-      //   });
-      // } else {
-      //   list.push({
-      //     tag: {
-      //       value: "",
-      //       color: Color.SecondaryText,
-      //     },
-      //     tooltip: "Send to Up Next",
-      //     icon: Icon.ArrowNe,
-      //   });
-      // }
+      if (task.onDeck) {
+        list.push({
+          tag: {
+            value: "",
+            color: Color.Yellow,
+          },
+          tooltip: "Task is Up Next",
+          icon: Icon.ArrowNe,
+        });
+      }
       list.push({
         tag: {
           value: "",
@@ -384,8 +374,29 @@ function TaskList() {
                               }
                             }}
                           />
+                          {
+                            task.onDeck ? (
+                              <Action
+                                icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
+                                title="Remove from Up Next"
+                                onAction={() => {
+                                  const payload = { "onDeck": false };
+                                  handleUpdateTask(task, payload);
+                                }}
+                              />
+                            ) : (
+                              <Action
+                                icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
+                                title="Send to Up Next"
+                                onAction={() => {
+                                  const payload = { "onDeck": true };
+                                  handleUpdateTask(task, payload);
+                                }}
+                              />
+                            )
+                          }
                           <Action
-                            icon={Icon.Checkmark}
+                            icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
                             title="Mark as Done"
                             onAction={() => {
                               handleDoneTask(task);
