@@ -59,21 +59,6 @@ function TaskList() {
   const { data: tasksData, isLoading } = useFetchTasks();
   const tasks = useMemo(() => tasksData ?? [], [tasksData]);
 
-  const handleUpdatePriority = async (task: Task, priority: string) => {
-    await showToast(Toast.Style.Animated, "Updating priority...");
-    try {
-      task.priority = priority;
-      const updatedPriority = await updateTask(task);
-      if (updatedPriority) {
-        showToast(Toast.Style.Success, `Updated priority successfully!`);
-      } else {
-        throw new Error("Update task priority failed.");
-      }
-    } catch (error) {
-      showToast({ style: Toast.Style.Failure, title: "Error while updating priority", message: String(error) });
-    }
-  };
-
   // Add time to task function
   const handleAddTime = async (task: Task, time: number) => {
     await showToast(Toast.Style.Animated, "Adding time...");
@@ -120,19 +105,20 @@ function TaskList() {
   };
 
   // Update due date
-  const handleUpdateTask = async (task: Task) => {
-    await showToast(Toast.Style.Animated, "Updating due date...");
+  // const handleUpdateTask = async (task: Partial<Task>) => {
+    const handleUpdateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
+    await showToast(Toast.Style.Animated, `Updating '${task.title}'...`);
     try {
-      const updatedTask = await updateTask(task);
+      const updatedTask = await updateTask(task, payload);
       if (updatedTask) {
-        showToast(Toast.Style.Success, `Updated due date for "${task.title}" successfully!`);
+        showToast(Toast.Style.Success, `Updated '${task.title}' successfully!`);
       } else {
-        throw new Error("Update due date request failed.");
+        throw new Error(`Updating failed for task: ${task.title}`);
       }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
-        title: "Error while updating due date",
+        title: `Error while updating '${task.title}'!`,
         message: String(error),
       });
     }
@@ -163,26 +149,37 @@ function TaskList() {
   const getListAccessories = (task: Task) => {
     const list = [];
 
+    if (task.status !== "ARCHIVED" && task.atRisk) {
+      list.push({
+        tag: {
+          value: "",
+          color: Color.Red,
+        },
+        icon: Icon.ExclamationMark,
+        tooltip: "Task at risk!",
+      });
+    }
+
     if (defaults.schedulerVersion > 14) {
-      if (task.onDeck) {
-        list.push({
-          tag: {
-            value: "",
-            color: Color.Green,
-          },
-          tooltip: "Remove from Up Next",
-          icon: Icon.ArrowNe,
-        });
-      } else {
-        list.push({
-          tag: {
-            value: "",
-            color: Color.SecondaryText,
-          },
-          tooltip: "Send to Up Next",
-          icon: Icon.ArrowNe,
-        });
-      }
+      // if (task.onDeck) {
+      //   list.push({
+      //     tag: {
+      //       value: "",
+      //       color: Color.Green,
+      //     },
+      //     tooltip: "Remove from Up Next",
+      //     icon: Icon.ArrowNe,
+      //   });
+      // } else {
+      //   list.push({
+      //     tag: {
+      //       value: "",
+      //       color: Color.SecondaryText,
+      //     },
+      //     tooltip: "Send to Up Next",
+      //     icon: Icon.ArrowNe,
+      //   });
+      // }
       list.push({
         tag: {
           value: "",
@@ -298,8 +295,8 @@ function TaskList() {
                                 icon={{ source: Icon.FullSignal }}
                                 title="Critical"
                                 onAction={() => {
-                                  const priority = "P1";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P1" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
 
@@ -307,8 +304,8 @@ function TaskList() {
                                 icon={{ source: Icon.Signal3 }}
                                 title="High Priority"
                                 onAction={() => {
-                                  const priority = "P2";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P2" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
 
@@ -316,16 +313,16 @@ function TaskList() {
                                 icon={{ source: Icon.Signal2 }}
                                 title="Medium Priority"
                                 onAction={() => {
-                                  const priority = "P3";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P3" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
                               <Action
                                 icon={{ source: Icon.Signal1 }}
                                 title="Low Priority"
                                 onAction={() => {
-                                  const priority = "P1";
-                                  handleUpdatePriority(task, priority);
+                                  const payload = { priority: "P4" };
+                                  handleUpdateTask(task, payload);
                                 }}
                               />
                             </ActionPanel.Submenu>
@@ -382,7 +379,8 @@ function TaskList() {
                             shortcut={{ modifiers: ["cmd"], key: "d" }}
                             onChange={(date: Date | null) => {
                               if (date) {
-                                handleUpdateTask({ ...task, due: date.toISOString() });
+                                const payload = { due: date.toISOString() };
+                                handleUpdateTask(task, payload);
                               }
                             }}
                           />
