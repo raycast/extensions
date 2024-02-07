@@ -4,6 +4,7 @@
 - Resolves issue of updating task priority to "low priority"
 - Displays a warning icon in the task list if a task is "at risk".
 - Implemented optimistic updates for listed tasks.
+- Added new "Send to Up Next" action for tasks.
 - Simplified the task update process.
 
 ## [Fixes] - 2024-01-31
