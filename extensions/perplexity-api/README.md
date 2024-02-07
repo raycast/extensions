@@ -1,4 +1,4 @@
-# perplexity-api
+# Perplexity API
 
 Perplexity API offers a wide range of AI models such as Mistral, Meta's Llama and their own models.
 With this powerful extension, you can boost your productivity using advanced AI models without having to leave your Raycast interface.
