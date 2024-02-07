@@ -19,8 +19,8 @@ export default function Command(props: LaunchProps) {
       isLoading={caffeinateLoader}
       icon={
         caffeinateStatus
-          ? { source: { light: "coffee.png", dark: "coffeedark.png" } }
-          : { source: { light: "coffee-off.png", dark: "coffeedark-off.png" } }
+          ? { source: { light: "coffee-pot-filled-light-mode.svg", dark: "coffee-pot-filled-dark-mode.svg" } }
+          : { source: { light: "coffee-pot-empty-grey.svg", dark: "coffee-pot-empty-grey.svg" } }
       }
     >
       {isLoading ? null : (
