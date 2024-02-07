@@ -77,16 +77,6 @@ const useTask = () => {
     }
   };
 
-  // const getAllTasks = async () => {
-  //   try {
-  //     const [tasks, error] = await axiosPromiseData<ApiResponseTasks>(fetcher("/tasks"));
-  //     if (!tasks && error) throw error;
-  //     return tasks;
-  //   } catch (error) {
-  //     console.error("Error while fetching tasks", error);
-  //   }
-  // };
-
   // Add time
   const addTime = async (task: Task, time: number) => {
     try {
@@ -148,7 +138,6 @@ const useTask = () => {
     createTask,
     handleStartTask,
     handleStopTask,
-    // getAllTasks,
     addTime,
     updateTask,
     doneTask,
