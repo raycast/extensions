@@ -142,6 +142,8 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+# VSCode settings
+.vscode
 
 ## JS Source Maps
 *.js.map

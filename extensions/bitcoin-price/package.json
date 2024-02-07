@@ -5,20 +5,14 @@
   "description": "See the current price of Bitcoin in various currencies.",
   "icon": "btc-price-icon.png",
   "author": "futantan",
+  "contributors": [
+    "gutenye"
+  ],
   "categories": [
-    "Web"
+    "Web",
+    "Finance"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "hideIcon",
-      "description": "Hide icon from the menu bar",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Hide icon"
-    }
-  ],
   "commands": [
     {
       "name": "bitcoin-menu-bar",
@@ -26,7 +20,83 @@
       "subtitle": "Crypto",
       "description": "See the current price of Bitcoin",
       "mode": "menu-bar",
-      "interval": "5m"
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "currency",
+      "title": "Currency",
+      "description": "Currency to use for the price",
+      "type": "dropdown",
+      "required": false,
+      "default": "USD",
+      "data": [
+        {
+          "title": "🇺🇸 United States dollar",
+          "value": "USD"
+        },
+        {
+          "title": "🇪🇺 Euro",
+          "value": "EUR"
+        },
+        {
+          "title": "🇬🇧 Pound Sterling",
+          "value": "GBP"
+        },
+        {
+          "title": "🇯🇵 Japanese Yen",
+          "value": "JPY"
+        },
+        {
+          "title": "🇧🇷 Brazilian Real",
+          "value": "BRL"
+        }
+      ]
+    },
+    {
+      "name": "style",
+      "title": "Style",
+      "description": "Style to display on the system menubar",
+      "type": "dropdown",
+      "required": false,
+      "default": "price",
+      "data": [
+        {
+          "title": "$1,234.56",
+          "value": "price"
+        },
+        {
+          "title": "100-$1,234-200",
+          "value": "low-price-high"
+        },
+        {
+          "title": "1% $1,234 2%",
+          "value": "lowPercent-price-highPrecent"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "title": "Source",
+      "description": "Source to use for fetching the price",
+      "type": "dropdown",
+      "required": false,
+      "default": "CryptoCompare",
+      "data": [
+        {
+          "title": "CryptoCompare",
+          "value": "CryptoCompare"
+        },
+        {
+          "title": "Binance Spot",
+          "value": "BinanceSpot"
+        },
+        {
+          "title": "Binance Futures",
+          "value": "BinanceFutures"
+        }
+      ]
     }
   ],
   "dependencies": {

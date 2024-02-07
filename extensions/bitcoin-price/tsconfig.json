@@ -3,6 +3,10 @@
   "display": "Node 16",
   "include": ["src/**/*"],
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "#/*": ["src/*"]
+    },
     "lib": ["es2021"],
     "module": "commonjs",
     "target": "es2021",
