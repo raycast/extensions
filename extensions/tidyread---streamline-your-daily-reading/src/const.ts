@@ -3,6 +3,7 @@ export const CATEGORIES = [
   { value: "AI", emoji: "✨", weight: 100 },
   { value: "Arts", emoji: "🎨" },
   { value: "Automotive", emoji: "🚗" },
+  { value: "BlockChain", emoji: "🔗" },
   { value: "Blog", emoji: "📝" },
   { value: "Business", emoji: "💼", weight: 70 },
   { value: "Culture", emoji: "🌍" },
@@ -19,7 +20,7 @@ export const CATEGORIES = [
   { value: "Language", emoji: "🔤" },
   { value: "Legal", emoji: "🧑‍⚖️" },
   { value: "Lifestyle", emoji: "🛋️" },
-  { value: "Other", emoji: "💭" },
+  { value: "Others", emoji: "💭" },
   { value: "Personal Development", emoji: "🚀", weight: 85 },
   { value: "Philosophy", emoji: "🤔" },
   { value: "Politics", emoji: "🏛", weight: 80 },
@@ -34,6 +35,7 @@ export const CATEGORIES = [
   { value: "Startup", emoji: "🚀", weight: 90 },
   { value: "Technology", emoji: "🤖", weight: 90 },
   { value: "Travel", emoji: "🛫" },
+  { value: "Web3", emoji: "🌐" },
 ];
 
 export const CATEGORIES_EMOJI_MAP = CATEGORIES.reduce(
