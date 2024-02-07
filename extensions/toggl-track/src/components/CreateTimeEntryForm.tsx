@@ -20,6 +20,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
     }
 
     try {
+      await showToast(Toast.Style.Animated, "Starting time entry...");
       await createTimeEntry({
         projectId: selectedProject?.id,
         workspaceId,
@@ -28,7 +29,6 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         taskId: selectedTask?.id,
         billable,
       });
-      await showToast(Toast.Style.Animated, "Starting time entry...");
       await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
       revalidateRunningTimeEntry();
