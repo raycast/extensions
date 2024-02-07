@@ -19,7 +19,8 @@ export default function IconGridItem(props: IconGridItemProps) {
   const { icon, selectedWeight } = props;
 
   const svgPath = path.join(
-    environment.supportPath,
+    environment.assetsPath,
+    "icons",
     selectedWeight,
     `${icon.name}${selectedWeight !== "regular" ? `-${selectedWeight}` : ``}.svg`,
   );

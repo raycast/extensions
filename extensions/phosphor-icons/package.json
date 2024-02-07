@@ -78,7 +78,7 @@
     }
   ],
   "dependencies": {
-    "@phosphor-icons/core": "^2.0.6",
+    "@phosphor-icons/core": "^2.0.8",
     "@raycast/api": "^1.66.0",
     "@raycast/utils": "1.11.1"
   },
