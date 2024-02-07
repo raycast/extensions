@@ -3,6 +3,7 @@ import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useWorkspaces, useClients, useGroups } from "./hooks";
 import { Workspace } from "./api";
+import Shortcut from "./helpers/shortcuts";
 import ClientListItem from "./components/ClientListItem";
 import ClientForm from "./components/ClientForm";
 
@@ -24,12 +25,13 @@ export default function ClientList() {
       <Action.Push
         title="Create New Client"
         icon={Icon.Plus}
-        shortcut={{ key: "n", modifiers: ["cmd", "shift"] }}
+        shortcut={Shortcut.New}
         target={<ClientForm {...{ workspaces, revalidateClients }} />}
       />
       <Action
         title={`${showArchived ? "Hide" : "Show"} Archived Clients`}
         icon={showArchived ? Icon.Eye : Icon.EyeDisabled}
+        shortcut={Shortcut.ShowOrHide}
         onAction={() => setShowArchived((value) => !value)}
       />
     </ActionPanel.Section>

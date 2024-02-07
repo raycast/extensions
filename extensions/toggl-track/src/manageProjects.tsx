@@ -3,6 +3,7 @@ import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useOrganizations, useWorkspaces, useProjects, useGroups, useClients } from "./hooks";
 import { Workspace, Project } from "./api";
+import Shortcut from "./helpers/shortcuts";
 import ProjectListItem from "./components/ProjectListItem";
 import ProjectForm from "./components/ProjectForm";
 
@@ -29,14 +30,10 @@ export default function ProjectList() {
       <Action.Push
         title="Create New Project"
         icon={Icon.Plus}
-        shortcut={{ key: "n", modifiers: ["cmd", "shift"] }}
+        shortcut={Shortcut.New}
         target={<ProjectForm {...{ workspaces, clients, revalidateProjects }} />}
       />
-      <ActionPanel.Submenu
-        title="Show/Hide Projects..."
-        icon={Icon.Eye}
-        shortcut={{ key: "h", modifiers: ["cmd", "shift"] }}
-      >
+      <ActionPanel.Submenu title="Show/Hide Projects..." icon={Icon.Eye} shortcut={Shortcut.ShowOrHide}>
         {statuses.map((status) => {
           const isVisible = statusVisibily[status];
           const capitalized = status[0].toUpperCase() + status.slice(1);

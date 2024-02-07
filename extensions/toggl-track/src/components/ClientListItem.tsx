@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, confirmAlert, Alert } from "@raycast/a
 import { Workspace, Client, deleteClient, archiveClient, restoreClient } from "../api";
 import ClientForm from "./ClientForm";
 import { withToast, Verb } from "../helpers/withToast";
+import Shortcut from "../helpers/shortcuts";
 
 interface ClientListItemProps {
   workspace: Workspace;
@@ -26,13 +27,13 @@ export default function ClientListItem({ workspace, client, revalidateClients, S
               <Action.Push
                 title="Rename Tag"
                 icon={Icon.Pencil}
-                shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
+                shortcut={Shortcut.Edit}
                 target={<ClientForm {...{ client, revalidateClients }} />}
               />
               <Action
                 title="Delete Tag"
                 icon={Icon.Trash}
-                shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                shortcut={Shortcut.Remove}
                 style={Action.Style.Destructive}
                 onAction={async () => {
                   if (
@@ -55,7 +56,7 @@ export default function ClientListItem({ workspace, client, revalidateClients, S
                 }}
               />
               {client.archived ? (
-                <ActionPanel.Submenu title="Restore Client..." icon={Icon.Undo}>
+                <ActionPanel.Submenu title="Restore Client..." icon={Icon.Undo} shortcut={Shortcut.Archive}>
                   <Action
                     title={`Restore Client and Projects`}
                     onAction={() =>
@@ -89,6 +90,7 @@ export default function ClientListItem({ workspace, client, revalidateClients, S
                 <Action
                   title={`Archive Client`}
                   icon={Icon.Tray}
+                  shortcut={Shortcut.Archive}
                   onAction={async () => {
                     if (
                       await confirmAlert({

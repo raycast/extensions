@@ -3,6 +3,7 @@ import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { useWorkspaces, useTags, useGroups } from "./hooks";
 import type { Workspace } from "./api";
+import Shortcut from "./helpers/shortcuts";
 import TagListItem from "./components/TagListItem";
 import TagForm from "./components/TagForm";
 
@@ -17,7 +18,7 @@ function ManageTags() {
     <Action.Push
       title="Create New Tag"
       icon={Icon.Plus}
-      shortcut={{ key: "n", modifiers: ["cmd", "shift"] }}
+      shortcut={Shortcut.New}
       target={<TagForm {...{ workspaces, revalidateTags }} />}
     />
   );

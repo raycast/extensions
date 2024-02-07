@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, confirmAlert, Alert } from "@raycast/a
 import { Workspace, Tag, deleteTag } from "../api";
 import TagForm from "./TagForm";
 import { withToast, Verb } from "../helpers/withToast";
+import Shortcut from "../helpers/shortcuts";
 
 interface TagListProps {
   workspace: Workspace;
@@ -23,13 +24,13 @@ export default function TagListItem({ workspace, tag, revalidateTags, SharedActi
               <Action.Push
                 title="Rename Tag"
                 icon={Icon.Pencil}
-                shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
+                shortcut={Shortcut.Edit}
                 target={<TagForm {...{ tag, revalidateTags }} />}
               />
               <Action
                 title="Delete Tag"
                 icon={Icon.Trash}
-                shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                shortcut={Shortcut.Remove}
                 style={Action.Style.Destructive}
                 onAction={async () => {
                   if (

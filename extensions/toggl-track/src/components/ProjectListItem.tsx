@@ -5,6 +5,7 @@ import { Organization, Workspace, Project, Client, updateProject, deleteProject 
 import ProjectForm from "./ProjectForm";
 import { withToast, Verb } from "../helpers/withToast";
 import { formatSeconds } from "../helpers/formatSeconds";
+import Shortcut from "../helpers/shortcuts";
 
 interface ProjectListProps {
   organization: Organization;
@@ -57,12 +58,13 @@ export default function ProjectListItem({
                 <Action.Push
                   title="Edit Project"
                   icon={Icon.Pencil}
-                  shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
+                  shortcut={Shortcut.Edit}
                   target={<ProjectForm projectWorkspace={workspace} {...{ project, clients, revalidateProjects }} />}
                 />
                 <Action
                   title={`${project.status === "archived" ? "Restore" : "Archive"} Project`}
                   icon={project.status === "archived" ? Icon.Undo : Icon.Tray}
+                  shortcut={Shortcut.Archive}
                   onAction={() =>
                     withToast({
                       verb: project.status === "archived" ? Verb.Restore : Verb.Archive,
@@ -79,7 +81,7 @@ export default function ProjectListItem({
                 <ActionPanel.Submenu
                   title="Delete Project..."
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                  shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                  shortcut={Shortcut.Remove}
                 >
                   <Action
                     title="Delete Only Project"
