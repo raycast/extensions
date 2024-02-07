@@ -1,7 +1,7 @@
-import { IEpisodeData } from "@/interfaces/episodes";
-import { colorRotation } from "@/utils/colors";
 import { Detail } from "@raycast/api";
 
+import { IEpisodeData } from "../../interfaces/episodes";
+import { colorRotation } from "../../utils/colors";
 import mappings from "./mappings";
 
 export function episodeMetadata(episode: IEpisodeData) {

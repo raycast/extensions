@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import { IRequest, IResponse } from "@/interfaces/http";
 import { useFetch } from "@raycast/utils";
 
+import { IRequest, IResponse } from "../interfaces/http";
 import { BASE_URL, ERROR_MAP } from "./constants";
-import preference from "./preference";
+import preference from "./shortcut";
 
 export default function HTTPRequest(request: IRequest) {
   const [errorTitle, setErrorTitle] = useState("");

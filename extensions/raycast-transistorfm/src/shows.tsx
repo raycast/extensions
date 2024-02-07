@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 
-import { showMetadata } from "@/components/showMetadata";
-import mappings from "@/components/showMetadata/mappings";
-import IShows from "@/interfaces/shows";
-import HTTPRequest from "@/utils/request";
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+
+import { showMetadata } from "./components/showMetadata";
+import mappings from "./components/showMetadata/mappings";
+import IShows from "./interfaces/shows";
+import HTTPRequest from "./utils/request";
 
 export default function Command() {
   const { data, isLoading, error } = HTTPRequest({

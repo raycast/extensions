@@ -1,9 +1,10 @@
 import { useState } from "react";
 
-import mappings from "@/components/showMetadata/mappings";
-import IShows from "@/interfaces/shows";
-import HTTPRequest from "@/utils/request";
 import { Action, ActionPanel, Detail, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+
+import mappings from "./components/showMetadata/mappings";
+import IShows from "./interfaces/shows";
+import HTTPRequest from "./utils/request";
 
 export default function DefaultShowCommand() {
   const [defaultShow, setDefaultShow] = useState<string | undefined>();

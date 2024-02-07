@@ -1,7 +1,7 @@
-import { IShowData } from "@/interfaces/shows";
-import { colorRotation } from "@/utils/colors";
 import { Color, Detail } from "@raycast/api";
 
+import { IShowData } from "../../interfaces/shows";
+import { colorRotation } from "../../utils/colors";
 import mappings from "./mappings";
 
 export function showMetadata(show: IShowData) {
