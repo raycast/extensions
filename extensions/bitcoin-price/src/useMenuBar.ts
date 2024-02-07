@@ -30,12 +30,12 @@ function genTitle(data: Data, style: string, currency: string) {
     case "price": {
       return formatCurrency(price, currency);
     }
-    case "low24h-price-high24h": {
+    case "down24h-price-up24h": {
       const down = price - low24h;
       const up = high24h - price;
       return `${formatNumber(down)} ${priceDisplay} ${formatNumber(up)}`;
     }
-    case "low24hPercent-price-high24hPrecent": {
+    case "down24hPercent-price-up24hPercent": {
       const down = -(low24h - price) / price;
       const up = (high24h - price) / price;
       return `${formatPercent(down)} ${priceDisplay} ${formatPercent(up)}`;

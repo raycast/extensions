@@ -63,16 +63,16 @@
       "default": "price",
       "data": [
         {
-          "title": "$1,234.56",
+          "title": "$1,234",
           "value": "price"
         },
         {
           "title": "100 $1,234 200",
-          "value": "low24h-price-high24h"
+          "value": "down24h-price-up24h"
         },
         {
           "title": "1% $1,234 2%",
-          "value": "low24hPercent-price-high24hPrecent"
+          "value": "down24hPercent-price-up24hPercent"
         }
       ]
     },
