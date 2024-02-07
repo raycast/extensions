@@ -1,5 +1,9 @@
 # Dash Off Changelog
 
+## [Update] - 2024-07-01
+
+- Remove Google Consent disclaimer from README
+
 ## [Fix] - 2024-02-01
 
 - Fixed typo in description.
