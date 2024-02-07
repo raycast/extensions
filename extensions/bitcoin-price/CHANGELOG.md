@@ -6,5 +6,7 @@
 - Add perference to select currency
 - Add different display styles: price, price with 24hr low and heigh, price with 24hr low and heigh in percentage
 - Add more information: 24hr volume, supply, market cap
+- Add Open with Binance
+- Rewrite the code
 
 ## [Initial Version] - 2022-10-04
