@@ -7,7 +7,8 @@
   "author": "petr",
   "contributors": [
     "jhjr",
-    "thomas"
+    "thomas",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -38,6 +39,7 @@
     "@raycast/utils": "^1.11.1",
     "@slack/web-api": "^6.4.0",
     "moment": "^2.29.1",
+    "nanoid": "^5.0.5",
     "node-fetch": "^3.3.2",
     "pluralize": "^8.0.0"
   },

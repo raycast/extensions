@@ -3,7 +3,7 @@
 ## [Launch Context] - 2024-01-27
 
 - The extension's `setStatus` command now supports launch context.
-- Users can now create Quicklinks to launch their favorite status presets via the `presetName` context param.
+- Users can now copy Deeplink and create Quicklinks to launch their favorite status presets from the action panel.
 
 ## [OAuth + AI] - 2023-11-14
 

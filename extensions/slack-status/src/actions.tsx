@@ -20,6 +20,7 @@ import { StatusForm } from "./form";
 import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
 import { setStatusToPreset, showToastWithPromise } from "./utils";
+import { nanoid } from "nanoid";
 
 // Status Actions
 
@@ -274,6 +275,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              id: nanoid(),
             });
 
             pop();
@@ -291,7 +293,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
 }
 
 function createLink(preset: SlackStatusPreset) {
-  const contextPreset = encodeURIComponent(JSON.stringify({ presetName: preset.title }));
+  const contextPreset = encodeURIComponent(JSON.stringify({ presetId: preset.id }));
   return `raycast://extensions/petr/${environment.extensionName}/setStatus?context=${contextPreset}`;
 }
 
@@ -369,6 +371,7 @@ export function EditStatusPresetAction(props: {
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              id: props.preset.id ?? nanoid(),
             });
 
             pop();

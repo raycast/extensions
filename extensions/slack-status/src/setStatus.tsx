@@ -36,12 +36,12 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const slack = useSlack();
 
   useMemo(() => {
-    if (props.launchContext?.presetName) {
-      const presetName = props.launchContext.presetName;
-      const presetToLaunch = presets.find((p) => p.title === props.launchContext?.presetName);
+    if (props.launchContext?.presetId) {
+      const presetId = props.launchContext.presetId;
+      const presetToLaunch = presets.find((p) => p.id === props.launchContext?.presetId);
       if (!presetToLaunch) {
-        console.error("No preset found with name: ", presetName);
-        showFailureToast(new Error(`Could not find "${presetName}" preset`), { title: "No preset found" });
+        console.error("No preset found with id: ", presetId);
+        showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
       } else {
         setStatusToPreset({ preset: presetToLaunch, slack, mutate });
         closeMainWindow();
