@@ -1,73 +1,99 @@
-import fetch from "node-fetch";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Detail, Icon, LocalStorage, MenuBarExtra, open, showToast, Toast } from "@raycast/api";
 
 import IAnalytics from "./interfaces/analytics";
 import IShows from "./interfaces/shows";
-import { requestOptions } from "./utils/requests";
+import HTTPRequest from "./utils/request";
 
 export default function Command() {
-  const [defaultShow, setDefaultShow] = useState<string | undefined>("Bingo");
+  const [defaultShow, setDefaultShow] = useState<string | undefined>("");
+  const [defaultShowTitle, setDefaultShowTitle] = useState<string | undefined>("");
 
-  const abortable = useRef<AbortController>();
-
-  const { isLoading, data } = useCachedPromise(
-    async (url: string) => {
-      const response = await fetch(url, requestOptions);
-      const { data } = (await response.json()) as IShows;
-      return data;
-    },
-    ["https://api.transistor.fm/v1/shows"],
-    {
-      abortable,
-    },
-  );
+  const { data, isLoading } = HTTPRequest({
+    url: "/shows",
+  }) as {
+    data: IShows | undefined;
+    isLoading: boolean;
+    error: { title: string; message: string; markdown: string } | undefined;
+  };
 
   useEffect(() => {
-    data && setDefaultShow(data.pop()?.attributes.slug);
-  }, [data, isLoading]);
+    async function fetchDefaultShow() {
+      const showSlug = await LocalStorage.getItem<string>("defaultShowSlug");
+      const showTitle = await LocalStorage.getItem<string>("defaultShowTitle");
 
-  const { isLoading: isLoadingAnalytics, data: analytics } = useCachedPromise(
-    async (url: string) => {
-      const response = await fetch(url, requestOptions);
-      const result = await response.json();
-      const { data } = result as IAnalytics;
-      return data;
-    },
-    [`https://api.transistor.fm/v1/analytics/${defaultShow}`],
-    {
-      // to make sure the screen isn't flickering when the searchText changes
-      keepPreviousData: true,
-    },
-  );
+      if (showSlug) {
+        setDefaultShow(showSlug);
+      } else {
+        setDefaultShow(data?.data.pop()?.attributes.slug);
+      }
 
-  const downloads = data && analytics && analytics.attributes.downloads.pop()!.downloads.toString();
+      if (showTitle) {
+        setDefaultShowTitle(showTitle);
+      } else {
+        setDefaultShowTitle(data?.data.pop()?.attributes.title);
+      }
+    }
 
-  return (
-    <MenuBarExtra icon={Icon.Microphone} isLoading={isLoading && isLoadingAnalytics} title={downloads}>
-      <MenuBarExtra.Item
-        title="Open TransistorFM Dashboard"
-        onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}`)}
-      />
+    fetchDefaultShow();
+  }, []);
 
-      <MenuBarExtra.Separator />
+  const {
+    data: analyticsData,
+    isLoading: analyticsIsLoading,
+    error: analyticsError,
+  } = HTTPRequest({
+    url: `/analytics/${defaultShow}`,
+  }) as {
+    data: IAnalytics | undefined;
+    isLoading: boolean;
+    error: { title: string; message: string; markdown: string } | undefined;
+  };
 
-      <MenuBarExtra.Item
-        title="Episodes"
-        onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}/episodes`)}
-      />
+  if (isLoading) {
+    return <MenuBarExtra isLoading={isLoading} />;
+  }
 
-      <MenuBarExtra.Item
-        title="Distribution"
-        onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}/distribution`)}
-      />
+  const downloads = analyticsData?.data.attributes.downloads.pop()!.downloads.toLocaleString();
 
-      <MenuBarExtra.Item
-        title="Analytics"
-        onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}/analytics`)}
-      />
-    </MenuBarExtra>
-  );
+  if (analyticsData) {
+    return (
+      <MenuBarExtra icon={Icon.Download} isLoading={isLoading && analyticsIsLoading} title={downloads}>
+        <MenuBarExtra.Item title={"Current Show: " + defaultShowTitle} />
+
+        <MenuBarExtra.Separator />
+
+        <MenuBarExtra.Item
+          title="Open TransistorFM Dashboard"
+          onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}`)}
+        />
+
+        <MenuBarExtra.Separator />
+
+        <MenuBarExtra.Item
+          title="Episodes"
+          onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}/episodes`)}
+        />
+
+        <MenuBarExtra.Item
+          title="Distribution"
+          onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}/distribution`)}
+        />
+
+        <MenuBarExtra.Item
+          title="Analytics"
+          onAction={() => open(`https://dashboard.transistor.fm/shows/${defaultShow}/analytics`)}
+        />
+      </MenuBarExtra>
+    );
+  } else if (analyticsError) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: analyticsError.title,
+      message: analyticsError.message,
+    });
+
+    return <Detail markdown={analyticsError.markdown} />;
+  }
 }

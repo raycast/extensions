@@ -1,7 +1,15 @@
 import { getPreferenceValues as gp } from "@raycast/api";
 
-import { Preference } from "./types";
+export type Preference = {
+  apiKey: string;
+  show?: string;
+  showTitle?: string;
+};
 
-export function getPreferenceValues() {
+function getPreferenceValues() {
   return gp<Preference>();
 }
+
+const preference: Preference = getPreferenceValues();
+
+export default preference;

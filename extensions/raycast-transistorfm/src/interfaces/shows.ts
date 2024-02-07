@@ -62,7 +62,7 @@ interface IShowAttributes {
   email_notifications: boolean;
 }
 
-interface IShowData {
+export interface IShowData {
   id: string;
   type: string;
   attributes: IShowAttributes;
