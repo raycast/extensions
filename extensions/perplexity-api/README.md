@@ -10,3 +10,19 @@ With this powerful extension, you can boost your productivity using advanced AI 
 3. Input your key on the Extension's setup page
 
 You're all good to go!
+
+## Disabled Commands
+
+This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings.
+
+These commands are:
+
+- Compose Email Response
+- Add Comments to Code
+- Change Tone to Friendly
+- Change Tone to Casual
+- Change Tone to Professional
+- Change Tone to Academic
+- Find Synonyms
+- Task Generator
+- Translate Text
