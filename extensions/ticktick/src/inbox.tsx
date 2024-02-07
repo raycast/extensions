@@ -60,6 +60,11 @@ const TickTickInbox: React.FC<Record<string, never>> = () => {
               projectId={task.projectId}
               priority={task.priority}
               detailMarkdown={getTaskDetailMarkdownContent(task)}
+              dueDate={task.dueDate}
+              startDate={task.startDate}
+              isFloating={task.isFloating}
+              isAllDay={task.isAllDay}
+              timeZone={task.timeZone}
               tags={task.tags}
               copyContent={getTaskCopyContent(task)}
               refresh={refresh}
@@ -76,6 +81,11 @@ const TickTickInbox: React.FC<Record<string, never>> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    dueDate={task.dueDate}
+                    startDate={task.startDate}
+                    isFloating={task.isFloating}
+                    isAllDay={task.isAllDay}
+                    timeZone={task.timeZone}
                     tags={task.tags}
                     detailMarkdown={getTaskDetailMarkdownContent(task)}
                     copyContent={getTaskCopyContent(task)}

@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { missingCLIError, useDayOneIntegration } from "./day-one";
+import { CLISyncError, missingCLIError, useDayOneIntegration } from "./day-one";
 import { useCachedState } from "@raycast/utils";
 import { useCallback, useState } from "react";
 
@@ -50,7 +50,7 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
 
       return entryId;
     } catch (error) {
-      if (typeof error === "string" && error.includes("journal")) {
+      if (error instanceof Error && error.message.includes("Invalid value(s) for option -j")) {
         setError("journal");
       } else {
         setError("unknown");
@@ -62,14 +62,17 @@ const AddEntryCommand = ({ draftValues }: LaunchProps) => {
 
   async function submitAndOpen(values: Values) {
     const entryId = await submitEntry(values, { notify: false });
+
     if (entryId !== null) {
       await popToRoot();
       await open(`dayone://view?entryId=${entryId}`);
     }
   }
 
-  if (!installed && !loading) {
-    return <Detail isLoading={loading} markdown={missingCLIError} />;
+  if (installed !== "ready" && !loading) {
+    const errorBody = installed === "missing" ? missingCLIError : CLISyncError;
+
+    return <Detail isLoading={loading} markdown={errorBody} />;
   }
 
   if (loading) {

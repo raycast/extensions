@@ -22,7 +22,8 @@
     "erics118",
     "hjoelh",
     "hobhouse",
-    "bkeys818"
+    "bkeys818",
+    "jatindotdev"
   ],
   "license": "MIT",
   "preferences": [
@@ -182,6 +183,13 @@
       "disabledByDefault": true
     },
     {
+      "name": "devices",
+      "title": "Select Device",
+      "subtitle": "Spotify",
+      "description": "Select a device to play music on.",
+      "mode": "view"
+    },
+    {
       "name": "volume",
       "title": "Set Volume",
       "subtitle": "Spotify",
@@ -316,6 +324,14 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "subtitle": "Spotify",
+      "description": "See your queue.",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

@@ -32,16 +32,16 @@ export default function Command() {
               {
                 icon: expense.group_id ? Icon.TwoPeople : "",
                 tooltip: `Group: ${
-                  expense.group_id ? groups.filter((group) => group.id === expense.group_id)[0].name : ""
+                  expense.group_id ? groups.filter((group) => group.id === expense.group_id)[0]?.name : ""
                 }`,
               },
               { icon: expense.payment ? Icon.BankNote : "", tooltip: "Payment" },
               {
                 tag: {
-                  value: `${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code)}`,
+                  value: `${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code).symbol}`,
                   color: getColor(expense, currentUserID),
                 },
-                tooltip: `Amount: ${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code)}`,
+                tooltip: `Amount: ${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code).symbol}`,
               },
             ]}
             detail={
@@ -51,7 +51,7 @@ export default function Command() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.TagList title={expense.description}>
                       <List.Item.Detail.Metadata.TagList.Item
-                        text={`${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code)}`}
+                        text={`${Number(expense.cost).toFixed(2)} ${getCurrency_code(expense.currency_code).symbol}`}
                         color={getColor(expense, currentUserID)}
                         key={expense.id}
                         icon={Icon.Coins}
@@ -62,7 +62,7 @@ export default function Command() {
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Link
                           title="Group Expense"
-                          text={`Open '${groups.filter((group) => group.id === expense.group_id)[0].name}'`}
+                          text={`Open '${groups.filter((group) => group.id === expense.group_id)[0]?.name}'`}
                           target={`https://secure.splitwise.com/#/groups/${expense.group_id}`}
                         />
                       </>
@@ -96,14 +96,14 @@ export default function Command() {
                           <List.Item.Detail.Metadata.TagList.Item
                             text={
                               Number(user.owed_share) === 0
-                                ? `${user.user.first_name} paid ${Number(user.paid_share).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code)}`
-                                : `${user.user.first_name} paid ${Number(user.paid_share).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code)} and owes ${Number(
-                                    user.owed_share
-                                  ).toFixed(2)} ${getCurrency_code(expense.currency_code)}`
+                                ? `${user.user.first_name} paid ${Number(user.paid_share).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
+                                : `${user.user.first_name} paid ${Number(user.paid_share).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  } and owes ${Number(user.owed_share).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
                             }
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Green}
@@ -119,12 +119,12 @@ export default function Command() {
                           <List.Item.Detail.Metadata.TagList.Item
                             text={
                               expense.payment === true
-                                ? `${user.user.first_name} received ${(Number(user.net_balance) * -1).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code)}`
-                                : `${user.user.first_name} owes ${(Number(user.net_balance) * -1).toFixed(
-                                    2
-                                  )} ${getCurrency_code(expense.currency_code)}`
+                                ? `${user.user.first_name} received ${(Number(user.net_balance) * -1).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
+                                : `${user.user.first_name} owes ${(Number(user.net_balance) * -1).toFixed(2)} ${
+                                    getCurrency_code(expense.currency_code).symbol
+                                  }`
                             }
                             icon={{ source: user.user.picture.medium, mask: Image.Mask.Circle }}
                             color={Color.Red}
@@ -289,7 +289,7 @@ function ChangeValues(handedOverValues: { expense: Expense }) {
     >
       <Form.TextField title="Description" {...itemProps.description} />
       <Form.DatePicker title="Date of Expense" {...itemProps.date} />
-      <Form.TextField title={`Cost in ${getCurrency_code(expense.currency_code)}`} {...itemProps.cost} />
+      <Form.TextField title={`Cost in ${getCurrency_code(expense.currency_code).symbol}`} {...itemProps.cost} />
       <Form.Separator />
       <Form.Dropdown title="Who paid?" {...itemProps.paid}>
         {friendsWithCurrentUser.map((friend) => (

@@ -44,7 +44,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "version": "1.0.5",
+  "version": "1.0.7",
   "main": "index.js",
   "repository": {
     "type": "git",

@@ -11,29 +11,31 @@ import {
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useModels } from "../../hooks/useModels";
+import { ExtensionPreferences } from "../../lib/preferences/types";
+import { Command } from "../../lib/commands/types";
 import {
   BooleanConfigField,
-  Command,
   CommandConfig,
-  ExtensionPreferences,
   NumberConfigField,
   StringConfigField,
-} from "../../utils/types";
+} from "../../lib/commands/config/types";
 import { Fragment, useEffect, useState } from "react";
 import * as crypto from "crypto";
 import { useRef } from "react";
-import { Placeholders, checkForPlaceholders } from "../../utils/placeholders";
 import {
   EditCustomPlaceholdersAction,
   OpenAdvancedSettingsAction,
   OpenPlaceholdersGuideAction,
 } from "../actions/OpenFileActions";
-import { updateCommand } from "../../utils/command-utils";
+import { updateCommand } from "../../lib/commands";
 import * as fs from "fs";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../lib/common/constants";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
-import { isActionEnabled } from "../../utils/action-utils";
+import { isActionEnabled } from "../../lib/actions";
+import { loadCustomPlaceholders } from "../../lib/placeholders/utils";
+import { PromptLabPlaceholders } from "../../lib/placeholders";
+import { PLChecker } from "placeholders-toolkit";
 
 interface CommandFormValues {
   name: string;
@@ -67,6 +69,7 @@ interface CommandFormValues {
   useSpeech?: boolean;
   speakResponse?: boolean;
   showInMenuBar?: boolean;
+  recordRuns?: boolean;
 }
 
 const defaultPromptInfo =
@@ -74,7 +77,7 @@ const defaultPromptInfo =
 
 export default function CommandForm(props: {
   oldData?: Command;
-  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>;
+  setCommands?: (commands: Command[]) => void;
   duplicate?: boolean;
 }) {
   const { oldData, setCommands, duplicate } = props;
@@ -84,7 +87,7 @@ export default function CommandForm(props: {
   const [showAddPlaceholderAction, setShowAddPlaceholderAction] = useState<boolean>(false);
   const [prompt, setPrompt] = useState<string>(oldData != undefined ? oldData.prompt : "");
   const [showResponse, setShowResponse] = useState<boolean>(
-    oldData != undefined && oldData.showResponse != undefined ? oldData.showResponse : true
+    oldData != undefined && oldData.showResponse != undefined ? oldData.showResponse : true,
   );
   const models = useModels();
   const { pop } = useNavigation();
@@ -122,7 +125,7 @@ export default function CommandForm(props: {
   const getDefaultValues = () => {
     try {
       const advancedSettingsValues = JSON.parse(
-        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8")
+        fs.readFileSync(path.join(environment.supportPath, ADVANCED_SETTINGS_FILENAME), "utf-8"),
       );
       if ("commandDefaults" in advancedSettingsValues) {
         return advancedSettingsValues.commandDefaults;
@@ -160,6 +163,7 @@ export default function CommandForm(props: {
       useSpeech: false,
       speakResponse: false,
       showInMenuBar: true,
+      recordRuns: true,
     };
   };
 
@@ -169,25 +173,35 @@ export default function CommandForm(props: {
 
   useEffect(() => {
     if (oldData) {
-      checkForPlaceholders(oldData.prompt).then((includedPlaceholders) => {
-        let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
-        includedPlaceholders.forEach((placeholder) => {
-          newPromptInfo =
-            newPromptInfo +
-            `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${placeholder.example}`;
-        });
-        setPromptInfo(newPromptInfo);
-
-        checkForPlaceholders(oldData.actionScript || "").then((includedPlaceholders) => {
-          let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
+      loadCustomPlaceholders(advancedSettings).then((customPlaceholders) => {
+        PLChecker.checkForPlaceholders(oldData.prompt, {
+          customPlaceholders,
+          defaultPlaceholders: PromptLabPlaceholders,
+        }).then((includedPlaceholders) => {
+          let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
           includedPlaceholders.forEach((placeholder) => {
-            newScriptInfo =
-              newScriptInfo +
+            newPromptInfo =
+              newPromptInfo +
               `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${
                 placeholder.example
               }`;
           });
-          setScriptInfo(newScriptInfo);
+          setPromptInfo(newPromptInfo);
+
+          PLChecker.checkForPlaceholders(oldData.actionScript || "", {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          }).then((includedPlaceholders) => {
+            let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
+            includedPlaceholders.forEach((placeholder) => {
+              newScriptInfo =
+                newScriptInfo +
+                `\n\n${placeholder.hintRepresentation || ""}: ${placeholder.description}\nExample: ${
+                  placeholder.example
+                }`;
+            });
+            setScriptInfo(newScriptInfo);
+          });
         });
       });
     }
@@ -309,7 +323,7 @@ export default function CommandForm(props: {
       if (minNumFiles == "0") {
         if (
           values.prompt.match(
-            /{{(imageText|imageFaces|imageAnimals|imageSubjects|imageSaliency|imageBarcodes|imageRectangles|pdfRawText|pdfOCRText|contents)}}/g
+            /{{(imageText|imageFaces|imageAnimals|imageSubjects|imageSaliency|imageBarcodes|imageRectangles|pdfRawText|pdfOCRText|contents)}}/g,
           ) != null
         ) {
           minNumFiles = "1";
@@ -335,11 +349,11 @@ export default function CommandForm(props: {
         outputKind: values.outputKind,
         actionScript: values.actionScript,
         showResponse: values.showResponse,
-        description: values.description,
+        description: values.description || "",
         useSaliencyAnalysis: values.useSaliencyAnalysis,
         author: values.author,
         website: values.website,
-        version: values.version,
+        version: values.version || "1.0.0",
         requirements: values.requirements,
         scriptKind: values.scriptKind,
         categories: values.categories,
@@ -351,6 +365,9 @@ export default function CommandForm(props: {
         showInMenuBar: values.showInMenuBar,
         favorited: values.favorited,
         model: values.model,
+        timesExecuted: oldData ? oldData.timesExecuted : 0,
+        recordRuns: values.recordRuns,
+        runs: oldData ? oldData.runs : [],
       };
 
       if (setupFields.length > 0) {
@@ -408,7 +425,7 @@ export default function CommandForm(props: {
             });
             if (oldData && oldData.setupConfig) {
               const oldField = oldData.setupConfig.fields.find(
-                (field) => field.name == (newField as NumberConfigField | BooleanConfigField | StringConfigField).name
+                (field) => field.name == (newField as NumberConfigField | BooleanConfigField | StringConfigField).name,
               );
               if (oldField) {
                 (newField as NumberConfigField | BooleanConfigField | StringConfigField).value = oldField.value;
@@ -465,6 +482,7 @@ export default function CommandForm(props: {
 
   return (
     <Form
+      navigationTitle={oldData && !duplicate ? `Edit Command '${oldData.name}'` : "New PromptLab Command"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -473,14 +491,13 @@ export default function CommandForm(props: {
           />
           {showAddPlaceholderAction ? (
             <ActionPanel.Submenu title="Add Placeholder..." icon={Icon.Plus}>
-              {Object.values(Placeholders.allPlaceholders)
-                .filter(
-                  (placeholder) =>
-                    !placeholder.name.startsWith("textfile:") &&
-                    !placeholder.name.startsWith("video:") &&
-                    !placeholder.name.startsWith("audio:") &&
-                    !placeholder.name.startsWith("image:")
-                )
+              {PromptLabPlaceholders.filter(
+                (placeholder) =>
+                  !placeholder.name.startsWith("textfile:") &&
+                  !placeholder.name.startsWith("video:") &&
+                  !placeholder.name.startsWith("audio:") &&
+                  !placeholder.name.startsWith("image:"),
+              )
                 .sort((a, b) => (a.fullRepresentation > b.fullRepresentation ? 1 : -1))
                 .map((placeholder) => (
                   <Action
@@ -699,7 +716,7 @@ export default function CommandForm(props: {
                         key={`removeField-${sectionName}`}
                         onAction={async () => {
                           const fields = [...setupFields.map((field) => ({ ...field }))].filter(
-                            (field) => field.associatedConfigField != section[1]
+                            (field) => field.associatedConfigField != section[1],
                           );
                           setSetupFields(fields);
                           setCurrentFieldFocus(-1);
@@ -798,6 +815,13 @@ export default function CommandForm(props: {
         onFocus={() => setShowAddPlaceholderAction(false)}
       />
 
+      <Form.Checkbox
+        label="Record Runs"
+        {...itemProps.recordRuns}
+        info="If checked, the command will record each time it is run, including the fully substituted prompt and the response. You can then use this information using the {{lastRun}} placeholder."
+        onFocus={() => setShowAddPlaceholderAction(false)}
+      />
+
       <Form.Separator />
 
       <Form.TextArea
@@ -809,7 +833,11 @@ export default function CommandForm(props: {
         onChange={async (value) => {
           itemProps.prompt.onChange?.(value);
           setPrompt(value);
-          const includedPlaceholders = await checkForPlaceholders(value);
+          const customPlaceholders = await loadCustomPlaceholders(advancedSettings);
+          const includedPlaceholders = await PLChecker.checkForPlaceholders(value, {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          });
           let newPromptInfo = defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
           includedPlaceholders.forEach((placeholder) => {
             newPromptInfo =
@@ -833,7 +861,11 @@ export default function CommandForm(props: {
         {...itemProps.actionScript}
         onChange={async (value) => {
           itemProps.actionScript.onChange?.(value);
-          const includedPlaceholders = await checkForPlaceholders(value);
+          const customPlaceholders = await loadCustomPlaceholders(advancedSettings);
+          const includedPlaceholders = await PLChecker.checkForPlaceholders(value, {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          });
           let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
           includedPlaceholders.forEach((placeholder) => {
             newScriptInfo =

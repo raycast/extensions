@@ -136,7 +136,7 @@ export const getDaysLeftThisYear = () => {
 };
 
 export const getLifeProgress = (countdownDates: CountdownDate[]) => {
-  const raycastTheme = environment.theme;
+  const raycastTheme = environment.appearance;
   const lifeProgresses: LifeProgress[] = [];
 
   const timeIcon12 = ["🕚", "🕙", "🕘", "🕗", "🕖", "🕕", "🕔", "🕓", "🕒", "🕑", "🕐", "🕛"];

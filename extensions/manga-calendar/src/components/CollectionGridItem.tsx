@@ -1,6 +1,6 @@
+import { CollectionListView } from "@components/CollectionListView";
 import { Action, ActionPanel, Color, Grid } from "@raycast/api";
-import { Collection } from "../types";
-import { CollectionListView } from "./CollectionListView";
+import { Collection } from "@types";
 
 interface Props {
   collection: Collection;

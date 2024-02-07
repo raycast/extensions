@@ -41,10 +41,17 @@ export type Picture = {
 };
 
 export type ExpenseParams = {
-  input: string;
-  friend_id?: number;
+  description: string;
+  date: Date | null;
+  cost: string;
+  currency_code: string;
   group_id?: number;
-  autosave: boolean;
+  split_equally?: boolean;
+  users__0__user_id?: number;
+  users__0__paid_share?: string;
+  users__0__owed_share?: string;
+  users__1__user_id?: number;
+  users__1__owed_share?: string;
 };
 
 export type Expense = {

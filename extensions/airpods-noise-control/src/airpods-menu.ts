@@ -9,23 +9,29 @@ export async function execAirPodsMenu(
 set AirPodsIndex to ${airpodsIndex}
 set ToggleOption to "${toggleOption}"
 
-on getOptionIndex(Option)
-		if Option is equal to "Transparency"
-			set OptionIndex to 2
-		else if Option is equal to "Adaptive"
+on getOptionIndex(Opt1, Opt2)
+	if Opt1 is equal to "Off" then
+		set OptionIndex to 1
+	else if Opt1 is equal to "Transparency" then
+		set OptionIndex to 2
+	else if Opt1 is equal to "Adaptive" or Opt2 is equal to "Adaptive" then
+		if Opt1 is equal to "Adaptive" then
 			set OptionIndex to 3
-		else
+		else if Opt1 is equal to "Noise Cancellation" then
 			set OptionIndex to 4
 		end if
-		return OptionIndex
+	else if Opt1 is equal to "Noise Cancellation" then
+		set OptionIndex to 3
+	end if
+	return OptionIndex
 end getOptionIndex
 
 if ToggleOption is "noise-control"
 	set OptionOne to "${optionOne}"
 	set OptionTwo to "${optionTwo}"
 
-	set IndexOne to AirPodsIndex + getOptionIndex(OptionOne)
-	set IndexTwo to AirPodsIndex + getOptionIndex(OptionTwo)
+	set IndexOne to AirPodsIndex + getOptionIndex(OptionOne, OptionTwo)
+	set IndexTwo to AirPodsIndex + getOptionIndex(OptionTwo, OptionOne)
 else
 	set OptionOne to "Off"
 	set OptionTwo to "On"
