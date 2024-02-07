@@ -1,3 +1,3 @@
-# perplexity-api Changelog
+# Perplexity API Changelog
 
 ## [Initial Version] - 2024-02-01
