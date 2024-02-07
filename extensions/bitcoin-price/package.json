@@ -68,11 +68,11 @@
         },
         {
           "title": "100-$1,234-200",
-          "value": "low-price-high"
+          "value": "low24h-price-high24h"
         },
         {
           "title": "1% $1,234 2%",
-          "value": "lowPercent-price-highPrecent"
+          "value": "low24hPercent-price-high24hPrecent"
         }
       ]
     },
