@@ -1,4 +1,4 @@
-import { LaunchProps, MenuBarExtra } from "@raycast/api";
+import { Color, LaunchProps, MenuBarExtra } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { stopCaffeinate, startCaffeinate } from "./utils";
 
@@ -19,8 +19,8 @@ export default function Command(props: LaunchProps) {
       isLoading={caffeinateLoader}
       icon={
         caffeinateStatus
-          ? { source: { light: "coffee-pot-filled-light-mode.svg", dark: "coffee-pot-filled-dark-mode.svg" } }
-          : { source: { light: "coffee-pot-empty-grey.svg", dark: "coffee-pot-empty-grey.svg" } }
+          ? { source: "coffee-pot-filled.svg", tintColor: Color.PrimaryText }
+          : { source: "coffee-pot-empty.svg", tintColor: Color.PrimaryText }
       }
     >
       {isLoading ? null : (
