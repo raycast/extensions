@@ -19,7 +19,19 @@
       "title": "Shorten Link",
       "subtitle": "Shorten a link with dub.co",
       "description": "Shorten links with dub.co",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text"
+        },
+        {
+          "name": "key",
+          "placeholder": "Key",
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "search-links",
