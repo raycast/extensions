@@ -166,7 +166,7 @@
       "name": "apiKey",
       "required": true,
       "title": "Perplexity API Key",
-      "type": "password"
+      "type": "password",
       "placeholder": "pplx-XXX",
     },
     {
