@@ -32,20 +32,24 @@ async function getAllFilteredItems(
   httpProxy?: string,
   requestTimeout?: number,
   onProgress?: (stage: PullItemsStage, err?: Error) => void,
-): Promise<RSSItem[]> {
+): Promise<{
+  successItems: RSSItem[];
+  failedFeeds: { feed: RSSFeed; error: Error }[];
+}> {
   const agent = httpProxy ? new HttpsProxyAgent(httpProxy) : undefined;
 
   const parser = new Parser({
     headers: {
-      // 否则有些服务会返回 406 错误码
       Accept: "application/rss+xml, application/xml, text/xml",
     },
+    timeout: requestTimeout ?? 30 * 1000,
     requestOptions: {
       agent,
-      timeout: requestTimeout ?? 30 * 1000,
     },
   });
-  let allItems: RSSItem[] = [];
+
+  let successItems: RSSItem[] = [];
+  const failedFeeds: { feed: RSSFeed; error: Error }[] = [];
 
   onProgress?.({
     stageName: "pull_items",
@@ -53,58 +57,46 @@ async function getAllFilteredItems(
     data: null,
   });
 
-  for (const feed of rssFeeds) {
-    try {
-      console.log("start to parse rss feed", feed.url);
-      const resp = await parser.parseURL(feed.url);
+  // 并行处理所有feeds
+  const promises = rssFeeds.map((feed) =>
+    (async () => {
+      try {
+        console.log("start to parse rss feed", feed.url);
+        const resp = await parser.parseURL(feed.url);
 
-      // console.log(
-      //   "rss feed parsed",
-      //   resp.items.map((item) => [item.summary, item.content]),
-      //   "items found",
-      // );
+        const filteredItems = await Promise.all(
+          uniqBy(resp.items.filter(feed.filter ?? (() => true)).slice(0, feed.maxItems ?? 10), "title").map(
+            async (item) => ({
+              ...item,
+              feed,
+            }),
+          ),
+        );
 
-      const filteredItems = await Promise.all(
-        // 需要对相同title去重，有些rss质量不高，会出现重复的title不同link
-        uniqBy(resp.items.filter(feed.filter ?? (() => true)).slice(0, feed.maxItems ?? 10), "title").map(
-          async (item) => ({
-            ...item,
-            feed,
-            // 以下代码会增加执行时间，并且raycast展示空间有限，暂时不展示cover
-            // coverImage: item.link ? (await fetchMetadata(item.link)).coverImageUrl : "",
-          }),
-        ),
-      );
+        console.log(`rss feed ${feed.url} parsed, ${filteredItems.length} items found`);
+        successItems = successItems.concat(filteredItems);
+      } catch (error: any) {
+        console.error(`Failed to parse RSS feed ${feed.url}: ${error.message}`);
+        failedFeeds.push({
+          feed,
+          error,
+        });
+      }
+    })(),
+  );
 
-      // console.log(
-      //   "coverimages:",
-      //   filteredItems.map((item) => item.coverImage),
-      // );
-
-      console.log(`rss feed ${feed.url} parsed, ${filteredItems.length} items found`);
-
-      allItems = allItems.concat(filteredItems);
-    } catch (error: any) {
-      console.error(`Failed to parse RSS feed ${feed.url}: ${error.message}`);
-      onProgress?.(
-        {
-          stageName: "pull_items",
-          status: "failed",
-          data: null,
-        },
-        error,
-      );
-      throw new Error(`Failed to parse RSS feed ${feed.url}: ${error.message}`);
-    }
-  }
+  await Promise.all(promises);
 
   onProgress?.({
     stageName: "pull_items",
     status: "success",
-    data: allItems.length,
+    data: successItems.length,
   });
 
-  return allItems;
+  return {
+    successItems,
+    failedFeeds,
+  };
 }
 
 function ellipsisContent(content: string, maxLen: number): string {
@@ -193,9 +185,19 @@ async function summarizeItem(
 function generateDigestTemplate(
   provider: Provider,
   items: RSSItemWithStatus[],
+  failedFeeds: { feed: RSSFeed; error: Error }[],
   splitByTags?: boolean,
   ignoreIntroduction?: boolean,
 ): string {
+  const failedFeedsGuide =
+    failedFeeds.length > 0
+      ? `\n\n---\n\n### ❗ Failed To Fetch Some RSS Feeds\n\n${failedFeeds
+          .map((f, index) => {
+            return `**${index + 1}.** ${f.feed.title}: \`${f.error.message}\``;
+          })
+          .join("\n\n")}`
+      : "";
+
   // const prefix = `# ${title}  \`at ${dayjs(time).format('HH:mm')}\`\n\n`;
   const prefix = provider.available
     ? ``
@@ -207,7 +209,9 @@ function generateDigestTemplate(
   }
 
   if (items.length === 0) {
-    return `${digest}No [RSS](https://meganesulli.com/blog/how-rss-works/) items remain after filtering.`;
+    return (
+      `${digest}No [RSS](https://meganesulli.com/blog/how-rss-works/) items remain after filtering.` + failedFeedsGuide
+    );
   }
 
   const tagsItemsMap = new Map<string, RSSItemWithStatus[]>();
@@ -258,6 +262,8 @@ function generateDigestTemplate(
       digest += formatItemForDigest(item, `${index + 1}. `);
     }
   }
+
+  digest += failedFeedsGuide;
 
   if (items.some((item) => item.status === "failedToSummarize")) {
     digest += `\n\n---\n\n### 🚧 Why Some Articles Failed To Be Summarized By AI?\n\nYou can check out [this document](https://www.tidyread.info/docs/why-some-articles-fail-to-be-summarized) to understand why and how to fix it.\n\n`;
@@ -355,7 +361,12 @@ export async function genDigest(options: {
   const rssFeeds = options.rssFeeds;
 
   // 第一步：获取并过滤所有RSS items
-  const allFilteredItems = await getAllFilteredItems(rssFeeds, options.httpProxy, options.requestTimeout, onProgress);
+  const { successItems: allFilteredItems, failedFeeds } = await getAllFilteredItems(
+    rssFeeds,
+    options.httpProxy,
+    options.requestTimeout,
+    onProgress,
+  );
 
   // 第二步：格式化rss item
   let formatedItems = (await formatRSSItems(allFilteredItems)) as RSSItemWithStatus[];
@@ -428,7 +439,7 @@ export async function genDigest(options: {
 
   // 第五步：生成并返回摘要
   return {
-    content: generateDigestTemplate(options.provider, formatedItems, splitByTags, ignoreIntroduction),
+    content: generateDigestTemplate(options.provider, formatedItems, failedFeeds, splitByTags, ignoreIntroduction),
     items: formatedItems.map((item) => ({
       status: item.status!,
     })),

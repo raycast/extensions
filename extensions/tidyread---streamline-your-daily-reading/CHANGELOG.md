@@ -7,6 +7,8 @@
 - chore: moonshot default to 8k
 - chore: improve feedback and digest content
 - chore: change prompt to remove ads
+- chore: improve speed of parse RSS
+- fix: abort on RSS pull failed
 - fix: RSS pull 406 error code
 - fix: feed with only summary cause empty content
 
