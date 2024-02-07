@@ -195,7 +195,7 @@ function generateDigestTemplate(
           .map((f, index) => {
             return `**${index + 1}.** ${f.feed.title}: \`${f.error.message}\``;
           })
-          .join("\n\n")}`
+          .join("\n\n")}\n\n> 💡 Check [here](https://www.tidyread.info/docs/why-digest-failed#network-blocking) to know how to fix it.`
       : "";
 
   // const prefix = `# ${title}  \`at ${dayjs(time).format('HH:mm')}\`\n\n`;
