@@ -1,6 +1,6 @@
 export type Author = {
-    name: string;
-    email: string;
+  name: string;
+  email: string;
 };
 
 export type Authors = Author[];
