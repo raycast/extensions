@@ -68,10 +68,8 @@ function TaskList() {
       return;
     }
     // optimistic update
-    const updatedTime = task.timeChunksRemaining + (time / TIME_BLOCK_IN_MINUTES);
-    setTasks((prevTasks) =>
-      prevTasks.map((t) => (t.id === task.id ? { ...t, timeChunksRemaining: updatedTime } : t))
-    );
+    const updatedTime = task.timeChunksRemaining + time / TIME_BLOCK_IN_MINUTES;
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, timeChunksRemaining: updatedTime } : t)));
     showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
   };
 
@@ -85,9 +83,7 @@ function TaskList() {
       return;
     }
     // optimistic update
-    setTasks((prevTasks) =>
-      prevTasks.map((t) => (t.id === task.id ? { ...t, status: "ARCHIVED" } : t))
-    );
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "ARCHIVED" } : t)));
     showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
   };
 
@@ -101,9 +97,7 @@ function TaskList() {
       return;
     }
     // optimistic update
-    setTasks((prevTasks) =>
-      prevTasks.map((t) => (t.id === task.id ? { ...t, status: "NEW" } : t))
-    );
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, status: "NEW" } : t)));
     showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
   };
 
@@ -117,9 +111,7 @@ function TaskList() {
       return;
     }
     // optimistic update
-    setTasks((prevTasks) =>
-      prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t))
-    );
+    setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, ...payload } : t)));
     showToast(Toast.Style.Success, `Updated '${task.title}'!`);
   };
 
@@ -374,27 +366,25 @@ function TaskList() {
                               }
                             }}
                           />
-                          {
-                            task.onDeck ? (
-                              <Action
-                                icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
-                                title="Remove from Up Next"
-                                onAction={() => {
-                                  const payload = { "onDeck": false };
-                                  handleUpdateTask(task, payload);
-                                }}
-                              />
-                            ) : (
-                              <Action
-                                icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
-                                title="Send to Up Next"
-                                onAction={() => {
-                                  const payload = { "onDeck": true };
-                                  handleUpdateTask(task, payload);
-                                }}
-                              />
-                            )
-                          }
+                          {task.onDeck ? (
+                            <Action
+                              icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
+                              title="Remove From Up Next"
+                              onAction={() => {
+                                const payload = { onDeck: false };
+                                handleUpdateTask(task, payload);
+                              }}
+                            />
+                          ) : (
+                            <Action
+                              icon={{ source: Icon.ArrowNe, tintColor: Color.Yellow }}
+                              title="Send to Up Next"
+                              onAction={() => {
+                                const payload = { onDeck: true };
+                                handleUpdateTask(task, payload);
+                              }}
+                            />
+                          )}
                           <Action
                             icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
                             title="Mark as Done"
