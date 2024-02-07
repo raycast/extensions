@@ -1,4 +1,4 @@
-import { getPreferenceValues as gp } from "@raycast/api";
+import { getPreferenceValues as gp } from '@raycast/api';
 
 export type Preference = {
   apiKey: string;
@@ -6,10 +6,6 @@ export type Preference = {
   showTitle?: string;
 };
 
-function getPreferenceValues() {
+export function getPreferenceValues() {
   return gp<Preference>();
 }
-
-const preference: Preference = getPreferenceValues();
-
-export default preference;
