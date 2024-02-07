@@ -22,7 +22,7 @@ const useTask = () => {
   );
 
   const useFetchTasks = () =>
-    useFetch<ApiResponseTasks>(`${apiUrl}/tasks`, {
+    useFetch<ApiResponseTasks>(`${apiUrl}/tasks?instances=true`, {
       headers,
       keepPreviousData: true,
     });
@@ -101,16 +101,16 @@ const useTask = () => {
   };
 
   // Update task
-  const updateTask = async (task: Task) => {
+  const updateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
     try {
       const [updatedTask, error] = await axiosPromiseData(
         fetcher(`/tasks/${task.id}`, {
-          method: "PUT",
+          method: "PATCH",
           responseType: "json",
-          data: task,
+          data: payload,
         })
       );
-
+  
       if (!updatedTask || error) throw error;
       return updatedTask;
     } catch (error) {
