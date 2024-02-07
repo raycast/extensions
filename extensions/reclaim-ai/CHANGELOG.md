@@ -1,8 +1,8 @@
 # reclaim Changelog
 
 ## [Update] - 2024-02-07
-- Resolves issue of updating task priority to "low priority."
-- Displays a warning icon in the task list if a task is "at risk."
+- Resolves issue of updating task priority to "low priority"
+- Displays a warning icon in the task list if a task is "at risk".
 - Implemented optimistic updates for listed tasks.
 - Simplified the task update process.
 
