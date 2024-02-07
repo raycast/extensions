@@ -11,6 +11,7 @@ export interface Data {
     price: number;
     high24h: number;
     low24h: number;
+    priceDisplay: string;
   };
   more: Record<string, string>;
 }

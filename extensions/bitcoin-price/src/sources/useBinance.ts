@@ -1,6 +1,6 @@
 import { Data, UseSource } from "#/types";
 import { useFetch } from "@raycast/utils";
-import { formatLargeNumber } from "#/utils";
+import { formatLargeNumber, formatCurrency } from "#/utils";
 
 function createUseBinace(sourceName: string) {
   const baseUrl = sourceName === "Spot" ? `https://api.binance.com/api/v3` : `https://fapi.binance.com/fapi/v1`;
@@ -15,6 +15,7 @@ function createUseBinace(sourceName: string) {
         price: parseInt(d.lastPrice),
         high24h: parseInt(d.highPrice),
         low24h: parseInt(d.lowPrice),
+        priceDisplay: formatCurrency(parseInt(d.lastPrice), "USD"),
       },
       more: {
         "Volume (24h)": formatLargeNumber(parseInt(d.volume)),

@@ -1,6 +1,6 @@
 import { Data, UseSource } from "#/types";
 import { useFetch } from "@raycast/utils";
-import { formatLargeNumber } from "#/utils";
+import { formatLargeNumber, formatCurrency } from "#/utils";
 
 export const useCryptoCompare: UseSource = (currency: string) => {
   const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC&tsyms=${currency}`;
@@ -14,6 +14,7 @@ export const useCryptoCompare: UseSource = (currency: string) => {
       price: d.PRICE,
       high24h: d.HIGH24HOUR,
       low24h: d.LOW24HOUR,
+      priceDisplay: formatCurrency(d.PRICE, currency),
     },
     more: {
       "Volume (24h)": formatLargeNumber(d.VOLUME24HOURTO),
