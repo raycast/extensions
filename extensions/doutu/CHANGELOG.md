@@ -1,6 +1,6 @@
 # DouTu Changelog
 
-## [Fix Debug] - {PR_MERGE_DATE}
+## [Fix Debug] - 2024-02-07
 
 - Fix copying GIF images to output static images
 - Fix Source 3 image not displaying
