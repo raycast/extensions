@@ -56,66 +56,64 @@ function TaskList() {
   const { useFetchTasks, addTime, updateTask, doneTask, incompleteTask } = useTask();
 
   const { data: tasksData, isLoading } = useFetchTasks();
-  // const tasks = useMemo(() => tasksData ?? [], [tasksData]);
-  // const tasks = tasksData ?? [];
   const [tasks, setTasks] = useState<Task[]>(tasksData ?? []);
 
   // Add time to task function
   const handleAddTime = async (task: Task, time: number) => {
     await showToast(Toast.Style.Animated, "Adding time...");
     try {
-      const updatedTime = await addTime(task, time);
-      if (updatedTime) {
-        showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
-      } else {
-        throw new Error("Update time request failed.");
-      }
+      await addTime(task, time);
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error while updating time", message: String(error) });
+      return;
     }
+    // optimistic update
+    const updatedTime = task.timeChunksRemaining + (time / TIME_BLOCK_IN_MINUTES);
+    setTasks((prevTasks) =>
+      prevTasks.map((t) => (t.id === task.id ? { ...t, timeChunksRemaining: updatedTime } : t))
+    );
+    showToast(Toast.Style.Success, `Added ${formatStrDuration(time + "m")} to "${task.title}" successfully!`);
   };
 
   // Set task to done
   const handleDoneTask = async (task: Task) => {
     await showToast(Toast.Style.Animated, "Updating task...");
     try {
-      const setTaskDone = await doneTask(task);
-      if (setTaskDone) {
-        showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
-      } else {
-        throw new Error("Update task request failed.");
-      }
+      await doneTask(task);
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+      return;
     }
+    // optimistic update
+    setTasks((prevTasks) =>
+      prevTasks.map((t) => (t.id === task.id ? { ...t, status: "ARCHIVED" } : t))
+    );
+    showToast(Toast.Style.Success, `Task '${task.title}' marked done. Nice work!`);
   };
 
   // Set task to incomplete
   const handleIncompleteTask = async (task: Task) => {
     await showToast(Toast.Style.Animated, "Updating task...");
     try {
-      const setTaskDone = await incompleteTask(task);
-      if (setTaskDone) {
-        showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
-      } else {
-        throw new Error("Update task request failed.");
-      }
+      await incompleteTask(task);
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Error while updating task", message: String(error) });
+      return;
     }
+    // optimistic update
+    setTasks((prevTasks) =>
+      prevTasks.map((t) => (t.id === task.id ? { ...t, status: "NEW" } : t))
+    );
+    showToast(Toast.Style.Success, `Task '${task.title}' marked incomplete!`);
   };
 
   // Update tasks
   const handleUpdateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
     await showToast(Toast.Style.Animated, `Updating '${task.title}'...`);
     try {
-      const updatedTask = await updateTask(task, payload);
+      await updateTask(task, payload);
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Error while updating '${task.title}'!`,
-        message: String(error),
-      });
+      showToast({ style: Toast.Style.Failure, title: `Error while updating '${task.title}'!`, message: String(error) });
       return;
     }
     // optimistic update
