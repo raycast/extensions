@@ -167,7 +167,7 @@
       "required": true,
       "title": "Perplexity API Key",
       "type": "password",
-      "placeholder": "pplx-XXX",
+      "placeholder": "pplx-XXX"
     },
     {
       "name": "modelSelector",
