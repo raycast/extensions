@@ -66,14 +66,13 @@ export default function Command() {
           onAction={() => open(`https://studio.youtube.com/channel/${youtubeChannelId}`)}
         />
       )}
-      {error && (
-        <MenuBarExtra.Item
-          title="Open Extension Preferences"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-          icon={Icon.Gear}
-          onAction={openExtensionPreferences}
-        />
-      )}
+
+      <MenuBarExtra.Item
+        title="Open Extension Preferences"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        icon={Icon.Gear}
+        onAction={openExtensionPreferences}
+      />
     </MenuBarExtra>
   );
 }
