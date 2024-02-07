@@ -1,4 +1,4 @@
-import { Task } from "../types/task";
+// import { Task } from "../types/task";
 
 export interface CreateTaskProps {
   title: string;
@@ -14,4 +14,4 @@ export interface CreateTaskProps {
   onDeck: boolean;
 }
 
-export type ApiResponseTasks = Task[];
+// export type ApiResponseTasks = Task[];
