@@ -1,3 +1,3 @@
-# time
+# Time
 
-show current time
+Show the current time.
