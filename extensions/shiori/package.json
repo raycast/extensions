@@ -13,6 +13,7 @@
   "type": "module",
   "dependencies": {
     "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.12.4",
     "got": "^14.0.0"
   },
   "devDependencies": {
