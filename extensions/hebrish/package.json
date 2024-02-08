@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "to-hebrew",
-      "title": "To Hebrew",
+      "title": "Convert to Hebrew",
       "description": "Change Hebrew accidently written on an English keyboard to Hebrew",
       "mode": "no-view"
     },
     {
       "name": "to-english",
-      "title": "To English",
+      "title": "Convert to English",
       "description": "Change English accidently written on an Hebrew keyboard to English",
       "mode": "no-view"
     } 
