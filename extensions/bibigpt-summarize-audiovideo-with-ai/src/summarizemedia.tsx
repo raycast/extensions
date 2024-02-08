@@ -146,7 +146,7 @@ function Command() {
       >
         <Form.TextField
           id="url"
-          title="Audio and video URL"
+          title="Audio and Video URL"
           placeholder="Please enter the audio and video URL to be summarized, press ⌘ + K to view commands"
           value={url}
           onChange={setUrl}
