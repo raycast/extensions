@@ -2,7 +2,8 @@
 
 ## [Update] - 2024-08-01
 
-- Google has now approved our OAuth Consent Screen. Users no longer need to create their own Client ID.
+- Google has now approved our OAuth Consent Screen. Users no longer need to create their own Client ID
+- Switch Client ID based on Raycast Flavour
 
 ## [Update] - 2024-07-01
 
