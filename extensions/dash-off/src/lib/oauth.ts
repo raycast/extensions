@@ -1,12 +1,14 @@
 import { OAuth } from "@raycast/api";
 import fetch from "cross-fetch";
 
+const raycastBundleId = process.env.RAYCAST_BUNDLE_ID?.includes("internal") ? "internal" : "production";
+
 const clientIds = {
   internal: "294480066767-816sgubnqjc3u5mge0am5ncltgh8uvvr.apps.googleusercontent.com",
   production: "294480066767-1pk79i9blrm0tgva3c0p3a35j6f4upm6.apps.googleusercontent.com",
 };
 
-export const clientId = clientIds.production;
+export const clientId = clientIds[raycastBundleId];
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.AppURI,
