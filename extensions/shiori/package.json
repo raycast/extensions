@@ -34,7 +34,7 @@
   "preferences": [
     {
       "name": "hostUrl",
-      "title": "Shiori instance URL",
+      "title": "Shiori Instance URL",
       "description": "URL for your Shiori instance",
       "placeholder": "URL for your Shiori instance",
       "type": "textfield",
