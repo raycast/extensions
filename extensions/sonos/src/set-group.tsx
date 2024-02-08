@@ -11,10 +11,10 @@ export default function SetActiveGroupCommand() {
   }
 
   return (
-    <List filtering={false} navigationTitle="Which group would you like to control?">
-      {availableGroups === undefined
+    <List navigationTitle="Which group would you like to control?">
+      {!availableGroups
         ? null
-        : Array.from(availableGroups).map((group) => (
+        : availableGroups.map((group) => (
             <List.Item
               key={group}
               title={group}
