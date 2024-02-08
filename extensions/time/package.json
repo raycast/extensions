@@ -1,18 +1,21 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "time",
-  "title": "time",
-  "description": "show current time",
+  "title": "Time",
+  "description": "Show the current time.",
   "icon": "command-icon.png",
   "author": "g0d",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "time",
-      "description": "",
+      "title": "Show Time",
+      "description": "Show the current time.",
       "mode": "view"
     }
+  ],
+  "categories": [
+    "Productivity"
   ],
   "dependencies": {
     "@raycast/api": "^1.67.1"
