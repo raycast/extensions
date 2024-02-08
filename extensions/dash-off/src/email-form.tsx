@@ -53,7 +53,6 @@ function EmailMe() {
           message: "Specify at least one recipient",
         });
       }
-
       const bccAddresses = [...restAddresses, ...additionalAddresses];
 
       await sendEmail(subject, body, toAddress, bccAddresses);

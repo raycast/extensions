@@ -1,5 +1,10 @@
 # Menubar Weather Changelog
 
+## [Fix error] - 2024-02-05
+
+- Fix json parsing errors
+- Add dates as subheadings in weather forecasts
+
 ## [Add new weather icon] - 2023-08-21
 
 - Now you can choose SF Symbols style weather icons, thanks to [Arttu](https://www.raycast.com/r22) for the SF Symbols icons

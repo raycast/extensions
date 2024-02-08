@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types";
 import { isNumber, isEmpty } from "lodash";
 
-const DEFAULT_PROMPT = `Summarize the content within 50 to 200 characters, excluding any references to author publicity and promotion. The summary should be straightforward and in {{lang}}.`;
+const DEFAULT_PROMPT = `Summarize the content within 50-200 characters, directly output. Focusing strictly on its core insights. Exclude promotional content, including podcast listening options, subscription offers, access instructions, and any form of contact details for additional services. Most important, respond in {{lang}}.`;
 
 function isNum(value?: string) {
   if (isEmpty((value || "").trim())) return false;
@@ -29,10 +29,6 @@ const PROVIDER_CONFIG = {
   },
 };
 
-function formatApiModel(pref: Preferences) {
-  return pref.provider === "raycast" ? (pref.apiModel ?? "").replace("raycast-", "") : pref?.apiModel;
-}
-
 export function normalizePreference(): Required<Preferences> {
   const values = getPreferenceValues();
 
@@ -41,13 +37,13 @@ export function normalizePreference(): Required<Preferences> {
   return {
     provider: values.provider ?? "openai",
     apiKey: values.apiKey || "",
-    apiModel: formatApiModel(values) || "",
+    apiModel: values.apiModel || "",
     maxTokens: isNum(values.maxTokens) ? +values.maxTokens : 200,
     apiHost: values.apiHost || "",
     preferredLanguage: values.preferredLanguage || "",
     httpProxy: values.httpProxy || "",
     summarizePrompt: (values.summarizePrompt || "").trim() || DEFAULT_PROMPT,
-    maxItemsPerFeed: isNum(values.maxItemsPerFeed) ? +values.maxItemsPerFeed : 10,
+    maxItemsPerFeed: isNum(values.maxItemsPerFeed) ? +values.maxItemsPerFeed : 5,
     maxApiConcurrency: isNum(values.maxApiConcurrency) ? +values.maxApiConcurrency : defaultApiConfig.maxApiConcurrency,
     retryCount: isNum(values.retryCount) ? +values.retryCount : defaultApiConfig.retryCount,
     // 默认重试延迟时间为30秒
@@ -56,6 +52,7 @@ export function normalizePreference(): Required<Preferences> {
     autoGenDigest: values.autoGenDigest ?? false,
     requestTimeout: isNum(values.requestTimeout) ? +values.requestTimeout * 1000 : 30 * 1000,
     enableItemLinkProxy: values.enableItemLinkProxy ?? true,
+    splitByTags: values.splitByTags ?? true,
     writeFreelyEndpoint: values.writeFreelyEndpoint || "",
     writeFreelyAccount: values.writeFreelyAccount || "",
     writeFreelyPassword: values.writeFreelyPassword || "",

@@ -1,5 +1,5 @@
 import { Project, User } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type ProjectResult = Pick<
   Project,

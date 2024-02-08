@@ -1,0 +1,246 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "perplexity-api",
+  "title": "Perplexity API",
+  "description": "Use the powerful models via Perplexity API from the comfort of Raycast.",
+  "icon": "perplexity.png",
+  "author": "ilian",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "subtitle": "Perplexity AI",
+      "description": "Ask Perplexity AI",
+      "mode": "view",
+      "icon": "perplexity.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "subtitle": "Perplexity AI",
+      "description": "Ask Perplexity AI about your selected text",
+      "mode": "view",
+      "icon": "perplexity.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "composeResponse",
+      "title": "Compose Reponse",
+      "subtitle": "Perplexity AI",
+      "description": "Crafting an Email Response",
+      "disabledByDefault": true,
+      "mode": "view",
+      "icon": "perplexity.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Details",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize text",
+      "icon": "perplexity.png",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain text",
+      "icon": "perplexity.png",
+      "mode": "view"
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "description": "Add comments to code",
+      "disabledByDefault": true,
+      "icon": "perplexity.png",
+      "mode": "view"
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "icon": "perplexity.png",
+      "description": "Change tone of selected text to friendly",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "casual",
+      "title": "Change Tone to Casual",
+      "icon": "perplexity.png",
+      "description": "Change tone of selected text to casual",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "icon": "perplexity.png",
+      "description": "Change tone of selected text to professional",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "academic",
+      "title": "Change Tone to Academic",
+      "icon": "perplexity.png",
+      "description": "Change tone of selected text to academic",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "icon": "perplexity.png",
+      "description": "Find synonyms of selected word",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "taskBreakdown",
+      "title": "Task Generator",
+      "icon": "perplexity.png",
+      "description": "Break down a project into tasks",
+      "disabledByDefault": true,
+      "mode": "view"
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "icon": "perplexity.png",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "icon": "perplexity.png",
+      "description": "Make selected text longer",
+      "mode": "view"
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "icon": "perplexity.png",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    },
+    {
+      "name": "improve",
+      "title": "Improve Text",
+      "icon": "perplexity.png",
+      "description": "Improve selected text",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate Text",
+      "icon": "perplexity.png",
+      "description": "Translate selected text",
+      "disabledByDefault": true,
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Language",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Perplexity API Key",
+      "name": "apiKey",
+      "required": true,
+      "title": "Perplexity API Key",
+      "type": "password",
+      "placeholder": "pplx-XXX"
+    },
+    {
+      "name": "modelSelector",
+      "title": "Select a model",
+      "default": "mixtral-8x7b-instruct",
+      "description": "Select a model you want to use",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "value": "mixtral-8x7b-instruct",
+          "title": "Mistral 8x7b Instruct"
+        },
+        {
+          "value": "mistral-7b-instruct",
+          "title": "Mistral 7B Instruct"
+        },
+        {
+          "value": "llama-2-70b-chat",
+          "title": "Llama2.70B Chat"
+        },
+        {
+          "value": "codellama-34b-instruct",
+          "title": "CodeLlama 34B Instruct"
+        },
+        {
+          "value": "codellama-70b-instruct",
+          "title": "CodeLlama 70B Instruct"
+        },
+        {
+          "value": "pplx-7b-chat",
+          "title": "Perplexity 7B Chat"
+        },
+        {
+          "value": "pplx-70b-chat",
+          "title": "Perplexity 70B Chat"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

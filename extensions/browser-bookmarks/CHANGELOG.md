@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fixes] - 2024-02-01
+
+- Fixed sort by score issue
+
 ## [Bug Fixes] - 2023-12-29
 
 - Fixed an issue where the selected item would not be the first one after the search text changed

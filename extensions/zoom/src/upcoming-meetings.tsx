@@ -37,6 +37,4 @@ function UpcomingMeetings() {
   );
 }
 
-export default function Command() {
-  return withZoomAuth(<UpcomingMeetings />);
-}
+export default withZoomAuth(UpcomingMeetings);

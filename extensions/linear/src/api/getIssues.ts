@@ -11,7 +11,7 @@ import {
 } from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getPaginated, PageInfo } from "./pagination";
 
 const DEFAULT_PAGE_SIZE = 50;
