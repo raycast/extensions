@@ -46,9 +46,9 @@
     },
     {
       "name": "composeResponse",
-      "title": "Compose Reponse",
+      "title": "Compose Response",
       "subtitle": "Perplexity AI",
-      "description": "Crafting an Email Response",
+      "description": "Craft an Email Response",
       "disabledByDefault": true,
       "mode": "view",
       "icon": "perplexity.png",
