@@ -14,6 +14,7 @@ import { usePromise } from "@raycast/utils";
 
 export default function PowerMonitor() {
   const { revalidate, data: batteryLevel } = usePromise(getBatteryLevel);
+
   useInterval(revalidate, 1000);
 
   return (
@@ -34,6 +35,7 @@ function PowerMonitorDetail({ batteryLevel }: { batteryLevel: string }) {
     data: isCharging,
     isLoading: isLoadingCharging,
   } = usePromise(getIsCharging);
+
   useInterval(revalidateIsCharging, 1000);
 
   const {
@@ -41,6 +43,7 @@ function PowerMonitorDetail({ batteryLevel }: { batteryLevel: string }) {
     data: batteryTime,
     isLoading: isLoadingBatteryTime,
   } = usePromise(getBatteryTime);
+
   useInterval(revalidateIsBatteryTime, 1000);
 
   const {
@@ -48,6 +51,7 @@ function PowerMonitorDetail({ batteryLevel }: { batteryLevel: string }) {
     data: timeOnBattery,
     isLoading: isLoadingTimeOnBattery,
   } = usePromise(getTimeOnBattery);
+
   useInterval(revalidateTimeOnBattery, 1000 * 60);
 
   const { data: cycleCount, isLoading: isLoadingCycleCount } = usePromise(getCycleCount);

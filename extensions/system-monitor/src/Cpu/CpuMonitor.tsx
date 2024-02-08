@@ -14,6 +14,7 @@ export default function CpuMonitor() {
       });
     });
   });
+
   useInterval(revalidate, 1000);
 
   return (
@@ -36,12 +37,14 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
     isLoading: isLoadingAvgLoad,
   } = usePromise(async () => {
     const newLoadAvg = loadavg();
+
     return [
       newLoadAvg[0].toFixed(2).toString(),
       newLoadAvg[1].toFixed(2).toString(),
       newLoadAvg[2].toFixed(2).toString(),
     ];
   });
+
   useInterval(revalidateAvgLoad, 1000 * 10);
 
   const {
@@ -49,6 +52,7 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
     revalidate: revalidateTopProcess,
     isLoading: isLoadingTopProcess,
   } = usePromise(() => getTopCpuProcess(5));
+
   useInterval(revalidateTopProcess, 1000 * 5);
 
   const {
@@ -57,8 +61,10 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
     isLoading: isLoadingUptimes,
   } = usePromise(async () => {
     const uptime = sysUptime();
+
     return getRelativeTime(uptime);
   });
+
   useInterval(revalidateUptime, 1000);
 
   return (

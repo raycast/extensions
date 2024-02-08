@@ -19,11 +19,13 @@ export const getTopCpuProcess = async (count: number): Promise<string[][]> => {
     .split("\n")
     .slice(1, count + 1);
   const modProcessList: string[][] = [];
+
   processList.forEach((value) => {
     let temp: string[] = value.trim().split(" ");
     temp = [temp[0], temp.slice(1).join(" ")];
     modProcessList.push(temp);
   });
+
   return modProcessList;
 };
 

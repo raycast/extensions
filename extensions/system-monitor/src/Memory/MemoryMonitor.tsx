@@ -54,9 +54,11 @@ function MemoryMonitorDetail({
     isLoading: isLoadingTopProcess,
     revalidate: revalidateTopProcess,
   } = usePromise(getTopRamProcess);
+
   useInterval(revalidateTopProcess, 5000);
 
   const { data: freeDisk, isLoading: isLoadingFreeDisk, revalidate: revalidateFreeDisk } = usePromise(getFreeDiskSpace);
+
   useInterval(revalidateFreeDisk, 1000 * 60);
 
   return (
