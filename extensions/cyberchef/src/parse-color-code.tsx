@@ -1,4 +1,4 @@
-import { Container } from "./container";
-export default function Command() {
-  return <Container recipe="Parse_colour_code()" />;
+import { runCyberchefRecipe } from "./utils";
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "Parse_colour_code()" });
 }

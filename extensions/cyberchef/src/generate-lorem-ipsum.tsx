@@ -1,4 +1,4 @@
-import { Container } from "./container";
-export default function Command() {
-  return <Container recipe="Generate_Lorem_Ipsum(3,'Paragraphs')" />;
+import { runCyberchefRecipe } from "./utils";
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "Generate_Lorem_Ipsum(3,'Paragraphs')" });
 }

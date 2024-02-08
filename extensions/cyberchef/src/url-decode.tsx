@@ -1,5 +1,5 @@
-import { Container } from "./container";
+import { runCyberchefRecipe } from "./utils";
 
-export default function Command() {
-  return <Container recipe="URL_Decode()" />;
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "URL_Decode()" });
 }

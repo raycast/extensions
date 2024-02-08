@@ -1,5 +1,5 @@
-import { Container } from "./container";
+import { runCyberchefRecipe } from "./utils";
 
-export default function Command() {
-  return <Container recipe="To_Base64('A-Za-z0-9+/=')" />;
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "To_Base64('A-Za-z0-9+/=')" });
 }

@@ -1,4 +1,4 @@
-import { Container } from "./container";
-export default function Command() {
-  return <Container recipe="Generic_Code_Beautify()" />;
+import { runCyberchefRecipe } from "./utils";
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "Generic_Code_Beautify()" });
 }

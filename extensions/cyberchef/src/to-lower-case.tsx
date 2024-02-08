@@ -1,4 +1,4 @@
-import { Container } from "./container";
-export default function Command() {
-  return <Container recipe="To_Lower_case()" />;
+import { runCyberchefRecipe } from "./utils";
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "To_Lower_case()" });
 }

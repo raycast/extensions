@@ -1,5 +1,5 @@
-import { Container } from "./container";
+import { runCyberchefRecipe } from "./utils";
 
-export default function Command() {
-  return <Container recipe="JSON_to_CSV(',','\\r\\n')" />;
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "JSON_to_CSV(',','\\r\\n')" });
 }

@@ -1,4 +1,4 @@
-import { Container } from "./container";
-export default function Command() {
-  return <Container recipe="Convert_mass('Yoctogram (yg)','Yoctogram (yg)')" />;
+import { runCyberchefRecipe } from "./utils";
+export default async function Command() {
+  await runCyberchefRecipe({ recipe: "Convert_mass('Yoctogram (yg)','Yoctogram (yg)')" });
 }
