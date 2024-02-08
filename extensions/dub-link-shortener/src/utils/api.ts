@@ -11,8 +11,8 @@ function hasHttps(url: string) {
 
 export const useCreateShortLink = () => {
   return useMutation({
-    mutationFn: async (originalUrl: string) => {
-      const response = await createShortLink(originalUrl);
+    mutationFn: async ({ originalUrl, urlKey }: { originalUrl: string; urlKey?: string }) => {
+      const response = await createShortLink(originalUrl, urlKey);
       return response.data as DomainResponse;
     },
   });
@@ -39,7 +39,7 @@ export const useDeleteShortLink = () => {
   });
 };
 
-const createShortLink = async (originalURL: string) => {
+const createShortLink = async (originalURL: string, urlKey?: string) => {
   const urlToShorten = hasHttps(originalURL) ? originalURL : `https://${originalURL}`;
 
   return axios({
@@ -52,6 +52,7 @@ const createShortLink = async (originalURL: string) => {
     data: {
       domain: projectDomain,
       url: urlToShorten,
+      key: urlKey,
     },
   });
 };
