@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { Form, Detail, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
+import { useState, useEffect, useRef } from "react";
+import { Form, Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { getIssues, getProjects, postTimeLog } from "./controllers";
 import { toSeconds, createTimeLogSuccessMessage } from "./utils";
 import { Project, Issue } from "./types";
 
 export default function Command() {
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [projects, setProjects] = useState<Project[]>();
+  const [projects, setProjects] = useState<Project[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Issue>();
   const [hours, setHours] = useState("0");
   const [minutes, setMinutes] = useState("0");
@@ -15,16 +15,20 @@ export default function Command() {
   const [selectedProject, setSelectedProject] = useState<string>();
   const [startedAt, setStartedAt] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
+  const [issueCache, setIssueCache] = useState(new Map());
+
+  const pageGot = useRef(0);
+  const pageTotal = useRef(1);
 
   async function handleSubmit() {
     const totalTimeWorked = toSeconds(Number(seconds), Number(minutes), Number(hours));
 
     if (!selectedIssue) {
-      showToast(ToastStyle.Failure, "Error logging time: issue not found");
+      showToast(Toast.Style.Failure, "Error logging time: issue not found");
       return;
     }
     if (!totalTimeWorked) {
-      showToast(ToastStyle.Failure, "Error logging time: no time entered.");
+      showToast(Toast.Style.Failure, "Error logging time: no time entered.");
       return;
     }
 
@@ -33,11 +37,11 @@ export default function Command() {
     try {
       await postTimeLog(totalTimeWorked, selectedIssue.key, description, startedAt);
       const successMessage = createTimeLogSuccessMessage(selectedIssue.key, hours, minutes, seconds);
-      showToast(ToastStyle.Success, successMessage);
+      showToast(Toast.Style.Success, successMessage);
       cleanUp();
     } catch (e) {
       const message = e instanceof Error ? e.message : "Error Logging Time";
-      showToast(ToastStyle.Failure, message);
+      showToast(Toast.Style.Failure, message);
     } finally {
       setLoading(false);
     }
@@ -45,40 +49,73 @@ export default function Command() {
 
   // fetch projects on mount
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const projects = await getProjects();
-        if (projects.length) {
-          setProjects(projects);
-        }
-      } catch (e) {
-        const message = e instanceof Error ? e.message : "Error Logging Time";
-        showToast(ToastStyle.Failure, message);
-      } finally {
-        setLoading(false);
+    if (!selectedProject) {
+      if (pageGot.current < pageTotal.current) {
+        const fetchProjects = async () => {
+          console.debug("fetch project");
+          try {
+            const result = await getProjects(pageGot.current);
+            pageTotal.current = result.total;
+            pageGot.current = pageGot.current + result.data.length;
+            if (result.data.length > 0) {
+              setProjects([...projects, ...result.data]);
+            }
+            showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
+          } catch (e) {
+            const message = e instanceof Error ? e.message : "Error Logging Time";
+            showToast(Toast.Style.Failure, message);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchProjects();
+      } else {
+        showToast(Toast.Style.Success, `Project loaded ${pageGot.current}/${pageTotal.current}`);
       }
-    };
-
-    fetchProjects();
-  }, []);
+    }
+  }, [projects]);
 
   // fetch issues after project is selected
   useEffect(() => {
     if (selectedProject) {
-      const fetchIssues = async () => {
-        const issues = await getIssues(selectedProject);
-        if (issues) {
-          setIssues(issues);
-          setSelectedIssue(issues.at(-1));
-        }
-      };
-      fetchIssues();
+      if (pageGot.current < pageTotal.current) {
+        const fetchIssues = async (project: string) => {
+          const result = await getIssues(pageGot.current, project);
+          const oldIssues = issueCache.get(project) ?? [];
+          setIssueCache((prev) => new Map(prev).set(project, [...oldIssues, ...result.data]));
+          pageTotal.current = result.total;
+          showToast(Toast.Style.Animated, `Loading issues ${pageGot.current}/${pageTotal.current}`);
+        };
+        fetchIssues(selectedProject);
+      } else {
+        showToast(Toast.Style.Success, `Issue loaded ${pageGot.current}/${pageTotal.current}`);
+      }
     }
+  }, [issues]);
+
+  const resetIssue = (resetLength: boolean) => {
+    const list = issueCache.get(selectedProject) ?? [];
+    setIssues([...list]);
+    setSelectedIssue(list[0]);
+    pageGot.current = list.length;
+    if (resetLength) {
+      pageTotal.current = list.length + 1;
+    }
+  };
+
+  useEffect(() => {
+    resetIssue(true);
   }, [selectedProject]);
+
+  useEffect(() => {
+    resetIssue(false);
+  }, [issueCache]);
 
   const handleSelectIssue = (key: string) => {
     const issue = issues.find((issue) => issue.key === key);
-    if (issue) setSelectedIssue(issue);
+    if (issue) {
+      setSelectedIssue(issue);
+    }
   };
 
   const cleanUp = () => {
@@ -113,41 +150,46 @@ Please check your permissions, jira account or credentials and try again.
       navigationTitle="Log Time"
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Dropdown id="projectId" title="Project Id" onChange={setSelectedProject}>
-        {projects?.map((item) => (
-          <Form.DropdownItem key={item.key} value={item.key} title={item.name} />
-        ))}
+        {projects?.map((item) => <Form.Dropdown.Item key={item.key} value={item.key} title={item.name} />)}
       </Form.Dropdown>
       <Form.Dropdown id="issueId" title="Issue Key" defaultValue={selectedIssue?.key} onChange={handleSelectIssue}>
         {issues.map((item) => (
-          <Form.DropdownItem key={item.key} value={item.key} title={`${item.key}: ${item.fields.summary}`} />
+          <Form.Dropdown.Item key={item.key} value={item.key} title={`${item.key}: ${item.fields.summary}`} />
         ))}
       </Form.Dropdown>
-      <Form.DatePicker id="startedAt" title="Start Date" value={startedAt} onChange={setStartedAt} />
+      <Form.DatePicker
+        id="startedAt"
+        title="Start Date"
+        value={startedAt}
+        onChange={(date) => {
+          date && setStartedAt(date);
+        }}
+      />
       <Form.Separator />
       <Form.Dropdown id="hours" title="Hours" value={hours} onChange={setHours}>
         {Array(25)
           .fill(null)
           .map((_, i) => (
-            <Form.DropdownItem title={`${i}`} key={"hours-" + i} value={String(i)} />
+            <Form.Dropdown.Item title={`${i}`} key={"hours-" + i} value={String(i)} />
           ))}
       </Form.Dropdown>
       <Form.Dropdown id="minutes" title="Minutes" value={minutes} onChange={setMinutes}>
         {Array(60)
           .fill(null)
           .map((_, i) => (
-            <Form.DropdownItem title={`${i}`} key={"minutes-" + i} value={String(i)} />
+            <Form.Dropdown.Item title={`${i}`} key={"minutes-" + i} value={String(i)} />
           ))}
       </Form.Dropdown>
       <Form.Dropdown id="seconds" title="Seconds" value={seconds} onChange={setSeconds}>
         {Array(60)
           .fill(null)
           .map((_, i) => (
-            <Form.DropdownItem title={`${i}`} key={"seconds-" + i} value={String(i)} />
+            <Form.Dropdown.Item title={`${i}`} key={"seconds-" + i} value={String(i)} />
           ))}
       </Form.Dropdown>
       <Form.TextArea
