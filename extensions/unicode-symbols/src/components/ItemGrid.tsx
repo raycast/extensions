@@ -12,6 +12,14 @@ import { numberToHex, upperCaseFirst } from "@/utils/string";
 import DataSetSelector from "./DataSetSelector";
 
 const getSquare = (value: string, dark = false) => {
+  let val = value;
+  if (value === "&") {
+    val = "&amp;";
+  } else if (value === "<") {
+    val = "&lt;";
+  } else if (value === ">") {
+    val = "&gt;";
+  }
   const textColor = dark ? "#fff" : "#000";
   const size = 200;
   return `
@@ -21,7 +29,7 @@ const getSquare = (value: string, dark = false) => {
       size / 1.3
     }" fill="${textColor}" text-anchor="middle" alignment-baseline="central" font-size="${
       size / 2
-    }" line-height="0" font-family="mono-space">${value}</text>
+    }" line-height="0" font-family="mono-space">${val}</text>
   </svg>
   `;
 };

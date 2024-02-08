@@ -1,5 +1,11 @@
 # Unicode Symbols
 
+## [Add symbol search] - 2024-02-08
+
+- Added the ability to search for the exact symbol. This works with the integer code (e.g. `U+1F600`), the hex code (e.g. `1F600`) or the symbol itself (e.g. `😀`).
+- Bump dependencies
+- Minor bugfix: Not showing the following symbols correctly in grid: `&<>`
+
 ## [Minor bugfix] - 2023-12-13
 
 - Fixed a minor bug that breaks the item grid over cached items (#9664)
