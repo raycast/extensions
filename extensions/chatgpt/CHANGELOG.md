@@ -1,5 +1,9 @@
 # Changelog
 
+## [Feat] - 2024-01-31
+
+- Feature: Make responses display above the question
+
 ## [Fix] - 2024-01-28
 
 - Fix: Proxy not working

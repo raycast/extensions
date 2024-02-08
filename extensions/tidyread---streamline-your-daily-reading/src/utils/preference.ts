@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "../types";
 import { isNumber, isEmpty } from "lodash";
 
-const DEFAULT_PROMPT = `Summarize the content within 50 to 200 characters, excluding any references to author publicity and promotion. The summary should be straightforward and in {{lang}}.`;
+const DEFAULT_PROMPT = `Summarize the content within 50-200 characters, directly output. Focusing strictly on its core insights. Exclude promotional content, including podcast listening options, subscription offers, access instructions, and any form of contact details for additional services. Most important, respond in {{lang}}.`;
 
 function isNum(value?: string) {
   if (isEmpty((value || "").trim())) return false;
@@ -52,6 +52,7 @@ export function normalizePreference(): Required<Preferences> {
     autoGenDigest: values.autoGenDigest ?? false,
     requestTimeout: isNum(values.requestTimeout) ? +values.requestTimeout * 1000 : 30 * 1000,
     enableItemLinkProxy: values.enableItemLinkProxy ?? true,
+    splitByTags: values.splitByTags ?? true,
     writeFreelyEndpoint: values.writeFreelyEndpoint || "",
     writeFreelyAccount: values.writeFreelyAccount || "",
     writeFreelyPassword: values.writeFreelyPassword || "",

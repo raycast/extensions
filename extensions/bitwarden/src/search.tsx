@@ -9,10 +9,11 @@ import { FavoritesProvider, useSeparateFavoriteItems } from "~/context/favorites
 import { SessionProvider } from "~/context/session";
 import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
+import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>
-    <BitwardenProvider>
+    <BitwardenProvider loadingFallback={<VaultLoadingFallback />}>
       <SessionProvider unlock>
         <VaultListenersProvider>
           <VaultProvider>

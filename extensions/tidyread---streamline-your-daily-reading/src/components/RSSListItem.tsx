@@ -46,7 +46,7 @@ export default function RSSListItem(props: {
   }, [selected]);
 
   const keywords = useMemo(() => {
-    return [item.description, silent(() => extractDomain(item.url!))].filter(Boolean) as string[];
+    return [item.description, item.url, silent(() => extractDomain(item.url!))].filter(Boolean) as string[];
   }, [item]);
 
   return (

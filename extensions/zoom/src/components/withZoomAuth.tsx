@@ -4,7 +4,9 @@ export const zoom = OAuthService.zoom({
   clientId: "C_EgncmFQYWrxiZ1lEHFA",
   authorizeUrl: "https://zoom.oauth.raycast.com/authorize",
   tokenUrl: "https://zoom.oauth.raycast.com/token",
+  refreshTokenUrl: "https://zoom.oauth.raycast.com/refresh-token",
   scope: "",
+  bodyEncoding: "json",
 });
 
 export function withZoomAuth<T>(Component: React.ComponentType<T>) {

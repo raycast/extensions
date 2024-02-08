@@ -150,7 +150,8 @@ export default function GenTodaysDigestPanel({
             setTotal(stage.data);
             console.log("pullitems stage.data", stage.data);
           } else if (status === "failed") {
-            setPullItemsStatus("failed");
+            // 无需关注错误情况，会在简报中生成相应的错误提示
+            // setPullItemsStatus("failed");
           }
         }
 

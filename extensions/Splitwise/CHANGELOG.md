@@ -1,5 +1,10 @@
 # Splitwise Changelog
 
+## [Fixed Bug] - 2024-02-06
+
+- Fixed issue when adding expense to friends
+- Added user's default currency to the expense form
+
 ## [Fixed Bug] - 2024-01-04
 
 - Updated `Add Expense` command to work with supported API endpoint

@@ -36,12 +36,16 @@ export const quitAppsHook = () => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const quitAppsString = defaultCache.get(CacheKey.QUIT_APP);
-    let quitApps: Application[] = [];
-    if (typeof quitAppsString == "string") {
-      quitApps = JSON.parse(quitAppsString);
+    try {
+      const quitAppsString = defaultCache.get(CacheKey.QUIT_APP);
+      let quitApps: Application[] = [];
+      if (typeof quitAppsString == "string") {
+        quitApps = JSON.parse(quitAppsString);
+      }
+      setQuitApps(quitApps);
+    } catch (e) {
+      console.error(e);
     }
-    setQuitApps(quitApps);
 
     // Quit Apps
     if (environment.launchType == LaunchType.Background) {

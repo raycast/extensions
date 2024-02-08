@@ -10,8 +10,9 @@ import SourceForm from "./SourceForm";
 export default function RSSPlainListView(props: {
   searchBarAccessory?: List.Props["searchBarAccessory"];
   filterByTag?: string;
+  defaultSearchText?: string;
 }) {
-  const { searchBarAccessory } = props;
+  const { searchBarAccessory, filterByTag, defaultSearchText } = props;
   const [selectId, setSelectId] = useState<string>("");
   const { data, isLoading } = useCachedPromise(async () => {
     const resp = (await requestWithFallback(
@@ -25,7 +26,7 @@ export default function RSSPlainListView(props: {
         return resp
           .filter((item) => item.available ?? true)
           .filter((item) => {
-            return props.filterByTag ? (item.tags || []).includes(props.filterByTag) : true;
+            return filterByTag ? (item.tags || []).includes(filterByTag) : true;
           })
           .sort((a, b) => (b.weight ?? 1) - (a.weight ?? 1));
       })) as Partial<ExternalSource>[];
@@ -53,6 +54,7 @@ export default function RSSPlainListView(props: {
       isLoading={isLoading}
       searchBarPlaceholder="Search source, or press `⌘ + Enter` to manually add"
       isShowingDetail
+      searchText={defaultSearchText}
       searchBarAccessory={searchBarAccessory}
       // selectedItemId={selectId}
       onSelectionChange={(id) => {

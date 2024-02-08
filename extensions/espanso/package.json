@@ -23,7 +23,7 @@
       "mode": "view"
     },
     {
-      "name": "addMatch",
+      "name": "add-match",
       "title": "Add Match",
       "subtitle": "Espanso",
       "description": "Add a match to your Espanso config",
@@ -34,6 +34,20 @@
       "title": "Toggle Espanso",
       "subtitle": "Espanso",
       "description": "Enable or disable Espanso",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable",
+      "title": "Enable Espanso",
+      "subtitle": "Espanso",
+      "description": "Enable Espanso",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable",
+      "title": "Disable Espanso",
+      "subtitle": "Espanso",
+      "description": "Disable Espanso",
       "mode": "no-view"
     }
   ],
