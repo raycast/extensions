@@ -26,7 +26,7 @@ const getGoodPreferences = (): Preferences => {
 };
 
 export default function Command() {
-  const { handleSubmit, itemProps } = useForm<AddBookmarkFormValues>({
+  const { handleSubmit, itemProps, reset } = useForm<AddBookmarkFormValues>({
     onSubmit: async (values) => {
       const { hostUrl, username, password } = getGoodPreferences();
       const apiEndpoint = `${hostUrl}api`;
@@ -57,6 +57,8 @@ export default function Command() {
           style: Toast.Style.Success,
           title: "Bookmark created with id " + bookmarkId,
         });
+
+        reset();
       } catch (error) {
         console.log(error);
         await showToast({
