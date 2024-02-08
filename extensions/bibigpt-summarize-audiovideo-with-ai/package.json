@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bibigpt-summarize-audiovideo-with-ai",
-  "title": "BibiGPT-Summarize-AudioVideo-with-AI",
+  "title": "BibiGPT AI Summarize Audio and Video",
   "description": "Simplify media summarization with the BibiGPT-Summarize-AudioVideo-with-AI plugin for Raycast. Effortlessly create summaries via BibiGPT API, enhancing efficiency and understanding of complex media. Ideal for professionals and enthusiasts seeking to optimize time and deepen media comprehension.",
   "icon": "bibigpt-icon.png",
   "author": "skyline-123",
@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "summarizemedia",
-      "title": "SummarizeMedia",
-      "subtitle": "Empowering Your Media with BibiGPT",
+      "title": "Summarize Media",
+      "subtitle": "BibiGPT",
       "description": "Instantly generate a concise summary for any audio or video content using the BibiGPT API. Streamline your media consumption by understanding the essence quickly.",
       "mode": "view",
       "preferences": [
@@ -32,18 +32,18 @@
           "title": "Output Language",
           "default": "en-US",
           "data": [
-            {"title": "English", "value": "en-US"},
-            {"title": "中文", "value": "zh-CN"},
-            {"title": "繁體中文", "value": "zh-TW"},
-            {"title": "日本語", "value": "ja-JP"},
-            {"title": "Italiano", "value": "it-IT"},
-            {"title": "Deutsch", "value": "de-DE"},
-            {"title": "Español", "value": "es-ES"},
-            {"title": "Français", "value": "fr-FR"},
-            {"title": "Nederlands", "value": "nl-NL"},
-            {"title": "한국어", "value": "ko-KR"},
-            {"title": "ភាសាខ្មែរ", "value": "km-KH"},
-            {"title": "हिंदी", "value": "hi-IN"}
+            {"title": "en-US", "value": "en-US"},
+            {"title": "zh-CN", "value": "zh-CN"},
+            {"title": "zh-TW", "value": "zh-TW"},
+            {"title": "ja-JP", "value": "ja-JP"},
+            {"title": "it-IT", "value": "it-IT"},
+            {"title": "de-DE", "value": "de-DE"},
+            {"title": "es-ES", "value": "es-ES"},
+            {"title": "fr-FR", "value": "fr-FR"},
+            {"title": "nl-NL", "value": "nl-NL"},
+            {"title": "ko-KR", "value": "ko-KR"},
+            {"title": "km-KH", "value": "km-KH"},
+            {"title": "hi-IN", "value": "hi-IN"}
           ]
         }
       ]
