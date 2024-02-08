@@ -2,12 +2,6 @@ import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast } from
 import { useForm, FormValidation } from "@raycast/utils";
 import { addBookmark, login } from "./api.js";
 
-interface Preferences {
-  hostUrl: string;
-  username: string;
-  password: string;
-}
-
 interface AddBookmarkFormValues {
   url: string;
 }
