@@ -1,5 +1,5 @@
 import { cpuUsage, sysUptime } from "os-utils";
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { loadavg } from "os";
 import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
@@ -21,7 +21,8 @@ export default function CpuMonitor() {
     <>
       <List.Item
         id="cpu"
-        title={`🖥️  CPU`}
+        title="CPU"
+        icon={Icon.Monitor}
         accessories={[{ text: !cpu ? "Loading…" : `${cpu}%` }]}
         detail={<CpuMonitorDetail cpu={cpu || ""} />}
         actions={<Actions />}

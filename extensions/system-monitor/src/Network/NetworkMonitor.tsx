@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Color, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { getNetworkData } from "./NetworkUtils";
 import { useInterval } from "usehooks-ts";
 import { formatBytes, isObjectEmpty } from "../utils";
@@ -78,7 +78,7 @@ export default function NetworkMonitor() {
       <List.Item
         id="network"
         title="Network"
-        icon="🛜"
+        icon={Icon.Network}
         accessories={[
           {
             text: data ? `↓ ${formatBytes(data.download)}/s ↑ ${formatBytes(data.upload)}/s` : "Loading…",

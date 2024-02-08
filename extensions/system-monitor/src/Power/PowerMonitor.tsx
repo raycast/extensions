@@ -1,4 +1,4 @@
-import { Color, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import {
   getBatteryCondition,
   getBatteryLevel,
@@ -20,8 +20,8 @@ export default function PowerMonitor() {
   return (
     <List.Item
       id="power"
-      title={`Power`}
-      icon={{ source: "lightning.png", tintColor: Color.Yellow }}
+      title="Power"
+      icon={Icon.Plug}
       accessories={[{ text: batteryLevel ? `${batteryLevel}%` : "Loading…" }]}
       detail={<PowerMonitorDetail batteryLevel={batteryLevel || ""} />}
       actions={<Actions />}

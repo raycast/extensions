@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage } from "./MemoryUtils";
 import { useInterval } from "usehooks-ts";
 import { Actions } from "../components/Actions";
@@ -24,7 +24,8 @@ export default function MemoryMonitor() {
     <>
       <List.Item
         id="memory"
-        title="📝  Memory"
+        title="Memory"
+        icon={Icon.MemoryChip}
         accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage}% (~ ${data.freeMem} GB)` }]}
         detail={
           <MemoryMonitorDetail
