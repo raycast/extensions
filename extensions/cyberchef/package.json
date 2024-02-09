@@ -11,6 +11,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "search",
+      "title": "Search CyberChef",
+      "description": "Search CyberChef",
+      "mode": "view"
+    },
+    {
       "name": "to-base64",
       "title": "Encode Base64",
       "description": "Base64 is a notation for encoding arbitrary byte data using a restricted set of symbols that can be conveniently used by humans and processed by computers. This operation encodes raw data into an ASCII Base64 string. e.g. hello becomes aGVsbG8=",
@@ -412,6 +418,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.4",
+    "node-fetch": "^3.3.2",
     "query-string": "^8.1.0"
   },
   "devDependencies": {
