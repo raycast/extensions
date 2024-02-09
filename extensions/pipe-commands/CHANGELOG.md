@@ -1,5 +1,10 @@
 # Pipe Commands Changelog
 
+## [Added new dedicated clipboard command] - 2024-02-08
+
+BREAKING CHANGE: the text command no longer falls back to the clipboard contents. Now, there is a dedicated clipboard
+command to pipe clipboard input.
+
 ## [Added new pipe command] - 2023-11-28
 
 - Add remove smart quotes command (helpful for some LLM prompting)
