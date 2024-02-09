@@ -3,9 +3,6 @@ import { List, Image, ActionPanel, Action, Icon } from "@raycast/api";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { useOrganizations, useWorkspaces } from "./hooks";
 import { Workspace } from "./api";
-import TagList from "./components/TagList";
-import ClientList from "./components/ClientList";
-import ProjectList from "./components/ProjectList";
 
 function ManageWorkspaces() {
   const { organizations, isLoadingOrganizations } = useOrganizations();
@@ -87,34 +84,6 @@ function ManageWorkspaces() {
                     url={`https://track.toggl.com/organizations/${organization.id}/workspaces/${workspace.id}`}
                   />
                 )}
-                <ActionPanel.Section>
-                  {organization && (
-                    <Action.Push
-                      title="Manage Projects"
-                      target={
-                        <ExtensionContextProvider>
-                          <ProjectList {...{ organization, workspace }} isLoading={isLoadingWorkspaces} />
-                        </ExtensionContextProvider>
-                      }
-                    />
-                  )}
-                  <Action.Push
-                    title="Manage Tags"
-                    target={
-                      <ExtensionContextProvider>
-                        <TagList workspace={workspace} isLoading={isLoadingWorkspaces} />
-                      </ExtensionContextProvider>
-                    }
-                  />
-                  <Action.Push
-                    title="Manage Clients"
-                    target={
-                      <ExtensionContextProvider>
-                        <ClientList workspace={workspace} isLoading={isLoadingWorkspaces} />
-                      </ExtensionContextProvider>
-                    }
-                  />
-                </ActionPanel.Section>
               </ActionPanel>
             }
           />

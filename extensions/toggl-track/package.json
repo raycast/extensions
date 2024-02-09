@@ -29,6 +29,24 @@
       "title": "Manage Workspaces",
       "description": "A list of all the workspace you have access to.",
       "mode": "view"
+    },
+    {
+      "name": "manageTags",
+      "title": "Manage Tags",
+      "description": "A list of all the tags you have access to.",
+      "mode": "view"
+    },
+    {
+      "name": "manageClients",
+      "title": "Manage Clients",
+      "description": "A list of all the clients you have access to.",
+      "mode": "view"
+    },
+    {
+      "name": "manageProjects",
+      "title": "Manage Projects",
+      "description": "A list of all the projects you have access to.",
+      "mode": "view"
     }
   ],
   "preferences": [
