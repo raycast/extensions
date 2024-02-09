@@ -27,6 +27,7 @@
     "@raycast/api": "^1.52.0",
     "@raycast/utils": "^1.10.0",
     "os-utils": "0.0.14",
+    "systeminformation": "^5.21.24",
     "usehooks-ts": "^2.6.0"
   },
   "devDependencies": {
@@ -52,6 +53,10 @@
       "title": "Default tab",
       "placeholder": "placeHolder",
       "data": [
+        {
+          "title": "System Info",
+          "value": "system-info"
+        },
         {
           "title": "CPU",
           "value": "cpu"
