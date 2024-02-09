@@ -1,13 +1,12 @@
 import { useCryptoCompare } from "./useCryptoCompare";
-import { useBinanceSpot, useBinanceFutures } from "./useBinance";
+import { useBinance } from "./useBinance";
 import { SourceName, UseSource } from "#/types";
 
-export const sourceNames = ["CryptoCompare", "BinanceSpot", "BinanceFutures"] as const;
+export const sourceNames = ["CryptoCompare", "Binance"] as const;
 
 const sources: Record<SourceName, UseSource> = {
   CryptoCompare: useCryptoCompare,
-  BinanceSpot: useBinanceSpot,
-  BinanceFutures: useBinanceFutures,
+  Binance: useBinance,
 };
 
 export function useSource(name: string, ...args: Parameters<UseSource>) {

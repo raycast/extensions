@@ -1,31 +1,38 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Perferences, Data } from "#/types";
+import type { Perferences, Coin, IsCoinEnabled } from "#/types";
 import { useSource } from "#/sources";
 import { formatCurrency, formatNumber, formatPercent } from "./utils";
 
 export function useMenuBar() {
-  const { source, currency, style } = getPreferenceValues<Perferences>();
+  const { source, currency, style, ...rest } = getPreferenceValues<Perferences>();
 
-  const { isLoading, data } = useSource(source, currency);
+  const coinSymbols = getCoinSymbols(rest);
+  const { isLoading, coins } = useSource(source, currency, coinSymbols);
 
-  if (isLoading || !data) {
-    return { isLoading, title: "Loading...", items: [] };
+  if (isLoading || !coins) {
+    return { isLoading, title: "Loading...", coinItems: [], moreItems: [] };
   }
 
-  const title = genTitle(data, style, currency);
-  const items = Object.entries(data.more).map(([name, value]) => ({
+  const { BTC, ...restCoins } = coins;
+  const title = genTitle(BTC, style, currency);
+  const moreItems = Object.entries(BTC.more).map(([name, value]) => ({
     title: `${name}: ${value}`,
+    onAction: () => null,
+  }));
+  const coinItems = Object.values(restCoins).map((coin) => ({
+    title: `${coin.symbol}: ${coin.priceDisplay}`,
     onAction: () => null,
   }));
 
   return {
     title,
-    items,
+    coinItems,
+    moreItems,
   };
 }
 
-function genTitle(data: Data, style: string, currency: string) {
-  const { price, high24h, low24h, priceDisplay } = data.basic;
+function genTitle(coin: Coin, style: string, currency: string) {
+  const { price, high24h, low24h, priceDisplay } = coin;
   switch (style) {
     case "price": {
       return formatCurrency(price, currency);
@@ -44,4 +51,13 @@ function genTitle(data: Data, style: string, currency: string) {
       throw new Error(`Invalid style: ${style}`);
     }
   }
+}
+
+function getCoinSymbols({ isETHEnabled, isBNBEnabled, isSOLEnabled, isXRPEnabled }: IsCoinEnabled): string[] {
+  const symbols = ["BTC"];
+  if (isETHEnabled) symbols.push("ETH");
+  if (isBNBEnabled) symbols.push("BNB");
+  if (isSOLEnabled) symbols.push("SOL");
+  if (isXRPEnabled) symbols.push("XRP");
+  return symbols;
 }

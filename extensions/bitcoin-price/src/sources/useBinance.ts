@@ -1,30 +1,29 @@
-import { Data, UseSource } from "#/types";
+import { Coin, UseSource } from "#/types";
 import { useFetch } from "@raycast/utils";
 import { formatLargeNumber, formatCurrency } from "#/utils";
 
-function createUseBinace(sourceName: string) {
-  const baseUrl = sourceName === "Spot" ? `https://api.binance.com/api/v3` : `https://fapi.binance.com/fapi/v1`;
-  const useBinance: UseSource = () => {
-    const url = `${baseUrl}/ticker/24hr?symbol=BTCUSDT`;
-    const { isLoading, data: d } = useFetch<any>(url);
-    if (isLoading) {
-      return { isLoading, data: undefined };
-    }
-    const data: Data = {
-      basic: {
-        price: parseInt(d.lastPrice),
-        high24h: parseInt(d.highPrice),
-        low24h: parseInt(d.lowPrice),
-        priceDisplay: formatCurrency(parseInt(d.lastPrice), "USD"),
-      },
-      more: {
-        "Volume (24h)": formatLargeNumber(parseInt(d.volume)),
-      },
-    };
-    return { isLoading, data };
-  };
-  return useBinance;
-}
-
-export const useBinanceSpot = createUseBinace("Spot");
-export const useBinanceFutures = createUseBinace("Futures");
+export const useBinance: UseSource = (currency, coinSymbols) => {
+  const symbols = JSON.stringify(coinSymbols.map((symbol) => `${symbol}USDT`));
+  const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=${symbols}&type=MINI`;
+  const { isLoading, data } = useFetch<any>(url);
+  if (isLoading) {
+    return { isLoading, coins: undefined };
+  }
+  const coins = Object.fromEntries(
+    data.map((d: any) => {
+      const symbol = d.symbol.replace("USDT", "");
+      const coin: Coin = {
+        symbol,
+        price: parseFloat(d.lastPrice),
+        high24h: parseFloat(d.highPrice),
+        low24h: parseFloat(d.lowPrice),
+        priceDisplay: formatCurrency(parseFloat(d.lastPrice), "USD"),
+        more: {
+          "Volume (24h)": formatLargeNumber(parseFloat(d.volume)),
+        },
+      };
+      return [symbol, coin];
+    })
+  );
+  return { isLoading, coins };
+};

@@ -89,19 +89,50 @@
           "value": "CryptoCompare"
         },
         {
-          "title": "Binance Spot",
-          "value": "BinanceSpot"
-        },
-        {
-          "title": "Binance Futures",
-          "value": "BinanceFutures"
+          "title": "Binance",
+          "value": "Binance"
         }
       ]
+    },
+    {
+      "title": "Coins",
+      "name": "isETHEnabled",
+      "description": "Enable Ethereum",
+      "type": "checkbox",
+      "label": "Ethereum",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "isBNBEnabled",
+      "description": "Enable BNB",
+      "type": "checkbox",
+      "label": "BNB",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "isSOLEnabled",
+      "description": "Enable Solana",
+      "type": "checkbox",
+      "label": "Solana",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "isXRPEnabled",
+      "description": "Enable XRP",
+      "type": "checkbox",
+      "label": "XRP",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.3",
-    "@raycast/utils": "^1.4.8"
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
+    "@types/lodash-es": "^4.17.12",
+    "lodash-es": "^4.17.21"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
