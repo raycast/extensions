@@ -2,9 +2,6 @@
 
 See the current price of Bitcoin in various currencies.
 
-![command](./metadata/screenshot-1.png)
-![menu bar](./metadata/screenshot-2.png)
-
 This extension is highly inspired by [Ethereum Price](https://www.raycast.com/peduarte/ethereum-price#readme).
 
 Custom Display Style
