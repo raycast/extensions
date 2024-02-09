@@ -20,7 +20,7 @@ function EmailMe() {
 
   const [subject, setSubject] = React.useState(defaultSubject);
   const [body, setBody] = React.useState("");
-  const [addresses, setAddresses] = React.useState(defaultAddressesArray);
+  const [addresses, setAddresses] = React.useState([defaultAddressesArray[0]]);
   const [additionalAddresses, setAdditionalAddresses] = React.useState([""]);
 
   React.useEffect(() => {
@@ -89,14 +89,14 @@ function EmailMe() {
           onChange={(checked) => {
             if (checked) {
               if (addresses.includes(address)) return;
-              setAddresses([...addresses, address]);
+              setAddresses((addresses) => [...addresses, address]);
             } else {
-              setAddresses(addresses.filter((x) => x !== address));
+              setAddresses((addresses) => addresses.filter((x) => x !== address));
             }
           }}
         />
       ))}
-      <Form.TextArea
+      <Form.TextField
         id="bcc"
         title="BCC"
         placeholder="john@dash.com, doe@off.com"
