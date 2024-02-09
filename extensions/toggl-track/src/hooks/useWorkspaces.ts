@@ -1,10 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getWorkspaces } from "../api";
 
-export function useWorkspaces(initialExecute = true) {
+export function useWorkspaces() {
   const { data, error, isLoading, revalidate } = useCachedPromise(getWorkspaces, [], {
     initialData: [],
-    execute: initialExecute,
   });
   return {
     workspaces: data,

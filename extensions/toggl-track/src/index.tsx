@@ -4,7 +4,6 @@ import duration from "dayjs/plugin/duration";
 import RunningTimeEntry from "./components/RunningTimeEntry";
 import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
 import { createTimeEntry, TimeEntry } from "./api";
-import ProjectListItem from "./components/ProjectListItem";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { TimeEntryContextProvider, useTimeEntryContext } from "./context/TimeEntryContext";
@@ -12,15 +11,8 @@ import { TimeEntryContextProvider, useTimeEntryContext } from "./context/TimeEnt
 dayjs.extend(duration);
 
 function ListView() {
-  const {
-    isLoading,
-    timeEntries,
-    runningTimeEntry,
-    projects,
-    projectGroups,
-    revalidateRunningTimeEntry,
-    revalidateTimeEntries,
-  } = useTimeEntryContext();
+  const { isLoading, timeEntries, runningTimeEntry, projects, revalidateRunningTimeEntry, revalidateTimeEntries } =
+    useTimeEntryContext();
 
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
@@ -102,15 +94,17 @@ function ListView() {
         />
       </List.Section>
       {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
-        <List.Section title="Resume recent time entry">
+        <List.Section title="Recent time entries">
           {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
             <List.Item
               key={timeEntry.id}
               keywords={[timeEntry.description, getProjectById(timeEntry.project_id)?.name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={timeEntry.billable ? "$" : ""}
-              accessoryTitle={getProjectById(timeEntry?.project_id)?.name}
-              accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color }}
+              accessories={[
+                { text: getProjectById(timeEntry?.project_id)?.name },
+                { icon: { source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color } },
+              ]}
               icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.project_id)?.color }}
               actions={
                 <ActionPanel>
@@ -125,19 +119,6 @@ function ListView() {
           ))}
         </List.Section>
       )}
-      <List.Section title="Projects">
-        {projectGroups &&
-          projectGroups.map((group) =>
-            group.projects.map((project) => (
-              <ProjectListItem
-                key={project.id}
-                project={project}
-                subtitle={group.client?.name}
-                accessoryTitle={group.workspace.name}
-              />
-            )),
-          )}
-      </List.Section>
     </List>
   );
 }

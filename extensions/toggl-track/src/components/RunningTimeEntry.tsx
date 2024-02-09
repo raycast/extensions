@@ -39,8 +39,7 @@ function RunningTimeEntry({
           (runningTimeEntry.billable ? "$  " : "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessoryTitle={project?.name}
-        accessoryIcon={{ source: Icon.Dot, tintColor: project?.color }}
+        accessories={[{ text: project?.name }, { icon: { source: Icon.Dot, tintColor: project?.color } }]}
         icon={{ source: Icon.Clock, tintColor: project?.color }}
         actions={
           <ActionPanel>
