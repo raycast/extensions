@@ -1,4 +1,5 @@
-import Item from "../interfaces/FollowingItem";
+import type Item from "@/interfaces/FollowingItem";
+
 import { useTwitchRequest } from "./useTwitchRequest";
 
 export default function useLiveChannels(query: string | undefined) {

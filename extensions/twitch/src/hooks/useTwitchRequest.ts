@@ -1,13 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- we should allow `any` as the network response, otherwise we're getting into @tanstack/query territory and it gets complicated fast */
+import fetch from "node-fetch";
+import { useRef } from "react";
 
 import { LaunchType, Toast, environment, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { zeroDate } from "./cache";
-import { getHeaders } from "./auth";
-import { useRef } from "react";
-import fetch from "node-fetch";
+
+import { getHeaders } from "@/helpers/auth";
+import { zeroDate } from "@/helpers/cache";
 
 const defaultSelect = (data: any) => data.data;
+
+export type TwitchResponse<T> = {
+  data: T;
+  isLoading: boolean;
+  revalidate: () => void;
+  updatedAt: number;
+};
 
 export function useTwitchRequest<T>({
   url,
@@ -19,15 +27,16 @@ export function useTwitchRequest<T>({
   initialData: T;
   enabled?: boolean;
   select?: (data: any) => T;
-}) {
+}): TwitchResponse<T> {
   const initial = { data: initialData, updatedAt: zeroDate };
   const abortable = useRef<AbortController>();
 
-  const { data, isLoading } = useCachedPromise(
-    (url: string) => {
+  const { data, isLoading, revalidate } = useCachedPromise(
+    async (url: string) => {
       const signal = abortable.current?.signal;
-      return getHeaders()
-        .then((headers) => fetch(url, { headers, signal }))
+      const headers = await getHeaders();
+
+      return fetch(url, { headers, signal })
         .then((response) => response.json())
         .then((data: any) => {
           if (data && data.data) {
@@ -56,6 +65,7 @@ export function useTwitchRequest<T>({
   return {
     data: data.data,
     isLoading,
+    revalidate,
     updatedAt: Number(data.updatedAt),
   };
 }

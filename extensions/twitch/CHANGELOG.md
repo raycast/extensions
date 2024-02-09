@@ -1,5 +1,12 @@
 # Twitch Changelog
 
+## [Refactoring & Extra Features] - 2024-02-09
+
+- Refactored the codebase for better maintainability
+- Bumped dependencies
+- Updated useFollowedChannels to return 100 channels instead of 20
+- Added option to show times in 24-hour format
+
 ## [OAuth & Rich Results] - 2023-12-21
 
 - Added Twitch Oauth support

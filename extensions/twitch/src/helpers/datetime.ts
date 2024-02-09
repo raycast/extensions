@@ -1,3 +1,10 @@
+import { getPreferenceValues } from "@raycast/api";
+
+import type { Preferences } from "@/interfaces/Preferences";
+import { TimeNotation } from "@/interfaces/Preferences";
+
+const isTimeFormat12 = getPreferenceValues<Preferences>().timeNotation === TimeNotation.Twelve;
+
 export function formatDate(date: string | number, options: Intl.DateTimeFormatOptions = {}) {
   const d = new Date(date);
   return d.toLocaleString("en-US", {
@@ -5,6 +12,7 @@ export function formatDate(date: string | number, options: Intl.DateTimeFormatOp
     hour: "hour" in options ? options.hour : "numeric",
     minute: "minute" in options ? options.minute : "numeric",
     second: "second" in options ? options.second : "numeric",
+    hour12: isTimeFormat12,
   });
 }
 
@@ -14,11 +22,11 @@ export function formatLongAgo(date: string | number) {
   const diff = now.getTime() - d.getTime();
   // less than a week
   if (diff < 604800000) {
-    return d.toLocaleString("en-US", { weekday: "long", hour: "numeric", minute: "numeric" });
+    return d.toLocaleString("en-US", { weekday: "long", hour: "numeric", minute: "numeric", hour12: isTimeFormat12 });
   } else if (d.getFullYear() === now.getFullYear()) {
-    return d.toLocaleString("en-US", { month: "long", day: "numeric", weekday: "long" });
+    return d.toLocaleString("en-US", { month: "long", day: "numeric", weekday: "long", hour12: isTimeFormat12 });
   } else {
-    return d.toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    return d.toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour12: isTimeFormat12 });
   }
 }
 

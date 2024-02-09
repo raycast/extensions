@@ -1,21 +1,24 @@
-import { getPreferenceValues, OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 
-const preferences = getPreferenceValues<Preferences.Live | Preferences.Following>();
+import { OAuth, getPreferenceValues } from "@raycast/api";
+
+import { type Preferences } from "@/interfaces/Preferences";
+
+const { clientId, authorization } = getPreferenceValues<Preferences>();
 
 const AUTH_URL = "https://twitch.oauth.raycast.com/authorize";
 const TOKEN_URL = "https://twitch.oauth.raycast.com/token";
 const REFRESH_URL = "https://twitch.oauth.raycast.com/refresh-token";
 const CLIENT_ID = "2seilcmdzzph88cijp963sbm9485bo";
-const IS_DEPRECATED_AUTH = preferences.clientId && preferences.authorization;
+const IS_DEPRECATED_AUTH = clientId && authorization;
 
 let runningAuthPromise: Promise<string> | undefined;
 
 export async function getHeaders() {
   if (IS_DEPRECATED_AUTH) {
     return {
-      "Client-Id": preferences.clientId,
-      Authorization: `Bearer ${preferences.authorization}`,
+      "Client-Id": clientId,
+      Authorization: `Bearer ${authorization}`,
     } as const;
   }
 

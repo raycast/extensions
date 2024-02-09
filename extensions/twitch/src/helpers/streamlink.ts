@@ -1,12 +1,13 @@
 import { exec } from "child_process";
-import { popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+
+import { Toast, popToRoot, showHUD, showToast } from "@raycast/api";
 
 export function watchStream(
   name: string,
   streamlinkLocation: string | undefined,
   quality: string | undefined,
   lowlatency: boolean | undefined,
-  streamlinkConfig: string,
+  streamlinkConfig: string | undefined,
 ) {
   if (name.includes("twitch.tv/")) {
     name = name.replace(/^(https?:\/\/)?(www\.)?twitch\.tv\//, "");
@@ -21,7 +22,7 @@ export function watchStream(
   // For low latency streams
   if (lowlatency) {
     let command = `${streamlinkLocation} twitch.tv/${name} ${quality} --twitch-low-latency`;
-    if (streamlinkConfig !== "") {
+    if (streamlinkConfig && streamlinkConfig !== "") {
       command += ` --config ${streamlinkConfig}`;
     }
 

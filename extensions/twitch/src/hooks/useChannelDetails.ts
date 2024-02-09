@@ -1,4 +1,5 @@
-import { ChannelDetails } from "../interfaces/ChannelDetails";
+import type { ChannelDetails } from "@/interfaces/ChannelDetails";
+
 import { useTwitchRequest } from "./useTwitchRequest";
 
 export default function useChannelDetails(channelId: string | undefined) {

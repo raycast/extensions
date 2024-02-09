@@ -1,4 +1,5 @@
-import Game from "../interfaces/Game";
+import type Game from "@/interfaces/Game";
+
 import { useTwitchRequest } from "./useTwitchRequest";
 
 export default function useLiveGames(query: string | undefined) {

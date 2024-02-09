@@ -1,4 +1,5 @@
-import { FollowedStreams } from "../interfaces/FollowedStreams";
+import type { FollowedStreams } from "@/interfaces/FollowedStreams";
+
 import { useTwitchRequest } from "./useTwitchRequest";
 
 export default function useFollowedStreams(userId: string | undefined, options: { loadingWhileStale?: boolean } = {}) {

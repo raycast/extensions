@@ -1,4 +1,5 @@
-import { Video } from "../interfaces/Video";
+import type { Video } from "@/interfaces/Video";
+
 import { useTwitchRequest } from "./useTwitchRequest";
 
 export default function useChannelVideos(channelId: string | undefined) {

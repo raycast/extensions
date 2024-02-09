@@ -10,7 +10,8 @@
     "suth",
     "pernielsentikaer",
     "MiracleXYZ",
-    "Sheraff"
+    "Sheraff",
+    "j3lte"
   ],
   "license": "MIT",
   "preferences": [
@@ -97,6 +98,24 @@
       "title": "Authorization Token (deprecated)",
       "required": false,
       "description": "Twitch Bearer Token (Must be matching with ClientId) https://twitchapps.com/tokengen/"
+    },
+    {
+      "name": "timeNotation",
+      "type": "dropdown",
+      "default": "12h",
+      "title": "Time Notation",
+      "required": false,
+      "description": "Choose the time notation",
+      "data": [
+        {
+          "title": "24h",
+          "value": "24h"
+        },
+        {
+          "title": "12h",
+          "value": "12h"
+        }
+      ]
     }
   ],
   "commands": [
@@ -131,19 +150,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.0",
     "millify": "^6.1.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-plugin": "^1.0.7",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.9.5",
-    "prettier": "^3.1.1"
+    "@raycast/eslint-config": "^1.0.6",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "~20.11.16",
+    "@types/react": "^18.2.52",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
