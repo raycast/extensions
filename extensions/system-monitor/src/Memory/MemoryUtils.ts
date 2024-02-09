@@ -18,24 +18,6 @@ export const getTopRamProcess = async (): Promise<string[][]> => {
   return modProcessList;
 };
 
-export const getFreeDiskSpace = async (): Promise<string> => {
-  const output = await execp(
-    `/usr/sbin/system_profiler SPStorageDataType | grep Free | sed -n 2p | awk '{print $2 " " $3}'`
-  );
-  const freeDiskSpace = output.stdout.trim();
-
-  return freeDiskSpace;
-};
-
-export const getTotalDiskSpace = async (): Promise<string> => {
-  const output = await execp(
-    `/usr/sbin/system_profiler SPStorageDataType | grep Capacity | sed -n 2p | awk '{print $2 " " $3}'`
-  );
-  const totalDiskSpace = output.stdout.trim();
-
-  return totalDiskSpace;
-};
-
 export const getMemoryUsage = async (): Promise<MemoryInterface> => {
   const pHwPagesize = await execp("/usr/sbin/sysctl -n hw.pagesize");
   const hwPagesize: number = parseFloat(pHwPagesize.stdout.trim());
