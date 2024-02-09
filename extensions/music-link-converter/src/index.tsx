@@ -153,7 +153,7 @@ export default function MusicLinkConverter(props: LaunchProps<{ arguments: { tex
                 )}
               <Action.CopyToClipboard title={"Copy URL"} content={`${item.link.url}`} />
               <Action.OpenInBrowser
-                title={"Open Url"}
+                title={"Open URL"}
                 url={`${item.link.url}`}
                 onOpen={(url: string) => Clipboard.copy(url)}
               />
