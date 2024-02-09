@@ -41,3 +41,9 @@ export interface MemoryInterface {
   memTotal: number;
   memUsed: number;
 }
+
+export interface DiskInterface {
+  diskName: string;
+  totalSize: string;
+  totalAvailableStorage: string;
+}

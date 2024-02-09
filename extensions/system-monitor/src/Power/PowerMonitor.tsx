@@ -22,7 +22,7 @@ export default function PowerMonitor() {
       id="power"
       title="Power"
       icon={Icon.Plug}
-      accessories={[{ text: batteryLevel ? `${batteryLevel}%` : "Loading…" }]}
+      accessories={[{ text: batteryLevel ? `${batteryLevel} %` : "Loading…" }]}
       detail={<PowerMonitorDetail batteryLevel={batteryLevel || ""} />}
       actions={<Actions />}
     />
@@ -70,7 +70,7 @@ function PowerMonitorDetail({ batteryLevel }: { batteryLevel: string }) {
       }
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Battery Level" text={batteryLevel + "%"} />
+          <List.Item.Detail.Metadata.Label title="Battery Level" text={`${batteryLevel} %`} />
           <List.Item.Detail.Metadata.Label title="Charging" text={isCharging ? "Yes" : "No"} />
           <List.Item.Detail.Metadata.Label title="Cycle Count" text={cycleCount || "Loading…"} />
           <List.Item.Detail.Metadata.Label title="Condition" text={batteryCondition || "Loading…"} />

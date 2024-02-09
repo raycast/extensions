@@ -45,7 +45,7 @@
   },
   "preferences": [
     {
-      "name": "defaultview",
+      "name": "defaultView",
       "description": "Select active tab upon launch",
       "type": "dropdown",
       "required": false,

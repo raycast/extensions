@@ -23,7 +23,7 @@ export default function CpuMonitor() {
         id="cpu"
         title="CPU"
         icon={Icon.Monitor}
-        accessories={[{ text: !cpu ? "Loading…" : `${cpu}%` }]}
+        accessories={[{ text: !cpu ? "Loading…" : `${cpu} %` }]}
         detail={<CpuMonitorDetail cpu={cpu || ""} />}
         actions={<Actions />}
       />
@@ -73,7 +73,7 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
       isLoading={isLoadingAvgLoad || isLoadingTopProcess || isLoadingUptimes}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Usage" text={cpu + " %"} />
+          <List.Item.Detail.Metadata.Label title="Usage" text={`${cpu} %`} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Average Load" />
           <List.Item.Detail.Metadata.Label title="1 min" text={avgLoad?.[0]} />
@@ -88,8 +88,8 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
                 return (
                   <List.Item.Detail.Metadata.Label
                     key={index}
-                    title={index + 1 + ".    " + element[1]}
-                    text={element[0] + "%"}
+                    title={`${index + 1} -> ${element[1]}`}
+                    text={`${element[0]} %`}
                   />
                 );
               })

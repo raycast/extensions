@@ -104,7 +104,7 @@ export default function NetworkMonitor() {
                       return (
                         <List.Item.Detail.Metadata.Label
                           key={index}
-                          title={`${index + 1}.    ${value[0]}`}
+                          title={`${index + 1} -> ${value[0]}`}
                           text={`↓ ${formatBytes(value[1])}/s   ↑ ${formatBytes(value[2])}/s`}
                         />
                       );

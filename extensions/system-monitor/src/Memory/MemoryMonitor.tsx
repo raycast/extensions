@@ -26,7 +26,7 @@ export default function MemoryMonitor() {
         id="memory"
         title="Memory"
         icon={Icon.MemoryChip}
-        accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage}% (~ ${data.freeMem} GB)` }]}
+        accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage} % (~ ${data.freeMem} GB)` }]}
         detail={
           <MemoryMonitorDetail
             freeMem={data?.freeMem || ""}
@@ -81,7 +81,7 @@ function MemoryMonitorDetail({
               return (
                 <List.Item.Detail.Metadata.Label
                   key={index}
-                  title={index + 1 + ".    " + element[0]}
+                  title={`${index + 1} -> ${element[0]}`}
                   text={element[1]}
                 />
               );
