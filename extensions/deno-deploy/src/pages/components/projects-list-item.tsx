@@ -19,7 +19,7 @@ import DebugProject from "@/pages/components/debug-project";
 import ProjectDeployments from "@/pages/components/project-deployments";
 import ProjectNameChange from "@/pages/form/project-namechange";
 import { getTimeSince } from "@/utils/time";
-import { showActionToast, showFailureToast } from "@/utils/toast";
+import { showActionToast, showFailureToastWithTimeout } from "@/utils/toast";
 
 const ProjectsListItemF = ({ project: prj }: { project: Project }) => {
   const { push } = useNavigation();
@@ -76,11 +76,6 @@ const ProjectsListItemF = ({ project: prj }: { project: Project }) => {
       detail={
         ((isLoading || !project) && <List.Item.Detail markdown={`Loading...`} />) || (
           <List.Item.Detail
-            // markdown={
-            //   project?.type === "playground" && project.playground.snippet
-            //     ? `\`\`\`${project.playground.mediaType}\n${project.playground.snippet}\n\`\`\`\``
-            //     : ""
-            // }
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Name" text={project?.name} />
@@ -218,10 +213,13 @@ const ProjectsListItemF = ({ project: prj }: { project: Project }) => {
                       if (res.ok) {
                         showToast(Toast.Style.Success, "Project deleted succesfully");
                       } else {
-                        await showFailureToast("Project deletion failed", new Error("Project deletion failed"));
+                        await showFailureToastWithTimeout(
+                          "Project deletion failed",
+                          new Error("Project deletion failed"),
+                        );
                       }
                     } catch (error) {
-                      await showFailureToast("Project deletion failed", error as Error);
+                      await showFailureToastWithTimeout("Project deletion failed", error as Error);
                     }
 
                     refresh();

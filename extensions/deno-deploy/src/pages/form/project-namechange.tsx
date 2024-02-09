@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import { Action, ActionPanel, Form, Toast, showHUD, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 
 import type { Project } from "@/api/types";
 import { useDenoApi } from "@/hooks/useDenoApi";
-import { showActionToast, showFailureToast } from "@/utils/toast";
+import { showActionToast, showFailureToastWithTimeout } from "@/utils/toast";
 
 function validateName(value: string): null | string {
   // name can only be lowercase letters, numbers, and dashes
@@ -56,9 +56,11 @@ const ProjectNameChange = ({ project, refresh }: { project: Project; refresh: ()
                   pop();
                 } catch (e) {
                   console.error(`Failed to rename project ${project.name} to ${newName}: ${e}`);
-                  showHUD(`Failed to rename project ${project.name} to ${newName}: ${(e as Error).message}}`);
                   setRenameError((e as Error).message);
-                  await showFailureToast("Upgrade failed", e as Error);
+                  await showFailureToastWithTimeout(
+                    "Failed to rename project ${project.name} to ${newName}",
+                    e as Error,
+                  );
                   return;
                 }
               }

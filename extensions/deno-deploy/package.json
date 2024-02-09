@@ -59,16 +59,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "@raycast/utils": "^1.12.1",
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
     "node-fetch": "^3.3.2",
     "swr": "^2.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "20.11.16",
-    "@types/react": "18.2.53",
+    "@types/node": "20.11.17",
+    "@types/react": "18.2.55",
     "eslint": "^8.56.0",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"

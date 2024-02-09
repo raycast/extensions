@@ -6,7 +6,7 @@ import { Action, ActionPanel, Form, Icon, Toast, open, popToRoot, showHUD, showT
 import { type CreatePlaygroundMediaType, createPlayground } from "@/api/dash/requests";
 import { useOrganizations } from "@/hooks/useOrganizations";
 import { wait } from "@/utils";
-import { showActionToast, showFailureToast } from "@/utils/toast";
+import { showActionToast, showFailureToast, showFailureToastWithTimeout } from "@/utils/toast";
 
 const x = `/** @jsx h */
 import html, { h } from "https://deno.land/x/htm@0.2.1/mod.ts";
@@ -83,12 +83,12 @@ const CreatePlayground = () => {
 
               if (formData.type === "file") {
                 if (!formData.file || formData.file.length !== 1) {
-                  showHUD("No file selected");
+                  await showFailureToastWithTimeout("Error", "Please select a file to run in the playground.");
                   return;
                 }
                 const filePath = formData.file[0];
                 if (!(await okFile(filePath))) {
-                  showHUD("Invalid file selected");
+                  await showFailureToastWithTimeout("Error", "Invalid file selected");
                   return;
                 }
                 snippet = await readFile(filePath, "utf8");

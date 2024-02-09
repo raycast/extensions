@@ -1,5 +1,7 @@
 import { Clipboard, Toast } from "@raycast/api";
 
+import { wait } from "@/utils";
+
 type IActionToastOptions = {
   title: string;
   message?: string;
@@ -39,8 +41,8 @@ export function showActionToast(actionOptions: IActionToastOptions): AbortContro
   return controller;
 }
 
-export async function showFailureToast(title: string, error: Error): Promise<void> {
-  if (error.name == "AbortError") {
+export async function showFailureToast(title: string, error: Error | string): Promise<void> {
+  if (error instanceof Error && error.name == "AbortError") {
     console.log("AbortError");
     return;
   }
@@ -61,4 +63,13 @@ export async function showFailureToast(title: string, error: Error): Promise<voi
 
   const toast = new Toast(options);
   await toast.show();
+}
+
+export async function showFailureToastWithTimeout(
+  title: string,
+  error: Error | string,
+  timeout: number = 3000,
+): Promise<void> {
+  await showFailureToast(title, error);
+  await wait(timeout);
 }
