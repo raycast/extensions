@@ -1,5 +1,8 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## TODO
+- chore: change CATEGORIES
+
 ## [Support Categorized Digest And Fix Some Edge Case Bugs] - 2024-01-30
 - feat: digest can be categorized by tags
 - feat: export digest as markdown file
