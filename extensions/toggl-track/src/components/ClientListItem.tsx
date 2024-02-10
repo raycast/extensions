@@ -23,13 +23,13 @@ export default function ClientListItem({ workspace, client, revalidateClients, S
           {canModifyProjectIn(workspace) && (
             <ActionPanel.Section>
               <Action.Push
-                title="Rename Tag"
+                title="Rename Client"
                 icon={Icon.Pencil}
                 shortcut={Shortcut.Edit}
                 target={<ClientForm {...{ client, revalidateClients }} />}
               />
               <Action
-                title="Delete Tag"
+                title="Delete Client"
                 icon={Icon.Trash}
                 shortcut={Shortcut.Remove}
                 style={Action.Style.Destructive}
