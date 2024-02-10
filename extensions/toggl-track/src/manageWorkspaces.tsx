@@ -51,14 +51,14 @@ function ManageWorkspaces() {
         return (
           <List.Item
             title={workspace.name}
-            subtitle={organization?.name}
+            subtitle={isShoingDetails ? undefined : organization?.name}
             key={workspace.id}
             icon={
               workspace.logo_url == "https://assets.track.toggl.com/images/workspace.jpg"
                 ? undefined
                 : { source: workspace.logo_url, mask: Image.Mask.RoundedRectangle }
             }
-            accessories={accessories}
+            accessories={isShoingDetails ? undefined : accessories}
             detail={
               <List.Item.Detail
                 markdown={logoUrl ? `![${workspace.name} Logo](${logoUrl})` : undefined}
