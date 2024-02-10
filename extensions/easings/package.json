@@ -13,10 +13,18 @@
       "subtitle": "Easings",
       "description": "Search common easings to copy",
       "mode": "view"
+    },
+    {
+      "name": "add",
+      "title": "Add Custom Easing",
+      "subtitle": "Easings",
+      "description": "Add your own easing",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1"
+    "@raycast/api": "^1.67.1",
+    "nanoid": "^5.0.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

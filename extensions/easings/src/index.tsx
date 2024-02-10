@@ -1,8 +1,50 @@
-import { Grid } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
 
+import { Grid, LocalStorage, showToast } from "@raycast/api";
+
+import { customGridItem } from "./components/custom-item";
 import { gridItem } from "./components/item";
+import { Easing, State } from "./utils/types";
 
 export default function Command() {
+  const [state, setState] = useState<State>({
+    isLoading: true,
+    easings: [],
+  });
+
+  useEffect(() => {
+    (async () => {
+      const storedEasings = await LocalStorage.getItem<string>("easings");
+
+      if (!storedEasings) {
+        setState((previous) => ({ ...previous, isLoading: false }));
+        return;
+      }
+
+      try {
+        const easings: Easing[] = JSON.parse(storedEasings);
+        setState((previous) => ({ ...previous, easings, isLoading: false }));
+      } catch (e) {
+        // can't decode easings
+        setState((previous) => ({ ...previous, easings: [], isLoading: false }));
+      }
+    })();
+  }, []);
+
+  const handleDelete = useCallback(
+    async (index: number, title: string) => {
+      const newEasings = [...state.easings];
+      newEasings.splice(index, 1);
+      setState((previous) => ({ ...previous, easings: newEasings }));
+      await LocalStorage.setItem("easings", JSON.stringify(newEasings));
+      showToast({
+        title: "Success",
+        message: `${title} has been deleted`,
+      });
+    },
+    [state.easings, setState],
+  );
+
   return (
     <Grid columns={8} inset={Grid.Inset.Zero}>
       <Grid.Section title="Ease In Out">
@@ -36,6 +78,12 @@ export default function Command() {
         {gridItem("quint", "out")}
         {gridItem("expo", "out")}
         {gridItem("back", "out")}
+      </Grid.Section>
+
+      <Grid.Section title="Custom">
+        {state.easings.map((e, index) =>
+          customGridItem(e.id, e.title, e.type, e.value, () => handleDelete(index, e.title)),
+        )}
       </Grid.Section>
     </Grid>
   );

@@ -101,7 +101,7 @@ export const CUSTOM_CSS = (easing: string) => {
 };
 
 export const CUSTOM_FIGMA = (easing: string) => {
-  return `${BEZIER_VALUES(easing)}`;
+  return `${easing}`;
 };
 
 export const CUSTOM_FRAMER = (easing: string) => {
