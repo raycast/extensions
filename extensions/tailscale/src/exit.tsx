@@ -1,6 +1,15 @@
 import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { StatusResponse, getStatus, getDevices, tailscale, sortDevices, ErrorDetails, getErrorDetails, Device } from "./shared";
+import {
+  StatusResponse,
+  getStatus,
+  getDevices,
+  tailscale,
+  sortDevices,
+  ErrorDetails,
+  getErrorDetails,
+  Device,
+} from "./shared";
 
 function loadExitNodes(status: StatusResponse) {
   const devices = getDevices(status);
