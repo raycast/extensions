@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { DOMAINS_API, LIST_LINK_API, LocalStorageKey } from "../utils/constants";
-import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Preferences } from "../types/preferences";
 import { Domain, ListLinksResponse, ShortLink } from "../types/types";
 import { isEmpty } from "../utils/common-utils";
@@ -53,30 +53,37 @@ export const getDefaultDomain = (paraDomain: string) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
-    if (!isEmpty(paraDomain)) {
-      setDomain(paraDomain);
-      setLoading(false);
-    } else {
-      const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.DEFAULT_DOMAIN);
-      if (typeof localStorage !== "undefined") {
-        setDomain((JSON.parse(localStorage) as Domain).hostname);
+    try {
+      if (!isEmpty(paraDomain)) {
+        setDomain(paraDomain);
         setLoading(false);
       } else {
-        const domainResponse = await axios.get(DOMAINS_API, {
-          headers: {
-            accept: "application/json",
-            authorization: apiKey,
-          },
-        });
-        const _domains = domainResponse.data as Domain[];
-        if (_domains.length > 0) {
-          setDomain(_domains[0].hostname);
-          await LocalStorage.setItem(LocalStorageKey.DEFAULT_DOMAIN, JSON.stringify(_domains[0]));
+        const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.DEFAULT_DOMAIN);
+        if (typeof localStorage !== "undefined") {
+          setDomain((JSON.parse(localStorage) as Domain).hostname);
+          setLoading(false);
         } else {
-          setDomain("");
+          const domainResponse = await axios.get(DOMAINS_API, {
+            headers: {
+              accept: "application/json",
+              authorization: apiKey,
+            },
+          });
+          const _domains = domainResponse.data as Domain[];
+          if (_domains.length > 0) {
+            setDomain(_domains[0].hostname);
+            await LocalStorage.setItem(LocalStorageKey.DEFAULT_DOMAIN, JSON.stringify(_domains[0]));
+          } else {
+            setDomain("");
+          }
+          setLoading(false);
         }
-        setLoading(false);
       }
+    } catch (e) {
+      console.error(e);
+      await showToast(Toast.Style.Failure, String(e));
+      setDomain("");
+      setLoading(false);
     }
   }, [paraDomain]);
 
@@ -92,40 +99,45 @@ export const getShortLinks = (refresh: number) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
-    let domainID = -1;
-    const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.DEFAULT_DOMAIN);
+    try {
+      let domainID = -1;
+      const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.DEFAULT_DOMAIN);
 
-    if (typeof localStorage !== "undefined") {
-      domainID = (JSON.parse(localStorage) as Domain).id;
-    } else {
-      const _domains = (
-        await axios.get(DOMAINS_API, {
-          headers: {
-            accept: "application/json",
-            authorization: apiKey,
-          },
-        })
-      ).data as Domain[];
-      if (_domains.length > 0) {
-        domainID = _domains[0].id;
-        await LocalStorage.setItem(LocalStorageKey.DEFAULT_DOMAIN, JSON.stringify(_domains[0]));
+      if (typeof localStorage !== "undefined") {
+        domainID = (JSON.parse(localStorage) as Domain).id;
+      } else {
+        const _domains = (
+          await axios.get(DOMAINS_API, {
+            headers: {
+              accept: "application/json",
+              authorization: apiKey,
+            },
+          })
+        ).data as Domain[];
+        if (_domains.length > 0) {
+          domainID = _domains[0].id;
+          await LocalStorage.setItem(LocalStorageKey.DEFAULT_DOMAIN, JSON.stringify(_domains[0]));
+        }
       }
-    }
-    if (domainID !== -1) {
-      const listLinksResponse = (
-        await axios.get(LIST_LINK_API, {
-          params: {
-            domain_id: domainID,
-            limit: "150",
-            offset: "0",
-          },
-          headers: {
-            accept: "application/json",
-            authorization: apiKey,
-          },
-        })
-      ).data as ListLinksResponse;
-      setShortLinks(listLinksResponse.links);
+      if (domainID !== -1) {
+        const listLinksResponse = (
+          await axios.get(LIST_LINK_API, {
+            params: {
+              domain_id: domainID,
+              limit: "150",
+              offset: "0",
+            },
+            headers: {
+              accept: "application/json",
+              authorization: apiKey,
+            },
+          })
+        ).data as ListLinksResponse;
+        setShortLinks(listLinksResponse.links);
+      }
+    } catch (e) {
+      console.error(e);
+      await showToast(Toast.Style.Failure, String(e));
     }
     setLoading(false);
   }, [refresh]);
@@ -143,7 +155,7 @@ export const alertDialog = async (
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction?: () => void
+  cancelAction?: () => void,
 ) => {
   const options: Alert.Options = {
     icon: icon,

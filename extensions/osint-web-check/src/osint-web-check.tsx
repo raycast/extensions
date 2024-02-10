@@ -15,6 +15,7 @@ import useSWR from "swr";
 import { checkUrl } from "./utils/checkUrl";
 import { addHttps } from "./utils/addHttps";
 import { useEffect } from "react";
+import { SecurityTxt } from "./SecurityTxt";
 
 export default function OsintWebCheck({
   arguments: { url: consumerUrl },
@@ -67,6 +68,7 @@ function CheckDetails({ url }: { url: string }) {
       <Hsts {...sharedProps} />
       <Redirects {...sharedProps} />
       <Firewall {...sharedProps} />
+      <SecurityTxt {...sharedProps} />
     </List>
   );
 }

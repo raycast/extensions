@@ -6,7 +6,7 @@ import { format } from "date-fns";
 
 import { IssueResult, IssueDetailResult, Attachment } from "../../api/getIssues";
 
-import { getLinearClient } from "../../helpers/withLinearClient";
+import { getLinearClient } from "../../api/linearClient";
 
 import { getEstimateScale } from "../../helpers/estimates";
 import { getErrorMessage } from "../../helpers/errors";

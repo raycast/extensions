@@ -1,18 +1,36 @@
 import { parseDate } from "./utils";
 import { jiraRequest } from "./requests";
-import { issuesValidator, projectsValidator } from "./validators";
+import { issuesValidator, paginationValidator, projectsValidator } from "./validators";
 
-export const getProjects = async () => {
-  const response = await jiraRequest(`/rest/api/3/project/search`);
-  return projectsValidator(response) ? response.values : [];
+export const getProjects = async (begin: number) => {
+  const response = await jiraRequest(`/rest/api/3/project/search?maxResults=500&startAt=${begin}`);
+  return {
+    total: handlePaginationResp(response),
+    data: handleProjectResp(response),
+  };
 };
 
-export const getIssues = async (projectId?: string) => {
-  const endpoint = `/rest/api/3/search?fields=summary,parent,project&maxResults=500&startAt=0&jql=${
-    projectId ? "project=" + projectId : ""
+export const getIssues = async (begin: number, projectId?: string) => {
+  const endpoint = `/rest/api/3/search?fields=summary,parent,project&maxResults=500&startAt=${begin}&jql=${
+    projectId ? `project=${projectId}` : ""
   }`;
   const response = await jiraRequest(endpoint);
-  return issuesValidator(response) ? response.issues : [];
+  return {
+    total: handlePaginationResp(response),
+    data: handleIssueResp(response),
+  };
+};
+
+const handlePaginationResp = (resp: unknown) => {
+  return paginationValidator(resp) ? resp.total : 0;
+};
+
+const handleProjectResp = (resp: unknown) => {
+  return projectsValidator(resp) ? resp.values : [];
+};
+
+const handleIssueResp = (resp: unknown) => {
+  return issuesValidator(resp) ? resp.issues : [];
 };
 
 export const postTimeLog = async (timeSpentSeconds: number, issueId: string, description: string, startedAt: Date) => {

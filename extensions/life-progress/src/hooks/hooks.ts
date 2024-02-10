@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { buildShanBayURL, ShanBeiResponseData, WordOfTheDay } from "../utils/shanbei-utils";
-import { Alert, confirmAlert, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Alert, confirmAlert, getPreferenceValues, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { CountdownDate, LifeProgress } from "../types/types";
 import { getLifeProgress } from "../utils/life-progress-utils";
 import { LocalStorageKey } from "../utils/constants";
+import { updateCommandSubtitle } from "../utils/common-utils";
+import { Preferences } from "../types/preferences";
 
 export const getWordOfTheDay = () => {
   const [wordOfTheDay, setWordOfTheDay] = useState<WordOfTheDay>({
@@ -13,9 +15,18 @@ export const getWordOfTheDay = () => {
     translation: "",
   });
   const fetchData = useCallback(async () => {
+    const { showDailyWord } = getPreferenceValues<Preferences>();
+    if (!showDailyWord) {
+      return;
+    }
     try {
       fetch(buildShanBayURL())
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error ${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then((data) => {
           const shanBeiResponseData = data as ShanBeiResponseData;
           setWordOfTheDay({
@@ -23,6 +34,12 @@ export const getWordOfTheDay = () => {
             author: shanBeiResponseData.author,
             translation: shanBeiResponseData.translation,
           });
+        })
+        .catch(async (e) => {
+          if (e instanceof AbortError) {
+            return;
+          }
+          await showToast(Toast.Style.Failure, String(e));
         });
     } catch (e) {
       if (e instanceof AbortError) {
@@ -50,10 +67,12 @@ export const getLifeProgressInfo = (refresh: number) => {
     const localStorage = await LocalStorage.getItem<string>(LocalStorageKey.COUNTDOWN_DATE_KEY);
     const localCountdownDates: CountdownDate[] = typeof localStorage !== "undefined" ? JSON.parse(localStorage) : [];
     const { lifeProgresses, cakeIndex } = getLifeProgress(localCountdownDates);
+
     setLifeProgresses(lifeProgresses);
     setCountdownDates(localCountdownDates);
     setCakeIndex(cakeIndex);
     setLoading(false);
+    await updateCommandSubtitle(lifeProgresses);
   }, [refresh]);
 
   useEffect(() => {
@@ -69,7 +88,7 @@ export const alertDialog = async (
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction?: () => void
+  cancelAction?: () => void,
 ) => {
   const options: Alert.Options = {
     icon: icon,

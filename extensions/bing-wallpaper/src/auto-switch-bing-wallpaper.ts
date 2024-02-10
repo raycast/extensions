@@ -12,12 +12,21 @@ export default async () => {
 };
 
 const getLatestWallpaper = async () => {
-  const firstResponse = await fetch(buildBingWallpapersURL(0, 8));
-  const bingWallpaperHD = ((await firstResponse.json()) as BingResponseData).images;
-
-  const randomImage = bingWallpaperHD[0];
-  await setWallpaperWithoutToast(
-    getPictureName(randomImage.url) + "-" + randomImage.startdate,
-    buildBingImageURL(randomImage.url, "raw")
-  );
+  const firstResponse = await fetch(buildBingWallpapersURL(0, 8)).catch(async (e) => {
+    console.error(e);
+    return undefined;
+  });
+  if (typeof firstResponse == "undefined") {
+    return;
+  }
+  try {
+    const bingWallpaperHD = ((await firstResponse.json()) as BingResponseData).images;
+    const randomImage = bingWallpaperHD[0];
+    await setWallpaperWithoutToast(
+      getPictureName(randomImage.url) + "-" + randomImage.startdate,
+      buildBingImageURL(randomImage.url, "raw"),
+    );
+  } catch (e) {
+    console.error(e);
+  }
 };

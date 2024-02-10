@@ -5,7 +5,7 @@ import { NativePreferences } from "../types/preferences";
 import { Task } from "../types/task";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import reclaimApi from "./useApi";
-import { ApiResponseTasks, CreateTaskProps } from "./useTask.types";
+import { CreateTaskProps } from "./useTask.types";
 
 const useTask = () => {
   const { fetcher } = reclaimApi();
@@ -22,7 +22,7 @@ const useTask = () => {
   );
 
   const useFetchTasks = () =>
-    useFetch<ApiResponseTasks>(`${apiUrl}/tasks`, {
+    useFetch<[Task]>(`${apiUrl}/tasks?instances=true`, {
       headers,
       keepPreviousData: true,
     });
@@ -77,16 +77,6 @@ const useTask = () => {
     }
   };
 
-  const getAllTasks = async () => {
-    try {
-      const [tasks, error] = await axiosPromiseData<ApiResponseTasks>(fetcher("/tasks"));
-      if (!tasks && error) throw error;
-      return tasks;
-    } catch (error) {
-      console.error("Error while fetching tasks", error);
-    }
-  };
-
   // Add time
   const addTime = async (task: Task, time: number) => {
     try {
@@ -101,20 +91,19 @@ const useTask = () => {
   };
 
   // Update task
-  const updateTask = async (task: Task) => {
+  const updateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
     try {
-      const [updatedTask, error] = await axiosPromiseData(
+      const [updatedTask] = await axiosPromiseData(
         fetcher(`/tasks/${task.id}`, {
-          method: "PUT",
+          method: "PATCH",
           responseType: "json",
-          data: task,
+          data: payload,
         })
       );
-
-      if (!updatedTask || error) throw error;
       return updatedTask;
     } catch (error) {
       console.error("Error while updating task", error);
+      throw error;
     }
   };
 
@@ -149,7 +138,6 @@ const useTask = () => {
     createTask,
     handleStartTask,
     handleStopTask,
-    getAllTasks,
     addTime,
     updateTask,
     doneTask,

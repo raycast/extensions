@@ -1,5 +1,21 @@
 # reclaim Changelog
 
+## [Update] - 2024-02-07
+- Resolves issue of updating task priority to "low priority"
+- Displays a warning icon in the task list if a task is "at risk".
+- Implemented optimistic updates for listed tasks.
+- Added new "Send to Up Next" action for tasks.
+- Simplified the task update process.
+
+## [Fixes] - 2024-01-31
+- Removed top-level Join Meeting command, deferring instead to My Calendar → Choose Event → Join meeting.
+
+## [Fixes] - 2024-01-27
+- Misspelling fixes.
+
+## [Update] - 2024-01-18
+- Menu bar update for start / stop of habits: when starting or stopping a habit, the extension will now display a HUD giving the user immediate feedback that their action was successful. 
+
 ## [Fixes] - 2023-11-29
 
 - Fix duration string parsing so that task durations work correctly in more cases (RAI-9438)

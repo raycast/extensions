@@ -1,5 +1,14 @@
 # Wi-Fi Changelog
 
+## [Fix crash] - 2024-02-05
+
+- Fix potential crash issues
+- Fix the issue of menu bar icon not updating
+
+## [Optimize UI display] - 2024-01-19
+
+- When the Toggle Wi-Fi command is run, the menu bar icons are immediately updated
+
 ## [Added Menubar Command] - 2023-10-09
 
 - Wi-Fi Signal: Show Wi-Fi signal strength in the menubar

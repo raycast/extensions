@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  LocalStorage,
+  showHUD,
+  useNavigation,
+} from "@raycast/api";
 import React, { useState } from "react";
 import { useWifiList, useWifiStatus } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
@@ -10,10 +22,10 @@ import { getSignalIcon, getSignalIconColor } from "./utils/common-utils";
 import { RefreshWifi } from "./components/refresh-wifi";
 
 export default function ScanWifi() {
-  const { push } = useNavigation();
   const [refresh, setRefresh] = useState<number>(0);
   const { wifiPasswordCaches, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = useWifiList(refresh);
   const { wifiStatus } = useWifiStatus();
+  const { push } = useNavigation();
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>
@@ -99,7 +111,7 @@ export default function ScanWifi() {
                               });
                               LocalStorage.setItem(
                                 LocalStorageKey.WIFI_PASSWORD,
-                                JSON.stringify(newWifiWithPasswordLis)
+                                JSON.stringify(newWifiWithPasswordLis),
                               );
                               setRefresh(Date.now());
                             },
@@ -152,12 +164,19 @@ export default function ScanWifi() {
                             wifiPasswordCaches={wifiPasswordCaches}
                             wifiNetWork={value}
                             setRefresh={setRefresh}
-                          />
+                          />,
                         );
                       }
                     }}
                   />
-                  <Action.CopyToClipboard title={"Copy Wi-FI"} content={value.ssid} />
+                  <Action
+                    icon={Icon.Clipboard}
+                    title={"Copy Wi-FI"}
+                    onAction={async () => {
+                      await Clipboard.copy(value.ssid);
+                      await showHUD(`🛜 Wi-FI Copied`);
+                    }}
+                  />
                   <RefreshWifi setRefresh={setRefresh} />
                 </ActionPanel>
               }

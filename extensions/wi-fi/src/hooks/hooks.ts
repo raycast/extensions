@@ -18,75 +18,93 @@ export const useWifiList = (refresh: number) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const _curWifi = await wifi.getCurrentConnections();
-    setCurWifi(_curWifi);
-    const wifiPasswordCache = await LocalStorage.getItem<string>(LocalStorageKey.WIFI_PASSWORD);
-    const passwordCaches: WifiPasswordCache[] =
-      typeof wifiPasswordCache === "string" ? JSON.parse(wifiPasswordCache) : [];
-    setWifiPasswordCaches(passwordCaches);
+      const _curWifi = await wifi.getCurrentConnections();
+      setCurWifi(_curWifi);
+      const wifiPasswordCache = await LocalStorage.getItem<string>(LocalStorageKey.WIFI_PASSWORD);
+      const passwordCaches: WifiPasswordCache[] =
+        typeof wifiPasswordCache === "string" ? JSON.parse(wifiPasswordCache) : [];
+      setWifiPasswordCaches(passwordCaches);
 
-    const wifiCache = await LocalStorage.getItem<string>(LocalStorageKey.WIFI_CACHE);
-    let allWifiList: WiFiNetwork[];
-    typeof wifiCache === "string" ? JSON.parse(wifiCache) : [];
-    if (typeof wifiCache === "string") {
-      allWifiList = JSON.parse(wifiCache) as WiFiNetwork[];
-    } else {
-      const _allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
-      allWifiList = uniqueWifiNetWork(_allWifiList);
-      if (allWifiList.length > 0) {
-        await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(allWifiList));
+      const wifiCache = await LocalStorage.getItem<string>(LocalStorageKey.WIFI_CACHE);
+      let allWifiList: WiFiNetwork[];
+      typeof wifiCache === "string" ? JSON.parse(wifiCache) : [];
+      if (typeof wifiCache === "string") {
+        allWifiList = JSON.parse(wifiCache) as WiFiNetwork[];
+      } else {
+        const _allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
+        allWifiList = uniqueWifiNetWork(_allWifiList);
+        if (allWifiList.length > 0) {
+          await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(allWifiList));
+        }
       }
-    }
 
-    const _wifiList: WiFiNetwork[] = [];
-    const _wifiListWithPassword: WifiNetworkWithPassword[] = [];
-    allWifiList
-      .filter((wifiItem) => wifiItem.security !== "NONE")
-      .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
-      .forEach((value1) => {
-        const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
-        if (includeWifi.length > 0) {
-          _wifiListWithPassword.push({ ...value1, password: includeWifi[0].password });
-        } else {
-          _wifiList.push(value1);
-        }
-      });
-    setWifiWithPasswordList(_wifiListWithPassword);
-    setWifiList(_wifiList);
-    setPublicWifi(
+      const _wifiList: WiFiNetwork[] = [];
+      const _wifiListWithPassword: WifiNetworkWithPassword[] = [];
+
       allWifiList
-        .filter((wifiItem) => wifiItem.security === "NONE")
-        .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
-    );
+        .filter((wifiItem) => wifiItem.security !== "NONE")
+        .filter((wifiItem) => {
+          if (_curWifi && _curWifi.length > 0) {
+            return _curWifi[0].ssid !== wifiItem.ssid;
+          } else {
+            return true;
+          }
+        })
+        .forEach((value1) => {
+          const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
+          if (includeWifi.length > 0) {
+            _wifiListWithPassword.push({ ...value1, password: includeWifi[0].password });
+          } else {
+            _wifiList.push(value1);
+          }
+        });
+      setWifiWithPasswordList(_wifiListWithPassword);
+      setWifiList(_wifiList);
+      setPublicWifi(
+        allWifiList
+          .filter((wifiItem) => wifiItem.security === "NONE")
+          .filter((wifiItem) => {
+            if (_curWifi && _curWifi.length > 0) {
+              return _curWifi[0].ssid !== wifiItem.ssid;
+            } else {
+              return true;
+            }
+          }),
+      );
 
-    const __allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
-    const _allWifiList = uniqueWifiNetWork(__allWifiList);
+      const __allWifiList = (await wifi.scan()).sort((a, b) => b.quality - a.quality);
+      const _allWifiList = uniqueWifiNetWork(__allWifiList);
 
-    const __wifiList: WiFiNetwork[] = [];
-    const __wifiListWithPassword: WifiNetworkWithPassword[] = [];
-    _allWifiList
-      .filter((wifiItem) => wifiItem.security !== "NONE")
-      .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
-      .forEach((value1) => {
-        const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
-        if (includeWifi.length > 0) {
-          __wifiListWithPassword.push({ ...value1, password: includeWifi[0].password });
-        } else {
-          __wifiList.push(value1);
-        }
-      });
-    setWifiWithPasswordList(__wifiListWithPassword);
-    setWifiList(__wifiList);
-    setPublicWifi(
+      const __wifiList: WiFiNetwork[] = [];
+      const __wifiListWithPassword: WifiNetworkWithPassword[] = [];
       _allWifiList
-        .filter((wifiItem) => wifiItem.security === "NONE")
+        .filter((wifiItem) => wifiItem.security !== "NONE")
         .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid)
-    );
-    setLoading(false);
-    if (_allWifiList.length > 0) {
-      await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));
+        .forEach((value1) => {
+          const includeWifi = passwordCaches.filter((value2) => value1.ssid === value2.ssid);
+          if (includeWifi.length > 0) {
+            __wifiListWithPassword.push({ ...value1, password: includeWifi[0].password });
+          } else {
+            __wifiList.push(value1);
+          }
+        });
+      setWifiWithPasswordList(__wifiListWithPassword);
+      setWifiList(__wifiList);
+      setPublicWifi(
+        _allWifiList
+          .filter((wifiItem) => wifiItem.security === "NONE")
+          .filter((wifiItem) => _curWifi[0].ssid !== wifiItem.ssid),
+      );
+      setLoading(false);
+      if (_allWifiList.length > 0) {
+        await LocalStorage.setItem(LocalStorageKey.WIFI_CACHE, JSON.stringify(_allWifiList));
+      }
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
     }
   }, [refresh]);
 
@@ -108,21 +126,30 @@ export const useCurWifi = () => {
   const cache = new Cache();
   const curWifiCache = cache.get(LocalStorageKey.CUR_WIFI);
   let _curWifiCache: WiFiNetwork | undefined = undefined;
-  if (typeof curWifiCache === "string" && curWifiCache != "") {
-    _curWifiCache = JSON.parse(curWifiCache);
+  try {
+    if (typeof curWifiCache === "string" && curWifiCache != "") {
+      _curWifiCache = JSON.parse(curWifiCache);
+    }
+  } catch (e) {
+    console.error(e);
+    _curWifiCache = undefined;
   }
   const [curWifi, setCurWifi] = useState<WiFiNetwork | undefined>(_curWifiCache);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const _curWifiList = await wifi.getCurrentConnections();
-    const _curWifi = _curWifiList.length != 0 ? _curWifiList[0] : undefined;
-    setCurWifi(_curWifi);
-    if (_curWifi === undefined) {
-      cache.set(LocalStorageKey.CUR_WIFI, "");
-    } else {
-      cache.set(LocalStorageKey.CUR_WIFI, JSON.stringify(_curWifi));
+    try {
+      const _curWifiList = await wifi.getCurrentConnections();
+      const _curWifi = _curWifiList.length != 0 ? _curWifiList[0] : undefined;
+      setCurWifi(_curWifi);
+      if (_curWifi === undefined) {
+        cache.set(LocalStorageKey.CUR_WIFI, "");
+      } else {
+        cache.set(LocalStorageKey.CUR_WIFI, JSON.stringify(_curWifi));
+      }
+    } catch (e) {
+      console.error(e);
     }
     setLoading(false);
   }, []);

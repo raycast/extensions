@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Agent } from "http";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { ProxyAgent } from "proxy-agent";
 
 export function useProxy(): Agent | undefined {
   const prefs = getPreferenceValues<{
@@ -16,10 +16,13 @@ export function useProxy(): Agent | undefined {
     return undefined;
   }
 
-  let url = `${prefs.proxyProtocol}://${prefs.proxyHost}:${prefs.proxyPort}`;
+  let proxyUrl = `${prefs.proxyProtocol}://${prefs.proxyHost}:${prefs.proxyPort}`;
 
   if (prefs.proxyUsername && prefs.proxyPassword) {
-    url = `${prefs.proxyProtocol}://${prefs.proxyUsername}:${prefs.proxyPassword}@${prefs.proxyHost}:${prefs.proxyPort}`;
+    proxyUrl = `${prefs.proxyProtocol}://${prefs.proxyUsername}:${prefs.proxyPassword}@${prefs.proxyHost}:${prefs.proxyPort}`;
   }
-  return new HttpsProxyAgent(url);
+
+  return new ProxyAgent({
+    getProxyForUrl: () => proxyUrl,
+  });
 }

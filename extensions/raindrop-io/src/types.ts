@@ -44,9 +44,12 @@ export type Group = {
   sort: number;
   collections: number[];
 };
+
 export interface Preferences {
   token: string;
   useLastCollection?: boolean;
+  additionalItemToDisplayInList?: string;
+  displayDate?: string;
 }
 
 export interface CollectionsResponse {
