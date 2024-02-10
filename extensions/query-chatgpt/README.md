@@ -8,6 +8,9 @@ custom prompt and an additional query that you provide on the fly while running 
 
 ## Motivation
 
+ChatGPT doesn't provide ability to provide custom search query to the URL, like for perplexity or other search
+engines `https://www.perplexity.ai/search?q=myquery`.
+
 This extension enables the ability to query ChatGPT asynchronously using your ChatGPT subscription, eliminating the need
 to wait for a response.
 
