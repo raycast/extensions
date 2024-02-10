@@ -1,6 +1,14 @@
 import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Device, getStatus, getDevices, getErrorDetails, sortDevices, ErrorDetails, MULLVAD_DEVICE_TAG } from "./shared";
+import {
+  Device,
+  getStatus,
+  getDevices,
+  getErrorDetails,
+  sortDevices,
+  ErrorDetails,
+  MULLVAD_DEVICE_TAG,
+} from "./shared";
 
 export default function DeviceList() {
   const [devices, setDevices] = useState<Device[]>();
@@ -10,13 +18,13 @@ export default function DeviceList() {
       try {
         const status = getStatus();
         const _list = getDevices(status);
-        const _filteredList = _list.filter((device)=> {
+        const _filteredList = _list.filter((device) => {
           // mullvad devices should not be shown in the devices list - this mirrors the behavior of tailscale cli and client apps
           if (device.tags?.indexOf(MULLVAD_DEVICE_TAG) > -1) {
-            return false
+            return false;
           }
-          return true
-        })
+          return true;
+        });
         sortDevices(_filteredList);
         setDevices(_filteredList);
       } catch (error) {
