@@ -194,10 +194,10 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
                     d.icon_emoji
                       ? d.icon_emoji
                       : d.icon_file
-                      ? d.icon_file
-                      : d.icon_external
-                      ? d.icon_external
-                      : Icon.List
+                        ? d.icon_file
+                        : d.icon_external
+                          ? d.icon_external
+                          : Icon.List
                   }
                 />
               );

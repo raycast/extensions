@@ -20,8 +20,7 @@ export async function fetchDatabase(pageId: string, silent: boolean = true) {
 
     return pageMapper(page);
   } catch (err) {
-    if (!silent)
-    return handleError(err, "Failed to fetch database", undefined);
+    if (!silent) return handleError(err, "Failed to fetch database", undefined);
   }
 }
 

@@ -72,11 +72,11 @@ export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
     [k: string]: T extends "date"
       ? Date | null
       : T extends "checkbox"
-      ? boolean
-      : T extends "multi_select" | "relation" | "people"
-      ? string[]
-      : T extends "formula"
-      ? null
-      : string;
+        ? boolean
+        : T extends "multi_select" | "relation" | "people"
+          ? string[]
+          : T extends "formula"
+            ? null
+            : string;
   }>
 >["itemProps"][string];
