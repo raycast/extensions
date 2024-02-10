@@ -3,9 +3,9 @@ import { useState } from "react";
 import { Action, ActionPanel, Grid } from "@raycast/api";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
 
-import { CACHE_PREFIX } from "./helpers/cache";
-import useLiveGames from "./hooks/useLiveGames";
-import type Game from "./interfaces/Game";
+import { CACHE_PREFIX } from "@/helpers/cache";
+import useLiveGames from "@/hooks/useLiveGames";
+import type Game from "@/interfaces/Game";
 
 export default function main() {
   const [query, setQuery] = useState<string>("");

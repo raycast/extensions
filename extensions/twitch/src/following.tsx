@@ -3,10 +3,10 @@ import { useCallback, useMemo } from "react";
 import { List } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 
-import FollowedChannelListItem from "./components/FollowedChannelListItem";
-import useFollowedChannels from "./hooks/useFollowedChannels";
-import useFollowedStreams from "./hooks/useFollowedStreams";
-import { useUserId } from "./hooks/useUserId";
+import FollowedChannelListItem from "@/components/FollowedChannelListItem";
+import useFollowedChannels from "@/hooks/useFollowedChannels";
+import useFollowedStreams from "@/hooks/useFollowedStreams";
+import { useUserId } from "@/hooks/useUserId";
 
 export default function Main() {
   const { data: userId, isLoading: isLoadingUserId } = useUserId();

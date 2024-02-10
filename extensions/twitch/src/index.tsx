@@ -3,10 +3,10 @@ import { useState } from "react";
 import { Image, List } from "@raycast/api";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
 
-import { action } from "./helpers/action";
-import { CACHE_PREFIX } from "./helpers/cache";
-import useLiveChannels from "./hooks/useLiveChannels";
-import type StreamerItem from "./interfaces/FollowingItem";
+import { action } from "@/helpers/action";
+import { CACHE_PREFIX } from "@/helpers/cache";
+import useLiveChannels from "@/hooks/useLiveChannels";
+import type StreamerItem from "@/interfaces/FollowingItem";
 
 export default function main() {
   const [query, setQuery] = useState<string>("");
