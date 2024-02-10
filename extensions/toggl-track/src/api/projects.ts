@@ -20,7 +20,7 @@ export function deleteProject(workspaceId: number, projectId: number, deletionMo
 export interface ProjectOptions {
   name: string;
   /** HEX value of the project color. */
-  color: string;
+  color?: string;
   is_private: boolean;
   /** Start date of the project timeframe in `YYYY-MM-DD` format. */
   start_date: string;

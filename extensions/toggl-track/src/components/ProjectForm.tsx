@@ -109,19 +109,21 @@ export default function ProjectForm({
           if (!event.target.value?.trim()) setNameError("Required!");
         }}
       />
-      <Form.TextField
-        id="color"
-        title="Color"
-        defaultValue={project?.color}
-        info="Color must be HEX value (e.g. #FF0000)"
-        error={colorError}
-        onChange={(value) => {
-          if (!value || hexColorRegex.test(value)) setColorError(undefined);
-        }}
-        onBlur={(event) => {
-          if (event.target.value && !hexColorRegex.test(event.target.value)) setColorError("Invalid HEX color!");
-        }}
-      />
+      {(workspace.premium || workspace.business_ws) && (
+        <Form.TextField
+          id="color"
+          title="Color"
+          defaultValue={project?.color}
+          info="Color must be HEX value (e.g. #FF0000)"
+          error={colorError}
+          onChange={(value) => {
+            if (!value || hexColorRegex.test(value)) setColorError(undefined);
+          }}
+          onBlur={(event) => {
+            if (event.target.value && !hexColorRegex.test(event.target.value)) setColorError("Invalid HEX color!");
+          }}
+        />
+      )}
       <Form.Checkbox
         id="isPrivate"
         label="Private"
@@ -172,7 +174,7 @@ export default function ProjectForm({
 interface ProjectFormValues {
   workspaceId: string;
   name: string;
-  color: string;
+  color?: string;
   isPrivate: boolean;
   clientIdString: string;
   startDate: Date;
