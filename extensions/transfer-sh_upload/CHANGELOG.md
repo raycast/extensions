@@ -8,3 +8,4 @@
 ## [1.0.1] 2024-02-10
 
 - added check if serverUrl is really a url
+- changed upload successfull message

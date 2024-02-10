@@ -82,7 +82,7 @@ export default async function Command() {
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Upload successful",
+      title: "Copied URL to clipboard",
       message: fileName,
     });
   } catch (error) {
