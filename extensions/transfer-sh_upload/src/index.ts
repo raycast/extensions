@@ -19,6 +19,17 @@ export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
   try {
+    new URL(preferences.serverUrl);
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid server URL",
+      message: "serverUrl has to be a URL",
+    });
+    return;
+  }
+
+  try {
     const filePaths = await getSelectedFinderItems();
     if (filePaths.length === 0) {
       await showToast({
@@ -57,7 +68,6 @@ export default async function Command() {
       toast.message = `${uploadPercentage}%`;
     });
 
-    // Use got.stream.put to initiate the upload, attaching the monitorStream to track progress
     const uploadStream = got.put(fullUrl, {
       headers: {
         "Content-Type": "application/octet-stream",
@@ -65,11 +75,8 @@ export default async function Command() {
       body: monitorStream,
     });
 
-    // Pipe fileStream through monitorStream to uploadStream
     await pipelinePromise(fileStream, monitorStream);
 
-    // After upload completes, handle the server's response or perform additional actions as needed
-    // Clipboard.copy(responseUrl) // Adjust this line based on your actual response handling
     const response = await uploadStream;
     await Clipboard.copy(response.body);
 
