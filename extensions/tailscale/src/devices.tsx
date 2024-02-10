@@ -20,7 +20,7 @@ export default function DeviceList() {
         const _list = getDevices(status);
         const _filteredList = _list.filter((device) => {
           // mullvad devices should not be shown in the devices list - this mirrors the behavior of tailscale cli and client apps
-          if (device.tags?.indexOf(MULLVAD_DEVICE_TAG) > -1) {
+          if (device.tags?.includes(MULLVAD_DEVICE_TAG)) {
             return false;
           }
           return true;
