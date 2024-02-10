@@ -25,7 +25,7 @@
       "subtitle": "Get your Sleep, Readiness, and Activity scores",
       "description": "Get your up-to-date Oura scores.",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "10m"
     },
     {
       "name": "workouts",
