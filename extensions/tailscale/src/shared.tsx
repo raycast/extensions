@@ -110,6 +110,24 @@ export function getDevices(status: StatusResponse) {
   return devices;
 }
 
+export function sortDevices(devices: Device[]) {
+  devices.sort((a, b) => {
+    // self should always be first
+    if (a.self) {
+      return -1;
+    }
+    // then sort by online status
+    if (a.online && !b.online) {
+      return -1;
+    }
+    if (!a.online && b.online) {
+      return 1;
+    }
+    // lastly, sort by name
+    return a.name.localeCompare(b.name);
+  });
+}
+
 const prefs = getPreferenceValues();
 
 const tailscalePath: string =

@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Device, getStatus, getDevices, getErrorDetails, ErrorDetails, MULLVAD_DEVICE_TAG } from "./shared";
+import { Device, getStatus, getDevices, getErrorDetails, sortDevices, ErrorDetails, MULLVAD_DEVICE_TAG } from "./shared";
 
 export default function DeviceList() {
   const [devices, setDevices] = useState<Device[]>();
@@ -17,6 +17,7 @@ export default function DeviceList() {
           }
           return true
         })
+        sortDevices(_filteredList);
         setDevices(_filteredList);
       } catch (error) {
         setError(getErrorDetails(error, "Couldn’t load device list."));
