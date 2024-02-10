@@ -6,6 +6,7 @@ import { Workspace } from "./api";
 import Shortcut from "./helpers/shortcuts";
 import ClientListItem from "./components/ClientListItem";
 import ClientForm from "./components/ClientForm";
+import { canModifyProjectIn } from "./helpers/privileges";
 
 export default function ClientList() {
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -20,14 +21,17 @@ export default function ClientList() {
   );
   const groupedClients = useGroups(filteredClients, "wid");
 
+  const clientAdminWorkspaces = workspaces.filter(canModifyProjectIn);
   const SharedActions = (
     <ActionPanel.Section>
-      <Action.Push
-        title="Create New Client"
-        icon={Icon.Plus}
-        shortcut={Shortcut.New}
-        target={<ClientForm {...{ workspaces, revalidateClients }} />}
-      />
+      {clientAdminWorkspaces && (
+        <Action.Push
+          title="Create New Client"
+          icon={Icon.Plus}
+          shortcut={Shortcut.New}
+          target={<ClientForm workspaces={clientAdminWorkspaces} revalidateClients={revalidateClients} />}
+        />
+      )}
       <Action
         title={`${showArchived ? "Hide" : "Show"} Archived Clients`}
         icon={showArchived ? Icon.Eye : Icon.EyeDisabled}

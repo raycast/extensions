@@ -6,6 +6,7 @@ import ProjectForm from "./ProjectForm";
 import { withToast, Verb } from "../helpers/withToast";
 import { formatSeconds } from "../helpers/formatSeconds";
 import Shortcut from "../helpers/shortcuts";
+import { canModifyProjectIn } from "../helpers/privileges";
 
 interface ProjectListProps {
   organization: Organization;
@@ -32,9 +33,6 @@ export default function ProjectListItem({
   clients,
   SharedActions,
 }: ProjectListProps) {
-  const canModifyProject =
-    !workspace.only_admins_may_create_projects || workspace.role == "admin" || workspace.role == "projectlead";
-
   return (
     <List.Item
       key={project.id}
@@ -53,7 +51,7 @@ export default function ProjectListItem({
               icon={Icon.Info}
               onAction={() => setIsShowingDetail((current) => !current)}
             />
-            {canModifyProject && (
+            {canModifyProjectIn(workspace) && (
               <>
                 <Action.Push
                   title="Edit Project"

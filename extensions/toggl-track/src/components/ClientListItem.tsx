@@ -3,6 +3,7 @@ import { Workspace, Client, deleteClient, archiveClient, restoreClient } from ".
 import ClientForm from "./ClientForm";
 import { withToast, Verb } from "../helpers/withToast";
 import Shortcut from "../helpers/shortcuts";
+import { canModifyProjectIn } from "../helpers/privileges";
 
 interface ClientListItemProps {
   workspace: Workspace;
@@ -12,9 +13,6 @@ interface ClientListItemProps {
 }
 
 export default function ClientListItem({ workspace, client, revalidateClients, SharedActions }: ClientListItemProps) {
-  const canModifyClients =
-    !workspace.only_admins_may_create_projects || workspace.role == "admin" || workspace.role == "projectlead";
-
   return (
     <List.Item
       title={client.name}
@@ -22,7 +20,7 @@ export default function ClientListItem({ workspace, client, revalidateClients, S
       accessories={client.archived ? [{ tag: "archived", icon: Icon.Tray }] : undefined}
       actions={
         <ActionPanel>
-          {canModifyClients && (
+          {canModifyProjectIn(workspace) && (
             <ActionPanel.Section>
               <Action.Push
                 title="Rename Tag"

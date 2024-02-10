@@ -6,6 +6,7 @@ import type { Workspace } from "./api";
 import Shortcut from "./helpers/shortcuts";
 import TagListItem from "./components/TagListItem";
 import TagForm from "./components/TagForm";
+import { canModifyTagsIn } from "./helpers/privileges";
 
 function ManageTags() {
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -14,12 +15,13 @@ function ManageTags() {
 
   const [searchFilter, setSearchFilter] = useState<Workspace>();
 
-  const SharedActions = (
+  const tagAdminWorkspaces = workspaces.filter(canModifyTagsIn);
+  const SharedActions = tagAdminWorkspaces && (
     <Action.Push
       title="Create New Tag"
       icon={Icon.Plus}
       shortcut={Shortcut.New}
-      target={<TagForm {...{ workspaces, revalidateTags }} />}
+      target={<TagForm revalidateTags={revalidateTags} workspaces={tagAdminWorkspaces} />}
     />
   );
 

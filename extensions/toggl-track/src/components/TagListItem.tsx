@@ -3,6 +3,7 @@ import { Workspace, Tag, deleteTag } from "../api";
 import TagForm from "./TagForm";
 import { withToast, Verb } from "../helpers/withToast";
 import Shortcut from "../helpers/shortcuts";
+import { canModifyTagsIn } from "../helpers/privileges";
 
 interface TagListProps {
   workspace: Workspace;
@@ -12,13 +13,11 @@ interface TagListProps {
 }
 
 export default function TagListItem({ workspace, tag, revalidateTags, SharedActions }: TagListProps) {
-  const canModifyTags =
-    !workspace.only_admins_may_create_tags || workspace.role == "admin" || workspace.role == "projectlead";
   return (
     <List.Item
       title={tag.name}
       actions={
-        canModifyTags ? (
+        canModifyTagsIn(workspace) ? (
           <ActionPanel>
             <ActionPanel.Section>
               <Action.Push

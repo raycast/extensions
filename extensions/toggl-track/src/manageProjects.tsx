@@ -6,6 +6,7 @@ import { Workspace, Project } from "./api";
 import Shortcut from "./helpers/shortcuts";
 import ProjectListItem from "./components/ProjectListItem";
 import ProjectForm from "./components/ProjectForm";
+import { canModifyProjectIn } from "./helpers/privileges";
 
 export default function ProjectList() {
   const { organizations, isLoadingOrganizations } = useOrganizations();
@@ -25,14 +26,23 @@ export default function ProjectList() {
 
   const isLoading = isLoadingOrganizations || isLoadingWorkspaces || isLoadingProjects || isLoadingClients;
 
+  const projectAdminWorkspaces = workspaces.filter(canModifyProjectIn);
   const SharedActions = (
     <ActionPanel.Section>
-      <Action.Push
-        title="Create New Project"
-        icon={Icon.Plus}
-        shortcut={Shortcut.New}
-        target={<ProjectForm {...{ workspaces, clients, revalidateProjects }} />}
-      />
+      {projectAdminWorkspaces && (
+        <Action.Push
+          title="Create New Project"
+          icon={Icon.Plus}
+          shortcut={Shortcut.New}
+          target={
+            <ProjectForm
+              workspaces={projectAdminWorkspaces}
+              clients={clients}
+              revalidateProjects={revalidateProjects}
+            />
+          }
+        />
+      )}
       <ActionPanel.Submenu title="Show/Hide Projects..." icon={Icon.Eye} shortcut={Shortcut.ShowOrHide}>
         {statuses.map((status) => {
           const isVisible = statusVisibily[status];
