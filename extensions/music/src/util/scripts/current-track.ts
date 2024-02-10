@@ -178,4 +178,4 @@ export const removeCurrentTrackFromCurrentPlaylist = (): TE.TaskEither<Error, Re
     `),
     TE.map(parseQueryString<Track>())
   );
-}
+};

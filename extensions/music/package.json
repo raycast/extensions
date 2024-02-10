@@ -112,7 +112,7 @@
     },
     {
       "name": "remove-current-playing-from-current-playlist",
-      "title": "Remove Current Track from Current Playlist",
+      "title": "Remove Current Track From Current Playlist",
       "subtitle": "Apple Music",
       "description": "Remove the currently playing track from the current playlist and skip to the next track.",
       "disabledByDefault": true,
