@@ -5,4 +5,5 @@ export const preferences: {
   terminalApp: "terminal" | "iterm";
   greedyUpgrades: boolean;
   zapCask: boolean;
+  quarantine: boolean;
 } = getPreferenceValues();
