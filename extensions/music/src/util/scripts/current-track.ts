@@ -144,3 +144,38 @@ export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
     TE.map(parseQueryString<Track>())
   );
 };
+
+// Adapted from: https://dougscripts.com/itunes/2018/05/remove-currently-playing-from-current-playlist/
+export const removeCurrentTrackFromCurrentPlaylist = (): TE.TaskEither<Error, Readonly<Track>> => {
+  const querystring = createQueryString({
+    id: "trackId",
+    name: "trackName",
+    artist: "trackArtist",
+    album: "trackAlbum",
+    duration: "trackDuration",
+    rating: "trackRating",
+  });
+
+  // prettier-ignore
+  return pipe(
+    runScript(`
+      set output to ""
+        tell application "Music"
+          set t to (get current track)
+          set trackId to id of t
+          set trackName to name of t
+          set trackArtist to artist of t
+          set trackAlbum to album of t
+          set trackDuration to duration of t
+          set trackRating to rating of t
+
+          next track
+          delete t
+
+          set output to ${querystring}
+        end tell
+      return output
+    `),
+    TE.map(parseQueryString<Track>())
+  );
+}
