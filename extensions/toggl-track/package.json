@@ -26,7 +26,7 @@
     },
     {
       "name": "manageWorkspaces",
-      "title": "Manage Workspaces",
+      "title": "View Workspaces",
       "description": "A list of all the workspace you have access to.",
       "mode": "view",
       "disabledByDefault": false
