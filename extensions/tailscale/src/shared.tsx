@@ -115,12 +115,13 @@ export function sortDevices(devices: Device[]) {
     // self should always be first
     if (a.self) {
       return -1;
+    } else if (b.self) {
+      return 1;
     }
     // then sort by online status
     if (a.online && !b.online) {
       return -1;
-    }
-    if (!a.online && b.online) {
+    } else if (!a.online && b.online) {
       return 1;
     }
     // lastly, sort by name
