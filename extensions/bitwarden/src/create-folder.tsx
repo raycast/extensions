@@ -1,4 +1,4 @@
-import { Form, Action, showHUD, ActionPanel, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { Form, Action, ActionPanel, showToast, Toast, Icon } from "@raycast/api";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { SessionProvider } from "~/context/session";
