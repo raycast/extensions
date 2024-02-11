@@ -13,165 +13,340 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "askAI",
-      "title": "Ask AI",
-      "subtitle": "Perplexity AI",
-      "description": "Ask Perplexity AI",
-      "mode": "view",
-      "icon": "perplexity.png",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "askAboutSelectedText",
-      "title": "Ask About Selected Text",
-      "subtitle": "Perplexity AI",
-      "description": "Ask Perplexity AI about your selected text",
-      "mode": "view",
-      "icon": "perplexity.png",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "composeResponse",
-      "title": "Compose Reponse",
-      "subtitle": "Perplexity AI",
-      "description": "Crafting an Email Response",
-      "disabledByDefault": true,
-      "mode": "view",
-      "icon": "perplexity.png",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Details",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "summarize",
       "title": "Summarize",
-      "description": "Summarize text",
-      "icon": "perplexity.png",
-      "mode": "view"
-    },
-    {
-      "name": "explain",
-      "title": "Explain",
-      "description": "Explain text",
-      "icon": "perplexity.png",
-      "mode": "view"
-    },
-    {
-      "name": "comment",
-      "title": "Add Comments to Code",
-      "description": "Add comments to code",
-      "disabledByDefault": true,
-      "icon": "perplexity.png",
-      "mode": "view"
-    },
-    {
-      "name": "friendly",
-      "title": "Change Tone to Friendly",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to friendly",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "casual",
-      "title": "Change Tone to Casual",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to casual",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "professional",
-      "title": "Change Tone to Professional",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to professional",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "academic",
-      "title": "Change Tone to Academic",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to academic",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "synonyms",
-      "title": "Find Synonyms",
-      "icon": "perplexity.png",
-      "description": "Find synonyms of selected word",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "taskBreakdown",
-      "title": "Task Generator",
-      "icon": "perplexity.png",
-      "description": "Break down a project into tasks",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "grammar",
-      "title": "Fix Spelling and Grammar",
-      "icon": "perplexity.png",
-      "description": "Fix spelling and grammar of selected text",
-      "mode": "view"
-    },
-    {
-      "name": "longer",
-      "title": "Make Longer",
-      "icon": "perplexity.png",
-      "description": "Make selected text longer",
-      "mode": "view"
-    },
-    {
-      "name": "shorter",
-      "title": "Make Shorter",
-      "icon": "perplexity.png",
-      "description": "Make selected text shorter",
-      "mode": "view"
-    },
-    {
-      "name": "improve",
-      "title": "Improve Text",
-      "icon": "perplexity.png",
-      "description": "Improve selected text",
-      "mode": "view"
-    },
-    {
-      "name": "translate",
-      "title": "Translate Text",
-      "icon": "perplexity.png",
-      "description": "Translate selected text",
-      "disabledByDefault": true,
+      "description": "Summarize selected text",
       "mode": "view",
-      "arguments": [
+      "preferences": [
         {
-          "name": "query",
-          "placeholder": "Language",
-          "type": "text",
+          "name": "prompt_summarize",
+          "title": "Summarize Prompt",
+          "description": "The prompt for the summarize command",
+          "type": "textfield",
+          "default": "Summarize all relevant aspects from the following text as concise as possible: ",
           "required": false
+        },
+        {
+          "name": "model_summarize",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "title": "Rewrite",
+      "description": "Rewrite selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_rewrite",
+          "title": "Rewrite Prompt",
+          "description": "The prompt for the rewrite command",
+          "type": "textfield",
+          "default": "Rewrite this using an academic tone: \n\n",
+          "required": false
+        },
+        {
+          "name": "model_rewrite",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "refine",
+      "title": "Fix Spelling and Grammar",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_refine",
+          "title": "Refine Prompt",
+          "description": "The prompt for the refine command",
+          "type": "textfield",
+          "default": "Fix spelling, grammar and punctuation. Example: Input: 'I are a good writer.' Output: 'I am a good writer.'",
+          "required": false
+        },
+        {
+          "name": "model_refine",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Ask AI based on a custom prompt",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Custom Prompt",
+          "description": "The prompt for the custom action command",
+          "type": "textfield",
+          "default": "Write a custom prompt here.",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask",
+      "description": "Ask ChatGPT a question about the selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "ask_sys_prompt",
+          "title": "System Prompt",
+          "description": "The system prompt for the ask command",
+          "type": "textfield",
+          "default": "You are a helpful assistant.",
+          "required": false
+        },
+        {
+          "name": "ask_default_question",
+          "title": "Default Question",
+          "description": "The question that will be asked about the selected text if you don't input one",
+          "type": "textfield",
+          "default": "Please explain this.",
+          "required": false
+        },
+        {
+          "name": "model_ask",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            }
+          ]
         }
       ]
     }
@@ -179,17 +354,16 @@
   "preferences": [
     {
       "description": "Perplexity API Key",
-      "name": "apiKey",
+      "name": "apikey",
       "required": true,
       "title": "Perplexity API Key",
       "type": "password",
       "placeholder": "pplx-XXX"
     },
     {
-      "name": "modelSelector",
+      "name": "model",
       "title": "Select a model",
-      "default": "mixtral-8x7b-instruct",
-      "description": "Select a model you want to use",
+      "description": "Perplexity LLM to use for your commands",
       "type": "dropdown",
       "required": true,
       "data": [
@@ -220,18 +394,36 @@
         {
           "value": "pplx-70b-chat",
           "title": "Perplexity 70B Chat"
+        },
+        {
+          "value": "pplx-7b-online",
+          "title": "Perplexity 7B Online"
+        },
+        {
+          "value": "pplx-70b-online",
+          "title": "Perplexity 70B Online"
         }
       ]
+    },
+    {
+      "name": "enableStreaming",
+      "title": "Response Streaming",
+      "label": "Enabled",
+      "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.66.2",
-    "node-fetch": "^3.3.2"
+    "openai": "^4.14.2",
+    "@nem035/gpt-3-encoder": "^1.1.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "18.0.9",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
