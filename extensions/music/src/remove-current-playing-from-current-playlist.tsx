@@ -2,7 +2,6 @@ import { showToast, closeMainWindow, Toast } from "@raycast/api";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 
-import { Track } from "./util/models";
 import * as music from "./util/scripts";
 
 export default async () => {
@@ -10,10 +9,10 @@ export default async () => {
 
   await pipe(
     music.currentTrack.removeCurrentTrackFromCurrentPlaylist(),
-    TE.map((track: Track) =>
+    TE.map((track) =>
       showToast({
         style: Toast.Style.Success,
-        title: `Removed "${track.name}" (${track.artist}) from current playlist.`,
+        title: `Removed "${track.name}" (${track.album} - ${track.artist}) from "${track.playlist}".`,
       })
     ),
     TE.mapLeft(() =>
