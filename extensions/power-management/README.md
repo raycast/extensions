@@ -1,3 +1,3 @@
-# Low Power Mode
+# Power Management
 
-Toggle the Low Power Mode of the system
+Change Power Management Settings of the system
