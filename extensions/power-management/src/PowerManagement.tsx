@@ -14,7 +14,7 @@ export class PowerManagement {
   powerModeSettingKey: string;
 
   constructor() {
-    const result = execSync(`pmset -g | grep ${POWER_MODE_SETTING_VALUE_DEFAULT}`);
+    const result = execSync(`pmset -g | grep powermode`);
 
     if (result.toString().trim()) {
       this.powerModeSettingKey = POWER_MODE_SETTING_VALUE_DEFAULT;
@@ -27,6 +27,7 @@ export class PowerManagement {
     try {
       const result = execSync(`pmset -g | grep ${this.powerModeSettingKey}`);
       const lowPowerModeValue = result.toString().trim().at(-1);
+
       return lowPowerModeValue === LOW_POWER_MODE;
     } catch (error) {
       showFailureToast(error, { title: "Could not determine the Low Power Mode state" });
