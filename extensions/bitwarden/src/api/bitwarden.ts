@@ -48,16 +48,35 @@ type ExecProps = {
 
 const { supportPath } = environment;
 
-const cliInfo = {
-  Δ: "1", // changing this forces a new bin download for people that had a failed one
+const Δ = "1"; // changing this forces a new bin download for people that had a failed one
+const BinDownloadLogger = (() => {
+  /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
+   but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
+   Although, the plan is to discontinue this method, if there's a better way of logging errors in the issues dashboard
+   or there are no crashes reported with the bin download after some time. */
+  const filePath = join(supportPath, `bw-bin-download-error-${Δ}.log`);
+  return {
+    logError: (error: any) => tryExec(() => writeFileSync(filePath, error?.message ?? "Unexpected error")),
+    clearError: () => tryExec(() => unlinkSync(filePath)),
+    hasError: () => tryExec(() => existsSync(filePath), false),
+  };
+})();
+
+export const cliInfo = {
   version: "2023.10.0",
   sha256: "c129b1806bb00806676298198fb54d540561e2c06d66016f0836e31b1bd65e72",
   downloadPage: "https://github.com/bitwarden/clients/releases",
-  paths: {
+  path: {
     arm64: "/opt/homebrew/bin/bw",
     x64: "/usr/local/bin/bw",
     get downloadedBin() {
-      return join(environment.supportPath, cliInfo.binFilename);
+      return join(supportPath, cliInfo.binFilename);
+    },
+    get installedBin() {
+      return process.arch === "arm64" ? this.arm64 : this.x64;
+    },
+    get bin() {
+      return !BinDownloadLogger.hasError() ? this.downloadedBin : this.installedBin;
     },
   },
   get binFilename() {
@@ -71,21 +90,9 @@ const cliInfo = {
   },
 } as const;
 
-const BinDownloadLogger = (() => {
-  /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
-   but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
-   Although, the plan is to discontinue this method, if there's a better way of logging errors in the issues dashboard
-   or there are no crashes reported with the bin download after some time. */
-  const filePath = join(environment.supportPath, `bw-bin-download-error-${cliInfo.Δ}.log`);
-  return {
-    logError: (error: any) => tryExec(() => writeFileSync(filePath, error?.message ?? "Unexpected error")),
-    clearError: () => tryExec(() => unlinkSync(filePath)),
-    hasError: () => tryExec(() => existsSync(filePath), false),
-  };
-})();
-
 export class Bitwarden {
   private env: Env;
+  private isInitialized = false;
   private initPromise: Promise<void>;
   private tempSessionToken?: string;
   private callbacks: ActionCallbacks = {};
@@ -94,17 +101,12 @@ export class Bitwarden {
   lockReason: string | undefined;
 
   constructor() {
-    const { cliPath: cliPathPref, clientId, clientSecret, serverCertsPath } = this.preferences;
+    const { cliPath: cliPathPreference, clientId, clientSecret, serverCertsPath } = this.preferences;
     const serverUrl = getServerUrlPreference();
 
-    if (!BinDownloadLogger.hasError()) {
-      this.cliPath = cliPathPref || cliInfo.paths.downloadedBin;
-    } else {
-      this.cliPath = process.arch == "arm64" ? cliInfo.paths.arm64 : cliInfo.paths.x64;
-    }
-
+    this.cliPath = cliPathPreference || cliInfo.path.bin;
     this.env = {
-      BITWARDENCLI_APPDATA_DIR: environment.supportPath,
+      BITWARDENCLI_APPDATA_DIR: supportPath,
       BW_CLIENTSECRET: clientSecret.trim(),
       BW_CLIENTID: clientId.trim(),
       PATH: dirname(process.execPath),
@@ -192,6 +194,7 @@ export class Bitwarden {
 
   async initialize(): Promise<this> {
     await this.initPromise;
+    this.isInitialized = true;
     return this;
   }
 
@@ -243,6 +246,8 @@ export class Bitwarden {
   }
 
   private async exec(args: string[], options?: ExecProps): Promise<ExecaChildProcess> {
+    if (!this.isInitialized) throw new Error("Bitwarden not initialized");
+
     const { abortController, input = "", skipLastActivityUpdate = false } = options ?? {};
     let env = this.env;
     if (this.tempSessionToken) env = { ...env, BW_SESSION: this.tempSessionToken };

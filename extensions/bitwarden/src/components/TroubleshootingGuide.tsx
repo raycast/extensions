@@ -1,10 +1,9 @@
-import { ActionPanel, Action, Detail, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Detail, getPreferenceValues, environment } from "@raycast/api";
+import BugReportOpenAction, { BUG_REPORT_URL } from "~/components/searchVault/actions/BugReportOpenAction";
 import { EnsureCliBinError, getErrorString } from "~/utils/errors";
 
 const LINE_BREAK = "\n\n";
 const CLI_INSTALLATION_HELP_URL = "https://bitwarden.com/help/cli/#download-and-install";
-const BUG_REPORT_URL =
-  "https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2Cbug&template=extension_bug_report.yml&title=%5BBitwarden%5D+...";
 
 const getCodeBlock = (content: string) => `\`\`\`\n${content}\n\`\`\``;
 
@@ -20,7 +19,10 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
   const isCliDownloadError = error instanceof EnsureCliBinError;
   const needsCliInstallGuide = localCliPath || isCliDownloadError;
 
-  const messages: Messages[] = ["# 🚨 Whoops! Something went wrong"];
+  const messages: Messages[] = [
+    "# 💥 Whoops! Something went wrong",
+    `The \`${environment.commandName}\` command crashed when we were not expecting it to.`,
+  ];
 
   if (isCliDownloadError) {
     messages.push("We couldn't download the Bitwarden CLI, you can always install your own by following this guide:");
@@ -38,7 +40,6 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
   }
 
   messages.push(
-    "---",
     `**Please try restarting the command. If the issue persists, consider [reporting a bug on GitHub](${BUG_REPORT_URL}) to help us fix it.**`
   );
 
@@ -57,7 +58,7 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
       markdown={messages.filter(Boolean).join(LINE_BREAK)}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Bug Report" url={BUG_REPORT_URL} />
+          <BugReportOpenAction />
           {needsCliInstallGuide && (
             <>
               <Action.CopyToClipboard title="Copy Homebrew Installation Command" content="brew install bitwarden-cli" />
