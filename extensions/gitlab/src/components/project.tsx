@@ -19,6 +19,7 @@ import {
   OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
+  CopyProjectUrlToClipboardAction,
 } from "./project_actions";
 import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
@@ -53,6 +54,7 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean })
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyProjectUrlToClipboardAction project={project} />
             <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
             <OpenProjectIssuesPushAction project={project} />
             <OpenProjectMergeRequestsPushAction project={project} />

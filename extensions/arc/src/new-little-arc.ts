@@ -1,13 +1,31 @@
-import { LaunchProps, closeMainWindow, showHUD } from "@raycast/api";
+import { LaunchProps, closeMainWindow, showHUD, getSelectedText } from "@raycast/api";
 import { makeNewLittleArcWindow } from "./arc";
 import { newLittleArcPreferences } from "./preferences";
-import { URLArguments } from "./types";
-import { validateURL } from "./utils";
+import { NewTabSearchConfigs, URLArguments } from "./types";
+import { isURL, validateURL } from "./utils";
+
+export const config: NewTabSearchConfigs = {
+  google: "https://www.google.com/search?q=",
+  duckduckgo: "https://www.duckduckgo.com?q=",
+  bing: "https://www.bing.com/search?q=",
+  yahoo: "https://search.yahoo.com/search?p=",
+  ecosia: "https://www.ecosia.org/search?q=",
+  kagi: "https://kagi.com/search?q=",
+};
 
 export default async function command(props: LaunchProps<{ arguments: URLArguments }>) {
   const { url } = props.arguments;
   const { fallbackText } = props;
-  const newTabUrl = url || fallbackText || newLittleArcPreferences.url;
+  const selectedText = await getSelectedText().catch(() => ""); // Ignore error, it's fine if there's no selected text.
+
+  const selectedTextAsSearch = `${config[newLittleArcPreferences.engine]}${encodeURIComponent(selectedText)}`;
+
+  const newTabUrl =
+    url || selectedText
+      ? isURL(selectedText)
+        ? selectedText
+        : selectedTextAsSearch
+      : fallbackText || newLittleArcPreferences.url;
 
   try {
     if (await validateURL(newTabUrl)) {

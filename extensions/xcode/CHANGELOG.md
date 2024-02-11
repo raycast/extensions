@@ -1,5 +1,9 @@
 # Xcode Changelog
 
+## [Maintenance Update] - 2024-01-10
+
+- Removed "Search Swift Package Index" command due to the unavailability of the underlying API
+
 ## [Maintenance Update] - 2023-10-28
 
 - Added an option to open the App Group directory from the "Show Recent Builds in Menu Bar"

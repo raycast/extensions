@@ -1,5 +1,20 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2024-01-16
+
+- Rename main command to "Start/Stop Time Entry".
+- Remove projects from list view.
+
+## [Bug Fixes] - 2024-01-15
+
+- Remove `refresh` action.
+- Fix project dropdown in time entry form.
+- Fix today's duration timer.
+
+## [Refactor] - 2024-01-04
+
+- Refactor extension to use updated Raycast utilities.
+
 ## [New Feature] - 2023-02-28
 
 - Add ability to choose a [project task](https://support.toggl.com/en/articles/2220738-tasks) when creating a new time entry.

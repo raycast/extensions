@@ -94,14 +94,14 @@
   ],
   "dependencies": {
     "@googleapis/gmail": "^5.0.0",
-    "@raycast/api": "^1.60.0",
+    "@raycast/api": "^1.62.0",
     "@raycast/utils": "^1.10.0",
     "cross-fetch": "^4.0.0",
     "googleapis": "^123.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "^18.8.4",
+    "@types/node": "^20.8.10",
     "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^3.0.1",

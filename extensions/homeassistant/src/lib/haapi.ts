@@ -40,6 +40,7 @@ export interface HomeAssistantOptions {
   urlInternal?: string;
   wifiSSIDs?: string[];
   usePing?: boolean;
+  preferCompanionApp?: boolean;
 }
 
 export class HomeAssistant {
@@ -51,6 +52,7 @@ export class HomeAssistant {
   public wifiSSIDs: string[] | undefined;
   private usePing = true;
   private messageSubscription?: object | null;
+  public preferCompanionApp = false;
 
   constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
     this.token = token;
@@ -59,6 +61,7 @@ export class HomeAssistant {
     this.wifiSSIDs = options?.wifiSSIDs;
     this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
+    this.preferCompanionApp = options?.preferCompanionApp === undefined ? false : options.preferCompanionApp;
   }
 
   private httpsAgent(url: string): Agent | undefined {
@@ -76,6 +79,17 @@ export class HomeAssistant {
   public urlJoin(text: string): string {
     const url = this._nearestURL && this._nearestURL.length > 0 ? this._nearestURL : this.url;
     return urljoin(url, text);
+  }
+
+  public navigateUrl(text: string) {
+    if (this.preferCompanionApp) {
+      return urljoin("homeassistant://navigate", text);
+    }
+    return this.urlJoin(text);
+  }
+
+  public isCompanionUrl(url: string) {
+    return url.startsWith("homeassistant://");
   }
 
   private isHomeSSIDActive(): boolean {

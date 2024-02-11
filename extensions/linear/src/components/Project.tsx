@@ -5,8 +5,7 @@ import { format } from "date-fns";
 
 import { ProjectResult } from "../api/getProjects";
 
-import { getLinearClient } from "../helpers/withLinearClient";
-import { isLinearInstalled } from "../helpers/isLinearInstalled";
+import { getLinearClient } from "../api/linearClient";
 import { getProjectIcon, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getUserIcon } from "../helpers/users";
 import { getErrorMessage } from "../helpers/errors";
@@ -15,6 +14,7 @@ import ProjectIssues from "./ProjectIssues";
 import EditProjectForm from "./EditProjectForm";
 import { getDateIcon } from "../helpers/dates";
 import CreateMilestoneForm from "./CreateMilestoneForm";
+import OpenInLinear from "./OpenInLinear";
 
 type ProjectProps = {
   project: ProjectResult;
@@ -117,11 +117,7 @@ export default function Project({ project, priorities, users, me, mutateProjects
             icon={{ source: "linear-icons/milestone.svg", tintColor: Color.PrimaryText }}
           />
 
-          {isLinearInstalled ? (
-            <Action.Open title="Open Project in Linear" icon="linear.png" target={project.url} application="Linear" />
-          ) : (
-            <Action.OpenInBrowser title="Open Project in Browser" url={project.url} />
-          )}
+          <OpenInLinear title="Open Project" url={project.url} />
 
           <ActionPanel.Section>
             <Action.Push

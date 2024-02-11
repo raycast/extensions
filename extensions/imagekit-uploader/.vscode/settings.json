@@ -1,0 +1,37 @@
+{
+  "editor.tabSize": 2,
+  "editor.fontSize": 16,
+  "editor.fontFamily": "'MONASPACE KRYPTON', 'FiraCode Nerd Font', Hack, PingFang SC, Menlo, Monaco, 'Courier New', monospace",
+  "editor.formatOnSave": true,
+  "[astro]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "astro-build.astro-vscode"
+  },
+  "[json]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "editor.rulers": [80],
+  "cSpell.words": [
+    "applescript",
+    "datepicker",
+    "Frontmost",
+    "ICNS",
+    "imagekit",
+    "ludafa",
+    "raycast",
+    "tokeneditor"
+  ]
+}

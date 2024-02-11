@@ -164,10 +164,14 @@ export function preferencesChanged() {
 }
 
 function getCacheString(key: string, defaultValue = "") {
-  const cacheString = cache.get(key);
-  if (typeof cacheString == "string") {
-    return JSON.parse(cacheString) as string;
-  } else {
+  try {
+    const cacheString = cache.get(key);
+    if (typeof cacheString == "string") {
+      return JSON.parse(cacheString) as string;
+    } else {
+      return defaultValue;
+    }
+  } catch (e) {
     return defaultValue;
   }
 }
@@ -260,8 +264,8 @@ export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {
       Math.round(
         tempType == "apparent_temperature"
           ? weather?.hourly.apparent_temperature[timeHour()]
-          : weather?.current_weather?.temperature
-      ) + tempUnit
+          : weather?.current_weather?.temperature,
+      ) + tempUnit,
     );
     if (menuUVI && weather.daily?.uv_index_max.length != 0) {
       menuItems.push("☀ " + Math.round(weather.daily.uv_index_max[0]));
@@ -271,7 +275,7 @@ export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {
     }
     if (menuHumidity && weather.hourly?.relativehumidity_2m.length != 0) {
       menuItems.push(
-        "🜄 " + Math.round(weather.hourly.relativehumidity_2m[timeHour()]) + weather.hourly_units.relativehumidity_2m
+        "🜄 " + Math.round(weather.hourly.relativehumidity_2m[timeHour()]) + weather.hourly_units.relativehumidity_2m,
       );
     }
     if (menuWind) {
@@ -279,7 +283,7 @@ export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {
         windAngle2Direction(weather.current_weather.winddirection).icon +
           " " +
           Math.round(weather.current_weather.windspeed) +
-          windUnit
+          windUnit,
       );
     }
   }

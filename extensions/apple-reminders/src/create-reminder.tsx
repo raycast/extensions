@@ -10,13 +10,31 @@ import {
   useNavigation,
   getPreferenceValues,
   LaunchProps,
+  PopToRootType,
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
+import { createReminder } from "swift:../swift/AppleReminders";
 
-import { createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
+
+type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+export type NewReminder = {
+  title: string;
+  listId?: string;
+  notes?: string;
+  dueDate?: string;
+  priority?: string;
+  recurrence?: {
+    frequency: Frequency;
+    interval: number;
+    endDate?: string;
+  };
+  address?: string;
+  proximity?: string;
+  radius?: number;
+};
 
 type CreateReminderValues = {
   title: string;
@@ -27,6 +45,9 @@ type CreateReminderValues = {
   isRecurring: boolean;
   frequency: string;
   interval: string;
+  address: string;
+  proximity: string;
+  radius: string;
 };
 
 type CreateReminderFormProps = {
@@ -52,6 +73,9 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       isRecurring: draftValues?.isRecurring ?? false,
       frequency: draftValues?.frequency,
       interval: draftValues?.interval,
+      address: draftValues?.address,
+      proximity: draftValues?.proximity,
+      radius: draftValues?.radius,
     },
     validation: {
       title: FormValidation.Required,
@@ -60,20 +84,14 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
         if (!value) return "Interval is required";
         if (isNaN(Number(value))) return "Interval must be a number";
       },
+      radius: (value) => {
+        if (!values.address) return;
+        if (isNaN(Number(value))) return "Interval must be a number";
+      },
     },
     async onSubmit(values) {
       try {
-        const payload: {
-          title: string;
-          listId?: string;
-          notes?: string;
-          dueDate?: string;
-          priority?: string;
-          recurrence?: {
-            frequency: string;
-            interval: number;
-          };
-        } = {
+        const payload: NewReminder = {
           title: values.title,
           listId: values.listId,
         };
@@ -90,13 +108,25 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
         if (values.isRecurring) {
           payload.recurrence = {
-            frequency: values.frequency,
+            frequency: values.frequency as Frequency,
             interval: Number(values.interval),
           };
         }
 
         if (values.priority) {
           payload.priority = values.priority;
+        }
+
+        if (values.address) {
+          payload.address = values.address;
+
+          if (values.proximity) {
+            payload.proximity = values.proximity;
+          }
+
+          if (values.radius) {
+            payload.radius = parseInt(values.radius);
+          }
         }
 
         const reminder = await createReminder(payload);
@@ -122,6 +152,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
         setValue("title", "");
         setValue("notes", "");
+        setValue("address", "");
+        setValue("radius", "");
 
         focus("title");
       } catch (error) {
@@ -169,7 +201,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />
           <Action.SubmitForm
             onSubmit={async (values) => {
-              await closeMainWindow();
+              await closeMainWindow({ popToRootType: PopToRootType.Immediate });
               await handleSubmit(values as CreateReminderValues);
             }}
             title="Create Reminder and Close Window"
@@ -199,6 +231,27 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
               <Form.Separator />
             </>
           ) : null}
+        </>
+      ) : null}
+
+      <Form.TextField {...itemProps.address} title="Location" placeholder="Address" />
+
+      {values.address ? (
+        <>
+          <Form.Dropdown
+            {...itemProps.proximity}
+            title="Proximity"
+            info="Whether you want to trigger the reminder when arriving at the place or when leaving it"
+          >
+            <Form.Dropdown.Item title="Arriving" value="enter" />
+            <Form.Dropdown.Item title="Leaving" value="leave" />
+          </Form.Dropdown>
+          <Form.TextField
+            {...itemProps.radius}
+            title="Radius"
+            placeholder="100"
+            info="The minimum distance in meters from the place that would trigger the reminder"
+          />
         </>
       ) : null}
 
