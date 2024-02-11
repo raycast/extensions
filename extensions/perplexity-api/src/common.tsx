@@ -32,82 +32,6 @@ export default function ResultView(props: {
   const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
-  // async function getResult() {
-  //   const now = new Date();
-  //   let duration = 0;
-  //   const toast = await showToast(Toast.Style.Animated, toast_title);
-
-  //   async function getChatResponse(prompt: string, selectedText: string) {
-  //     console.log("model: ", model, "temp: ", temp, "prompt", prompt, "user_extra_msg", user_extra_msg); // DEBUG
-  //     console.log("selectedText: ", selectedText); // DEBUG
-  //     try {
-  //       const streamOrCompletion = await openai.chat.completions.create({
-  //         model: model,
-  //         messages: [
-  //           { role: "system", content: prompt },
-  //           { role: "user", content: selectedText + (user_extra_msg ? `\n\n${user_extra_msg}` : "") },
-  //         ],
-  //         // frequency_penalty: 1,
-  //         temperature: temp,
-  //         // top_p: 1,
-  //         stream: enable_streaming,
-  //       });
-  //       setPromptTokenCount(countToken(prompt + selectedText));
-  //       return streamOrCompletion;
-  //     } catch (error) {
-  //       toast.title = "Error";
-  //       toast.style = Toast.Style.Failure;
-  //       setLoading(false);
-  //       const response_ =
-  //         "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``;
-  //       setResponse(response_);
-  //       return;
-  //     }
-  //   }
-
-  //   let selectedText = selected_text;
-  //   if (selectedText === undefined) {
-  //     try {
-  //       selectedText = await getSelectedText();
-  //     } catch (error) {
-  //       console.log(error);
-  //       toast.title = "Error";
-  //       toast.style = Toast.Style.Failure;
-  //       setLoading(false);
-  //       setResponse(
-  //         "## ⚠️ Raycast was unable to get the selected text. \n\n You may try copying the text to a text editor and try again.",
-  //       );
-  //       return;
-  //     }
-  //   }
-
-  //   getChatResponse(sys_prompt, selectedText).then(async (resp) => {
-  //     if (!resp) return;
-
-  //     let response_ = "";
-  //     function appendResponse(part: string) {
-  //       response_ += part;
-  //       setResponse(response_);
-  //       setResponseTokenCount(countToken(response_));
-  //     }
-
-  //     if (resp instanceof Stream) {
-  //       for await (const part of resp) {
-  //         appendResponse(part.choices[0]?.delta?.content ?? "");
-  //       }
-  //     } else {
-  //       appendResponse(resp.choices[0]?.message?.content ?? "");
-  //     }
-
-  //     setLoading(false);
-  //     const done = new Date();
-  //     duration = (done.getTime() - now.getTime()) / 1000;
-  //     toast.style = Toast.Style.Success;
-  //     toast.title = `Finished in ${duration} seconds`;
-  //   });
-  // }
-  //-------
-
   async function getChatResponse(prompt: string, selectedText: string, model: string, temp: number) {
     console.log("model: ", model, "temp: ", temp, "prompt", prompt, "user_extra_msg", user_extra_msg); // DEBUG
     console.log("selectedText: ", selectedText); // DEBUG
@@ -135,35 +59,17 @@ export default function ResultView(props: {
     }
   }
   
-  // async function getSelectedTextOrError() {
-  //   try {
-  //     return await getSelectedText();
-  //   } catch (error) {
-  //       console.log(error);
-  //       await showToast({ style: Toast.Style.Failure, title: "Error" });
-  //       setLoading(false);
-  //       setResponse(
-  //         "## ⚠️ Raycast was unable to get the selected text. \n\n You may try copying the text to a text editor and try again.",
-  //       );
-  //       return;
-  //   }
-  // }
-  
   async function getResult(newModel?: string, newTemp?: number) {
     const now = new Date();
     let duration = 0;
     const toast = await showToast(Toast.Style.Animated, toast_title);
   
-    // let selectedText = selected_text ?? await getSelectedTextOrError();
-    // if (!selectedText) return;
     let selectedText = selected_text;
     if (selectedText === undefined) {
       try {
         selectedText = await getSelectedText();
       } catch (error) {
         console.log(error);
-        // toast.title = "Error";
-        // toast.style = Toast.Style.Failure;
         await showToast({ style: Toast.Style.Failure, title: "Error" });
         setLoading(false);
         setResponse(
