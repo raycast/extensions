@@ -1,7 +1,7 @@
-import { execa } from "execa";
-import { statSync } from "fs";
+import { existsSync, mkdirSync, statSync } from "fs";
 import { readdir, unlink } from "fs/promises";
 import { join } from "path";
+import streamZip from "node-stream-zip";
 
 export function waitForFileAvailable(path: string): Promise<void> {
   return new Promise((resolve) => {
@@ -19,9 +19,11 @@ export function waitForFileAvailable(path: string): Promise<void> {
   });
 }
 
-export function decompressFile(filePath: string, targetPath: string) {
-  const tarArgs = filePath.endsWith(".gz") ? "-xzf" : "-xf";
-  return execa("tar", [tarArgs, filePath, "-C", targetPath], { env: { LC_ALL: "C" } });
+export async function decompressFile(filePath: string, targetPath: string) {
+  const zip = new streamZip.async({ file: filePath });
+  if (!existsSync(targetPath)) mkdirSync(targetPath, { recursive: true });
+  await zip.extract(null, targetPath);
+  await zip.close();
 }
 
 export async function removeFilesThatStartWith(startingWith: string, path: string) {

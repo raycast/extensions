@@ -20,7 +20,7 @@ import { join } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, waitForFileAvailable } from "~/utils/fs";
 import { getFileSha256 } from "~/utils/crypto";
-import download from "download";
+import { download } from "~/utils/network";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -129,7 +129,6 @@ export class Bitwarden {
 
     // remove old binaries to check if it's an update and because they are 100MB+
     const hadOldBinaries = await removeFilesThatStartWith("bw-", supportPath);
-
     const toast = await showToast({
       title: `${hadOldBinaries ? "Updating" : "Initializing"} Bitwarden CLI`,
       style: Toast.Style.Animated,
@@ -141,8 +140,8 @@ export class Bitwarden {
     try {
       try {
         toast.message = "Downloading...";
-        await download(cliInfo.downloadUrl, supportPath, { filename: tmpFileName });
-        if (!cliInfo.checkHashMatchesFile(zipPath)) throw new EnsureCliBinError("File hash does not match");
+        await download(cliInfo.downloadUrl, zipPath, (percent) => (toast.message = `Downloading ${percent}%`));
+        if (!cliInfo.checkHashMatchesFile(zipPath)) throw new EnsureCliBinError("Binary hash does not match");
       } catch (downloadError) {
         toast.title = "Failed to download Bitwarden CLI";
         throw downloadError;
