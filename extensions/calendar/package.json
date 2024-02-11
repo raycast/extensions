@@ -5,12 +5,8 @@
   "description": "View calendar month-by-month",
   "icon": "command-icon.png",
   "author": "fuksman",
-  "contributors": [
-    "pernielsentikaer"
-  ],
-  "categories": [
-    "Productivity"
-  ],
+  "contributors": ["pernielsentikaer"],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -47,6 +43,24 @@
       "title": "Week numbers",
       "description": "Indicated if it is necessary to show week numbers",
       "default": true
+    },
+    {
+      "name": "viewMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "View Mode",
+      "data": [
+        {
+          "title": "Compact",
+          "value": "0"
+        },
+        {
+          "title": "Wide",
+          "value": "1"
+        }
+      ],
+      "description": "View Mode",
+      "default": "1"
     }
   ],
   "dependencies": {
