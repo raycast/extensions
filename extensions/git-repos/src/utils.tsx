@@ -227,9 +227,15 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -type d -name .git -print || true`;
+      const findCmd = `find -L ${path.replace(
+        /(\s+)/g,
+        "\\$1"
+      )} -maxdepth ${maxDepth} -type d -name .git -print || true`;
       const { stdout, stderr } = await execp(findCmd);
-      const filteredStderr = stderr.split('\n').filter((line) => !/Permission denied|Operation not permitted/.test(line)).join('\n')
+      const filteredStderr = stderr
+        .split("\n")
+        .filter((line) => !/Permission denied|Operation not permitted/.test(line))
+        .join("\n");
       if (filteredStderr) {
         showToast(Toast.Style.Failure, "Find Failed", stderr);
         return [];
