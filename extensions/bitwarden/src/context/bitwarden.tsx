@@ -13,7 +13,7 @@ export const BitwardenProvider = (props: BitwardenProviderProps) => {
   const [bitwarden, setBitwarden] = useState<Bitwarden>();
 
   useEffect(() => {
-    void new Bitwarden().initialize().then(setBitwarden).catch(setError);
+    new Bitwarden().initialize().then(setBitwarden).catch(setError);
   }, []);
 
   if (error) return <TroubleshootingGuide error={error} />;
