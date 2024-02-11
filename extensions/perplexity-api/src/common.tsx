@@ -38,7 +38,8 @@ export default function ResultView(props: {
   //   const toast = await showToast(Toast.Style.Animated, toast_title);
 
   //   async function getChatResponse(prompt: string, selectedText: string) {
-  //     console.log("model: ", model, "temp: ", temp, "user_extra_msg", user_extra_msg); // DEBUG
+  //     console.log("model: ", model, "temp: ", temp, "prompt", prompt, "user_extra_msg", user_extra_msg); // DEBUG
+  //     console.log("selectedText: ", selectedText); // DEBUG
   //     try {
   //       const streamOrCompletion = await openai.chat.completions.create({
   //         model: model,
@@ -105,8 +106,11 @@ export default function ResultView(props: {
   //     toast.title = `Finished in ${duration} seconds`;
   //   });
   // }
+  //-------
+
   async function getChatResponse(prompt: string, selectedText: string, model: string, temp: number) {
-    console.log("model: ", model, "temp: ", temp, "user_extra_msg", user_extra_msg); // DEBUG
+    console.log("model: ", model, "temp: ", temp, "prompt", prompt, "user_extra_msg", user_extra_msg); // DEBUG
+    console.log("selectedText: ", selectedText); // DEBUG
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
@@ -124,34 +128,50 @@ export default function ResultView(props: {
     } catch (error) {
         await showToast({ style: Toast.Style.Failure, title: "Error" });
         setLoading(false);
-        const response_ =
-          "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``;
-        setResponse(response_);
-        return;
-    }
-  }
-  
-  async function getSelectedTextOrError() {
-    try {
-      return await getSelectedText();
-    } catch (error) {
-        console.log(error);
-        await showToast({ style: Toast.Style.Failure, title: "Error" });
-        setLoading(false);
         setResponse(
-          "## ⚠️ Raycast was unable to get the selected text. \n\n You may try copying the text to a text editor and try again.",
+          "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``
         );
         return;
     }
   }
+  
+  // async function getSelectedTextOrError() {
+  //   try {
+  //     return await getSelectedText();
+  //   } catch (error) {
+  //       console.log(error);
+  //       await showToast({ style: Toast.Style.Failure, title: "Error" });
+  //       setLoading(false);
+  //       setResponse(
+  //         "## ⚠️ Raycast was unable to get the selected text. \n\n You may try copying the text to a text editor and try again.",
+  //       );
+  //       return;
+  //   }
+  // }
   
   async function getResult(newModel?: string, newTemp?: number) {
     const now = new Date();
     let duration = 0;
     const toast = await showToast(Toast.Style.Animated, toast_title);
   
-    let selectedText = selected_text ?? await getSelectedTextOrError();
-    if (!selectedText) return;
+    // let selectedText = selected_text ?? await getSelectedTextOrError();
+    // if (!selectedText) return;
+    let selectedText = selected_text;
+    if (selectedText === undefined) {
+      try {
+        selectedText = await getSelectedText();
+      } catch (error) {
+        console.log(error);
+        // toast.title = "Error";
+        // toast.style = Toast.Style.Failure;
+        await showToast({ style: Toast.Style.Failure, title: "Error" });
+        setLoading(false);
+        setResponse(
+          "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again."
+        );
+        return;
+      }
+    }
   
     const resp = await getChatResponse(sys_prompt, selectedText, newModel ?? model, newTemp ?? temp);
     if (!resp) return;
