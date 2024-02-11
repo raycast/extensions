@@ -11,10 +11,6 @@ import path from "path";
 import { pipeline, PassThrough } from "stream";
 import { promisify } from "util";
 
-interface Preferences {
-  serverUrl: string;
-}
-
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
