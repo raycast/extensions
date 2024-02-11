@@ -87,8 +87,9 @@ export default function AskView() {
         title="Question"
         enableMarkdown
         placeholder={
-          (usingContext && default_question + " ") || // Raycast will append ellipsis
-          undefined
+          usingContext &&
+          (default_question + ' ') // Raycast will append ellipsis
+          || undefined
         }
         value={question}
         error={questionError}
