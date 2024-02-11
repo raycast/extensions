@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Upgrades] - 2024-02-11
+
+- Add `cleanup` command
+
 ## [Bug fix] - 2022-12-01
 
 - Added `--ignore-pinned` flag to `brew upgrade` command to avoid problems on systems that have pinned packages installed

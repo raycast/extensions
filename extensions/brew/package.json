@@ -7,7 +7,8 @@
   "contributors": [
     "Aayush9029",
     "mathieudutour",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "ashokbaruaakas"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -38,6 +39,13 @@
       "title": "Upgrade",
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
+      "mode": "no-view"
+    },
+    {
+      "name": "clean-up",
+      "title": "Clean Up",
+      "subtitle": "Brew",
+      "description": "Clean Up Everything At Once",
       "mode": "no-view"
     }
   ],
@@ -85,7 +93,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
+    "@raycast/api": "^1.67.1",
     "@raycast/utils": "^1.4.11",
     "@types/stream-json": "^1.7.2",
     "node-fetch": "^2.6.7",

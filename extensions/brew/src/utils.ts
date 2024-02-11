@@ -44,6 +44,10 @@ export interface Remote<T> {
   fetch?: Promise<T[]>;
 }
 
+export async function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Top-level object keys which should be parsed from the raw JSON objects.
 const valid_keys = [
   "name",
