@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import ResultView from "./common";
 
@@ -8,19 +8,15 @@ const sys_prompt = prefs.ask_sys_prompt;
 const default_question = prefs.ask_default_question;
 const toast_title = "Thinking...";
 
-export default function AskView() {
-  const [question, setQuestion] = useState("");
+export default function AskView(props: { arguments: { query?: string }; fallbackText?: string}) {
+  // const { push } = useNavigation();
+  let { query } = props.arguments;
+  if (!query) query = props.fallbackText ?? "";
+  const [question, setQuestion] = useState(query ?? "");
   const [questionError, setQuestionError] = useState<string | undefined>();
   const [selectedText, setSelectedText] = useState<string | undefined>();
   const [canUseContext, setCanUseContext] = useState<boolean | undefined>();
   const [usingContext, setUsingContext] = useState<boolean>(false);
-
-  const currentDate = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
 
   function dropQuestionErrorIfNeeded() {
     if (questionError?.length ?? 0 > 0) {
@@ -33,7 +29,7 @@ export default function AskView() {
       setQuestionError("Question is empty!");
     }
   }
-
+  // console.log("selectedText: ", selectedText, "question: ", question, "query: ", props.arguments.query, query?.length); // Debugging
   useEffect(() => {
     (async () => {
       try {
@@ -50,6 +46,17 @@ export default function AskView() {
       } catch (error) {
         // No selected text. Pass an empty string so ResultView won't try getting selected text
         setCanUseContext(false);
+        // if (query?.length !== 0) {
+        //   push(
+        //     <ResultView
+        //       sys_prompt={sys_prompt}
+        //       selected_text={usingContext ? selectedText : ""}
+        //       user_extra_msg={question ? question : default_question}
+        //       model_override={model_override}
+        //       toast_title={toast_title}
+        //     />
+        //   );
+        // }
       }
     })();
   }, []);
@@ -66,12 +73,7 @@ export default function AskView() {
             title="Submit"
             target={
               <ResultView
-                sys_prompt={
-                  model_override === "pplx-70b-online" || model_override === "pplx-7b-online"
-                    ? `Current date: ${currentDate}.`
-                    : sys_prompt
-                }
-                // sys_prompt={sys_prompt}
+                sys_prompt={sys_prompt}
                 selected_text={usingContext ? selectedText : ""}
                 user_extra_msg={question ? question : default_question}
                 model_override={model_override}

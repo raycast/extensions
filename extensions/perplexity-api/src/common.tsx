@@ -32,8 +32,18 @@ export default function ResultView(props: {
   const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
+  const currentDate = new Date().toLocaleString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   async function getChatResponse(prompt: string, selectedText: string, model: string, temp: number) {
-    console.log("model: ", model, "temp: ", temp, "prompt", prompt, "user_extra_msg", user_extra_msg); // DEBUG
+    if (model === "pplx-70b-online" || model === "pplx-7b-online") {
+      prompt = `Current date: ${currentDate}.`;
+    }
+    console.log("model: ", model, "temp: ", temp, "prompt: ", prompt, "user_extra_msg: ", user_extra_msg); // DEBUG
     console.log("selectedText: ", selectedText); // DEBUG
     try {
       const streamOrCompletion = await openai.chat.completions.create({
@@ -128,8 +138,8 @@ export default function ResultView(props: {
     { name: "Llama2 70B Chat", id: "llama-2-70b-chat" },
     { name: "Perplexity 70B Chat", id: "pplx-70b-chat" },
     { name: "CodeLlama 70B Instruct", id: "codellama-70b-instruct" },
-    // { name: "Perplexity 7B Online", id: "pplx-7b-online"},
-    // { name: "Perplexity 70B Online", id: "pplx-70b-online"},
+    { name: "Perplexity 7B Online", id: "pplx-7b-online"},
+    { name: "Perplexity 70B Online", id: "pplx-70b-online"},
   ];
 
   return (
