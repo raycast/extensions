@@ -1,5 +1,10 @@
 # Parallels Virtual Machines Changelog
 
+## [Update] - 2024-02-12
+
+- Added ability to change colorsheme of icon in the list of virtual machines via extension preferences.
+- Added more actions (Shutdown, Reset, Restart, Pause), and their respective icons for better orientation.
+
 ## [Update] - 2024-01-05
 
 - Added error handling for when AppleScript can't launch VM.
