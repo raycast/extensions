@@ -279,8 +279,16 @@
     {
       "name": "ask",
       "title": "Ask",
-      "description": "Ask ChatGPT a question about the selected text",
+      "description": "Ask AI a question about the selected text",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
       "preferences": [
         {
           "name": "ask_sys_prompt",
@@ -295,7 +303,7 @@
           "title": "Default Question",
           "description": "The question that will be asked about the selected text if you don't input one",
           "type": "textfield",
-          "default": "Please explain this.",
+          "default": "Please explain this as concise and simple as possible.",
           "required": false
         },
         {
