@@ -32,7 +32,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -90,7 +90,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -148,7 +148,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -206,7 +206,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -280,7 +280,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -327,6 +327,81 @@
       ]
     },
     {
+      "name": "coding",
+      "title": "Coding Assistant",
+      "description": "Coding Assistant considering selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "coding_sys_prompt",
+          "title": "System Prompt",
+          "description": "System prompt for coding assistant.",
+          "type": "textfield",
+          "default": "You are a world class software engineer with deep understanding of any programming language.",
+          "required": false
+        },
+        {
+          "name": "coding_default_question",
+          "title": "Default Question",
+          "description": "Default question for selected text if none provided.",
+          "type": "textfield",
+          "default": "Explain the following code in detail. Start with an high-level overview.",
+          "required": false
+        },
+        {
+          "name": "model_coding",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "codellama-70b-instruct",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "casual",
       "title": "Change Tone to Casual",
       "description": "Change tone of selected text to casual.",
@@ -347,7 +422,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -406,7 +481,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -465,7 +540,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -524,7 +599,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
-          "placeholder": "Follow global model",
+          "default": "global",
           "data": [
             {
               "title": "Follow global model",
@@ -578,6 +653,7 @@
       "description": "Perplexity LLM to use for your commands",
       "type": "dropdown",
       "required": true,
+      "default": "pplx-70b-chat",
       "data": [
         {
           "value": "mixtral-8x7b-instruct",
