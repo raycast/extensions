@@ -1,11 +1,9 @@
 import { Action, ActionPanel, Detail, List, PopToRootType, showHUD } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import { useState } from "react";
 import { promisify } from "node:util";
 import { mullvadNotInstalledHint } from "./utils";
-
-const execAsync = promisify(exec);
 
 type Location = {
   country: string;
@@ -70,7 +68,7 @@ export default function Command() {
     if (!selectedLocation) return;
     const [countryCode, cityCode] = selectedLocation.split("/");
 
-    await execAsync(`mullvad relay set location ${countryCode} ${cityCode}`);
+    execSync(`mullvad relay set location ${countryCode} ${cityCode}`);
 
     await showHUD("Location changed", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
   }

@@ -1,14 +1,11 @@
-import { promisify } from "node:util";
-import { exec } from "child_process";
 import { showToast, Toast } from "@raycast/api";
+import { execSync } from "child_process";
 import Style = Toast.Style;
-
-export const execAsync = promisify(exec);
 
 export async function verifyIsMullvadInstalled() {
   try {
     // Weirdly, `which` is not available here
-    await execAsync("mullvad version");
+    execSync("mullvad version");
     return true;
   } catch (e) {
     console.error(e);
