@@ -15,14 +15,12 @@ You're all good to go!
 
 This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings.
 
-These commands are:
+Disabled commands are:
 
-- Compose Email Response
-- Add Comments to Code
-- Change Tone to Friendly
 - Change Tone to Casual
 - Change Tone to Professional
-- Change Tone to Academic
+- Coding Assustant
+- Custom Action
 - Find Synonyms
 - Task Generator
 - Translate Text
