@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { allModels as changeModels } from "./hook/utils";
 import { useEffect, useState } from "react";
 import ResultView from "./hook/perplexityAPI";
@@ -9,15 +9,15 @@ const sys_prompt = prefs.ask_sys_prompt;
 const default_question = prefs.ask_default_question;
 const toast_title = "Thinking...";
 
-export default function AskView(props: { arguments: { query?: string }; fallbackText?: string}) {
-  let { query } = props.arguments;
+export default function AskView(props: { arguments: { query?: string }; fallbackText?: string }) {
+  const { query } = props.arguments;
   const [question, setQuestion] = useState(query ?? "");
   const [questionError, setQuestionError] = useState<string | undefined>();
   const [selectedText, setSelectedText] = useState<string | undefined>();
   const [canUseContext, setCanUseContext] = useState<boolean | undefined>();
   const [usingContext, setUsingContext] = useState<boolean>(false);
   const [model_override, setUsedModel] = useState<string>(usedModel);
-  
+
   function dropQuestionErrorIfNeeded() {
     if (questionError?.length ?? 0 > 0) {
       setQuestionError(undefined);
@@ -33,13 +33,15 @@ export default function AskView(props: { arguments: { query?: string }; fallback
     (async () => {
       try {
         let selectedText: string | undefined = await getSelectedText();
-        if (selectedText.length === 0) { // Sometimes the call will return successfully but the text is "". In this case we'll just let ResultView retry getting the selected text later.
+        if (selectedText.length === 0) {
+          // Sometimes the call will return successfully but the text is "". In this case we'll just let ResultView retry getting the selected text later.
           selectedText = undefined;
         }
         setSelectedText(selectedText);
         setCanUseContext(true);
         setUsingContext(true);
-      } catch (error) { // No selected text. Pass an empty string so ResultView won't try getting selected text
+      } catch (error) {
+        // No selected text. Pass an empty string so ResultView won't try getting selected text
         setCanUseContext(false);
       }
     })();
@@ -73,9 +75,8 @@ export default function AskView(props: { arguments: { query?: string }; fallback
         title="Question"
         enableMarkdown
         placeholder={
-          usingContext &&
-          (default_question + ' ') // Raycast will append ellipsis
-          || undefined
+          (usingContext && default_question + " ") || // Raycast will append ellipsis
+          undefined
         }
         value={question}
         error={questionError}
@@ -96,7 +97,8 @@ export default function AskView(props: { arguments: { query?: string }; fallback
       ) : (
         <Form.Description
           title="Context"
-          text={ // Undefined when we're still trying to get the selection
+          text={
+            // Undefined when we're still trying to get the selection
             canUseContext === false ? "No selected text" : "Getting selected text..."
           }
         />

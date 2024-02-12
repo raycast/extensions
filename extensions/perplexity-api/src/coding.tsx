@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { allModels as changeModels } from "./hook/utils";
 import { useEffect, useState } from "react";
 import ResultView from "./hook/perplexityAPI";
@@ -9,7 +9,7 @@ const sys_prompt = prefs.coding_sys_prompt;
 const default_question = prefs.coding_default_question;
 const toast_title = "Coding...";
 
-export default function AskView(props: { arguments: { query?: string }; fallbackText?: string}) {
+export default function AskView(props: { arguments: { query?: string }; fallbackText?: string }) {
   let { query } = props.arguments;
   if (!query) query = props.fallbackText ?? "";
   const [question, setQuestion] = useState(query ?? "");
@@ -78,9 +78,8 @@ export default function AskView(props: { arguments: { query?: string }; fallback
         title="Question"
         enableMarkdown
         placeholder={
-          usingContext &&
-          (default_question + ' ') // Raycast will append ellipsis
-          || undefined
+          (usingContext && default_question + " ") || // Raycast will append ellipsis
+          undefined
         }
         value={question}
         error={questionError}
@@ -109,10 +108,10 @@ export default function AskView(props: { arguments: { query?: string }; fallback
       )}
       <Form.Dropdown id="selectedModel" title="Selected Model" defaultValue={model_override} onChange={setUsedModel}>
         {changeModels
-        .filter((model) => !model.id.includes("online"))
-        .map((model) => (
-          <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
-        ))}
+          .filter((model) => !model.id.includes("online"))
+          .map((model) => (
+            <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
+          ))}
       </Form.Dropdown>
     </Form>
   );

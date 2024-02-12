@@ -1,12 +1,4 @@
-import {
-  getSelectedText,
-  Detail,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
+import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./api";
 import { Stream } from "openai/streaming";
@@ -40,20 +32,20 @@ export default function ResultView(props: ResultViewProps) {
       setPromptTokenCount(countToken(prompt + selectedText));
       return streamOrCompletion;
     } catch (error) {
-        await showToast({ style: Toast.Style.Failure, title: "Error" });
-        setLoading(false);
-        setResponse(
-          "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``
-        );
-        return;
+      await showToast({ style: Toast.Style.Failure, title: "Error" });
+      setLoading(false);
+      setResponse(
+        "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``,
+      );
+      return;
     }
   }
-  
+
   async function getResult(newModel?: string, newTemp?: number) {
     const now = new Date();
     let duration = 0;
     const toast = await showToast(Toast.Style.Animated, toast_title);
-  
+
     let selectedText = selected_text;
     if (selectedText === undefined) {
       try {
@@ -63,22 +55,22 @@ export default function ResultView(props: ResultViewProps) {
         await showToast({ style: Toast.Style.Failure, title: "Error" });
         setLoading(false);
         setResponse(
-          "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again."
+          "⚠️ Raycast was unable to get the selected text. You may try copying the text to a text editor and try again.",
         );
         return;
       }
     }
-  
+
     const resp = await getChatResponse(sys_prompt, selectedText, newModel ?? model, newTemp ?? temp);
     if (!resp) return;
-  
+
     let response_ = "";
     function appendResponse(part: string) {
       response_ += part;
       setResponse(response_);
       setResponseTokenCount(countToken(response_));
     }
-  
+
     if (resp instanceof Stream) {
       for await (const part of resp) {
         appendResponse(part.choices[0]?.delta?.content ?? "");
@@ -86,7 +78,7 @@ export default function ResultView(props: ResultViewProps) {
     } else {
       appendResponse(resp.choices[0]?.message?.content ?? "");
     }
-  
+
     setLoading(false);
     const done = new Date();
     duration = (done.getTime() - now.getTime()) / 1000;
@@ -122,14 +114,24 @@ export default function ResultView(props: ResultViewProps) {
           <ActionPanel title="Actions">
             <Action.CopyToClipboard title="Copy Results" content={response} />
             <Action.Paste title="Paste Results" content={response} />
-            <Action title="Retry" onAction={() => retry({})} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
+            <Action
+              title="Retry"
+              onAction={() => retry({})}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              icon={Icon.Repeat}
+            />
             <ActionPanel.Submenu
               title="Retry with Another Model"
               icon={Icon.ArrowNe}
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             >
               {changeModels
-                .filter((newModel) => newModel.id !== model && (!user_extra_msg ? !newModel.id.includes("online") : true) && newModel.id !== "global")
+                .filter(
+                  (newModel) =>
+                    newModel.id !== model &&
+                    (!user_extra_msg ? !newModel.id.includes("online") : true) &&
+                    newModel.id !== "global",
+                )
                 .map((newModel) => (
                   <Action
                     key={newModel.id}
@@ -144,26 +146,10 @@ export default function ResultView(props: ResultViewProps) {
               icon={Icon.Temperature}
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             >
-              <Action
-                icon={{ source: Icon.Signal1 }}
-                title="0.2"
-                onAction={() => retry({ newTemp: 0.2 })}
-              />
-              <Action
-                icon={{ source: Icon.Signal2 }}
-                title="0.5"
-                onAction={() => retry({ newTemp: 0.5 })}
-              />
-              <Action
-                icon={{ source: Icon.Signal3 }}
-                title="1.0"
-                onAction={() => retry({ newTemp: 1.0 })}
-              />
-              <Action
-                icon={{ source: Icon.FullSignal }}
-                title="1.5"
-                onAction={() => retry({ newTemp: 1.5 })}
-              />
+              <Action icon={{ source: Icon.Signal1 }} title="0.2" onAction={() => retry({ newTemp: 0.2 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.5" onAction={() => retry({ newTemp: 0.5 })} />
+              <Action icon={{ source: Icon.Signal3 }} title="1.0" onAction={() => retry({ newTemp: 1.0 })} />
+              <Action icon={{ source: Icon.FullSignal }} title="1.5" onAction={() => retry({ newTemp: 1.5 })} />
             </ActionPanel.Submenu>
           </ActionPanel>
         )
