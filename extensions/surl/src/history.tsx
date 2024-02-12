@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Cache } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Cache, openCommandPreferences } from "@raycast/api";
 import { useState } from "react";
 
 const FRONTEND_ENDPOINT = "https://surlapp.uk";
@@ -38,9 +38,15 @@ export default function Command() {
                   <Action
                     icon={{ source: Icon.Trash }}
                     style={Action.Style.Destructive}
-                    title="Remove from History"
+                    title="Remove From History"
                     onAction={() => handleRemoveCache(index)}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  />
+                  <Action
+                    icon={{ source: Icon.Clock }}
+                    title="Customize Expiration Date"
+                    onAction={openCommandPreferences}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
                 </ActionPanel>
               }

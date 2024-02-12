@@ -4,7 +4,7 @@
   "title": "Surl",
   "description": "Make your URLs shorter",
   "icon": "surl.png",
-  "author": "yama_fuji",
+  "author": "fujiyamaorange",
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -32,6 +32,31 @@
       "subtitle": "Surl",
       "description": "History of Surl",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "expirationDate",
+      "label": "Expiration Date",
+      "description": "Enter the number of days it is valid",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "1",
+          "title": "1 Day"
+        },
+        {
+          "value": "7",
+          "title": "7 Days"
+        },
+        {
+          "value": "30",
+          "title": "30 Days"
+        }
+      ],
+      "title": "Expiration Date",
+      "required": true,
+      "default": "7"
     }
   ],
   "dependencies": {
