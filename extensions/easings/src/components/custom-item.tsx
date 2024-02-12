@@ -11,7 +11,7 @@ export const customGridItem = (
   onDelete: (index: string) => void,
 ) => {
   const parseType = type.split("-");
-  const typeName = `${capitalize(parseType[0]) + " " + capitalize(parseType[1]) + (parseType[2] && " " + parseType[2])}`;
+  const typeName = `${capitalize(parseType[0]) + (parseType[1] ? " " + capitalize(parseType[1]) : "") + (parseType[2] ? " " + capitalize(parseType[2]) : "")}`;
 
   return (
     <Grid.Item
