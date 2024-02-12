@@ -23,6 +23,14 @@ export default function Command() {
     );
   }
 
+  if(!sleep.data.data.length) {
+    return (
+      <List>
+        <List.Item title={`Sleep Score`} subtitle={`No sleep data available`} />
+      </List>
+    );
+  }
+
   const sToday = sleep?.data.data[0];
   if (!sleep.isLoading) {
     updateCommandMetadata({
