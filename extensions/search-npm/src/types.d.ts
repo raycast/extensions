@@ -6,3 +6,8 @@ declare module 'gitlab-url-parse' {
   const parse: (repoUrl: string) => ParseGitlabUrl
   export default parse
 }
+
+declare module 'tiny-relative-date' {
+  const tinyRelativeDate: (date: Date) => string
+  export default tinyRelativeDate
+}

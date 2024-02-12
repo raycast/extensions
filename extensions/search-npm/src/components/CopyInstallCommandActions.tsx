@@ -1,4 +1,5 @@
-import { getPreferenceValues, Action, Keyboard } from '@raycast/api'
+import type { Keyboard } from '@raycast/api'
+import { getPreferenceValues, Action } from '@raycast/api'
 
 type Registries = 'yarn' | 'npm' | 'pnpm'
 interface Preferences {
@@ -66,8 +67,8 @@ export const CopyInstallCommandActions = ({
       const shortcut = isPrimary
         ? defaultShortcut
         : isSecondary
-        ? alternateShortcut
-        : undefined
+          ? alternateShortcut
+          : undefined
       return (
         <Action.CopyToClipboard
           title={title}

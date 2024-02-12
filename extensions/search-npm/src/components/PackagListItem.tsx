@@ -10,17 +10,18 @@ import {
 } from '@raycast/api'
 import tinyRelativeDate from 'tiny-relative-date'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
-import { parseRepoUrl } from './utils/parseRepoUrl'
-import { getChangeLogUrl } from './utils/getChangelogUrl'
-import { Readme } from './Readme'
-import { Package } from './npmResponse.model'
-import { addToHistory, HistoryItem } from './utils/history-storage'
+import { parseRepoUrl } from '../utils/parseRepoUrl'
+import { getChangeLogUrl } from '../utils/getChangelogUrl'
+import { Readme } from '../screens/Readme'
+import type { Package } from '../model/npmResponse.model'
+import type { HistoryItem } from '../utils/history-storage'
+import { addToHistory } from '../utils/history-storage'
 import {
   addFavorite,
   removeAllItemsFromFavorites,
   removeItemFromFavorites,
-} from './utils/favorite-storage'
-import Favorites from './favorites'
+} from '../utils/favorite-storage'
+import Favorites from '../favorites'
 
 interface PackageListItemProps {
   result: Package
@@ -219,6 +220,12 @@ export const PackageListItem = ({
               title="Open Bundlephobia"
               icon={Icon.LevelMeter}
               shortcut={{ modifiers: ['cmd', 'shift'], key: 'enter' }}
+            />
+            <Action.OpenInBrowser
+              url={`https://esm.sh/${pkg.name}`}
+              title="Open ESM.sh URL"
+              icon={Icon.Cloud}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'e' }}
             />
             {pkg.links?.repository && type === 'github' ? (
               <Action.OpenInBrowser
