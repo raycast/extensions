@@ -33,17 +33,13 @@ export default function AskView(props: { arguments: { query?: string }; fallback
     (async () => {
       try {
         let selectedText: string | undefined = await getSelectedText();
-        if (selectedText.length === 0) {
-          // Sometimes the call will return successfully but the text is "". In
-          // this case we'll just let ResultView retry getting the selected
-          // text later.
+        if (selectedText.length === 0) { // Sometimes the call will return successfully but the text is "". In this case we'll just let ResultView retry getting the selected text later.
           selectedText = undefined;
         }
         setSelectedText(selectedText);
         setCanUseContext(true);
         setUsingContext(true);
-      } catch (error) {
-        // No selected text. Pass an empty string so ResultView won't try getting selected text
+      } catch (error) { // No selected text. Pass an empty string so ResultView won't try getting selected text
         setCanUseContext(false);
       }
     })();
@@ -100,8 +96,7 @@ export default function AskView(props: { arguments: { query?: string }; fallback
       ) : (
         <Form.Description
           title="Context"
-          text={
-            // Undefined when we're still trying to get the selection
+          text={ // Undefined when we're still trying to get the selection
             canUseContext === false ? "No selected text" : "Getting selected text..."
           }
         />
