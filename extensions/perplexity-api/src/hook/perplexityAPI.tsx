@@ -11,16 +11,9 @@ import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./api";
 import { countToken, estimatePrice } from "../util";
 import { Stream } from "openai/streaming";
-import { allModels as changeModels } from "./utils";
+import { allModels as changeModels, currentDate, ResultViewProps } from "./utils";
 
-export default function ResultView(props: {
-  sys_prompt: string;
-  selected_text?: string; // If defined, uses this as selected text
-  user_extra_msg?: string; // If not empty, appends this to the user message
-  model_override: string;
-  toast_title: string;
-  temperature?: number;
-}) {
+export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
@@ -31,15 +24,8 @@ export default function ResultView(props: {
   const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
-  const currentDate = new Date().toLocaleString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
   async function getChatResponse(prompt: string, selectedText: string, model: string, temp: number) {
-    if (model === "pplx-70b-online" || model === "pplx-7b-online") {
+    if (model.includes("online")) {
       prompt = `Current date: ${currentDate}.`;
     }
     try {
@@ -144,7 +130,7 @@ export default function ResultView(props: {
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             >
               {changeModels
-                .filter((newModel) => newModel.id !== model && !newModel.id.includes("online"))
+                .filter((newModel) => newModel.id !== model && (!user_extra_msg ? !newModel.id.includes("online") : true) && newModel.id !== "global")
                 .map((newModel) => (
                   <Action
                     key={newModel.id}

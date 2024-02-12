@@ -825,11 +825,11 @@
     },
     {
       "name": "model",
-      "title": "Select a model",
-      "description": "Perplexity LLM to use for your commands",
+      "title": "Select a global model",
+      "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "pplx-70b-chat",
+      "default": "mixtral-8x7b-instruct",
       "data": [
         {
           "value": "mixtral-8x7b-instruct",
