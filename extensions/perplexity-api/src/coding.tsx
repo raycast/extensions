@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText, useNavigation } from "@raycast/api";
+import { allModels as changeModels } from "./hook/utils";
 import { useEffect, useState } from "react";
 import ResultView from "./hook/perplexityAPI";
 
 const prefs = getPreferenceValues();
-const model_override = prefs.model_coding;
+const usedModel = prefs.model_coding;
 const sys_prompt = prefs.coding_sys_prompt;
 const default_question = prefs.coding_default_question;
 const toast_title = "Coding...";
@@ -16,6 +17,7 @@ export default function AskView(props: { arguments: { query?: string }; fallback
   const [selectedText, setSelectedText] = useState<string | undefined>();
   const [canUseContext, setCanUseContext] = useState<boolean | undefined>();
   const [usingContext, setUsingContext] = useState<boolean>(false);
+  const [model_override, setUsedModel] = useState<string>(usedModel);
 
   function dropQuestionErrorIfNeeded() {
     if (questionError?.length ?? 0 > 0) {
@@ -105,6 +107,13 @@ export default function AskView(props: { arguments: { query?: string }; fallback
           }
         />
       )}
+      <Form.Dropdown id="selectedModel" title="Selected Model" defaultValue={model_override} onChange={setUsedModel}>
+        {changeModels
+        .filter((model) => !model.id.includes("online"))
+        .map((model) => (
+          <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }

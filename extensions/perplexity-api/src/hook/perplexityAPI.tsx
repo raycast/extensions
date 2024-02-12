@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./api";
 import { countToken, estimatePrice } from "../util";
 import { Stream } from "openai/streaming";
+import { allModels as changeModels } from "./utils";
 
 export default function ResultView(props: {
   sys_prompt: string;
@@ -127,17 +128,6 @@ export default function ResultView(props: {
     }
   }, [loading]);
 
-  const changeModels = [
-    { name: "Mistral 8x7b Instruct", id: "mixtral-8x7b-instruct" },
-    { name: "Llama2 70B Chat", id: "llama-2-70b-chat" },
-    { name: "Perplexity 70B Chat", id: "pplx-70b-chat" },
-    { name: "CodeLlama 70B Instruct", id: "codellama-70b-instruct" },
-    ...(user_extra_msg ? [ // if user provides query
-      { name: "Perplexity 7B Online", id: "pplx-7b-online"},
-      { name: "Perplexity 70B Online", id: "pplx-70b-online"},
-    ] : []),
-  ];
-
   return (
     <Detail
       markdown={response}
@@ -154,7 +144,7 @@ export default function ResultView(props: {
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             >
               {changeModels
-                .filter((newModel) => newModel.id !== model)
+                .filter((newModel) => newModel.id !== model && !newModel.id.includes("online"))
                 .map((newModel) => (
                   <Action
                     key={newModel.id}
