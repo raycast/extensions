@@ -1,8 +1,9 @@
 # zed-recent-projects Changelog
 
-## ["Search Recent Projects" Command Update] - 2024-02-10
+## [Enhancements] - 2024-02-12
 
 - `Search Recent Projects` command now allows to pin and order projects to the top of the list.
+- Added preference for choosing to run commands using Zed or Zed Preview.
 
 ## ["Open With Zed" Command Update] - 2024-01-26
 

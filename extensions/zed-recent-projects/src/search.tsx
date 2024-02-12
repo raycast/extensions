@@ -1,12 +1,15 @@
 import { ComponentType, createContext, useContext, useEffect, useState } from "react";
-import { List, Action, Application, getApplications, Detail, Icon } from "@raycast/api";
+import { List, Action, Application, getApplications, getPreferenceValues, Detail, Icon } from "@raycast/api";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
-import { ZED_BUNDLE_ID } from "./lib/zed";
+import { getZedBundleId, ZedBuild } from "./lib/zed";
 import { useZedEntries } from "./hooks/useZedEntries";
 import { usePinnedEntries } from "./hooks/usePinnedEntries";
 import { EntryItem } from "./components/EntryItem";
+
+const preferences: Record<string, string> = getPreferenceValues();
+const zedBuild: ZedBuild = preferences.build as ZedBuild;
 
 const ZedContext = createContext<{
   zed?: Application;
@@ -22,7 +25,7 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
     useEffect(() => {
       getApplications()
         .then((apps) => {
-          const zedApp = apps.find((a) => a.bundleId === ZED_BUNDLE_ID);
+          const zedApp = apps.find((a) => a.bundleId === getZedBundleId(zedBuild));
           if (zedApp) {
             setZed(zedApp);
           }
