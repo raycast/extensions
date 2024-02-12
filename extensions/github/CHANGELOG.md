@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Show requested reviews on my pull requests menu bar] - 2024-02-12
+
+- If you enable the `Show requested reviews on my pull requests menu bar` option, you will now see the number of requested reviews on your pull requests menu bar.
+
 ## [Change cancelled workflow run status icon color] - 2023-12-18
 
 - Change cancelled workflow run status icon color to be in line with GitHub's UI

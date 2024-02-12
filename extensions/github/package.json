@@ -19,7 +19,8 @@
     "daquinoaldo",
     "ppy",
     "lin",
-    "marcotf"
+    "marcotf",
+    "MartinGonzalez"
   ],
   "categories": [
     "Developer Tools",
@@ -222,6 +223,15 @@
           "label": "Show Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "showrequested",
+          "description": "Shows pull requests where you are requested to review",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Requested Reviews",
+          "title": "Requested Reviews",
+          "default": false
         }
       ]
     }
