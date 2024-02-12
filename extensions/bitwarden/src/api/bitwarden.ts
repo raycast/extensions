@@ -98,12 +98,14 @@ export class Bitwarden {
   private callbacks: ActionCallbacks = {};
   private preferences = getPreferenceValues<Preferences>();
   private cliPath: string;
+  private toastInstance: Toast | undefined;
   lockReason: string | undefined;
 
-  constructor() {
+  constructor(toastInstance?: Toast) {
     const { cliPath: cliPathPreference, clientId, clientSecret, serverCertsPath } = this.preferences;
     const serverUrl = getServerUrlPreference();
 
+    this.toastInstance = toastInstance;
     this.cliPath = cliPathPreference || cliInfo.path.bin;
     this.env = {
       BITWARDENCLI_APPDATA_DIR: supportPath,
@@ -129,7 +131,7 @@ export class Bitwarden {
 
     // remove old binaries to check if it's an update and because they are 100MB+
     const hadOldBinaries = await removeFilesThatStartWith("bw-", supportPath);
-    const toast = await showToast({
+    const toast = await this.showToast({
       title: `${hadOldBinaries ? "Updating" : "Initializing"} Bitwarden CLI`,
       style: Toast.Style.Animated,
       primaryAction: { title: "Open Download Page", onAction: () => open(cliInfo.downloadPage) },
@@ -167,6 +169,8 @@ export class Bitwarden {
 
       if (error instanceof Error) throw new EnsureCliBinError(`${error.name}: ${error.message}`, error.stack);
       throw error;
+    } finally {
+      await toast.restore();
     }
   }
 
@@ -203,7 +207,7 @@ export class Bitwarden {
     if (cliServer === serverUrl) return;
 
     // Update the server Url
-    const toast = await showToast({
+    const toast = await this.showToast({
       style: Toast.Style.Animated,
       title: "Switching server...",
       message: "Bitwarden server preference changed",
@@ -229,6 +233,8 @@ export class Bitwarden {
       } else {
         toast.message = "Unknown error occurred";
       }
+    } finally {
+      await toast.restore();
     }
   }
 
@@ -445,4 +451,31 @@ export class Bitwarden {
     }
     return {};
   }
+
+  private showToast = async (toastOpts: Toast.Options): Promise<Toast & { restore: () => Promise<void> }> => {
+    if (this.toastInstance) {
+      const previousStateToastOpts: Toast.Options = {
+        message: this.toastInstance.message,
+        title: this.toastInstance.title,
+        primaryAction: this.toastInstance.primaryAction,
+        secondaryAction: this.toastInstance.secondaryAction,
+      };
+
+      if (toastOpts.style) this.toastInstance.style = toastOpts.style;
+      this.toastInstance.message = toastOpts.message;
+      this.toastInstance.title = toastOpts.title;
+      this.toastInstance.primaryAction = toastOpts.primaryAction;
+      this.toastInstance.secondaryAction = toastOpts.secondaryAction;
+      await this.toastInstance.show();
+
+      return Object.assign(this.toastInstance, {
+        restore: async () => {
+          await this.showToast(previousStateToastOpts);
+        },
+      });
+    } else {
+      const toast = await showToast(toastOpts);
+      return Object.assign(toast, { restore: () => toast.hide() });
+    }
+  };
 }
