@@ -25,7 +25,6 @@ export default function Command() {
         const easings: Easing[] = JSON.parse(storedEasings);
         setState((previous) => ({ ...previous, easings, isLoading: false }));
       } catch (e) {
-        // can't decode easings
         setState((previous) => ({ ...previous, easings: [], isLoading: false }));
       }
     })();

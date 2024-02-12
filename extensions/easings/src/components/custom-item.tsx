@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 
+import { capitalize } from "../utils/capitalize";
 import { CUSTOM_CSS, CUSTOM_FIGMA, CUSTOM_FRAMER } from "../utils/constants";
 
 export const customGridItem = (
@@ -9,11 +10,14 @@ export const customGridItem = (
   value: string,
   onDelete: (index: string) => void,
 ) => {
+  const parseType = type.split("-");
+  const typeName = `${capitalize(parseType[0]) + " " + capitalize(parseType[1]) + (parseType[2] && " " + parseType[2])}`;
+
   return (
     <Grid.Item
       title={name}
-      subtitle={type}
-      content={`../assets/custom-ease-${type}.svg`}
+      subtitle={`Ease ${typeName}`}
+      content={`custom-ease-${type}.svg`}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Cubic Bezier Value" content={CUSTOM_CSS(value)} />

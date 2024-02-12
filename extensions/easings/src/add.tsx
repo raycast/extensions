@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { useCallback, useEffect, useState } from "react";
 
-import { Action, ActionPanel, Form, LocalStorage, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, LocalStorage, showHUD, useNavigation } from "@raycast/api";
 
 import { Easing, State } from "./utils/types";
 
@@ -16,6 +16,8 @@ export default function Command() {
 
   const [titleError, setTitleError] = useState<string | undefined>();
   const [valueError, setValueError] = useState<string | undefined>();
+
+  const { pop } = useNavigation();
 
   function dropTitleError() {
     if (titleError && titleError.length > 0) {
@@ -59,9 +61,20 @@ export default function Command() {
 
   const handleCreate = useCallback(
     (title: string, type: string, value: string) => {
-      const newEasings = [...state.easings, { id: nanoid(), title, type, value }];
+      let parsedValue;
+
+      if (value.includes("cubic-bezier(")) {
+        parsedValue = value.replace("cubic-bezier(", "").replace(")", "").replace(";", "");
+      } else if (value.includes("cubicBezier(")) {
+        parsedValue = value.replace("cubicBezier(", "").replace(")", "").replace(";", "");
+      } else {
+        parsedValue = value;
+      }
+
+      const newEasings = [...state.easings, { id: nanoid(), title, type, value: parsedValue }];
       setState((previous) => ({ ...previous, easings: newEasings }));
       showHUD(`Successfully saved: ${title}`);
+      pop();
     },
     [state.easings, setState],
   );
@@ -71,7 +84,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Create Todo"
+            title="Add Custom Easing"
             onSubmit={(values: Easing) => {
               handleCreate(values.title, values.type, values.value);
             }}
@@ -103,6 +116,7 @@ export default function Command() {
         id="value"
         title="Value"
         value={value}
+        placeholder="1,0.25,0.25,0.5 or cubic-bezier(1,0.25,0.25,0.5)"
         onChange={setValue}
         error={valueError}
         onBlur={(event) => {
