@@ -81,7 +81,7 @@
           "title": "Prompt",
           "description": "The prompt for the grammar command.",
           "type": "textfield",
-          "default": "Fix spelling, grammar and punctuation. Example: Input: 'I are a good writer.' Output: 'I am a good writer.'",
+          "default": "Fix spelling, grammar and punctuation. Simply return the corrected version. Example: Input: 'I are a good writer.' Output: 'I am a good writer.'",
           "required": false
         },
         {
@@ -412,7 +412,7 @@
           "title": "Default Question",
           "description": "Default question for selected text if none provided.",
           "type": "textfield",
-          "default": "Explain the following code in detail. Start with an high-level overview.",
+          "default": "Explain the following code in detail. Start with a high-level overview.",
           "required": false
         },
         {
@@ -579,7 +579,7 @@
     },
     {
       "name": "professional",
-      "title": "Change Tone to Professional",
+      "title": "Change Tone to Professional.",
       "description": "Change tone of selected text to professional.",
       "mode": "view",
       "disabledByDefault": true,
@@ -653,6 +653,65 @@
         },
         {
           "name": "model_custom",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate Text",
+      "description": "Translate selected text",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_translate",
+          "title": "Language-defining Translation Prompt.",
+          "description": "The prompt for the translate command.",
+          "type": "textfield",
+          "default": "Act as translator. If English, to German. If German, to English. Maintain tone. Start with: '### Translated from .. to .. :'",
+          "required": false
+        },
+        {
+          "name": "model_translate",
           "description": "Override the global preferred model for this command.",
           "type": "dropdown",
           "required": false,
