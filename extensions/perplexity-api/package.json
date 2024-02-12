@@ -329,7 +329,7 @@
           "title": "Default Question",
           "description": "Default question for selected text if none provided.",
           "type": "textfield",
-          "default": "Please explain this as concise and simple as possible.",
+          "default": "Explain this as concise and simple as possible.",
           "required": false
         },
         {
