@@ -10,6 +10,8 @@
   "preferences": [
     {
       "name": "IconColorType",
+      "required": false,
+      "title": "Icon Color Type",
       "description": "Which colors are used for OS icons Mono/Colored",
       "type": "dropdown",
       "data": [
