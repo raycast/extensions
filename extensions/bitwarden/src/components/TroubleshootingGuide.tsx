@@ -48,7 +48,7 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
     messages.push(
       ">## Technical details",
       isArchError &&
-        "⚠️ We suspect that your Bitwarden CLI was installed using a version of NodeJS that's compatible with your system architecture (e.g. x64 NodeJS on a M1/Apple Silicon Mac). Please make sure your have the correct versions of your software installed (Homebrew → *NodeJS → Bitwarden CLI).",
+        "⚠️ We suspect that your Bitwarden CLI was installed using a version of NodeJS that's incompatible with your system architecture (e.g. x64 NodeJS on a M1/Apple Silicon Mac). Please make sure your have the correct versions of your software installed (Homebrew → NodeJS → Bitwarden CLI).",
       getCodeBlock(errorString)
     );
   }
