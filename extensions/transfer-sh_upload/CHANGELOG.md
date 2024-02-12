@@ -2,7 +2,7 @@
 
 ## [1.0.2] 2024-02-12
 
-- fixed some description and readme bugs
+- Fixed some description and README bugs
 
 ## [1.0.1] 2024-02-10
 
