@@ -9,7 +9,6 @@ const default_question = prefs.ask_default_question;
 const toast_title = "Thinking...";
 
 export default function AskView(props: { arguments: { query?: string }; fallbackText?: string}) {
-  // const { push } = useNavigation();
   let { query } = props.arguments;
   if (!query) query = props.fallbackText ?? "";
   const [question, setQuestion] = useState(query ?? "");
@@ -29,7 +28,6 @@ export default function AskView(props: { arguments: { query?: string }; fallback
       setQuestionError("Question is empty!");
     }
   }
-  // console.log("selectedText: ", selectedText, "question: ", question, "query: ", props.arguments.query, query?.length); // Debugging
   useEffect(() => {
     (async () => {
       try {
@@ -46,17 +44,6 @@ export default function AskView(props: { arguments: { query?: string }; fallback
       } catch (error) {
         // No selected text. Pass an empty string so ResultView won't try getting selected text
         setCanUseContext(false);
-        // if (query?.length !== 0) {
-        //   push(
-        //     <ResultView
-        //       sys_prompt={sys_prompt}
-        //       selected_text={usingContext ? selectedText : ""}
-        //       user_extra_msg={question ? question : default_question}
-        //       model_override={model_override}
-        //       toast_title={toast_title}
-        //     />
-        //   );
-        // }
       }
     })();
   }, []);

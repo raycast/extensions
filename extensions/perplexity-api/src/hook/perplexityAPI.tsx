@@ -41,11 +41,6 @@ export default function ResultView(props: {
     if (model === "pplx-70b-online" || model === "pplx-7b-online") {
       prompt = `Current date: ${currentDate}.`;
     }
-    console.log("model: ", model); // DEBUG
-    console.log("temp: ", temp);
-    console.log("prompt: ", prompt);
-    console.log("user_extra_msg: ", user_extra_msg);
-    // console.log("selectedText: ", selectedText); // DEBUG
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
@@ -53,9 +48,7 @@ export default function ResultView(props: {
           { role: "system", content: prompt },
           { role: "user", content: selectedText + (user_extra_msg ? `\n\n${user_extra_msg}` : "") },
         ],
-        // frequency_penalty: 1,
         temperature: temp,
-        // top_p: 1,
         stream: enable_streaming,
       });
       setPromptTokenCount(countToken(prompt + selectedText));
