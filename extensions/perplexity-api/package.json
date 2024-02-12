@@ -245,6 +245,64 @@
       ]
     },
     {
+      "name": "improve",
+      "title": "Improve Text",
+      "description": "Improve selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_improve",
+          "title": "Make Longer Prompt",
+          "description": "The prompt for the improve command.",
+          "type": "textfield",
+          "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity and conciseness, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
+          "required": false
+        },
+        {
+          "name": "model_improve",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "ask",
       "title": "Ask AI",
       "description": "Ask AI, use selected text, and web search via Online LLMs.",
@@ -413,7 +471,7 @@
           "title": "Change Tone Prompt",
           "description": "The prompt for the casual command.",
           "type": "textfield",
-          "default": "Rewrite the text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged, keep legth retained.",
+          "default": "Rewrite the text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged.",
           "required": false
         },
         {
@@ -531,7 +589,7 @@
           "title": "Change Tone Prompt",
           "description": "The prompt for the professional command.",
           "type": "textfield",
-          "default": "Rewrite the text using a professional tone of voice, formal language, accurate facts, concise phrasing, meaning unchanged.",
+          "default": "Rewrite the text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
           "required": false
         },
         {
