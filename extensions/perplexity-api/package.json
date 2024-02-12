@@ -212,21 +212,21 @@
       ]
     },
     {
-      "name": "refine",
-      "title": "Fix Spelling and Grammar",
+      "name": "grammar",
+      "title": "Fix Grammar",
       "description": "Fix spelling and grammar of selected text",
       "mode": "view",
       "preferences": [
         {
-          "name": "prompt_refine",
-          "title": "Refine Prompt",
-          "description": "The prompt for the refine command",
+          "name": "prompt_grammar",
+          "title": "Prompt",
+          "description": "The prompt for the grammar command",
           "type": "textfield",
           "default": "Fix spelling, grammar and punctuation. Example: Input: 'I are a good writer.' Output: 'I am a good writer.'",
           "required": false
         },
         {
-          "name": "model_refine",
+          "name": "model_grammar",
           "description": "Override the global preferred model for this command",
           "type": "dropdown",
           "required": false,

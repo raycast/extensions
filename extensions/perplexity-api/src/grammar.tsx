@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import ResultView from "./perplexityAPI";
 
-const prompt = getPreferenceValues().prompt_refine;
-const model_override = getPreferenceValues().model_refine;
+const prompt = getPreferenceValues().prompt_grammar;
+const model_override = getPreferenceValues().model_grammar;
 const toast_title = "Rewriting...";
 
 export default function Refine() {
