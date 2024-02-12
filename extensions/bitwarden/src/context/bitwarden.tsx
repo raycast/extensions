@@ -14,6 +14,7 @@ export const BitwardenProvider = ({ children, loadingFallback = <LoadingFallback
   const [bitwarden, setBitwarden] = useState<Bitwarden>();
 
   useEffect(() => {
+    throw new Error("Not implemented");
     new Bitwarden().initialize().then(setBitwarden).catch(setError);
   }, []);
 

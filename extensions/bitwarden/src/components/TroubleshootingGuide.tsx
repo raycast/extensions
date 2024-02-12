@@ -1,4 +1,5 @@
 import { ActionPanel, Action, Detail, getPreferenceValues, environment } from "@raycast/api";
+import BugReportCollectDataAction from "~/components/searchVault/actions/BugReportCollectDataAction";
 import BugReportOpenAction, { BUG_REPORT_URL } from "~/components/searchVault/actions/BugReportOpenAction";
 import { EnsureCliBinError, getErrorString } from "~/utils/errors";
 
@@ -58,7 +59,10 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
       markdown={messages.filter(Boolean).join(LINE_BREAK)}
       actions={
         <ActionPanel>
-          <BugReportOpenAction />
+          <ActionPanel.Section title="Bug Report">
+            <BugReportOpenAction />
+            <BugReportCollectDataAction />
+          </ActionPanel.Section>
           {needsCliInstallGuide && (
             <>
               <Action.CopyToClipboard title="Copy Homebrew Installation Command" content="brew install bitwarden-cli" />

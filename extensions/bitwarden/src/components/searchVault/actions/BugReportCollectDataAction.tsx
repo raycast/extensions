@@ -79,8 +79,8 @@ const getHomebrewInfo = async () => {
     if (config === NA) return { arch: NA, version: NA };
 
     const archValue = /HOMEBREW_PREFIX: (.+)/.exec(config)?.[1] || NA;
-    const arch = archValue !== NA ? (archValue.includes("/opt/homebrew") ? "arm64" : "x86_64") : NA;
     const version = /HOMEBREW_VERSION: (.+)/.exec(config)?.[1] || NA;
+    const arch = archValue !== NA ? (archValue.includes("/opt/homebrew") ? "arm64" : "x86_64") : NA;
 
     return { arch, version };
   } catch (error) {
@@ -88,17 +88,19 @@ const getHomebrewInfo = async () => {
   }
 };
 
-function BugReportDataCollectionAction() {
+function BugReportCollectDataAction() {
   const collectData = async () => {
     const toast = await showToast(Toast.Style.Animated, "Collecting data...");
     try {
       const preferences = getSafePreferences();
-      const systemArch = await tryExec("uname -m");
-      const macosVersion = await tryExec("sw_vers -productVersion");
-      const macosBuildVersion = await tryExec("sw_vers -buildVersion");
       const bwInfo = getBwBinInfo();
-      const bwVersion = await tryExec(`"${bwInfo.path}" --version`);
-      const brewInfo = await getHomebrewInfo();
+      const [systemArch, macosVersion, macosBuildVersion, bwVersion, brewInfo] = await Promise.all([
+        tryExec("uname -m"),
+        tryExec("sw_vers -productVersion"),
+        tryExec("sw_vers -buildVersion"),
+        tryExec(`"${getBwBinInfo().path}" --version`),
+        getHomebrewInfo(),
+      ]);
 
       const data = {
         raycast: {
@@ -134,14 +136,7 @@ function BugReportDataCollectionAction() {
     }
   };
 
-  return (
-    <Action
-      title="Collect Bug Report Data"
-      icon={Icon.Bug}
-      onAction={collectData}
-      shortcut={{ key: "d", modifiers: ["opt"] }}
-    />
-  );
+  return <Action title="Collect Bug Report Data" icon={Icon.Bug} onAction={collectData} />;
 }
 
-export default BugReportDataCollectionAction;
+export default BugReportCollectDataAction;
