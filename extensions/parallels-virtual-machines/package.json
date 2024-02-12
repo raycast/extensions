@@ -5,9 +5,19 @@
   "description": "Launch and control virtual machines in Parallels Desktop.",
   "icon": "command-icon.png",
   "author": "danpalmer",
-  "categories": [
-    "Productivity",
-    "Developer Tools"
+  "contributors": ["jakucermak"],
+  "categories": ["Productivity", "Developer Tools"],
+  "preferences": [
+    {
+      "name": "IconColorType",
+      "description": "Which colors are used for OS icons Mono/Colored",
+      "type": "dropdown",
+      "data": [
+        { "title": "Colored", "value": "0" },
+        { "title": "Mono", "value": "1" }
+      ],
+      "default": "1"
+    }
   ],
   "license": "MIT",
   "commands": [
@@ -16,11 +26,7 @@
       "title": "Show Virtual Machines",
       "subtitle": "Parallels Desktop",
       "description": "Shows virtual machines in Parallels Desktop.",
-      "keywords": [
-        "open",
-        "parallels",
-        "vm"
-      ],
+      "keywords": ["open", "parallels", "vm"],
       "mode": "view"
     }
   ],

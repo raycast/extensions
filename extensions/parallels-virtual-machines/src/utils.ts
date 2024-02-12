@@ -1,8 +1,10 @@
 import { Image } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+import { IconsColorType } from "./types";
 
-import { VM, VMState } from "./types";
+import { VM, VMAction, VMState } from "./types";
 
-export { parseVM, stateFromText, stateToDescription, iconForVM };
+export { parseVM, stateFromText, stateToDescription, iconForVM, iconAction };
 
 function parseVM(data: any): VM {
   const id: string = data["ID"];
@@ -44,6 +46,11 @@ function stateToDescription(state: VMState): string {
 
 function iconForVM(vm: VM): Image {
   let icon = "other";
+  let colortype = "mono";
+  if (parseInt(getPreferenceValues().IconColorType) === IconsColorType.Color) {
+    colortype = "colored";
+  }
+
   if (["win-11", "win-10", "ubuntu", "fedora", "fedora-core", "debian", "kali", "centos", "macos"].includes(vm.os)) {
     icon = vm.os;
   } else if (vm.os.includes("win") || vm.os.includes("Win")) {
@@ -51,5 +58,36 @@ function iconForVM(vm: VM): Image {
   } else if (["redhat", "mint", "opensuse", "manjaro", "arch", "linux", "lin"].includes(vm.os)) {
     icon = "linux";
   }
-  return { source: `osicons/${icon}.png` };
+  return { source: `osicons/${colortype}/${icon}.png` };
+}
+
+function iconAction(action: VMAction): Image {
+  let image = "other";
+  switch (action) {
+    case VMAction.Resume:
+      image = "play";
+      break;
+    case VMAction.Start:
+      image = "start";
+      break;
+    case VMAction.Suspend:
+      image = "suspend";
+      break;
+    case VMAction.Stop:
+      image = "stop";
+      break;
+    case VMAction.Restart:
+      image = "restart";
+      break;
+    case VMAction.Reset:
+      image = "reset";
+      break;
+    case VMAction.Pause:
+      image = "pause";
+      break;
+    case VMAction.Shutdown:
+      image = "shutdown";
+      break;
+  }
+  return { source: `actions/${image}.png` };
 }
