@@ -2,15 +2,17 @@ import * as React from "react";
 import { readdir } from "node:fs/promises";
 import { useLaunchCommands, useContainingDirectories } from "./configApi";
 import { getAvatarIcon, useCachedPromise } from "@raycast/utils";
-import { Action, ActionPanel, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, useNavigation } from "@raycast/api";
 import path from "node:path";
 import { promisify } from "node:util";
 import { exec as _exec } from "node:child_process";
+import { SettingsView } from "./Settings/SettingsView";
 
 const exec = promisify(_exec);
 
 export default function Command() {
   const projectsRoots = useContainingDirectories();
+  const navigation = useNavigation();
 
   const { isLoading, data } = useCachedPromise(
     async () => {
@@ -44,6 +46,15 @@ export default function Command() {
           actions={<ProjectActions item={item} />}
         />
       ))}
+      <List.EmptyView
+        title="No projects found"
+        description="Configure a Containing Directory from the extension settings."
+        actions={
+          <ActionPanel title="Configure extension">
+            <Action title="Open Settings" icon={Icon.Gear} onAction={() => navigation.push(<SettingsView />)} />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }

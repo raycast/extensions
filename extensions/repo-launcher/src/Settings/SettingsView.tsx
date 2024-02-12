@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, useNavigation } from "@raycast/api";
 import { NewContainingDirectory } from "./NewContainingDirectory";
 import {
   useLaunchCommands,
@@ -32,7 +32,13 @@ export function SettingsView() {
               actions={
                 <ActionPanel>
                   <Action.ShowInFinder title="Show in Finder" path={dir} />
-                  <Action title={`Remove ${dir}`} onAction={() => removeContainingDirectories(dir)} />
+                  <Action
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                    shortcut={DELETE_SHORTCUT}
+                    title={`Remove ${dir}`}
+                    onAction={() => removeContainingDirectories(dir)}
+                  />
                 </ActionPanel>
               }
             />
@@ -46,6 +52,7 @@ export function SettingsView() {
             <ActionPanel>
               <Action
                 title="New Containing Directory"
+                icon={{ source: Icon.PlusCircle, tintColor: "raycast-green" }}
                 onAction={() => {
                   navigation.push(<NewContainingDirectory />);
                 }}
@@ -65,21 +72,38 @@ export function SettingsView() {
               <ActionPanel>
                 <Action
                   title={`Edit ${cmd.title}`}
+                  icon={Icon.Pencil}
                   onAction={() => navigation.push(<UpsertLaunchCommand existingCommand={cmd} />)}
                 />
-                <Action title="Move to Top" onAction={() => moveLaunchCommand(cmd, "top")} />
+                <Action
+                  icon={Icon.ArrowUpCircleFilled}
+                  title="Move to Top"
+                  onAction={() => moveLaunchCommand(cmd, "top")}
+                />
                 <Action
                   title="Move Up"
+                  icon={Icon.ArrowUpCircle}
                   shortcut={{ modifiers: ["shift"], key: "arrowUp" }}
                   onAction={() => moveLaunchCommand(cmd, "up")}
                 />
                 <Action
                   title="Move Down"
+                  icon={Icon.ArrowDownCircle}
                   shortcut={{ modifiers: ["shift"], key: "arrowDown" }}
                   onAction={() => moveLaunchCommand(cmd, "down")}
                 />
-                <Action title="Move to Bottom" onAction={() => moveLaunchCommand(cmd, "bottom")} />
-                <Action title={`Remove ${cmd.title}`} onAction={() => removeLaunchCommand(cmd.id)} />
+                <Action
+                  title="Move to Bottom"
+                  icon={Icon.ArrowDownCircleFilled}
+                  onAction={() => moveLaunchCommand(cmd, "bottom")}
+                />
+                <Action
+                  title={`Remove ${cmd.title}`}
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={DELETE_SHORTCUT}
+                  onAction={() => removeLaunchCommand(cmd.id)}
+                />
               </ActionPanel>
             }
           />
@@ -98,3 +122,5 @@ export function SettingsView() {
     </List>
   );
 }
+
+const DELETE_SHORTCUT: Keyboard.Shortcut = { modifiers: ["ctrl"], key: "x" };
