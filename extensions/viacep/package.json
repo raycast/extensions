@@ -5,6 +5,10 @@
   "description": "Find Brazilian addresses and postal codes",
   "icon": "viacep-icon.png",
   "author": "xilopaint",
+  "keywords": [
+    "cep",
+    "brazil"
+  ],
   "categories": [
     "Web"
   ],
