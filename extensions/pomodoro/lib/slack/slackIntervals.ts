@@ -86,6 +86,9 @@ const getRemainingTime = (interval: Interval): number => {
     let totalPausedTime = 0;
 
     for (const part of interval.parts) {
+        if(!part.pausedAt)
+            continue;
+        
         totalPausedTime += (part.pausedAt - part.startedAt);
     }
 
