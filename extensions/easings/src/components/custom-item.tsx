@@ -21,9 +21,22 @@ export const customGridItem = (
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Cubic Bezier Value" content={CUSTOM_CSS(value)} />
-          <Action.CopyToClipboard title="Copy Figma Easing Value" content={CUSTOM_FIGMA(value)} />
-          <Action.CopyToClipboard title="Copy Framer Motion Value" content={CUSTOM_FRAMER(value)} />
-          <Action icon={Icon.Trash} title="Delete Custom Easing" onAction={() => onDelete(id)} />
+          <Action.CopyToClipboard
+            title="Copy Figma Easing Value"
+            content={CUSTOM_FIGMA(value)}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Framer Motion Value"
+            content={CUSTOM_FRAMER(value)}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+          <Action
+            icon={Icon.Trash}
+            title="Delete Custom Easing"
+            onAction={() => onDelete(id)}
+            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          />
         </ActionPanel>
       }
     />

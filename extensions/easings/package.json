@@ -24,6 +24,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
     "nanoid": "^5.0.5"
   },
   "devDependencies": {

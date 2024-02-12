@@ -1,35 +1,13 @@
 import { nanoid } from "nanoid";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { Action, ActionPanel, Form, LocalStorage, showHUD, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 
 import { Easing, State } from "./utils/types";
 
-function validateEasing(value: string): boolean {
-  return value.length >= 7;
-}
-
 export default function Command() {
-  const [title, setTitle] = useState<string>("");
-  const [type, setType] = useState<string>("");
-  const [value, setValue] = useState<string>("");
-
-  const [titleError, setTitleError] = useState<string | undefined>();
-  const [valueError, setValueError] = useState<string | undefined>();
-
   const { pop } = useNavigation();
-
-  function dropTitleError() {
-    if (titleError && titleError.length > 0) {
-      setTitleError(undefined);
-    }
-  }
-
-  function dropValueError() {
-    if (valueError && valueError.length > 0) {
-      setValueError(undefined);
-    }
-  }
 
   const [state, setState] = useState<State>({
     isLoading: true,
@@ -49,7 +27,6 @@ export default function Command() {
         const easings: Easing[] = JSON.parse(storedEasings);
         setState((previous) => ({ ...previous, easings, isLoading: false }));
       } catch (e) {
-        // can't decode easings
         setState((previous) => ({ ...previous, easings: [], isLoading: false }));
       }
     })();
@@ -59,8 +36,8 @@ export default function Command() {
     LocalStorage.setItem("easings", JSON.stringify(state.easings));
   }, [state.easings]);
 
-  const handleCreate = useCallback(
-    (title: string, type: string, value: string) => {
+  const { handleSubmit, itemProps } = useForm<{ title: string; type: string; value: string }>({
+    onSubmit({ title, value, type }) {
       let parsedValue;
 
       if (value.includes("cubic-bezier(")) {
@@ -72,12 +49,30 @@ export default function Command() {
       }
 
       const newEasings = [...state.easings, { id: nanoid(), title, type, value: parsedValue }];
+
       setState((previous) => ({ ...previous, easings: newEasings }));
-      showHUD(`Successfully saved: ${title}`);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Success",
+        message: `Successfully saved: ${title}`,
+      });
+
       pop();
+
+      [(state.easings, setState)];
     },
-    [state.easings, setState],
-  );
+    validation: {
+      title: FormValidation.Required,
+      type: FormValidation.Required,
+      value: (value) => {
+        if (value && value.length <= 6) {
+          return "Invalid easing value";
+        } else if (!value) {
+          return "Easing value is required";
+        }
+      },
+    },
+  });
 
   return (
     <Form
@@ -86,52 +81,22 @@ export default function Command() {
           <Action.SubmitForm
             title="Add Custom Easing"
             onSubmit={(values: Easing) => {
-              handleCreate(values.title, values.type, values.value);
+              handleSubmit(values);
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Enter a name"
-        value={title}
-        onChange={setTitle}
-        error={titleError}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setTitleError("Name can't be empty");
-          } else {
-            dropTitleError();
-          }
-        }}
-      />
-      <Form.Dropdown id="type" title="Type" value={type} onChange={setType}>
+      <Form.TextField title="Title" placeholder="Enter a name" {...itemProps.title} />
+      <Form.Dropdown title="Easing Type" {...itemProps.type}>
         <Form.Dropdown.Item value="in-out" title="Ease In Out" />
         <Form.Dropdown.Item value="in" title="Ease In" />
         <Form.Dropdown.Item value="out" title="Ease Out" />
       </Form.Dropdown>
       <Form.TextField
-        id="value"
         title="Value"
-        value={value}
         placeholder="1,0.25,0.25,0.5 or cubic-bezier(1,0.25,0.25,0.5)"
-        onChange={setValue}
-        error={valueError}
-        onBlur={(event) => {
-          const value = event.target.value;
-
-          if (value && value.length > 0) {
-            if (!validateEasing(value)) {
-              setValueError("Easing value should be at least 8 characters!");
-            } else {
-              dropValueError();
-            }
-          } else {
-            setValueError("Easing value can't be empty");
-          }
-        }}
+        {...itemProps.value}
       />
     </Form>
   );
