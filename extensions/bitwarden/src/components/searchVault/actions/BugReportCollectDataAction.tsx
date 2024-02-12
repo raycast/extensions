@@ -98,7 +98,7 @@ function BugReportCollectDataAction() {
         tryExec("uname -m"),
         tryExec("sw_vers -productVersion"),
         tryExec("sw_vers -buildVersion"),
-        tryExec(`"${getBwBinInfo().path}" --version`),
+        tryExec(`"${bwInfo.path}" --version`),
         getHomebrewInfo(),
       ]);
 
