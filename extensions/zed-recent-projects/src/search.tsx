@@ -1,5 +1,5 @@
 import { ComponentType, createContext, useContext, useEffect, useState } from "react";
-import { List, Action, Application, getApplications, getPreferenceValues, Detail } from "@raycast/api";
+import { List, Action, Application, getApplications, getPreferenceValues, Detail, Icon } from "@raycast/api";
 import { existsSync } from "fs";
 import { URL } from "url";
 import { getEntry } from "./lib/entry";
