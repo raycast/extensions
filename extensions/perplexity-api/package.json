@@ -21,14 +21,14 @@
         {
           "name": "prompt_summarize",
           "title": "Summarize Prompt",
-          "description": "The prompt for the summarize command",
+          "description": "The prompt for the summarize command.",
           "type": "textfield",
-          "default": "Summarize all relevant aspects from the following text as concise as possible: ",
+          "default": "Summarize all relevant aspects from the following text as concise as possible.",
           "required": false
         },
         {
           "name": "model_summarize",
-          "description": "Override the global preferred model for this command",
+          "description": "Override the global preferred model for this command.",
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
@@ -65,37 +65,28 @@
             {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
-            },
-            {
-              "value": "pplx-7b-online",
-              "title": "Perplexity 7B Online"
-            },
-            {
-              "value": "pplx-70b-online",
-              "title": "Perplexity 70B Online"
             }
           ]
         }
       ]
     },
     {
-      "name": "taskBreakdown",
-      "title": "Task Generator",
-      "description": "Break down a project into tasks",
-      "disabledByDefault": true,
+      "name": "academic",
+      "title": "Change Tone to Academic",
+      "description": "Change tone of selected text to academic.",
       "mode": "view",
       "preferences": [
         {
-          "name": "prompt_task",
-          "title": "Generator Prompt",
-          "description": "The prompt for generating tasks",
+          "name": "prompt_academic",
+          "title": "Change Tone Prompt",
+          "description": "The prompt for the academic command.",
           "type": "textfield",
-          "default": "Turn the following project title or description into a list of todos.",
+          "default": "Act as a academic content writer and editor. Rewrite the text to ensure: Academic tone of voice, formal language, accurate facts, concise phrasing, meaning unchanged, legth retained.",
           "required": false
         },
         {
-          "name": "model_task",
-          "description": "Override the global preferred model for this command",
+          "name": "model_academic",
+          "description": "Override the global preferred model for this command.",
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
@@ -132,80 +123,6 @@
             {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
-            },
-            {
-              "value": "pplx-7b-online",
-              "title": "Perplexity 7B Online"
-            },
-            {
-              "value": "pplx-70b-online",
-              "title": "Perplexity 70B Online"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "rewrite",
-      "title": "Rewrite",
-      "description": "Rewrite selected text",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "prompt_rewrite",
-          "title": "Rewrite Prompt",
-          "description": "The prompt for the rewrite command",
-          "type": "textfield",
-          "default": "Rewrite this using an academic tone: \n\n",
-          "required": false
-        },
-        {
-          "name": "model_rewrite",
-          "description": "Override the global preferred model for this command",
-          "type": "dropdown",
-          "required": false,
-          "title": "Model Override",
-          "placeholder": "Follow global model",
-          "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
-            },
-            {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
-            },
-            {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
-            },
-            {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
-            },
-            {
-              "value": "pplx-7b-online",
-              "title": "Perplexity 7B Online"
-            },
-            {
-              "value": "pplx-70b-online",
-              "title": "Perplexity 70B Online"
             }
           ]
         }
@@ -214,20 +131,20 @@
     {
       "name": "grammar",
       "title": "Fix Grammar",
-      "description": "Fix spelling and grammar of selected text",
+      "description": "Fix spelling and grammar of selected text.",
       "mode": "view",
       "preferences": [
         {
           "name": "prompt_grammar",
           "title": "Prompt",
-          "description": "The prompt for the grammar command",
+          "description": "The prompt for the grammar command.",
           "type": "textfield",
           "default": "Fix spelling, grammar and punctuation. Example: Input: 'I are a good writer.' Output: 'I am a good writer.'",
           "required": false
         },
         {
           "name": "model_grammar",
-          "description": "Override the global preferred model for this command",
+          "description": "Override the global preferred model for this command.",
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
@@ -264,80 +181,6 @@
             {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
-            },
-            {
-              "value": "pplx-7b-online",
-              "title": "Perplexity 7B Online"
-            },
-            {
-              "value": "pplx-70b-online",
-              "title": "Perplexity 70B Online"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "custom",
-      "title": "Custom Action",
-      "description": "Ask AI based on a custom prompt",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "prompt_custom",
-          "title": "Custom Prompt",
-          "description": "The prompt for the custom action command",
-          "type": "textfield",
-          "default": "Write a custom prompt here.",
-          "required": false
-        },
-        {
-          "name": "model_custom",
-          "description": "Override the global preferred model for this command",
-          "type": "dropdown",
-          "required": false,
-          "title": "Model Override",
-          "placeholder": "Follow global model",
-          "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
-            },
-            {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
-            },
-            {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
-            },
-            {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
-            },
-            {
-              "value": "pplx-7b-online",
-              "title": "Perplexity 7B Online"
-            },
-            {
-              "value": "pplx-70b-online",
-              "title": "Perplexity 70B Online"
             }
           ]
         }
@@ -346,7 +189,7 @@
     {
       "name": "ask",
       "title": "Ask",
-      "description": "Ask AI a question about the selected text",
+      "description": "Ask AI, use selected text, and web search via Online LLMs.",
       "mode": "view",
       "arguments": [
         {
@@ -360,7 +203,7 @@
         {
           "name": "ask_sys_prompt",
           "title": "System Prompt",
-          "description": "The system prompt for the ask command",
+          "description": "Online LLMs use current date instead!",
           "type": "textfield",
           "default": "You are a helpful assistant.",
           "required": false
@@ -368,14 +211,81 @@
         {
           "name": "ask_default_question",
           "title": "Default Question",
-          "description": "The question that will be asked about the selected text if you don't input one",
+          "description": "Default question for selected text if none provided.",
           "type": "textfield",
           "default": "Please explain this as concise and simple as possible.",
           "required": false
         },
         {
           "name": "model_ask",
-          "description": "Override the global preferred model for this command",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Custom action based on selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Custom Prompt",
+          "description": "The prompt for the custom action command.",
+          "type": "textfield",
+          "default": "Write a custom prompt here.",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command.",
           "type": "dropdown",
           "required": false,
           "title": "Model Override",
@@ -412,14 +322,65 @@
             {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "taskBreakdown",
+      "title": "Task Generator",
+      "description": "Break down a project into tasks.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_task",
+          "title": "Generator Prompt",
+          "description": "The prompt for generating tasks.",
+          "type": "textfield",
+          "default": "Turn the following project title or project description into a list of todos.",
+          "required": false
+        },
+        {
+          "name": "model_task",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
             },
             {
-              "value": "pplx-7b-online",
-              "title": "Perplexity 7B Online"
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
             },
             {
-              "value": "pplx-70b-online",
-              "title": "Perplexity 70B Online"
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
             }
           ]
         }
@@ -469,14 +430,6 @@
         {
           "value": "pplx-70b-chat",
           "title": "Perplexity 70B Chat"
-        },
-        {
-          "value": "pplx-7b-online",
-          "title": "Perplexity 7B Online"
-        },
-        {
-          "value": "pplx-70b-online",
-          "title": "Perplexity 70B Online"
         }
       ]
     },
