@@ -23,7 +23,7 @@ export default function Command() {
     );
   }
 
-  if(!sleep.data.data.length) {
+  if (!sleep.data.data.length) {
     return (
       <List>
         <List.Item title={`Sleep Score`} subtitle={`No sleep data available`} />

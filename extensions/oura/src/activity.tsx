@@ -42,7 +42,7 @@ export default function Command() {
     );
   }
 
-  if(!activity.data.data.length) {
+  if (!activity.data.data.length) {
     return (
       <List>
         <List.Item title={`Activity Score`} subtitle={`No activity data available`} />

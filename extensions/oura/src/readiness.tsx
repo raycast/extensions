@@ -29,7 +29,7 @@ export default function Command() {
     );
   }
 
-  if(!readiness.data.data.length) {
+  if (!readiness.data.data.length) {
     return (
       <List>
         <List.Item title={`Readiness Score`} subtitle={`No readiness data available`} />
