@@ -5,6 +5,6 @@ const prompt = getPreferenceValues().prompt_synonyms;
 const model_override = getPreferenceValues().model_synonyms;
 const toast_title = "Thinking...";
 
-export default function Rewrite() {
+export default function Synonyms() {
   return <ResultView sys_prompt={prompt} model_override={model_override} toast_title={toast_title} />;
 }
