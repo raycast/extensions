@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./api";
-import { countToken, estimatePrice } from "./util";
+import { countToken, estimatePrice } from "../util";
 import { Stream } from "openai/streaming";
 
 export default function ResultView(props: {
@@ -45,7 +45,7 @@ export default function ResultView(props: {
     console.log("temp: ", temp);
     console.log("prompt: ", prompt);
     console.log("user_extra_msg: ", user_extra_msg);
-    console.log("selectedText: ", selectedText); // DEBUG
+    // console.log("selectedText: ", selectedText); // DEBUG
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
@@ -178,7 +178,7 @@ export default function ResultView(props: {
             >
               <Action
                 icon={{ source: Icon.Signal1 }}
-                title="0.1"
+                title="0.2"
                 onAction={() => retry({ newTemp: 0.2 })}
               />
               <Action

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, getSelectedText, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import ResultView from "./perplexityAPI";
+import ResultView from "./hook/perplexityAPI";
 
 const prefs = getPreferenceValues();
 const model_override = prefs.model_ask;
