@@ -18,7 +18,7 @@ import {
 } from "~/utils/errors";
 import { join } from "path";
 import { chmod, rename, rm } from "fs/promises";
-import { decompressFile, removeFilesThatStartWith, waitForFileAvailable } from "~/utils/fs";
+import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 
@@ -162,7 +162,7 @@ export class Bitwarden {
     } catch (error) {
       toast.message = error instanceof EnsureCliBinError ? error.message : "Please try again";
       toast.style = Toast.Style.Failure;
-      await tryExec(() => execa("rm", ["-rf", zipPath, this.cliPath]));
+      unlinkAllSync(zipPath, this.cliPath);
       BinDownloadLogger.logError(error);
 
       if (error instanceof Error) throw new EnsureCliBinError(`${error.name}: ${error.message}`, error.stack);

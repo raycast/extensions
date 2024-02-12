@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, statSync } from "fs";
+import { existsSync, mkdirSync, statSync, unlinkSync } from "fs";
 import { readdir, unlink } from "fs/promises";
 import { join } from "path";
 import streamZip from "node-stream-zip";
@@ -43,4 +43,13 @@ export async function removeFilesThatStartWith(startingWith: string, path: strin
     return false;
   }
   return removedAtLeastOne;
+}
+export function unlinkAllSync(...paths: string[]) {
+  for (const path of paths) {
+    try {
+      unlinkSync(path);
+    } catch {
+      // ignore
+    }
+  }
 }
