@@ -174,7 +174,7 @@ export default function ResultView(props: {
             <ActionPanel.Submenu
               title="Change Temperature"
               icon={Icon.Temperature}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
             >
               <Action
                 icon={{ source: Icon.Signal1 }}
