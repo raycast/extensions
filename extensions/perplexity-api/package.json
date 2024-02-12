@@ -79,6 +79,73 @@
       ]
     },
     {
+      "name": "taskBreakdown",
+      "title": "Task Generator",
+      "description": "Break down a project into tasks",
+      "disabledByDefault": true,
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_task",
+          "title": "Generator Prompt",
+          "description": "The prompt for generating tasks",
+          "type": "textfield",
+          "default": "Turn the following project title or description into a list of todos.",
+          "required": false
+        },
+        {
+          "name": "model_task",
+          "description": "Override the global preferred model for this command",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "rewrite",
       "title": "Rewrite",
       "description": "Rewrite selected text",
