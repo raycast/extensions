@@ -9,9 +9,8 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./api";
-import { countToken, estimatePrice } from "../util";
 import { Stream } from "openai/streaming";
-import { allModels as changeModels, currentDate, ResultViewProps } from "./utils";
+import { allModels as changeModels, currentDate, ResultViewProps, countToken, estimatePrice } from "./utils";
 
 export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
