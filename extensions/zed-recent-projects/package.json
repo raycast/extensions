@@ -5,8 +5,13 @@
   "description": "Search and open recent projects from Zed",
   "icon": "icon.png",
   "author": "ewgenius",
-  "contributors": ["tleo19", "jylamont"],
-  "categories": ["Developer Tools"],
+  "contributors": [
+    "tleo19",
+    "jylamont"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
