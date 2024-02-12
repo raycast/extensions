@@ -26,3 +26,9 @@ These commands are:
 - Find Synonyms
 - Task Generator
 - Translate Text
+
+## API Pricing
+
+Pricing for the Perplexity API is based on the number of tokens processed. 
+
+You can find more information on the [Pricing Page](https://docs.perplexity.ai/docs/pricing).
