@@ -64,6 +64,10 @@
       "mode": "view"
     }
   ],
+  "keywords": [
+    "chat",
+    "gpt"
+  ],
   "preferences": [
     {
       "name": "apiKey",
