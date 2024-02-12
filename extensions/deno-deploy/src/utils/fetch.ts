@@ -4,32 +4,11 @@ import fetch, { FormData } from "node-fetch";
 import { useFetch } from "@raycast/utils";
 import type { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 
+import { APIError } from "./error";
+
 export type RequestOptions = RequestInit & {
   accept?: string;
 };
-
-export class APIError extends Error {
-  code: string;
-  xDenoRay: string | null;
-
-  name = "APIError";
-
-  constructor(code: string, message: string, xDenoRay: string | null) {
-    super(message);
-    this.code = code;
-    this.xDenoRay = xDenoRay;
-  }
-
-  toString() {
-    let error = `${this.name}: ${this.message}`;
-    if (this.xDenoRay !== null) {
-      error += `\n\nx-deno-ray: ${this.xDenoRay}`;
-      error +=
-        "\n\nIf you encounter this error frequently," + " contact us at deploy@deno.com with the above x-deno-ray.";
-    }
-    return error;
-  }
-}
 
 type APIErrorJSON = {
   code: string;
@@ -42,6 +21,7 @@ type APIErrorJSON = {
 export class Fetcher {
   #token: string;
   #apiUrl: string;
+  #throwError: (error: Error) => void;
 
   /**
    * Create a new Fetcher
@@ -49,8 +29,9 @@ export class Fetcher {
    * @param token {string} A valid access token
    * @param apiUrl {string} The base URL of the API
    */
-  constructor(token: string, apiUrl: string) {
+  constructor(token: string, apiUrl: string, throwError: (error: Error) => void) {
     this.#token = token;
+    this.#throwError = throwError;
 
     if (apiUrl.endsWith("/")) {
       apiUrl = apiUrl.slice(0, -1);
@@ -80,7 +61,9 @@ export class Fetcher {
     if (res.status !== 200) {
       const json = (await res.json()) as APIErrorJSON;
       const xDenoRay = res.headers.get("x-deno-ray");
-      throw new APIError(json.code, json.message, xDenoRay);
+      const err = new APIError(json.code, json.message || "Api Error", xDenoRay);
+      this.#throwError(err);
+      throw err;
     }
     return res;
   }
@@ -110,6 +93,6 @@ export class Fetcher {
       Authorization: authorization,
       ...(opts.body !== undefined ? (opts.body instanceof FormData ? {} : { "Content-Type": "application/json" }) : {}),
     };
-    return useFetch(url, { method, headers, body, keepPreviousData: opts.keepPreviousData });
+    return useFetch(url, { method, headers, body, keepPreviousData: opts.keepPreviousData, onError: this.#throwError });
   }
 }

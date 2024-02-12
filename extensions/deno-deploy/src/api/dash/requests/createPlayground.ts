@@ -1,7 +1,7 @@
 import type { Project } from "@/api/types";
 import type { RequestOptions } from "@/utils/fetch";
 
-import { createFetcher } from "../fetcher";
+import { createWindowLessFetcher } from "../fetcher";
 
 export type CreatePlaygroundMediaType = "ts" | "js" | "tsx" | "jsx";
 
@@ -18,7 +18,7 @@ export const createPlayground = (
       snippet,
     },
   };
-  return createFetcher()
+  return createWindowLessFetcher()
     .request(`/projects`, {
       method: "POST",
       body: JSON.stringify(body),

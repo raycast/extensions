@@ -1,7 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Icon, List } from "@raycast/api";
 
+import { useErrorBoundary } from "@/context/ErrorBoundary";
 import { ProjectListProvider } from "@/context/ProjectList";
 import { useDenoApi } from "@/hooks/useDenoApi";
 import useDenoState from "@/hooks/useDenoState";
@@ -10,9 +11,16 @@ import ProjectsListItem from "@/pages/components/projects-list-item";
 
 const ProjectListSectionList = ({ orgId }: { orgId: string }) => {
   const [query, setQuery] = useState("");
+  const { throwError } = useErrorBoundary();
   const { useProjects } = useDenoApi();
   const { user } = useDenoState();
   const { isLoading, data, error, revalidate } = useProjects(orgId, query);
+
+  useEffect(() => {
+    if (error) {
+      throwError(error);
+    }
+  }, [error, throwError]);
 
   const refresh = useCallback(() => {
     revalidate();

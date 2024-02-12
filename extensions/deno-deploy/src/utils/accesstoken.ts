@@ -1,5 +1,7 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 
+import { InvalidTokenError } from "./error";
+
 /**
  * Returns the current access token
  */
@@ -14,7 +16,7 @@ const isValidToken = () => {
       style: Toast.Style.Failure,
       title: "Invalid token detected. Please set one in the settings.",
     });
-    throw new Error("Invalid token length detected");
+    throw new InvalidTokenError("Invalid token length detected");
   } else {
     return true;
   }

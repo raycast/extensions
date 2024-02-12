@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 import type { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 
@@ -19,7 +19,7 @@ import type {
  * Hook: Use the unofficial Dash API
  */
 export const useDashApi = () => {
-  const fetcher = useMemo(() => createFetcher(), []);
+  const fetcher = createFetcher();
 
   // These hooks use the Dash API to fetch data from the server
 

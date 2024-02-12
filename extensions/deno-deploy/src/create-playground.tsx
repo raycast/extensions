@@ -1,9 +1,16 @@
 import CreatePlayground from "@/pages/form/create-playground";
-import isValidToken from "@/utils/accesstoken";
+
+import { ErrorBoundaryProvider } from "./context/ErrorBoundary";
+import WithValidToken from "./pages/components/with-valid-token";
 
 function Main() {
-  isValidToken();
-  return <CreatePlayground />;
+  return (
+    <ErrorBoundaryProvider>
+      <WithValidToken>
+        <CreatePlayground />
+      </WithValidToken>
+    </ErrorBoundaryProvider>
+  );
 }
 
 export default Main;

@@ -19,18 +19,23 @@ const useDenoState = () => {
         if (selectedOrganizationId) {
           setSelectedOrganizationId(selectedOrganizationId);
         }
-        const [fetchedUser, fetchedOrganizations] = await Promise.all([getUser(), getUserOrganizations()]);
+        try {
+          const fetchedUser = await getUser();
+          const fetchedOrganizations = await getUserOrganizations();
 
-        setUser(fetchedUser);
-        setOrganizations(fetchedOrganizations);
+          setUser(fetchedUser);
+          setOrganizations(fetchedOrganizations);
 
-        if (selectedOrganizationId) {
-          const selectedOrganization = fetchedOrganizations.find((o) => o.id === selectedOrganizationId);
-          if (!selectedOrganization) {
+          if (selectedOrganizationId) {
+            const selectedOrganization = fetchedOrganizations.find((o) => o.id === selectedOrganizationId);
+            if (!selectedOrganization) {
+              setSelectedOrganizationId(fetchedOrganizations[0].id);
+            }
+          } else {
             setSelectedOrganizationId(fetchedOrganizations[0].id);
           }
-        } else {
-          setSelectedOrganizationId(fetchedOrganizations[0].id);
+        } catch (error) {
+          // console.log("IN ERROR", error);
         }
       }
     };

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 import type { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
 
@@ -9,7 +9,7 @@ import type { Project, RestDatabase, RestDeployment } from "@/api/types";
  * Hook: Use the official Deno API
  */
 export const useDenoApi = () => {
-  const fetcher = useMemo(() => createFetcher(), []);
+  const fetcher = createFetcher();
 
   /**
    * Hook: Fetches all projects for an organization

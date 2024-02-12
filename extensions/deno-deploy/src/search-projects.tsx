@@ -1,9 +1,16 @@
 import ProjectListSection from "@/pages/lists/projects-list";
-import isValidToken from "@/utils/accesstoken";
+
+import { ErrorBoundaryProvider } from "./context/ErrorBoundary";
+import WithValidToken from "./pages/components/with-valid-token";
 
 function Main() {
-  isValidToken();
-  return <ProjectListSection />;
+  return (
+    <ErrorBoundaryProvider>
+      <WithValidToken>
+        <ProjectListSection />
+      </WithValidToken>
+    </ErrorBoundaryProvider>
+  );
 }
 
 export default Main;
