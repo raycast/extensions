@@ -13,6 +13,10 @@ async function lockVaultCommand() {
     }
 
     const bitwarden = await new Bitwarden().initialize();
+
+    // show message again in case it was replaced during initialization
+    await showToast(Toast.Style.Animated, "Locking vault...", "Please wait");
+
     await bitwarden.withSession(token).lock(VAULT_LOCK_MESSAGES.MANUAL);
     await SessionStorage.clearSession();
 
