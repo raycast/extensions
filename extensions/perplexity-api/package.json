@@ -71,64 +71,6 @@
       ]
     },
     {
-      "name": "academic",
-      "title": "Change Tone to Academic",
-      "description": "Change tone of selected text to academic.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "prompt_academic",
-          "title": "Change Tone Prompt",
-          "description": "The prompt for the academic command.",
-          "type": "textfield",
-          "default": "Act as a academic content writer and editor. Rewrite the text to ensure: Academic tone of voice, formal language, accurate facts, concise phrasing, meaning unchanged, legth retained.",
-          "required": false
-        },
-        {
-          "name": "model_academic",
-          "description": "Override the global preferred model for this command.",
-          "type": "dropdown",
-          "required": false,
-          "title": "Model Override",
-          "placeholder": "Follow global model",
-          "data": [
-            {
-              "title": "Follow global model",
-              "value": "global"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
-            },
-            {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B Instruct"
-            },
-            {
-              "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
-            },
-            {
-              "value": "codellama-34b-instruct",
-              "title": "CodeLlama 34B Instruct"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B Instruct"
-            },
-            {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
-            },
-            {
-              "value": "pplx-70b-chat",
-              "title": "Perplexity 70B Chat"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "grammar",
       "title": "Fix Grammar",
       "description": "Fix spelling and grammar of selected text.",
@@ -188,7 +130,7 @@
     },
     {
       "name": "ask",
-      "title": "Ask",
+      "title": "Ask AI",
       "description": "Ask AI, use selected text, and web search via Online LLMs.",
       "mode": "view",
       "arguments": [
@@ -235,6 +177,124 @@
             {
               "value": "pplx-70b-online",
               "title": "Perplexity 70B Online"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "casual",
+      "title": "Change Tone to Casual",
+      "description": "Change tone of selected text to casual.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_casual",
+          "title": "Change Tone Prompt",
+          "description": "The prompt for the casual command.",
+          "type": "textfield",
+          "default": "Rewrite the text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged, keep legth retained.",
+          "required": false
+        },
+        {
+          "name": "model_casual",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mistral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2.70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "description": "Change tone of selected text to professional.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_professional",
+          "title": "Change Tone Prompt",
+          "description": "The prompt for the professional command.",
+          "type": "textfield",
+          "default": "Rewrite the text using a professional tone of voice, formal language, accurate facts, concise phrasing, meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_professional",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "placeholder": "Follow global model",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
             },
             {
               "value": "mixtral-8x7b-instruct",
