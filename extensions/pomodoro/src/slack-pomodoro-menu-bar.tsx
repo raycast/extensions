@@ -1,17 +1,16 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import { FocusText, LongBreakText, ShortBreakText } from "../lib/constants";
-import {
-  getCurrentInterval,
-  isPaused,
-  duration,
-  preferences,
-  progress,
-} from "../lib/intervals";
+import { getCurrentInterval, isPaused, duration, preferences, progress } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 import { Interval, IntervalType } from "../lib/types";
 import { OAuthService, getAccessToken, withAccessToken } from "@raycast/utils";
-import { slackContinueInterval, slackCreateInterval, slackPauseInterval, slackResetInterval } from "../lib/slack/slackIntervals";
+import {
+  slackContinueInterval,
+  slackCreateInterval,
+  slackPauseInterval,
+  slackResetInterval,
+} from "../lib/slack/slackIntervals";
 
 const IconTint: Color.Dynamic = {
   light: "#000000",
@@ -20,14 +19,14 @@ const IconTint: Color.Dynamic = {
 };
 
 const slackClient = OAuthService.slack({
-  scope: 'users.profile:write dnd:write'
-})
+  scope: "users.profile:write dnd:write",
+});
 
-export default withAccessToken(slackClient)(TogglePomodoroTimer)
+export default withAccessToken(slackClient)(TogglePomodoroTimer);
 
 export function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
-  const { token } = getAccessToken()
+  const { token } = getAccessToken();
 
   if (currentInterval && progress(currentInterval) >= 100) {
     try {
@@ -42,17 +41,17 @@ export function TogglePomodoroTimer() {
   }
 
   async function onStart(type: IntervalType) {
-    const interval = await slackCreateInterval(type, token)
+    const interval = await slackCreateInterval(type, token);
     setCurrentInterval(interval);
   }
 
   async function onPause() {
-    const interval = await slackPauseInterval(token)
+    const interval = await slackPauseInterval(token);
     setCurrentInterval(interval);
   }
 
   async function onContinue() {
-    const interval = await slackContinueInterval(token)
+    const interval = await slackContinueInterval(token);
     setCurrentInterval(interval);
   }
 

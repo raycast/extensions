@@ -2,14 +2,16 @@ import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Ic
 import { ActionPanel, Action } from "@raycast/api";
 import { OAuthService, getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { exec } from "child_process";
-import {
-  getCurrentInterval,
-  isPaused,
-  preferences,
-} from "../lib/intervals";
+import { getCurrentInterval, isPaused, preferences } from "../lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
 import { GiphyResponse, Interval } from "../lib/types";
-import { getNextSlackIntervalExecutor, slackContinueInterval, slackCreateInterval, slackPauseInterval, slackResetInterval } from "../lib/slack/slackIntervals";
+import {
+  getNextSlackIntervalExecutor,
+  slackContinueInterval,
+  slackCreateInterval,
+  slackPauseInterval,
+  slackResetInterval,
+} from "../lib/slack/slackIntervals";
 
 const createAction = (action: () => Promise<void> | Promise<Interval | undefined>) => async () => {
   await action();
@@ -29,7 +31,7 @@ const createAction = (action: () => Promise<void> | Promise<Interval | undefined
 
 const ActionsList = () => {
   const currentInterval = getCurrentInterval();
-  const { token } = getAccessToken()
+  const { token } = getAccessToken();
   return (
     <List navigationTitle="Control Pomodoro Timers">
       {currentInterval ? (
@@ -83,7 +85,10 @@ const ActionsList = () => {
             icon={`🧘‍♂️`}
             actions={
               <ActionPanel>
-                <Action onAction={createAction(async () => slackCreateInterval("short-break", token))} title={"Short Break"} />
+                <Action
+                  onAction={createAction(async () => slackCreateInterval("short-break", token))}
+                  title={"Short Break"}
+                />
               </ActionPanel>
             }
           />
@@ -93,7 +98,10 @@ const ActionsList = () => {
             icon={`🚶`}
             actions={
               <ActionPanel>
-                <Action onAction={createAction(async () => slackCreateInterval("long-break", token))} title={"Long Break"} />
+                <Action
+                  onAction={createAction(async () => slackCreateInterval("long-break", token))}
+                  title={"Long Break"}
+                />
               </ActionPanel>
             }
           />
@@ -141,9 +149,9 @@ const EndOfInterval = () => {
     markdownImage = `![${"You did it!"}](${preferences.completionImage})`;
   }
 
-  const { token } = getAccessToken()
+  const { token } = getAccessToken();
   const executor = getNextSlackIntervalExecutor();
-  
+
   return (
     <Detail
       navigationTitle={`Interval completed`}
@@ -177,10 +185,10 @@ const EndOfInterval = () => {
 };
 
 const slackClient = OAuthService.slack({
-  scope: 'users.profile:write dnd:write'
-})
+  scope: "users.profile:write dnd:write",
+});
 
-export default withAccessToken(slackClient)(Command)
+export default withAccessToken(slackClient)(Command);
 
 export function Command(props: { launchContext?: { currentInterval: string } }) {
   return props.launchContext?.currentInterval ? <EndOfInterval /> : <ActionsList />;
