@@ -5,6 +5,7 @@ import { URL } from "url";
 import { getEntry } from "./lib/entry";
 import { getZedBundleId, ZedBuild } from "./lib/zed";
 import { useZedEntries } from "./hooks/useZedEntries";
+import { usePinnedEntries } from "./hooks/usePinnedEntries";
 import { EntryItem } from "./components/EntryItem";
 
 const preferences: Record<string, string> = getPreferenceValues();
@@ -48,13 +49,16 @@ export function Command() {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const zed = useContext(ZedContext).zed!;
   const { entries, setEntry } = useZedEntries();
+  const { pinnedEntries, pinEntry, unpinEntry, moveUp, moveDown } = usePinnedEntries();
+
+  const pinned = Object.values(pinnedEntries)
+    .filter((e) => existsSync(new URL(e.uri)))
+    .sort((a, b) => a.order - b.order);
 
   return (
     <List>
-      {Object.values(entries)
-        .filter((e) => existsSync(new URL(e.uri)))
-        .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
-        .map((e) => {
+      <List.Section title="Pinned Projects">
+        {pinned.map((e) => {
           const entry = getEntry(e.uri);
           return (
             <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
@@ -66,9 +70,59 @@ export function Command() {
                 icon={{ fileIcon: zed.path }}
               />
               <Action.ShowInFinder path={entry.path} />
+              <Action
+                title="Unpin Entry"
+                icon={Icon.PinDisabled}
+                onAction={() => unpinEntry(e)}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              />
+              {e.order > 0 ? (
+                <Action
+                  title="Move Up"
+                  icon={Icon.ArrowUp}
+                  onAction={() => moveUp(e)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                />
+              ) : null}
+              {e.order < pinned.length - 1 ? (
+                <Action
+                  title="Move Down"
+                  icon={Icon.ArrowDown}
+                  onAction={() => moveDown(e)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                />
+              ) : null}
             </EntryItem>
           );
         })}
+      </List.Section>
+
+      <List.Section title="Recent Projects">
+        {Object.values(entries)
+          .filter((e) => !pinnedEntries[e.uri] && existsSync(new URL(e.uri)))
+          .sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0))
+          .map((e) => {
+            const entry = getEntry(e.uri);
+            return (
+              <EntryItem key={entry.uri} entry={entry} icon={entry.path && { fileIcon: entry.path }}>
+                <Action.Open
+                  title="Open in Zed"
+                  onOpen={() => setEntry(entry.uri, true)}
+                  target={entry.path}
+                  application={zed}
+                  icon={{ fileIcon: zed.path }}
+                />
+                <Action.ShowInFinder path={entry.path} />
+                <Action
+                  title="Pin Entry"
+                  icon={Icon.Pin}
+                  onAction={() => pinEntry(e)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                />
+              </EntryItem>
+            );
+          })}
+      </List.Section>
     </List>
   );
 }

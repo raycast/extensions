@@ -1,5 +1,17 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
+## [Support Categorized Digest And Fix Some Edge Case Bugs] - 2024-01-30
+- feat: digest can be categorized by tags
+- feat: export digest as markdown file
+- feat: add defaultSearchText context for search rss page
+- chore: moonshot default to 8k
+- chore: improve feedback and digest content
+- chore: change prompt to remove ads
+- chore: improve speed of parse RSS
+- fix: abort on RSS pull failed
+- fix: RSS pull 406 error code
+- fix: feed with only summary cause empty content
+
 ## [Add Search RSS Page] - 2024-01-30
 - add search rss page
 - add generate digest in background

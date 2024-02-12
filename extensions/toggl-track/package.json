@@ -19,9 +19,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Track Time",
-      "subtitle": "Toggl Track",
-      "description": "Start and stop time entries with Toggl Track",
+      "title": "Start/Stop Time Entry",
+      "description": "Start a new time entry or end the running time entry.",
       "mode": "view"
     }
   ],

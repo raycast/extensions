@@ -18,6 +18,7 @@ const days = [
 
 const weekStart = Number(getPreferenceValues().weekStart);
 const showWeeks = getPreferenceValues().showWeeks;
+const viewMode = getPreferenceValues().viewMode;
 const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
 export default function main() {
@@ -29,31 +30,68 @@ export default function main() {
     const cal = new Calendar(weekStart);
     const m = cal.monthDates(date.getFullYear(), date.getMonth());
     const today = new Date().toDateString();
-
-    const table = m
-      .map((week) => {
-        let row = showWeeks ? `| **${weekStart === 0 ? weekNumberSun(week[0]) : weekNumber(week[0])}** |` : "|";
-
-        row += week
-          .map((day) => {
-            const dayString = day.getMonth() === date.getMonth() ? day.getDate().toString() : " ";
-            const todayMarker = day.toDateString() === today && dayString !== " " ? "**• " : " ";
-            return `${todayMarker}${dayString}${todayMarker !== " " ? "**" : ""} |`;
-          })
-          .join("");
-
-        return `${row}\n`;
-      })
-      .join("");
-
     const header = date.toLocaleString("en", { month: "long", year: "numeric" });
-    const weeksHeader = showWeeks ? "| **#** |" : "|";
     const daysArray = days[weekStart];
-    const daysHeader = daysArray.map((day) => `**${day}**`).join(" |");
-    const separator = `${showWeeks ? "| :---: |" : "|"}${daysArray.map(() => ":---:").join(" |")}`;
 
-    setHeader(header);
-    setCalendar(`# ${header}\n${weeksHeader}${daysHeader} |\n${separator} |\n${table}`);
+    if (viewMode == 1) {
+      const table = m
+        .map((week) => {
+          let row = showWeeks ? `| **${weekStart === 0 ? weekNumberSun(week[0]) : weekNumber(week[0])}** |` : "|";
+
+          row += week
+            .map((day) => {
+              const dayString = day.getMonth() === date.getMonth() ? day.getDate().toString() : " ";
+              const todayMarker = day.toDateString() === today && dayString !== " " ? "**• " : " ";
+              return `${todayMarker}${dayString}${todayMarker !== " " ? "**" : ""} |`;
+            })
+            .join("");
+
+          return `${row}\n`;
+        })
+        .join("");
+
+      const weeksHeader = showWeeks ? "| **#** |" : "|";
+      const daysHeader = daysArray.map((day) => `**${day}**`).join(" |");
+      const separator = `${showWeeks ? "| :---: |" : "|"}${daysArray.map(() => ":---:").join(" |")}`;
+
+      setHeader(header);
+      setCalendar(`# ${header}\n${weeksHeader}${daysHeader} |\n${separator} |\n${table}`);
+    } else {
+      const table = m
+        .map((week) => {
+          let row = "";
+          if (showWeeks) {
+            let wn = "";
+            if (weekStart == 0) {
+              wn = weekNumberSun(week[0]).toString();
+            } else {
+              wn = weekNumber(week[0]).toString();
+            }
+            row += "`" + wn + " ".repeat(2 - wn.length) + "`    ";
+          }
+
+          row += week
+            .map((day) => {
+              const dayString = day.getMonth() === date.getMonth() ? day.getDate().toString() : "";
+              if (day.toDateString() === today && dayString !== "") {
+                return "`•" + " ".repeat(3 - dayString.length) + dayString + "` ";
+              } else {
+                return "`" + " ".repeat(4 - dayString.length) + dayString + "` ";
+              }
+            })
+            .join("");
+
+          return `${row}\n`;
+        })
+        .join("\n\n");
+
+      const header = date.toLocaleString("en", { month: "long", year: "numeric" });
+      const weeksHeader = showWeeks ? "`# `    " : "";
+      const daysHeader = daysArray.map((day) => `\` ${day}\``).join(" ");
+
+      setHeader(header);
+      setCalendar("# " + header + "\n***\n" + weeksHeader + daysHeader + "\n\n" + table);
+    }
   }, [date]);
 
   const changeMonth = (change: number) => {

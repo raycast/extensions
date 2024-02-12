@@ -123,10 +123,12 @@ export async function getComeFrom() {
   return await LocalStorage.getItem<string>("comeFrom");
 }
 
+// 这个实际含义是查看摘要的次数。这样可以避免用户有时候自动生成，没有查看，则无需计数。
 export async function getDigestGenerationCount() {
   return (await LocalStorage.getItem<number>("digestGenerationCount")) ?? 0;
 }
 
+// 这个实际含义是查看摘要的次数。这样可以避免用户有时候自动生成，没有查看，则无需计数。
 export async function addDigestGenerationCount() {
   const count = (await getDigestGenerationCount()) ?? 0;
   await LocalStorage.setItem("digestGenerationCount", count + 1);
