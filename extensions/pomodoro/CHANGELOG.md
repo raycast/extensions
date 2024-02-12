@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-02-12
+
+Added support for slack to change status during interval
+
 ## [Enhancement] - 2024-01-29
 
 Added confetti parameter to display confetti after interval completes
