@@ -1,7 +1,6 @@
 import {
   getSelectedText,
   Detail,
-  // getPreferenceValues,
   ActionPanel,
   Action,
   showToast,
@@ -22,7 +21,6 @@ export default function ResultView(props: {
   temperature?: number;
 }) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
-  // const pref = getPreferenceValues();
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
   const [response, setResponse] = useState("");
@@ -43,7 +41,10 @@ export default function ResultView(props: {
     if (model === "pplx-70b-online" || model === "pplx-7b-online") {
       prompt = `Current date: ${currentDate}.`;
     }
-    console.log("model: ", model, "temp: ", temp, "prompt: ", prompt, "user_extra_msg: ", user_extra_msg); // DEBUG
+    console.log("model: ", model); // DEBUG
+    console.log("temp: ", temp);
+    console.log("prompt: ", prompt);
+    console.log("user_extra_msg: ", user_extra_msg);
     console.log("selectedText: ", selectedText); // DEBUG
     try {
       const streamOrCompletion = await openai.chat.completions.create({
@@ -138,8 +139,10 @@ export default function ResultView(props: {
     { name: "Llama2 70B Chat", id: "llama-2-70b-chat" },
     { name: "Perplexity 70B Chat", id: "pplx-70b-chat" },
     { name: "CodeLlama 70B Instruct", id: "codellama-70b-instruct" },
-    { name: "Perplexity 7B Online", id: "pplx-7b-online"},
-    { name: "Perplexity 70B Online", id: "pplx-70b-online"},
+    ...(user_extra_msg ? [ // if user provides query
+      { name: "Perplexity 7B Online", id: "pplx-7b-online"},
+      { name: "Perplexity 70B Online", id: "pplx-70b-online"},
+    ] : []),
   ];
 
   return (
@@ -176,7 +179,7 @@ export default function ResultView(props: {
               <Action
                 icon={{ source: Icon.Signal1 }}
                 title="0.1"
-                onAction={() => retry({ newTemp: 0.1 })}
+                onAction={() => retry({ newTemp: 0.2 })}
               />
               <Action
                 icon={{ source: Icon.Signal2 }}
