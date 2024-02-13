@@ -13,9 +13,7 @@ You're all good to go!
 
 ## Disabled Commands
 
-This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings.
-
-Disabled commands are:
+The extension features several disabled commands that can be enabled in the settings:
 
 - Change Tone to Casual
 - Change Tone to Professional
