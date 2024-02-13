@@ -83,7 +83,7 @@ const ActionsListView = () => {
                   title="Send Prompt"
                   icon={{ source: Icon.TextInput }}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  onAction={() => push(<PromptFormView guid={a.guid} variables={a.meta_data.variables} />)}
+                  onAction={() => push(<PromptFormView guid={a.guid} variables={a.meta_data?.variables ?? []} />)}
                 />
               </ActionPanel>
             }
