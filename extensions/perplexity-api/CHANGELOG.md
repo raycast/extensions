@@ -3,7 +3,7 @@
 ## [Update] - 2024-02-13
 - The extension now uses the OpenAI client.
 - Streaming capability has been added for receiving responses, ensuring real-time interaction.
-- Prompts can now be edited directly in the extension settings for customization.
+- Prompts can now be edited directly in the extension's settings to allow for customization.
 - Retrying with different models and temperature values is now supported, allowing for flexibility in generating outputs.
 - Individual models can be selected in the extension settings for each command, enabling tailored usage according to your needs.
 - Perplexity Online LLMs have been integrated into the `Ask AI` command.
