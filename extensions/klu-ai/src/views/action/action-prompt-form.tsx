@@ -1,7 +1,7 @@
 import { useActionState } from "@/hooks/use-action";
 import klu from "@/libs/klu";
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, memo, useCallback, useState } from "react";
 import ActionDataList from "./action-data-list";
 
 interface ActionPromptFormProps {
@@ -16,24 +16,27 @@ const DefaultActionPrompt = (props: PropsWithChildren<Omit<ActionPromptFormProps
   const [isLoading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const onChangePrompt = (value: string): void => {
-    setPrompt(value);
-    if (error && error.length > 0) {
-      setError("");
-    }
-  };
+  const onChangePrompt = useCallback(
+    (value: string): void => {
+      setPrompt(value);
+      if (error && error.length > 0) {
+        setError("");
+      }
+    },
+    [error],
+  );
 
-  const onSubmitPrompt = async (): Promise<void> => {
+  const onSubmitPrompt = useCallback(async (): Promise<void> => {
     setLoading(true);
     await klu.actions.prompt(props.guid, prompt);
     setLoading(false);
     props.onSubmit();
-  };
+  }, [props.onSubmit, props.guid, prompt]);
 
-  const onBlurPrompt = (value: string): void => {
+  const onBlurPrompt = useCallback((value: string): void => {
     value.length === 0 ? setError("This field shouldn't be empty") : setError(undefined);
     return;
-  };
+  }, []);
 
   return (
     <Form
@@ -60,19 +63,71 @@ const DefaultActionPrompt = (props: PropsWithChildren<Omit<ActionPromptFormProps
 
 const VariableActionPrompt = (props: PropsWithChildren<ActionPromptFormProps>) => {
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [variables] = useState<string[]>(props.variables);
   const [data, setData] = useState<{ [key: string]: string }>(() =>
     props.variables.reduce((obj: { [key: string]: string }, key: string) => {
       obj[key] = "";
+      console.log("alex-2", obj);
       return obj;
     }, {}),
   );
 
-  const onSubmitPrompt = async (): Promise<void> => {
+  const MemoizedTextArea = memo(
+    ({
+      variable,
+      id,
+      onBlurPrompt,
+      onChangePrompt,
+      error,
+    }: {
+      variable: string;
+      id: number;
+      onBlurPrompt: (value: string) => void;
+      onChangePrompt: (value: string) => void;
+      error: string | undefined;
+    }) => (
+      <Form.TextArea
+        key={id}
+        id={variable}
+        title={variable.toUpperCase()}
+        placeholder="Enter value"
+        error={error}
+        enableMarkdown
+        onChange={onChangePrompt}
+        onBlur={(e) => onBlurPrompt(e.target.value ?? "")}
+      />
+    ),
+  );
+
+  const textAreaComponents = variables.map((variable, id) => {
+    const [error, setError] = useState<string>();
+
+    const onBlurPrompt = (value: string): void => {
+      value.length === 0 ? setError("This field shouldn't be empty") : setError(undefined);
+    };
+
+    const onChangePrompt = (value: string): void => {
+      setData((prev) => ({ ...prev, [variable]: value }));
+    };
+
+    return (
+      <MemoizedTextArea
+        key={id}
+        variable={variable}
+        id={id}
+        onBlurPrompt={onBlurPrompt}
+        onChangePrompt={onChangePrompt}
+        error={error}
+      />
+    );
+  });
+
+  const onSubmitPrompt = useCallback(async (): Promise<void> => {
     setLoading(true);
     await klu.actions.prompt(props.guid, data);
     setLoading(false);
     props.onSubmit();
-  };
+  }, [props.onSubmit, props.guid, data]);
 
   return (
     <Form
@@ -84,27 +139,7 @@ const VariableActionPrompt = (props: PropsWithChildren<ActionPromptFormProps>) =
       }
     >
       {props.children}
-      {props.variables.map((variable, id) => {
-        const [error, setError] = useState<string>();
-        const onBlurPrompt = (value: string): void => {
-          value.length === 0 ? setError("This field shouldn't be empty") : setError(undefined);
-          return;
-        };
-        return (
-          <Form.TextArea
-            key={id}
-            id={variable}
-            title={variable.toUpperCase()}
-            placeholder="Enter value"
-            error={error}
-            enableMarkdown
-            onChange={(value) => {
-              setData((prev) => ({ ...prev, [variable]: value }));
-            }}
-            onBlur={(e) => onBlurPrompt(e.target.value ?? "")}
-          />
-        );
-      })}
+      {textAreaComponents}
     </Form>
   );
 };
@@ -119,11 +154,13 @@ const ActionPromptForm = (props: PropsWithChildren<Omit<ActionPromptFormProps, "
 
   const newProps = { ...props, onSubmit };
 
-  if (!props.variables || props.variables.length === 0) {
-    return <DefaultActionPrompt {...newProps} />;
+  if (props.variables && props.variables.length > 0) {
+    console.log("alex");
+    return <VariableActionPrompt {...newProps} />;
   }
 
-  return <VariableActionPrompt {...newProps} />;
+  console.log("citra");
+  return <DefaultActionPrompt {...newProps} />;
 };
 
 export default ActionPromptForm;
