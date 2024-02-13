@@ -3,9 +3,17 @@ import { useEffect, useState } from "react";
 import { global_model, enable_streaming, openai } from "./api";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
-import { ResultViewProps } from "./ResultView.types";
+// import { ResultViewProps } from "./ResultView.types";
 
-export default function ResultView(props: ResultViewProps) {
+// export default function ResultView(props: ResultViewProps) {
+export default function ResultView(props: {
+  sys_prompt: string;
+  selected_text?: string; // If defined, uses this as selected text
+  user_extra_msg?: string; // Textfield in Form -> If not empty, appends this to the user message
+  model_override: string;
+  toast_title: string;
+  temperature?: number;
+}) {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
