@@ -3,6 +3,7 @@ import { oura } from "./utils/ouraData";
 import { today } from "./utils/datetime";
 import { ReadinessResponse } from "./types";
 import { getProgressStatus } from "./utils/measurement";
+import Unauthorized from "./unauthorized";
 
 const loading = `Loading...`;
 
@@ -29,10 +30,16 @@ export default function Command() {
     );
   }
 
+  if(readiness.error) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   if (!readiness.data.data.length) {
     return (
       <List>
-        <List.Item title={`Readiness Score`} subtitle={`No readiness data available`} />
+        <List.Item title={`Readiness Score`} subtitle={`No readiness data available. Open the Oura app to sync data.`} />
       </List>
     );
   }

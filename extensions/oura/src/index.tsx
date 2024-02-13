@@ -1,9 +1,11 @@
 import { List } from "@raycast/api";
 import { oura } from "./utils/ouraData";
 import { convertHeight, convertWeight } from "./utils/measurement";
+import Unauthorized from "./unauthorized";
 
 interface UserResponse {
   isLoading: boolean;
+  error: Error;
   data: {
     id: string;
     age: number;
@@ -16,6 +18,13 @@ interface UserResponse {
 
 export default function Command() {
   const personalInfo = oura("usercollection/personal_info") as UserResponse;
+
+  if(personalInfo.error) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   return (
     <List isLoading={personalInfo.isLoading}>
       <List.Item title={`Age`} subtitle={`${personalInfo?.data?.age}`} />

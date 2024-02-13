@@ -1,5 +1,6 @@
 export interface WorkoutResponse {
   isLoading: boolean;
+  error: Error;
   data: {
     data: [
       {
@@ -20,6 +21,7 @@ export interface WorkoutResponse {
 
 export interface SleepResponse {
   isLoading: boolean;
+  error: Error;
   data: {
     data: [
       {
@@ -43,6 +45,7 @@ export interface SleepResponse {
 
 export interface ReadinessResponse {
   isLoading: boolean;
+  error: Error;
   data: {
     data: [
       {
@@ -69,6 +72,7 @@ export interface ReadinessResponse {
 
 export interface ActivityResponse {
   isLoading: boolean;
+  error: Error;
   data: {
     data: [
       {

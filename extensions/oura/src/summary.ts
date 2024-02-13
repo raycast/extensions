@@ -50,6 +50,13 @@ export default async function Command() {
     distance: data?.activity.data.data[0].equivalent_walking_distance as number,
   };
 
+  if (!data) {
+    await updateCommandMetadata({
+      subtitle: `Readiness, Sleep, and Activity from Oura`,
+    });
+    return;
+  }
+
   await updateCommandMetadata({
     subtitle: `Readiness: ${subtitleData.readiness} | Sleep: ${subtitleData.sleep} | Activity: ${subtitleData.activity} · Steps: ${numberWithCommas(subtitleData.steps)} · Distance: ${convertMeters(subtitleData.distance)}`,
   });

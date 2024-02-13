@@ -3,6 +3,7 @@ import { oura } from "./utils/ouraData";
 import { today, tomorrow, getTimeDifference, calculatePastDate } from "./utils/datetime";
 import { WorkoutResponse } from "./types";
 import { convertMeters, numberWithCommas } from "./utils/measurement";
+import Unauthorized from "./unauthorized";
 
 type ActivityData = {
   id: string;
@@ -71,6 +72,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Workou
         <List.Item title={`Workouts`} subtitle={`Loading...`} />
       </List>
     );
+  }
+
+  if(workouts.error) {
+    return (
+      <Unauthorized />
+    )
   }
 
   const wToday = workouts?.data.data.reverse();

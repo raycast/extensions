@@ -5,6 +5,7 @@ import { ActivityResponse } from "./types";
 import { minutedFormatted, convertMeters, numberWithCommas } from "./utils/measurement";
 import { Color } from "@raycast/api";
 import { getProgressStatus } from "./utils/measurement";
+import Unauthorized from "./unauthorized";
 
 function distanceToGoal(distance: number) {
   // if distance is negative, we've already met the goal
@@ -42,10 +43,16 @@ export default function Command() {
     );
   }
 
+  if(activity.error) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   if (!activity.data.data.length) {
     return (
       <List>
-        <List.Item title={`Activity Score`} subtitle={`No activity data available`} />
+        <List.Item title={`Activity Score`} subtitle={`No activity data available. Open the Oura app to sync data.`} />
       </List>
     );
   }
