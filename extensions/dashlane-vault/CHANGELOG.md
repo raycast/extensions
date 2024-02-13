@@ -1,5 +1,10 @@
 # Dashlane Vault Changelog
 
+## [Fixes] - 2024-02-10
+
+- Fix crash if a favorite item id does not exist anymore
+- Improve validation and parsing of data from the Dashlane CLI
+
 ## [Fixes] - 2023-12-04
 
 - Fix crash if a note doesn't have a title
