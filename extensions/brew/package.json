@@ -82,6 +82,15 @@
       "title": "Uninstall",
       "label": "Remove all files associated with a cask.",
       "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
+    },
+    {
+      "name": "quarantine",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Quarantine",
+      "label": "Enable quarantine of downloads",
+      "description": "Enable or disable quarantine of files downloaded by brew"
     }
   ],
   "dependencies": {
