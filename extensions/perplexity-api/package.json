@@ -40,7 +40,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -48,7 +48,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -81,7 +81,7 @@
           "title": "Prompt",
           "description": "The prompt for the grammar command.",
           "type": "textfield",
-          "default": "Fix spelling, grammar and punctuation. Simply return the corrected version. Example: Input: 'I are a good writer.' Output: 'I am a good writer.'",
+          "default": "Act as lecturer. Fix spelling, grammar and punctuation. ONLY write the corrected version without explanations.",
           "required": false
         },
         {
@@ -98,7 +98,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -106,7 +106,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -156,7 +156,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -164,7 +164,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -214,7 +214,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -222,7 +222,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -255,7 +255,7 @@
           "title": "Make Longer Prompt",
           "description": "The prompt for the improve command.",
           "type": "textfield",
-          "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity and conciseness, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
+          "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
           "required": false
         },
         {
@@ -272,7 +272,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -280,7 +280,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -354,7 +354,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -362,7 +362,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -437,7 +437,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -445,7 +445,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "pplx-7b-chat",
@@ -488,7 +488,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -496,7 +496,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -547,7 +547,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -555,7 +555,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -606,7 +606,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -614,7 +614,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -665,7 +665,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -673,7 +673,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -724,7 +724,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -732,7 +732,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -766,7 +766,7 @@
           "title": "Generator Prompt",
           "description": "The prompt for generating tasks.",
           "type": "textfield",
-          "default": "Turn the following project title or project description into a list of todos.",
+          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Write a summary of the project.'",
           "required": false
         },
         {
@@ -783,7 +783,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mistral 8x7b Instruct"
+              "title": "Mixtral 8x7b Instruct"
             },
             {
               "value": "mistral-7b-instruct",
@@ -791,7 +791,7 @@
             },
             {
               "value": "llama-2-70b-chat",
-              "title": "Llama2.70B Chat"
+              "title": "Llama2 70B Chat"
             },
             {
               "value": "codellama-34b-instruct",
@@ -833,7 +833,7 @@
       "data": [
         {
           "value": "mixtral-8x7b-instruct",
-          "title": "Mistral 8x7b Instruct"
+          "title": "Mixtral 8x7b Instruct"
         },
         {
           "value": "mistral-7b-instruct",
@@ -841,7 +841,7 @@
         },
         {
           "value": "llama-2-70b-chat",
-          "title": "Llama2.70B Chat"
+          "title": "Llama2 70B Chat"
         },
         {
           "value": "codellama-34b-instruct",
