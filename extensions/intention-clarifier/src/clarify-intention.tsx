@@ -22,10 +22,14 @@ const { customMoods } = getPreferenceValues<{ customMoods: string }>();
 
 export default function IntentionClarifier() {
   const [mood, setMood] = useState<string[]>([]);
-  const moods = customMoods
-    .split(",")
-    .map((mood) => mood.trim())
-    .filter((mood) => mood !== "");
+  const moods = [
+    ...new Set(
+      customMoods
+        .split(",")
+        .map((mood) => mood.trim())
+        .filter((mood) => mood !== ""),
+    ),
+  ];
 
   return (
     <Form
