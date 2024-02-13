@@ -4,11 +4,14 @@ import checkAdbExists from "./utils";
 
 export default async function airplane() {
   const adbDir = await checkAdbExists();
-  const enabled = execSync(`${adbDir} shell settings get global airplane_mode_on`).toString().trim() === "true";
+  const enabled = execSync(`${adbDir} shell settings get global airplane_mode_on`).toString().trim() === "1";
+  let toggleValue;
   if (enabled) {
+    toggleValue = "disable";
     await showHUD("✈️ Turning off airplane mode");
   } else {
+    toggleValue = "enable";
     await showHUD("✈️ Turning on airplane mode");
   }
-  execSync(`${adbDir} shell cmd connectivity airplane-mode ${!enabled}`);
+  execSync(`${adbDir} shell cmd connectivity airplane-mode ${toggleValue}`);
 }
