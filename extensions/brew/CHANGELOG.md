@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Upgrades] - 2024-02-11
+## [Improvements] - 2024-02-11
 
 - Add `cleanup` command
 

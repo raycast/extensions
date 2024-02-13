@@ -45,7 +45,7 @@
       "name": "clean-up",
       "title": "Clean Up",
       "subtitle": "Brew",
-      "description": "Clean Up Everything At Once",
+      "description": "Clean files and packages from the cache that are older than 120 days",
       "mode": "no-view"
     }
   ],
@@ -82,6 +82,15 @@
       "description": "Include auto-updating casks when upgrading or checking for outdated items.",
       "default": false,
       "label": "Include auto-updating casks when upgrading"
+    },
+    {
+      "name": "withoutThreshold",
+      "title": "Clean Up",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Include --prune=all when cleaning",
+      "description": "Include --prune=all when cleaning files & packages from cache.\nThis option bypasses the 120 days threshold."
     },
     {
       "name": "zapCask",

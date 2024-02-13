@@ -44,6 +44,9 @@ export interface Remote<T> {
   fetch?: Promise<T[]>;
 }
 
+// Wait around until user has had chance to click the Toast action.
+// Note this only works for "no view" commands (actions still break when popping a view based command).
+// See: https://raycastapp.slack.com/archives/C01E6LWGXJ8/p1642676284027700
 export async function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
