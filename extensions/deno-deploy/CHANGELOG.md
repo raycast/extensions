@@ -1,5 +1,9 @@
 # Deno Deploy Changelog
 
+## [Tiny typo fix] - 2024-02-13
+
+- Fixed a tiny typo in the description of the extension
+
 ## [Initial Version] - 2024-02-05
 
 - Initial version of the extension

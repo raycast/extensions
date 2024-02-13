@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deno-deploy",
   "title": "Deno Deploy",
-  "description": "View amd modify your Deno Deploy projects",
+  "description": "View and modify your Deno Deploy projects",
   "icon": "command-icon.png",
   "author": "j3lte",
   "license": "MIT",
