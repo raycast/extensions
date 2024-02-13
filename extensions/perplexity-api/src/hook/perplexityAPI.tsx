@@ -4,7 +4,7 @@ import { global_model, enable_streaming, openai } from "./api";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, ResultViewProps, countToken, estimatePrice } from "./utils";
 
-export default function ResultView(props: ResultViewProps): ReactElement{
+export default function ResultView(props: ResultViewProps): ReactElement {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
