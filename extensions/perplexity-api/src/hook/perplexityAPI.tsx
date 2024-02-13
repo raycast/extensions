@@ -1,11 +1,11 @@
 import { getSelectedText, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { global_model, enable_streaming, openai } from "./api";
 import { Stream } from "openai/streaming";
 import { allModels as changeModels, currentDate, countToken, estimatePrice } from "./utils";
 import { ResultViewProps } from "./ResultView.types";
 
-export default function ResultView(props: ResultViewProps) {
+export default function ResultView(props: ResultViewProps): ReactNode {
   const { sys_prompt, selected_text, user_extra_msg, model_override, toast_title, temperature } = props;
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
