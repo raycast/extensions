@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deno-deploy",
   "title": "Deno Deploy",
-  "description": "View amd modify your Deno Deploy projects",
+  "description": "View and modify your Deno Deploy projects",
   "icon": "command-icon.png",
   "author": "j3lte",
   "license": "MIT",
@@ -21,6 +21,7 @@
     {
       "name": "search-projects",
       "title": "Search Projects",
+      "subtitle": "Deno Deploy",
       "description": "Explore your Deno Deploy projects",
       "icon": "command-icon.png",
       "mode": "view"
@@ -28,6 +29,7 @@
     {
       "name": "search-organizations",
       "title": "Search Organizations",
+      "subtitle": "Deno Deploy",
       "description": "Explore your Deno Deploy organizations",
       "icon": "command-icon.png",
       "mode": "view"
@@ -35,6 +37,7 @@
     {
       "name": "create-playground",
       "title": "Create Playground",
+      "subtitle": "Deno Deploy",
       "description": "Create a new playground for Deno Deploy",
       "icon": "command-icon.png",
       "mode": "view"
@@ -42,6 +45,7 @@
     {
       "name": "create-playground-quick",
       "title": "Create Playground (Quick)",
+      "subtitle": "Deno Deploy",
       "description": "Create a new playground for Deno Deploy",
       "icon": "command-icon.png",
       "mode": "no-view"
