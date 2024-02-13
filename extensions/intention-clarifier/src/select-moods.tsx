@@ -92,9 +92,9 @@ function SelectMoods() {
       {data
         .filter((item) => selectedCategory === "all" || selectedCategory === "" || item.category === selectedCategory)
         .map((item, index) => {
-          const { moods, name } = item;
+          const { moods, name, category } = item;
           return (
-            <List.Section key={index} title={name}>
+            <List.Section key={index} title={name} subtitle={categories.find((c) => c.id === category)?.name}>
               {moods.map((mood: string) => (
                 <List.Item
                   key={mood}
