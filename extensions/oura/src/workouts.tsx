@@ -74,10 +74,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Workou
     );
   }
 
-  if(workouts.error) {
-    return (
-      <Unauthorized />
-    )
+  if (workouts.error) {
+    return <Unauthorized />;
   }
 
   const wToday = workouts?.data.data.reverse();

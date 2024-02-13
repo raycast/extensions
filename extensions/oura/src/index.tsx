@@ -19,10 +19,8 @@ interface UserResponse {
 export default function Command() {
   const personalInfo = oura("usercollection/personal_info") as UserResponse;
 
-  if(personalInfo.error) {
-    return (
-      <Unauthorized />
-    )
+  if (personalInfo.error) {
+    return <Unauthorized />;
   }
 
   return (

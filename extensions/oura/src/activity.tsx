@@ -43,10 +43,8 @@ export default function Command() {
     );
   }
 
-  if(activity.error) {
-    return (
-      <Unauthorized />
-    )
+  if (activity.error) {
+    return <Unauthorized />;
   }
 
   if (!activity.data.data.length) {

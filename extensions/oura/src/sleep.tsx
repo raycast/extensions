@@ -1,4 +1,4 @@
-import { List, Detail, updateCommandMetadata } from "@raycast/api";
+import { List, updateCommandMetadata } from "@raycast/api";
 import { oura } from "./utils/ouraData";
 import { today } from "./utils/datetime";
 import { SleepResponse } from "./types";
@@ -24,10 +24,8 @@ export default function Command() {
     );
   }
 
-  if(sleep.error) {
-    return (
-      <Unauthorized />
-    )
+  if (sleep.error) {
+    return <Unauthorized />;
   }
 
   if (!sleep.data.data.length) {
@@ -44,7 +42,7 @@ export default function Command() {
       subtitle: `Sleep: ${sToday.score}`,
     });
   }
-  
+
   return (
     <List isLoading={sleep.isLoading}>
       <List.Item title={`Sleep Score`} icon={getProgressStatus(sToday.score)} subtitle={`${sToday.score}`} />

@@ -30,16 +30,17 @@ export default function Command() {
     );
   }
 
-  if(readiness.error) {
-    return (
-      <Unauthorized />
-    )
+  if (readiness.error) {
+    return <Unauthorized />;
   }
 
   if (!readiness.data.data.length) {
     return (
       <List>
-        <List.Item title={`Readiness Score`} subtitle={`No readiness data available. Open the Oura app to sync data.`} />
+        <List.Item
+          title={`Readiness Score`}
+          subtitle={`No readiness data available. Open the Oura app to sync data.`}
+        />
       </List>
     );
   }
