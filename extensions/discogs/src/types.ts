@@ -42,7 +42,7 @@ interface Result {
   cover_image: string;
   resource_url: string;
   community: Community;
-  formats: Format[]
+  formats: Format[];
 }
 
 interface UserData {
