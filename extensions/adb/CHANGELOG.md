@@ -1,5 +1,8 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Fix wifi/airplane commands] - 2024-02-13
+- Fix `wifi`, `airplane` commands. ADB requires these commands to receive specific enable/disable arguments to be fully compatible.
+
 ## [Add toggle layout bounds command] - 2024-02-13
 - Add `toggle layout bounds` command, disabled by default
 - Change `wifi`, `airplane`, `dark mode` commands to toggle instead of taking arguments to enable/disable.
