@@ -15,5 +15,5 @@ export default function Command() {
     }, 1000);
   });
 
-  return <Detail markdown={`# ${time}`} />;
+  return <Detail isLoading={time == ""} markdown={`# ${time}`} />;
 }
