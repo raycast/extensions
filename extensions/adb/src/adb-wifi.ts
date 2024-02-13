@@ -1,21 +1,14 @@
-import { LaunchProps, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import { execSync } from "child_process";
 import checkAdbExists from "./utils";
 
-interface AdbWifiArguments {
-  toggle: string;
-}
-
-export default async function wifi(props: LaunchProps<{ arguments: AdbWifiArguments }>) {
+export default async function wifi() {
   const adbDir = await checkAdbExists();
-  const enable = props.arguments.toggle === "enable" || props.arguments.toggle === "e";
-  let toggleValue;
-  if (enable) {
-    toggleValue = "enable";
-    await showHUD("🛜 Turning on wifi");
-  } else {
-    toggleValue = "disable";
+  const enabled = execSync(`${adbDir} shell settings get global wifi_on`).toString().trim() === "true";
+  if (enabled) {
     await showHUD("🛜 Turning off wifi");
+  } else {
+    await showHUD("🛜 Turning on wifi");
   }
-  execSync(`${adbDir} shell svc wifi ${toggleValue}`);
+  execSync(`${adbDir} shell svc wifi ${!enabled}`);
 }

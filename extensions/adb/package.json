@@ -29,46 +29,29 @@
       "mode": "no-view"
     },
     {
+      "name": "adb-toggle-layout-bounds",
+      "title": "Toggle Layout Bounds",
+      "description": "Show or Hide the layout bounds",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "adb-wifi",
       "title": "Enable or Disable Wifi",
       "description": "enable/disable wifi",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "toggle",
-          "placeholder": "enable|disable",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "adb-airplane",
       "title": "Enable or Disable Airplane Mode",
       "description": "enable/disable airplane mode (all connectivity on/off)",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "toggle",
-          "placeholder": "enable|disable",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "adb-dark-mode",
       "title": "Enable or Disable Dark Mode",
       "description": "enable/disable/auto dark mode",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "toggle",
-          "placeholder": "enable|disable|auto",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "adb-font-size",

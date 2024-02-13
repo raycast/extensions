@@ -1,5 +1,9 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Add toggle layout bounds command] - 2024-02-13
+- Add `toggle layout bounds` command, disabled by default
+- Change `wifi`, `airplane`, `dark mode` commands to toggle instead of taking arguments to enable/disable.
+
 ## [Add open device developer settings] - 2024-02-13
 - Add `open developer settings` to open the locale developer settings
 - Disable `adb-display-size` by default, since it's less used
