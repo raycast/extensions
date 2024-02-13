@@ -265,7 +265,7 @@ export async function brewSearch(
 
 export async function brewInstall(installable: Cask | Formula, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execBrew(`install ${brewCaskOption(installable)} ${identifier}`, cancel);
+  await execBrew(`install ${brewQuarantineOption()} ${brewCaskOption(installable)} ${identifier}`, cancel);
   if (isCask(installable)) {
     installable.installed = installable.version;
   } else {
@@ -282,11 +282,11 @@ export async function brewUninstall(installable: Cask | Nameable, cancel?: Abort
 
 export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(upgradable);
-  await execBrew(`upgrade ${brewCaskOption(upgradable)} ${identifier}`, cancel);
+  await execBrew(`upgrade ${brewQuarantineOption()} ${brewCaskOption(upgradable)} ${identifier}`, cancel);
 }
 
 export async function brewUpgradeAll(greedy: boolean, cancel?: AbortController): Promise<void> {
-  let cmd = `upgrade --ignore-pinned`;
+  let cmd = `upgrade --ignore-pinned ${brewQuarantineOption()}`;
   if (greedy) {
     cmd += " --greedy";
   }
@@ -453,6 +453,10 @@ function brewIdentifier(item: Cask | Nameable): string {
 
 function brewCaskOption(maybeCask: Cask | Nameable, zappable = false): string {
   return isCask(maybeCask) ? "--cask" + (zappable && preferences.zapCask ? " --zap" : "") : "";
+}
+
+function brewQuarantineOption(): string {
+  return preferences.quarantine ? "--quarantine" : "--no-quarantine";
 }
 
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {

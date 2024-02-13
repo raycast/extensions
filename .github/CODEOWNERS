@@ -267,6 +267,7 @@
 /extensions/defiscan                                 @adrian-schnell
 /extensions/defly-io                                 @zisra
 /extensions/dekudeals                                @rrroyal
+/extensions/deno-deploy                              @j3lte
 /extensions/descript-to-youtube-chapters             @peduarte
 /extensions/designer-news                            @itsnwa
 /extensions/deta-space                               @deta @SlumberDemon
@@ -324,6 +325,7 @@
 /extensions/dust-tt                                  @vineus
 /extensions/dynamic-font-size                        @nilshoenson
 /extensions/eagle                                    @Yukaii
+/extensions/easings                                  @madebyankur
 /extensions/easy-new-file                            @koinzhang
 /extensions/easy-ocr                                 @Rafo1994 @wojciechkrol
 /extensions/easydict                                 @tisfeng
@@ -647,7 +649,7 @@
 /extensions/localcan                                 @ajzbc
 /extensions/lodash                                   @vimtor
 /extensions/logitech-litra                           @timrogers
-/extensions/logseq                                   @futantan @sawhney17 @hadret
+/extensions/logseq                                   @futantan @sawhney17 @hadret @jonatan-petursson
 /extensions/logsnag                                  @xmok
 /extensions/logtail                                  @Cavallando
 /extensions/looksee                                  @olavgjerde @pernielsentikaer
@@ -728,7 +730,7 @@
 /extensions/mullvad                                  @0x46616c6b
 /extensions/multilinks                               @abhisheksatre
 /extensions/multipass                                @davibe @pernielsentikaer
-/extensions/music                                    @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford
+/extensions/music                                    @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford @urwrstkn8mare
 /extensions/music-link-converter                     @quentin23soleil
 /extensions/music-timer                              @JulienLacr0ix
 /extensions/musicthread                              @ChucKN0risK
@@ -1035,9 +1037,9 @@
 /extensions/search-hexpm                             @jordelver
 /extensions/search-hookmark                          @QIanGua
 /extensions/search-joplin-notes                      @wisdom-plus
-/extensions/search-mdn                               @krzysztofzuraw @OBQun @k8scat
+/extensions/search-mdn                               @krzysztofzuraw @OBQun @k8scat @j3lte
 /extensions/search-notion                            @sadanand-singh @erikjs14
-/extensions/search-npm                               @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch @jomifepe
+/extensions/search-npm                               @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch @jomifepe @j3lte
 /extensions/search-regexp                            @musienkoyuriy @pernielsentikaer
 /extensions/search-rubygems                          @aleks
 /extensions/search-shopify-liquid-documentation      @maximedaraize
@@ -1165,7 +1167,7 @@
 /extensions/temporary-email                          @natterstefan @JoelKlint
 /extensions/tennis-standings                         @faisal3389
 /extensions/terminal                                 @ron-myers
-/extensions/terminalfinder                           @yedongze
+/extensions/terminalfinder                           @yedongze @Bibabidu
 /extensions/terraform-doc                            @shoppingjaws
 /extensions/tesla                                    @WilliamWelsh
 /extensions/text-decorator                           @koinzhang
@@ -1241,6 +1243,7 @@
 /extensions/typescript-documentation-search          @chezhe
 /extensions/typescript-mock-generator                @comoser
 /extensions/typographer                              @mikeozornin
+/extensions/uk-bank-holidays                         @kud
 /extensions/ulid                                     @zephyrpathsofglory
 /extensions/ulysses                                  @praveenjuge
 /extensions/unicode-symbols                          @mmazzarolo @FezVrasta @pernielsentikaer @j3lte
@@ -1348,7 +1351,7 @@
 /extensions/youversion-suggest                       @caleb531
 /extensions/yubikey-code                             @yoyoyeti
 /extensions/zalgo-text                               @petermiles
-/extensions/zed-recent-projects                      @ewgenius @tleo19
+/extensions/zed-recent-projects                      @ewgenius @tleo19 @jylamont
 /extensions/zeitraum                                 @KennethWussmann
 /extensions/zen-mode                                 @pradeepb28
 /extensions/zendesk                                  @cpenned
