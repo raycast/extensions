@@ -1,6 +1,6 @@
 # ViaCEP Changelog
 
-## [New Icon] - 2024-02-12
+## [New Icon] - 2024-02-13
 
 ### Added
 
