@@ -42,12 +42,14 @@ export default function Command() {
                     onAction={() => handleRemoveCache(index)}
                     shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   />
-                  <Action
-                    icon={{ source: Icon.Clock }}
-                    title="Customize Expiration Date"
-                    onAction={openExtensionPreferences}
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
-                  />
+                  <ActionPanel.Section title="Global Options">
+                    <Action
+                      icon={{ source: Icon.Clock }}
+                      title="Customize Expiration Date"
+                      onAction={openExtensionPreferences}
+                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
