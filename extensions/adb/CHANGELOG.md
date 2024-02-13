@@ -1,5 +1,9 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Add open device developer settings] - 2024-02-13
+- Add `open developer settings` to open the locale developer settings
+- Disable `adb-display-size` by default, since it's less used
+
 ## [Add font/display sizes commands] - 2023-06-13
 - Add `display density` to control display density (values from 0.5 to 3.0)
 - Add `font size` to control font sizes (vales from 0.5 to 3.0)
