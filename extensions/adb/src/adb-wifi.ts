@@ -13,5 +13,5 @@ export default async function wifi() {
     toggleValue = "enable";
     await showHUD("🛜 Turning on wifi");
   }
-  execSync(`${adbDir} shell svc wifi ${toggleValue}`);
+  execSync(`${adbDir} shell svc wifi ${!enabled}`);
 }

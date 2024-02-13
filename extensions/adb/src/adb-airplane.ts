@@ -13,5 +13,5 @@ export default async function airplane() {
     toggleValue = "enable";
     await showHUD("✈️ Turning on airplane mode");
   }
-  execSync(`${adbDir} shell cmd connectivity airplane-mode ${toggleValue}`);
+  execSync(`${adbDir} shell cmd connectivity airplane-mode ${!enabled}`);
 }
