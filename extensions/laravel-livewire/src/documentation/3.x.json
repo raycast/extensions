@@ -57,7 +57,5 @@
     { "url": "https://livewire.laravel.com/docs/synthesizers", "title": "Synthesizers" },
     { "url": "https://livewire.laravel.com/docs/contribution-guide", "title": "Contribution Guide" }
   ],
-  "Packages": [
-    { "url": "https://livewire.laravel.com/docs/volt", "title": "Volt" }
-  ]
+  "Packages": [{ "url": "https://livewire.laravel.com/docs/volt", "title": "Volt" }]
 }
