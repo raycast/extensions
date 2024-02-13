@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Cache, openCommandPreferences } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Cache, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 
 const FRONTEND_ENDPOINT = "https://surlapp.uk";
@@ -45,7 +45,7 @@ export default function Command() {
                   <Action
                     icon={{ source: Icon.Clock }}
                     title="Customize Expiration Date"
-                    onAction={openCommandPreferences}
+                    onAction={openExtensionPreferences}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
                 </ActionPanel>
