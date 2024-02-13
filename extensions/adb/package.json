@@ -23,6 +23,12 @@
       "mode": "no-view"
     },
     {
+      "name": "adb-open-developer-settings",
+      "title": "Open Developer Settings",
+      "description": "Open the developer settings on your device",
+      "mode": "no-view"
+    },
+    {
       "name": "adb-wifi",
       "title": "Enable or Disable Wifi",
       "description": "enable/disable wifi",
