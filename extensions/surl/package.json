@@ -55,7 +55,7 @@
         }
       ],
       "title": "Expiration Date",
-      "required": true,
+      "required": false,
       "default": "7"
     }
   ],
