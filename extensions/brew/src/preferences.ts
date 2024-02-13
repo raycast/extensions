@@ -1,9 +1,3 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export const preferences: {
-  customBrewPath?: string;
-  terminalApp: "terminal" | "iterm";
-  greedyUpgrades: boolean;
-  zapCask: boolean;
-  quarantine: boolean;
-} = getPreferenceValues();
+export const preferences = <Preferences>getPreferenceValues();
