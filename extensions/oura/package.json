@@ -15,22 +15,19 @@
     {
       "name": "index",
       "title": "Get Oura Personal Info",
-      "subtitle": "Get your personal info from Oura",
       "description": "Get your latest personal info from Oura like your age, weight, and height.",
       "mode": "view"
     },
     {
       "name": "summary",
       "title": "Oura Summary",
-      "subtitle": "Get your Sleep, Readiness, and Activity scores",
-      "description": "Get your up-to-date Oura scores.",
+      "description": "Get your Sleep, Readiness, and Activity scores",
       "mode": "no-view",
       "interval": "10m"
     },
     {
       "name": "workouts",
       "title": "Latest Oura Workouts",
-      "subtitle": "Get your latest workouts from Oura",
       "description": "Get your latest workouts from Oura like your activity type, start time, and duration.",
       "mode": "view",
       "arguments": [
@@ -45,21 +42,18 @@
     {
       "name": "readiness",
       "title": "Oura Readiness",
-      "subtitle": "Get today's Readiness Score",
       "description": "Get today's readiness data: activity balance, temperature, HRV, resting heart rate, and sleep balance.",
       "mode": "view"
     },
     {
       "name": "sleep",
       "title": "Oura Sleep",
-      "subtitle": "Get last night's Sleep Score",
       "description": "Get your sleep data: score, total sleep, REM sleep, deep sleep, and latency.",
       "mode": "view"
     },
     {
       "name": "activity",
       "title": "Oura Activity",
-      "subtitle": "Get your Activity Score",
       "description": "Get your today's activity data: like steps, calories, and distance.",
       "mode": "view"
     }
