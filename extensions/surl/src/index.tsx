@@ -12,10 +12,6 @@ type Item = {
   url: string;
 };
 
-export type Preferences = {
-  expirationDate: string;
-};
-
 export default async function Command(props: LaunchProps) {
   const url = props.arguments.url;
   const preferences = getPreferenceValues<Preferences>();
