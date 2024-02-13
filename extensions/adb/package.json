@@ -88,6 +88,7 @@
       "name": "adb-display-size",
       "title": "Change the Display Density",
       "description": "Increase or decrease the display density",
+      "disabledByDefault": true,
       "mode": "no-view",
       "arguments": [
         {
