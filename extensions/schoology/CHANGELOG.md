@@ -1,5 +1,12 @@
 # Schoology Changelog
 
+## [View Assignment Details and Graphs + FREE NOTIFICATIONS + Grade Calculation Bug fixes]
+- You can now use the `Show Graph` action inside the assignment view on the `Overall Grade` list item
+- You can copy data (that the extension fetches from the API) and see the JSON
+- You can click enter on any assignment to open the `Assignment Details` action
+- Grade calculation bug fixes (a new formula I'm using)
+- FREE NOTIFICATIONS that refresh once every 20 minutes and check for new assignments (try `Check for Grade Updates` command)
+
 ## [View Individual Assignments Grades] - 2024-1-02
 - You can now see individual assignments, comments, grades, and even when they were graded!
 - You can see the categories for those assignments with their weightage percentages.

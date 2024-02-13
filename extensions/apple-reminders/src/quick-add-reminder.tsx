@@ -1,11 +1,13 @@
 import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
+import { getReminders, createReminder } from "swift:../swift/AppleReminders";
 
-import { createReminder, getData, NewReminder } from "./api";
+import { NewReminder } from "./create-reminder";
+import { Data } from "./hooks/useData";
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddReminder }) {
   try {
-    const data = await getData();
+    const data: Data = await getReminders();
 
     const lists = data.lists.map((list) => {
       return `${list.title}:${list.id}`;
@@ -130,7 +132,7 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
   const maxRetries = 3;
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const result = await AI.ask(prompt);
+      const result = await AI.ask(prompt, { model: "gpt-4" });
       const json = JSON.parse(result.trim());
       if (json.recurrence && !json.dueDate) {
         throw new Error("Recurrence without dueDate");

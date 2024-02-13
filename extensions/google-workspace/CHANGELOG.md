@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Use OAuth utils] - 2024-02-12
+
+- Use new OAuth utils
+
 ## [Add menu bar shortcuts] - 2023-11-16
 
 - Create new Google documents from the menu bar.

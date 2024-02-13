@@ -8,7 +8,7 @@ export function UserTweetList(props: { username: string }) {
   const { data, error, isLoading, fetcher } = useRefresher<TweetV1[] | undefined>(
     async (updateInline): Promise<TweetV1[] | undefined> => {
       return updateInline ? await refreshTweets(data) : await getTweets(username);
-    }
+    },
   );
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

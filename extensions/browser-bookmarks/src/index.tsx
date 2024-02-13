@@ -287,7 +287,7 @@ export default function Command() {
         }
 
         // If both frecencies are undefined, sort by their score
-        return (a.score || 1) - (a.score || 1);
+        return (a.score || 1) - (b.score || 1);
       })
       .map((result) => result.item);
   }, [folderBookmarks, fuse, query]);

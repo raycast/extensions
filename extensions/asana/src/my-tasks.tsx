@@ -79,6 +79,4 @@ function MyTasks() {
   );
 }
 
-export default function Command() {
-  return withAsanaAuth(<MyTasks />);
-}
+export default withAsanaAuth(MyTasks);

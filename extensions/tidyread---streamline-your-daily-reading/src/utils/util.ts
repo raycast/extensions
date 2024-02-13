@@ -25,7 +25,7 @@ export function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<
     timeoutHandle = setTimeout(() => {
       reject(
         new Error(
-          `Operation timed out after ${timeoutMs} ms, you could try to set \`Http Proxy\` in \`Extensions Settings Page\` and try again`,
+          `Operation timed out after ${timeoutMs} ms, you could try to set "Http Proxy" in "Extensions Settings Page" and try again`,
         ),
       );
     }, timeoutMs);
@@ -77,13 +77,36 @@ export default function formatDate(date: string | number | Date) {
   }
 }
 
-export function retry<T>(fn: () => Promise<T>, retries = 3, delay = 0, err = null): Promise<T> {
-  if (!retries) {
-    return Promise.reject(err);
+export function formatSeconds(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds}s`;
+  } else {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}min ${remainingSeconds}s`;
   }
+}
+
+export function retry<T>(
+  fn: () => Promise<T>,
+  retries = 3,
+  delay = 0,
+  stopOnError: (error: Error) => boolean = () => false, // 新增参数，判断是否是特定错误
+): Promise<T> {
   return fn().catch((error: any) => {
+    // 检查是否遇到了特定错误
+    if (stopOnError(error)) {
+      return Promise.reject(error);
+    }
+
+    // 当重试次数用完时，返回错误
+    if (retries <= 0) {
+      return Promise.reject(error);
+    }
+
+    // 如果不是特定错误，继续重试
     return new Promise((resolve) => {
-      setTimeout(() => resolve(retry(fn, retries - 1, delay, error)), delay);
+      setTimeout(() => resolve(retry(fn, retries - 1, delay, stopOnError)), delay);
     });
   });
 }
@@ -104,3 +127,28 @@ export function reflect<T, P>(
     .then((value) => ({ payload, status: "fulfilled" as const, value }))
     .catch((reason) => Promise.reject({ payload, status: "rejected", reason }));
 }
+
+export function extractDomain(urlString: string) {
+  const parsedUrl = new URL(urlString);
+  const hostname = parsedUrl.hostname; // 获取完整主机名，例如 "www.baidu.com"
+
+  // 分割主机名并提取域名部分
+  const parts = hostname.split(".");
+  const domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
+
+  return domain;
+}
+
+/**
+ * 执行一个函数并在出错时返回null。跟lodash attempt类似，不过失败是返回null
+ *
+ * @param fn 要执行的函数。
+ * @returns 函数的返回值或null（如果执行失败）。
+ */
+export const silent = <T>(fn: () => T): T | null => {
+  try {
+    return fn();
+  } catch (error) {
+    return null;
+  }
+};

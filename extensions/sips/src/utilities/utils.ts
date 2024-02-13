@@ -5,7 +5,7 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:48:00
- * Last modified  : 2023-07-06 15:48:20
+ * Last modified  : 2024-01-27 13:31:10
  */
 
 import { execSync } from "child_process";
@@ -36,9 +36,30 @@ import { ExtensionPreferences } from "./preferences";
 const getSelectedFinderImages = async (): Promise<string> => {
   return runAppleScript(
     `set imageTypes to {"PNG", "JPG", "JPEG", "TIF", "HEIF", "GIF", "ICO", "ICNS", "ASTC", "BMP", "DDS", "EXR", "JP2", "KTX", "Portable Bitmap", "Adobe Photoshop", "PVR", "TGA", "WebP", "SVG", "PDF", "HEIC"}
-
+    
     tell application "Finder"
       set theSelection to selection
+
+      if theSelection is {} and (count Finder windows) > 0 then
+        repeat with i from 1 to (count Finder windows)
+          activate window i
+          set theSelection to selection
+
+          set selectionKinds to {}
+          repeat with j from 1 to (count theSelection)
+            set selectionKinds to selectionKinds & kind of (item j of theSelection)
+          end repeat
+
+          set containsImage to false
+          repeat with imageType in imageTypes
+            if selectionKinds contains imageType then
+              set containsImage to true
+              exit repeat
+            end if
+          end repeat
+        end repeat
+      end if
+
       if theSelection is {} then
         return
       else if (theSelection count) is equal to 1 then
@@ -75,6 +96,27 @@ const getSelectedPathFinderImages = async (): Promise<string> => {
 
     tell application "Path Finder"
       set theSelection to selection
+
+      if theSelection is {} and (count windows) > 0 then
+        repeat with i from 1 to (count windows)
+          activate window i
+          set theSelection to selection
+
+          set selectionKinds to {}
+          repeat with j from 1 to (count theSelection)
+            set selectionKinds to selectionKinds & kind of (item j of theSelection)
+          end repeat
+
+          set containsImage to false
+          repeat with imageType in imageTypes
+            if selectionKinds contains imageType then
+              set containsImage to true
+              exit repeat
+            end if
+          end repeat
+        end repeat
+      end if
+
       if theSelection is {} then
         return
       else if (theSelection count) is equal to 1 then
@@ -154,14 +196,16 @@ export const getSelectedImages = async (): Promise<string[]> => {
 
   // Attempt to get selected images from Path Finder
   try {
-    if (activeApp == "Path Finder" && inputMethod == "Path Finder") {
+    if (inputMethod == "Path Finder") {
       const pathFinderImages = (await getSelectedPathFinderImages()).split(", ");
       pathFinderImages.forEach((imgPath) => {
         if (!selectedImages.includes(imgPath)) {
           selectedImages.push(imgPath);
         }
       });
-      return selectedImages;
+      if (selectedImages.length > 0) {
+        return selectedImages;
+      }
     }
   } catch (error) {
     // Error getting images from Path Finder, fall back to Finder
@@ -204,6 +248,37 @@ export const moveImageResultsToFinalDestination = async (imagePaths: string[]) =
   }
 };
 
+export const getWebPBinaryPath = async () => {
+  const cpuType = os.cpus()[0].model.includes("Apple") ? "arm" : "x86";
+
+  if (cpuType == "arm") {
+    // Make sure the arm binaries are executable
+    execSync(`chmod +x ${environment.assetsPath}/webp/arm/dwebp`);
+    execSync(`chmod +x ${environment.assetsPath}/webp/arm/cwebp`);
+    // Remove x86 binaries if they exist
+    if (fs.existsSync(`${environment.assetsPath}/webp/x86/dwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/x86/dwebp`);
+    }
+    if (fs.existsSync(`${environment.assetsPath}/webp/x86/cwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/x86/cwebp`);
+    }
+    return [`${environment.assetsPath}/webp/arm/dwebp`, `${environment.assetsPath}/webp/arm/cwebp`];
+  } else {
+    // Make sure the x86 binaries are executable
+    execSync(`chmod +x ${environment.assetsPath}/webp/x86/dwebp`);
+    execSync(`chmod +x ${environment.assetsPath}/webp/x86/cwebp`);
+
+    // Remove arm binaries if they exist
+    if (fs.existsSync(`${environment.assetsPath}/webp/arm/dwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/arm/dwebp`);
+    }
+    if (fs.existsSync(`${environment.assetsPath}/webp/arm/cwebp`)) {
+      await fs.promises.rm(`${environment.assetsPath}/webp/arm/cwebp`);
+    }
+    return [`${environment.assetsPath}/webp/x86/dwebp`, `${environment.assetsPath}/webp/x86/cwebp`];
+  }
+};
+
 /**
  * Executes a SIPS command on a WebP image, using a temporary PNG in the process.
  *
@@ -236,10 +311,10 @@ export const execSIPSCommandOnWebP = async (command: string, webpPath: string): 
     iter++;
   }
 
-  execSync(`chmod +x ${environment.assetsPath}/webp/dwebp`);
-  execSync(`chmod +x ${environment.assetsPath}/webp/cwebp`);
+  const [dwebpPath, cwebpPath] = await getWebPBinaryPath();
+
   execSync(
-    `${environment.assetsPath}/webp/dwebp "${webpPath}" -o "${tmpPath}" && ${command} "${tmpPath}" && ${environment.assetsPath}/webp/cwebp "${tmpPath}" -o "${newPath}" ; rm "${tmpPath}"`
+    `${dwebpPath} "${webpPath}" -o "${tmpPath}" && ${command} "${tmpPath}" && ${cwebpPath} "${tmpPath}" -o "${newPath}" ; rm "${tmpPath}"`
   );
   return newPath;
 };

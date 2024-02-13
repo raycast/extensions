@@ -11,6 +11,12 @@ export const saveSources = async (items: Source[]) => {
   await LocalStorage.setItem("sources", JSON.stringify(items));
 };
 
+export const addSource = async (item: Omit<Source, "id">): Promise<void> => {
+  const items = await getSources();
+  items.push({ id: `${Date.now()}`, ...item });
+  await saveSources(items);
+};
+
 export const getDigests = async (): Promise<Digest[]> => {
   const itemsJson = await LocalStorage.getItem<string>("digests");
   return itemsJson ? JSON.parse(itemsJson) : [];
@@ -96,6 +102,7 @@ export async function saveInterestsSelected(selected: boolean) {
   await LocalStorage.setItem("interestsSelected", selected);
 }
 
+// 发现打印出来是1，而非true
 export async function getInterestsSelected() {
   return (await LocalStorage.getItem<boolean>("interestsSelected")) || false;
 }
@@ -114,4 +121,15 @@ export async function saveComeFrom(from: string) {
 
 export async function getComeFrom() {
   return await LocalStorage.getItem<string>("comeFrom");
+}
+
+// 这个实际含义是查看摘要的次数。这样可以避免用户有时候自动生成，没有查看，则无需计数。
+export async function getDigestGenerationCount() {
+  return (await LocalStorage.getItem<number>("digestGenerationCount")) ?? 0;
+}
+
+// 这个实际含义是查看摘要的次数。这样可以避免用户有时候自动生成，没有查看，则无需计数。
+export async function addDigestGenerationCount() {
+  const count = (await getDigestGenerationCount()) ?? 0;
+  await LocalStorage.setItem("digestGenerationCount", count + 1);
 }

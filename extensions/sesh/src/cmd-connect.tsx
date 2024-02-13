@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { List, Action, ActionPanel, closeMainWindow, clearSearchBar, showToast, Toast } from "@raycast/api";
-import { getSessions, connectToSession } from "./sesh";
+import { getSessions, connectToSession, isTmuxRunning } from "./sesh";
 import { openApp } from "./app";
 
 export default function ConnectCommand() {
@@ -25,6 +25,15 @@ export default function ConnectCommand() {
 
   useEffect(() => {
     (async () => {
+      if (!(await isTmuxRunning())) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "tmux isn't running",
+          message: "Please start tmux before using this command.",
+        });
+        setIsLoading(false);
+        return;
+      }
       await getAndSetSessions();
     })();
   }, []);

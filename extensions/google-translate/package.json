@@ -14,7 +14,8 @@
     "metakirby5",
     "AlanHuang",
     "nirtamir2",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "rasitayaz"
   ],
   "license": "MIT",
   "commands": [
@@ -31,14 +32,22 @@
       "subtitle": "Google Translate",
       "description": "Simple translation via Google Translate",
       "mode": "view"
+    },
+    {
+      "name": "quick-translate",
+      "title": "Quick Translate",
+      "subtitle": "Google Translate",
+      "description": "Quickly translate to multiple languages",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "lang1",
-      "type": "dropdown",
+      "title": "Primary Language",
+      "description": "Preferred language to translate from",
       "required": true,
-      "title": "First Language",
+      "type": "dropdown",
       "default": "auto",
       "data": [
         {
@@ -477,13 +486,14 @@
           "title": "Zulu",
           "value": "zu"
         }
-      ],
-      "description": "First language"
+      ]
     },
     {
       "name": "lang2",
-      "type": "dropdown",
+      "title": "Secondary Language",
+      "description": "Preferred language to translate to",
       "required": true,
+      "type": "dropdown",
       "default": "de",
       "data": [
         {
@@ -922,9 +932,16 @@
           "title": "Zulu",
           "value": "zu"
         }
-      ],
-      "title": "Second Language",
-      "description": "Second language"
+      ]
+    },
+    {
+      "name": "autoInput",
+      "title": "Autofill Input",
+      "label": "Automatically fill input with selected text.",
+      "description": "When enabled, selected text from the foremost app will be automatically filled in the input field.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
     }
   ],
   "dependencies": {

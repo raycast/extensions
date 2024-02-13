@@ -1,5 +1,28 @@
 # Apple Reminders Changelog
 
+## [Use GPT-4 model for Quick Add Reminder command] - 2024-02-12
+
+- Improve `Quick Add Reminder` results by using GPT-4 instead of the default model (GPT-3.5 Turbo)
+
+## [Fix Invalid time value error] - 2024-01-31
+
+- Fix an error that occurs in "My Reminders" when a reminder does not have any due dates, but the list is grouped by due dates.
+
+## [Fix timezone bugs] - 2024-01-26
+
+- Fix multiple timezone issues that result in reminders not being displayed in the correct section or with incorrect dates.
+
+## [Bug fixes] - 2024-01-26
+
+- Fix a bug where it wasn't possible to remove the priority from a list item
+- Fix a bug where it wasn't possible to remove the due date from a list item
+- Fix a bug where it wasn't possible to change the due date from the menu bar
+- Migrate codebase to use new Swift macros
+
+## [Allow to open Reminders app from the menu bar] - 2024-01-25
+
+- Add menu item that allows to open the Reminders app from the menu bar.
+
 ## [Fixes pop to root issue after creating reminders] - 2024-01-16
 
 - Fix an issue where `Create Reminder and Close Window` would stay on the `Create Reminder` screen after opening up Raycast again. Now, it should immediately pops to root after closing the window.

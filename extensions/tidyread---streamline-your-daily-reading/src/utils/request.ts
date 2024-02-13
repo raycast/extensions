@@ -1,20 +1,30 @@
-import fetch, { RequestInit } from "node-fetch";
+import fetch, { RequestInit, Response } from "node-fetch";
 import { isURL, withTimeout } from "./util";
 import { createAgent } from "./biz";
 import { load } from "cheerio";
 
+// 里面不处理res.json，是因为 fetchHeadContent 会用到原始的response
 export async function request(url: URL | string, options?: RequestInit, timeout?: number) {
   return withTimeout(
     fetch(url, {
       ...options,
       agent: createAgent(),
-    }).catch((err: any) => {
-      if (err.message.includes("connect ECONNREFUSED")) {
-        throw new Error("Please check if your proxy is connected properly");
-      }
+    })
+      .then((res) => {
+        // 若res.ok 为 false
+        if (!res.ok) {
+          throw new Error(`Request failed with status code ${res.status}: ${res.statusText}`);
+        }
 
-      throw err;
-    }),
+        return res;
+      })
+      .catch((err: any) => {
+        if (err.message.includes("connect ECONNREFUSED")) {
+          throw new Error("Please check if your proxy is connected properly");
+        }
+
+        throw err;
+      }),
     timeout ?? 20000,
   );
 }
@@ -48,11 +58,6 @@ export async function fetchHeadContent(url: string): Promise<string | null> {
       resolve(content);
     });
   });
-}
-
-interface Metadata {
-  title: string;
-  favicon: string;
 }
 
 interface Metadata {
@@ -97,7 +102,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
 export async function isValidRSSLink(url: string): Promise<boolean> {
   if (!isURL(url)) return false;
 
-  const response = await request(url, undefined, 10000);
+  const response = await request(url, undefined, 20 * 1000);
   const contentType = response.headers.get("content-type");
   const text = await response.text();
 
@@ -108,4 +113,21 @@ export async function isValidRSSLink(url: string): Promise<boolean> {
 
   // 检查是否包含 RSS 特有的标签
   return text.includes("<rss") || text.includes("<channel") || text.includes("<feed");
+}
+
+/**
+ * 尝试请求首选URL，如果失败则请求备用URL。
+ *
+ * @param primaryUrl 首选URL。
+ * @param fallbackUrl 备用URL。
+ */
+export function requestWithFallback(primaryUrl: string, fallbackUrl: string) {
+  return new Promise<Response>((resolve, reject) => {
+    request(primaryUrl)
+      .then(resolve)
+      .catch((err) => {
+        console.error(`Failed to request ${primaryUrl}, fallback to ${fallbackUrl}`, err);
+        request(fallbackUrl).then(resolve).catch(reject);
+      });
+  });
 }

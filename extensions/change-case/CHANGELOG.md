@@ -1,6 +1,9 @@
 # Change Case Changelog
 
-## [Fix Quicklink]
+## [Better Sentence Case] - 2024-01-28
+- Sentence case now handles punctuation better
+
+## [Fix Quicklink] - 2023-12-27
 - Fixed quicklinks not respecting the `Primary Action` preference.
 
 ## [Manual Refresh] - 2023-11-27

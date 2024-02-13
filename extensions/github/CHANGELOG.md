@@ -5,6 +5,10 @@
 - Add preferences to include or not some categories of Pull Requests in the My Pull Requests menu bar command.
 - Add preferences to include or not some categories in the count of the My Pull Requests menu bar command.
 
+## [Change cancelled workflow run status icon color] - 2023-12-18
+
+- Change cancelled workflow run status icon color to be in line with GitHub's UI
+
 ## [Open vercel preview on pull requests] - 2023-12-18
 
 - If you have a vercel project, you can now open your preview directly from your pull request

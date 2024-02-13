@@ -1,16 +1,17 @@
 import { isAfter, subHours } from "date-fns";
 import queryString from "query-string";
-import { RSSItem, genDigest } from "../digest";
+import fetch from "node-fetch";
+import { genDigest } from "../digest";
 import { PROVIDERS_MAP } from "../providers";
-import { Digest, Source } from "../types";
+import { Digest, DigestStage, RSSItem, RawFeed, Source } from "../types";
 import { normalizePreference } from "./preference";
 import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
 import dayjs from "dayjs";
-import { addOrUpdateDigest, getComeFrom, getInterest, getSources } from "../store";
+import { addOrUpdateDigest, getComeFrom, getDigestGenerationCount, getInterest, getSources } from "../store";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
-import { request } from "./request";
+import Parser from "rss-parser";
 
 export const categorizeSources = (items: Source[]): { todayItems: Source[]; otherItems: Source[] } => {
   const today = new Date();
@@ -32,27 +33,7 @@ export function createAgent(): RequestOptions["agent"] | undefined {
 }
 
 function getTranslateTitlesPrompt(lang: string) {
-  return `
-  ## Target
-  Translate each title in the array.
-
-  ## Example
-  Input:
-  ['Title 1', 'Title 2', 'Title 3', ...]
-
-  Output:
-  1.Title 1
-  2.Title 2
-  3.Title 3
-  ...
-
-  ## Requirements
-  1. Directly output the translated titles, without any other content.
-  2. Each output title must be translated into language: ${lang}
-  3. Maintain the original order.
-  4. Each title should start on a new line, separated by a blank line, rather than any other separators.
-  5. Each title is prefixed with a serial number.
-  `;
+  return `Translate the following content into ${lang}, preserving the original line format and order.`;
 }
 
 function parseOutput(output: string): string[] {
@@ -63,21 +44,49 @@ function parseOutput(output: string): string[] {
     .filter((line) => line !== "");
 
   // 目标行
-  const targetLines = lines.filter((line) => line.match(/^\d+\s*?\./)).map((line) => line.replace(/^\d+\s*?\./, ""));
+  const targetLines = lines
+    // .filter((line) => line.match(/^\d+\s*?\./))
+    .map((line) => line.replace(/^\d+\s*?\./, ""));
 
   return targetLines;
 }
 
-export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Digest> {
+export async function getFeedbackContent() {
+  const count = await getDigestGenerationCount();
+  const { preferredLanguage } = await normalizePreference();
+  const useTestimonial = Math.random() < 0.5;
+  const testimonialUrl = /(中文)|(汉语)|(中国)|(Chinese)|(China)/.test(preferredLanguage ?? "")
+    ? "https://testimonial.to/tidyread-cn"
+    : "https://testimonial.to/tidyread";
+  const finalLink = useTestimonial ? testimonialUrl : "https://tally.so/r/w4r61X";
+
+  // 当第三次生成简报时，提示用户反馈
+  if (count === 3) {
+    return `> Hi there! 👋 We've noticed you've been enjoying our Digest feature. Your opinion matters to us! 🌟 Could you spare a moment to share your feedback? It'll help us make Tidyread even better for you. Just click [here](${finalLink}) to tell us what you think. Thank you for helping us grow! 🚀\n\n![thanku](./thanku_1.svg)\n\n---\n\n`;
+  }
+
+  if (count === 30) {
+    return `> Hello there! 👋  Wow, you've used our Digest feature 30 times already! And we're thrilled to have you on board. We'd love to hear your thoughts! Your feedback is invaluable in shaping the future of Tidyread. Please take a moment to share your experience with us [here](${finalLink}). Your voice makes a big difference! Thank you for being a part of our growing community! 🚀\n\n![thanku](./thanku_2.svg)\n\n---\n\n`;
+  }
+
+  return "";
+}
+
+export async function bizGenDigest(
+  type: "manual" | "auto" = "auto",
+  onProgress?: (stage: DigestStage, err?: Error) => void,
+): Promise<Digest> {
   const preferences = normalizePreference();
   const {
     preferredLanguage,
     apiHost,
     apiKey,
     apiModel,
+    maxTokens,
     summarizePrompt,
     httpProxy,
     enableItemLinkProxy,
+    splitByTags,
     maxApiConcurrency,
     retryCount,
     retryDelay,
@@ -90,6 +99,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     apiHost,
     apiKey,
     apiModel,
+    maxTokens,
     httpProxy,
     summarizePrompt: summarizePrompt.replaceAll("{{lang}}", preferredLanguage || "language of the content"),
     translatePrompt: getTranslateTitlesPrompt(preferredLanguage || "language of the content"),
@@ -109,6 +119,7 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
         return isAfter(itemDate, timeThreshold);
       },
       maxItems: maxItemsPerFeed,
+      tags: readItem.tags,
     }));
 
   if (feeds.length === 0) {
@@ -118,12 +129,13 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
   const digestTitle = `${dayjs().format("YYYY-MM-DD")} Digest`;
 
   // 判断tidyread是否可访问，如果不可访问，则使用原始链接
-  const tidyreadCloudAvailable = await request("https://www.tidyread.info/read")
+  const tidyreadCloudAvailable = await withTimeout(fetch("https://www.tidyread.info/read"), 20 * 1000)
     .then(() => true)
     .catch(() => false);
 
   const interest = await getInterest();
   const comeFrom = await getComeFrom();
+  const count = await getDigestGenerationCount();
 
   // 主要逻辑
   const digest = await genDigest({
@@ -135,12 +147,15 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
     retryCount,
     retryDelay,
     requestTimeout,
+    splitByTags,
+    ignoreIntroduction: count >= 2,
     translateTitles: !preferredLanguage
       ? undefined
       : async (titles) => {
           const translatedTitles = await withTimeout(
-            provider.translate(JSON.stringify(titles), preferredLanguage),
-            requestTimeout,
+            provider.translate(titles.join("\n"), preferredLanguage),
+            // OpenAI需要的最长时间，比如30条内容会接近30秒
+            60000,
           );
           console.log("raw translated titles:", translatedTitles);
           return parseOutput(translatedTitles);
@@ -156,11 +171,13 @@ export async function bizGenDigest(type: "manual" | "auto" = "auto"): Promise<Di
       });
       return `https://tidyread.info/read?${qstr}`;
     },
+    onProgress,
   });
 
   // 写入存储
   const finalDigest = await addOrUpdateDigest({
     ...digest,
+    content: digest.content,
     type,
     title: digestTitle,
   });
@@ -204,4 +221,19 @@ export function addUtmSourceToUrl(url: string): string {
 
   // 重新构建URL
   return queryString.stringifyUrl(parsedQuery);
+}
+
+const parser = new Parser({
+  headers: {
+    // 否则有些服务会返回 406 错误码
+    Accept: "application/rss+xml, application/xml, text/xml",
+  },
+  timeout: normalizePreference().requestTimeout ?? 30 * 1000,
+  requestOptions: {
+    agent: createAgent(),
+  },
+});
+
+export function parseRSS(url: string): Promise<RawFeed> {
+  return parser.parseURL(url) as Promise<RawFeed>;
 }

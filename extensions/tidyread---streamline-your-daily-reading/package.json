@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidyread---streamline-your-daily-reading",
   "title": "TidyRead - Streamline Your Daily Reading",
-  "description": "Enhance controlled, efficient, and organized information intake using an AI-powered digest from RSS feeds. More at https://tidyread.info.",
+  "description": "An AI-powered digest tool based on RSS feeds. Enhance controlled, efficient, and organized information intake. More at https://tidyread.info.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "categories": [
@@ -35,9 +35,9 @@
   "commands": [
     {
       "name": "manage-source-list.command",
-      "title": "Manage Source List",
+      "title": "Manage Sources",
       "subtitle": "TidyRead",
-      "description": "Manage your read sources, including adding, editing, deleting, and scheduling.",
+      "description": "Manage your reading sources, including adding, editing, deleting, and scheduling.",
       "mode": "view"
     },
     {
@@ -138,7 +138,7 @@
       "type": "dropdown",
       "required": false,
       "title": "API Model",
-      "default": "gpt-3.5-turbo-instruct",
+      "default": "raycast-gpt-3.5-turbo-instruct",
       "description": "Choose an API model for your provider",
       "data": [
         {
@@ -194,15 +194,15 @@
           "title": "gpt-4-32k-0613"
         },
         {
-          "value": "gpt-3.5-turbo-instruct",
+          "value": "raycast-gpt-3.5-turbo-instruct",
           "title": "raycast gpt-3.5-turbo-instruct"
         },
         {
-          "value": "gpt-3.5-turbo",
+          "value": "raycast-gpt-3.5-turbo",
           "title": "raycast gpt-3.5-turbo"
         },
         {
-          "value": "gpt-4",
+          "value": "raycast-gpt-4",
           "title": "raycast gpt-4"
         },
         {
@@ -220,8 +220,16 @@
       ]
     },
     {
+      "name": "maxTokens",
+      "description": "Maximum number of tokens output for AI Summarizing. No need to set this value for Raycast AI.",
+      "type": "textfield",
+      "title": "Max Tokens",
+      "required": false,
+      "default": "200"
+    },
+    {
       "name": "preferredLanguage",
-      "description": "If you configure the AI, it will automatically translate the article titles in the digest into your preferred language. You can also use the {{lang}} variable in the Summarize Prompt field.",
+      "description": "Summarize the content within 50-200 characters, directly output. Focusing strictly on its core insights. Exclude promotional content, including podcast listening options, subscription offers, access instructions, and any form of contact details for additional services. Most important, respond in {{lang}}.",
       "type": "textfield",
       "title": "Preferred Language",
       "required": false
@@ -266,34 +274,31 @@
     },
     {
       "name": "maxApiConcurrency",
-      "description": "Maximum number of concurrent calls to the AI api for summarizing, default is 3",
+      "description": "Maximum number of concurrent calls to the AI api for summarizing",
       "type": "textfield",
       "title": "Max Summarize API Concurrency",
-      "default": "3",
       "required": false
     },
     {
       "name": "retryCount",
-      "description": "AI API request retry count, default is 5, it means that it will retry 5 times with `Retry Delay` intervals. If you encounter a `Rate Limit` error in digest, you can increase this value.",
+      "description": "AI API request retry count. Assuming you set it to 5, it means that it will retry 5 times with `Retry Delay` intervals. If you encounter a `Rate Limit` error in digest, you can try to increase this value.",
       "type": "textfield",
       "title": "AI API Retry Count",
-      "default": "5",
       "required": false
     },
     {
       "name": "retryDelay",
-      "description": "AI API request retry delay, default is 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can increase this value.",
+      "description": "AI API request retry delay. Assuming you set it to 30, means retry after 30 seconds. If you encounter a `Rate Limit` error, you can try to increase this value.",
       "type": "textfield",
       "title": "AI API Retry Delay",
-      "default": "30",
       "required": false
     },
     {
       "name": "requestTimeout",
-      "description": "Timeout for each request, default is 20 seconds",
+      "description": "Timeout for each request, default is 30 seconds",
       "type": "textfield",
       "title": "Request Timeout",
-      "default": "20",
+      "default": "30",
       "required": false
     },
     {
@@ -316,6 +321,15 @@
       "type": "password",
       "description": "Any WriteFreely instance account password",
       "title": "WriteFreely Password",
+      "required": false
+    },
+    {
+      "name": "splitByTags",
+      "description": "Whether digest content is categorized by label",
+      "type": "checkbox",
+      "title": "Enable Digest Split By Tags",
+      "label": "Enable",
+      "default": false,
       "required": false
     },
     {

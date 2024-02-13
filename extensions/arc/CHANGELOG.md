@@ -1,8 +1,20 @@
 # Arc Changelog
 
+## [Fixes] - 2024-01-30
+
+- Fix issue #10455: When opening a new tab and no window is open, a new window will be opened.
+
+## [New Features] - 2024-01-29
+
+- Added Kagi as a search engine for the commands `Search Arc` and `Open New Little Arc Window`
+
+## [Update] - 2024-01-26
+
+- Update release notes url
+
 ## [Update] - 2024-01-19
 
-- A few commands is now disabled by default  
+- A few commands is now disabled by default
 
 ## [Fixes] - 2024-01-18
 
