@@ -13,6 +13,7 @@ export default function SearchDocumentation() {
   const documentation: { [key: string]: docList } = {
     "1.x": require("./documentation/1.x.json"),
     "2.x": require("./documentation/2.x.json"),
+    "3.x": require("./documentation/3.x.json"),
   };
 
   return (

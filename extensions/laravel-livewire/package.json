@@ -5,6 +5,9 @@
   "description": "Quickly search through Laravel Livewire documentation and open it in the browser",
   "icon": "livewire-icon-transparent.png",
   "author": "tafhyseni",
+  "contributors": [
+    "patrikkernke"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -22,6 +25,10 @@
           "description": "Specify the Laravel livewire version it will search the docs for.",
           "default": "2.x",
           "data": [
+            {
+              "title": "3.x",
+              "value": "3.x"
+            },
             {
               "title": "2.x",
               "value": "2.x"
