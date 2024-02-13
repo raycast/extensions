@@ -872,14 +872,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "openai": "^4.14.2",
+    "@raycast/api": "^1.67.1",
+    "openai": "^4.27.0",
     "@nem035/gpt-3-encoder": "^1.1.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.0.9",
+    "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
