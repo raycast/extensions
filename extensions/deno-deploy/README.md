@@ -28,8 +28,8 @@ Feel free to open an issue or a pull request. I'm using the official [Deno Deplo
 
 ## Screenshots
 
-![Show projects](/media/deno-deploy-1.png)
-![Show deployments](media/deno-deploy-2.png)
-![Show organizations](media/deno-deploy-3.png)
-![Create playground from snippet](media/deno-deploy-4.png)
-![Create playground from file](media/deno-deploy-5.png)
+![Show projects](/metadata/deno-deploy-1.png)
+![Show deployments](metadata/deno-deploy-2.png)
+![Show organizations](metadata/deno-deploy-3.png)
+![Create playground from snippet](metadata/deno-deploy-4.png)
+![Create playground from file](metadata/deno-deploy-5.png)
