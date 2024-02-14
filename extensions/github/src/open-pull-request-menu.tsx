@@ -105,6 +105,7 @@ function OpenPullRequestMenu() {
       {filteredSections().map((section) => {
         return (
           <MenuBarSection
+            key={section.type}
             title={section.type}
             maxChildren={getMaxPullRequestsPreference()}
             moreElement={(hidden) => (
