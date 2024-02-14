@@ -212,9 +212,13 @@ async function findSubmodules(path: string): Promise<string[]> {
 
 async function findWorktrees(path: string, maxDepth: number): Promise<GitRepo[]> {
   let foundRepos: GitRepo[] = [];
-  const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -name .git -type f`;
+  const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -name .git -type f -print || true`;
   const { stdout, stderr } = await execp(findCmd);
-  if (!stderr) {
+  const filteredStderr = stderr
+    .split("\n")
+    .filter((line) => !/Permission denied|Operation not permitted/.test(line))
+    .join("\n");
+  if (!filteredStderr) {
     const repoPaths = stdout.split("\n").filter((e) => e);
     const repos = parseRepoPaths(path, repoPaths, false);
     foundRepos = foundRepos.concat(repos);
