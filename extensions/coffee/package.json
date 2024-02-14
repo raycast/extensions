@@ -103,8 +103,12 @@
           "value": "coffee-pot"
         },
         {
-          "title": "Coffee Mug",
+          "title": "Coffee Mug 1",
           "value": "coffee-mug-1"
+        },
+                {
+          "title": "Coffee Mug 2",
+          "value": "coffee-mug-2"
         }
       ]
     }
