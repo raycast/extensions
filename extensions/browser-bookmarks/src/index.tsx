@@ -20,6 +20,7 @@ import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBr
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
+import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
@@ -103,6 +104,7 @@ export default function Command() {
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
+  const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
@@ -118,6 +120,7 @@ export default function Command() {
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
   const chrome = useChromeBookmarks(hasChrome);
+  const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
@@ -137,6 +140,7 @@ export default function Command() {
       ...braveBeta.bookmarks,
       ...braveNightly.bookmarks,
       ...chrome.bookmarks,
+      ...chromeBeta.bookmarks,
       ...chromeDev.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
@@ -184,6 +188,7 @@ export default function Command() {
     braveBeta.bookmarks,
     braveNightly.bookmarks,
     chrome.bookmarks,
+    chromeBeta.bookmarks,
     chromeDev.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
@@ -203,6 +208,7 @@ export default function Command() {
       ...braveBeta.folders,
       ...braveNightly.folders,
       ...chrome.folders,
+      ...chromeBeta.folders,
       ...chromeDev.folders,
       ...edge.folders,
       ...edgeCanary.folders,
@@ -220,6 +226,7 @@ export default function Command() {
     braveBeta.folders,
     braveNightly.folders,
     chrome.folders,
+    chromeBeta.folders,
     chromeDev.folders,
     edge.folders,
     edgeCanary.folders,
@@ -318,6 +325,9 @@ export default function Command() {
     if (hasChrome) {
       chrome.mutate();
     }
+    if (hasChromeBeta) {
+      chromeBeta.mutate();
+    }
     if (hasChromeDev) {
       chromeDev.mutate();
     }
@@ -388,6 +398,7 @@ export default function Command() {
         braveBeta.isLoading ||
         braveNightly.isLoading ||
         chrome.isLoading ||
+        chromeBeta.isLoading ||
         chromeDev.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
@@ -492,6 +503,15 @@ export default function Command() {
                     profiles={chrome.profiles}
                     currentProfile={chrome.currentProfile}
                     setCurrentProfile={chrome.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    bundleId={BROWSERS_BUNDLE_ID.chromeBeta}
+                    name="Chrome Beta"
+                    icon="chrome-beta.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    profiles={chromeBeta.profiles}
+                    currentProfile={chromeBeta.currentProfile}
+                    setCurrentProfile={chromeBeta.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
                     bundleId={BROWSERS_BUNDLE_ID.chromeDev}
