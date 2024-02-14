@@ -5,6 +5,7 @@ import { exec as execWithCallbacks } from "child_process";
 import { promisify } from "util";
 import { cliInfo } from "~/api/bitwarden";
 import { existsSync } from "fs";
+import { dirname } from "path";
 
 const exec = promisify(execWithCallbacks);
 
@@ -44,7 +45,7 @@ const getSafePreferences = () => {
 const NA = "N/A";
 const tryExec = async (command: string, trimLineBreaks = true) => {
   try {
-    const { stdout } = await exec(command);
+    const { stdout } = await exec(`PATH="$PATH:${dirname(process.execPath)}" ${command}`);
     const response = stdout.trim();
     if (trimLineBreaks) return response.replace(/\n|\r/g, "");
     return response;
