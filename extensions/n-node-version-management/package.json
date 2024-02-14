@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "n-node-version-management",
+  "title": "N - Node Version Management",
+  "description": "Support for managing node versions with n",
+  "icon": "extension_icon.png",
+  "author": "simonkub",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Manage Node.js Versions",
+      "subtitle": "N – Node Version Manager",
+      "description": "List node.js versions on your machine",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "path",
+      "title": "Path of the n executable",
+      "description": "Path of the n executable",
+      "default": "/opt/homebrew/bin/n",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "directory",
+      "title": "Directory used for storing node versions",
+      "description": "If you set a custom directory via N_PREFIX environment variable, use the same path here.",
+      "default": "/usr/local",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.11.17",
+    "@types/react": "18.2.55",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
