@@ -18,25 +18,25 @@ export default function ViewBookmarks() {
   const { isLoading, data } = useFetch<Response>("https://re-mind.danilocampos.cc/api/remindapi");
   const [selectedcategory, setSelectedCategory] = React.useState("All");
 
-  const list = data?.bookmarks || [];
+  const bookmarks = data?.bookmarks || [];
 
-  const categoriesList = [...new Set(list.map((item: Bookmark) => item.category))];
+  const categoriesList = [...new Set(bookmarks.map((bookmark) => bookmark.category))];
 
-  const sortedList = list.sort((a: Bookmark, b: Bookmark) =>
+  const sortedBookmarks = bookmarks.sort((a, b) =>
     a.title.trim().toLowerCase().localeCompare(b.title.trim().toLowerCase()),
   );
 
-  let filteredList = sortedList;
+  let filteredBookmarks = sortedBookmarks;
 
   if (selectedcategory !== "All") {
-    filteredList = sortedList.filter((item: Bookmark) => item.category === selectedcategory);
+    filteredBookmarks = sortedBookmarks.filter((bookmark) => bookmark.category === selectedcategory);
   }
 
   return (
     <Grid
       isLoading={isLoading}
       columns={4}
-      searchBarPlaceholder="Search for a website, studio, designer,..."
+      searchBarPlaceholder="Search for a website, studio, designer"
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select category"
@@ -52,7 +52,7 @@ export default function ViewBookmarks() {
         </Grid.Dropdown>
       }
     >
-      {filteredList.map((item: Bookmark) => (
+      {filteredBookmarks.map((item: Bookmark) => (
         <Grid.Item
           key={item.id}
           content={item.imageurl}
