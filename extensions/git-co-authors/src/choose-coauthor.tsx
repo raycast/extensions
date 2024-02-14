@@ -47,13 +47,24 @@ export default function ChooseAuthor() {
                 }}
               />
 
-              <Action.CopyToClipboard
-                content={selectedAuthors
-                  .map((selectedAuthor) => `Co-authored-by: ${selectedAuthor.name} <${selectedAuthor.email}>`)
-                  .join("\n")}
-              />
+              {selectedAuthors.length > 0 && (
+                <>
+                  <Action.CopyToClipboard
+                    content={selectedAuthors
+                      .map((selectedAuthor) => `Co-authored-by: ${selectedAuthor.name} <${selectedAuthor.email}>`)
+                      .join("\n")}
+                  />
+                  <Action.Paste
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    content={selectedAuthors
+                      .map((selectedAuthor) => `Co-authored-by: ${selectedAuthor.name} <${selectedAuthor.email}>`)
+                      .join("\n")}
+                  />
+                </>
+              )}
               <Action.Push
                 title={`Edit ${author.name}`}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
                 target={<AddOrEditAuthor author={author} />}
                 icon={Icon.Pencil}
               />
