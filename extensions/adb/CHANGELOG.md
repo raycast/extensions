@@ -1,5 +1,8 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Fix wifi/airplane commands] - 2024-02-14
+- Fix `wifi`, `airplane` commands. There was a problem fixing merge conflicts disregarding the usage of new toggle value.
+
 ## [Fix wifi/airplane commands] - 2024-02-13
 - Fix `wifi`, `airplane` commands. ADB requires these commands to receive specific enable/disable arguments to be fully compatible.
 
