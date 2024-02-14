@@ -14,7 +14,7 @@ type Response = {
   bookmarks: Bookmark[];
 };
 
-export default function ViewBookmarks() {
+export default function ViewLinks() {
   const { isLoading, data } = useFetch<Response>("https://re-mind.danilocampos.cc/api/remindapi");
   const [selectedcategory, setSelectedCategory] = React.useState("All");
 

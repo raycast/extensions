@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "view-re-mind",
-      "title": "View Bookmarks",
+      "title": "View Links",
       "description": "View, search or filter Re-mind bookmarks.",
       "mode": "view"
     }
