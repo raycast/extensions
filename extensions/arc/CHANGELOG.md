@@ -2,7 +2,7 @@
 
 ## [Fix] - 2024-02-14
 
-- Fixed an issue where the `Search Tab` command would not work if the tab title contained a backslash.
+- Fixed an issue where the `Search Tabs` command would not work if the tab title contained a backslash.
 
 ## [Fixes] - 2024-01-30
 
