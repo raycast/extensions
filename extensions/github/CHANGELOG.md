@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Select categories for My Pull Request Menu command] - 2024-01-25
+## [Select categories for My Pull Request Menu command] - 2024-02-14
 
 - Add preferences to include or not some categories of Pull Requests in the My Pull Requests menu bar command.
 - Add preferences to include or not some categories in the count of the My Pull Requests menu bar command.
