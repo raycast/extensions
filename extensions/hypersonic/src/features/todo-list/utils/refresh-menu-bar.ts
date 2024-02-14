@@ -7,6 +7,6 @@ export async function refreshMenuBar() {
       type: LaunchType.Background,
     })
   } catch (error) {
-    return;
+    return
   }
 }
