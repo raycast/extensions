@@ -5,6 +5,9 @@
   "description": "Re-mind is a curated collection of design-related links compiled by Danilo Campos.",
   "icon": "remind-icon.png",
   "author": "daniloc",
+  "contributors": [
+    "peduarte"
+  ],
   "categories": [
     "Design Tools"
   ],
