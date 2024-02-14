@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { brewCleanup } from "./brew";
 import { showActionToast, showFailureToast, wait } from "./utils";
 import { preferences } from "./preferences";
