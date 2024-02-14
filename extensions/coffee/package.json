@@ -56,12 +56,12 @@
       "mode": "view"
     },
     {
-        "name": "status",
-        "title": "Caffeinate Status",
-        "description": "Show the current caffeination status",
-        "mode": "no-view",
-        "interval": "1m"
-      }
+      "name": "status",
+      "title": "Caffeinate Status",
+      "description": "Show the current caffeination status",
+      "mode": "no-view",
+      "interval": "1m"
+    }
   ],
   "preferences": [
     {
@@ -88,6 +88,25 @@
       "required": false,
       "default": true,
       "label": "Prevent Disk Sleep"
+    },
+    {
+      "name": "icon",
+      "description": "Select icon set for Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "coffee-pot",
+      "title": "Menu Bar Icon",
+      "placeholder": "Icon 3",
+      "data": [
+        {
+          "title": "Coffee Pot",
+          "value": "coffee-pot"
+        },
+        {
+          "title": "Coffee Mug",
+          "value": "coffee-mug-1"
+        }
+      ]
     }
   ],
   "dependencies": {
