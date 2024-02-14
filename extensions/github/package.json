@@ -19,7 +19,8 @@
     "daquinoaldo",
     "ppy",
     "lin",
-    "marcotf"
+    "marcotf",
+    "qeude"
   ],
   "categories": [
     "Developer Tools",
@@ -207,21 +208,119 @@
       "interval": "15m",
       "preferences": [
         {
+          "name": "includeOpen",
+          "type": "checkbox",
+          "required": false,
+          "title": "Categories To Display",
+          "default": true,
+          "label": "Opened",
+          "description": "Includes pull request you opened in the menu list."
+        },
+        {
+          "name": "includeAssigned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "description": "Includes pull request you were assigned to in the menu list."
+        },
+        {
+          "name": "includeMentioned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes pull request you were mentioned in the menu list."
+        },
+        {
+          "name": "includeReviewRequests",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Review Requests",
+          "description": "Includes pull request you were requested to review in the menu list."
+        },
+        {
+          "name": "includeReviewed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Reviewed",
+          "description": "Includes pull request you reviewed in the menu list."
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
           "name": "maxitems",
-          "description": "Maximum Pull Requests shown",
+          "description": "Maximum Pull Requests shown per category.",
           "type": "textfield",
           "required": false,
-          "title": "Max. Pull Requests",
-          "placeholder": "10"
+          "title": "Max. Pull Requests per category",
+          "placeholder": "5"
         },
         {
           "name": "showtext",
           "description": "Show Pull Requests Count",
           "type": "checkbox",
           "required": false,
-          "label": "Show Count",
-          "title": "Appearance",
+          "label": "Show",
+          "title": "Icon Count",
           "default": true
+        },
+        {
+          "name": "includeOpenCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Icon Count Categories",
+          "label": "Opened",
+          "description": "Includes pull request you opened in the icon counter."
+        },
+        {
+          "name": "includeAssignedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "description": "Includes pull request you were assigned to in the icon counter."
+        },
+        {
+          "name": "includeMentionedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes pull request you were mentioned in the icon counter."
+        },
+        {
+          "name": "includeReviewRequestsCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Review Requests",
+          "description": "Includes pull request you were requested to review in the icon counter."
+        },
+        {
+          "name": "includeReviewedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Reviewed",
+          "description": "Includes pull request you reviewed in the icon counter."
+        },
+        {
+          "name": "includeRecentlyClosedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull request you recently closed in the icon counter."
         }
       ]
     }
