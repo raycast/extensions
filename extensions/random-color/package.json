@@ -3,8 +3,8 @@
   "name": "random-color",
   "title": "Random Color",
   "description": "Pick a random color.",
-  "icon": "command-icon.png",
-  "author": "sevensidedmarble",
+  "icon": "icon.png",
+  "author": "srcrip",
   "categories": [
     "Design Tools",
     "Developer Tools"
@@ -13,15 +13,13 @@
   "commands": [
     {
       "name": "random-color",
-      "title": "Random Color",
-      "subtitle": "Pick a random color.",
+      "title": "Copy Random Color",
       "description": "Get a random color, copy it to your clipboard, or paste it into the current app.",
       "mode": "no-view"
     },
     {
       "name": "select-color",
       "title": "Select Color",
-      "subtitle": "Choose from some random colors.",
       "description": "Choose from a set of random colors.",
       "mode": "view",
       "preferences": [
