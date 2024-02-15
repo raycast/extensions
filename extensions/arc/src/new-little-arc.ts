@@ -1,5 +1,5 @@
 import { LaunchProps, closeMainWindow, getSelectedText, showHUD } from "@raycast/api";
-import { getValidatedSpaceTitle, makeNewLittleArcWindow } from "./arc";
+import { makeNewLittleArcWindow } from "./arc";
 import { newLittleArcPreferences } from "./preferences";
 import { NewTabSearchConfigs, URLArguments } from "./types";
 import { isURL, validateURL } from "./utils";
@@ -20,8 +20,6 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
 
   const selectedTextAsSearch = `${config[newLittleArcPreferences.engine]}${encodeURIComponent(selectedText)}`;
 
-  const space = await getValidatedSpaceTitle(props.arguments.space);
-
   const newTabUrl =
     url || selectedText
       ? isURL(selectedText)
@@ -35,7 +33,7 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
       const openURL = !/^\S+?:\/\//i.test(newTabUrl) ? "https://" + newTabUrl : newTabUrl;
 
       await closeMainWindow();
-      await makeNewLittleArcWindow(openURL, space);
+      await makeNewLittleArcWindow(openURL);
     }
   } catch (e) {
     console.error(e);

@@ -92,13 +92,6 @@
           "default": "https://google.com"
         },
         {
-          "name": "space",
-          "title": "Space",
-          "description": "The Space to open the new tab in",
-          "type": "textfield",
-          "required": false
-        },
-        {
           "name": "engine",
           "title": "Search Engine",
           "description": "Search engine used when opening mini arc with a non-url argument",
@@ -137,12 +130,6 @@
         {
           "name": "url",
           "placeholder": "URL",
-          "type": "text",
-          "required": false
-        },
-        {
-          "name": "space",
-          "placeholder": "Space",
           "type": "text",
           "required": false
         }

@@ -33,6 +33,6 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
 
     return Promise.all(multileTabs);
   } else {
-    return await handleOpenNewTab(newTabUrl);
+    return await handleOpenNewTab(newTabUrl, space);
   }
 }

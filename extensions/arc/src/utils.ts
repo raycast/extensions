@@ -24,7 +24,7 @@ export function getSpaceTitle(space: Space) {
 export function findSpaceInSpaces(spaceId: string, spaces: Space[]): string | undefined {
   for (const s of spaces) {
     const title = getSpaceTitle(s);
-    if (title.toLowerCase() === spaceId.toLowerCase()) {
+    if (title.toLowerCase() === spaceId.toLowerCase() || s.id.toString() === spaceId) {
       return title;
     }
   }

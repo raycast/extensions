@@ -190,12 +190,10 @@ export async function makeNewBlankWindow(): Promise<void> {
   `);
 }
 
-export async function makeNewLittleArcWindow(url: string, space?: string) {
+export async function makeNewLittleArcWindow(url: string) {
   await runAppleScript(`
     tell application "Arc"
-      ${space ? `tell front window to tell space "${space}" to focus` : ""}
       make new tab with properties {URL:"${url}"}
-
       activate
     end tell
   `);
