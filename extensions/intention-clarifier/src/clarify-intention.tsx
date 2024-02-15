@@ -23,10 +23,10 @@ const { customMoods } = getPreferenceValues<{ customMoods: string }>();
 export default function IntentionClarifier() {
   const moods = [
     ...new Set(
-      customMoods
-        .split(",")
-        .map((mood) => mood.trim())
-        .filter((mood) => mood !== ""),
+        customMoods
+            .split(",")
+            .map((mood) => mood.trim())
+            .filter((mood) => mood !== ""),
     ),
   ];
 
@@ -43,28 +43,28 @@ export default function IntentionClarifier() {
   });
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Paste Intention" onSubmit={(data: IntentionForm) => handleSubmit(data, "paste")} />
-          <Action.SubmitForm title="Copy to Clipboard" onSubmit={(data: IntentionForm) => handleSubmit(data, "copy")} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField title="Task" placeholder="What do you want to do?" {...itemProps.task} />
-      <Form.TagPicker
-        id="mood"
-        title="Mood"
-        value={values.mood}
-        onChange={(newMood) => setValue("mood", newMood)}
-        placeholder="Needed mindsets?"
+      <Form
+          actions={
+            <ActionPanel>
+              <Action.SubmitForm title="Paste Intention" onSubmit={(data: IntentionForm) => handleSubmit(data, "paste")} />
+              <Action.SubmitForm title="Copy to Clipboard" onSubmit={(data: IntentionForm) => handleSubmit(data, "copy")} />
+            </ActionPanel>
+          }
       >
-        {moods.map((mood) => (
-          <Form.TagPicker.Item key={mood} value={mood} title={mood} />
-        ))}
-      </Form.TagPicker>
-      <Form.TextField title="Reason" placeholder="Why are you doing it?" {...itemProps.reason} />
-    </Form>
+        <Form.TextField title="Task" placeholder="What do you want to do?" {...itemProps.task} />
+        <Form.TagPicker
+            id="mood"
+            title="Mood"
+            value={values.mood}
+            onChange={(newMood) => setValue("mood", newMood)}
+            placeholder="Needed mindsets?"
+        >
+          {moods.map((mood) => (
+              <Form.TagPicker.Item key={mood} value={mood} title={mood} />
+          ))}
+        </Form.TagPicker>
+        <Form.TextField title="Reason" placeholder="Why are you doing it?" {...itemProps.reason} />
+      </Form>
   );
 }
 
