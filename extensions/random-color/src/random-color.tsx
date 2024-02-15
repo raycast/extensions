@@ -2,10 +2,10 @@ import { randomColor } from './utils'
 import { closeMainWindow, Clipboard, showHUD, getPreferenceValues } from '@raycast/api'
 
 export const produceOutput = async (content: string) => {
-  const { action: preference = 'clipboard' } = getPreferenceValues()
+  const { primaryAction } = getPreferenceValues<Preferences.SelectColor>()
 
-  switch (preference) {
-    case 'clipboard':
+  switch (primaryAction) {
+    case 'copy':
       await Clipboard.copy(content)
       showHUD(`Copied ${content} to clipboard!`)
       break
