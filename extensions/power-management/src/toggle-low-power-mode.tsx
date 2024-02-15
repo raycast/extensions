@@ -1,7 +1,5 @@
-import { PowerManagement } from "./PowerManagement";
+import { toggleLowPowerMode } from "./utils/powerManagement";
 
 export default async function main() {
-  const powerManagement = new PowerManagement();
-
-  await powerManagement.toggleLowPowerMode();
+  await toggleLowPowerMode();
 }
