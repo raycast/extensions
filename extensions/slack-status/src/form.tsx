@@ -46,7 +46,6 @@ export function StatusForm(props: {
         <Form.Dropdown
           title="Pause notifications for"
           storeValue={props.initalValues?.emoji === undefined}
-          defaultValue={values.duration}
           {...itemProps.pauseNotificationsDuration}
         >
           {Object.entries(pauseNotificationsDurationTitleMap).map(([duration, title]) => (
