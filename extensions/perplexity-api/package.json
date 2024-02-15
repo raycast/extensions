@@ -13,165 +13,803 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "askAI",
-      "title": "Ask AI",
-      "subtitle": "Perplexity AI",
-      "description": "Ask Perplexity AI",
-      "mode": "view",
-      "icon": "perplexity.png",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "askAboutSelectedText",
-      "title": "Ask About Selected Text",
-      "subtitle": "Perplexity AI",
-      "description": "Ask Perplexity AI about your selected text",
-      "mode": "view",
-      "icon": "perplexity.png",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "composeResponse",
-      "title": "Compose Response",
-      "subtitle": "Perplexity AI",
-      "description": "Craft an Email Response",
-      "disabledByDefault": true,
-      "mode": "view",
-      "icon": "perplexity.png",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Details",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "summarize",
       "title": "Summarize",
-      "description": "Summarize text",
-      "icon": "perplexity.png",
-      "mode": "view"
-    },
-    {
-      "name": "explain",
-      "title": "Explain",
-      "description": "Explain text",
-      "icon": "perplexity.png",
-      "mode": "view"
-    },
-    {
-      "name": "comment",
-      "title": "Add Comments to Code",
-      "description": "Add comments to code",
-      "disabledByDefault": true,
-      "icon": "perplexity.png",
-      "mode": "view"
-    },
-    {
-      "name": "friendly",
-      "title": "Change Tone to Friendly",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to friendly",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "casual",
-      "title": "Change Tone to Casual",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to casual",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "professional",
-      "title": "Change Tone to Professional",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to professional",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "academic",
-      "title": "Change Tone to Academic",
-      "icon": "perplexity.png",
-      "description": "Change tone of selected text to academic",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "synonyms",
-      "title": "Find Synonyms",
-      "icon": "perplexity.png",
-      "description": "Find synonyms of selected word",
-      "disabledByDefault": true,
-      "mode": "view"
-    },
-    {
-      "name": "taskBreakdown",
-      "title": "Task Generator",
-      "icon": "perplexity.png",
-      "description": "Break down a project into tasks",
-      "disabledByDefault": true,
-      "mode": "view"
+      "description": "Summarize selected text",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_summarize",
+          "title": "Summarize Prompt",
+          "description": "The prompt for the summarize command.",
+          "type": "textfield",
+          "default": "Summarize all relevant aspects from the following text as concise as possible.",
+          "required": false
+        },
+        {
+          "name": "model_summarize",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "grammar",
-      "title": "Fix Spelling and Grammar",
-      "icon": "perplexity.png",
-      "description": "Fix spelling and grammar of selected text",
-      "mode": "view"
-    },
-    {
-      "name": "longer",
-      "title": "Make Longer",
-      "icon": "perplexity.png",
-      "description": "Make selected text longer",
-      "mode": "view"
+      "title": "Fix Grammar",
+      "description": "Fix spelling and grammar of selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_grammar",
+          "title": "Prompt",
+          "description": "The prompt for the grammar command.",
+          "type": "textfield",
+          "default": "Act as lecturer. Fix spelling, grammar and punctuation. ONLY write the corrected version without explanations.",
+          "required": false
+        },
+        {
+          "name": "model_grammar",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "shorter",
       "title": "Make Shorter",
-      "icon": "perplexity.png",
-      "description": "Make selected text shorter",
-      "mode": "view"
+      "description": "Make selected text shorter.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_shorter",
+          "title": "Make Shorter Prompt",
+          "description": "The prompt for the shorter command.",
+          "type": "textfield",
+          "default": "Make the following text shorter with the following instructions: Use the same style and tone of voice, reduce repetition, keep key information.",
+          "required": false
+        },
+        {
+          "name": "model_shorter",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "description": "Make selected text longer.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_longer",
+          "title": "Make Longer Prompt",
+          "description": "The prompt for the longer command.",
+          "type": "textfield",
+          "default": "Act as a world class content writer. Expand the text with the following instructions: Use the same style and tone of voice, expand the key information and concepts, avoid repetition, stay factual close to the provided text.",
+          "required": false
+        },
+        {
+          "name": "model_longer",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "improve",
       "title": "Improve Text",
-      "icon": "perplexity.png",
-      "description": "Improve selected text",
-      "mode": "view"
+      "description": "Improve selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_improve",
+          "title": "Make Longer Prompt",
+          "description": "The prompt for the improve command.",
+          "type": "textfield",
+          "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
+          "required": false
+        },
+        {
+          "name": "model_improve",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
     },
     {
-      "name": "translate",
-      "title": "Translate Text",
-      "icon": "perplexity.png",
-      "description": "Translate selected text",
-      "disabledByDefault": true,
+      "name": "ask",
+      "title": "Ask AI",
+      "description": "Ask AI, use selected text, and web search via Online LLMs.",
       "mode": "view",
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Language",
+          "placeholder": "Query",
           "type": "text",
           "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "ask_sys_prompt",
+          "title": "System Prompt",
+          "description": "Online LLMs use current date instead!",
+          "type": "textfield",
+          "default": "You are a helpful assistant.",
+          "required": false
+        },
+        {
+          "name": "ask_default_question",
+          "title": "Default Question",
+          "description": "Default question for selected text if none provided.",
+          "type": "textfield",
+          "default": "Explain this as concise and simple as possible.",
+          "required": false
+        },
+        {
+          "name": "model_ask",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "pplx-7b-online",
+              "title": "Perplexity 7B Online"
+            },
+            {
+              "value": "pplx-70b-online",
+              "title": "Perplexity 70B Online"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "coding",
+      "title": "Coding Assistant",
+      "description": "Coding Assistant considering selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "coding_sys_prompt",
+          "title": "System Prompt",
+          "description": "System prompt for coding assistant.",
+          "type": "textfield",
+          "default": "You are a world class software engineer with deep understanding of any programming language.",
+          "required": false
+        },
+        {
+          "name": "coding_default_question",
+          "title": "Default Question",
+          "description": "Default question for selected text if none provided.",
+          "type": "textfield",
+          "default": "Explain the following code in detail. Start with a high-level overview.",
+          "required": false
+        },
+        {
+          "name": "model_coding",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "codellama-70b-instruct",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "casual",
+      "title": "Change Tone to Casual",
+      "description": "Change tone of selected text to casual.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_casual",
+          "title": "Change Tone Prompt",
+          "description": "The prompt for the casual command.",
+          "type": "textfield",
+          "default": "Rewrite the text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_casual",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "description": "Find synonyms of selected word.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_synonyms",
+          "title": "Synonyms Prompt",
+          "description": "The prompt for the synonyms command.",
+          "type": "textfield",
+          "default": "Find synonyms for the given word and format the output as a markdown list. Do NOT write any explanations. Do NOT include the original word in the list. The list should not have any duplicates.",
+          "required": false
+        },
+        {
+          "name": "model_synonyms",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional.",
+      "description": "Change tone of selected text to professional.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_professional",
+          "title": "Change Tone Prompt",
+          "description": "The prompt for the professional command.",
+          "type": "textfield",
+          "default": "Rewrite the text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_professional",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Custom action based on selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Custom Prompt",
+          "description": "The prompt for the custom action command.",
+          "type": "textfield",
+          "default": "Write a custom prompt here.",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate Text",
+      "description": "Translate selected text",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_translate",
+          "title": "Language-defining Translation Prompt.",
+          "description": "The prompt for the translate command.",
+          "type": "textfield",
+          "default": "Act as translator. If English, to German. If German, to English. Maintain tone. Start with: '### Translated from .. to .. :'",
+          "required": false
+        },
+        {
+          "name": "model_translate",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "taskBreakdown",
+      "title": "Task Generator",
+      "description": "Break down a project into tasks.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_task",
+          "title": "Generator Prompt",
+          "description": "The prompt for generating tasks.",
+          "type": "textfield",
+          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Write a summary of the project.'",
+          "required": false
+        },
+        {
+          "name": "model_task",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "title": "Follow global model",
+              "value": "global"
+            },
+            {
+              "value": "mixtral-8x7b-instruct",
+              "title": "Mixtral 8x7b Instruct"
+            },
+            {
+              "value": "mistral-7b-instruct",
+              "title": "Mistral 7B Instruct"
+            },
+            {
+              "value": "llama-2-70b-chat",
+              "title": "Llama2 70B Chat"
+            },
+            {
+              "value": "codellama-34b-instruct",
+              "title": "CodeLlama 34B Instruct"
+            },
+            {
+              "value": "codellama-70b-instruct",
+              "title": "CodeLlama 70B Instruct"
+            },
+            {
+              "value": "pplx-7b-chat",
+              "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-70b-chat",
+              "title": "Perplexity 70B Chat"
+            }
+          ]
         }
       ]
     }
@@ -179,23 +817,23 @@
   "preferences": [
     {
       "description": "Perplexity API Key",
-      "name": "apiKey",
+      "name": "apikey",
       "required": true,
       "title": "Perplexity API Key",
       "type": "password",
       "placeholder": "pplx-XXX"
     },
     {
-      "name": "modelSelector",
-      "title": "Select a model",
-      "default": "mixtral-8x7b-instruct",
-      "description": "Select a model you want to use",
+      "name": "model",
+      "title": "Select a global model",
+      "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
+      "default": "mixtral-8x7b-instruct",
       "data": [
         {
           "value": "mixtral-8x7b-instruct",
-          "title": "Mistral 8x7b Instruct"
+          "title": "Mixtral 8x7b Instruct"
         },
         {
           "value": "mistral-7b-instruct",
@@ -203,7 +841,7 @@
         },
         {
           "value": "llama-2-70b-chat",
-          "title": "Llama2.70B Chat"
+          "title": "Llama2 70B Chat"
         },
         {
           "value": "codellama-34b-instruct",
@@ -222,11 +860,21 @@
           "title": "Perplexity 70B Chat"
         }
       ]
+    },
+    {
+      "name": "enableStreaming",
+      "title": "Response Streaming",
+      "label": "Enabled",
+      "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.67.1",
+    "openai": "^4.27.0",
+    "@nem035/gpt-3-encoder": "^1.1.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

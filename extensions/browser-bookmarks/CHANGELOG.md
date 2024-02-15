@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Support for Chrome Beta] - 2024-01-12
+
+- Add support for `Chrome Beta` browser.
+
 ## [Bug Fixes] - 2024-02-01
 
 - Fixed sort by score issue

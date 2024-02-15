@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Select categories for My Pull Request Menu command] - 2024-02-14
+
+- Add preferences to include or not some categories of Pull Requests in the My Pull Requests menu bar command.
+- Add preferences to include or not some categories in the count of the My Pull Requests menu bar command.
+
 ## [Change cancelled workflow run status icon color] - 2023-12-18
 
 - Change cancelled workflow run status icon color to be in line with GitHub's UI
