@@ -3,8 +3,8 @@
 ## [Bug Fix] - 2024-02-10
 
 - Make find command handle errors better
-    - change exit code to be always zero so execp doesn't throw
-    - filter out error commands due to unreadable directories in the path
+    - Changed exit code to be always zero so execp doesn't throw
+    - Filter out error commands due to unreadable directories in the path
 
 ## [Enhancement] - 2023-12-07
 
