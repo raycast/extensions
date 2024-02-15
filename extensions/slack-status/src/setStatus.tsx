@@ -20,7 +20,7 @@ import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
 const preferences: Preferences = getPreferenceValues();
 
 const slack = OAuthService.slack({
-  scope: "emoji:read users.profile:write users.profile:read",
+  scope: "emoji:read users.profile:write users.profile:read dnd:read dnd:write",
   personalAccessToken: preferences.accessToken,
 });
 
