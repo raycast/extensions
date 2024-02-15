@@ -20,7 +20,7 @@ interface IntentionForm {
 }
 
 // Assuming there's a preferences setup in the extension's package.json for customMoods
-const { customMoods } = getPreferenceValues<{ customMoods: string }>();
+const { customMoods, defaultAction } = getPreferenceValues<Preferences.ClarifyIntention>();
 
 export default function IntentionClarifier() {
   const moods = [
@@ -52,8 +52,6 @@ export default function IntentionClarifier() {
       task: FormValidation.Required,
     },
   });
-
-  const { defaultAction } = getPreferenceValues<{ defaultAction: string }>();
 
   const copyAction = (
     <Action.SubmitForm
