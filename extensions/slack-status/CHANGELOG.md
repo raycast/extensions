@@ -1,5 +1,9 @@
 # Slack Status Change
 
+## [Add option to pause notifications] - 2024-02-15
+
+- Add pause notifications option to presets
+
 ## [Use OAuth utils] - 2024-02-15
 
 - Use new OAuth utils
