@@ -61,8 +61,8 @@ After setting up your token you should be able to browse and create YouTrack iss
 
 ## Showcases
 
-![browse](./metadata/youtrack-browse.png)
-![details](./metadata/youtrack-browse-details.png)
-![create](./metadata/youtrack-create.png)
-![draft](./media/youtrack-draft.png)
-![created-actions](./metadata/youtrack-created-actions.png)
+![browse](media/youtrack-browse.png)
+![details](media/youtrack-browse-details.png)
+![create](media/youtrack-create.png)
+![draft](media/youtrack-draft.png)
+![created-actions](media/youtrack-created-actions.png)
