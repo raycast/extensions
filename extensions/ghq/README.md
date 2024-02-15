@@ -1,6 +1,20 @@
 # ghq Extension for Raycast
 
-This is a raycast extension of ghq, which can be opened directly in VSCode from a list equivalent to the `ghq list`, and the same path can be opened in other applications.
+![](metadata/ghq-1.png)
+
+Raycast Extension for [ghq](https://github.com/x-motemen/ghq) `list` and `get`.
+
+ghq extension is currently no plans to implement `create`, `rm`, and `root` because there are few situations where you want to use Raycast to perform these functions.
+
+## Feature Support
+
+| Command      | Support            |
+| :----------- | :----------------- |
+| `ghq list`   | ✅                 |
+| `ghq get`    | Planned            |
+| `ghq create` | No support planned |
+| `ghq rm`     | No support planned |
+| `ghq root`   | No support planned |
 
 ## Preferences
 

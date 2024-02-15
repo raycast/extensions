@@ -2,17 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ghq",
   "title": "ghq",
-  "description": "Control Visual Studio Code directly from Raycast - Search from ghq list and open project.",
+  "description": "Raycast Extension for ghq.",
   "icon": "ghq-raycast.png",
   "author": "konojunya",
   "categories": [
-    "System",
     "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "search",
+      "name": "list",
       "title": "Search Your Repositories",
       "description": "Open the search results in VSCode or another application. For example, Finder or your terminal app",
       "mode": "view"
