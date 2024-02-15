@@ -116,7 +116,7 @@ export function getStatusSubtitle(profile: Profile | undefined, dndData: DndInfo
     return undefined;
   }
 
-  if (typeof profile.status_expiration !== "number") {
+  if (typeof profile.status_expiration !== "number" || !profile.status_text) {
     return undefined;
   }
 
