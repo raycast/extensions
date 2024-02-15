@@ -1,5 +1,5 @@
 import AppKit
-import RaycastExtensionMacro
+import RaycastSwiftMacros
 
 struct Color: Encodable {
   let red: Int
@@ -8,8 +8,7 @@ struct Color: Encodable {
   let alpha: Int
 }
 
-#exportFunction(pickColor)
-func pickColor() async -> Color? {
+@raycast func pickColor(_ workaround: Bool?) async -> Color? {
   let colorSampler = NSColorSampler()
   guard let color = await colorSampler.sample() else { return nil }
 
@@ -20,4 +19,3 @@ func pickColor() async -> Color? {
     alpha: lroundf(Float(color.alphaComponent) * 0xFF)
   )
 }
-#handleFunctionCall()
