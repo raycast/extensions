@@ -2,8 +2,8 @@ import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import IssueListItem from "./IssueListItem";
 

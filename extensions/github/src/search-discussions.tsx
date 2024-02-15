@@ -4,8 +4,8 @@ import { useState } from "react";
 
 import { DiscussionListItem } from "./components/DiscussionListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
-import View from "./components/View";
 import { DiscussionFieldsFragment } from "./generated/graphql";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useDiscussions } from "./hooks/useDiscussions";
 
 function DiscussionList(): JSX.Element {
@@ -32,10 +32,4 @@ function DiscussionList(): JSX.Element {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <DiscussionList />
-    </View>
-  );
-}
+export default withGitHubClient(DiscussionList);
