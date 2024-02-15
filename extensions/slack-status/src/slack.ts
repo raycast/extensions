@@ -19,3 +19,14 @@ export function useSlackProfile() {
     return response.profile;
   });
 }
+
+export function useSlackDndInfo() {
+  const slack = useSlack();
+  return usePromise(async () => {
+    const response = await slack.dnd.info();
+    if (!response.ok) {
+      throw Error("Failed to fetch dnd info");
+    }
+    return response;
+  });
+}

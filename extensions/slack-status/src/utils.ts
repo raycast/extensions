@@ -3,6 +3,7 @@ import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
 import moment from "moment";
 import pluralize from "pluralize";
 import { getEmojiForCode } from "./emojis";
+import { DndInfoResponse } from "@slack/web-api";
 
 function isTomorrowOrAlmostTomorrow(date: moment.Moment) {
   // Slack treats "tomorrow" as 1 minute before midnight, hence this little hack
@@ -110,18 +111,20 @@ export function getStatusTitle(profile: Profile | undefined) {
   return profile.status_text;
 }
 
-export function getStatusSubtitle(profile: Profile | undefined) {
+export function getStatusSubtitle(profile: Profile | undefined, dndData: DndInfoResponse | undefined) {
   if (!profile) {
     return undefined;
   }
 
-  if (!profile.status_expiration) {
+  if (typeof profile.status_expiration !== "number") {
     return undefined;
   }
 
+  const dndText = dndData?.snooze_enabled ? "- Notifications paused" : "";
+
   if (profile.status_expiration === 0) {
-    return "Don't clear";
+    return `Don't clear ${dndText}`;
   }
 
-  return getTextForExpiration(profile.status_expiration);
+  return `${getTextForExpiration(profile.status_expiration)} ${dndText}`;
 }

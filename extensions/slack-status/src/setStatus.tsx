@@ -14,7 +14,7 @@ import {
 import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
-import { useSlackProfile } from "./slack";
+import { useSlackDndInfo, useSlackProfile } from "./slack";
 import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
@@ -27,10 +27,11 @@ const slack = OAuthService.slack({
 function StatusList() {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data, mutate } = useSlackProfile();
+  const { isLoading: isLoadingDnd, data: dndData } = useSlackDndInfo();
   const [presets, setPresets] = usePresets();
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} filtering>
+    <List isLoading={isLoading || isLoadingDnd} onSearchTextChange={setSearchText} filtering>
       <List.EmptyView
         icon={Icon.Stars}
         title={searchText ? `Set status to '${searchText}'` : undefined}
@@ -44,7 +45,7 @@ function StatusList() {
           key="current-status"
           icon={getStatusIcon(data)}
           title={getStatusTitle(data)}
-          subtitle={getStatusSubtitle(data)}
+          subtitle={getStatusSubtitle(data, dndData)}
           actions={
             <ActionPanel>
               {data?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
