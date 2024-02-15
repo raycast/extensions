@@ -22,14 +22,17 @@ import { DndInfoResponse } from "@slack/web-api";
 
 // Status Actions
 
-export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+export function ClearStatusAction(props: {
+  mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
+}) {
   const slack = useSlack();
   return (
     <Action
       title="Clear Status"
       icon={Icon.XMarkCircle}
       onAction={async () => {
-        await showToastWithPromise(
+        const promise = Promise.all([
           props.mutate(
             slack.users.profile.set({
               profile: JSON.stringify({
@@ -44,12 +47,14 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
               },
             },
           ),
-          {
-            loading: "Clearing status...",
-            success: "Cleared status",
-            error: "Failed clearing status",
-          },
-        );
+          props.mutateDnd(slack.dnd.endSnooze()),
+        ]);
+
+        await showToastWithPromise(promise, {
+          loading: "Clearing status...",
+          success: "Cleared status",
+          error: "Failed clearing status",
+        });
       }}
     />
   );

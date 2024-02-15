@@ -50,7 +50,7 @@ function StatusList() {
           actions={
             <ActionPanel>
               {data?.status_text ? (
-                <ClearStatusAction mutate={mutate} />
+                <ClearStatusAction mutate={mutate} mutateDnd={mutateDnd} />
               ) : (
                 <SetCustomStatusAction mutate={mutate} mutateDnd={mutateDnd} />
               )}
@@ -85,7 +85,7 @@ function StatusList() {
                 <ActionPanel.Section>
                   <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
                   <SetCustomStatusAction mutate={mutate} mutateDnd={mutateDnd} />
-                  <ClearStatusAction mutate={mutate} />
+                  <ClearStatusAction mutate={mutate} mutateDnd={mutateDnd} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
