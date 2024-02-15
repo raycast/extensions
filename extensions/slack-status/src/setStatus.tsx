@@ -6,12 +6,13 @@ import {
   CreateStatusPresetAction,
   DeleteStatusPresetAction,
   EditStatusPresetAction,
+  ResumeNotificationsAction,
   SetCustomStatusAction,
   SetStatusAction,
   SetStatusWithAIAction,
   SetStatusWithDuration,
 } from "./actions";
-import { getTitleForDuration } from "./durations";
+import { getPresetDurationsTitle } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
 import { useSlackDndInfo, useSlackProfile } from "./slack";
@@ -27,7 +28,7 @@ const slack = OAuthService.slack({
 function StatusList() {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data, mutate } = useSlackProfile();
-  const { isLoading: isLoadingDnd, data: dndData } = useSlackDndInfo();
+  const { isLoading: isLoadingDnd, data: dndData, mutate: mutateDnd } = useSlackDndInfo();
   const [presets, setPresets] = usePresets();
 
   return (
@@ -48,7 +49,12 @@ function StatusList() {
           subtitle={getStatusSubtitle(data, dndData)}
           actions={
             <ActionPanel>
-              {data?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
+              {data?.status_text ? (
+                <ClearStatusAction mutate={mutate} />
+              ) : (
+                <SetCustomStatusAction mutate={mutate} mutateDnd={mutateDnd} />
+              )}
+              {!!dndData?.snooze_enabled && <ResumeNotificationsAction mutate={mutateDnd} />}
               <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
             </ActionPanel>
           }
@@ -60,12 +66,12 @@ function StatusList() {
             key={JSON.stringify(preset)}
             icon={getEmojiForCode(preset.emojiCode)}
             title={preset.title}
-            subtitle={getTitleForDuration(preset.defaultDuration)}
+            subtitle={getPresetDurationsTitle(preset)}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <SetStatusAction preset={preset} mutate={mutate} />
-                  <SetStatusWithDuration preset={preset} mutate={mutate} />
+                  <SetStatusAction preset={preset} mutate={mutate} mutateDnd={mutateDnd} />
+                  <SetStatusWithDuration preset={preset} mutate={mutate} mutateDnd={mutateDnd} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <EditStatusPresetAction
@@ -78,7 +84,7 @@ function StatusList() {
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
-                  <SetCustomStatusAction mutate={mutate} />
+                  <SetCustomStatusAction mutate={mutate} mutateDnd={mutateDnd} />
                   <ClearStatusAction mutate={mutate} />
                 </ActionPanel.Section>
               </ActionPanel>

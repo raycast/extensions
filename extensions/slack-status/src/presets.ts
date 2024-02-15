@@ -3,33 +3,56 @@ import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { useEffect, useState } from "react";
 import { SlackStatusPreset } from "./types";
 
+const DEFAULT_PAUSE_NOTIFICATIONS = false;
+const DEFAULT_STATUS_DURATION = 120;
+
 export const DEFAULT_PRESETS: SlackStatusPreset[] = [
   {
     title: "Focus Mode",
     emojiCode: ":technologist:",
-    defaultDuration: 120,
+    defaultDuration: DEFAULT_STATUS_DURATION,
+    pauseNotifications: DEFAULT_PAUSE_NOTIFICATIONS,
+    pauseNotificationsDuration: DEFAULT_STATUS_DURATION,
   },
   {
     title: "In a Meeting",
     emojiCode: ":spiral_calendar_pad:",
     defaultDuration: 30,
+    pauseNotifications: DEFAULT_PAUSE_NOTIFICATIONS,
+    pauseNotificationsDuration: DEFAULT_STATUS_DURATION,
   },
   {
     title: "Eating",
     emojiCode: ":hamburger:",
     defaultDuration: 60,
+    pauseNotifications: DEFAULT_PAUSE_NOTIFICATIONS,
+    pauseNotificationsDuration: DEFAULT_STATUS_DURATION,
   },
   {
     title: "Coffee Break",
     emojiCode: ":coffee:",
     defaultDuration: 15,
+    pauseNotifications: DEFAULT_PAUSE_NOTIFICATIONS,
+    pauseNotificationsDuration: DEFAULT_STATUS_DURATION,
   },
   {
     title: "AFK",
     emojiCode: ":walking:",
     defaultDuration: 0,
+    pauseNotifications: DEFAULT_PAUSE_NOTIFICATIONS,
+    pauseNotificationsDuration: DEFAULT_STATUS_DURATION,
   },
 ];
+
+function ensureDefaultValues(presets: SlackStatusPreset[]) {
+  return presets.map((preset) => {
+    return {
+      ...preset,
+      pauseNotifications: preset.pauseNotifications ?? DEFAULT_PAUSE_NOTIFICATIONS,
+      pauseNotificationsDuration: preset.pauseNotificationsDuration ?? DEFAULT_STATUS_DURATION,
+    };
+  });
+}
 
 function storePresets(presets: SlackStatusPreset[]) {
   try {
@@ -56,7 +79,7 @@ export function usePresets() {
   const [presets, setPresets] = useState<SlackStatusPreset[]>(() => {
     const stored = readStoredPresets();
     if (stored) {
-      return stored;
+      return ensureDefaultValues(stored);
     } else {
       return DEFAULT_PRESETS;
     }

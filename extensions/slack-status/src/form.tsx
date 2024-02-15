@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { durationTitleMap } from "./durations";
+import { durationTitleMap, pauseNotificationsDurationTitleMap } from "./durations";
 import { slackEmojiCodeMap } from "./emojis";
 import { FormValues } from "./types";
 
@@ -10,7 +10,7 @@ export function StatusForm(props: {
   initalValues?: FormValues;
   onSubmit: (values: FormValues) => void;
 }) {
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values } = useForm<FormValues>({
     initialValues: props.initalValues,
     validation: {
       statusText: FormValidation.Required,
@@ -37,6 +37,23 @@ export function StatusForm(props: {
           <Form.Dropdown.Item key={duration} title={title} value={duration.toString()} />
         ))}
       </Form.Dropdown>
+      <Form.Checkbox
+        label="Pause notifications"
+        storeValue={props.initalValues?.emoji === undefined}
+        {...itemProps.pauseNotifications}
+      />
+      {values.pauseNotifications && (
+        <Form.Dropdown
+          title="Pause notifications for"
+          storeValue={props.initalValues?.emoji === undefined}
+          defaultValue={values.duration}
+          {...itemProps.pauseNotificationsDuration}
+        >
+          {Object.entries(pauseNotificationsDurationTitleMap).map(([duration, title]) => (
+            <Form.Dropdown.Item key={duration} title={title} value={duration.toString()} />
+          ))}
+        </Form.Dropdown>
+      )}
     </Form>
   );
 }

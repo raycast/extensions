@@ -18,6 +18,7 @@ import { StatusForm } from "./form";
 import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
 import { showToastWithPromise } from "./utils";
+import { DndInfoResponse } from "@slack/web-api";
 
 // Status Actions
 
@@ -49,6 +50,23 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
             error: "Failed clearing status",
           },
         );
+      }}
+    />
+  );
+}
+
+export function ResumeNotificationsAction(props: { mutate: MutatePromise<DndInfoResponse | undefined> }) {
+  const slack = useSlack();
+  return (
+    <Action
+      title="Resume notifications"
+      icon={Icon.Bell}
+      onAction={async () => {
+        await showToastWithPromise(props.mutate(slack.dnd.endSnooze()), {
+          loading: "Resuming notifications...",
+          success: "Resumed notifications",
+          error: "Failed resuming notifications",
+        });
       }}
     />
   );
@@ -125,7 +143,11 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
   );
 }
 
-export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: MutatePromise<Profile | undefined> }) {
+export function SetStatusAction(props: {
+  preset: SlackStatusPreset;
+  mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
+}) {
   const slack = useSlack();
   return (
     <Action
@@ -157,6 +179,16 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
                 },
               },
             );
+
+            if (props.preset.pauseNotifications) {
+              await props.mutateDnd(
+                slack.dnd.setSnooze({
+                  num_minutes: props.preset.pauseNotificationsDuration,
+                }),
+              );
+            } else {
+              await props.mutateDnd(slack.dnd.endSnooze());
+            }
           },
           {
             loading: "Setting status...",
@@ -172,6 +204,7 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
 export function SetStatusWithDuration(props: {
   preset: SlackStatusPreset;
   mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
 }) {
   const slack = useSlack();
 
@@ -211,6 +244,16 @@ export function SetStatusWithDuration(props: {
                       },
                     },
                   );
+
+                  if (props.preset.pauseNotifications) {
+                    await props.mutateDnd(
+                      slack.dnd.setSnooze({
+                        num_minutes: props.preset.pauseNotificationsDuration,
+                      }),
+                    );
+                  } else {
+                    await props.mutateDnd(slack.dnd.endSnooze());
+                  }
                 },
                 {
                   loading: "Setting status with duration...",
@@ -226,7 +269,10 @@ export function SetStatusWithDuration(props: {
   );
 }
 
-export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+export function SetCustomStatusAction(props: {
+  mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
+}) {
   const slack = useSlack();
   const { pop } = useNavigation();
 
@@ -267,6 +313,16 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
                   },
                 );
 
+                if (values.pauseNotifications) {
+                  await props.mutateDnd(
+                    slack.dnd.setSnooze({
+                      num_minutes: parseInt(values.pauseNotificationsDuration),
+                    }),
+                  );
+                } else {
+                  await props.mutateDnd(slack.dnd.endSnooze());
+                }
+
                 pop();
               },
               {
@@ -300,6 +356,8 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              pauseNotifications: values.pauseNotifications,
+              pauseNotificationsDuration: parseInt(values.pauseNotificationsDuration),
             });
 
             pop();
@@ -347,7 +405,6 @@ export function EditStatusPresetAction(props: {
   onEdit: (editedPreset: SlackStatusPreset) => void;
 }) {
   const { pop } = useNavigation();
-
   return (
     <Action.Push
       title="Edit Preset"
@@ -360,12 +417,16 @@ export function EditStatusPresetAction(props: {
             emoji: props.preset.emojiCode,
             statusText: props.preset.title,
             duration: props.preset.defaultDuration.toString(),
+            pauseNotifications: props.preset.pauseNotifications,
+            pauseNotificationsDuration: props.preset.pauseNotificationsDuration.toString(),
           }}
           onSubmit={async (values) => {
             props.onEdit({
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              pauseNotifications: values.pauseNotifications,
+              pauseNotificationsDuration: parseInt(values.pauseNotificationsDuration),
             });
 
             pop();

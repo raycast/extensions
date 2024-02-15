@@ -14,13 +14,7 @@ function isToday(date: moment.Moment) {
   return date.isSame(new Date(), "day");
 }
 
-export function getTextForExpiration(expirationTimestamp: number) {
-  const expirationDate = moment((expirationTimestamp *= 1000));
-
-  if (moment().isAfter(expirationDate)) {
-    return undefined;
-  }
-
+function getRelativeDurationText(expirationDate: moment.Moment) {
   const isTomorrow = isTomorrowOrAlmostTomorrow(expirationDate);
   if (isTomorrow) {
     return "Until tomorrow";
@@ -46,6 +40,18 @@ export function getTextForExpiration(expirationTimestamp: number) {
   } else {
     relativeDuration = "a minute";
   }
+
+  return relativeDuration;
+}
+
+export function getTextForExpiration(expirationTimestamp: number) {
+  const expirationDate = moment((expirationTimestamp *= 1000));
+
+  if (moment().isAfter(expirationDate)) {
+    return undefined;
+  }
+
+  const relativeDuration = getRelativeDurationText(expirationDate);
 
   return `Clears in ${relativeDuration}`;
 }
@@ -120,11 +126,14 @@ export function getStatusSubtitle(profile: Profile | undefined, dndData: DndInfo
     return undefined;
   }
 
-  const dndText = dndData?.snooze_enabled ? "- Notifications paused" : "";
+  const dndDuration =
+    dndData?.next_dnd_end_ts && dndData.snooze_enabled ? moment(dndData.next_dnd_end_ts * 1000) : undefined;
+  const dndRelativeDuration = dndDuration && getRelativeDurationText(dndDuration);
+  const dndText = dndDuration ? ` - Resumes notifications in ${dndRelativeDuration}` : "";
 
   if (profile.status_expiration === 0) {
-    return `Don't clear ${dndText}`;
+    return `Don't clear${dndText}`;
   }
 
-  return `${getTextForExpiration(profile.status_expiration)} ${dndText}`;
+  return `${getTextForExpiration(profile.status_expiration)}${dndText}`;
 }
