@@ -54,6 +54,35 @@
       "title": "Balance",
       "description": "Balance the windows.",
       "mode": "no-view"
+    },
+    {
+      "name": "create-space-and-focus",
+      "title": "Create & Focus New Space",
+      "subtitle": "yabai",
+      "description": "Creates a new workspace and focuses it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-space",
+      "title": "Focus Space",
+      "subtitle": "yabai",
+      "description": "Focuses the specified space.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "placeholder": "Space Number",
+          "required": true,
+          "name": "spaceIndex"
+        }
+      ]
+    },
+    {
+      "name": "destroy-space",
+      "title": "Destroy Current Space",
+      "subtitle": "yabai",
+      "description": "Destroys the currently focused space.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
