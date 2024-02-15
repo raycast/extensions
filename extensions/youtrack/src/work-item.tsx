@@ -30,9 +30,17 @@ export function AddWork(props: {
   }
 
   const handleSubmit = async (values: WorkItemSubmit) => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Submitting work item",
+    });
+
     if (!props.createWorkItemCb) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed adding work item, missing callback function";
       return;
     }
+
     const workItem: WorkItem = {
       text: values.comment,
       date: values.date.valueOf(),
@@ -43,18 +51,21 @@ export function AddWork(props: {
     try {
       await props.createWorkItemCb(workItem);
       setSubmitted(true);
-      showToast({
-        style: Toast.Style.Success,
-        title: "Work item added",
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Work item added";
+      toast.primaryAction = {
+        title: "Go Back",
+        onAction: pop,
+        shortcut: {
+          modifiers: ["cmd"],
+          key: "enter",
+        },
+      };
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed adding work item",
-        // @ts-expect-error message is not defined on Error
-        message: `${error?.message || "Unknown error occurred"}`,
-      });
-      return;
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed adding work item";
+      // @ts-expect-error message is not defined on Error
+      toast.message = `${error?.message || "Unknown error occurred"}`;
     }
   };
 
@@ -65,14 +76,14 @@ export function AddWork(props: {
           {submitted ? (
             <Action icon={Icon.ArrowLeft} title="Go Back" onAction={pop} />
           ) : (
-            <Action.SubmitForm icon={Icon.Upload} title="Add work" onSubmit={handleSubmit} />
+            <Action.SubmitForm icon={Icon.Upload} title="Add Work" onSubmit={handleSubmit} />
           )}
         </ActionPanel>
       }
     >
       <Form.Description title="Issue" text={`${issue.id} - ${issue.summary}`} />
       <Form.DatePicker id="date" title="Date" defaultValue={new Date()} />
-      <Form.TextField id="time" title="Spent time" placeholder="1h 15m" autoFocus />
+      <Form.TextField id="time" title="Spent Time" placeholder="1h 15m" autoFocus />
       <Form.Dropdown id="workTypeId" title="Worktype" storeValue defaultValue={""}>
         {workTypes.map((workType) => (
           <Form.Dropdown.Item

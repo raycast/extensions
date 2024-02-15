@@ -114,7 +114,7 @@ function IssueDetails(props: {
             />
             <Action.Push
               icon={Icon.AppWindowSidebarRight}
-              title="Add work"
+              title="Add Work"
               shortcut={{ modifiers: ["cmd"], key: "t" }}
               target={
                 <AddWork
@@ -145,7 +145,7 @@ function Actions(props: {
         {link && (
           <Action.Push
             icon={Icon.AppWindowSidebarRight}
-            title="Show details"
+            title="Show Details"
             target={
               <IssueDetails
                 link={link}
@@ -159,7 +159,7 @@ function Actions(props: {
         {link && (
           <Action.Push
             icon={Icon.AppWindowSidebarRight}
-            title="Add work"
+            title="Add Work"
             shortcut={{ modifiers: ["cmd"], key: "t" }}
             target={
               <AddWork
