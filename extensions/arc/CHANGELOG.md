@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Fixes] - 2024-02-14
+
+- Fixed an issue where the `Search Tabs` command would not work if a tab title contained a backslash.
+
 ## [Fixes] - 2024-01-30
 
 - Fix issue #10455: When opening a new tab and no window is open, a new window will be opened.
