@@ -44,7 +44,7 @@ export const DEFAULT_PRESETS: SlackStatusPreset[] = [
   },
 ];
 
-function ensureDefaultValues(presets: SlackStatusPreset[]) {
+function ensureDefaultValues(presets: SlackStatusPreset[]): SlackStatusPreset[] {
   return presets.map((preset) => {
     return {
       ...preset,
