@@ -9,7 +9,7 @@ import {
   PopToRootType,
   getPreferenceValues,
 } from "@raycast/api";
-import { useState } from "react";
+import { useForm, FormValidation } from "@raycast/utils";
 
 interface IntentionForm {
   task: string;
@@ -21,7 +21,6 @@ interface IntentionForm {
 const { customMoods } = getPreferenceValues<{ customMoods: string }>();
 
 export default function IntentionClarifier() {
-  const [mood, setMood] = useState<string[]>([]);
   const moods = [
     ...new Set(
       customMoods
@@ -30,6 +29,18 @@ export default function IntentionClarifier() {
         .filter((mood) => mood !== ""),
     ),
   ];
+
+  const { itemProps, setValue, values } = useForm<IntentionForm>({
+    async onSubmit(values) {
+      console.log("onSubmit", values);
+    },
+    initialValues: {
+      mood: [],
+    },
+    validation: {
+      task: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -40,13 +51,19 @@ export default function IntentionClarifier() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="task" title="Task" placeholder="What do you want to do?" />
-      <Form.TagPicker id="mood" title="Mood" value={mood} onChange={setMood} placeholder="Needed mindsets?">
+      <Form.TextField title="Task" placeholder="What do you want to do?" {...itemProps.task} />
+      <Form.TagPicker
+        id="mood"
+        title="Mood"
+        value={values.mood}
+        onChange={(newMood) => setValue("mood", newMood)}
+        placeholder="Needed mindsets?"
+      >
         {moods.map((mood) => (
           <Form.TagPicker.Item key={mood} value={mood} title={mood} />
         ))}
       </Form.TagPicker>
-      <Form.TextField id="reason" title="Reason" placeholder="Why are you doing it?" />
+      <Form.TextField title="Reason" placeholder="Why are you doing it?" {...itemProps.reason} />
     </Form>
   );
 }
