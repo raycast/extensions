@@ -53,26 +53,36 @@ export default function IntentionClarifier() {
     },
   });
 
+  const { defaultAction } = getPreferenceValues<{ defaultAction: string }>();
+
+  const copyAction = (
+      <Action.SubmitForm
+          title="Copy"
+          icon={Icon.CopyClipboard}
+          onSubmit={() => {
+            values.mode = "copy";
+            handleSubmit(values);
+          }}
+      />
+  );
+
+  const pasteAction = (
+      <Action.SubmitForm
+          title="Paste"
+          icon={Icon.Clipboard}
+          onSubmit={() => {
+            values.mode = "paste";
+            handleSubmit(values);
+          }}
+      />
+  );
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Copy"
-            icon={Icon.CopyClipboard}
-            onSubmit={() => {
-              values.mode = "copy";
-              handleSubmit(values);
-            }}
-          />
-          <Action.SubmitForm
-            title="Paste"
-            icon={Icon.Clipboard}
-            onSubmit={() => {
-              values.mode = "paste";
-              handleSubmit(values);
-            }}
-          />
+          {defaultAction === "copy" ? copyAction : pasteAction}
+          {defaultAction === "copy" ? pasteAction : copyAction}
         </ActionPanel>
       }
     >

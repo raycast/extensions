@@ -23,6 +23,18 @@
           "required": true,
           "title": "Custom Mood Tags",
           "placeholder": "Enter your custom mood tags separated by commas."
+        },
+        {
+          "name": "defaultAction",
+          "type": "dropdown",
+          "description": "Select the default action for the form submission.",
+          "data": [
+            { "value": "copy", "title": "Copy to Clipboard" },
+            { "value": "paste", "title": "Paste Intention" }
+          ],
+          "required": false,
+          "title": "Default Action",
+          "default": "copy"
         }
       ]
     },
