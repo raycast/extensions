@@ -35,13 +35,13 @@
         },
         {
           "name": "gptUrl",
-          "placeholder": "GPT Url",
+          "placeholder": "GPT URL",
           "type": "text",
           "required": true
         },
         {
           "name": "query",
-          "placeholder": "Your query",
+          "placeholder": "Your Query",
           "type": "text",
           "required": true
         }

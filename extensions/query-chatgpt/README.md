@@ -25,7 +25,7 @@ respond (5+ seconds) for me to wait.
 
 1. Select correct browser in extension settings.
 2. Create your first custom command via "Create Custom Command".
-3. Enter GPT Url. It can be any GPT or any existing chat link.
+3. Enter GPT URL. It can be any GPT or any existing chat link.
 4. Provide custom prompt. You can leave that empty as well.
 5. On success, you will be redirected to "Create Quicklink" Raycast functionality, enter the name of quicklink.
 6. Execute the quicklink to open ChatGPT tab in the browser with your custom query.
