@@ -1,7 +1,8 @@
 # Notion Changelog
 
-## [Properly allow date with time] - 2024-02-10
-- Fixed bug that prevented creating pages with time
+## [Properly allow date with time] - 2024-02-15
+
+- Fix a bug that prevented creating pages with time
 
 ## [Open Notion page improvement] - 2024-01-02
 
