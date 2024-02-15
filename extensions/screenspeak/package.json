@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenspeak",
+  "title": "ScreenSpeak - Speak to your screen using whisper",
+  "description": "Based on superwhisper. Start a recording, send the result over to GPT-Vision. Requires superwhisper to be installed and running.",
+  "icon": "superwhisper-light-icon.png",
+  "author": "nchudleigh",
+  "contributors": [
+    "caffeinum"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "openai-api-key",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API Key",
+      "type": "password",
+      "secure": true,
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "toggle-record",
+      "title": "Start Recording",
+      "subtitle": "screenspeak",
+      "description": "Start Recording",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "select-mode",
+      "title": "Select Mode",
+      "subtitle": "screenspeak",
+      "description": "Change the mode you are using",
+      "mode": "view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Superwhisper Settings",
+      "subtitle": "screenspeak",
+      "description": "Open the superwhisper settings page",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "send-screenshot",
+      "title": "Send Screenshot",
+      "subtitle": "screenspeak",
+      "description": "Send a screenshot to GPT-Vision",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "send-screenshot-form",
+      "title": "Send Screenshot With Input",
+      "subtitle": "screenspeak",
+      "description": "Send a screenshot to GPT-Vision",
+      "mode": "view",
+      "icon": "superwhisper-light-icon.png"
+    },
+    {
+      "name": "set-openai-key",
+      "title": "Set OpenAI API Key",
+      "subtitle": "screenspeak",
+      "description": "Save your OpenAI API Key",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "openai": "^4.28.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@raycast"
+    ]
+  }
+}
