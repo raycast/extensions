@@ -49,7 +49,7 @@
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince
 /extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia
-/extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq
+/extensions/arc                                      @thomaspaulmann @pomdtr @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq @xilopaint
 /extensions/archiver                                 @404J
 /extensions/ars-technica                             @edwin-dd-ong
 /extensions/arxiv                                    @koayon @pernielsentikaer
@@ -421,7 +421,7 @@
 /extensions/ghost-docs                               @royalfig
 /extensions/gif-search                               @josephschmitt @tmwrnr @j3lte
 /extensions/git-branch-name-generator                @michaelbonner
-/extensions/git-co-authors                           @nickradford @pernielsentikaer
+/extensions/git-co-authors                           @nickradford @pernielsentikaer @mateusjunges
 /extensions/git-commands                             @manumorante
 /extensions/git-repos                                @moored @nitishpdmn @go-dima @cameronsstone
 /extensions/gitee                                    @koinzhang
