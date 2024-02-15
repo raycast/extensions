@@ -33,7 +33,7 @@ You can see our different providers in the following page: [OAuthService](./OAut
 
 ```tsx
 import { OAuth, Detail, LaunchProps } from "@raycast/api";
-import { withAccessToken, getAccessToken, OAuthService } from "@raycast/utils/oauth";
+import { withAccessToken, getAccessToken, OAuthService } from "@raycast/utils";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
