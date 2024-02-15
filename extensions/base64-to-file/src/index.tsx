@@ -13,8 +13,8 @@ export default function Command() {
   const storageKey = "convertBase64ToFile";
   const defaultFilePath = `${homedir()}/Downloads/out.pdf`;
   const [state, setState] = useState<ConvertFormValues>({
-    base64: '',
-    filePath: defaultFilePath
+    base64: "",
+    filePath: defaultFilePath,
   });
 
   const base64ToBlob = (base64Text: string) => {
@@ -30,12 +30,15 @@ export default function Command() {
   const writeFile = async (filePath: string, blob: Blob) => {
     return new Promise((resolve, reject) => {
       const writableStream = createWriteStream(filePath);
-      blob.arrayBuffer().then(buffer => {
-        writableStream.write(Buffer.from(buffer));
-        writableStream.end();
-      }).catch(reject);
-      writableStream.on('finish', resolve);
-      writableStream.on('error', reject);
+      blob
+        .arrayBuffer()
+        .then((buffer) => {
+          writableStream.write(Buffer.from(buffer));
+          writableStream.end();
+        })
+        .catch(reject);
+      writableStream.on("finish", resolve);
+      writableStream.on("error", reject);
     });
   };
 
@@ -47,9 +50,9 @@ export default function Command() {
       }
       try {
         const values: ConvertFormValues = JSON.parse(storedConvertBase64ToFile);
-        setState((previous) => (values));
+        setState((previous) => ({ ...previous, ...values }));
       } catch (e) {
-        setState((previous) => ({ ...previous, base64: '', filePath: defaultFilePath }));
+        setState((previous) => ({ ...previous, base64: "", filePath: defaultFilePath }));
       }
     })();
   }, []);
@@ -58,7 +61,7 @@ export default function Command() {
     LocalStorage.setItem(storageKey, JSON.stringify(state));
   }, [state]);
 
-  const { handleSubmit, itemProps } = useForm<ConvertFormValues>({
+  const { handleSubmit } = useForm<ConvertFormValues>({
     async onSubmit(values) {
       try {
         const blob = base64ToBlob(values.base64);
@@ -80,7 +83,7 @@ export default function Command() {
     },
     validation: {
       base64: FormValidation.Required,
-      filePath: FormValidation.Required
+      filePath: FormValidation.Required,
     },
   });
 
@@ -94,7 +97,12 @@ export default function Command() {
     >
       <Form.Description text="Convert base64 to a file1" />
       <Form.TextArea id="base64" title="Base64 Text" placeholder="Please enter the string encoded in base64" />
-      <Form.TextField id="filePath" title="File Path" placeholder="Please enter the file path to convert to" defaultValue={defaultFilePath} />
+      <Form.TextField
+        id="filePath"
+        title="File Path"
+        placeholder="Please enter the file path to convert to"
+        defaultValue={defaultFilePath}
+      />
     </Form>
   );
 }
