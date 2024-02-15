@@ -4,10 +4,11 @@ import YAML from "yaml";
 import Papa from "papaparse";
 
 import * as TOML from "@iarna/toml";
-import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 
-import { getPinsJSON } from "./lib/Pins";
+import { getPinsJSON, PinKeys } from "./lib/Pins";
 import { CopyPinsPreferences } from "./lib/preferences";
+import { GroupKeys } from "./lib/Groups";
 
 /**
  * Raycast command for exporting Pins and Groups data to the clipboard or a file.
@@ -19,8 +20,8 @@ export default async function ExportPinsCommand() {
   const jsonData = await getPinsJSON();
   try {
     if (preferences.exportFormat == "csv") {
-      const d1 = Papa.unparse(jsonData.pins);
-      const d2 = Papa.unparse(jsonData.groups);
+      const d1 = Papa.unparse(jsonData.pins, { columns: PinKeys });
+      const d2 = Papa.unparse(jsonData.groups, { columns: GroupKeys });
       data = `${d1}\n\n\n${d2}`;
     } else if (preferences.exportFormat == "json") {
       data = JSON.stringify(jsonData, null, 2);
@@ -50,6 +51,7 @@ export default async function ExportPinsCommand() {
       // For CSVs, split the data into two files: one for pins, one for groups
       // JSON and YAML files are fine to export all at once
       const exports = data.split("\n\n\n");
+      const exportFiles: string[] = [];
       for (let i = 0; i < exports.length; i++) {
         let subpart = "";
         if (exports.length > 1) {
@@ -67,8 +69,34 @@ export default async function ExportPinsCommand() {
           attempt++;
         }
 
+        exportFiles.push(exportFile);
         fs.writeFileSync(exportFile, exports[i]);
-        await showToast({ title: `Exported pin data to ${exportFile}!` });
+
+        if (exports.length === 1) {
+          await showToast({
+            title: `Exported pin data to ${exportFile}!`,
+            primaryAction: {
+              title: `View in TextEdit`,
+              onAction: () => {
+                open(exportFile, "TextEdit");
+              },
+            },
+          });
+        }
+      }
+
+      if (exports.length > 1) {
+        await showToast({
+          title: `Exported pin data to ${exports.length} files!`,
+          primaryAction: {
+            title: `View in TextEdit`,
+            onAction: async () => {
+              for (const file of exportFiles) {
+                await open(file, "TextEdit");
+              }
+            },
+          },
+        });
       }
     } catch (err) {
       console.error(err);

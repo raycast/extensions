@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Use OAuth utils] - 2024-02-01
+
+- Use new OAuth utils
+
 ## [Remove Raycast signature] - 2023-04-19
 
 - Remove Raycast signature preference from the `Create Task` command

@@ -14,8 +14,19 @@ export const isRunning = async () => {
 
 export const startOpenVPN = async () => {
   try {
-    await execAsync('"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect" --minimize');
+    await execAsync('"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect"');
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const oneConfig = async () => {
+  try {
+    const { stdout } = await execAsync(
+      '"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect" --list-profiles',
+    );
+    return JSON.parse(stdout).length === 1;
+  } catch (e) {
+    return false;
   }
 };

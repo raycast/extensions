@@ -15,6 +15,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import AddCommand from "./add";
 import { Worktree, formatPath, getRootDir, getWorktrees, removeWorktree } from "./helpers";
+import { useRef } from "react";
 
 export default function Command() {
   const rootDir = getRootDir();
@@ -23,8 +24,13 @@ export default function Command() {
     isLoading,
     revalidate,
   } = useCachedPromise((searchDir) => getWorktrees(searchDir), [rootDir]);
+  const removing = useRef(false);
 
   async function handleRemove(repo: string, worktree: Worktree) {
+    if (removing.current) {
+      return;
+    }
+
     if (
       !(await confirmAlert({
         title: "Are you sure you want to remove the worktree?",
@@ -38,6 +44,8 @@ export default function Command() {
     }
 
     try {
+      removing.current = true;
+      await showToast({ title: "Removing worktree", message: formatPath(worktree.path), style: Toast.Style.Animated });
       await removeWorktree(repo, worktree.path);
       revalidate();
       await showToast({ title: "Removed worktree", message: formatPath(worktree.path) });
@@ -47,6 +55,8 @@ export default function Command() {
         message: err instanceof Error ? err.message : undefined,
         style: Toast.Style.Failure,
       });
+    } finally {
+      removing.current = false;
     }
   }
 
@@ -63,12 +73,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Push title="Add Worktree" icon={Icon.Plus} target={<AddCommand />} />
-              <Action
-                title="Open Preferences"
-                icon={Icon.Gear}
-                shortcut={{ key: ",", modifiers: ["cmd"] }}
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -84,18 +89,22 @@ export default function Command() {
                 accessories={worktree.dirty ? [{ text: { value: "Dirty", color: Color.Yellow } }] : undefined}
                 actions={
                   <ActionPanel>
-                    <Action.Open
-                      title={`Open in ${editorApp.name}`}
-                      icon={{ fileIcon: editorApp.path }}
-                      target={worktree.path}
-                      application={editorApp.bundleId}
-                    />
-                    <Action.Open
-                      title={`Open in ${terminalApp.name}`}
-                      icon={{ fileIcon: terminalApp.path }}
-                      target={worktree.path}
-                      application={terminalApp.bundleId}
-                    />
+                    {editorApp && (
+                      <Action.Open
+                        title={`Open in ${editorApp.name}`}
+                        icon={{ fileIcon: editorApp.path }}
+                        target={worktree.path}
+                        application={editorApp.bundleId}
+                      />
+                    )}
+                    {terminalApp && (
+                      <Action.Open
+                        title={`Open in ${terminalApp.name}`}
+                        icon={{ fileIcon: terminalApp.path }}
+                        target={worktree.path}
+                        application={terminalApp.bundleId}
+                      />
+                    )}
                     {!worktree.dirty && (
                       <Action
                         title="Remove Worktree"

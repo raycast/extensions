@@ -16,18 +16,24 @@ export default function Command() {
           <Grid.Item
             key={item.url}
             content={{
-              value: { source: { light: getIconDataString(svgContentLight), dark: getIconDataString(svgContentDark) } },
+              value: {
+                source: {
+                  light: getIconDataString(svgContentLight),
+                  dark: getIconDataString(svgContentDark),
+                },
+              },
               tooltip: item.displayName,
             }}
             keywords={item.keywords}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={item.url} />
+                <Action.Paste title="Paste Icon JSX" content={`<${item.name} />`} />
                 <Action.CopyToClipboard
-                  title="Copy Icon JSX"
-                  content={`<${item.name} />`}
+                  title="Copy Icon Name"
+                  content={item.name}
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
+                <Action.OpenInBrowser url={item.url} shortcut={Keyboard.Shortcut.Common.Open} />
               </ActionPanel>
             }
           />

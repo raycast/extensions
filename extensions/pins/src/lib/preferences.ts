@@ -37,6 +37,51 @@ export interface ExtensionPreferences {
 }
 
 /**
+ * Ways to display groups in the menu bar dropdown.
+ */
+export enum GroupDisplaySetting {
+  /**
+   * Do not display groups. Show all pins in a single list.
+   */
+  None = "none",
+
+  /**
+   * Display groups as separate submenus.
+   */
+  Submenus = "submenus",
+
+  /**
+   * Display groups as separate sections.
+   */
+  Subsections = "subsections",
+}
+
+/**
+ * Actions to perform when a pin menu item is right-clicked.
+ */
+export enum RightClickAction {
+  /**
+   * Open the pin.
+   */
+  Open = "open",
+
+  /**
+   * Delete the pin.
+   */
+  Delete = "delete",
+
+  /**
+   * Copy the pin's data to the clipboard.
+   */
+  Copy = "copy",
+
+  /**
+   * Open the edit pin form.
+   */
+  Edit = "edit",
+}
+
+/**
  * Preferences for the menu bar extra.
  */
 export interface PinsMenubarPreferences {
@@ -86,9 +131,14 @@ export interface PinsMenubarPreferences {
   showInapplicablePins: boolean;
 
   /**
+   * How to display groups in the menu bar dropdown.
+   */
+  groupDisplaySetting: GroupDisplaySetting;
+
+  /**
    * The action to perform when a pin menu item is right-clicked.
    */
-  rightClickAction: "open" | "delete";
+  rightClickAction: RightClickAction;
 }
 
 /**
@@ -139,6 +189,11 @@ export interface ViewPinsPreferences {
    * Whether to display an indicator for the most recently opened pin.
    */
   showLastOpened: boolean;
+
+  /**
+   * Whether to display the tags of each pin as accessories.
+   */
+  showTags: boolean;
 }
 
 /**

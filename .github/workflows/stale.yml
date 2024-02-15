@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'raycast/extensions'
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v9
         with:
           repo-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
 
@@ -47,7 +47,7 @@ jobs:
           days-before-pr-close: 7
 
           # Limiting
-          operations-per-run: 100
+          operations-per-run: 200
 
           # Debug
           #debug-only: true

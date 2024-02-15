@@ -300,6 +300,9 @@ export class DustApi {
         Authorization: `Bearer ${apiKey}`,
       },
     });
+    if (!response.ok) {
+      return { error: `Could not get agents: ${response.statusText}` };
+    }
     const json = (await response.json()) as {
       agentConfigurations?: AgentConfigurationType[];
       error?: DustAPIErrorResponse;

@@ -1,4 +1,4 @@
-import { Detail, ActionPanel } from "@raycast/api";
+import { Detail, ActionPanel, Icon } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
@@ -21,6 +21,7 @@ import { getMilestoneIcon } from "../helpers/milestones";
 type IssueDetailProps = {
   issue: IssueResult;
   mutateList?: MutatePromise<IssueResult[] | undefined>;
+  showAttachmentsAction?: boolean;
   priorities: IssuePriorityValue[] | undefined;
   users: User[] | undefined;
   me: User | undefined;
@@ -39,6 +40,8 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
 
   const relatedIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "related") : null;
   const duplicateIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "duplicate") : null;
+
+  const linksCount = issue.attachments?.nodes.length ?? 0;
 
   return (
     <Detail
@@ -88,6 +91,14 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                     title="Due Date"
                     text={format(new Date(issue.dueDate), "MM/dd/yyyy")}
                     icon={getDateIcon(new Date(issue.dueDate))}
+                  />
+                ) : null}
+
+                {linksCount > 0 ? (
+                  <Detail.Metadata.Label
+                    title="Links"
+                    text={`${linksCount > 1 ? `${linksCount} links` : "1 link"}`}
+                    icon={Icon.Link}
                   />
                 ) : null}
 
@@ -145,6 +156,8 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   mutateList={mutateList}
                   mutateDetail={mutateDetail}
                   priorities={priorities}
+                  showAttachmentsAction={linksCount > 0}
+                  attachments={issue.attachments?.nodes ?? []}
                   users={users}
                   me={me}
                 />

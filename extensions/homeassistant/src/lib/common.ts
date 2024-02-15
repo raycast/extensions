@@ -19,10 +19,12 @@ function createHomeAssistantClient(): HomeAssistant {
   const ignoreCerts = (preferences.ignorecerts as boolean) || false;
   const wifiSSIDs = ((preferences.homeSSIDs as string) || "").split(",").map((v) => v.trim());
   const usePing = preferences.usePing as boolean;
+  const preferredApp = preferences.preferredapp as string | undefined;
   const hac = new HomeAssistant(instance, token, ignoreCerts, {
     urlInternal: instanceInternal,
     wifiSSIDs: wifiSSIDs,
     usePing: usePing,
+    preferCompanionApp: preferredApp === "companion",
   });
   return hac;
 }

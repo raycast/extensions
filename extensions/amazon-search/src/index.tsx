@@ -1,6 +1,6 @@
-import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
-import { useState, useEffect, useRef } from "react";
+import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useState } from "react";
 
 interface Preferences {
   top_level_domain: string;
@@ -10,25 +10,11 @@ interface AutocompleteResponse {
   suggestions: { value: string }[];
 }
 
-async function autoComplete(searchQuery: string, tld: string, marketplaceID: string): Promise<string[]> {
-  try {
-    const encodedQuery = encodeURIComponent(searchQuery);
-    const url = `https://completion.amazon.${tld}/api/2017/suggestions?alias=aps&mid=${marketplaceID}&prefix=${encodedQuery}`;
-
-    const response = await fetch(url);
-    const data = (await response.json()) as AutocompleteResponse;
-
-    return data.suggestions.map((suggestion) => suggestion.value).filter((value: string) => value !== searchQuery);
-  } catch (error) {
-    console.error("Error fetching autocomplete data", error);
-    showToast(Toast.Style.Failure, "Failed to fetch autocomplete data");
-    return [];
-  }
-}
-
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
+  const preferences: Preferences = getPreferenceValues();
+  const tld = preferences.top_level_domain;
   const marketplaceIDs: { [key: string]: string } = {
     "com.au": "A39IBJ37TRP1C6",
     "com.be": "AMEN7PMS3EDWL",
@@ -52,65 +38,35 @@ export default function Command() {
     "co.uk": "A1F83G8C2ARO7P",
     com: "ATVPDKIKX0DER",
   };
-  const [items, setItems] = useState<string[]>([]);
+  const mid = marketplaceIDs[tld];
 
-  const preferences: Preferences = getPreferenceValues();
+  const url = `https://completion.amazon.${tld}/api/2017/suggestions?alias=aps&mid=${mid}&prefix=${encodeURIComponent(
+    searchText,
+  )}`;
 
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const { data, isLoading } = useFetch<AutocompleteResponse>(url, {
+    execute: searchText.length > 0,
+    keepPreviousData: true,
+  });
 
-  const search = async () => {
-    if (searchText.length === 0) {
-      // Clear the autocomplete results if the search text is empty
-      setItems([]);
-      return;
-    }
-
-    const tld = preferences.top_level_domain;
-    const mid = marketplaceIDs[tld];
-
-    const results = await autoComplete(searchText, tld, mid);
-    setItems(results);
-  };
-
-  useEffect(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    debounceTimerRef.current = setTimeout(() => {
-      search();
-    }, 400);
-
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, [searchText]);
+  const items = data ? data.suggestions.map((suggestion) => suggestion.value) : [];
 
   return (
-    <List
-      onSearchTextChange={setSearchText}
-      isLoading={searchText.length > 0 && items.length === 0}
-      searchBarPlaceholder="Search Amazon..."
-    >
-      {items.length === 0 ? (
-        <List.EmptyView icon="amazon-emptyview.png" title="No Results" />
-      ) : (
-        items.map((item, index) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Search Amazon..." onSearchTextChange={setSearchText} throttle>
+      <List.Section title="Suggestions" subtitle={`${items.length}`}>
+        {items.map((item, index) => (
           <List.Item
             key={index}
             title={item}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={`https://www.amazon.${preferences.top_level_domain}/s?k=${encodeURIComponent(item)}`}
-                />
+                <Action.OpenInBrowser url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`} />
               </ActionPanel>
             }
           />
-        ))
-      )}
+        ))}
+      </List.Section>
+      <List.EmptyView icon="amazon-emptyview.png" title="No Results" />
     </List>
   );
 }

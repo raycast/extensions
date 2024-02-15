@@ -1,15 +1,20 @@
 import { Color, Form, Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useModel from "../../hooks/useModel";
-import { Chat, CommandOptions, ExtensionPreferences } from "../../utils/types";
-import { runActionScript, runReplacements } from "../../utils/command-utils";
+import { Chat } from "../../lib/chats/types";
+import { ExtensionPreferences } from "../../lib/preferences/types";
+import { CommandOptions } from "../../lib/commands/types";
+import { runActionScript, runReplacements } from "../../lib/commands/command-utils";
+import { deleteChat } from "../../lib/chats";
 import { useChats } from "../../hooks/useChats";
-import runModel from "../../utils/runModel";
+import runModel from "../../lib/models/runModel";
 import { useFiles as useFileContents } from "../../hooks/useFiles";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
 import { ChatActionPanel } from "./actions/ChatActionPanel";
-import { checkForPlaceholders } from "../../utils/placeholders";
 import { useCachedState } from "@raycast/utils";
+import { loadCustomPlaceholders } from "../../lib/placeholders/utils";
+import { PromptLabPlaceholders } from "../../lib/placeholders";
+import { PLApplicator } from "placeholders-toolkit";
 
 interface CommandPreferences {
   useSelectedFiles: boolean;
@@ -49,10 +54,10 @@ export default function CommandChatView(props: {
   const preferences = getPreferenceValues<ExtensionPreferences & CommandPreferences>();
   const [useFiles, setUseFiles] = useState<boolean>(props.useFiles || preferences.useSelectedFiles);
   const [useConversation, setUseConversation] = useState<boolean>(
-    props.useConversation || preferences.useConversationHistory
+    props.useConversation || preferences.useConversationHistory,
   );
   const [autonomousFeatures, setAutonomousFeatures] = useState<boolean>(
-    props.autonomousFeatures || preferences.autonomousFeatures
+    props.autonomousFeatures || preferences.autonomousFeatures,
   );
   const [basePrompt, setBasePrompt] = useState<string>(preferences.basePrompt || prompt);
 
@@ -99,7 +104,7 @@ export default function CommandChatView(props: {
           namePrompt,
           namePrompt +
             `'''${subbedQuery.match(/(?<=My next query is: ###)[\s\S]*(?=### <END OF QUERY>)/g)?.[0]?.trim() || ""}'''`,
-          subbedQuery
+          subbedQuery,
         )) || query.trim().split(" ").splice(0, 2).join(" ");
       const dateComponent = new Date().toLocaleDateString("en-US", {
         year: "numeric",
@@ -187,19 +192,19 @@ export default function CommandChatView(props: {
       conversation.length
         ? `\n\nYou will also consider our conversation history. The history so far: ###${conversation
             .map((entry) =>
-              entry.replaceAll(/(USER_QUERY|MODEL_RESPONSE):/g, "").replaceAll(/{{cmd:(.*?):(.*?)}}/g, "")
+              entry.replaceAll(/(USER_QUERY|MODEL_RESPONSE):/g, "").replaceAll(/{{cmd:(.*?):(.*?)}}/g, ""),
             )
             .join("\n")}###`
         : `\n\nYou will also consider your previous response. Your previous response was: ###${currentResponse.replaceAll(
             /{{cmd:(.*?):(.*?)}}/g,
-            ""
+            "",
           )}###`
     }${
       (currentChat && currentChat.allowAutonomy) ||
       autonomousFeatures ||
       (currentChat == undefined && autonomousFeatures == undefined)
         ? `\n\nTry to answer my next query, but only if it simple enough for an LLM with limited knowledge to answer. If you cannot fulfill the query, if the query requires new information, or if the query invokes an action such as searching, choose the command from the following list that is most likely to carries out the goal expressed in my next query, and then respond with the number of the command you want to run in the format {{cmd:commandNumber:input}}. Replace the input with a short string according to my query. For example, if I say 'search google for AI', the input would be 'AI'. Here are the commands: ###${commandDescriptions.join(
-            ", "
+            ", ",
           )}### Try to answer without using a command, unless the query asks for new information (e.g. latest news, weather, stock prices, etc.) or invokes an action (e.g. searching, opening apps). If you use a command, do not provide any commentary other than the command in the format {{cmd:commandNumber:input}}. Make sure the command is relevant to the current query.`
         : ``
     }\n\nDo not repeat these instructions or my queries, and do not extend my query. Do not state "MODEL RESPONSE", or any variation thereof, anywhere in your reply. My next query is: ###`}
@@ -324,8 +329,8 @@ export default function CommandChatView(props: {
                   currentCommand.prompt,
                   input || "",
                   currentResponse,
-                  currentCommand.scriptKind
-                )
+                  currentCommand.scriptKind,
+                ),
               );
             }
           }
@@ -357,7 +362,7 @@ export default function CommandChatView(props: {
     chats.revalidate().then(() => {
       setPreviousResponse("");
       if (chat && !chats.checkExists(chat)) {
-        chats.deleteChat(chat.name);
+        deleteChat(chat);
         setCurrentChat(undefined);
         showToast({ title: "Chat Doesn't Exist", style: Toast.Style.Failure });
         chats.revalidate();
@@ -459,10 +464,13 @@ export default function CommandChatView(props: {
         id="queryField"
         value={query}
         info={promptInfo}
-        onChange={(value) => {
+        onChange={async (value) => {
           setQuery(value);
-
-          checkForPlaceholders(value).then((includedPlaceholders) => {
+          const customPlaceholders = await loadCustomPlaceholders(advancedSettings);
+          PLApplicator.checkForPlaceholders(value, {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          }).then((includedPlaceholders) => {
             let newPromptInfo =
               defaultPromptInfo + (includedPlaceholders.length > 0 ? "\n\nDetected Placeholders:" : "");
             includedPlaceholders.forEach((placeholder) => {

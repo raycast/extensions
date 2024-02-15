@@ -95,11 +95,13 @@ function Command() {
                         url={toUrl(page.subdomain)}
                         shortcut={{ modifiers: ['cmd'], key: 'p' }}
                       />
-                      <Action.OpenInBrowser
-                        title="Open Repo"
-                        url={getRepoUrl(page.source)}
-                        shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                      />
+                      {page.source && (
+                        <Action.OpenInBrowser
+                          title="Open Repo"
+                          url={getRepoUrl(page.source)}
+                          shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                        />
+                      )}
                       <Action.OpenInBrowser
                         title="Open on Cloudflare"
                         url={getPageUrl(accountId, page.name)}
@@ -160,10 +162,14 @@ function PageView(props: PageProps) {
   ## Status
 
   ${page.status}
-
+${
+  page.source
+    ? `
   ## Autopublish enabled
 
-  ${page.source.config.autopublishEnabled}
+  ${page.source.config.autopublishEnabled}`
+    : ''
+}
   `;
 
   return (
@@ -191,11 +197,13 @@ function PageView(props: PageProps) {
             url={toUrl(page.subdomain)}
             shortcut={{ modifiers: ['cmd'], key: 'p' }}
           />
-          <Action.OpenInBrowser
-            title="Open Repo"
-            url={getRepoUrl(page.source)}
-            shortcut={{ modifiers: ['cmd'], key: 'r' }}
-          />
+          {page.source && (
+            <Action.OpenInBrowser
+              title="Open Repo"
+              url={getRepoUrl(page.source)}
+              shortcut={{ modifiers: ['cmd'], key: 'r' }}
+            />
+          )}
           <Action.OpenInBrowser
             title="Open on Cloudflare"
             url={getPageUrl(accountId, page.name)}

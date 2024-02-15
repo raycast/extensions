@@ -25,3 +25,7 @@ More IP address processing operations can be accessed through the [ip-toolkit](h
 
 ![preview](./metadata/ip-tools-6.png)
 ![preview](./metadata/ip-tools-7.png)
+
+## Query IP Geolocation Information
+
+![preview](./metadata/ip-tools-8.png)

@@ -1,5 +1,9 @@
 # Mozilla Firefox Changelog
 
+## [Fix] - 2024-01-06
+
+- Fixes issue (#9373) with search by browser history.
+
 ## [Add support to Firefox Nightly] - 2023-10-25
 
 - Add support as a fallback for Mozilla Firefox Nightly when only this version exists.

@@ -1,5 +1,13 @@
 # ToolBox Changelog
 
+## [Format SQL script fix] - 2023-12-21
+
+- Fixed Format SQL script
+
+## [More Commands] - 2023-12-21
+
+- Added command to make unix timestamp to human readable date and vice versa
+
 ## [More Commands] - 2023-12-11
 
 - Added command to convert JavaScript object to JSON and vice versa

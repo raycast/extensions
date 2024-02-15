@@ -57,7 +57,6 @@ export default function useSearchAPI({
       cancelRef.current = new AbortController();
       setIsLoading(true);
 
-      let items: IGif[];
       try {
         const api = await getAPIByServiceName(searchService);
         if (api === null) {
@@ -66,18 +65,16 @@ export default function useSearchAPI({
           return;
         }
 
-        if (searchTerm) {
-          items = dedupe(await api.search(searchTerm, { offset, limit }));
-        } else {
-          items = dedupe(await api.trending({ offset, limit }));
-        }
+        const newItems = searchTerm
+          ? await api.search(searchTerm, { offset, limit })
+          : await api.trending({ offset, limit });
 
         if (searchService === prevServiceRef.current && searchTerm === prevTermRef.current) {
           // If neither the service nor the term have changed, append the items
-          setResults({ items: [...(results?.items ?? []), ...items], term: searchTerm });
+          setResults({ items: dedupe([...(results?.items ?? []), ...newItems]), term: searchTerm });
         } else {
           // If either the service or the term have changed, replace the items
-          setResults({ items, term: searchTerm });
+          setResults({ items: dedupe(newItems), term: searchTerm });
           prevServiceRef.current = searchService;
           prevTermRef.current = searchTerm;
         }

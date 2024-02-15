@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
@@ -59,4 +60,13 @@ export function convertToRelativeDate(input: Date | string | undefined): string 
     return;
   }
   return timeAgo.format(date) as string;
+}
+
+export function clockFormat(): "24h" | "12h" {
+  const prefs = getPreferenceValues();
+  const f = prefs.clockformat as string | undefined;
+  if (f === "12h" || f === "24h") {
+    return f;
+  }
+  return "24h";
 }

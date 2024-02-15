@@ -1,12 +1,12 @@
 import { Icon, Image } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { isBefore, isSameDay, parseISO } from "date-fns";
+import { isBefore, parseISO } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
 import { useMemo } from "react";
 import React from "react";
 
-import { displayDueDate, isOverdue, parseDay } from "../helpers";
+import { displayDueDate, getDateString, isOverdue, isToday } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -91,13 +91,13 @@ export const groupByOptions: GroupByOptions = [
 ];
 
 export function groupByDueDates(reminders: Reminder[]) {
-  const [dated, notDated] = partition(reminders, (reminder: Reminder) => reminder.dueDate !== null);
+  const [dated, notDated] = partition(reminders, (reminder: Reminder) => !!reminder.dueDate);
   const [overdue, upcoming] = partition(dated, (reminder: Reminder) => reminder.dueDate && isOverdue(reminder.dueDate));
-  const allDueDates = [...new Set(upcoming.map((reminder) => parseDay(reminder.dueDate).toISOString()))];
+  const allDueDates = [...new Set(upcoming.map((reminder) => getDateString(reminder.dueDate as string)))];
   allDueDates.sort();
 
   const sections = allDueDates.map((date) => {
-    const remindersOnDate = upcoming.filter((reminder) => parseDay(reminder.dueDate).toISOString() === date);
+    const remindersOnDate = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === date);
     return {
       title: displayDueDate(date),
       reminders: remindersOnDate,
@@ -179,9 +179,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     return reminders.filter((reminder) => {
       if (listId === "all") return true;
       if (listId === "today")
-        return reminder.dueDate
-          ? isOverdue(reminder.dueDate) || isSameDay(new Date(reminder.dueDate), parseDay())
-          : false;
+        return reminder.dueDate ? isOverdue(reminder.dueDate) || isToday(reminder.dueDate) : false;
       if (listId === "scheduled") return !!reminder.dueDate;
       return reminder.list?.id === listId;
     });

@@ -1,10 +1,9 @@
 import { LocalStorage, Toast, showToast } from '@raycast/api';
-import got from 'got';
 import { getDefaultStore } from 'jotai';
 import { isAuthenticatedAtom } from '../hooks/atoms';
 import { GENERAL_DOMAIN } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
-import { cookieJar, isAbortError } from './shared';
+import { client, isAbortError } from './shared';
 
 export type UserID = string;
 export type NodeID = string;
@@ -106,7 +105,7 @@ export interface WikiEntity {
   wiki_version: string;
 }
 
-export interface RecentListResponse {
+export interface RecentDocsListResponse {
   node_list: NodeID[];
   has_more: boolean;
   total: number;
@@ -126,10 +125,8 @@ export interface SearchDocsResponse {
   };
 }
 
-const client = got.extend({
-  cookieJar,
-  headers: { 'User-Agent': 'Raycast' },
-  responseType: 'json',
+const docsClient = client.extend({
+  prefixUrl: `${GENERAL_DOMAIN}/space/api/`,
   hooks: {
     beforeRequest: [
       (options) => {
@@ -166,13 +163,9 @@ export function isNodeEntity(entity: NodeEntity | ObjEntity): entity is NodeEnti
   return 'obj_token' in entity;
 }
 
-function prependUrl(url: string) {
-  return `${GENERAL_DOMAIN}/space/api/${url}`;
-}
-
-export async function fetchRecentList(length: number, signal?: AbortSignal): Promise<RecentListResponse> {
+export async function fetchRecentDocsList(length: number, signal?: AbortSignal): Promise<RecentDocsListResponse> {
   try {
-    const { body } = await client.get<RecentListResponse>(prependUrl('explorer/recent/list/'), {
+    const { body } = await docsClient.get<RecentDocsListResponse>('explorer/recent/list/', {
       searchParams: { length },
       signal,
     });
@@ -180,7 +173,7 @@ export async function fetchRecentList(length: number, signal?: AbortSignal): Pro
   } catch (error) {
     let errorMessage = 'Could not load recent documents';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
     if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
@@ -203,7 +196,7 @@ export interface SearchDocsParams {
 
 export async function searchDocs(params: SearchDocsParams, signal?: AbortSignal): Promise<SearchDocsResponse> {
   try {
-    const { body } = await client.get<SearchDocsResponse>(prependUrl('search/refine_search/'), {
+    const { body } = await docsClient.get<SearchDocsResponse>('search/refine_search/', {
       searchParams: { offset: 0, count: 15, ...params },
       signal,
     });
@@ -221,7 +214,7 @@ export async function searchDocs(params: SearchDocsParams, signal?: AbortSignal)
   } catch (error) {
     let errorMessage = 'Could not search documents';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
     if (!isAbortError(error)) showToast(Toast.Style.Failure, errorMessage);
     return Promise.resolve({
@@ -263,7 +256,7 @@ const computeType = (objEntity: ObjEntity) => {
 
 export async function removeRecentDocument(objToken: string): Promise<boolean> {
   try {
-    await client.post(prependUrl('explorer/recent/delete/'), {
+    await docsClient.post('explorer/recent/delete/', {
       form: {
         obj_token: objToken,
       },
@@ -273,7 +266,7 @@ export async function removeRecentDocument(objToken: string): Promise<boolean> {
   } catch (error) {
     let errorMessage = 'Could not remove the document from recent list';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

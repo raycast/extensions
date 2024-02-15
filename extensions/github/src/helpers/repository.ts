@@ -51,7 +51,7 @@ const VISITED_REPOSITORIES_LENGTH = 25;
 
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
   const { application, baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
-  const applicationPath = application.path.replaceAll(" ", "\\ ");
+  const applicationPath = application?.path.replaceAll(" ", "\\ ");
   const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
   const openCommand = `open -a ${applicationPath} ${clonePath}`;
 

@@ -9,6 +9,10 @@ export function formatHeartRate(heartRate?: number) {
 }
 
 export function formatDate(dateString: string, formatString: string, relational?: boolean) {
+  if (isNaN(Date.parse(dateString))) {
+    return undefined;
+  }
+
   const date = new Date(dateString);
   const today = new Date();
   const yesterday = subDays(new Date(), 1);

@@ -4,7 +4,7 @@ import { useState } from "react";
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
-import View from "./components/View";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useOpenIssues } from "./hooks/useOpenIssues";
 import { useViewer } from "./hooks/useViewer";
 
@@ -34,10 +34,4 @@ function OpenIssues() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <OpenIssues />
-    </View>
-  );
-}
+export default withGitHubClient(OpenIssues);

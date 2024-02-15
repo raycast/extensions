@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Model } from "../utils/types";
+import { Model } from "../lib/models/types";
 import { Color, Icon, LocalStorage } from "@raycast/api";
-import { installDefaults } from "../utils/file-utils";
+import { installDefaults } from "../lib/files/file-utils";
+import { updateModel } from "../lib/models";
 
 export function useModels() {
   const [models, setModels] = useState<Model[]>([]);
@@ -27,17 +28,6 @@ export function useModels() {
 
   const revalidate = async () => {
     return loadModels();
-  };
-
-  const updateModel = async (model: Model, newData: Model) => {
-    if (model.name !== newData.name) {
-      await LocalStorage.removeItem(`--model-${model.name}`);
-    }
-    await LocalStorage.setItem(`--model-${newData.name}`, JSON.stringify(newData));
-  };
-
-  const deleteModel = async (model: Model) => {
-    await LocalStorage.removeItem(`--model-${model.name}`);
   };
 
   const dummyModel = (): Model => {
@@ -115,8 +105,6 @@ export function useModels() {
     isLoading: isLoading,
     error: error,
     revalidate: revalidate,
-    updateModel: updateModel,
-    deleteModel: deleteModel,
     createModel: createModel,
     favorites: favorites,
     dummyModel: dummyModel,

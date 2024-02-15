@@ -1,44 +1,71 @@
-import { OllamaApiGenerateResponse } from "../types";
-import { Form, Action, ActionPanel, LocalStorage } from "@raycast/api";
+import { RaycastChatMessage } from "../types";
+import { Form, Action, ActionPanel } from "@raycast/api";
 import React from "react";
+import { DeleteChatHistory, SaveChatToHistory } from "../common";
 
 interface props {
   ShowSaveChatView: React.Dispatch<React.SetStateAction<boolean>>;
-  ChatHistory: Map<string, [string, string, OllamaApiGenerateResponse][] | undefined>;
+  ChatHistoryKeys: string[];
+  ChatMessages: RaycastChatMessage[];
+}
+
+interface form {
+  name: string;
 }
 
 export function SaveChatView(props: props): JSX.Element {
-  const [ChatName, SetChatName]: [string, React.Dispatch<React.SetStateAction<string>>] = React.useState("");
+  const NameInfo = "Provide a Chat Name";
 
+  const [NameError, SetNameError] = React.useState<string | undefined>();
+
+  /**
+   * Validate Name Field.
+   * @param event
+   */
+  function ValidateName(event: any): void {
+    const value = event.target.value;
+    if (value && value.length > 0 && !props.ChatHistoryKeys.find((k) => k === value)) {
+      SetNameError(undefined);
+    } else {
+      if (value.length === 0) {
+        SetNameError("Name is required");
+      } else if (props.ChatHistoryKeys.find((k) => k === value)) {
+        SetNameError("Name already exists");
+      }
+    }
+  }
+  /**
+   * Drop Name Error.
+   */
+  function DropNameError(): void {
+    if (NameError && NameError.length > 0) {
+      SetNameError(undefined);
+    }
+  }
   /**
    * Save ChatHistory to Local Storage with a Name
    * @returns {Promise<void>}
    */
-  async function SaveChatToHistory(): Promise<void> {
-    const chat = props.ChatHistory.get("Current");
-    if (chat) {
-      props.ChatHistory.set(ChatName, chat);
-      props.ChatHistory.set("Current", undefined);
-      await LocalStorage.setItem("chatName", "Current");
-      await LocalStorage.setItem("answerListHistory", JSON.stringify([...props.ChatHistory]));
-      props.ShowSaveChatView(false);
-    }
+  async function Save(data: form): Promise<void> {
+    await DeleteChatHistory("Current");
+    await SaveChatToHistory(data.name, props.ChatMessages, true);
+    props.ShowSaveChatView(false);
   }
 
   return (
     <Form
       actions={
-        <ActionPanel>
-          <Action.SubmitForm onSubmit={SaveChatToHistory} title="Save Conversation" />
-        </ActionPanel>
+        <ActionPanel>{!NameError && <Action.SubmitForm onSubmit={Save} title="Save Conversation" />}</ActionPanel>
       }
     >
       <Form.TextField
-        id="chatName"
+        id="name"
         title="Chat Name"
         placeholder="Enter Chat Name"
-        value={ChatName}
-        onChange={SetChatName}
+        info={NameInfo}
+        error={NameError}
+        onChange={DropNameError}
+        onBlur={ValidateName}
       />
     </Form>
   );

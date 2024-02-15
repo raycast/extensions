@@ -1,16 +1,28 @@
 # Jira Changelog
 
+## [Add OAuth utils] - 2024-02-13
+
+- Use new OAuth utils
+
+## [Add command to open issue from clipboard] - 2024-01-19
+
+- Add a new command to open issue by key from the clipboard.
+
+## [Fix issue with JQL reserved keywords in project names] - 2023-12-18
+
+- Fix a bug causing queries to fail when project names included JQL reserved keywords.
+
 ## [Fix bug with loading Create Issue panel with extensive metadata] - 2023-11-19
 
-Fixes an issue with issue creation where large amounts of issue metadata could cause out-of-memory errors during loading.
+- Fix an issue with issue creation where large amounts of issue metadata could cause out-of-memory errors during loading.
 
 ## [Add watching functionality to issue actions] - 2023-11-19
 
-Add start/stop watching issue action.
+- Add start/stop watching issue action.
 
 ## [Add project list in Search Issues command] - 2023-10-06
 
-It is now possible to filter issues by projects in the `Search Issues` command. If a project is selected, you can simply input the ticket number in the search query for faster results.
+- It is now possible to filter issues by projects in the `Search Issues` command. If a project is selected, you can simply input the ticket number in the search query for faster results.
 
 ## [Implement Comments on issues] - 2023-10-03
 
@@ -18,7 +30,6 @@ It is now possible to filter issues by projects in the `Search Issues` command. 
 - Add new comment action
 - Add edit comment action
 - Add delete comment action
-
 
 ## [Render authenticated image URIs] - 2023-09-10
 
@@ -38,8 +49,7 @@ It is now possible to filter issues by projects in the `Search Issues` command. 
 
 ## [Persist Active Sprint Project value when closing command] - 2023-06-28
 
-- Persist Active Sprint Project value when closing command allowing the command to
-  fetch the issues for the latest selected project when opening the command anew.
+- Persist Active Sprint Project value when closing command allowing the command to fetch the issues for the latest selected project when opening the command anew.
 
 ## [Bug fixes] - 2023-06-15
 

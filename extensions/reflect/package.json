@@ -8,13 +8,24 @@
   "contributors": [
     "joshknowles",
     "tylerwince",
-    "ocavue"
+    "ocavue",
+    "theomjones"
   ],
   "categories": [
     "Applications",
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "parentLists",
+      "type": "textfield",
+      "description": "Comma separated lists of parent lists to append your notes within (i.e. 🗓 Daily Log, or [[🗓 Daily Log]])",
+      "required": false,
+      "title": "Parent Lists (comma separated)",
+      "placeholder": "🗓 Daily Log, [[✅ Tasks]]"
+    }
+  ],
   "commands": [
     {
       "name": "append",
@@ -49,7 +60,7 @@
         {
           "name": "listName",
           "title": "Parent List (Optional)",
-          "description": "Parent list to append your notes within (i.e. 🗓 Daily Log)",
+          "description": "Parent list to append your notes within (i.e. 🗓 Daily Log, or [[✅ Tasks]])",
           "type": "textfield",
           "required": false
         },
@@ -65,13 +76,16 @@
           "title": "Timestamp Format",
           "description": "The format of prepended timestamp",
           "type": "dropdown",
-          "data": [{
-            "title": "12 hour",
-            "value": "12"
-          },{
-            "title": "24 hour",
-            "value": "24"
-          }],
+          "data": [
+            {
+              "title": "12 hour",
+              "value": "12"
+            },
+            {
+              "title": "24 hour",
+              "value": "24"
+            }
+          ],
           "default": "12",
           "required": false
         }
@@ -82,6 +96,12 @@
           "type": "text",
           "placeholder": "What's top of mind?",
           "required": true
+        },
+        {
+          "name": "list",
+          "type": "text",
+          "placeholder": "Parent list substring",
+          "required": false
         }
       ],
       "mode": "no-view"

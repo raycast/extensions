@@ -42,7 +42,7 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
       return issue;
     },
     [issueKey],
-    { initialData: initialIssue }
+    { initialData: initialIssue },
   );
 
   const attachments = issue?.fields.attachment;

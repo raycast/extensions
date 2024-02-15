@@ -61,6 +61,11 @@ const config: SearchConfigs = {
       });
     },
   },
+  kagi: {
+    search: "https://kagi.com/search?q=",
+    suggestions: null, //Note: Unknown
+    suggestionParser: null,
+  },
 };
 
 async function parseResponse(response: Response) {

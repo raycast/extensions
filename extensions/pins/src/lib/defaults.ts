@@ -13,7 +13,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { StorageKey } from "./constants";
 import { getNextGroupID, Group } from "./Groups";
 import { getNextPinID, Pin } from "./Pins";
-import { getStorage, setStorage } from "./utils";
+import { getStorage, setStorage } from "./storage";
 
 /**
  * A set of example pins and groups to help users get started.
@@ -50,6 +50,7 @@ const examplePins: Pin[] = [
     icon: "Favicon / File Icon",
     group: "Dev Utils",
     application: "None",
+    tags: ["terminal"],
   },
   {
     id: 5,
@@ -133,6 +134,7 @@ const examplePins: Pin[] = [
     group: "Raycast AI Examples",
     application: "None",
     iconColor: "raycast-green",
+    tags: ["AI"],
   },
   {
     id: 15,
@@ -141,6 +143,7 @@ const examplePins: Pin[] = [
     icon: "Network",
     group: "Raycast AI Examples",
     application: "None",
+    tags: ["AI", "selection"],
   },
   {
     id: 16,
@@ -149,6 +152,7 @@ const examplePins: Pin[] = [
     icon: "Clipboard",
     group: "Raycast AI Examples",
     application: "None",
+    tags: ["AI"],
   },
   {
     id: 17,
@@ -190,6 +194,7 @@ const examplePins: Pin[] = [
     icon: "Text",
     group: "Raycast AI Examples",
     application: "None",
+    tags: ["AI", "selection"],
   },
 ];
 

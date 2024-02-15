@@ -2,6 +2,11 @@ import { List } from "@raycast/api";
 
 type DrinkType = { id: string; name: string };
 
+export const langTypes: DrinkType[] = [
+  { id: "en", name: "English" },
+  { id: "zh-CN", name: "Chinese" },
+];
+
 export const drinkTypes: DrinkType[] = [
   { id: "IPv4", name: "IPv4" },
   { id: "IPv6", name: "IPv6" },

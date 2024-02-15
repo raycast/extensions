@@ -25,12 +25,13 @@ function SearchLinks() {
     >
       <ListEmptyView title={"No Links"} icon={Icon.Link} />
       {allLinks?.map((value, index) => {
+        const shortUrl = `${value.domain}/${value.key}`;
         const fullShortUrl = `https://${value.domain}/${value.key}`;
         return (
           <List.Item
             key={index}
             icon={{ source: { light: "link-icon.svg", dark: "link-icon@dark.svg" } }}
-            title={value.url}
+            title={shortUrl}
             detail={
               <List.Item.Detail
                 metadata={

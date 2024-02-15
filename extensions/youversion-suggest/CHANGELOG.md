@@ -1,5 +1,13 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.4.0] - 2024-01-09
+
+- Added language support for Ukrainian (ukr)
+  - To use, look for Українська in the Language dropdown for the _Set Bible
+    Preferences_ command
+  - CUV has been set as the default version/translation for this language, but
+    if you want to change it, feel free
+
 ## [v3.3.0] - 2023-06-17
 
 - Fixed a bug where "Search the Bible by Phrase" results were always in English

@@ -36,7 +36,7 @@ const useRemoteTabs = () => {
     DATABASE_PATH,
     `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
          FROM cloud_tabs t
-         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`
+         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`,
   );
 };
 

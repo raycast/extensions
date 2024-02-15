@@ -5,7 +5,7 @@ import { Grid } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 
 export interface GifGridSectionProps {
-  title?: string;
+  title: string;
   term?: string;
   hide?: boolean;
   results?: IGif[];
@@ -13,7 +13,7 @@ export interface GifGridSectionProps {
   isLocalGifSection?: boolean;
 }
 
-export function GifGridSection(props: GifGridSectionProps & { loadMoreGifs: () => void }) {
+export function GifGridSection(props: GifGridSectionProps) {
   const results = [...(props.results ?? [])];
   const { data: sortedGifs, visitItem: visitGifItem } = useFrecencySorting(results, {
     namespace: props.service,
@@ -35,7 +35,7 @@ export function GifGridSection(props: GifGridSectionProps & { loadMoreGifs: () =
           index={index}
           service={props.service}
           visitGifItem={visitGifItem}
-          loadMoreGifs={props.loadMoreGifs}
+          section={props.title}
         />
       ))}
     </Grid.Section>

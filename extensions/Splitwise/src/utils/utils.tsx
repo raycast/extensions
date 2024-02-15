@@ -4,15 +4,15 @@ import { Color } from "@raycast/api";
 export function getCurrency_code(currency_code: string) {
   switch (currency_code) {
     case "USD":
-      return "$";
+      return { symbol: "$", emoji: "💵" };
     case "EUR":
-      return "€";
+      return { symbol: "€", emoji: "💶" };
     case "GBP":
-      return "£";
+      return { symbol: "£", emoji: "💷" };
     case "JPY":
-      return "¥";
+      return { symbol: "¥", emoji: "💴" };
     default:
-      return currency_code;
+      return { symbol: currency_code, emoji: "💸" };
   }
 }
 

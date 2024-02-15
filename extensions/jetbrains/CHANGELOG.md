@@ -1,5 +1,10 @@
 # Jetbrains Changelog
 
+## [Shell Script Fixes] - 2024-01-23
+
+- Use correct script name from config
+- Better handling of missing scripts 
+
 ## [Toolbox 2.0 Updates] - 2023-07-22
 
 - Post release 2.0 fixes
