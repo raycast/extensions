@@ -8,9 +8,20 @@ export interface Source {
   rssLink?: string;
   // Time span of the content pulled by rss, default is 1 day
   timeSpan?: string;
-  tags: string[];
+  tags?: string[];
   favicon?: string;
+  description?: string;
 }
+
+export type ExternalSource = Pick<Source, "url" | "title" | "description" | "favicon" | "rssLink" | "tags"> & {
+  available?: boolean;
+  // 权重
+  weight?: number;
+  // 活跃度分数 0 - 100
+  activeScore?: number;
+  // 活跃状态
+  activeStatus?: "active" | "lowActive" | "inactive";
+};
 
 export type SummarizeStatus = "summraized" | "failedToSummarize" | "raw";
 
@@ -32,6 +43,7 @@ export interface RSSFeed {
   url: string;
   filter?: (item: RSSItem) => boolean;
   maxItems?: number;
+  tags?: string[];
 }
 
 export interface RSSItem {
@@ -44,6 +56,13 @@ export interface RSSItem {
   coverImage?: string;
   feed?: RSSFeed;
   [k: string]: any;
+}
+
+export interface RawFeed {
+  title: string;
+  link: string;
+  feedUrl: string;
+  items: RSSItem[];
 }
 
 export interface Preferences {
@@ -63,6 +82,7 @@ export interface Preferences {
   autoGenDigest?: boolean;
   requestTimeout?: number;
   enableItemLinkProxy?: boolean;
+  splitByTags?: boolean;
   writeFreelyEndpoint?: string;
   writeFreelyAccount?: string;
   writeFreelyPassword?: string;

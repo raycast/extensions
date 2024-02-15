@@ -7,7 +7,8 @@
   "author": "futantan",
   "contributors": [
     "sawhney17",
-    "hadret"
+    "hadret",
+    "jonatan_petursson"
   ],
   "license": "MIT",
   "preferences": [
@@ -72,12 +73,10 @@
     "edn-data": "^0.2.0",
     "logseq-dateutils": "0.0.22",
     "minisearch": "^4.0.3",
-    "ramda": "^0.28.0",
     "untildify": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/ramda": "^0.28.7",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

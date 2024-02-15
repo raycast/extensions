@@ -91,7 +91,7 @@ export const groupByOptions: GroupByOptions = [
 ];
 
 export function groupByDueDates(reminders: Reminder[]) {
-  const [dated, notDated] = partition(reminders, (reminder: Reminder) => reminder.dueDate !== null);
+  const [dated, notDated] = partition(reminders, (reminder: Reminder) => !!reminder.dueDate);
   const [overdue, upcoming] = partition(dated, (reminder: Reminder) => reminder.dueDate && isOverdue(reminder.dueDate));
   const allDueDates = [...new Set(upcoming.map((reminder) => getDateString(reminder.dueDate as string)))];
   allDueDates.sort();

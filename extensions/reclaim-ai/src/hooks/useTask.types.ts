@@ -1,5 +1,3 @@
-import { Task } from "../types/task";
-
 export interface CreateTaskProps {
   title: string;
   timePolicy: string;
@@ -13,5 +11,3 @@ export interface CreateTaskProps {
   priority: string;
   onDeck: boolean;
 }
-
-export type ApiResponseTasks = Task[];

@@ -1,10 +1,15 @@
 # ngrok Changelog
 
+## [Fixes & Enhancements] - 2024-02-01
+
+- Fix bug that prevented users to create tunnels on ngrok CLI installed with Homebrew
+- Updated deps to latest version
+
 ## [Fixes & Enhancements] - 2023-10-28
 
 - Changed to check the right port, 4040
-- Updated deps to latest version.
-- Improved the README, which mentions the default ngrok interface port.
+- Updated deps to latest version
+- Improved the README, which mentions the default ngrok interface port
 
 ## [Fixes & Bits] - 2023-09-30
 

@@ -35,7 +35,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.60.0",
-    "@raycast/utils": "^1.9.1",
+    "@raycast/utils": "^1.12.4",
     "@slack/web-api": "^6.4.0",
     "moment": "^2.29.1",
     "node-fetch": "^3.3.2",

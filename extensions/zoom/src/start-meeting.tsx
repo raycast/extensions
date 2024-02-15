@@ -1,9 +1,9 @@
 import { open, closeMainWindow, Clipboard, popToRoot, showToast, Toast, showHUD } from "@raycast/api";
 import { createInstantMeeting } from "./api/meetings";
-import { authorize } from "./api/oauth";
+import { zoom } from "./components/withZoomAuth";
 
 export default async function Command() {
-  const token = await authorize();
+  const token = await zoom.authorize();
 
   try {
     await showToast({ style: Toast.Style.Animated, title: "Creating meeting" });

@@ -1,6 +1,25 @@
 # Spotify Player Changelog
 
+## [Feature] - 2024-02-02
+
+- New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
+- Removed the condition to filter collaborative playlists from other users, since Spotify doesn't update it correctly.
+
+## [New Command] - 2023-01-31
+
+- New `Queue` command allowing the user to view songs/epsiodes in the queue.
+
+## [Fix] - 2024-01-31
+
+- Fixed a bug that caused launching the Spotify app to not work properly
+- Modified the device selection preference for playback
+
+## [Improvement] - 2024-01-30
+
+- Increase the stale data time from 10 minutes to 2 hours
+
 ## [Fix Current Track Like State] - 2023-12-31
+
 - Fix showing the like/disliked state of the current track
 
 ## [Feature & Optimisation] - 2023-12-02

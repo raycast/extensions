@@ -235,7 +235,7 @@
     {
       "name": "preview",
       "title": "Preview",
-      "description": "Use selected text as ChatGPT output and preview output",
+      "description": "Use selected text as ChatGPT input and preview output",
       "mode": "view",
       "preferences": [
         {

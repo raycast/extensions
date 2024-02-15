@@ -1,5 +1,19 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Fix wifi/airplane commands] - 2024-02-14
+- Fix `wifi`, `airplane` commands. There was a problem fixing merge conflicts disregarding the usage of new toggle value.
+
+## [Fix wifi/airplane commands] - 2024-02-13
+- Fix `wifi`, `airplane` commands. ADB requires these commands to receive specific enable/disable arguments to be fully compatible.
+
+## [Add toggle layout bounds command] - 2024-02-13
+- Add `toggle layout bounds` command, disabled by default
+- Change `wifi`, `airplane`, `dark mode` commands to toggle instead of taking arguments to enable/disable.
+
+## [Add open device developer settings] - 2024-02-13
+- Add `open developer settings` to open the locale developer settings
+- Disable `adb-display-size` by default, since it's less used
+
 ## [Add font/display sizes commands] - 2023-06-13
 - Add `display density` to control display density (values from 0.5 to 3.0)
 - Add `font size` to control font sizes (vales from 0.5 to 3.0)

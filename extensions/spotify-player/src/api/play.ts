@@ -1,6 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
-import { buildScriptEnsuringSpotifyIsRunning, checkIfSpotifyIsInstalled } from "../helpers/applescript";
+import { buildScriptEnsuringSpotifyIsRunning } from "../helpers/applescript";
 import { getErrorMessage } from "../helpers/getError";
+import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 import { getMyDevices } from "./getMyDevices";
 
@@ -24,14 +25,19 @@ const uriForType: Record<ContextTypes, string> = {
 export async function play({ id, type, contextUri }: PlayProps = {}) {
   const { spotifyClient } = getSpotifyClient();
   const { devices } = await getMyDevices();
+  const isSpotifyInstalled = await checkSpotifyApp();
 
   try {
-    if (!devices?.length || devices.length < 0) {
-      throw new Error("No device found.");
+    // If there is an active device, we can just play the track.
+    // If there is no active device, we need to open Spotify and play the track.
+    // If there is no active device and Spotify is not installed, we need to throw an error.
+    const activeDevice = devices?.find((device) => device.is_active);
+
+    if (!activeDevice && isSpotifyInstalled) {
+      await launchSpotifyAndPlay({ id, type });
+      return;
     }
 
-    // If there is an active device, use that. Otherwise, use the first device.
-    const activeDevice = devices?.find((device) => device.is_active);
     const deviceId = activeDevice?.id ?? devices?.[0]?.id ?? undefined;
 
     if (!type || !id) {
@@ -46,7 +52,7 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
         await spotifyClient.putMePlayerPlay(
           {
             context_uri: contextUri,
-            offset: { uri: `${uriForType["track"]}${id}` },
+            offset: { uri: `${uriForType.track}${id}` },
           },
           {
             deviceId,
@@ -54,7 +60,7 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
         );
       } else {
         await spotifyClient.putMePlayerPlay(
-          { uris: [`${uriForType["track"]}${id}`] },
+          { uris: [`${uriForType.track}${id}`] },
           {
             deviceId,
           },
@@ -62,7 +68,7 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
       }
     } else if (type === "episode") {
       await spotifyClient.putMePlayerPlay(
-        { uris: [`${uriForType["episode"]}${id}`] },
+        { uris: [`${uriForType.episode}${id}`] },
         {
           deviceId,
         },
@@ -79,36 +85,37 @@ export async function play({ id, type, contextUri }: PlayProps = {}) {
     const error = getErrorMessage(err);
 
     if (
-      error?.toLocaleLowerCase().includes("no device found") ||
-      error?.toLocaleLowerCase().includes("no active device") ||
-      error?.toLocaleLowerCase().includes("restricted device")
+      isSpotifyInstalled &&
+      (error?.toLocaleLowerCase().includes("no device found") ||
+        error?.toLocaleLowerCase().includes("no active device") ||
+        error?.toLocaleLowerCase().includes("restricted device"))
     ) {
-      const isSpotifyInstalled = await checkIfSpotifyIsInstalled();
-      if (!isSpotifyInstalled) {
-        throw new Error("No active device found. Spotify is not installed.");
-      }
-
-      // If there is no active device, we need to open Spotify and play the track.
-      try {
-        if (!type || !id) {
-          const script = buildScriptEnsuringSpotifyIsRunning("play");
-          await runAppleScript(script);
-        } else if (type === "track") {
-          const script = buildScriptEnsuringSpotifyIsRunning(`play track "${uriForType[type]}${id}"`);
-          await runAppleScript(script);
-        } else {
-          // For albums/artists/etc we seem to need a delay. Trying 1 second.
-          const script = buildScriptEnsuringSpotifyIsRunning(`
-            delay 1
-            play track "${uriForType[type]}${id}"`);
-          await runAppleScript(script);
-        }
-      } catch (error) {
-        const message = getErrorMessage(error);
-        throw new Error(message);
-      }
+      // If one of the above errors is thrown, we need to open Spotify and play the track.
+      await launchSpotifyAndPlay({ id, type });
+      return;
     }
 
     throw new Error(error);
+  }
+}
+
+async function launchSpotifyAndPlay({ id, type }: { id?: string; type?: ContextTypes }) {
+  try {
+    if (!type || !id) {
+      const script = buildScriptEnsuringSpotifyIsRunning("play");
+      await runAppleScript(script);
+    } else if (type === "track") {
+      const script = buildScriptEnsuringSpotifyIsRunning(`play track "${uriForType[type]}${id}"`);
+      await runAppleScript(script);
+    } else {
+      // For albums/artists/etc we seem to need a delay. Trying 1 second.
+      const script = buildScriptEnsuringSpotifyIsRunning(`
+        delay 1
+        play track "${uriForType[type]}${id}"`);
+      await runAppleScript(script);
+    }
+  } catch (error) {
+    const message = getErrorMessage(error);
+    throw new Error(message);
   }
 }

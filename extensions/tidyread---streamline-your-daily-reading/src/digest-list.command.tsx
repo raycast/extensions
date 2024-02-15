@@ -21,6 +21,7 @@ import DigestDetail from "./components/DigestDetail";
 import DigestListItem from "./components/DigestListItem";
 import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
+import RedirectRoute from "./components/RedirectRoute";
 
 export default function DigestList() {
   const [digests, setDigests] = useState<Digest[]>();
@@ -54,67 +55,69 @@ export default function DigestList() {
   // );
 
   return (
-    <List isLoading={!digests}>
-      {digests?.length === 0 ? (
-        <List.EmptyView
-          actions={
-            <CustomActionPanel>
-              <Action
-                icon={Icon.ArrowRight}
-                title="Go to Daily Read"
-                onAction={() => {
-                  launchCommand({ name: "daily-read.command", type: LaunchType.UserInitiated });
+    <RedirectRoute>
+      <List isLoading={!digests}>
+        {digests?.length === 0 ? (
+          <List.EmptyView
+            actions={
+              <CustomActionPanel>
+                <Action
+                  icon={Icon.ArrowRight}
+                  title="Go to Daily Read"
+                  onAction={() => {
+                    launchCommand({ name: "daily-read.command", type: LaunchType.UserInitiated });
+                  }}
+                />
+                {/* {debugActionNode} */}
+              </CustomActionPanel>
+            }
+            title="No Digest Found"
+            description="Go to 'Daily Read' View to generate digest."
+          />
+        ) : (
+          (digests || []).map((digest, index) => {
+            return (
+              <DigestListItem
+                key={index}
+                digest={digest}
+                itemProps={{
+                  actions: (
+                    <CustomActionPanel>
+                      <Action.Push icon={Icon.Eye} title="View Detail" target={<DigestDetail digest={digest} />} />
+                      <SharableLinkAction
+                        actionTitle="Share This Digest"
+                        articleTitle={digest.title}
+                        articleContent={digest.content}
+                      />
+                      <Action
+                        style={Action.Style.Destructive}
+                        icon={Icon.Trash}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        title="Delete Source"
+                        onAction={async () => {
+                          const flag = await confirmAlert({
+                            title: "Delete Digest",
+                            icon: Icon.Trash,
+                            primaryAction: {
+                              style: Alert.ActionStyle.Destructive,
+                              title: "Delete",
+                            },
+                            message: "Confirm delete the digest permanently?",
+                          });
+                          if (flag) {
+                            handleDelete(digest);
+                          }
+                        }}
+                      />
+                      {/* {debugActionNode} */}
+                    </CustomActionPanel>
+                  ),
                 }}
               />
-              {/* {debugActionNode} */}
-            </CustomActionPanel>
-          }
-          title="No Digest Found"
-          description="Go to 'Daily Read' View to generate digest."
-        />
-      ) : (
-        (digests || []).map((digest, index) => {
-          return (
-            <DigestListItem
-              key={index}
-              digest={digest}
-              itemProps={{
-                actions: (
-                  <CustomActionPanel>
-                    <Action.Push icon={Icon.Eye} title="View Detail" target={<DigestDetail digest={digest} />} />
-                    <SharableLinkAction
-                      actionTitle="Share This Digest"
-                      articleTitle={digest.title}
-                      articleContent={digest.content}
-                    />
-                    <Action
-                      style={Action.Style.Destructive}
-                      icon={Icon.Trash}
-                      shortcut={Keyboard.Shortcut.Common.Remove}
-                      title="Delete Source"
-                      onAction={async () => {
-                        const flag = await confirmAlert({
-                          title: "Delete Digest",
-                          icon: Icon.Trash,
-                          primaryAction: {
-                            style: Alert.ActionStyle.Destructive,
-                            title: "Delete",
-                          },
-                          message: "Confirm delete the digest permanently?",
-                        });
-                        if (flag) {
-                          handleDelete(digest);
-                        }
-                      }}
-                    />
-                    {/* {debugActionNode} */}
-                  </CustomActionPanel>
-                ),
-              }}
-            />
-          );
-        })
-      )}
-    </List>
+            );
+          })
+        )}
+      </List>
+    </RedirectRoute>
   );
 }

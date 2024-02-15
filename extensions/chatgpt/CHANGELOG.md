@@ -1,5 +1,13 @@
 # Changelog
 
+## [Added keywords] - 2024-12-02
+
+- Added a few keywords to make the extension easier to find in the store.
+
+## [Feat] - 2024-01-31
+
+- Feature: Make responses display above the question
+
 ## [Fix] - 2024-01-28
 
 - Fix: Proxy not working
