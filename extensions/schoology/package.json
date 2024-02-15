@@ -4,7 +4,7 @@
   "title": "Schoology - Grade Viewer",
   "description": "View your courselists, grades, graphs, and individual assignments quickly using Raycast.",
   "icon": "command-icon.png",
-  "author": "Vaibhav-Satishkumar",
+  "author": "Visual-Studio-Coder",
   "contributors": [
     "giantsquidgamer",
     "akshay_mahajan",
@@ -25,7 +25,7 @@
     "Raycast",
     "Vaibhav",
     "Satishkumar",
-    "Vaibhav-Satishkumar",
+    "Visual-Studio-Coder",
     "School"
   ],
   "license": "MIT",
