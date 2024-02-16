@@ -148,8 +148,8 @@ const EndOfInterval = () => {
 
   if (preferences.enableQuote) {
     markdownContent += handleQuote() + "\n\n";
-  } 
-  
+  }
+
   if (preferences.enableImage) {
     if (preferences.giphyAPIKey) {
       const { isLoading, data } = useFetch(
