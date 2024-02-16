@@ -129,7 +129,7 @@ const handleQuote = (): string => {
 };
 
 const EndOfInterval = () => {
-  let markdownContent = "# Timer Completed \n\n";
+  let markdownContent = "# Interval Completed \n\n";
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
