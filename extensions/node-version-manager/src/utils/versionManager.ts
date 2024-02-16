@@ -19,7 +19,7 @@ const getVersionManager = () => {
         name: '',
         list: (): NodeVersionsInfo[] => [],
         listRemote: (): NodeVersionsInfo[] => [],
-        install: async (version: string) => {
+        install: (version: string) => {
           console.log('install', version);
         },
         uninstall: (version: string) => {

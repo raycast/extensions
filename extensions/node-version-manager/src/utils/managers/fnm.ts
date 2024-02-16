@@ -2,7 +2,10 @@ import { spawnSync } from 'node:child_process';
 import preferences from '../preferences';
 
 import { NodeVersionsInfo } from '../../types';
-import { env } from '../common';
+
+function env() {
+  return { PATH: '/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:' };
+}
 
 const getFnmPath = () => {
   if (preferences.versionManager === 'fnm') {
