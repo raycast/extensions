@@ -1,21 +1,15 @@
-import * as React from "react";
+import React from "react";
+import { User } from "@supabase/supabase-js";
 import { showHUD } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import * as db from "./db";
-import { supabase } from "./supabase";
 
-export function useGroups() {
+export function useGroups(user: User) {
   const [groups, setGroups] = useCachedState<Omit<db.Group, "user_id">[]>("groups", []);
 
   React.useEffect(() => {
     (async () => {
-      const userRes = await supabase.auth.getUser();
-
-      if (!userRes.data.user) {
-        return;
-      }
-
-      const { data, error } = await db.getGroups(userRes.data.user.id);
+      const { data, error } = await db.getGroups(user.id);
 
       if (error) {
         showHUD(error.message);

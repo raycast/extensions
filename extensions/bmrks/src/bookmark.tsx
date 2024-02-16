@@ -1,60 +1,127 @@
-import * as React from "react";
-import { runAppleScript, getFavicon } from "@raycast/utils";
-import { Action, ActionPanel, Detail, Form, PopToRootType, openExtensionPreferences, showHUD } from "@raycast/api";
-import { useAuth } from "./use-auth";
-import { useGroups } from "./use-groups";
-import * as db from "./db";
-import { useUser } from "./use-user";
+import React from "react";
+import fetch from "node-fetch";
+import { getFavicon } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  PopToRootType,
+  Toast,
+  openExtensionPreferences,
+  showHUD,
+  showToast,
+} from "@raycast/api";
+import colorString from "color-string";
+import { useAuth } from "../lib/use-auth";
+import { useGroups } from "../lib/use-groups";
+import * as db from "../lib/db";
+import { ensureValidUrl } from "../lib/ensureValidUrl";
+import { useActiveTab } from "../lib/useActiveTab";
+import { User } from "@supabase/supabase-js";
 
-export default function Bookmark() {
+interface MicrolinkResponse {
+  data: {
+    title?: string;
+  };
+}
+
+function Bookmark({ user }: { user: User }) {
+  const [isLoading, setIsLoading] = React.useState(true);
   const [activeGroupId, setActiveGroupId] = React.useState<string | undefined>();
+  const [urlValue, setUrlValue] = React.useState("");
+  const [titleValue, setTitleValue] = React.useState<string | null>(null);
 
-  const user = useUser();
-  const authError = useAuth();
   const activeTab = useActiveTab();
-  const groups = useGroups();
+  const groups = useGroups(user);
+
+  React.useEffect(() => {
+    if (activeTab) {
+      setUrlValue(activeTab.url);
+      setTitleValue(activeTab.title);
+    }
+  }, [activeTab]);
+
+  React.useEffect(() => {
+    if (groups.length > 0) {
+      setIsLoading(false);
+    }
+  }, [groups]);
 
   const activeGroup = React.useMemo(() => {
     return groups.find((group) => group.id === activeGroupId);
   }, [groups, activeGroupId]);
 
-  if (authError) {
-    const markdown =
-      authError === "Invalid login credentials"
-        ? authError + ". Please open the preferences and try again."
-        : authError;
+  async function handleSubmit({ groupId, url }: { groupId: string; url: string; title: string }) {
+    if (!url) {
+      await showToast({ style: Toast.Style.Failure, title: "Missing URL", message: "Please provide one" });
+      return;
+    }
 
-    return (
-      <Detail
-        markdown={markdown}
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
+    setIsLoading(true);
+
+    // the function below tries to detect whether the value is like a URL
+    // value may not contain http:// or https:// or www.
+    // but it could still be a valid URL, like "example.com"
+    const isUrlLike = url.includes(".") && !url.includes(" ");
+
+    const isValidColor = Boolean(colorString.get(url));
+
+    if (isValidColor) {
+      const res = await db.insertBookmark({
+        type: "color",
+        group_id: groupId,
+        title: url,
+      });
+
+      if (res.error) {
+        await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+        return;
+      }
+    } else if (isUrlLike) {
+      const validUrl = ensureValidUrl(url);
+
+      const favicon = await getFavicon(validUrl);
+
+      let title: string | undefined;
+
+      if (!titleValue) {
+        const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(validUrl)}&data.title`);
+        if (response.ok) {
+          const data = (await response.json()) as MicrolinkResponse;
+          title = data.data.title;
         }
-      />
-    );
-  }
+      } else {
+        title = titleValue;
+      }
 
-  async function onSubmit({ groupId, url, title }: { groupId: string; url: string; title: string }) {
-    if (!activeTab) {
-      await showHUD("No active tab found");
-      return;
+      const res = await db.insertBookmark({
+        type: "link",
+        group_id: groupId,
+        url: validUrl,
+        title,
+        // @ts-expect-error: looks like source is missing
+        favicon_url: favicon.source || "",
+      });
+
+      if (res.error) {
+        await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+        return;
+      }
+    } else {
+      const res = await db.insertBookmark({
+        type: "text",
+        group_id: groupId,
+        title: url,
+      });
+
+      if (res.error) {
+        await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+        return;
+      }
     }
 
-    const res = await db.insertBookmark({
-      type: "link",
-      url,
-      title,
-      favicon_url: activeTab.faviconUrl,
-      group_id: groupId,
-    });
-
-    if (res.error) {
-      await showHUD(res.error.message);
-      return;
-    }
-
+    setIsLoading(false);
     await showHUD(`Saved to ${activeGroup!.name}`, {
       clearRootSearch: true,
       popToRootType: PopToRootType.Immediate,
@@ -63,10 +130,10 @@ export default function Bookmark() {
 
   return (
     <Form
-      isLoading={!groups.length}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Bookmark" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Save Bookmark" onSubmit={handleSubmit} />
           {activeGroup && user && (
             <Action.OpenInBrowser
               url={`https://bmrks.com/${user.user_metadata["username"]}/${activeGroup.name.toLowerCase()}`}
@@ -81,93 +148,33 @@ export default function Bookmark() {
         ))}
       </Form.Dropdown>
       <Form.Separator />
-      <Form.TextField id="url" title="URL" value={activeTab?.url} />
-      <Form.TextField id="title" title="Title" value={activeTab?.title} />
-      <Form.Dropdown id="faviconUrl" title="Icon">
-        <Form.Dropdown.Item
-          key={activeTab?.faviconUrl}
-          value={activeTab?.faviconUrl || ""}
-          title={activeTab?.faviconUrl || ""}
-          icon={
-            activeTab?.faviconUrl
-              ? {
-                  source: activeTab?.faviconUrl,
-                }
-              : undefined
-          }
-        />
-      </Form.Dropdown>
+      <Form.TextField id="url" title="Link, color, or text" value={urlValue} onChange={setUrlValue} />
     </Form>
   );
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
+export default function AuthenticatedBookmark() {
+  const { error, user } = useAuth();
 
-type ActiveTab = {
-  url: string;
-  title: string;
-  faviconUrl: string;
-};
+  const markdown =
+    error === "Invalid login credentials" ? error + ". Please open the preferences and try again." : error;
 
-function useActiveTab() {
-  const [activeTab, setActiveTab] = React.useState<ActiveTab | null>(null);
+  if (error) {
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
-  React.useEffect(() => {
-    (async () => {
-      const activeWindow = await getActiveWindow();
+  if (user) {
+    return <Bookmark user={user} />;
+  }
 
-      if (!supportedBrowsers.some((browser) => browser === activeWindow)) {
-        return;
-      }
-
-      const activeTab = await getActiveTabByBrowser[activeWindow as Browser]();
-
-      if (!activeTab) {
-        return;
-      }
-
-      const { url, title } = extractUrlAndTitle(activeTab);
-      const favicon = await getFavicon(url);
-
-      setActiveTab({
-        url,
-        title,
-        // @ts-expect-error -- This seems to work fine
-        faviconUrl: favicon.source ?? "",
-      });
-    })();
-  }, []);
-
-  return activeTab;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////
-
-type Browser = "Google Chrome" | "Safari" | "firefox" | "Brave Browser" | "Arc";
-
-function getActiveWindow() {
-  return runAppleScript(`tell application "System Events" to get name of (processes whose frontmost is true) as text`);
-}
-
-const getActiveTabByBrowser = {
-  "Google Chrome": () =>
-    runAppleScript(`tell application "Google Chrome" to return {URL, title} of active tab of front window`),
-  Arc: () => runAppleScript(`tell application "Arc" to return {URL, title} of active tab of front window`),
-  Safari: () => runAppleScript(`tell application "Safari" to return {URL of front document, name of front document}`),
-  firefox: () => {},
-  "Brave Browser": () =>
-    runAppleScript(`tell application "Brave Browser" to return {URL, title} of active tab of front window`),
-} as const;
-
-const supportedBrowsers = Object.keys(getActiveTabByBrowser);
-
-function extractUrlAndTitle(string: string) {
-  const commaIndex = string.indexOf(",");
-  const url = string.slice(0, commaIndex).trim();
-  const title = string.slice(commaIndex + 1).trim();
-
-  return {
-    url,
-    title: title.trim(),
-  };
+  return <Detail isLoading />;
 }

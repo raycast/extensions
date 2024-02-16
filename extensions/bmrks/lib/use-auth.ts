@@ -1,19 +1,17 @@
-import * as React from "react";
+import React from "react";
+import { User } from "@supabase/supabase-js";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { supabase } from "./supabase";
 
 export function useAuth() {
   const [error, setError] = React.useState<string | null>(null);
+  const [user, setUser] = React.useState<User | null>(null);
 
   React.useEffect(() => {
     async function init() {
-      if ((await supabase.auth.getUser()).data.user) {
-        return;
-      }
-
       const preferences = getPreferenceValues<Preferences>();
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email: preferences.email,
         password: preferences.password,
       });
@@ -27,12 +25,17 @@ export function useAuth() {
         });
         return;
       }
+
+      if (data?.user) {
+        setUser(data.user);
+        return;
+      }
     }
 
     init();
-  });
+  }, []);
 
-  return error;
+  return { user, error };
 }
 
 interface Preferences {
