@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Standing, Table } from "../types";
 import { showFailureToast } from "@raycast/utils";
 
-const endpoint = "http://localhost:8080";
+const endpoint = "https://ekstraklasa.szarbartosz.com";
 
 export const getTable = async (): Promise<Standing[]> => {
   const config: AxiosRequestConfig = {
