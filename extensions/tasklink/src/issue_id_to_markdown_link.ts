@@ -1,12 +1,27 @@
-import { getSelectedText, Clipboard } from "@raycast/api";
+import { getSelectedText, showToast, Clipboard, Toast } from "@raycast/api";
 import { getPreferences } from "./preferences";
 
 export default async function Command() {
+  return getSelectedText() //
+    .then(convertIssueIdsIntoMarkdownLinks)
+    .then(replaceSelectedText)
+    .catch(handleErrors);
+}
+
+const convertIssueIdsIntoMarkdownLinks = (text: string): string => {
   const { url, format } = getPreferences();
-  const selectedText = await getSelectedText();
   const regexp = new RegExp(format, "gm");
 
-  const transformedText = selectedText.replace(regexp, `[$&](${url})`);
+  return text.replace(regexp, `[$&](${url})`);
+};
 
-  await Clipboard.paste({ text: transformedText });
-}
+const replaceSelectedText = (text: string): Promise<void> => {
+  return Clipboard.paste({ text: text });
+};
+
+const handleErrors = () => {
+  return showToast({
+    style: Toast.Style.Failure,
+    title: "No text selected",
+  });
+};
