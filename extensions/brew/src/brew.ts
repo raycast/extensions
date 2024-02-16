@@ -293,6 +293,14 @@ export async function brewUpgradeAll(greedy: boolean, cancel?: AbortController):
   await execBrew(cmd, cancel);
 }
 
+export async function brewCleanup(withoutThreshold: boolean, cancel?: AbortController): Promise<void> {
+  let cmd = `cleanup`;
+  if (withoutThreshold) {
+    cmd += " --prune=all";
+  }
+  await execBrew(cmd, cancel);
+}
+
 export async function brewPinFormula(formula: Formula | OutdatedFormula): Promise<void> {
   await execBrew(`pin ${formula.name}`);
   formula.pinned = true;
