@@ -4,7 +4,6 @@ import preferences from '../preferences';
 import { NodeVersionsInfo } from '../../types';
 import { env } from '../common';
 
-
 const getFnmPath = () => {
   if (preferences.versionManager === 'fnm') {
     const { stdout, stderr } = spawnSync('which', ['fnm'], {
