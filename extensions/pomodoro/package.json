@@ -10,7 +10,8 @@
     "brodelp",
     "susan_thapa",
     "mikikiv",
-    "MartinGonzalez"
+    "MartinGonzalez",
+    "nathanjms"
   ],
   "keywords": [
     "pomodoro",
@@ -277,6 +278,15 @@
           "value": "8"
         }
       ]
+    },
+    {
+      "name": "quoteInsteadOfImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Quote Instead of Image",
+      "description": "Instead of a gif on completion, use a random quote from quotable.io",
+      "default": false,
+      "label": "Show Quote Instead of Image"
     },
     {
       "name": "completionImage",
