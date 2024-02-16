@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ekstraklasa",
   "title": "Ekstraklasa",
-  "description": "Stay up to date with the polish league",
+  "description": "Stay up to date with the polish football league",
   "icon": "ekstraklasa-logo.png",
   "author": "szarbartosz",
   "categories": [
