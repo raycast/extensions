@@ -29,7 +29,7 @@ interface MicrolinkResponse {
 function Bookmark({ user }: { user: User }) {
   const [isLoading, setIsLoading] = React.useState(true);
   const [activeGroupId, setActiveGroupId] = React.useState<string | undefined>();
-  const [urlValue, setUrlValue] = React.useState("");
+  const [value, setValue] = React.useState("");
   const [titleValue, setTitleValue] = React.useState<string | null>(null);
 
   const activeTab = useActiveTab();
@@ -37,7 +37,7 @@ function Bookmark({ user }: { user: User }) {
 
   React.useEffect(() => {
     if (activeTab) {
-      setUrlValue(activeTab.url);
+      setValue(activeTab.url);
       setTitleValue(activeTab.title);
     }
   }, [activeTab]);
@@ -47,6 +47,8 @@ function Bookmark({ user }: { user: User }) {
       setIsLoading(false);
     }
   }, [groups]);
+
+  const isUrlLike = value.includes(".") && !value.includes(" ");
 
   const activeGroup = React.useMemo(() => {
     return groups.find((group) => group.id === activeGroupId);
@@ -80,7 +82,6 @@ function Bookmark({ user }: { user: User }) {
       }
     } else if (isUrlLike) {
       const validUrl = ensureValidUrl(url);
-
       const favicon = await getFavicon(validUrl);
 
       let title: string | undefined;
@@ -148,7 +149,8 @@ function Bookmark({ user }: { user: User }) {
         ))}
       </Form.Dropdown>
       <Form.Separator />
-      <Form.TextField id="url" title="Link, color, or text" value={urlValue} onChange={setUrlValue} />
+      <Form.TextField id="url" title="Link, color, or text" value={value} onChange={setValue} />
+      {isUrlLike && <Form.TextField id="title" title="Link title" value={titleValue || ""} onChange={setTitleValue} />}
     </Form>
   );
 }
