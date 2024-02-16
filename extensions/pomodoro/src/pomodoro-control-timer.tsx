@@ -108,8 +108,8 @@ const ActionsList = () => {
 };
 
 const handleQuote = (): string => {
+  let markdownContent = "";
   const quoteUrl = "https://api.quotable.io/quotes/random?limit=1";
-  let markdownContent = "# Timer Completed! \n\n";
   // Get Quote here
   const backupQuote = { content: "You did it!", author: "Unknown" }; // Backup quote if the API returns no data
   const { isLoading, data } = useFetch(quoteUrl, { keepPreviousData: true }) as {
@@ -129,7 +129,7 @@ const handleQuote = (): string => {
 };
 
 const EndOfInterval = () => {
-  let markdownContent;
+  let markdownContent = "# Timer Completed \n\n";
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
@@ -146,32 +146,36 @@ const EndOfInterval = () => {
     exec(`afplay /System/Library/Sounds/${preferences.sound}.aiff -v 10 && $$`);
   }
 
-  if (preferences.quoteInsteadOfImage) {
-    markdownContent = handleQuote();
-  } else if (preferences.giphyAPIKey) {
-    const { isLoading, data } = useFetch(
-      `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
-      {
-        keepPreviousData: true,
+  if (preferences.enableQuote) {
+    markdownContent += handleQuote() + "\n\n";
+  } 
+  
+  if (preferences.enableImage) {
+    if (preferences.giphyAPIKey) {
+      const { isLoading, data } = useFetch(
+        `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
+        {
+          keepPreviousData: true,
+        }
+      );
+      if (!isLoading && data) {
+        const giphyResponse = data as GiphyResponse;
+        markdownContent += `![${giphyResponse.data.title}](${giphyResponse.data.images.fixed_height.url})`;
+        usingGiphy = true;
+      } else if (isLoading) {
+        ("You did it!");
+      } else {
+        markdownContent += `![${"You did it!"}](${preferences.completionImage})`;
       }
-    );
-    if (!isLoading && data) {
-      const giphyResponse = data as GiphyResponse;
-      markdownContent = `![${giphyResponse.data.title}](${giphyResponse.data.images.fixed_height.url})`;
-      usingGiphy = true;
-    } else if (isLoading) {
-      ("You did it!");
     } else {
-      markdownContent = `![${"You did it!"}](${preferences.completionImage})`;
+      markdownContent += preferences.completionImage
+        ? `![${"You did it!"}](${preferences.completionImage})`
+        : "You did it!";
     }
-  } else {
-    markdownContent = preferences.completionImage
-      ? `![${"You did it!"}](${preferences.completionImage})`
-      : "You did it!";
   }
 
   if (usingGiphy) {
-    markdownContent = `![powered by GIPHY](Poweredby_100px-White_VertLogo.png) \n \n` + markdownContent;
+    markdownContent = `![powered by GIPHY](Poweredby_100px-White_VertLogo.png) \n\n` + markdownContent;
   }
 
   const executor = getNextIntervalExecutor();

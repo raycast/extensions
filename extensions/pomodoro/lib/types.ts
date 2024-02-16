@@ -27,7 +27,8 @@ export type Preferences = {
   sound: string;
   enableTimeOnMenuBar: boolean;
   giphyAPIKey: string;
-  quoteInsteadOfImage: boolean;
+  enableImage: boolean;
+  enableQuote: boolean;
 };
 
 export type IntervalType = "focus" | "short-break" | "long-break";

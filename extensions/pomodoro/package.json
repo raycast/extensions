@@ -280,15 +280,6 @@
       ]
     },
     {
-      "name": "quoteInsteadOfImage",
-      "type": "checkbox",
-      "required": false,
-      "title": "Quote Instead of Image",
-      "description": "Instead of a gif on completion, use a random quote from quotable.io",
-      "default": false,
-      "label": "Show Quote Instead of Image"
-    },
-    {
       "name": "completionImage",
       "type": "textfield",
       "required": false,
@@ -380,6 +371,24 @@
       "description": "Shows confetti when interval finishes",
       "default": false,
       "label": "Shows confetti when interval finishes"
+    },
+    {
+      "name": "enableQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Quote",
+      "description": "Shows a random quote from quotable.io when interval finishes",
+      "default": false,
+      "label": "Shows quote when interval finishes"
+    },
+    {
+      "name": "enableImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Image",
+      "description": "Shows the image configured above when interval finishes",
+      "default": true,
+      "label": "Shows image when interval finishes"
     }
   ],
   "dependencies": {
