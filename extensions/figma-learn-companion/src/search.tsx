@@ -76,9 +76,10 @@ export default function Command() {
                             />
                         ))}
                     </List.Section>
-                    <List.Section title="More">
+                    <List.Section title="Misc">
                         <List.Item
                             title={"Troubleshooting"}
+                            icon={Icon.QuestionMark}
                             actions={
                                 <ActionPanel title="Figma Learn">
                                     <Action.OpenInBrowser url="https://help.figma.com/hc/en-us/sections/1500000378401-Troubleshoot" />
@@ -87,6 +88,7 @@ export default function Command() {
                         />
                         <List.Item
                             title={"More resources"}
+                            icon={Icon.ArrowRight}
                             actions={
                                 <ActionPanel title="Figma Learn">
                                     <Action.OpenInBrowser url="https://help.figma.com/hc/en-us/categories/6448726686615" />
