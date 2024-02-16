@@ -15,6 +15,6 @@ If you are using docker it is as simple as running:
 
 ```bash
 git clone https://github.com/szarbartosz/ekstraklasa-scraper.git
-cd ekstraklasa-scrapper
+cd ekstraklasa-scraper
 ./pull_and_compose.sh
 ```
