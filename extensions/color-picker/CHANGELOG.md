@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [New Swift Macro] - 2024-02-16
+
+- Upgrade to the latest version of Swift Macros
+
 ## [Enhancements] - 2023-11-30
 
 - Now using Raycast Swift Macro instead of manually compiling

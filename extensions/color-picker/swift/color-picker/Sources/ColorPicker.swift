@@ -8,7 +8,7 @@ struct Color: Encodable {
   let alpha: Int
 }
 
-@raycast func pickColor(_ workaround: Bool?) async -> Color? {
+@raycast func pickColor() async -> Color? {
   let colorSampler = NSColorSampler()
   guard let color = await colorSampler.sample() else { return nil }
 
