@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="assets/ekstraklasa-logo.png" height="128">
+  <img src="media/ekstraklasa-logo.png" height="128">
   <h1>Ekstraklasa</h1>
 </div>
 
 Stay up to date with the latest Ekstraklasa standings.
 
-![Demo](./metadata/ekstraklasa-1.png)
+![Demo](./media/demo-screenshot.png)
 
 ## Setup
 
