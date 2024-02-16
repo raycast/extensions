@@ -28,19 +28,16 @@ const shouldUseBrew = () => {
 
 const brewList = (): NodeVersionsInfo[] => {
   try {
-    const output = shell.run(
-      'brew list --versions | grep node',
-      (output) => output.split('\n')
-    );
+    const output = shell.run('brew list --versions | grep node', (output) => output.split('\n'));
 
     return output.map((pkg) => {
       const [pkgName, versionInfo] = pkg.split(' ');
 
-      return ({
+      return {
         title: `v${versionInfo}`,
-        type: pkgName, // show packageName as a card, 
-        group: 'Installed'
-      });
+        type: pkgName, // show packageName as a card,
+        group: 'Installed',
+      };
     });
   } catch (e) {
     console.log(e);
@@ -48,7 +45,7 @@ const brewList = (): NodeVersionsInfo[] => {
     showToast({
       style: Toast.Style.Failure,
       title: 'unknown error',
-      message: 'something went wrong'
+      message: 'something went wrong',
     });
   }
 
@@ -56,15 +53,17 @@ const brewList = (): NodeVersionsInfo[] => {
 };
 
 const brewListRemote = (): NodeVersionsInfo[] => {
-  const versions = shell.run(
-    `brew search '/^node(@[0-9]*)?$/'`,
-    (output) => output.replaceAll(/\n/g, ' ').replaceAll(/\s{2,}/g, ' ').split(' ')
+  const versions = shell.run(`brew search '/^node(@[0-9]*)?$/'`, (output) =>
+    output
+      .replaceAll(/\n/g, ' ')
+      .replaceAll(/\s{2,}/g, ' ')
+      .split(' '),
   );
 
-  return versions.map(v => ({
+  return versions.map((v) => ({
     title: v,
     type: v,
-    group: 'Remote'
+    group: 'Remote',
   }));
 };
 
@@ -75,7 +74,7 @@ const brewInstall = (pkg: string) => {
 const brewUninstall = (version: string) => {
   const localNodePackages = brewList();
 
-  const versionInfo = localNodePackages.find(p => p.title === version);
+  const versionInfo = localNodePackages.find((p) => p.title === version);
 
   if (!versionInfo) {
     const msg = `couldn't find version to uninstall, ${versionInfo}`;
@@ -99,5 +98,5 @@ export default {
   install: brewInstall,
   uninstall: brewUninstall,
   default: brewDefault,
-  isInstalled: shouldUseBrew()
+  isInstalled: shouldUseBrew(),
 };

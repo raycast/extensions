@@ -13,7 +13,7 @@ const getVersionManager = () => {
     case 'fnm':
       return fnm;
     case 'brew':
-      return brew
+      return brew;
     default:
       return {
         name: '',
