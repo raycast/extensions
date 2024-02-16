@@ -5,7 +5,7 @@
 
 ## What is it for? :soccer:
 
-This extension gives the possibility to stay up to date with the latest `Ekstraklasa` standings.
+This extension allows keeping track of the standings of `Ekstraklasa`, which is polish football league :poland:
 
 ## Preview :rocket:
 
