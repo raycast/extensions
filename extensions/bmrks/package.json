@@ -16,6 +16,12 @@
       "title": "Bookmark",
       "description": "Bookmark the currently active browser tab",
       "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "search",
+      "mode": "view"
     }
   ],
   "preferences": [
