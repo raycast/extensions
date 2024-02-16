@@ -5,6 +5,11 @@
   "description": "Control your node versions with ease",
   "icon": "extension_icon.png",
   "author": "andresmorelos",
+  "contributors": [
+    "AndresMorelos",
+    "pernielsentikaer",
+    "leondaz"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -64,6 +69,10 @@
         {
           "title": "FNM",
           "value": "fnm"
+        },
+        {
+          "title": "Brew",
+          "value": "brew"
         }
       ]
     }

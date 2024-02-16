@@ -100,7 +100,7 @@ const nvmUninstall = (version: string) => {
   return output;
 };
 
-const nvmDefault = (version: string) => {
+const nvmDefault = async (version: string) => {
   const { stdout, stderr } = spawnSync(`source ~/.zshrc; nvm alias default ${version}`, { shell: '/bin/zsh' });
 
   if (stderr.length > 0) {
