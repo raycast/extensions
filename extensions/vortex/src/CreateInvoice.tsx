@@ -1,4 +1,3 @@
-// SendInvoice.tsx
 import { setInterval } from "timers";
 import React, { useState, useRef, useEffect } from "react";
 import { Form, Detail, ActionPanel, Action, Icon, showToast, environment, Toast } from "@raycast/api";

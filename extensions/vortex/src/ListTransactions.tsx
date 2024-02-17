@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { List, showToast, Toast, Icon, ActionPanel, Action, Color } from "@raycast/api";
 import { connectWallet } from "./wallet";
 
@@ -63,7 +63,9 @@ export default function Transactions() {
         <List.Item
           key={transaction.payment_hash}
           title={`${new Intl.NumberFormat().format(transaction.amount)} sats`}
-          subtitle={`${transaction.description ? `for ${transaction.description}` : ""} ${transaction.settled_at ? new Date(transaction.settled_at * 1000).toLocaleString() : ""}`}
+          subtitle={`${transaction.description ? `for ${transaction.description}` : ""} ${
+            transaction.settled_at ? new Date(transaction.settled_at * 1000).toLocaleString() : ""
+          }`}
           icon={transaction.type === "incoming" ? IncomingIcon : OutgoingIcon}
           actions={
             <ActionPanel title={`Payment ${transaction.description}`}>

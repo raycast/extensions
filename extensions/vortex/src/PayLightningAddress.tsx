@@ -1,5 +1,5 @@
 import "cross-fetch/polyfill";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Clipboard } from "@raycast/api";
 import { LightningAddress } from "@getalby/lightning-tools";

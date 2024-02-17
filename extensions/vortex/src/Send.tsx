@@ -1,5 +1,5 @@
 import "cross-fetch/polyfill";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import { Form, ActionPanel, Action, Clipboard, getSelectedText, LaunchProps } from "@raycast/api";
 import { LightningAddress, Invoice } from "@getalby/lightning-tools";
@@ -7,7 +7,7 @@ import { LightningAddress, Invoice } from "@getalby/lightning-tools";
 import PayInvoice from "./PayInvoice";
 import PayToLightingAddress from "./PayLightningAddress";
 
-export default function Pay(props: LaunchProps<{ arguments: Arguments.Pay }>) {
+export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) {
   const [lightningAddress, setLightningAddress] = useState("");
   const [invoice, setInvoice] = useState("");
   const [input, setInput] = useState(props.arguments.input);

@@ -10,23 +10,45 @@
   "preferences": [
     {
       "name": "nwcurl",
+      "title": "NWC connection details",
       "description": "Your NWC wallet connection details",
       "placeholder": "nostr+walletconnect://...",
       "type": "password",
+      "required": true
+    },
+    {
+      "name": "currency",
+      "title": "Currency",
+      "description": "You preferred currency to see amounts",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "USD",
+          "value": "USD"
+        },
+        {
+          "title": "EUR",
+          "value": "EUR"
+        },
+        {
+          "title": "GBP",
+          "value": "GBP"
+        }
+      ],
       "required": true,
-      "title": "NWC connection details"
+      "default": "USD"
     }
   ],
   "commands": [
     {
-      "name": "pay",
+      "name": "send",
       "title": "Send",
       "keywords": ["send", "pay", "wallet", "invoice", "lnurl", "lightning"],
       "subtitle": "Send to lightning address or pay lightning invoice",
       "description": "Send to lightning address or pay lightning invoice",
       "icon": "send.png",
       "mode": "view",
-      "script": "src/Pay.tsx",
+      "script": "src/Send.tsx",
       "arguments": [
         {
           "name": "input",
@@ -79,7 +101,6 @@
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
   "scripts": {
@@ -90,6 +111,6 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "keywords": []
 }
