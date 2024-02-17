@@ -1,9 +1,7 @@
 import "cross-fetch/polyfill";
 import { useState, useEffect, useRef } from "react";
-
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Clipboard } from "@raycast/api";
 import { LightningAddress } from "@getalby/lightning-tools";
-import type { Invoice } from "@getalby/lightning-tools";
 import { connectWallet } from "./wallet";
 
 export default function PayToLightingAddress(props: { lightningAddress: string }) {
