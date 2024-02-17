@@ -142,7 +142,7 @@ export default function CreateInvoice() {
             <Detail.Metadata>
               <Detail.Metadata.Label title="Amount" text={`${amount} sats`} icon={Icon.Bolt} />
               <Detail.Metadata.Label title="Description" text={description} />
-              <Detail.Metadata.TagList title="Type">
+              <Detail.Metadata.TagList title="Status">
                 <Detail.Metadata.TagList.Item
                   text={invoiceState}
                   color={invoiceState == "paid" ? "green" : "#eed535"}
