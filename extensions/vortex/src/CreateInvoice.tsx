@@ -1,7 +1,8 @@
 import { setInterval } from "timers";
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Form, Detail, ActionPanel, Action, Icon, showToast, environment, Toast } from "@raycast/api";
 import { toDataURL } from "qrcode";
+import { webln } from "@getalby/sdk";
 import { connectWallet } from "./wallet";
 
 export default function CreateInvoice() {
@@ -13,13 +14,16 @@ export default function CreateInvoice() {
   const [loading, setLoading] = useState<boolean>(false);
   const invoiceCheckerIntervalRef = useRef<NodeJS.Timeout>();
   const invoiceCheckCounterRef = useRef(0);
-  const nwc = useRef<string>(null);
+  const nwc = useRef<webln.NostrWebLNProvider>();
 
   const checkInvoicePayment = (invoice: string) => {
     if (invoiceCheckerIntervalRef && invoiceCheckerIntervalRef.current) {
       clearInterval(invoiceCheckerIntervalRef.current);
     }
     invoiceCheckerIntervalRef.current = setInterval(async () => {
+      if (!nwc.current || !nwc.current.lookupInvoice) {
+        return;
+      }
       showToast(Toast.Style.Animated, "Waiting for payment...");
       // just in case. don't poll too long
       if (invoiceCheckCounterRef.current > 210) {

@@ -7,8 +7,11 @@ import { LightningAddress, Invoice } from "@getalby/lightning-tools";
 import PayInvoice from "./PayInvoice";
 import PayToLightingAddress from "./PayLightningAddress";
 
+const LN_ADDRESS_REGEX =
+  /^((?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*)|(?:".+"))@((?:\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(?:(?:[a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) {
-  const [lightningAddress] = useState("");
+  const [lightningAddress, setLightningAddress] = useState("");
   const [invoice, setInvoice] = useState("");
   const [input, setInput] = useState(props.arguments.input);
   const [error, setError] = useState("");
@@ -43,7 +46,7 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
         console.error(e);
       }
     }
-    if (text && (text.toLowerCase().startsWith("lnbc1") || text.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/))) {
+    if (text && (text.toLowerCase().startsWith("lnbc1") || text.match(LN_ADDRESS_REGEX))) {
       setInput(text);
     }
   };
@@ -57,11 +60,11 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
       setInvoice(invoice.paymentRequest);
       return;
     }
-    if (input?.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+    if (input?.match(LN_ADDRESS_REGEX)) {
       const lnAddress = new LightningAddress(input);
       await lnAddress.fetch();
       if (lnAddress.lnurlpData?.callback) {
-        setLightningAddress(input);
+        setLightningAddress(input.toLowerCase());
         return;
       } else {
         setError("Not a Lightning Address");

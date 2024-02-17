@@ -1,5 +1,7 @@
+import "cross-fetch/polyfill";
 import { useEffect, useState } from "react";
-import { List, showToast, Toast, Icon, ActionPanel, Action, Color } from "@raycast/api";
+import { fiat } from "@getalby/lightning-tools";
+import { List, showToast, Toast, Icon, ActionPanel, Action, Color, getPreferenceValues } from "@raycast/api";
 import { connectWallet } from "./wallet";
 
 export type Transaction = {
@@ -29,6 +31,7 @@ const OutgoingIcon = {
 export default function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [balance, setBalance] = useState<string | null>(null);
+  const [fiatBalance, setFiatBalance] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +43,14 @@ export default function Transactions() {
         showToast(Toast.Style.Animated, "Loading transactions...");
         const response = await nwc.listTransactions({});
         const balanceInfo = await nwc.getBalance(); // Fetch the balance from the connected wallet
+        const fiatCurrency = getPreferenceValues<{ currency: string }>().currency;
+        const fiatBalance = await fiat.getFormattedFiatValue({
+          satoshi: balanceInfo.balance,
+          currency: fiatCurrency,
+          locale: "en",
+        });
         setBalance(`${new Intl.NumberFormat().format(balanceInfo.balance)} sats`);
+        setFiatBalance(fiatBalance);
         setTransactions(response.transactions);
         nwc.close();
         showToast(Toast.Style.Success, "Loaded");
@@ -57,7 +67,11 @@ export default function Transactions() {
   return (
     <List isLoading={isLoading}>
       {!isLoading && (
-        <List.Item key="balane" title={`Balance: ${balance}`} icon={{ source: Icon.Wallet, tintColor: Color.Green }} />
+        <List.Item
+          key="balane"
+          title={`Balance: ${balance} (${fiatBalance})`}
+          icon={{ source: Icon.Wallet, tintColor: Color.Green }}
+        />
       )}
       {transactions.map((transaction) => (
         <List.Item
