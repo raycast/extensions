@@ -21,7 +21,7 @@ export default function Command() {
               text: `${team.goalsFor.toString()} - ${team.goalsAgainst.toString()}`,
               tooltip: "Goals For - Goals Against",
             },
-            ...team.lastResults.reverse().map((result) => ({
+            ...team.lastResults.map((result) => ({
               icon: {
                 source: Icon.CircleFilled,
                 tintColor:
