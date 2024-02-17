@@ -43,11 +43,11 @@
       "data": [
         {
           "title": "RAY-123 (eg. JIRA, YouTrack)",
-          "value": "([A-Z]+-\\d+)"
+          "value": "JIRA_STYLE"
         },
         {
           "title": "#1234 (eg. GitHub, Targetprocess)",
-          "value": "#(\\d+)"
+          "value": "GITHUB_STYLE"
         }
       ]
     }

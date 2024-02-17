@@ -1,10 +1,17 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferencess {
-  url: string;
-  format: string;
+export enum IssueIdFormat {
+  JIRA_STYLE = "([A-Z]+-\\d+)",
+  GITHUB_STYLE = "#(\\d+)",
 }
 
-export const getPreferences = () => {
-  return getPreferenceValues<Preferencess>();
+export type IssueIdStyle = keyof typeof IssueIdFormat;
+
+interface Preferences {
+  url: string;
+  format: IssueIdStyle;
+}
+
+export const getPreferences = (): Preferences => {
+  return getPreferenceValues<Preferences>();
 };

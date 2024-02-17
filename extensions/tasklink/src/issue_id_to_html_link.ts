@@ -1,22 +1,22 @@
-import { getSelectedText, showToast, Clipboard, Toast } from "@raycast/api";
+import { showToast, Clipboard, Toast } from "@raycast/api";
 import { getPreferences } from "./preferences";
+import { getSelectedTextOfFrontmostApplication, HtmlText, SelectedText } from "./selected_text";
 
 export default async function Command() {
-  return getSelectedText() //
+  return getSelectedTextOfFrontmostApplication()
     .then(convertIssueIdsIntoHtmlLinks)
     .then(replaceSelectedText)
     .catch(handleErrors);
 }
 
-const convertIssueIdsIntoHtmlLinks = (text: string): string => {
-  const { url, format } = getPreferences();
-  const regexp = new RegExp(format, "gm");
+const convertIssueIdsIntoHtmlLinks = (text: SelectedText): HtmlText => {
+  const { format, url } = getPreferences();
 
-  return text.replace(regexp, `<a href="${url}">$&</a>`);
+  return text.convertIssueIdsIntoHtmlLinks(format, url);
 };
 
-const replaceSelectedText = (text: string): Promise<void> => {
-  return Clipboard.paste({ html: text });
+const replaceSelectedText = (text: HtmlText): Promise<void> => {
+  return Clipboard.paste(text.toClipboardContent());
 };
 
 const handleErrors = () => {
