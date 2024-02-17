@@ -8,7 +8,7 @@ import PayInvoice from "./PayInvoice";
 import PayToLightingAddress from "./PayLightningAddress";
 
 export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) {
-  const [lightningAddress, setLightningAddress] = useState("");
+  const [lightningAddress] = useState("");
   const [invoice, setInvoice] = useState("");
   const [input, setInput] = useState(props.arguments.input);
   const [error, setError] = useState("");
@@ -43,7 +43,7 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
         console.error(e);
       }
     }
-    if (text && (text.toLowerCase().startsWith("lnbc1") || text.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/))) {
+    if (text && (text.toLowerCase().startsWith("lnbc1") || text.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/))) {
       setInput(text);
     }
   };
@@ -57,7 +57,7 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
       setInvoice(invoice.paymentRequest);
       return;
     }
-    if (input?.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+    if (input?.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
       const lnAddress = new LightningAddress(input);
       await lnAddress.fetch();
       if (lnAddress.lnurlpData?.callback) {

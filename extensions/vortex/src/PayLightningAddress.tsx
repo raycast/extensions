@@ -7,12 +7,11 @@ import type { Invoice } from "@getalby/lightning-tools";
 import { connectWallet } from "./wallet";
 
 export default function PayToLightingAddress(props: { lightningAddress: string }) {
-  const [lightningAddress, setLightningAddress] = useState(props.lightningAddress);
+  const [lightningAddress] = useState(props.lightningAddress);
   const [lightningAddressInfo, setLightningAddressInfo] = useState<string | undefined>("");
   const [amount, setAmount] = useState("");
   const [comment, setComment] = useState("");
   const [commentAllowed, setCommentAllowed] = useState(true);
-  const [invoiceData, setInvoiceData] = useState<Invoice | null>(null); // Reintroduce the invoiceData state
   const [loading, setLoading] = useState<boolean>(false);
   const amountFieldRef = useRef<Form.TextField>(null);
 

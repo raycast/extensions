@@ -52,7 +52,7 @@ export default function PayInvoice(props: { invoice: string }) {
       nwc.close();
     } catch (error) {
       console.error("Payment failed:", error);
-      showToast(Toast.Style.Failure, `Payment failed: ${(error as any).error}`);
+      showToast(Toast.Style.Failure, `Payment failed: ${(error as string).error}`);
     } finally {
       setLoading(false);
     }

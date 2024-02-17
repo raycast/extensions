@@ -2,7 +2,7 @@ import { webln } from "@getalby/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import "websocket-polyfill";
 import * as crypto from "crypto";
-globalThis.crypto = crypto as any;
+globalThis.crypto = crypto as unknown;
 
 interface Preferences {
   nwcurl: string;

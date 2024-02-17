@@ -13,7 +13,7 @@ export default function CreateInvoice() {
   const [loading, setLoading] = useState<boolean>(false);
   const invoiceCheckerIntervalRef = useRef<NodeJS.Timeout>();
   const invoiceCheckCounterRef = useRef(0);
-  const nwc = useRef<any>(null);
+  const nwc = useRef<string>(null);
 
   const checkInvoicePayment = (invoice: string) => {
     if (invoiceCheckerIntervalRef && invoiceCheckerIntervalRef.current) {
