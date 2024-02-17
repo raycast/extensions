@@ -6,12 +6,18 @@ Companion bookmarking utility for [(Basic) Bookmarks](https://bmrks.com).
 
 ## Commands
 
-### Bookmark
+### Create Bookmark
 
-Captures the current URL, title, and favicon from the browser currently in focus and active, and saves to a selected remote group on [bmrks.com](https://bmrks.com).
+Create a new bookmark, whether it's a URL, a color, or a note. You can also select a group to save the bookmark to.
+
+When this command is triggered while a browser window is in focus, it will automatically pre-fill the URL and title fields.
 
 Currently supports Chrome, Safari, Brave, Arc.
 
+### Search Bookmarks
+
+Search your bookmarks, open in the browser or copy the value to the clipboard. You can also filter by group.
+
 ---
 
-In order to use this extension, you'll need to have an account on bmrks.com, and log in after installing.
+In order to use this extension, you'll need to have an account on [(Basic) Bookmarks](https://bmrks.com), and log in after installing.
