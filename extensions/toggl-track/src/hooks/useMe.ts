@@ -1,10 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 import { getMe } from "../api";
 
-export function useMe(initialExecute = true) {
+export function useMe() {
   const { data, error, isLoading, revalidate } = useCachedPromise(getMe, [], {
     initialData: null,
-    execute: initialExecute,
   });
   return {
     me: data,

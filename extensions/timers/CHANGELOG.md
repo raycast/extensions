@@ -1,5 +1,7 @@
 # Timers Changelog
 
+## [Fix dismissTimerAlert leaving behind residual timer files] - 2024-02-02
+
 ## [Fix sorting and time subtitle in configureMenubarPresets] - 2024-01-23
 
 ## [Menu bar quality-of-life upgrades and configurability] - 2024-01-23

@@ -5,18 +5,14 @@
   "description": "The fastest way to dash off a quick email to yourself and others",
   "icon": "command-icon.png",
   "author": "peduarte",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
   "preferences": [
-    {
-      "name": "clientid",
-      "description": "Your Client ID from Google Cloud Platform. Check out the README for more info",
-      "type": "textfield",
-      "required": true,
-      "title": "OAuth Client ID"
-    },
     {
       "name": "defaultAddresses",
       "title": "Send To",
@@ -49,11 +45,9 @@
     }
   ],
   "dependencies": {
-    "@googleapis/gmail": "^9.0.0",
     "@raycast/api": "^1.65.0",
     "@raycast/utils": "^1.11.1",
-    "cross-fetch": "^4.0.0",
-    "googleapis-common": "^7.0.1"
+    "cross-fetch": "^4.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

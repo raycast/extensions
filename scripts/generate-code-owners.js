@@ -43,6 +43,7 @@ async function getExtensions() {
           author: packageJSON.author,
           owner: packageJSON.owner,
           contributors: packageJSON.contributors,
+          pastContributors: packageJSON.pastContributors,
         };
       } catch (err) {
         console.log(`Skipping ${extension}`);
@@ -118,7 +119,9 @@ async function formatAuthorName(extension, raycastUsername) {
 }
 
 async function formatOwners(extension) {
-  const owners = [...new Set([extension.author, ...(extension.contributors || [])])];
+  const owners = [...new Set([extension.author, ...(extension.contributors || [])])].filter(
+    (x) => !(extension.pastContributors || []).includes(x)
+  );
   return (await Promise.all(owners.map((x) => formatAuthorName(extension, x)))).filter(Boolean).join(" ");
 }
 

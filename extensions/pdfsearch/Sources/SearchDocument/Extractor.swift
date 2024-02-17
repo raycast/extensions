@@ -1,6 +1,11 @@
 import PDFKit
 import NaturalLanguage
 
+/// Extracts the entire paragraph the selection is contained in.
+/// - Parameters:
+///   - selection: Selection in the page
+///   - document: The document the selection is contained in
+/// - Returns: paragraph text and its corresponding range
 func extractParagraphContaining(selection: PDFSelection, in document: PDFDocument) -> (String, NSRange) {
     guard let page = selection.pages.first else {
         return ("", NSRange(location: NSNotFound, length: 0))

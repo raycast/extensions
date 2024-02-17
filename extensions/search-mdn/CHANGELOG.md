@@ -1,5 +1,12 @@
 # Changelog
 
+## Updated - 2024-02-03
+
+- Updated dependencies
+- Moved fetching to hooks, remove axios
+- Proper formatting of pages, removing ``{{<snippets>}}``
+- Fixing inline links & images
+
 ## Updated - 2022-12-18
 
 - Sync latest locale list with [MDN Web Docs Localization

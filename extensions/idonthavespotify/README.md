@@ -2,4 +2,4 @@
 
 More links coming soon :)
 
-Stay tuned [idonthavespotify.sjdonado.de](https://idonthavespotify.sjdonado.de)
+Source code [https://github.com/sjdonado/idonthavespotify](https://github.com/sjdonado/idonthavespotify)

@@ -1,5 +1,10 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2024-01-16
+
+- Rename main command to "Start/Stop Time Entry".
+- Remove projects from list view.
+
 ## [Bug Fixes] - 2024-01-15
 
 - Remove `refresh` action.
