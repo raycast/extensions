@@ -9,18 +9,21 @@
   ],
   "icon": "icon.png",
   "author": "rauno",
+  "contributors": [
+    "peduarte"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "bookmark",
-      "title": "Bookmark",
-      "description": "Bookmark the currently active browser tab",
+      "title": "Create Bookmark",
+      "description": "Create a new bookmark",
       "mode": "view"
     },
     {
       "name": "search-bookmarks",
       "title": "Search Bookmarks",
-      "description": "search",
+      "description": "Search your bookmarks",
       "mode": "view"
     }
   ],

@@ -54,8 +54,8 @@ function Bookmark({ user }: { user: User }) {
     return groups.find((group) => group.id === activeGroupId);
   }, [groups, activeGroupId]);
 
-  async function handleSubmit({ groupId, url }: { groupId: string; url: string; title: string }) {
-    if (!url) {
+  async function handleSubmit({ groupId, value }: { groupId: string; value: string; title: string }) {
+    if (!value) {
       await showToast({ style: Toast.Style.Failure, title: "Missing URL", message: "Please provide one" });
       return;
     }
@@ -65,23 +65,23 @@ function Bookmark({ user }: { user: User }) {
     // the function below tries to detect whether the value is like a URL
     // value may not contain http:// or https:// or www.
     // but it could still be a valid URL, like "example.com"
-    const isUrlLike = url.includes(".") && !url.includes(" ");
+    const isUrlLike = value.includes(".") && !value.includes(" ");
 
-    const isValidColor = Boolean(colorString.get(url));
+    const isValidColor = Boolean(colorString.get(value));
 
     if (isValidColor) {
       const res = await db.insertBookmark({
         type: "color",
         group_id: groupId,
-        title: url,
+        title: value,
       });
 
       if (res.error) {
-        await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: "res.error.message" });
+        await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: res.error.message });
         return;
       }
     } else if (isUrlLike) {
-      const validUrl = ensureValidUrl(url);
+      const validUrl = ensureValidUrl(value);
       const favicon = await getFavicon(validUrl);
 
       let title: string | undefined;
@@ -113,7 +113,7 @@ function Bookmark({ user }: { user: User }) {
       const res = await db.insertBookmark({
         type: "text",
         group_id: groupId,
-        title: url,
+        title: value,
       });
 
       if (res.error) {
@@ -149,7 +149,7 @@ function Bookmark({ user }: { user: User }) {
         ))}
       </Form.Dropdown>
       <Form.Separator />
-      <Form.TextField id="url" title="Link, color, or text" value={value} onChange={setValue} />
+      <Form.TextField id="value" autoFocus title="Link, color, or text" value={value} onChange={setValue} />
       {isUrlLike && <Form.TextField id="title" title="Link title" value={titleValue || ""} onChange={setTitleValue} />}
     </Form>
   );

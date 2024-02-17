@@ -1,28 +1,42 @@
-import { Action, ActionPanel, List, Toast, showHUD, showToast } from "@raycast/api";
-import { useGroups } from "../lib/use-groups";
-import { useCachedState } from "@raycast/utils";
-import * as db from "../lib/db";
 import React from "react";
-import { supabase } from "../lib/supabase";
+import { User } from "@supabase/supabase-js";
+import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useAuth } from "../lib/use-auth";
+import { useGroups } from "../lib/use-groups";
+import { useBookmarks } from "../lib/use-bookmarks";
 
-export default function SearchBookmarks() {
-  const { error, user } = useAuth();
+export function SearchBookmarks({ user }: { user: User }) {
   const groups = useGroups(user);
-  const [groupId, setGroupId] = React.useState<string | undefined>();
-  // const groupId = "5d4928ef-6c09-4db6-8566-91f932a7e164";
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [groupId, setGroupId] = React.useState<string | undefined>("");
   const bookmarks = useBookmarks(groupId);
+
+  React.useEffect(() => {
+    if (groups.length > 0) {
+      setGroupId(groups[0].id);
+    }
+  }, [groups]);
+
+  React.useEffect(() => {
+    if (bookmarks.length > 0 && groups.length > 0) {
+      setIsLoading(false);
+    }
+  }, [groups, bookmarks]);
 
   return (
     <List
       navigationTitle="Search Groups"
       searchBarPlaceholder="Search your groups"
-      isLoading={bookmarks.length === 0}
+      isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Groups"
-          onChange={(newId) => {
-            setGroupId(newId);
+          value={groupId}
+          onChange={(newValue) => {
+            if (groupId !== newValue) {
+              setIsLoading(true);
+              setGroupId(newValue);
+            }
           }}
         >
           {groups.length > 0 &&
@@ -34,16 +48,33 @@ export default function SearchBookmarks() {
     >
       {bookmarks.length > 0 &&
         bookmarks.map((bookmark) => {
-          const hostname = bookmark.type === "link" ? getUrlHostname(bookmark!.url) : "";
+          const hostname = bookmark.type === "link" ? getUrlHostname(bookmark.url || "") : "";
+          let icon;
+          if (bookmark.favicon_url) {
+            icon = bookmark.favicon_url;
+          }
+          if (bookmark.type === "color") {
+            icon = { source: Icon.CircleFilled, tintColor: bookmark.title };
+          }
+          if (bookmark.type === "text") {
+            icon = Icon.Paragraph;
+          }
+
           return (
             <List.Item
               key={bookmark.id}
               title={bookmark.title ? bookmark.title : hostname}
-              icon={bookmark.favicon_url}
+              icon={icon}
               subtitle={hostname}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={bookmark.url} />
+                  {bookmark.type === "link" && bookmark.url && (
+                    <>
+                      <Action.OpenInBrowser url={bookmark.url} />
+                      <Action.CopyToClipboard title="Copy URL to Clipboard" content={bookmark.url} />
+                    </>
+                  )}
+                  {bookmark.type !== "link" && bookmark.title && <Action.CopyToClipboard content={bookmark.title} />}
                 </ActionPanel>
               }
             />
@@ -53,38 +84,30 @@ export default function SearchBookmarks() {
   );
 }
 
-export function useBookmarks(groupId: string) {
-  const [bookmarks, setBookmarks] = useCachedState<Omit<db.Bookmark, "user_id">[]>("bookmarks-" + groupId, []);
+export default function AuthenticatedBookmark() {
+  const { error, user } = useAuth();
 
-  React.useEffect(() => {
-    (async () => {
-      if (!groupId) {
-        // await showToast({
-        //   title: "Error",
-        //   message: "Missing group id",
-        //   style: Toast.Style.Failure,
-        // });
-        return;
-      }
+  const markdown =
+    error === "Invalid login credentials" ? error + ". Please open the preferences and try again." : error;
 
-      const userRes = await supabase.auth.getUser();
+  if (error) {
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
-      if (!userRes.data.user) {
-        return;
-      }
+  if (user) {
+    return <SearchBookmarks user={user} />;
+  }
 
-      const { data, error } = await db.getBookmarksByGroupId(groupId);
-
-      if (error) {
-        showHUD(error.message);
-        return;
-      }
-
-      setBookmarks(data);
-    })();
-  }, [groupId]);
-
-  return bookmarks;
+  return <Detail isLoading />;
 }
 
 export function getUrlHostname(url: string) {
