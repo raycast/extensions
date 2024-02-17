@@ -18,6 +18,7 @@ import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensureValidUrl";
 import { useActiveTab } from "../lib/useActiveTab";
+import { isUrlLike } from "../lib/isUrlLike";
 import { User } from "@supabase/supabase-js";
 
 interface MicrolinkResponse {
@@ -27,13 +28,12 @@ interface MicrolinkResponse {
 }
 
 function Bookmark({ user }: { user: User }) {
-  const [isLoading, setIsLoading] = React.useState(true);
   const [activeGroupId, setActiveGroupId] = React.useState<string | undefined>();
   const [value, setValue] = React.useState("");
   const [titleValue, setTitleValue] = React.useState<string | null>(null);
 
   const activeTab = useActiveTab();
-  const groups = useGroups(user);
+  const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
 
   React.useEffect(() => {
     if (activeTab) {
@@ -42,30 +42,15 @@ function Bookmark({ user }: { user: User }) {
     }
   }, [activeTab]);
 
-  React.useEffect(() => {
-    if (groups.length > 0) {
-      setIsLoading(false);
-    }
-  }, [groups]);
+  const valueIsUrl = isUrlLike(value);
 
-  const isUrlLike = value.includes(".") && !value.includes(" ");
-
-  const activeGroup = React.useMemo(() => {
-    return groups.find((group) => group.id === activeGroupId);
-  }, [groups, activeGroupId]);
+  const activeGroup = groups.find((group) => group.id === activeGroupId);
 
   async function handleSubmit({ groupId, value }: { groupId: string; value: string; title: string }) {
     if (!value) {
       await showToast({ style: Toast.Style.Failure, title: "Missing URL", message: "Please provide one" });
       return;
     }
-
-    setIsLoading(true);
-
-    // the function below tries to detect whether the value is like a URL
-    // value may not contain http:// or https:// or www.
-    // but it could still be a valid URL, like "example.com"
-    const isUrlLike = value.includes(".") && !value.includes(" ");
 
     const isValidColor = Boolean(colorString.get(value));
 
@@ -80,7 +65,7 @@ function Bookmark({ user }: { user: User }) {
         await showToast({ style: Toast.Style.Failure, title: "Something went wrong", message: res.error.message });
         return;
       }
-    } else if (isUrlLike) {
+    } else if (valueIsUrl) {
       const validUrl = ensureValidUrl(value);
       const favicon = await getFavicon(validUrl);
 
@@ -122,7 +107,6 @@ function Bookmark({ user }: { user: User }) {
       }
     }
 
-    setIsLoading(false);
     await showHUD(`Saved to ${activeGroup!.name}`, {
       clearRootSearch: true,
       popToRootType: PopToRootType.Immediate,
@@ -131,7 +115,7 @@ function Bookmark({ user }: { user: User }) {
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoadingGroups}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Bookmark" onSubmit={handleSubmit} />
@@ -150,7 +134,7 @@ function Bookmark({ user }: { user: User }) {
       </Form.Dropdown>
       <Form.Separator />
       <Form.TextField id="value" autoFocus title="Link, color, or text" value={value} onChange={setValue} />
-      {isUrlLike && <Form.TextField id="title" title="Link title" value={titleValue || ""} onChange={setTitleValue} />}
+      {valueIsUrl && <Form.TextField id="title" title="Link title" value={titleValue || ""} onChange={setTitleValue} />}
     </Form>
   );
 }

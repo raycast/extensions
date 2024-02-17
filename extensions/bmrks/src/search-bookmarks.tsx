@@ -4,12 +4,12 @@ import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } fro
 import { useAuth } from "../lib/use-auth";
 import { useGroups } from "../lib/use-groups";
 import { useBookmarks } from "../lib/use-bookmarks";
+import { getHostname } from "../lib/getHostname";
 
 export function SearchBookmarks({ user }: { user: User }) {
-  const groups = useGroups(user);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
   const [groupId, setGroupId] = React.useState<string | undefined>("");
-  const bookmarks = useBookmarks(groupId);
+  const { data: bookmarks, isLoading: isLoadingBookmarks } = useBookmarks(groupId);
 
   React.useEffect(() => {
     if (groups.length > 0) {
@@ -17,38 +17,20 @@ export function SearchBookmarks({ user }: { user: User }) {
     }
   }, [groups]);
 
-  React.useEffect(() => {
-    if (bookmarks.length > 0 && groups.length > 0) {
-      setIsLoading(false);
-    }
-  }, [groups, bookmarks]);
-
   return (
     <List
-      navigationTitle="Search Groups"
-      searchBarPlaceholder="Search your groups"
-      isLoading={isLoading}
+      isLoading={isLoadingGroups || isLoadingBookmarks}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Groups"
-          value={groupId}
-          onChange={(newValue) => {
-            if (groupId !== newValue) {
-              setIsLoading(true);
-              setGroupId(newValue);
-            }
-          }}
-        >
-          {groups.length > 0 &&
-            groups.map((group) => {
-              return <List.Dropdown.Item key={group.id} title={group.name || ""} value={group.id} />;
-            })}
+        <List.Dropdown tooltip="Groups" value={groupId} onChange={setGroupId}>
+          {groups.map((group) => {
+            return <List.Dropdown.Item key={group.id} title={group.name || ""} value={group.id} />;
+          })}
         </List.Dropdown>
       }
     >
       {bookmarks.length > 0 &&
         bookmarks.map((bookmark) => {
-          const hostname = bookmark.type === "link" ? getUrlHostname(bookmark.url || "") : "";
+          const hostname = bookmark.type === "link" ? getHostname(bookmark.url || "") : "";
           let icon;
           if (bookmark.favicon_url) {
             icon = bookmark.favicon_url;
@@ -108,8 +90,4 @@ export default function AuthenticatedBookmark() {
   }
 
   return <Detail isLoading />;
-}
-
-export function getUrlHostname(url: string) {
-  return url.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split("/")[0];
 }
