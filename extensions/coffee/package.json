@@ -106,9 +106,13 @@
           "title": "Coffee Mug 1",
           "value": "coffee-mug-1"
         },
-                {
+        {
           "title": "Coffee Mug 2",
           "value": "coffee-mug-2"
+        },
+        {
+          "title": "Coffee Paper Cup",
+          "value": "paper-cup"
         }
       ]
     }
