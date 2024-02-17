@@ -11,22 +11,8 @@ export const durationTitleMap = {
   180: "3 hours",
 };
 
-export const pauseNotificationsDurationTitleMap = {
-  15: "15 minutes",
-  30: "30 minutes",
-  45: "45 minutes",
-  60: "1 hour",
-  90: "1.5 hours",
-  120: "2 hours",
-  180: "3 hours",
-};
-
 export function getTitleForDuration(duration: number): string {
   return durationTitleMap[duration];
-}
-
-export function getTitleForPauseNotificationsDuration(duration: number): string {
-  return pauseNotificationsDurationTitleMap[duration];
 }
 
 export function getPresetDurationsTitle(preset: SlackStatusPreset) {
@@ -34,7 +20,5 @@ export function getPresetDurationsTitle(preset: SlackStatusPreset) {
     return getTitleForDuration(preset.defaultDuration);
   }
 
-  return `${getTitleForDuration(
-    preset.defaultDuration,
-  )} - Pause notifications for ${getTitleForPauseNotificationsDuration(preset.pauseNotificationsDuration)}`;
+  return `${getTitleForDuration(preset.defaultDuration)} - Pause notifications`;
 }

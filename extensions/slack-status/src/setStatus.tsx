@@ -15,7 +15,7 @@ import {
 import { getPresetDurationsTitle } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
-import { useSlackDndInfo, useSlackProfile } from "./slack";
+import { useSlackDndInfo, useSlackProfile, useSlackUserIdentity } from "./slack";
 import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
@@ -29,6 +29,7 @@ function StatusList() {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data, mutate } = useSlackProfile();
   const { isLoading: isLoadingDnd, data: dndData, mutate: mutateDnd } = useSlackDndInfo();
+  const { data: userIdentity } = useSlackUserIdentity();
   const [presets, setPresets] = usePresets();
 
   return (

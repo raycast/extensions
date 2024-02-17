@@ -126,13 +126,10 @@ export function getStatusSubtitle(profile: Profile | undefined, dndData: DndInfo
     return undefined;
   }
 
-  const dndDuration =
-    dndData?.next_dnd_end_ts && dndData.snooze_enabled ? moment(dndData.next_dnd_end_ts * 1000) : undefined;
-  const dndRelativeDuration = dndDuration && getRelativeDurationText(dndDuration);
-  const dndText = dndDuration ? ` - Resumes notifications in ${dndRelativeDuration}` : "";
+  const dndText = dndData?.snooze_enabled ? ` - Notifications paused` : "";
 
   if (profile.status_expiration === 0) {
-    return `Don't clear${dndText}`;
+    return "Don't clear";
   }
 
   return `${getTextForExpiration(profile.status_expiration)}${dndText}`;

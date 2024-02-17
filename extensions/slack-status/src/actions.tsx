@@ -185,10 +185,10 @@ export function SetStatusAction(props: {
               },
             );
 
-            if (props.preset.pauseNotifications) {
+            if (props.preset.pauseNotifications && expiration > 0) {
               await props.mutateDnd(
                 slack.dnd.setSnooze({
-                  num_minutes: props.preset.pauseNotificationsDuration,
+                  num_minutes: props.preset.defaultDuration,
                 }),
               );
             } else {
@@ -250,10 +250,10 @@ export function SetStatusWithDuration(props: {
                     },
                   );
 
-                  if (props.preset.pauseNotifications) {
+                  if (props.preset.pauseNotifications && parsedDuration > 0) {
                     await props.mutateDnd(
                       slack.dnd.setSnooze({
-                        num_minutes: props.preset.pauseNotificationsDuration,
+                        num_minutes: parsedDuration,
                       }),
                     );
                   } else {
@@ -318,10 +318,10 @@ export function SetCustomStatusAction(props: {
                   },
                 );
 
-                if (values.pauseNotifications) {
+                if (values.pauseNotifications && duration > 0) {
                   await props.mutateDnd(
                     slack.dnd.setSnooze({
-                      num_minutes: parseInt(values.pauseNotificationsDuration),
+                      num_minutes: duration,
                     }),
                   );
                 } else {
@@ -362,7 +362,6 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
               pauseNotifications: values.pauseNotifications,
-              pauseNotificationsDuration: parseInt(values.pauseNotificationsDuration),
             });
 
             pop();
@@ -423,7 +422,6 @@ export function EditStatusPresetAction(props: {
             statusText: props.preset.title,
             duration: props.preset.defaultDuration.toString(),
             pauseNotifications: props.preset.pauseNotifications,
-            pauseNotificationsDuration: props.preset.pauseNotificationsDuration.toString(),
           }}
           onSubmit={async (values) => {
             props.onEdit({
@@ -431,7 +429,6 @@ export function EditStatusPresetAction(props: {
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
               pauseNotifications: values.pauseNotifications,
-              pauseNotificationsDuration: parseInt(values.pauseNotificationsDuration),
             });
 
             pop();

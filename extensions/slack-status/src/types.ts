@@ -9,7 +9,6 @@ export type SlackStatusPreset = {
   title: string;
   defaultDuration: number; // 0 means "don't clear"
   pauseNotifications: boolean;
-  pauseNotificationsDuration: number;
 };
 
 export type FormValues = {
@@ -17,5 +16,4 @@ export type FormValues = {
   statusText: string;
   duration: string;
   pauseNotifications: boolean;
-  pauseNotificationsDuration: string;
 };
