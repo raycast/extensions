@@ -1,5 +1,9 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-02-17
+- Fix task form so that it honors user preferences for the Up Next and Visibility task settings. 
+
+
 ## [Fixes] - 2024-01-27
 - Misspelling fixes.
 
