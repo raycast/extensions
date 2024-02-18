@@ -22,7 +22,7 @@ export interface Coin {
   more: Record<string, string>;
 }
 
-export type SourceName = typeof sourceNames[number];
+export type SourceName = (typeof sourceNames)[number];
 
 export type UseSource = (
   currency: string,
