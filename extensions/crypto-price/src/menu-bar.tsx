@@ -1,4 +1,4 @@
-import { MenuBarExtra } from "@raycast/api";
+import { MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { useMenuBar } from "./useMenuBar";
 
 export default function Command() {
@@ -12,6 +12,13 @@ export default function Command() {
         {moreItems.map((item) => (
           <MenuBarExtra.Item key={item.title} {...item} />
         ))}
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Settings"
+          onAction={openCommandPreferences}
+          shortcut={{ key: ",", modifiers: ["cmd"] }}
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
