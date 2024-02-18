@@ -1,7 +1,5 @@
 # Bitcoin Price
 
-## [Style, Source, Volume, Supply, Market Cap] - 2024-02-07
-
 ## [Initial Version] - 2024-02-18
 
 - Add perference to select source: CryptoCompare, Binance Spot, Binance Futures
