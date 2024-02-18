@@ -5,8 +5,9 @@ SnippetSurfer is a raycast extension designed to swiftly navigate through snippe
 ### Features
 - Raycast extension for quick navigation of text excerpts and code snippets.
 - Reads snippets from Markdown files for easy organization.
-- Supports Metadata YAML for enhanced categorization.
-- Automatically copies code snippets to clipboard for streamlined workflow integration.
+- YAML Metadata support enables addition of titles and descriptions to snippets for better organization.
+- Streamlines workflow integration by automatically copying code snippets to the clipboard.
+- Automatically copies only the content inside code snippets for code snippets. 
 
 ### Example of markdown
 ```
