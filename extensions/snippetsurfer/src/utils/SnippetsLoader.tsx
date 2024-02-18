@@ -56,14 +56,15 @@ function extractMetadataContent(fileContent: string): SnippetContent {
     }
   }
 
-  const metadata = parse(lines.slice(1, metadataEndIndex).join("\n"));
+  const rawMetadata = lines.slice(1, metadataEndIndex).join("\n");
+  const metadata = parse(rawMetadata);
   const content = lines.slice(contentStartIndex).join("\n").trim();
 
   return {
     title: metadata?.["Title"],
     description: metadata?.["Description"],
     content: content,
-    fullContent: fileContent,
+    rawMetadata: rawMetadata,
   };
 }
 

@@ -2,7 +2,7 @@ export interface SnippetContent {
   title: string;
   description: string;
   content: string;
-  fullContent: string;
+  rawMetadata: string;
 }
 
 export interface Snippet {
