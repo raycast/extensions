@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { Snippet, State } from "./types";
 import SnippetContent from "./components/SnippetContent";
 import CustomActionPanel from "./components/CustomActionPanel";
-import { storeLastCopied, getLastCopiedMap, clearUnusedSnippets, orderSnippets } from "./utils/LocalStorageHelper";
+import { storeLastCopied, clearUnusedSnippets, orderSnippets } from "./utils/LocalStorageHelper";
 import { loadAllSnippets } from "./utils/SnippetsLoader";
 
 export default function Command() {
@@ -13,10 +13,9 @@ export default function Command() {
   const handleAction = async function (snippet: Snippet) {
     await storeLastCopied(snippet);
 
-    const orderMap = await getLastCopiedMap();
-    const orderedSnippets = orderSnippets(state.snippets ?? [], orderMap);
-
-    setState((previous) => ({ ...previous, snippets: orderedSnippets }));
+    const orderedSnippets = await orderSnippets(state.snippets ?? []);
+    const filteredSnippets = await orderSnippets(state.filteredSnippets ?? state.snippets ?? []);
+    setState((previous) => ({ ...previous, snippets: orderedSnippets, filteredSnippets: filteredSnippets }));
   };
 
   // Fetch primary action preference
@@ -45,9 +44,9 @@ export default function Command() {
           )
         );
 
-        const lastCopiedMap = await getLastCopiedMap();
-        await clearUnusedSnippets(snippets, lastCopiedMap);
-        const orderedSnippets = orderSnippets(snippets, lastCopiedMap);
+        await clearUnusedSnippets(snippets);
+        const orderedSnippets = await orderSnippets(snippets);
+
         setState((previous) => ({
           ...previous,
           snippets: orderedSnippets,
@@ -68,15 +67,6 @@ export default function Command() {
     fetchData();
   }, []);
 
-  if (state.error) {
-    const options: Toast.Options = {
-      style: Toast.Style.Failure,
-      title: "Error loading snippets ",
-      message: "Make sure you are pointing to the right folder(s).",
-    };
-    showToast(options);
-  }
-
   // Handle filter folder
   useEffect(() => {
     if (state.selectedFolder && state.selectedFolder != "all") {
@@ -91,6 +81,15 @@ export default function Command() {
       setState((previous) => ({ ...previous, filteredSnippets: state.snippets }));
     }
   }, [state.selectedFolder]);
+
+  if (state.error) {
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "Error loading snippets ",
+      message: "Make sure you are pointing to the right folder(s).",
+    };
+    showToast(options);
+  }
 
   return (
     <List

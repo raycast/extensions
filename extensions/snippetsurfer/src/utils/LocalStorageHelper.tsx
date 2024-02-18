@@ -2,39 +2,43 @@ import { LocalStorage } from "@raycast/api";
 import type { Snippet } from "../types";
 
 const getKey = function (snippet: Snippet) {
-  const snippet_id = snippet.id;
-  return "LastCopied." + snippet_id;
+  return snippet.id;
+};
+
+const getLastCopiedMap = async function (): Promise<{ [key: string]: number }> {
+  const map: string = (await LocalStorage.getItem("lastCopiedMap")) ?? "{}";
+  return JSON.parse(map);
+};
+
+const setLastCopiedMap = async function (lastCopiedMap: { [key: string]: number }) {
+  await LocalStorage.setItem("lastCopiedMap", JSON.stringify(lastCopiedMap));
 };
 
 const storeLastCopied = async function (snippet: Snippet) {
+  const lastCopiedMap = await getLastCopiedMap();
+
   const itemKey = getKey(snippet);
-  await LocalStorage.setItem(itemKey, Date.now());
+  const itemValue = Date.now();
+  lastCopiedMap[itemKey] = itemValue;
+  setLastCopiedMap(lastCopiedMap);
 };
 
-const getLastCopiedMap = async function () {
-  return await LocalStorage.allItems();
-};
+const clearUnusedSnippets = async function (snippets: Snippet[]) {
+  const lastCopiedMap = await getLastCopiedMap();
 
-const clearUnusedSnippets = async function (snippets: Snippet[], lastUsedMap: { [key: string]: number }) {
   const snippetKeys = new Map(snippets.map((i) => [getKey(i), 1]));
-  const toDelete = Object.keys(lastUsedMap).filter((i) => !snippetKeys.get(i));
+  const toDelete = Object.keys(lastCopiedMap).filter((i) => !snippetKeys.get(i));
 
-  await Promise.all(
-    toDelete.map(async (i) => {
-      await LocalStorage.removeItem(i);
-    })
-  );
+  toDelete.map((i) => delete lastCopiedMap[i]);
+  setLastCopiedMap(lastCopiedMap);
 };
 
-const orderSnippets = function (snippets: Snippet[], orderMap: { [key: string]: number }) {
+const orderSnippets = async function (snippets: Snippet[]) {
   if (!snippets) {
     return snippets;
   }
 
-  if (!orderMap) {
-    return snippets;
-  }
-
+  const orderMap = await getLastCopiedMap();
   snippets.sort(function (a: Snippet, b: Snippet) {
     const orderA = orderMap[getKey(a)] || 0;
     const orderB = orderMap[getKey(b)] || 0;

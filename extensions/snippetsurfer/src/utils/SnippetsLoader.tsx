@@ -8,34 +8,46 @@ const supportedExtensions = [".md", ".txt"];
 async function loadAllSnippets(startPath: string): Promise<Snippet[]> {
   const files: Snippet[] = [];
 
-  async function readDirectory(directoryPath: string) {
+  async function readDirectory(directoryPath: string): Promise<void> {
     const entries = await fs.promises.readdir(directoryPath, { withFileTypes: true });
+
+    // Array to store promises for file processing
+    const filePromises: Promise<void>[] = [];
 
     for (const entry of entries) {
       const fullPath = path.join(directoryPath, entry.name);
 
       if (!entry.name.startsWith(".")) {
         if (entry.isDirectory()) {
-          await readDirectory(fullPath); // Recursive call for subdirectory
+          // Queue directory processing concurrently
+          filePromises.push(readDirectory(fullPath));
         } else if (supportedExtensions.includes(path.extname(entry.name))) {
-          const relativePath = path.relative(startPath, fullPath);
-          const parsedName = path.parse(entry.name).name;
-
-          const hash = crypto.createHash("md5");
-          hash.update(fullPath);
-          const id = hash.digest("hex");
-
-          const content = await readFileContent(fullPath);
-          files.push({
-            id: id,
-            folder: path.dirname(relativePath),
-            name: parsedName,
-            fullPath: fullPath,
-            content: content,
-          });
+          // Queue file processing concurrently
+          filePromises.push(processFile(fullPath));
         }
       }
     }
+
+    // Wait for all files and directories to be processed
+    await Promise.all(filePromises);
+  }
+
+  async function processFile(fullPath: string): Promise<void> {
+    const relativePath = path.relative(startPath, fullPath);
+    const parsedName = path.parse(fullPath).name;
+
+    const hash = crypto.createHash("md5");
+    hash.update(fullPath);
+    const id = hash.digest("hex");
+
+    const content = await readFileContent(fullPath);
+    files.push({
+      id: id,
+      folder: path.dirname(relativePath),
+      name: parsedName,
+      fullPath: fullPath,
+      content: content,
+    });
   }
 
   await readDirectory(startPath);
