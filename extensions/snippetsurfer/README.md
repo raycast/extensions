@@ -1,6 +1,6 @@
 # SnippetSurfer
 
-SnippetSurfer is a raycast extension designed to swiftly navigate through snippets of information. You can effortlessly skim through text excerpts, code snippets, or any other brief segments of content.
+SnippetSurfer is a raycast extension designed to swiftly navigate through snippets of information. You can effortlessly skim through text excerpts, code snippets, or any other brief segments of content and copy them to the clipboard. The snippets are read from a folder of markdown files.
 
 ### Features
 - Raycast extension for quick navigation of text excerpts and code snippets.

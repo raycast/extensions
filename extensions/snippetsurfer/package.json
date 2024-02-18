@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snippetsurfer",
   "title": "Snippet Surfer",
-  "description": "SnippetSurfer is a raycast extension designed to swiftly navigate through snippets of information. You can effortlessly skim through text excerpts, code snippets, or any other brief segments of content.",
+  "description": "SnippetSurfer is a raycast extension designed to swiftly navigate through snippets of information. You can effortlessly skim through text excerpts, code snippets, or any other brief segments of content and copy them to the clipboard. The snippets are read from a folder of markdown files.",
   "icon": "command-icon.png",
   "author": "astronight",
   "categories": [
