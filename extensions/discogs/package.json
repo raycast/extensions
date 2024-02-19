@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search",
+      "title": "Search Vinyl",
+      "subtitle": "Discogs",
       "description": "Search vinyl records in the Discogs database",
       "mode": "view"
     }
