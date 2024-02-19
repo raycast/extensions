@@ -20,13 +20,13 @@ Create a chatbot trained on any website or documentation, and with access to aut
 
 Train a custom ChatGPT chatbot on any website content or documentation, then query it from your command bar.
 
-![Answer view](media/chatwith-2.png)
+![Answer view](metadata/chatwith-2.png)
 
 ### Call automations
 
 Connect your chatbot to automation apps like Zapier, ActivePieces, Make.com or APIs and ask your chatbot to trigger the automations for you.
 
-![Automations view](media/chatwith-3.png)
+![Automations view](metadata/chatwith-3.png)
 
 # How to use
 
