@@ -302,6 +302,22 @@
       "description": "Open the Arc Boost Gallery",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "new-note",
+      "title": "Open New Note",
+      "subtitle": "Arc",
+      "description": "Open a new note",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "new-easel",
+      "title": "Open New Easel",
+      "subtitle": "Arc",
+      "description": "Open a new easel",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
