@@ -1,6 +1,6 @@
 import { ActionPanel, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
 import { OAuthService, useCachedState, withAccessToken } from "@raycast/utils";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ClearStatusAction,
   CreateStatusPresetAction,
