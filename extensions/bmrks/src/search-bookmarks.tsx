@@ -78,7 +78,7 @@ export default function AuthenticatedBookmark() {
         markdown={markdown}
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
