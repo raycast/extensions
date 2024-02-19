@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minion-ipsum",
-  "title": "Minion-ipsum",
-  "description": "Minions ipsum hahaha wiiiii gelatooo poopayee aaaaaah.",
+  "title": "Minion Ipsum",
+  "description": "Generate Minion Ipsum like: Minions ipsum hahaha wiiiii gelatooo poopayee aaaaaah.",
   "icon": "command-icon.png",
   "author": "vigosan",
   "categories": [
@@ -15,7 +15,6 @@
     {
       "name": "minion-ipsum",
       "title": "Generate Minion Ipsum",
-      "subtitle": "Create Minion-themed placeholder text",
       "description": "Generates paragraphs of 'Minion Ipsum' and copy them to the clipboard",
       "mode": "no-view",
       "arguments": [
