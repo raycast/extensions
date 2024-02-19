@@ -31,3 +31,14 @@ export function useSlackDndInfo(): UsePromiseReturnType<DndInfoResponse | undefi
     return response as DndInfoResponse | undefined;
   });
 }
+
+export function useSlackAuthInfo() {
+  const slack = useSlack();
+  return usePromise(async () => {
+    const response = await slack.auth.test();
+    if (!response.ok) {
+      throw Error("Failed to fetch auth info");
+    }
+    return response;
+  });
+}

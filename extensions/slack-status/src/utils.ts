@@ -134,3 +134,5 @@ export function getStatusSubtitle(profile: Profile | undefined, dndData: DndInfo
 
   return `${getTextForExpiration(profile.status_expiration)}${dndText}`;
 }
+
+export const slackScopes = ["emoji:read", "users.profile:write", "users.profile:read", "dnd:read", "dnd:write"];

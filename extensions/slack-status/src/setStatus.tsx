@@ -1,6 +1,6 @@
-import { ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { OAuthService, withAccessToken } from "@raycast/utils";
-import { useState } from "react";
+import { ActionPanel, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
+import { OAuthService, useCachedState, withAccessToken } from "@raycast/utils";
+import { PropsWithChildren, useEffect, useState } from "react";
 import {
   ClearStatusAction,
   CreateStatusPresetAction,
@@ -15,15 +15,45 @@ import {
 import { getPresetDurationsTitle } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
-import { useSlackDndInfo, useSlackProfile } from "./slack";
-import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
+import { useSlackAuthInfo, useSlackDndInfo, useSlackProfile } from "./slack";
+import { getStatusIcon, getStatusSubtitle, getStatusTitle, slackScopes } from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
 
 const slack = OAuthService.slack({
-  scope: "emoji:read users.profile:write users.profile:read",
+  scope: slackScopes.join(" "),
   personalAccessToken: preferences.accessToken,
 });
+
+function StatusListWrapper() {
+  const { isLoading: isLoadingAuth, data: authData } = useSlackAuthInfo();
+  const [hasCheckedAuth, setHasCheckedAuth] = useCachedState("slack-status-checked-auth", false);
+
+  useEffect(() => {
+    if (isLoadingAuth || hasCheckedAuth) return;
+
+    const checkAuthorization = async () => {
+      const userScopes = authData?.response_metadata?.scopes;
+      const hasNeededScopes = slackScopes.every((scope) => userScopes?.includes(scope));
+
+      if (!hasNeededScopes) {
+        await slack.client.removeTokens();
+        await slack.authorize();
+        return;
+      }
+
+      setHasCheckedAuth(true);
+    };
+
+    checkAuthorization();
+  }, [hasCheckedAuth, authData, isLoadingAuth]);
+
+  if (isLoadingAuth && !hasCheckedAuth) {
+    return <Detail isLoading />;
+  }
+
+  return <StatusList />;
+}
 
 function StatusList() {
   const [searchText, setSearchText] = useState<string>();
