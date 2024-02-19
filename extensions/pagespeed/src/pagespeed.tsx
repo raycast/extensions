@@ -78,7 +78,7 @@ export default function Main(): ReactElement {
           }
           accessories={[
             {
-              tag: { value: `Performarce`, color: getColor(item.performance) },
+              tag: { value: `Performance`, color: getColor(item.performance) },
               tooltip: `Performance: ${round(item.performance)}`,
               icon: getIcon(item.performance),
             },
