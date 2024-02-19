@@ -54,7 +54,7 @@ function Bookmark({ user }: { user: User }) {
         const validUrl = ensureValidUrl(values.value);
         const favicon = getFavicon(validUrl);
 
-        let title: string | undefined;
+        let { title } = values;
 
         if (!values.title) {
           const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(validUrl)}&data.title`);
@@ -62,8 +62,6 @@ function Bookmark({ user }: { user: User }) {
             const data = (await response.json()) as MicrolinkResponse;
             title = data.data.title;
           }
-        } else {
-          title = "";
         }
 
         const res = await db.insertBookmark({
