@@ -8,7 +8,8 @@
   "contributors": [
     "bibixx",
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "oasaleh"
   ],
   "license": "MIT",
   "commands": [
@@ -96,7 +97,6 @@
       "required": false,
       "default": "coffee-pot",
       "title": "Menu Bar Icon",
-      "placeholder": "Icon 3",
       "data": [
         {
           "title": "Coffee Pot",
