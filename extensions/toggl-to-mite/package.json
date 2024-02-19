@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toggl-to-mite",
+  "title": "Toggl to Mite",
+  "description": "Toggl to Mite entries",
+  "icon": "extension_icon.png",
+  "author": "peterkracik",
+  "lincence": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "mite",
+      "description": "Show Toggl entries for date",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "date",
+          "type": "text",
+          "placeholder": "21-07-2023",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_token",
+      "title": "Toggl API Token",
+      "description": "Toggl API Token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "workspace_id",
+      "title": "Toggl Workspace ID",
+      "description": "Toggl Workspace ID",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "btoa": "^1.2.1",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/btoa": "^1.2.3",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "prettier": "ray prettier"
+  }
+}
