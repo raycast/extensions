@@ -23,7 +23,7 @@
 
 ## [Update] - 2024-01-19
 
-- A few commands is now disabled by default
+- A few commands are now disabled by default
 
 ## [Fixes] - 2024-01-18
 
