@@ -113,7 +113,6 @@ function Bookmark({ user }: { user: User }) {
   }, [activeTab]);
 
   React.useEffect(() => {
-    console.log("values", values);
     if (values.value === "") {
       setValue("title", undefined);
     }
