@@ -14,7 +14,7 @@
       "name": "index",
       "title": "Paste from Apple Books",
       "description": "Remove citations where the text copy from Apple Books",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
