@@ -47,17 +47,17 @@ export function IconSubmenu(props: {
         // only load icons when the submenu is open to avoid slowdown
         isOpen
           ? iconPack.icons.map((icon) => (
-            <Action
-              icon={{ source: getIconPath(icon.filename) }}
-              title={icon.issuer[0]}
-              onAction={() => {
-                LocalStorage.setItem(getOverrideKey(accountKey), icon.filename);
-                setIsOpen(false);
-                onOverride();
-              }}
-              key={icon.filename}
-            />
-          ))
+              <Action
+                icon={{ source: getIconPath(icon.filename) }}
+                title={icon.issuer[0]}
+                onAction={() => {
+                  LocalStorage.setItem(getOverrideKey(accountKey), icon.filename);
+                  setIsOpen(false);
+                  onOverride();
+                }}
+                key={icon.filename}
+              />
+            ))
           : null
       }
     </ActionPanel.Submenu>
