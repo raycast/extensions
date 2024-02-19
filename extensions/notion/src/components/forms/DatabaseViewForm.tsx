@@ -82,10 +82,10 @@ export function DatabaseViewForm(props: {
                       d.icon_emoji
                         ? d.icon_emoji
                         : d.icon_file
-                        ? d.icon_file
-                        : d.icon_external
-                        ? d.icon_external
-                        : Icon.List
+                          ? d.icon_file
+                          : d.icon_external
+                            ? d.icon_external
+                            : Icon.List
                     }
                   />
                 );
@@ -144,13 +144,13 @@ function KanbanViewFormItem(props: { properties: DatabaseProperty[]; databaseVie
       const defaultCompletedOpts = currentConfig
         ? currentConfig.completed_ids
         : statusOptions[statusOptions.length - 1]?.id
-        ? [statusOptions[statusOptions.length - 1].id!]
-        : [];
+          ? [statusOptions[statusOptions.length - 1].id!]
+          : [];
       const defaultNotStartedOpts = currentConfig
         ? currentConfig.not_started_ids
         : statusOptions[0] && !defaultCompletedOpts.includes(statusOptions[0].id!)
-        ? [statusOptions[0].id!]
-        : [];
+          ? [statusOptions[0].id!]
+          : [];
       const defaultStartedOpts = currentConfig
         ? currentConfig.started_ids
         : statusOptions
