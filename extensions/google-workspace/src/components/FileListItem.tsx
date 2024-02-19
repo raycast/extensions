@@ -82,6 +82,13 @@ export default function FileListItem({ file, email }: FileListItemProps) {
               title="Copy Markdown Link"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
+
+            <Action.CopyToClipboard
+              icon={Icon.Clipboard}
+              content={`<a href="${file.webViewLink}" title="${file.name}">${file.name}</a>`}
+              title="Copy HTML Link"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "/" }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
