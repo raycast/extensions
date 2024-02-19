@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "paste-from-apple-books",
-  "title": "Paste from Apple Books",
+  "title": "Paste From Apple Books",
   "description": "When copy and paste from Apple Books into other App, it always comes with citations 'Excerpt from...' with quotation marks around the copy text. This Extension can make it clean. But you also need notice: 'This material may be protected by copyright.'",
   "icon": "command-icon.png",
   "author": "victor_song",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Paste from Apple Books",
+      "title": "Paste From Apple Books",
       "description": "Remove citations where the text copy from Apple Books",
       "mode": "no-view"
     }

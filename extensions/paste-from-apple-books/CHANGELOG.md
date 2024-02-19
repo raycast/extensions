@@ -2,6 +2,10 @@
 
 ## [Pass CI Check] - 2024-02-19
 
+- Extension's title use Title Cased
+
+## [Pass CI Check] - 2024-02-19
+
 - remove unused import
 
 ## [Pass CI Check] - 2024-02-19
