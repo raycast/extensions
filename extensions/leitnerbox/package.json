@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "create-a-question",
-      "title": "Create a Question",
+      "title": "Create A Question",
       "subtitle": "LeitnerBox",
       "description": "Create a question for your leitner box",
       "mode": "view"
