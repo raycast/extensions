@@ -10,8 +10,8 @@ export default async function Command() {
 
   await runAppleScript(`
 activate application "Finder"
-tell application "System Events"
-    keystroke "h" using {command down, option down}
+tell application "System Events" to tell process "Finder"
+    click menu item "Hide Others" of menu 1 of menu bar item "Finder" of menu bar 1
 end tell
 tell application "Finder" to set collapsed of windows to true
   `);
