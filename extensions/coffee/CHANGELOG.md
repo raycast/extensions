@@ -2,7 +2,7 @@
 
 ## [Update] - 2024-02-14
 
-- Added support for alternative icon, currently only on alternative
+- Added support for alternative icon Menu Bar icon.
 
 ## [Update] - 2024-02-06
 
