@@ -85,7 +85,7 @@ export default function Command() {
                     title="See Detail"
                     target={
                       <Detail
-                        markdown={`<img src="https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg?raycast-width=235&raycast-height=235"  />`}
+                        markdown={`<img src="https://cdn.simpleicons.org/${slug}?raycast-width=235&raycast-height=235"  />`}
                         navigationTitle={icon.title}
                         metadata={
                           <Detail.Metadata>
