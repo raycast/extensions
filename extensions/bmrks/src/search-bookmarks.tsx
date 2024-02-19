@@ -9,7 +9,7 @@ import { getHostname } from "../lib/getHostname";
 export function SearchBookmarks({ user }: { user: User }) {
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
   const [groupId, setGroupId] = React.useState<string | undefined>("");
-  const { data: bookmarks, isLoading: isLoadingBookmarks } = useBookmarks("groupId");
+  const { data: bookmarks, isLoading: isLoadingBookmarks } = useBookmarks(groupId);
 
   React.useEffect(() => {
     if (groups && groups.length > 0) {

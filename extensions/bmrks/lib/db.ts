@@ -4,10 +4,6 @@ export async function insertBookmark(bookmark: Omit<Bookmark, "created_at"> & { 
   return supabase.from("bookmarks").insert(bookmark).select();
 }
 
-export function getGroup(slug: string, userId: string) {
-  return supabase.from("groups").select("id").eq("user_id", userId).eq("slug", slug).returns<Group>().single();
-}
-
 export function getGroups(userId: string) {
   return supabase.from("groups").select("id, name, slug").eq("user_id", userId).returns<Group[]>();
 }

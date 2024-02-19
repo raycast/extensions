@@ -3,14 +3,17 @@ import { useCachedPromise } from "@raycast/utils";
 import { supabase } from "./supabase";
 
 export function useAuth() {
-  const { data, isLoading } = useCachedPromise(async () => {
-    const preferences = getPreferenceValues<Preferences>();
+  const { email, password } = getPreferenceValues<Preferences>();
 
-    return await supabase.auth.signInWithPassword({
-      email: preferences.email,
-      password: preferences.password,
-    });
-  });
+  const { data, isLoading } = useCachedPromise(
+    async (email, password) => {
+      return await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+    },
+    [email, password],
+  );
 
   return { data: data?.data, error: data?.error, isLoading };
 }
