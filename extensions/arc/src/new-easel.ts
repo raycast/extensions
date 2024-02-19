@@ -3,22 +3,22 @@ import { runAppleScript } from "@raycast/utils";
 
 function runAppleScriptAction() {
   return runAppleScript(`
+      tell application "Arc"
+      if (count of windows) is 0 then
+        make new window
+      end if
+      activate
+    end tell
+    delay (0.5)
     tell application "Arc"
-	    activate
+      activate
     end tell
 
-     delay 1
-
     tell application "System Events"
-	    tell process "Arc"
-          set frontmost to true
-      
-          keystroke "o" using {command down}
-          delay 1
-      
-          click menu item "New Easel" of menu 1 of menu bar item "File" of menu bar 1
-	      end tell
+      tell process "Arc"
+        click menu item "New Easel" of menu "File" of menu bar 1
       end tell
+    end tell
   `);
 }
 
