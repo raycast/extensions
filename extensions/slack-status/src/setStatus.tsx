@@ -126,4 +126,4 @@ function StatusList() {
   );
 }
 
-export default withAccessToken(slack)(StatusList);
+export default withAccessToken(slack)(StatusListWrapper);

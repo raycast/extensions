@@ -64,7 +64,7 @@ export function ResumeNotificationsAction(props: { mutate: MutatePromise<DndInfo
   const slack = useSlack();
   return (
     <Action
-      title="Resume notifications"
+      title="Resume Notifications"
       icon={Icon.Bell}
       onAction={async () => {
         await showToastWithPromise(props.mutate(slack.dnd.endSnooze()), {
