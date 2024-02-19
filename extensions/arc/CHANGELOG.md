@@ -1,5 +1,10 @@
 # Arc Changelog
 
+## [New Features] - 2024-02-18
+
+- Added `Open New Note` command to open a new Note in Arc.
+- Added `Open New Easel` command to open a new Easel in Arc.
+
 ## [Fixes] - 2024-02-14
 
 - Fixed an issue where the `Search Tabs` command would not work if a tab title contained a backslash.
