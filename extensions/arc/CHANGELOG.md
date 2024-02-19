@@ -2,8 +2,8 @@
 
 ## [New Features] - 2024-02-18
 
-- Added `Open New Note` command to open a new Note in Arc.
-- Added `Open New Easel` command to open a new Easel in Arc.
+- Added `Open New Note` command to open a new Note in Arc which is disabled by default.
+- Added `Open New Easel` command to open a new Easel in Arc which is disabled by default.
 
 ## [Fixes] - 2024-02-14
 
