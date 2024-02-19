@@ -2,7 +2,7 @@
 
 ## [Step Functions command] - 2024-02-18
 
-- Added new command to list SQS queues ([#10801](https://github.com/raycast/extensions/pull/10801))
+- Added new command to find and open Step Functions ([#10801](https://github.com/raycast/extensions/pull/10801))
 
 ## [Make Vault Optional] - 2023-11-16
 

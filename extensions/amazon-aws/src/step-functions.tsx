@@ -4,7 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "./util";
 
-export default function stepFunctions() {
+export default function StepFunctions() {
   const { data: stateMachineListItems, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
   return (
     <List
@@ -16,14 +16,14 @@ export default function stepFunctions() {
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
         stateMachineListItems?.map((stateMachineListItem) => (
-          <StepFunctions key={stateMachineListItem.name} stateMachineListItem={stateMachineListItem} />
+          <StepFunction key={stateMachineListItem.name} stateMachineListItem={stateMachineListItem} />
         ))
       )}
     </List>
   );
 }
 
-function StepFunctions({ stateMachineListItem }: { stateMachineListItem: StateMachineListItem }) {
+function StepFunction({ stateMachineListItem }: { stateMachineListItem: StateMachineListItem }) {
   return (
     <List.Item
       icon={"aws-icons/states.png"}
