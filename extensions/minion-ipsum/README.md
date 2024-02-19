@@ -1,3 +1,3 @@
 # Minion Ipsum
 
-Generate Minions Ipsum mumble texxt like: hahaha wiiiii gelatooo poopayee aaaaaah.
+Generate Minions Ipsum mumble text like: hahaha wiiiii gelatooo poopayee aaaaaah.
