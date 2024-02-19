@@ -1,5 +1,8 @@
 # Google Workspace Changelog
 
+## [Added copy link as markdown] - 2024-02-19
+- Added the ability to copy a link to a file list item to the clipboard as markdown. This is useful for sharing links in markdown documents.
+
 ## [Use OAuth utils] - 2024-02-12
 
 - Use new OAuth utils
