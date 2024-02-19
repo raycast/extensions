@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React from "react";
 import fetch from "node-fetch";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
 import {
@@ -105,12 +105,19 @@ function Bookmark({ user }: { user: User }) {
   const activeTab = useActiveTab();
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (activeTab) {
       setValue("value", activeTab.url);
       setValue("title", activeTab.title);
     }
   }, [activeTab]);
+
+  React.useEffect(() => {
+    console.log("values", values);
+    if (values.value === "") {
+      setValue("title", undefined);
+    }
+  }, [values]);
 
   const valueIsUrl = isUrlLike(values.value);
   const activeGroup = groups.find((group) => group.id === values.groupId);
