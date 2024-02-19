@@ -119,7 +119,7 @@ function Bookmark({ user }: { user: User }) {
   }, [values]);
 
   const valueIsUrl = isUrlLike(values.value);
-  const activeGroup = groups.find((group) => group.id === values.groupId);
+  const activeGroup = groups && groups.find((group) => group.id === values.groupId);
 
   return (
     <Form
@@ -137,9 +137,7 @@ function Bookmark({ user }: { user: User }) {
       }
     >
       <Form.Dropdown title="Group" {...itemProps.groupId}>
-        {groups.map((group) => (
-          <Form.Dropdown.Item key={group.id} value={group.id} title={group.name} />
-        ))}
+        {groups && groups.map((group) => <Form.Dropdown.Item key={group.id} value={group.id} title={group.name} />)}
       </Form.Dropdown>
       <Form.Separator />
       <Form.TextField title="Bookmark" placeholder="Link, color, or text" {...itemProps.value} />
@@ -149,10 +147,15 @@ function Bookmark({ user }: { user: User }) {
 }
 
 export default function AuthenticatedBookmark() {
-  const { error, user } = useAuth();
+  const { error, data, isLoading } = useAuth();
 
-  const markdown =
-    error === "Invalid login credentials" ? error + ". Please open the preferences and try again." : error;
+  const markdown = error?.message.includes("Invalid login credentials")
+    ? error.message + ". Please open the preferences and try again."
+    : error?.message;
+
+  if (isLoading) {
+    return <Detail isLoading />;
+  }
 
   if (error) {
     return (
@@ -167,9 +170,7 @@ export default function AuthenticatedBookmark() {
     );
   }
 
-  if (user) {
-    return <Bookmark user={user} />;
+  if (data?.user) {
+    return <Bookmark user={data.user} />;
   }
-
-  return <Detail isLoading />;
 }

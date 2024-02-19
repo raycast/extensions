@@ -9,10 +9,10 @@ import { getHostname } from "../lib/getHostname";
 export function SearchBookmarks({ user }: { user: User }) {
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
   const [groupId, setGroupId] = React.useState<string | undefined>("");
-  const { data: bookmarks, isLoading: isLoadingBookmarks } = useBookmarks(groupId);
+  const { data: bookmarks, isLoading: isLoadingBookmarks } = useBookmarks("groupId");
 
   React.useEffect(() => {
-    if (groups.length > 0) {
+    if (groups && groups.length > 0) {
       setGroupId(groups[0].id);
     }
   }, [groups]);
@@ -22,13 +22,14 @@ export function SearchBookmarks({ user }: { user: User }) {
       isLoading={isLoadingGroups || isLoadingBookmarks}
       searchBarAccessory={
         <List.Dropdown tooltip="Groups" value={groupId} onChange={setGroupId}>
-          {groups.map((group) => {
-            return <List.Dropdown.Item key={group.id} title={group.name || ""} value={group.id} />;
-          })}
+          {groups &&
+            groups.map((group) => {
+              return <List.Dropdown.Item key={group.id} title={group.name || ""} value={group.id} />;
+            })}
         </List.Dropdown>
       }
     >
-      {bookmarks.length > 0 &&
+      {bookmarks &&
         bookmarks.map((bookmark) => {
           const hostname = bookmark.type === "link" ? getHostname(bookmark.url || "") : "";
           let icon: Image.ImageLike = Icon.Bookmark;
@@ -68,10 +69,15 @@ export function SearchBookmarks({ user }: { user: User }) {
 }
 
 export default function AuthenticatedBookmark() {
-  const { error, user } = useAuth();
+  const { data, isLoading, error } = useAuth();
 
-  const markdown =
-    error === "Invalid login credentials" ? error + ". Please open the preferences and try again." : error;
+  const markdown = error?.message.includes("Invalid login credentials")
+    ? error.message + ". Please open the preferences and try again."
+    : error?.message;
+
+  if (isLoading) {
+    return <Detail isLoading />;
+  }
 
   if (error) {
     return (
@@ -86,9 +92,7 @@ export default function AuthenticatedBookmark() {
     );
   }
 
-  if (user) {
-    return <SearchBookmarks user={user} />;
+  if (data?.user) {
+    return <SearchBookmarks user={data.user} />;
   }
-
-  return <Detail isLoading />;
 }
