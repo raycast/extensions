@@ -1,4 +1,4 @@
-import { Clipboard, popToRoot } from "@raycast/api";
+import { Clipboard } from "@raycast/api";
 
 export default function Command() {
   return (async () => {
