@@ -133,8 +133,14 @@ function Bookmark({ user }: { user: User }) {
         ))}
       </Form.Dropdown>
       <Form.Separator />
-      <Form.TextField id="value" title="Link, color, or text" value={value} onChange={setValue} />
-      {valueIsUrl && <Form.TextField id="title" title="Link title" value={titleValue || ""} onChange={setTitleValue} />}
+      <Form.TextField
+        id="value"
+        title="Bookmark"
+        placeholder="Link, color, or text"
+        value={value}
+        onChange={setValue}
+      />
+      {valueIsUrl && <Form.TextField id="title" title="Link Title" value={titleValue || ""} onChange={setTitleValue} />}
     </Form>
   );
 }
