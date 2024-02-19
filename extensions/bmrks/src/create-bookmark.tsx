@@ -134,7 +134,7 @@ function Bookmark({ user }: { user: User }) {
       </Form.Dropdown>
       <Form.Separator />
       <Form.TextField id="value" autoFocus title="Link, color, or text" value={value} onChange={setValue} />
-      {valueIsUrl && <Form.TextField id="title" title="Link title" value={titleValue || ""} onChange={setTitleValue} />}
+      {valueIsUrl && <Form.TextField id="title" title="Link Title" value={titleValue || ""} onChange={setTitleValue} />}
     </Form>
   );
 }
