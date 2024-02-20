@@ -93,7 +93,6 @@ function Bookmark({ user }: { user: User }) {
       }
 
       await showHUD(`Created in ${activeGroup!.name}`, {
-        clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
       });
     },
