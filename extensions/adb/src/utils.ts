@@ -34,3 +34,7 @@ export function saveAppIdInCache(appId: string) {
   const cache = new Cache();
   cache.set("appId", appId);
 }
+
+export function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
