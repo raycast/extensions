@@ -129,22 +129,27 @@ const iconForMaskedEmail: (maskedEmail: MaskedEmail) => Image = (maskedEmail) =>
 
 const accessoryForMaskedEmail: (maskedEmail: MaskedEmail) => List.Item.Accessory = (maskedEmail) => {
   let color: Color;
+  let value: string;
 
   switch (maskedEmail.state) {
     case "pending":
       color = Color.Blue;
+      value = "Pending";
       break;
 
     case "deleted":
       color = Color.Red;
+      value = "Deleted";
       break;
 
     case "enabled":
       color = Color.Green;
+      value = "Active";
       break;
 
     case "disabled":
       color = Color.Orange;
+      value = "Blocked";
       break;
   }
 
@@ -153,5 +158,5 @@ const accessoryForMaskedEmail: (maskedEmail: MaskedEmail) => List.Item.Accessory
   // color to the provided color and sets a transparent background with the
   // same color. Whereas text only sets the text color. We add a `null` tooltip
   // to make TypeScript happy.
-  return { tag: { value: maskedEmail.state, color }, tooltip: null };
+  return { tag: { value, color }, tooltip: null };
 };
