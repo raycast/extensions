@@ -1,5 +1,9 @@
 # Paste From Apple Books Changelog
 
+## [Update author] - 2024-02-20
+
+- change author info
+
 ## [Pass CI Check] - 2024-02-19
 
 - Extension's title use Title Cased

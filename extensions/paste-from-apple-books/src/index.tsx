@@ -12,6 +12,5 @@ export default function Command() {
     } else {
       Clipboard.paste(text);
     }
-    // console.log(re);
   })();
 }
