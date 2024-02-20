@@ -6,7 +6,6 @@ export default function ViewCodeAction(props: { slug: string }) {
     <Action.Push
       title="View This ShareMyCode"
       icon={Icon.Eye}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
       target={<GetCommand arguments={{ slug: props.slug }} launchType={LaunchType.UserInitiated} />}
     />
   );

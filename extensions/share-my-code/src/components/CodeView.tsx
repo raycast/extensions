@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import useStoredRecents from "../hooks/useStoredRecents";
 import CreateCodeAction from "./CreateCodeAction";
 import { smcUrl } from "../Constants";
+import RecentCommand from "../recent";
 
 export default function CodeView(props: {
   code: { code: string; parsedCode: string };
@@ -51,7 +52,7 @@ export default function CodeView(props: {
           <ActionPanel.Section title="Other">
             {checkRecent(slug) ? (
               <Action
-                title="Remove From Recent"
+                title="Remove From Recents"
                 icon={Icon.Minus}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -61,7 +62,7 @@ export default function CodeView(props: {
               />
             ) : (
               <Action
-                title="Add as Recent"
+                title="Add to Recents"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "r" }}
                 onAction={() => {
@@ -69,6 +70,12 @@ export default function CodeView(props: {
                 }}
               />
             )}
+            <Action.Push
+              title="View Recent ShareMyCodes"
+              icon={Icon.List}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              target={<RecentCommand />}
+            />
             <CreateCodeAction slug={slug} />
           </ActionPanel.Section>
         </ActionPanel>

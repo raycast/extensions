@@ -48,7 +48,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.1",
+    "@raycast/api": "^1.67.0",
     "@raycast/utils": "^1.11.1",
     "@types/got": "^9.6.12",
     "flourite": "^1.2.4",

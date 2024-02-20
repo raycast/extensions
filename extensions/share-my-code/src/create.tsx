@@ -4,19 +4,10 @@ import { useEffect, useState } from "react";
 import got from "got";
 import { baseURL, characters, MIN_SLUG_SIZE, RAND_SLUG_SIZE, smcUrl } from "./Constants";
 import useStoredRecents from "./hooks/useStoredRecents";
-import flourite from "flourite";
+import flourite, { DetectedLanguage } from "flourite";
 import CodeView from "./components/CodeView";
 import useParser from "./hooks/useParser";
-
-type CodeChekResponse = {
-  timestamp: number;
-  size: number;
-};
-
-interface SMCFormValues {
-  slug: string;
-  content: string;
-}
+import { SMCFormValues, CodeCheckResponse } from "./types";
 
 interface LaunchPropsType {
   slug: string;
@@ -29,18 +20,21 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
   const [newSlug, setNewSlug] = useState<string>(slug || "");
   const [autoSlug, setAutoSlug] = useState<boolean>(!slug);
 
+  const [detectedLanguage, setDetectedLanguage] = useState<DetectedLanguage>();
+
   const { addRecent } = useStoredRecents();
   const { push } = useNavigation();
 
   const { handleSubmit, itemProps, values, setValue, setValidationError } = useForm<SMCFormValues>({
     async onSubmit(values: SMCFormValues) {
+      setNewSlug(values.slug);
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Sharing code",
       });
       const formData = new URLSearchParams();
-      formData.append("slug", values.slug);
-      formData.append("code", values.content);
+      formData.append("slug", encodeURIComponent(values.slug));
+      formData.append("code", encodeURIComponent(values.content));
 
       try {
         await got.post(`${baseURL}/code_update.php`, {
@@ -54,7 +48,7 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
 
         toast.style = Toast.Style.Success;
         toast.title = "Shared code!";
-        toast.message = `Copied ${smcUrl}/${values.slug} to your clipboard`;
+        toast.message = `Copied link to your clipboard`;
 
         const newStoredRecent = {
           slug: values.slug,
@@ -65,6 +59,7 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
         addRecent(newStoredRecent);
         push(<CodeView code={{ code: values.content, parsedCode: parsedData }} slug={values.slug} isLoading={false} />);
       } catch (error) {
+        console.error(error);
         toast.style = Toast.Style.Failure;
         toast.title = "Failed sharing code";
         toast.message = "There seems to be a problem with the server. Please try again later.";
@@ -78,7 +73,7 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
 
   const parsedData = useParser(values.content || "");
 
-  const { data, isLoading } = useFetch<CodeChekResponse>(`${baseURL}/code_check.php?slug=${newSlug}`, {
+  const { data, isLoading } = useFetch<CodeCheckResponse>(`${baseURL}/code_check.php?slug=${newSlug}`, {
     execute: newSlug !== "" && newSlug.length >= MIN_SLUG_SIZE,
   });
 
@@ -86,6 +81,10 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
     let error = "";
 
     if (values.slug != randomSlug) setAutoSlug(false);
+
+    if (autoSlug && values.slug && data?.size === 0) {
+      createRandomSlug();
+    }
 
     if (values.slug && !/^[a-zA-Z0-9_-]*$/.test(values.slug)) {
       error = "Slug can only contain letters, numbers, - and _";
@@ -111,6 +110,7 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
     if (autoSlug) {
       const newRandomSlug = createRandomSlug();
       setRandomSlug(newRandomSlug);
+      setNewSlug(newRandomSlug);
       setValue("slug", newRandomSlug);
     }
   }, [autoSlug]);
@@ -123,10 +123,17 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
     }
   }, [slug]);
 
+  useEffect(() => {
+    if (values.content) {
+      const flouriteDetect = flourite(values.content);
+      setDetectedLanguage(flouriteDetect);
+    }
+  }, [values.content]);
+
   return (
     <Form
       isLoading={isLoading}
-      searchBarAccessory={<Form.LinkAccessory text="Help" target="https://sharemycode.fr/help" />}
+      searchBarAccessory={<Form.LinkAccessory text="Help" target={smcUrl + "/help"} />}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" onSubmit={handleSubmit} icon={Icon.Upload} />
@@ -152,9 +159,13 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
       <Form.TextArea
         title="Content"
         autoFocus
+        enableMarkdown
         placeholder="Enter the text you want to share here"
         {...itemProps.content}
       />
+      {detectedLanguage && detectedLanguage.language != "Unknown" && (
+        <Form.Description title="Detected language" text={detectedLanguage?.language || "Unknown"} />
+      )}
     </Form>
   );
 }
