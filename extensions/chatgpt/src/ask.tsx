@@ -94,7 +94,7 @@ export default function Ask(props: { conversation?: Conversation }) {
 
   useEffect(() => {
     const selectedModel = models.data.find((x) => x.id === selectedModelId);
-    console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
+    //console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
       ...conversation,
       model: selectedModel ?? { ...conversation.model },
