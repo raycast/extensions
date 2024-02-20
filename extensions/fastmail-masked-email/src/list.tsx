@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
-import { Color, List, Icon, Image, ActionPanel, Action } from "@raycast/api";
+import { Color, List, Icon, Image, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { APIRequest, makeRequest, getSession } from "./api";
+
+type Preferences = {
+  show_deleted: boolean;
+  show_pending: boolean;
+};
 
 type ListMaskedEmail = {
   accountId?: string;
@@ -9,10 +14,17 @@ type ListMaskedEmail = {
   };
 };
 
+enum MaskedEmailState {
+  Pending = "pending",
+  Enabled = "enabled",
+  Disabled = "disabled",
+  Deleted = "deleted",
+}
+
 type MaskedEmail = {
   id: string;
   email: string;
-  state: "pending" | "enabled" | "disabled" | "deleted";
+  state: MaskedEmailState;
   forDomain: string;
   description: string;
   url: string | null;
@@ -31,6 +43,7 @@ export default function Command() {
   useEffect(() => {
     const listMaskedEmails = async () => {
       const session = await getSession();
+      const preferences = getPreferenceValues<Preferences>();
       const request: APIRequest<ListMaskedEmail> = {
         using: ["urn:ietf:params:jmap:core", MaskedEmailCapability],
         methodCalls: [
@@ -49,13 +62,23 @@ export default function Command() {
 
       try {
         const response = await makeRequest<ListMaskedEmail, MaskedEmailGet>({ request });
-        const emails: MaskedEmail[] = response.methodResponses[0][1].list;
+        const emails: MaskedEmail[] = response.methodResponses[0][1].list.filter((email) => {
+          if (email.state === MaskedEmailState.Deleted && preferences.show_deleted === false) {
+            return false;
+          }
 
-        const sortOrder: { [key in MaskedEmail["state"]]: number } = {
-          deleted: 0,
-          disabled: 1,
-          pending: 2,
-          enabled: 3,
+          if (email.state === MaskedEmailState.Pending && preferences.show_pending === false) {
+            return false;
+          }
+
+          return true;
+        });
+
+        const sortOrder: { [key in MaskedEmailState]: number } = {
+          [MaskedEmailState.Deleted]: 0,
+          [MaskedEmailState.Disabled]: 1,
+          [MaskedEmailState.Pending]: 2,
+          [MaskedEmailState.Enabled]: 3,
         };
         emails.sort((lhs, rhs) => sortOrder[rhs.state] - sortOrder[lhs.state]);
         setMaskedEmails(emails);

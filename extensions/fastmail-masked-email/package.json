@@ -26,7 +26,25 @@
       "title": "Show Masked Emails",
       "subtitle": "Fastmail",
       "description": "Show all your masked emails",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Show deleted masked emails in the list",
+          "name": "show_deleted",
+          "required": false,
+          "default": true,
+          "label": "Show Deleted",
+          "type": "checkbox"
+        },
+        {
+          "description": "Show pending masked emails in the list",
+          "name": "show_pending",
+          "required": false,
+          "default": true,
+          "label": "Show Pending",
+          "type": "checkbox"
+        }
+      ]
     }
   ],
   "preferences": [
