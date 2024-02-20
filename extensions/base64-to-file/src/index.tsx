@@ -95,7 +95,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Convert base64 to a file1" />
+      <Form.Description text="Convert base64 to a file" />
       <Form.TextArea id="base64" title="Base64 Text" placeholder="Please enter the string encoded in base64" />
       <Form.TextField
         id="filePath"
