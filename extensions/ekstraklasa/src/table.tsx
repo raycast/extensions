@@ -13,7 +13,7 @@ export default function Command() {
           icon={team.logoUrl}
           title={team.position.toString()}
           subtitle={team.teamName}
-          keywords={[team.teamName]}
+          keywords={team.teamName.split(" ")}
           accessories={[
             { icon: Icon.SoccerBall, text: team.gamesPlayed.toString(), tooltip: "Games Played" },
             {
@@ -37,7 +37,7 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard content={team.teamName} />
+              <Action.CopyToClipboard title="Copy Team Name to Clipboard" content={team.teamName} />
             </ActionPanel>
           }
         />
