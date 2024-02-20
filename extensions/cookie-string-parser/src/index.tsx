@@ -1,6 +1,7 @@
-import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, Action, Form } from "@raycast/api";
 import { useCallback, useState } from "react";
 import { default as cookiesParser } from "cookie-parse";
+import { ListView } from "./ListView";
 
 export default function Command() {
   const [cookies, setCookies] = useState<Record<string, string>>({});
@@ -13,35 +14,14 @@ export default function Command() {
   }, []);
 
   return (
-    <List
-      onSearchTextChange={onSearchTextChange}
-      searchBarPlaceholder="Foo=; Bar="
-      searchBarAccessory={
+    <Form
+      actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy All" content={JSON.stringify(cookies, null, 2)} />
+          <Action.Push title="Open In Detail View" target={<ListView cookies={cookies} />} />
         </ActionPanel>
       }
     >
-      {Object.entries(cookies).map(([key, value]) => (
-        <List.Item
-          icon={Icon.Text}
-          key={key}
-          title={key}
-          subtitle={value}
-          actions={
-            <ActionPanel>
-              <Action.Push title="Show Details" target={<Detail markdown={`## ${key} \n --- \n ${value}`} />} />
-              <Action.CopyToClipboard
-                title="Copy Item"
-                content={`{
-                  ${key}: ${value},
-                }`}
-              />
-              <Action.CopyToClipboard title={"Copy All"} content={JSON.stringify(cookies, null, 2)} />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
+      <Form.TextArea id={"cookies-text"} onChange={onSearchTextChange} placeholder="Foo=; Bar="></Form.TextArea>
+    </Form>
   );
 }
