@@ -16,7 +16,7 @@ Currently supports Chrome, Safari, Brave, Arc.
 
 ### Search Bookmarks
 
-Search your bookmarks, open in the browser or copy the value to the clipboard. You can also filter by group.
+Search your bookmarks by group. Open in the browser, copy the value to the clipboard or delete your bookmark.
 
 ---
 
