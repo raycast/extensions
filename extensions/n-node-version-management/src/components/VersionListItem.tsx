@@ -31,7 +31,12 @@ export function VersionListItem(
                 icon={Icon.CheckCircle}
                 onAction={() => onActivateVersionClick(version.version)}
               />
-              <Action title="Delete Version" icon={Icon.Trash} onAction={() => onDeleteVersionClick(version.version)} />
+              <Action
+                title="Delete Version"
+                style={Action.Style.Destructive}
+                icon={Icon.Trash}
+                onAction={() => onDeleteVersionClick(version.version)}
+              />
             </>
           )}
           {version.type == VersionSource.Network && (
