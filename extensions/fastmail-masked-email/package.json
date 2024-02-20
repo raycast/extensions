@@ -54,6 +54,13 @@
           "type": "checkbox"
         }
       ]
+    },
+    {
+      "name": "quick_create",
+      "title": "Quick Create Masked Email",
+      "subtitle": "Fastmail",
+      "description": "Quickly create a new masked email address",
+      "mode": "no-view"
     }
   ],
   "preferences": [
