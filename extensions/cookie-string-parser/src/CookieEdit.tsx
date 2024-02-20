@@ -1,14 +1,15 @@
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation } from "@raycast/api";
 import { useState, useCallback } from "react";
-import { ListView } from "./ListView";
 import { getCookiesWithEditedValue } from "./utils";
 
 export function CookieEdit({
   cookies,
   cookieToEdit,
+  onEdit,
 }: {
   cookies: Record<string, string>;
   cookieToEdit: Record<string, string>;
+  onEdit: (editedCookies: Record<string, string>) => void;
 }) {
   const [editedCookie, setEditedCookie] = useState(cookieToEdit);
 
@@ -16,14 +17,17 @@ export function CookieEdit({
     setEditedCookie({ ...editedCookie, [id]: value });
   }, []);
 
+  const { pop } = useNavigation();
+  const handleSave = useCallback(() => {
+    onEdit(getCookiesWithEditedValue(cookies, cookieToEdit, editedCookie));
+    pop();
+  }, [cookies, cookieToEdit, editedCookie]);
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Save"
-            target={<ListView cookies={getCookiesWithEditedValue(cookies, cookieToEdit, editedCookie)} />}
-          />
+          <Action title="Save" onAction={handleSave} />
         </ActionPanel>
       }
     >

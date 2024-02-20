@@ -1,10 +1,10 @@
-import { List, ActionPanel, Action, Icon, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState, useCallback } from "react";
 import { CookieEdit } from "./CookieEdit";
 
 export function ListView({ cookies }: { cookies: Record<string, string> }) {
   const [cookiesList, setCookiesList] = useState<Record<string, string>>(cookies);
-  const onSearchTextChange = useCallback((searchText: string) => {
+  const handleSearch = useCallback((searchText: string) => {
     if (!searchText.trim()) {
       setCookiesList(cookies);
       return;
@@ -23,7 +23,7 @@ export function ListView({ cookies }: { cookies: Record<string, string> }) {
   }, []);
   return (
     <List
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={handleSearch}
       searchBarPlaceholder="Foo=; Bar="
       searchBarAccessory={
         <ActionPanel>
@@ -40,9 +40,13 @@ export function ListView({ cookies }: { cookies: Record<string, string> }) {
           actions={
             <ActionPanel>
               <Action.Push
+                icon={Icon.Pencil}
                 title="Edit Item"
                 target={
                   <CookieEdit
+                    onEdit={(editedCookies) => {
+                      setCookiesList(editedCookies);
+                    }}
                     cookies={cookies}
                     cookieToEdit={{
                       key,
@@ -65,7 +69,16 @@ export function ListView({ cookies }: { cookies: Record<string, string> }) {
                   ${key}: ${value},
                 }`}
               />
-              <Action.Push title="Show Details" target={<Detail markdown={`## ${key} \n --- \n ${value}`} />} />
+              <Action
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                title="Delete Item"
+                onAction={() => {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { [key]: _, ...rest } = cookies;
+                  setCookiesList(rest);
+                }}
+              />
             </ActionPanel>
           }
         />
