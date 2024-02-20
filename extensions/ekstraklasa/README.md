@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/ekstraklasa-logo.png" height="128">
+  <img src="assets/ekstraklasa-logo.png" height="128">
   <h1>Ekstraklasa</h1>
 </div>
 
@@ -9,4 +9,4 @@ This extension allows keeping track of the standings of `Ekstraklasa`, which is 
 
 ## Preview :rocket:
 
-![Demo](./metadata/demo-screenshot.png)
+![Demo](metadata/ekstraklasa-1.png)
