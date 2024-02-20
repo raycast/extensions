@@ -333,6 +333,7 @@
 /extensions/easydict                                 @tisfeng
 /extensions/ebird                                    @OozyGrub
 /extensions/ecosia-search                            @MFCo
+/extensions/ekstraklasa                              @szarbartosz
 /extensions/element                                  @Aayush9029
 /extensions/elgato-key-light                         @thomaspaulmann @omarshahine
 /extensions/elm-search                               @NeoVier
@@ -597,6 +598,7 @@
 /extensions/keyboard-shortcut-sequences              @SKaplanOfficial
 /extensions/keychain-password-gen                    @breadone
 /extensions/kill-process                             @rolandleth @crazyones110 @zhenpewu @Saafo @erics118
+/extensions/kimai                                    @marinsokol
 /extensions/kinopio-inbox                            @pketh
 /extensions/kinopoisk                                @mattisssa
 /extensions/knowwa                                   @d0utone
@@ -771,7 +773,7 @@
 /extensions/nixpkgs-search                           @aiotter
 /extensions/nmbs-planner                             @SamuelVanhaecke
 /extensions/node-js-evaluate                         @selfish
-/extensions/node-version-manager                     @AndresMorelos
+/extensions/node-version-manager                     @AndresMorelos @pernielsentikaer @LeOndaz
 /extensions/nos-news                                 @Joran-Dob
 /extensions/note-in-google-doc                       @mnttnm
 /extensions/noteplan-3                               @shakedlokits @lukerandall @pr1mal
@@ -849,6 +851,7 @@
 /extensions/passphrase-generator                     @omBratteng @pernielsentikaer
 /extensions/password-generator                       @joshuaiz
 /extensions/paste-as-plain-text                      @koinzhang @pantajoe
+/extensions/paste-from-apple-books                   @winann
 /extensions/pastebin                                 @vimtor
 /extensions/pdfsearch                                @kevin-pek
 /extensions/pera-explorer                            @akgunberk
@@ -998,6 +1001,7 @@
 /extensions/remove-paywall                           @tegola @whitespacecode @DannySeidel
 /extensions/render                                   @Destiner
 /extensions/replicate                                @KevinBatdorf @bfirsh @cbh123
+/extensions/repo-launcher                            @gksander
 /extensions/repology-search                          @sebdanielsson
 /extensions/repository-manager                       @Frameck
 /extensions/rescuetime-focus-session-trigger         @tuortheblessed @RobErskine
@@ -1077,6 +1081,7 @@
 /extensions/silent-mention                           @peduarte
 /extensions/simctl                                   @noppefoxwolf
 /extensions/simon                                    @andreaselia @pernielsentikaer
+/extensions/simple-icons                             @LitoMore
 /extensions/simple-reminder                          @comoser @pernielsentikaer
 /extensions/simple-youdao                            @xeric
 /extensions/simplebackups                            @zOxta
