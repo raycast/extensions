@@ -12,6 +12,10 @@ export async function deleteBookmark(id: string) {
   return supabase.from("bookmarks").delete().match({ id });
 }
 
+export async function moveBookmarkToGroup(bookmarkId: string, groupId: string) {
+  return supabase.from("bookmarks").update({ group_id: groupId }).match({ id: bookmarkId }).select();
+}
+
 export async function getBookmarksByGroupId(groupId: string) {
   return supabase
     .from("bookmarks")

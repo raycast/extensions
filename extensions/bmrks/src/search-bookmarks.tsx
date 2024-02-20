@@ -15,7 +15,7 @@ import { useAuth } from "../lib/use-auth";
 import { useGroups } from "../lib/use-groups";
 import { useBookmarks } from "../lib/use-bookmarks";
 import { getHostname } from "../lib/getHostname";
-import { deleteBookmark } from "../lib/db";
+import { deleteBookmark, moveBookmarkToGroup } from "../lib/db";
 
 export function SearchBookmarks({ user }: { user: User }) {
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
@@ -73,7 +73,7 @@ export function SearchBookmarks({ user }: { user: User }) {
 
                   <Action
                     style={Action.Style.Destructive}
-                    title="Delete"
+                    title="Delete Bookmark"
                     icon={Icon.Trash}
                     shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                     onAction={async () => {
@@ -87,6 +87,32 @@ export function SearchBookmarks({ user }: { user: User }) {
                       }
                     }}
                   />
+                  <ActionPanel.Section>
+                    <ActionPanel.Submenu title="Move to Group" icon={Icon.ArrowRight}>
+                      {groups &&
+                        groups.map((group) => {
+                          if (group.id === groupId) {
+                            return null;
+                          }
+                          return (
+                            <Action
+                              key={group.id}
+                              title={group.name}
+                              onAction={async () => {
+                                if (bookmark.id) {
+                                  showToast({ title: "Moving bookmark...", style: Toast.Style.Animated });
+                                  const res = await moveBookmarkToGroup(bookmark.id, group.id);
+                                  revalidate();
+                                  res.error
+                                    ? showToast({ title: "Failed to move bookmark", style: Toast.Style.Failure })
+                                    : showToast({ title: `Moved to ${group.name}`, style: Toast.Style.Success });
+                                }
+                              }}
+                            />
+                          );
+                        })}
+                    </ActionPanel.Submenu>
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
