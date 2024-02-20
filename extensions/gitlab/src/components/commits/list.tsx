@@ -79,6 +79,10 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
   );
 }
 
+function RecentCommitsListEmptyView(): JSX.Element {
+  return <List.EmptyView title="No Commits" icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }} />;
+}
+
 export function RecentCommitsList(): JSX.Element {
   const [project, setProject] = useState<Project>();
   const { data, error, isLoading } = useCache<Event[]>(
@@ -109,6 +113,7 @@ export function RecentCommitsList(): JSX.Element {
       {commits?.map((e) => (
         <EventCommitListItem event={e} key={`${e.id}`} />
       ))}
+      <RecentCommitsListEmptyView />
     </List>
   );
 }

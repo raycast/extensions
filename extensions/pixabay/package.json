@@ -5,6 +5,9 @@
   "description": "Search Images and Videos on pixabay.com",
   "icon": "pixabay.png",
   "author": "tonka3000",
+  "contributors": [
+    "mjherich"
+  ],
   "categories": [
     "Design Tools"
   ],

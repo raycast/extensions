@@ -42,6 +42,10 @@ export default function Command() {
 
 <PropsTableFromJSDoc component="Detail" />
 
+{% hint style="info" %}
+You can specify custom image dimensions by adding a `raycast-width` and `raycast-height` query string to the markdown image. For example: `![Image Title](example.png?raycast-width=250&raycast-height=250)`
+{% endhint %}
+
 ### Detail.Metadata
 
 A Metadata view that will be shown in the right-hand-side of the `Detail`.

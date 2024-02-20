@@ -7,7 +7,9 @@
   "author": "yuercl",
   "contributors": [
     "thomas",
-    "arronhunt"
+    "arronhunt",
+    "ronaldheft",
+    "navtoj"
   ],
   "categories": [
     "Productivity"
@@ -30,6 +32,14 @@
       "required": false,
       "title": "Search last days for 2FA",
       "type": "textfield"
+    },
+    {
+      "default": false,
+      "description": "For ignoring messages that have been seen",
+      "name": "ignoreRead",
+      "required": false,
+      "label": "Ignore already read messages",
+      "type": "checkbox"
     }
   ],
   "dependencies": {

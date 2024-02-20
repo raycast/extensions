@@ -1,5 +1,38 @@
 # Changelog
 
+## [Added keywords] - 2024-12-02
+
+- Added a few keywords to make the extension easier to find in the store.
+
+## [Feat] - 2024-01-31
+
+- Feature: Make responses display above the question
+
+## [Fix] - 2024-01-28
+
+- Fix: Proxy not working
+- Fix: Fetching model data lag entered the form view
+- Fix: Switching from "Ask Question" to "Full Text Input", the model change didn't work
+- Chore: Add react hook lint
+
+## [Fix] - 2024-01-19
+
+- Fix: Azure API 401 error
+
+## [Chore] - 2024-01-11
+
+- Migrate openai v3 to v4
+
+## [Fix] - 2024-01-01
+
+- Fix: Markdown output being truncated when streaming enabled with json parse error
+- Fix: Display question improperly in markdown with trailing whitespace
+- Fix: Showing error message when throwing Can't stream message error
+
+## [Fix] - 2023-08-23
+
+- Fixed an authentication error when listing models which caused a crash
+
 ## [Fix & Feature] - May, 18 2023
 
 - Feature: Custom API Endpoint

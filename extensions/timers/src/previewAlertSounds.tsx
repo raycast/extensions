@@ -4,12 +4,13 @@ import { Preferences } from "./types";
 import { soundData } from "./soundData";
 
 export default function Command() {
+  const prefs = getPreferenceValues<Preferences>();
+
   const playSound = (fileName: string) => {
     let command;
     if (fileName === "speak_timer_name") {
       command = `say "Untitled Timer"`;
     } else {
-      const prefs = getPreferenceValues<Preferences>();
       const selectedSoundPath = `${environment.assetsPath + "/" + fileName}`;
       command = `afplay "${selectedSoundPath}" --volume ${prefs.volumeSetting.replace(",", ".")}`;
     }
@@ -31,7 +32,7 @@ export default function Command() {
         <List.Item
           key={index}
           icon={item.icon}
-          title={item.title}
+          title={item.value === prefs.selectedSound ? `${item.title} (currently selected)` : item.title}
           actions={
             <ActionPanel>
               <Action title="Play Sound" onAction={() => playSound(item.value)} />

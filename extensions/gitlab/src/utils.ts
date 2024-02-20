@@ -26,9 +26,15 @@ export function projectIconUrl(project: Project): string | undefined {
   return result;
 }
 
+export function getFirstChar(text: string): string {
+  const firstChar = text.codePointAt(0);
+
+  return firstChar ? String.fromCodePoint(firstChar) : "";
+}
+
 export function projectIcon(project: Project): Image.ImageLike {
   const svgSource = () => {
-    return getSVGText(project.name[0].toUpperCase()) || GitLabIcons.project;
+    return getSVGText(getFirstChar(project.name)) || GitLabIcons.project;
   };
   let result: string = GitLabIcons.project;
   // TODO check also namespace for icon

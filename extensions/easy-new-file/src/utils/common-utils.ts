@@ -1,9 +1,11 @@
 import { runAppleScript } from "run-applescript";
-import { getSelectedFinderItems } from "@raycast/api";
+import { environment, getSelectedFinderItems } from "@raycast/api";
 import fse from "fs-extra";
 import { homedir } from "os";
 import { buildFileName } from "../new-file-here";
 import { imgExt } from "./constants";
+import { TemplateType } from "../types/file-type";
+import fileUrl from "file-url";
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -24,24 +26,6 @@ export const getFinderPath = async () => {
     return await runAppleScript(scriptFinderPath);
   } catch (e) {
     return "Finder not running";
-  }
-};
-
-const scriptChooseFile = `
-if application "Finder" is not running then
-    return "Not running"
-end if
-
-return POSIX path of (choose file)
-`;
-
-export const getChooseFile = async () => {
-  let finderPath = "";
-  try {
-    finderPath = await runAppleScript(scriptChooseFile);
-    return finderPath;
-  } catch (e) {
-    return finderPath;
   }
 };
 
@@ -89,7 +73,7 @@ export async function createNewFileWithText(
   fileExtension: string,
   saveDirectory: string,
   fileContent = "",
-  fileName = ""
+  fileName = "",
 ) {
   isEmpty(fileName)
     ? (fileName = buildFileName(saveDirectory, "Untitled", fileExtension))
@@ -97,4 +81,12 @@ export async function createNewFileWithText(
   const filePath = saveDirectory + fileName;
   fse.writeFileSync(filePath, fileContent);
   return { fileName: fileName, filePath: filePath };
+}
+
+export function getDetail(template: TemplateType) {
+  if (isImage("." + template.extension.toLowerCase())) {
+    return `<img src="${fileUrl(`${template.path}`)}" alt="${template.name}" height="190" />`;
+  } else {
+    return `<img src="${fileUrl(`${environment.assetsPath}/file-icon.png`)}" alt="${template.name}" height="190" />`;
+  }
 }

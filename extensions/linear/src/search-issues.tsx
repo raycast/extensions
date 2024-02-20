@@ -17,7 +17,7 @@ function SearchIssues() {
   const { issues, isLoadingIssues, mutateList } = useIssues(
     (query: string) => (query === "" ? getLastUpdatedIssues() : searchIssues(query)),
     [query],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();

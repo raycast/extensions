@@ -14,7 +14,7 @@ export interface Alternate {
 }
 
 export enum Type {
-  TextHTML = 'text/html'
+  TextHTML = "text/html",
 }
 
 export interface Item {
@@ -41,7 +41,7 @@ export interface Category {
 }
 
 export enum Label {
-  Dev = 'Dev'
+  Dev = "Dev",
 }
 
 export interface Origin {
@@ -66,6 +66,6 @@ export interface Visual {
 }
 
 export enum ContentType {
-  ImageJPEG = 'image/jpeg',
-  ImagePNG = 'image/png'
+  ImageJPEG = "image/jpeg",
+  ImagePNG = "image/png",
 }

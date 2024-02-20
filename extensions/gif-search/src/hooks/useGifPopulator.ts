@@ -29,7 +29,7 @@ export default function useGifPopulator() {
 
   const populate = useCallback(
     async function populate(ids: GifIds, service?: ServiceName, opt?: LocalOpt) {
-      const { offset = 0, limit, reverse } = opt || {};
+      const { limit, reverse } = opt || {};
 
       if (!service || !ids.size) {
         setIsLoadingGifs(false);
@@ -79,7 +79,7 @@ export default function useGifPopulator() {
 
   const populateAll = useCallback(
     async function populateAll(allIds: Map<ServiceName, GifIds>, opt?: LocalOpt) {
-      const { offset = 0, limit, reverse } = opt || {};
+      const { limit, reverse } = opt || {};
 
       if (!allIds.size) {
         setIsLoadingGifs(false);

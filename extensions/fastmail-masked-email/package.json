@@ -5,27 +5,37 @@
   "description": "Create a masked email address with Fastmail.",
   "icon": "mask.png",
   "author": "LightQuantum",
+  "contributors": [
+    "kpa"
+  ],
   "categories": [
     "Productivity",
     "Web"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "api_token",
-      "title": "Fastmail API Token",
-      "description": "Enter your Fastmail API Token.",
-      "type": "password",
-      "required": true
-    }
-  ],
   "commands": [
     {
-      "name": "index",
+      "name": "create",
       "title": "Create Masked Email",
       "subtitle": "Fastmail",
       "description": "Generate a new masked email address",
       "mode": "view"
+    },
+    {
+      "name": "list",
+      "title": "Show Masked Emails",
+      "subtitle": "Fastmail",
+      "description": "Show all your masked emails",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter your Fastmail API Token.",
+      "name": "api_token",
+      "required": true,
+      "title": "Fastmail API Token",
+      "type": "password"
     }
   ],
   "dependencies": {

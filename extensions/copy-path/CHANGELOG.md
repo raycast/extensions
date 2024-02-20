@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Copy Browser Tab URL] - 2023-10-10
+
+- Added the ability to copy the URL of the current tab of the browser
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0

@@ -4,7 +4,7 @@
   "title": "Anybox",
   "description": "Control Anybox with Raycast",
   "icon": "anybox-icon.png",
-  "author": "francisfeng",
+  "author": "anybox",
   "keywords": [
     "anybox",
     "bookmarks",
@@ -19,7 +19,7 @@
       "name": "search",
       "title": "Search Links",
       "subtitle": "Anybox",
-      "description": "Search for links and optionally collections in Anybox.",
+      "description": "Search for links and optionally tags in Anybox.",
       "mode": "view",
       "preferences": [
         {
@@ -31,28 +31,36 @@
           "placeholder": "Enter API Key from Anybox › Preferences › General"
         },
         {
-          "name": "searchCollections",
+          "name": "searchTags",
           "type": "checkbox",
           "required": false,
           "default": true,
-          "label": "Show Collections in Search Result",
-          "description": "Enable to also search collections and limit search scope to one specific collection."
+          "label": "Show Tags in Search Results",
+          "description": "Search tags and limit search scope to one specific tag."
         },
         {
-          "name": "searchLinkDescriptions",
+          "name": "searchFolders",
           "type": "checkbox",
           "required": false,
           "default": false,
-          "label": "Search Link Descriptions",
-          "description": "Also search link descriptions when searching for links."
+          "label": "Show Folders in Search Results",
+          "description": "Search folders and limit search scope to one specific folder."
         },
         {
-          "name": "usePinyin",
+          "name": "asIcons",
           "type": "checkbox",
           "required": false,
           "default": false,
-          "label": "Search by Pinyin",
-          "description": "Enable to also search link title by pinyin. Keep it disabled if you don’t know what it is."
+          "label": "As Icons",
+          "description": "Show search results as icons."
+        },
+        {
+          "name": "preferLinkIcons",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Prefer Link Icons in Icons view",
+          "description": "Show favicons instead of Open Graph images in Icons view if possible."
         }
       ]
     },
@@ -71,10 +79,17 @@
       "mode": "no-view"
     },
     {
-      "name": "saveCurrentTabWithCollections",
-      "title": "Save Current Tab With Collections",
+      "name": "saveCurrentTabWithTags",
+      "title": "Save Current Tab With Tags",
       "subtitle": "Anybox",
-      "description": "Save URL of current tab to Anybox with optional collections.",
+      "description": "Save URL of current tab to Anybox with optional tags.",
+      "mode": "view"
+    },
+    {
+      "name": "saveCurrentTabWithFolder",
+      "title": "Save Current Tab With Folder",
+      "subtitle": "Anybox",
+      "description": "Save URL of current tab to Anybox with optional folder.",
       "mode": "view"
     },
     {
@@ -85,17 +100,24 @@
       "mode": "no-view"
     },
     {
-      "name": "pasteWithCollections",
-      "title": "Save Clipboard With Collections",
+      "name": "pasteWithTags",
+      "title": "Save Clipboard With Tags",
       "subtitle": "Anybox",
-      "description": "Save clipboard to Anybox with optional collections.",
+      "description": "Save clipboard to Anybox with optional tags.",
+      "mode": "view"
+    },
+    {
+      "name": "pasteWithFolder",
+      "title": "Save Clipboard With Folder",
+      "subtitle": "Anybox",
+      "description": "Save clipboard to Anybox with optional Folder.",
       "mode": "view"
     },
     {
       "name": "saveNote",
       "title": "Save Note",
       "subtitle": "Anybox",
-      "description": "Save note to Anybox with optional collections.",
+      "description": "Save note to Anybox with optional tags.",
       "preferences": [
         {
           "name": "autoFill",
@@ -152,26 +174,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
-    "dayjs": "^1.11.5",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.62.2",
+    "dayjs": "^1.11.10",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "license": "MIT"
 }

@@ -13,7 +13,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
+import { formatHours, isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
 import dayjs from "dayjs";
@@ -38,7 +38,7 @@ export default function Command({
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
   const [taskId, setTaskId] = useState<string | undefined>(entry?.task.id.toString());
   const [notes, setNotes] = useState<string | undefined>(entry?.notes);
-  const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
+  const [hours, setHours] = useState<string | undefined>(formatHours(entry?.hours?.toFixed(2), company));
   const [spentDate, setSpentDate] = useState<Date>(viewDate);
   const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 
@@ -183,7 +183,7 @@ export default function Command({
   }
 
   function setTimeFormat(value?: string) {
-    // This function can be called direclty from the onBlur event to better match the Harvest app behavior when it exists
+    // This function can be called directly from the onBlur event to better match the Harvest app behavior when it exists
     if (!value) return;
 
     if (company?.time_format === "decimal") {

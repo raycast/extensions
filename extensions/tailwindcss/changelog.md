@@ -1,5 +1,18 @@
 # Tailwind CSS Changelog
 
+## [Fixed sorting] - 2023-10-16
+
+- Fixed incorrect color sorting when querying colors.
+
+## [Update] - 2023-09-06
+- Updated "Copy CSS" shortcut in Search Classes to cmd+shift+.
+- Updated Tailwind
+
+## [Add a preference to display CSS spacing units in pixels] - 2023-09-03
+
+## [Allow for HEX value search] - 2023-07-22
+- Add HEX values as possible keyword for the `Search Colors` command
+
 ## [Add actions to copy color class names] - 2023-03-12
 - Add actions to copy colors as background, text and border class names for the `Search Colors` command
 

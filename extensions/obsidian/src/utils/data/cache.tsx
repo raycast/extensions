@@ -55,7 +55,7 @@ export function cacheExistForVault(vault: Vault) {
 
 export function updateNoteInCache(vault: Vault, note: Note) {
   if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "");
+    const data = JSON.parse(cache.get(vault.name) ?? "{}");
     data.notes = data.notes.map((n: Note) => (n.path === note.path ? note : n));
     cache.set(vault.name, JSON.stringify(data));
   }
@@ -69,7 +69,7 @@ export function updateNoteInCache(vault: Vault, note: Note) {
  */
 export function deleteNoteFromCache(vault: Vault, note: Note) {
   if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "");
+    const data = JSON.parse(cache.get(vault.name) ?? "{}");
     data.notes = data.notes.filter((n: Note) => n.path !== note.path);
     cache.set(vault.name, JSON.stringify(data));
   }
@@ -77,12 +77,16 @@ export function deleteNoteFromCache(vault: Vault, note: Note) {
 
 export function getNotesFromCache(vault: Vault) {
   if (cacheExistForVault(vault)) {
-    const data = JSON.parse(cache.get(vault.name) ?? "");
-    if (data.lastCached > Date.now() - 1000 * 60 * 5) {
+    const data = JSON.parse(cache.get(vault.name) ?? "{}");
+    if (data.notes?.length > 0 && data.lastCached > Date.now() - 1000 * 60 * 5) {
       const notes_ = data.notes;
       console.log("Returning cached notes");
       return notes_;
     }
   }
   return cacheNotesFor(vault);
+}
+
+export function clearCache() {
+  cache.clear();
 }

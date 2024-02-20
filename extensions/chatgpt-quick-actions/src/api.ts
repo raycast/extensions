@@ -5,4 +5,4 @@ const configuration = new Configuration({
   apiKey: getPreferenceValues().apikey,
 });
 export const openai = new OpenAIApi(configuration);
-export const model = getPreferenceValues().model;
+export const global_model = getPreferenceValues().model;

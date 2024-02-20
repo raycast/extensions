@@ -48,10 +48,10 @@ type UseViewTasks = {
 };
 
 export default function useViewTasks(name: string, { tasks, optionsToExclude, data }: UseViewTasks) {
-  const projects = data?.projects ?? [];
-  const labels = data?.labels ?? [];
-  const collaborators = data?.collaborators ?? [];
-  const user = data?.user;
+  const projects = useMemo(() => data?.projects ?? [], [data]);
+  const labels = useMemo(() => data?.labels ?? [], [data]);
+  const collaborators = useMemo(() => data?.collaborators ?? [], [data]);
+  const user = useMemo(() => data?.user, [data]);
 
   const [sortBy, setSortBy] = useCachedState<SortByOption>(name + "sortby", "default");
   const [groupBy, setGroupBy] = useCachedState<GroupByOption>(name + "groupby", "default");
@@ -93,7 +93,7 @@ export default function useViewTasks(name: string, { tasks, optionsToExclude, da
     };
 
     return { sortedTasks, sortByProp, orderByProp };
-  }, [tasks, sortBy, orderBy, projects, labels]);
+  }, [tasks, sortBy, setSortBy, optionsToExclude, orderBy, setOrderBy, collaborators, projects]);
 
   const { sections, groupByProp } = useMemo(() => {
     let sections: SectionWithTasks[] = [];
@@ -133,7 +133,7 @@ export default function useViewTasks(name: string, { tasks, optionsToExclude, da
     };
 
     return { sections, groupByProp };
-  }, [sortedTasks, groupBy, projects, labels]);
+  }, [sortedTasks, groupBy, setGroupBy, optionsToExclude, collaborators, user, labels, projects]);
 
   const viewProps: ViewProps = {
     groupBy: groupByProp,

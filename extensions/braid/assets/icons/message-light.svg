@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_14" data-name="14" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #000;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <g id="chat">
+    <path class="cls-1" d="M12,3C7.02944,3,3,7.02944,3,12c0,1.77094,.51184,3.42219,1.39516,4.81452l-1.39516,4.18548,4.90854-.98171c1.22753,.62762,2.61813,.98171,4.09146,.98171,4.97056,0,9-4.02944,9-9S16.97056,3,12,3Z"/>
+  </g>
+</svg>

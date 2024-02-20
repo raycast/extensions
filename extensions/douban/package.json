@@ -5,7 +5,12 @@
   "description": "Search Something on Douban",
   "icon": "douban.png",
   "author": "crazyczy",
-  "categories": ["Web"],
+  "contributors": [
+    "iiwenwen"
+  ],
+  "categories": [
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {

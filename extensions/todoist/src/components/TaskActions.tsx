@@ -6,6 +6,7 @@ import {
   AddTaskArgs,
   MoveTaskArgs,
   Reminder,
+  SyncData,
   Task,
   UpdateTaskArgs,
   addTask,
@@ -26,9 +27,8 @@ import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
 import { displayReminderName } from "../helpers/reminders";
-import { getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
-import { QuickLinkView, ViewMode } from "../home";
-import useCachedData from "../hooks/useCachedData";
+import { ViewMode, getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
+import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
 import { ViewProps } from "../hooks/useViewTasks";
 
@@ -45,6 +45,8 @@ type TaskActionsProps = {
   fromDetail?: boolean;
   mode?: ViewMode;
   viewProps?: ViewProps;
+  data?: SyncData;
+  setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
   quickLinkView?: QuickLinkView;
 };
 
@@ -53,12 +55,13 @@ export default function TaskActions({
   fromDetail,
   viewProps,
   mode,
+  data,
+  setData,
   quickLinkView,
 }: TaskActionsProps): JSX.Element {
   const { pop } = useNavigation();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
-  const [data, setData] = useCachedData();
 
   const projects = data?.projects;
   const comments = data?.notes;
@@ -251,10 +254,15 @@ export default function TaskActions({
 
         <Action.PickDate
           title="Schedule Task"
-          type={Action.PickDate.Type.Date}
+          type={Action.PickDate.Type.DateTime}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onChange={(date) =>
-            updateTask({ id: task.id, due: date ? { date: getAPIDate(date) } : { string: "no due date" } })
+            updateTask({
+              id: task.id,
+              due: date
+                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                : { string: "no due date" },
+            })
           }
         />
 

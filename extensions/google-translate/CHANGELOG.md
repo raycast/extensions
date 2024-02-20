@@ -1,12 +1,60 @@
 # Google Translate Changelog
 
+## [Enhancement] - 2024-01-26
+
+ - Added "Autofill Input" preference to allow users to disable the autofill selected text feature
+
+## [Feature] - 2024-01-20
+
+ - Added new "Quick Translate" command
+
+## [Enhancement] - 2023-11-15
+
+ - Added Copy Pronunciation keyboard shortcut
+
+## [Enhancement] - 2023-08-31
+
+ - Added pronunciation for Translate and Translate Form
+
+## [Fix] - 2023-08-16
+
+ - Fixed case when autodetect language name is not found in our supported languages list
+
+## [Fix] - 2023-08-09
+
+- Fixed auto language detect when detected language is not in the available list
+- Added Latin
+
+## [Fix] - 2023-06-21
+
+- Supplementary change for zh-TW info to match Google Translate
+
+## [Fix] - 2023-06-21
+
+- Changed zh-TW info to match Google Translate
+
+## [Fix] - 2023-06-15
+
+- Fixed language code for Hebrew
+
+## [Enhancement] - 2023-05-30
+
+- Added ability to translate selected text
+
+## [Enhancement] - 2023-05-22
+
+- Added error handling
+- Updated the Raycast libraries to the latest version.
+- Translations are now identical to translate.google.com 🎉
+- Ideally, there should be no more TooManyRequests errors now! 🚀
+
 ## [Enhancement] - 2023-02-10
 
 - Add Languages Set manager to be able to configure multiple language presets and easy switch between them
 
 ## [Enhancements] - 2023-02-09
 
-- Retuned back LangTo -> LangFrom translation
+- Returned back LangTo -> LangFrom translation
 - Improved auto-detect translation in Translate Form
 
 ## [Add auto-detect option] - 2023-02-07

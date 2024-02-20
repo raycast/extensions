@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Fix Deeplink] - 2023-06-12
+
+- Fix the problem that deeplink cannot be opened normally
+
 ## [Optimize Path Logic] - 2023-03-30
 
 - Optimize the judgment logic of opening path

@@ -3,6 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import fetch from "node-fetch";
 import { Fragment, useEffect, useState } from "react";
 import { DomainPricing, Response } from "./utils/types";
+import { API_DOCS_URL, TLD_SVG_BASE_URL } from "./utils/constants";
 
 export default function DomainPricing() {
   const [isLoading, setIsLoading] = useState(false);
@@ -62,7 +63,7 @@ export default function DomainPricing() {
           if (Math.floor((Number(new Date()) - Number(updatedOn)) / (1000 * 60 * 60 * 24)) > 0) {
             if (
               await confirmAlert({
-                title: "Reload domains?",
+                title: "Reload domain pricing?",
                 message: "It has been at least 24 hours since domain pricing was last fetched.",
                 primaryAction: { title: "Reload" },
               })
@@ -96,12 +97,8 @@ export default function DomainPricing() {
       navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
-          <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
-          <Action.OpenInBrowser
-            icon={Icon.Globe}
-            title="Go to API Reference"
-            url="https://porkbun.com/api/json/v3/documentation#Domain%20Pricing"
-          />
+          <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />
+          <Action.OpenInBrowser icon={Icon.Globe} title="Go to API Reference" url={`${API_DOCS_URL}Domain%20Pricing`} />
         </ActionPanel>
       }
       searchBarAccessory={
@@ -119,18 +116,20 @@ export default function DomainPricing() {
         Object.entries(filteredList).map(([domain, pricing]) => (
           <List.Item
             icon={{
-              source: `https://porkbun-media.s3-us-west-2.amazonaws.com/tld-buns/_${domain}.svg`,
+              source: `${TLD_SVG_BASE_URL}${domain}.svg`,
               fallback: "porkbun.png",
             }}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://porkbun.com/tld/${domain}`} />
-                <Action icon={Icon.Redo} title="Reload Domains" onAction={callApi} />
-                <Action.OpenInBrowser
-                  icon={Icon.Globe}
-                  title="Go to API Reference"
-                  url="https://porkbun.com/api/json/v3/documentation#Domain%20Pricing"
-                />
+                <Action icon={Icon.Redo} title="Reload Domain Pricing" onAction={callApi} />
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    icon={Icon.Globe}
+                    title="Go to API Reference"
+                    url={`${API_DOCS_URL}Domain%20Pricing`}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
             key={domain}

@@ -81,7 +81,7 @@ const normalizeText = (text: string) =>
 
 export const search = (collection: object[], keys: string[], searchText: string) =>
   _.filter(collection, (item) =>
-    _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText)))
+    _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText))),
   );
 
 const dtf = new Intl.DateTimeFormat(undefined, {

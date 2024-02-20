@@ -1,5 +1,5 @@
 import { IssueFragment, IssueResult } from "./getIssues";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type CreateIssuePayload = {
   title: string;
@@ -13,6 +13,7 @@ export type CreateIssuePayload = {
   assigneeId?: string;
   cycleId?: string;
   projectId?: string;
+  projectMilestoneId?: string;
   parentId?: string;
 };
 
@@ -48,6 +49,10 @@ export async function createIssue(payload: CreateIssuePayload) {
     issueCreateInput += `, projectId: "${payload.projectId}"`;
   }
 
+  if (payload.projectId && payload.projectMilestoneId) {
+    issueCreateInput += `, projectMilestoneId: "${payload.projectMilestoneId}"`;
+  }
+
   if (payload.parentId) {
     issueCreateInput += `, parentId: "${payload.parentId}"`;
   }
@@ -65,7 +70,7 @@ export async function createIssue(payload: CreateIssuePayload) {
           }
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueCreate.success, issue: data?.issueCreate.issue };
@@ -98,7 +103,7 @@ export async function createSubIssue(payload: CreateSubIssuePayload) {
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.issueCreate.success };

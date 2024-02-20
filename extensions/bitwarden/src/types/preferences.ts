@@ -14,4 +14,5 @@ export type Preferences = {
   repromptIgnoreDuration: string;
   generatePasswordQuickAction: "paste" | "copy" | "copyAndPaste";
   shouldCacheVaultItems: boolean;
+  windowActionOnCopy: "keepOpen" | "close" | "closeAndPopToRoot";
 } & TransientCopyPreferences;

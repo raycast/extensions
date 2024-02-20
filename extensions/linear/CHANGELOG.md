@@ -1,5 +1,41 @@
 # Linear Changelog
 
+## [Fix images in issues] - 2024-02-02
+
+- Images are now properly loaded when looking at the details of an issue.
+
+## [Use OAuth utils] - 2024-02-01
+
+- Use new OAuth utils
+
+## [Fix projects search not working] - 2024-01-30
+
+- The projects search was not working in case there were no roadmaps available. This is now fixed.
+
+## [Add Favorites command] - 2024-01-05
+
+- Add `Favorites` command to browse your Linear favorites right from Raycast.
+
+## [Add issue links] - 2023-12-29
+
+- Add support for issue links. It is now possible to see the number of links an issue has from the detail view. You can also browse them in a dedicated view.
+
+## [Mark notification as read without opening it] - 2023-11-16
+
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+
+## [Include team key as keyword in Create Issue command] - 2023-09-22
+
+Added the team key as a keyword in the "Create Issue" function so that it will appear when the user searches for a key.
+
+## [Fix] - 2023-08-23
+
+Fixed "Workflow state not in same team as issue" error for Break Issue into Sub-issues error.
+
+## [Add milestone functionality] - 2023-08-16
+
+Linear now allows users to create milestones within projects. This feature is now available on this extension.
+
 ## [Add "Break Issue Into Sub-Issues" action] - 2023-05-09
 
 Thanks to AI, the Linear extension has a new issue action: `Break Issue Into Sub-Issues`. It takes the issue title and description as context and generates actionable sub-issues that you can choose to create or not.

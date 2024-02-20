@@ -1,5 +1,70 @@
 # Todoist Changelog
 
+## [Add time to Schedule Task action] - {PR_MERGE_DATE}
+
+It's now possible to specify a time when scheduling a task from the list item.
+
+## [Change Menu Bar Icon Color in Dark Mode] - 2024-01-22
+
+Changed Menu bar icon color in dark mode to #e5e5e5.
+
+## [Show filters and filter tasks] - 2023-12-18
+
+You can now view your Todoist filters and see all tasks associated with a selected filter.
+
+## [Focused task] - 2023-10-30
+
+You can now directly open the focused task via a Raycast command.
+
+## [Duration support] - 2023-09-20
+
+You can now create tasks with durations in "Create Task," as well as choose dates with times.
+
+## [View task in Raycast from menu bar] - 2023-06-29
+
+When using menu bar you may want to take a closer a look at your task description without opening the Todoist app. This change adds a way to quickly preview any task from menu bar on Raycast floating window.
+
+It also enhances user experience in the following ways:
+
+- Add subtask count to the task detail view in Raycast, so you can quickly see how many subtasks you have for each task.
+- Fix null issue when Editing task without changing any field (#7057)
+- Truncate menu bar task content to 50 characters to improve user experience.
+
+Happy viewing!
+
+## [Subtasks on menu bar] - 2023-06-14
+
+This update adds subtasks to the menu bar tasks options. Thanks to this change, you can now break down tasks on the app and work on them one step at a time while still using the menu bar for navigation.
+
+Happy task breaking!
+
+## [Show task count for projects] - 2023-06-07
+
+This update adds a new feature to display the `task count` besides project name in the `Show Projects` view. Note it's set to off by default in the command's preferences.
+
+## [Filter view menu bar] - 2023-06-05
+
+This updates adds a new view on menu bar called filter. When set, you can specify a custom [Filter Query](https://todoist.com/help/articles/205248842) to only show those tasks that matter the most to you in the menu bar.
+
+It also improves user experience by addressing the following bugs:
+
+- Fix an issue grouping tasks by due date when local is not UTC.
+
+Happy filtering!
+
+## [Search command and bug fixes] - 2023-06-02
+
+This update adds a new command called `Search`, allowing you to search among your Todoist tasks, projects, labels, and comments. Please note that the `All Tasks` view of the `Home` command has been moved to the `Search` command.
+
+It also enhances the user experience by addressing and fixing several bugs:
+
+- The `JS heap out of memory error` in the menu bar has been resolved (still not the case for other commands)
+- The ability to focus on tasks outside the menu bar tasks has been added for improved usability
+- The `Quick Add Task` command now works properly a fallback command
+- The dates with a datetime should be placed in full dates sections
+
+Happy searching!
+
 ## [Todoist v2] - 2023-05-12
 
 The Todoist extension has been completely revamped for a cleaner, better and smoother Raycast experience. The goal of this extension is clear: make you able to use Todoist anytime, anywhere, for anything on your computer using the power of Raycast. This update is packed with new features, so let's jump right into them.
@@ -15,7 +80,6 @@ To start using the extension, you previously had to go to Todoist settings, then
 ### Better performance and always fresh data
 
 Navigating across the extension is now smoother and faster. Plus, your data can stay always fresh by activating the `Background Refresh` option in the `Menu Bar Tasks` command. This has been made possible by using Todoist's Sync API instead of the REST API. The Sync API is actually used by Todoist's own clients and also unlocks ton of new features, which brings us to the next feature...
-
 
 ### Assignee Support
 
@@ -40,14 +104,16 @@ There's also significant improvements to labels with this update: introducing th
 ### Menu Bar improvements
 
 The menu bar command also gets its own set of improvements:
+
 - Hide the tasks count in the command's preferences if you want to have a cleaner (and maybe more stress-free) menu-bar
 - Add a label or an assignee to a task
-- Quickly access your tasks views (`Inbox`, `Today`, etc.), or other commands such as `Create Task` or `Create Project` 
+- Quickly access your tasks views (`Inbox`, `Today`, etc.), or other commands such as `Create Task` or `Create Project`
 - Also, some bugs have been fixed which should make the menu-bar smoother to use
 
 ### Quality of Life Improvements
 
 This changelog is getting long, isn't it? I'd be happy to tell you more about other updates but it'd get way longer so let's just put up a list for the rest of them:
+
 - See your sub-tasks from a task list item (`⌘` + `⇧` + `T`)
 - See the task's project section from within the list
 - Set the parent task of another task if you want to make-it a sub-task (`⌘` + `⇧` + `M`)

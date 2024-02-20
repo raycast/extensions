@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dust-tt",
+  "title": "Ask Dust",
+  "description": "Query dust.tt AI agents",
+  "icon": "dust.png",
+  "author": "vineus",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Your Dust API key",
+      "type": "password",
+      "required": true,
+      "title": "API key",
+      "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "workspaceId",
+      "description": "Your Dust workspace ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Workspace ID",
+      "placeholder": "xxxxxxxx"
+    }
+  ],
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Dust",
+      "description": "Query dust.tt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ask a question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askGpt",
+      "title": "Ask GPT-4",
+      "description": "Query gpt-4 on Dust.tt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ask a question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Questions History",
+      "description": "Show the questions and answers of the last 30 days",
+      "mode": "view"
+    },
+    {
+      "name": "askAgent",
+      "title": "Ask A Dust Agent",
+      "description": "Select an agent to ask a question",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
+    "date-fns": "^3.0.0-alpha.2",
+    "eventsource-parser": "^1.1.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

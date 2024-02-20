@@ -11,7 +11,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { TRANS_SERVICES_NAMES } from "../common/const";
-import { clearAllHistory, getHistories, getLang, say } from "../common/itranslate.shared";
+import { clearAllHistory, getHistories, getLang } from "../common/itranslate.shared";
 import { useEffect, useState } from "react";
 
 export function TranslateHistory() {
@@ -124,12 +124,6 @@ export function TranslateHistory() {
               <ActionPanel>
                 <CopyResSubmenu history={history} />
                 <Action.CopyToClipboard title="Copy Source to Clipboard" content={history.text} />
-                <Action
-                  title="Play Source Sound"
-                  icon={Icon.SpeakerOn}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  onAction={() => say(history.text, getLang(history.from))}
-                />
                 <Action
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   title="Clear All Histories"

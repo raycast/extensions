@@ -94,7 +94,7 @@ function Secret({
 async function fetchSecrets(
   search: string,
   token?: string,
-  accSecrets?: SecretListEntry[]
+  accSecrets?: SecretListEntry[],
 ): Promise<SecretListEntry[]> {
   if (search.length < 4) return [];
   if (!isReadyToFetch()) return [];
@@ -103,7 +103,7 @@ async function fetchSecrets(
     new ListSecretsCommand({
       NextToken: token,
       Filters: [{ Key: "all", Values: [search] }],
-    })
+    }),
   );
 
   const combinedLogGroups = [...(accSecrets || []), ...(SecretList || [])];
@@ -118,7 +118,7 @@ async function fetchSecrets(
 async function fetchSecret(arn?: string): Promise<{ SecretString?: string; SecretBinary?: Uint8Array } | undefined> {
   if (!arn) return;
   const { SecretString, SecretBinary } = await new SecretsManagerClient({}).send(
-    new GetSecretValueCommand({ SecretId: arn })
+    new GetSecretValueCommand({ SecretId: arn }),
   );
   return { SecretString, SecretBinary };
 }

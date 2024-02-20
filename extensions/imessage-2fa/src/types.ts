@@ -7,6 +7,7 @@ export interface Message {
 
 export interface Preferences {
   lookBackDays?: string;
+  ignoreRead: boolean;
 }
 
 export type SearchType = "all" | "code";

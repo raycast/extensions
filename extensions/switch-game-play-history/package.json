@@ -35,6 +35,24 @@
       "required": false
     },
     {
+      "name": "GAME_TITLE_LANGUAGE_CODE",
+      "title": "Game Title Language (Beta)",
+      "description": "Game title language depends on your Nintendo accout region. If you choose English, the English game title will be displayed as much as possible. For games that cannot be obtained, the original title is displayed.",
+      "type": "dropdown",
+      "default": "original",
+      "required": false,
+      "data": [
+        {
+          "value": "ORIG",
+          "title": "Original"
+        },
+        {
+          "value": "US",
+          "title": "English"
+        }
+      ]
+    },
+    {
       "name": "SYNC_TO_NOTION",
       "title": "Sync to Notion (Beta)",
       "description": "Sync your play history to Notion.If you want to use this feature, please set `Notion API Key` and `Notion Database ID`.",

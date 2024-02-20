@@ -6,13 +6,16 @@ import { VideoItem } from "./video";
 import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import { getPinnedVideos, getRecentVideos } from "./recent_videos";
 import { Preferences } from "../lib/types";
+import { FilterDropdown } from "./dropdown";
+import { useCachedState } from "@raycast/utils";
 
 export function SearchVideoList({ channelId, searchQuery }: { channelId?: string; searchQuery?: string | undefined }) {
   const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
+  const [order, setOrder] = useCachedState<string>("search-video-order", "relevance");
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(
-    async () => (searchText ? await searchVideos(searchText, channelId) : undefined),
-    [searchText]
+    async () => (searchText ? await searchVideos(searchText, channelId, { order: order }) : undefined),
+    [searchText, order],
   );
   if (error) {
     showToast(Toast.Style.Failure, "Could Not Search Videos", getErrorMessage(error));
@@ -37,6 +40,7 @@ export function SearchVideoList({ channelId, searchQuery }: { channelId?: string
     <ListOrGrid
       isLoading={isLoading}
       columns={griditemsize}
+      searchBarAccessory={<FilterDropdown onChange={setOrder} defaultValue={order} />}
       aspectRatio={"4/3"}
       onSearchTextChange={setSearchText}
       throttle={true}

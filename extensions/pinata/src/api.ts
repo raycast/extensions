@@ -4,7 +4,6 @@ import axios from "axios";
 
 interface Preferences {
   PINATA_JWT: string;
-  SUBMARINE_KEY: string;
   GATEWAY: string;
 }
 
@@ -50,11 +49,9 @@ interface Metadata {
 
 const preferences = getPreferenceValues<Preferences>();
 const JWT = `Bearer ${preferences.PINATA_JWT}`;
-const SUBMARINE_KEY = preferences.SUBMARINE_KEY;
-const GATEWAY = preferences.GATEWAY;
 
 export function getPinned() {
-  return useFetch<PinnedResponse>(
+  const data = useFetch<PinnedResponse>(
     "https://api.pinata.cloud/data/pinList?includesCount=false&status=pinned&pageLimit=100",
     {
       headers: {
@@ -70,41 +67,17 @@ export function getPinned() {
             onAction: () => openExtensionPreferences(),
           },
         });
+        console.log(error);
       },
     }
   );
+  return data;
 }
 
-export function getSubmarinedPinned() {
-  return useFetch<SubmarinedPinnedResponse>("https://managed.mypinata.cloud/api/v1/content?status=pinned&limit=100", {
-    headers: {
-      "x-api-key": `${SUBMARINE_KEY}`,
-    },
-    onError: (error: Error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Failed to fetch`,
-        message: `Check and make sure the API key is valid`,
-        primaryAction: {
-          title: "Change  Preferences",
-          onAction: () => openExtensionPreferences(),
-        },
-      });
-    },
-  });
-}
-
-export function deleteFileByHash(hash) {
+export function deleteFileByHash(hash: string) {
   return axios.delete(`https://api.pinata.cloud/pinning/unpin/${hash}`, {
     headers: {
       Authorization: JWT,
-    },
-  });
-}
-export function deleteSubmarineFileByHash(id) {
-  return axios.delete(`https://managed.mypinata.cloud/api/v1/content/${id}`, {
-    headers: {
-      "x-api-key": `${SUBMARINE_KEY}`,
     },
   });
 }

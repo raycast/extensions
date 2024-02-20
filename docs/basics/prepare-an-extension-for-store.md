@@ -13,10 +13,8 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure you use `MIT` in the `license` field
   - Ensure you are using the latest Raycast API version
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
-- Please check the terms of service of third-party services that your extension uses. If your extension doesn't comply with their terms, include a warning in your extension's README. The warning should be similar to:
-
-  > Warning: This extension is not compliant with the Terms of Service of \[service name]. Use at your own risk.
-
+- Please check the terms of service of third-party services that your extension uses.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -162,7 +160,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 ```markdown
 # Brew Changelog
 
-## [Added a bunch of new feedback] - 2022-01-17
+## [Added a bunch of new feedback] - 2023-01-17
 
 - Improve reliability of `outdated` command
 - Add action to copy formula/cask name
@@ -245,7 +243,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
   - ❌ `Copy url`, `set project`, `Set priority`
 - Provide icons for actions if there are other actions with icons in the list
   - Avoid having a list of actions where some have icons and some don't
-- Add ellipses `…` for actions that will have a submenu. Don't repeat parent the action name in the submenu
+- Add ellipses `…` for actions that will have a submenu. Don't repeat the parent action name in the submenu
   - ✅ `Set Priority…` and submenu would have `Low`, `Medium`, `High`
   - ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
 

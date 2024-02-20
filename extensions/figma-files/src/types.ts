@@ -3,6 +3,14 @@ export type File = {
   last_modified: string;
   name: string;
   thumbnail_url: string;
+  branches: Branch[];
+};
+
+export type Branch = {
+  key: string;
+  last_modified: string;
+  name: string;
+  thumbnail_url: string;
 };
 
 export type Project = {

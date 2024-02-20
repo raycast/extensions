@@ -2,20 +2,23 @@ import { Toast, showToast } from "@raycast/api";
 import { CommandNotFoundError } from "./commandNotFoundError";
 import { UnknownError } from "./unknownError";
 
-export const ErrorDetails = (args: { error: Error }) => {
-  if (args.error.message.includes("command not found")) {
+const mask = (content: string, mask: string) => content.replace(mask, "*".repeat(mask.toString().length));
+
+export const ErrorDetails = (args: { maskPattern: string; error: string }) => {
+  const maskedError = mask(args.error, args.maskPattern);
+  if (args?.error?.includes("command not found")) {
     showToast({
       style: Toast.Style.Failure,
       title: "LastPass CLI not found",
-      message: args.error.message,
+      message: maskedError,
     });
     return <CommandNotFoundError />;
   } else {
     showToast({
       style: Toast.Style.Failure,
       title: "Something went wrong",
-      message: args.error.message,
+      message: maskedError,
     });
-    return <UnknownError error={args.error} />;
+    return <UnknownError error={maskedError} />;
   }
 };

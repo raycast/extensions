@@ -1,0 +1,7 @@
+diff --git a/node_modules/fluent-ffmpeg/index.js b/node_modules/fluent-ffmpeg/index.js
+index 04e594c..68a1522 100644
+--- a/node_modules/fluent-ffmpeg/index.js
++++ b/node_modules/fluent-ffmpeg/index.js
+@@ -1 +1 @@
+-module.exports = process.env.FLUENTFFMPEG_COV ? require('./lib-cov/fluent-ffmpeg') : require('./lib/fluent-ffmpeg');
++module.exports = require('./lib/fluent-ffmpeg');

@@ -1,6 +1,6 @@
 # `useSQL`
 
-Hook which executes a query on a local SQL database and returns the [AsyncState](#asyncstate) corresponding to the execution of the query. The last value will be kept between command runs.
+Hook which executes a query on a local SQL database and returns the [AsyncState](#asyncstate) corresponding to the execution of the query.
 
 ## Signature
 
@@ -61,7 +61,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, permissionView } = useSQL<NoteItem>(NOTES_DB, notesQuery);
 
   if (permissionView) {
@@ -75,7 +75,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -97,7 +97,7 @@ type NoteItem = {
   title: string;
 };
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate, permissionView } = useFetch("https://api.example");
 
   if (permissionView) {
@@ -145,7 +145,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Types

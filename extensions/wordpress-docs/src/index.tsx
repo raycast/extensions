@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { XMLParser } from "fast-xml-parser";
-import { useFetch, Response } from "@raycast/utils";
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { useAI, useFetch } from "@raycast/utils";
+import { ActionPanel, Action, List, Icon, environment, AI, Detail } from "@raycast/api";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -84,8 +84,63 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
-            <Action.CopyToClipboard title="Copy URL to Clipboard" content={searchResult.url} />
+            <DefaultActions searchResult={searchResult} />
+            {environment.canAccess(AI) && (
+              <Action.Push
+                title="View Summary"
+                icon={Icon.Paragraph}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                target={<Summary searchResult={searchResult} />}
+              />
+            )}
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function DefaultActions({ searchResult }: { searchResult: SearchResult }) {
+  return (
+    <>
+      <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
+      <Action.CopyToClipboard title="Copy URL to Clipboard" content={searchResult.url} />
+    </>
+  );
+}
+
+function Summary({ searchResult }: { searchResult: SearchResult }) {
+  const item = JSON.stringify(searchResult);
+  const prompt = `Summarize the following from the WordPress documentation and give one example of usage in a code block. Add the language to the code block like \`\`\`php. The context can only be about WordPress. Format the response as if you are providing documentation:\n${item}`;
+  const { data, isLoading } = useAI(prompt, { creativity: 0 });
+  const code = data.match(/```[\w\S]*\n([\s\S]*?)\n```/);
+
+  return (
+    <Detail
+      navigationTitle="AI Generated Summary"
+      isLoading={isLoading}
+      markdown={data}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Continue in Chat"
+              icon={Icon.SpeechBubble}
+              url={`raycast://extensions/raycast/raycast-ai/ai-chat?fallbackText=${encodeURIComponent(prompt)}`}
+            />
+            <DefaultActions searchResult={searchResult} />
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              title="Copy Summary To Clipboard"
+              content={data}
+            />
+            {code?.[1] ? (
+              <Action.CopyToClipboard
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                title="Copy Snippet To Clipboard"
+                content={code[1].replace(/`{3}/g, "")}
+              />
+            ) : null}
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -2,26 +2,29 @@ import { Grid } from "@raycast/api";
 import { IPlayHistory } from "../types/nintendo";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { getGameTitle, useGameTitleName } from "../helpers/nintendo";
 dayjs.extend(relativeTime);
 
-export const PlayHistoriesGridItem = ({ history }: { history: IPlayHistory }) => {
+export const PlayHistoriesGridItem = ({ data }: { data: IPlayHistory }) => {
+  const gameTitle = useGameTitleName(data.titleId);
+  data.titleName = gameTitle.data || data.titleName;
   const totalPlayTime =
-    history.totalPlayedMinutes < 60
-      ? history.totalPlayedMinutes + " min"
-      : Math.floor(history.totalPlayedMinutes / 60) + " hr " + (history.totalPlayedMinutes % 60) + " min";
+    data.totalPlayedMinutes < 60
+      ? data.totalPlayedMinutes + " min"
+      : Math.floor(data.totalPlayedMinutes / 60) + " hr " + (data.totalPlayedMinutes % 60) + " min";
   const tooltip = [
-    "[" + history.titleName + "]",
-    "First Played: " + dayjs(history.firstPlayedAt).fromNow(),
-    "Last Played: " + dayjs(history.lastPlayedAt).fromNow(),
+    "[" + data.titleName + "]",
+    "First Played: " + dayjs(data.firstPlayedAt).fromNow(),
+    "Last Played: " + dayjs(data.lastPlayedAt).fromNow(),
     "Total Playtime: " + totalPlayTime,
   ].join("\n");
   return (
     <Grid.Item
       content={{
         tooltip,
-        value: history.imageUrl,
+        value: data.imageUrl,
       }}
-      title={history.titleName}
+      title={data.titleName}
       subtitle={totalPlayTime}
     />
   );

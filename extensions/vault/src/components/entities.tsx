@@ -24,13 +24,13 @@ import {
   deleteEnabled,
   writeEnabled,
 } from "../utils";
-import { VaultAuth, VaultEntity } from "../interfaces";
+import { VaultEntity, VaultMount } from "../interfaces";
 
 function VaultAddEntity(props: { entity?: VaultEntity }) {
   const { push } = useNavigation();
   const edit = props.entity !== undefined;
 
-  const [auths, setAuths] = useState<VaultAuth[]>([]);
+  const [auths, setAuths] = useState<VaultMount[]>([]);
   const [policies, setPolicies] = useState<string[]>([]);
 
   const { isLoading } = usePromise(async () => {
@@ -175,8 +175,14 @@ export function VaultEntities() {
   }
 
   return (
-    <List filtering={true} isShowingDetail={showDetails} isLoading={isLoading}>
+    <List
+      filtering={true}
+      isShowingDetail={showDetails}
+      isLoading={isLoading}
+      searchBarPlaceholder="Search in entities"
+    >
       <List.EmptyView
+        title={"No entities found"}
         actions={
           <ActionPanel>
             <Configuration />

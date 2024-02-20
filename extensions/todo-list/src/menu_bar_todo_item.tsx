@@ -17,11 +17,11 @@ export default function MenuBarTodoItem({
 
   return (
     <MenuBarExtra.Item
-      title={`${item.completed ? "✓" : "○"}  ${item.title}`}
       onAction={async () => {
         toggleTodo();
         await setTimeout(1);
       }}
+      title={`${item.completed ? "✓" : "○"}  ${item.title}`}
     />
   );
 }

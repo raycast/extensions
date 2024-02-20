@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wordreference",
+  "title": "WordReference Dictionary Translation",
+  "description": "Quickly find a word translation using WordReference",
+  "version": "1.1.0",
+  "icon": "icon.png",
+  "author": "Katatsu",
+  "categories": [
+    "Productivity",
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchTranslations",
+      "title": "Translate Word",
+      "subtitle": "WordReference",
+      "description": "Translate a word and find its definitions using WordReference",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "word",
+          "placeholder": "Word",
+          "type": "text"
+        },
+        {
+          "name": "language",
+          "placeholder": "Language",
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "useSelectedText",
+          "title": "Selected text",
+          "description": "When enabled, the extension will automatically search the selected text",
+          "type": "checkbox",
+          "label": "Automatically use the selected text.",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.0",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

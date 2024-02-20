@@ -5,6 +5,9 @@
   "description": "The Raycast version of Espanso Search Bar",
   "icon": "espanso-logo.png",
   "author": "kud",
+  "contributors": [
+    "nbbaier"
+  ],
   "categories": [
     "Applications",
     "System",
@@ -18,19 +21,49 @@
       "subtitle": "Espanso",
       "description": "The Raycast version of Espanso Search Bar",
       "mode": "view"
+    },
+    {
+      "name": "add-match",
+      "title": "Add Match",
+      "subtitle": "Espanso",
+      "description": "Add a match to your Espanso config",
+      "mode": "view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Espanso",
+      "subtitle": "Espanso",
+      "description": "Enable or disable Espanso",
+      "mode": "no-view"
+    },
+    {
+      "name": "enable",
+      "title": "Enable Espanso",
+      "subtitle": "Espanso",
+      "description": "Enable Espanso",
+      "mode": "no-view"
+    },
+    {
+      "name": "disable",
+      "title": "Disable Espanso",
+      "subtitle": "Espanso",
+      "description": "Disable Espanso",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.5",
-    "zx": "7.2.2"
+    "@raycast/api": "^1.61.1",
+    "@raycast/utils": "^1.10.0",
+    "fs-extra": "^11.1.1",
+    "zx": "7.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.34",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

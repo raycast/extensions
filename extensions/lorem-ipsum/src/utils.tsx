@@ -1,4 +1,4 @@
-import { closeMainWindow, Clipboard, showHUD } from "@raycast/api";
+import { closeMainWindow, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
 import { LoremIpsum } from "lorem-ipsum";
 
 // don't want to cause a heap error, so cap it 😱
@@ -17,18 +17,15 @@ const loremIpsumOptions = {
 
 const generator = new LoremIpsum(loremIpsumOptions);
 
-// generator.generateWords(1);
-// generator.generateParagraphs(7);
-
 export const generateParagraphs = (count: number) => {
   return Array.from(Array(count))
     .map(() =>
       generator.generateSentences(
         Math.floor(
           Math.random() *
-            (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1)
-        ) + loremIpsumOptions.sentencesPerParagraph.min
-      )
+            (loremIpsumOptions.sentencesPerParagraph.max - loremIpsumOptions.sentencesPerParagraph.min + 1),
+        ) + loremIpsumOptions.sentencesPerParagraph.min,
+      ),
     )
     .join("\r\n\r\n"); // newline + seperator line
 };
@@ -39,10 +36,6 @@ export const generateSentences = (count: number) => {
 
 export const generateWords = (count: number) => {
   return generator.generateWords(count);
-};
-
-export const notify = () => {
-  showHUD("Copied to clipboard");
 };
 
 export const safeLoremIpsumNumberArg = async (arg: string | undefined) => {
@@ -79,15 +72,18 @@ export const safeLoremIpsumNumberArg = async (arg: string | undefined) => {
   }
 };
 
-export const preformAction = async (action: string, output: string) => {
-  switch (action) {
+export const produceOutput = async (content: string) => {
+  const { action: preference = "clipboard" } = getPreferenceValues();
+
+  switch (preference) {
     case "clipboard":
-      await Clipboard.copy(output);
-      await notify();
+      await Clipboard.copy(content);
+      showHUD("Copied to clipboard! 📋");
       break;
 
     case "paste":
-      await Clipboard.paste(output);
+      await Clipboard.paste(content);
+      showHUD("Pasted to active app! 📝");
       break;
   }
 

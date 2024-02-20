@@ -12,7 +12,7 @@ import { cacheLastSearch, getLastSearch } from "./utils/cache";
 import { playAudio, stopAudio } from "./utils/audio";
 
 const spotifyContentLinksTitles = {
-  [SpotifyContentLinkType.Youtube]: "YouTube",
+  [SpotifyContentLinkType.YouTube]: "YouTube",
   [SpotifyContentLinkType.Deezer]: "Deezer",
   [SpotifyContentLinkType.AppleMusic]: "Apple Music",
   [SpotifyContentLinkType.Tidal]: "Tidal",
@@ -29,32 +29,43 @@ const spotifyContentTypesTitles = {
 };
 
 export default function Command() {
+  const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [spotifyContent, setSpotifyContent] = useState<SpotifyContent>();
 
   const fetchSpotifyContent = useCallback(
     async (spotifyLink: string) => {
       setSearchText(spotifyLink);
+      setSpotifyContent(undefined);
 
-      if (!spotifyLink) {
+      if (!SPOTIFY_LINK_REGEX.test(spotifyLink)) {
         return;
       }
 
       setIsLoading(true);
 
       try {
-        const request = await fetch(`${API_URL}?spotifyLink=${spotifyLink}&v=2`);
+        const request = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            spotifyLink,
+          }),
+        });
+
         const spotifyContent = (await request.json()) as SpotifyContent & ApiError;
 
         if (request.status !== 200) {
-          throw new Error(spotifyContent.error);
+          throw new Error(spotifyContent.message);
         }
 
         setSpotifyContent(spotifyContent);
         cacheLastSearch(spotifyLink, spotifyContent);
       } catch (error) {
         console.error(error);
+        setSpotifyContent(undefined);
         showToast(Toast.Style.Failure, "Error", (error as Error).message);
       }
 
@@ -66,19 +77,24 @@ export default function Command() {
   useEffect(() => {
     (async () => {
       const clipboardText = await Clipboard.readText();
+      const lastSearch = getLastSearch();
 
-      if (clipboardText && SPOTIFY_LINK_REGEX.test(clipboardText)) {
-        await fetchSpotifyContent(clipboardText);
-        return;
+      if (
+        clipboardText &&
+        SPOTIFY_LINK_REGEX.test(clipboardText) &&
+        !(lastSearch && lastSearch.spotifyLink === clipboardText)
+      ) {
+        return await fetchSpotifyContent(clipboardText);
       }
 
-      const lastSearch = getLastSearch();
       if (lastSearch) {
         setSpotifyContent(lastSearch.spotifyContent);
         setSearchText(lastSearch.spotifyLink);
       }
+
+      setIsLoading(false);
     })();
-  }, [fetchSpotifyContent]);
+  }, [fetchSpotifyContent, setIsLoading, setSearchText, setSpotifyContent]);
 
   return (
     <List
@@ -118,7 +134,7 @@ export default function Command() {
               }
             />
           </List.Section>
-          <List.Section title="Listen on">
+          <List.Section title={spotifyContent.links.length > 0 ? "Listen on" : "Results"}>
             {spotifyContent.links.length === 0 && (
               <List.Item key="no-links" icon={Icon.Info} title="Not available on other platforms" />
             )}
@@ -128,7 +144,7 @@ export default function Command() {
                 icon={Icon.Link}
                 title={spotifyContentLinksTitles[type as SpotifyContentLinkType]}
                 subtitle={url}
-                accessories={[{ text: isVerified ? "Verified" : "" }]}
+                accessories={[{ icon: isVerified ? Icon.CheckCircle : null }]}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser url={url} />

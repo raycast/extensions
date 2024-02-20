@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Enhnacement] - 2023-06-08
+
+- Added rich text support when copying an URL
+
 ## [Bug Fixes & Improvements] - 2023-04-09
 
 - Added Copy Note URL and Copy Mobile Note URL actions.

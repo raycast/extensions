@@ -1,5 +1,16 @@
 # AI Assistant Changelog
 
+## [Version: 1.6.1] - 2023-12-01
+
+- Add support for `OpenAI Base Path` configuration
+- Update README.md
+
+## [Version: 1.6.0] - 2023-11-16
+
+- Add support for `gpt-4-1106-preview` and `gpt-3.5-turbo-1106` models
+- Remove support for `text-davinci-003` and `text-davinci-002` models
+- Update README.md
+
 ## [Version: 1.5.0] - 2023-03-30
 
 - Change name from `OpenAI GPT3` to `OpenAI GPT`

@@ -20,8 +20,10 @@ import {
   OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
+  CopyProjectUrlToClipboardAction,
 } from "./project_actions";
 import { CacheActionPanelSection } from "./cache_actions";
+import { ProjectListEmptyView } from "./project";
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
@@ -50,6 +52,7 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyProjectUrlToClipboardAction project={project} />
             <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -88,14 +91,17 @@ export function ProjectSearchList(): JSX.Element {
 
   return (
     <List
-      searchBarPlaceholder="Filter Projects by name..."
+      searchBarPlaceholder="Filter Projects by Name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
     >
-      {projects?.map((project) => (
-        <ProjectListItem key={project.id} project={project} />
-      ))}
+      <List.Section title="Projects" subtitle={`${projects?.length}`}>
+        {projects?.map((project) => (
+          <ProjectListItem key={project.id} project={project} />
+        ))}
+      </List.Section>
+      <ProjectListEmptyView />
     </List>
   );
 }

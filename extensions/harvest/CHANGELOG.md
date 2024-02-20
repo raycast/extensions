@@ -1,5 +1,25 @@
 # Harvest Changelog
 
+## [Toggle Timer Entry Command] - 2024-01-02
+
+- Added: New command to toggle the timer on the most recent time entry
+- Added: New preference to save the currently running timer to a JSON file of the user's choice. This can be used to trigger other apps or scripts when a timer is started or stopped without using the callback URL feature (which takes away Raycast from the foreground)
+- Fixed: Check for when the extentions is rate-limited by Harvest and automatically retry after the timeout
+
+## [Menu Bar Fixes] - 2023-07-24
+
+- Fix: Menu bar widget snows the running timer in the format based on the user's preference
+- New option added to hide the timer from the menu bar widget
+
+## [Customize Time Entry Form] - 2023-06-11
+
+- Add new preference to show all times using hours/minutes, decimal, or whatever your company prefers in your Harvest account (default)
+
+## [Menu Bar Support] - 2023-05-22
+
+- Add support for a menu bar widget that shows the current running timer.
+- Add Callback URLs to trigger other apps when a timer is started or stopped.
+
 ## [Better Project Search] - 2023-01-31
 
 - Add user preference to show the client's name for the selected project in the time entry form

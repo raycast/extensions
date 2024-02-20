@@ -23,12 +23,19 @@ export const getFlagEmoji = (isoCode?: string) => {
 };
 
 export const convertToLocalTime = (label?: string, outputFormat?: string) => {
-  if (!label || label.length === 15) return undefined;
+  if (!label) return undefined;
+
+  const inputFormat =
+    label.includes("BST") || label.includes("GMT")
+      ? "EEE d MMM yyyy, HH:mm XXX"
+      : "EEE d MMM yyyy";
+
+  if (inputFormat.length === 14 && outputFormat?.length === 5) return undefined;
 
   const time = label.replace("BST", "+01:00").replace("GMT", "+00:00");
 
   return format(
-    parse(time, "EEE d MMM yyyy, HH:mm XXX", new Date()),
-    outputFormat || "EEE d MMM yyyy, HH:mm"
+    parse(time, inputFormat, new Date()),
+    outputFormat || "EEE d MMM yyyy, HH:mm",
   );
 };

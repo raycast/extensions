@@ -1,92 +1,50 @@
-import { ActionPanel, Action, List, Detail } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { $, ProcessOutput } from "zx";
-
-const noContentMd = `# No Espanso Expansion Rules Detected
-
-We've noticed that you haven't created any expansion rules in Espanso yet. Espanso works by replacing keywords with longer phrases, making your typing faster and more efficient.
-
-To start using Espanso, you need to create at least one rule. This can be done by following these steps:
-
-1. Open Espanso's configuration file (default.yml) in your text editor.
-
-2. Add a rule in the following format:
-\`\`\`
-   - trigger: ":keyword"
-     replace: "The phrase you want to expand to."
-\`\`\`
-
-3. Save the configuration file and restart Espanso.
-
-For more detailed instructions, please refer to the official Espanso documentation at https://espanso.org/docs/.
-
-Remember, the power of Espanso comes from its customizability. Make it work for you!`;
-
-const commandNotFoundMd = `# Espanso Command Not Found
-
-It seems like the Espanso command-line tool is not currently installed on your system. Espanso is necessary for creating and managing text expansion rules to streamline your typing.
-
-Please follow these steps to install Espanso:
-
-For MacOS:
-
-1. Open Terminal.
-
-2. Install Homebrew by pasting the following command and pressing Enter:
-\`\`\`
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-\`\`\`
-3. Once Homebrew is installed, paste the following command to install Espanso:
-\`\`\`
-brew install espanso
-\`\`\`
-4. Verify the installation by typing \`espanso\` in the terminal. If the installation was successful, you'll see information about how to use Espanso.
-
-For Windows:
-1. Download the latest Espanso installer from the official website: https://espanso.org/install/
-2. Run the installer and follow the on-screen instructions.
-3. Verify the installation by opening PowerShell and typing \`espanso\`. If the installation was successful, you'll see information about how to use Espanso.
-
-For Linux:
-1. Open Terminal.
-2. Depending on your distribution, use the appropriate command to install Espanso. For example, on Debian-based distributions (like Ubuntu), you'd use:
-\`\`\`
-sudo apt install espanso
-\`\`\`
-3. Verify the installation by typing \`espanso\` in the terminal. If the installation was successful, you'll see information about how to use Espanso.
-
-Remember to restart your computer after the installation process. If you need more detailed instructions, please refer to the official Espanso installation guide at https://espanso.org/install/.
-`;
-
-interface EspansoMatch {
-  triggers: string[];
-  replace: string;
-}
+import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { ProcessOutput } from "zx";
+import { commandNotFoundMd, noContentMd } from "./content/messages";
+import { NormalizedEspansoMatch } from "./lib/types";
+import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
-  const [items, setItems] = useState<EspansoMatch[]>([]);
+  const [items, setItems] = useState<NormalizedEspansoMatch[]>([]);
   const [error, setError] = useState<ProcessOutput | null>(null);
+  const [application, setApplication] = useState<Application | undefined>(undefined);
 
   useEffect(() => {
-    async function fetchData() {
+    getFrontmostApplication().then((app) => {
+      setApplication(app);
+    });
+  }, []);
+
+  const pasteTitle = `Paste to ${application?.name}`;
+
+  useEffect(() => {
+    const fetchData = async () => {
       try {
-        const { stdout: result } = await $`espanso match list -j`;
-        let matches: EspansoMatch[] = JSON.parse(result);
-        matches = matches.sort((a, b) => a.triggers[0].localeCompare(b.triggers[0]));
-        setItems(matches);
+        const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+
+        const packageMatches = getMatches(packageFilesDirectory, { packagePath: true });
+
+        const userMatches = getMatches(matchFilesDirectory);
+
+        const combinedMatches: NormalizedEspansoMatch[] = [...userMatches, ...packageMatches];
+
+        const sortedMatches = sortMatches(combinedMatches);
+
+        setItems(sortedMatches);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof ProcessOutput ? err : null);
         setIsLoading(false);
       }
-    }
+    };
 
     fetchData();
   }, []);
 
   if (error) {
-    const notFound = Boolean(error.stderr.match("command not found"));
+    const notFound = Boolean(/command not found/.exec(error.stderr));
 
     return notFound ? <Detail markdown={commandNotFoundMd} /> : <Detail markdown={error.stderr} />;
   }
@@ -97,13 +55,15 @@ export default function Command() {
 
   return (
     <List isShowingDetail isLoading={isLoading}>
-      {items.map(({ triggers, replace }, index) => (
+      {items.map(({ triggers, replace, label }, index) => (
         <List.Item
           key={index}
-          title={triggers.join(", ")}
+          title={label ?? triggers.join(", ")}
+          subtitle={!label ? "" : triggers.join(", ")}
           detail={<List.Item.Detail markdown={replace} />}
           actions={
             <ActionPanel>
+              <Action title={pasteTitle} onAction={() => Clipboard.paste(replace)} />
               <Action.CopyToClipboard title="Copy Content" content={replace} />
               <Action.CopyToClipboard title="Copy Triggers" content={triggers.join(", ")} />
             </ActionPanel>

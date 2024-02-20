@@ -8,12 +8,25 @@ import {
   HarvestTimeEntry,
   HarvestProjectAssignment,
   HarvestUserResponse,
+  HarvestCompany,
 } from "./responseTypes";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import {
+  Cache,
+  environment,
+  getPreferenceValues,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
+
+const cache = new Cache();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isAxiosError(error: any): error is AxiosError {
@@ -23,6 +36,7 @@ export function isAxiosError(error: any): error is AxiosError {
 interface Preferences {
   token: string;
   accountID: string;
+  timeFormat: "hours_minutes" | "decimal" | "company";
 }
 
 const { token, accountID }: Preferences = getPreferenceValues();
@@ -37,8 +51,31 @@ const api = axios.create({
 });
 
 async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: AxiosRequestConfig) {
-  const resp = await api.request<unknown, T>({ method, ...props });
-  return resp;
+  try {
+    const resp = await api.request<unknown, T>({ method, ...props });
+    return resp;
+  } catch (error) {
+    if (!isAxiosError(error)) throw error;
+    if (error.response?.status === 429) {
+      const data = error.response?.data as { retry_after: number; message: string };
+
+      // try again after the retry_after time
+      console.log(`Hit a rate-limit. Retrying after ${data.retry_after} seconds`, environment.launchType);
+
+      const toast =
+        environment.launchType === LaunchType.UserInitiated
+          ? await showToast({
+              style: Toast.Style.Animated,
+              title: "Rate-limited by Harvest, please wait...",
+            })
+          : null;
+      await new Promise((resolve) => setTimeout(resolve, data.retry_after * 1000));
+      const result = (await harvestAPI<T>({ method, ...props })) as T;
+      await toast?.hide();
+      return result;
+    }
+    throw error;
+  }
 }
 
 export function useCompany() {
@@ -87,7 +124,23 @@ export async function getMyId() {
   return resp.data.id;
 }
 
-export async function getMyTimeEntries({ from = new Date(), to = new Date() }: { from: Date; to: Date }) {
+export function useMyTimeEntries(from = new Date(), to = new Date()) {
+  const qr = useCachedPromise(getMyTimeEntries, [{ from, to }], { initialData: [], keepPreviousData: true });
+  useEffect(() => {
+    if (from === new Date() && to === new Date()) {
+      const running_timer = qr.data.find((o) => o.is_running);
+      if (running_timer) {
+        cache.set("running", JSON.stringify(running_timer));
+      } else {
+        cache.remove("running");
+      }
+    }
+  }, [qr.data]);
+  return qr;
+}
+
+export async function getMyTimeEntries(args?: { from: Date; to: Date }): Promise<HarvestTimeEntry[]> {
+  const { from = new Date(), to = new Date() } = args ?? {};
   const id = await getMyId();
   let time_entries: HarvestTimeEntry[] = [];
   let page = 1;
@@ -113,6 +166,7 @@ export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntrySta
   const url = id ? `/time_entries/${id}` : "/time_entries";
   console.log({ url });
   const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: id ? "PATCH" : "POST", url, data: param });
+  refreshMenuBar();
   return resp.data;
 }
 
@@ -132,6 +186,7 @@ export async function stopTimer(entry?: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/stop`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -140,6 +195,7 @@ export async function restartTimer(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}/restart`,
     method: "PATCH",
   });
+  refreshMenuBar();
   return true;
 }
 
@@ -148,5 +204,49 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
     url: `/time_entries/${entry.id}`,
     method: "DELETE",
   });
+  refreshMenuBar();
   return true;
+}
+
+export async function refreshMenuBar() {
+  try {
+    await launchCommand({ extensionName: "harvest", name: "menu-bar", type: LaunchType.Background });
+  } catch {
+    console.log("failed to refresh menu bar");
+  }
+}
+
+export function formatHours(hours: string | undefined, company: HarvestCompany | undefined): string {
+  if (!hours) return "";
+  const { timeFormat }: Preferences = getPreferenceValues();
+
+  if (timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes")) {
+    const time = hours.split(".");
+    const hour = time[0];
+    const minute = parseFloat(`0.${time[1]}`) * 60;
+    return `${hour}:${minute < 10 ? "0" : ""}${minute.toFixed(0)}`;
+  }
+  return hours;
+}
+
+export async function toggleTimer(): Promise<{ action: "started" | "stopped" | "failed" }> {
+  const timeEntries = await getMyTimeEntries();
+  const runningEntry = timeEntries.find((o) => o.is_running);
+  if (runningEntry) {
+    // stop the running timer
+    await stopTimer(runningEntry);
+    return { action: "stopped" };
+  } else if (timeEntries.length > 0) {
+    // re-start the most recent timer
+    const sortedEntries = timeEntries.sort((a, b) => {
+      if (dayjs(a.updated_at).isSame(dayjs(b.updated_at))) {
+        return b.is_running ? 1 : -1;
+      }
+      return dayjs(a.updated_at).isAfter(dayjs(b.updated_at)) ? -1 : 1;
+    });
+    await restartTimer(sortedEntries[0]);
+    return { action: "started" };
+  } else {
+    return { action: "failed" };
+  }
 }

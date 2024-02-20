@@ -1,5 +1,17 @@
 # Trello Changelog
 
+## [Update] - 2023-12-12
+
+Added support to open cards in Trello desktop. Thanks to the Trello support team 🥳!
+
+## [Update] - 2023-12-09
+
+Added toggle for closed boards in preferences.
+
+## [Update] - 2023-06-23
+
+Added functionality to assign members when creating a new todo
+
 ## [Fix] - 2023-03-28
 
 - Fixed a bug in the endpoint.
@@ -10,7 +22,7 @@ Add fields missing that broke card creation action
 
 ## [Fix] - 2023-03-13
 
-Revert earlier changes that broke search feature
+Revert earlier changes that broke the search feature
 
 ## [Update] - 2023-02-13
 

@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, Detail, Grid, Icon, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Detail,
+  Grid,
+  Icon,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getDownloadFolder, Hit, Pixabay, showInFolderAfterDownload } from "./lib/api";
@@ -63,6 +74,44 @@ function ImageDownloadAction(props: { localFilepath: string | undefined; hit: Hi
   );
 }
 
+function ImageCopyToClipboardAction(props: { localFilepath: string | undefined; hit: Hit }): JSX.Element | null {
+  const hit = props.hit;
+  const lfp = props.localFilepath;
+  if (!lfp || !fs.existsSync(lfp)) {
+    return null;
+  }
+  const handle = async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Downloading" });
+    try {
+      const [firsttag] = hit.tags.split(",");
+      const filename = `${firsttag} - ${hit.id}.${getLargeFileExtension(hit)}`;
+      const downloadFolder = getDownloadFolder();
+      fs.mkdirSync(downloadFolder, { recursive: true });
+      const localFilename = path.join(downloadFolder, filename);
+      fs.copyFileSync(lfp, localFilename);
+
+      const fileContent: Clipboard.Content = { file: localFilename };
+      await Clipboard.copy(fileContent);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Copied to Clipboard",
+        message: filename,
+      });
+    } catch (error) {
+      await showToast({ style: Toast.Style.Failure, title: "Download Failed", message: getErrorMessage(error) });
+    }
+  };
+  return (
+    <Action
+      title={`Copy Image - ${hit.imageWidth} x ${hit.imageHeight}`}
+      onAction={handle}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      icon={{ source: Icon.CopyClipboard, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
 function ImageDetail(props: { hit: Hit }): JSX.Element {
   const hit = props.hit;
   const { base64, localFilepath, error } = useImage(hit.largeImageURL, hit.id.toString());
@@ -106,6 +155,7 @@ function ImageDetail(props: { hit: Hit }): JSX.Element {
         <ActionPanel>
           <ImagePageOpenInBrowserAction hit={hit} />
           <ImageDownloadAction localFilepath={localFilepath} hit={hit} />
+          <ImageCopyToClipboardAction localFilepath={localFilepath} hit={hit} />
         </ActionPanel>
       }
     />
@@ -114,6 +164,7 @@ function ImageDetail(props: { hit: Hit }): JSX.Element {
 
 function ImageGridItem(props: { hit: Hit }): JSX.Element {
   const hit = props.hit;
+  const { localFilepath } = useImage(hit.largeImageURL, hit.id.toString());
   return (
     <Grid.Item
       title={`♥️${compactNumberFormat(hit.likes)} ⬇️${compactNumberFormat(hit.downloads)} 👁️${compactNumberFormat(
@@ -129,6 +180,7 @@ function ImageGridItem(props: { hit: Hit }): JSX.Element {
             icon={{ source: Icon.Image, tintColor: Color.PrimaryText }}
           />
           <ImagePageOpenInBrowserAction hit={hit} />
+          <ImageCopyToClipboardAction localFilepath={localFilepath} hit={hit} />
         </ActionPanel>
       }
     />

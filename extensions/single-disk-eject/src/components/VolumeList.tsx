@@ -19,10 +19,15 @@ export default function VolumeList() {
     const toast = new Toast({ style: ToastStyle.Animated, title: `Ejecting ${volume.name}...` });
     await toast.show();
 
-    await ejectVolume(volume);
-
-    await toast.hide();
-    showToast(ToastStyle.Success, `Successfully Ejected ${volume.name}`);
+    try {
+      await ejectVolume(volume);
+      await toast.hide();
+      showToast(ToastStyle.Success, `Successfully Ejected ${volume.name}`);
+    } catch (e: any) {
+      console.log(">>> Error: ", e.message);
+      await toast.hide();
+      showToast(ToastStyle.Failure, "Error ejecting volume. Is it in use?");
+    }
 
     await fetchVolumes();
   }

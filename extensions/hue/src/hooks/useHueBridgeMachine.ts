@@ -9,7 +9,7 @@ export function useHueBridgeMachine(
   setGroupedLights: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
   setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
   setZones: React.Dispatch<React.SetStateAction<Zone[]>>,
-  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>
+  setScenes: React.Dispatch<React.SetStateAction<Scene[]>>,
 ) {
   const machine = useMemo(() => hueBridgeMachine(setLights, setGroupedLights, setRooms, setZones, setScenes), []);
 

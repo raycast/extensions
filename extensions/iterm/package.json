@@ -5,6 +5,11 @@
   "description": "Control iTerm with Raycast",
   "icon": "command-icon.png",
   "author": "ron-myers",
+  "contributors": [
+    "flops",
+    "papey",
+    "jose-elias-alvarez"
+  ],
   "license": "MIT",
   "categories": [
     "Applications",
@@ -23,6 +28,30 @@
       "name": "new-iterm-tab",
       "title": "New iTerm Tab",
       "description": "Launch new tab in iTerm",
+      "mode": "view"
+    },
+    {
+      "name": "split-iterm-horizontally",
+      "title": "Split iTerm Horizontally",
+      "description": "Split Horizontally with Current Profile",
+      "mode": "view"
+    },
+    {
+      "name": "split-iterm-vertically",
+      "title": "Split iTerm Vertically",
+      "description": "Split Vertically with Current Profile",
+      "mode": "view"
+    },
+    {
+      "name": "edit-in-iterm",
+      "title": "Edit in iTerm",
+      "description": "Edit the selected file(s) in iTerm using $EDITOR",
+      "mode": "view"
+    },
+    {
+      "name": "open-iterm-here",
+      "title": "Open iTerm Here",
+      "description": "Open iTerm in the currently selected folder(s)",
       "mode": "view"
     }
   ],

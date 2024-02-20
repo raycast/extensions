@@ -1,5 +1,254 @@
 # Changelog
 
+## 1.67.0 - 2024-02-07
+
+### 🐞 Fixes
+
+- Fix a crash that could happen when exporting a function that would return another function.
+- **Menu Bar Extra:** Fixed a bug that caused the text in text-only extras to be offset.
+
+## 1.66.0 - 2024-01-24
+
+### 💎 Improvements
+
+- Improved some error messages in the `ray` CLI.
+
+### 🐞 Fixes
+
+- **Form**: Fixed the display of full-day dates in the Date Picker.
+
+## 1.65.0 - 2024-01-10
+
+### ✨ New
+
+- **Developer Tools**: we've introduced a new developer option, `Use file logging instead of OSLog`, to work around an OS issue that causes some users to not see any extension logs in the terminal during development.
+
+### 💎 Improvements
+
+- **Form's Date Picker:** Future dates will be prioritised when parsing the date, f.e. if you type "8am" and itrs already "10am", then the parsed date will be "tomorrow 8am".
+
+### 🐞 Fixes
+
+- Fixed an issue where the `ray` CLI could not communicate with the app.
+- Fixed an issue where an OAuth authorization session triggered by a menu bar command would not be able to complete if a `background` launch was triggered between authorization starting and completing.
+- Fixed an issue on multi-monitor setups, where sometimes MenuBarExtra icons would not appear dimmed on inactive displays.
+
+## 1.64.0 - 2023-12-13
+
+### ✨ New
+
+- **Form**: Introduced a new component `Form.LinkAccessory` to render a link displayed in the right-hand side of the search bar.
+- **Arguments**: Introduced a new Argument type: `dropdown`. You can now [specify a list of options](https://developers.raycast.com/information/manifest#argument-properties) for the user choose from.
+- **Developer Hub**: User preferences are now included in error reports. Password and text preferences will be replaced with `[REDACTED]`, file/directory/appPicker preferences will be scrubbed of PII, and dropdown/checkbox preferences will be sent as-is.
+
+### 💎 Improvements
+
+- **Window Capture**: Added a warning when trying to take a screenshot of Raycast if that screenshot won’t match the requirement for the Store’s extensions guidelines (eg. if Raycast is too close to an edge or if the screen doesn’t have a high enough resolution).
+
+### 🐞 Fixes
+
+- **Types generation**: Fixed the type of a required `appPicker` preference (even if it is `required`, the app might be undefined because it is missing).
+- **Empty View**: Fixed an issue where the Empty View might not be showing in a certain case.
+- **Menu Bar Extra**: \*\*\*\*icons tinted with `Color.PrimaryText` and `Color.SecondaryText` should now change based on the menu bar’s appearance.
+- **List Metadata:** `Link`s should be properly aligned again.
+
+## 1.63.0 - 2023-11-29
+
+### 💎 Improvements
+
+- Improved runtime error handling when using a Swift project
+
+### 🐞 Fixes
+
+- **Lists**: Fixed a race condition where the selected item would not be the first one after a list items update
+
+- **MenuBarExtra:** `alternate` are no longer supported on pre-Sonoma versions of macOS, as they would often appear alongside their parent items.
+
+## 1.62.0 - 2023-11-15
+
+### ✨ New
+
+- **Menu Bar:** `MenuBarExtra.Item`s have a new prop, `alternate`. If an `alternate` is defined, it will replace its parent `MenuBarExtra.Item` when the user presses the ⌥ (option) key.
+- The Node runtime has been updated to [Node 20](https://nodejs.org/en/blog/announcements/v20-release-announce/), the [current](https://github.com/nodejs/Release#release-schedule) Long-term Support (LTS) release.
+- **AI**: You can now use the `gpt-4` model with `AI.ask`. If a user does not have access to this model, it will gracefully fall back to an available model. You can check if a user has access using `environment.canAccess('gpt-4')`.
+
+### 💎 Improvements
+
+- **Error Handling:** `Could not communicate with command worker` errors should not be reported anymore.
+
+### 🐞 Fixes
+
+- **Toast:** Fixed an issue that caused toast actions to not work after a toast was updated.
+- **Error Handling:** Fixed an edge case that could cause an out-of-memory error while an uncaught exception was processed, obfuscating the original error.
+- **Performance**: Fixed an issue where some keyboard events would be dropped while an extension was loading.
+- **Markdown**: Fixed a regression where HTML comments would show up in the rendered Markdown.
+
+## 1.61.0 - 2023-11-02
+
+### 💎 Improvements
+
+- **Date Picker**: When specifying a min and/or max date, the suggestion will now always be within those bounds
+
+### 🐞 Fixes
+
+- Fixed a bug that previously could cause a `no-view` command to display an error icon in the root search, with no means of removing the error.
+
+## 1.60.0 - 2023-10-18
+
+## Introducing the Extension Issues Dashboard
+
+![](.gitbook/assets/extension-issues.png)
+
+The new Extension Issues Dashboard is designed to help you quickly troubleshoot and resolve issues in any of your extensions by providing real-time visibility into errors encountered by users. You can access it at https://www.raycast.com/extension-issues, or by using the new `View Issues` action.
+
+### ✨ New
+
+- It is now possible to write extensions [using ESM](https://developers.raycast.com/faq) instead of CommonJS
+
+### 💎 Improvements
+
+- Updated NodeJS runtime to 18.18.2
+- When copying a deeplink with some arguments in the root search, copy the deeplink with those arguments
+
+### 🐞 Fixes
+
+- Fixed an issue where animated toasts would hang around after the command was unloaded.
+
+## 1.59.0 - 2023-09-21
+
+### ✨ New
+
+- **PickDate**: Similar to `Form.DatePicker`, you can also check whether the user picked a full day or a specific time with `Action.PickDate.isFullDay(date)`.
+
+### 💎 Improvements
+
+- **Clipboard**: The `transient` option is renamed to `concealed`.
+
+### 🐞 Fixes
+
+- **MenuBarExtra:** Right-clicking `MenuBarExtra.Item`s should now work in macOS Sonoma.
+
+## 1.58.0 - 2023-09-06
+
+### ✨ New
+
+- **Alert**: Add a new option `rememberUserChoice` to show a checkbox to remember the user choice the next time the same Alert would be shown.
+- **DatePicker**: You can know check whether the user picked a full day or a specific time with `Form.DatePicker.isFullDay(date)`.
+
+### 💎 Improvements
+
+- The “Fork Extension” action is now also available in the Store for installed extensions.
+- All the APIs that accepts a file path will now resolve `~` if necessary.
+
+### 🐞 Fixes
+
+- Fix an issue where some Toasts would not disappear after the command was terminated.
+- Fix an issue where List Item’s accessories with an icon could have their text cut off.
+- Fix `getFrontmostApplication` failing for some applications.
+- The “Fork Extension” will now be more robust dealing with unexpected `package.json` formats.
+- Fixed an issue where newly created Extensions would not use the correct username after it had been updated.
+- Fix an issue where it was possible to set a multiline `searchText`
+
+## 1.57.0 - 2023-08-09
+
+### 🐞 Fixes
+
+- **Metadata**: Fixed various rendering issues with `TagList`.
+- **Menu Bar Extra**: Fixed a bug that caused section titles to be unreadable on macOS Sonoma.
+- **Menu Bar Extra**: Fixed a bug that could cause a menu bar command to be unloaded while its menu is open.
+- **Form**: Fixed stale suggestions in the DatePicker when changing its type.
+- **Icon**: Fixed the `AppWindowGrid2x2` icon only showing a square.
+
+## 1.56.0 - 2023-07-26
+
+### ✨ New
+
+- **Clipboard**: `Clipboard.read()` now supports an `offset` option to access the Clipboard History (limited to the last 5)
+- **Grid:** Grid items can now have an icon accessory
+- **Shortcuts:** Providing a consistent user experience should now be easier thanks to the new `Keyboard.Shortcut.Common` export.
+
+### 💎 Improvements
+
+- `getSelectedText` is now more reliable
+- **Trash**: Improved behaviour of `trash` and `Action.Trash` to better handle missing files.
+- **HUD**: `showHUD` now supports the same options as `closeMainWindow`
+- **Command Launching:** Improved logic for deciding which version of a command gets launched when a user has both a production and a development version of an extension installed.
+- **Tags:** Icon-only tags should now center the icon.
+
+### 🐞 Fixes
+
+- **Form**: When working on a draft, updating a `Form.Checkbox` will update the draft.
+- **Error Reports:** Improved error messages when an extension crashes during a background launch.
+- **Shortcuts:** Previously, the API permitted the creation of shortcuts using keys reserved by Raycast (⌘+K, ⌘+W, ⌘+Esc, etc.), resulting in unexpected behavior. Raycast now ignores these and, during development mode, they will trigger a runtime warning.
+
+## 1.55.0 - 2023-07-06
+
+### 💎 Improvements
+
+- **Fallback Commands**: Local commands will now have an indicator so that it’s possible to differentiate them from the commands installed from the Store
+- The NodeJS process used for Raycast extensions will now be named `Raycast Helper (Extensions)`
+- Active menu bar commands will now be displayed in `Extension Diagnostics`.
+
+### 🐞 Fixes
+
+- Fix an issue where Metadata’s Tag items would sometimes not be updated
+- Fix a bug where renamed commands appear in the root search with both the original and the updated name after an extension update.
+
+## 1.54.0 - 2023-06-21
+
+### 💎 Improvements
+
+- Add an action to clear the local storage when an unexpected error occurs
+- When using `showToast` while the Raycast window is closed (for example if a command is launched with a hotkey), a `HUD` will be shown instead
+- Improve the error messages when a command fails to load
+- The NodeJS inspector will now use a random free port instead of using the default 9229 port (which you can use for other NodeJS scripts)
+
+### 🐞 Fixes
+
+- Fix a performance issue on the first render of Lists and Grids
+- Fix an issue where required arguments wouldn’t be required when launching a command right after installing it
+- Fix a regression where the deprecated `render` method would not work anymore
+- Fix an edge case where some Form items would not be updated if some items would be added at the same time
+
+## 1.53.0 - 2023-06-07
+
+### ✨ New
+
+- **Metadata**: `List.Item.Detail.Metadata.TagList.Item` and `Detail.Metadata.TagList.Item` now accepts an action handler via the `onAction` prop!
+- Added [LaunchContext](https://developers.raycast.com/api-reference/command#launchcontext) support to `Create Quicklink` and `Create Snippet:`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "raycast", name: "create-quicklink", type: LaunchType.UserInitiated, context: { name: "context name", application: "Xcode", }});`
+  - `launchCommand({ ownerOrAuthorName: "raycast", extensionName: "snippets", name: "create-snippet", type: LaunchType.UserInitiated, context: { name: "context name", text: "context text", keyword: "context keyword" }})`
+- **Date Pickers:** You can now add a minimum and maximum date to `Form.DatePicker` and `Action.PickDate` using the `min` and `max` props to limit the suggestions shown when entering a date.
+
+### 💎 Improvements
+
+- Updated NodeJS to 18.16.0
+- Improve the “Fork Extension” action to avoid modifying the manifest as much as possible.
+
+### 🐞 Fixes
+
+- Fixed a bug that sometimes caused `no-view` commands to not display errors.
+- Fixed a bug that caused OAuth not to work if the `client.authorize(authorizationRequest)` was executed more than once.
+- Fixed a problem where commands with background execution would not display the OAuth sign-in screen.
+- **SVG**: Properly handle `currentColor`
+- **List/Grid**: Fixed `selectedItemId` being sometimes ignored on the first render.
+- **Form**: Fixed triggering `onChange` on the TextArea when using a markdown keyboard shortcut.
+
+## 1.52.0 - 2023-05-24
+
+### ✨ New
+
+- **SVG**: You can now use the Raycast `Color` in an SVG.
+
+### 💎 Improvements
+
+- Improve the error message when a required property is missing on a component
+
+### 🐞 Fixes
+
+- Fixed an edge case where the keyboard events triggered while an extension is loading would not be passed down to the extension once loaded
+- Fixed an issue where the fallback of an image would show while it is being loaded
+
 ## 1.51.0 - 2023-05-10
 
 ### ✨ New

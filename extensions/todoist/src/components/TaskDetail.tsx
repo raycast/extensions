@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, Icon } from "@raycast/api";
+import { ActionPanel, Detail, Icon, Color } from "@raycast/api";
 import { format } from "date-fns";
 
 import { Task } from "../api";
@@ -17,7 +17,7 @@ type TaskDetailProps = {
 };
 
 export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
-  const [data] = useCachedData();
+  const [data, setData] = useCachedData();
 
   const task = data?.items.find((task) => task.id === taskId);
   const comments = data?.notes.filter((comment) => comment.item_id === taskId);
@@ -30,6 +30,7 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
   const section = data?.sections.find((section) => section.id === task?.section_id);
   const taskLabels = task && data?.labels ? getTaskLabels(task, data.labels) : [];
   const hasComments = comments && comments.length > 0;
+  const subTasks = data?.items.filter((item) => item.parent_id === taskId);
 
   let displayedDate = "No due date";
 
@@ -71,6 +72,14 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
                 ) : null}
 
                 <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
+
+                {subTasks && subTasks?.length > 0 ? (
+                  <Detail.Metadata.Label
+                    title={"Sub-tasks"}
+                    text={`${subTasks.length} subtask${subTasks.length > 1 ? "s" : ""}`}
+                    icon={{ source: "sub-task.svg", tintColor: Color.PrimaryText }}
+                  />
+                ) : null}
 
                 {priority ? (
                   <Detail.Metadata.Label
@@ -127,7 +136,7 @@ export default function TaskDetail({ taskId }: TaskDetailProps): JSX.Element {
             ),
             actions: (
               <ActionPanel>
-                <TaskActions task={task} fromDetail={true} />
+                <TaskActions task={task} fromDetail={true} data={data} setData={setData} />
               </ActionPanel>
             ),
           }

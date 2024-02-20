@@ -1,5 +1,13 @@
 # Spotify Controls Changelog
 
+## [Fix] - 2023-08-02
+
+- Added better error handling by making sure that Spotify is installed for the majority of the Spotify Controls commands. If not installed, a HUD is shown.
+
+## [New command] - 2023-05-26
+
+Add Backward To The Beginning command.
+
 ## [Enhancement] - 2023-02-09
 
 Select the steps for increasing and decreasing the volume.

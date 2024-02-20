@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sort-mentions",
+  "title": "Sort Mentions",
+  "description": "Sort usernames alphabetically for mentions in Slack, Twitter and other apps",
+  "icon": "command-icon.png",
+  "author": "Yamen",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sort-primary",
+      "title": "Sort Usernames",
+      "description": "Sort usernames alphabetically",
+      "mode": "no-view"
+    },
+    {
+      "name": "sort-secondary",
+      "title": "Sort Channels",
+      "description": "Custom sort alphabetically",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "preferences": [
+    {
+      "name": "primary_handle",
+      "type": "textfield",
+      "default": "@",
+      "required": true,
+      "title": "Primary Handle",
+      "description": "Primary handle for username"
+    },
+    {
+      "name": "secondary_handle",
+      "type": "textfield",
+      "default": "#",
+      "required": true,
+      "title": "Secondary Handle",
+      "description": "Secondary handle for channels"
+    },
+    {
+      "name": "default_action",
+      "type": "dropdown",
+      "default": "paste",
+      "required": true,
+      "title": "Default Action",
+      "description": "Default action after processing",
+      "data": [
+        {
+          "title": "Replace Selected Text",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        }
+      ]
+    },
+    {
+      "name": "should_play_sound_on_success",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "On success",
+      "label": "Play sound",
+      "description": "Play sound on success"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

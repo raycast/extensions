@@ -24,8 +24,8 @@ import {
   LocalStorage,
   useNavigation,
 } from "@raycast/api";
-import Message from "./message";
-import { useCachedPromise, getAvatarIcon, usePromise } from "@raycast/utils";
+import MessageComponent from "./message";
+import { useCachedPromise, getAvatarIcon } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import moment from "moment";
 
@@ -43,7 +43,7 @@ interface FormValues {
 
 function NewCustomEmail({ update }) {
   const abortable = useRef<AbortController>();
-  const { isLoading, data, revalidate } = usePromise(getDomains, [], {
+  const { isLoading, data, revalidate } = useCachedPromise(getDomains, [], {
     abortable,
     onError: (e) => {
       if (e.message == "Email Expired") revalidate();
@@ -310,23 +310,25 @@ export default function Command() {
                       <Action.Push
                         title="View Email"
                         icon={{ source: Icon.Eye }}
-                        target={<Message id={message.id} />}
+                        target={MessageComponent({ id: message.id })}
                       />
-                      <Action
-                        title="View in Mail App"
-                        icon={{ source: Icon.AppWindow }}
-                        onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.MailApp)}
-                      />
-                      <Action
-                        title="View in Browser"
-                        icon={{ source: Icon.Globe }}
-                        onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Browser)}
-                      />
-                      <Action
-                        title="Download Email"
-                        icon={{ source: Icon.Download }}
-                        onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Finder)}
-                      />
+                      <ActionPanel.Submenu title="View Email Externally" icon={{ source: Icon.Upload }}>
+                        <Action
+                          title="Mail App"
+                          icon={{ source: Icon.AppWindow }}
+                          onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.MailApp)}
+                        />
+                        <Action
+                          title="Browser"
+                          icon={{ source: Icon.Globe }}
+                          onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Browser)}
+                        />
+                        <Action
+                          title="Download Email"
+                          icon={{ source: Icon.Download }}
+                          onAction={() => downloadEmail(message.downloadUrl, EmailViewMedium.Finder)}
+                        />
+                      </ActionPanel.Submenu>
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Modify">
                       <Action

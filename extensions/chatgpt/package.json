@@ -14,7 +14,9 @@
     "cruelmoney",
     "sykuang",
     "thanhlongb",
-    "k8scat"
+    "k8scat",
+    "Nauxscript",
+    "Lemon"
   ],
   "categories": [
     "Productivity",
@@ -61,6 +63,10 @@
       "description": "Collection of your custom and default model",
       "mode": "view"
     }
+  ],
+  "keywords": [
+    "chat",
+    "gpt"
   ],
   "preferences": [
     {
@@ -126,13 +132,20 @@
       "default": false
     },
     {
-      "name": "apiEndpoint",
-      "label": "Change API Endpoint",
+      "default": false,
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
-      "type": "checkbox",
+      "label": "Change API Endpoint",
+      "name": "useApiEndpoint",
+      "required": false,
+      "title": "Use API Endpoint",
+      "type": "checkbox"
+    },
+    {
+      "description": "Custom API endpoint",
+      "name": "apiEndpoint",
+      "required": false,
       "title": "API Endpoint",
-      "placeholder": "https://api.openai.com/v1",
-      "required": false
+      "type": "textfield"
     },
     {
       "name": "useProxy",
@@ -225,14 +238,15 @@
     "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.5.2",
     "@types/uuid": "^9.0.0",
-    "openai": "^3.2.1",
+    "openai": "^4.24.3",
+    "proxy-agent": "^6.3.1",
     "say": "^0.16.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"

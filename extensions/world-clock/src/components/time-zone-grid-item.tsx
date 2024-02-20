@@ -72,14 +72,12 @@ export function StarredTimeZoneGridItem(props: {
           },
         },
         tooltip: `${starTimezones[index].timezone}
-${buildFullDateTime(new Date(starTimezones[index].unixtime))}${buildIntervalTime(starTimezones[index].unixtime)}
-${!isEmpty(starTimezones[index].memo) ? "_".repeat(10) : ""}
-
-${!isEmpty(starTimezones[index].memo) ? "Meme: " + starTimezones[index].memo : ""}`,
+${buildFullDateTime(new Date(starTimezones[index].unixtime))}${buildIntervalTime(starTimezones[index].unixtime)}`,
       }}
       keywords={keywords}
       title={isEmpty(starTimezones[index].alias) ? timezone : starTimezones[index].alias + ""}
       subtitle={starTimezones[index].date_time + buildIntervalTime(starTimezones[index].unixtime)}
+      accessory={{ icon: starTimezones[index].memoIcon, tooltip: starTimezones[index].memo }}
       actions={
         <ActionOnStarredTimezone
           timeInfo={timeInfo}

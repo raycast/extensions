@@ -8,7 +8,7 @@
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
 
-import { francLangaugeDetect } from "../detectLanauge/franc";
+import { francLanguageDetect } from "../detectLanguage/franc";
 import { QueryWordInfo } from "../dictionary/youdao/types";
 import { preferredLanguages } from "../preferences";
 import { languageItemList } from "./consts";
@@ -114,7 +114,7 @@ export function getYoudaoLangCodeFromBaiduCode(baiduLangCode: string): string {
  * Todo: currently only support Chinese and English, later support other languages.
  */
 export function getYoudaoLangCodeFromAppleCode(appleLanguageTitle: string): string {
-  const francLanguage = francLangaugeDetect(appleLanguageTitle);
+  const francLanguage = francLanguageDetect(appleLanguageTitle);
   const youdaoLangCode = francLanguage.youdaoLangCode;
   console.log(`getYoudaoLangCodeFromAppleCode: ${appleLanguageTitle}, franc detect YoudaoLangCode: ${youdaoLangCode}`);
 

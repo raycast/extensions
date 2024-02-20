@@ -73,5 +73,10 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
     setSearchBarText(item.title);
   };
 
-  return { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin, toggleTodo };
+  const setPriority = (priority?: 1 | 2 | 3) => {
+    item.priority = priority;
+    setClone();
+  };
+
+  return { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin, toggleCompleted, toggleTodo, setPriority };
 };

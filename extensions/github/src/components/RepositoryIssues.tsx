@@ -2,8 +2,8 @@ import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import IssueListItem from "./IssueListItem";
 
@@ -23,15 +23,13 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
       });
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
     },
-    [searchText]
+    [searchText],
   );
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} navigationTitle={props.repo} throttle>
       <List.Section title="Issues" subtitle={`${data?.length}`}>
-        {data?.map((d) => (
-          <IssueListItem key={d.id} issue={d} mutateList={mutateList} />
-        ))}
+        {data?.map((d) => <IssueListItem key={d.id} issue={d} mutateList={mutateList} />)}
       </List.Section>
     </List>
   );

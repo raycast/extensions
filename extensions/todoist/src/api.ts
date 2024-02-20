@@ -9,7 +9,7 @@ import FormData from "form-data";
 import mime from "mime";
 import { Dispatch, SetStateAction } from "react";
 
-import { getTodoistApi } from "./helpers/withTodoistApi";
+import { getTodoistApi, getTodoistRestApi } from "./helpers/withTodoistApi";
 
 let sync_token = "*";
 
@@ -56,6 +56,7 @@ export type SyncData = {
   collaborator_states: CollaboratorState[];
   items: Task[];
   labels: Label[];
+  filters: Filter[];
   locations: [string, string, string][];
   notes: Comment[];
   reminders: Reminder[];
@@ -70,7 +71,7 @@ export type CachedDataParams = {
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
 };
 
-export async function syncRequest(params: Record<string, any>) {
+export async function syncRequest(params: Record<string, unknown>) {
   const todoistApi = getTodoistApi();
   const { data } = await todoistApi.post<SyncData>("/sync", params);
 
@@ -84,6 +85,16 @@ export async function syncRequest(params: Record<string, any>) {
 
   sync_token = data.sync_token;
   return data;
+}
+
+export async function getFilterTasks(query: string) {
+  const todoistApi = getTodoistRestApi();
+  try {
+    const { data } = await todoistApi.get<Task[]>("/tasks", { params: { filter: query } });
+    return data as Task[];
+  } catch (error) {
+    throw new Error("Error fetching filter tasks:" + error);
+  }
 }
 
 export async function initialSync() {
@@ -219,6 +230,7 @@ export type Task = {
   day_order: number;
   collapsed: boolean;
   labels: string[];
+  filters: string[];
   added_by_uid: string | null;
   assigned_by_uid: string;
   responsible_uid: string | null;
@@ -249,6 +261,10 @@ export type AddTaskArgs = {
   description?: string;
   project_id?: string;
   due?: DateOrString;
+  duration?: {
+    unit: "minute" | "day";
+    amount: number;
+  };
   priority?: number;
   parent_id?: string | null;
   child_order?: number;
@@ -317,7 +333,8 @@ export async function updateTask(args: UpdateTaskArgs, cachedData?: CachedDataPa
     ],
   });
 
-  if (cachedData?.data) {
+  // If returned items length is 0 then no update is needed, we can skip.
+  if (cachedData?.data && updatedData.items.length > 0) {
     cachedData.setData({
       ...cachedData.data,
       items: cachedData.data.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
@@ -546,6 +563,68 @@ export async function deleteLabel(id: string, { data, setData }: CachedDataParam
     setData({
       ...data,
       labels: data.labels.filter((l) => {
+        return l.id != id;
+      }),
+    });
+  }
+}
+
+export type Filter = {
+  id: string;
+  name: string;
+  query: string;
+  color: string;
+  item_order: number;
+  is_deleted: boolean;
+  is_favorite: boolean;
+};
+
+type UpdateFilterArgs = {
+  id: string;
+  name?: string;
+  color?: string;
+  item_order?: number;
+  is_favorite?: boolean;
+};
+
+export async function updateFilter(args: UpdateFilterArgs, { data, setData }: CachedDataParams) {
+  const updatedData = await syncRequest({
+    sync_token,
+    resource_types: ["filters"],
+    commands: [
+      {
+        type: "filter_update",
+        uuid: crypto.randomUUID(),
+        args,
+      },
+    ],
+  });
+
+  if (data) {
+    setData({
+      ...data,
+      filters: data.filters.map((p) => (p.id === args.id ? updatedData.filters[0] : p)),
+    });
+  }
+}
+
+export async function deleteFilter(id: string, { data, setData }: CachedDataParams) {
+  await syncRequest({
+    sync_token,
+    resource_types: ["filters"],
+    commands: [
+      {
+        type: "filter_delete",
+        uuid: crypto.randomUUID(),
+        args: { id },
+      },
+    ],
+  });
+
+  if (data) {
+    setData({
+      ...data,
+      filters: data.filters.filter((l) => {
         return l.id != id;
       }),
     });

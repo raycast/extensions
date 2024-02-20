@@ -13,7 +13,9 @@
   ],
   "contributors": [
     "AnishDe12020",
-    "kud"
+    "kud",
+    "gerardcs",
+    "prince_yadav"
   ],
   "commands": [
     {
@@ -61,6 +63,13 @@
       ]
     },
     {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Todoist",
+      "description": "Search your Todoist tasks, projects, labels, and comments.",
+      "mode": "view"
+    },
+    {
       "name": "create-task",
       "title": "Create Task",
       "subtitle": "Todoist",
@@ -87,7 +96,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "Title/info (today 5pm p2)",
+          "placeholder": "Text (today 5pm p2)",
           "type": "text",
           "required": true
         },
@@ -103,7 +112,8 @@
       "title": "Create Project",
       "subtitle": "Todoist",
       "description": "Create a Todoist project.",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "menu-bar",
@@ -130,6 +140,10 @@
               "value": "today"
             },
             {
+              "title": "Filter",
+              "value": "filter"
+            },
+            {
               "title": "Upcoming",
               "value": "upcoming"
             }
@@ -148,12 +162,20 @@
           "description": "Indicates the number of days you want in the upcoming view."
         },
         {
-          "name": "focusFeatureWidth",
+          "default": "",
+          "description": "Task filter for the filter view. Use Todoist filter syntax, e.g. today & (#Work | @next).",
+          "name": "filter",
+          "required": false,
+          "title": "Filter Query",
+          "type": "textfield"
+        },
+        {
+          "name": "taskWidth",
           "type": "textfield",
           "required": false,
           "default": "40",
-          "title": "Maximum Width of Focused Task",
-          "description": "Maximum width of the focused task's text."
+          "title": "Maximum Width of Menu Bar's Tasks",
+          "description": "Maximum width of all menu bar task's text."
         }
       ],
       "interval": "10m"
@@ -163,7 +185,18 @@
       "title": "Show Projects",
       "subtitle": "Todoist",
       "description": "Show your Todoist projects.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showTaskCount",
+          "type": "checkbox",
+          "title": "Advanced",
+          "label": "Show the task count besides the project",
+          "description": "When enabled, you can see the task count besides your project.",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "show-labels",
@@ -173,12 +206,25 @@
       "mode": "view"
     },
     {
+      "name": "show-filters",
+      "title": "Show Filters",
+      "description": "Show your Todoist filters.",
+      "mode": "view"
+    },
+    {
       "name": "unfocus-current-task",
       "title": "Unfocus Current Task",
       "subtitle": "Todoist",
       "description": "Unfocus the current task in the menu bar.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "open-focused-task",
+      "title": "Open Focus Task",
+      "subtitle": "Todoist",
+      "description": "When a task is chosen as the focused one, you can open it directly using this command.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -192,30 +238,33 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
-    "@raycast/utils": "^1.5.2",
-    "axios": "^1.3.6",
-    "date-fns": "^2.29.3",
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.11.1",
+    "axios": "^1.6.6",
+    "date-fns": "^3.3.1",
     "form-data": "^4.0.0",
     "lodash": "^4.17.21",
-    "mime": "^3.0.0",
-    "node-fetch": "^3.3.1",
+    "mime": "^4.0.1",
+    "node-fetch": "^3.3.2",
     "remove-markdown": "^0.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/lodash": "^4.14.185",
-    "@types/mime": "^3.0.1",
-    "@types/node": "^18.7.18",
-    "@types/react": "^18.0.20",
-    "@types/remove-markdown": "^0.3.1",
-    "eslint": "^8.23.1",
-    "eslint-plugin-import": "^2.27.5",
-    "typescript": "^4.8.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.202",
+    "@types/mime": "^3.0.4",
+    "@types/node": "^20.11.6",
+    "@types/react": "^18.2.48",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix": "ray lint --fix"
   }
 }

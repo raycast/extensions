@@ -6,6 +6,9 @@
   "icon": "zoom.png",
   "author": "thomaslombart",
   "owner": "raycast",
+  "contributors": [
+    "Vaibhav-Satishkumar"
+  ],
   "access": "public",
   "categories": [
     "Communication"
@@ -54,8 +57,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.0",
-    "@raycast/utils": "^1.4.1",
+    "@raycast/api": "^1.53.3",
+    "@raycast/utils": "^1.12.3",
     "date-fns": "^2.28.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.2.8"
@@ -72,6 +75,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

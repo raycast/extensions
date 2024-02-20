@@ -19,8 +19,8 @@
   "commands": [
     {
       "name": "fan-add-event-editable",
-      "title": "Add Fantastical Calendar Event",
-      "description": "add a new fantastical event",
+      "title": "Add Fantastical Event",
+      "description": "Add a new Fantastical event",
       "mode": "no-view",
       "arguments": [
         {
@@ -96,8 +96,8 @@
         {
           "type": "text",
           "name": "add",
-          "title": "Add Reminder",
-          "placeholder": "reminder",
+          "title": "Add Event",
+          "placeholder": "event",
           "required": true
         }
       ],
@@ -105,15 +105,16 @@
         "fantastical",
         "fan",
         "add",
-        "reminder",
-        "fan add reminder",
-        "fan reminder",
+        "event",
+        "fan add event",
+        "fan event",
         "quick"
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.38.2",
+    "default-browser-id": "^3.0.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

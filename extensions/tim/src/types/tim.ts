@@ -36,7 +36,7 @@ export type Task = {
   id: UUID;
   title: string;
   updatedAt: Timestamp;
-  tags: UUID[];
+  tags: UUID[] | null;
   createdAt: Timestamp;
   records: TaskRecord[];
   rate?: number;

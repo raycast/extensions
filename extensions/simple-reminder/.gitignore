@@ -10,3 +10,5 @@
 .idea/
 
 dist/
+
+raycast-env.d.ts

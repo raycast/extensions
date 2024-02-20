@@ -23,11 +23,11 @@ Let's say we want a command with two arguments. Its `package.json` will look lik
   "title": "API Arguments",
   "description": "Example of Arguments usage in the API",
   "icon": "command-icon.png",
-  "author": "mattisssa",
+  "author": "raycast",
   "license": "MIT",
   "commands": [
     {
-      "name": "arguments",
+      "name": "my-command",
       "title": "Arguments",
       "subtitle": "API Examples",
       "description": "Demonstrates usage of arguments",
@@ -41,8 +41,28 @@ Let's say we want a command with two arguments. Its `package.json` will look lik
         },
         {
           "name": "subtitle",
-          "placeholder": "Subtitle",
-          "type": "text"
+          "placeholder": "Secret Subtitle",
+          "type": "password"
+        },
+        {
+          "name": "favoriteColor",
+          "type": "dropdown",
+          "placeholder": "Favorite Color",
+          "required": true,
+          "data": [
+            {
+              "title": "Red",
+              "value": "red"
+            },
+            {
+              "title": "Green",
+              "value": "green"
+            },
+            {
+              "title": "Blue",
+              "value": "blue"
+            }
+          ]
         }
       ]
     }
@@ -63,12 +83,7 @@ The command itself will receive the arguments' values via the `arguments` prop:
 ```typescript
 import { Form, LaunchProps } from "@raycast/api";
 
-interface TodoArguments {
-  title: string;
-  subtitle?: string;
-}
-
-export default function Todoist(props: LaunchProps<{ arguments: TodoArguments }>) {
+export default function Todoist(props: LaunchProps<{ arguments: Arguments.MyCommand }>) {
   const { title, subtitle } = props.arguments;
   console.log(`title: ${title}, subtitle: ${subtitle}`);
 
@@ -93,6 +108,7 @@ Depending on the `type` of the argument, the type of its value will be different
 | :-------------------- | :------------------ |
 | <code>text</code>     | <code>string</code> |
 | <code>password</code> | <code>string</code> |
+| <code>dropdown</code> | <code>string</code> |
 
 {% hint style="info" %}
 Raycast provides a global TypeScript namespace called `Arguments` which contains the types of the arguments of all the commands of the extensions.

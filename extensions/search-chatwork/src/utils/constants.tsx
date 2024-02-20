@@ -18,7 +18,18 @@ export class Constants {
    * @param chatId
    * @returns URL linked to specified chat
    */
-  public static getCWAppLinkUrl(roomId: number, chatId: string): string {
+  public static getCWAppLinkUrlForChat(roomId: number, chatId: string): string {
     return `${this.CW_CW_APP_URL}${this.CW_CW_APP_PREFIX_FOR_LINK}${roomId}-${chatId}`;
+  }
+
+  /**
+   * resolving URL linked to specified rooom
+   *
+   * @param roomId
+   * @param chatId
+   * @returns URL linked to specified rooom
+   */
+  public static getCWAppLinkUrlForRoom(roomId: number): string {
+    return `${this.CW_CW_APP_URL}${this.CW_CW_APP_PREFIX_FOR_LINK}${roomId}`;
   }
 }

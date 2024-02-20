@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cobalt",
+  "title": "Cobalt",
+  "description": "Download videos and audio from popular social media platforms with ease.",
+  "icon": "command-icon.png",
+  "author": "aelew",
+  "categories": [
+    "Applications",
+    "Data",
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download Media",
+      "subtitle": "Cobalt",
+      "description": "Download video and/or audio from social media with customizable settings.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Where Cobalt should save downloaded files.",
+      "default": "~/Downloads",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "apiInstanceUrl",
+      "title": "API Instance URL",
+      "description": "Want to use a different Cobalt API instance? Change your instance URL here!",
+      "placeholder": "https://co.wuk.sh",
+      "default": "https://co.wuk.sh",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "filenamePattern",
+      "title": "File Name Style",
+      "description": "How downloaded files should be named.\n\nClassic: Default file name pattern.\nBasic: Title and basic info in brackets.\nPretty: Title and info in brackets.\nNerdy: Title and all info in brackets.\n\nSome services don't support rich file names and will always use the classic style.",
+      "type": "dropdown",
+      "required": false,
+      "default": "classic",
+      "data": [
+        {
+          "title": "Classic",
+          "value": "classic"
+        },
+        {
+          "title": "Basic",
+          "value": "basic"
+        },
+        {
+          "title": "Pretty",
+          "value": "pretty"
+        },
+        {
+          "title": "Nerdy",
+          "value": "nerdy"
+        }
+      ]
+    },
+    {
+      "name": "vimeoDownloadType",
+      "title": "Vimeo Download Type",
+      "description": "Progressive: Direct file link to Vimeo's CDN. Max quality is 1080p.\nDash: Video and audio are merged into one file. Max quality is 4K.\n\nPick progressive if you want the best editor/player/social media compatibility.\nIf progressive download isn't available, dash is used instead.",
+      "type": "dropdown",
+      "required": false,
+      "default": "progressive",
+      "data": [
+        {
+          "title": "Progressive",
+          "value": "progressive"
+        },
+        {
+          "title": "Dash",
+          "value": "dash"
+        }
+      ]
+    },
+    {
+      "name": "notifyOnDownload",
+      "label": "Notify on Successful Download",
+      "description": "Sends you a notification when your download is complete.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "removeTikTokWatermark",
+      "label": "Remove TikTok and Douyin Watermarks",
+      "description": "Whether downloaded TikTok & Douyin videos should have watermarks removed.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "downloadOriginalTikTokSound",
+      "label": "Use Original TikTok Audio",
+      "description": "Downloads the original sound used in the TikTok video without any additional changes by the post's author.",
+      "type": "checkbox",
+      "required": false
+    },
+    {
+      "name": "muteVideoAudio",
+      "label": "Mute Video Audio",
+      "description": "Disable the audio track in video downloads.",
+      "type": "checkbox",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.1",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.9",
+    "@types/react": "18.2.33",
+    "eslint": "^8.52.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

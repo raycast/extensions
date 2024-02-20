@@ -38,6 +38,4 @@ export function RecentlyUpdatedIssues() {
   );
 }
 
-export default function Command() {
-  return withJiraCredentials(<RecentlyUpdatedIssues />);
-}
+export default withJiraCredentials(RecentlyUpdatedIssues);

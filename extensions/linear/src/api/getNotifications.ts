@@ -1,6 +1,6 @@
 import { Organization, Comment, User, IssueNotification } from "@linear/sdk";
 import { IssueFragment, IssueResult } from "./getIssues";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type NotificationResult = Pick<
   IssueNotification,
@@ -46,7 +46,7 @@ export async function getNotifications() {
           urlKey
         }
       }
-    `
+    `,
   );
 
   return { notifications: data?.notifications.nodes, urlKey: data?.organization.urlKey };

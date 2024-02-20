@@ -1,5 +1,9 @@
 # Transmission Changelog
 
+## [Fix remove torrent and delete local data] - 2024-01-15
+
+- "Delete local data" option when removing torrent fixed.
+
 ## [Usability improvements] - 2023-04-30
 
 - Use the password type for a field storing a password.

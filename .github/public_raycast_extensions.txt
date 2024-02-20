@@ -1,6 +1,9 @@
 linear
 github
+browser-bookmarks
+raycast-explorer
 google-workspace
+jira
 zoom
 hypersonic
 asana
@@ -19,3 +22,14 @@ pinata
 grafbase
 tailscale
 todoist
+screen-studio
+openverse
+putio
+warp
+getsound
+reclaim-ai
+posthog
+notion
+stablecog
+apple-reminders
+whitebit

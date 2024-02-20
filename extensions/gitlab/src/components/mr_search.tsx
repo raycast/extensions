@@ -5,7 +5,7 @@ import { useCache } from "../cache";
 import { getListDetailsPreference, gitlab } from "../common";
 import { MergeRequest } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
-import { MRScope, MRState, MRListItem, getMRQuery, injectMRQueryNamedParameters } from "./mr";
+import { MRScope, MRState, MRListItem, getMRQuery, injectMRQueryNamedParameters, MRListEmptyView } from "./mr";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -67,6 +67,7 @@ export function SearchMyMergeRequests(): JSX.Element {
           />
         ))}
       </List.Section>
+      <MRListEmptyView />
     </List>
   );
 }

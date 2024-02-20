@@ -50,7 +50,7 @@ export default function CompletedTasks({ quickLinkView }: CompletedTaskProps) {
     }));
 
     return sections;
-  }, [activity]);
+  }, [events]);
 
   return (
     <>

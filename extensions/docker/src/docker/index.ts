@@ -1,4 +1,10 @@
-import Dockerode, { ContainerInfo, ContainerInspectInfo, ImageInfo, ImageInspectInfo } from '@priithaamer/dockerode';
+import Dockerode, {
+  ContainerInfo,
+  ContainerInspectInfo,
+  ImageInfo,
+  ImageInspectInfo,
+  ContainerCreateOptions,
+} from '@priithaamer/dockerode';
 import React, { useEffect, useRef, useState } from 'react';
 import { ComposeProject, containersToProjects } from './compose';
 import { isContainerRunning } from './container';
@@ -20,7 +26,7 @@ export const useDocker = (docker: Dockerode) => {
     const [images, setImages] = useState<ImageInfo[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
-    const interval = useRef<NodeJS.Timer>();
+    const interval = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
       async function fetchImages() {
@@ -51,7 +57,7 @@ export const useDocker = (docker: Dockerode) => {
   const useImageInfo = ({ Id }: { Id: string }) => {
     const [imageInfo, setImageInfo] = useState<ImageInspectInfo>();
     const [isLoading, setLoading] = useState(false);
-    const interval = useRef<NodeJS.Timer>();
+    const interval = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
       async function fetchImageInfo() {
@@ -72,7 +78,7 @@ export const useDocker = (docker: Dockerode) => {
     const [containers, setContainers] = useState<ContainerInfo[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
-    const interval = useRef<NodeJS.Timer>();
+    const interval = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
       async function fetchContainers() {
@@ -106,7 +112,7 @@ export const useDocker = (docker: Dockerode) => {
   const useContainerInfo = (containerId: string) => {
     const [containerInfo, setContainerInfo] = useState<ContainerInspectInfo>();
     const [isLoading, setLoading] = useState(false);
-    const interval = useRef<NodeJS.Timer>();
+    const interval = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
       async function fetchContainerInfo() {
@@ -134,7 +140,7 @@ export const useDocker = (docker: Dockerode) => {
     const [projects, setProjects] = useState<ComposeProject[]>();
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState<Error>();
-    const interval = useRef<NodeJS.Timer>();
+    const interval = useRef<NodeJS.Timeout>();
 
     useEffect(() => {
       async function fetchContainers() {
@@ -179,12 +185,34 @@ export const useDocker = (docker: Dockerode) => {
     };
   };
 
+  const useCreateContainer = () => {
+    const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState<Error>();
+
+    const createContainer = async (options: ContainerCreateOptions) => {
+      setLoading(true);
+      try {
+        const container = await docker.createContainer(options);
+        await container.start();
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return { createContainer, isLoading, error };
+  };
+
   return {
     useImages,
     useImageInfo,
     useContainers,
     useContainerInfo,
     useProjects,
+    useCreateContainer,
   };
 };
 

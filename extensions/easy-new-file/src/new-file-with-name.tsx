@@ -149,7 +149,7 @@ const createFileWithName = async (
   templateFiles: TemplateType[],
   path: string,
   fileName: string,
-  fileContent: string
+  fileContent: string,
 ) => {
   switch (newFileType.section) {
     case "Template": {

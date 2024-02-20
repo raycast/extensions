@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fake-financial-data",
+  "title": "Fake Financial Data",
+  "description": "Generate fake financial data",
+  "icon": "command-icon.png",
+  "author": "andre-rd-rodrigues",
+  "contributors": [
+    "farisaziz12"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "copy-account-number",
+      "title": "Copy Account Number",
+      "description": "Copy a fake account number",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-iban",
+      "title": "Copy IBAN",
+      "description": "Copy a fake International Bank Account Number (IBAN)",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-sort-code",
+      "title": "Copy Sort Code",
+      "description": "Copy a fake sort code",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-swift",
+      "title": "Copy SWIFT Code",
+      "description": "Copy a fake SWIFT code",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-commands",
+      "title": "Generate Financial Data",
+      "description": "Generate fake financial data",
+      "mode": "menu-bar"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.51.1",
+    "ibankit": "^1.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/jest": "^29.5.1",
+    "@types/lodash": "^4.14.194",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^8.40.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.32.2",
+    "jest": "^29.5.0",
+    "lodash": "^4.17.21",
+    "prettier": "^2.5.1",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.4.3",
+    "eslint-plugin-jest": "^27.2.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "jest"
+  }
+}

@@ -8,13 +8,13 @@ export default function SearchRepositoryDropdown(props: { onFilterChange: (filte
   return (
     <List.Dropdown tooltip="Filter Repositories" onChange={props.onFilterChange} storeValue>
       <List.Dropdown.Section>
+        <List.Dropdown.Item title={"All Repositories"} value={""} />
         {viewer ? (
           <List.Dropdown.Item
             title={"My Repositories"}
             value={`user:${viewer.login} ${viewer.organizations?.nodes?.map((org) => `org:${org?.login}`).join(" ")}`}
           />
         ) : null}
-        <List.Dropdown.Item title={"All Repositories"} value={""} />
       </List.Dropdown.Section>
 
       <List.Dropdown.Section>

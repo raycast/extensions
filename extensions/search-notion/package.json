@@ -5,6 +5,9 @@
   "description": "Search Notion pages and open visited ones faster. No admin access required.",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
+  "contributors": [
+    "erikjs"
+  ],
   "version": "1.1.0",
   "license": "MIT",
   "commands": [

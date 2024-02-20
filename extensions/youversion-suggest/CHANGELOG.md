@@ -1,5 +1,25 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.4.0] - 2024-01-09
+
+- Added language support for Ukrainian (ukr)
+  - To use, look for Українська in the Language dropdown for the _Set Bible
+    Preferences_ command
+  - CUV has been set as the default version/translation for this language, but
+    if you want to change it, feel free
+
+## [v3.3.0] - 2023-06-17
+
+- Fixed a bug where "Search the Bible by Phrase" results were always in English
+- Fixed a bug where copied Bible content was always in English
+- Updated the Raycast API to the latest version (v1.53.4, at the time of
+  writing)
+
+## [v3.2.0] - 2023-06-03
+
+- Fixed a recently-occurring error when fetching Bible content
+- Under-the-hood improvements to improve the stability of the extension going forward
+
 ## [v3.1.0] - 2023-05-02
 
 - Added a new setting to control the inclusion of verse numbers in copied Bible

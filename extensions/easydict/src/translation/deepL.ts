@@ -26,7 +26,7 @@ const deepLAuthStoredKey = "deepLAuthStoredKey";
  * https://www.deepl.com/zh/docs-api/translating-text
  */
 export async function requestDeepLTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
-  console.log(`---> start rquest DeepL`);
+  console.log(`---> start request DeepL`);
   const { fromLanguage, toLanguage, word } = queryWordInfo;
   const sourceLang = getDeepLLangCode(fromLanguage);
   const targetLang = getDeepLLangCode(toLanguage);
@@ -168,7 +168,7 @@ interface DeepLUsage {
  *
  * https://www.deepl.com/zh/docs-api/other-functions/monitoring-usage/
  */
-function checkIfKeyVaild(key: string): Promise<boolean> {
+function checkIfKeyValid(key: string): Promise<boolean> {
   console.log(`test a deepL key: ${key}`);
   const url = "https://api-free.deepl.com/v2/usage";
   const params = {
@@ -190,7 +190,7 @@ function checkIfKeyVaild(key: string): Promise<boolean> {
         }
       })
       .catch((err) => {
-        console.error(`---> isVaildKey deepL error: ${err}`);
+        console.error(`---> isValidKey deepL error: ${err}`);
 
         // if error, remove key from wildEncryptedDeepLKeys
         const encryptedKey = myEncrypt(key);
@@ -227,7 +227,7 @@ export async function getAndStoreValidDeepLKey(encryptedKeys: string[]): Promise
   if (encryptedKeys.length > 0) {
     for (const encryptedKey of encryptedKeys) {
       const key = myDecrypt(encryptedKey);
-      if (await checkIfKeyVaild(key)) {
+      if (await checkIfKeyValid(key)) {
         // remove key
         encryptedKeys.splice(encryptedKeys.indexOf(encryptedKey), 1);
         console.log(`---> find and store new key: ${key}`);

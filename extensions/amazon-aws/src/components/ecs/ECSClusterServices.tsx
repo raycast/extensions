@@ -21,7 +21,7 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
               <List.Item.Detail
                 markdown={service.events?.reduce(
                   (acc, cur) => `${acc}\n\n${cur.createdAt?.toLocaleString()}-${cur.message}`,
-                  ""
+                  "",
                 )}
                 metadata={
                   <List.Item.Detail.Metadata>
@@ -42,9 +42,8 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
                         service.networkConfiguration?.awsvpcConfiguration?.assignPublicIp === "ENABLED"
                           ? "Public"
                           : "Private"
-                      } | Subnets: ${service.networkConfiguration?.awsvpcConfiguration?.subnets?.length} | SG: ${
-                        service.networkConfiguration?.awsvpcConfiguration?.securityGroups?.length
-                      }`}
+                      } | Subnets: ${service.networkConfiguration?.awsvpcConfiguration?.subnets?.length} | SG: ${service
+                        .networkConfiguration?.awsvpcConfiguration?.securityGroups?.length}`}
                     />
                     <List.Item.Detail.Metadata.Label title="Creation Date" text={service.createdAt?.toLocaleString()} />
                     <List.Item.Detail.Metadata.Label
@@ -97,7 +96,7 @@ function forceNewDeployment(service: Service) {
               cluster: service.clusterArn,
               service: service.serviceName,
               forceNewDeployment: true,
-            })
+            }),
           );
           toast.style = Toast.Style.Success;
           toast.title = "Force Deployment done";
@@ -131,7 +130,7 @@ function getActionCopySection(service: Service) {
         content={
           service.networkConfiguration?.awsvpcConfiguration?.securityGroups?.reduce(
             (acc, cur) => `${cur},${acc}`,
-            ""
+            "",
           ) || ""
         }
         shortcut={{ modifiers: ["opt"], key: "g" }}

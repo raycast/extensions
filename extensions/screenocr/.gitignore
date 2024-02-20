@@ -267,3 +267,5 @@ fastlane/test_output
 iOSInjectionProject/
 .swiftpm
 bun.lockb
+
+raycast-env.d.ts

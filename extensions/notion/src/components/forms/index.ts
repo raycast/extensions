@@ -1,3 +1,3 @@
-export * from "./CreateDatabaseForm";
+export * from "./CreatePageForm";
 export * from "./DatabaseViewForm";
 export * from "./AppendToPageForm";

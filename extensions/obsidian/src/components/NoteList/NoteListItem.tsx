@@ -49,7 +49,15 @@ export function NoteListItem(props: {
   return !noteHasBeenMoved ? (
     <List.Item
       title={note.title}
-      accessories={[{ text: note.starred ? "⭐" : "" }]}
+      accessories={[
+        {
+          icon: note.bookmarked
+            ? {
+                source: "bookmark.svg",
+              }
+            : null,
+        },
+      ]}
       detail={
         <List.Item.Detail
           markdown={filterContent(note.content)}

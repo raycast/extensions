@@ -153,3 +153,10 @@ extensions/**/*.zip
 # IntelliJ / WebStorm
 .idea/
 *.iml
+
+# Raycast
+raycast-env.d.ts
+.build
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
