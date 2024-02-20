@@ -57,5 +57,3 @@ export type Quote = {
   length: number;
   tags: string[];
 };
-
-export type QuoteResponse = Array<Quote>;

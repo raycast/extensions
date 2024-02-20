@@ -13,7 +13,7 @@ import {
   resetInterval,
 } from "../lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse, QuoteResponse } from "../lib/types";
+import { GiphyResponse, Quote } from "../lib/types";
 
 const createAction = (action: () => void) => () => {
   action();
@@ -108,24 +108,15 @@ const ActionsList = () => {
 };
 
 const handleQuote = (): string => {
-  let markdownContent = "";
-  const quoteUrl = "https://api.quotable.io/quotes/random?limit=1";
-  // Get Quote here
-  const backupQuote = { content: "You did it!", author: "Unknown" }; // Backup quote if the API returns no data
-  const { isLoading, data } = useFetch(quoteUrl, { keepPreviousData: true }) as {
-    isLoading: boolean;
-    data: QuoteResponse;
-  };
-  if (!isLoading) {
-    markdownContent += data.length ? formatQuote(data[0]) : formatQuote(backupQuote);
+  let quote = { content: "You did it!", author: "Unknown" };
+  const { isLoading, data } = useFetch<Quote[]>("https://api.quotable.io/quotes/random?limit=1", {
+    keepPreviousData: true,
+  });
+  if (!isLoading && data?.length) {
+    quote = data[0];
   }
 
-  return markdownContent;
-
-  function formatQuote(quote: { content: string; author: string }) {
-    // Format the quote in markdown:
-    return `> ${quote.content} \n>\n> &dash; ${quote.author}`;
-  }
+  return `> ${quote.content} \n>\n> &dash; ${quote.author}`;
 };
 
 const EndOfInterval = () => {
