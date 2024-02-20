@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-icons",
   "title": "Simple Icons",
-  "description": "Browse, Search, and Copy 2900+ brand icons.",
+  "description": "Browse, Search, and Copy 3000+ brand icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Search Simple Icons",
-      "description": "Browse, search, and copy 2900+ free SVG icons for popular brands",
+      "description": "Browse, search, and copy 3000+ free SVG icons for popular brands",
       "mode": "view"
     }
   ],

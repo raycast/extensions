@@ -19,9 +19,9 @@ export default function Command() {
         style: Toast.Style.Animated,
         title: "Loading Icons",
       });
-      const version = await loadLatestVersion();
-      const cached = await cache.get(`json-${version}`);
 
+      const version = await loadLatestVersion();
+      const cached = cache.get(`json-${version}`);
       const json: IconJson = cached ? JSON.parse(cached) : await loadJson(version);
 
       if (!cached) {
@@ -33,13 +33,15 @@ export default function Command() {
         ...icon,
         slug: icon.slug || titleToSlug(icon.title),
       }));
+
       setIsLoading(false);
       setIcons(icons);
       setVersion(version);
+
       await showToast({
         style: Toast.Style.Success,
         title: "",
-        message: `Loaded ${icons.length} icons`,
+        message: `${icons.length} icons loaded`,
       });
     })();
   }, []);
