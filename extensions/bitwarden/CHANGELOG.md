@@ -1,5 +1,11 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2024-02-20
+
+- Download the official CLI binary upon launch if necessary, rather than relying on the user to install it
+- Improved troubleshooting screen content
+- Added a bug report data collection action
+
 ## [New Command and Fix] - 2024-01-06
 
 - Adds Create Folder command
