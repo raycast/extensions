@@ -19,7 +19,16 @@
       "title": "Create Masked Email",
       "subtitle": "Fastmail",
       "description": "Generate a new masked email address",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "description": "Prefix to use for a new masked email address. Must be <= 64 characters in length and only contain characters a-z, 0-9 and _ (underscore)",
+          "name": "create_prefix",
+          "required": false,
+          "title": "Default Prefix",
+          "type": "textfield"
+        }
+      ]
     },
     {
       "name": "list",
@@ -57,12 +66,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.40.3",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.67.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.57",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
