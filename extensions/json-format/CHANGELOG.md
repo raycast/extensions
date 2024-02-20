@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix json () bug] - 2024-02-20
+
+- Fixed bug where json with "()"" was not being recognized, for example `{"color": "rgba(0, 0, 0, 0.5)"}`
+
 ## [Adds support for parsing stringified JSON] - 2023-06-29
 
 - If the JSON is stringified, it will be parsed before formatting
