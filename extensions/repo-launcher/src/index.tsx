@@ -11,12 +11,12 @@ import { SettingsView } from "./Settings/SettingsView";
 const exec = promisify(_exec);
 
 export default function Command() {
-  const projectsRoots = useContainingDirectories();
+  const containingDirectories = useContainingDirectories();
   const navigation = useNavigation();
 
-  const { isLoading, data } = useCachedPromise(
+  const { isLoading, data, revalidate } = useCachedPromise(
     async () => {
-      const proms = projectsRoots.map((dir) =>
+      const proms = containingDirectories.map((dir) =>
         readdir(dir, { withFileTypes: true }).then((els) =>
           els
             .filter((dirent) => dirent.isDirectory())
@@ -35,6 +35,15 @@ export default function Command() {
       initialData: [],
     },
   );
+
+  // Revalidate if we find ourselves in a state where we have containing directory but no projects.
+  // This will occur e.g. when setting up a containing directory for the first time and coming
+  //  back to the list view.
+  React.useEffect(() => {
+    if (containingDirectories.length > 0 && !isLoading && data.length === 0) {
+      revalidate();
+    }
+  }, [containingDirectories, isLoading, data.length, revalidate]);
 
   return (
     <List isLoading={isLoading}>
