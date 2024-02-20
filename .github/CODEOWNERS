@@ -773,7 +773,7 @@
 /extensions/nixpkgs-search                           @aiotter
 /extensions/nmbs-planner                             @SamuelVanhaecke
 /extensions/node-js-evaluate                         @selfish
-/extensions/node-version-manager                     @AndresMorelos
+/extensions/node-version-manager                     @AndresMorelos @pernielsentikaer @LeOndaz
 /extensions/nos-news                                 @Joran-Dob
 /extensions/note-in-google-doc                       @mnttnm
 /extensions/noteplan-3                               @shakedlokits @lukerandall @pr1mal
