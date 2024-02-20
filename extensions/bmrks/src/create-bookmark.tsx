@@ -37,6 +37,8 @@ function Bookmark({ user }: { user: User }) {
 
   const { handleSubmit, itemProps, setValue, values } = useForm<BookmarkValues>({
     async onSubmit(values) {
+      showHUD("Creating Bookmark...");
+
       const isValidColor = Boolean(colorString.get(values.value));
 
       if (isValidColor) {
@@ -56,7 +58,7 @@ function Bookmark({ user }: { user: User }) {
 
         let { title } = values;
 
-        if (!values.title) {
+        if (!title) {
           const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(validUrl)}&data.title`);
           if (response.ok) {
             const data = (await response.json()) as MicrolinkResponse;
@@ -90,7 +92,7 @@ function Bookmark({ user }: { user: User }) {
         }
       }
 
-      await showHUD(`Saved to ${activeGroup!.name}`, {
+      await showHUD(`Created in ${activeGroup!.name}`, {
         clearRootSearch: true,
         popToRootType: PopToRootType.Immediate,
       });
@@ -114,7 +116,7 @@ function Bookmark({ user }: { user: User }) {
     if (values.value === "") {
       setValue("title", undefined);
     }
-  }, [values]);
+  }, [values.value]);
 
   const valueIsUrl = isUrlLike(values.value);
   const activeGroup = groups && groups.find((group) => group.id === values.groupId);
@@ -124,7 +126,7 @@ function Bookmark({ user }: { user: User }) {
       isLoading={isLoadingGroups}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save Bookmark" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Bookmark" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
           {activeGroup && user && (
             <Action.OpenInBrowser
               title={`Open ${activeGroup.name} in bmrks.com`}
@@ -161,7 +163,7 @@ export default function AuthenticatedBookmark() {
         markdown={markdown}
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
