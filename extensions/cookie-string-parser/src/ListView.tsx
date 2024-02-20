@@ -51,14 +51,21 @@ export function ListView({ cookies }: { cookies: Record<string, string> }) {
                   />
                 }
               />
-              <Action.Push title="Show Details" target={<Detail markdown={`## ${key} \n --- \n ${value}`} />} />
               <Action.CopyToClipboard
-                title="Copy Item"
+                title={"Copy All As Text"}
+                content={Object.entries(cookies)
+                  .map(([key, value]) => `${key}=${value}`)
+                  .join("; ")}
+              />
+              <Action.CopyToClipboard title={"Copy All As Object"} content={JSON.stringify(cookies, null, 2)} />
+              <Action.CopyToClipboard title="Copy Item As Text" content={`${key}=${value}`} />
+              <Action.CopyToClipboard
+                title="Copy Item As Object"
                 content={`{
                   ${key}: ${value},
                 }`}
               />
-              <Action.CopyToClipboard title={"Copy All"} content={JSON.stringify(cookies, null, 2)} />
+              <Action.Push title="Show Details" target={<Detail markdown={`## ${key} \n --- \n ${value}`} />} />
             </ActionPanel>
           }
         />
