@@ -10,12 +10,14 @@
     {
       "name": "log-time",
       "title": "Log Time",
+      "subtitle": "Kimai",
       "description": "Add new time log linked to project and activity",
       "mode": "view"
     },
     {
       "name": "logged-hours",
       "title": "Logged Hours Today",
+      "subtitle": "Kimai",
       "description": "View amount of hours logged today",
       "interval": "15m",
       "mode": "menu-bar"
