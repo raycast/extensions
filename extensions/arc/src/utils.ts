@@ -70,7 +70,8 @@ export function getNumberOfTabs(tabs?: Tab[]) {
   return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
 }
 
-export function isTab(tab: Tab): tab is Tab {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isTab(tab: any): tab is Tab {
   if (tab && tab.id && tab.url && tab.title && tab.location) {
     return true;
   }
