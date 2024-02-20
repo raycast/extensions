@@ -12,15 +12,13 @@
   "commands": [
     {
       "name": "issue_id_to_html_link",
-      "title": "Convert Issue Ids Into Clickable Links",
-      "subtitle": "As HTML",
+      "title": "Convert Issue Ids Into Clickable HTML Links",
       "description": "Converts issue tracker IDs into HTML links",
       "mode": "no-view"
     },
     {
       "name": "issue_id_to_markdown_link",
-      "title": "Convert Issue Ids Into Clickable Links",
-      "subtitle": "As Markdown",
+      "title": "Convert Issue Ids Into Clickable Markdown Links",
       "description": "Converts issue tracker IDs into Markdown links",
       "mode": "no-view"
     }
