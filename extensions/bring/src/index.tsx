@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { useCachedPromise, useCachedState} from "@raycast/utils";
-import { Grid, Icon, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Grid, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
@@ -9,7 +9,6 @@ import { getOrCreateCustomSection, getSectionsFromData, getListData, getTranslat
 export default function Command() {
   const bringApiRef = useRef<Promise<BringAPI> | null>(null);
   const [selectedList, setSelectedList] = useCachedState<BringListInfo>("selectedList");
-  // const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
 
@@ -36,7 +35,11 @@ export default function Command() {
   };
 
   const {
-    data: [listDetail, customItems], isLoading: isLoadingItems, mutate } = useCachedPromise(async (selectedList?: BringListInfo) => {
+    data: [listDetail, customItems],
+    isLoading: isLoadingItems,
+    mutate,
+  } = useCachedPromise(
+    async (selectedList?: BringListInfo) => {
       if (!selectedList) {
         return Promise.resolve<[BringList | undefined, BringCustomItem[]]>([undefined, []]);
       }
