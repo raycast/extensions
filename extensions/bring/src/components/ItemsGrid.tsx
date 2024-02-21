@@ -58,9 +58,9 @@ export const ItemsGrid = ({
         actions={
           <ActionPanel title="Bring!">
             {!isInPurchaseList ? (
-            <Action title="Add to List" onAction={() => onAddAction(item)} />
+            <Action title="Add to List" onAction={() => onAddAction(item)} icon={{ source:Icon.PlusCircle, tintColor:Color.Green}}/>
             ) : (
-            <Action title="Remove from List" onAction={() => onRemoveAction(item)} />
+            <Action title="Remove from List" onAction={() => onRemoveAction(item)} icon={{ source:Icon.MinusCircle, tintColor:Color.Red}} />
             )}
           </ActionPanel>
         }
