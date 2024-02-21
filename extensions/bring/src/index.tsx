@@ -8,7 +8,7 @@ import { getOrCreateCustomSection, getSectionsFromData, getListData, getTranslat
 
 export default function Command() {
   const bringApiRef = useRef<Promise<BringAPI> | null>(null);
-  const [selectedList, setSelectedList] = useCachedState<BringListInfo>("selectedList");
+  const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
 
@@ -135,26 +135,26 @@ export default function Command() {
     }
   }, [lists, selectedList, setSelectedList]);
 
-  if (!selectedList) {
-    return null;
-  }
-
   let sections = getSectionsFromData(catalog, listDetail, customItems, translations);
   sections = addNewItemToSectionBasedOnSearch(sections, search, translations);
 
-  return (
-    <ItemsGrid
-      list={selectedList}
-      sections={sections}
-      searchText={search}
-      isLoading={isLoadingLists || isLoadingItems}
-      showAddedItemsOnTop={search.length === 0}
-      onSearchTextChange={setSearch}
-      onAddAction={addToList(selectedList)}
-      onRemoveAction={removeFromList(selectedList)}
-      DropdownComponent={DropdownComponent}
-    />
-  );
+  if (!selectedList) {
+    return <Grid isLoading={true}></Grid>;
+  } else {
+    return (
+      <ItemsGrid
+        list={selectedList}
+        sections={sections}
+        searchText={search}
+        isLoading={isLoadingLists || isLoadingItems}
+        showAddedItemsOnTop={search.length === 0}
+        onSearchTextChange={setSearch}
+        onAddAction={addToList(selectedList)}
+        onRemoveAction={removeFromList(selectedList)}
+        DropdownComponent={DropdownComponent}
+      />
+    );
+  }
 }
 
 function addNewItemToSectionBasedOnSearch(sections: Section[], search: string, translations?: Translations): Section[] {
