@@ -1,66 +1,14 @@
+import { Action, ActionPanel, Color, Icon, Image, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Color, List, Icon, Image, ActionPanel, Action, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { APIRequest, makeRequest, getSession } from "./api";
-import { hideToast } from "./utils";
+import { MaskedEmail, MaskedEmailState, updateMaskedEmailState, retrieveAllMaskedEmails } from "./fastmail";
 
 type Preferences = {
   show_deleted: boolean;
   show_pending: boolean;
 };
 
-type ListMaskedEmail = {
-  accountId?: string;
-  get: {
-    ids: [string] | null;
-  };
-};
-
-enum MaskedEmailState {
-  Pending = "pending",
-  Enabled = "enabled",
-  Disabled = "disabled",
-  Deleted = "deleted",
-}
-
-type MaskedEmail = {
-  id: string;
-  email: string;
-  state: MaskedEmailState;
-  forDomain: string;
-  description: string;
-  url: string | null;
-  lastMessageAt: string;
-};
-
-type MaskedEmailGet = {
-  list: [MaskedEmail];
-};
-
-type UpdateMaskedEmail = {
-  accountId?: string;
-  update: Record<
-    string,
-    {
-      state: "pending" | "enabled" | "disabled" | "deleted";
-      description?: string;
-      emailPrefix?: string;
-    }
-  >;
-};
-
-type MaskedEmailSet = {
-  updated: Record<
-    string,
-    {
-      email: string;
-    }
-  >;
-};
-
-const MaskedEmailCapability = "https://www.fastmail.com/dev/maskedemail";
-
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const { show_deleted, show_pending } = getPreferenceValues<Preferences>();
   const [maskedEmails, setMaskedEmails] = useState<MaskedEmail[]>([]);
 
   const updateMaskedEmails = (emails: MaskedEmail[]) => {
@@ -74,40 +22,23 @@ export default function Command() {
     setMaskedEmails(
       emails
         .filter((email) => {
-          if (email.state === MaskedEmailState.Deleted && preferences.show_deleted === false) {
+          if (email.state === MaskedEmailState.Deleted && show_deleted === false) {
             return false;
           }
 
-          if (email.state === MaskedEmailState.Pending && preferences.show_pending === false) {
+          if (email.state === MaskedEmailState.Pending && show_pending === false) {
             return false;
           }
 
           return true;
         })
-        .sort((lhs, rhs) => sortOrder[rhs.state] - sortOrder[lhs.state])
+        .sort((lhs, rhs) => sortOrder[rhs.state] - sortOrder[lhs.state]),
     );
   };
 
-  const updateMaskedEmailState = async (email: MaskedEmail, state: MaskedEmailState) => {
-    const session = await getSession();
-    const request: APIRequest<UpdateMaskedEmail> = {
-      using: ["urn:ietf:params:jmap:core", MaskedEmailCapability],
-      methodCalls: [
-        [
-          "MaskedEmail/set",
-          {
-            accountId: session.primaryAccounts[MaskedEmailCapability],
-            update: {
-              [email.id]: {
-                state,
-              },
-            },
-          },
-          "0",
-        ],
-      ],
-    };
-    await makeRequest<UpdateMaskedEmail, MaskedEmailSet>({ request });
+  const updateMaskedEmail = async (email: MaskedEmail, state: MaskedEmailState) => {
+    await updateMaskedEmailState(email, state);
+
     updateMaskedEmails(maskedEmails.map((e) => (e.id === email.id ? { ...e, state } : e)));
   };
 
@@ -119,15 +50,17 @@ export default function Command() {
     });
 
     try {
-      await updateMaskedEmailState(email, state);
+      await updateMaskedEmail(email, state);
 
-      toast.title = `Masked email ${state === MaskedEmailState.Disabled ? "blocked" : "unblocked"}`;
       toast.style = Toast.Style.Success;
+      toast.title = `Masked email ${state === MaskedEmailState.Disabled ? "blocked" : "unblocked"}`;
     } catch (error) {
-      toast.title = `Failed to ${state === MaskedEmailState.Disabled ? "block" : "unblock"} masked email: ${error}`;
       toast.style = Toast.Style.Failure;
-    } finally {
-      hideToast(toast, 2000);
+      toast.title = `Failed to ${state === MaskedEmailState.Disabled ? "block" : "unblock"} masked email`;
+      toast.message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while updating the masked email, please try again later";
     }
   };
 
@@ -135,14 +68,17 @@ export default function Command() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting masked email..." });
 
     try {
-      await updateMaskedEmailState(email, MaskedEmailState.Deleted);
-      toast.title = "Masked email deleted";
+      await updateMaskedEmail(email, MaskedEmailState.Deleted);
+
       toast.style = Toast.Style.Success;
+      toast.title = "Masked email deleted";
     } catch (error) {
-      toast.title = "Failed to delete masked email: ${error}";
       toast.style = Toast.Style.Failure;
-    } finally {
-      hideToast(toast, 2000);
+      toast.title = "Failed to delete masked email";
+      toast.message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while updating the masked email, please try again later";
     }
   };
 
@@ -150,43 +86,25 @@ export default function Command() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Restoring masked email..." });
 
     try {
-      await updateMaskedEmailState(email, MaskedEmailState.Enabled);
-      toast.title = "Masked email restored";
+      await updateMaskedEmail(email, MaskedEmailState.Enabled);
+
       toast.style = Toast.Style.Success;
+      toast.title = "Masked email restored";
     } catch (error) {
-      toast.title = "Failed to restore masked email: ${error}";
       toast.style = Toast.Style.Failure;
-    } finally {
-      hideToast(toast, 2000);
+      toast.title = "Failed to restore masked email";
+      toast.message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while updating the masked email, please try again later";
     }
   };
 
   useEffect(() => {
     const listMaskedEmails = async () => {
-      const session = await getSession();
-      const request: APIRequest<ListMaskedEmail> = {
-        using: ["urn:ietf:params:jmap:core", MaskedEmailCapability],
-        methodCalls: [
-          [
-            "MaskedEmail/get",
-            {
-              accountId: session.primaryAccounts[MaskedEmailCapability],
-              get: {
-                ids: null,
-              },
-            },
-            "0",
-          ],
-        ],
-      };
+      const emails = await retrieveAllMaskedEmails();
 
-      try {
-        const response = await makeRequest<ListMaskedEmail, MaskedEmailGet>({ request });
-        const emails: MaskedEmail[] = response.methodResponses[0][1].list;
-        updateMaskedEmails(emails);
-      } catch (error) {
-        throw new Error(`Failed to list masked emails: ${error}`);
-      }
+      updateMaskedEmails(emails);
     };
 
     listMaskedEmails().catch(console.error);
@@ -233,16 +151,16 @@ export default function Command() {
 
 const iconForMaskedEmail: (maskedEmail: MaskedEmail) => Image = (maskedEmail) => {
   switch (maskedEmail.state) {
-    case "pending":
+    case MaskedEmailState.Pending:
       return { source: Icon.Pause, tintColor: Color.Blue };
 
-    case "deleted":
+    case MaskedEmailState.Deleted:
       return { source: Icon.Trash, tintColor: Color.Red };
 
-    case "enabled":
+    case MaskedEmailState.Enabled:
       return { source: Icon.Check, tintColor: Color.Green };
 
-    case "disabled":
+    case MaskedEmailState.Disabled:
       return { source: Icon.Stop, tintColor: Color.Orange };
   }
 };
@@ -252,22 +170,22 @@ const accessoryForMaskedEmail: (maskedEmail: MaskedEmail) => List.Item.Accessory
   let value: string;
 
   switch (maskedEmail.state) {
-    case "pending":
+    case MaskedEmailState.Pending:
       color = Color.Blue;
       value = "Pending";
       break;
 
-    case "deleted":
+    case MaskedEmailState.Deleted:
       color = Color.Red;
       value = "Deleted";
       break;
 
-    case "enabled":
+    case MaskedEmailState.Enabled:
       color = Color.Green;
       value = "Active";
       break;
 
-    case "disabled":
+    case MaskedEmailState.Disabled:
       color = Color.Orange;
       value = "Blocked";
       break;
