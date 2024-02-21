@@ -33,7 +33,7 @@ export class BringAPI {
         this.isAuthenticated = true;
       } catch (error: any) {
         if (error.response && error.response.status === 401) {
-          throw new Error('Failed to authenticate with Bring! Please check your credentials.');
+          throw new Error("Failed to authenticate with Bring! Please check your credentials.");
         }
         throw error;
       }
