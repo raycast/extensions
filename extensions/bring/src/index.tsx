@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useRef, useState, useEffect } from "react";
+import { useCachedPromise, useCachedState} from "@raycast/utils";
 import { Action, ActionPanel, Grid, Icon, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
@@ -8,19 +8,14 @@ import { getOrCreateCustomSection, getSectionsFromData, getListData, getTranslat
 
 export default function Command() {
   const bringApiRef = useRef<Promise<BringAPI> | null>(null);
-  const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
+  const [selectedList, setSelectedList] = useCachedState<BringListInfo>("selectedList");
+  // const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
 
   const { data: lists = [], isLoading: isLoadingLists } = useCachedPromise(async () => {
     const bringApi = await getBringApi();
-
     const { lists } = await bringApi.getLists();
-    // if there is only one list, use it
-    if (lists.length === 1) {
-      setSelectedList(lists[0]);
-    }
-
     return lists;
   });
 
@@ -41,11 +36,7 @@ export default function Command() {
   };
 
   const {
-    data: [listDetail, customItems],
-    isLoading: isLoadingList,
-    mutate,
-  } = useCachedPromise(
-    async (selectedList?: BringListInfo) => {
+    data: [listDetail, customItems], isLoading: isLoadingItems, mutate } = useCachedPromise(async (selectedList?: BringListInfo) => {
       if (!selectedList) {
         return Promise.resolve<[BringList | undefined, BringCustomItem[]]>([undefined, []]);
       }
@@ -135,22 +126,14 @@ export default function Command() {
     };
   }
 
+  useEffect(() => {
+    if (!selectedList && lists.length > 0) {
+      setSelectedList(lists[0]);
+    }
+  }, [lists, selectedList, setSelectedList]);
+
   if (!selectedList) {
-    return (
-      <List isLoading={isLoadingLists} navigationTitle="Choose a List to Add Items to">
-        {lists.map((list) => (
-          <List.Item
-            key={list.listUuid}
-            title={list.name}
-            actions={
-              <ActionPanel>
-                <Action title="Select List" onAction={() => setSelectedList(list)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List>
-    );
+    return null;
   }
 
   let sections = getSectionsFromData(catalog, listDetail, customItems, translations);
@@ -161,7 +144,7 @@ export default function Command() {
       list={selectedList}
       sections={sections}
       searchText={search}
-      isLoading={isLoadingList}
+      isLoading={isLoadingLists || isLoadingItems}
       showAddedItemsOnTop={search.length === 0}
       canSwitchList={lists.length > 1}
       onSearchTextChange={setSearch}
