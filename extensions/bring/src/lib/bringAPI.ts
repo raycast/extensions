@@ -25,11 +25,18 @@ export class BringAPI {
       if (!this.authenticationPromise) {
         this.authenticationPromise = this.bringAuth(email, password);
       }
-      const { uuid, access_token: token, bringListUUID: defaultListUuid } = await this.authenticationPromise;
-      this.setAuthToken(token);
-      this.userUuid = uuid;
-      this.defaultListUuid = defaultListUuid;
-      this.isAuthenticated = true;
+      try {
+        const { uuid, access_token: token, bringListUUID: defaultListUuid } = await this.authenticationPromise;
+        this.setAuthToken(token);
+        this.userUuid = uuid;
+        this.defaultListUuid = defaultListUuid;
+        this.isAuthenticated = true;
+      } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+          throw new Error('Failed to authenticate with Bring! Please check your credentials.');
+        }
+        throw error;
+      }
     }
 
     return this;
