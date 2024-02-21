@@ -104,7 +104,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       >
         <Form.Dropdown.Item value="none" title="Choose an Awesome ChatGPT Prompts" icon={"🧠"} />
         {(data || []).map((prompt) => (
-          <Form.Dropdown.Item value={prompt.prompt} title={prompt.act} />
+          <Form.Dropdown.Item value={prompt.prompt} title={prompt.act} key={prompt.prompt} />
         ))}
       </Form.Dropdown>
       <Form.TextArea title="Prompt" placeholder="Describe your prompt" {...itemProps.prompt} />
