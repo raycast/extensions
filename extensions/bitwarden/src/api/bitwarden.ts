@@ -124,10 +124,10 @@ export class Bitwarden {
 
   private async ensureCliBinary(): Promise<void> {
     if (existsSync(this.cliPath)) return;
-    if (BinDownloadLogger.hasError()) return BinDownloadLogger.clearError();
     if (this.cliPath === this.preferences.cliPath) {
       throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
+    if (BinDownloadLogger.hasError()) BinDownloadLogger.clearError();
 
     // remove old binaries to check if it's an update and because they are 100MB+
     const hadOldBinaries = await removeFilesThatStartWith("bw-", supportPath);
