@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { Grid, Icon, getPreferenceValues, showToast, Toast, List } from "@raycast/api";
+import { Grid, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
@@ -132,7 +132,7 @@ export default function Command() {
   }, [lists, selectedList, setSelectedList]);
 
   const sections = useMemo(() => {
-    let sections = getSectionsFromData(catalog, listDetail, customItems, translations);
+    const sections = getSectionsFromData(catalog, listDetail, customItems, translations);
     return addNewItemToSectionBasedOnSearch(sections, search, translations);
   }, [catalog, listDetail, customItems, translations, search]);
 
