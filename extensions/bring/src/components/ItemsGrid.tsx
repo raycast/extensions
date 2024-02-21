@@ -25,11 +25,9 @@ export const ItemsGrid = ({
   searchText,
   isLoading,
   showAddedItemsOnTop,
-  canSwitchList,
   onSearchTextChange,
   onAddAction,
   onRemoveAction,
-  onResetList,
   DropdownComponent,
 }: {
   list: BringListInfo;
@@ -37,11 +35,9 @@ export const ItemsGrid = ({
   searchText: string;
   isLoading: boolean;
   showAddedItemsOnTop: boolean;
-  canSwitchList: boolean;
   onSearchTextChange: (text: string) => void;
   onAddAction: (item: Item, specification?: string) => void;
   onRemoveAction: (item: Item) => void;
-  onResetList: () => void;
   DropdownComponent: () => JSX.Element;
 }) => {
   function getGridItem(item: Item, keywords?: string[]): JSX.Element {
@@ -62,22 +58,9 @@ export const ItemsGrid = ({
         actions={
           <ActionPanel title="Bring!">
             {!isInPurchaseList ? (
-              <ActionPanel.Section>
-                <Action title="Add to List" onAction={() => onAddAction(item)} />
-                {/* <Action title="Add to List with Specification" onAction={() => addWithSpecification(name)} /> */}
-              </ActionPanel.Section>
+            <Action title="Add to List" onAction={() => onAddAction(item)} />
             ) : (
-              <ActionPanel.Section>
-                <Action title="Remove from List" onAction={() => onRemoveAction(item)} />
-                {/* <Action title="Edit Specification" onAction={() => addWithSpecification(name)} /> */}
-              </ActionPanel.Section>
-            )}
-            {canSwitchList && (
-              <Action
-                title="Switch to Another List"
-                onAction={onResetList}
-                shortcut={{ modifiers: ["cmd"], key: "l" }}
-              />
+            <Action title="Remove from List" onAction={() => onRemoveAction(item)} />
             )}
           </ActionPanel>
         }

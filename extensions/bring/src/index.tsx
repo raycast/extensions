@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useCachedPromise, useCachedState} from "@raycast/utils";
-import { Action, ActionPanel, Grid, Icon, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Grid, Icon, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
@@ -146,13 +146,9 @@ export default function Command() {
       searchText={search}
       isLoading={isLoadingLists || isLoadingItems}
       showAddedItemsOnTop={search.length === 0}
-      canSwitchList={lists.length > 1}
       onSearchTextChange={setSearch}
       onAddAction={addToList(selectedList)}
       onRemoveAction={removeFromList(selectedList)}
-      onResetList={() => {
-        setSelectedList(undefined);
-      }}
       DropdownComponent={DropdownComponent}
     />
   );
