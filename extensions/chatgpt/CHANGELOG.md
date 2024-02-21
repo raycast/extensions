@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fet] - 2024-02-21
+
+- Feature: Integrate awesome-chatgpt-prompts project
+
 ## [Fix] - 2024-02-20
 
 - Fix: Inability to answer according to prompt rules or even refusal to answer

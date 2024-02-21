@@ -1,13 +1,14 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
-import { Model, ModelHook } from "../../type";
+import { CSVPrompt, Model, ModelHook } from "../../type";
+import { parse } from "csv-parse/sync";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
   const { pop } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<Model>({
+  const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
       let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
       if (typeof updatedModel.temperature === "string") {
@@ -66,6 +67,25 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
 
   const MODEL_OPTIONS = use.models.option;
 
+  const { isLoading, data } = useFetch<CSVPrompt[]>(
+    "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
+    {
+      parseResponse: async (response) => {
+        const text = await response.text();
+        return parse(text, {
+          columns: true,
+        });
+      },
+      keepPreviousData: true,
+    }
+  );
+
+  function replacePrompt(value: string) {
+    if (value !== "none") {
+      setValue("prompt", value);
+    }
+  }
+
   return (
     <Form
       actions={
@@ -75,6 +95,18 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       }
     >
       <Form.TextField title="Name" placeholder="Name your model" {...itemProps.name} />
+      <Form.Dropdown
+        id="template"
+        title="Awesome Prompts"
+        isLoading={isLoading}
+        defaultValue="none"
+        onChange={replacePrompt}
+      >
+        <Form.Dropdown.Item value="none" title="Choose an Awesome ChatGPT Prompts" icon={"🧠"} />
+        {(data || []).map((prompt) => (
+          <Form.Dropdown.Item value={prompt.prompt} title={prompt.act} />
+        ))}
+      </Form.Dropdown>
       <Form.TextArea title="Prompt" placeholder="Describe your prompt" {...itemProps.prompt} />
       <Form.TextField
         title="Temperature"
