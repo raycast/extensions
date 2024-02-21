@@ -92,6 +92,7 @@ export const ItemsGrid = ({
   return (
     <Grid
       columns={5}
+      aspectRatio="4/3"
       searchText={searchText}
       searchBarPlaceholder="What would you like to add?"
       onSearchTextChange={onSearchTextChange}
