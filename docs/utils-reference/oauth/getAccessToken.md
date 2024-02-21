@@ -23,8 +23,6 @@ The function returns an object containing the following properties:
 
 ## Example
 
-Here's a simple example:
-
 ```tsx
 import { Detail } from "@raycast/api";
 import { authorize } from "./oauth"

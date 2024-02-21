@@ -1,5 +1,11 @@
 # Library Genesis Changelog
 
+## [Ignore HTTPS Errors] - 2024-02-17
+
+- Fixed an issue where `library.lol` gives certificate errors (ignore SSL errors) (#10798)
+- Added an extra description in download error where the user is instructed to either choose a different mirror or ignore https errors
+- Bump dependencies to latest version
+
 ## [Housekeeping] - 2023-12-05
 
 - Removed [libgen](https://www.npmjs.com/package/libgen) dependency

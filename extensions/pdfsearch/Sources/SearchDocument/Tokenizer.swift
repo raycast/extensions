@@ -1,6 +1,12 @@
 import NaturalLanguage
 import Accelerate
 
+/// Expands the search query to smaller/similar words for more keyword matches.
+/// Similar words include stemming
+/// - Parameters:
+///   - query: Search query
+///   - embedding: Embedding model
+/// - Returns: Expanded list of words to search
 func expandQuery(query: String, using embedding: NLEmbedding?) -> [String] {
     guard let embedding = embedding else { return [query] }
     // let words = query.components(separatedBy: .whitespacesAndNewlines)

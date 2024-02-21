@@ -1,5 +1,17 @@
 export const READING_STYLES_PROMPTS = {
-  autoDetect: `auto detect the type of contents depending on the content details, and make a tts-script accordingly such as audiobook, educational, explainCode, codeReview, news, podcast, sparkNotes. if it doesn't fit into these, create an appropriate style. The script should aim for human-like narration, utilizing only verified details about the content's nature, authorship, and other relevant information.`,
+  autoDetect: `
+  Analyze the details of the provided content to automatically determine the most suitable type of script. 
+  Then, generate a script in one of the following formats, optimized for a natural and smooth reading experience:
+
+  Audiobook: Narrate the story with emotion and appropriate tone, ensuring a captivating storytelling experience.
+  Educational Material: Focus on clarity and effectiveness in teaching, with explanations or summaries where necessary.
+  Code Explanation: Clearly articulate the functions, structures, and logic of the code, making it understandable even for those not familiar with the programming language.
+  Code Review: Provide a balanced assessment of the code, highlighting strengths, weaknesses, and suggestions for improvement in a clear manner.
+  News: Present the information factually and concisely, maintaining a neutral tone throughout.
+  Podcast: Engage the listener with a conversational and dynamic style, appropriate for a podcast format.
+  Spark Notes: Concisely summarize the key points and essential information, making it easy to grasp the core concepts quickly.
+  If the content doesn't fit these categories, create a script that best matches the unique characteristics of the content, always aiming for a human-like, engaging narration and using only verified, relevant details about the content's nature and authorship.
+  `.trim(),
   summary: `highly condensed script for text-to-speech, focusing exclusively on summarizing the key points. The script should distill the essential information into a brief, clear, and direct format, ensuring that the author's main messages are conveyed succinctly and effectively without any extraneous details or embellishments.`,
   detailed: `This script for text-to-speech starts with an explanation of the content's plot from a third-person perspective. The script will then provide a detailed summary of the main points, ensuring comprehensive coverage in a clear and concise manner. It is structured logically and coherently, allowing the listener to easily follow the narrative and understand the key messages as if an observer is recounting the events.`,
   audioBook: `script for text-to-speech that begins with a natural introduction of the author and the book. After the introduction, seamlessly transition into reading the main content. The script should emulate an audiobook style, being straightforward and engaging, and emphasize key points with minimal embellishments. The narrative should be clear and concise, effectively conveying essential information as if the author is personally addressing the audience.`,

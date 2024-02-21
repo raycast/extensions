@@ -132,7 +132,7 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
   const maxRetries = 3;
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const result = await AI.ask(prompt);
+      const result = await AI.ask(prompt, { model: "gpt-4" });
       const json = JSON.parse(result.trim());
       if (json.recurrence && !json.dueDate) {
         throw new Error("Recurrence without dueDate");

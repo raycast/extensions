@@ -10,7 +10,7 @@ import {
   User,
   WorkflowState,
 } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type Favorite = {
   id: string;

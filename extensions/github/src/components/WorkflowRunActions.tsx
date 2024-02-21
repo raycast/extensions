@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
+import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
-import { getGitHubClient } from "../helpers/withGithubClient";
 import { WorkflowRunsResponse } from "../workflow-runs";
 
 export type WorkflowRun = WorkflowRunsResponse["data"]["workflow_runs"][0];

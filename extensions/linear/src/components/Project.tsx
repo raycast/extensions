@@ -5,7 +5,7 @@ import { format } from "date-fns";
 
 import { ProjectResult } from "../api/getProjects";
 
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getProjectIcon, projectStatusIcon, projectStatusText } from "../helpers/projects";
 import { getUserIcon } from "../helpers/users";
 import { getErrorMessage } from "../helpers/errors";

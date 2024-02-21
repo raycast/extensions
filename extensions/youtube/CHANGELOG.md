@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Sorting] - 2024-02-05
+
+- Add Sorting Dropdown
+
 ## [Enhancements] - 2023-06-20
 
 - Added video duration info on details view

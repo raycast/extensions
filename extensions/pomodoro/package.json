@@ -9,7 +9,8 @@
     "pernielsentikaer",
     "brodelp",
     "susan_thapa",
-    "mikikiv"
+    "mikikiv",
+    "MartinGonzalez"
   ],
   "keywords": [
     "pomodoro",
@@ -240,6 +241,44 @@
       ]
     },
     {
+      "name": "longBreakStartThreshold",
+      "type": "dropdown",
+      "required": false,
+      "title": "Long Break Start Threshold",
+      "description": "Pomodoro cycles after which you want to take a long break",
+      "default": "4",
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
+    },
+    {
       "name": "completionImage",
       "type": "textfield",
       "required": false,
@@ -322,6 +361,15 @@
       "description": "Shows time on the Menu Bar",
       "default": true,
       "label": "Show time on Menu Bar"
+    },
+    {
+      "name": "enableConfetti",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Confetti",
+      "description": "Shows confetti when interval finishes",
+      "default": false,
+      "label": "Shows confetti when interval finishes"
     }
   ],
   "dependencies": {

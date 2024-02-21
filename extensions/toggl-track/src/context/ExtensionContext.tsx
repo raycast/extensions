@@ -23,10 +23,10 @@ export const ExtensionContextProvider = ({ children }: { children: JSX.Element }
           </ActionPanel>
         }
       >
-        <List.Item
+        <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Invalid API Key Detected"
-          accessories={[{ text: `Go to Extensions → Toggl Track` }]}
+          description="Go to Extensions → Toggl Track"
         />
       </List>
     );

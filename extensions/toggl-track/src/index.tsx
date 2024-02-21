@@ -4,25 +4,19 @@ import duration from "dayjs/plugin/duration";
 import RunningTimeEntry from "./components/RunningTimeEntry";
 import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
 import { createTimeEntry, TimeEntry } from "./api";
-import ProjectListItem from "./components/ProjectListItem";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { TimeEntryContextProvider, useTimeEntryContext } from "./context/TimeEntryContext";
+import { useTimeEntries, useRunningTimeEntry, useProjects } from "./hooks";
+import { formatSeconds } from "./helpers/formatSeconds";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const {
-    isLoading,
-    timeEntries,
-    runningTimeEntry,
-    projects,
-    projectGroups,
-    revalidateRunningTimeEntry,
-    revalidateTimeEntries,
-  } = useTimeEntryContext();
+  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
+  const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
+  const { projects, isLoadingProjects } = useProjects();
 
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingProjects;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
     (acc, timeEntry) =>
@@ -41,20 +35,11 @@ function ListView() {
     return seconds;
   }, [timeEntries, runningTimeEntry]);
 
-  function formatSeconds(seconds: number) {
-    const h = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  }
-
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
     try {
       await createTimeEntry({
-        projectId: timeEntry.project_id,
+        projectId: timeEntry.project_id ?? undefined,
         workspaceId: timeEntry.workspace_id,
         description: timeEntry.description,
         tags: timeEntry.tags,
@@ -91,9 +76,7 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <TimeEntryContextProvider>
-                      <CreateTimeEntryForm />
-                    </TimeEntryContextProvider>
+                    <CreateTimeEntryForm {...{ isLoading, projects, revalidateRunningTimeEntry }} />
                   </ExtensionContextProvider>
                 }
               />
@@ -102,16 +85,18 @@ function ListView() {
         />
       </List.Section>
       {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
-        <List.Section title="Resume recent time entry">
+        <List.Section title="Recent time entries">
           {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
             <List.Item
               key={timeEntry.id}
-              keywords={[timeEntry.description, getProjectById(timeEntry.project_id)?.name || ""]}
+              keywords={[timeEntry.description, timeEntry.project_name || ""]}
               title={timeEntry.description || "No description"}
               subtitle={timeEntry.billable ? "$" : ""}
-              accessoryTitle={getProjectById(timeEntry?.project_id)?.name}
-              accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color }}
-              icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.project_id)?.color }}
+              accessories={[
+                { text: timeEntry.project_name },
+                { icon: { source: Icon.Dot, tintColor: timeEntry.project_color } },
+              ]}
+              icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
                   <Action.SubmitForm
@@ -125,19 +110,6 @@ function ListView() {
           ))}
         </List.Section>
       )}
-      <List.Section title="Projects">
-        {projectGroups &&
-          projectGroups.map((group) =>
-            group.projects.map((project) => (
-              <ProjectListItem
-                key={project.id}
-                project={project}
-                subtitle={group.client?.name}
-                accessoryTitle={group.workspace.name}
-              />
-            )),
-          )}
-      </List.Section>
     </List>
   );
 }
@@ -145,9 +117,7 @@ function ListView() {
 export default function Command() {
   return (
     <ExtensionContextProvider>
-      <TimeEntryContextProvider>
-        <ListView />
-      </TimeEntryContextProvider>
+      <ListView />
     </ExtensionContextProvider>
   );
 }

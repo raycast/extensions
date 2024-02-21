@@ -6,7 +6,7 @@ import { ProjectListItem } from "./components/project-list-item";
 
 export default function Command() {
   const p = getPreferenceValues();
-  const { isLoading, error, data } = useFetch<Project[]>(`${p.httpdAddress}/api/v1/projects`);
+  const { isLoading, error, data } = useFetch<Project[]>(`${p.httpdAddress}/api/v1/projects?perPage=500&show=all`);
 
   if (error) {
     showToast({

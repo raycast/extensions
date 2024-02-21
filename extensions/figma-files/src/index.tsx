@@ -1,4 +1,4 @@
-import { Application, getApplications, Grid, getPreferenceValues } from "@raycast/api";
+import { Application, getApplications, Grid, getPreferenceValues, LaunchProps } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
@@ -8,7 +8,7 @@ import { useCachedPromise } from "@raycast/utils";
 import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
 
-export default function Command() {
+export default function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
@@ -35,6 +35,7 @@ export default function Command() {
   const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
   const [desktopApp, setDesktopApp] = useState<Application>();
+  const [searchText, setSearchText] = useState<string>(launchContext?.query ?? "");
 
   useEffect(() => {
     getApplications()
@@ -105,6 +106,9 @@ export default function Command() {
     <Grid
       isLoading={isLoadingBlock}
       searchBarPlaceholder="Filter files by name..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={true}
       searchBarAccessory={filterDropdown()}
     >
       {!isFiltered && (

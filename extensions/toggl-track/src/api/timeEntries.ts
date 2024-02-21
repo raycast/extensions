@@ -1,6 +1,7 @@
+import type { ToggleItem } from "./types";
 import { get, post, patch } from "./togglClient";
 
-export async function getTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
+export async function getMyTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
   const timeEntries = await get<TimeEntry[]>(
     `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`,
   );
@@ -47,14 +48,42 @@ export function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: nu
 }
 
 // https://developers.track.toggl.com/docs/api/time_entries#response
-export interface TimeEntry {
-  at: string;
+export interface TimeEntry extends ToggleItem {
   billable: boolean;
+  /** Related entities meta fields - if requested */
+  client_name?: string;
   description: string;
-  id: number;
-  project_id: number;
-  start: string;
+  /**
+   * Time entry duration.
+   *
+   * For running entries should be negative, preferable -1
+   */
   duration: number;
+  /**
+   * Used to create a TE with a duration but without a stop time.
+   *
+   * @deprecated This field is deprecated for GET endpoints where the value will always be true.
+   */
+  duronly: boolean;
+  project_color?: string;
+  /**
+   * Project ID
+   *
+   * Can be null if project was not provided or project was later deleted
+   */
+  project_id: number | null;
+  project_name?: string;
+  start: string;
+  /**
+   * Stop time in UTC.
+   *
+   * Can be null if it's still running or created with "duration" and "duronly" fields.
+   */
+  stop: string | null;
+  tag_ids: number[] | null;
   tags: string[];
+  task_id: number | null;
+  /** Time Entry creator ID */
+  user_id: number;
   workspace_id: number;
 }

@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { Space, Tab } from "./types";
 
 // Tabs
@@ -6,13 +6,17 @@ import { Space, Tab } from "./types";
 export async function getTabs() {
   const response = await runAppleScript(`
     on escape_value(this_text)
+      set AppleScript's text item delimiters to the "\\\\"
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\\\"
+      set this_text to the item_list as string
       set AppleScript's text item delimiters to the "\\""
       set the item_list to every text item of this_text
       set AppleScript's text item delimiters to the "\\\\\\""
       set this_text to the item_list as string
       set AppleScript's text item delimiters to ""
       return this_text
-    end replace_chars
+    end escape_value
 
     set _output to ""
 
@@ -92,6 +96,9 @@ export async function findTab(url: string) {
 function runAppleScriptActionOnTab(tab: Tab, action: string, activate = false) {
   return runAppleScript(`
     tell application "Arc"
+    if (count of windows) is 0 then
+    make new window
+  end if
       set tabIndex to 1
       repeat with aTab in every tab of first window
         if id of aTab is "${tab.id}" then

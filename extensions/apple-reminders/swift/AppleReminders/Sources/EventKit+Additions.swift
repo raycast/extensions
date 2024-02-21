@@ -102,7 +102,7 @@ extension EKRecurrenceRule {
     if months.count == 12 {
       return " of Every Month"
     } else {
-      let formattedMonths = months.compactMap { monthSymbols?[$0.intValue] }.formatted()
+      let formattedMonths = months.compactMap { monthSymbols?[$0.intValue - 1] }.formatted()
       return " in \(formattedMonths)"
     }
   }
@@ -192,36 +192,43 @@ extension EKReminder {
     let isRecurring = self.recurrenceRules?.isEmpty == false
     let recurrenceRuleDescription = self.recurrenceRules?.first?.displayString
 
-      var location: Location? = nil
+    var location: Location? = nil
 
-      // Check if the reminder has associated alarms with a location
-      if let alarms = self.alarms {
-        for alarm in alarms where alarm.structuredLocation != nil {
-          if let structuredLocation = alarm.structuredLocation {
-            // Assuming you only want to capture the first valid location
-            let proximityString: String
-            switch alarm.proximity {
-            case .enter:
-              proximityString = "enter"
-            case .leave:
-              proximityString = "leave"
-            case .none:
-              proximityString = ""
-            @unknown default:
-              proximityString = ""
-            }
-
-            location = Location(
-              address: structuredLocation.title ?? "Unknown address",
-              proximity: proximityString,
-              radius: structuredLocation.radius > 0 ? structuredLocation.radius : nil 
-            )
-            break
+    // Check if the reminder has associated alarms with a location
+    if let alarms = self.alarms {
+      for alarm in alarms where alarm.structuredLocation != nil {
+        if let structuredLocation = alarm.structuredLocation {
+          // Assuming you only want to capture the first valid location
+          let proximityString: String
+          switch alarm.proximity {
+          case .enter:
+            proximityString = "enter"
+          case .leave:
+            proximityString = "leave"
+          case .none:
+            proximityString = ""
+          @unknown default:
+            proximityString = ""
           }
+
+          location = Location(
+            address: structuredLocation.title ?? "Unknown address",
+            proximity: proximityString,
+            radius: structuredLocation.radius > 0 ? structuredLocation.radius : nil
+          )
+          break
         }
       }
+    }
 
-      return Reminder(id: self.calendarItemIdentifier, openUrl: "x-apple-reminderkit://REMCDReminder/\(self.calendarItemIdentifier)", title: self.title ?? "", notes: self.notes ?? "", dueDate: dueDateString, isCompleted: self.isCompleted, priority: reminderPriority.displayString, completionDate: completionDateString, isRecurring: isRecurring, recurrenceRule: recurrenceRuleDescription ?? "", list: calendar.toStruct(defaultCalendarId: nil), location: location)
+    return Reminder(
+      id: self.calendarItemIdentifier,
+      openUrl: "x-apple-reminderkit://REMCDReminder/\(self.calendarItemIdentifier)",
+      title: self.title ?? "", notes: self.notes ?? "", dueDate: dueDateString,
+      isCompleted: self.isCompleted, priority: reminderPriority.displayString,
+      completionDate: completionDateString, isRecurring: isRecurring,
+      recurrenceRule: recurrenceRuleDescription ?? "",
+      list: calendar.toStruct(defaultCalendarId: nil), location: location)
   }
 }
 
@@ -232,11 +239,13 @@ extension EKAlarm {
 }
 
 extension EKCalendar {
-    func toStruct(defaultCalendarId: String?) -> ReminderList {
+  func toStruct(defaultCalendarId: String?) -> ReminderList {
     let color = self.cgColor?.components
     let hexColor = color != nil ? rgbaToHex(color![0], color![1], color![2]) : "#000000"
-        let isDefault = self.calendarIdentifier == defaultCalendarId
-      
-        return ReminderList(id: self.calendarIdentifier, title: self.title, color: hexColor, isDefault: defaultCalendarId != nil ? isDefault: false)
+    let isDefault = self.calendarIdentifier == defaultCalendarId
+
+    return ReminderList(
+      id: self.calendarIdentifier, title: self.title, color: hexColor,
+      isDefault: defaultCalendarId != nil ? isDefault : false)
   }
 }

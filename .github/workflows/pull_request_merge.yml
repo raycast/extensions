@@ -15,7 +15,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ env.GITHUB_TOKEN }}
       - name: Setup GIT
@@ -102,4 +102,4 @@ jobs:
             PR ${{ github.event.inputs.pr_number }} merge failed. ${{ steps.commit_changes.outputs.error }}
             Check <${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}|action logs>.
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}

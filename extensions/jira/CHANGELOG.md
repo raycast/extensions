@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Add OAuth utils] - 2024-02-13
+
+- Use new OAuth utils
+
 ## [Add command to open issue from clipboard] - 2024-01-19
 
 - Add a new command to open issue by key from the clipboard.

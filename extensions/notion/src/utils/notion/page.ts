@@ -10,7 +10,7 @@ import { handleError, pageMapper } from "./global";
 
 import { NotionObject } from ".";
 
-export async function fetchPage(pageId: string) {
+export async function fetchPage(pageId: string, silent: boolean = true) {
   try {
     await authorize();
     const page = await notion.pages.retrieve({
@@ -19,7 +19,7 @@ export async function fetchPage(pageId: string) {
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to fetch page", undefined);
+    if (!silent) return handleError(err, "Failed to fetch page", undefined);
   }
 }
 
@@ -136,12 +136,12 @@ export function getPageIcon(page: Page): Image.ImageLike {
   return page.icon_emoji
     ? page.icon_emoji
     : page.icon_file
-    ? page.icon_file
-    : page.icon_external
-    ? page.icon_external
-    : page.object === "database"
-    ? Icon.List
-    : Icon.BlankDocument;
+      ? page.icon_file
+      : page.icon_external
+        ? page.icon_external
+        : page.object === "database"
+          ? Icon.List
+          : Icon.BlankDocument;
 }
 
 export function getPageName(page: Page): string {

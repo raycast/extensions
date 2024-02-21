@@ -14,7 +14,7 @@ export const isRunning = async () => {
 
 export const startOpenVPN = async () => {
   try {
-    await execAsync('"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect" --minimize');
+    await execAsync('"/Applications/OpenVPN Connect/OpenVPN Connect.app/contents/MacOS/OpenVPN Connect"');
   } catch (e) {
     console.error(e);
   }

@@ -1,5 +1,17 @@
 # Toggl Track Changelog
 
+## [New Feature] - 2024-01-16
+
+- Adds a new `Manage Tags` command.
+- Adds a new `Manage Projects` command.
+- Adds a new `Manage Clients` command.
+- Adds a new `View Projects` command.
+
+## [Enhancements] - 2024-01-16
+
+- Rename main command to "Start/Stop Time Entry".
+- Remove projects from list view.
+
 ## [Bug Fixes] - 2024-01-15
 
 - Remove `refresh` action.
