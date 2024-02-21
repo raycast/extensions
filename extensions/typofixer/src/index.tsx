@@ -1,20 +1,23 @@
 import { Clipboard, getPreferenceValues, getSelectedText, environment } from "@raycast/api";
-import { exec as Exec } from "child_process";
-import { promisify } from "util";
+import { exec } from "child_process";
 
-const Layout = [
+const LayoutPC = [
   "@#$^&`~qwertyuiop[]QWERTYUIOP{}asdfghjkl;'ASDFGHJKL:\"|zxcvbnm,./ZXCVBNM<>?",
   '"№;:?ёЁйцукенгшщзхъЙЦУКЕНГШЩЗХЪфывапролджэФЫВАПРОЛДЖЭ/ячсмитьбю.ЯЧСМИТЬБЮ,',
+];
+
+const LayoutnPC = [
+  "@#$^&`~qwertyuiop[]QWERTYUIOP{}asdfghjkl;'ASDFGHJKL:\"|zxcvbnm,./ZXCVBNM<>?%*\\",
+  '"№%,.][йцукенгшщзхъЙЦУКЕНГШЩЗХЪфывапролджэФЫВАПРОЛДЖЭЁячсмитьбю.ЯЧСМИТЬБЮ,:;ё',
 ];
 
 const { layoutEN, layoutRU } = getPreferenceValues();
 const regex = /[А-Яа-яЁё]/m;
 
-const exec = promisify(Exec);
-
 export default async function main() {
   let inStr = "";
   let layoutDirect = 0;
+  let Layout = ["", ""];
   const outArr: Array<string> = [];
 
   try {
@@ -24,6 +27,7 @@ export default async function main() {
   }
 
   if (inStr !== "") {
+    layoutRU == "Russian" ? (Layout = LayoutnPC) : (Layout = LayoutPC);
     inStr.split(" ").map((word) => {
       layoutDirect = Number(regex.test(word));
       outArr.push(

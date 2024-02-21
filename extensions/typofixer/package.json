@@ -25,15 +25,15 @@
       "title": "English Input Source",
       "description": "English Input Source after fix",
       "required": false,
-      "default": "English - Ilya Birman Typography",
+      "default": "English – Ilya Birman Typography",
       "data": [
+        {
+          "title": "English – Ilya Birman Typography",
+          "value": "English – Ilya Birman Typography"
+        },
         {
           "title": "ABC",
           "value": "ABC"
-        },
-        {
-          "title": "English - Ilya Birman Typography",
-          "value": "English - Ilya Birman Typography"
         }
       ]
     },
@@ -43,15 +43,19 @@
       "title": "Russian Input Source",
       "description": "Russian Input Source after fix",
       "required": false,
-      "default": "Russian - Ilya Birman Typography",
+      "default": "Russian – Ilya Birman Typography",
       "data": [
+        {
+          "title": "Russian – Ilya Birman Typography",
+          "value": "Russian – Ilya Birman Typography"
+        },
         {
           "title": "Russian - PC",
           "value": "Russian - PC"
         },
         {
-          "title": "Russian - Ilya Birman Typography",
-          "value": "Russian - Ilya Birman Typography"
+          "title": "Russian",
+          "value": "Russian"
         }
       ]
     }

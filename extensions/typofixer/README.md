@@ -3,6 +3,7 @@
 Fix text typed with the wrong keyboard layout (English/Russian).
 
 ## Supported keyboard layout
+- ABC/Russian
 - ABC/Russian PC
 - English/Russian Ilya Birman Typography
 
