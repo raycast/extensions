@@ -29,9 +29,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       <List.EmptyView icon="no-view.png" title="No Results" />
-      {data?.map((app, index) => (
-        <AppListItem key={index} app={app} />
-      ))}
+      {data?.map((app, index) => <AppListItem key={index} app={app} />)}
     </List>
   );
 }
