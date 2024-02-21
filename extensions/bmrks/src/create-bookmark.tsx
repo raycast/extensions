@@ -9,7 +9,7 @@ import { ensureValidUrl } from "../lib/ensure-valid-url";
 import { useActiveTab } from "../lib/use-active-tab";
 import { isUrlLike } from "../lib/is-url-like";
 import { User } from "@supabase/supabase-js";
-import AuthenticatedView from "./components/AuthenticatedView";
+import AuthenticatedView from "./components/authenticated-view";
 
 interface MicrolinkResponse {
   data: {
