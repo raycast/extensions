@@ -1,0 +1,78 @@
+import { Explorer } from "./interfaces";
+
+export const explorers: Explorer[] = [
+  {
+    chainName: "Osmosis (osmosis-1)",
+    networkName: "osmosis-1",
+    explorerName: "Celatone Osmosis",
+    baseUrl: "https://celatone.osmosis.zone/osmosis-1",
+    chainId: "osmosis-1",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/osmosis.svg",
+  },
+  {
+    chainName: "Osmosis (osmo-test-5)",
+    networkName: "osmo-test-5",
+    explorerName: "Celatone Osmosis",
+    baseUrl: "https://celatone.osmosis.zone/osmo-test-5",
+    chainId: "osmo-test-5",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/osmosis.svg",
+  },
+  {
+    chainName: "Neutron (neutron-1)",
+    networkName: "neutron-1",
+    explorerName: "Celatone Neutron",
+    baseUrl: "https://neutron.celat.one/neutron-1",
+    chainId: "neutron-1",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/neutron.svg",
+  },
+  {
+    chainName: "Neutron (pion-1)",
+    networkName: "pion-1",
+    explorerName: "Celatone Neutron",
+    baseUrl: "https://neutron.celat.one/pion-1",
+    chainId: "pion-1",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/neutron.svg",
+  },
+  {
+    chainName: "Terra (phoenix-1)",
+    networkName: "phoenix-1",
+    explorerName: "Celatone Terra",
+    baseUrl: "https://terra.celat.one/phoenix-1",
+    chainId: "phoenix-1",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/terra.svg",
+  },
+  {
+    chainName: "Terra (pisco-1)",
+    networkName: "pisco-1",
+    explorerName: "Celatone Terra",
+    baseUrl: "https://terra.celat.one/pisco-1",
+    chainId: "pisco-1",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/terra.svg",
+  },
+  {
+    chainName: "Sei (pacific-1)",
+    networkName: "pacific-1",
+    explorerName: "Celatone Sei",
+    baseUrl: "https://seiscan.app/pacific-1",
+    chainId: "pacific-1",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/sei.svg",
+  },
+  {
+    chainName: "Sei (atlantic-2)",
+    networkName: "atlantic-2",
+    explorerName: "Celatone Sei",
+    baseUrl: "https://seiscan.app/atlantic-2",
+    chainId: "atlantic-2",
+    imageUrl: "",
+    iconUri: "https://assets.alleslabs.dev/webapp-assets/asset/sei.svg",
+  },
+];
+
+export const defaultExplorer = explorers[0];
