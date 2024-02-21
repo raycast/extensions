@@ -3,4 +3,4 @@
 ## [Initial version] - 2024-02-17
 
 - Added command to retrieve air quality data
-- Added menu bar
+- Added Menu Bar
