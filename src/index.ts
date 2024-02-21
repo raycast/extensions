@@ -5,16 +5,18 @@ export default async function highlightBlock(props: LaunchProps<{ arguments: Arg
 
   try {
     let insertInline = true;
-    let selectedText = await getSelectedText();
-    if (selectedText.length === 0) {
+    let selectedText = await getSelectedTextWithOptional();
+
+    if (selectedText == undefined || selectedText.length === 0) {
       const clipboardText = await Clipboard.readText();
-      if (clipboardText !== undefined) {
+      if (clipboardText !== undefined && clipboardText.length > 0) {
         selectedText = clipboardText;
         insertInline = false;
       } else {
         throw Error("No text selection or clipboard content.");
       }
     }
+
     const transformedSelection = selectedText.replace(/\n/g, "\n> ");
     const concatenatedSelection = `> [!${highlightStyle}]\n> `.concat(transformedSelection);
 
@@ -30,6 +32,15 @@ export default async function highlightBlock(props: LaunchProps<{ arguments: Arg
       title: "Cannot format selection as a GitHub highlight block",
       message: String(error),
     });
+  }
+}
+
+async function getSelectedTextWithOptional(): Promise<String | undefined> {
+  try {
+    const text = await getSelectedText();
+    return text;
+  } catch (error) {
+    return undefined;
   }
 }
 
