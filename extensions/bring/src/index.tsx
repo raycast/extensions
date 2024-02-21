@@ -1,13 +1,13 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { Grid, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Grid, Icon, getPreferenceValues, showToast, Toast, List } from "@raycast/api";
 import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
 import { getOrCreateCustomSection, getSectionsFromData, getListData, getTranslationsData } from "./lib/bringService";
 
 export default function Command() {
-  const bringApiRef = useRef<Promise<BringAPI> | null>(null);
+  const bringApiRef = useRef(new BringAPI());
   const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
@@ -68,13 +68,9 @@ export default function Command() {
   );
 
   async function getBringApi(): Promise<BringAPI> {
-    if (!bringApiRef.current) {
-      const bringApi = new BringAPI();
-      const { email, password } = getPreferenceValues<ExtensionPreferences>();
-      bringApiRef.current = bringApi.login(email, password);
-    }
-
-    return await bringApiRef.current;
+    const { email, password } = getPreferenceValues<ExtensionPreferences>();
+    await bringApiRef.current.login(email, password);
+    return bringApiRef.current;
   }
 
   function addToList(list: BringListInfo): (item: Item, specification?: string) => Promise<void> {
@@ -135,8 +131,10 @@ export default function Command() {
     }
   }, [lists, selectedList, setSelectedList]);
 
-  let sections = getSectionsFromData(catalog, listDetail, customItems, translations);
-  sections = addNewItemToSectionBasedOnSearch(sections, search, translations);
+  const sections = useMemo(() => {
+    let sections = getSectionsFromData(catalog, listDetail, customItems, translations);
+    return addNewItemToSectionBasedOnSearch(sections, search, translations);
+  }, [catalog, listDetail, customItems, translations, search]);
 
   if (!selectedList) {
     return <Grid isLoading={true}></Grid>;
