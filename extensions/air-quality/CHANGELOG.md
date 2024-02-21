@@ -1,4 +1,4 @@
-# Changelog
+# Air Quality Changelog
 
 ## [Initial version] - 2024-02-17
 
