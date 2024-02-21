@@ -5,9 +5,9 @@ import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, showHUD, showToa
 import colorString from "color-string";
 import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
-import { ensureValidUrl } from "../lib/ensureValidUrl";
-import { useActiveTab } from "../lib/useActiveTab";
-import { isUrlLike } from "../lib/isUrlLike";
+import { ensureValidUrl } from "../lib/ensure-valid-url";
+import { useActiveTab } from "../lib/use-active-tab";
+import { isUrlLike } from "../lib/is-url-like";
 import { User } from "@supabase/supabase-js";
 import AuthenticatedView from "./components/AuthenticatedView";
 
