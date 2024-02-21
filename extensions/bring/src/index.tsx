@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
 import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
@@ -23,6 +23,22 @@ export default function Command() {
 
     return lists;
   });
+
+  const DropdownComponent = () => {
+    return (
+      <Grid.Dropdown
+        tooltip="Select list"
+        storeValue={true}
+        defaultValue={selectedList?.listUuid}
+        onChange={(selectedUuid) => setSelectedList(lists.find((list) => list.listUuid === selectedUuid))}
+        isLoading={isLoadingLists}
+      >
+        {lists.map((list) => (
+          <Grid.Dropdown.Item icon={Icon.Receipt} key={list.listUuid} value={list.listUuid} title={list.name} />
+        ))}
+      </Grid.Dropdown>
+    );
+  };
 
   const {
     data: [listDetail, customItems],
@@ -154,6 +170,7 @@ export default function Command() {
       onResetList={() => {
         setSelectedList(undefined);
       }}
+      DropdownComponent={DropdownComponent}
     />
   );
 }
