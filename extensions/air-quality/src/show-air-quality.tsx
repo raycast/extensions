@@ -12,7 +12,12 @@ export default function Command() {
       <Detail
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              onAction={openExtensionPreferences}
+            />
           </ActionPanel>
         }
       />

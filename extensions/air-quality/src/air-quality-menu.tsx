@@ -1,4 +1,4 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchAirQuality } from "./shared/api";
 import dayjs from "./shared/dayjs";
@@ -9,9 +9,14 @@ export default function Command() {
 
   if (error || !data) {
     return (
-      <MenuBarExtra icon={Icon.Warning}>
+      <MenuBarExtra icon={{ source: Icon.Warning, tintColor: Color.Red }}>
         <MenuBarExtra.Item title={error?.message || "Error"} />
-        <MenuBarExtra.Item title="Open Extension Preferences" onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item
+          title="Open Extension Preferences"
+          icon={Icon.Gear}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          onAction={openExtensionPreferences}
+        />
       </MenuBarExtra>
     );
   }
