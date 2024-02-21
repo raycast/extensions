@@ -18,6 +18,7 @@
 /extensions/ai-gen                                   @josephschmitt @snilan
 /extensions/ai-humanizer                             @frolvanya
 /extensions/aimlab                                   @whitespacecode
+/extensions/air-quality                              @earthpyy
 /extensions/airplane                                 @pradeepb28
 /extensions/airpods-noise-control                    @chrahe @hllvc
 /extensions/airport                                  @siddharthsharma94
@@ -377,6 +378,7 @@
 /extensions/ffmpeg                                   @RenderCoder @blekmus @aagedal
 /extensions/fibonacci-sequence                       @adambutler
 /extensions/figma-files                              @michaelwschultz @pernielsentikaer @GLaDO8
+/extensions/figma-learn-companion                    @MadMaxMcKinney
 /extensions/filamentphp-doc-seach                    @aurawindsurfing
 /extensions/file-manager                             @erics118 @BalliAsghar @urwrstkn8mare @fengtianze
 /extensions/filemaker-snippets                       @eluce2
