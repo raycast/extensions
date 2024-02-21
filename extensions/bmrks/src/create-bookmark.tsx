@@ -1,26 +1,15 @@
 import React from "react";
 import fetch from "node-fetch";
 import { FormValidation, getFavicon, useForm } from "@raycast/utils";
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  PopToRootType,
-  Toast,
-  openExtensionPreferences,
-  showHUD,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import colorString from "color-string";
-import { useAuth } from "../lib/use-auth";
 import { useGroups } from "../lib/use-groups";
 import * as db from "../lib/db";
 import { ensureValidUrl } from "../lib/ensureValidUrl";
 import { useActiveTab } from "../lib/useActiveTab";
 import { isUrlLike } from "../lib/isUrlLike";
 import { User } from "@supabase/supabase-js";
+import AuthenticatedView from "./components/AuthenticatedView";
 
 interface MicrolinkResponse {
   data: {
@@ -28,7 +17,7 @@ interface MicrolinkResponse {
   };
 }
 
-function Bookmark({ user }: { user: User }) {
+function CreateBookmark({ user }: { user: User }) {
   interface BookmarkValues {
     groupId: string;
     value: string;
@@ -145,31 +134,6 @@ function Bookmark({ user }: { user: User }) {
   );
 }
 
-export default function AuthenticatedBookmark() {
-  const { error, data, isLoading } = useAuth();
-
-  const markdown = error?.message.includes("Invalid login credentials")
-    ? error.message + ". Please open the preferences and try again."
-    : error?.message;
-
-  if (isLoading) {
-    return <Detail isLoading />;
-  }
-
-  if (error) {
-    return (
-      <Detail
-        markdown={markdown}
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  if (data?.user) {
-    return <Bookmark user={data.user} />;
-  }
+export default function Command() {
+  return <AuthenticatedView component={CreateBookmark} />;
 }

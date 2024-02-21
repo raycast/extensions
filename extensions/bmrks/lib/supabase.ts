@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
 
 // These are not sensitive. Has access to public operations, like auth.
@@ -17,6 +17,22 @@ class Storage {
 
   async setItem(key: string, value: string) {
     await LocalStorage.setItem(key, value);
+  }
+}
+
+export async function authorize() {
+  const rawSession = await LocalStorage.getItem("session");
+  const session = rawSession ? JSON.parse(String(rawSession)) : null;
+  const { email, password } = getPreferenceValues<Preferences>();
+
+  if (session && email === session.user?.email) {
+    const { data, error } = await supabase.auth.setSession(session);
+    LocalStorage.setItem("session", JSON.stringify(data.session));
+    return { user: data.user, error };
+  } else {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    LocalStorage.setItem("session", JSON.stringify(data.session));
+    return { user: data.user, error };
   }
 }
 
