@@ -1,5 +1,6 @@
 import tinyColor from "tinycolor2";
 import { ColorDescribe } from "./type";
+import { isWord } from "./utils";
 
 export type ColorType = "rgb" | "hsl" | "hex" | "named";
 type CorrectionFn = (i: string) => string;
@@ -58,6 +59,9 @@ export function getColorType(colorStr: string): ColorType {
 }
 
 export function dealWithNamedColor(name: string): ColorDescribe[] {
+  if (!isWord(name)) {
+    return []
+  }
   const reg = new RegExp(name, "i");
   const optionalNames = Object.keys(tinyColor.names).filter((name) => reg.test(name));
 
