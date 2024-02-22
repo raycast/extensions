@@ -9,31 +9,11 @@ interface EasydictArguments {
 }
 
 export default function Command(props: LaunchProps<{ arguments: EasydictArguments }>) {
-  const [inputText, setInputText] = useState<string>();
-  const { queryText } = props.arguments;
-  const trimQueryText = queryText ? trimText(queryText) : props.fallbackText;
+  const { queryText = "" } = props.arguments;
+
+  const [inputText, setInputText] = useState<string>(trimText(queryText));
+
   const [colorResult, setColorResult] = useState<ColorDescribe[]>([]);
-  function onInputChange(text: string) {
-    setInputText(text);
-    convertColor(text as string);
-  }
-
-  useEffect(() => {
-    if (inputText === undefined) {
-      setup();
-    }
-  }, [inputText]);
-
-  function setup() {
-    if (trimQueryText?.length) {
-      console.warn(`---> arguments queryText: ${trimQueryText}`);
-    }
-    const userInputText = trimQueryText;
-    if (userInputText?.length) {
-      setInputText(userInputText);
-      convertColor(userInputText as string);
-    }
-  }
 
   function convertColor(str: string) {
     if (!str) {
@@ -44,8 +24,12 @@ export default function Command(props: LaunchProps<{ arguments: EasydictArgument
     setColorResult(isNamedColor ? dealWithNamedColor(str) : dealWithOthers(str, colorType));
   }
 
+  useEffect(() => {
+    convertColor(inputText);
+  }, [inputText]);
+
   return (
-    <List searchBarPlaceholder={"Input color"} searchText={inputText} onSearchTextChange={onInputChange} actions={null}>
+    <List searchBarPlaceholder={"Input color"} searchText={inputText} onSearchTextChange={setInputText} actions={null}>
       {colorResult.map((item) => {
         return (
           <List.Item
