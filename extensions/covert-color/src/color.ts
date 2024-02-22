@@ -60,7 +60,7 @@ export function getColorType(colorStr: string): ColorType {
 
 export function dealWithNamedColor(name: string): ColorDescribe[] {
   if (!isWord(name)) {
-    return []
+    return [];
   }
   const reg = new RegExp(name, "i");
   const optionalNames = Object.keys(tinyColor.names).filter((name) => reg.test(name));
