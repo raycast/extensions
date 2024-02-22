@@ -87,14 +87,11 @@
   ],
   "preferences": [
     {
-      "name": "yabaiExecutablePath",
-      "description": "Path to the yabai executable.",
-      "type": "textfield",
+      "name": "yabaiPath",
+      "title": "Yabai installation path",
       "required": false,
-      "default": "./opt/homebrew/bin/yabai",
-      "title": "Path to the yabai executable",
-      "placeholder": "./opt/homebrew/bin/yabai",
-      "label": "By default, the extension will use the yabai executable from the homebrew installation. If you have yabai installed in a different location, you can specify it here."
+      "type": "textfield",
+      "description": "Location to the Yabai installation (Defaults to `/opt/homebrew/bin/yabai` on M1 Macs, and `/usr/local/bin/yabai` otherwise)"
     }
   ],
   "dependencies": {

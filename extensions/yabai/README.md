@@ -14,5 +14,3 @@ brew install koekeishiya/formulae/yabai
 ```
 
 [Official installation instructions](https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(latest-release))
-
-Make sure to start Yabai with `Start Yabai` command in Raycast before using this extension.
