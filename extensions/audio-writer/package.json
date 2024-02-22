@@ -18,6 +18,13 @@
       "subtitle": "Audio Writer",
       "description": "Voice to text transcript",
       "mode": "no-view"
+    },
+    {
+      "name": "show-my-transcripts",
+      "title": "Show My Transcripts",
+      "subtitle": "Audio Writer",
+      "description": "It shows list of transcripts in Audio Writer app.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

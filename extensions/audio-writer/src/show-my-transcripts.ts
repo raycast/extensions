@@ -5,7 +5,7 @@ export default async () => {
   try {
     const isInstalled = await isAudioWriterInstalled();
     if (isInstalled) {
-      const url = "audiowriter://transcripts";
+      const url = "audiowriter://record";
       open(url);
       await closeMainWindow();
     } else {
@@ -14,6 +14,6 @@ export default async () => {
     }
   } catch (error) {
     console.error(error);
-    showHUD("Unable to open AudioWriter.");
+    showHUD("An error occurred while opening AudioWriter.");
   }
 };
