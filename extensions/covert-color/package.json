@@ -22,6 +22,10 @@
       ]
     }
   ],
+  "keywords": [
+    "raycast",
+    "covert color" 
+  ],
   "dependencies": {
     "@raycast/api": "^1.67.1",
     "tinycolor2": "^1.6.0"
