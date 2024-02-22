@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Action, ActionPanel, List, getPreferenceValues, closeMainWindow, clearSearchBar } from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues, closeMainWindow, clearSearchBar, Icon } from "@raycast/api";
 import { fetchGHQList } from "./ghq";
-import { launchVSCode } from "./vscode";
+import { lanuchEditor } from "./editor";
 import { Fzf } from "fzf";
 import { showFailureToast } from "@raycast/utils";
 
@@ -10,20 +10,28 @@ async function cleanup() {
   await closeMainWindow({ clearRootSearch: true });
 }
 
-function getGHQRootPath() {
-  const preferences = getPreferenceValues<{ GHQ_ROOT_PATH: string }>();
-  const root = preferences.GHQ_ROOT_PATH.trim();
+function getPreference() {
+  const preferences = getPreferenceValues<{
+    GHQ_ROOT_PATH: string;
+    EDITOR: { bundleId: string; name: string; path: string };
+  }>();
+  console.log(preferences);
+  let rootPath = preferences.GHQ_ROOT_PATH.trim();
+  const editor = preferences.EDITOR.path;
 
   // replace ~ with the actual home directory
-  if (root.startsWith("~")) {
-    return root.replace("~", String(process.env.HOME));
+  if (rootPath.startsWith("~")) {
+    rootPath = rootPath.replace("~", String(process.env.HOME));
   }
 
-  return root;
+  return {
+    rootPath,
+    editor,
+  };
 }
 
 export default function Command() {
-  const rootPath = getGHQRootPath();
+  const { rootPath, editor } = getPreference();
   const [paths, setPaths] = useState<string[]>([]);
   const [result, setResult] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,15 +46,15 @@ export default function Command() {
     [paths],
   );
 
-  const handleOpenVSCode = useCallback(
+  const handleOpenEditor = useCallback(
     async (index: number) => {
       const projectPath = `${rootPath}/${paths[index]}`;
 
       try {
-        await launchVSCode(projectPath);
+        await lanuchEditor(editor, projectPath);
         await cleanup();
       } catch (e) {
-        await showFailureToast(e, { title: "Can not open VSCode" });
+        await showFailureToast(e, { title: "Can not open Editor" });
       }
     },
     [paths],
@@ -68,7 +76,7 @@ export default function Command() {
           title={path}
           actions={
             <ActionPanel>
-              <Action icon="vscode.png" title="Open VSCode" onAction={() => handleOpenVSCode(index)} />
+              <Action icon={Icon.Code} title="Editor" onAction={() => handleOpenEditor(index)} />
               <Action.OpenWith title="Open Other App" path={`${rootPath}/${paths[index]}`} />
             </ActionPanel>
           }
