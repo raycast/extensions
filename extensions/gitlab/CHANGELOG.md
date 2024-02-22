@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Standardize Project Actions and List Items] - 2024-02-22
+
+- Standardize project actions between Search Projects and Groups > Show Group viewsm
+- Reuse `<ProjectListItem>` for consistent future behavior
+
 ## [Add Issue State Filter] - 2024-02-16
 
 - Add dropdown filter for issue state
