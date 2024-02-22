@@ -5,7 +5,7 @@ export default async () => {
   try {
     const isInstalled = await isAudioWriterInstalled();
     if (isInstalled) {
-      const url = "audiowriter://record";
+      const url = "audiowriter://transcripts";
       open(url);
       await closeMainWindow();
     } else {
