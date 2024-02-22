@@ -1,4 +1,4 @@
-import { showToast, Toast, Cache, Clipboard, LaunchProps } from "@raycast/api";
+import { showToast, Toast, Cache, Clipboard, LaunchProps, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { isValidUrl } from "./util";
 
@@ -14,6 +14,7 @@ type Item = {
 
 export default async function Command(props: LaunchProps) {
   const url = props.arguments.url;
+  const preferences = getPreferenceValues<Preferences>();
 
   const cache = new Cache();
   const cachedData = cache.get(CACHE_KEY);
@@ -31,12 +32,13 @@ export default async function Command(props: LaunchProps) {
       return;
     }
 
+    const expirationDate = Number(preferences.expirationDate);
     const res = await fetch(BACKEND_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, expirationDate }),
     });
 
     if (!res.ok) throw new Error("Failed to create");

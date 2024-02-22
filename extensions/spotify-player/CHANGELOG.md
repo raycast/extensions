@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Feature] - 2024-02-02
+
+- New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
+- Removed the condition to filter collaborative playlists from other users, since Spotify doesn't update it correctly.
+
 ## [New Command] - 2023-01-31
 
 - New `Queue` command allowing the user to view songs/epsiodes in the queue.
