@@ -8,14 +8,7 @@ import { normalizePreference } from "./preference";
 import { isToday, withTimeout } from "./util";
 import { NO_FEEDS } from "./error";
 import dayjs from "dayjs";
-import {
-  addDigestGenerationCount,
-  addOrUpdateDigest,
-  getComeFrom,
-  getDigestGenerationCount,
-  getInterest,
-  getSources,
-} from "../store";
+import { addOrUpdateDigest, getComeFrom, getDigestGenerationCount, getInterest, getSources } from "../store";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { RequestOptions } from "http";
 import Parser from "rss-parser";
@@ -58,16 +51,22 @@ function parseOutput(output: string): string[] {
   return targetLines;
 }
 
-async function getFeedbackContent() {
+export async function getFeedbackContent() {
   const count = await getDigestGenerationCount();
+  const { preferredLanguage } = await normalizePreference();
+  const useTestimonial = Math.random() < 0.5;
+  const testimonialUrl = /(中文)|(汉语)|(中国)|(Chinese)|(China)/.test(preferredLanguage ?? "")
+    ? "https://testimonial.to/tidyread-cn"
+    : "https://testimonial.to/tidyread";
+  const finalLink = useTestimonial ? testimonialUrl : "https://tally.so/r/w4r61X";
 
   // 当第三次生成简报时，提示用户反馈
-  if (count === 2) {
-    return `> Hi there! 👋 We've noticed you've been enjoying our Digest feature. Your opinion matters to us! 🌟 Could you spare a moment to share your feedback? It'll help us make Tidyread even better for you. Just click [here](https://tally.so/r/w4r61X) to tell us what you think. Thank you for helping us grow! 🚀\n\n![thanku](./thanku_1.svg)\n\n---\n\n`;
+  if (count === 3) {
+    return `> Hi there! 👋 We've noticed you've been enjoying our Digest feature. Your opinion matters to us! 🌟 Could you spare a moment to share your feedback? It'll help us make Tidyread even better for you. Just click [here](${finalLink}) to tell us what you think. Thank you for helping us grow! 🚀\n\n![thanku](./thanku_1.svg)\n\n---\n\n`;
   }
 
   if (count === 30) {
-    return `> Hello there! 👋  Wow, you've used our Digest feature 30 times already! And we're thrilled to have you on board. We'd love to hear your thoughts! Your feedback is invaluable in shaping the future of Tidyread. Please take a moment to share your experience with us [here](https://tally.so/r/w4r61X). Your voice makes a big difference! Thank you for being a part of our growing community! 🚀\n\n![thanku](./thanku_2.svg)\n\n---\n\n`;
+    return `> Hello there! 👋  Wow, you've used our Digest feature 30 times already! And we're thrilled to have you on board. We'd love to hear your thoughts! Your feedback is invaluable in shaping the future of Tidyread. Please take a moment to share your experience with us [here](${finalLink}). Your voice makes a big difference! Thank you for being a part of our growing community! 🚀\n\n![thanku](./thanku_2.svg)\n\n---\n\n`;
   }
 
   return "";
@@ -87,6 +86,7 @@ export async function bizGenDigest(
     summarizePrompt,
     httpProxy,
     enableItemLinkProxy,
+    splitByTags,
     maxApiConcurrency,
     retryCount,
     retryDelay,
@@ -119,6 +119,7 @@ export async function bizGenDigest(
         return isAfter(itemDate, timeThreshold);
       },
       maxItems: maxItemsPerFeed,
+      tags: readItem.tags,
     }));
 
   if (feeds.length === 0) {
@@ -134,6 +135,7 @@ export async function bizGenDigest(
 
   const interest = await getInterest();
   const comeFrom = await getComeFrom();
+  const count = await getDigestGenerationCount();
 
   // 主要逻辑
   const digest = await genDigest({
@@ -145,6 +147,8 @@ export async function bizGenDigest(
     retryCount,
     retryDelay,
     requestTimeout,
+    splitByTags,
+    ignoreIntroduction: count >= 2,
     translateTitles: !preferredLanguage
       ? undefined
       : async (titles) => {
@@ -170,17 +174,13 @@ export async function bizGenDigest(
     onProgress,
   });
 
-  const feedbackContent = await getFeedbackContent();
-
   // 写入存储
   const finalDigest = await addOrUpdateDigest({
     ...digest,
-    content: feedbackContent + digest.content,
+    content: digest.content,
     type,
     title: digestTitle,
   });
-
-  await addDigestGenerationCount();
 
   console.log("digest content:", finalDigest.content);
 
@@ -224,9 +224,13 @@ export function addUtmSourceToUrl(url: string): string {
 }
 
 const parser = new Parser({
+  headers: {
+    // 否则有些服务会返回 406 错误码
+    Accept: "application/rss+xml, application/xml, text/xml",
+  },
+  timeout: normalizePreference().requestTimeout ?? 30 * 1000,
   requestOptions: {
     agent: createAgent(),
-    timeout: normalizePreference().requestTimeout ?? 30 * 1000,
   },
 });
 

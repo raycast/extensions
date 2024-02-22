@@ -110,3 +110,8 @@ export interface ConfigurationPreferences {
   useApiEndpoint: boolean;
   apiEndpoint: string;
 }
+
+export interface CSVPrompt {
+  act: string;
+  prompt: string;
+}

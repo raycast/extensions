@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Properly allow date with time] - 2024-02-15
+
+- Fix a bug that prevented creating pages with time
+
 ## [Open Notion page improvement] - 2024-01-02
 
 - Add the ability to open Notion in the browser of your choice or in the Notion app.

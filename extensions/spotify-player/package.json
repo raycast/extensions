@@ -23,7 +23,8 @@
     "hjoelh",
     "hobhouse",
     "bkeys818",
-    "jatindotdev"
+    "jatindotdev",
+    "devbear"
   ],
   "license": "MIT",
   "preferences": [
@@ -151,6 +152,14 @@
       "subtitle": "Spotify",
       "description": "Toggle the playback of the current song.",
       "mode": "no-view"
+    },
+    {
+      "name": "addPlayingSongToPlaylist",
+      "title": "Add Playing Song to Playlist",
+      "subtitle": "Spotify",
+      "description": "Adds the current song to a playlist of your choice.",
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "next",

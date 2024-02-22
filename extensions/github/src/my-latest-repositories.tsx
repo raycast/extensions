@@ -2,12 +2,12 @@ import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import RepositoryListItem from "./components/RepositoryListItem";
-import View from "./components/View";
 import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 
 function MyLatestRepositories() {
   const { github } = getGitHubClient();
@@ -66,10 +66,4 @@ function MyLatestRepositories() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <MyLatestRepositories />
-    </View>
-  );
-}
+export default withGitHubClient(MyLatestRepositories);

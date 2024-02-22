@@ -49,6 +49,7 @@ export interface LibgenPreferences {
   preferredLibgenMirror: string;
   downloadGateway: LibgenDownloadGateway;
   downloadPath: string;
+  allowIgnoreHTTPSErrors: boolean;
   alwaysAskWhereToSave: boolean;
   searchPriority: SearchPriority;
   preferredLanguages: string;

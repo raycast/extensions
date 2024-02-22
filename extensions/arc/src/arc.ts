@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { Space, Tab } from "./types";
 
 // Tabs
@@ -6,13 +6,17 @@ import { Space, Tab } from "./types";
 export async function getTabs() {
   const response = await runAppleScript(`
     on escape_value(this_text)
+      set AppleScript's text item delimiters to the "\\\\"
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\\\"
+      set this_text to the item_list as string
       set AppleScript's text item delimiters to the "\\""
       set the item_list to every text item of this_text
       set AppleScript's text item delimiters to the "\\\\\\""
       set this_text to the item_list as string
       set AppleScript's text item delimiters to ""
       return this_text
-    end replace_chars
+    end escape_value
 
     set _output to ""
 

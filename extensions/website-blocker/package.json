@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "website-blocker",
   "title": "Website Blocker",
-  "description": "Block websites by changing your hosts file",
+  "description": "Block websites by changing your hosts file automatically, directly from Raycast",
   "icon": "command-icon.png",
   "author": "gersomvg",
   "contributors": [

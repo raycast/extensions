@@ -60,6 +60,7 @@ function autoPasteEnabled(): boolean {
 }
 
 function convert(input: string) {
+  if (isJson(input)) return input;
   if (input.endsWith(';')) input = input.slice(0, -1);
   try {
     if (isExecuteable(input)) throw new Error('executeable');
@@ -87,4 +88,13 @@ function parse(input: string) {
     });
     return;
   }
+}
+
+function isJson(str: string) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }

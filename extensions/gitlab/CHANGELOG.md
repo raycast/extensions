@@ -1,6 +1,10 @@
 # GitLab Changelog
 
-## [Added Group Search] - 2024-01-26
+## [Add Issue State Filter] - 2024-02-16
+
+- Add dropdown filter for issue state
+
+## [Add Group Search] - 2024-01-26
 
 - Add `Search Groups` command
 - Update keyboard shortcut for project `Pipelines` command to `cmd`+`shift`+`P` to remove conflict with reserved shortcut for Raycast core

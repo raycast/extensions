@@ -11,7 +11,7 @@ import { DatabaseProperty, DatabasePropertyOption } from "./property";
 
 export type { DatabaseProperty, DatabasePropertyOption };
 
-export async function fetchDatabase(pageId: string) {
+export async function fetchDatabase(pageId: string, silent: boolean = true) {
   try {
     await authorize();
     const page = await notion.databases.retrieve({
@@ -20,7 +20,7 @@ export async function fetchDatabase(pageId: string) {
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to fetch database", undefined);
+    if (!silent) return handleError(err, "Failed to fetch database", undefined);
   }
 }
 
