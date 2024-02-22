@@ -22,7 +22,7 @@
     "description": "Select the folder where snippets are located.",
     "type": "directory",
     "required": true,
-    "title": "Select snippet folder"
+    "title": "Select Snippet Folder"
   }, {
     "name": "primaryAction",
     "description": "Primary action.",
