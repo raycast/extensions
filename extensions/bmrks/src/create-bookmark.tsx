@@ -26,8 +26,6 @@ function CreateBookmark({ user }: { user: User }) {
 
   const { handleSubmit, itemProps, setValue, values } = useForm<BookmarkValues>({
     async onSubmit(values) {
-      showHUD("Creating Bookmark...");
-
       const isValidColor = Boolean(colorString.get(values.value));
 
       if (isValidColor) {

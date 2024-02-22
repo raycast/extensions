@@ -9,20 +9,15 @@ import AuthenticatedView from "./components/authenticated-view";
 
 export function SearchBookmarks({ user }: { user: User }) {
   const { data: groups, isLoading: isLoadingGroups } = useGroups(user);
-  const [groupId, setGroupId] = React.useState<string | undefined>("");
+  const [groupId, setGroupId] = React.useState<string>("all");
   const { data: bookmarks, isLoading: isLoadingBookmarks, revalidate } = useBookmarks(groupId);
-
-  React.useEffect(() => {
-    if (groups && groups.length > 0) {
-      setGroupId(groups[0].id);
-    }
-  }, [groups]);
 
   return (
     <List
       isLoading={isLoadingGroups || isLoadingBookmarks}
       searchBarAccessory={
         <List.Dropdown tooltip="Groups" value={groupId} onChange={setGroupId}>
+          <List.Dropdown.Item title="All" value="all" />
           {groups &&
             groups.map((group) => {
               return <List.Dropdown.Item key={group.id} title={group.name || ""} value={group.id} />;
@@ -45,12 +40,19 @@ export function SearchBookmarks({ user }: { user: User }) {
             icon = Icon.Paragraph;
           }
 
+          const findGroup = groups?.find((group) => group.id === bookmark.group_id);
+
           return (
             <List.Item
               key={bookmark.id}
               title={bookmark.title ? bookmark.title : hostname}
               icon={icon}
               subtitle={hostname}
+              accessories={[
+                {
+                  text: groupId === "all" ? findGroup?.name : undefined,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   {bookmark.type === "link" && bookmark.url && (
@@ -81,7 +83,7 @@ export function SearchBookmarks({ user }: { user: User }) {
                     <ActionPanel.Submenu title="Move to Group" icon={Icon.ArrowRight}>
                       {groups &&
                         groups.map((group) => {
-                          if (group.id === groupId) {
+                          if (group.id === groupId || group.id === findGroup?.id) {
                             return null;
                           }
                           return (
