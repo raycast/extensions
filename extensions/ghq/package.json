@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "list",
-      "title": "Search Your Repositories",
+      "title": "Search Repositories",
       "subtitle": "ghq",
       "description": "Open the search results in Your Editor or another application. For example, Finder or your terminal app",
       "mode": "view"
@@ -32,7 +32,7 @@
     {
       "label": "Editor",
       "name": "EDITOR",
-      "title": "Pick Your Editor",
+      "title": "Editor",
       "description": "Pick your editor to open the repository.",
       "type": "appPicker",
       "required": true
