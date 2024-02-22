@@ -119,9 +119,9 @@ export default function Command() {
               id={i.id}
               key={i.id}
               title={i.name}
-              subtitle={i.folder}
-              keywords={i.content.content.split(" ").concat(i.content.rawMetadata.split(" "))}
-              icon={Icon.TextDocument}
+              accessories={[{ icon: Icon.Folder, text: i.folder }]}
+              keywords={[i.folder, ...i.content.content.split(" ").concat(i.content.rawMetadata.split(" "))]}
+              icon={Icon.Document}
               detail={<SnippetContent snippet={i} />}
               actions={
                 <>
