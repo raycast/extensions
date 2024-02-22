@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { createTimeEntry, Project, Task } from "../api";
-import { useMe, useWorkspaces, useClients, useTags, useTasks, useEffectWithCachedDeps } from "../hooks";
-import { createProjectGroups, ProjectGroup } from "../helpers/createProjectGroups";
+import { useMe, useWorkspaces, useClients, useTags, useTasks } from "../hooks";
+import { createProjectGroups } from "../helpers/createProjectGroups";
 
 interface CreateTimeEntryFormParams {
   isLoading: boolean;
@@ -31,15 +30,9 @@ function CreateTimeEntryForm({
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [billable, setBillable] = useState<boolean>(false);
 
-  const [projectGroups, setProjectGroups] = useCachedState<ProjectGroup[]>("projectGroups", []);
-
-  useEffectWithCachedDeps(
-    () => {
-      const projectGroups = createProjectGroups(projects, workspaces, clients);
-      setProjectGroups(projectGroups);
-    },
+  const projectGroups = useMemo(
+    () => createProjectGroups(projects, workspaces, clients),
     [projects, workspaces, clients],
-    toggleArrayIsEqual,
   );
 
   async function handleSubmit(values: { description: string }) {
@@ -148,7 +141,3 @@ function CreateTimeEntryForm({
 }
 
 export default CreateTimeEntryForm;
-
-function toggleArrayIsEqual<T extends { id: number }[]>(original: T, updated: T) {
-  return original.length === updated.length && original.every((item, i) => item.id == updated[i].id);
-}
