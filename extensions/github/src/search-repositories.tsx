@@ -45,6 +45,7 @@ function SearchRepositories() {
     { keepPreviousData: true },
   );
 
+  // Update visited repositories (history) if any of the metadata changes, especially the repository name.
   useEffect(() => {
     history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r)));
   }, [data]);
