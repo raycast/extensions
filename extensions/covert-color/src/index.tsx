@@ -2,6 +2,7 @@ import { List, Icon, ActionPanel, Action, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { trimText } from "./utils";
 import { getColorType, dealWithOthers, dealWithNamedColor } from "./color";
+import { ColorDescribe } from "./type";
 
 interface EasydictArguments {
   queryText?: string;
@@ -11,17 +12,17 @@ export default function Command(props: LaunchProps<{ arguments: EasydictArgument
   const [inputText, setInputText] = useState<string>();
   const { queryText } = props.arguments;
   const trimQueryText = queryText ? trimText(queryText) : props.fallbackText;
-  const [colorResult, setColorResult] = useState<any[]>([]);
+  const [colorResult, setColorResult] = useState<ColorDescribe[]>([]);
   function onInputChange(text: string) {
-    setInputText(text)
-    convertColor(text as string)
+    setInputText(text);
+    convertColor(text as string);
   }
 
   useEffect(() => {
     if (inputText === undefined) {
       setup();
     }
-  }, [inputText])
+  }, [inputText]);
 
   function setup() {
     if (trimQueryText?.length) {
@@ -29,29 +30,25 @@ export default function Command(props: LaunchProps<{ arguments: EasydictArgument
     }
     const userInputText = trimQueryText;
     if (userInputText?.length) {
-      setInputText(userInputText)
-      convertColor(userInputText as string)
+      setInputText(userInputText);
+      convertColor(userInputText as string);
     }
   }
 
   function convertColor(str: string) {
     if (!str) {
-      return
+      return;
     }
-    const colorType = getColorType(str)
-    const isNamedColor = colorType === 'named';
-    setColorResult(isNamedColor
-      ? dealWithNamedColor(str)
-      : dealWithOthers(str, colorType))
+    const colorType = getColorType(str);
+    const isNamedColor = colorType === "named";
+    setColorResult(isNamedColor ? dealWithNamedColor(str) : dealWithOthers(str, colorType));
   }
 
   return (
-    <List searchBarPlaceholder={"Input color"}
-      searchText={inputText}
-      onSearchTextChange={onInputChange} actions={null}>
-      {
-        colorResult.map(item => {
-          return <List.Item
+    <List searchBarPlaceholder={"Input color"} searchText={inputText} onSearchTextChange={onInputChange} actions={null}>
+      {colorResult.map((item) => {
+        return (
+          <List.Item
             key={item.title}
             icon={{
               source: Icon.CircleFilled,
@@ -69,10 +66,8 @@ export default function Command(props: LaunchProps<{ arguments: EasydictArgument
               </ActionPanel>
             }
           />
-        })
-      }
+        );
+      })}
     </List>
   );
 }
-
-
