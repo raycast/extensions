@@ -12,6 +12,10 @@ export default async function Command() {
 
     showHUD("Balanced space");
   } catch (error) {
+    if (error instanceof Error && error.message.includes("Yabai executable not found")) {
+      return;
+    }
+
     showFailureToast(error, {
       title: "Failed to balance space, make sure you have Yabai installed and running.",
     });

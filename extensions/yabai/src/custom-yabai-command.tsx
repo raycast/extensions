@@ -21,8 +21,15 @@ export default async function Command(launchProps: LaunchProps) {
 
     command = `-m ${command}`;
 
-    await runYabaiCommand(command);
+    const { stderr } = await runYabaiCommand(command);
+    if (stderr) {
+      throw new Error(stderr);
+    }
   } catch (error) {
+    if (error instanceof Error && error.message.includes("Yabai executable not found")) {
+      return;
+    }
+
     showFailureToast(error);
   }
 }

@@ -1,9 +1,14 @@
 import { showHUD } from "@raycast/api";
 import { runYabaiCommand } from "./helpers/scripts";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
-    await runYabaiCommand(`-m space --create`);
+    const { stderr } = await runYabaiCommand(`-m space --create`);
+
+    if (stderr) {
+      throw new Error(stderr);
+    }
 
     const { stdout: spacesOutput } = await runYabaiCommand(`-m query --spaces`);
     const spaces = JSON.parse(spacesOutput);
@@ -14,9 +19,17 @@ export default async function Command() {
     showHUD(`Created space: ${lastSpaceIndex}`);
   } catch (error) {
     if (error instanceof Error) {
-      showHUD(`Error: ${error.message}`);
+      if (error.message.includes("Yabai executable not found")) {
+        return;
+      }
+
+      showFailureToast(error, {
+        title: "Failed to create space",
+      });
     } else {
-      showHUD(`Error: ${error}`);
+      showFailureToast(error, {
+        title: "Failed to create space",
+      });
     }
   }
 }

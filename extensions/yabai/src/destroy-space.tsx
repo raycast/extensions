@@ -1,9 +1,15 @@
 import { showHUD } from "@raycast/api";
 import { runYabaiCommand } from "./helpers/scripts";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
-    const { stdout: rawRecentSpace } = await runYabaiCommand(`-m query --spaces --space recent`);
+    const { stdout: rawRecentSpace, stderr } = await runYabaiCommand(`-m query --spaces --space recent`);
+
+    if (stderr) {
+      throw new Error(stderr);
+    }
+
     const recentSpace = JSON.parse(rawRecentSpace);
     const lastSpaceIndex = recentSpace.index;
 
@@ -18,10 +24,17 @@ export default async function Command() {
     await showHUD(`Destroyed Space`);
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error executing yabai commands", error.message);
-      showHUD(`Error: ${error.message}`);
+      if (error.message.includes("Yabai executable not found")) {
+        return;
+      }
+
+      showFailureToast(error, {
+        title: "Failed to destroy space",
+      });
     } else {
-      showHUD(`Error: ${error}`);
+      showFailureToast(error, {
+        title: "Failed to destroy space",
+      });
     }
   }
 }

@@ -14,6 +14,14 @@ export async function mirror(axis: "x" | "y") {
 
     showHUD(`Mirrored space in the ${axis} axis`);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      typeof error?.message === "string" &&
+      error.message.includes("Yabai executable not found")
+    ) {
+      return;
+    }
+
     showFailureToast(error, {
       title: `Failed to mirror space in the ${axis} axis. Make sure Yabai is installed and running.`,
     });

@@ -6,11 +6,20 @@ export default async () => {
   let serviceRunning = false;
 
   try {
-    await runYabaiCommand("--stop-service");
+    const { stderr } = await runYabaiCommand("--stop-service");
+
+    if (stderr) {
+      throw new Error(stderr);
+    }
+
     showHUD("Yabai has been stopped.");
 
     serviceRunning = false;
   } catch (error) {
+    if (error instanceof Error && error.message.includes("Yabai executable not found")) {
+      return;
+    }
+
     if (String(error).includes("Could not find service")) {
       serviceRunning = true;
     } else {
@@ -22,9 +31,18 @@ export default async () => {
 
   if (serviceRunning) {
     try {
-      await runYabaiCommand("--start-service");
+      const { stderr } = await runYabaiCommand("--start-service");
+
+      if (stderr) {
+        throw new Error(stderr);
+      }
+
       showHUD("Yabai has been started.");
     } catch (error) {
+      if (error instanceof Error && error.message.includes("Yabai executable not found")) {
+        return;
+      }
+
       showFailureToast(error, {
         title: "Error starting Yabai",
       });
