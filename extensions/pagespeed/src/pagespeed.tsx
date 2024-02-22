@@ -68,6 +68,7 @@ export default function Main(): ReactElement {
               <Action
                 icon={Icon.Trash}
                 title="Remove"
+                style={Action.Style.Destructive}
                 onAction={async () => {
                   await removeItem(item.url);
                   await revalidate();
