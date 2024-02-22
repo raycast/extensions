@@ -63,6 +63,10 @@
               "title": "Perplexity 7B Chat"
             },
             {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
+            },
+            {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
             }
@@ -119,6 +123,10 @@
             {
               "value": "pplx-7b-chat",
               "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -179,6 +187,10 @@
               "title": "Perplexity 7B Chat"
             },
             {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
+            },
+            {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
             }
@@ -235,6 +247,10 @@
             {
               "value": "pplx-7b-chat",
               "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -295,6 +311,10 @@
               "title": "Perplexity 7B Chat"
             },
             {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
+            },
+            {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
             }
@@ -349,6 +369,10 @@
               "title": "Perplexity 7B Online"
             },
             {
+              "value": "pplx-8x7b-online",
+              "title": "Perplexity 8x7B Online"
+            },
+            {
               "value": "pplx-70b-online",
               "title": "Perplexity 70B Online"
             },
@@ -375,6 +399,10 @@
             {
               "value": "pplx-7b-chat",
               "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -452,6 +480,10 @@
               "title": "Perplexity 7B Chat"
             },
             {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
+            },
+            {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
             }
@@ -509,6 +541,10 @@
             {
               "value": "pplx-7b-chat",
               "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -570,6 +606,10 @@
               "title": "Perplexity 7B Chat"
             },
             {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
+            },
+            {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
             }
@@ -627,6 +667,10 @@
             {
               "value": "pplx-7b-chat",
               "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -688,6 +732,10 @@
               "title": "Perplexity 7B Chat"
             },
             {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
+            },
+            {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
             }
@@ -745,6 +793,10 @@
             {
               "value": "pplx-7b-chat",
               "title": "Perplexity 7B Chat"
+            },
+            {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -806,6 +858,10 @@
               "title": "Perplexity 7B Chat"
             },
             {
+              "value": "pplx-8x7b-chat",
+              "title": "Perplexity 8x7B Chat"
+            },
+            {
               "value": "pplx-70b-chat",
               "title": "Perplexity 70B Chat"
             }
@@ -854,6 +910,10 @@
         {
           "value": "pplx-7b-chat",
           "title": "Perplexity 7B Chat"
+        },
+        {
+          "value": "pplx-8x7b-chat",
+          "title": "Perplexity 8x7B Chat"
         },
         {
           "value": "pplx-70b-chat",
