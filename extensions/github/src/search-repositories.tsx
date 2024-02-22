@@ -46,12 +46,8 @@ function SearchRepositories() {
   );
 
   useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-
     history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r)));
-  }, [data, isLoading]);
+  }, [data]);
 
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
