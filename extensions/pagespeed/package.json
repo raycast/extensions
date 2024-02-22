@@ -20,7 +20,7 @@
   "commands": [
     {
       "name": "pagespeed",
-      "title": "Run a Pagespeed Test",
+      "title": "Run Pagespeed Test",
       "description": "Run a pagespeed test on a given URL",
       "mode": "view"
     }
