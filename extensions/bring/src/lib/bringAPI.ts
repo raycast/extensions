@@ -31,8 +31,8 @@ export class BringAPI {
         this.userUuid = uuid;
         this.defaultListUuid = defaultListUuid;
         this.isAuthenticated = true;
-      } catch (error: unknown) {
-        if (error.response && error.response.status === 401) {
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("401")) {
           throw new Error("Failed to authenticate with Bring! Please check your credentials.");
         }
         throw error;
