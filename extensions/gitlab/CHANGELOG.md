@@ -2,7 +2,7 @@
 
 ## [Standardize Project Actions and List Items] - 2024-02-22
 
-- Standardize project actions between Search Projects and Groups > Show Group viewsm
+- Standardize project actions between Search Projects and Groups > Show Group views
 - Reuse `<ProjectListItem>` for consistent future behavior
 
 ## [Add Issue State Filter] - 2024-02-16
