@@ -14,7 +14,34 @@
       "name": "rym-search",
       "title": "Search on Rate Your Music",
       "description": "Opens Rate Your Music with your search query in the URL",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search for...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "category",
+          "type": "dropdown",
+          "placeholder": "Everything",
+          "data": [
+            {
+              "title": "Artist",
+              "value": "artist"
+            },
+            {
+              "title": "Genre",
+              "value": "genre"
+            },
+            {
+              "title": "Release",
+              "value": "release"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {

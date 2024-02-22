@@ -1,56 +1,37 @@
-import { List, ActionPanel, open, Action } from "@raycast/api";
-import { useState } from "react";
+import { LaunchProps, open, showToast, Toast } from "@raycast/api";
 
-export default function SearchRateYourMusic() {
-  const [query, setQuery] = useState("");
-  // Add "genre" to the selectedType state type
-  const [selectedType, setSelectedType] = useState<"artist" | "release" | "everything" | "genre">("everything");
+type SearchType = "artist" | "release" | "genre";
 
-  return (
-    <List
-      searchBarPlaceholder="Search RateYourMusic..."
-      onSearchTextChange={setQuery}
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Type"
-          value={selectedType}
-          onChange={(newValue) => setSelectedType(newValue as "artist" | "release" | "everything" | "genre")}
-        >
-          <List.Dropdown.Item title="Everything" value="everything" />
-          <List.Dropdown.Item title="Artist" value="artist" />
-          <List.Dropdown.Item title="Release" value="release" />
-          <List.Dropdown.Item title="Genre" value="genre" />
-        </List.Dropdown>
-      }
-    >
-      <List.Item
-        title={`Search for "${query}" as ${selectedType}`}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Search on RateYourMusic"
-              onAction={() => {
-                const baseUrl = "https://rateyourmusic.com";
-                const searchParams = {
-                  artist: "&searchtype=a",
-                  release: "&searchtype=l",
-                  genre: `/genre/${encodeURIComponent(query)}`,
-                };
-                let url = `${baseUrl}/search?searchterm=${encodeURIComponent(query)}`;
-                if (selectedType === "everything") {
-                  open(url);
-                } else if (selectedType in searchParams) {
-                  url =
-                    selectedType === "genre"
-                      ? `${baseUrl}${searchParams[selectedType]}`
-                      : `${url}${searchParams[selectedType]}`;
-                  open(url);
-                }
-              }}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
+export default async function SearchRateYourMusic(props: LaunchProps<{ arguments: Arguments.RymSearch }>) {
+  const { query, category: selectedType } = props.arguments;
+
+  const constructBaseURL = (baseUrl: string, query: string): string =>
+    `${baseUrl}/search?searchterm=${encodeURIComponent(query)}`;
+
+  const appendSearchType = (url: string, type: SearchType | null, baseUrl: string): string => {
+    const searchParams = {
+      artist: "&searchtype=a",
+      release: "&searchtype=l",
+      genre: (query: string) => `/genre/${encodeURIComponent(query)}`,
+    };
+
+    if (type && type in searchParams) {
+      return type === "genre" ? `${baseUrl}${searchParams[type](query)}` : `${url}${searchParams[type]}`;
+    }
+    return url;
+  };
+
+  async function handleSearch() {
+    const baseUrl = "https://rateyourmusic.com";
+    let url = constructBaseURL(baseUrl, query);
+    url = appendSearchType(url, selectedType, baseUrl);
+
+    try {
+      await open(url);
+    } catch (error) {
+      showToast(Toast.Style.Failure, "Error during search", error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  await handleSearch();
 }

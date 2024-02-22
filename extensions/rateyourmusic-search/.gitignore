@@ -10,4 +10,6 @@ raycast-env.d.ts
 compiled_raycast_swift
 
 # misc
+.vscode
+.idea
 .DS_Store
