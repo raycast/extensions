@@ -1,11 +1,10 @@
-import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import { pluralize } from "./utils";
 import { Item, ListItems, Preferences } from "./types";
 import { EditForm } from "./editForm";
 import { getItems, saveItems } from "./storage";
-import Accessory = List.Item.Accessory;
 
 export default function Command() {
   const [connectionsList, setConnectionsList] = useState<ListItems[]>([]);
@@ -93,8 +92,19 @@ function Actions({
         <Action
           title="Remove Item"
           icon={Icon.Trash}
+          style={Action.Style.Destructive}
           onAction={async () => {
-            await onItemRemove(item);
+            await confirmAlert({
+              title: "Remove item?",
+              message: "Do you want to remove the selected item?",
+              primaryAction: {
+                title: "Remove",
+                style: Alert.ActionStyle.Destructive,
+                onAction: async () => {
+                  await onItemRemove(item);
+                },
+              },
+            });
           }}
         />
       </ActionPanel>

@@ -15,7 +15,7 @@ const FormSprintDropdown = forwardRef((props: FormSprintDropdownProps, ref: Forw
 
   const { data: sprints, isLoading } = useCachedPromise(
     async (query) => getSprints({ fieldName: props.name, fieldValue: query }),
-    [query]
+    [query],
   );
 
   return (

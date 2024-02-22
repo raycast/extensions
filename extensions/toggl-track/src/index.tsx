@@ -1,56 +1,51 @@
+import { useMemo } from "react";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { AppContextProvider, useAppContext } from "./context";
 import RunningTimeEntry from "./components/RunningTimeEntry";
 import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
-import { TimeEntry } from "./toggl/types";
-import toggl from "./toggl";
-import { storage, refreshStorage } from "./storage";
-import ProjectListItem from "./components/ProjectListItem";
+import { createTimeEntry, TimeEntry } from "./api";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
+import { ExtensionContextProvider } from "./context/ExtensionContext";
+import { useTimeEntries, useRunningTimeEntry, useProjects } from "./hooks";
+import { formatSeconds } from "./helpers/formatSeconds";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const { isLoading, isValidToken, projectGroups, runningTimeEntry, timeEntries, projects } = useAppContext();
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
+  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
+  const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
+  const { projects, isLoadingProjects } = useProjects();
 
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries
-    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-    .reduce(
-      (acc, timeEntry) =>
-        acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
-          ? acc
-          : [...acc, timeEntry],
-      [] as TimeEntry[]
-    );
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingProjects;
 
-  const totalDurationToday =
-    timeEntries
+  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
+    (acc, timeEntry) =>
+      acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
+        ? acc
+        : [...acc, timeEntry],
+    [] as TimeEntry[],
+  );
+
+  const totalDurationToday = useMemo(() => {
+    let seconds = timeEntries
+      .slice(runningTimeEntry ? 1 : 0)
       .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day"))
-      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0) +
-    (runningTimeEntry ? dayjs().diff(runningTimeEntry.start, "second") : 0);
-
-  function formatSeconds(seconds: number) {
-    const h = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  }
+      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0);
+    if (runningTimeEntry) seconds += dayjs().diff(dayjs(runningTimeEntry.start), "second");
+    return seconds;
+  }, [timeEntries, runningTimeEntry]);
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
     try {
-      await toggl.createTimeEntry({
-        projectId: timeEntry.project_id,
+      await createTimeEntry({
+        projectId: timeEntry.project_id ?? undefined,
         workspaceId: timeEntry.workspace_id,
         description: timeEntry.description,
         tags: timeEntry.tags,
         billable: timeEntry.billable,
       });
-      await storage.runningTimeEntry.refresh();
+      revalidateRunningTimeEntry();
       await showToast(Toast.Style.Success, "Time entry resumed");
       await clearSearchBar({ forceScrollToTop: true });
     } catch (e) {
@@ -64,87 +59,56 @@ function ListView() {
       throttle
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
-      {isValidToken ? (
-        !isLoading && (
-          <>
-            {runningTimeEntry && <RunningTimeEntry runningTimeEntry={runningTimeEntry} />}
-            <List.Section title="Actions">
+      {runningTimeEntry && (
+        <RunningTimeEntry
+          project={projects.find(({ id }) => runningTimeEntry.project_id === id)}
+          {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }}
+        />
+      )}
+      <List.Section title="Actions">
+        <List.Item
+          title="Create a new time entry"
+          icon={"command-icon.png"}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Create Time Entry"
+                icon={{ source: Icon.Clock }}
+                target={
+                  <ExtensionContextProvider>
+                    <CreateTimeEntryForm {...{ isLoading, projects, revalidateRunningTimeEntry }} />
+                  </ExtensionContextProvider>
+                }
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+      {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
+        <List.Section title="Recent time entries">
+          {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => {
+            const project = projects.find(({ id }) => timeEntry.project_id === id);
+            return (
               <List.Item
-                title="Create a new time entry"
-                icon={"command-icon.png"}
+                key={timeEntry.id}
+                keywords={[timeEntry.description, project?.name || ""]}
+                title={timeEntry.description || "No description"}
+                subtitle={timeEntry.billable ? "$" : ""}
+                accessories={[{ text: project?.name }, { icon: { source: Icon.Dot, tintColor: project?.color } }]}
+                icon={{ source: Icon.Circle, tintColor: project?.color }}
                 actions={
                   <ActionPanel>
-                    <Action.Push
-                      title="Create Time Entry"
+                    <Action.SubmitForm
+                      title="Resume Time Entry"
+                      onSubmit={() => resumeTimeEntry(timeEntry)}
                       icon={{ source: Icon.Clock }}
-                      target={
-                        <AppContextProvider>
-                          <CreateTimeEntryForm />
-                        </AppContextProvider>
-                      }
                     />
-                    <ActionPanel.Section>
-                      <Action.SubmitForm
-                        title="Refresh"
-                        icon={{ source: Icon.RotateClockwise }}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                        onSubmit={refreshStorage}
-                      />
-                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />
-            </List.Section>
-            {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
-              <List.Section title="Resume recent time entry">
-                {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
-                  <List.Item
-                    key={timeEntry.id}
-                    keywords={[timeEntry.description, getProjectById(timeEntry.project_id)?.name || ""]}
-                    title={timeEntry.description || "No description"}
-                    subtitle={timeEntry.billable ? "$" : ""}
-                    accessoryTitle={getProjectById(timeEntry?.project_id)?.name}
-                    accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color }}
-                    icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.project_id)?.color }}
-                    actions={
-                      <ActionPanel>
-                        <Action.SubmitForm
-                          title="Resume Time Entry"
-                          onSubmit={() => resumeTimeEntry(timeEntry)}
-                          icon={{ source: Icon.Clock }}
-                        />
-                        <Action.SubmitForm
-                          title="Refresh"
-                          icon={{ source: Icon.RotateClockwise }}
-                          onSubmit={refreshStorage}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                ))}
-              </List.Section>
-            )}
-            <List.Section title="Projects">
-              {projectGroups &&
-                projectGroups.map((group) =>
-                  group.projects.map((project) => (
-                    <ProjectListItem
-                      key={project.id}
-                      project={project}
-                      subtitle={group.client?.name}
-                      accessoryTitle={group.workspace.name}
-                    />
-                  ))
-                )}
-            </List.Section>
-          </>
-        )
-      ) : (
-        <List.Item
-          icon={Icon.ExclamationMark}
-          title="Invalid API Key Detected"
-          accessoryTitle={`Go to Extensions → Toggl Track`}
-        />
+            );
+          })}
+        </List.Section>
       )}
     </List>
   );
@@ -152,8 +116,8 @@ function ListView() {
 
 export default function Command() {
   return (
-    <AppContextProvider>
+    <ExtensionContextProvider>
       <ListView />
-    </AppContextProvider>
+    </ExtensionContextProvider>
   );
 }

@@ -1,102 +1,79 @@
 import fs from "fs";
-import path from "path";
 import { promisify } from "util";
 import { exec as defaultExec } from "child_process";
 import gte from "semver/functions/gte";
 import parse from "semver/functions/parse";
+import { Device } from "./types";
 const exec = promisify(defaultExec);
 
-interface Device {
-  name: string;
-  serial_number: string;
-  is_on: boolean;
-}
+const MINIMUM_SUPPORTED_LITRA_VERSION = "0.2.0";
 
-const MINIMUM_SUPPORTED_LITRA_VERSION = "4.4.0";
-
-export const checkLitraVersion = async (cliDirectory: string, nodeBinaryPath?: string): Promise<void> => {
-  const version = await getLitraVersion(cliDirectory, nodeBinaryPath);
+export const checkLitraVersion = async (binaryPath: string): Promise<void> => {
+  const version = await getLitraVersion(binaryPath);
 
   if (gte(version, MINIMUM_SUPPORTED_LITRA_VERSION)) {
     if (parse(version)?.major != parse(MINIMUM_SUPPORTED_LITRA_VERSION)?.major) {
-      throw `You are running v${version} of the \`litra\` package which is too new for this Raycast extension. Please downgrade to v${MINIMUM_SUPPORTED_LITRA_VERSION} or a later version within the same major version by running \`npm install -g litra@${MINIMUM_SUPPORTED_LITRA_VERSION}\`.`;
+      throw `You are running v${version} of the \`litra\` CLI which is too new for this Raycast extension. Please downgrade to v${MINIMUM_SUPPORTED_LITRA_VERSION} or a later version within the same major version.`;
     }
   } else {
-    throw `You are running an old version of the \`litra\` package, v${version}. You must be running v${MINIMUM_SUPPORTED_LITRA_VERSION} or a later version within the same major version. Please update by running \`npm install -g litra@${MINIMUM_SUPPORTED_LITRA_VERSION}\`.`;
+    throw `You are running an old version of the \`litra\` CLI, v${version}. You must be running v${MINIMUM_SUPPORTED_LITRA_VERSION} or a later version within the same major version. For details on how to install the latest version, see https://github.com/timrogers/litra-rs.`;
   }
 };
 
-const getLitraVersion = async (cliDirectory: string, nodeBinaryPath?: string): Promise<string> => {
-  try {
-    const { stdout: version } = await runLitraCommand(cliDirectory, "litra-devices", "--version", nodeBinaryPath);
-    return version.trim();
-  } catch (error: any) {
-    if (error.stderr.includes("unknown option")) {
-      throw `You seem to be running an old version of the \`litra\` package. You must be running at least v${MINIMUM_SUPPORTED_LITRA_VERSION}. Please update by running \`npm install -g litra@${MINIMUM_SUPPORTED_LITRA_VERSION}\`.`;
-    } else {
-      throw error;
-    }
-  }
+const getLitraVersion = async (binaryPath: string): Promise<string> => {
+  const { stdout: version } = await runLitraCommand(binaryPath, undefined, "--version");
+  // The CLI returns an output like this:
+  // > litra 0.1.0
+  return version.trim().split(" ")[1];
 };
 
 const runLitraCommand = (
-  directory: string,
-  filename: string,
+  binaryPath: string,
+  subcommand: string | undefined,
   args?: string,
-  nodeBinaryPath?: string
 ): Promise<{
   stdout: string;
   stderr: string;
 }> => {
-  const binPath = path.join(directory, filename);
-
-  if (fs.existsSync(binPath)) {
-    const command = [nodeBinaryPath, binPath, args].filter((argument) => argument).join(" ");
+  if (fs.existsSync(binaryPath)) {
+    const command = [binaryPath, subcommand, args].filter((argument) => argument).join(" ");
     return exec(command);
   } else {
-    throw `The CLI utility \`${filename}\` is not available in \`${directory}\`. Please check the extension's preferences.`;
+    throw `The \`litra\` CLI could not be found at \`${binaryPath}\`. Please check the extension's preferences.`;
   }
 };
 
-export const getDevices = async (cliDirectory: string, nodeBinaryPath?: string): Promise<Device[]> => {
-  const { stdout } = await runLitraCommand(cliDirectory, "litra-devices", "--json", nodeBinaryPath);
+export const getDevices = async (binaryPath: string): Promise<Device[]> => {
+  const { stdout } = await runLitraCommand(binaryPath, "devices", "--json");
   return JSON.parse(stdout) as Device[];
 };
 
-export const isOn = async (cliDirectory: string, serialNumber: string, nodeBinaryPath?: string): Promise<boolean> => {
-  const devices = await getDevices(cliDirectory, nodeBinaryPath);
+export const isOn = async (serialNumber: string, binaryPath: string): Promise<boolean> => {
+  const devices = await getDevices(binaryPath);
   const device = devices.find((device) => device.serial_number === serialNumber) as Device;
   return device.is_on;
 };
 
-export const toggle = async (cliDirectory: string, serialNumber: string, nodeBinaryPath?: string): Promise<void> => {
-  await runLitraCommand(cliDirectory, "litra-toggle", `--serial-number ${serialNumber}`, nodeBinaryPath);
+export const toggle = async (serialNumber: string, binaryPath: string): Promise<void> => {
+  await runLitraCommand(binaryPath, "toggle", `--serial-number ${serialNumber}`);
 };
 
 export const setTemperatureInKelvin = async (
-  cliDirectory: string,
   serialNumber: string,
   temperatureInKelvin: number,
-  nodeBinaryPath?: string
+  binaryPath: string,
 ): Promise<void> => {
-  await runLitraCommand(
-    cliDirectory,
-    "litra-temperature-k",
-    `${temperatureInKelvin} --serial-number ${serialNumber}`,
-    nodeBinaryPath
-  );
+  await runLitraCommand(binaryPath, "temperature", `--value ${temperatureInKelvin} --serial-number ${serialNumber}`);
 };
 
 export const setBrightnessPercentage = async (
-  cliDirectory: string,
   serialNumber: string,
   brightnessPercentage: number,
-  nodeBinaryPath?: string
+  binaryPath: string,
 ): Promise<void> => {
   await runLitraCommand(
-    cliDirectory,
-    "litra-brightness",
-    `${brightnessPercentage} --serial-number ${serialNumber}`,
-    nodeBinaryPath
+    binaryPath,
+    "brightness",
+    `--percentage ${brightnessPercentage} --serial-number ${serialNumber}`,
   );
 };

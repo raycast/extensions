@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useRef, useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
-import { Preferences } from "~/types/preferences";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
@@ -29,10 +28,13 @@ const UnlockForm = (props: UnlockFormProps) => {
       setLoading(true);
       setUnlockError(undefined);
 
-      const state = await bitwarden.status();
-      if (state.status === "unauthenticated") {
+      const { error, result: vaultState } = await bitwarden.status();
+      if (error) throw error;
+
+      if (vaultState.status === "unauthenticated") {
         try {
-          await bitwarden.login();
+          const { error } = await bitwarden.login();
+          if (error) throw error;
         } catch (error) {
           const {
             displayableError = `Please check your ${shouldShowServer ? "Server URL, " : ""}API Key and Secret.`,

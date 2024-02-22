@@ -32,7 +32,7 @@ interface IPreferences {
   enableHistory: boolean;
   historyLimit: number;
   multipleServiceProvider: TransServiceProviderTp;
-  "mulZh-CN": boolean;
+  "mulZh-Hans": boolean;
   mulEn: boolean;
   mulEs: boolean;
   mulHi: boolean;
@@ -90,8 +90,8 @@ interface ILangItem {
   youdaoLangId?: string;
   aliyunLangId?: string;
   microsoftLangId?: string;
+  googleLangId?: string;
   langTitle: string;
-  voice?: string;
 }
 
 interface ITranslateRes {
@@ -296,4 +296,9 @@ interface IMicrosoftAzureOCRResult {
       }[];
     }[];
   }[];
+}
+
+interface IVoice {
+  voice: string;
+  code: string;
 }

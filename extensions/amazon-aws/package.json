@@ -15,13 +15,25 @@
     "crisboarna",
     "sidhant92",
     "DorukAkinci",
-    "frese"
+    "frese",
+    "nagauta"
   ],
   "categories": [
     "Developer Tools",
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "type": "checkbox",
+      "name": "useAWSVault",
+      "title": "Use AWS Vault",
+      "description": "Use AWS Vault to manage your AWS credentials",
+      "required": true,
+      "default": false,
+      "label": "Use AWS Vault"
+    }
+  ],
   "commands": [
     {
       "name": "ec2",
@@ -110,9 +122,16 @@
           "default": "/bin/zsh -l -c \"assume -c <profile>\""
         }
       ]
+    },
+    {
+      "name": "step-functions",
+      "title": "Step Functions",
+      "description": "Find and open a Step Function",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@aws-sdk/client-sfn": "^3.216.0",
     "@aws-sdk/client-cloudformation": "^3.216.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
     "@aws-sdk/client-codepipeline": "^3.216.0",
@@ -121,9 +140,9 @@
     "@aws-sdk/client-ecs": "^3.216.0",
     "@aws-sdk/client-lambda": "^3.216.0",
     "@aws-sdk/client-s3": "^3.216.0",
+    "@aws-sdk/client-secrets-manager": "^3.226.0",
     "@aws-sdk/client-sqs": "^3.216.0",
     "@aws-sdk/client-ssm": "^3.226.0",
-    "@aws-sdk/client-secrets-manager": "^3.226.0",
     "@aws-sdk/shared-ini-file-loader": "^3.215.0",
     "@raycast/api": "^1.42.0",
     "@raycast/utils": "^1.4.11",
@@ -136,6 +155,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

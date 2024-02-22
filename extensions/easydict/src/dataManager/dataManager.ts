@@ -12,9 +12,9 @@ import { OpenAITranslateResult } from "./../types";
 import { environment } from "@raycast/api";
 import axios from "axios";
 import { getProxyAgent } from "../axiosConfig";
-import { detectLanguage } from "../detectLanauge/detect";
-import { DetectedLangModel } from "../detectLanauge/types";
-import { rquestLingueeDictionary } from "../dictionary/linguee/linguee";
+import { detectLanguage } from "../detectLanguage/detect";
+import { DetectedLangModel } from "../detectLanguage/types";
+import { requestLingueeDictionary } from "../dictionary/linguee/linguee";
 import { formatLingueeDisplaySections } from "../dictionary/linguee/parse";
 import { updateYoudaoDictionaryDisplay } from "../dictionary/youdao/formatData";
 import { QueryWordInfo, YoudaoDictionaryFormatResult } from "../dictionary/youdao/types";
@@ -38,7 +38,7 @@ import { requestOpenAIStreamTranslate } from "../translation/openAI/chat";
 import { requestTencentTranslate } from "../translation/tencent";
 import { requestVolcanoTranslate } from "../translation/volcano/volcanoAPI";
 import {
-  DicionaryType,
+  DictionaryType,
   DisplaySection,
   ListAccessoryItem,
   ListDisplayItem,
@@ -185,7 +185,7 @@ export class DataManager {
         this.queryDeepLTranslate(queryWordInfo);
       }
 
-      // We need to pass a abort signal, becase google translate is used "got" to request, not axios.
+      // We need to pass a abort signal, because google translate is used "got" to request, not axios.
       this.queryGoogleTranslate(queryWordInfo, this.abortController);
     });
 
@@ -364,10 +364,10 @@ export class DataManager {
    */
   private queryLingueeDictionary(queryWordInfo: QueryWordInfo) {
     if (myPreferences.enableLingueeDictionary) {
-      const type = DicionaryType.Linguee;
+      const type = DictionaryType.Linguee;
       this.addQueryToRecordList(type);
 
-      rquestLingueeDictionary(queryWordInfo)
+      requestLingueeDictionary(queryWordInfo)
         .then((lingueeTypeResult) => {
           const lingueeDisplaySections = formatLingueeDisplaySections(lingueeTypeResult);
           if (lingueeDisplaySections.length === 0) {
@@ -446,15 +446,15 @@ export class DataManager {
    */
   private queryYoudaoDictionary(queryWordInfo: QueryWordInfo, queryType?: QueryType) {
     if (this.enableYoudaoDictionary) {
-      const type = queryType ?? DicionaryType.Youdao;
+      const type = queryType ?? DictionaryType.Youdao;
       this.addQueryToRecordList(type);
 
       const enableYoudaoAPI = hasYoudaoAppKey();
 
       // If user has Youdao API key, use official API, otherwise use web API.
-      const youdaoDictionayFnPtr = enableYoudaoAPI ? requestYoudaoAPITranslate : requestYoudaoWebDictionary;
+      const youdaoDictionaryFnPtr = enableYoudaoAPI ? requestYoudaoAPITranslate : requestYoudaoWebDictionary;
 
-      youdaoDictionayFnPtr(queryWordInfo, type)
+      youdaoDictionaryFnPtr(queryWordInfo, type)
         .then((youdaoDictionaryResult) => {
           // console.log(`---> youdaoDictionaryResult: ${JSON.stringify(youdaoDictionaryResult, null, 4)}`);
 
@@ -901,12 +901,12 @@ export class DataManager {
 
       // this is Linguee dictionary query, we need to check to update Linguee translation.
       if (type === TranslationType.DeepL) {
-        const lingueeQueryResult = this.getQueryResult(DicionaryType.Linguee);
+        const lingueeQueryResult = this.getQueryResult(DictionaryType.Linguee);
         this.updateLingueeTranslation(lingueeQueryResult, oneLineTranslation);
 
         // * Check if need to display DeepL translation.
         newQueryResult.hideDisplay = !myPreferences.enableDeepLTranslate;
-        console.log(`---> update deepL transaltion, disableDisplay: ${newQueryResult.hideDisplay}`);
+        console.log(`---> update deepL translation, disableDisplay: ${newQueryResult.hideDisplay}`);
       }
       this.updateQueryResultAndSections(newQueryResult);
     }
@@ -967,7 +967,7 @@ export class DataManager {
   private updateYoudaoDictionaryTranslation(translations: string[]) {
     console.log(`---> try updateYoudaoDictionaryTranslation: ${translations}`);
 
-    const youdaoDictionaryResult = this.getQueryResult(DicionaryType.Youdao);
+    const youdaoDictionaryResult = this.getQueryResult(DictionaryType.Youdao);
     if (youdaoDictionaryResult) {
       this.updateDictionaryTranslation(youdaoDictionaryResult, translations);
     }

@@ -1,7 +1,9 @@
 import { VISIBILITY } from "./constant";
 
 export interface Preferences {
-  openApi: string;
+  openApi?: string;
+  host?: string;
+  token?: string;
 }
 
 export enum ROLE {

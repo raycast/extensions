@@ -4,21 +4,88 @@
   "title": "Gitpod",
   "description": "A blazingly fast way to work with Gitpod",
   "icon": "logo-mark.png",
-  "author": "henitchobisa",
+  "author": "Henit-Palani",
   "contributors": [
-    "Palanikannan1437"
+    "Palanikannan1437",
+    "henitchobisa",
+    "pernielsentikaer",
+    "mads"
   ],
   "categories": [
     "Developer Tools",
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "preferredEditor",
+      "title": "Default Workspace Editor",
+      "description": "Choose your Preferred editor for Gitpod",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "VS Code Desktop",
+          "value": "code-desktop"
+        },
+        {
+          "title": "VS Code Browser",
+          "value": "code"
+        },
+        {
+          "title": "SSH",
+          "value": "ssh"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "useLatest",
+      "label": "Latest Release (Unstable)",
+      "description": "Use the latest version for each editor. Insiders for VS Code, EAP for JetBrains IDEs.",
+      "type": "checkbox",
+      "required": true
+    },
+    {
+      "name": "preferredEditorClass",
+      "title": "Default Workspace Class",
+      "description": "Up to 4 cores, 8GB RAM, 30GB storage in Standard and Up to 8 cores, 16GB RAM, 50GB storage in Large",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Standard",
+          "value": "g1-standard"
+        },
+        {
+          "title": "Large",
+          "value": "g1-large"
+        }
+      ],
+      "required": true
+    },
+    {
+      "name": "gitpodUrl",
+      "title": "Gitpod's URL Endpoint",
+      "placeholder": "https://custom-gitpod-host",
+      "default": "https://gitpod.io",
+      "description": "Configure your custom Gitpod URL for Dedicated and Self-Hosted",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "access_token",
+      "title": "Gitpod Access Token",
+      "placeholder": "Gitpod Access Token",
+      "description": "Generate and Enter a Gitpod Access Token from Gitpod with Full Access.",
+      "type": "password",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "open_in_gitpod",
-      "title": "Open in Gitpod",
-      "subtitle": "Gitpod",
-      "description": "Open any GitHub Repository's Branch, Pull Request or Issue in Gitpod",
+      "title": "Open Contexts From Github",
+      "subtitle": "Open any Context in Gitpod",
+      "description": "Open any Repository / Branch / PR / Issue in Gitpod with the extension",
       "mode": "view",
       "keywords": [
         "gitpod",
@@ -27,40 +94,55 @@
       ]
     },
     {
+      "name": "feedback_form",
+      "title": "Feedback",
+      "subtitle": "Feedback form for Gitpod Extension",
+      "description": "We'd love your valuable feedback",
+      "mode": "view",
+      "keywords": [
+        "gitpod",
+        "gp",
+        "feedback"
+      ]
+    },
+    {
+      "name": "gitpod_dashboard",
+      "title": "Manage Workspaces",
+      "subtitle": "Manage and Create New Workspaces",
+      "description": "Start, Stop or Create New Workspaces just from the extension.",
+      "mode": "view"
+    },
+    {
       "name": "menubar",
-      "title": "Recent Repositories",
-      "subtitle": "Gitpod",
-      "description": "A Menubar Icon for faster access to recently visited Repositories",
+      "title": "Menu Bar Workspaces",
+      "subtitle": "Manage Workspaces from Menubar",
+      "description": "A Menubar Icon for faster access to recently visited workspaces, starting them and opening quicklinks.",
       "mode": "menu-bar",
+      "interval": "100000d",
       "keywords": [
         "gitpod",
         "gp",
         "recent repositories",
-        "menubar"
+        "menubar",
+        "workspaces"
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "personalAccessToken",
-      "title": "Personal Access Token",
-      "placeholder": "Visit https://github.com/settings/tokens",
-      "description": "Enter Classic Personal Access Token from Github",
-      "type": "password",
-      "required": true
-    }
-  ],
   "dependencies": {
+    "@bufbuild/connect": "^0.8.6",
+    "@bufbuild/connect-node": "^0.8.6",
+    "@bufbuild/protobuf": "^1.2.0",
     "@graphql-codegen/cli": "^2.16.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.8",
     "@graphql-codegen/typescript-operations": "^2.5.11",
-    "@raycast/api": "^1.45.2",
-    "@raycast/utils": "^1.4.14",
+    "@raycast/api": "^1.57.1",
+    "@raycast/utils": "^1.9.1",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.0",
-    "octokit": "^2.0.10"
+    "octokit": "^2.0.10",
+    "ws": "^8.11.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.191",

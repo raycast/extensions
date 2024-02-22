@@ -2,10 +2,10 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { MutatePromise, getFavicon } from "@raycast/utils";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
-import { WEB_IDES } from "../helpers/repository";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
 
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
@@ -106,6 +106,13 @@ export default function RepositoryActions({ repository, mutateList, onVisit }: R
             />
           ))}
         </ActionPanel.Submenu>
+
+        <Action
+          icon={Icon.Terminal}
+          title="Clone and Open"
+          onAction={() => cloneAndOpen(repository)}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        />
 
         <Action.OpenInBrowser
           icon="vscode.svg"

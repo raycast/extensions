@@ -9,8 +9,8 @@ import { Stopwatch } from "./types";
 const SWPATH = environment.supportPath + "/raycast-stopwatches.json";
 
 const ensureSWFileExists = () => {
-  if (!existsSync(SWPATH)) {
-    writeFileSync(SWPATH, JSON.stringify([]));
+  if (!existsSync(SWPATH) || readFileSync(SWPATH).toString() == "") {
+    writeFileSync(SWPATH, "[]");
   }
 };
 
@@ -76,7 +76,7 @@ const unpauseStopwatch = (swToUnpause: string) => {
           pauseElapsed: s.pauseElapsed + secondsBetweenDates({ d2: s.lastPaused }),
           lastPaused: "----",
         }
-      : s
+      : s,
   );
   writeFileSync(SWPATH, JSON.stringify(swStore));
 };

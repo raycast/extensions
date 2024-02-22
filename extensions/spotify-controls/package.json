@@ -11,7 +11,8 @@
     "sandypockets",
     "kenan",
     "dmacdermott",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "yansq"
   ],
   "license": "MIT",
   "commands": [
@@ -96,6 +97,13 @@
       ]
     },
     {
+      "name": "backwardToBeginning",
+      "title": "Backward To The Beginning",
+      "subtitle": "Spotify",
+      "description": "Plays current track from the beginning in Spotify.",
+      "mode": "no-view"
+    },
+    {
       "name": "forwardXseconds",
       "title": "Skip Forward",
       "subtitle": "Spotify",
@@ -137,17 +145,17 @@
       "subtitle": "Spotify",
       "description": "Decrease volume in Spotify.",
       "mode": "no-view",
-        "preferences": [
-            {
-            "title": "Decrease volume by x%",
-            "name": "volumeStep",
-            "type": "textfield",
-            "default": "10",
-            "description": "The amount to decrease the volume by.",
-            "placeholder": "10%",
-            "required": false
-            }
-        ]
+      "preferences": [
+        {
+          "title": "Decrease volume by x%",
+          "name": "volumeStep",
+          "type": "textfield",
+          "default": "10",
+          "description": "The amount to decrease the volume by.",
+          "placeholder": "10%",
+          "required": false
+        }
+      ]
     },
     {
       "name": "quarterVolume",
@@ -214,16 +222,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.53.3",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "prettier": "2.4.1",
     "typescript": "^4.4.3"

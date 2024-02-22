@@ -3,7 +3,7 @@
   "name": "arc",
   "title": "Arc",
   "description": "Search and quickly navigate Arc's history and open tabs.",
-  "icon": "icon-dark.png",
+  "icon": "icon.png",
   "author": "thomas",
   "owner": "the-browser-company",
   "access": "public",
@@ -12,13 +12,29 @@
     "Applications",
     "Productivity"
   ],
+  "keywords": [
+    "browser",
+    "arc",
+    "history",
+    "search",
+    "tabs",
+    "open",
+    "windows",
+    "web"
+  ],
   "license": "MIT",
   "contributors": [
     "pomdtr",
     "zach",
     "ankitchouhan1020",
     "pernielsentikaer",
-    "danpalmer"
+    "danpalmer",
+    "danulqua",
+    "rgrunberg",
+    "tleo19",
+    "loris",
+    "bdsqqq",
+    "xilopaint"
   ],
   "commands": [
     {
@@ -36,6 +52,13 @@
       "subtitle": "Arc"
     },
     {
+      "name": "new-blank-window",
+      "title": "Open New Blank Window",
+      "description": "Create and open a new blank window",
+      "mode": "no-view",
+      "subtitle": "Arc"
+    },
+    {
       "name": "new-little-arc",
       "title": "Open New Little Arc Window",
       "description": "Create and open a new little arc window",
@@ -44,11 +67,45 @@
       "preferences": [
         {
           "name": "url",
-          "title": "URL",
-          "description": "The URL to open in the new tab",
+          "title": "Default URL",
+          "description": "The URL to open in the new tab if no argument is provided",
           "type": "textfield",
           "required": false,
           "default": "https://google.com"
+        },
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used when opening mini arc with a non-url argument",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            }
+          ]
         }
       ],
       "arguments": [
@@ -79,7 +136,24 @@
       "title": "Open New Incognito Window",
       "subtitle": "Arc",
       "description": "Create and open a new incognito window",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "url",
+          "title": "URL",
+          "description": "The URL to open in the new window",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-tab",
@@ -93,6 +167,14 @@
           "title": "URL",
           "description": "The URL to open in the new tab",
           "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
           "required": false
         }
       ]
@@ -110,6 +192,40 @@
       "description": "Search tabs, history and search suggestions",
       "mode": "view",
       "preferences": [
+        {
+          "name": "engine",
+          "title": "Search Engine",
+          "description": "Search engine used for suggestions",
+          "type": "dropdown",
+          "required": false,
+          "default": "google",
+          "data": [
+            {
+              "title": "Google",
+              "value": "google"
+            },
+            {
+              "title": "DuckDuckGo",
+              "value": "duckduckgo"
+            },
+            {
+              "title": "Bing",
+              "value": "bing"
+            },
+            {
+              "title": "Yahoo!",
+              "value": "yahoo"
+            },
+            {
+              "title": "Ecosia",
+              "value": "ecosia"
+            },
+            {
+              "title": "Kagi",
+              "value": "kagi"
+            }
+          ]
+        },
         {
           "name": "sorting",
           "title": "Sorting",
@@ -170,29 +286,59 @@
           "default": true
         }
       ]
+    },
+    {
+      "name": "release-notes",
+      "title": "Open Arc Release Notes",
+      "subtitle": "Arc",
+      "description": "Open the Arc release notes",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "boost-gallery",
+      "title": "Open Arc Boost Gallery",
+      "subtitle": "Arc",
+      "description": "Open the Arc Boost Gallery",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "new-note",
+      "title": "Open New Note",
+      "subtitle": "Arc",
+      "description": "Open a new note",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "new-easel",
+      "title": "Open New Easel",
+      "subtitle": "Arc",
+      "description": "Open a new easel",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.0",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/api": "^1.53.0",
+    "@raycast/utils": "^1.12.4",
+    "cross-fetch": "^3.1.6",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
     "nanoid": "^4.0.0",
-    "run-applescript": "^6.1.0",
     "semver": "^7.3.8"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
     "@types/is-url": "^1.2.30",
     "@types/lodash": "^4.14.191",
     "@types/nanoid": "^3.0.0",
     "@types/node": "^18.8.3",
     "@types/react": "^18.0.17",
     "@types/semver": "^7.3.13",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.8.4",
     "typescript": "^4.4.3"
   },

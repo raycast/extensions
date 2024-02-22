@@ -24,6 +24,11 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
               style: Toast.Style.Success,
               title: "Selected text loaded!",
             });
+          } else {
+            await showToast({
+              style: Toast.Style.Success,
+              title: "No text selected!",
+            });
           }
         } catch (error) {
           await showToast({

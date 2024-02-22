@@ -11,6 +11,7 @@ export type SettingsValues = {
   highlightHighlightedAt: string
   highlightLocation: string
   highlightNote: string
+  highlightNoteSupertag: string
   highlightSupertag: string
   highlightTags: string
   highlightUpdatedAt: string
@@ -161,6 +162,12 @@ export default function Settings({ handleSave, template }: SettingsProps) {
         id="highlightNote"
         title="Note"
         info="If this is omitted the note will be added as a child node of the highlight."
+        storeValue
+      />
+      <Form.TextField
+        id="highlightNoteSupertag"
+        title="Note Supertag"
+        info="Tag notes with a supertag. # can be omitted"
         storeValue
       />
       <Form.TextField id="highlightColor" title="Color" storeValue />

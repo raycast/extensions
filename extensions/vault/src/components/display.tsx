@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
-import { DeleteMode, DisplayMode, VaultEntry, VaultReadMetadataResponse } from "../interfaces";
+import { DeleteMode, DisplayMode, ExportMode, VaultEntry, VaultReadMetadataResponse } from "../interfaces";
 import {
   addToFavorites,
   callDelete,
@@ -21,10 +21,10 @@ import {
   callUndelete,
   deleteEnabled,
   duration,
+  exportSecretToFile,
   getVaultNamespace,
   isFavorite,
   removeFromFavorites,
-  saveSecretToFile,
   stringify,
   writeEnabled,
 } from "../utils";
@@ -169,9 +169,15 @@ export function VaultDisplay(props: { path: string }) {
             <Action.CopyToClipboard icon={Icon.CopyClipboard} title="Copy Secret" content={stringify(secret)} />
             <Action
               icon={Icon.SaveDocument}
-              title="Save Secret to File"
+              title="Export Secret to Json File"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
-              onAction={() => saveSecretToFile(secret, props.path)}
+              onAction={() => exportSecretToFile(secret, props.path, ExportMode.json)}
+            />
+            <Action
+              icon={Icon.SaveDocument}
+              title="Export Secret to Env File"
+              shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
+              onAction={() => exportSecretToFile(secret, props.path, ExportMode.env)}
             />
             {CopyToken()}
           </ActionPanel.Section>

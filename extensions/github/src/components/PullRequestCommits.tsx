@@ -3,9 +3,9 @@ import { useCachedPromise } from "@raycast/utils";
 import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { PullRequestCommitFieldsFragment } from "../generated/graphql";
 import { getCheckStateAccessory } from "../helpers/pull-request";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { PullRequest } from "./PullRequestActions";
 
@@ -21,7 +21,7 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
       const commits = await github.pullRequestCommits({ nodeId: pullRequest.id });
       return commits.node as PullRequestCommitFieldsFragment;
     },
-    [pullRequest]
+    [pullRequest],
   );
 
   const sortedCommits = useMemo(() => {

@@ -1,20 +1,25 @@
 import { List, Icon, ActionPanel } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
-import SearchCommonActions from "~/components/searchVault/actions/CommonActions";
+import VaultManagementActions from "~/components/searchVault/actions/shared/VaultManagementActions";
 import VaultListenersProvider from "~/components/searchVault/context/vaultListeners";
 import VaultItem from "~/components/searchVault/Item";
+import ListFolderDropdown from "~/components/searchVault/ListFolderDropdown";
 import { BitwardenProvider } from "~/context/bitwarden";
+import { FavoritesProvider, useSeparateFavoriteItems } from "~/context/favorites";
 import { SessionProvider } from "~/context/session";
-import { useVault, VaultProvider } from "~/context/vault";
+import { useVaultContext, VaultProvider } from "~/context/vault";
 import { Folder, Item } from "~/types/vault";
+import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 
 const SearchVaultCommand = () => (
   <RootErrorBoundary>
-    <BitwardenProvider>
+    <BitwardenProvider loadingFallback={<VaultLoadingFallback />}>
       <SessionProvider unlock>
         <VaultListenersProvider>
           <VaultProvider>
-            <SearchVaultComponent />
+            <FavoritesProvider>
+              <SearchVaultComponent />
+            </FavoritesProvider>
           </VaultProvider>
         </VaultListenersProvider>
       </SessionProvider>
@@ -23,13 +28,23 @@ const SearchVaultCommand = () => (
 );
 
 function SearchVaultComponent() {
-  const { items, folders, isLoading, isEmpty } = useVault();
+  const { items, folders, isLoading, isEmpty } = useVaultContext();
+  const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(items);
 
   return (
-    <List isLoading={isLoading}>
-      {items.map((item) => (
-        <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
-      ))}
+    <List searchBarPlaceholder="Search vault" isLoading={isLoading} searchBarAccessory={<ListFolderDropdown />}>
+      {favoriteItems.length > 0 ? (
+        <>
+          <List.Section title="Favorites">
+            <VaultItemList items={favoriteItems} folders={folders} />
+          </List.Section>
+          <List.Section title="Other Items">
+            <VaultItemList items={nonFavoriteItems} folders={folders} />
+          </List.Section>
+        </>
+      ) : (
+        <VaultItemList items={nonFavoriteItems} folders={folders} />
+      )}
       {isLoading ? (
         <List.EmptyView icon={Icon.ArrowClockwise} title="Loading..." description="Please wait." />
       ) : (
@@ -44,13 +59,23 @@ function SearchVaultComponent() {
           actions={
             !isLoading && (
               <ActionPanel>
-                <SearchCommonActions />
+                <VaultManagementActions />
               </ActionPanel>
             )
           }
         />
       )}
     </List>
+  );
+}
+
+function VaultItemList({ items, folders }: { items: Item[]; folders: Folder[] }) {
+  return (
+    <>
+      {items.map((item) => (
+        <VaultItem key={item.id} item={item} folder={getItemFolder(folders, item)} />
+      ))}
+    </>
   );
 }
 

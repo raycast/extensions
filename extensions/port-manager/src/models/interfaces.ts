@@ -1,13 +1,10 @@
-export interface Preferences {
-  sudo: boolean;
-}
-
 export interface PortInfo {
   host: string;
   port: number;
+  name?: string;
 }
 
-export interface IProcessInfo {
+export interface ProcessInfo {
   pid: number;
   path?: string;
   name?: string;

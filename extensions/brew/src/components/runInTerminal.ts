@@ -2,7 +2,8 @@ import { closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { preferences } from "../preferences";
 
-const appleScripts: { [key in typeof preferences.terminalApp]: (c: string) => string } = {
+const terminalApp = preferences.terminalApp || "terminal";
+const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
   terminal: (c: string) => `
     tell application "Terminal"
       do shell script "open -a 'Terminal'"
@@ -17,6 +18,6 @@ const appleScripts: { [key in typeof preferences.terminalApp]: (c: string) => st
 };
 
 export function runCommandInTerminal(command: string): void {
-  runAppleScript(appleScripts[preferences.terminalApp](command));
+  runAppleScript(appleScripts[terminalApp](command));
   closeMainWindow();
 }

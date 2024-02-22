@@ -39,9 +39,15 @@ export default class Bookmark {
     return this.RepositoryIdentifier !== "";
   }
 
-  get getBranch(): string {
-    const branch = getCurrentBranchName(this.getPath);
-
-    return branch.length > 50 ? `${branch.slice(0, 50)}...` : branch;
+  get getBranch(): { name: string; unknowBranch: boolean } {
+    try {
+      const branch = getCurrentBranchName(this.getPath);
+      return {
+        name: branch.length > 50 ? `${branch.slice(0, 50)}...` : branch,
+        unknowBranch: false,
+      };
+    } catch {
+      return { name: "Unknow branch", unknowBranch: true };
+    }
   }
 }

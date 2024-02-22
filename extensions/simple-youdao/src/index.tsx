@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   Icon,
   Color,
+  LaunchProps,
   List,
   Action,
   ActionPanel,
@@ -12,39 +13,43 @@ import {
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import fetch, { Response, AbortError } from "node-fetch";
-import crypto from "crypto";
+import crypto, { randomUUID } from "crypto";
 import fs from "fs";
-import qs from "querystring";
 import sound from "sound-play";
+import { URLSearchParams } from "url";
 
-export default function Command() {
-  const { state, translate, setState } = useTranslate();
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
+  const { text } = props.arguments;
+  const { searchText, state, setState, setSearchTextAndTranslate } = useSearchText(text);
 
   return (
     <List
+      searchText={searchText}
       isLoading={state.isLoading}
-      onSearchTextChange={translate}
+      onSearchTextChange={setSearchTextAndTranslate}
       searchBarPlaceholder={
         state.selection || state.clipboard
-          ? `default search for ${state.clipboard ? "Clipboard" : state.selection ? "Selection" : ""}`
+          ? `default search from ${state.clipboard ? "Clipboard" : state.selection ? "Selection" : ""}${
+              state.searchText != "" ? " : " + state.searchText : ""
+            }`
           : "input content wants to tranlate..."
       }
       throttle
     >
       {state.translateResult ? (
-        <Translate searchText={state.searchText} translate_result={state.translateResult} setState={setState} />
+        <Translate translate_result={state.translateResult} state={state} setState={setState} />
       ) : null}
     </List>
   );
 }
 
 function Translate({
-  searchText,
   translate_result,
+  state,
   setState,
 }: {
-  searchText: string | undefined;
   translate_result: TranslateResult;
+  state: TranslateState;
   setState: React.Dispatch<React.SetStateAction<TranslateState>>;
 }) {
   if (translate_result && translate_result.errorCode && translate_result.errorCode !== "0") {
@@ -65,12 +70,14 @@ function Translate({
             <List.Item
               key={index}
               title={item}
-              subtitle={translate_result.basic?.phonetic ? `${searchText} /${translate_result.basic?.phonetic}/` : ""}
+              subtitle={
+                translate_result.basic?.phonetic ? `${state.searchText} /${translate_result.basic?.phonetic}/` : ""
+              }
               icon={{ source: Icon.Dot, tintColor: Color.Red }}
               actions={
                 <TranslateResultActionPanel
                   setState={setState}
-                  text={searchText}
+                  text={state.searchText}
                   copy_content={item}
                   language={translate_result.l}
                   url={
@@ -206,8 +213,27 @@ function TranslateResultActionPanel(props: {
   );
 }
 
-function useTranslate() {
+function useSearchText(argText: string) {
+  const [searchText, setSearchText] = useState(argText);
+  const { state, translate, setState } = useTranslate(argText);
+
+  const setSearchTextAndTranslate = function setSearchTextAndTranslate(translateText: string) {
+    console.log(`set search text to |${translateText}|`);
+    setSearchText(translateText);
+    translate(translateText);
+  };
+
+  return {
+    searchText: searchText,
+    state: state,
+    setState: setState,
+    setSearchTextAndTranslate: setSearchTextAndTranslate,
+  };
+}
+
+function useTranslate(argText: string) {
   const [state, setState] = useState<TranslateState>({
+    searchText: argText,
     translateResult: undefined,
     selection: false,
     clipboard: false,
@@ -278,13 +304,6 @@ function useTranslate() {
     [cancelRef, setState]
   );
 
-  useEffect(() => {
-    translate("");
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, []);
-
   return {
     state: state,
     translate: translate,
@@ -303,25 +322,42 @@ async function performTranslate(searchText: string, signal: AbortSignal): Promis
   }
 }
 
-function generateSign(content: string, salt: number, app_key: string, app_secret: string) {
-  const md5 = crypto.createHash("md5");
-  md5.update(app_key + content + salt + app_secret);
-  const cipher = md5.digest("hex");
-  return cipher.slice(0, 32).toUpperCase();
+function generateSign(content: string, salt: string, curtime: number, app_key: string, app_secret: string) {
+  const sha256 = crypto.createHash("sha256");
+  sha256.update(app_key + getContentForSign(content) + salt + curtime + app_secret);
+  const cipher = sha256.digest("hex");
+  return cipher;
+}
+
+function getContentForSign(content: string) {
+  return content.length > 20
+    ? content.substring(0, 10) + content.length + content.substring(content.length - 10)
+    : content;
 }
 
 function translateAPI(content: string, signal: AbortSignal): Promise<Response> {
   const { app_key, app_secret, from_language, to_language } = getPreferenceValues();
-  const q = Buffer.from(content).toString();
-  const salt = Date.now();
+  const q = content;
+  const salt = randomUUID();
+  const curtime = Math.floor(Date.now() / 1000);
   content;
-  const sign = generateSign(q, salt, app_key, app_secret);
-  const query = qs.stringify({ q: q, appKey: app_key, from: from_language, to: to_language, salt, sign });
-  console.log(`https://openapi.youdao.com/api?${query}`);
-  return fetch(`https://openapi.youdao.com/api?${query}`, {
+  const sign = generateSign(q, salt, curtime, app_key, app_secret);
+  const query = new URLSearchParams([
+    ["q", q],
+    ["from", from_language],
+    ["to", to_language],
+    ["appKey", app_key],
+    ["salt", salt],
+    ["sign", sign],
+    ["signType", "v3"],
+    ["curtime", curtime],
+  ]);
+  console.log(`${query}`);
+  return fetch(`https://openapi.youdao.com/api`, {
     signal: signal,
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: query.toString(),
   });
 }
 

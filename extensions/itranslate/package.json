@@ -127,12 +127,20 @@
           ]
         },
         {
-          "name": "mulZh-CN",
+          "name": "mulZh-Hans",
           "type": "checkbox",
           "required": false,
           "title": "Multiple Languages to be Translated into",
           "label": "Chinese-Simplified",
           "description": "Chinese-Simplified option",
+          "default": true
+        },
+        {
+          "name": "mulZh-Hant",
+          "type": "checkbox",
+          "required": false,
+          "label": "Chinese-Traditional",
+          "description": "Chinese-Traditional option",
           "default": true
         },
         {
@@ -583,7 +591,11 @@
       "data": [
         {
           "title": "Chinese-Simplified",
-          "value": "zh-CN"
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-Hant"
         },
         {
           "title": "English",
@@ -740,7 +752,11 @@
         },
         {
           "title": "Chinese-Simplified",
-          "value": "zh-CN"
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese-Traditional",
+          "value": "zh-Hant"
         },
         {
           "title": "Spanish",

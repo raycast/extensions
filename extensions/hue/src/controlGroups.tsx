@@ -1,18 +1,19 @@
-import { ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
-import { Group, GroupedLight, Id, Light, Palette, Room, Zone } from "./lib/types";
+import { Action, ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
+import { Group, GroupedLight, Id, Light, Palette, PngUri, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import useGradientUris from "./hooks/useGradientUris";
 import "./helpers/arrayExtensions";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import SetScene from "./setScene";
 import { getColorFromLight, getLightsFromGroup } from "./helpers/hueResources";
-import { getTransitionTimeInMs, optimisticUpdate, optimisticUpdates } from "./helpers/raycast";
+import { getTransitionTimeInMs, optimisticUpdates } from "./helpers/raycast";
 import { calculateAdjustedBrightness, getClosestBrightness } from "./helpers/colors";
+import chroma from "chroma-js";
 import Style = Toast.Style;
 
 // Exact dimensions of a 16:9 Raycast 5 column grid item.
@@ -22,20 +23,28 @@ const GRID_ITEM_HEIGHT = 153;
 export default function ControlGroups() {
   const useHueObject = useHue();
   const { hueBridgeState, sendHueMessage, isLoading, lights, groupedLights, rooms, zones } = useHueObject;
-  const rateLimiter = useInputRateLimiter(10, 1000);
+  const rateLimiter = useInputRateLimiter(3, 1000);
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradientUris(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
 
   useMemo(() => {
     const groups = [...rooms, ...zones];
     const palettes = new Map<Id, Palette>(
-      groups.map((group) => [group.id, getLightsFromGroup(lights, group).map((light) => getColorFromLight(light))])
+      groups.map((group) => {
+        const groupLights = getLightsFromGroup(lights, group);
+        const uniqueColors = new Set(groupLights.map((light) => getColorFromLight(light)));
+        const groupColors = groupLights
+          .filter((light) => uniqueColors.has(getColorFromLight(light)))
+          .map((light) => getColorFromLight(light))
+          .sort((a, b) => chroma.hex(b).get("hsl.h") - chroma.hex(a).get("hsl.h"));
+        return [group.id, groupColors];
+      }),
     );
 
     setPalettes(palettes);
   }, [rooms, zones, lights]);
 
-  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
@@ -46,11 +55,11 @@ export default function ControlGroups() {
             .sort((a, b) => a.metadata.name.localeCompare(b.metadata.name))
             .map((room: Room) => {
               const groupLights = getLightsFromGroup(lights, room).sort((a, b) =>
-                a.metadata.name.localeCompare(b.metadata.name)
+                a.metadata.name.localeCompare(b.metadata.name),
               );
               const groupedLight = groupedLights.find(
                 (groupedLight) =>
-                  groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid
+                  groupedLight.id === room.services.find((resource) => resource.rtype === "grouped_light")?.rid,
               );
 
               return (
@@ -75,7 +84,7 @@ export default function ControlGroups() {
               const groupLights = getLightsFromGroup(lights, zone);
               const groupedLight = groupedLights.find(
                 (groupedLight) =>
-                  groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid
+                  groupedLight.id === zone.services.find((resource) => resource.rtype === "grouped_light")?.rid,
               );
 
               return (
@@ -100,7 +109,7 @@ function Group(props: {
   groupLights: Light[];
   groupedLight?: GroupedLight;
   group: Group;
-  gradientUri?: string;
+  gradientUri?: PngUri;
   useHue: ReturnType<typeof useHue>;
   rateLimiter: ReturnType<typeof useInputRateLimiter>;
 }) {
@@ -110,10 +119,8 @@ function Group(props: {
     lightStatusText = "All lights are off";
   } else if (lightsOnCount === props.groupLights.length) {
     lightStatusText = "All lights are on";
-  } else if (lightsOnCount === 1) {
-    lightStatusText = "1 light is on";
   } else {
-    lightStatusText = `${lightsOnCount} lights are on`;
+    lightStatusText = `${lightsOnCount} out of ${props.groupLights.length} lights are on`;
   }
 
   const content = props.groupedLight?.on?.on
@@ -153,7 +160,7 @@ function Group(props: {
                     props.groupLights,
                     props.groupedLight,
                     props.group,
-                    brightness
+                    brightness,
                   )
                 }
               />
@@ -161,28 +168,14 @@ function Group(props: {
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onIncrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    props.groupedLight,
-                    props.group,
-                    "increase"
-                  )
+                  handleBrightnessChange(props.useHue, props.rateLimiter, props.groupedLight, props.group, "increase")
                 }
               />
               <DecreaseBrightnessAction
                 group={props.group}
                 groupedLight={props.groupedLight}
                 onDecrease={() =>
-                  handleBrightnessChange(
-                    props.useHue,
-                    props.rateLimiter,
-                    props.groupLights,
-                    props.groupedLight,
-                    props.group,
-                    "decrease"
-                  )
+                  handleBrightnessChange(props.useHue, props.rateLimiter, props.groupedLight, props.group, "decrease")
                 }
               />
             </ActionPanel.Section>
@@ -199,7 +192,7 @@ function Group(props: {
 
 function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLight; onToggle: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       title={`Turn ${props.group.metadata.name} ${props.groupedLight.on?.on ? "Off" : "On"}`}
       icon={props.groupedLight.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={props.onToggle}
@@ -211,7 +204,7 @@ function SetSceneAction(props: { group: Group; useHue: ReturnType<typeof useHue>
   const { push } = useNavigation();
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Set Scene"
       icon={Icon.Image}
       onAction={() => push(<SetScene group={props.group} useHue={props.useHue} />)}
@@ -228,11 +221,7 @@ function SetBrightnessAction(props: { group: Group; groupedLight: GroupedLight; 
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
     >
       {BRIGHTNESSES.map((brightness) => (
-        <ActionPanel.Item
-          key={brightness}
-          title={`${brightness}% Brightness`}
-          onAction={() => props.onSet(brightness)}
-        />
+        <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -246,9 +235,8 @@ function IncreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
     return null;
   }
 
-  // TODO: Why does this shortcut not work, but Increase Brightness for Light does?
   return (
-    <ActionPanel.Item
+    <Action
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
       icon={Icon.Plus}
@@ -265,9 +253,8 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
     return null;
   }
 
-  // TODO: Why does this shortcut not work, but Decrease Brightness for Light does?
   return (
-    <ActionPanel.Item
+    <Action
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
       icon={Icon.Minus}
@@ -277,44 +264,63 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
 }
 
 async function handleToggle(
-  { hueBridgeState, setLights, setGroupedLights }: ReturnType<typeof useHue>,
+  { hueBridgeState, groupedLights, setGroupedLights, zones }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   groupLights: Light[],
   groupedLight: GroupedLight | undefined,
-  group: Group
+  group: Group,
 ) {
   const toast = new Toast({ title: "" });
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (groupedLight === undefined) throw new Error("Light group not found.");
+    if (!rateLimiter.canExecute()) return;
 
     const changes = {
       on: { on: !groupedLight.on?.on },
-      dynamics: { duration: getTransitionTimeInMs() },
-      ...(groupedLight.dimming ? { dimming: { brightness: groupedLight.dimming?.brightness } } : {}),
+      // No dynamics when toggling groups, as that causes the brightness to the set to the lowest possible level,
+      //   even when only applied to toggling off.
     };
 
-    // TODO: Update zones
-    const changesToLights = new Map(groupLights.map((light) => [light.id, changes]));
-    const undoOptimisticLightsUpdate = optimisticUpdates(changesToLights, setLights);
-    const undoOptimisticGroupedLightUpdate = optimisticUpdate(groupedLight, changes, setGroupedLights);
-    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((e: Error) => {
-      undoOptimisticLightsUpdate();
-      undoOptimisticGroupedLightUpdate();
-      throw e;
+    const changesToGroupedLights = new Map(
+      zones
+        // Find zones that contain affected lights
+        .filter((zone) =>
+          zone.children.some((child) =>
+            groupLights.some((light) => light.id === child.rid || light.owner.rid === child.rid),
+          ),
+        )
+        // Get the grouped lights that belong to those zones
+        .map((zone) =>
+          groupedLights.find((zoneGroupedLight) =>
+            zone.services.some((zoneService) => zoneService.rid === zoneGroupedLight.id),
+          ),
+        )
+        // Filter out undefined grouped lights
+        .filter((zoneGroupedLight): zoneGroupedLight is GroupedLight => zoneGroupedLight !== undefined)
+        .map((zoneGroupedLight) => [zoneGroupedLight.id, changes]),
+    )
+      // Add the grouped light that triggered the action
+      .set(groupedLight.id, changes);
+
+    const undoOptimisticGroupedLightsUpdate = optimisticUpdates(changesToGroupedLights, setGroupedLights);
+    await hueBridgeState.context.hueClient.updateGroupedLight(groupedLight, changes).catch((error: Error) => {
+      if (error.message === 'device (grouped_light) is "soft off", command (.on) may not have effect') return;
+      undoOptimisticGroupedLightsUpdate();
+      throw error;
     });
 
     toast.style = Style.Success;
     toast.title = groupedLight.on?.on ? `Turned ${group.metadata.name} off` : `Turned ${group.metadata.name} on`;
     await toast.show();
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     toast.style = Style.Failure;
     toast.title = groupedLight?.on?.on
       ? `Failed turning ${group.metadata.name} off`
       : `Failed turning ${group.metadata.name} on`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -325,7 +331,7 @@ async function handleSetBrightness(
   groupLights: Light[],
   groupedLight: GroupedLight | undefined,
   group: Group,
-  brightness: number
+  brightness: number,
 ) {
   const toast = new Toast({ title: "" });
 
@@ -352,10 +358,10 @@ async function handleSetBrightness(
       style: "percent",
     })}.`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed setting brightness of ${group.metadata.name}.`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
@@ -363,10 +369,9 @@ async function handleSetBrightness(
 async function handleBrightnessChange(
   { hueBridgeState, lights, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  groupLights: Light[],
   groupedLight: GroupedLight | undefined,
   group: Group,
-  direction: "increase" | "decrease"
+  direction: "increase" | "decrease",
 ) {
   const toast = new Toast({ title: "" });
 
@@ -399,12 +404,12 @@ async function handleBrightnessChange(
       style: "percent",
     })}`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
       group.metadata.name
     }`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }

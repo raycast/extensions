@@ -89,7 +89,7 @@ export const alertDialog = async (
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction?: () => void
+  cancelAction?: () => void,
 ) => {
   const options: Alert.Options = {
     icon: icon,

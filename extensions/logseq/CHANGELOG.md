@@ -1,5 +1,15 @@
 # Logseq Changelog
 
+## [Use leading spaces for nesting] 2023-02-06
+
+- Write nested notes from the quick notes box
+- Nesting uses `*` in org mode files
+- Removes ramda dependency
+
+## [Fix search] - 2023-06-06
+
+- Fix protocol change in Logseq in the search functionality [Issue](https://github.com/raycast/extensions/issues/5415)
+
 ## [Support for org files] - 2022-10-14
 
 Add org files support for LogSearch by fetching preferred format from Logseq config

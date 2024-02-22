@@ -1,14 +1,21 @@
-import { List } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 import { useState } from "react";
-import { Conference } from "../types/standings.types";
+import { Conference, League, Team } from "../types/standings.types";
 
 const Standings = () => {
   const { data, isLoading } = useStandings();
-  const [conference, setConference] = useState<string>(Conference.Eastern);
+  const { conferences: preference } = getPreferenceValues();
+  const [conference, setConference] = useState<string>(preference);
 
-  const conferenceData = conference === Conference.Eastern ? data?.easternStandings : data?.westernStandings;
+  const preferenceMapping = {
+    Eastern: data?.easternStandings,
+    Western: data?.westernStandings,
+    League: data?.leagueStandings,
+  };
+  const conferenceData = preferenceMapping[conference as keyof typeof preferenceMapping];
+  const sectionTitle = conference === League ? conference : `${conference} Conference`;
 
   return (
     <List
@@ -22,11 +29,12 @@ const Standings = () => {
         >
           <List.Dropdown.Item value={Conference.Eastern} title="Eastern" />
           <List.Dropdown.Item value={Conference.Western} title="Western" />
+          <List.Dropdown.Item value={League} title="League" />
         </List.Dropdown>
       }
     >
-      <List.Section title={`${conference} Conference`}>
-        {conferenceData?.map((team) => {
+      <List.Section title={sectionTitle}>
+        {conferenceData?.map((team: Team) => {
           return <TeamComponent key={team.id} team={team} />;
         })}
       </List.Section>

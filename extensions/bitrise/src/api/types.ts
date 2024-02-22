@@ -52,8 +52,8 @@ export interface AppOwner {
 }
 
 export interface AppsByOwner {
-  apps: Map<AppSlug, App[]>;
-  owners: Map<OwnerSlug, AppOwner>;
+  owner: AppOwner;
+  apps: App[];
 }
 
 export interface BuildsByStatus {
@@ -63,13 +63,29 @@ export interface BuildsByStatus {
 
 export interface BuildParams {
   branch?: string;
-  workflow_id: string;
+  workflow_id?: string;
+  pipeline_id?: string;
   commit_message?: string;
 }
 
 export interface BuildTriggerResponse {
   build_number: number;
   build_url: string;
+}
+
+export interface Workflow {
+  name: string;
+  last_run_at: string;
+}
+
+export interface Pipeline {
+  name: string;
+  last_run_at: string;
+}
+
+export interface PipelinesAndWorkflows {
+  active_pipelines: Pipeline[];
+  active_workflows: Workflow[];
 }
 
 export interface StepCollection {

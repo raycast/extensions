@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, List } from '@raycast/api';
+import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import Service from './service';
@@ -32,8 +32,10 @@ function Command() {
             <ActionPanel>
               <Action.Push
                 title="Open Cheatsheet"
+                icon={Icon.Window}
                 target={<SheetView slug={sheet} />}
               />
+              <Action.OpenInBrowser url={Service.urlFor(sheet)} />
             </ActionPanel>
           }
           key={sheet}

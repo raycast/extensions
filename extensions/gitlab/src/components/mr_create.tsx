@@ -1,5 +1,5 @@
 import { showToast, Toast, Form, Icon, popToRoot, Image, ActionPanel, Action } from "@raycast/api";
-import { Project, User, Label, Milestone, Branch, Issue } from "../gitlabapi";
+import { Project, User, Label, Milestone, Branch, Issue, TemplateSummary, TemplateDetail } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
 import { getErrorMessage, projectIcon, showErrorToast, stringToSlug, toFormValues } from "../utils";
@@ -17,6 +17,8 @@ interface MRFormValues {
   milestone_id: number;
   remove_source_branch: boolean;
 }
+
+const NO_TEMPLATE = "no_template";
 
 async function submit(values: MRFormValues) {
   try {
@@ -119,6 +121,7 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
   const { projectinfo, errorProjectInfo, isLoadingProjectInfo } = useProject(selectedProject);
   const members = projectinfo?.members || [];
   const labels = projectinfo?.labels || [];
+  const mergeRequestTemplates = projectinfo?.mergeRequestTemplates || [];
   const isLoading = isLoadingProjects || isLoadingProjectInfo;
   const error = errorProjects || errorProjectInfo;
 
@@ -137,6 +140,21 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
     return project?.remove_source_branch_after_merge ?? true;
   };
   const [removeBranch, setRemoveBranch] = useState<boolean | undefined>(undefined);
+  const [selectedTemplateName, setSelectedTemplateName] = useState<string>(NO_TEMPLATE);
+  const [description, setDescription] = useState<string | undefined>(undefined);
+
+  const { data: selectedTemplateDetail } = useCache<TemplateDetail | undefined>(
+    `project_${project?.id}_selected_template_${selectedTemplateName}`,
+    async () => {
+      if (selectedTemplateName === NO_TEMPLATE) return undefined;
+      return await gitlab.getProjectMergeRequestTemplate(project?.id || 0, selectedTemplateName);
+    },
+    { deps: [selectedTemplateName] }
+  );
+
+  useEffect(() => {
+    setDescription(selectedTemplateDetail?.content ?? "");
+  }, [selectedTemplateDetail]);
 
   return (
     <Form
@@ -158,7 +176,19 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
       <SourceBranchDropdown project={project} info={projectinfo} value={props.branch} />
       <TargetBranchDropdown project={project} info={projectinfo} />
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
-      <Form.TextArea id="description" title="Description" placeholder="Enter description" />
+      <Form.Dropdown id="template_id" title="Template" value={selectedTemplateName} onChange={setSelectedTemplateName}>
+        <Form.Dropdown.Item key={NO_TEMPLATE} value={NO_TEMPLATE} title={"None"} />
+        {mergeRequestTemplates.map((template) => (
+          <Form.Dropdown.Item key={template.id} value={template.id} title={template.name} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextArea
+        id="description"
+        title="Description"
+        placeholder="Enter description"
+        value={description}
+        onChange={setDescription}
+      />
       <Form.TagPicker id="assignee_ids" title="Assignees" placeholder="Type or choose an assignee">
         {members.map((member) => (
           <Form.TagPicker.Item
@@ -311,6 +341,7 @@ export function useProject(query?: string): {
           const labels = await gitlab.getProjectLabels(proid);
           const milestones = await gitlab.getProjectMilestones(proid);
           const branches = ((await gitlab.fetch(`projects/${proid}/repository/branches`, {}, true)) as Branch[]) || [];
+          const mergeRequestTemplates = await gitlab.getProjectMergeRequestTemplates(proid);
 
           if (!didUnmount) {
             setProjectInfo({
@@ -319,6 +350,7 @@ export function useProject(query?: string): {
               labels: labels,
               milestones: milestones,
               branches: branches,
+              mergeRequestTemplates: mergeRequestTemplates,
             });
           }
         } else {
@@ -350,4 +382,5 @@ interface ProjectInfoMR {
   labels: Label[];
   milestones: Milestone[];
   branches: Branch[];
+  mergeRequestTemplates: TemplateSummary[];
 }

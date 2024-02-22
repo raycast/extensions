@@ -1,13 +1,31 @@
-import { Action, ActionPanel, Icon, useNavigation } from "@raycast/api";
-import { getFavoriteNamespaces, getUserToken, getVaultNamespace, getVaultUrl, setVaultNamespace } from "../utils";
+import { Action, ActionPanel, Icon, useNavigation, Clipboard, showHUD } from "@raycast/api";
+import {
+  getFavoriteNamespaces,
+  getUserToken,
+  getVaultNamespace,
+  getVaultUrl,
+  setSecretEngine,
+  setVaultNamespace,
+} from "../utils";
 import { VaultNamespace } from "./namespace";
 import { VaultTree } from "./tree";
 import { VaultEntities } from "./entities";
 import { VaultFavorites } from "./favorites";
 import { ReactNode } from "react";
+import { VaulEngines } from "./engines";
 
-export function setNamespaceAndGoToTree(values: { namespace: string }, push: (component: ReactNode) => void) {
-  setVaultNamespace(values.namespace);
+export async function setNamespaceAndGoToTree(
+  values: {
+    namespace: string;
+  },
+  push: (component: ReactNode) => void
+) {
+  await setVaultNamespace(values.namespace);
+  push(<VaultTree path={"/"} />);
+}
+
+export function setSecretEngineAndGoToTree(secretEngine: string, push: (component: ReactNode) => void) {
+  setSecretEngine(secretEngine);
   push(<VaultTree path={"/"} />);
 }
 
@@ -55,6 +73,12 @@ export function Configuration() {
           shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
           target={<VaultTree path={"/"} />}
         />
+        <Action.Push
+          icon={Icon.AppWindow}
+          title={"List Engines"}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+          target={<VaulEngines />}
+        />
       </ActionPanel.Section>
     </>
   );
@@ -76,11 +100,15 @@ export function Reload(props: { revalidate: () => Promise<void> }) {
 
 export function CopyToken() {
   return (
-    <Action.CopyToClipboard
+    <Action
       icon={Icon.CopyClipboard}
       title="Copy Token"
       shortcut={{ modifiers: ["cmd"], key: "t" }}
-      content={getUserToken()}
+      onAction={async () => {
+        const token = await getUserToken();
+        await Clipboard.copy(token);
+        await showHUD("Token copied to clipboard");
+      }}
     />
   );
 }

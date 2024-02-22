@@ -17,7 +17,7 @@ import { myDecrypt } from "./preferences";
 /**
  * Check if ip is in China. If error, default is true.
  *
- * If request is succcessful, store value in LocalStorage.
+ * If request is successful, store value in LocalStorage.
  */
 export function checkIfIpInChina(): Promise<boolean> {
   console.log(`check if ip in China`);

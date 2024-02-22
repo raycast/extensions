@@ -1,8 +1,9 @@
-import type { ChatCompletionRequestMessage } from "openai";
+import OpenAI from "openai";
+import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 
 export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
 
-export type Message = ChatCompletionRequestMessage;
+export type Message = ChatCompletionMessageParam;
 
 export interface Question {
   id: string;
@@ -66,6 +67,7 @@ export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneAr
 export type ModelHook = Hook<Model> & {
   update: PromiseFunctionWithOneArg<Model>;
   option: Model["option"][];
+  isFetching: boolean;
 };
 
 export interface ChatHook {
@@ -77,6 +79,7 @@ export interface ChatHook {
   setSelectedChatId: Set<string | null>;
   ask: PromiseFunctionWithTwoArg<string, Model>;
   clear: PromiseFunctionNoArg;
+  streamData: Chat | undefined;
 }
 
 export interface ChangeModelProp {
@@ -99,19 +102,16 @@ export interface ChatViewProps extends ChangeModelProp {
   use: { chats: ChatHook; conversations: ConversationsHook; savedChats: SavedChatHook };
 }
 
-export interface CreateChatCompletionDeltaResponse {
-  id: string;
-  object: "chat.completion.chunk";
-  created: number;
-  model: string;
-  choices: [
-    {
-      delta: {
-        role: "user" | "assistant" | "system";
-        content?: string;
-      };
-      index: number;
-      finish_reason: string | null;
-    }
-  ];
+export interface ConfigurationPreferences {
+  apiKey: string;
+  useAzure: boolean;
+  azureEndpoint: string;
+  azureDeployment: string;
+  useApiEndpoint: boolean;
+  apiEndpoint: string;
+}
+
+export interface CSVPrompt {
+  act: string;
+  prompt: string;
 }

@@ -13,6 +13,7 @@ export interface TodoSections {
 export interface TodoItem {
   title: string;
   completed: boolean;
+  priority?: 1 | 2 | 3;
   timeAdded: number;
 }
 
@@ -32,12 +33,12 @@ const getInitialValue = () => {
           storedTodo.push(todo);
         }
       }
-      const convertedStoredItems = {
+
+      return {
         pinned: storedPinned,
         todo: storedTodo,
         completed: storedCompleted,
       };
-      return convertedStoredItems;
     } else {
       return storedItems;
     }

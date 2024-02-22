@@ -1,63 +1,53 @@
 import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
-import { caffeinatePreferences } from "./interfaces";
-import { exec } from "child_process";
+import { execSync } from "node:child_process";
 
-function preventArguments(args?: string | undefined) {
-  const preferences = getPreferenceValues<caffeinatePreferences>();
-  const preventArguments = [];
+function generateArgs(additionalArgs?: string) {
+  const preferences = getPreferenceValues<Preferences>();
+  const args = [];
 
-  if (preferences.preventDisplay) {
-    preventArguments.push("d");
-  }
+  if (preferences.preventDisplay) args.push("d");
+  if (preferences.preventDisk) args.push("m");
+  if (preferences.preventSystem) args.push("i");
+  if (additionalArgs) args.push(` ${additionalArgs}`);
 
-  if (preferences.preventDisk) {
-    preventArguments.push("m");
-  }
-
-  if (preferences.preventSystem) {
-    preventArguments.push("i");
-  }
-
-  if (typeof args === "string") {
-    preventArguments.push(` ${args}`);
-  }
-
-  if (preventArguments.length > 0) {
-    return `-${preventArguments.join("")}`;
-  }
-
-  return "";
+  return args.length > 0 ? `-${args.join("")}` : "";
 }
 
-export async function stopCaffeinate(updateMenubar = true, hudMessage?: string) {
-  if (updateMenubar) {
+type Updates = {
+  menubar: boolean;
+  status: boolean;
+};
+
+async function update(updates: Updates, caffeinated: boolean) {
+  if (updates.menubar) {
     try {
-      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: false } });
+      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffeinated } });
     } catch (error) {
-      console.error(error);
+      // catch error if menubar is not enabled
     }
   }
+  if (updates.status) {
+    await launchCommand({ name: "status", type: LaunchType.Background, context: { caffeinated } });
+  }
+}
+
+export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
+  update(updates, false);
 
   if (hudMessage) {
     await showHUD(hudMessage);
   }
 
-  return exec("/usr/bin/killall caffeinate");
+  execSync("/usr/bin/killall caffeinate || true");
 }
 
-export async function startCaffeinate(updateMenubar = true, hudMessage?: string, args?: string | undefined) {
-  await stopCaffeinate(false);
-  if (updateMenubar) {
-    try {
-      await launchCommand({ name: "index", type: LaunchType.Background, context: { caffinated: true } });
-    } catch (error) {
-      console.error(error);
-    }
-  }
+export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
+  await stopCaffeinate({ menubar: false, status: false });
+  update(updates, true);
 
   if (hudMessage) {
     await showHUD(hudMessage);
   }
 
-  return exec(`/usr/bin/caffeinate ${preventArguments(args)}`);
+  execSync(`/usr/bin/caffeinate ${generateArgs(additionalArgs)} || true`);
 }

@@ -7,7 +7,8 @@
   "icon": "icon.png",
   "author": "zerowidth",
   "contributors": [
-    "bjw-s"
+    "bjw-s",
+    "mattts"
   ],
   "license": "MIT",
   "commands": [
@@ -41,6 +42,14 @@
           "title": "Editor",
           "description": "The editor app to use when opening a project folder",
           "default": "/Applications/Visual Studio Code.app"
+        },
+        {
+          "name": "editorAppAlt",
+          "type": "appPicker",
+          "required": false,
+          "title": "Alternate Editor",
+          "description": "The alternate editor app to use when opening a project folder",
+          "default": "/Applications/PhpStorm.app"
         },
         {
           "name": "terminalApp",

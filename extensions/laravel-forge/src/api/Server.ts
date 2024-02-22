@@ -24,12 +24,14 @@ export const Server = {
     let servers = await getServers({
       tokenKey: "laravel_forge_api_key",
       token: preferences?.laravel_forge_api_key as string,
+      sshUser: (preferences?.laravel_forge_ssh_user as string) || "forge",
     });
 
     if (preferences?.laravel_forge_api_key_two) {
       const serversTwo = await getServers({
         tokenKey: "laravel_forge_api_key_two",
         token: preferences?.laravel_forge_api_key_two as string,
+        sshUser: (preferences?.laravel_forge_ssh_user_two as string) || "forge",
       });
       servers = [...servers, ...serversTwo];
     }
@@ -45,7 +47,7 @@ export const Server = {
   },
 };
 
-const getServers = async ({ token, tokenKey }: { token: string; tokenKey: string }) => {
+const getServers = async ({ token, tokenKey, sshUser }: { token: string; tokenKey: string; sshUser: string }) => {
   const { servers } = await apiFetch<{ servers: IServer[] }>(`${FORGE_API_URL}/servers`, {
     method: "get",
     headers: { ...defaultHeaders, Authorization: `Bearer ${token}` },
@@ -65,6 +67,7 @@ const getServers = async ({ token, tokenKey }: { token: string; tokenKey: string
     .map((server) => {
       server.keywords = server?.id && keywordsByServer[server.id] ? [...keywordsByServer[server.id]] : [];
       server.api_token_key = tokenKey;
+      server.ssh_user = sshUser;
       return server;
     })
     .filter((s) => !s.revoked);

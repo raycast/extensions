@@ -48,8 +48,19 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
     refreshCommands();
   }, []);
 
+  function generatePlaceholder(inputType: string | undefined) {
+    switch (inputType) {
+      case "text":
+        return "Pipe selected text or clipboard contents to";
+      case "url":
+        return "Pipe active browser tab URL to";
+      default:
+        return `Pipe ${inputType} to`;
+    }
+  }
+
   return (
-    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={`Pipe ${props.inputType} to`}>
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={generatePlaceholder(props.inputType)}>
       <List.Section title="Commands">
         {state?.commands.map((command) => (
           <PipeCommand key={command.path} command={command} inputFrom={props.inputType} onTrash={refreshCommands} />
@@ -97,10 +108,26 @@ export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
 async function getInput(inputType: InputType) {
   switch (inputType) {
     case "text": {
-      const selection = await getSelectedText();
-      if (selection) {
-        return selection;
+      try {
+        // there are some applications where text selection cannot be retrieved, fallback to clipboard
+        const selection = await getSelectedText();
+
+        if (selection) {
+          return selection;
+        }
+      } catch (e: any) {
+        const selectionErrors = [
+          "Unable to get selected text from frontmost application",
+          "Cannot copy selected text from frontmost application.",
+        ];
+
+        // if there was an error copying text, let's pull from clipboard instead
+        // most likely no text was selected!
+        if (!selectionErrors.includes(e.message)) {
+          throw e;
+        }
       }
+
       const clipboard = await Clipboard.readText();
       if (!clipboard) {
         throw new Error("No text in clipboard");

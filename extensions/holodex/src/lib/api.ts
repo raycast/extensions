@@ -77,7 +77,7 @@ export async function apiRequest(
     method: body ? "POST" : "GET",
     body: JSON.stringify(body),
     headers: {
-      "X-API-KEY": apiKey,
+      "X-APIKEY": apiKey,
       "User-Agent": `Raycast/${environment.raycastVersion}`,
       ...(body ? { "Content-Type": "application/json" } : null),
     },

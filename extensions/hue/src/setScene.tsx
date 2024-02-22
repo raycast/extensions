@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Grid, Icon, Toast } from "@raycast/api";
-import { GradientUri, GradientUriCache, Group, Id, Palette, Scene } from "./lib/types";
+import { Action, ActionPanel, Grid, Icon, Toast, useNavigation } from "@raycast/api";
+import { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import useGradients from "./hooks/useGradientUris";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./helpers/arrayExtensions";
 import { getColorsFromScene } from "./helpers/hueResources";
 
@@ -21,12 +21,14 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
   const [palettes, setPalettes] = useState(new Map<Id, Palette>([]));
   const { gradientUris } = useGradients(palettes, GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT);
   const groupTypes = [rooms, zones];
+  const { pop } = useNavigation();
+  const isSubView = props.group !== undefined;
 
   useMemo(() => {
     setPalettes(new Map<Id, Palette>(scenes.map((scene) => [scene.id, getColorsFromScene(scene)])));
   }, [scenes]);
 
-  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   if (props.group !== undefined) {
@@ -50,6 +52,11 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
               scene={groupScene}
               group={group}
               gradientUri={gradientUris.get(groupScene.id)}
+              onSetScene={() => {
+                if (isSubView) {
+                  pop();
+                }
+              }}
               hueClient={hueBridgeState.context.hueClient}
               sendHueMessage={sendHueMessage}
             />
@@ -60,8 +67,8 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
   } else {
     return (
       <Grid isLoading={isLoading} aspectRatio="16/9" filtering={{ keepSectionOrder: true }}>
-        {groupTypes.map((groupType: Group[]): JSX.Element[] => {
-          return groupType.map((group: Group): JSX.Element => {
+        {groupTypes.map((groupType: Group[]): React.JSX.Element[] => {
+          return groupType.map((group: Group): React.JSX.Element => {
             const groupScenes =
               scenes
                 .filter((scene: Scene) => scene.group.rid === group.id)
@@ -87,23 +94,25 @@ export default function SetScene(props: { group?: Group; useHue?: ReturnType<typ
 function Group(props: {
   group: Group;
   scenes: Scene[];
-  gradientUris: GradientUriCache;
+  gradientUris: PngUriCache;
+  onSetScene?: () => void;
   hueClient?: HueClient;
   sendHueMessage: SendHueMessage;
 }) {
   return (
     <Grid.Section key={props.group.id} title={props.group.metadata.name}>
       {props.scenes.map(
-        (scene: Scene): JSX.Element => (
+        (scene: Scene): React.JSX.Element => (
           <Scene
             key={scene.id}
             group={props.group}
             scene={scene}
             gradientUri={props.gradientUris.get(scene.id)}
+            onSetScene={props.onSetScene}
             hueClient={props.hueClient}
             sendHueMessage={props.sendHueMessage}
           />
-        )
+        ),
       )}
     </Grid.Section>
   );
@@ -112,7 +121,8 @@ function Group(props: {
 function Scene(props: {
   scene: Scene;
   group: Group;
-  gradientUri: GradientUri | undefined;
+  gradientUri: PngUri | undefined;
+  onSetScene?: () => void;
   sendHueMessage: SendHueMessage;
   hueClient?: HueClient;
 }) {
@@ -127,7 +137,10 @@ function Scene(props: {
           <SetSceneAction
             group={props.group}
             scene={props.scene}
-            onSet={() => handleSetScene(props.hueClient, props.group, props.scene)}
+            onSet={() => {
+              handleSetScene(props.hueClient, props.group, props.scene).then();
+              props.onSetScene?.();
+            }}
           />
           <ActionPanel.Section>
             <UnlinkAction sendHueMessage={props.sendHueMessage} />
@@ -158,10 +171,10 @@ async function handleSetScene(hueClient: HueClient | undefined, group: Group, sc
     toast.style = Style.Success;
     toast.title = `Scene ${scene.metadata.name} set for ${group.metadata.name}.`;
     await toast.show();
-  } catch (e) {
+  } catch (error) {
     toast.style = Style.Failure;
     toast.title = `Failed setting scene ${scene.metadata.name} for ${group.metadata.name}.`;
-    toast.message = e instanceof Error ? e.message : undefined;
+    toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }

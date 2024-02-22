@@ -1,35 +1,66 @@
-import { ActionPanel, Icon, Action, confirmAlert, Alert } from "@raycast/api";
-import ProcessInfo from "../models/ProcessInfo";
-import { handleKill } from "../utilities/handleKill";
-import { kill, KillSignal } from "../utilities/killProcess";
+import { Action, ActionPanel, Icon, confirmAlert, getPreferenceValues } from "@raycast/api";
+import Alerts from "../feedback/Alerts";
+import Process from "../models/Process";
+import { KillSignal, killProcess } from "../utilities/killProcess";
 
-export interface IProcessInfoWithParent extends Omit<ProcessInfo, "parentPid"> {
+export type ProcessWithKillableParent = Process & {
   parentPid: number;
-}
-
-const alertOptions: Alert.Options = {
-  title: "CHANGE ME",
-  message: "Killing some processes might crash apps or even your system",
-  primaryAction: {
-    title: "Kill",
-  },
-  dismissAction: {
-    title: "Cancel",
-  },
 };
 
-export default function KillParentActionsMenu(props: {
-  process: IProcessInfoWithParent;
-  reloadCallback?: () => Promise<void>;
+export function isProcessWithKillableParent(process: Process): process is ProcessWithKillableParent {
+  return process.parentPid !== undefined && process.parentPid !== 1;
+}
+
+const preferences = getPreferenceValues<Preferences>();
+
+export default function KillParentActions(props: {
+  process: Process;
+  onError?: (err: unknown) => Promise<void> | void;
+  onKilled?: () => Promise<void> | void;
 }) {
+  if (!isProcessWithKillableParent(props.process)) {
+    return null;
+  }
+
+  if (preferences.killSignal === KillSignal.KILL || preferences.killSignal === KillSignal.TERM) {
+    return (
+      <Action
+        title="Kill Parent"
+        icon={Icon.ExclamationMark}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+        onAction={async () => {
+          if (await confirmAlert(Alerts.KillParentProcess(props.process))) {
+            await killProcess(props.process, {
+              killSignal: preferences.killSignal,
+              killParent: true,
+              onKilled: props.onKilled,
+              onError: props.onError,
+            });
+          } else {
+            return;
+          }
+        }}
+      />
+    );
+  }
+
   return (
-    <ActionPanel.Submenu title="Kill Parent" icon={Icon.ExclamationMark} shortcut={{ modifiers: ["cmd"], key: "p" }}>
+    <ActionPanel.Submenu
+      title="Kill Parent"
+      icon={Icon.ExclamationMark}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
+    >
       <Action
         title="With SIGTERM"
         onAction={async () => {
-          alertOptions.title = `Kill Process ${props.process.parentPid}?`;
-          if (await confirmAlert(alertOptions)) {
-            await handleKill(props.process, async () => await kill(props.process.parentPid), props.reloadCallback);
+          if (await confirmAlert(Alerts.KillParentProcess(props.process))) {
+            await killProcess(props.process, {
+              killSignal: KillSignal.TERM,
+
+              killParent: true,
+              onKilled: props.onKilled,
+              onError: props.onError,
+            });
           } else {
             return;
           }
@@ -38,13 +69,13 @@ export default function KillParentActionsMenu(props: {
       <Action
         title="With SIGKILL"
         onAction={async () => {
-          alertOptions.title = `Kill Process ${props.process.parentPid}?`;
-          if (await confirmAlert(alertOptions)) {
-            await handleKill(
-              props.process,
-              async () => await kill(props.process.parentPid, KillSignal.KILL),
-              props.reloadCallback
-            );
+          if (await confirmAlert(Alerts.KillParentProcess(props.process))) {
+            await killProcess(props.process, {
+              killSignal: KillSignal.KILL,
+              killParent: true,
+              onKilled: props.onKilled,
+              onError: props.onError,
+            });
           } else {
             return;
           }

@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rescuetime-focus-session-trigger",
-  "title": "RescueTime Focus Session Trigger",
-  "description": "Commands to start and stop a Focus Session on the RescueTime desktop or web apps",
+  "title": "RescueTime",
+  "description": "Commands to get the most out of RescueTime. Start and stop Focus Sessions, get your daily highlights, goals, alerts, log offline time, and more.",
   "icon": "rescueTime-logo.png",
   "author": "TuorTheBlessed",
+  "contributors": [
+    "Rob"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -17,9 +20,32 @@
       "required": true,
       "title": "RescueTime API key",
       "placeholder": "https://www.rescuetime.com/anapi/manage"
+    },
+    {
+      "name": "defaultOfflineDuration",
+      "description": "Default duration of offline time in minutes",
+      "type": "textfield",
+      "required": false,
+      "default": "60",
+      "title": "Default Offline Time Duration"
+    },
+    {
+      "name": "defaultFocusDuration",
+      "description": "Default duration for FocusTime in minutes",
+      "type": "textfield",
+      "required": false,
+      "default": "25",
+      "title": "Default FocusTime Duration"
     }
   ],
   "commands": [
+    {
+      "name": "rescueTimeToday",
+      "title": "RescueTime Today",
+      "subtitle": "RescueTime",
+      "description": "Gets today's RescueTime status",
+      "mode": "view"
+    },
     {
       "name": "startFocusTime",
       "title": "Start Focus Session",
@@ -43,23 +69,59 @@
       "subtitle": "RescueTime",
       "description": "Ends a Focus Session for RescueTime",
       "mode": "no-view"
+    },
+    {
+      "name": "focusTimeFeed",
+      "title": "FocusTime Feed",
+      "subtitle": "Get recently triggered Focus Sessions from RescueTime",
+      "description": "Get recently triggered Focus Sessions from RescueTime through Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "alertsFeed",
+      "title": "Alerts Feed",
+      "subtitle": "Get recently triggered user-defined alerts from RescueTime",
+      "description": "Get recently triggered user-defined alerts from RescueTime through Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "dailyHighlights",
+      "title": "Daily Highlights",
+      "subtitle": "Get daily highlights from RescueTime",
+      "description": "Get daily highlights from RescueTime through Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "logDailyHighlight",
+      "title": "Log Daily Highlight",
+      "subtitle": "Log daily highlight to RescueTime",
+      "description": "Log daily highlight to RescueTime through Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "logOfflineTime",
+      "title": "Log Offline Time",
+      "subtitle": "Log offline time to RescueTime",
+      "description": "Log offline time to RescueTime through Raycast",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
-    "got": "^12.0.2"
+    "@raycast/api": "^1.62.1",
+    "@raycast/utils": "1.10.1",
+    "got": "12.6.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.15.0",
-    "@typescript-eslint/parser": "^5.15.0",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "~20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-react": "^7.29.4",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "prettier": "3.1.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

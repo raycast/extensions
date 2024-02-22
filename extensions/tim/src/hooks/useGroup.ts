@@ -11,7 +11,7 @@ export function useGroup(id: UUID, tagFilter?: UUID) {
     const task = data.tasks[node.id];
     if (!task) return false;
 
-    if (tagFilter) return task.tags.includes(tagFilter);
+    if (tagFilter) return task.tags?.includes(tagFilter);
 
     return true;
   });

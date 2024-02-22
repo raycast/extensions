@@ -1,17 +1,27 @@
-import { environment, showToast, Toast } from "@raycast/api";
-import _ from "lodash";
-import { searchTracks, play } from "./spotify/client";
-import { trackTitle } from "./utils";
+import { showHUD } from "@raycast/api";
+import { setSpotifyClient } from "./helpers/withSpotifyClient";
+import { searchTracks } from "./api/searchTracks";
+import { play } from "./api/play";
+import { getErrorMessage } from "./helpers/getError";
 
 type Props = { arguments: { query: string } };
 
 export default async function Command(props: Props) {
-  const response = await searchTracks(props.arguments.query, 1);
-  const firstMatch = _(response.result?.tracks.items).first();
-  if (firstMatch) {
-    await play(firstMatch.uri);
-    await showToast(Toast.Style.Success, `${environment.theme == "light" ? "🎵" : "♫"}  ${trackTitle(firstMatch)}`);
-  } else {
-    await showToast(Toast.Style.Failure, `Track is not found!`);
+  const { query } = props.arguments;
+  await setSpotifyClient();
+
+  try {
+    const response = await searchTracks(query, 1);
+    const firstMatch = response?.items?.[0] ?? undefined;
+
+    if (firstMatch?.artists) {
+      await play({ id: firstMatch.id, type: "track" });
+      await showHUD(`Playing ${firstMatch.name} by ${firstMatch.artists[0].name}`);
+    } else {
+      await showHUD(`No results for ${query}`);
+    }
+  } catch (err) {
+    const error = getErrorMessage(err);
+    await showHUD(error);
   }
 }

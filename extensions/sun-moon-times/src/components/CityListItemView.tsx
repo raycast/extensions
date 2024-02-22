@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Alert, confirmAlert, Icon, List } from "@raycast/api"
 import { CityItem } from "../../types/CityItem"
 import { countryList } from "../ressources/countryList"
+import { getTimeAndDataUrl } from "../utils/getTimeAndDataUrl"
 import { DetailView } from "./DetailView"
 import { useFavorites } from "./FavoritesProvider"
 
@@ -38,12 +39,18 @@ export const CityListItemView = ({
             }
             actions={
                 <ActionPanel>
+                    <Action.OpenInBrowser
+                        title="Open on TimeAndDate.com"
+                        icon={Icon.Globe}
+                        url={getTimeAndDataUrl(countryCode, city.name)}
+                    />
                     {isFavorite ? (
                         <>
                             <Action
-                                title="Remove from Favorites"
+                                title="Remove From Favorites"
                                 style={Action.Style.Destructive}
                                 icon={Icon.Trash}
+                                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                                 onAction={async () => {
                                     if (
                                         await confirmAlert({
@@ -73,6 +80,7 @@ export const CityListItemView = ({
                         <Action
                             title="Add to Favorites"
                             icon={Icon.Star}
+                            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                             onAction={async () => await addToFavorites(city)}
                         />
                     )}

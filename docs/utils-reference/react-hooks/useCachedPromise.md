@@ -1,6 +1,10 @@
 # `useCachedPromise`
 
-Hook which wraps an asynchronous function or a function that returns a Promise and returns the [AsyncState](#asyncstate) corresponding to the execution of the function. The last value will be kept between command runs.
+Hook which wraps an asynchronous function or a function that returns a Promise and returns the [AsyncState](#asyncstate) corresponding to the execution of the function.
+
+It follows the `stale-while-revalidate` cache invalidation strategy popularized by [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). `useCachedPromise` first returns the data from cache (stale), then executes the promise (revalidate), and finally comes with the up-to-date data again.
+
+The last value will be kept between command runs.
 
 {% hint style="info" %}
 The value needs to be JSON serializable.
@@ -37,7 +41,7 @@ function useCachedPromise<T, U>(
 
 With a few options:
 
-- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
+- `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See [Promise Argument dependent on List search text](#promise-argument-dependent-on-list-search-text) for more information.
 
 Including the [useCachedState](./useCachedState.md)'s options:
 
@@ -65,18 +69,19 @@ Returns an object with the [AsyncState](#asyncstate) corresponding to the execut
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const abortable = useRef<AbortController>();
   const { isLoading, data, revalidate } = useCachedPromise(
     async (url: string) => {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: abortable.current?.signal });
       const result = await response.text();
       return result;
     },
     ["https://api.example"],
     {
       initialData: "Some Text",
-    }
+      abortable,
+    },
   );
 
   return (
@@ -90,7 +95,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Promise Argument dependent on List search text
@@ -104,19 +109,19 @@ import { useState } from "react";
 import { List, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { isLoading, data } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
-      const result = await response.text();
+      const result = await response.json();
       return result;
     },
-    ["https://api.example"],
+    [`https://api.example?q=${searchText}`],
     {
       // to make sure the screen isn't flickering when the searchText changes
       keepPreviousData: true,
-    }
+    },
   );
 
   return (
@@ -126,7 +131,7 @@ const Demo = () => {
       ))}
     </List>
   );
-};
+}
 ```
 
 ## Mutation and Optimistic Updates
@@ -141,14 +146,14 @@ When doing so, you can specify a `rollbackOnError` function to mutate back the d
 import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-const Demo = () => {
+export default function Command() {
   const { isLoading, data, mutate } = useCachedPromise(
     async (url: string) => {
       const response = await fetch(url);
       const result = await response.text();
       return result;
     },
-    ["https://api.example"]
+    ["https://api.example"],
   );
 
   const appendFoo = async () => {
@@ -163,7 +168,7 @@ const Demo = () => {
           optimisticUpdate(data) {
             return data + "foo";
           },
-        }
+        },
       );
       // yay, the API call worked!
       toast.style = Toast.Style.Success;
@@ -188,7 +193,7 @@ const Demo = () => {
       }
     />
   );
-};
+}
 ```
 
 ## Types
@@ -238,6 +243,6 @@ export type MutatePromise<T> = (
     optimisticUpdate?: (data: T) => T;
     rollbackOnError?: boolean | ((data: T) => T);
     shouldRevalidateAfter?: boolean;
-  }
+  },
 ) => Promise<any>;
 ```

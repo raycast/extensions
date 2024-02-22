@@ -30,7 +30,7 @@ export function DocumentationProductsList() {
     showToast(
       ToastStyle.Failure,
       "Could not fetch available products from GCP, check your Internet Connection!",
-      error.message
+      error.message,
     );
   }
 
@@ -40,9 +40,7 @@ export function DocumentationProductsList() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search products by name...">
-      {data?.map((product) => (
-        <DocumentationProductListItem key={product.id} product={product} />
-      ))}
+      {data?.map((product) => <DocumentationProductListItem key={product.id} product={product} />)}
     </List>
   );
 }

@@ -1,5 +1,77 @@
 # Bitwarden Changelog
 
+## [New Command and Fix] - 2024-01-06
+
+- Adds Create Folder command
+- Fixes issue with Loading Fallback
+
+## [Error handling] - 2023-11-30
+
+- Improved error handling
+- Fix "not logged in" error when locking the vault
+
+## [Fix] - 2023-09-08
+
+- Fixed irregular identity table
+
+## [Fix] - 2023-08-29
+
+- Fixed crash in Logout command
+
+## [Improvements] - 2023-08-15
+
+- Adds ability to paste TOTP code into active application
+
+## [Fix] - 2023-08-01
+
+- Removed visible line break in card, identity and note details
+
+## [Improvements] - 2023-07-06
+
+- Display favorites at the top of the list on a separate section
+- Added ability to mark/remove items as favorites and reorder them in the list (with keybindings)
+- Display reprompt required icon on the list
+
+## [Update] - 2023-06-12
+
+- Fixed a bug that prevented the user from searching by username/email
+- Updated the raycast packages and resolved a small type checking TODO
+
+## [New Preference] - 2023-06-03
+
+- Added preference to change the window behaviour when copying values
+
+## [New Command] - 2023-05-31
+
+- Added Logout command
+
+## [Search Vault Command Improvements] - 2023-05-22
+
+- Added a Folder Dropdown to filter the list by folder
+- Each item now displays an icon that represents its type
+- Allow to search by item type (e.g. login)
+- Display a different image depending on the card brand
+
+## [Fix] - 2023-05-19
+
+- Avoid displaying timeout info label on Unlock Form when the preference is Never
+- Fix crashing when getting the name of the frontmost application
+
+## [Improvements to Actions] - 2023-05-18
+
+- Add "Show Identity" action for identity vault items
+- Change "Show Card" action details view to a table format
+- Add actions with shortcuts to copy Card and Identity fields in the details view
+- General action improvements: Better order, labels, icons and section titles
+
+## [New Command] - 2023-05-18
+
+- Add Lock Vault command
+
+## [Fix] - 2023-05-16
+
+- Fixed Generate Password (Quick) command not copying password before pasting
+
 ## [Improvement] - 2023-05-12
 
 - Add different icons for each command
@@ -53,7 +125,7 @@
 
 ## [Copy Enhancement] - 2022-11-02
 
-- Copy passwords in a way that asks clipboard managers to not save it 
+- Copy passwords in a way that asks clipboard managers to not save it
 
 ## [UI Enhancement] - 2022-09-21
 

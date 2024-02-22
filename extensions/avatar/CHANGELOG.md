@@ -1,5 +1,9 @@
 # Avatar Changelog
 
+## [Minor typo fix] - 2023-06-16
+
+- Fixes typo in command preferences
+
 ## [Update Raycast API] - 2022-12-01
 
 - Update Raycast API version to 1.44.0

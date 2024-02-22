@@ -1,8 +1,91 @@
 # GitHub Changelog
 
+## [Use OAuth utils] - 2024-02-15
+
+- Use new OAuth utils
+
+## [Select categories for My Pull Request Menu command] - 2024-02-14
+
+- Add preferences to include or not some categories of Pull Requests in the My Pull Requests menu bar command.
+- Add preferences to include or not some categories in the count of the My Pull Requests menu bar command.
+
+## [Change cancelled workflow run status icon color] - 2024-02-12
+
+- Change cancelled workflow run status icon color to be in line with GitHub's UI
+
+## [Open vercel preview on pull requests] - 2023-12-18
+
+- If you have a vercel project, you can now open your preview directly from your pull request
+
+## [Mark notification as read without opening it] - 2023-11-16
+
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+
+## [Search Repositories improvements + Fixes] - 2023-11-06
+
+- Add "Archived" and "Fork" tag accessories in the "Search Repositories" results.
+- Hide archived repositories in the different create commands.
+- Sort repositories by last updated.
+- Fix the updated date to use the latest commit push.
+- Fix Open Pull Request menu bar command following GitHub's outage
+
+## [Add My Latest Repositories command] - 2023-11-06
+
+- Add a command to show my latest repositories in descending order.
+
+## [Add Clone and Open command] - 2023-10-11
+
+- Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
+
+## [Fix menu colors] - 2023-09-30
+
+- Fix menu colors for issues and pr menus.
+
+## [Fix menu bar notifications] - 2023-09-06
+
+- Fixes an issue where marking all notifications as read wouldn't reset the menu bar notifications count.
+
+## [Pull request templates] - 2023-08-08
+
+- Support all pull request templates when creating pull requests.
+
+## [Bug fix] - 2023-08-07
+
+- Fixed a bug (`Cannot read properties of null (reading 'name')`) which caused the extension to crash.
+
+## [Added missing value] - 2023-08-04
+
+- Fix missing repo name for non numberTag cases
+
+## [Menu Commands] - 2023-07-18
+
+- Add repo name to `Unread Notifications` Menu
+
+## [Menu Commands] - 2023-07-10
+
+- Add Issues Menu Command
+- Add Pull Requests Menu Command
+
+## [Support rerun failed workflow jobs] - 2023-06-27
+
+- Support rerun failed workflow jobs in `Workflow Runs` command
+
+## [Show Issue/PR number in Notification] - 2023-06-19
+
+- Add Issue/PR number in `Notification` command
+
+## [Add more branches to the into field] - 2023-06-16
+
+- Add more branches to the into field in Create Pull Request command (#4642)
+
+## [Menu bar mark all as read] - 2023-05-20
+
+- Add `Mark All as Read` command to menu bar action
+- Fix `graphql` not being part of devDependencies
+
 ## [Notifications fixes] - 2023-04-05
 
-- Add `issuecomment` prefix to read notifications 
+- Add `issuecomment` prefix to read notifications
 - Don't show success toast when opening a notification
 
 ## [Clear form fields] - 2023-01-19

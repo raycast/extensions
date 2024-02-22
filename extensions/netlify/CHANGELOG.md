@@ -1,5 +1,9 @@
 # Changelog
 
+## [New Logo] - 2023-05-26
+
+- Updated the logo
+
 ## [New Logo] - 2023-03-07
 
 - Updated the logo to match the refreshed brand assets

@@ -1,4 +1,4 @@
-import { Clipboard, environment, Keyboard, showToast, Toast } from "@raycast/api";
+import { Clipboard, environment, Keyboard, showHUD, showToast, Toast } from "@raycast/api";
 import { searchArcPreferences } from "./preferences";
 import { HistoryEntry, Space, Tab, TabLocation } from "./types";
 
@@ -22,7 +22,7 @@ export function getSpaceTitle(space: Space) {
 }
 
 export function getKey(tab: Tab) {
-  return `${tab.windowId}-${tab.tabId}`;
+  return `${tab.id}`;
 }
 
 export function getOrderedLocations() {
@@ -70,6 +70,15 @@ export function getNumberOfTabs(tabs?: Tab[]) {
   return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isTab(tab: any): tab is Tab {
+  if (tab && tab.id && tab.url && tab.title && tab.location) {
+    return true;
+  }
+
+  return false;
+}
+
 export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
   if (!entries) {
     return undefined;
@@ -100,4 +109,26 @@ export async function showFailureToast(error: unknown, options?: Omit<Toast.Opti
       },
     },
   });
+}
+
+export async function validateURL(url: string) {
+  const urlRegex =
+    /(http(s)?:\/\/|arc:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{0,256}(\.[a-z]{2,6})?\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
+
+  if (url === undefined || url === "") {
+    await showHUD("❌ No URL found");
+    return false;
+  }
+
+  if (!urlRegex.test(url)) {
+    await showHUD("❌ Invalid URL provided");
+    return false;
+  }
+
+  return true;
+}
+
+export function isURL(value: string): boolean {
+  const urlPattern = /^(?:(?:https?|ftp):\/\/)?(?:\w+\.)+\w{2,}|localhost[:?\d]*(?:\/|$)/;
+  return urlPattern.test(value);
 }

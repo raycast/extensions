@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, showToast, Action, Toast, Icon, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript, runAppleScriptSync } from "run-applescript";
 import { Connection } from "./types/connection";
@@ -24,7 +24,7 @@ async function getVpnConnections(): Promise<Connection[]> {
     return connections;
   } catch {
     return new Promise((resolve, reject) =>
-      reject("Couln't get VPN connections. Make sure you have Tunnelblick installed.")
+      reject("Couln't get VPN connections. Make sure you have Tunnelblick installed."),
     );
   }
 }
@@ -35,6 +35,10 @@ export default function Command() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Getting configurations",
+    });
     getVpnConnections()
       .then((connections: Connection[]) => {
         setConnections(connections);
@@ -43,12 +47,17 @@ export default function Command() {
         setError(new Error(error));
       })
       .finally(() => {
+        Toast.prototype.hide();
         setIsLoading(false);
       });
   }, []);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Something went wrong", error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong",
+      message: error.message,
+    });
   }
 
   return (
@@ -56,23 +65,50 @@ export default function Command() {
       {connections.map((connection) => (
         <List.Item
           key={connection.name}
-          icon={connection.status === "EXITING" ? "xmark-circle-16" : "checkmark-circle-16"}
+          icon={connection.status === "EXITING" ? Icon.Network : { source: Icon.Network, tintColor: Color.Green }}
           title={connection.name}
-          subtitle={connection.status === "EXITING" ? "Connect" : "Disconnect"}
+          accessories={[
+            {
+              tag: {
+                value: connection.status === "EXITING" ? "Disconnected" : "Connected",
+                color: connection.status === "EXITING" ? Color.Red : Color.Green,
+              },
+            },
+          ]}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
-                title="Connect"
+              <Action
+                title={connection.status === "EXITING" ? "Connect" : "Disconnect"}
                 key={connection.name}
+                icon={connection.status === "EXITING" ? Icon.Livestream : Icon.LivestreamDisabled}
                 onAction={() => {
                   if (connection.status === "EXITING") {
                     runAppleScriptSync(`tell application "Tunnelblick" to connect "${connection.name}"`);
-                    showToast(ToastStyle.Success, "Connected");
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Connected",
+                    });
                   } else {
                     runAppleScriptSync(`tell application "Tunnelblick" to disconnect "${connection.name}"`);
-                    showToast(ToastStyle.Success, "Disconnected");
+                    showToast({
+                      style: Toast.Style.Success,
+                      title: "Disconnected",
+                    });
                   }
                   getVpnConnections().then(setConnections);
+                }}
+              />
+              <Action
+                title="Disconnect All"
+                icon={Icon.LivestreamDisabled}
+                shortcut={{ modifiers: ["cmd"], key: "delete" }}
+                key="disconnectAllConnections"
+                onAction={() => {
+                  runAppleScriptSync(`tell application "Tunnelblick" to disconnect all`);
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: "Disconnected",
+                  });
                 }}
               />
             </ActionPanel>

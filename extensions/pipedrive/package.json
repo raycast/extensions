@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pipedrive",
   "title": "Pipedrive Search",
-  "description": "Search Pipedrive Deals",
+  "description": "Search Pipedrive deals, people and organizations",
   "icon": "command-icon.png",
-  "author": "stephendolan",
+  "author": "ahp",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search Deals",
+      "title": "Search Pipedrive",
       "subtitle": "Pipedrive",
-      "description": "Search Pipedrive deals.",
+      "description": "Search Pipedrive deals, people and organizations",
       "mode": "view"
     }
   ],
@@ -31,21 +31,29 @@
       "title": "API Token",
       "description": "Your Pipedrive API Token",
       "placeholder": "Enter your Pipedrive API Token"
+    },
+    {
+      "name": "limit",
+      "type": "textfield",
+      "required": true,
+      "title": "Result Limit",
+      "description": "Maximum number of results",
+      "placeholder": "20"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.65.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

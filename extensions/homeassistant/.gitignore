@@ -3,3 +3,7 @@ node_modules
 .vscode
 
 raycast-env.d.ts
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

@@ -2,6 +2,7 @@ import { Detail } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   MyPullRequestsQuery,
   PullRequestDetailsFieldsFragment,
@@ -11,7 +12,6 @@ import {
 import { pluralize } from "../helpers";
 import { getPullRequestAuthor, getPullRequestReviewers, getPullRequestStatus } from "../helpers/pull-request";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
 import { useViewer } from "../hooks/useViewer";
 
 import PullRequestActions from "./PullRequestActions";
@@ -37,7 +37,7 @@ export default function PullRequestDetail({ initialPullRequest, mutateList }: Pu
       return pullRequestDetail.node as PullRequestDetailsFieldsFragment;
     },
     [initialPullRequest.id],
-    { initialData: initialPullRequest }
+    { initialData: initialPullRequest },
   );
 
   let markdown = `# ${pullRequest.title}`;

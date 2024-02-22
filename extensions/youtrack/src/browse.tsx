@@ -1,16 +1,14 @@
-// noinspection JSIgnoredPromiseFromCall
-
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { Youtrack } from "youtrack-rest-client";
 import { IssueListItem } from "./components";
-import { fetchIssues, getEmptyIssue, loadCache, saveCache } from "./utils";
-import { Preferences, State } from "./interfaces";
+import { fetchIssueDetails, fetchIssues, getEmptyIssue } from "./utils";
+import { State, Issue } from "./interfaces";
 import _ from "lodash";
+import { loadCache, saveCache } from "./cache";
 
-// noinspection JSUnusedGlobalSymbols
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Browse>();
 
   const [state, setState] = useState<State>({ isLoading: true, items: [], project: null, yt: null });
 
@@ -35,7 +33,7 @@ export default function Command() {
       }
       setState((previous) => ({ ...previous, isLoading: true }));
       try {
-        const cache = await loadCache();
+        const cache = await loadCache<Issue>("youtrack-issues");
 
         if (cache.length) {
           setState((previous) => ({ ...previous, items: cache, isLoading: true }));
@@ -48,7 +46,7 @@ export default function Command() {
         }
 
         setState((previous) => ({ ...previous, items: feed, isLoading: false }));
-        await saveCache(feed);
+        await saveCache<Issue>("youtrack-issues", feed);
       } catch (error) {
         setState((previous) => ({
           ...previous,
@@ -72,10 +70,24 @@ export default function Command() {
     }
   }, [state.error]);
 
+  const getIssueDetails = useCallback((issue: Issue, yt: Youtrack | null) => {
+    if (!yt) {
+      return null;
+    }
+    return fetchIssueDetails(issue, yt);
+  }, []);
+
   return (
     <List isLoading={(!state.items && !state.error) || state.isLoading}>
       {state.items?.map((item, index) => (
-        <IssueListItem key={item.id} item={item} index={index} instance={prefs.instance} resolved={item.resolved} />
+        <IssueListItem
+          key={item.id}
+          item={item}
+          index={index}
+          instance={prefs.instance}
+          resolved={item.resolved}
+          getIssueDetailsCb={() => getIssueDetails(item, state.yt)}
+        />
       ))}
     </List>
   );

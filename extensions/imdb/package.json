@@ -3,15 +3,32 @@
   "name": "imdb",
   "title": "IMDb Search",
   "description": "Easily open your favorite film or TV series on IMDb.",
-  "icon": "icon.png",
+  "icon": "popcorn.png",
   "author": "ryan",
+  "contributors": [
+    "kgrhartlage"
+  ],
+  "keywords": [
+    "imdb",
+    "film",
+    "movie",
+    "tv",
+    "series"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Film and TV Series",
+      "name": "movies",
+      "title": "Search Movies",
       "subtitle": "IMDb",
-      "description": "Easily open your favorite film or TV series on IMDb.",
+      "description": "Search movies by title.",
+      "mode": "view"
+    },
+    {
+      "name": "series",
+      "title": "Search TV Series",
+      "subtitle": "IMDb",
+      "description": "Search TV series by title.",
       "mode": "view"
     }
   ],
@@ -20,18 +37,16 @@
       "name": "token",
       "type": "password",
       "required": true,
-      "title": "API Token",
-      "link": "https://www.omdbapi.com/apikey.aspx",
-      "description": "Register for a free token at https://www.omdbapi.com/",
-      "placeholder": "Enter your Open Movie Database (OMDb) API token"
+      "title": "OMDb API Token",
+      "description": "Register for a free token at www.omdbapi.com",
+      "placeholder": "Enter your API token here"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.4",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.51.3",
+    "@raycast/utils": "^1.6.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
@@ -42,6 +57,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

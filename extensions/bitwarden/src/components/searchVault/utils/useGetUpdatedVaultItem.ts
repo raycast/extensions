@@ -3,10 +3,6 @@ import { useVaultItemSubscriber } from "~/components/searchVault/context/vaultLi
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { Item } from "~/types/vault";
 
-export type Options = {
-  onBeforeGetItem?: () => any | Promise<any>;
-};
-
 /**
  * Returns a function that will get the latest value of a vault item.
  * If the value is already known, it will be returned immediately.
@@ -35,11 +31,8 @@ function useGetUpdatedVaultItem() {
 
 function valueHasSensitiveValuePlaceholder(value: any) {
   try {
-    if (typeof value === "object") {
-      return JSON.stringify(value).includes(SENSITIVE_VALUE_PLACEHOLDER);
-    } else if (typeof value === "string") {
-      return value === SENSITIVE_VALUE_PLACEHOLDER;
-    }
+    if (typeof value === "object") return JSON.stringify(value).includes(SENSITIVE_VALUE_PLACEHOLDER);
+    if (typeof value === "string") return value === SENSITIVE_VALUE_PLACEHOLDER;
     return false;
   } catch (error) {
     return false;

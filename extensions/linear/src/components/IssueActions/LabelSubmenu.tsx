@@ -20,7 +20,7 @@ export default function LabelSubmenu({
   const { labels } = useLabels(issue.team.id, { execute: load });
 
   const [, availableLabels] = partition(labels || [], (label) =>
-    issue.labels.nodes.map((issueLabel) => issueLabel.id).includes(label.id)
+    issue.labels.nodes.map((issueLabel) => issueLabel.id).includes(label.id),
   );
 
   async function addLabel(label: LabelResult) {

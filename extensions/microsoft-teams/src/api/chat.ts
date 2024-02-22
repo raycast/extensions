@@ -6,11 +6,12 @@ interface Chats {
 
 export interface Chat {
   id: string;
-  topic: string;
+  topic?: string;
   chatType: "oneOnOne" | "group" | "meeting";
+  createdDateTime: string;
   webUrl: string;
-  members: ChatMember[];
-  lastMessagePreview: MessagePreview;
+  members: ChatMember[] | null;
+  lastMessagePreview: MessagePreview | null;
 }
 
 interface ChatMember {
