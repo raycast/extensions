@@ -174,3 +174,7 @@ export async function handleSetWallpaper(filePath: string) {
     )}" as POSIX file`,
   );
 }
+
+export function icloudDrivePath(): string {
+  return `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`;
+}
