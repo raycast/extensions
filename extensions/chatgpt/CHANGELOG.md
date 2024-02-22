@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fet] - 2024-02-21
+## [Feature] - 2024-02-21
 
 - Feature: Integrate awesome-chatgpt-prompts project
 
