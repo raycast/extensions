@@ -22,7 +22,7 @@
     {
       "label": "ghq root path",
       "name": "GHQ_ROOT_PATH",
-      "title": "ghq root path",
+      "title": "ghq Root Path",
       "description": "Your ghq root path. use `ghq root` command to get the path.",
       "type": "textfield",
       "required": true,
