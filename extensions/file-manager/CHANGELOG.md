@@ -2,7 +2,7 @@
 
 ## [Features] - 2023-02-22
 
-- Added `Icloud Drive` to the start directory.
+- Added `iCloud Drive` to the start directory.
 
 ## [Features] - 2023-12-18
 

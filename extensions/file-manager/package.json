@@ -94,9 +94,9 @@
     },
     {
       "default": false,
-      "description": "Show Icloud Folder on Top of Start Directory",
-      "label": "Show Icloud Drive",
-      "name": "showIcloudDrive",
+      "description": "Show iCloud Folder on Top of Start Directory",
+      "label": "Show iCloud Drive",
+      "name": "showiCloudDrive",
       "required": true,
       "title": "",
       "type": "checkbox"

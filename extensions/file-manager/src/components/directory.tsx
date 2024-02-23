@@ -1,7 +1,7 @@
 import fs from "node:fs";
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
-import { getDirectoryData, createItem, getStartDirectory, icloudDrivePath } from "../utils";
+import { getDirectoryData, createItem, getStartDirectory, iCloudDrivePath } from "../utils";
 import { FileDataType } from "../types";
 
 export function Directory(props: { path: string }) {
@@ -17,14 +17,14 @@ export function Directory(props: { path: string }) {
     const nonDirectories = directoryData.filter((file) => file.type !== "directory");
     return (
       <List searchBarPlaceholder={`Search in ${props.path}/`}>
-        {props.path === getStartDirectory() && preferences.showIcloudDrive && (
-          <List.Section title="Icloud Drive">
+        {props.path === getStartDirectory() && preferences.showiCloudDrive && (
+          <List.Section title="iCloud Drive">
             <List.Item
-              title="Icloud Drive"
-              icon={{ source: "icloud.png" }}
+              title="iCloud Drive"
+              icon={{ source: "iCloud.png" }}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Open Icloud" target={<Directory path={icloudDrivePath()} />} />
+                  <Action.Push title="Open Icloud" target={<Directory path={iCloudDrivePath()} />} />
                 </ActionPanel>
               }
             />
@@ -45,13 +45,13 @@ export function Directory(props: { path: string }) {
   } else {
     return (
       <List searchBarPlaceholder={`Search in ${props.path}/`}>
-        {props.path === getStartDirectory() && preferences.showIcloudDrive && (
+        {props.path === getStartDirectory() && preferences.showiCloudDrive && (
           <List.Item
-            title="Icloud Drive"
-            icon={{ source: "icloud.png" }}
+            title="iCloud Drive"
+            icon={{ source: "iCloud.png" }}
             actions={
               <ActionPanel>
-                <Action.Push title="Open Icloud" target={<Directory path={icloudDrivePath()} />} />
+                <Action.Push title="Open iCloud" target={<Directory path={iCloudDrivePath()} />} />
               </ActionPanel>
             }
           />
