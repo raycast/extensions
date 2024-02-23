@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
-import { Errors, ValidationError } from './errors';
+import fs from "fs/promises";
+import { Errors, ValidationError } from "./errors";
 
 export const makeDirIfNotExists = async (path: string): Promise<void> => {
   await fs.mkdir(path).catch((err) => {

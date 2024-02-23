@@ -1,8 +1,8 @@
-import { Shell } from 'zx';
+import { Shell } from "zx";
 
-export type NodePackageManagerName = 'npm' | 'yarn' | 'bun' | 'pnpm';
-export type PythonPackageManager = 'poetry' | 'pip' | 'pip3';
-export type GoPackageManager = 'go';
+export type NodePackageManagerName = "npm" | "yarn" | "bun" | "pnpm";
+export type PythonPackageManager = "poetry" | "pip" | "pip3";
+export type GoPackageManager = "go";
 export type PackageManagerName = NodePackageManagerName | GoPackageManager | PythonPackageManager;
 
 export interface ProjectInstallOpts {
@@ -45,15 +45,15 @@ export interface NodePackageManager extends PackageManager {
 }
 
 export interface PackageManagerSpecs {
-  installCommand?: 'install' | 'add';
-  initCommand?: 'init'; // FIXME: if this comment stays, most likely no package manager had anything other than init
+  installCommand?: "install" | "add";
+  initCommand?: "init"; // FIXME: if this comment stays, most likely no package manager had anything other than init
 
   globalFlag?: string;
   devFlag?: string;
 }
 
 export interface NodePackageManagerSpecs extends PackageManagerSpecs {
-  createCommand?: 'create';
+  createCommand?: "create";
 
   templateArg?: string[];
 }

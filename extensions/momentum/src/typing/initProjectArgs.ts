@@ -1,6 +1,6 @@
-import { NodePackageManager, PackageManager } from './packageMangers';
+import { NodePackageManager, PackageManager } from "./packageMangers";
 
-type EslintPreset = 'eslint' | 'author-recommended';
+type EslintPreset = "eslint" | "author-recommended";
 
 export interface BasePerformOpts<T extends PackageManager> {
   manager: T;

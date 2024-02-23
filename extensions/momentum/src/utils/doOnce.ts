@@ -1,4 +1,4 @@
-import { LocalStorage } from '@raycast/api';
+import { LocalStorage } from "@raycast/api";
 
 export const doOnce = async (operationId: string, func: () => void) => {
   const hasRun = await LocalStorage.getItem(operationId);

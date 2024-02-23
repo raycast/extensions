@@ -1,5 +1,5 @@
-import { ProjectCommand } from './utils/projectCommand';
-import { NodePackageManager } from './typing/packageMangers';
+import { ProjectCommand } from "./utils/projectCommand";
+import { NodePackageManager } from "./typing/packageMangers";
 
 export default ProjectCommand<Preferences.ProjectVite, Arguments.ProjectVite, NodePackageManager>(async (opts) => {
   const { manager } = opts;
@@ -8,7 +8,7 @@ export default ProjectCommand<Preferences.ProjectVite, Arguments.ProjectVite, No
 
   await manager.create({
     template,
-    bundler: 'vite', // TODO
+    bundler: "vite", // TODO
     projectName: projectName,
     root: projectsLocation, // not root, the root will be created because of create command
   });

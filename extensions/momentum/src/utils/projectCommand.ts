@@ -1,10 +1,10 @@
-import { getPreferenceValues, type LaunchProps } from '@raycast/api';
-import { validatePrefs, ValidPrefsResult } from './validation';
-import { isValidationError } from './errors';
-import { showError } from './toasts';
-import { Arguments } from '../typing/misc';
-import { NodePackageManager, PackageManager } from '../typing/packageMangers';
-import { Project } from '../typing/project';
+import { getPreferenceValues, type LaunchProps } from "@raycast/api";
+import { validatePrefs, ValidPrefsResult } from "./validation";
+import { isValidationError } from "./errors";
+import { showError } from "./toasts";
+import { Arguments } from "../typing/misc";
+import { NodePackageManager, PackageManager } from "../typing/packageMangers";
+import { Project } from "../typing/project";
 
 export interface PerformOpts<Prefs extends Project, Args extends Arguments.ProjectEmpty, PM extends PackageManager> {
   projectRoot: string;
@@ -50,7 +50,7 @@ export const ProjectCommand = <Prefs extends Project, Args extends Arguments, PM
         await openEditor();
       } catch (e) {
         console.error(e);
-        await showError('failed to open editor... exiting');
+        await showError("failed to open editor... exiting");
         return;
       }
     }
@@ -69,14 +69,14 @@ export const ProjectCommand = <Prefs extends Project, Args extends Arguments, PM
         return;
       }
 
-      await showError('unknown error has occurred');
+      await showError("unknown error has occurred");
     }
 
     try {
       await openEditor();
     } catch (e) {
       console.error(e);
-      await showError('project was created but failed to open editor');
+      await showError("project was created but failed to open editor");
     }
   };
 };

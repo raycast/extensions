@@ -1,6 +1,6 @@
-import { ProjectCommand } from './utils/projectCommand';
-import { initEslint } from './utils/node/initEslint';
-import { NodePackageManager } from './typing/packageMangers';
+import { ProjectCommand } from "./utils/projectCommand";
+import { initEslint } from "./utils/node/initEslint";
+import { NodePackageManager } from "./typing/packageMangers";
 
 export default ProjectCommand<Preferences.ProjectReact, Arguments.ProjectReact, NodePackageManager>(async (opts) => {
   const { manager, projectRoot, preferences } = opts;
@@ -12,7 +12,7 @@ export default ProjectCommand<Preferences.ProjectReact, Arguments.ProjectReact, 
 
   if (typescript) {
     await manager.install({
-      packageName: 'typescript',
+      packageName: "typescript",
       root: projectRoot,
       dev: true,
     });
@@ -21,7 +21,7 @@ export default ProjectCommand<Preferences.ProjectReact, Arguments.ProjectReact, 
   if (eslint) {
     await initEslint({
       manager,
-      preset: 'author-recommended',
+      preset: "author-recommended",
       root: projectRoot,
       typescript,
     });

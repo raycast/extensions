@@ -1,7 +1,7 @@
-import { Toast, showToast } from '@raycast/api';
+import { Toast, showToast } from "@raycast/api";
 import Style = Toast.Style;
 
-export const showError = async (message: string, title = 'failed') => {
+export const showError = async (message: string, title = "failed") => {
   return showToast({
     style: Style.Failure,
     message,
@@ -9,7 +9,7 @@ export const showError = async (message: string, title = 'failed') => {
   });
 };
 
-export const showLoading = async (message: string, title = 'loading') => {
+export const showLoading = async (message: string, title = "loading") => {
   return showToast({
     style: Style.Animated,
     message,
@@ -17,7 +17,7 @@ export const showLoading = async (message: string, title = 'loading') => {
   });
 };
 
-export const showSuccess = async (message: string, title = 'done') => {
+export const showSuccess = async (message: string, title = "done") => {
   return showToast({
     style: Style.Success,
     message,
