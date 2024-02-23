@@ -69,5 +69,5 @@ export async function toggleDND() {
 
 export async function getDNDStatus() {
   const { stdout } = await executeCommand(`echo "status" | shortcuts run "${DNDshortcutName}" | cat`);
-  return stdout !== '';
+  return stdout !== "";
 }
