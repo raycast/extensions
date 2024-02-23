@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "one-thing",
   "title": "One Thing",
-  "description": "Put a thing in your menu bar.",
+  "description": "Put a thing in your Menu Bar.",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
@@ -14,14 +14,14 @@
     {
       "name": "show-one-thing",
       "title": "One Thing",
-      "description": "Put a thing in your menu bar.",
+      "description": "Put a thing in your Menu Bar.",
       "mode": "menu-bar",
       "interval": "1m"
     },
     {
       "name": "set-one-thing",
       "title": "Set One Thing",
-      "description": "Set a thing to display in your menu bar.",
+      "description": "Set a thing to display in your Menu Bar.",
       "mode": "view",
       "arguments": [
         {
@@ -34,7 +34,7 @@
     {
       "name": "remove-one-thing",
       "title": "Remove One Thing",
-      "description": "Remove the thing displayed in your menu bar.",
+      "description": "Remove the thing displayed in your Menu Bar.",
       "mode": "no-view"
     }
   ],
