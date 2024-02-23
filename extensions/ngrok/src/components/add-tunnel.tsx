@@ -9,7 +9,7 @@ import {
   useNavigation,
   openCommandPreferences,
 } from "@raycast/api";
-import { useExec, useForm } from "@raycast/utils";
+import { useForm } from "@raycast/utils";
 
 import { validateLabel, validatePort } from "../utils/validators";
 import { createTunnel, checkIsNgrokReady, connectNgrok, ReservedDomain } from "../api";
@@ -28,17 +28,8 @@ type Props = {
 export default function AddTunnel({ revalidate, domains }: Props) {
   const { pop } = useNavigation();
 
-  const { data: ngrokBin } = useExec("which", ["ngrok"]);
-
   const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
-      if (!ngrokBin) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: `Couldn't find ngrok CLI`,
-        });
-        return;
-      }
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: `Connecting ngrok service...`,

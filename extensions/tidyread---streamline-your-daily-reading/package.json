@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tidyread---streamline-your-daily-reading",
   "title": "TidyRead - Streamline Your Daily Reading",
-  "description": "Enhance controlled, efficient, and organized information intake using an AI-powered digest from RSS feeds. More at https://tidyread.info.",
+  "description": "An AI-powered digest tool based on RSS feeds. Enhance controlled, efficient, and organized information intake. More at https://tidyread.info.",
   "icon": "logo.png",
   "author": "jaredliu233",
   "categories": [
@@ -35,9 +35,9 @@
   "commands": [
     {
       "name": "manage-source-list.command",
-      "title": "Manage Source List",
+      "title": "Manage Sources",
       "subtitle": "TidyRead",
-      "description": "Manage your read sources, including adding, editing, deleting, and scheduling.",
+      "description": "Manage your reading sources, including adding, editing, deleting, and scheduling.",
       "mode": "view"
     },
     {
@@ -229,7 +229,7 @@
     },
     {
       "name": "preferredLanguage",
-      "description": "If you configure the AI, it will automatically translate the article titles in the digest into your preferred language. You can also use the {{lang}} variable in the Summarize Prompt field.",
+      "description": "Summarize the content within 50-200 characters, directly output. Focusing strictly on its core insights. Exclude promotional content, including podcast listening options, subscription offers, access instructions, and any form of contact details for additional services. Most important, respond in {{lang}}.",
       "type": "textfield",
       "title": "Preferred Language",
       "required": false
@@ -321,6 +321,15 @@
       "type": "password",
       "description": "Any WriteFreely instance account password",
       "title": "WriteFreely Password",
+      "required": false
+    },
+    {
+      "name": "splitByTags",
+      "description": "Whether digest content is categorized by label",
+      "type": "checkbox",
+      "title": "Enable Digest Split By Tags",
+      "label": "Enable",
+      "default": false,
       "required": false
     },
     {

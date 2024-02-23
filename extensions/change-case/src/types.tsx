@@ -15,6 +15,8 @@ const lowerFirst = (input: string) => {
   return input[0].toLowerCase() + input.slice(1);
 };
 
+const sentenceCase = (input: string) => titleCase(input, { sentenceCase: true });
+
 const upperCase = (input: string) => input.toUpperCase();
 
 const upperFirst = (input: string) => {
@@ -40,7 +42,7 @@ export const functions: CaseFunctions = {
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
   "Random Case": spongeCase,
-  "Sentence Case": changeCase.sentenceCase,
+  "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
   "Swap Case": swapCase,
   "Title Case": titleCase,

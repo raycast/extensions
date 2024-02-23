@@ -31,7 +31,7 @@
       "type": "password",
       "required": true,
       "title": "API Token",
-      "description": "Your ClickUp API token taken from User Settings > apps > API Token in ClickUp Desktop",
+      "description": "Your ClickUp API token taken from User Settings > Apps > API Token in ClickUp Desktop",
       "link": "https://github.com/Ali-Parandeh/raycast-clickup-extension",
       "placeholder": "Enter your ClickUp API token."
     },

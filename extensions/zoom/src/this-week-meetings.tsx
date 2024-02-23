@@ -45,6 +45,4 @@ function ThisWeekMeetings() {
   );
 }
 
-export default function Command() {
-  return withZoomAuth(<ThisWeekMeetings />);
-}
+export default withZoomAuth(ThisWeekMeetings);

@@ -25,7 +25,7 @@ import SourcesJson from "./components/SourcesJson";
 import { validateSources } from "./utils/validate";
 import SharableLinkAction from "./components/SharableLinkAction";
 import { usePromise } from "@raycast/utils";
-import RecommendedForm from "./components/RecommendedForm";
+import Onboarding from "./components/Onboarding";
 
 export default function SourceList() {
   const [sources, setSources] = useState<Source[]>();
@@ -64,19 +64,33 @@ export default function SourceList() {
       target={
         <Form
           searchBarAccessory={
-            <Form.LinkAccessory target="https://tidyread.info/docs/batch-import-sources" text="Learn How To Import" />
+            <Form.LinkAccessory
+              target="https://tidyread.info/docs/batch-import-sources"
+              text="🤔 Learn How To Import"
+            />
           }
           actions={
             <ActionPanel>
               <Action.SubmitForm
-                title="Save Source"
+                title="Save"
                 onSubmit={async (values) => {
                   try {
-                    const newSources = JSON.parse(values.sources) as Source[];
+                    const newSources = JSON.parse(values.sources) as Partial<Source>[];
                     showToast(Toast.Style.Animated, "Validating sources json");
                     await validateSources(newSources);
                     const now = Date.now();
-                    await saveSources([...sources!, ...newSources.map((s, index) => ({ ...s, id: `${now + index}` }))]);
+                    await saveSources([
+                      ...sources!,
+                      ...newSources.map(
+                        (s, index) =>
+                          ({
+                            schedule: "everyday",
+                            timeSpan: "1",
+                            ...s,
+                            id: `${now + index}`,
+                          }) as Source,
+                      ),
+                    ]);
                     showToast(Toast.Style.Success, "Sources imported");
                     pop();
                     loadSources();
@@ -97,7 +111,7 @@ export default function SourceList() {
 
   if (showInterestsSelectPanel) {
     return (
-      <RecommendedForm
+      <Onboarding
         onSkip={async () => {
           await saveInterestsSelected(true);
           revalidate();
@@ -106,7 +120,19 @@ export default function SourceList() {
           await saveInterestsSelected(true);
           await sleep(500);
           const now = Date.now();
-          await saveSources(sources.map((s, index) => ({ ...s, id: `${now + index}` })));
+          await saveSources(
+            sources.map((s, index) => ({
+              schedule: "everyday",
+              timeSpan: "1",
+              title: s.title!,
+              url: s.url!,
+              rssLink: s.rssLink,
+              favicon: s.favicon,
+              tags: s.tags ?? [],
+              customDays: [],
+              id: `${now + index}`,
+            })),
+          );
           showToast(Toast.Style.Success, "Sources Generated");
           await launchCommand({
             name: "daily-read.command",
@@ -127,25 +153,19 @@ export default function SourceList() {
         <List.EmptyView
           actions={
             <CustomActionPanel>
-              <Action.Push
+              <Action
                 title="Add Source"
                 shortcut={Keyboard.Shortcut.Common.New}
                 icon={Icon.Plus}
-                target={
-                  <SourceForm
-                    navigationTitle="Add Source"
-                    onSuccess={async () => {
-                      pop();
-                      loadSources();
-                    }}
-                  ></SourceForm>
-                }
+                onAction={async () => {
+                  await launchCommand({ name: "add-source.command", type: LaunchType.UserInitiated });
+                }}
               />
               {batchImportActionNode}
             </CustomActionPanel>
           }
           title="No Source Found"
-          description="Add your first source, or press cmd + Enter to import sources from json."
+          description="Press `Enter` to add your first source, or press `⌘ + Enter` to batch import"
         />
       ) : (
         (sources || []).map((item, index) => {
@@ -160,7 +180,7 @@ export default function SourceList() {
                 value: `${(item.tags || [])?.join?.(", ")}`,
                 color: Color.Blue,
               },
-              show: item.tags?.length > 0,
+              show: (item.tags || [])?.length > 0,
             },
             {
               tag: {
@@ -194,19 +214,13 @@ export default function SourceList() {
                       ></SourceForm>
                     }
                   />
-                  <Action.Push
+                  <Action
                     title="Add Source"
                     icon={Icon.Plus}
                     shortcut={Keyboard.Shortcut.Common.New}
-                    target={
-                      <SourceForm
-                        navigationTitle="Add Source"
-                        onSuccess={async () => {
-                          pop();
-                          loadSources();
-                        }}
-                      ></SourceForm>
-                    }
+                    onAction={async () => {
+                      await launchCommand({ name: "add-source.command", type: LaunchType.UserInitiated });
+                    }}
                   />
                   <Action
                     style={Action.Style.Destructive}
@@ -252,7 +266,7 @@ export default function SourceList() {
                     actionTitle="Share Your Sources"
                     articleTitle="My Reading Sources"
                     articleContent={() => {
-                      return `You can batch import the sources into your [Tidyread](https://tidyread.info) in 'Manage Source List' Command.\n\n\`\`\`json\n${JSON.stringify(
+                      return `You can batch import the sources into your [Tidyread](https://tidyread.info) in 'Manage Sources' Command.\n\n\`\`\`json\n${JSON.stringify(
                         sources!.map((s) => omit(s, ["id"])),
                         null,
                         4,

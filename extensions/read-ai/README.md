@@ -1,6 +1,6 @@
 # Read AI for Raycast
 
-Feeling too lazy to read? No worries, we've got you covered! This Raycast extension is your go-to solution for those moments when reading feels like a chore. Leveraging OpenAI's Text-to-Speech (TTS) API, it transforms selected text into speech in a style of your choice. Perfect for those who prefer to listen, as well as for visually impaired users who benefit from auditory content. Sit back, relax, and let the extension do the reading for you, in the way you like it.
+Feeling too lazy to read or have an image that needs interpreting? No worries, we've got you covered! This Raycast extension is your go-to solution for those moments when reading feels like a chore or when you need to understand the content of an image. Leveraging OpenAI's Text-to-Speech (TTS) API, it transforms selected text into speech in a style of your choice. It also uses advanced AI technology to interpret and read out the content from selected images. Perfect for those who prefer to listen, as well as for visually impaired users who benefit from auditory content, and for anyone who needs to understand the content within images without the need for manual interpretation. Sit back, relax, and let the extension do the reading and the interpreting for you, in the way you like it.
 
 ## Features
 
@@ -25,6 +25,10 @@ Feeling too lazy to read? No worries, we've got you covered! This Raycast extens
 4. **Enhanced User Experience**:
    - Ideal for Various User Groups: Whether you're a student, a professional, a developer, or someone who enjoys listening to content rather than reading it, this extension is designed to cater to a wide array of needs.
    - Accessibility for Visually Impaired: This extension is particularly useful for visually impaired users, offering them a means to access written content in an audible format.
+5. **Read Image Feature**:
+   - Image Selection: Choose an image from your device or provide a URL.
+   - Advanced Image Interpretation: Utilizing OpenAI's Vision API, the extension not only reads text from images but also interprets the content within the image.
+   - Use Cases: Beyond digitizing documents and extracting text from screenshots, this feature is also capable of understanding and explaining the content within text-rich images.
 
 ## Installation
 

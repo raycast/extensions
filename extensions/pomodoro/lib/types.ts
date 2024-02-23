@@ -27,6 +27,8 @@ export type Preferences = {
   sound: string;
   enableTimeOnMenuBar: boolean;
   giphyAPIKey: string;
+  enableImage: boolean;
+  enableQuote: boolean;
 };
 
 export type IntervalType = "focus" | "short-break" | "long-break";
@@ -40,4 +42,18 @@ export type Interval = {
   parts: Part[];
   length: number;
   type: IntervalType;
+};
+
+export type IntervalExecutor = {
+  title: string;
+  onStart: () => void;
+};
+
+export type Quote = {
+  _id: string;
+  content: string;
+  author: string;
+  authorSlug: string;
+  length: number;
+  tags: string[];
 };

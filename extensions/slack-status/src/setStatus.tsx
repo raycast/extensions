@@ -1,4 +1,5 @@
 import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { OAuthService, withAccessToken, showFailureToast } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import {
   ClearStatusAction,
@@ -14,19 +15,16 @@ import {
 } from "./actions";
 import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
-import { withOAuthSession } from "./oauth";
 import { usePresets } from "./presets";
-import { SlackOAuthSessionConfig, useSlack, useSlackProfile } from "./slack";
 import { CommandLinkParams } from "./types";
+import { useSlack, useSlackProfile } from "./slack";
 import { getStatusIcon, getStatusSubtitle, getStatusTitle, setStatusToPreset } from "./utils";
-import { showFailureToast } from "@raycast/utils";
 
 const preferences: Preferences = getPreferenceValues();
 
-const slackOAuthConfig = new SlackOAuthSessionConfig({
-  clientId: "851756884692.5546927290212",
-  userScopes: ["emoji:read", "users.profile:write", "users.profile:read"],
-  defaultAccessToken: preferences.accessToken,
+const slack = OAuthService.slack({
+  scope: "emoji:read users.profile:write users.profile:read",
+  personalAccessToken: preferences.accessToken,
 });
 
 function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
@@ -113,4 +111,4 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   );
 }
 
-export default withOAuthSession(StatusList, slackOAuthConfig);
+export default withAccessToken(slack)(StatusList);

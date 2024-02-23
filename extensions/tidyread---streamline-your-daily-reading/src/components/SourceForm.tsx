@@ -128,10 +128,12 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
 
   return (
     <Form
-      searchBarAccessory={<Form.LinkAccessory target="https://tidyread.info/docs/where-to-find-rss" text="Find RSS" />}
+      searchBarAccessory={
+        <Form.LinkAccessory target="https://tidyread.info/docs/where-to-find-rss" text="🤔 How To Find RSS?" />
+      }
       actions={
         <CustomActionPanel>
-          <Action.SubmitForm icon={Icon.SaveDocument} title="Save Source" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.SaveDocument} title="Save" onSubmit={handleSubmit} />
         </CustomActionPanel>
       }
       navigationTitle={navigationTitle}
@@ -157,8 +159,8 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
       <Form.TextField
         {...itemProps.rssLink}
         title="RSS Link"
-        placeholder="Enter RSS link (optional)"
-        info="Used for generate digest, you can learn how to find rss through the documentation in the upper right corner"
+        placeholder="Enter RSS link for digest (optional)"
+        info="Used for generating digest. You can learn how to find rss through the documentation in the upper right corner."
       />
       {!!values.rssLink && (
         <Form.TextField
@@ -168,9 +170,10 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
           info="Time span of the content pulled by rss, e.g.: 1 means 1 day. Maximum 7 days, minimum 1 day."
         />
       )}
+      {!values.rssLink && <Form.Description text="💁 If not filled, Digest feature will disable on this source" />}
       <Form.TagPicker {...itemProps.tags} title="Tags" placeholder="Select tags (optional)">
         {CATEGORIES.map((category) => (
-          <Form.TagPicker.Item key={category} value={category} title={category} />
+          <Form.TagPicker.Item key={category.value} value={category.value} title={category.value} />
         ))}
       </Form.TagPicker>
     </Form>

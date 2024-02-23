@@ -5,6 +5,9 @@
   "description": "LetMeGoogleThat is a Raycast extension that generates links to the popular 'Let Me Google That For You' website. With just a few clicks, you can create a custom link that takes your friends or colleagues directly to a Google search page for the term you specify. Perfect for those times when someone asks you a question that they could easily look up themselves! Simply enter the search term, generate the link, and share it with others. LetMeGoogleThat saves you time and makes it easy to share information with others.",
   "icon": "command_icon.png",
   "author": "Ek217",
+  "contributors": [
+    "prince_yadav"
+  ],
   "categories": [
     "Fun"
   ],

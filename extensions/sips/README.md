@@ -9,9 +9,11 @@ Apply filters and transformations to various image formats, and convert between 
   - SVG conversion supported by [Potrace](https://potrace.sourceforge.net)
 - Rotate, flip, scale, resize, and pad images by applying SIPS commands
 - Apply filters and distortions such as Bokeh Blur, Noir, X-Ray, and more
+- Real time filter previews
 - Rotate, flip, and apply filters to the pages of PDFs
 - Optimize images using JPEG compression, [svgo](https://github.com/svg/svgo), and other strategies
 - Perform realtime image manipulation on images in the clipboard
+- Strip EXIF data from images using [ExifTool](https://exiftool.org)
 
 ## Commands
 
@@ -36,5 +38,7 @@ Apply filters and transformations to various image formats, and convert between 
   - Rotate images clockwise by the specified amount.
 - Scale Images [Scale Factor]
   - Scale images proportionally by the specified factor.
+- Strip EXIF Data
+  - Remove EXIF data from the provided images.
 
 Filter thumbnail image credit: <https://unsplash.com/photos/UBA_W3_LsOk>

@@ -1,4 +1,8 @@
-# Slack Status Changelog
+# Slack Status Change
+
+## [Use OAuth utils] - 2024-02-15
+
+- Use new OAuth utils
 
 ## [Launch Context] - 2024-01-27
 
