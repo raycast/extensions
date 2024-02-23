@@ -5,6 +5,9 @@
   "description": "Disable notifications on your Apple devices",
   "icon": "dnd-icon.png",
   "author": "yakitrak",
+  "contributors": [
+    "quanru"
+  ],
   "categories": [
     "Productivity"
   ],
