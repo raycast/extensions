@@ -123,6 +123,14 @@
       "mode": "no-view",
       "preferences": [
         {
+          "name": "dontUseAI",
+          "type": "checkbox",
+          "label": "Don't use the AI",
+          "description": "When enabled, the reminder is simply added to your default list with the input as the title.",
+          "default": true,
+          "required": false
+        },
+        {
           "name": "shouldCloseMainWindow",
           "type": "checkbox",
           "title": "Advanced",
