@@ -12,6 +12,9 @@ export function getFormattedColor(color: Color) {
     case "hex-lower-case": {
       return getHex(color).toLowerCase();
     }
+    case "hex-no-prefix": {
+      return getHexRaw(color);
+    }
     case "rgba": {
       const alpha = Math.round(color.alpha / 255);
       return `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha})`;
@@ -39,6 +42,11 @@ export function getFormattedColor(color: Color) {
 export function getHex(color: Color) {
   const hex = convert.rgb.hex(color.red, color.green, color.blue);
   return `#${hex}`;
+}
+
+export function getHexRaw(color: Color) {
+  const hex = convert.rgb.hex(color.red, color.green, color.blue);
+  return `${hex}`;
 }
 
 export function getShortcut(index: number) {
