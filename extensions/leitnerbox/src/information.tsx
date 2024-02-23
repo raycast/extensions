@@ -1,7 +1,8 @@
 import { Detail } from "@raycast/api";
-export default function Information () {
-  return(
-    <Detail markdown={` # What is the leitner system
+export default function Information() {
+  return (
+    <Detail
+      markdown={` # What is the leitner system
 
 The **Leitner system** is a widely used method of efficiently using  **flashcards** that was proposed by the German science journalist [Sebastian Leitner](https://en.wikipedia.org/wiki/Sebastian_Leitner "Sebastian Leitner") in 1972. 
 It is a simple implementation of the principle of **spaced repetition**, where cards are reviewed at increasing intervals to integrate it into long-term memory.
@@ -33,6 +34,7 @@ The goal when answering a question. Is to do it in your **own words** as if you 
 **You are your own judge**  it's up to you to see if your answer is close enough to the answer you wrote. Because **there is no better judge than yourself**.
 
 If you judge that you have answered incorrectly, the **goal** is to return to this part of your **course or subject** that you are **learning** and reread the part corresponding to the question to improve the **chance of retention in long-term memory.**
-`}/>
-  )
-};
+`}
+    />
+  );
+}

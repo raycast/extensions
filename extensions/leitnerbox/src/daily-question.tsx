@@ -19,7 +19,7 @@ export default function DailyQuestion() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const objDays:ObjDays = {};
+      const objDays: ObjDays = {};
       const stringifyRes = await LocalStorage.allItems<Question>();
       const res = Object.entries(stringifyRes)
         .map((entry) => {
@@ -29,16 +29,17 @@ export default function DailyQuestion() {
         .filter((entry) => {
           // filter the question with the hashMap and corresponding days
           const dayBetween = Math.round((today.getTime() - new Date(entry.date).getTime()) / (1000 * 60 * 60 * 24));
-          //@ts-ignore
+
+          //@ts-expect-error because ts think entry.box is undefined
           const dayBeforeAnswering = dayBetween + hashMap[entry.box];
-          if(objDays.hasOwnProperty(dayBeforeAnswering)){
-            objDays[dayBeforeAnswering] += 1
+          if (dayBeforeAnswering in objDays) {
+            objDays[dayBeforeAnswering] += 1;
           } else {
             objDays[dayBeforeAnswering] = 1;
-          } 
+          }
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
-        return hashMap[entry.box] <= dayBetween;
+          return hashMap[entry.box] <= dayBetween;
         });
       setQuestions(res);
       setQuestionInDays(objDays);
@@ -98,20 +99,18 @@ export default function DailyQuestion() {
       </>
     );
   } else {
-    let text:string = ""
-    if(Object.keys(questionInDays).length === 0){
-     text = "You don't have any questions, think about creating one"
-    }else{
-      text = `\n You will have \n`
-      Object.entries(questionInDays).forEach(([key, value])=> {
-        text += `- ${value} questions in ${key} days \n`
-      })
+    let text: string = "";
+    if (Object.keys(questionInDays).length === 0) {
+      text = "You don't have any questions, think about creating one";
+    } else {
+      text = `\n You will have \n`;
+      Object.entries(questionInDays).forEach(([key, value]) => {
+        text += `- ${value} questions in ${key} days \n`;
+      });
     }
     const markdown = `## you don't have any questions for today \n
         ${text} 
     `;
-    return (
-      <Detail markdown={markdown} />
-    );
+    return <Detail markdown={markdown} />;
   }
 }
