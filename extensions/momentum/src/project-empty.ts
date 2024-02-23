@@ -1,5 +1,4 @@
 import { getPreferenceValues, type LaunchProps, open } from '@raycast/api';
-import { Arguments } from './typing/misc';
 import { makeDirIfNotExists } from './utils/makeDirIfNotExists';
 import path from 'path';
 import { showError } from './utils/toasts';

@@ -68,7 +68,7 @@ export const ProjectCommand = <Prefs extends Project, Args extends Arguments, PM
         await showError(e.message);
         return;
       }
-      
+
       await showError('unknown error has occurred');
     }
 

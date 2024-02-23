@@ -1,9 +1,7 @@
 {
   "root": true,
   "extends": ["@raycast", "@leondaz"],
-  "ignorePatterns": [
-    "scripts/generateTypes.js"
-  ],
+  "ignorePatterns": ["scripts/generateTypes.js"],
   "globals": {
     "node": true
   }

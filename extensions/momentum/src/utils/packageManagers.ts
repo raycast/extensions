@@ -74,7 +74,8 @@ const packageManager = (name: PackageManagerName, specs: PackageManagerSpecs = d
     }
   };
 
-  const checkPackage = async ({ pkgName, global }: CheckPageOpts): Promise<boolean> => { // TODO idk if this is working atm
+  const checkPackage = async ({ pkgName, global }: CheckPageOpts): Promise<boolean> => {
+    // TODO idk if this is working atm
     if (global && !specs.globalFlag) {
       throw new Error(`${name} does not support global installations`);
     }
@@ -122,14 +123,14 @@ const nodePackageManager = (
 
   const create = async ({ projectName, root, bundler, template }: NodeProjectCreateOpts) => {
     console.log('creating...');
-  
-    if (!specs.templateArg || specs.templateArg.length === 0){
+
+    if (!specs.templateArg || specs.templateArg.length === 0) {
       const msg = `template argument not set in ${name} specs`;
       console.error(msg);
       await showError(msg);
       throw new Error(msg);
     }
-    
+
     await showLoading(bundler, `${name} is running at ${root}`);
 
     const command = [
@@ -140,7 +141,7 @@ const nodePackageManager = (
       ...specs.templateArg,
       template,
     ];
-    
+
     try {
       await $`cd ${root} && ${command}`;
     } catch (e) {
@@ -217,17 +218,17 @@ export const poetry = () => {
 
 export function getManagerByName(name: PackageManagerName): PackageManager | NodePackageManager | null {
   switch (name) {
-  case 'pnpm':
-    return pnpm();
-  case 'npm':
-    return npm();
-  case 'yarn':
-    return yarn();
-  case 'bun':
-    return bun();
-  case 'poetry':
-    return poetry();
-  default:
-    return null;
+    case 'pnpm':
+      return pnpm();
+    case 'npm':
+      return npm();
+    case 'yarn':
+      return yarn();
+    case 'bun':
+      return bun();
+    case 'poetry':
+      return poetry();
+    default:
+      return null;
   }
 }

@@ -52,7 +52,7 @@ export const validatePrefs = async <T extends Project, PM extends PackageManager
       await showError('no editor selected in preferences');
       return;
     }
-    
+
     await showHUD(`opening ${prefs.editor.name}`);
     await open(projectRoot, prefs.editor);
   };

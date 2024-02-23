@@ -48,13 +48,12 @@ export interface PackageManagerSpecs {
   installCommand?: 'install' | 'add';
   initCommand?: 'init'; // FIXME: if this comment stays, most likely no package manager had anything other than init
 
-
   globalFlag?: string;
   devFlag?: string;
 }
 
 export interface NodePackageManagerSpecs extends PackageManagerSpecs {
   createCommand?: 'create';
-  
+
   templateArg?: string[];
 }

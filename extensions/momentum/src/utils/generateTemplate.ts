@@ -14,7 +14,6 @@ const loadRawTemplate = async (template: TemplatePath): Promise<string> => {
   return fs.readFile(path.join(templatesRoot, `${template}.template`), { encoding: 'utf-8' });
 };
 
-
 export const generateTemplate = async (relativePath: TemplatePath, savePath: string, data: object) => {
   const template = await loadRawTemplate(relativePath);
   const compiledTemplate = bars.compile(template)(data);
