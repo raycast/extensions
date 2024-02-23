@@ -175,7 +175,7 @@ export class Bitwarden {
 
   async logout(): Promise<MaybeError> {
     try {
-      await this.exec(["logout"]);
+      await this.exec(["logout"], { skipLastActivityUpdate: true });
       await this.handlePostLogout();
       return { result: undefined };
     } catch (execError) {
@@ -194,7 +194,7 @@ export class Bitwarden {
       }
 
       if (reason) await this.setLockReason(reason);
-      await this.exec(["lock"]);
+      await this.exec(["lock"], { skipLastActivityUpdate: true });
       await this.callbacks.lock?.(reason);
       return { result: undefined };
     } catch (execError) {
