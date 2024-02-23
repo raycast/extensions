@@ -21,7 +21,7 @@ export function Directory(props: { path: string }) {
           <List.Section title="iCloud Drive">
             <List.Item
               title="iCloud Drive"
-              icon={{ source: "iCloud.png" }}
+              icon={{ source: "icloud.png" }}
               actions={
                 <ActionPanel>
                   <Action.Push title="Open Icloud" target={<Directory path={iCloudDrivePath()} />} />
@@ -48,7 +48,7 @@ export function Directory(props: { path: string }) {
         {props.path === getStartDirectory() && preferences.showiCloudDrive && (
           <List.Item
             title="iCloud Drive"
-            icon={{ source: "iCloud.png" }}
+            icon={{ source: "icloud.png" }}
             actions={
               <ActionPanel>
                 <Action.Push title="Open iCloud" target={<Directory path={iCloudDrivePath()} />} />
