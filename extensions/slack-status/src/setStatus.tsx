@@ -1,6 +1,6 @@
-import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
 import { OAuthService, withAccessToken, showFailureToast } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ClearStatusAction,
   CopyDeeplinkPresetAction,
@@ -33,18 +33,20 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const [presets, setPresets] = usePresets();
   const slack = useSlack();
 
-  useMemo(() => {
+  useEffect(() => {
     if (props.launchContext?.presetId) {
       const presetId = props.launchContext.presetId;
-      const presetToLaunch = presets.find((p) => p.id === props.launchContext?.presetId);
+      const presetToLaunch = presets.find((p) => p.id === presetId);
+
       if (!presetToLaunch) {
         console.error("No preset found with id: ", presetId);
         showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
       } else {
         setStatusToPreset({ preset: presetToLaunch, slack, mutate });
+        popToRoot();
         closeMainWindow();
-        return;
       }
+
       return;
     }
   }, [slack]);

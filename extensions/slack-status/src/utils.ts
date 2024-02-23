@@ -165,7 +165,7 @@ export function setStatusToPreset({
       );
     },
     {
-      loading: "Setting status...",
+      loading: "Setting status…",
       success: `Set status to ${preset.title}`,
       error: "Failed setting status",
     },

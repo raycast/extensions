@@ -62,14 +62,12 @@ export function usePresets() {
   const [presets, setPresets] = useState<SlackStatusPreset[]>(() => {
     const stored = readStoredPresets();
     if (stored) {
+      // Migrate old stored presets to have an ID if they don't
       let isModified = false;
       const updatedPresets = stored.map((preset) => {
         if (!preset.id) {
           isModified = true;
-          return {
-            ...preset,
-            id: nanoid(),
-          };
+          return { ...preset, id: nanoid() };
         }
         return preset;
       });

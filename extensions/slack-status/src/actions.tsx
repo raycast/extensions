@@ -293,8 +293,9 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
 }
 
 function createLink(preset: SlackStatusPreset) {
+  const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
   const contextPreset = encodeURIComponent(JSON.stringify({ presetId: preset.id }));
-  return `raycast://extensions/petr/${environment.extensionName}/setStatus?context=${contextPreset}`;
+  return `${protocol}extensions/petr/${environment.extensionName}/setStatus?context=${contextPreset}`;
 }
 
 export function CreateQuicklinkPresetAction(props: { preset: SlackStatusPreset }) {

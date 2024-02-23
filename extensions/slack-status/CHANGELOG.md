@@ -1,13 +1,12 @@
 # Slack Status Change
 
+## [Set Slack status from Raycast's root search] - 2024-02-23
+
+- You can now create quicklinks from the `Set Status` command making it possible to set your favorite Slack status from Raycast's root search.
+
 ## [Use OAuth utils] - 2024-02-15
 
 - Use new OAuth utils
-
-## [Launch Context] - 2024-01-27
-
-- The extension's `setStatus` command now supports launch context.
-- Users can now copy Deeplink and create Quicklinks to launch their favorite status presets from the action panel.
 
 ## [OAuth + AI] - 2023-11-14
 
