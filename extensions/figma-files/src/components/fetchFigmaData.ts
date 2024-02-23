@@ -1,10 +1,12 @@
 import { getPreferenceValues, showToast, Toast, LocalStorage, environment } from "@raycast/api";
 import fetch from "node-fetch";
 import { ProjectFiles, TeamFiles, TeamProjects } from "../types";
+import { getAccessToken } from "@raycast/utils";
 
 async function fetchTeamProjects(): Promise<TeamProjects[]> {
   const { PERSONAL_ACCESS_TOKEN, TEAM_ID } = getPreferenceValues();
 
+  const { token, type } = getAccessToken();
   const teamID: string[] = TEAM_ID.split(",").map((team: string) => team.toString().trim());
   const teams = teamID.map(async (team) => {
     try {
@@ -12,7 +14,7 @@ async function fetchTeamProjects(): Promise<TeamProjects[]> {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+          ...(type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
         },
       });
 
@@ -21,6 +23,7 @@ async function fetchTeamProjects(): Promise<TeamProjects[]> {
       }
 
       const json = (await response.json()) as TeamProjects;
+      console.log(json);
       return json;
     } catch (error) {
       console.error(error);
@@ -35,6 +38,8 @@ async function fetchTeamProjects(): Promise<TeamProjects[]> {
 
 async function fetchFiles(): Promise<ProjectFiles[][]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
+  const { token, type } = getAccessToken();
+
   const teamProjects = await fetchTeamProjects();
   const teamNames = teamProjects.map((team) => team.name).join(",");
   await LocalStorage.setItem("teamNames", teamNames);
@@ -46,7 +51,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+            ...(type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
           },
         });
 

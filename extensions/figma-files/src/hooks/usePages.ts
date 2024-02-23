@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 
 import type { File, FileDetail, Node } from "../types";
 import { loadPages, storePages } from "../cache";
+import { getAccessToken } from "@raycast/utils";
 
 export function usePages(file: File) {
   const [pages, setPages] = useState<Node[]>();
@@ -38,13 +39,14 @@ export function usePages(file: File) {
 
 async function fetchPages(file: File, signal: AbortSignal | undefined): Promise<Node[]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
+  const { token, type } = getAccessToken();
 
   try {
     const response = await fetch(`https://api.figma.com/v1/files/${file.key}?depth=1`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+        ...(type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
       },
       signal,
     });

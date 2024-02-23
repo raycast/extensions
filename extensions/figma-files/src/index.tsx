@@ -4,11 +4,12 @@ import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
+import { figma } from "./oauth";
 
-export default function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
+function SearchFiles({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
@@ -185,3 +186,5 @@ export default function Command({ launchContext }: Readonly<LaunchProps<{ launch
     </Grid>
   );
 }
+
+export default withAccessToken(figma)(SearchFiles);
