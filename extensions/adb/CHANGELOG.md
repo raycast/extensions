@@ -1,5 +1,17 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [App id commands] - 2024-02-20
+- Add `clear-app-data` command to clear cache and files for an appId
+- Add `force-stop` command to force-stop an app (doesn't save state)
+- Add `soft-kill` command to soft-kill an app (saves state)
+
+## [Crash fixes] - 2024-02-20
+- Fix missing device.
+- Fix multiple devices connected (it'll use the first device for now).
+- Fix `open-url` command due to url with params.
+- Add regex testing for `open-url` command to reject non-valid format.
+- Add max/min density. If user input a greater/lower value, it'll be maxed/mined out.
+
 ## [Fix wifi/airplane commands] - 2024-02-14
 - Fix `wifi`, `airplane` commands. There was a problem fixing merge conflicts disregarding the usage of new toggle value.
 

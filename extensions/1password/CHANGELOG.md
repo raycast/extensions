@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Bug fixes] - 2024-02-04
+
+- Fix the problem of synchronization with the 1password client in v8 verison 
+
 ## [Enhancements] - 2023-12-05
 
 - Adds Copy one-time password action.

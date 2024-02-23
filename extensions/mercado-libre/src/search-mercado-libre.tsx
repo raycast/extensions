@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Grid, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, List, getPreferenceValues } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { useCachedState, useFetch } from "@raycast/utils";
 
 interface MercadoLibreItem {
@@ -16,9 +17,12 @@ interface Preferences {
   gridItemSize: number;
 }
 
+const MAX_RECENT_SEARCHES = 7;
+
 export default function Command() {
   const { siteId, viewLayout, gridItemSize } = getPreferenceValues<Preferences>();
-  const [searchQuery, setSearchQuery] = useCachedState<string>("searchQuery", "");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [recentSearches, setRecentSearches] = useCachedState<string[]>("recentSearches", []);
 
   const { data, isLoading } = useFetch<MercadoLibreItem[]>(
     `https://api.mercadolibre.com/sites/${siteId}/search?q=${searchQuery}`,
@@ -31,6 +35,28 @@ export default function Command() {
       },
     },
   );
+
+  useEffect(() => {
+    if (searchQuery) {
+      const updatedSearches = [searchQuery, ...recentSearches.filter((query) => query !== searchQuery)].slice(
+        0,
+        MAX_RECENT_SEARCHES,
+      );
+      setRecentSearches(updatedSearches);
+    }
+  }, [searchQuery]);
+
+  const handleSearchSelect = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleRemoveSearchItem = (query: string) => {
+    setRecentSearches(recentSearches.filter((item) => item !== query));
+  };
+
+  const handleClearSearchHistory = () => {
+    setRecentSearches([]);
+  };
 
   const siteToLocaleMap: Record<string, string> = {
     MLA: "es-AR", // Argentina
@@ -57,54 +83,85 @@ export default function Command() {
     return new Intl.NumberFormat(locale, { style: "currency", currency }).format(price);
   };
 
-  return viewLayout === "grid" ? (
-    <Grid
-      isLoading={isLoading}
-      columns={Number(gridItemSize)}
-      searchBarPlaceholder="Search Mercado Libre"
-      onSearchTextChange={setSearchQuery}
-      throttle
-    >
-      <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
-        {data?.map((item) => (
-          <Grid.Item
-            key={item.id}
-            content={item.thumbnail.replace(/^http:/, "https:")}
-            title={item.title}
-            subtitle={formatPrice(item.price, item.currency_id)}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`${item.permalink}`} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </Grid.Section>
-      <Grid.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />
-    </Grid>
-  ) : (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search Mercado Libre"
-      onSearchTextChange={setSearchQuery}
-      throttle
-    >
-      <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
-        {data?.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.title}
-            accessories={[{ text: formatPrice(item.price, item.currency_id) }]}
-            icon={item.thumbnail.replace(/^http:/, "https:")}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`${item.permalink}`} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      <List.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />
-    </List>
-  );
+  if (recentSearches.length === 0 && searchQuery === "") {
+    return (
+      <List searchBarPlaceholder="Search Mercado Libre" onSearchTextChange={setSearchQuery} throttle>
+        <List.EmptyView
+          icon={{ source: "mercado-libre-emptyview.png", tintColor: Color.SecondaryText }}
+          title="What's on your shopping list?"
+        />
+      </List>
+    );
+  } else if (recentSearches.length > 0 && searchQuery === "") {
+    return (
+      <List searchBarPlaceholder="Search Mercado Libre" onSearchTextChange={setSearchQuery} throttle>
+        <List.Section title="Recent Searches">
+          {recentSearches.map((query, index) => (
+            <List.Item
+              key={index}
+              title={query}
+              actions={
+                <ActionPanel>
+                  <Action title="Search" onAction={() => handleSearchSelect(query)} />
+                  <Action title="Remove Search Item" onAction={() => handleRemoveSearchItem(query)} />
+                  <Action title="Clear Search History" onAction={handleClearSearchHistory} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      </List>
+    );
+  } else {
+    return viewLayout === "grid" ? (
+      <Grid
+        isLoading={isLoading}
+        columns={Number(gridItemSize)}
+        searchBarPlaceholder="Search Mercado Libre"
+        onSearchTextChange={setSearchQuery}
+        throttle
+        searchText={searchQuery}
+      >
+        <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+          {data?.map((item) => (
+            <Grid.Item
+              key={item.id}
+              content={item.thumbnail.replace(/^http:/, "https:")}
+              title={item.title}
+              subtitle={formatPrice(item.price, item.currency_id)}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={`${item.permalink}`} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </Grid.Section>
+      </Grid>
+    ) : (
+      <List
+        isLoading={isLoading}
+        searchBarPlaceholder="Search Mercado Libre"
+        onSearchTextChange={setSearchQuery}
+        throttle
+        searchText={searchQuery}
+      >
+        <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+          {data?.map((item) => (
+            <List.Item
+              key={item.id}
+              title={item.title}
+              accessories={[{ text: formatPrice(item.price, item.currency_id) }]}
+              icon={item.thumbnail.replace(/^http:/, "https:")}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={`${item.permalink}`} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      </List>
+    );
+  }
 }
