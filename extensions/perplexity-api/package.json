@@ -85,7 +85,7 @@
           "title": "Prompt",
           "description": "The prompt for the grammar command.",
           "type": "textfield",
-          "default": "Act as lecturer. Fix spelling, grammar and punctuation. ONLY write the corrected version without explanations.",
+          "default": "Fix spelling, grammar and punctuation. ONLY write the corrected version without explanations.",
           "required": false
         },
         {
