@@ -1,8 +1,8 @@
 # Perplexity API Changelog
 
 ## [Update] - 2024-02-22
-- Added new MoE models `pplx-8x7b-online` and `pplx-8x7b-chat`.
-- Updated pricing for MoE models.
+- Added Perplexity's new Sonar models `sonar-small-chat`, `sonar-medium-chat` and `sonar-small-online`, `sonar-medium-online`.
+- Updated pricing for MoE (8x7B) models.
 
 ## [Update] - 2024-02-13
 - The extension now uses the OpenAI client.

@@ -59,12 +59,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -121,12 +121,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -183,12 +183,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -245,12 +245,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -307,12 +307,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -365,12 +365,12 @@
               "value": "global"
             },
             {
-              "value": "pplx-7b-online",
-              "title": "Perplexity 7B Online"
+              "value": "sonar-small-online",
+              "title": "Sonar small 7B Online"
             },
             {
-              "value": "pplx-8x7b-online",
-              "title": "Perplexity 8x7B Online"
+              "value": "sonar-medium-online",
+              "title": "Sonar medium 8x7B Online"
             },
             {
               "value": "pplx-70b-online",
@@ -397,12 +397,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -476,12 +476,12 @@
               "title": "Llama2 70B Chat"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -539,12 +539,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -602,12 +602,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -665,12 +665,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -728,12 +728,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -791,12 +791,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -854,12 +854,12 @@
               "title": "CodeLlama 70B Instruct"
             },
             {
-              "value": "pplx-7b-chat",
-              "title": "Perplexity 7B Chat"
+              "value": "sonar-small-chat",
+              "title": "Sonar small 7B Chat"
             },
             {
-              "value": "pplx-8x7b-chat",
-              "title": "Perplexity 8x7B Chat"
+              "value": "sonar-medium-chat",
+              "title": "Sonar medium 8x7B Chat"
             },
             {
               "value": "pplx-70b-chat",
@@ -885,7 +885,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "mixtral-8x7b-instruct",
+      "default": "sonar-medium-chat",
       "data": [
         {
           "value": "mixtral-8x7b-instruct",
@@ -908,12 +908,12 @@
           "title": "CodeLlama 70B Instruct"
         },
         {
-          "value": "pplx-7b-chat",
-          "title": "Perplexity 7B Chat"
+          "value": "sonar-small-chat",
+          "title": "Sonar small 7B Chat"
         },
         {
-          "value": "pplx-8x7b-chat",
-          "title": "Perplexity 8x7B Chat"
+          "value": "sonar-medium-chat",
+          "title": "Sonar medium 8x7B Chat"
         },
         {
           "value": "pplx-70b-chat",
