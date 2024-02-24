@@ -1,7 +1,8 @@
 # Perplexity API Changelog
 
 ## [Update] - 2024-02-22
-- Added new MoE models `pplx-8x7b-online` and `pplx-8x7b-chat`
+- Added new MoE models `pplx-8x7b-online` and `pplx-8x7b-chat`.
+- Updated pricing for MoE models.
 
 ## [Update] - 2024-02-13
 - The extension now uses the OpenAI client.

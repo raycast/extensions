@@ -38,7 +38,7 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       break;
     case "mixtral-8x7b-instruct":
     case "pplx-8x7b-chat":
-      price = ((prompt_token * 0.14) / 1_000_000 + (output_token * 0.56) / 1_000_000) * 100;
+      price = ((prompt_token * 0.60) / 1_000_000 + (output_token * 1.8) / 1_000_000) * 100;
       break;
     case "codellama-34b-instruct":
       price = ((prompt_token * 0.35) / 1_000_000 + (output_token * 1.4) / 1_000_000) * 100;
@@ -52,7 +52,7 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       price = (5 / 1000 + (output_token * 0.28) / 1_000_000) * 100;
       break;
     case "pplx-8x7b-online":
-      price = (5 / 1000 + (output_token * 0.56) / 1_000_000) * 100;
+      price = (5 / 1000 + (output_token * 1.8) / 1_000_000) * 100;
       break;
     case "pplx-70b-online":
       price = (5 / 1000 + (output_token * 2.8) / 1_000_000) * 100;
