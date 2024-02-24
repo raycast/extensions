@@ -1,5 +1,13 @@
 # Jira Changelog
 
+## [Add OAuth utils] - 2024-02-13
+
+- Use new OAuth utils
+
+## [Add command to open issue from clipboard] - 2024-01-19
+
+- Add a new command to open issue by key from the clipboard.
+
 ## [Fix issue with JQL reserved keywords in project names] - 2023-12-18
 
 - Fix a bug causing queries to fail when project names included JQL reserved keywords.

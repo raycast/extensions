@@ -1,5 +1,16 @@
 # Image Modification Changelog
 
+## [WebP Hotfix] - 2024-01-29
+
+- Fixed some commands (e.g. convert) looking for WebP binaries in the wrong location
+
+## [Strip EXIF Data, Filter Previews] - 2024-01-28
+
+- Added "Strip EXIF Data" command
+- Added real time filter previews
+- Improved selection detection when Finder/Path Finder is not the frontmost application
+- Fixed bug where converting from WebP to anything but PNG would change the file extension but not the file format
+
 ## [Bug Fix] - 2023-10-05
 
 - Fixed a bug where the "Convert Images" command failed for image paths containing dots. (#8549)

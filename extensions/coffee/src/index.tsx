@@ -1,4 +1,4 @@
-import { LaunchProps, MenuBarExtra } from "@raycast/api";
+import { Color, LaunchProps, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { stopCaffeinate, startCaffeinate } from "./utils";
 
@@ -13,14 +13,15 @@ export default function Command(props: LaunchProps) {
 
   const caffeinateStatus = hasLaunchContext ? props.launchContext?.caffeinated : data;
   const caffeinateLoader = hasLaunchContext ? false : isLoading;
+  const preferences = getPreferenceValues<Preferences>();
 
   return (
     <MenuBarExtra
       isLoading={caffeinateLoader}
       icon={
         caffeinateStatus
-          ? { source: { light: "coffee.png", dark: "coffeedark.png" } }
-          : { source: { light: "coffee-off.png", dark: "coffeedark-off.png" } }
+          ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
+          : { source: `${preferences.icon}-empty.svg`, tintColor: Color.PrimaryText }
       }
     >
       {isLoading ? null : (

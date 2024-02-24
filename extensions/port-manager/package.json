@@ -10,17 +10,26 @@
   ],
   "icon": "command-icon.png",
   "author": "lucaschultz",
+  "contributors": [
+    "Sheraff"
+  ],
   "license": "MIT",
   "commands": [
     {
+      "name": "named-ports",
+      "title": "Named Ports",
+      "description": "Name ports to make them easier to find in the open port list",
+      "mode": "view"
+    },
+    {
       "name": "open-ports",
-      "title": "List Open Ports",
+      "title": "Open Ports",
       "description": "Show and Close Opened Ports",
       "mode": "view"
     },
     {
       "name": "open-ports-menu-bar",
-      "title": "List Open Ports in Menu Bar",
+      "title": "Open Ports in Menu Bar",
       "description": "List open ports in menu bar",
       "mode": "menu-bar",
       "icon": "command-icon.png",
@@ -29,19 +38,10 @@
   ],
   "preferences": [
     {
-      "name": "sudo",
-      "type": "checkbox",
-      "required": false,
-      "title": "Use Sudo",
-      "description": "See raycast.com/lucaschultz/port-manager",
-      "default": false,
-      "label": "Run lsof and kill commands as sudo"
-    },
-    {
       "name": "killSignal",
       "description": "The signal used to kill the process",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "select",
       "title": "Kill Signal",
       "data": [
@@ -50,7 +50,7 @@
           "value": "ask"
         },
         {
-          "title": "Alway use SIGTERM",
+          "title": "Always use SIGTERM",
           "value": "15"
         },
         {
@@ -77,6 +77,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

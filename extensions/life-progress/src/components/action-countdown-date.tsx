@@ -43,7 +43,7 @@ export function ActionRemoveCountdownDate(props: {
             _cd.splice(countdownDates.length - lifeProgressesLength + index, 1);
             LocalStorage.setItem(LocalStorageKey.COUNTDOWN_DATE_KEY, JSON.stringify(_cd));
             setRefresh(Date.now());
-          }
+          },
         );
       }}
     />

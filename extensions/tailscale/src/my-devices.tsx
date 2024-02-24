@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, Icon, Image } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Device, getStatus, getErrorDetails, getDevices, ErrorDetails } from "./shared";
+import { Device, getStatus, getErrorDetails, getDevices, sortDevices, ErrorDetails } from "./shared";
 
 export default function MyDeviceList() {
   const [devices, setDevices] = useState<Device[]>();
@@ -12,6 +12,7 @@ export default function MyDeviceList() {
         const me: string = status.Self.UserID.toString();
         const _list = getDevices(status);
         const _mylist = _list.filter((device) => device.userid === me);
+        sortDevices(_mylist);
         setDevices(_mylist);
       } catch (error) {
         setError(getErrorDetails(error, "Couldn’t load device list."));

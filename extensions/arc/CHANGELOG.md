@@ -1,5 +1,44 @@
 # Arc Changelog
 
+## [New Features] - 2024-02-18
+
+- Added `Open New Note` command to open a new Note in Arc which is disabled by default.
+- Added `Open New Easel` command to open a new Easel in Arc which is disabled by default.
+
+## [Fixes] - 2024-02-14
+
+- Fixed an issue where the `Search Tabs` command would not work if a tab title contained a backslash.
+
+## [Fixes] - 2024-01-30
+
+- Fix issue #10455: When opening a new tab and no window is open, a new window will be opened.
+
+## [New Features] - 2024-01-29
+
+- Added Kagi as a search engine for the commands `Search Arc` and `Open New Little Arc Window`
+
+## [Update] - 2024-01-26
+
+- Update release notes url
+
+## [Update] - 2024-01-19
+
+- A few commands are now disabled by default
+
+## [Fixes] - 2024-01-18
+
+- Fix #10204, opening little arc without selected text doesn't throw an error anymore.
+
+## [Improvements] - 2024-01-16
+
+- If text is selected, the command `Open New Little Arc Window` will now open in a search for the selected text.
+- If an URL is selected, the command `Open New Little Arc Window` will now open in the selected URL.
+- The command `Open New Little Arc Window` now accepts a preference for which engine to use when searching.
+
+## [Fixes] - 2024-01-05
+
+- Fixed an issue (#8189) where a wrong tab could be randomly opened instead of the one selected
+
 ## [Improvements & New Features] - 2023-12-08
 
 - Improve behavior when opening a new tab, if no window is open, a new window is opened

@@ -21,7 +21,7 @@ const main = ({ arguments: { url } }: { arguments: { url: string } }) => {
     };
 
     (async () => {
-      if (url.length > 0 && url.startsWith("http")) {
+      if (url && url.length > 0 && url.startsWith("http")) {
         const tags = await exifFromUrl(url);
         handleTags(tags, url);
         return;

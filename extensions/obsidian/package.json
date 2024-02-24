@@ -13,7 +13,8 @@
     "iancanderson",
     "pernielsentikaer",
     "ofalvai",
-    "adamadamsmusic"
+    "adamadamsmusic",
+    "fservais"
   ],
   "license": "MIT",
   "preferences": [
@@ -569,11 +570,13 @@
   "dependencies": {
     "@raycast/api": "^1.47.0",
     "@types/uuid": "^8.3.4",
+    "luxon": "^3.4.4",
     "uuid": "^8.3.2",
     "yaml": "^2.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/luxon": "^3.4.2",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.52",
     "eslint": "^8.42.0",

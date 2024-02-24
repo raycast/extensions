@@ -25,7 +25,7 @@ const timeout = setTimeout(() => {
 export async function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   console.warn(`---> start request OpenAI`);
 
-  const url = "https://api.openai.com/v1/chat/completions";
+  const url = AppKeyStore.openAIAPIURL;
 
   const prompt = `translate the following ${queryWordInfo.fromLanguage} text to ${queryWordInfo.toLanguage}, :\n\n${queryWordInfo.word} `;
   console.warn(`---> prompt: ${prompt}`);
@@ -165,7 +165,7 @@ export async function requestOpenAIStreamTranslate(queryWordInfo: QueryWordInfo)
 export function requestOpenAITextTranslate(queryWordInfo: QueryWordInfo): Promise<QueryTypeResult> {
   //   console.warn(`---> start request OpenAI`);
 
-  const url = "https://api.openai.com/v1/chat/completions";
+  const url = AppKeyStore.openAIAPIURL;
   //   const prompt = `translate from English to Chinese:\n\n"No level of alcohol consumption is safe for our health." =>`;
   const prompt = `translate from ${queryWordInfo.fromLanguage} to ${queryWordInfo.toLanguage}:\n\n"${queryWordInfo.word}" =>`;
   const message = [

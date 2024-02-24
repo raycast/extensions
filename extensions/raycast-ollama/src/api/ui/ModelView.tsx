@@ -48,7 +48,7 @@ export function ModelView(): JSX.Element {
     const map: Map<string, OllamaApiShowResponse> = new Map();
 
     if (tags)
-      await tags.models.forEach(async (tag) => {
+      tags.models.forEach(async (tag) => {
         const show = await OllamaApiShow(tag.name);
         map.set(tag.name, show);
       });
@@ -110,17 +110,18 @@ export function ModelView(): JSX.Element {
 
   /**
    * Model Detail.
-   * @param {OllamaApiTagsResponseModel} tags
-   * @param {Map<string, OllamaApiShowResponse> | undefined} show
+   * @param {OllamaApiTagsResponseModel} props.tags
+   * @param {Map<string, OllamaApiShowResponse> | undefined} props.show
    * @returns {JSX.Element}
    */
   function ModelDetail(prop: {
     tag: OllamaApiTagsResponseModel;
     show: Map<string, OllamaApiShowResponse> | undefined;
   }): JSX.Element {
-    const show = prop.show?.get(prop.tag.name);
-
+    let show: OllamaApiShowResponse | undefined = undefined;
     let modelfile: OllamaApiShowModelfile | undefined;
+
+    if (prop.show) show = prop.show.get(prop.tag.name);
     if (show) modelfile = OllamaApiShowParseModelfile(show);
 
     return (
@@ -167,7 +168,7 @@ export function ModelView(): JSX.Element {
 
   /**
    * Model Action Menu.
-   * @param {OllamaApiTagsResponseModel} model
+   * @param {OllamaApiTagsResponseModel} props.model
    * @returns {JSX.Element}
    */
   function ModelAction(prop: { model: OllamaApiTagsResponseModel }): JSX.Element {

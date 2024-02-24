@@ -3,6 +3,7 @@ import { Fragment, ReactElement, useState } from "react";
 import { TweetV1 } from "twitter-api-v2";
 import { twitterClient } from "../lib/twitterapi";
 import { getErrorMessage } from "../../utils";
+import { XIcon } from "../../icon";
 
 interface TweetFormValues {
   text: string;
@@ -177,11 +178,7 @@ export function TweetSendThreadForm(): ReactElement {
         <ActionPanel>
           <ActionPanel.Section>
             {validTweets(tweets) && (
-              <Action.SubmitForm
-                title={submitText}
-                icon="twitter.png"
-                onSubmit={(values: TweetFormValues) => submitTweets(tweets)}
-              />
+              <Action.SubmitForm title={submitText} icon={XIcon()} onSubmit={() => submitTweets(tweets)} />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Thread">
@@ -193,7 +190,7 @@ export function TweetSendThreadForm(): ReactElement {
             />
             {tweets.length > 1 && (
               <Action
-                title="Remove last Tweet"
+                title="Remove Last Tweet"
                 onAction={removeTweet}
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ["cmd"], key: "-" }}

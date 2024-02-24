@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import ResponseActions from "./actions/ResponseActions";
-import { CommandOptions } from "../../utils/types";
+import { CommandOptions } from "../../lib/commands/types";
 import { useSpeech } from "../../hooks/useSpeech";
 
 export default function CommandDetailView(props: {

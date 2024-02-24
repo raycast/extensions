@@ -75,9 +75,9 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   const currentTime = Date.now();
-  const tenMinutesInMilliseconds = 10 * 60 * 1000;
+  const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
   const dataIsOld =
-    currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > tenMinutesInMilliseconds;
+    currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > twoHoursInMilliseconds;
 
   if (spotifyAppData?.state === "NOT_RUNNING") {
     return (
@@ -239,7 +239,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       {menuItems}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
         {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id || playlist.collaborative)
+          ?.filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => {
             return (
               playlist.name &&

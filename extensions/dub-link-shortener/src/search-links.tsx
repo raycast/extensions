@@ -32,7 +32,6 @@ function SearchLinks() {
             key={index}
             icon={{ source: { light: "link-icon.svg", dark: "link-icon@dark.svg" } }}
             title={shortUrl}
-            subtitle={value.url}
             detail={
               <List.Item.Detail
                 metadata={

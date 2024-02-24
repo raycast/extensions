@@ -13,14 +13,14 @@ You can view images of PromptLab's output in [the gallery](https://skaplanoffici
 - [Feature Overview](#feature-overview)
 - [Top-Level Commands](#top-level-commands)
 - [Create Your Own Commands](#create-your-own-commands)
-    - [Placeholders](#placeholders)
-    - [Action Scripts](#action-scripts)
-        - [Provided Variables](#provided-variables)
-        - [Provided Handlers](#provided-handlers)
-    - [Custom Configuration Fields](#custom-configuration-fields)
-- [Chats and Autonomous Agents](#chats--autonomous-agents)
-    - [Chats and Autonomous Agent Features](#chats-and-autonomous-agent-features)
-    - [Autonomous Agent Features](#autonomous-agent-features)
+  - [Placeholders](#placeholders)
+  - [Action Scripts](#action-scripts)
+    - [Provided Variables](#provided-variables)
+    - [Provided Handlers](#provided-handlers)
+  - [Custom Configuration Fields](#custom-configuration-fields)
+- [Chats and Autonomous Agent Features](#chats-and-autonomous-agent-features)
+  - [Chats](#chats)
+  - [Autonomous Agent Features](#autonomous-agent-features)
 - [Custom Model Endpoints](#custom-model-endpoints)
 - [Troubleshooting](#troubleshooting)
 - [Privacy Policy](https://github.com/SKaplanOfficial/Raycast-PromptLab/blob/main/PRIVACY.md)
@@ -51,23 +51,23 @@ You can view images of PromptLab's output in [the gallery](https://skaplanoffici
 ## Top-Level Commands
 
 - New PromptLab Command
-    - Create a custom PromptLab command accessible via 'My PromptLab Commands'.
+  - Create a custom PromptLab command accessible via 'My PromptLab Commands'.
 - My PromptLab Commands
-    - Search and run custom PromptLab commands that you've installed or created.
+  - Search and run custom PromptLab commands that you've installed or created.
 - Manage Models
-    - View, edit, add, and delete custom models.
+  - View, edit, add, and delete custom models.
 - PromptLab Command Store
-    - Explore and search commands uploaded to the store by other PromptLab users.
+  - Explore and search commands uploaded to the store by other PromptLab users.
 - PromptLab Chat
-    - Start a back-and-forth conversation with AI with selected files provided as context.       
+  - Start a back-and-forth conversation with AI with selected files provided as context.
 - PromptLab Menu Item
-    - Displays a menu of PromptLab commands in your menu bar.
+  - Displays a menu of PromptLab commands in your menu bar.
 - Import PromptLab Commands
-    - Add custom commands from a JSON string.
+  - Add custom commands from a JSON string.
 
 ## Create Your Own Commands
 
-You can create custom PromptLab commands, accessed via the "My PromptLab Commands" command, to execute your own prompts acting on the contents of selected files. A variety of useful defaults are provided, as listed under [Default Commands](#default-commands), and you can find more in the *PromptLab Command Store*.
+You can create custom PromptLab commands, accessed via the "My PromptLab Commands" command, to execute your own prompts acting on the contents of selected files. A variety of useful defaults are provided, and you can find more in the *PromptLab Command Store*.
 
 ### Placeholders
 
@@ -85,7 +85,7 @@ A few examples of placeholders are:
 | `{{todayEvents}}` | The events scheduled for today, including their start and end times |
 | `{{youtube:[search term]}}` | The transcription of the first YouTube video result for the specified search term |
 | `{{url:[url]}}` | The visible text at the specified URL |
-| `{{as:...}}` | The result of the specified AppleScript code | 
+| `{{as:...}}` | The result of the specified AppleScript code |
 | `{{js:...}}` | The result of the specified JavaScript code |
 
 These are just a few of the many placeholders available. [View the full list here](https://github.com/SKaplanOfficial/Raycast-PromptLab/blob/main/assets/placeholders_guide.md). You even create your own placeholders using JSON, if you want!
@@ -95,6 +95,7 @@ These are just a few of the many placeholders available. [View the full list her
 When configuring a PromptLab command, you can provide AppleScript code to execute once the AI finishes its response. You can access the response text via the `response` variable in AppleScript. Several convenient handlers for working with the response text are also provided, as listed below. Action Scripts can be used to build complex workflows using AI as a content provider, navigator, or decision-maker.
 
 #### Provided Variables
+
 | Variable | Value | Type |
 | --- | --- | --- |
 | `input` | The selected files or text input provided to the command. | String |
@@ -102,6 +103,7 @@ When configuring a PromptLab command, you can provide AppleScript code to execut
 | `response` | The full response received from the AI. | String |
 
 #### Provided Handlers
+
 | Handler | Purpose | Returns |
 | --- | --- | --- |
 | `split(theText, theDelimiter)` | Splits text around the specified delimiter. | List of String |
@@ -135,7 +137,7 @@ To use Anthropic's Claude API as the model endpoint, configure the extension as 
 
 | Preference Name | Value |
 | --- | --- |
-| Model Endpoint | https://api.anthropic.com/v1/complete |
+| Model Endpoint | <https://api.anthropic.com/v1/complete> |
 | API Authorization Type | X-API-Key |
 | API Key | Your API key |
 | Input Schema | {"prompt": "\n\nHuman: {{prompt}} \n\nAssistant:", "model": "claude-instant-1-100k", "max_tokens_to_sample": 3000, "stream": true } |
@@ -148,7 +150,7 @@ To use the OpenAI API as the model endpoint, configure the extension as follows:
 
 | Preference Name | Value |
 | --- | --- |
-| Model Endpoint | https://api.openai.com/v1/chat/completions |
+| Model Endpoint | <https://api.openai.com/v1/chat/completions> |
 | API Authorization Type | Bearer Token |
 | API Key | Your API key |
 | Input Schema | { "model": "gpt-4", "messages": [{"role": "user", "content": "{prompt}"}], "stream": true }
@@ -160,7 +162,7 @@ To use the OpenAI API as the model endpoint, configure the extension as follows:
 If you encounter any issues with the extension, you can try the following steps to resolve them:
 
 1. Make sure you're running the latest version of Raycast and PromptLab. I'm always working to improve the extension, so it's possible that your issue has already been fixed.
-2. If you're having trouble with a command not outputting the desired response, try adjusting the command's configuration. You might just need to make small adjustments to the wording of the prompt. See the [Useful Resources](#useful-resources) section below for help with prompt engineering. You can also try adjusting the included information settings to add or remove context from the prompt and guide the AI towards the desired response.
+2. If you're having trouble with a command not outputting the desired response, try adjusting the command's configuration. You might just need to make small adjustments to the wording of the prompt. You can also try adjusting the included information settings to add or remove context from the prompt and guide the AI towards the desired response.
 3. If you're having trouble with PromptLab Chat responding in unexpected ways, make sure the chat settings are configured correctly. If you are trying to reference selected files, you need to enable "Use Selected Files As Context". Likewise, to run other PromptLab commands automatically, you need to enable "Allow AI To Run Commands". To have the AI remember information about your conversation, you'll need to enable "Use Conversation As Context". Having multiple of these settings enabled can sometimes cause unexpected behavior, so try disabling them one at a time to see if that resolves the issue.
 4. Check the [PromptLab Wiki](https://github.com/SKaplanOfficial/Raycast-PromptLab/wiki) to see if a solution to your problem is provided there.
 5. If you're still having trouble, [create a new issue](https://github.com/SKaplanOfficial/Raycast-PromptLab/issues/new/choose) on GitHub with a detailed description of the issue and any relevant screenshots or information. I'll do my best to help you out!

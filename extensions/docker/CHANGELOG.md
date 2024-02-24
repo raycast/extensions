@@ -1,5 +1,9 @@
 # Docker Changelog
 
+## [Feature] - 2023-12-15
+
+- Added support for http, https, and tcp sockets
+
 ## [Fix] - 2023-12-19
 
 - Fixes errors on image detail view

@@ -63,13 +63,32 @@
     },
     {
       "name": "showPathInMenubar",
-      "description": "Show Path in Menubar",
+      "description": "Show Subtitle in Menu Bar",
       "type": "checkbox",
       "required": false,
       "default": false,
-      "title": "Show Path in Menubar",
-      "placeholder": "Show Path in Menubar",
-      "label": "Show Path in Menubar"
+      "title": "Show Subtitle in Menu Bar",
+      "placeholder": "Show Subtitle in Menu Bar",
+      "label": "Show Subtitle in Menu Bar"
+    },
+    {
+      "name": "subtitleMenubar",
+      "description": "Subtitle Menu Bar",
+      "label": "Subtitle Menu Bar",
+      "title": "Subtitle Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "path",
+      "data": [
+        {
+          "title": "Show Environment",
+          "value": "environment" 
+        },
+        {
+          "title": "Show Path",
+          "value": "path"
+        }
+      ]
     },
     {
       "name": "showMonochromeIcon",
@@ -77,9 +96,9 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Show monochrome icon in Menubar",
+      "title": "Show Monochrome Icon in Menu Bar",
       "placeholder": "Show monochrome icon in Menubar",
-      "label": "Show monochrome icon in Menubar"
+      "label": "Show Monochrome Icon in Menu Bar"
     },
     {
       "name": "defaultAction",
@@ -102,17 +121,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
+    "@raycast/api": "^1.62.0",
     "plist": "^3.0.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/expand-tilde": "^2.0.0",
-    "@types/node": "^18.8.3",
+    "@types/node": "^20.8.10",
     "@types/plist": "^3.0.2",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "expand-tilde": "^2.0.2",
     "prettier": "^3.0.2",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

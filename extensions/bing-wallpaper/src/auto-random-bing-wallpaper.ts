@@ -18,37 +18,50 @@ export default async () => {
 
 export const getRandomWallpaper = async () => {
   const { includeDownloadedWallpapers } = getPreferenceValues<Preferences>();
-  const firstResponse = await fetch(buildBingWallpapersURL(0, 8));
-  const secondResponse = await fetch(buildBingWallpapersURL(8, 8));
-  const firstResponseDataImages = ((await firstResponse.json()) as BingResponseData).images;
-  const secondResponseDataImages = ((await secondResponse.json()) as BingResponseData).images;
-  secondResponseDataImages.shift();
-  const bingWallpaperHD = firstResponseDataImages.concat(secondResponseDataImages);
+  const firstResponse = await fetch(buildBingWallpapersURL(0, 8)).catch(async (e) => {
+    console.error(e);
+    return undefined;
+  });
+  const secondResponse = await fetch(buildBingWallpapersURL(8, 8)).catch(async (e) => {
+    console.error(e);
+    return undefined;
+  });
+  if (typeof firstResponse == "undefined" || typeof secondResponse == "undefined") {
+    return;
+  }
+  try {
+    const firstResponseDataImages = ((await firstResponse.json()) as BingResponseData).images;
+    const secondResponseDataImages = ((await secondResponse.json()) as BingResponseData).images;
+    secondResponseDataImages.shift();
+    const bingWallpaperHD = firstResponseDataImages.concat(secondResponseDataImages);
 
-  if (includeDownloadedWallpapers) {
-    const downloadedBingWallpaper = getDownloadedBingWallpapers();
+    if (includeDownloadedWallpapers) {
+      const downloadedBingWallpaper = getDownloadedBingWallpapers();
 
-    if (bingWallpaperHD.length + downloadedBingWallpaper.length != 0) {
-      const randomImageIndex = Math.floor(Math.random() * (bingWallpaperHD.length + downloadedBingWallpaper.length));
-      if (randomImageIndex < bingWallpaperHD.length) {
-        const randomImage = bingWallpaperHD[randomImageIndex];
-        await setWallpaperWithoutToast(
-          getPictureName(randomImage.url) + "-" + randomImage.startdate,
-          buildBingImageURL(randomImage.url, "raw")
-        );
+      if (bingWallpaperHD.length + downloadedBingWallpaper.length != 0) {
+        const randomImageIndex = Math.floor(Math.random() * (bingWallpaperHD.length + downloadedBingWallpaper.length));
+        if (randomImageIndex < bingWallpaperHD.length) {
+          const randomImage = bingWallpaperHD[randomImageIndex];
+          await setWallpaperWithoutToast(
+            getPictureName(randomImage.url) + "-" + randomImage.startdate,
+            buildBingImageURL(randomImage.url, "raw"),
+          );
+        } else {
+          const randomImage = downloadedBingWallpaper[randomImageIndex - bingWallpaperHD.length];
+          await setDownloadedWallpaperWithoutToast(randomImage.path);
+        }
       } else {
-        const randomImage = downloadedBingWallpaper[randomImageIndex - bingWallpaperHD.length];
-        await setDownloadedWallpaperWithoutToast(randomImage.path);
+        await showHUD("No wallpaper found.");
       }
     } else {
-      await showHUD("No wallpaper found.");
+      const randomImageIndex = Math.floor(Math.random() * bingWallpaperHD.length);
+      const randomImage = bingWallpaperHD[randomImageIndex];
+      await setWallpaperWithoutToast(
+        getPictureName(randomImage.url) + "-" + randomImage.startdate,
+        buildBingImageURL(randomImage.url, "raw"),
+      );
     }
-  } else {
-    const randomImageIndex = Math.floor(Math.random() * bingWallpaperHD.length);
-    const randomImage = bingWallpaperHD[randomImageIndex];
-    await setWallpaperWithoutToast(
-      getPictureName(randomImage.url) + "-" + randomImage.startdate,
-      buildBingImageURL(randomImage.url, "raw")
-    );
+  } catch (e) {
+    console.error(e);
   }
 };

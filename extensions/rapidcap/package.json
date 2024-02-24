@@ -5,6 +5,9 @@
   "description": "Quickly save information without context switching",
   "icon": "rapidcap-icon.png",
   "author": "brittany_carusone",
+  "contributors": [
+    "mikikiv"
+  ],
   "categories": [
     "Productivity",
     "Other"

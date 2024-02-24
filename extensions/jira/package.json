@@ -13,7 +13,8 @@
     "rifont",
     "gavinroderick",
     "lusit",
-    "literallyjustroy"
+    "literallyjustroy",
+    "mheidinger"
   ],
   "owner": "raycast",
   "access": "public",
@@ -88,11 +89,27 @@
       "subtitle": "Jira",
       "description": "Search issues globally in all projects.",
       "mode": "view"
+    },
+    {
+      "name": "open-from-clipboard",
+      "title": "Open Issue From Clipboard",
+      "subtitle": "Jira",
+      "description": "Open an issue by its key from the clipboard.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "baseUrl",
+          "type": "textfield",
+          "required": false,
+          "title": "Jira Base URL",
+          "description": "Optional Base URL for Self-Hosted Jira (e.g. https://jira.acme-inc.com). Defaults to the public Jira."
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.3",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/utils": "^1.12.4",
     "date-fns": "^2.30.0",
     "filesize": "^10.1.0",
     "form-data": "^4.0.0",

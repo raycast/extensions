@@ -16,7 +16,6 @@ import { parseHTML } from "linkedom";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
-import { View } from "./components";
 import { useSearchPages } from "./hooks";
 import { appendToPage, createDatabasePage, getPageIcon } from "./utils/notion";
 
@@ -176,9 +175,5 @@ ${result?.content}
 }
 
 export default function Command() {
-  return (
-    <View>
-      <QuickCapture />
-    </View>
-  );
+  return <QuickCapture />;
 }

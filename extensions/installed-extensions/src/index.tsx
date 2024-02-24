@@ -8,9 +8,11 @@ import {
   Clipboard,
   showHUD,
   openExtensionPreferences,
+  getDefaultApplication,
+  Application,
 } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExtensionMetadata, Option } from "./types";
 import { extensionTypes } from "./constants";
 import { formatItem, formatOutput } from "./utils";
@@ -41,6 +43,26 @@ async function getPackageJsonFiles() {
     }
     throw new Error("An unknown error occurred");
   }
+}
+
+function OpenManifestInDefaultAppAction(props: { url: string }) {
+  const [defaultApp, setDefaultApp] = useState<Application>();
+  useEffect(() => {
+    getDefaultApplication(props.url)
+      .then((app) => setDefaultApp(app))
+      .catch(() => setDefaultApp(undefined));
+  }, [props.url]);
+  if (!defaultApp) {
+    return null;
+  }
+  return (
+    <Action.Open
+      title={`Open Manifest in ${defaultApp.name}`}
+      target={props.url}
+      icon={{ fileIcon: defaultApp.path }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+    />
+  );
 }
 
 export default function IndexCommand() {
@@ -194,6 +216,9 @@ export default function IndexCommand() {
                         icon={Icon.Clipboard}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                       />
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                      <OpenManifestInDefaultAppAction url={path.join(item.path, "package.json")} />
                     </ActionPanel.Section>
                     <Action
                       title="Open Extension Preferences"

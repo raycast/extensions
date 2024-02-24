@@ -1,17 +1,39 @@
-import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import toggl from "../toggl";
-import { storage } from "../storage";
-import { Project, Task } from "../toggl/types";
-import { useAppContext } from "../context";
 import { useMemo, useState } from "react";
+import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
+import { createTimeEntry, Project, Task } from "../api";
+import { useMe, useWorkspaces, useClients, useTags, useTasks } from "../hooks";
+import { createProjectGroups } from "../helpers/createProjectGroups";
 
-function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
+interface CreateTimeEntryFormParams {
+  isLoading: boolean;
+  projects: Project[];
+  revalidateRunningTimeEntry: () => void;
+  project?: Project;
+  description?: string;
+}
+
+function CreateTimeEntryForm({
+  isLoading,
+  projects,
+  revalidateRunningTimeEntry,
+  project,
+  description,
+}: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
-  const { projects, tags, tasks, isLoading, projectGroups, me } = useAppContext();
+  const { me, isLoadingMe } = useMe();
+  const { workspaces, isLoadingWorkspaces } = useWorkspaces();
+  const { clients, isLoadingClients } = useClients();
+  const { tags, isLoadingTags } = useTags();
+  const { tasks, isLoadingTasks } = useTasks();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [billable, setBillable] = useState<boolean>(false);
+
+  const projectGroups = useMemo(
+    () => createProjectGroups(projects, workspaces, clients),
+    [projects, workspaces, clients],
+  );
 
   async function handleSubmit(values: { description: string }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -22,7 +44,8 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
     }
 
     try {
-      await toggl.createTimeEntry({
+      await showToast(Toast.Style.Animated, "Starting time entry...");
+      await createTimeEntry({
         projectId: selectedProject?.id,
         workspaceId,
         description: values.description,
@@ -30,10 +53,9 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         taskId: selectedTask?.id,
         billable,
       });
-      await showToast(Toast.Style.Animated, "Starting time entry...");
-      await storage.runningTimeEntry.refresh();
       await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
+      revalidateRunningTimeEntry();
       await clearSearchBar();
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed to start time entry");
@@ -62,7 +84,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingMe || isLoadingWorkspaces || isLoadingClients || isLoadingTags || isLoadingTasks}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Time Entry" onSubmit={handleSubmit} />
@@ -73,9 +95,10 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
       <Form.Dropdown
         id="project"
         title="Project"
-        defaultValue={selectedProject?.id.toString()}
+        defaultValue={selectedProject?.id.toString() ?? "-1"}
         onChange={onProjectChange}
       >
+        <Form.Dropdown.Item key="-1" value="-1" title={"No Project"} icon={{ source: Icon.Circle }} />
         {projectGroups.map((group) => (
           <Form.Dropdown.Section
             key={group.key}

@@ -16,15 +16,12 @@ import qs from "qs";
 import util from "util";
 import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudio } from "../../audio";
 import { requestCostTime } from "../../axiosConfig";
-import { userAgent, YoudaoErrorCode } from "../../consts";
+import { YoudaoErrorCode, userAgent } from "../../consts";
 import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
 import { AppKeyStore, myPreferences } from "../../preferences";
 import { DictionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo, md5 } from "../../utils";
-import {
-  formatYoudaoWebDictionaryModel as formatYoudaoWebDictionaryModel,
-  formatYoudaoDictionaryResult,
-} from "./formatData";
+import { formatYoudaoDictionaryResult, formatYoudaoWebDictionaryModel } from "./formatData";
 import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
 import { getYoudaoWebDictionaryLanguageId, isValidYoudaoWebTranslateLanguage } from "./utils";
 
@@ -230,7 +227,7 @@ export function requestYoudaoWebDictionary(
           return resolve(youdaoTypeResult);
         }
 
-        // * Note: Youdao web dict from-to language may be incorrect, eg: 鶗鴂, so we need to update it.
+        // * Note: Youdao web dict from-to language may be incorrect, eg: 鶗鴂，so we need to update it.
         if (queryWordInfo.fromLanguage !== autoDetectLanguageItem.youdaoLangCode) {
           youdaoQueryWordInfo.fromLanguage = queryWordInfo.fromLanguage;
           youdaoQueryWordInfo.toLanguage = queryWordInfo.toLanguage;

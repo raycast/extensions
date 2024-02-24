@@ -8,6 +8,9 @@
   ],
   "license": "MIT",
   "author": "skydiver",
+  "contributors": [
+    "kytta"
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",

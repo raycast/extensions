@@ -13,31 +13,22 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import {
-  addWeeks,
-  endOfWeek,
-  isBefore,
-  isToday,
-  isTomorrow,
-  parseISO,
-  startOfDay,
-  startOfToday,
-  startOfTomorrow,
-  startOfWeek,
-} from "date-fns";
+import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
 import { useMemo } from "react";
-
 import {
   deleteReminder as apiDeleteReminder,
+  setPriorityStatus,
   toggleCompletionStatus,
-  setReminderPriority,
-  setReminderDueDate,
-} from "./api";
-import { getPriorityIcon, truncateMiddle } from "./helpers";
+  setDueDate as setReminderDueDate,
+} from "swift:../swift/AppleReminders";
+
+import { getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
+const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
+
 export default function Command() {
-  const { displayMenuBarCount, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
@@ -50,16 +41,17 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    const reminders = listId ? data?.reminders.filter((reminder) => reminder.list?.id === listId) : data?.reminders;
-    reminders?.forEach((reminder) => {
+    const reminders = listId
+      ? data?.reminders.filter((reminder: Reminder) => reminder.list?.id === listId)
+      : data?.reminders;
+    reminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
       if (!reminder.dueDate) {
         other.push(reminder);
       } else {
-        const dueDate = parseISO(reminder.dueDate);
-
-        if (isBefore(dueDate, startOfDay(new Date()))) {
+        const { dueDate } = reminder;
+        if (isOverdue(dueDate)) {
           overdue.push(reminder);
         } else if (isToday(dueDate)) {
           today.push(reminder);
@@ -89,7 +81,7 @@ export default function Command() {
 
   async function setPriority(reminderId: string, priority: Priority) {
     try {
-      await setReminderPriority(reminderId, priority);
+      await setPriorityStatus({ reminderId, priority });
       await mutate();
       await showToast({
         style: Toast.Style.Success,
@@ -106,7 +98,7 @@ export default function Command() {
 
   async function setDueDate(reminderId: string, date: Date | null) {
     try {
-      await setReminderDueDate(reminderId, date ? date.toISOString() : null);
+      await setReminderDueDate({ reminderId, dueDate: date ? format(date, "yyyy-MM-dd") : null });
       await mutate();
       await showToast({
         style: Toast.Style.Success,
@@ -160,14 +152,43 @@ export default function Command() {
     await mutate();
   }
 
+  let title = "";
+  if (titleType === "count") {
+    title = hideMenuBarCountWhenEmpty && remindersCount === 0 ? "" : String(remindersCount);
+  }
+
+  const displayReminderTitle = titleType === "firstReminder" && remindersCount > 0;
+  if (displayReminderTitle) {
+    const firstReminder = sections[0].items[0];
+    title = truncate(addPriorityToTitle(firstReminder.title, firstReminder.priority), 30);
+  }
+
   return (
-    <MenuBarExtra
-      isLoading={isLoading}
-      icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }}
-      {...(displayMenuBarCount
-        ? { title: hideMenuBarCountWhenEmpty && remindersCount === 0 ? undefined : String(remindersCount) }
-        : {})}
-    >
+    <MenuBarExtra isLoading={isLoading} icon={{ source: { light: "icon.png", dark: "icon@dark.png" } }} title={title}>
+      {displayReminderTitle ? (
+        <MenuBarExtra.Item
+          title="Complete"
+          icon={Icon.CheckCircle}
+          onAction={async () => {
+            const reminder = sections[0].items[0];
+            try {
+              await toggleCompletionStatus(reminder.id);
+              await mutate();
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Marked reminder as complete",
+                message: reminder.title,
+              });
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Unable to mark reminder as complete",
+                message: reminder.title,
+              });
+            }
+          }}
+        />
+      ) : null}
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
@@ -175,12 +196,12 @@ export default function Command() {
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={truncateMiddle(addPriorityToTitle(reminder.title, reminder.priority))}
+                title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
-                  icon={{ fileIcon: "/System/Applications/Reminders.app" }}
+                  icon={{ fileIcon: REMINDERS_FILE_ICON }}
                 />
 
                 <MenuBarExtra.Item
@@ -313,6 +334,14 @@ export default function Command() {
           alternate={
             <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
           }
+        />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Reminders"
+          icon={{ fileIcon: REMINDERS_FILE_ICON }}
+          onAction={() => open("home", "com.apple.reminders")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

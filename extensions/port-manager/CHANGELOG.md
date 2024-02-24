@@ -1,6 +1,14 @@
 # Port Manager Changelog
 
-## [Menu Bar COmmand] - 2023-08-18
+## [Improved Menu Bar Command] - 2024-01-18
+
+- Improved menu bar commands
+- Caches the opened ports, so opening the extension feels instant
+- Removed the preference to use `sudo` for listing and killing processes
+- Added the "named ports" feature (special thanks to [@Sheraff](https://www.raycast.com/Sheraff))
+- Made command names more concise
+
+## [Menu Bar Command] - 2023-08-18
 
 - Added simple menu bar command
 - Added preference to always use the same kill signal

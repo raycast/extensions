@@ -1,5 +1,17 @@
 # Browser Bookmarks Changelog
 
+## [Support for Chrome Beta] - 2024-01-12
+
+- Add support for `Chrome Beta` browser.
+
+## [Bug Fixes] - 2024-02-01
+
+- Fixed sort by score issue
+
+## [Bug Fixes] - 2023-12-29
+
+- Fixed an issue where the selected item would not be the first one after the search text changed
+
 ## [Support for Sidekick] - 2023-12-18
 
 - Add support for `Sidekick` browser

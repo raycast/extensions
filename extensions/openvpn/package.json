@@ -14,26 +14,26 @@
     {
       "name": "connect",
       "title": "Connect OpenVPN",
-      "description": "Template for running a script without any view",
+      "description": "Connect to a VPN using applescript to control OpenVPN Client.",
       "mode": "no-view"
     },
     {
       "name": "disconnect",
       "title": "Disconnect OpenVPN",
-      "description": "Template for running a script without any view",
+      "description": "Disconnect to a VPN using applescript to control OpenVPN Client.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.64.0",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

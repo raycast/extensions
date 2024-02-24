@@ -2,13 +2,18 @@ import { List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { WordListItem } from "./WordListItem";
-import { TranslateResponse } from "./types";
+import { Locale, TranslateResponse } from "./types";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { data = [], isLoading } = useFetch(`https://translate.ge/api/search/eng/${searchText}`, {
-    parseResponse: parseFetchResponse,
-  });
+  const [from, to]: [Locale, Locale] = /^[ა-ჰ]+$/.test(searchText) ? ["ka", "en"] : ["en", "ka"];
+  const { data = [], isLoading } = useFetch(
+    `https://beta2.translate.ge/api/translate?from=${from}&to=${to}&str=${encodeURIComponent(searchText)}`,
+    {
+      parseResponse: parseFetchResponse,
+      execute: searchText.length > 0,
+    },
+  );
 
   return (
     <List
@@ -18,9 +23,7 @@ export default function Command() {
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((word) => (
-          <WordListItem key={word.id} word={word} />
-        ))}
+        {data?.map((word) => <WordListItem key={word.id} word={word} />)}
       </List.Section>
     </List>
   );
@@ -30,9 +33,12 @@ export default function Command() {
 async function parseFetchResponse(response: Response) {
   try {
     const data = (await response.json()) as TranslateResponse;
-    return data.hits.map((hit) => ({
-      ...hit,
-      desc: hit.desc.replace(/\r|\n|\t/g, " "),
+    return data.found.map((item) => ({
+      id: item.id,
+      word: item[data.from],
+      translation: item[data.to],
+      from: data.from,
+      to: data.to,
     }));
   } catch (err) {
     return [];

@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Performance Improvements] - 2024-01-19
+
+- Improve icon fetching performance by using the API provided by Raycast
+
 ## [Deeplinks Support] - 2023-10-21
 
 - Added Deeplink Support

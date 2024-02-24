@@ -1,5 +1,12 @@
 # I Don't Have Spotify Changelog
 
+## [Fix] - 2024-01-31
+
+- fix Error: Missing required property "title" for List.Item
+- replace isVerified text with an icon
+- update hostname + SPOTIFY_LINK_REGEX
+- fix cache vs clipboard validation
+
 ## [Fix] - 2023-11-06
 
 - Corrected the hostname from which the data was fetched from

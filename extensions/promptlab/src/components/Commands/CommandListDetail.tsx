@@ -1,14 +1,7 @@
 import { List } from "@raycast/api";
-import {
-  Command,
-  StoreCommand,
-  isCommand,
-  NumberConfigField,
-  BooleanConfigField,
-  StringConfigField,
-  isStoreCommand,
-  isTrueStr,
-} from "../../utils/types";
+import { isTrueStr } from "../../lib/common/types";
+import { Command, StoreCommand, isCommand, isStoreCommand } from "../../lib/commands/types";
+import { NumberConfigField, BooleanConfigField, StringConfigField } from "../../lib/commands/config/types";
 
 export default function CommandListDetail(props: { command: Command | StoreCommand }) {
   const { command } = props;
@@ -98,6 +91,7 @@ ${
           : "Any"
       } |
 | Creativity | ${command.temperature == undefined || command.temperature == "" ? "1.0" : command.temperature} |
+| Record Runs? | ${isTrueStr(command.recordRuns) ? "Yes" : "No"} |
 | Use File Metadata? | ${isTrueStr(command.useMetadata) ? "Yes" : "No"} |
 | Use Sound Classification? | ${isTrueStr(command.useSoundClassification) ? "Yes" : "No"} |
 | Use Subject Classification? | ${isTrueStr(command.useSubjectClassification) ? "Yes" : "No"} |
@@ -120,7 +114,7 @@ ${(isCommand(command) ? command.setupConfig : JSON.parse(command.setupConfig)).f
     (field: NumberConfigField | BooleanConfigField | StringConfigField) =>
       `| ${field.name} | ${
         field.description == undefined || field.description.trim().length == 0 ? "None" : field.description
-      } | ${field.value == undefined || field.value.toString().trim().length == 0 ? "None" : field.value} |`
+      } | ${field.value == undefined || field.value.toString().trim().length == 0 ? "None" : field.value} |`,
   )
   .join("\n")}
 `

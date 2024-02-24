@@ -61,7 +61,6 @@ export async function GetImageFromUrl(url: string): Promise<RaycastImage | undef
 /**
  * Get Image from disk.
  * @param {string} file
- * @returns {RaycastImage}
  */
 export async function GetImageFromFile(file: string) {
   if (!file.match(/(file:)?([/|.|\w|\s|-])/g)) throw new Error("Only PNG and JPG are supported");
@@ -89,7 +88,7 @@ export async function GetImage(): Promise<RaycastImage[]> {
   const image: RaycastImage[] = [];
   const finder = await getSelectedFinderItems().catch(() => []);
   if (finder.length > 0) {
-    const p = finder.map((f) => {
+    const p = finder.map(async (f) => {
       return GetImageFromFile(f.path).catch(() => {
         return undefined;
       });
@@ -147,7 +146,7 @@ export async function GetModel(
  */
 export async function GetModelModelfile(model: string): Promise<OllamaApiShowModelfile | undefined> {
   return await OllamaApiShow(model)
-    .then(async (data) => await OllamaApiShowParseModelfile(data))
+    .then((data) => OllamaApiShowParseModelfile(data))
     .catch(() => undefined);
 }
 

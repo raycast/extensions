@@ -154,7 +154,15 @@
       "title": "Translate",
       "subtitle": "Ollama",
       "description": "Translate selected text",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+         "name": "language",
+         "placeholder": "To Language",
+         "type": "text",
+         "required": true
+        }
+      ]
     },
     {
       "name": "ollama-tweet",

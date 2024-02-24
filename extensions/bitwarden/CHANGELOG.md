@@ -4,6 +4,11 @@
 
 - Added a new experimental option to lock the vault "On system lock"
 
+## [New Command and Fix] - 2024-01-06
+
+- Adds Create Folder command
+- Fixes issue with Loading Fallback
+
 ## [Error handling] - 2023-11-30
 
 - Improved error handling

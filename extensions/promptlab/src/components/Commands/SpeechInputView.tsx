@@ -1,6 +1,6 @@
 import { Detail, Toast, environment, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execScript } from "../../utils/scripts";
+import { execScript } from "../../lib/scripts";
 import path from "path";
 
 export default function SpeechInputView(props: {

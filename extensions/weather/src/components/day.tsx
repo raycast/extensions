@@ -2,12 +2,18 @@ import { Color, List } from "@raycast/api";
 import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
 import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Hourly, WeatherData, getHourlyCloudCover, getHourlyRain, getHourlyThunder } from "../wttr";
-import { getUVIndexIcon } from "../utils";
+import { clockFormat, getUVIndexIcon } from "../utils";
 
 function getTime(time: string): string {
-  const h = parseInt(time) / 100.0;
-  const postfix = h < 12 ? "AM" : "PM";
-  return `${h} ${postfix}`;
+  const t = parseInt(time);
+  const h = t / 100.0;
+  const m = t % 100;
+  if (clockFormat() === "24h") {
+    return new Date(2000, 1, 1, h, m).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } else {
+    const postfix = h < 12 ? "AM" : "PM";
+    return `${h} ${postfix}`;
+  }
 }
 
 export function DayList(props: { day: WeatherData; title: string; isLoading?: boolean }): JSX.Element {

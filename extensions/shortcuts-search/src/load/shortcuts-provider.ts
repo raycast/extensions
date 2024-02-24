@@ -46,7 +46,7 @@ export default function useAllShortcuts(props?: Properties): UseAllShortcutsResu
       dataParser: (v) => {
         return v ? v : emptyShortcuts;
       },
-      execute: !keyCodesResult.data,
+      execute: !!keyCodesResult.data,
     }
   );
 

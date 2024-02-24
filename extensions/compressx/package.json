@@ -3,7 +3,7 @@
   "name": "compressx",
   "title": "CompressX",
   "description": "Compress the selected video in Finder with CompressX.",
-  "icon": "command-icon.png",
+  "icon": "compressx-icon.png",
   "author": "hieudinh",
   "categories": [
     "Applications"

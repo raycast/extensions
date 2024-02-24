@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-
-import { List, Icon, Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
-import { SelectTerminalApp } from "./SelectTermnialApp";
+import { List, Icon, Action, ActionPanel, useNavigation, launchCommand, LaunchType } from "@raycast/api";
 import { RenameTmuxSession } from "./RenameTmuxSession";
 import { deleteSession, getAllSession, switchToSession } from "./utils/sessionUtils";
 import { checkTerminalSetup } from "./utils/terminalUtils";
@@ -54,6 +52,18 @@ export default function Command() {
     setupListSesssions();
   }, [isTerminalSetup]);
 
+  useEffect(() => {
+    if (!isTerminalSetup && !isLoading) {
+      launchCommand({
+        type: LaunchType.UserInitiated,
+        name: "choose_terminal_app",
+        extensionName: "tmux-sessioner",
+        ownerOrAuthorName: "louishuyng",
+        context: { launcherCommand: "index" },
+      });
+    }
+  }, [isTerminalSetup, isLoading]);
+
   return (
     <>
       <List isLoading={isLoading}>
@@ -84,17 +94,6 @@ export default function Command() {
           />
         ))}
       </List>
-
-      {!isTerminalSetup && !isLoading && (
-        <Detail
-          markdown="**Setup Default Terminal App Before Usage** `Go to Actions or using Cmd + k`"
-          actions={
-            <ActionPanel>
-              <Action.Push title="Setup Here" target={<SelectTerminalApp setIsTerminalSetup={setIsTerminalSetup} />} />
-            </ActionPanel>
-          }
-        />
-      )}
     </>
   );
 }
