@@ -66,7 +66,7 @@ export const ItemsGrid = ({
               </ActionPanel.Section>
             ) : (
               <ActionPanel.Section>
-                <Action title="Remove from List" onAction={() => onRemoveAction(item)} />
+                <Action title="Remove From List" onAction={() => onRemoveAction(item)} />
                 {/* <Action title="Edit Specification" onAction={() => addWithSpecification(name)} /> */}
               </ActionPanel.Section>
             )}
@@ -93,7 +93,7 @@ export const ItemsGrid = ({
     <Grid
       columns={5}
       searchText={searchText}
-      searchBarPlaceholder="What would you like to add?"
+      searchBarPlaceholder="I need"
       onSearchTextChange={onSearchTextChange}
       navigationTitle={`Add Items to ${list.name}`}
       inset={Grid.Inset.Medium}
