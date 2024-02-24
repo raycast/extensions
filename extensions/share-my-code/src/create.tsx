@@ -1,12 +1,10 @@
-import { Action, ActionPanel, Form, Toast, showToast, Clipboard, LaunchProps, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, Clipboard, LaunchProps, Icon, popToRoot } from "@raycast/api";
 import { FormValidation, useForm, useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import got from "got";
 import { baseURL, characters, MIN_SLUG_SIZE, RAND_SLUG_SIZE, smcUrl } from "./Constants";
 import useStoredRecents from "./hooks/useStoredRecents";
 import flourite, { DetectedLanguage } from "flourite";
-import CodeView from "./components/CodeView";
-import useParser from "./hooks/useParser";
 import { SMCFormValues, CodeCheckResponse } from "./types";
 
 interface LaunchPropsType {
@@ -23,18 +21,17 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
   const [detectedLanguage, setDetectedLanguage] = useState<DetectedLanguage>();
 
   const { addRecent } = useStoredRecents();
-  const { push } = useNavigation();
 
   const { handleSubmit, itemProps, values, setValue, setValidationError } = useForm<SMCFormValues>({
     async onSubmit(values: SMCFormValues) {
       setNewSlug(values.slug);
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: "Sharing code",
+        title: "Sharing code...",
       });
       const formData = new URLSearchParams();
-      formData.append("slug", encodeURIComponent(values.slug));
-      formData.append("code", encodeURIComponent(values.content));
+      formData.append("slug", values.slug);
+      formData.append("code", values.content);
 
       try {
         await got.post(`${baseURL}/code_update.php`, {
@@ -47,8 +44,8 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
         await Clipboard.copy(smcUrl + "/" + values.slug);
 
         toast.style = Toast.Style.Success;
-        toast.title = "Shared code!";
-        toast.message = `Copied link to your clipboard`;
+        toast.title = "Shared!";
+        toast.message = `Link copied to your clipboard.`;
 
         const newStoredRecent = {
           slug: values.slug,
@@ -57,7 +54,7 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
           language: flourite(values.content).language,
         };
         addRecent(newStoredRecent);
-        push(<CodeView code={{ code: values.content, parsedCode: parsedData }} slug={values.slug} isLoading={false} />);
+        popToRoot();
       } catch (error) {
         console.error(error);
         toast.style = Toast.Style.Failure;
@@ -70,8 +67,6 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
       content: FormValidation.Required,
     },
   });
-
-  const parsedData = useParser(values.content || "");
 
   const { data, isLoading } = useFetch<CodeCheckResponse>(`${baseURL}/code_check.php?slug=${newSlug}`, {
     execute: newSlug !== "" && newSlug.length >= MIN_SLUG_SIZE,
