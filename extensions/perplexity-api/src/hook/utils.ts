@@ -29,37 +29,24 @@ export function countToken(content: string) {
   return encode(content).length;
 }
 
-export function estimatePrice(
-  prompt_token: number,
-  output_token: number,
-  model: string
-) {
+export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   let price = 0;
   switch (model) {
     case "pplx-7b-chat":
     case "mistral-7b-instruct":
-      price =
-        ((prompt_token * 0.07) / 1_000_000 +
-          (output_token * 0.28) / 1_000_000) *
-        100;
+      price = ((prompt_token * 0.07) / 1_000_000 + (output_token * 0.28) / 1_000_000) * 100;
       break;
     case "mixtral-8x7b-instruct":
     case "pplx-8x7b-chat":
-      price =
-        ((prompt_token * 0.6) / 1_000_000 + (output_token * 1.8) / 1_000_000) *
-        100;
+      price = ((prompt_token * 0.6) / 1_000_000 + (output_token * 1.8) / 1_000_000) * 100;
       break;
     case "codellama-34b-instruct":
-      price =
-        ((prompt_token * 0.35) / 1_000_000 + (output_token * 1.4) / 1_000_000) *
-        100;
+      price = ((prompt_token * 0.35) / 1_000_000 + (output_token * 1.4) / 1_000_000) * 100;
       break;
     case "llama-2-70b-chat":
     case "codellama-70b-instruct":
     case "pplx-70b-chat":
-      price =
-        ((prompt_token * 0.7) / 1_000_000 + (output_token * 2.8) / 1_000_000) *
-        100;
+      price = ((prompt_token * 0.7) / 1_000_000 + (output_token * 2.8) / 1_000_000) * 100;
       break;
     case "pplx-7b-online":
       price = (5 / 1000 + (output_token * 0.28) / 1_000_000) * 100;
