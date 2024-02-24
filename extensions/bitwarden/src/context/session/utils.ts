@@ -62,7 +62,7 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   if (vaultTimeoutMs === VAULT_TIMEOUT.SCREEN_LOCK) {
     return {
       ...loadedState,
-      shouldLockVault: await checkScreenWasLockedSinceLastTime(lastActivityTime),
+      shouldLockVault: await checkScreenWasLockedSinceLastAccess(lastActivityTime),
       lockReason: VAULT_LOCK_MESSAGES.SCREEN_LOCK,
     };
   }
@@ -75,27 +75,30 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   return { ...loadedState, shouldLockVault: false };
 }
 
-const TIMESPAN_INCREMENT = 2;
-const MAX_RETRY_ATTEMPTS = 5;
-async function checkScreenWasLockedSinceLastTime(lastActivityTime: Date): Promise<boolean> {
+export async function checkScreenWasLockedSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
   const lastScreenLockTime = await getLastScreenLockTime();
-  console.log("lastScreenLockTime", lastScreenLockTime);
   if (!lastScreenLockTime) return true; // assume the screen was locked for improved safety
   return new Date(lastScreenLockTime).getTime() > lastActivityTime.getTime();
 }
 
-async function getLastScreenLockTime(timespanHours = 1, retryAttempt = 0): Promise<Date | undefined> {
+const TIME_SPAN_INCREMENT_HOURS = 2;
+const MAX_RETRY_ATTEMPTS = 5;
+/**
+ * Starts by checking the last hour and increases the time span by {@link TIME_SPAN_INCREMENT_HOURS} hours on each retry.
+ * ⚠️ Calls to the system log are very slow, and if the screen hasn't been locked for some hours, it gets slower.
+ */
+async function getLastScreenLockTime(timeSpanHours = 1, retryAttempt = 0): Promise<Date | undefined> {
   try {
     if (retryAttempt > MAX_RETRY_ATTEMPTS) {
       debugLog("Max retry attempts reached to check if screen was locked since last time");
       return undefined;
     }
     const { stdout, stderr } = await exec(
-      `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${timespanHours}h | grep "handleUnlockResult" | tail -n 1`
+      `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${timeSpanHours}h | grep "handleUnlockResult" | tail -n 1`
     );
     const [logDate, logTime] = stdout?.split(" ") ?? [];
     if (stderr || !logDate || !logTime) {
-      return await getLastScreenLockTime(timespanHours + TIMESPAN_INCREMENT, retryAttempt + 1);
+      return await getLastScreenLockTime(timeSpanHours + TIME_SPAN_INCREMENT_HOURS, retryAttempt + 1);
     }
 
     const logFullDate = new Date(`${logDate}T${logTime}`);

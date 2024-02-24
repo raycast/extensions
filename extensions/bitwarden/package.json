@@ -245,12 +245,12 @@
           "value": "86400000"
         },
         {
-          "title": "Never",
-          "value": "-1"
+          "title": "On system lock (experimental)",
+          "value": "-2"
         },
         {
-          "title": "On Screen Lock (slow initial load)",
-          "value": "-2"
+          "title": "Never",
+          "value": "-1"
         }
       ]
     },
