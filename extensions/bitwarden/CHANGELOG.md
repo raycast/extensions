@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Timeout Option] - 2024-02-24
+
+- Added a new experimental option to lock the vault "On system lock"
+
 ## [Error handling] - 2023-11-30
 
 - Improved error handling
