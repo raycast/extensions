@@ -59,11 +59,11 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   const vaultTimeoutMs = +getPreferenceValues<Preferences>().repromptIgnoreDuration;
   if (vaultTimeoutMs === VAULT_TIMEOUT.NEVER) return { ...loadedState, shouldLockVault: false };
 
-  if (vaultTimeoutMs === VAULT_TIMEOUT.SCREEN_LOCK) {
+  if (vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_LOCK) {
     return {
       ...loadedState,
       shouldLockVault: await checkScreenWasLockedSinceLastAccess(lastActivityTime),
-      lockReason: VAULT_LOCK_MESSAGES.SCREEN_LOCK,
+      lockReason: VAULT_LOCK_MESSAGES.SYSTEM_LOCK,
     };
   }
 
