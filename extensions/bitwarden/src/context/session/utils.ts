@@ -2,7 +2,7 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { LOCAL_STORAGE_KEY, VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { VAULT_TIMEOUT } from "~/constants/preferences";
 import { SessionState } from "~/types/session";
-import { exec as callbackExec } from "child_process";
+import { exec as callbackExec, PromiseWithChild } from "child_process";
 import { promisify } from "util";
 import { captureException, debugLog } from "~/utils/development";
 
@@ -66,6 +66,13 @@ export async function getSavedSession(): Promise<SavedSessionState> {
       lockReason: VAULT_LOCK_MESSAGES.SYSTEM_LOCK,
     };
   }
+  if (vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_SLEEP) {
+    return {
+      ...loadedState,
+      shouldLockVault: await checkSystemSleptSinceLastAccess(lastActivityTime),
+      lockReason: VAULT_LOCK_MESSAGES.SYSTEM_SLEEP,
+    };
+  }
 
   const timeElapseSinceLastPasswordEnter = Date.now() - lastActivityTime.getTime();
   if (vaultTimeoutMs === VAULT_TIMEOUT.IMMEDIATELY || timeElapseSinceLastPasswordEnter >= vaultTimeoutMs) {
@@ -75,30 +82,53 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   return { ...loadedState, shouldLockVault: false };
 }
 
-export async function checkScreenWasLockedSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
-  const lastScreenLockTime = await getLastScreenLockTime();
-  if (!lastScreenLockTime) return true; // assume the screen was locked for improved safety
-  return new Date(lastScreenLockTime).getTime() > lastActivityTime.getTime();
+async function checkScreenWasLockedSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
+  const getLogEntry = (_timeSpanHours: number) => {
+    return exec(
+      `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${_timeSpanHours}h | grep "handleUnlockResult" | tail -n 1`
+    );
+  };
+  return checkSystemLogTimeAfter(lastActivityTime, getLogEntry);
 }
 
-const TIME_SPAN_INCREMENT_HOURS = 2;
-const MAX_RETRY_ATTEMPTS = 5;
+async function checkSystemSleptSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
+  const getLogEntry = (_timeSpanHours: number) => {
+    return exec(
+      `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${_timeSpanHours}h | grep "sleep 0" | tail -n 1`
+    );
+  };
+  return checkSystemLogTimeAfter(lastActivityTime, getLogEntry);
+}
+
+export async function checkSystemLogTimeAfter(
+  time: Date,
+  getLogEntry: (timeSpanHours: number) => PromiseWithChild<{ stdout: string; stderr: string }>
+): Promise<boolean> {
+  const lastScreenLockTime = await getSystemLogTime(getLogEntry);
+  if (!lastScreenLockTime) return true; // assume that log was found for improved safety
+  return new Date(lastScreenLockTime).getTime() > time.getTime();
+}
+
+const getSystemLogTime_INCREMENT_HOURS = 2;
+const getSystemLogTime_MAX_RETRIES = 5;
 /**
- * Starts by checking the last hour and increases the time span by {@link TIME_SPAN_INCREMENT_HOURS} hours on each retry.
+ * Starts by checking the last hour and increases the time span by {@link getSystemLogTime_INCREMENT_HOURS} hours on each retry.
  * ⚠️ Calls to the system log are very slow, and if the screen hasn't been locked for some hours, it gets slower.
  */
-async function getLastScreenLockTime(timeSpanHours = 1, retryAttempt = 0): Promise<Date | undefined> {
+async function getSystemLogTime(
+  getLogEntry: (timeSpanHours: number) => PromiseWithChild<{ stdout: string; stderr: string }>,
+  timeSpanHours = 1,
+  retryAttempt = 0
+): Promise<Date | undefined> {
   try {
-    if (retryAttempt > MAX_RETRY_ATTEMPTS) {
+    if (retryAttempt > getSystemLogTime_MAX_RETRIES) {
       debugLog("Max retry attempts reached to get last screen lock time");
       return undefined;
     }
-    const { stdout, stderr } = await exec(
-      `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${timeSpanHours}h | grep "handleUnlockResult" | tail -n 1`
-    );
+    const { stdout, stderr } = await getLogEntry(timeSpanHours);
     const [logDate, logTime] = stdout?.split(" ") ?? [];
     if (stderr || !logDate || !logTime) {
-      return getLastScreenLockTime(timeSpanHours + TIME_SPAN_INCREMENT_HOURS, retryAttempt + 1);
+      return getSystemLogTime(getLogEntry, timeSpanHours + getSystemLogTime_INCREMENT_HOURS, retryAttempt + 1);
     }
 
     const logFullDate = new Date(`${logDate}T${logTime}`);

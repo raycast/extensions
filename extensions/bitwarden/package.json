@@ -258,6 +258,10 @@
           "value": "-2"
         },
         {
+          "title": "On system sleep (experimental)",
+          "value": "-3"
+        },
+        {
           "title": "Never",
           "value": "-1"
         }
