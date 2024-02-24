@@ -90,7 +90,7 @@ const MAX_RETRY_ATTEMPTS = 5;
 async function getLastScreenLockTime(timeSpanHours = 1, retryAttempt = 0): Promise<Date | undefined> {
   try {
     if (retryAttempt > MAX_RETRY_ATTEMPTS) {
-      debugLog("Max retry attempts reached to check if screen was locked since last time");
+      debugLog("Max retry attempts reached to get last screen lock time");
       return undefined;
     }
     const { stdout, stderr } = await exec(
