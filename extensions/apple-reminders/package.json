@@ -127,7 +127,7 @@
           "type": "checkbox",
           "label": "Don't use the AI",
           "description": "When enabled, the reminder is simply added to your default list with the input as the title.",
-          "default": true,
+          "default": false,
           "required": false
         },
         {
