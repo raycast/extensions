@@ -30,7 +30,7 @@ export const buildItems = (path: string, faker: Faker) => {
       if (_.isFunction(func)) {
         const getValue = (): string => {
           const value = func();
-          return value ? value.toString() : "";
+          return value ? value.toString() : value === false ? "false" : "";
         };
         acc.push({ section: path, id: key, value: getValue(), getValue });
       } else if (_.isObject(func)) {
