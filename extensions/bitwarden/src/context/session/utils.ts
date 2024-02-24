@@ -98,7 +98,7 @@ async function getLastScreenLockTime(timeSpanHours = 1, retryAttempt = 0): Promi
     );
     const [logDate, logTime] = stdout?.split(" ") ?? [];
     if (stderr || !logDate || !logTime) {
-      return await getLastScreenLockTime(timeSpanHours + TIME_SPAN_INCREMENT_HOURS, retryAttempt + 1);
+      return getLastScreenLockTime(timeSpanHours + TIME_SPAN_INCREMENT_HOURS, retryAttempt + 1);
     }
 
     const logFullDate = new Date(`${logDate}T${logTime}`);
