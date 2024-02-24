@@ -9,7 +9,7 @@ import {
 } from "./types";
 import { getSelectedFinderItems, Clipboard, LocalStorage } from "@raycast/api";
 import fs from "fs";
-import mime from "mime-types";
+import { fileTypeFromBuffer } from "file-type/core";
 import fetch from "node-fetch";
 import { OllamaApiShow, OllamaApiShowParseModelfile, OllamaApiTags } from "./ollama";
 import {
@@ -62,19 +62,18 @@ export async function GetImageFromUrl(url: string): Promise<RaycastImage | undef
  * Get Image from disk.
  * @param {string} file
  */
-export async function GetImageFromFile(file: string) {
+export async function GetImageFromFile(file: string): Promise<RaycastImage> {
   if (!file.match(/(file:)?([/|.|\w|\s|-])/g)) throw new Error("Only PNG and JPG are supported");
 
   file = file.replace("file://", "");
-  const contentType = mime.lookup(file);
-  if (contentType === "image/jpeg" || contentType === "image/png") {
-    const blob = fs.readFileSync(file);
-    const base64 = Buffer.from(blob).toString("base64");
+  const buffer = fs.readFileSync(decodeURI(file));
+  const { mime } = (await fileTypeFromBuffer(buffer)) || {};
+  if (mime === "image/jpeg" || mime === "image/png") {
     return {
       path: file,
       html: `<img src="${file}" alt="image" height="180" width="auto">`,
-      base64: base64,
-    } as RaycastImage;
+      base64: buffer.toString("base64"),
+    };
   } else {
     throw new Error("Only PNG and JPG are supported");
   }
