@@ -2,18 +2,16 @@ import { existsSync, mkdirSync, statSync, unlinkSync } from "fs";
 import { readdir, unlink } from "fs/promises";
 import { join } from "path";
 import streamZip from "node-stream-zip";
+import { tryExec } from "~/utils/errors";
 
 export function waitForFileAvailable(path: string): Promise<void> {
   return new Promise((resolve) => {
     const interval = setInterval(() => {
-      try {
-        const stats = statSync(path);
-        if (stats.isFile()) {
-          clearInterval(interval);
-          resolve();
-        }
-      } catch (e) {
-        // ignore
+      tryExec(() => {});
+      const stats = statSync(path);
+      if (stats.isFile()) {
+        clearInterval(interval);
+        resolve();
       }
     }, 300);
   });
@@ -32,12 +30,10 @@ export async function removeFilesThatStartWith(startingWith: string, path: strin
     const files = await readdir(path);
     for await (const file of files) {
       if (!file.startsWith(startingWith)) continue;
-      try {
+      await tryExec(async () => {
         await unlink(join(path, file));
         removedAtLeastOne = true;
-      } catch {
-        // ignore
-      }
+      });
     }
   } catch {
     return false;
@@ -46,10 +42,6 @@ export async function removeFilesThatStartWith(startingWith: string, path: strin
 }
 export function unlinkAllSync(...paths: string[]) {
   for (const path of paths) {
-    try {
-      unlinkSync(path);
-    } catch {
-      // ignore
-    }
+    tryExec(() => unlinkSync(path));
   }
 }
