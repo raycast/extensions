@@ -1,5 +1,7 @@
 import fse from "fs-extra";
-import fetch from "node-fetch";
+import type { RequestInit } from "node-fetch";
+import fetch, { FetchError } from "node-fetch";
+import https from "node:https";
 
 import { Toast, getPreferenceValues, open, showHUD, showInFinder, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
@@ -12,10 +14,17 @@ import { languages } from "./constants";
 import { showActionToast, showFailureToast } from "./toast";
 
 const fetchImageArrayBuffer = async (url: string, signal?: AbortSignal): Promise<ArrayBuffer> => {
-  const res = await fetch(url, {
+  const requestInit: RequestInit = {
     method: "GET",
     signal: signal,
-  });
+  };
+  const { allowIgnoreHTTPSErrors } = getPreferenceValues<LibgenPreferences>();
+  if (allowIgnoreHTTPSErrors) {
+    requestInit.agent = new https.Agent({
+      rejectUnauthorized: false,
+    });
+  }
+  const res = await fetch(url, requestInit);
   const buffer = await res.arrayBuffer();
   return buffer;
 };
@@ -144,6 +153,15 @@ export async function downloadBookToDefaultDirectory(url = "", book: BookEntry) 
     };
     await showToast(options);
   } catch (err) {
+    if (err instanceof FetchError && err.code === "CERT_HAS_EXPIRED") {
+      await showFailureToast(
+        "Download Failed",
+        new Error(
+          "The certificate has expired. Try with a different download gateway or enable 'Ignore HTTPS Errors' in your settings.",
+        ),
+      );
+      return;
+    }
     await showFailureToast("Download Failed", err as Error);
   }
 }

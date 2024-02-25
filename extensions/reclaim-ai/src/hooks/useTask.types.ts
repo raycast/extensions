@@ -8,6 +8,7 @@ export interface CreateTaskProps {
   snoozeUntil: Date;
   due: Date;
   notes: string;
+  alwaysPrivate: boolean;
   priority: string;
   onDeck: boolean;
 }

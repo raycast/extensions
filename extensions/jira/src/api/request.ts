@@ -1,6 +1,6 @@
 import fetch, { RequestInit } from "node-fetch";
 
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
+import { getJiraCredentials } from "../api/jiraCredentials";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 

@@ -2,14 +2,14 @@ import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
-import View from "./components/View";
 import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
 import { useHistory } from "./helpers/repository";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 
 function SearchRepositories() {
   const { github } = getGitHubClient();
@@ -92,10 +92,4 @@ function SearchRepositories() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <SearchRepositories />
-    </View>
-  );
-}
+export default withGitHubClient(SearchRepositories);

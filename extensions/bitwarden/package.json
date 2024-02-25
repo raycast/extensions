@@ -254,6 +254,14 @@
           "value": "86400000"
         },
         {
+          "title": "On system lock (experimental)",
+          "value": "-2"
+        },
+        {
+          "title": "On system sleep (experimental)",
+          "value": "-3"
+        },
+        {
           "title": "Never",
           "value": "-1"
         }

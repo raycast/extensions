@@ -41,8 +41,9 @@ type ActionCallbacks = {
 type MaybeError<T = undefined> = { result: T; error?: undefined } | { result?: undefined; error: ManuallyThrownError };
 
 type ExecProps = {
+  /** Reset the time of the last command that accessed data or modified the vault, used to determine if the vault timed out */
+  resetVaultTimeout: boolean;
   abortController?: AbortController;
-  skipLastActivityUpdate?: boolean;
   input?: string;
 };
 
@@ -219,7 +220,7 @@ export class Bitwarden {
         // It doesn't matter if we weren't logged in.
       }
       // If URL is empty, set it to the default
-      await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL]);
+      await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { resetVaultTimeout: false });
       await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
 
       toast.style = Toast.Style.Success;
@@ -250,20 +251,19 @@ export class Bitwarden {
     }
   }
 
-  private async exec(args: string[], options?: ExecProps): Promise<ExecaChildProcess> {
+  private async exec(args: string[], options: ExecProps): Promise<ExecaChildProcess> {
     if (!this.isInitialized) throw new Error("Bitwarden not initialized");
 
-    const { abortController, input = "", skipLastActivityUpdate = false } = options ?? {};
-    let env = this.env;
-    if (this.tempSessionToken) env = { ...env, BW_SESSION: this.tempSessionToken };
-    const result = await execa(this.cliPath, args, { env, input, signal: abortController?.signal });
+    const { abortController, input = "", resetVaultTimeout } = options ?? {};
 
-    if (!skipLastActivityUpdate) {
-      await LocalStorage.setItem(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME, new Date().toISOString());
-    }
+    let env = this.env;
     if (this.tempSessionToken) {
+      env = { ...env, BW_SESSION: this.tempSessionToken };
       this.tempSessionToken = undefined;
     }
+
+    const result = await execa(this.cliPath, args, { input, env, signal: abortController?.signal });
+
     if (this.isPromptWaitingForMasterPassword(result)) {
       /* since we have the session token in the env, the password 
       should not be requested, unless the vault is locked */
@@ -271,12 +271,16 @@ export class Bitwarden {
       throw new VaultIsLockedError();
     }
 
+    if (resetVaultTimeout) {
+      await LocalStorage.setItem(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME, new Date().toISOString());
+    }
+
     return result;
   }
 
   async login(): Promise<MaybeError> {
     try {
-      await this.exec(["login", "--apikey"]);
+      await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
       await this.clearLockReason();
       await this.callbacks.login?.();
       return { result: undefined };
@@ -289,7 +293,7 @@ export class Bitwarden {
 
   async logout(): Promise<MaybeError> {
     try {
-      await this.exec(["logout"]);
+      await this.exec(["logout"], { resetVaultTimeout: false });
       await this.handlePostLogout();
       return { result: undefined };
     } catch (execError) {
@@ -308,7 +312,7 @@ export class Bitwarden {
       }
 
       if (reason) await this.setLockReason(reason);
-      await this.exec(["lock"]);
+      await this.exec(["lock"], { resetVaultTimeout: false });
       await this.callbacks.lock?.(reason);
       return { result: undefined };
     } catch (execError) {
@@ -320,7 +324,7 @@ export class Bitwarden {
 
   async unlock(password: string): Promise<MaybeError<string>> {
     try {
-      const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"]);
+      const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"], { resetVaultTimeout: true });
       this.setSessionToken(sessionToken);
       await this.clearLockReason();
       await this.callbacks.unlock?.(password, sessionToken);
@@ -334,7 +338,7 @@ export class Bitwarden {
 
   async sync(): Promise<MaybeError> {
     try {
-      await this.exec(["sync"]);
+      await this.exec(["sync"], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
       const { error } = await this.handleCommonErrors(execError);
@@ -345,7 +349,7 @@ export class Bitwarden {
 
   async listItems(): Promise<MaybeError<Item[]>> {
     try {
-      const { stdout } = await this.exec(["list", "items"]);
+      const { stdout } = await this.exec(["list", "items"], { resetVaultTimeout: true });
       const items = JSON.parse<Item[]>(stdout);
       // Filter out items without a name property (they are not displayed in the bitwarden app)
       return { result: items.filter((item: Item) => !!item.name) };
@@ -358,7 +362,7 @@ export class Bitwarden {
 
   async listFolders(): Promise<MaybeError<Folder[]>> {
     try {
-      const { stdout } = await this.exec(["list", "folders"]);
+      const { stdout } = await this.exec(["list", "folders"], { resetVaultTimeout: true });
       return { result: JSON.parse<Folder[]>(stdout) };
     } catch (execError) {
       const { error } = await this.handleCommonErrors(execError);
@@ -372,7 +376,7 @@ export class Bitwarden {
       const folder = await this.getTemplate("folder");
       folder.name = name;
       const encodedFolder = await this.encode(JSON.stringify(folder));
-      await this.exec(["create", "folder", encodedFolder]);
+      await this.exec(["create", "folder", encodedFolder], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
       const { error } = await this.handleCommonErrors(execError);
@@ -384,7 +388,7 @@ export class Bitwarden {
   async getTotp(id: string): Promise<MaybeError<string>> {
     try {
       // this could return something like "Not found." but checks for totp code are done before calling this function
-      const { stdout } = await this.exec(["get", "totp", id]);
+      const { stdout } = await this.exec(["get", "totp", id], { resetVaultTimeout: true });
       return { result: stdout };
     } catch (execError) {
       const { error } = await this.handleCommonErrors(execError);
@@ -395,7 +399,7 @@ export class Bitwarden {
 
   async status(): Promise<MaybeError<VaultState>> {
     try {
-      const { stdout } = await this.exec(["status"]);
+      const { stdout } = await this.exec(["status"], { resetVaultTimeout: false });
       return { result: JSON.parse<VaultState>(stdout) };
     } catch (execError) {
       const { error } = await this.handleCommonErrors(execError);
@@ -406,7 +410,7 @@ export class Bitwarden {
 
   async checkLockStatus(): Promise<VaultStatus> {
     try {
-      await this.exec(["unlock", "--check"]);
+      await this.exec(["unlock", "--check"], { resetVaultTimeout: false });
       return "unlocked";
     } catch (error) {
       const errorMessage = (error as ExecaError).stderr;
@@ -416,19 +420,19 @@ export class Bitwarden {
   }
 
   async getTemplate(type: string): Promise<any> {
-    const { stdout } = await this.exec(["get", "template", type]);
+    const { stdout } = await this.exec(["get", "template", type], { resetVaultTimeout: true });
     const template = JSON.parse(stdout);
     return template;
   }
 
   async encode(input: any): Promise<string> {
-    const { stdout } = await this.exec(["encode"], { input });
+    const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
     return stdout;
   }
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {
     const args = options ? getPasswordGeneratingArgs(options) : [];
-    const { stdout } = await this.exec(["generate", ...args], { abortController });
+    const { stdout } = await this.exec(["generate", ...args], { abortController, resetVaultTimeout: false });
     return stdout;
   }
 
