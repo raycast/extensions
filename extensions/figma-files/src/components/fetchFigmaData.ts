@@ -2,8 +2,12 @@ import { getPreferenceValues, showToast, Toast, LocalStorage } from "@raycast/ap
 import fetch from "node-fetch";
 import { File, ProjectFiles, TeamFiles, TeamProjects } from "../types";
 
-async function fetchTeamProjects(): Promise<TeamProjects[]> {
+async function fetchTeamProjects(accessTok: string): Promise<TeamProjects[]> {
   const { PERSONAL_ACCESS_TOKEN, TEAM_ID } = getPreferenceValues();
+  let isOAuth = true;
+  if (PERSONAL_ACCESS_TOKEN) {
+    isOAuth = false;
+  }
 
   const teamID: string[] = TEAM_ID.split(",").map((team: string) => team.toString().trim());
   const teams = teamID.map(async (team) => {
@@ -12,7 +16,7 @@ async function fetchTeamProjects(): Promise<TeamProjects[]> {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+          ...(isOAuth === true ? { Authorization: `Bearer ${accessTok}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
         },
       });
 
@@ -31,9 +35,13 @@ async function fetchTeamProjects(): Promise<TeamProjects[]> {
   return Promise.all(teams) as Promise<TeamProjects[]>;
 }
 
-async function fetchFiles(): Promise<ProjectFiles[][]> {
+async function fetchFiles(accessTok: string): Promise<ProjectFiles[][]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
-  const teamProjects = await fetchTeamProjects();
+  let isOAuth = true;
+  if (PERSONAL_ACCESS_TOKEN) {
+    isOAuth = false;
+  }
+  const teamProjects = await fetchTeamProjects(accessTok);
   const teamNames = teamProjects.map((team) => team.name).join(",");
   await LocalStorage.setItem("teamNames", teamNames);
   const teamFiles = teamProjects.map(async (team) => {
@@ -44,7 +52,9 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+            ...(isOAuth === true
+              ? { Authorization: `Bearer ${accessTok}` }
+              : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
           },
         });
 
@@ -61,8 +71,8 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
   return Promise.all(teamFiles);
 }
 
-export async function resolveAllFiles(): Promise<TeamFiles[]> {
-  const teamFiles = await fetchFiles();
+export async function resolveAllFiles(accessTok: string): Promise<TeamFiles[]> {
+  const teamFiles = await fetchFiles(accessTok);
   const teams = ((await LocalStorage.getItem<string>("teamNames")) || "").split(",");
   const fi = teamFiles.map((projectFiles, index) => {
     return { name: teams[index], files: projectFiles } as TeamFiles;

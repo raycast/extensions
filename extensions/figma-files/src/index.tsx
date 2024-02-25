@@ -8,17 +8,20 @@ import { useCachedPromise } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
+import { figma } from "./components/oauth";
+import { withAccessToken, getAccessToken } from "@raycast/utils";
 
-export default function Command() {
+function Command() {
+  const { token } = getAccessToken();
   const { data, isLoading, error } = useCachedPromise(
     async () => {
-      const results = await resolveAllFiles();
+      const results = await resolveAllFiles(token);
       return results;
     },
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const {
@@ -176,9 +179,11 @@ export default function Command() {
             >
               <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
             </Grid.Section>
-          ),
-        ),
+          )
+        )
       )}
     </Grid>
   );
 }
+
+export default withAccessToken(figma)(Command);
