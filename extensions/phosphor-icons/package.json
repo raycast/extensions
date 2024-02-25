@@ -20,11 +20,32 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "view",
+      "title": "View",
+      "description": "The view to display the icons in.",
+      "type": "dropdown",
+      "default": "grid",
+      "required": false,
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@phosphor-icons/core": "^2.0.8",
     "@raycast/api": "^1.66.2",
     "@raycast/utils": "^1.12.4",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

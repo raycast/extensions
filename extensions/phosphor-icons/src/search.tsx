@@ -1,25 +1,29 @@
-import { Action, ActionPanel, Grid } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { icons } from "@phosphor-icons/core";
-import debounce from "lodash/debounce";
+import { IconEntry, icons } from "@phosphor-icons/core";
+import { getPreferenceValues } from "@raycast/api";
 import difference from "lodash/difference";
-import upperFirst from "lodash/upperFirst";
-import { getIconUrl } from "./utils/helpers";
+import IconsGrid from "./components/IconsGrid";
+import IconsList from "./components/IconsList";
 
-const weights = ["thin", "light", "regular", "bold", "fill", "duotone"];
+// @phosphor-icons has tricky typescript setup
+// This is hacky way to create type that is easy to use in code
+// Casting is safe, because all icons match IconEntry
+// https://github.com/phosphor-icons/core?tab=readme-ov-file#catalog
+const allIcons = icons as unknown as IconEntry[];
 
 const SearchIconsCommand = () => {
+  const { view } = getPreferenceValues<{ view: "grid" | "list" }>();
   const [weight, setWeight] = useState("regular");
   const [search, setSearch] = useState("");
 
-  const filteredIcons = useMemo(() => {
+  const filteredIcons = useMemo<IconEntry[]>(() => {
     const queries = search
       .split(" ")
       .filter(Boolean)
       .map((q) => q.toLowerCase());
-    if (queries.length === 0) return icons;
+    if (queries.length === 0) return allIcons;
 
-    return icons.filter((i) => {
+    return allIcons.filter((i) => {
       const searchValues = [...i.tags, ...i.categories].map((s) => s.toLowerCase());
       return (
         difference(queries, searchValues).length === 0 || queries.find((q) => i.pascal_name.toLowerCase().includes(q))
@@ -27,77 +31,10 @@ const SearchIconsCommand = () => {
     });
   }, [search]);
 
-  return (
-    <Grid
-      columns={6}
-      inset={Grid.Inset.Large}
-      searchBarPlaceholder="Search icons by name, category or tag"
-      onSearchTextChange={debounce(setSearch, 1000)}
-      searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Select Icon Weight"
-          placeholder="Icon Weight"
-          storeValue={true}
-          defaultValue={weight}
-          onChange={setWeight}
-        >
-          {weights.map((type) => (
-            <Grid.Dropdown.Item key={type} title={upperFirst(type)} value={type} />
-          ))}
-        </Grid.Dropdown>
-      }
-    >
-      {filteredIcons.map((i) => {
-        const weightText = weight !== "regular" ? `weight="${weight}"` : "";
-        const weightClassName = weight !== "regular" ? `ph-${weight}` : "ph";
-        return (
-          <Grid.Item
-            key={i.name}
-            title={i.name}
-            content={{
-              source: getIconUrl(i.name, weight),
-              tintColor: { light: "black", dark: "white" },
-            }}
-            actions={
-              <ActionPanel title="Copy to Clipboard">
-                <Action.CopyToClipboard
-                  title="Copy Name"
-                  content={i.name}
-                  icon={{
-                    source: getIconUrl("clipboard-text", weight),
-                    tintColor: { light: "black", dark: "white" },
-                  }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy HTML"
-                  content={`<i class="${weightClassName} ph-${i.name}"></i>`}
-                  icon={{
-                    source: getIconUrl("brackets-angle", weight),
-                    tintColor: { light: "black", dark: "white" },
-                  }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy React"
-                  content={`<${i.pascal_name} ${weightText} size={32} />`}
-                  icon={{
-                    source: getIconUrl("atom", weight),
-                    tintColor: { light: "black", dark: "white" },
-                  }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Vue"
-                  content={`<ph-${i.name} ${weightText} :size="32" />`}
-                  icon={{
-                    source: getIconUrl("file-vue", weight),
-                    tintColor: { light: "black", dark: "white" },
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
-    </Grid>
+  return view === "list" ? (
+    <IconsList weight={weight} icons={filteredIcons} setSearch={setSearch} setWeight={setWeight} />
+  ) : (
+    <IconsGrid weight={weight} icons={filteredIcons} setSearch={setSearch} setWeight={setWeight} />
   );
 };
 
