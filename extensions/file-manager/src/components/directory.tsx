@@ -24,7 +24,7 @@ export function Directory(props: { path: string }) {
               icon={{ source: "icloud.png" }}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Open Icloud" target={<Directory path={iCloudDrivePath()} />} />
+                  <Action.Push title="Open iCloud" target={<Directory path={iCloudDrivePath()} />} />
                 </ActionPanel>
               }
             />
