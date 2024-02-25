@@ -4,6 +4,10 @@
 
 - Added a new experimental option to lock the vault "On system lock"
 
+## [Fix] - 2024-02-23
+
+- Fixes timeout lock being removed due to lock command updating last activity time
+
 ## [New Command and Fix] - 2024-01-06
 
 - Adds Create Folder command
