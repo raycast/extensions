@@ -15,13 +15,19 @@
       "name": "index",
       "title": "Parse Cookie String",
       "description": "Parses your cookie string",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "cookies",
+          "placeholder": "Foo=test;Bar=hello;",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "cookie": "^0.6.0",
-    "cookie-parse": "^0.4.0"
+    "@raycast/api": "^1.67.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

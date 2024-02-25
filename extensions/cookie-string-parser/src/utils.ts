@@ -1,5 +1,3 @@
-import { default as cookiesParser } from "cookie-parse";
-
 export function getCookiesWithEditedValue(
   cookies: Record<string, string>,
   cookieToEdit: Record<string, string>,
@@ -17,7 +15,25 @@ export function getCookiesWithEditedValue(
 }
 
 export function toCookiesObject(cookiesString: string): Record<string, string> {
-  const cookies = cookiesParser.parse(cookiesString);
+  const cookies = parseCookieString(cookiesString);
 
   return Object.fromEntries(Object.entries(cookies).filter(([key]) => key.trim() !== ""));
+}
+
+function parseCookieString(cookieString: string): Record<string, string> {
+  return Object.fromEntries(
+    cookieString
+      .trim()
+      .split(";")
+      .map((cookie) => {
+        const [key, value] = cookie.split("=");
+
+        if (!key || !value) {
+          return [];
+        }
+
+        return [key.trim(), value];
+      })
+      .filter((cookie) => cookie.length > 0),
+  );
 }
