@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2024-02-25
+
+- The `/image` tag can now access screenshots in clipboard taken with the CMD + OPTION + SHIFT + 4 functionality.
+
 ## [BugFix] - 2024-01-24
 
 - Fixed `Cannot read properties of undefined (reading 'split')` caused by API route '/api/show' responding with empty 'parameters' value for some models.
