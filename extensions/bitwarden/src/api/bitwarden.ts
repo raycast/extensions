@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
-import { existsSync, unlinkSync, writeFileSync } from "fs";
+import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
 import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
@@ -124,7 +124,7 @@ export class Bitwarden {
   }
 
   private async ensureCliBinary(): Promise<void> {
-    if (existsSync(this.cliPath)) return;
+    if (this.checkCliBinIsReady(this.cliPath)) return;
     if (this.cliPath === this.preferences.cliPath) {
       throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
@@ -172,6 +172,17 @@ export class Bitwarden {
       throw error;
     } finally {
       await toast.restore();
+    }
+  }
+
+  private checkCliBinIsReady(filePath: string): boolean {
+    try {
+      if (!existsSync(this.cliPath)) return false;
+      accessSync(filePath, constants.X_OK);
+      return true;
+    } catch {
+      chmodSync(filePath, "755");
+      return true;
     }
   }
 
