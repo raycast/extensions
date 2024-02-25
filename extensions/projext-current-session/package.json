@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "projext-current-session",
+  "title": "Projext",
+  "description": "Shows the current active focus session in the menu bar.",
+  "icon": "icon-cmd.png",
+  "author": "kian",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Projext Menu Bar",
+      "subtitle": "Active focus session",
+      "description": "Showing your current focus session in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [{
+        "name": "apiKey",
+        "title": "Projext API Key",
+        "description": "Enter your Projext API key from the profile tab.",
+        "type": "password",
+        "required": true
+      }]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
