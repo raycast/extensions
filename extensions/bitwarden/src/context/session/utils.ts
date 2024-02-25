@@ -82,22 +82,17 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   return { ...loadedState, shouldLockVault: false };
 }
 
-async function checkSystemLockedSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
-  const getLogEntry = (_timeSpanHours: number) => {
-    return exec(
-      `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${_timeSpanHours}h | grep "handleUnlockResult" | tail -n 1`
-    );
-  };
-  return checkSystemLogTimeAfter(lastActivityTime, getLogEntry);
-}
+const checkSystemLockedSinceLastAccess = (lastActivityTime: Date) => {
+  return checkSystemLogTimeAfter(lastActivityTime, (time: number) => getLastSyslog(time, "handleUnlockResult"));
+};
+const checkSystemSleptSinceLastAccess = (lastActivityTime: Date) => {
+  return checkSystemLogTimeAfter(lastActivityTime, (time: number) => getLastSyslog(time, "sleep 0"));
+};
 
-async function checkSystemSleptSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
-  const getLogEntry = (_timeSpanHours: number) => {
-    return exec(
-      `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${_timeSpanHours}h | grep "sleep 0" | tail -n 1`
-    );
-  };
-  return checkSystemLogTimeAfter(lastActivityTime, getLogEntry);
+function getLastSyslog(hours: number, filter: string) {
+  return exec(
+    `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${hours}h | grep "${filter}" | tail -n 1`
+  );
 }
 
 export async function checkSystemLogTimeAfter(
