@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Timeout Option] - 2024-02-24
+
+- Added a new experimental option to lock the vault "On system lock"
+
 ## [Fix] - 2024-02-23
 
 - Fixes timeout lock being removed due to lock command updating last activity time
