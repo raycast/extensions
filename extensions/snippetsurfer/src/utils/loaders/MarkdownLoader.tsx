@@ -64,10 +64,9 @@ async function loadMarkdown(
   const snippet: Snippet = {
     id: id,
     folder: path.dirname(relativePath),
-    name: parsedName,
+    name: content.title ?? parsedName,
     content: content,
   };
-
   return { snippet: snippet, error: error };
 }
 

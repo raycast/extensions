@@ -1,6 +1,6 @@
 export interface SnippetContent {
-  title: string;
-  description: string;
+  title: string?;
+  description: string?;
   content: string;
   rawMetadata: string;
 }

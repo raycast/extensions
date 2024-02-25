@@ -13,12 +13,14 @@ SnippetSurfer is a raycast extension designed to swiftly navigate through snippe
 ### Example of markdown
 ```
 ---
-Title: Git Init
-Description: Create empty Git repo in specified directory. Run with noarguments to initialize the current directory as a git repository
+Title: Git init
+Description: |
+    Create empty Git repo in specified directory.
+    Run with noarguments to initialize the current directory as a git repository.
 ---
-	```shell
-	git init
-	```
+```shell
+git init
+    ```
 ```
 
 ### Example of yaml file
