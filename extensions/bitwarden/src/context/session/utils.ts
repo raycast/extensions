@@ -62,7 +62,7 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   if (vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_LOCK) {
     return {
       ...loadedState,
-      shouldLockVault: await checkScreenWasLockedSinceLastAccess(lastActivityTime),
+      shouldLockVault: await checkSystemLockedSinceLastAccess(lastActivityTime),
       lockReason: VAULT_LOCK_MESSAGES.SYSTEM_LOCK,
     };
   }
@@ -82,7 +82,7 @@ export async function getSavedSession(): Promise<SavedSessionState> {
   return { ...loadedState, shouldLockVault: false };
 }
 
-async function checkScreenWasLockedSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
+async function checkSystemLockedSinceLastAccess(lastActivityTime: Date): Promise<boolean> {
   const getLogEntry = (_timeSpanHours: number) => {
     return exec(
       `log show --style syslog --predicate "process == 'loginwindow'" --info --last ${_timeSpanHours}h | grep "handleUnlockResult" | tail -n 1`
