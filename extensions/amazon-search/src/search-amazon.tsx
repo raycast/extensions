@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { useState } from "react";
 
@@ -64,8 +64,20 @@ export default function Command() {
     setRecentSearches(recentSearches.filter((item) => item !== query));
   };
 
-  const handleClearSearchHistory = () => {
-    setRecentSearches([]);
+  const handleClearSearchHistory = async () => {
+    const isConfirmed = await confirmAlert({
+      title: "Clear all recent searches?",
+      icon: Icon.Trash,
+      message: "This action cannot be undone.",
+      primaryAction: {
+        title: "Clear History",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (isConfirmed) {
+      setRecentSearches([]);
+    }
   };
 
   const suggestions = data ? data.suggestions.map((suggestion) => suggestion.value) : [];
@@ -78,6 +90,7 @@ export default function Command() {
             <List.Item
               key={index}
               title={item}
+              icon={Icon.MagnifyingGlass}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`} />
@@ -94,11 +107,22 @@ export default function Command() {
             <List.Item
               key={index}
               title={item}
+              icon={Icon.MagnifyingGlass}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`} />
-                  <Action title="Remove Search Item" onAction={() => handleRemoveSearchItem(item)} />
-                  <Action title="Clear Search History" onAction={handleClearSearchHistory} />
+                  <Action
+                    title="Remove Search Item"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => handleRemoveSearchItem(item)}
+                  />
+                  <Action
+                    title="Clear Search History"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={handleClearSearchHistory}
+                  />
                 </ActionPanel>
               }
             />
