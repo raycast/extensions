@@ -1,11 +1,8 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useSafeCachedPromise } from "./useSafeCachedPromise";
 import { getRunningTimeEntry } from "../api";
 
-export function useRunningTimeEntry(initialExecute = true) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(getRunningTimeEntry, [], {
-    initialData: null,
-    execute: initialExecute,
-  });
+export function useRunningTimeEntry() {
+  const { data, error, isLoading, revalidate } = useSafeCachedPromise(getRunningTimeEntry, [], { initialData: null });
   return {
     runningTimeEntry: data,
     runningTimeEntryError: error,

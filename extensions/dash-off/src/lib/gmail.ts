@@ -1,43 +1,25 @@
-// Borrowed from the Gmail Extension
-// https://github.com/raycast/extensions/blob/main/extensions/gmail/src/lib/gmail.ts
-import { gmail as gmailclient, auth, gmail_v1 } from "@googleapis/gmail";
-import { authorize, client, OAuthClientId } from "./oauth";
-import { GaxiosResponse } from "googleapis-common";
+import fetch from "cross-fetch";
+import { getOAuthToken } from "./withGmailAuth";
 
-let profile: GaxiosResponse<gmail_v1.Schema$Profile>;
-
-export async function getAuthorizedGmailClient() {
-  await authorize();
-  const t = await client.getTokens();
-
-  const oAuth2Client = new auth.OAuth2(OAuthClientId());
-  oAuth2Client.setCredentials({
-    access_token: t?.accessToken,
-    refresh_token: t?.refreshToken,
-    id_token: t?.idToken,
-    scope: t?.scope,
-    expiry_date: t?.expiresIn,
+async function getSenderEmailAddress() {
+  const response = await fetch("https://www.googleapis.com/oauth2/v1/userinfo?alt=json", {
+    headers: {
+      Authorization: `Bearer ${getOAuthToken()}`,
+    },
   });
-  const gm = gmailclient({ version: "v1", auth: oAuth2Client });
-  return gm;
-}
-
-export async function getGMailCurrentProfile(gmail: gmail_v1.Gmail) {
-  if (!profile) {
-    profile = await gmail.users.getProfile({ userId: "me" });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sender info: ${response.statusText}`);
   }
-  return profile.data;
+  const userInfo = await response.json();
+  return userInfo;
 }
 
 export async function sendEmail(subject: string, body: string, toAddress: string, BCCAddresses: string[]) {
-  const gmail = await getAuthorizedGmailClient();
-  const currentProfile = await getGMailCurrentProfile(gmail);
-  const address = currentProfile?.emailAddress;
-
   const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString("base64")}?=`;
 
+  const fromAddress = await getSenderEmailAddress();
   const messageParts = [
-    `From: Raycast Dash Off <${address}>`,
+    `From: Raycast Dash Off <${fromAddress}>`,
     `To: ${toAddress}`,
     `CC: ${BCCAddresses.join(",")}`,
     "Content-Type: text/html; charset=utf-8",
@@ -56,12 +38,18 @@ export async function sendEmail(subject: string, body: string, toAddress: string
     .replace(/\//g, "_")
     .replace(/=+$/, "");
 
-  const res = await gmail.users.messages.send({
-    userId: "me",
-    requestBody: {
-      raw: encodedMessage,
+  const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getOAuthToken()}`,
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      raw: encodedMessage,
+    }),
   });
 
-  return res.data;
+  if (!response.ok) {
+    throw new Error(`Error in sendEmail: ${response.statusText}`);
+  }
 }

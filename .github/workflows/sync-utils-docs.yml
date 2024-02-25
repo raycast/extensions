@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -74,7 +74,7 @@ jobs:
 
       - name: Get changed files in the docs folder
         id: changed-files
-        uses: tj-actions/changed-files@v19
+        uses: tj-actions/changed-files@v42
         with:
           files: |
             docs/utils-reference/**

@@ -7,32 +7,39 @@ import { getConnections, saveConnections } from "./storage.api";
 interface Preferences {
   terminal: string;
   openin: string;
+  onlyname: boolean;
 }
 const preferences = getPreferenceValues<Preferences>();
 export const terminal = preferences["terminal"];
 export const openIn = preferences["openin"];
+export const onlyName = preferences["onlyname"];
 
 async function runTerminal(item: ISSHConnection) {
-  let identity = "";
-  if (item.sshKey) {
-    identity = `-i ${item.sshKey} `;
+  let command;
+  if (onlyName) {
+    const name = item.name;
+    command = ["ssh", name].join(" ");
+  } else {
+    let identity = "";
+    if (item.sshKey) {
+      identity = `-i ${item.sshKey} `;
+    }
+    let customPort = "";
+    if (item.port) {
+      customPort = `-p ${item.port} `;
+    }
+    let customCommand = "";
+    let interactive = "";
+    if (item.command) {
+      customCommand = `\\"${item.command}\\" `;
+      interactive = "-t";
+    }
+    let address = item.address;
+    if (item.user) {
+      address = `${encodeURIComponent(item.user)}@${address}`;
+    }
+    command = ["ssh", interactive, identity, address, customPort, customCommand].filter(Boolean).join(" ");
   }
-  let customPort = "";
-  if (item.port) {
-    customPort = `-p ${item.port} `;
-  }
-  let customCommand = "";
-  let interactive = "";
-  if (item.command) {
-    customCommand = `\\"${item.command}\\" `;
-    interactive = "-t";
-  }
-  let address = item.address;
-  if (item.user) {
-    address = `${encodeURIComponent(item.user)}@${address}`;
-  }
-
-  const command = ["ssh", interactive, identity, address, customPort, customCommand].filter(Boolean).join(" ");
 
   const scriptWarp = `
       -- For the latest version:

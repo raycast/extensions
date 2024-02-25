@@ -229,7 +229,7 @@
     },
     {
       "name": "preferredLanguage",
-      "description": "If you configure the AI, it will automatically translate the article titles in the digest into your preferred language. You can also use the {{lang}} variable in the Summarize Prompt field.",
+      "description": "Summarize the content within 50-200 characters, directly output. Focusing strictly on its core insights. Exclude promotional content, including podcast listening options, subscription offers, access instructions, and any form of contact details for additional services. Most important, respond in {{lang}}.",
       "type": "textfield",
       "title": "Preferred Language",
       "required": false
@@ -321,6 +321,15 @@
       "type": "password",
       "description": "Any WriteFreely instance account password",
       "title": "WriteFreely Password",
+      "required": false
+    },
+    {
+      "name": "splitByTags",
+      "description": "Whether digest content is categorized by label",
+      "type": "checkbox",
+      "title": "Enable Digest Split By Tags",
+      "label": "Enable",
+      "default": false,
       "required": false
     },
     {

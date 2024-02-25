@@ -9,7 +9,8 @@
     "peterdev22",
     "danpalmer",
     "itsjustxan",
-    "Shpigford"
+    "Shpigford",
+    "urwrstkn8mare"
   ],
   "license": "MIT",
   "keywords": [
@@ -106,6 +107,14 @@
       "title": "Currently Playing Track",
       "subtitle": "Apple Music",
       "description": "Get info about currently playing track.",
+      "disabledByDefault": true,
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-current-playing-from-current-playlist",
+      "title": "Remove Current Track From Current Playlist",
+      "subtitle": "Apple Music",
+      "description": "Remove the currently playing track from the current playlist and skip to the next track.",
       "disabledByDefault": true,
       "mode": "no-view"
     },

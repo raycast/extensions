@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.67.0 - 2024-02-07
+
+### 🐞 Fixes
+
+- Fix a crash that could happen when exporting a function that would return another function.
+- **Menu Bar Extra:** Fixed a bug that caused the text in text-only extras to be offset.
+
 ## 1.66.0 - 2024-01-24
 
 ### 💎 Improvements

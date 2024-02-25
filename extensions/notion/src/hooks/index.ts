@@ -121,10 +121,11 @@ export function useRecentPages() {
       await Promise.all(
         recentPages.map((p) => {
           // convert each RecentPage object into a Page object
+          // don't error if the page is not found
           if (p.type === "page") {
-            return fetchPage(p.id);
+            return fetchPage(p.id, true);
           } else {
-            return fetchDatabase(p.id);
+            return fetchDatabase(p.id, true);
           }
         }),
       )

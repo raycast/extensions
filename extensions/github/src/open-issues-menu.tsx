@@ -1,6 +1,7 @@
 import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
+import { getGitHubClient } from "./api/githubClient";
 import {
   MenuBarItem,
   MenuBarItemConfigureCommand,
@@ -8,9 +9,8 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/Menu";
-import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 
 async function launchOpenIssuesCommand(): Promise<void> {
   return launchCommand({ name: "open-issues", type: LaunchType.UserInitiated });
@@ -87,10 +87,4 @@ function OpenIssuesMenu() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <OpenIssuesMenu />
-    </View>
-  );
-}
+export default withGitHubClient(OpenIssuesMenu);

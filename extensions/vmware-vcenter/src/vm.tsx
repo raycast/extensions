@@ -32,6 +32,7 @@ import {
   LocalStorage,
   Cache,
   getPreferenceValues,
+  open,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import ServerView from "./api/ServerView";
@@ -216,27 +217,20 @@ export default function Command(): JSX.Element {
       [VMGuestPowerAction.SHUTDOWN, `Powered Off`],
       [VMGuestPowerAction.STANDBUY, `Suspended`],
     ]);
-    if (!vm.vm_info) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Vm Info is Undefined",
-      });
-      return;
-    }
-    if (!Server || Server.has(vm.summary.vm)) {
+    if (!Server || !Server.has(vm.server)) {
       await showToast({
         style: Toast.Style.Failure,
         title: "vCenter Server is Undefined",
       });
       return;
     }
-    await showToast({
-      style: Toast.Style.Animated,
-      title: `${vm.summary.name}`,
-      message: `${MessageGuestActionStarted.get(action)}`,
-    });
-    const s = Server.get(vm.summary.vm);
-    if (s)
+    const s = Server.get(vm.server);
+    if (s) {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `${vm.summary.name}`,
+        message: `${MessageGuestActionStarted.get(action)}`,
+      });
       await s
         .VMGuestPower(vm.summary.vm, action)
         .then(
@@ -251,6 +245,7 @@ export default function Command(): JSX.Element {
           async (error) =>
             await showToast({ style: Toast.Style.Failure, title: `${vm.summary.name}`, message: `${error}` })
         );
+    }
   }
 
   /**
@@ -319,27 +314,20 @@ export default function Command(): JSX.Element {
       [VMPowerAction.STOP, `Powered Off`],
       [VMPowerAction.SUSPEND, `Suspended`],
     ]);
-    if (!vm.vm_info) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Vm Info is Undefined",
-      });
-      return;
-    }
-    if (!Server || Server.has(vm.summary.vm)) {
+    if (!Server || !Server.has(vm.server)) {
       await showToast({
         style: Toast.Style.Failure,
         title: "vCenter Server is Undefined",
       });
       return;
     }
-    await showToast({
-      style: Toast.Style.Animated,
-      title: `${vm.vm_info.name}`,
-      message: `${MessageActionStarted.get(action)}`,
-    });
-    const s = Server.get(vm.summary.vm);
-    if (s)
+    const s = Server.get(vm.server);
+    if (s) {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `${vm.summary.name}`,
+        message: `${MessageActionStarted.get(action)}`,
+      });
       await s
         .VMPower(vm.summary.vm, action)
         .then(
@@ -354,6 +342,46 @@ export default function Command(): JSX.Element {
           async (error) =>
             await showToast({ style: Toast.Style.Failure, title: `${vm.summary.name}`, message: `${error}` })
         );
+    }
+  }
+
+  /**
+   * Generate Console Ticket. If the ticket can't be generated it fallback to standard vmrc url requiring authentication.
+   * @param {Vm} vm.
+   */
+  async function VMOpenConsole(vm: Vm): Promise<void> {
+    if (!Server || !Server.has(vm.server)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "vCenter Server is Undefined",
+      });
+      return;
+    }
+    const s = Server.get(vm.server);
+    if (s) {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `${vm.summary.name}`,
+        message: `Requesting Console Ticket`,
+      });
+      await s
+        .VMCreateConsoleTickets(vm.summary.vm)
+        .then(async (ticket) => {
+          if (ticket) {
+            await showToast({
+              style: Toast.Style.Success,
+              title: `${vm.summary.name}`,
+              message: `Console Ticket Generated`,
+            });
+            console.log(ticket.ticket);
+            open(ticket.ticket);
+          }
+        })
+        .catch(async (error) => {
+          await showToast({ style: Toast.Style.Failure, title: `${vm.summary.name}`, message: `${error}` });
+          open(`vmrc://${Server.get(vm.server)?.GetFqdn()}/?moid=${vm.summary.vm}`);
+        });
+    }
   }
 
   /**
@@ -475,10 +503,10 @@ export default function Command(): JSX.Element {
             />
           )}
           {Server && Server.has(vm.server) && (
-            <Action.Open
+            <Action
               title="Open Console"
               icon={{ source: "icons/vm/console.svg" }}
-              target={`vmrc://${Server.get(vm.server)?.GetFqdn()}/?moid=${vm.summary.vm}`}
+              onAction={() => VMOpenConsole(vm)}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
             />
           )}
@@ -749,7 +777,7 @@ export default function Command(): JSX.Element {
       GetNetworks();
       GetStoragePolicies();
     } else if (Server && !IsLoadingServer && !ServerSelected && !IsLoadingServerSelected) {
-      const name = Object.keys(Server)[0];
+      const name = [...Server.keys()][0];
       LocalStorage.setItem("server_selected", name);
       RevalidateServerSelected();
     } else if (!IsLoadingServer && !Server) {
@@ -787,19 +815,18 @@ export default function Command(): JSX.Element {
       throttle={true}
       onSelectionChange={GetVmInfo}
     >
-      {VMs &&
-        VMs.map((vm) => (
-          <List.Item
-            key={`${vm.server}_${vm.summary.vm}`}
-            id={`${vm.server}_${vm.summary.vm}`}
-            title={vm.summary.name}
-            icon={PowerModeIcons.get(vm.summary.power_state)}
-            accessories={GetVmAccessory(vm)}
-            keywords={GetVmKeywords(vm)}
-            detail={GetVmDetail(vm)}
-            actions={GetVMAction(vm)}
-          />
-        ))}
+      {VMs.map((vm) => (
+        <List.Item
+          key={`${vm.server}_${vm.summary.vm}`}
+          id={`${vm.server}_${vm.summary.vm}`}
+          title={vm.summary.name}
+          icon={PowerModeIcons.get(vm.summary.power_state)}
+          accessories={GetVmAccessory(vm)}
+          keywords={GetVmKeywords(vm)}
+          detail={GetVmDetail(vm)}
+          actions={GetVMAction(vm)}
+        />
+      ))}
     </List>
   );
 }
