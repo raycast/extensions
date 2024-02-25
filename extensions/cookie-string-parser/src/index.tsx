@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Form } from "@raycast/api";
 import { useCallback, useState } from "react";
-import { default as cookiesParser } from "cookie-parse";
 import { ListView } from "./ListView";
+import { toCookiesObject } from "./utils";
 
 export default function Command() {
   const [cookies, setCookies] = useState<Record<string, string>>({});
@@ -10,7 +10,8 @@ export default function Command() {
       setCookies({});
       return;
     }
-    setCookies(cookiesParser.parse(searchText));
+
+    setCookies(toCookiesObject(searchText));
   }, []);
 
   return (
