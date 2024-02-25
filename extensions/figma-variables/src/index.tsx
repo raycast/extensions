@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Form, ActionPanel, Action,LocalStorage, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  LocalStorage,
+  Icon,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import CollectionsView from "./CollectionsView";
 
 interface Preferences {
@@ -32,11 +40,10 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-            <Action title="Fetch Variables" onAction={saveTokensAndShowResults} icon={Icon.Download} />
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action title="Fetch Variables" onAction={saveTokensAndShowResults} icon={Icon.Download} />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
-    >
-    </Form>
+    ></Form>
   );
 }

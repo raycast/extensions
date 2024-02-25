@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, showToast, Toast, openExtensionPreferences } from "@raycast/api";
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 import VariablesView from "./VariablesView";
 
 interface Collection {
@@ -25,7 +25,6 @@ interface ApiResponse {
   };
 }
 
-
 interface CollectionsViewProps {
   accessToken: string;
   fileKey: string;
@@ -34,55 +33,50 @@ interface CollectionsViewProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CollectionsView: React.FC<CollectionsViewProps> = ({ accessToken, fileKey, onEditTokens }) => {
-    const [collections, setCollections] = useState<Collection[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`https://api.figma.com/v1/files/${fileKey}/variables/local`, {
-        headers: { 'X-Figma-Token': accessToken },
-      });
-      const data: unknown = await response.json();
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`https://api.figma.com/v1/files/${fileKey}/variables/local`, {
+          headers: { "X-Figma-Token": accessToken },
+        });
+        const data: unknown = await response.json();
 
-      const isApiResponse = (data: unknown): data is ApiResponse => {
-        return typeof data === 'object' && data !== null && 'meta' in data;
-      };
+        const isApiResponse = (data: unknown): data is ApiResponse => {
+          return typeof data === "object" && data !== null && "meta" in data;
+        };
 
-      if (!isApiResponse(data) || data.error) {
-        showToast(Toast.Style.Failure, "Failed to fetch collections");
-        return;
+        if (!isApiResponse(data) || data.error) {
+          showToast(Toast.Style.Failure, "Failed to fetch collections");
+          return;
+        }
+
+        const collectionsData = data.meta?.variableCollections;
+        if (!collectionsData) {
+          showToast(Toast.Style.Failure, "Invalid collections data");
+          return;
+        }
+
+        const filteredCollections = Object.values(collectionsData)
+          .filter((collection) => typeof collection === "object" && collection !== null && !collection.remote)
+          .map((collection) => ({
+            ...collection,
+            variableCount: collection.variableIds.length,
+          }));
+
+        setCollections(filteredCollections);
+      } catch (error) {
+        showToast(Toast.Style.Failure, "Failed to fetch collections", String(error));
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      const collectionsData = data.meta?.variableCollections;
-      if (!collectionsData) {
-        showToast(Toast.Style.Failure, "Invalid collections data");
-        return;
-      }
-
-      const filteredCollections = Object.values(collectionsData).filter(collection => 
-        typeof collection === 'object' && 
-        collection !== null && 
-        !collection.remote
-      ).map(collection => ({
-        ...collection,
-        variableCount: collection.variableIds.length,
-      }));
-
-      setCollections(filteredCollections);
-    } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to fetch collections", String(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  fetchData();
-}, [accessToken, fileKey]);
-
-
-
+    fetchData();
+  }, [accessToken, fileKey]);
 
   return (
     <List isLoading={isLoading}>

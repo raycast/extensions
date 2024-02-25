@@ -19,7 +19,7 @@ export type ValuesByMode = {
 
 export type ModeValue = {
   [modeId: string]: VariableAlias | ColorValue | number;
-}
+};
 
 export interface ColorValue {
   r: number;
@@ -29,4 +29,4 @@ export interface ColorValue {
 }
 export type ModesMap = {
   [modeId: string]: string;
-}
+};
