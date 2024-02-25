@@ -1,7 +1,5 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as crypto from "crypto";
-import { parse } from "yaml";
 import type { Snippet } from "../types";
 import loadMarkdown from "./loaders/MarkdownLoader";
 import loadYaml from "./loaders/YamlLoader";

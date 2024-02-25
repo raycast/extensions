@@ -5,8 +5,8 @@ import { Snippet, SnippetContent } from "../../types";
 import { parse } from "yaml";
 
 function extractSnippet(
-  fullPath: string,
   relativePath: string,
+  fullPath: string,
   index: number,
   snippetRaw: { [key: string]: any }
 ): Snippet | null {
@@ -68,7 +68,7 @@ async function loadYaml(relativePath: string, fullPath: string): Promise<{ snipp
         // Handle the case where `yamlContent` is an array
         const extracted = yamlContent
           .map((item: any, index: number) => {
-            return extractSnippet(fullPath, relativePath, index, item);
+            return extractSnippet(relativePath, fullPath, index, item);
           })
           .filter((item): item is Snippet => {
             return item !== null;
@@ -81,12 +81,14 @@ async function loadYaml(relativePath: string, fullPath: string): Promise<{ snipp
         if (Array.isArray(yamlSnippets)) {
           const extracted = yamlSnippets
             .map((item: any, index: number) => {
-              return extractSnippet(fullPath, relativePath, index, item);
+              return extractSnippet(relativePath, fullPath, index, item);
             })
             .filter((item): item is Snippet => {
               return item !== null;
             });
           snippets.push(...extracted);
+        } else {
+          errors = [new Error(`Incorrect yaml file ${relativePath}`)];
         }
       } else {
         errors = [new Error(`Incorrect yaml file ${relativePath}`)];
