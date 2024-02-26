@@ -5,7 +5,9 @@
   "description": "The fastest way to use bitcoin on macOS",
   "icon": "vortex.png",
   "author": "saunter",
-  "categories": ["Finance"],
+  "categories": [
+    "Finance"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -43,7 +45,14 @@
     {
       "name": "send",
       "title": "Send",
-      "keywords": ["send", "pay", "wallet", "invoice", "lnurl", "lightning"],
+      "keywords": [
+        "send",
+        "pay",
+        "wallet",
+        "invoice",
+        "lnurl",
+        "lightning"
+      ],
       "subtitle": "Send to lightning address or pay lightning invoice",
       "description": "Send to lightning address or pay lightning invoice",
       "icon": "send.png",
@@ -61,7 +70,13 @@
     {
       "name": "balance",
       "title": "View Balance",
-      "keywords": ["balance", "wallet", "lightning", "vortex", "bitcoin"],
+      "keywords": [
+        "balance",
+        "wallet",
+        "lightning",
+        "vortex",
+        "bitcoin"
+      ],
       "description": "Display your current wallet balance",
       "icon": "vortex.png",
       "mode": "view",
@@ -70,7 +85,12 @@
     {
       "name": "createinvoice",
       "title": "Receive",
-      "keywords": ["receive", "invoice", "wallet", "lightning"],
+      "keywords": [
+        "receive",
+        "invoice",
+        "wallet",
+        "lightning"
+      ],
       "description": "Create a new lightning invoice",
       "icon": "receive.png",
       "mode": "view",
@@ -79,7 +99,12 @@
     {
       "name": "listtransactions",
       "title": "Recent Transactions",
-      "keywords": ["wallet", "payments", "lightning", "transactions"],
+      "keywords": [
+        "wallet",
+        "payments",
+        "lightning",
+        "transactions"
+      ],
       "description": "Show recent transactions",
       "icon": "vortex.png",
       "mode": "view",
@@ -95,12 +120,12 @@
     "websocket-polyfill": "^0.0.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.11.16",
     "@types/qrcode": "^1.5.5",
     "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "scripts": {

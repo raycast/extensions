@@ -1,12 +1,12 @@
 import { ActionPanel, Detail, Action, openExtensionPreferences } from "@raycast/api";
 
-export default function ConnectionError(props: {error: unknown}) {
+export default function ConnectionError(props: { error: unknown }) {
   let message = "";
   if (props.error instanceof Error) {
     message = props.error.message;
   }
   if (props.error instanceof Object && props.error.hasOwnProperty("error")) {
-    const e = props.error as {error: string};
+    const e = props.error as { error: string };
     message = e.error;
   }
 

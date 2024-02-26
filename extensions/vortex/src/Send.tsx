@@ -31,10 +31,10 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
   const tryConnectWallet = async () => {
     try {
       await connectWallet();
-    } catch(error) {
+    } catch (error) {
       setConnectionError(error);
     }
-  }
+  };
 
   const discoverInput = async () => {
     if (input) {
@@ -85,7 +85,7 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
   };
 
   if (connectionError) {
-    return (<ConnectionError error={connectionError} />);
+    return <ConnectionError error={connectionError} />;
   }
 
   return (

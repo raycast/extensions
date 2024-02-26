@@ -106,7 +106,7 @@ export default function CreateInvoice() {
   }
 
   if (connectionError) {
-    return (<ConnectionError error={connectionError} />);
+    return <ConnectionError error={connectionError} />;
   }
 
   return (

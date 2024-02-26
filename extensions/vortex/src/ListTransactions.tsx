@@ -67,7 +67,7 @@ export default function Transactions() {
   }, []);
 
   if (connectionError) {
-    return (<ConnectionError error={connectionError} />);
+    return <ConnectionError error={connectionError} />;
   }
 
   return (

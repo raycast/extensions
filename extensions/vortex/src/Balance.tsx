@@ -1,6 +1,14 @@
 import "cross-fetch/polyfill";
 import { useEffect, useState } from "react";
-import { ActionPanel, Detail, Action, showToast, Toast, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { fiat } from "@getalby/lightning-tools";
 import { connectWallet } from "./wallet";
 import ConnectionError from "./ConnectionError";
@@ -34,7 +42,7 @@ export default function ShowBalance() {
   }, []); // Run only once on component mount
 
   if (connectionError) {
-    return (<ConnectionError error={connectionError} />);
+    return <ConnectionError error={connectionError} />;
   }
 
   return (
