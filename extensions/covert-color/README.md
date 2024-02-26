@@ -1,4 +1,4 @@
-# covert color
+# Convert Color
 
 hsl, rgb, hexadecimal, convert to each other
 
