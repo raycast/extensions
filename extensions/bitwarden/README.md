@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/bitwarden/assets/bitwarden-512.png" width="128" height="128" />
+  <img src="assets/bitwarden-512.png" width="128" height="128" />
 
   <br/>
 
@@ -21,15 +21,16 @@ Before you're able to use this extension, you need to complete the following ste
 > 
 > <img src="assets/setup-secrets-1.png" width="700" />
 
-> 1.2 - Paste the secrets in the corresponding fields the first time you use the extension.  
+> 1.2 - Paste the secrets in the corresponding fields the **first time you use** the extension or in the **extension settings**.
 > 
 > <img src="assets/setup-secrets-2.png" width="700" />
+> <img src="assets/setup-secrets-3.png" width="700" />
 
 You're all set! 🎉
 
 ### Self-hosted Instance
 
-This extension connects to Bitwarden-hosted servers by default, but can be configured to use a self-hosted Bitwarden instance instead. If the self-hosted Bitwarden server requires a self-signed TLS certificate, add the path to the extension preferences.
+This extension connects to Bitwarden-hosted servers by default, but can be configured to use a self-hosted Bitwarden instance instead. If the self-hosted Bitwarden server requires a self-signed TLS certificate, add the path to the extension settings.
 
 ## Security
 
