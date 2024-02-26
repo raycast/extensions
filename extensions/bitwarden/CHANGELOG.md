@@ -1,5 +1,11 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2024-02-25
+
+- Download the official CLI binary upon launch if necessary, rather than relying on the user to install it
+- Improved troubleshooting screen content
+- Added a bug report data collection action
+
 ## [New Timeout Option] - 2024-02-24
 
 - Added a new experimental option to lock the vault "On system lock"
