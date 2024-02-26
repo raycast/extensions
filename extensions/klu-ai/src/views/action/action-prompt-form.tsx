@@ -67,7 +67,6 @@ const VariableActionPrompt = (props: PropsWithChildren<ActionPromptFormProps>) =
   const [data, setData] = useState<{ [key: string]: string }>(() =>
     props.variables.reduce((obj: { [key: string]: string }, key: string) => {
       obj[key] = "";
-      console.log("alex-2", obj);
       return obj;
     }, {}),
   );
@@ -155,11 +154,9 @@ const ActionPromptForm = (props: PropsWithChildren<Omit<ActionPromptFormProps, "
   const newProps = { ...props, onSubmit };
 
   if (props.variables && props.variables.length > 0) {
-    console.log("alex");
     return <VariableActionPrompt {...newProps} />;
   }
 
-  console.log("citra");
   return <DefaultActionPrompt {...newProps} />;
 };
 
