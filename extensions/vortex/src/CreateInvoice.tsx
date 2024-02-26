@@ -3,6 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { Form, Detail, ActionPanel, Action, Icon, showToast, environment, Toast } from "@raycast/api";
 import { toDataURL } from "qrcode";
 import { webln } from "@getalby/sdk";
+
+import ConnectionError from "./ConnectionError";
 import { connectWallet } from "./wallet";
 
 export default function CreateInvoice() {
@@ -12,6 +14,7 @@ export default function CreateInvoice() {
   const [invoiceMarkdown, setInvoiceMarkdown] = useState<string | undefined>();
   const [invoiceState, setInvoiceState] = useState("pending");
   const [loading, setLoading] = useState<boolean>(false);
+  const [connectionError, setConnectionError] = useState<unknown>(null);
   const invoiceCheckerIntervalRef = useRef<NodeJS.Timeout>();
   const invoiceCheckCounterRef = useRef(0);
   const nwc = useRef<webln.NostrWebLNProvider>();
@@ -69,8 +72,8 @@ export default function CreateInvoice() {
         showToast(Toast.Style.Failure, "Failed to create invoice");
       }
     } catch (error) {
-      console.error("Error creating invoice:", error);
-      showToast(Toast.Style.Failure, "Error creating invoice", String(error));
+      setConnectionError(error);
+      showToast(Toast.Style.Failure, "Error creating invoice");
     } finally {
       setLoading(false);
     }
@@ -100,6 +103,10 @@ export default function CreateInvoice() {
           : { light: "#0000", dark: "#dedede" },
     });
     return `![](${qrCodeData})`;
+  }
+
+  if (connectionError) {
+    return (<ConnectionError error={connectionError} />);
   }
 
   return (

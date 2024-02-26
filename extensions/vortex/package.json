@@ -10,7 +10,7 @@
   "preferences": [
     {
       "name": "nwcurl",
-      "title": "NWC Connection Details",
+      "title": "NWC connection details",
       "description": "Your NWC wallet connection details",
       "placeholder": "nostr+walletconnect://...",
       "type": "password",
@@ -42,9 +42,9 @@
   "commands": [
     {
       "name": "send",
-      "title": "Send to Address or Invoice",
+      "title": "Send",
       "keywords": ["send", "pay", "wallet", "invoice", "lnurl", "lightning"],
-      "subtitle": "Vortex",
+      "subtitle": "Send to lightning address or pay lightning invoice",
       "description": "Send to lightning address or pay lightning invoice",
       "icon": "send.png",
       "mode": "view",
@@ -61,7 +61,6 @@
     {
       "name": "balance",
       "title": "View Balance",
-      "subtitle": "Vortex",
       "keywords": ["balance", "wallet", "lightning", "vortex", "bitcoin"],
       "description": "Display your current wallet balance",
       "icon": "vortex.png",
@@ -71,7 +70,6 @@
     {
       "name": "createinvoice",
       "title": "Receive",
-      "subtitle": "Vortex",
       "keywords": ["receive", "invoice", "wallet", "lightning"],
       "description": "Create a new lightning invoice",
       "icon": "receive.png",
@@ -81,7 +79,6 @@
     {
       "name": "listtransactions",
       "title": "Recent Transactions",
-      "subtitle": "Vortex",
       "keywords": ["wallet", "payments", "lightning", "transactions"],
       "description": "Show recent transactions",
       "icon": "vortex.png",

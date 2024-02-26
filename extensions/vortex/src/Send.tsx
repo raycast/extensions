@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, Clipboard, getSelectedText, LaunchProps } from "@raycast/api";
 import { LightningAddress, Invoice } from "@getalby/lightning-tools";
 
+import ConnectionError from "./ConnectionError";
 import PayInvoice from "./PayInvoice";
 import PayToLightingAddress from "./PayLightningAddress";
+import { connectWallet } from "./wallet";
 
 const LN_ADDRESS_REGEX =
   /^((?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*)|(?:".+"))@((?:\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(?:(?:[a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -15,14 +17,24 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
   const [invoice, setInvoice] = useState("");
   const [input, setInput] = useState(props.arguments.input);
   const [error, setError] = useState("");
+  const [connectionError, setConnectionError] = useState<unknown>(null);
 
   useEffect(() => {
+    tryConnectWallet();
     discoverInput();
   }, []);
 
   useEffect(() => {
     handleInput();
   }, [input]);
+
+  const tryConnectWallet = async () => {
+    try {
+      await connectWallet();
+    } catch(error) {
+      setConnectionError(error);
+    }
+  }
 
   const discoverInput = async () => {
     if (input) {
@@ -71,6 +83,10 @@ export default function Send(props: LaunchProps<{ arguments: Arguments.Send }>) 
       }
     }
   };
+
+  if (connectionError) {
+    return (<ConnectionError error={connectionError} />);
+  }
 
   return (
     <>

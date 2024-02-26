@@ -1,12 +1,14 @@
 import "cross-fetch/polyfill";
 import { useEffect, useState } from "react";
-import { ActionPanel, Detail, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Detail, Action, showToast, Toast, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { fiat } from "@getalby/lightning-tools";
 import { connectWallet } from "./wallet";
+import ConnectionError from "./ConnectionError";
 
 export default function ShowBalance() {
   const [balance, setBalance] = useState("");
   const [fiatBalance, setFiatBalance] = useState("");
+  const [connectionError, setConnectionError] = useState<unknown>(null);
 
   const updateBalance = async () => {
     const fiatCurrency = getPreferenceValues<{ currency: string }>().currency;
@@ -22,16 +24,18 @@ export default function ShowBalance() {
       setBalance(`${new Intl.NumberFormat().format(balanceInfo.balance)} sats`);
       setFiatBalance(fiatBalance);
     } catch (error) {
-      if (error instanceof Error) {
-        showToast(Toast.Style.Failure, "Failed to fetch wallet balance", error.message);
-      }
-      console.error("Failed to fetch wallet balance:", error);
+      setConnectionError(error);
+      showToast(Toast.Style.Failure, "Failed to fetch wallet balance");
     }
   };
 
   useEffect(() => {
     updateBalance(); // Fetch balance when component mounts
   }, []); // Run only once on component mount
+
+  if (connectionError) {
+    return (<ConnectionError error={connectionError} />);
+  }
 
   return (
     <Detail

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import { Invoice } from "@getalby/lightning-tools";
 
-import { connectWallet } from "./wallet"; // Use your existing connectWallet function
+import { connectWallet } from "./wallet";
 
 export default function PayInvoice(props: { invoice: string }) {
   const [invoice, setInvoice] = useState(props.invoice);

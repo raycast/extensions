@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { fiat } from "@getalby/lightning-tools";
 import { List, showToast, Toast, Icon, ActionPanel, Action, Color, getPreferenceValues } from "@raycast/api";
 import { connectWallet } from "./wallet";
+import ConnectionError from "./ConnectionError";
 
 export type Transaction = {
   type: string;
@@ -33,6 +34,7 @@ export default function Transactions() {
   const [balance, setBalance] = useState<string | null>(null);
   const [fiatBalance, setFiatBalance] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState<unknown>(null);
 
   useEffect(() => {
     async function fetchTransactions() {
@@ -56,13 +58,17 @@ export default function Transactions() {
         showToast(Toast.Style.Success, "Loaded");
         setIsLoading(false);
       } catch (error) {
-        console.error("Failed to fetch transactions:", error);
+        setConnectionError(error);
         showToast(Toast.Style.Failure, "Failed to fetch transactions");
       }
     }
 
     fetchTransactions();
   }, []);
+
+  if (connectionError) {
+    return (<ConnectionError error={connectionError} />);
+  }
 
   return (
     <List isLoading={isLoading}>
