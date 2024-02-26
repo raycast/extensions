@@ -8,7 +8,6 @@ export default function Command({ arguments: { cookies } }: LaunchProps<{ argume
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const hasCookies = Object.keys(cookiesList || {}).length > 0;
-    console.log(cookiesList);
 
     if (hasCookies) {
       return;
