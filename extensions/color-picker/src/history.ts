@@ -13,6 +13,12 @@ export function useHistory() {
       setHistory((previousHistory) => {
         return previousHistory.filter((item) => getFormattedColor(item.color) !== getFormattedColor(color));
       }),
+    edit: (historyItem: HistoryItem) =>
+      setHistory((previousHistory) => {
+        return previousHistory.map((item) =>
+          getFormattedColor(item.color) === getFormattedColor(item.color) ? historyItem : item,
+        );
+      }),
     add: (color: Color) => {
       const historyItem: HistoryItem = { date: new Date().toISOString(), color };
       setHistory((previousHistory) => {

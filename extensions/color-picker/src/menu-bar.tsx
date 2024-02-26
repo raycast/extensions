@@ -10,6 +10,7 @@ import {
 } from "@raycast/api";
 import { useHistory } from "./history";
 import { getFormattedColor, getIcon, getShortcut } from "./utils";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const { history, remove, clear } = useHistory();
@@ -18,12 +19,16 @@ export default function Command() {
     <MenuBarExtra icon={Icon.EyeDropper}>
       <MenuBarExtra.Item
         title="Pick Color"
-        onAction={() => {
-          launchCommand({
-            name: "pick-color",
-            type: LaunchType.Background,
-            context: { source: "menu-bar" },
-          });
+        onAction={async () => {
+          try {
+            await launchCommand({
+              name: "pick-color",
+              type: LaunchType.Background,
+              context: { source: "menu-bar" },
+            });
+          } catch (e) {
+            await showFailureToast(e);
+          }
         }}
       />
       <MenuBarExtra.Section>
