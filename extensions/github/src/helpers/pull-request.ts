@@ -107,7 +107,7 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
     case "FAILURE":
       return { icon: { source: Icon.Xmark, tintColor: Color.Red }, tooltip: "Checks: Failure" };
     case "PENDING":
-      return { icon: { source: Icon.Clock, tintColor: Color.SecondaryText }, tooltip: "Checks: Pending" };
+      return { icon: { source: Icon.Clock, tintColor: Color.Orange }, tooltip: "Checks: Pending" };
     default:
       return null;
   }
