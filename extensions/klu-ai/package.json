@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "klu-ai",
   "title": "Klu",
-  "description": "",
+  "description": "Klu AI extension for Raycast",
   "icon": "spark.png",
   "author": "abielzulio",
   "license": "MIT",
@@ -10,13 +10,13 @@
     {
       "name": "search-actions",
       "title": "Search Actions",
-      "description": "Search Actions",
+      "description": "Search for actions in your workspace",
       "mode": "view"
     },
     {
       "name": "send-prompt",
       "title": "Send Prompt",
-      "description": "Send Prompt",
+      "description": "Send a prompt to your action",
       "mode": "view"
     }
   ],
