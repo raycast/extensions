@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-amazon",
+      "name": "index",
       "title": "Search Amazon",
       "description": "Amazon search with autosuggestions",
       "mode": "view"
