@@ -3,7 +3,7 @@
   "name": "phosphor-icons",
   "title": "Phosphor Icons",
   "description": "Search, preview and copy Phosphor Icons",
-  "icon": "phosphor-logo-fill.png",
+  "icon": "command-icon.png",
   "author": "marinsokol",
   "categories": [
     "Design Tools",
