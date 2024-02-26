@@ -1,4 +1,6 @@
-# GitHub C## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
+# GitHub Changelog
+
+## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
 - Use Raycast's built-in icons for the My Pull Requests Menu Bar.
 
