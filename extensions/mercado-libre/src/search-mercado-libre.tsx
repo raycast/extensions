@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Grid, List, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Alert, Color, Grid, Icon, List, confirmAlert, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
+import { useEffect, useState } from "react";
 
 interface MercadoLibreItem {
   id: string;
@@ -54,8 +54,20 @@ export default function Command() {
     setRecentSearches(recentSearches.filter((item) => item !== query));
   };
 
-  const handleClearSearchHistory = () => {
-    setRecentSearches([]);
+  const handleClearSearchHistory = async () => {
+    const isConfirmed = await confirmAlert({
+      title: "Clear all recent searches?",
+      icon: Icon.Trash,
+      message: "This action cannot be undone.",
+      primaryAction: {
+        title: "Clear History",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (isConfirmed) {
+      setRecentSearches([]);
+    }
   };
 
   const siteToLocaleMap: Record<string, string> = {
@@ -100,11 +112,22 @@ export default function Command() {
             <List.Item
               key={index}
               title={query}
+              icon={Icon.MagnifyingGlass}
               actions={
                 <ActionPanel>
-                  <Action title="Search" onAction={() => handleSearchSelect(query)} />
-                  <Action title="Remove Search Item" onAction={() => handleRemoveSearchItem(query)} />
-                  <Action title="Clear Search History" onAction={handleClearSearchHistory} />
+                  <Action title="Search" icon={Icon.MagnifyingGlass} onAction={() => handleSearchSelect(query)} />
+                  <Action
+                    title="Remove Search Item"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => handleRemoveSearchItem(query)}
+                  />
+                  <Action
+                    title="Clear Search History"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={handleClearSearchHistory}
+                  />
                 </ActionPanel>
               }
             />
@@ -126,7 +149,7 @@ export default function Command() {
           {data?.map((item) => (
             <Grid.Item
               key={item.id}
-              content={item.thumbnail.replace(/^http:/, "https:")}
+              content={{ value: item.thumbnail.replace(/^http:/, "https:"), tooltip: item.title }}
               title={item.title}
               subtitle={formatPrice(item.price, item.currency_id)}
               actions={
@@ -150,7 +173,7 @@ export default function Command() {
           {data?.map((item) => (
             <List.Item
               key={item.id}
-              title={item.title}
+              title={{ value: item.title, tooltip: item.title }}
               accessories={[{ text: formatPrice(item.price, item.currency_id) }]}
               icon={item.thumbnail.replace(/^http:/, "https:")}
               actions={
