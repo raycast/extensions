@@ -5,6 +5,9 @@
   "description": "Add items to your Bring! shopping lists",
   "icon": "bring-icon.png",
   "author": "amuelli",
+  "contributors": [
+    "ilian"
+  ],
   "categories": [
     "Productivity"
   ],
