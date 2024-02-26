@@ -14,7 +14,7 @@ export function getSessions() {
   return new Promise<Session[]>((resolve, reject) => {
     exec(`sesh list -j`, { env }, (error, stdout, stderr) => {
       if (error || stderr) {
-        return reject(error?.message ?? stderr);
+        return reject(`Please upgrade to the latest version of the sesh CLI`);
       }
       const sessions = JSON.parse(stdout);
       return resolve(sessions ?? []);
