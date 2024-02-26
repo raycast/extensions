@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useFeedbinApiContext } from "../utils/FeedbinApiContext";
 import { Entry } from "../utils/api";
+import { getIcon } from "../utils/getIcon";
 import { isPagesSubscription } from "../utils/isPagesSubscription";
-import { useIcon } from "../utils/useIcon";
 import { ActionAiSummary } from "./ActionAiSummary";
 import { ActionCopyUrlToClipboard } from "./ActionCopyUrlToClipboard";
 import { ActionDebugJson } from "./ActionDebugJson";
@@ -111,12 +111,11 @@ function ListItem(props: { entry: Entry; isUnread?: boolean }) {
   const { subscriptionMap, starredEntriesIdsSet, unreadEntriesSet } =
     useFeedbinApiContext();
   const { entry } = props;
-  const icon = useIcon(entry.url);
   return (
     <List.Item
       key={entry.id}
       title={entry.title ?? entry.summary}
-      icon={icon}
+      icon={getIcon(entry.url)}
       keywords={(subscriptionMap[entry.feed_id]?.title ?? entry.url).split(" ")}
       subtitle={subscriptionMap[entry.feed_id]?.title ?? entry.url}
       accessories={[
