@@ -8,9 +8,9 @@ You will need to create a [Fastmail API token](https://app.fastmail.com/settings
 
 ## Features
 
-- Create masked email (with an optional description and prefix)
-- Quickly create a masked without any prompts
-- List all of your masked emails
+- Create a masked email (with an optional description and prefix)
+- Quickly create a masked email without any prompts
+- List and manage all of your masked emails
 
 ## Icon Credits
 

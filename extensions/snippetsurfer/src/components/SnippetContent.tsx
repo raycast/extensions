@@ -13,7 +13,9 @@ const SnippetContent = ({ snippet }: { snippet: Snippet }) => {
       .join("\n");
 
     return `### ${title} - ${folder}
+
 ${descriptionTxt}
+
 ${content}
     `;
   };
