@@ -5,6 +5,7 @@ import { toCookiesObject } from "./utils";
 
 export default function Command({ arguments: { cookies } }: LaunchProps<{ arguments: Arguments.Index }>) {
   const [cookiesList, setCookiesList] = useState<Record<string, string>>();
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const hasCookies = Object.keys(cookiesList || {}).length > 0;
     console.log(cookiesList);
@@ -13,7 +14,6 @@ export default function Command({ arguments: { cookies } }: LaunchProps<{ argume
       return;
     }
     const cookies_ = toCookiesObject(cookies);
-    console.log(cookies_);
     // check if cookies_ is not empty or have a value of {undefined: undefined}
     const isEmpty = Object.keys(cookies_).length === 0;
     if (isEmpty) {
@@ -26,10 +26,11 @@ export default function Command({ arguments: { cookies } }: LaunchProps<{ argume
       return;
     }
     setCookiesList(cookies_);
+    setIsLoading(false);
   }, []);
   return (
     <List
-      searchBarPlaceholder="Foo=;"
+      isLoading={isLoading}
       searchBarAccessory={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy All" content={JSON.stringify(cookiesList, null, 2)} />
