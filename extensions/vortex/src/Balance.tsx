@@ -1,14 +1,6 @@
 import "cross-fetch/polyfill";
 import { useEffect, useState } from "react";
-import {
-  ActionPanel,
-  Detail,
-  Action,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, Detail, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { fiat } from "@getalby/lightning-tools";
 import { connectWallet } from "./wallet";
 import ConnectionError from "./ConnectionError";

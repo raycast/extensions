@@ -5,7 +5,7 @@ export default function ConnectionError(props: { error: unknown }) {
   if (props.error instanceof Error) {
     message = props.error.message;
   }
-  if (props.error instanceof Object && props.error.hasOwnProperty("error")) {
+  if (props.error instanceof Object) {
     const e = props.error as { error: string };
     message = e.error;
   }
