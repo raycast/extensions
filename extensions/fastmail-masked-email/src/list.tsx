@@ -143,7 +143,7 @@ export default function Command() {
                 )}
                 {canView && (
                   <Action.OpenInBrowser
-                    title="View In Fastmail"
+                    title="View in Fastmail"
                     url={`https://app.fastmail.com/settings/masked/${email.id}`}
                   />
                 )}
