@@ -29,41 +29,41 @@ export default function Command() {
   }, []);
 
   // Initial data fetch
+  const fetchData = async () => {
+    try {
+      const preferences = await getPreferenceValues();
+      const path = preferences["folderPath"];
+
+      const { snippets, errors } = await loadAllSnippets(path);
+      const folders = Array.from(
+        new Set(
+          snippets.map((i) => {
+            return i.folder;
+          })
+        )
+      );
+
+      await clearUnusedSnippets(snippets);
+      const orderedSnippets = await orderSnippets(snippets);
+
+      setState((previous) => ({
+        ...previous,
+        snippets: orderedSnippets,
+        filteredSnippets: orderedSnippets,
+        folders: folders,
+        rootPath: path,
+        errors: errors,
+      }));
+    } catch (err) {
+      setState((previous) => ({
+        ...previous,
+        errors: [err instanceof Error ? err : new Error("Something went wrong")],
+      }));
+    }
+
+    setState((previous) => ({ ...previous, isLoading: false }));
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const preferences = await getPreferenceValues();
-        const path = preferences["folderPath"];
-
-        const snippets = await loadAllSnippets(path);
-        const folders = Array.from(
-          new Set(
-            snippets.map((i) => {
-              return i.folder;
-            })
-          )
-        );
-
-        await clearUnusedSnippets(snippets);
-        const orderedSnippets = await orderSnippets(snippets);
-
-        setState((previous) => ({
-          ...previous,
-          snippets: orderedSnippets,
-          filteredSnippets: orderedSnippets,
-          folders: folders,
-        }));
-      } catch (err) {
-        console.log(err);
-        setState((previous) => ({
-          ...previous,
-          error: err instanceof Error ? err : new Error("Something went wrong"),
-        }));
-      }
-
-      setState((previous) => ({ ...previous, isLoading: false }));
-    };
-
     fetchData();
   }, []);
 
@@ -82,11 +82,11 @@ export default function Command() {
     }
   }, [state.selectedFolder]);
 
-  if (state.error) {
+  if (state.errors && state.errors.length != 0) {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
-      title: "Error loading snippets ",
-      message: "Make sure you are pointing to the right folder(s).",
+      title: "Error loading snippets.",
+      message: state.errors?.map((e) => e.message).join("\n"),
     };
     showToast(options);
   }
@@ -129,6 +129,8 @@ export default function Command() {
                     handleAction={handleAction}
                     snippet={i}
                     primaryAction={state.primaryAction ?? ""}
+                    reloadSnippets={fetchData}
+                    rootPath={state.rootPath ?? ""}
                   />
                 </>
               }
