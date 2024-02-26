@@ -1,6 +1,6 @@
 import { useActionState } from "@/hooks/use-action";
 import klu from "@/libs/klu";
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { PropsWithChildren, memo, useCallback, useState } from "react";
 import ActionDataList from "./action-data-list";
 
@@ -133,7 +133,7 @@ const VariableActionPrompt = (props: PropsWithChildren<ActionPromptFormProps>) =
       isLoading={props.isLoading || isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit" onSubmit={onSubmitPrompt} />
+          <Action.SubmitForm title="Send Prompt" icon={Icon.Terminal} onSubmit={onSubmitPrompt} />
         </ActionPanel>
       }
     >
