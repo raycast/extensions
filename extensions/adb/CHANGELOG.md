@@ -1,5 +1,8 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Add preference for Android Sdk] - 2024-02-23
+- Add preference to set Android Sdk path
+
 ## [App id commands] - 2024-02-20
 - Add `clear-app-data` command to clear cache and files for an appId
 - Add `force-stop` command to force-stop an app (doesn't save state)
