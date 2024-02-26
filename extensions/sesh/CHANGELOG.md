@@ -2,8 +2,9 @@
 
 ## Visual improvements - 02-22-24
 
+- List sessions with `--json` flag for metadata
 - Group sessions by tmux and zoxide
-- Add icon support
+- Show icons to differentiate between tmux and zoxide sessions
 - Show window count for tmux sessions
 - Show score for zoxide results
 
