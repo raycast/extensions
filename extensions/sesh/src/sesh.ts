@@ -12,7 +12,7 @@ export interface Session {
 
 export function getSessions() {
   return new Promise<Session[]>((resolve, reject) => {
-    exec(`sesh list -j`, { env }, (error, stdout, stderr) => {
+    exec(`sesh list --json`, { env }, (error, stdout, stderr) => {
       if (error || stderr) {
         return reject(`Please upgrade to the latest version of the sesh CLI`);
       }
