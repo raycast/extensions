@@ -1,5 +1,10 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-02-21
+
+- Update the `project` from in `CreateTimeEntryFrom` when projects are changed.
+- Fix list item accessory for time entries' projects.
+
 ## [New Feature] - 2024-01-16
 
 - Adds a new `Manage Tags` command.
