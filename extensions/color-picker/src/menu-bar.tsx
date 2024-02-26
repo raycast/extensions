@@ -39,6 +39,7 @@ export default function Command() {
               key={formattedColor}
               icon={getIcon(historyItem.color)}
               title={formattedColor}
+              subtitle={historyItem.title}
               shortcut={getShortcut(index)}
               onAction={async (event) => {
                 if (event.type === "left-click") {

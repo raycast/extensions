@@ -49,6 +49,7 @@ export default function Command() {
           <Action.Push
             target={<EditTitle item={historyItem} onEdit={onEdit} />}
             title="Edit Title"
+            icon={Icon.Pencil}
             shortcut={Keyboard.Shortcut.Common.Edit}
           />
         </ActionPanel.Section>
