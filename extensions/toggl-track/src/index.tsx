@@ -85,13 +85,10 @@ function ListView() {
           {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
             <List.Item
               key={timeEntry.id}
-              keywords={[timeEntry.description, timeEntry.project_name || ""]}
+              keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
               title={timeEntry.description || "No description"}
-              subtitle={timeEntry.billable ? "$" : ""}
-              accessories={[
-                { text: timeEntry.project_name },
-                { icon: { source: Icon.Dot, tintColor: timeEntry.project_color } },
-              ]}
+              subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
+              accessories={[...timeEntry.tags.map((tag) => ({ tag })), { text: timeEntry.billable ? "$" : "" }]}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>

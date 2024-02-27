@@ -33,15 +33,18 @@ function RunningTimeEntry({
     <List.Section title="Running time entry" key="running-time-entry">
       <List.Item
         title={runningTimeEntry.description || "No description"}
+        keywords={[
+          runningTimeEntry.description,
+          runningTimeEntry.project_name || "",
+          runningTimeEntry.client_name || "",
+        ]}
         subtitle={
-          (runningTimeEntry.billable ? "$  " : "") +
+          (runningTimeEntry.client_name ? runningTimeEntry.client_name + " | " : "") +
+          (runningTimeEntry.project_name ?? "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessories={[
-          { text: runningTimeEntry.project_name },
-          { icon: { source: Icon.Dot, tintColor: runningTimeEntry.project_color } },
-        ]}
-        icon={{ source: Icon.Clock, tintColor: runningTimeEntry.project_color }}
+        accessories={[...runningTimeEntry.tags.map((tag) => ({ tag })), { text: runningTimeEntry.billable ? "$" : "" }]}
+        icon={{ source: Icon.Circle, tintColor: runningTimeEntry.project_color }}
         actions={
           <ActionPanel>
             <Action.SubmitForm icon={{ source: Icon.Clock }} onSubmit={stopRunningTimeEntry} title="Stop Time Entry" />
