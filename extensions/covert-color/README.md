@@ -2,10 +2,10 @@
 
 hsl, rgb, hexadecimal, convert to each other
 
-Here are two examples， and enter triggers copy
+Here are some examples, enter triggers copy
 
-![alt text](image.png)
+![covert name](./metadata/covert-color-1.png)
 
-![alt text](image-1.png)
+![covert hexadecimal](./metadata/covert-color-2.png)
 
-
+![covert rgb](./metadata/covert-color-3.png)
