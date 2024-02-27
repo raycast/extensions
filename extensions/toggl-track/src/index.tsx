@@ -23,7 +23,7 @@ function ListView() {
       acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
         ? acc
         : [...acc, timeEntry],
-    [] as TimeEntry[],
+    [] as typeof timeEntries,
   );
 
   const totalDurationToday = useMemo(() => {
@@ -86,28 +86,28 @@ function ListView() {
       </List.Section>
       {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
         <List.Section title="Recent time entries">
-          {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => {
-            const project = projects.find(({ id }) => timeEntry.project_id === id);
-            return (
-              <List.Item
-                key={timeEntry.id}
-                keywords={[timeEntry.description, project?.name || ""]}
-                title={timeEntry.description || "No description"}
-                subtitle={timeEntry.billable ? "$" : ""}
-                accessories={[{ text: project?.name }, { icon: { source: Icon.Dot, tintColor: project?.color } }]}
-                icon={{ source: Icon.Circle, tintColor: project?.color }}
-                actions={
-                  <ActionPanel>
-                    <Action.SubmitForm
-                      title="Resume Time Entry"
-                      onSubmit={() => resumeTimeEntry(timeEntry)}
-                      icon={{ source: Icon.Clock }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
+          {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
+            <List.Item
+              key={timeEntry.id}
+              keywords={[timeEntry.description, timeEntry.project_name || ""]}
+              title={timeEntry.description || "No description"}
+              subtitle={timeEntry.billable ? "$" : ""}
+              accessories={[
+                { text: timeEntry.project_name },
+                { icon: { source: Icon.Dot, tintColor: timeEntry.project_color } },
+              ]}
+              icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
+              actions={
+                <ActionPanel>
+                  <Action.SubmitForm
+                    title="Resume Time Entry"
+                    onSubmit={() => resumeTimeEntry(timeEntry)}
+                    icon={{ source: Icon.Clock }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
         </List.Section>
       )}
     </List>
