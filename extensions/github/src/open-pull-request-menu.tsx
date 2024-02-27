@@ -8,8 +8,8 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/Menu";
-import View from "./components/View";
 import { PullRequestFieldsFragment } from "./generated/graphql";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { SectionType, useMyPullRequests } from "./hooks/useMyPullRequests";
 
 async function launchMyPullRequestsCommand(): Promise<void> {
@@ -144,10 +144,4 @@ function OpenPullRequestMenu() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <OpenPullRequestMenu />
-    </View>
-  );
-}
+export default withGitHubClient(OpenPullRequestMenu);

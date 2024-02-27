@@ -2,9 +2,9 @@ import { useCachedPromise } from "@raycast/utils";
 import { subDays, format, compareDesc } from "date-fns";
 import { uniqBy } from "lodash";
 
+import { getGitHubClient } from "../api/githubClient";
 import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 export function useMyPullRequests(repository: string | null) {
   const { github } = getGitHubClient();

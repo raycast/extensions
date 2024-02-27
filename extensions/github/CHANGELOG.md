@@ -1,11 +1,19 @@
 # GitHub Changelog
 
+## [Fix repository name after change] - 2024-02-21
+
+- Fixes an issue where a visited repository does not reflect the correct name after being changed on GitHub.
+
+## [Use OAuth utils] - 2024-02-15
+
+- Use new OAuth utils
+
 ## [Select categories for My Pull Request Menu command] - 2024-02-14
 
 - Add preferences to include or not some categories of Pull Requests in the My Pull Requests menu bar command.
 - Add preferences to include or not some categories in the count of the My Pull Requests menu bar command.
 
-## [Change cancelled workflow run status icon color] - 2023-12-18
+## [Change cancelled workflow run status icon color] - 2024-02-12
 
 - Change cancelled workflow run status icon color to be in line with GitHub's UI
 

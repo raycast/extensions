@@ -1,15 +1,39 @@
+import { useMemo, useState } from "react";
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
 import { createTimeEntry, Project, Task } from "../api";
-import { useTimeEntryContext } from "../context/TimeEntryContext";
-import { useMemo, useState } from "react";
+import { useMe, useWorkspaces, useClients, useTags, useTasks } from "../hooks";
+import { createProjectGroups } from "../helpers/createProjectGroups";
 
-function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
+interface CreateTimeEntryFormParams {
+  isLoading: boolean;
+  projects: Project[];
+  revalidateRunningTimeEntry: () => void;
+  project?: Project;
+  description?: string;
+}
+
+function CreateTimeEntryForm({
+  isLoading,
+  projects,
+  revalidateRunningTimeEntry,
+  project,
+  description,
+}: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
-  const { me, isLoading, projects, tags, tasks, projectGroups, revalidateRunningTimeEntry } = useTimeEntryContext();
+  const { me, isLoadingMe } = useMe();
+  const { workspaces, isLoadingWorkspaces } = useWorkspaces();
+  const { clients, isLoadingClients } = useClients();
+  const { tags, isLoadingTags } = useTags();
+  const { tasks, isLoadingTasks } = useTasks();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [billable, setBillable] = useState<boolean>(false);
+
+  const projectGroups = useMemo(
+    () => createProjectGroups(projects, workspaces, clients),
+    [projects, workspaces, clients],
+  );
 
   async function handleSubmit(values: { description: string }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -60,7 +84,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingMe || isLoadingWorkspaces || isLoadingClients || isLoadingTags || isLoadingTasks}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Time Entry" onSubmit={handleSubmit} />

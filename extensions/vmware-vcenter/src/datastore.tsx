@@ -243,7 +243,7 @@ export default function Command(): JSX.Element {
     if (Server && !IsLoadingServer && ServerSelected && !IsLoadingServerSelected) {
       GetDatastores();
     } else if (Server && !IsLoadingServer && !ServerSelected && !IsLoadingServerSelected) {
-      const name = Object.keys(Server)[0];
+      const name = [...Server.keys()][0];
       LocalStorage.setItem("server_selected", name);
       RevalidateServerSelected();
     } else if (!IsLoadingServer && !Server) {
@@ -275,18 +275,17 @@ export default function Command(): JSX.Element {
       actions={GetDatastoreAction()}
       searchBarAccessory={Server && GetSearchBar(Server)}
     >
-      {Datastores &&
-        Datastores.map((datastore) => (
-          <List.Item
-            key={`${datastore.server}_${datastore.summary.datastore}`}
-            id={`${datastore.server}_${datastore.summary.datastore}`}
-            title={datastore.summary.name}
-            icon={{ source: "icons/datastore/datastore.svg" }}
-            accessories={GetDatastoreAccessory(datastore)}
-            detail={GetDatastoreDetail(datastore)}
-            actions={GetDatastoreAction()}
-          />
-        ))}
+      {Datastores.map((datastore) => (
+        <List.Item
+          key={`${datastore.server}_${datastore.summary.datastore}`}
+          id={`${datastore.server}_${datastore.summary.datastore}`}
+          title={datastore.summary.name}
+          icon={{ source: "icons/datastore/datastore.svg" }}
+          accessories={GetDatastoreAccessory(datastore)}
+          detail={GetDatastoreDetail(datastore)}
+          actions={GetDatastoreAction()}
+        />
+      ))}
     </List>
   );
 }

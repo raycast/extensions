@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-02-16
+
+Added option to use a quote on timer completion, and added option to disable the image on timer completion.
+
 ## [Enhancement] - 2024-01-29
 
 Added confetti parameter to display confetti after interval completes

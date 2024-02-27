@@ -4,7 +4,7 @@ import { useState } from "react";
 import PullRequestListEmptyView from "./components/PullRequestListEmptyView";
 import PullRequestListItem from "./components/PullRequestListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
-import View from "./components/View";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyPullRequests } from "./hooks/useMyPullRequests";
 import { useViewer } from "./hooks/useViewer";
 
@@ -41,10 +41,4 @@ function MyPullRequests() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <MyPullRequests />
-    </View>
-  );
-}
+export default withGitHubClient(MyPullRequests);

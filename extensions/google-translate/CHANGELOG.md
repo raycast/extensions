@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Feature] - 2024-02-23
+
+ - Added new "Play Text-To-Speed" command
+
 ## [Enhancement] - 2024-01-26
 
  - Added "Autofill Input" preference to allow users to disable the autofill selected text feature

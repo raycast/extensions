@@ -1,11 +1,8 @@
-import { useCachedPromise } from "@raycast/utils";
-import { getWorkspaceProjects, Workspace } from "../api";
-import { allWorkspacesFetch } from "../helpers/allWorkspacesFetch";
+import { useSafeCachedPromise } from "./useSafeCachedPromise";
+import { getMyProjects } from "../api";
 
-export function useProjects(workspaces: Workspace[]) {
-  const { data, error, isLoading, revalidate } = useCachedPromise(getProjects, [workspaces], {
-    initialData: [],
-  });
+export function useProjects() {
+  const { data, error, isLoading, revalidate } = useSafeCachedPromise(getMyProjects, [], { initialData: [] });
 
   return {
     projects: data,
@@ -13,8 +10,4 @@ export function useProjects(workspaces: Workspace[]) {
     isLoadingProjects: isLoading,
     revalidateProjects: revalidate,
   };
-}
-
-function getProjects(workspaces: Workspace[]) {
-  return allWorkspacesFetch(getWorkspaceProjects, workspaces);
 }
