@@ -1,4 +1,4 @@
-# Codeforces-Extension Changelog
+# Codeforces Changelog
 
 ## [Update] - 2024-02-27
 
