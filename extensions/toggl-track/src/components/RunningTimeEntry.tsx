@@ -1,18 +1,16 @@
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 import useCurrentTime from "../hooks/useCurrentTime";
-import { stopTimeEntry, TimeEntry, Project } from "../api";
+import { stopTimeEntry, TimeEntry, TimeEntryMetaData } from "../api";
 
 interface RunningTimeEntryProps {
-  runningTimeEntry: TimeEntry;
-  project?: Project;
+  runningTimeEntry: TimeEntry & TimeEntryMetaData;
   revalidateRunningTimeEntry: () => void;
   revalidateTimeEntries: () => void;
 }
 
 function RunningTimeEntry({
   runningTimeEntry,
-  project,
   revalidateRunningTimeEntry,
   revalidateTimeEntries,
 }: RunningTimeEntryProps) {
@@ -39,8 +37,11 @@ function RunningTimeEntry({
           (runningTimeEntry.billable ? "$  " : "") +
           dayjs.duration(dayjs(currentTime).diff(runningTimeEntry.start), "milliseconds").format("HH:mm:ss")
         }
-        accessories={[{ text: project?.name }, { icon: { source: Icon.Dot, tintColor: project?.color } }]}
-        icon={{ source: Icon.Clock, tintColor: project?.color }}
+        accessories={[
+          { text: runningTimeEntry.project_name },
+          { icon: { source: Icon.Dot, tintColor: runningTimeEntry.project_color } },
+        ]}
+        icon={{ source: Icon.Clock, tintColor: runningTimeEntry.project_color }}
         actions={
           <ActionPanel>
             <Action.SubmitForm icon={{ source: Icon.Clock }} onSubmit={stopRunningTimeEntry} title="Stop Time Entry" />

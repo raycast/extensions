@@ -6,7 +6,7 @@ import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } fro
 import { createTimeEntry, TimeEntry } from "./api";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { useTimeEntries, useRunningTimeEntry, useProjects } from "./hooks";
+import { useTimeEntries, useRunningTimeEntry } from "./hooks";
 import { formatSeconds } from "./helpers/formatSeconds";
 
 dayjs.extend(duration);
@@ -14,9 +14,8 @@ dayjs.extend(duration);
 function ListView() {
   const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
   const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
-  const { projects, isLoadingProjects } = useProjects();
 
-  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingProjects;
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
     (acc, timeEntry) =>
@@ -60,10 +59,7 @@ function ListView() {
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
       {runningTimeEntry && (
-        <RunningTimeEntry
-          project={projects.find(({ id }) => runningTimeEntry.project_id === id)}
-          {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }}
-        />
+        <RunningTimeEntry {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }} />
       )}
       <List.Section title="Actions">
         <List.Item
@@ -76,7 +72,7 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <CreateTimeEntryForm {...{ isLoading, projects, revalidateRunningTimeEntry }} />
+                    <CreateTimeEntryForm {...{ isLoading, revalidateRunningTimeEntry }} />
                   </ExtensionContextProvider>
                 }
               />
