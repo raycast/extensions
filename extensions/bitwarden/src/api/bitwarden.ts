@@ -49,7 +49,7 @@ type ExecProps = {
 
 const { supportPath } = environment;
 
-const Δ = "1"; // changing this forces a new bin download for people that had a failed one
+const Δ = "2"; // changing this forces a new bin download for people that had a failed one
 const BinDownloadLogger = (() => {
   /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
    but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
@@ -64,8 +64,8 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2023.10.0",
-  sha256: "c129b1806bb00806676298198fb54d540561e2c06d66016f0836e31b1bd65e72",
+  version: "2024.2.0",
+  sha256: "fd80ffefd4686e677d7c8720258b3c92559b65b890519b1327cd4bb45887dde8",
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
     arm64: "/opt/homebrew/bin/bw",
