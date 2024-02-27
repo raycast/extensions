@@ -1,5 +1,9 @@
 # Codeforces-Extension Changelog
 
+## [Update] - 2024-02-27
+
+- Menu Bar items length issue fixed
+
 ## [Update] - 2024-02-03
 
 - Add to Google Calender Feature Added
