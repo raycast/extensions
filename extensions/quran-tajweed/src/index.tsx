@@ -12,7 +12,14 @@ export default function Command() {
   const { push } = useNavigation();
 
   useEffect(() => {
-    filterList(items.filter((item) => item.id.toString() == searchText.toLowerCase() || item.name.toLowerCase().includes(searchText.toLowerCase()) || item.name_translation.toLowerCase().includes(searchText.toLowerCase())));
+    filterList(
+      items.filter(
+        (item) =>
+          item.id.toString() == searchText.toLowerCase() ||
+          item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.name_translation.toLowerCase().includes(searchText.toLowerCase()),
+      ),
+    );
   }, [searchText]);
 
   return (
@@ -36,34 +43,19 @@ export default function Command() {
                 adjustContrast: true,
               },
             }}
-            accessories={[
-              { text: { value: `${item.name}`, color: Color.Green } }
-            ]}
+            accessories={[{ text: { value: `${item.name}`, color: Color.Green } }]}
             title={`${item.id.toString()} - `}
             subtitle={`${item.name_translation}`}
-
             detail={
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Surah Information" />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Verses"
-                      text={item.array.length.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Type"
-                      text={item.type_en.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Words"
-                      text={item.words.toString()}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Letters"
-                      text={item.letters.toString()}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Verses" text={item.array.length.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Type" text={item.type_en.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Words" text={item.words.toString()} />
+                    <List.Item.Detail.Metadata.Label title="Letters" text={item.letters.toString()} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -71,8 +63,12 @@ export default function Command() {
             actions={
               <ActionPanel title={`Surah ${item.name_translation}`}>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser title="Open in Browser" url={`https://easyquran.com/en/recite-the-tajweed-quran-in-hafs-an-asim-narration/#${item.start_page}`} />
-                  <Action onAction={() => push(<SurahDetails surah={item} />)}
+                  <Action.OpenInBrowser
+                    title="Open in Browser"
+                    url={`https://easyquran.com/en/recite-the-tajweed-quran-in-hafs-an-asim-narration/#${item.start_page}`}
+                  />
+                  <Action
+                    onAction={() => push(<SurahDetails surah={item} />)}
                     title={"Show Surah Conent"}
                     icon={{
                       source: Icon.TextCursor,
@@ -81,7 +77,8 @@ export default function Command() {
                         dark: "#FFFF50",
                         adjustContrast: true,
                       },
-                    }} />
+                    }}
+                  />
                 </ActionPanel.Section>
               </ActionPanel>
             }
