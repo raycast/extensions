@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "covert-color",
-  "title": "Covert Color",
+  "title": "Convert Color",
   "description": "hsl, rgb, hexadecimal, convert to each other",
   "icon": "command-icon.png",
   "author": "yf_zhang",
@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Covert Color",
+      "title": "Convert Color",
       "description": "hsl, rgb, hexadecimal, convert to each other",
       "mode": "view",
       "arguments": [
@@ -21,10 +21,6 @@
         }
       ]
     }
-  ],
-  "keywords": [
-    "raycast",
-    "covert color" 
   ],
   "dependencies": {
     "@raycast/api": "^1.67.1",
