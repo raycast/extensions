@@ -102,7 +102,7 @@ extension EKRecurrenceRule {
     if months.count == 12 {
       return " of Every Month"
     } else {
-      let formattedMonths = months.compactMap { monthSymbols?[$0.intValue] }.formatted()
+      let formattedMonths = months.compactMap { monthSymbols?[$0.intValue - 1] }.formatted()
       return " in \(formattedMonths)"
     }
   }

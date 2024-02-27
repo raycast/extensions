@@ -13,16 +13,18 @@ You're all good to go!
 
 ## Disabled Commands
 
-This extension includes a few commands that are disabled by default. You can enable them by going to the extension's settings.
+The extension features several disabled commands that can be enabled in the settings:
 
-These commands are:
-
-- Compose Email Response
-- Add Comments to Code
-- Change Tone to Friendly
 - Change Tone to Casual
 - Change Tone to Professional
-- Change Tone to Academic
+- Coding Assustant
+- Custom Action
 - Find Synonyms
 - Task Generator
 - Translate Text
+
+## API Pricing
+
+Pricing for the Perplexity API is based on the number of tokens processed. 
+
+You can find more information on the [Pricing Page](https://docs.perplexity.ai/docs/pricing).

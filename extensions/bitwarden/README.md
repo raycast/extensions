@@ -14,21 +14,18 @@
 
 ## Setup
 
-Before you're able to use this extension, you need to follow these steps:
+Before you're able to use this extension, you need to complete the following steps:
 
-#### Step 1 - Install the Bitwarden CLI
+#### Step 1 - Set your account's API secrets
+> 1.1 - Get the secrets from your account [security settings](https://vault.bitwarden.com/#/settings/security/security-keys) (`View API Key` button). For more information check the official [documentation](https://bitwarden.com/help/personal-api-key/#get-your-personal-api-key)  
+> 
+> <img src="assets/setup-secrets-1.png" width="700" />
 
-> ##### Option 1 - Using Homebrew
-> ```sh
-> brew install bitwarden-cli
-> ```
-> ##### Option 2 - Downloading it from the [official page](https://bitwarden.com/help/cli/#download-and-install)
+> 1.2 - Paste the secrets in the corresponding fields the first time you use the extension.  
+> 
+> <img src="assets/setup-secrets-2.png" width="700" />
 
-#### Step 2 - Set your API secrets in the extension preferences. 
-> Get them from your account [security settings](https://vault.bitwarden.com/#/settings/security/security-keys).
-For more information check the official [documentation](https://bitwarden.com/help/personal-api-key/#get-your-personal-api-key).
-
-#### You're all set! 🎉
+You're all set! 🎉
 
 ### Self-hosted Instance
 
@@ -38,7 +35,7 @@ This extension connects to Bitwarden-hosted servers by default, but can be confi
 
 The extension relies on the Bitwarden CLI, so every security consideration that applies to the CLI applies to the extension as well. See <https://bitwarden.com/help/article/cli-security/> for more information.
 
-#### Caching
+### Caching
 Out of the box, the extension caches the **visible and non-sensitive** part of your vault to ensure faster access. Secrets like passwords, identity fields, credit card information, secret notes and others sensitive data are **never** saved. Even though the cache will never have any sensitive information, the data is also encrypted with a key derived from your master password. 
 
 If you wish to disable the caching feature, you can **always** do so in the extension preferences.

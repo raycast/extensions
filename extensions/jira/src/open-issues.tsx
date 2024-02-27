@@ -10,6 +10,4 @@ export function OpenIssues() {
   return <StatusIssueList issues={issues} isLoading={isLoading} mutate={mutate} />;
 }
 
-export default function Command() {
-  return withJiraCredentials(<OpenIssues />);
-}
+export default withJiraCredentials(OpenIssues);

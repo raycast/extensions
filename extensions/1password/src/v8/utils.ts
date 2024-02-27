@@ -58,30 +58,50 @@ export function op(args: string[]) {
   throw Error("1Password CLI is not found!");
 }
 
+const CACHE_TIMEOUTS: { [key: string]: number } = {
+  [CATEGORIES_CACHE_NAME]: 1000 * 60 * 10,
+  [ITEMS_CACHE_NAME]: 1000 * 60 * 10,
+  [ACCOUNT_CACHE_NAME]: 1000 * 60 * 10,
+};
+
+const DEFAULT_CACHE_TIMEOUT = 1000 * 60 * 10;
+
 export function useOp<T>(args: string[], cacheKey?: string) {
   const [data, setData] = useState<T>();
   const [error, setError] = useState<unknown>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const lastUpdatedKey = `${cacheKey}_lastUpdated`;
 
   useEffect(() => {
-    if (cacheKey && cache.has(cacheKey)) {
-      setIsLoading(false);
-      return setData(JSON.parse(cache.get(cacheKey) as string));
-    }
-
-    try {
-      const items = op([...args, "--format=json"]);
-
-      if (cacheKey) {
-        cache.set(cacheKey, items);
-        return setData(JSON.parse(cache.get(cacheKey) as string));
+    const fetchData = async () => {
+      try {
+        const items = op([...args, "--format=json"]);
+        if (cacheKey) {
+          cache.set(cacheKey, items);
+          cache.set(lastUpdatedKey, Date.now().toString());
+        }
+        setData(JSON.parse(items));
+      } catch (error: unknown) {
+        setError(error);
+      } finally {
+        setIsLoading(false);
       }
-      return setData(JSON.parse(items));
-    } catch (error: unknown) {
-      setError(error);
-    } finally {
-      setIsLoading(false);
+    };
+
+    if (cacheKey && cache.has(cacheKey) && cache.has(lastUpdatedKey)) {
+      const lastUpdatedString = cache.get(lastUpdatedKey) as string;
+      const lastUpdated = parseInt(lastUpdatedString, 10);
+      const timeSinceLastUpdate = Date.now() - lastUpdated;
+      const cacheTimeout = CACHE_TIMEOUTS[cacheKey] || DEFAULT_CACHE_TIMEOUT;
+
+      if (timeSinceLastUpdate < cacheTimeout) {
+        const cachedData = cache.get(cacheKey) as string;
+        setIsLoading(false);
+        return setData(JSON.parse(cachedData));
+      }
     }
+
+    fetchData();
   }, [cacheKey]);
 
   return { data, error, isLoading };

@@ -89,7 +89,7 @@ export async function initQRCode(): Promise<
   } catch (error) {
     let errorMessage = 'Load QR Code failed';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

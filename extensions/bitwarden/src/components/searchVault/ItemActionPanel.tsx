@@ -19,6 +19,8 @@ import {
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
+import BugReportCollectDataAction from "~/components/searchVault/actions/BugReportCollectDataAction";
+import BugReportOpenAction from "~/components/searchVault/actions/BugReportOpenAction";
 
 const { primaryAction } = getPreferenceValues();
 
@@ -80,6 +82,10 @@ const VaultItemActionPanel = () => {
       </ActionPanel.Section>
       <ActionPanel.Section title="Vault Management">
         <VaultManagementActions />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Bug Report">
+        <BugReportOpenAction />
+        <BugReportCollectDataAction />
       </ActionPanel.Section>
       {environment.isDevelopment && (
         <ActionPanel.Section title="Development">

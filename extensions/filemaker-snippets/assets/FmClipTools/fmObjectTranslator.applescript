@@ -21,8 +21,9 @@ end run
 on fmObjectTranslator_Instantiate(prefs)
 	
 	script fmObjectTranslator
-		-- version 4.1.3, Daniel A. Shockley
+		-- version 4.1.4, Daniel A. Shockley
 		
+		-- 4.1.4 - 2024-01-11 ( danshockley ): Added Theme support. Note, since this added use Foundation, had to convert logic like "file somePath" into "somePath as Çclass furlÈ" in the handlers: dataObjectToUTF8, convertXmlToObjects, and prettifyXML. 
 		-- 4.1.3 - 2023-03-13 ( danshockley ): Added modern note in the recordFromList function. Renamed dshockley to danshockley in comments. 
 		-- 4.1.2 - 2023-03-10 ( danshockley ): In prettifyXML, no longer try to use tabs instead of tidy's spaces. DO still avoid extra line-breaks around CDATA, which means scanning for leading whitespace for both CR and LF line breaks, since the recently-added HEREDOC method converted CRs to LFs. 
 		-- 4.1.1 - 2023-03-10 ( danshockley ): Renamed function to "isStringValidFMObjectXML" instead of "checkStringForValidXML" to be more specific. Added isStringAnyValidXML. 
@@ -94,6 +95,8 @@ on fmObjectTranslator_Instantiate(prefs)
 		property xmlHeader_LO_LIST : {xmlHeader_LO_Line1 & xmlHeader_LO_Line2, xmlHeader_LO_Line1 & charLF & xmlHeader_LO_Line2, xmlHeader_LO_Line1 & charCR & xmlHeader_LO_Line2, xmlHeader_LO_Line1 & charCR & charLF & xmlHeader_LO_Line2}
 		property xmlHeader_LO_current : ""
 		
+		property themeClipboardType : "dyn.agk8u" -- FileMaker's clipboard type for Theme data
+		property themeCode : "FakeCodeTheme"
 		
 		property fmObjCodes : {Â
 			{objName:"Step", objCode:"XMSS"}, Â
@@ -104,7 +107,8 @@ on fmObjectTranslator_Instantiate(prefs)
 			{objName:"Field", objCode:"XMFD"}, Â
 			{objName:"CustomFunction", objCode:"XMFN"}, Â
 			{objName:"BaseTable", objCode:"XMTB"}, Â
-			{objName:"ValueList", objCode:"XMVL"} Â
+			{objName:"ValueList", objCode:"XMVL"}, Â
+			{objName:"Theme", objCode:themeCode} Â
 				}
 		
 		property currentCode : ""
@@ -122,12 +126,19 @@ on fmObjectTranslator_Instantiate(prefs)
 			set fmObjectList to {}
 			repeat with oneObject in fmObjCodes
 				set oneCode to objCode of oneObject
-				set oneClass to classFromCode(oneCode)
+				
+				if oneCode is themeCode then
+					-- Theme gets special logic (has no AppleScript data class)
+					set oneClass to null
+				else
+					set oneClass to classFromCode(oneCode)
+				end if
 				set oneSecondaryNode to ""
 				try
 					set oneSecondaryNode to secondaryNode of oneObject
 				end try
 				copy {objName:objName of oneObject, objCode:objCode of oneObject, objClass:oneClass, secondaryNode:oneSecondaryNode} to end of fmObjectList
+				
 			end repeat
 		end run
 		
@@ -188,8 +199,9 @@ on fmObjectTranslator_Instantiate(prefs)
 		
 		
 		on clipboardSetObjectsUsingXML(prefs)
-			-- version 3.6
+			-- version 3.7
 			
+			-- 3.7 - 2024-01-11 ( danshockley ): added Theme support. 
 			-- 3.6 - some error-trapping added
 			-- changed in 3.5 to ACTUALLY replace of existing clipboard instead of ADDing objects to whatever was already in clipboard.
 			-- sets the clipboard to FM Objects from specified XML string
@@ -208,23 +220,33 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			if debugMode then logConsole(ScriptName, "clipboardSetObjectsUsingXML : currentCode: " & currentCode)
 			
-			try
-				set fmObjects to convertXmlToObjects(stringFmXML)
-			on error errMsg number errNum
-				return false
-			end try
-			set the clipboard to fmObjects
-			
-			return true
-			
+			if currentCode is equal to themeCode then
+				-- Theme gets special handling: 
+				
+				return clipboardWriteTheme(stringFmXML)
+				
+			else
+				-- all other object codes, convert XML to objects and put into clipboard: 				
+				
+				try
+					set fmObjects to convertXmlToObjects(stringFmXML)
+				on error errMsg number errNum
+					return false
+				end try
+				set the clipboard to fmObjects
+				
+				return true
+			end if
 		end clipboardSetObjectsUsingXML
 		
 		
 		
 		on clipboardAddObjectsUsingXML(prefs)
+			-- 3.7
 			
 			-- ADDS FM Objects for the specified XML string TO the clipboard
 			
+			-- 3.7 - added Theme support: if theme, just write it.
 			-- 3.6 - some error-trapping added
 			
 			if class of prefs is string then
@@ -247,52 +269,79 @@ on fmObjectTranslator_Instantiate(prefs)
 				return false
 			end try
 			
-			set fmClass to classFromCode(currentCode)
-			
-			set newClip to {string:stringFmXML} & recordFromList({fmClass, fmObjects})
-			
-			set the clipboard to newClip
-			
-			return true
+			if currentCode is equal to themeCode then
+				-- CANNOT append Theme data into clipboard, so just overwrite: 
+				
+				return clipboardWriteTheme(stringFmXML)
+				
+			else
+				-- all other object codes, try to append to existing clipboard types: 
+				
+				set fmClass to classFromCode(currentCode)
+				
+				set newClip to {string:stringFmXML} & recordFromList({fmClass, fmObjects})
+				
+				set the clipboard to newClip
+				
+				return true
+				
+			end if
 			
 		end clipboardAddObjectsUsingXML
 		
 		
 		
 		on clipboardConvertToFMObjects(prefs)
-			-- version 3.6
+			-- version 3.7
 			-- converts the specified XML string to FM Objects and puts BOTH in clipboard
 			
+			-- 3.7 - added Theme support: if theme, just write it.
 			-- 3.6 - updated for currentCode issue; some error-trapping added
 			
 			if debugMode then logConsole(ScriptName, "clipboardConvertToFMObjects: START")
 			
 			set stringFmXML to get the clipboard
 			
-			try
-				set fmObjects to convertXmlToObjects(stringFmXML)
-			on error errMsg number errNum
-				if debugMode then logConsole(ScriptName, "clipboardSetToTranslatedFMObjects: ERROR: " & errMsg & ".")
+			-- call this, because it will check the XML AND set the currentCode, so we know if we need special Theme logic:
+			if not isStringValidFMObjectXML(stringFmXML) then
+				if debugMode then logConsole(ScriptName, "clipboardSetToTranslatedFMObjects: ERROR: Clipboard did not contain valid FM XML.")
 				return false
-			end try
+			end if
 			
-			set the clipboard to fmObjects
-			
-			set fmClipboard to get the clipboard
-			
-			set newClip to {string:stringFmXML} & fmClipboard
-			
-			set the clipboard to newClip
-			
-			return true
+			if currentCode is equal to themeCode then
+				-- CANNOT put both Theme data AND text into clipboard, so just overwrite: 
+				
+				return clipboardWriteTheme(stringFmXML)
+				
+			else
+				-- all other object codes, convert to XML and try to put both text and object into clipboard: 				
+				
+				try
+					set fmObjects to convertXmlToObjects(stringFmXML)
+				on error errMsg number errNum
+					if debugMode then logConsole(ScriptName, "clipboardSetToTranslatedFMObjects: ERROR: " & errMsg & ".")
+					return false
+				end try
+				
+				set the clipboard to fmObjects
+				
+				set fmClipboard to get the clipboard
+				
+				set newClip to {string:stringFmXML} & fmClipboard
+				
+				set the clipboard to newClip
+				
+				return true
+			end if
 			
 		end clipboardConvertToFMObjects
 		
 		
 		
 		on clipboardConvertToXML(prefs)
-			-- version 3.6
+			-- version 3.7
 			
+			-- 3.7 - added Theme support. 
 			-- 3.6 - updated to deal with currentCode issue
 			-- 1.9 - remove the extraneous ASCII 10 added after Layout tag by FM10
 			-- 1.8 - ADD XML string to FM objects in clipboard, not replace
@@ -300,10 +349,20 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			if debugMode then logConsole(ScriptName, "clipboardConvertToXML: START")
 			
+			if currentCode is equal to themeCode then
+				-- SPECIAL HANDLING for Theme:
+				
+				set themeXML to clipboardReadTheme()
+				set the clipboard to themeXML
+				return true
+			end if
+			
+			-- continue, if not Theme:
+			
 			set fmClipboard to get the clipboard -- get it now, so we can ADD XML to it.
 			
 			try
-				set xmlTranslation to clipboardGetObjectsasXML({}) -- as string
+				set xmlTranslation to clipboardGetObjectsAsXML({}) -- as string
 				if debugMode then logConsole(ScriptName, "clipboardConvertToXML: obtained XML")
 			on error errMsg number errNum
 				if debugMode then logConsole(ScriptName, "clipboardConvertToXML: ERROR: " & errMsg & ".")
@@ -326,20 +385,27 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			if debugMode then logConsole(ScriptName, "clipboardConvertToXML: added XML to clipboard")
 			
-			return newClip
+			return true
 			
 		end clipboardConvertToXML
 		
 		
 		
-		on clipboardGetObjectsasXML(prefs)
-			-- version 1.1
+		on clipboardGetObjectsAsXML(prefs)
+			-- version 1.2
 			-- returns the XML translation of FM objects in the clipboard
 			
+			-- 1.2 - 2024-01-11 ( danshockley ): added Theme support. 
 			-- 1.1 - 2016-11-02 ( dshockley/eshagdar ): always check/set currentCode before using; renamed variable, use currentClass() handler.
 			
 			
 			if debugMode then logConsole(ScriptName, "clipboardGetObjectsAsXML: START")
+			
+			if clipboardHasTheme() then
+				set themeXML to clipboardReadTheme()
+				return themeXML
+			end if
+			
 			set clipboardDoesContainFmObjects to checkClipboardForObjects({}) -- return boolean, also sets currentCode property.
 			if not clipboardDoesContainFmObjects then
 				error "clipboardGetObjectsAsXML : Clipboard does not contain valid FileMaker objects." number 1024
@@ -352,11 +418,13 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			return convertObjectsToXML(fmObjects)
 			
-		end clipboardGetObjectsasXML
+		end clipboardGetObjectsAsXML
 		
 		
 		on clipboardGetXMLAsObjects(prefs)
 			-- returns the FM object translation of XML string in the clipboard
+			
+			-- NOTE: does NOT support Theme. 
 			
 			if debugMode then logConsole(ScriptName, "clipboardGetXMLAsObjects: START")
 			
@@ -376,9 +444,10 @@ on fmObjectTranslator_Instantiate(prefs)
 		
 		
 		on clipboardGetObjectsToXmlFilePath(prefs)
-			-- version 1.1
-			-- returns the PATH to an XML translation of FM objects in the clipboard
+			-- version 1.2
+			-- returns the PATH (Mac/AppleScript, not POSIX) to an XML translation of FM objects in the clipboard
 			
+			-- 1.2 - 2024-01-11 ( danshockley ): added Theme support. 
 			-- 1.1 - 2016-11-02 ( dshockley/eshagdar ): always check/set currentCode before using; renamed variable, use currentClass() handler.
 			
 			set defaultPrefs to {outputFilePath:"__TEMP__", resultType:"MacPath"}
@@ -389,12 +458,24 @@ on fmObjectTranslator_Instantiate(prefs)
 			set clipboardDoesContainFmObjects to checkClipboardForObjects({}) -- return boolean, also sets currentCode property.			
 			if not clipboardDoesContainFmObjects then return ""
 			
-			set fmClass to currentClass()
-			set fmObjects to get the clipboard as fmClass
+			if currentCode is equal to themeCode then
+				-- CANNOT append Theme data into clipboard, so just overwrite: 
+				set themeXML to clipboardReadTheme()
+				set xmlFilePath to writeTextToFileSimple({someText:themeXML, resultType:resultType of prefs, outputFilePath:outputFilePath of prefs})
+				
+				return xmlFilePath
+				
+			else
+				-- all other object codes, write the objects to a file as XML: 
+				
+				set fmClass to currentClass()
+				set fmObjects to get the clipboard as fmClass
+				
+				set xmlFilePath to dataObjectToUTF8({fmObjects:fmObjects, resultType:resultType of prefs, outputFilePath:outputFilePath of prefs})
+			end if
 			
-			set xmlConverted to dataObjectToUTF8({fmObjects:fmObjects, resultType:resultType of prefs, outputFilePath:outputFilePath of prefs})
+			return xmlFilePath
 			
-			return xmlConverted
 		end clipboardGetObjectsToXmlFilePath
 		
 		
@@ -406,45 +487,64 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			if debugMode then logConsole(ScriptName, "checkClipboardForValidXML: START")
 			
-			set testClipboard to get the clipboard
+			if clipboardHasTheme() then
+				set testClipboard to clipboardReadTheme()
+			else
+				set testClipboard to get the clipboard
+			end if
 			
 			return isStringValidFMObjectXML(testClipboard)
 		end checkClipboardForValidXML
 		
 		
 		on checkClipboardForObjects(prefs)
-			-- version 1.1
+			-- version 1.2
 			-- Checks clipboard for FM Objects (as classes, not XML). Returns true if it does, false if not. 
 			
+			-- 1.2 - 2024-01-11 ( danshockley ): added Theme support. 
 			-- 1.1 - 2016-11-02 ( dshockley/eshagdar ): added comment, changed test to length of instead of empty string.
 			
 			if debugMode then logConsole(ScriptName, "checkClipboardForObjects: START")
 			
-			set clipboardClasses to clipboard info
-			
-			set clipboardType to ""
-			repeat with oneTypeAndLength in clipboardClasses
-				set oneTypeAndLength to contents of oneTypeAndLength
+			if clipboardHasTheme() then
+				-- Theme, so set currentCode (redundantly, but oh well), and return true:
+				set currentCode to themeCode
 				
-				repeat with oneClass in fmObjectList
-					set {className, classType} to {objName of oneClass, objClass of oneClass}
-					if (item 1 of oneTypeAndLength) is classType then
-						set clipboardType to objCode of oneClass
-						exit repeat
-					end if
-				end repeat
-			end repeat
-			
-			if debugMode then logConsole(ScriptName, "checkClipboardForObjects: clipboardType: " & clipboardType)
-			
-			-- now, save _whatever_ it was into currentCode.
-			set currentCode to clipboardType
-			
-			if length of currentCode is 0 then
-				return false
-			else
+				if debugMode then logConsole(ScriptName, "checkClipboardForObjects: clipboardType: " & clipboardType)
 				return true
+				
+			else
+				-- NOT Theme, so check for others:
+				
+				set clipboardClasses to clipboard info
+				
+				set clipboardType to ""
+				repeat with oneTypeAndLength in clipboardClasses
+					set oneTypeAndLength to contents of oneTypeAndLength
+					
+					repeat with oneClass in fmObjectList
+						set {className, classType} to {objName of oneClass, objClass of oneClass}
+						if (item 1 of oneTypeAndLength) is classType then
+							set clipboardType to objCode of oneClass
+							exit repeat
+						end if
+					end repeat
+				end repeat
+				
+				if debugMode then logConsole(ScriptName, "checkClipboardForObjects: clipboardType: " & clipboardType)
+				
+				-- now, save _whatever_ it was into currentCode.
+				set currentCode to clipboardType
+				
+				if length of currentCode is 0 then
+					return false
+				else
+					return true
+				end if
+				
+				-- END OF: not Theme.
 			end if
+			
 			
 		end checkClipboardForObjects
 		
@@ -458,7 +558,6 @@ on fmObjectTranslator_Instantiate(prefs)
 			if debugMode then logConsole(ScriptName, "convertObjectsToXML: START")
 			
 			set objectsAsXML to dataObjectToUTF8({fmObjects:fmObjects})
-			
 			
 			if shouldPrettify then
 				set objectsAsXML to prettifyXML(objectsAsXML)
@@ -501,15 +600,17 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 			set tempXMLPosix to (makeTempDirPosix() & tempXMLName)
 			set xmlFilePath to (POSIX file tempXMLPosix) as string
+			set xmlFilePath to xmlFilePath as Çclass furlÈ
 			if debugMode then logConsole(ScriptName, "convertXmlToObjects: xmlFilePath: " & xmlFilePath)
-			set xmlHandle to open for access file xmlFilePath with write permission
+			set xmlHandle to open for access xmlFilePath with write permission
 			write stringFmXML to xmlHandle as Çclass utf8È
 			close access xmlHandle
-			set fmObjects to read alias xmlFilePath as fmClass
+			set fmObjects to read xmlFilePath as fmClass
 			
 			return fmObjects
 			
 		end convertXmlToObjects
+		
 		
 		on isStringAnyValidXML(someString)
 			-- version 1.0
@@ -548,9 +649,10 @@ on fmObjectTranslator_Instantiate(prefs)
 		end isStringAnyValidXML
 		
 		on isStringValidFMObjectXML(someString)
-			-- version 1.2
+			-- version 1.3
 			-- Checks someString for XML that represents FM objects. Returns true if it does, false if not. 
 			
+			-- 1.3 - 2024-01-11 ( danshockley ): no actual change, just note that this automatically supports Theme. 
 			-- 1.2 - 2019-03-07 ( danshockley ): Added capture of error -1700. 
 			-- 1.1 - 2016-11-02 ( dshockley/eshagdar ): added comment, changed test to length of instead of empty string.
 			
@@ -825,19 +927,20 @@ on fmObjectTranslator_Instantiate(prefs)
 							set tempFolderPath to (POSIX file tempFolderPosix) as string
 							
 							set tempPath to tempFolderPath & prettyTempName
+							set tempPath to tempPath as Çclass furlÈ
 							
 							try
-								close access file tempPath
+								close access tempPath
 							end try
 							
-							set someHandle to open for access file tempPath with write permission
+							set someHandle to open for access tempPath with write permission
 							
 							tell application "System Events"
 								write prettyXML to someHandle
 							end tell
 							
 							try
-								close access file tempPath
+								close access tempPath
 							end try
 							
 							
@@ -854,7 +957,7 @@ on fmObjectTranslator_Instantiate(prefs)
 							if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: shell command result: " & result)
 							
 							-- read the modified temp file:
-							set prettyXML to read file tempPath
+							set prettyXML to read tempPath
 							
 							
 							if debugMode then my logConsole(ScriptName, "prettifyXML: DEBUG: 1st chars of temp file: " & text 1 thru 200 of prettyXML)
@@ -863,7 +966,7 @@ on fmObjectTranslator_Instantiate(prefs)
 						on error errMsg number errNum
 							if debugMode then my logConsole(ScriptName, "prettifyXML: ERROR: " & errMsg & "(" & errNum & ")")
 							try
-								close access file tempPath
+								close access tempPath
 							end try
 							error errMsg number errNum
 						end try
@@ -943,8 +1046,9 @@ on fmObjectTranslator_Instantiate(prefs)
 		
 		
 		on dataObjectToUTF8(prefs)
-			-- version 2.9
+			-- version 3.0
 			
+			-- 3.0 - 2024-01-11 ( danshockley ): Update to use Çclass furlÈ for file ref.
 			-- 2.9 - 2018-10-29 ( danshockley ): BUG-FIX: the error handler closed a non-existent variable. 
 			-- 2.8 - 2016-11-02 ( dshockley/eshagdar ): debugMode now logs the tempDataPosix
 			-- 2.7 - by default, look for someObject instead of 'fmObjects' (but allow calling code to specify 'fmObjects' for backwards compatibility).
@@ -979,25 +1083,26 @@ on fmObjectTranslator_Instantiate(prefs)
 					set tempDataPosix to POSIX path of tempDataPath
 				end if
 				
+				set tempDataPath to tempDataPath as Çclass furlÈ
 				
 				try
-					close access file tempDataPath
+					close access tempDataPath
 				end try
 				
-				set someHandle to open for access file tempDataPath with write permission
+				set someHandle to open for access tempDataPath with write permission
 				
 				tell application "System Events"
 					write someObject to someHandle
 				end tell
 				
 				try
-					close access file tempDataPath
+					close access tempDataPath
 				end try
 				
 			on error errMsg number errNum
 				if debugMode then my logConsole(ScriptName, "dataObjectToUTF8: ERROR: " & errMsg & "(" & errNum & ")")
 				try
-					close access file tempDataPath
+					close access tempDataPath
 				end try
 				error errMsg number errNum
 			end try
@@ -1007,7 +1112,7 @@ on fmObjectTranslator_Instantiate(prefs)
 			if resultType is "utf8" then
 				
 				tell application "System Events"
-					read file tempDataPath as Çclass utf8È
+					read tempDataPath as Çclass utf8È
 				end tell
 				
 				return result
@@ -1022,6 +1127,78 @@ on fmObjectTranslator_Instantiate(prefs)
 			
 		end dataObjectToUTF8
 		
+		
+		on writeTextToFileSimple(prefs)
+			-- version 1.0
+			
+			-- 1.0 - 2024-01-11 ( danshockley ): created, simplified version of a more complex writeToFile handler.
+			
+			set defaultPrefs to {resultType:"MacPath", outputFilePath:"__TEMP__", someText:null}
+			set prefs to prefs & defaultPrefs
+			
+			set resultType to resultType of prefs
+			set someText to someText of prefs
+			set outputFilePath to outputFilePath of prefs
+			
+			if debugMode then logConsole(ScriptName, "writeTextToFileSimple: START")
+			
+			try
+				
+				if outputFilePath is "__TEMP__" then
+					set tempDataFolderPosix to my makeTempDirPosix()
+					set tempDataFolderPath to (POSIX file tempDataFolderPosix) as string
+					
+					set tempDataPosix to tempDataFolderPosix & tempDataName
+					set tempDataPath to tempDataFolderPath & tempDataName
+					
+				else
+					set tempDataPath to outputFilePath
+					set tempDataPosix to POSIX path of tempDataPath
+				end if
+				
+				set tempDataPath to tempDataPath as Çclass furlÈ
+				
+				try
+					close access tempDataPath
+				end try
+				
+				set someHandle to open for access tempDataPath with write permission
+				
+				tell application "System Events"
+					write someText to someHandle
+				end tell
+				
+				try
+					close access tempDataPath
+				end try
+				
+			on error errMsg number errNum
+				if debugMode then my logConsole(ScriptName, "writeTextToFileSimple: ERROR: " & errMsg & "(" & errNum & ")")
+				try
+					close access tempDataPath
+				end try
+				error errMsg number errNum
+			end try
+			
+			if debugMode then my logConsole(ScriptName, "writeTextToFileSimple: tempDataPosix: " & tempDataPosix)
+			
+			if resultType is "MacPath" then
+				return tempDataPath
+				
+			else if resultType is "Posix" then
+				return POSIX path of tempDataPosix
+				
+			else if resultType is "utf8" then
+				-- echo back the text data written to the file.				
+				tell application "System Events"
+					read tempDataPath as Çclass utf8È
+				end tell
+				
+				return result
+				
+			end if
+			
+		end writeTextToFileSimple
 		
 		
 		
@@ -1384,6 +1561,40 @@ on fmObjectTranslator_Instantiate(prefs)
 			end try
 		end recordFromList
 		
+		
+		use framework "Foundation"
+		use framework "AppKit"
+		use scripting additions
+		
+		
+		on clipboardHasTheme()
+			
+			set theNSPasteboard to current application's NSPasteboard's generalPasteboard()
+			set clipboardTypes to theNSPasteboard's types() as list
+			set hasTheme to clipboardTypes contains themeClipboardType
+			if hasTheme then set currentCode to themeCode
+			return hasTheme
+			
+		end clipboardHasTheme
+		
+		on clipboardReadTheme()
+			
+			if not clipboardHasTheme() then
+				error "clipboardReadTheme failed: Clipboard does not contain Theme data." number 1024
+			end if
+			set pasteboard to current application's NSPasteboard's generalPasteboard()
+			set clipboardData to pasteboard's dataForType:themeClipboardType
+			set clipboardText to (current application's NSString's alloc()'s initWithData:clipboardData encoding:(current application's NSUTF8StringEncoding)) as text
+			return clipboardText
+		end clipboardReadTheme
+		
+		
+		on clipboardWriteTheme(themeXML)
+			set pasteboard to current application's NSPasteboard's generalPasteboard()
+			pasteboard's clearContents()
+			pasteboard's setString:themeXML forType:themeClipboardType
+			return result
+		end clipboardWriteTheme
 		
 		
 		

@@ -1,5 +1,8 @@
 # Github Co-Authors Changelog
 
+## [Update] - 2024-02-14
+- Added support for adding multiple commit co-authors at once
+
 ## [Initial Version] - 2023-01-11
 
 - Initial build of the extension
