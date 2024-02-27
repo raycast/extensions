@@ -21,6 +21,7 @@ import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
+import { captureException } from "~/utils/development";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -49,7 +50,7 @@ type ExecProps = {
 
 const { supportPath } = environment;
 
-const Δ = "1"; // changing this forces a new bin download for people that had a failed one
+const Δ = "2"; // changing this forces a new bin download for people that had a failed one
 const BinDownloadLogger = (() => {
   /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
    but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
@@ -64,8 +65,8 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2023.10.0",
-  sha256: "c129b1806bb00806676298198fb54d540561e2c06d66016f0836e31b1bd65e72",
+  version: "2024.2.0",
+  sha256: "fd80ffefd4686e677d7c8720258b3c92559b65b890519b1327cd4bb45887dde8",
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
     arm64: "/opt/homebrew/bin/bw",
@@ -93,13 +94,13 @@ export const cliInfo = {
 
 export class Bitwarden {
   private env: Env;
-  private isInitialized = false;
   private initPromise: Promise<void>;
   private tempSessionToken?: string;
   private callbacks: ActionCallbacks = {};
   private preferences = getPreferenceValues<Preferences>();
   private cliPath: string;
   private toastInstance: Toast | undefined;
+  wasCliUpdated = false;
   lockReason: string | undefined;
 
   constructor(toastInstance?: Toast) {
@@ -157,6 +158,7 @@ export class Bitwarden {
         await rename(decompressedBinPath, this.cliPath);
         await chmod(this.cliPath, "755");
         await rm(zipPath, { force: true });
+        this.wasCliUpdated = true;
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
         throw extractError;
@@ -209,7 +211,6 @@ export class Bitwarden {
 
   async initialize(): Promise<this> {
     await this.initPromise;
-    this.isInitialized = true;
     return this;
   }
 
@@ -263,8 +264,6 @@ export class Bitwarden {
   }
 
   private async exec(args: string[], options: ExecProps): Promise<ExecaChildProcess> {
-    if (!this.isInitialized) throw new Error("Bitwarden not initialized");
-
     const { abortController, input = "", resetVaultTimeout } = options ?? {};
 
     let env = this.env;
@@ -296,18 +295,21 @@ export class Bitwarden {
       await this.callbacks.login?.();
       return { result: undefined };
     } catch (execError) {
+      captureException("Failed to login", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
     }
   }
 
-  async logout(): Promise<MaybeError> {
+  async logout(reason?: string): Promise<MaybeError> {
     try {
+      if (reason) await this.setLockReason(reason);
       await this.exec(["logout"], { resetVaultTimeout: false });
       await this.handlePostLogout();
       return { result: undefined };
     } catch (execError) {
+      captureException("Failed to logout", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -327,6 +329,7 @@ export class Bitwarden {
       await this.callbacks.lock?.(reason);
       return { result: undefined };
     } catch (execError) {
+      captureException("Failed to lock vault", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -341,6 +344,7 @@ export class Bitwarden {
       await this.callbacks.unlock?.(password, sessionToken);
       return { result: sessionToken };
     } catch (execError) {
+      captureException("Failed to unlock vault", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -352,6 +356,7 @@ export class Bitwarden {
       await this.exec(["sync"], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
+      captureException("Failed to sync vault", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -365,6 +370,7 @@ export class Bitwarden {
       // Filter out items without a name property (they are not displayed in the bitwarden app)
       return { result: items.filter((item: Item) => !!item.name) };
     } catch (execError) {
+      captureException("Failed to list items", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -376,6 +382,7 @@ export class Bitwarden {
       const { stdout } = await this.exec(["list", "folders"], { resetVaultTimeout: true });
       return { result: JSON.parse<Folder[]>(stdout) };
     } catch (execError) {
+      captureException("Failed to list folder", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -390,6 +397,7 @@ export class Bitwarden {
       await this.exec(["create", "folder", encodedFolder], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
+      captureException("Failed to create folder", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -402,6 +410,7 @@ export class Bitwarden {
       const { stdout } = await this.exec(["get", "totp", id], { resetVaultTimeout: true });
       return { result: stdout };
     } catch (execError) {
+      captureException("Failed to get TOTP", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -413,6 +422,7 @@ export class Bitwarden {
       const { stdout } = await this.exec(["status"], { resetVaultTimeout: false });
       return { result: JSON.parse<VaultState>(stdout) };
     } catch (execError) {
+      captureException("Failed to get status", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -424,6 +434,7 @@ export class Bitwarden {
       await this.exec(["unlock", "--check"], { resetVaultTimeout: false });
       return "unlocked";
     } catch (error) {
+      captureException("Failed to check lock status", error);
       const errorMessage = (error as ExecaError).stderr;
       if (errorMessage === "Vault is locked.") return "locked";
       return "unauthenticated";
@@ -431,9 +442,15 @@ export class Bitwarden {
   }
 
   async getTemplate(type: string): Promise<any> {
-    const { stdout } = await this.exec(["get", "template", type], { resetVaultTimeout: true });
-    const template = JSON.parse(stdout);
-    return template;
+    try {
+      const { stdout } = await this.exec(["get", "template", type], { resetVaultTimeout: true });
+      return JSON.parse(stdout);
+    } catch (execError) {
+      captureException("Failed to get template", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   async encode(input: any): Promise<string> {

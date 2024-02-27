@@ -1,8 +1,11 @@
 # Bitwarden Changelog
 
-## [Enhancement] - 2024-02-27
+## [Fixes and Improvements] - 2024-02-27
 
 - Added images to README
+- Bumped the downloaded CLI version from 2023.10.0 to 2024.2.0
+- Added new action to copy the errors captured during the command execution
+- Attempt to fix reported crashes with the new download CLI mechanism
 
 ## [Improvements] - 2024-02-25
 
