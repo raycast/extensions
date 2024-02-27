@@ -8,7 +8,7 @@ type Log = {
 
 const _exceptions = {
   logs: new Map<Date, Log>(),
-  set: (message: string, error: any): void => {
+  set: (message: string, error?: any): void => {
     capturedExceptions.logs.set(new Date(), { message, error });
   },
   clear: (): void => capturedExceptions.logs.clear(),
@@ -16,7 +16,8 @@ const _exceptions = {
     let str = "";
     capturedExceptions.logs.forEach((log, date) => {
       if (str.length > 0) str += "\n\n";
-      str += `[${date.toISOString()}] ${log.message}: ${getErrorString(log.error)}`;
+      str += `[${date.toISOString()}] ${log.message}`;
+      if (log.error) str += `: ${getErrorString(log.error)}`;
     });
 
     return str;

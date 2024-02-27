@@ -44,7 +44,7 @@ export function SessionProvider(props: SessionProviderProps) {
       if (restoredSession.token) bitwarden.setSessionToken(restoredSession.token);
 
       if (bitwarden.wasCliUpdated) {
-        await bitwarden.logout();
+        await bitwarden.logout("Bitwarden has been updated. Please login again.");
         return;
       }
 

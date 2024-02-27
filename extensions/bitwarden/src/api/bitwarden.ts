@@ -302,8 +302,9 @@ export class Bitwarden {
     }
   }
 
-  async logout(): Promise<MaybeError> {
+  async logout(reason?: string): Promise<MaybeError> {
     try {
+      if (reason) await this.setLockReason(reason);
       await this.exec(["logout"], { resetVaultTimeout: false });
       await this.handlePostLogout();
       return { result: undefined };
