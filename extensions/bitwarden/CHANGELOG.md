@@ -1,5 +1,19 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2024-02-25
+
+- Download the official CLI binary upon launch if necessary, rather than relying on the user to install it
+- Improved troubleshooting screen content
+- Added a bug report data collection action
+
+## [New Timeout Option] - 2024-02-24
+
+- Added a new experimental option to lock the vault "On system lock"
+
+## [Fix] - 2024-02-23
+
+- Fixes timeout lock being removed due to lock command updating last activity time
+
 ## [New Command and Fix] - 2024-01-06
 
 - Adds Create Folder command

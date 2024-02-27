@@ -65,14 +65,16 @@ export interface TimeEntry extends ToggleItem {
    * @deprecated This field is deprecated for GET endpoints where the value will always be true.
    */
   duronly: boolean;
-  project_color?: string;
+  /** @deprecated */
+  project_color: never;
   /**
    * Project ID
    *
    * Can be null if project was not provided or project was later deleted
    */
   project_id: number | null;
-  project_name?: string;
+  /** @deprecated */
+  project_name: never;
   start: string;
   /**
    * Stop time in UTC.
