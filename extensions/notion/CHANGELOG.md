@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Improve authentication docs] - 2024-02-27
+
+- Improve documentation on creating an internal integration
+- Use OAuth utils
+
 ## [Properly allow date with time] - 2024-02-15
 
 - Fix a bug that prevented creating pages with time
