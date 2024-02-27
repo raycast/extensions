@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Detail, getPreferenceValues, environment } from "@raycast/api";
-import BugReportCollectDataAction from "~/components/searchVault/actions/BugReportCollectDataAction";
-import BugReportOpenAction, { BUG_REPORT_URL } from "~/components/searchVault/actions/BugReportOpenAction";
+import { BugReportCollectDataAction, BugReportOpenAction } from "~/components/actions";
+import { BUG_REPORT_URL } from "~/components/actions/BugReportOpenAction";
 import { EnsureCliBinError, getErrorString } from "~/utils/errors";
 
 const LINE_BREAK = "\n\n";
