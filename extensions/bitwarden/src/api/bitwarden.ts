@@ -93,13 +93,13 @@ export const cliInfo = {
 
 export class Bitwarden {
   private env: Env;
-  private isInitialized = false;
   private initPromise: Promise<void>;
   private tempSessionToken?: string;
   private callbacks: ActionCallbacks = {};
   private preferences = getPreferenceValues<Preferences>();
   private cliPath: string;
   private toastInstance: Toast | undefined;
+  wasCliUpdated = false;
   lockReason: string | undefined;
 
   constructor(toastInstance?: Toast) {
@@ -157,6 +157,7 @@ export class Bitwarden {
         await rename(decompressedBinPath, this.cliPath);
         await chmod(this.cliPath, "755");
         await rm(zipPath, { force: true });
+        this.wasCliUpdated = true;
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
         throw extractError;
@@ -209,7 +210,6 @@ export class Bitwarden {
 
   async initialize(): Promise<this> {
     await this.initPromise;
-    this.isInitialized = true;
     return this;
   }
 
@@ -263,8 +263,6 @@ export class Bitwarden {
   }
 
   private async exec(args: string[], options: ExecProps): Promise<ExecaChildProcess> {
-    if (!this.isInitialized) throw new Error("Bitwarden not initialized");
-
     const { abortController, input = "", resetVaultTimeout } = options ?? {};
 
     let env = this.env;
