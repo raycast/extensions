@@ -1,7 +1,7 @@
 # Android Changelog
 
 ## [Feature Update] - 2024-02-23
-- Add preference to set Android avd path
+- Added preference to set Android avd path
 
 ## [Feature Update] - 2023-10-11
 - Added Emulator Shutdown & Restart
