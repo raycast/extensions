@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Enhancement] - 2024-02-27
+
+- Added images to README
+
 ## [Improvements] - 2024-02-25
 
 - Download the official CLI binary upon launch if necessary, rather than relying on the user to install it
