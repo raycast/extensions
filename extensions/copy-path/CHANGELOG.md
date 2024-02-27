@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Optimize Copy URL] - {PR_MERGE_DATE}
+## [Optimize Copy URL] - 2024-02-27
 
 - Add multiple setting items
 - Optimize the ability to copy URLs
