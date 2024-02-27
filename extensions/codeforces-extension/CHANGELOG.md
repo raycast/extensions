@@ -1,4 +1,8 @@
-# Codeforces-Extension Changelog
+# Codeforces Changelog
+
+## [Update] - 2024-02-27
+
+- Menu Bar items length issue fixed
 
 ## [Update] - 2024-02-03
 
