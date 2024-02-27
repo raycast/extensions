@@ -12,7 +12,7 @@ const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues<Preferences>();
 
 export const figma = new OAuthService({
   client,
-  clientId: "Afx7B0B39PL41r2kOkfTB2",
+  clientId: "dkY6v4uzFHoH4RaK7mB7Uw",
   authorizeUrl: "https://figma.oauth.raycast.com/authorize",
   tokenUrl: "https://figma.oauth.raycast.com/token",
   refreshTokenUrl: "https://figma.oauth.raycast.com/refresh-token",
