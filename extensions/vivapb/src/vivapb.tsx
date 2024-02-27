@@ -1,12 +1,16 @@
 import { getApplications, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
 
-async function isVivaldiInstalled(): Promise<boolean> {
+export default async function Command() {
+  await openVivaldiIncognitoIfInstalled();
+}
+
+async function isVivaldiInstalled() {
   const applications = await getApplications();
   return applications.some((app) => app.bundleId === "com.vivaldi.Vivaldi");
 }
 
-async function openVivaldiIncognito(): Promise<void> {
+async function openVivaldiIncognito() {
   try {
     await exec(' open -na "Vivaldi" --args -incognito "https://www.duckduckgo.com"');
   } catch (error) {
@@ -16,7 +20,7 @@ async function openVivaldiIncognito(): Promise<void> {
   }
 }
 
-function showVivaldiNotInstalledErrorToast(): void {
+function showVivaldiNotInstalledErrorToast() {
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: "Vivaldi is not installed",
@@ -25,7 +29,7 @@ function showVivaldiNotInstalledErrorToast(): void {
   showToast(options);
 }
 
-function showOpenVivaldiErrorToast(): void {
+function showOpenVivaldiErrorToast() {
   const options: Toast.Options = {
     style: Toast.Style.Failure,
     title: "Failed to open Vivaldi incognito",
@@ -34,7 +38,7 @@ function showOpenVivaldiErrorToast(): void {
   showToast(options);
 }
 
-export async function openVivaldiIncognitoIfInstalled(): Promise<void> {
+async function openVivaldiIncognitoIfInstalled() {
   const vivaldiInstalled = await isVivaldiInstalled();
   if (vivaldiInstalled) {
     await openVivaldiIncognito();
@@ -42,5 +46,3 @@ export async function openVivaldiIncognitoIfInstalled(): Promise<void> {
     showVivaldiNotInstalledErrorToast();
   }
 }
-
-openVivaldiIncognitoIfInstalled();
