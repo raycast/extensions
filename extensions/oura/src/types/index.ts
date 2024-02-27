@@ -1,3 +1,8 @@
+export interface Preference {
+  unit_measurement: "metric" | "imperial";
+  oura_token: string;
+}
+
 export interface WorkoutResponse {
   isLoading: boolean;
   error: Error;
