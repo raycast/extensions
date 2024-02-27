@@ -4,7 +4,7 @@ import * as os from "os";
 import * as path from "path";
 import * as https from "https";
 import * as child_process from "child_process";
-import { writeFileSync, unlinkSync } from "fs";
+import { existsSync, writeFileSync, unlinkSync } from "fs";
 import { LanguageCode } from "./languages";
 import { LanguageCodeSet } from "./types";
 
@@ -129,7 +129,9 @@ export async function playTTS(text: string, langTo: string) {
         if (code !== 0) {
           console.error("Error playing audio");
         }
-        unlinkSync(tempFilePath);
+        if (existsSync(tempFilePath)) {
+          unlinkSync(tempFilePath);
+        }
       });
     });
   });
