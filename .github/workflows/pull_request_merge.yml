@@ -1,5 +1,9 @@
 name: Pull Request - Merge
 
+concurrency:
+  group: pull_request_merge_queue
+  cancel-in-progress: false
+
 on:
   workflow_dispatch:
     inputs:
