@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Form, Toast, showToast, Clipboard, LaunchProps, Icon, popToRoot } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Toast,
+  showToast,
+  Clipboard,
+  LaunchProps,
+  Icon,
+  popToRoot,
+  useNavigation,
+  getPreferenceValues,
+} from "@raycast/api";
 import { FormValidation, useForm, useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import got from "got";
@@ -6,6 +18,8 @@ import { baseURL, characters, MIN_SLUG_SIZE, RAND_SLUG_SIZE, smcUrl } from "./Co
 import useStoredRecents from "./hooks/useStoredRecents";
 import flourite, { DetectedLanguage } from "flourite";
 import { SMCFormValues, CodeCheckResponse } from "./types";
+import CodeView from "./components/CodeView";
+import useParser from "./hooks/useParser";
 
 interface LaunchPropsType {
   slug: string;
@@ -13,6 +27,8 @@ interface LaunchPropsType {
 
 export default function CreateCommand(props: LaunchProps<{ arguments: LaunchPropsType }>) {
   const { slug } = props.arguments;
+  const { push } = useNavigation();
+  const preferences = getPreferenceValues();
 
   const [randomSlug, setRandomSlug] = useState<string>("");
   const [newSlug, setNewSlug] = useState<string>(slug || "");
@@ -54,7 +70,12 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
           language: flourite(values.content).language,
         };
         addRecent(newStoredRecent);
-        popToRoot();
+
+        if (preferences.openAfterCreation)
+          push(
+            <CodeView code={{ code: values.content, parsedCode: parsedData }} slug={values.slug} isLoading={false} />,
+          );
+        else popToRoot();
       } catch (error) {
         console.error(error);
         toast.style = Toast.Style.Failure;
@@ -71,6 +92,8 @@ export default function CreateCommand(props: LaunchProps<{ arguments: LaunchProp
   const { data, isLoading } = useFetch<CodeCheckResponse>(`${baseURL}/code_check.php?slug=${newSlug}`, {
     execute: newSlug !== "" && newSlug.length >= MIN_SLUG_SIZE,
   });
+
+  const parsedData = useParser(values.content || "");
 
   useEffect(() => {
     let error = "";

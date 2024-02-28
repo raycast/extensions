@@ -47,6 +47,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "title": "On ShareMyCode Creation",
+      "name": "openAfterCreation",
+      "label": "Open After Creation",
+      "description": "Open the created ShareMyCode in a new view after its creation.",
+      "type": "checkbox",
+      "defaultValue": false,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.67.0",
     "@raycast/utils": "^1.11.1",
