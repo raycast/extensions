@@ -1,4 +1,5 @@
 import { closeMainWindow, open, LaunchProps } from "@raycast/api";
+import { checkDropshareInstallation, isDropshareInstalled } from "./utils/check";
 
 namespace Dropshare {
     export type Upload = {
@@ -8,9 +9,12 @@ namespace Dropshare {
 
 export default async function Upload(props: LaunchProps<{ arguments: Dropshare.Upload }>) {
     const { file } = props.arguments;
-    console.log(`file: ${file}`);
 
-    const url = "dropshare5:///action/upload?file=" + file;
-    open(url);
-    await closeMainWindow();
+    checkDropshareInstallation();
+
+    if (await isDropshareInstalled() === true) {
+        const url = "dropshare5:///action/upload?file=" + file;
+        open(url);
+        await closeMainWindow();
+    }
 }
