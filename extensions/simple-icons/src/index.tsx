@@ -20,9 +20,7 @@ export default function Command() {
       });
 
       const version = await loadLatestVersion();
-      console.log(version);
       const cached = cache.get(`json-${version}`);
-      console.log(Boolean(cached));
       const json: IconJson = cached ? JSON.parse(cached) : await loadJson(version);
 
       if (!cached) {
