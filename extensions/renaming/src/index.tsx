@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
-import { runAppleScript } from "./utilitaries/AppleScript";
-import { Form, ActionPanel, Action, closeMainWindow, popToRoot, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  closeMainWindow,
+  popToRoot,
+  showToast,
+  Toast,
+  getSelectedFinderItems,
+} from "@raycast/api";
 
 export default function Command() {
   const [files, setFiles] = useState<string[]>([]);
@@ -8,21 +17,12 @@ export default function Command() {
   const [prefix, setPrefix] = useState<string>("");
   const [suffix, setSuffix] = useState<string>("");
   const [preserveName, setPreserveName] = useState<boolean>(false);
+  const [preview, setPreview] = useState<string>("");
 
   const getSelectedFiles = async () => {
     try {
-      const files = await runAppleScript(`
-          tell application "Finder"
-            set selectedItems to selection
-            set selectedPaths to {}
-            repeat with selectedItem in selectedItems
-              set end of selectedPaths to (POSIX path of (selectedItem as text))
-            end repeat
-            return selectedPaths
-          end tell
-        `);
-
-      const fileList = files.split(/, |\n/).filter(Boolean);
+      const files = await getSelectedFinderItems();
+      const fileList = files.map((file) => file.path);
       console.log("Fetched files:", fileList);
 
       setFiles(fileList);
@@ -42,19 +42,28 @@ export default function Command() {
     getSelectedFiles();
   }, []);
 
+  const generateNewName = (index: number): string => {
+    const selectedFile = files[index];
+    if (!selectedFile) {
+      // Handle the case where files[index] is undefined
+      return "";
+    }
+    const lastSlashIndex = selectedFile.lastIndexOf("/");
+    const lastDotIndex = selectedFile.lastIndexOf(".");
+    const baseName = selectedFile.substring(lastSlashIndex + 1, lastDotIndex);
+    const extension = lastDotIndex >= 0 ? selectedFile.substring(lastDotIndex + 1) : "";
+    const prefixWithUnderscore = prefix ? `${prefix}_` : "";
+    const suffixWithUnderscore = suffix ? `_${suffix}` : "";
+    return preserveName
+      ? `${prefixWithUnderscore}${baseName}${suffixWithUnderscore}.${extension}`
+      : `${prefixWithUnderscore}${newName}-${index + 1}${suffixWithUnderscore}.${extension}`;
+  };
+
   const renameFiles = async () => {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const lastSlashIndex = file.lastIndexOf("/");
-        const lastDotIndex = file.lastIndexOf(".");
-        const baseName = file.substring(lastSlashIndex + 1, lastDotIndex);
-        const extension = lastDotIndex >= 0 ? file.substring(lastDotIndex + 1) : "";
-        const prefixWithUnderscore = prefix ? `${prefix}_` : "";
-        const suffixWithUnderscore = suffix ? `_${suffix}` : "";
-        const newNameWithExtension = preserveName
-          ? `${prefixWithUnderscore}${baseName}${suffixWithUnderscore}.${extension}`
-          : `${prefixWithUnderscore}${newName}-${i + 1}${suffixWithUnderscore}.${extension}`;
+        const newNameWithExtension = generateNewName(i);
 
         await runAppleScript(`
           tell application "Finder"
@@ -79,6 +88,10 @@ export default function Command() {
     }
   };
 
+  useEffect(() => {
+    setPreview(generateNewName(0));
+  }, [newName, prefix, suffix, preserveName]);
+
   return (
     <>
       <Form
@@ -88,27 +101,29 @@ export default function Command() {
           </ActionPanel>
         }
       >
-        <Form.TextField
-          id="newName"
-          title="New Name"
-          value={newName}
-          onChange={setNewName}
-          placeholder="Enter new name"
-        />
         {files.length > 1 && (
           <>
-            <Form.TextField id="prefix" title="Prefix" value={prefix} onChange={setPrefix} placeholder="Enter prefix" />
-            <Form.TextField id="suffix" title="Suffix" value={suffix} onChange={setSuffix} placeholder="Enter suffix" />
             <Form.Checkbox
               id="preserveName"
               label="Preserve base name"
               value={preserveName}
               onChange={setPreserveName}
             />
+            {!preserveName && (
+              <Form.TextField
+                id="newName"
+                title="New Name"
+                value={newName}
+                onChange={setNewName}
+                placeholder="Enter new name"
+              />
+            )}
+            <Form.TextField id="prefix" title="Prefix" value={prefix} onChange={setPrefix} placeholder="Enter prefix" />
+            <Form.TextField id="suffix" title="Suffix" value={suffix} onChange={setSuffix} placeholder="Enter suffix" />
+            <Form.Description title="Preview" text={preview} />
           </>
         )}
         <Form.Separator />
-        <Form.Description title="Infos" text={`Files: ${files.length}\nprefix_base-name_suffix.ext `} />
       </Form>
     </>
   );
