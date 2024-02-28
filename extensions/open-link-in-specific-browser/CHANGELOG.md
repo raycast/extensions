@@ -1,5 +1,9 @@
 # Open Link in Specific Browser Changelog
 
+## [Hide All Apps] - 2023-11-03
+
+- Add setting item, you can choose to hide all apps
+
 ## [Fix Bug] - 2023-03-30
 
 - Fix the bug that Safari don't show up

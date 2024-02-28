@@ -22,7 +22,7 @@ export function getSpaceTitle(space: Space) {
 }
 
 export function getKey(tab: Tab) {
-  return `${tab.windowId}-${tab.tabId}`;
+  return `${tab.id}`;
 }
 
 export function getOrderedLocations() {
@@ -68,6 +68,15 @@ export function getNumberOfTabs(tabs?: Tab[]) {
   }
 
   return tabs.length === 1 ? "1 tab" : `${tabs.length} tabs`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isTab(tab: any): tab is Tab {
+  if (tab && tab.id && tab.url && tab.title && tab.location) {
+    return true;
+  }
+
+  return false;
 }
 
 export function getNumberOfHistoryEntries(entries?: HistoryEntry[]) {
@@ -117,4 +126,9 @@ export async function validateURL(url: string) {
   }
 
   return true;
+}
+
+export function isURL(value: string): boolean {
+  const urlPattern = /^(?:(?:https?|ftp):\/\/)?(?:\w+\.)+\w{2,}|localhost[:?\d]*(?:\/|$)/;
+  return urlPattern.test(value);
 }

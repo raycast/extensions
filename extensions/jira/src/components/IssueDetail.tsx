@@ -3,8 +3,10 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getIssue, Issue } from "../api/issues";
+import { getAuthenticatedUri, getBaseUrl } from "../api/request";
 import { getProjectAvatar, getUserAvatar } from "../helpers/avatars";
-import { formatDate, getCustomFieldsForDetail, getIssueDescription, getStatusColor } from "../helpers/issues";
+import { formatDate, getCustomFieldsForDetail, getMarkdownFromHtml, getStatusColor } from "../helpers/issues";
+import { replaceAsync } from "../helpers/string";
 
 import IssueActions from "./IssueActions";
 import IssueDetailCustomFields from "./IssueDetailCustomFields";
@@ -19,7 +21,29 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
     data: issue,
     isLoading,
     mutate,
-  } = useCachedPromise((issueId) => getIssue(issueId), [issueKey], { initialData: initialIssue });
+  } = useCachedPromise(
+    async (issueId) => {
+      const issue = await getIssue(issueId);
+
+      if (!issue) {
+        return null;
+      }
+
+      const baseUrl = getBaseUrl();
+      const description = issue.renderedFields?.description ?? "";
+      // Resolve all the image URLs to data URIs in the cached promise for better performance
+      // Jira images use partial URLs, so we need to prepend the base URL
+      const resolvedDescription = await replaceAsync(description, /src="(.*?)"/g, async (_, uri) => {
+        const dataUri = await getAuthenticatedUri(`${baseUrl}${uri}`, "image/jpeg");
+        return `src="${dataUri}"`;
+      });
+      issue.renderedFields.description = resolvedDescription;
+
+      return issue;
+    },
+    [issueKey],
+    { initialData: initialIssue },
+  );
 
   const attachments = issue?.fields.attachment;
   const numberOfAttachments = attachments?.length ?? 0;
@@ -36,7 +60,7 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
     const description = issue.renderedFields?.description;
 
     if (description) {
-      markdown += `\n\n${getIssueDescription(description)}`;
+      markdown += `\n\n${getMarkdownFromHtml(description)}`;
     }
 
     customMarkdownFields.forEach((markdownField) => {

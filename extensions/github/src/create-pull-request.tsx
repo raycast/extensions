@@ -2,11 +2,11 @@ import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import PullRequestDetail from "./components/PullRequestDetail";
-import View from "./components/View";
 import { getErrorMessage } from "./helpers/errors";
 import { getGitHubUser } from "./helpers/users";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
 
 type PullRequestFormValues = {
@@ -154,10 +154,10 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const milestones = data?.repository?.milestones?.nodes;
 
   useEffect(() => {
-    const template = data?.repository?.pullRequestTemplateLowercase ?? data?.repository?.pullRequestTemplateUppercase;
+    const template = data?.repository?.pullRequestTemplates?.[0];
 
-    if (template && "text" in template && template.text && !values.description) {
-      setValue("description", template.text);
+    if (template && template.body && !values.description) {
+      setValue("description", template.body);
     }
 
     if (defaultBranch) {
@@ -305,10 +305,4 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   );
 }
 
-export default function Command(props: { draftValues?: PullRequestFormValues }) {
-  return (
-    <View>
-      <PullRequestForm draftValues={props.draftValues} />
-    </View>
-  );
-}
+export default withGitHubClient(PullRequestForm);

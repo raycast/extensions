@@ -1,13 +1,17 @@
-import { Icon, List } from "@raycast/api";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
 import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
 import { useCachedPromise, useCachedState, useExec } from "@raycast/utils";
 
+interface Preferences {
+  useAWSVault: boolean;
+}
 interface Props {
   onProfileSelected?: VoidFunction;
 }
 
 export default function AWSProfileDropdown({ onProfileSelected }: Props) {
+  const preferences = getPreferenceValues<Preferences>();
   const [selectedProfile, setSelectedProfile] = useCachedState<string>("aws_profile");
   const profileOptions = useProfileOptions();
 
@@ -21,10 +25,10 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
   }, [profileOptions]);
 
   const vaultSessions = useVaultSessions();
-  const isUsingAwsVault = !!vaultSessions;
+  const isUsingAwsVault = !!vaultSessions && preferences.useAWSVault;
 
   useAwsVault({
-    profile: vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined,
+    profile: isUsingAwsVault && vaultSessions?.includes(selectedProfile || "") ? selectedProfile : undefined,
     onUpdate: () => onProfileSelected?.(),
   });
 
@@ -59,7 +63,7 @@ export default function AWSProfileDropdown({ onProfileSelected }: Props) {
           title={profile.name}
           icon={
             isUsingAwsVault
-              ? vaultSessions.some((session) => session === profile.name)
+              ? vaultSessions?.some((session) => session === profile.name)
                 ? Icon.LockUnlocked
                 : Icon.LockDisabled
               : undefined

@@ -4,7 +4,7 @@ import { useCache } from "../cache";
 import { getGitLabGQL, gitlab } from "../common";
 import { dataToProject, Group, Project } from "../gitlabapi";
 import { getTextIcon, GitLabIcons, useImage } from "../icons";
-import { hashRecord, showErrorToast } from "../utils";
+import { getFirstChar, hashRecord, showErrorToast } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { CacheActionPanelSection } from "./cache_actions";
 import { EpicList } from "./epics";
@@ -37,7 +37,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
     <List.Item
       id={`${group.id}`}
       title={props.nameOnly === true ? group.name : group.full_name}
-      icon={localImageFilepath || getTextIcon((group.name ? group.name[0] : "?").toUpperCase())}
+      icon={localImageFilepath || getTextIcon((group.name ? getFirstChar(group.name) : "?").toUpperCase())}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -51,6 +51,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Group ID" content={group.id} />
+            <Action.CopyToClipboard title="Copy Group URL" content={group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push
@@ -105,7 +106,7 @@ export function GroupListItem(props: { group: any; nameOnly?: boolean }): JSX.El
   );
 }
 
-function GroupListEmptyView(): JSX.Element {
+export function GroupListEmptyView(): JSX.Element {
   return <List.EmptyView title="No Groups or Projects" icon={{ source: "group.svg", tintColor: Color.PrimaryText }} />;
 }
 

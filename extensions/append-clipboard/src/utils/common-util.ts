@@ -2,8 +2,13 @@ import { Clipboard, closeMainWindow, getPreferenceValues, getSelectedText, showH
 import { Preferences } from "../types/preferences";
 
 export async function getAppendedText(append = true) {
-  const { appendSeparator, trimBeforeAppendClipboardText, trimBeforeAppendSelectedText, trimAfterAppend } =
-    getPreferenceValues<Preferences>();
+  const {
+    appendSeparator,
+    prependSeparator,
+    trimBeforeAppendClipboardText,
+    trimBeforeAppendSelectedText,
+    trimAfterAppend,
+  } = getPreferenceValues<Preferences>();
   await closeMainWindow({ clearRootSearch: false });
   try {
     let appendText = await getSelectedText();
@@ -25,10 +30,28 @@ export async function getAppendedText(append = true) {
     // appended text
     let finalText: string;
     if (append) {
-      finalText = clipBoardText + appendSeparator + appendText;
+      switch (appendSeparator) {
+        case "{newline}":
+          finalText = `${clipBoardText}\n${appendText}`;
+          break;
+        case "{tab}":
+          finalText = `${clipBoardText}\t${appendText}`;
+          break;
+        default:
+          finalText = clipBoardText + appendSeparator + appendText;
+      }
       await showHUD(`✅ Appended text to clipboard`);
     } else {
-      finalText = appendText + appendSeparator + clipBoardText;
+      switch (prependSeparator) {
+        case "{newline}":
+          finalText = `${appendText}\n${clipBoardText}`;
+          break;
+        case "{tab}":
+          finalText = `${appendText}\t${clipBoardText}`;
+          break;
+        default:
+          finalText = appendText + prependSeparator + clipBoardText;
+      }
       await showHUD(`✅ Prepended text to clipboard`);
     }
     if (trimAfterAppend) {

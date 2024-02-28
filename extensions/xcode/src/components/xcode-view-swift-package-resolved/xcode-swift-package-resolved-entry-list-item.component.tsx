@@ -11,7 +11,7 @@ export function XcodeSwiftPackageResolvedEntryListItem(props: {
   xcodeProject: XcodeProject;
   packageResolvedPath: string;
   entry: XcodeSwiftPackageResolvedEntry;
-}): JSX.Element {
+}) {
   return (
     <List.Item
       title={props.entry.name}

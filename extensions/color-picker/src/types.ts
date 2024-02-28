@@ -1,4 +1,4 @@
-import { LaunchType } from "@raycast/api";
+import { LaunchProps } from "@raycast/api";
 
 export type Color = {
   alpha: number;
@@ -10,19 +10,11 @@ export type Color = {
 export type HistoryItem = {
   date: string;
   color: Color;
+  title?: string;
 };
 
-export type OrganizeColorsCommandPreferences = {
-  primaryAction: "copy" | "paste";
-};
-
-export type ExtensionPreferences = {
-  colorFormat: "hex" | "hex-lower-case" | "rgba" | "rgba-percentage" | "hsla" | "hsva";
-};
-
-export type PickColorCommandLaunchProps = {
-  launchType: LaunchType;
+export type PickColorCommandLaunchProps = LaunchProps<{
   launchContext: {
     source?: "menu-bar" | "organize-colors";
   };
-};
+}>;

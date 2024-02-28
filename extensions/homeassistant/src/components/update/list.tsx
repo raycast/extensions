@@ -17,12 +17,12 @@ function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JS
   }
   return (
     <List.Item
-      title={r.name || r.display_name}
+      title={r.display_name || r.name}
       icon={{ source: "hacs.svg", tintColor: PrimaryIconColor }}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Install">
-            <Action.OpenInBrowser title="Open in Dashboard" url={ha.urlJoin("hacs/entry")} />
+            <Action.OpenInBrowser title="Open in Dashboard" url={ha.navigateUrl("hacs/entry")} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attribtues">
             <ShowAttributesAction state={props.state} />

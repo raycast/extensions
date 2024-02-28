@@ -50,6 +50,12 @@ export function GistAction(props: {
           shortcut={{ modifiers: ["cmd"], key: "l" }}
           content={gistArray[gistIndex].html_url}
         />
+        <Action.CopyToClipboard
+          title={"Copy Raw Link"}
+          icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          content={gistArray[gistIndex].file[0].raw_url}
+        />
         <Action.OpenInBrowser
           title={"Open in Browser"}
           icon={Icon.Globe}

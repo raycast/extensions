@@ -15,7 +15,7 @@ export function useArtistAlbums({ artistId = "", limit = 50, options }: UseArtis
     [artistId, limit],
     {
       execute: options?.execute !== false && !!artistId && !!limit,
-    }
+    },
   );
 
   return { artistAlbumsData: data, artistAlbumsError: error, artistAlbumsIsLoading: isLoading };

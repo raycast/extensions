@@ -5,6 +5,9 @@
   "description": "List and quickly trigger Keyboard Maestro Macros, bringing the \"Trigger Macro by Name\" action directly into Raycast",
   "icon": "icon.png",
   "author": "eluce2",
+  "contributors": [
+    "suaw3k"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -21,6 +24,50 @@
           "required": false
         }
       ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayShortcuts",
+      "description": "Do you want to display macro shortcuts?",
+      "type": "checkbox",
+      "required": false,
+      "title": "Display Details",
+      "label": "Shortcuts",
+      "default": false
+    },
+    {
+      "name": "displayTriggers",
+      "description": "Do you want to display macro text triggers?",
+      "type": "checkbox",
+      "required": false,
+      "label": "Text Triggers",
+      "default": false
+    },
+    {
+      "name": "displayIcon",
+      "description": "Do you want to display icons?",
+      "type": "checkbox",
+      "required": false,
+      "label": "Icons",
+      "default": false
+    },
+    {
+      "name": "filterPattern",
+      "description": "Enter a group name to filter. Use double quotes for an exact match; otherwise, it will be treated as a partial name.",
+      "type": "textfield",
+      "required": false,
+      "title": "Filter Macro Groups",
+      "placeholder": "Macro group name, partial name, or regex",
+      "default": ""
+    },
+    {
+      "name": "useRegex",
+      "description": "Use regex to filter macro groups",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use Regex",
+      "default": false
     }
   ],
   "dependencies": {

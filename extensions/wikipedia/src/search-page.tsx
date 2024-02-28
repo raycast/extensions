@@ -28,6 +28,15 @@ export default function SearchPage(props: { arguments: { title: string } }) {
       searchText={search}
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title="Search in Browser"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
+          />
+        </ActionPanel>
+      }
       searchBarAccessory={
         <View.Dropdown tooltip="Language" value={language} onChange={(value) => setLanguage(value as Locale)}>
           {languages.map((language) => (
@@ -44,13 +53,15 @@ export default function SearchPage(props: { arguments: { title: string } }) {
       {search ? (
         data?.language === language && (
           <View.Section title="Results">
-            {data?.results.map((title: string) => <PageItem key={title} title={title} language={language} />)}
+            {data?.results.map((title: string) => (
+              <PageItem key={title} search={search} title={title} language={language} />
+            ))}
           </View.Section>
         )
       ) : (
         <View.Section title="Recent Articles">
           {readArticles.map((title) => (
-            <PageItem key={title} title={title} language={language} />
+            <PageItem key={title} search={search} title={title} language={language} />
           ))}
         </View.Section>
       )}
@@ -58,7 +69,7 @@ export default function SearchPage(props: { arguments: { title: string } }) {
   );
 }
 
-function PageItem({ title, language }: { title: string; language: string }) {
+function PageItem({ search, title, language }: { search: string; title: string; language: string }) {
   const { data: page } = useCachedPromise(getPageData, [title, language]);
 
   return (
@@ -85,13 +96,22 @@ function PageItem({ title, language }: { title: string; language: string }) {
               <Action.OpenInBrowser url={page?.content_urls.desktop.page || ""} />
             </>
           )}
+          <Action.OpenInBrowser
+            title="Search in Browser"
+            url={`https://${language}.wikipedia.org/w/index.php?fulltext=1&profile=advanced&search=${search}&title=Special%3ASearch&ns0=1`}
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+          />
           <ActionPanel.Section>
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd"], key: "." }}
               title="Copy URL"
               content={page?.content_urls.desktop.page || ""}
             />
-            <Action.CopyToClipboard shortcut={{ modifiers: ["cmd"], key: "," }} title="Copy Title" content={title} />
+            <Action.CopyToClipboard
+              shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+              title="Copy Title"
+              content={title}
+            />
             <Action.CopyToClipboard
               shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               title="Copy Subtitle"

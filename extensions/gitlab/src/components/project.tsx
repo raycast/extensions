@@ -2,7 +2,7 @@ import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { daysInSeconds, hashRecord, projectIconUrl, showErrorToast } from "../utils";
+import { daysInSeconds, getFirstChar, hashRecord, projectIconUrl, showErrorToast } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
@@ -19,32 +19,36 @@ import {
   OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
+  CopyProjectUrlToClipboardAction,
+  CreateNewProjectIssuePushAction,
 } from "./project_actions";
 import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
 import { CacheActionPanelSection } from "./cache_actions";
 
 function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
-  return getTextIcon((project.name ? project.name[0] : "?").toUpperCase());
+  return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
 }
 
 export function ProjectListItem(props: { project: Project; nameOnly?: boolean }): JSX.Element {
   const project = props.project;
   const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
-
+  const accessories = [];
+  if (project.archived) {
+    accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
+  }
+  accessories.push({
+    text: project.star_count.toString(),
+    icon: {
+      source: Icon.Star,
+      tintColor: project.star_count > 0 ? Color.Yellow : null,
+    },
+    tooltip: `Number of stars: ${project.star_count}`,
+  });
   return (
     <List.Item
       title={props.nameOnly === true ? project.name : project.name_with_namespace}
-      accessories={[
-        {
-          icon: {
-            source: Icon.Star,
-            tintColor: project.star_count > 0 ? Color.Yellow : null,
-          },
-          text: `${project.star_count}`,
-          tooltip: `Number of stars: ${project.star_count}`,
-        },
-      ]}
+      accessories={accessories}
       icon={localImageFilepath ? { source: localImageFilepath } : getProjectTextIcon(project)}
       actions={
         <ActionPanel>
@@ -53,7 +57,10 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean })
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyProjectIDToClipboardAction project={project} />
+            <CopyProjectUrlToClipboardAction project={project} />
             <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <OpenProjectIssuesPushAction project={project} />
             <OpenProjectMergeRequestsPushAction project={project} />
             <OpenProjectBranchesPushAction project={project} />
@@ -63,6 +70,7 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean })
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
+            <CreateNewProjectIssuePushAction project={project} />
             <OpenProjectLabelsInBrowserAction project={project} />
             <OpenProjectSecurityComplianceInBrowserAction project={project} />
             <OpenProjectSettingsInBrowserAction project={project} />

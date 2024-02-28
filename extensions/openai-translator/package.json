@@ -565,6 +565,15 @@
       "default": "30"
     },
     {
+      "name": "alwayShowMetadata",
+      "label": "Alway show metadata",
+      "description": "Toggle default visiability of metadata in the translation content view",
+      "type": "checkbox",
+      "title": "Metadata Visiability",
+      "required": false,
+      "default": true
+    },
+    {
       "name": "useProxy",
       "label": "Enable proxy for each request",
       "description": "Each request will be passed through the proxy",

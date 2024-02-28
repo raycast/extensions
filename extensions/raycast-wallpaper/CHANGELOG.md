@@ -1,5 +1,9 @@
 # Raycast Wallpaper Changelog
 
+## [Exclude from Auto Switch] - 2023-08-21
+
+- Add a new action for Set Raycast Wallpaper: Exclude from Auto Switch
+
 ## [Update grid layout] - 2022-10-15
 
 - Update grid layout

@@ -32,7 +32,7 @@ export default async function Command() {
 import { showHUD } from "@raycast/api";
 
 export default async function Command() {
-  await showHUD("Hey there 👋", { clearRootSearch: true, PopToRootType.Immediate });
+  await showHUD("Hey there 👋", { clearRootSearch: true, popToRootType: PopToRootType.Immediate });
 }
 ```
 

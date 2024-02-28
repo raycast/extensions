@@ -34,14 +34,61 @@ export const WEB_IDES = [
   },
 ];
 
-import { LocalStorage } from "@raycast/api";
+import { execSync } from "node:child_process";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+
+import { LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect } from "react";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 
+import { getErrorMessage } from "./errors";
+
 const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
+
+export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
+  const { application, baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
+  const applicationPath = application?.path.replaceAll(" ", "\\ ");
+  const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
+  const openCommand = `open -a ${applicationPath} ${clonePath}`;
+
+  const toast = await showToast({
+    title: `Opening ${repository.nameWithOwner}`,
+    message: `at ${clonePath}`,
+    style: Toast.Style.Animated,
+  });
+
+  if (!existsSync(clonePath.replace("~", homedir()))) {
+    const cloneUrl = `https://github.com/${repository.nameWithOwner}`;
+    const cloneCommand = `git clone ${cloneUrl} ${clonePath}`;
+
+    try {
+      execSync(cloneCommand);
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Error while cloning the repository";
+      toast.message = getErrorMessage(error);
+      console.error(error);
+      return;
+    }
+  }
+
+  try {
+    execSync(openCommand);
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Error while opening the repository";
+    toast.message = getErrorMessage(error);
+    console.error(error);
+    return;
+  }
+
+  toast.title = "Code editor launched!";
+  toast.style = Toast.Style.Success;
+}
 
 // History was stored in `LocalStorage` before, after migration it's stored in `Cache`
 async function loadVisitedRepositories() {
@@ -68,7 +115,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   }, [migratedHistory]);
 
   function visitRepository(repository: ExtendedRepositoryFieldsFragment) {
-    const nextRepositories = [repository, ...(history?.filter((item) => item !== repository) ?? [])].slice(
+    const nextRepositories = [repository, ...(history?.filter((item) => item.id !== repository.id) ?? [])].slice(
       0,
       VISITED_REPOSITORIES_LENGTH,
     );

@@ -37,6 +37,12 @@ export interface VaultListEntry {
   favorite: boolean;
 }
 
+export interface VaultAuthUrlResponse {
+  data: {
+    auth_url: string;
+  };
+}
+
 export interface VaultLoginResponse {
   auth: VaultLoginAuthResponse;
 }

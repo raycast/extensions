@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-ollama",
   "title": "Ollama AI",
-  "description": "Performe Local Inference with Ollama",
+  "description": "Perform Local Inference with Ollama",
   "icon": "icon.png",
   "author": "massimiliano_pasquini",
   "categories": [
@@ -15,369 +15,55 @@
   },
   "preferences": [
     {
-      "name": "ollamaShowMetadata",
-      "description": "Show inference statistics",
+      "name": "ollamaHost",
+      "description": "Ollama API route",
+      "type": "textfield",
+      "required": false,
+      "title": "Ollama Host",
+      "default": "http://127.0.0.1:11434/"
+    },
+    {
+      "name": "ollamaResultViewInput",
+      "description": "Choose preferred input source",
       "type": "dropdown",
       "required": false,
-      "title": "Show Inference Statistics",
-      "default": "false",
+      "title": "Input Source",
       "data": [
         {
-          "title": "False",
-          "value": "false"
+          "title": "Selected Text",
+          "value": "SelectedText"
         },
         {
-          "title": "True",
-          "value": "true"
+          "title": "Clipboard",
+          "value": "Clipboard"
         }
-      ]
+      ],
+      "default": "SelectedText"
     },
     {
-      "name": "ollamaAskModel",
-      "description": "Select model used for perform 'Ask Ollama'",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Ask Ollama",
-      "default": "llama2:latest",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "orca:latest"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "llama2:latest"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "llama2:13b"
-        }
-      ]
+      "name": "ollamaResultViewInputFallback",
+      "description": "If there isn't text on main input source enable this option permit to fallback to other input source",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Input Source Fallback",
+      "label": "Check for enable input fallback"
     },
     {
-      "name": "ollamaAskCustomPromptModel",
-      "description": "Select model used for perform 'Ask Ollama With Custom Prompt'",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Ask Ollama With Custom Prompt",
-      "default": "raycast_llama2:7b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaAskCustomCommandModel",
-      "description": "Select model used for perform 'Custom Command'",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Custom Command",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaCasualModel",
-      "description": "Select model used for perform 'Change Tone to Casual' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Change Tone to Casual",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaCodeExplain",
-      "description": "Select model used for perform 'Explain Code Step by Step' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Explain Code Step by Step",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaConfidentModel",
-      "description": "Select model used for perform 'Change Tone to Confident' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Change Tone to Confident",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaExplainSimpleTerms",
-      "description": "Select model used for perform 'Explain This in Simple Terms' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Explain This in Simple Terms",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaFixSpellingGrammar",
-      "description": "Select model used for perform 'Fix Spelling and Grammar' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Fix Spelling and Grammar",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaFriendlyModel",
-      "description": "Select model used for perform 'Change Tone to Friendly' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Change Tone to Friendly",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaImproveWriting",
-      "description": "Select model used for perform 'Improve Writing' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Improve Writing",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaLongerModel",
-      "description": "Select model used for perform 'Make Longer' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Make Longer",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaProfessionalModel",
-      "description": "Select model used for perform 'Change Tone to Professional' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Change Tone to Professional",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaShorterModel",
-      "description": "Select model used for perform 'Make Shorter' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Make Shorter",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaTranslate",
-      "description": "Select model used for perform 'Translate' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Translate",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
-    },
-    {
-      "name": "ollamaRephraseAsTweet",
-      "description": "Select model used for perform 'Rephrase as Tweet' task",
-      "type": "dropdown",
-      "required": true,
-      "title": "Model - Rephrase as Tweet",
-      "default": "raycast_orca:3b",
-      "data": [
-        {
-          "title": "orca 3b (at least 8GB of RAM)",
-          "value": "raycast_orca:3b"
-        },
-        {
-          "title": "llama2 7b (at least 16GB of RAM)",
-          "value": "raycast_llama2:7b"
-        },
-        {
-          "title": "llama2 13b (at least 32GB of RAM)",
-          "value": "raycast_llama2:13b"
-        }
-      ]
+      "name": "ollamaChatHistoryMessagesNumber",
+      "description": "Number of last messages to use as memory",
+      "type": "textfield",
+      "required": false,
+      "title": "Chat Memory Messages",
+      "default": "20"
     }
   ],
   "commands": [
     {
-      "name": "ollama-ask",
-      "title": "Ask Ollama",
+      "name": "ollama-chat",
+      "title": "Chat With Ollama",
       "subtitle": "Ollama",
-      "description": "Ask ollama any question",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "description": "Chat with Ollama",
+      "mode": "view"
     },
     {
       "name": "ollama-casual",
@@ -401,42 +87,6 @@
       "mode": "view"
     },
     {
-      "name": "ollama-custom-ask",
-      "title": "Ask Ollama With Custom Prompt",
-      "subtitle": "Ollama",
-      "description": "Ask ollama any question with a custom prompt",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "prompt",
-          "placeholder": "Prompt",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "query",
-          "placeholder": "Query",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "ollama-custom-command",
-      "title": "Custom Command",
-      "subtitle": "Ollama",
-      "description": "Create a custom command using a quicklinks",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "prompt",
-          "placeholder": "Prompt",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
       "name": "ollama-explain",
       "title": "Explain This in Simple Terms",
       "subtitle": "Ollama",
@@ -455,6 +105,20 @@
       "title": "Change Tone to Friendly",
       "subtitle": "Ollama",
       "description": "Make selected text more friendly",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-image-describe",
+      "title": "Describe Content of Image",
+      "subtitle": "Ollama",
+      "description": "Describe content of the image on the clipboard or selected from finder",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-image-to-text",
+      "title": "Get Text From Image",
+      "subtitle": "Ollama",
+      "description": "Get text from image on the clipboard or selected from finder",
       "mode": "view"
     },
     {
@@ -490,7 +154,15 @@
       "title": "Translate",
       "subtitle": "Ollama",
       "description": "Translate selected text",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+         "name": "language",
+         "placeholder": "To Language",
+         "type": "text",
+         "required": true
+        }
+      ]
     },
     {
       "name": "ollama-tweet",
@@ -498,19 +170,74 @@
       "subtitle": "Ollama",
       "description": "Rephrase selected text as Tweet",
       "mode": "view"
+    },
+    {
+      "name": "ollama-models",
+      "title": "Manage Models",
+      "subtitle": "Ollama",
+      "description": "Manage installed models",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-create",
+      "title": "Create Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command",
+      "mode": "view"
+    },
+    {
+      "name": "ollama-custom-command",
+      "title": "Custom Command",
+      "subtitle": "Ollama",
+      "description": "Create a custom command using a quicklinks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Prompt",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "image",
+          "placeholder": "Use Image",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "Yes",
+              "value": "yes"
+            },
+            {
+              "title": "No",
+              "value": "no"
+            }
+          ]
+        },
+        {
+          "name": "model",
+          "placeholder": "Model",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
-    "node-fetch": "^3.3.2"
+    "langchain": "^0.0.183",
+    "mime-types": "^2.1.35",
+    "node-fetch": "^3.3.2",
+    "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
     "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

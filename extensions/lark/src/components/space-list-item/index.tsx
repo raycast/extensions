@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Image, List } from '@raycast/api';
+import { getAvatarIcon } from '@raycast/utils';
 import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from '../../services/space';
 import { timeFormat, timeSince } from '../../utils/time';
 
 export interface SpaceListItemProps {
   node: NodeEntity | ObjEntity;
-  owner: UserEntity;
+  owner?: UserEntity;
   actions?: React.ReactElement;
 }
 
@@ -17,8 +18,8 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actio
     short: string;
     full: string;
   };
-  const ownerAvatar = owner.avatar_url;
-  const ownerName = owner.name;
+  const ownerName = owner?.name || '';
+  const ownerAvatar = owner ? owner.avatar_url : getAvatarIcon(ownerName);
 
   if (isNodeEntity(node)) {
     id = node.obj_token;

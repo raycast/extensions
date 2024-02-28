@@ -7,8 +7,6 @@ export const TOUTIAO_TENAPI = BASE_URL + "/toutiaohot";
 export const BILI_TENAPI = BASE_URL + "/bilihot";
 export const TOUTIAO_NEWS_TENAPI = BASE_URL + "/toutiaohotnew";
 
-export const douyinSearchUrl = "https://www.douyin.com/search/";
-
 export enum TrendsTags {
   ALL = "All",
   WEIBO = "WeiBo",

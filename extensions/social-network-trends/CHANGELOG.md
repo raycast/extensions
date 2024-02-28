@@ -1,5 +1,9 @@
 # Social Network Trends Changelog
 
+## [Minor Updates] - 2023-10-04
+
+- Some minor updates to stay consistent with Raycast's latest version
+
 ## [More Trends] - 2023-05-22
 
 - Add more hotspot options for social platforms

@@ -78,7 +78,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title={connection.status === "EXITING" ? "Conenct" : "Disconnect"}
+                title={connection.status === "EXITING" ? "Connect" : "Disconnect"}
                 key={connection.name}
                 icon={connection.status === "EXITING" ? Icon.Livestream : Icon.LivestreamDisabled}
                 onAction={() => {

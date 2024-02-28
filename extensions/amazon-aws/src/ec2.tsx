@@ -56,7 +56,7 @@ async function fetchEC2Instances(token?: string, accInstances?: Instance[]): Pro
   const { NextToken, Reservations } = await new EC2Client({}).send(new DescribeInstancesCommand({ NextToken: token }));
   const instances = (Reservations || []).reduce<Instance[]>(
     (acc, reservation) => [...acc, ...(reservation.Instances || [])],
-    []
+    [],
   );
   const combinedInstances = [...(accInstances || []), ...instances];
 

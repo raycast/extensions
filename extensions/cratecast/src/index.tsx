@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { Crate, getCrates } from "./api";
+import Symbols from "./symbols";
 
 export default function Command() {
   const [crates, setCrates] = useState<Crate[]>([]);
@@ -25,10 +26,38 @@ export default function Command() {
         const actions = (
           <ActionPanel>
             <Action.CopyToClipboard content={`${name} = "${version}"`} title="Copy Dependency Line" />
-            <Action.OpenInBrowser url={`https://crates.io/crates/${name}`} title="View on crates.io" />
-            {documentationURL && <Action.OpenInBrowser url={documentationURL} title="Open Crate Documentation" />}
-            {homepageURL && <Action.OpenInBrowser url={homepageURL} title="Open Homepage" />}
-            {repositoryURL && <Action.OpenInBrowser url={repositoryURL} title="Open Repository" />}
+            <Action.OpenInBrowser
+              url={`https://crates.io/crates/${name}`}
+              title="View on crates.io"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+            />
+            {documentationURL && (
+              <Action.OpenInBrowser
+                url={documentationURL}
+                title="Open Crate Documentation"
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+              />
+            )}
+            {homepageURL && (
+              <Action.OpenInBrowser
+                url={homepageURL}
+                title="Open Homepage"
+                shortcut={{ modifiers: ["cmd"], key: "h" }}
+              />
+            )}
+            {repositoryURL && (
+              <Action.OpenInBrowser
+                url={repositoryURL}
+                title="Open Repository"
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            )}
+            <Action.Push
+              title="View Symbols"
+              target={<Symbols crate={crate} />}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              icon={Icon.Info}
+            />
           </ActionPanel>
         );
 

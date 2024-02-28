@@ -4,10 +4,9 @@
   "title": "Urban Dictionary Search",
   "description": "Search on urban dictionary",
   "icon": "urban.png",
-  "author": "Sheraff",
+  "author": "pernielsentikaer",
   "contributors": [
-    "zhenpewu",
-    "pernielsentikaer"
+    "zhenpewu"
   ],
   "categories": [
     "Web",

@@ -11,7 +11,10 @@ export async function skipToNext() {
   } catch (err) {
     const error = getErrorMessage(err);
 
-    if (error?.toLocaleLowerCase().includes("restricted device")) {
+    if (
+      error?.toLocaleLowerCase().includes("restricted device") ||
+      error?.toLocaleLowerCase().includes("premium required")
+    ) {
       const script = buildScriptEnsuringSpotifyIsRunning("next track");
       await runAppleScript(script);
       return;

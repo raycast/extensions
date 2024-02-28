@@ -4,6 +4,7 @@ import { hex } from "color-convert";
 // @ts-ignore
 import colors from "tailwindcss/colors";
 import { capitalize } from "lodash";
+import { useEffect, useState } from "react";
 
 const hiddenColors = [
   "inherit",
@@ -19,9 +20,32 @@ const hiddenColors = [
 ];
 
 export default function SearchColors() {
+  const [searchText, setSearchText] = useState("");
+  const [filteredColors, filterColors] = useState(Object.entries(colors));
+  useEffect(() => {
+    // If there's no search text, show all colors
+    if (!searchText) {
+      filterColors(Object.entries(colors));
+      return;
+    }
+    // If the search text starts with a number, we assume it's a shade
+    if (searchText.match(/^\d/)) {
+      const filteredShades = Object.entries(colors)
+        .map(([name, shades]) => {
+          const t = Object.entries(shades).filter(([shade]) => shade.includes(searchText));
+          return [name, Object.fromEntries(t)];
+        })
+        .filter(([name, shades]) => Object.keys(shades).length > 0);
+      console.log(filteredShades);
+      filterColors(filteredShades as any);
+      return;
+    }
+    // Otherwise, we assume it's a color name
+    filterColors(Object.entries(colors).filter(([name]) => name.includes(searchText)));
+  }, [searchText]);
   return (
-    <Grid searchBarPlaceholder="Search colors by name and shade..." itemSize={Grid.ItemSize.Small}>
-      {Object.entries(colors)
+    <Grid searchBarPlaceholder="Search colors by name and shade..." columns={8} onSearchTextChange={setSearchText}>
+      {filteredColors
         .filter(([name]) => !hiddenColors.includes(name))
         .map(([name, shades]) => (
           <Grid.Section key={name} title={capitalize(name)}>

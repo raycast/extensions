@@ -1,5 +1,5 @@
 import { Notification } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type UpdateNotificationPayload = {
   id: Notification["id"];
@@ -16,12 +16,12 @@ export async function updateNotification(payload: UpdateNotificationPayload) {
     `
       mutation {
         notificationUpdate(id: "${payload.id}", input: {readAt: ${
-      payload.readAt ? `"${payload.readAt.toISOString()}"` : null
-    }}) {
+          payload.readAt ? `"${payload.readAt.toISOString()}"` : null
+        }}) {
           success
         }
       }
-    `
+    `,
   );
 
   return { success: data?.notificationUpdate.success };

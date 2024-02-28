@@ -9,7 +9,7 @@ export default function RunProfileScript() {
   const { configFile } = configs;
 
   const profileOptions = Object.entries(configFile)
-    .map(([name, profile]) => ({ ...profile, name } as Record<string, string>))
+    .map(([name, profile]) => ({ ...profile, name }) as Record<string, string>)
     .map((profile, _, self) => {
       const profileToExtend = profile.source_profile ?? profile.include_profile;
       const sourceProfile = profileToExtend ? self.find((p) => p.name === profileToExtend) : undefined;

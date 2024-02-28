@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copy-path",
   "title": "Copy Path",
-  "description": "Copy path of the selected files or the current Finder window.",
+  "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
   "icon": "copy-path.png",
   "author": "koinzhang",
   "categories": [
@@ -10,16 +10,46 @@
     "Productivity",
     "System"
   ],
+  "keywords": [
+    "web",
+    "link"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "copy-path",
-      "title": "Copy Path",
-      "description": "Copy path of the selected files or the current Finder window.",
+      "title": "Copy Path or URL",
+      "description": "Copy the path of the current Finder open folder, the path of the selected file or the URL of the current browser tab.",
       "mode": "no-view"
     }
   ],
   "preferences": [
+    {
+      "title": "Tips",
+      "name": "showCopyTip",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Copy Tip",
+      "description": "Display a prompt when copying is successful.",
+      "default": true
+    },
+    {
+      "name": "showErrorTip",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Error Tip",
+      "description": "Display a prompt when copying fails.",
+      "default": true
+    },
+    {
+      "title": "Advanced",
+      "name": "showLastCopy",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Last Copy",
+      "description": "Show the path or URL of the most recent copy in the subtitle of the command.",
+      "default": true
+    },
     {
       "name": "multiPathSeparator",
       "type": "dropdown",
@@ -49,22 +79,48 @@
           "value": ":"
         }
       ]
+    },
+    {
+      "name": "copyUrlContent",
+      "type": "dropdown",
+      "required": false,
+      "title": "Copy which part of the URL",
+      "description": "When copying URLs, select what to copy.",
+      "default": "Original",
+      "data": [
+        {
+          "title": "Original",
+          "value": "Original"
+        },
+        {
+          "title": "Protocol://host/pathname",
+          "value": "Protocol://host/pathname"
+        },
+        {
+          "title": "Protocol://host",
+          "value": "Protocol://host"
+        },
+        {
+          "title": "Host",
+          "value": "Host"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
+    "parse-url": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "~20.11.20",
+    "@types/react": "^18.2.59",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

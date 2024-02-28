@@ -10,33 +10,10 @@ A keyboard shortcut is defined by one or more modifier keys (command, control, e
 
 See [KeyModifier](#keyboard.keymodifier) and [KeyEquivalent](#keyboard.keyequivalent) for supported values.
 
-### Keyboard.Shortcut.Common
-
-A collection of shortcuts that are commonly used throughout Raycast. Using them should help provide a more consistent experience and preserve muscle memory.
-
-| Name            | Shortcut  |
-| --------------- | --------- |
-| Copy            | ⌘ + ⇧ + C |
-| CopyDeeplink    | ⌘ + ⇧ + C |
-| CopyName        | ⌘ + ⇧ + . |
-| CopyPath        | ⌘ + ⇧ + , |
-| Duplicate       | ⌘ + D     |
-| Edit            | ⌘ + E     |
-| MoveDown        | ⌘ + ⇧ + ↓ |
-| MoveUp          | ⌘ + ⇧ + ↑ |
-| New             | ⌘ + N     |
-| Open            | ⌘ + O     |
-| OpenWith        | ⌘ + ⇧ + O |
-| Pin             | ⌘ + ⇧ + P |
-| Refresh         | ⌘ + R     |
-| Remove          | ⌃ + X     |
-| RemoveAll       | ⌃ + ⇧ + X |
-| ToggleQuickLook | ⌘ + Y     |
-
 #### Example
 
 ```typescript
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Keyboard } from "@raycast/api";
 
 export default function Command() {
   return (
@@ -60,6 +37,7 @@ export default function Command() {
             shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
             onAction={() => console.log("Go right")}
           />
+          <Action title="Open" shortcut={Keyboard.Shortcut.Common.Open} onAction={() => console.log("Open")} />
         </ActionPanel>
       }
     />
@@ -70,6 +48,29 @@ export default function Command() {
 #### Properties
 
 <InterfaceTableFromJSDoc name="Keyboard.Shortcut" />
+
+### Keyboard.Shortcut.Common
+
+A collection of shortcuts that are commonly used throughout Raycast. Using them should help provide a more consistent experience and preserve muscle memory.
+
+| Name            | Shortcut  |
+| --------------- | --------- |
+| Copy            | ⌘ + ⇧ + C |
+| CopyDeeplink    | ⌘ + ⇧ + C |
+| CopyName        | ⌘ + ⇧ + . |
+| CopyPath        | ⌘ + ⇧ + , |
+| Duplicate       | ⌘ + D     |
+| Edit            | ⌘ + E     |
+| MoveDown        | ⌘ + ⇧ + ↓ |
+| MoveUp          | ⌘ + ⇧ + ↑ |
+| New             | ⌘ + N     |
+| Open            | ⌘ + O     |
+| OpenWith        | ⌘ + ⇧ + O |
+| Pin             | ⌘ + ⇧ + P |
+| Refresh         | ⌘ + R     |
+| Remove          | ⌃ + X     |
+| RemoveAll       | ⌃ + ⇧ + X |
+| ToggleQuickLook | ⌘ + Y     |
 
 ### Keyboard.KeyEquivalent
 

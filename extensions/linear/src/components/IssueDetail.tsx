@@ -1,4 +1,4 @@
-import { Detail, ActionPanel } from "@raycast/api";
+import { Detail, ActionPanel, Icon } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { IssuePriorityValue, User } from "@linear/sdk";
 
@@ -16,10 +16,12 @@ import IssueActions from "./IssueActions";
 import { format } from "date-fns";
 import { getDateIcon } from "../helpers/dates";
 import { getProjectIcon } from "../helpers/projects";
+import { getMilestoneIcon } from "../helpers/milestones";
 
 type IssueDetailProps = {
   issue: IssueResult;
   mutateList?: MutatePromise<IssueResult[] | undefined>;
+  showAttachmentsAction?: boolean;
   priorities: IssuePriorityValue[] | undefined;
   users: User[] | undefined;
   me: User | undefined;
@@ -38,6 +40,8 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
 
   const relatedIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "related") : null;
   const duplicateIssues = issue.relations ? issue.relations.nodes.filter((node) => node.type == "duplicate") : null;
+
+  const linksCount = issue.attachments?.nodes.length ?? 0;
 
   return (
     <Detail
@@ -90,6 +94,14 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   />
                 ) : null}
 
+                {linksCount > 0 ? (
+                  <Detail.Metadata.Label
+                    title="Links"
+                    text={`${linksCount > 1 ? `${linksCount} links` : "1 link"}`}
+                    icon={Icon.Link}
+                  />
+                ) : null}
+
                 <Detail.Metadata.Separator />
 
                 <Detail.Metadata.Label
@@ -102,6 +114,12 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   title="Project"
                   text={issue.project ? issue.project.name : "No Project"}
                   icon={getProjectIcon(issue.project)}
+                />
+
+                <Detail.Metadata.Label
+                  title="Milestone"
+                  text={issue.projectMilestone ? issue.projectMilestone.name : "No Milestone"}
+                  icon={getMilestoneIcon(issue.projectMilestone)}
                 />
 
                 <Detail.Metadata.Label
@@ -138,6 +156,8 @@ export default function IssueDetail({ issue: existingIssue, mutateList, prioriti
                   mutateList={mutateList}
                   mutateDetail={mutateDetail}
                   priorities={priorities}
+                  showAttachmentsAction={linksCount > 0}
+                  attachments={issue.attachments?.nodes ?? []}
                   users={users}
                   me={me}
                 />

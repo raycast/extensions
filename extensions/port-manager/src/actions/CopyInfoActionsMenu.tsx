@@ -1,7 +1,7 @@
-import { ActionPanel, Icon, Action } from "@raycast/api";
-import { IProcessInfo } from "../models/interfaces";
+import { Action, ActionPanel, Icon } from "@raycast/api";
+import { ProcessInfo } from "../models/interfaces";
 
-export default function CopyInfoActionsMenu(props: { process: IProcessInfo }) {
+export default function CopyInfoActionsMenu(props: { process: ProcessInfo }) {
   return (
     <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard} shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}>
       <Action.CopyToClipboard content={props.process.pid} title="PID" />

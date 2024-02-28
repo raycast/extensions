@@ -105,7 +105,7 @@ export default function useSafariBookmarks(enabled: boolean) {
     (enabled) => {
       return enabled ? (readPlist(PLIST_PATH) as Promise<BookmarkFolder>) : Promise.resolve();
     },
-    [enabled]
+    [enabled],
   );
   const bookmarks = data ? getBookmarks(data) : [];
   const folders = data ? getFolders(data) : [];

@@ -16,11 +16,11 @@ export interface JustWatchMedia {
   year: number;
   thumbnail: string;
   backdrop: string;
-  jw_url: string;
+  jwUrl: string;
   offers: JustWatchMediaOffers[];
-  is_movie: boolean;
-  imdb_score: number;
-  imdb_votes: number;
+  isMovie: boolean;
+  imdbScore: number;
+  imdbVotes: number;
 }
 
 export interface JustWatchMediaOffers {
@@ -31,23 +31,18 @@ export interface JustWatchMediaOffers {
   icon: string;
   name: string;
   seasons: string;
-  price_amount: number;
-  presentation_type: string;
+  priceAmount: number;
+  priceString: string;
+  presentationType: string;
   currency: string;
-  other_prices?: OtherPrices[];
+  otherPrices?: OtherPrices[];
 }
 
 export interface OtherPrices {
-  price_amount: number;
-  presentation_type: string;
+  priceAmount: number;
+  presentationType: string;
   currency: string;
   seasons: string;
-}
-
-export interface MediaProvider {
-  icon_url: string;
-  short_name: string;
-  clear_name: string;
 }
 
 export enum Country {

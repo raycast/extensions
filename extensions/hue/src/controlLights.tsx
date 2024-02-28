@@ -1,4 +1,4 @@
-import { ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
+import { Action, ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
 import "./helpers/arrayExtensions";
 import { CssColor, Group, Id, Light, PngUriLightIconSet } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
@@ -58,7 +58,7 @@ function Group(props: {
   return (
     <Grid.Section key={props.group.id} title={props.group.metadata.name}>
       {props.lights.map(
-        (light: Light): JSX.Element => (
+        (light: Light): React.JSX.Element => (
           <Light
             key={light.id}
             light={light}
@@ -67,7 +67,7 @@ function Group(props: {
             useHue={props.useHue}
             rateLimiter={props.rateLimiter}
           />
-        )
+        ),
       )}
     </Grid.Section>
   );
@@ -105,18 +105,24 @@ function Light(props: {
               light={props.light}
               onToggle={() => handleToggle(props.useHue, props.rateLimiter, props.light)}
             />
-            <SetBrightnessAction
-              light={props.light}
-              onSet={(percentage: number) => handleSetBrightness(props.useHue, props.light, percentage)}
-            />
-            <IncreaseBrightnessAction
-              light={props.light}
-              onIncrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "increase")}
-            />
-            <DecreaseBrightnessAction
-              light={props.light}
-              onDecrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "decrease")}
-            />
+            {props.light.dimming !== undefined && (
+              <SetBrightnessAction
+                light={props.light}
+                onSet={(percentage: number) => handleSetBrightness(props.useHue, props.light, percentage)}
+              />
+            )}
+            {props.light.dimming !== undefined && (
+              <IncreaseBrightnessAction
+                light={props.light}
+                onIncrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "increase")}
+              />
+            )}
+            {props.light.dimming !== undefined && (
+              <DecreaseBrightnessAction
+                light={props.light}
+                onDecrease={() => handleBrightnessChange(props.useHue, props.rateLimiter, props.light, "decrease")}
+              />
+            )}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
@@ -155,7 +161,7 @@ function Light(props: {
 
 function ToggleLightAction(props: { light: Light; onToggle?: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       title={`Turn ${props.light.metadata.name} ${props.light.on?.on ? "Off" : "On"}`}
       icon={props.light.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={props.onToggle}
@@ -169,16 +175,12 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
       title="Set Brightness"
       icon={getProgressIcon(
         (props.light.dimming?.brightness ?? 0) / 100,
-        environment.theme === "light" ? "#000" : "#fff"
+        environment.appearance === "light" ? "#000" : "#fff",
       )}
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
     >
       {BRIGHTNESSES.map((brightness) => (
-        <ActionPanel.Item
-          key={brightness}
-          title={`${brightness}% Brightness`}
-          onAction={() => props.onSet(brightness)}
-        />
+        <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -190,7 +192,7 @@ function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void 
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
       icon={Icon.Plus}
@@ -205,7 +207,7 @@ function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void 
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
       icon={Icon.Minus}
@@ -218,12 +220,7 @@ function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void 
   return (
     <ActionPanel.Submenu title="Set Color" icon={Icon.Swatch} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
       {COLORS.map((color) => (
-        <ActionPanel.Item
-          key={color.name}
-          title={color.name}
-          icon={getIconForColor(color)}
-          onAction={() => props.onSet(color)}
-        />
+        <Action key={color.name} title={color.name} icon={getIconForColor(color)} onAction={() => props.onSet(color)} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -235,7 +232,7 @@ function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () =
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Increase Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
       icon={Icon.Plus}
@@ -250,7 +247,7 @@ function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () =
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Decrease Color Temperature"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
       icon={Icon.Minus}
@@ -262,7 +259,7 @@ function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () =
 async function handleToggle(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
-  light: Light
+  light: Light,
 ) {
   const toast = new Toast({ title: "" });
 
@@ -299,7 +296,7 @@ async function handleToggle(
 async function handleSetBrightness(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   light: Light,
-  brightness: number
+  brightness: number,
 ) {
   const toast = new Toast({ title: "" });
 
@@ -336,7 +333,7 @@ async function handleBrightnessChange(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
-  direction: "increase" | "decrease"
+  direction: "increase" | "decrease",
 ) {
   const toast = new Toast({ title: "" });
 
@@ -415,7 +412,7 @@ async function handleColorTemperatureChange(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
   rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
-  direction: "increase" | "decrease"
+  direction: "increase" | "decrease",
 ) {
   const toast = new Toast({ title: "" });
 

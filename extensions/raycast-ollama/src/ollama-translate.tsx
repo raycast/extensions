@@ -1,11 +1,8 @@
-import ResultView from "./api/main";
-import { GetPrompt } from "./api/prompt";
-import { getPreferenceValues } from "@raycast/api";
+import { AnswerView } from "./api/ui/AnswerView";
+import { RaycastArgumentsOllamaCommandTranslate } from "./api/types";
 
-const preferences = getPreferenceValues();
-
-export default function Command(): JSX.Element {
-  const prompt = GetPrompt(preferences.ollamaCasualModel, "ollama-translate", "");
-
-  return ResultView(preferences.ollamaCasualModel, prompt.prompt, prompt.tagEnd, true);
+export default function Command(props: RaycastArgumentsOllamaCommandTranslate): JSX.Element {
+  const c = "translate";
+  const p = `Act as a translator. Translate the following text to ${props.arguments.language}.\n\nOutput only with the translated text.\n`;
+  return <AnswerView command={c} prompt={p} />;
 }

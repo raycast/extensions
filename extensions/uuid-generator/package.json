@@ -8,7 +8,8 @@
   "contributors": [
     "GastroGeek",
     "pernielsentikaer",
-    "LunaticMuch"
+    "LunaticMuch",
+    "hmarr"
   ],
   "license": "MIT",
   "commands": [
@@ -54,6 +55,20 @@
           "title": "UUID v5 Namespace",
           "label": "Namespace",
           "description": "The namespace for UUID v5"
+        }
+      ]
+    },
+    {
+      "name": "generateV7",
+      "title": "Generate V7 UUIDs",
+      "description": "Copy generated UUIDs V7 to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfUUIDsToGenerate",
+          "type": "text",
+          "placeholder": "1",
+          "required": false
         }
       ]
     },
@@ -104,7 +119,8 @@
   "dependencies": {
     "@raycast/api": "^1.55.0",
     "ulidx": "^2.0.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "uuidv7": "^0.6.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

@@ -17,7 +17,7 @@ import {
   removeMyTemplateService,
   updateMyTemplateService,
 } from "../service";
-import { ChatParams, GetImagesOps, Message, TemplateBase, TemplateBaseOps, TemplateModel } from "../type";
+import { ChatParams, GetImagesOps, Message, TemplateBaseOps, TemplateModel } from "../type";
 
 class ChatGoAPi {
   token: string | undefined;

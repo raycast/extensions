@@ -20,7 +20,17 @@ declare namespace Preferences {
 declare namespace Arguments {
   /** Arguments passed to the `whois` command */
   export type Whois = {
-  /** raycast.com */
-  "domain": string
+  /** raycast.com, 1.1.1.1 */
+  "input": string
 }
+}
+
+
+declare module "swift:*" {
+  function run<T = unknown, U = any>(command: string, input?: U): Promise<T>;
+  export default run;
+	export class SwiftError extends Error {
+    stderr: string;
+    stdout: string;
+  }
 }

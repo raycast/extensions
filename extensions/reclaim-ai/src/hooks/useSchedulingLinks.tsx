@@ -1,9 +1,38 @@
+import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo } from "react";
+import { NativePreferences } from "../types/preferences";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import reclaimApi from "./useApi";
 import { ApiSchedulingLink, ApiSchedulingLinkGroups } from "./useSchedulingLinks.types";
 
-const useSchedulingLinks = () => {
+export const useSchedulingLinks = () => {
   const { fetcher } = reclaimApi();
+
+  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }),
+    [apiToken]
+  );
+
+  const useFetchSchedulingLinks = () =>
+    useFetch<ApiSchedulingLink>(`${apiUrl}/scheduling-link`, {
+      headers,
+      keepPreviousData: true,
+      method: "GET",
+    });
+
+  const useSchedulingLinksGroups = () =>
+    useFetch<ApiSchedulingLinkGroups>(`${apiUrl}/scheduling-link/group`, {
+      headers,
+      keepPreviousData: true,
+      method: "GET",
+    });
 
   const getSchedulingLinks = async () => {
     try {
@@ -34,9 +63,9 @@ const useSchedulingLinks = () => {
   };
 
   return {
+    useFetchSchedulingLinks,
+    useSchedulingLinksGroups,
     getSchedulingLinks,
     getSchedulingLinksGroups,
   };
 };
-
-export { useSchedulingLinks };

@@ -148,10 +148,10 @@ If a number is passed, it needs to be in the range 0-2. For larger values, 2 wil
 
 ### AI.Model
 
-The AI model to use to answer to the prompt. Defaults to `"text-davinci-003"`.
+The AI model to use to answer to the prompt. Defaults to `"gpt-3.5-turbo-instruct"`.
 
 ```typescript
-type Model = "text-davinci-003" | "gpt-3.5-turbo";
+type Model = "gpt-3.5-turbo" | "gpt-3.5-turbo-instruct" | "gpt-4";
 ```
 
 ### AI.AskOptions

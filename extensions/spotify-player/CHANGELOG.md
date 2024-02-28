@@ -1,5 +1,47 @@
 # Spotify Player Changelog
 
+## [Feature] - 2024-02-02
+
+- New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
+- Removed the condition to filter collaborative playlists from other users, since Spotify doesn't update it correctly.
+
+## [New Command] - 2023-01-31
+
+- New `Queue` command allowing the user to view songs/epsiodes in the queue.
+
+## [Fix] - 2024-01-31
+
+- Fixed a bug that caused launching the Spotify app to not work properly
+- Modified the device selection preference for playback
+
+## [Improvement] - 2024-01-30
+
+- Increase the stale data time from 10 minutes to 2 hours
+
+## [Fix Current Track Like State] - 2023-12-31
+
+- Fix showing the like/disliked state of the current track
+
+## [Feature & Optimisation] - 2023-12-02
+
+- Added `Select Device` command to select the device to play music on.
+- Automatically select a device when no device is selected.
+- Better handling when no device is found or Spotify is not installed.
+- Informative error toast messages.
+- Show songs for the `Liked Songs` playlist.
+- Fix uri for `Liked Songs` playlist.
+
+## [Feature] - 2023-09-29
+
+- Show a Liked Songs playlist in search and library commands.
+
+## [More Commands] - 2023-09-07
+
+- Added `Current Track` command to view the current track and artist/show, and the like state
+- Added `Replay` command to go to the beginning of the song, replaying it
+- Added `Set Volume` command to set the volume to an arbitrary percent, using an argument
+- Renamed `Toggle Repeat` to `Cycle Repeat` command to cycle between all three repeat states instead of just two states
+
 ## [Feature] - 2023-07-31
 
 - New Menu Bar Player preference to hide the icon when Spotify is not running, or when there is nothing playing.

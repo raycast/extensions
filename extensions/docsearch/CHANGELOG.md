@@ -1,5 +1,27 @@
 # DocSearch Changelog
 
+## [New feature] - 2024-2-3
+
+- 🌟 Use searchBarAccessory to switch different version of docs
+
+## [New feature and documentation] - 2024-01-16
+
+- 📄 Support [Element Plus](https://element-plus.org/en-US/)
+
+## [New feature and documentation] - 2023-10-22
+
+- 📄 Support [NvChad](https://nvchad.com/)
+
+## [New feature and documentation] - 2023-08-12
+
+- 🌟 Support auto generate entry file and config
+- 📄 Support [taro](https://docs.taro.zone/docs/)
+
+## [Support for new documentation] - 2023-08-11
+
+- 📄 Support [Antd](https://ant.design/)
+- 📄 Support [Antdv](https://antdv.com/components/overview)
+
 ## [Fix SearchDocumentation Component] - 2023-05-25
 
 - 🐛 Fix the title of the documentation is not displayed.

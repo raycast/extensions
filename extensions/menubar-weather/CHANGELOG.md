@@ -1,5 +1,14 @@
 # Menubar Weather Changelog
 
+## [Fix error] - 2024-02-05
+
+- Fix json parsing errors
+- Add dates as subheadings in weather forecasts
+
+## [Add new weather icon] - 2023-08-21
+
+- Now you can choose SF Symbols style weather icons, thanks to [Arttu](https://www.raycast.com/r22) for the SF Symbols icons
+
 ## [Add command subtitle] - 2023-07-24
 
 - Now you can view the weather directly from the subtitle of the command.
@@ -7,7 +16,7 @@
 
 ## [Add menubar info configutation] - 2023-07-11
 
-- You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar.
+- You can choose temperature type, UVI, pressure, humidity and rain to display in the menubar
 
 ## [Add UV Index] - 2023-07-03
 
@@ -16,7 +25,7 @@
 
 ## [Fix bug] - 2023-06-19
 
-- Fix a bug that caused the extension to crash if cached data couldn't be parsed properly.
+- Fix a bug that caused the extension to crash if cached data couldn't be parsed properly
 
 ## [Update UI] - 2023-03-29
 

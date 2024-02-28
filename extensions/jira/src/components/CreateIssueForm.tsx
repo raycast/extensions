@@ -2,7 +2,15 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, Clipboard, useNaviga
 import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
-import { createIssue, getCreateIssueMetadata, Component, Version, addAttachment, Priority } from "../api/issues";
+import {
+  createIssue,
+  getCreateIssueMetadataSummary,
+  Component,
+  Version,
+  addAttachment,
+  Priority,
+  getCreateIssueMetadata,
+} from "../api/issues";
 import { getLabels } from "../api/labels";
 import { getProjects } from "../api/projects";
 import { getUsers } from "../api/users";
@@ -42,7 +50,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   const { data: users } = useCachedPromise(() => getUsers());
@@ -139,16 +147,24 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
     setLastProject(values.projectId);
   }, [values.projectId]);
 
-  const { data: issueMetadata } = useCachedPromise(
-    (projectId) => getCreateIssueMetadata(projectId),
+  const { data: issueMetadataSummary } = useCachedPromise(
+    (projectId) => getCreateIssueMetadataSummary(projectId),
     [values.projectId],
-    { execute: !!values.projectId }
+    { execute: !!values.projectId },
   );
 
   const selectedProject = projects?.find((project) => project.id === values.projectId);
 
   // We only query one project in the getCreateIssueMetadata call
   // It's safe to assume the issue types will always correspond to the first element
+  const issueTypesSummary = issueMetadataSummary?.[0]?.issuetypes;
+
+  const { data: issueMetadata } = useCachedPromise(
+    (projectId, issueTypeId) => getCreateIssueMetadata(projectId, issueTypeId),
+    [values.projectId, values.issueTypeId],
+    { execute: !!values.projectId && !!values.issueTypeId },
+  );
+
   const issueTypes = issueMetadata?.[0]?.issuetypes;
 
   const selectedIssueType = issueTypes?.find((issueType) => issueType.id === values.issueTypeId);
@@ -216,7 +232,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
       </Form.Dropdown>
 
       <Form.Dropdown {...itemProps.issueTypeId} title="Issue Type" storeValue>
-        {issueTypes?.map((issueType) => {
+        {issueTypesSummary?.map((issueType) => {
           return (
             <Form.Dropdown.Item
               key={issueType.id}

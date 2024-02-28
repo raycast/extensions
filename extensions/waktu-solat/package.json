@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "waktu-solat",
   "title": "Waktu Solat",
-  "description": "Malaysia Prayer Time (JAKIM)",
-  "icon": "mosque.png",
+  "description": "Check Malaysia Prayer Time (JAKIM)",
+  "icon": "mosque-icon01.png",
   "author": "msms",
+  "contributors": [
+    "ezzylan"
+  ],
   "categories": [
     "Productivity",
     "Other"
@@ -14,36 +17,78 @@
     {
       "name": "index",
       "title": "Waktu Solat",
-      "description": "Malaysia Prayer Time (JAKIM)",
+      "description": "View Malaysia Prayer Times directly from Raycast",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Waktu Solat Menu Bar",
+      "description": "View Malaysia Prayer Times directly from your menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showIcon",
+      "description": "Display icon in menubar",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show icon in menu bar"
+    },
+    {
+      "name": "menuTemplate",
+      "description": "Placeholder: $name, $time",
+      "type": "textfield",
+      "required": false,
+      "default": "$name at $time",
+      "title": "Menubar template"
+    },
+    {
+      "name": "beforeOffset",
+      "description": "Display menubar few minutes before",
+      "type": "textfield",
+      "required": false,
+      "default": "30",
+      "placeholder": "30",
+      "title": "Offset before prayer time"
+    },
+    {
+      "name": "afterOffset",
+      "description": "Display menubar few minutes after",
+      "type": "textfield",
+      "required": false,
+      "default": "30",
+      "placeholder": "30",
+      "title": "Offset after prayer time"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.2",
-    "@raycast/utils": "^1.8.0",
-    "axios": "^1.4.0",
-    "humanize-duration": "^3.29.0",
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1",
+    "axios": "1.6.0",
+    "humanize-duration": "^3.31.0",
     "jsdom": "^22.1.0",
-    "moment": "^2.29.4",
-    "node-fetch": "^3.3.1",
-    "node-html-parser": "^6.1.5"
+    "moment": "^2.30.1",
+    "node-fetch": "^3.3.2",
+    "node-html-parser": "^6.1.12"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/humanize-duration": "^3.27.1",
-    "@types/jsdom": "^21.1.1",
-    "@types/moment": "^2.13.0",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "1.0.6",
+    "@types/humanize-duration": "^3.27.4",
+    "@types/jsdom": "^21.1.6",
+    "@types/node": "20.8.0",
+    "@types/react": "18.2.24",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.2",
+    "typescript": "^5.3.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
+    "build": "npx @raycast/api@latest build -e dist",
+    "dev": "npx @raycast/api@latest develop",
+    "fix-lint": "npx @raycast/api@latest lint --fix",
+    "lint": "npx @raycast/api@latest lint",
     "publish": "npx @raycast/api@latest publish"
   }
 }

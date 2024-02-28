@@ -13,7 +13,7 @@ export function useTask(id: UUID) {
   }
 
   const task = data.tasks[id];
-  const tags = task.tags.map((id) => data?.tags[id]);
+  const tags = task.tags?.map((id) => data.tags[id]);
 
   const { parent } = data.nodes.find((node) => node.id === id && node.parent) ?? {};
   if (parent) {

@@ -14,159 +14,34 @@ import {
   startOfWeek,
   startOfYear,
 } from "date-fns";
-import { PerferenceValue, Progress, ProgressBarOptions } from "../types";
+import { PerferenceValue, Progress } from "../types";
 
 const now = new Date();
-const currentTime = now.getTime();
 const { weekStartsOn } = getPreferenceValues<PerferenceValue>();
 
-export function getYear() {
-  return now.getFullYear();
+export function getYearProgressNum() {
+  const dayOfYear = getDayOfYear(now);
+  const daysInYear = isLeapYear(now) ? 366 : 365;
+  return Math.floor((dayOfYear / daysInYear) * 100);
 }
 
-export function getProgressBar(progress: number, options: ProgressBarOptions = {}) {
-  const { limit = 10 } = options;
-  let progressBar = "";
-  for (let i = 0; i < limit; i++) {
-    progressBar += progress > i * limit ? "■" : "□";
+export function getQuarterProgressNum() {
+  const quarter = getQuarter(now);
+  const nextQuarterDate = new Date();
+  if (quarter === 4) {
+    nextQuarterDate.setFullYear(now.getFullYear() + 1, 0, 1);
+  } else {
+    nextQuarterDate.setFullYear(now.getFullYear(), quarter * 3, 1);
   }
-  return progressBar;
+
+  const startQuarterTime = startOfQuarter(now).getTime();
+  const nextQuarterTime = nextQuarterDate.getTime();
+
+  const currentTime = now.getTime();
+  return Math.floor(((currentTime - startQuarterTime) / (nextQuarterTime - startQuarterTime)) * 100);
 }
 
-function getYearProgress(): Progress {
-  function getYearProgressNumber() {
-    const dayOfYear = getDayOfYear(now);
-    const daysInYear = isLeapYear(now) ? 366 : 365;
-    return Math.floor((dayOfYear / daysInYear) * 100);
-  }
-  function getYearProgressDate() {
-    const startDate = startOfYear(now);
-    const endDate = endOfYear(now);
-    return { startDate, endDate };
-  }
-
-  return {
-    key: "year",
-    title: "Year In Progress",
-    menubarTitle: "Year",
-    showInMenuBar: true,
-    startDate: getYearProgressDate().startDate,
-    endDate: getYearProgressDate().endDate,
-    getProgressNumberFn: getYearProgressNumber,
-    type: "default",
-    pinned: true,
-    editable: false,
-  };
-}
-
-function getQuarterProgress(): Progress {
-  function getQuarterProgressNumber() {
-    const quarter = getQuarter(now);
-    const nextQuarterDate = new Date();
-    if (quarter === 4) {
-      nextQuarterDate.setFullYear(now.getFullYear() + 1, 0, 1);
-    } else {
-      nextQuarterDate.setFullYear(now.getFullYear(), quarter * 3, 1);
-    }
-
-    const startQuarterTime = startOfQuarter(now).getTime();
-    const nextQuarterTime = nextQuarterDate.getTime();
-
-    return Math.floor(((currentTime - startQuarterTime) / (nextQuarterTime - startQuarterTime)) * 100);
-  }
-  function getQuarterProgressDate() {
-    const startDate = startOfQuarter(now);
-    const endDate = endOfQuarter(now);
-    return { startDate, endDate };
-  }
-
-  return {
-    key: "quarter",
-    title: "Quarter In Progress",
-    menubarTitle: "Quarter",
-    showInMenuBar: true,
-    startDate: getQuarterProgressDate().startDate,
-    endDate: getQuarterProgressDate().endDate,
-    getProgressNumberFn: getQuarterProgressNumber,
-    type: "default",
-    pinned: true,
-    editable: false,
-  };
-}
-
-function getMonthProgress(): Progress {
-  const startDate = startOfMonth(now);
-  const endDate = endOfMonth(now);
-
-  function getMonthProgressNumber() {
-    return getProgress(startDate, endDate);
-  }
-  function getMonthProgressDate() {
-    return { startDate, endDate };
-  }
-
-  return {
-    key: "month",
-    title: "Month In Progress",
-    menubarTitle: "Month",
-    showInMenuBar: true,
-    startDate: getMonthProgressDate().startDate,
-    endDate: getMonthProgressDate().endDate,
-    getProgressNumberFn: getMonthProgressNumber,
-    type: "default",
-    editable: false,
-  };
-}
-
-function getWeekProgress(): Progress {
-  const startDate = startOfWeek(now, { weekStartsOn: +weekStartsOn as any });
-  const endDate = endOfWeek(now, { weekStartsOn: +weekStartsOn as any });
-
-  function getWeekProgressNumber() {
-    return getProgress(startDate, endDate);
-  }
-  function getWeekProgressDate() {
-    return { startDate, endDate };
-  }
-
-  return {
-    key: "week",
-    title: "Week In Progress",
-    menubarTitle: "Week",
-    showInMenuBar: true,
-    startDate: getWeekProgressDate().startDate,
-    endDate: getWeekProgressDate().endDate,
-    getProgressNumberFn: getWeekProgressNumber,
-    type: "default",
-    editable: false,
-  };
-}
-
-function getDayProgress(): Progress {
-  const startDate = startOfDay(now);
-  const endDate = endOfDay(now);
-
-  function getDayprogressNumber() {
-    return getProgress(startDate, endDate);
-  }
-  function getDayProgressDate() {
-    return { startDate, endDate };
-  }
-
-  return {
-    key: "day",
-    title: "Day In Progress",
-    menubarTitle: "Day",
-    showInMenuBar: true,
-    startDate: getDayProgressDate().startDate,
-    endDate: getDayProgressDate().endDate,
-    getProgressNumberFn: getDayprogressNumber,
-    type: "default",
-    editable: false,
-  };
-}
-
-export function getProgress(startDate: Date, endDate: Date) {
+export function getProgressNumByDate(startDate: Date, endDate: Date) {
   const startTime = startDate.getTime();
   const endTime = endDate.getTime();
   const currentTime = new Date().getTime();
@@ -178,15 +53,111 @@ export function getProgress(startDate: Date, endDate: Date) {
   return Math.floor(progress * 100);
 }
 
-export function getDefaultProgress() {
-  return [getYearProgress(), getQuarterProgress(), getMonthProgress(), getWeekProgress(), getDayProgress()];
+function getYearProgress(): Progress {
+  const startDate = startOfYear(now);
+  const endDate = endOfYear(now);
+
+  return {
+    title: "Year In Progress",
+    type: "default",
+    pinned: true,
+    progressNum: getYearProgressNum(),
+    startDate: startDate.getTime(),
+    endDate: endDate.getTime(),
+    menubar: {
+      shown: true,
+      title: "Year",
+    },
+  };
 }
 
-export function getProgressSubtitle(progressNumber: number) {
-  return `${getProgressBar(progressNumber)} ${progressNumber}%`;
+function getQuarterProgress(): Progress {
+  const startDate = startOfQuarter(now);
+  const endDate = endOfQuarter(now);
+
+  return {
+    title: "Quarter In Progress",
+    type: "default",
+    pinned: true,
+    progressNum: getQuarterProgressNum(),
+    startDate: startDate.getTime(),
+    endDate: endDate.getTime(),
+    menubar: {
+      shown: true,
+      title: "Quarter",
+    },
+  };
 }
 
-export function getProgressNumber(progress: Progress) {
-  if (!progress) return 0;
-  return progress.getProgressNumberFn?.() || getProgress(progress.startDate, progress.endDate);
+function getMonthProgress(): Progress {
+  const startDate = startOfMonth(now);
+  const endDate = endOfMonth(now);
+
+  return {
+    title: "Month In Progress",
+    type: "default",
+    progressNum: getProgressNumByDate(startDate, endDate),
+    startDate: startDate.getTime(),
+    endDate: endDate.getTime(),
+    menubar: {
+      shown: true,
+      title: "Month",
+    },
+  };
 }
+
+function getWeekProgress(): Progress {
+  const startDate = startOfWeek(now, { weekStartsOn: +weekStartsOn as any });
+  const endDate = endOfWeek(now, { weekStartsOn: +weekStartsOn as any });
+
+  return {
+    title: "Week In Progress",
+    type: "default",
+    progressNum: getProgressNumByDate(startDate, endDate),
+    startDate: startDate.getTime(),
+    endDate: endDate.getTime(),
+    menubar: {
+      shown: true,
+      title: "Week",
+    },
+  };
+}
+
+function getDayProgress(): Progress {
+  const startDate = startOfDay(now);
+  const endDate = endOfDay(now);
+
+  return {
+    title: "Day In Progress",
+    type: "default",
+    progressNum: getProgressNumByDate(startDate, endDate),
+    startDate: startDate.getTime(),
+    endDate: endDate.getTime(),
+    menubar: {
+      shown: true,
+      title: "Day",
+    },
+  };
+}
+
+function getProgressBar(progressNum: number, options: { limit?: number } = {}) {
+  const { limit = 10 } = options;
+  let progressBar = "";
+  for (let i = 0; i < limit; i++) {
+    progressBar += progressNum > i * limit ? "■" : "□";
+  }
+  return progressBar;
+}
+
+// To display subtitle for menubar item & x-in-progress item
+export function getSubtitle(progressNum: number) {
+  return `${getProgressBar(progressNum)} ${progressNum}%`;
+}
+
+export const defaultProgress = [
+  getYearProgress(),
+  getQuarterProgress(),
+  getMonthProgress(),
+  getWeekProgress(),
+  getDayProgress(),
+];

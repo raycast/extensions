@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "solusvm-1-client",
+  "title": "SolusVM 1 Client",
+  "description": "Fetch Information and Manage SolusVM 1 Virtual Server",
+  "icon": "solusvm-1-client.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "solusVM_url",
+      "title": "SolusVM URL",
+      "placeholder": "https://<MASTER_IP>:5656",
+      "description": "URL of SolusVM Instance w/ Port",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "11AAA-AAA11-AAAAA",
+      "description": "API Key from API tab in SolusVM v1",
+      "required": true,
+      "type": "password"
+    },
+    {
+      "name": "api_hash",
+      "title": "API Hash",
+      "placeholder": "111aa....",
+      "description": "API Hash from API tab in SolusVM v1",
+      "required": true,
+      "type": "password"
+    },
+    {
+      "name": "confirm_before_actions",
+      "label": "Confirm Before Actions",
+      "description": "Confirm before Boot, Reboot or Shut Down",
+      "required": false,
+      "default": true,
+      "type": "checkbox"
+    }
+  ],
+  "commands": [
+    {
+      "name": "get-virtual-server-status",
+      "title": "Get Virtual Server Status",
+      "subtitle": "SolusVM 1 Client",
+      "description": "Get Virtual Server Status",
+      "mode": "view"
+    },
+    {
+      "name": "get-virtual-server-information",
+      "title": "Get Virtual Server Information",
+      "subtitle": "SolusVM 1 Client",
+      "description": "Get Virtual Server Information",
+      "mode": "view"
+    },
+    {
+      "name": "reboot-virtual-server",
+      "title": "Reboot Virtual Server",
+      "subtitle": "SolusVM 1 Client",
+      "description": "Reboot Virtual Server",
+      "mode": "no-view"
+    },
+    {
+      "name": "boot-virtual-server",
+      "title": "Boot Virtual Server",
+      "subtitle": "SolusVM 1 Client",
+      "description": "Boot Virtual Server",
+      "mode": "no-view"
+    },
+    {
+      "name": "shutdown-virtual-server",
+      "title": "Shut Down Virtual Server",
+      "subtitle": "SolusVM 1 Client",
+      "description": "Shut Down Virtual Server",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.2",
+    "@xmldom/xmldom": "^0.8.10",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

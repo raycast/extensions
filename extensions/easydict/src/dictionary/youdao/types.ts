@@ -140,7 +140,7 @@ export interface YoudaoWebTranslateResultItem {
 export interface YoudaoWebDictionaryModel {
   // English --> Chinese.
   input: string;
-  lang: string; // 目标语言，eng。 eg: https://www.youdao.com/w/eng/good
+  lang: string; // 目标语言，eng。eg: https://www.youdao.com/w/eng/good
   le: string; // 目标语言，en
   meta?: Meta; // 元数据
 

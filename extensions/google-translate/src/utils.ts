@@ -1,4 +1,4 @@
-import { supportedLanguagesByCode } from "./languages";
+import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageCodeSet } from "./types";
 
 export const isSameLanguageSet = (langSet1: LanguageCodeSet, langSet2: LanguageCodeSet) => {
@@ -14,5 +14,5 @@ export const getLanguageSetObjects = (languageSet: LanguageCodeSet) => {
 
 export const formatLanguageSet = (languageSet: LanguageCodeSet) => {
   const { langFrom, langTo } = getLanguageSetObjects(languageSet);
-  return `${langFrom.name} ${langFrom?.flag ?? "🏳"} -> ${langTo?.flag ?? "🏳"} ${langTo.name}`;
+  return `${langFrom.name} ${getLanguageFlag(langFrom)} -> ${getLanguageFlag(langTo)} ${langTo.name}`;
 };

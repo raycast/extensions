@@ -1,13 +1,18 @@
 import { Action, ActionPanel, Icon, List, Toast, open, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSchedulingLinks } from "./hooks/useSchedulingLinks";
 import { useUser } from "./hooks/useUser";
-import { SchedulingLink, SchedulingLinkGroup } from "./types/scheduling-link";
+import { SchedulingLink } from "./types/scheduling-link";
 import { axiosPromiseData, fetcher } from "./utils/axiosPromise";
 import { resolveTimePolicy } from "./utils/time-policy";
 
 const SLActions = ({ link }: { link: SchedulingLink }) => {
   const url = `https://app.reclaim.ai/m/${link.pageSlug}/${link.slug}`;
+  const { currentUser } = useUser();
+
+  const shareTimesEnabled = useMemo(() => {
+    return !!currentUser?.features.schedulingLinks.shareTimesEnabled;
+  }, [currentUser]);
 
   const createOneOffLink = async () => {
     const [oneOff, error] = await axiosPromiseData<SchedulingLink>(
@@ -20,7 +25,7 @@ const SLActions = ({ link }: { link: SchedulingLink }) => {
     );
 
     if (!error && oneOff) {
-      open(`https://app.reclaim.ai/scheduling-links/one-off/${oneOff.id}/edit`);
+      open(`https://app.reclaim.ai/scheduling-links?personalize=${oneOff.id}`);
     } else {
       await showToast({
         style: Toast.Style.Failure,
@@ -29,10 +34,15 @@ const SLActions = ({ link }: { link: SchedulingLink }) => {
     }
   };
 
+  const createShareLink = async () => {
+    open(`https://app.reclaim.ai/quick-forms/scheduling-links/${link.id}/available-times`);
+  };
+
   return (
     <ActionPanel>
       <Action.CopyToClipboard title="Copy Link to Clipboard" content={url} />
-      <Action icon={Icon.AddPerson} title="Create One Off Link" onAction={createOneOffLink} />
+      {shareTimesEnabled && <Action icon={Icon.AddPerson} title="Personalize and Share" onAction={createShareLink} />}
+      {!shareTimesEnabled && <Action icon={Icon.AddPerson} title="Create One Off Link" onAction={createOneOffLink} />}
       <Action.Open title="Open in Browser" target={url} />
     </ActionPanel>
   );
@@ -57,29 +67,29 @@ const ListDetailMetadataField = ({
 export default function Command() {
   const [searchText, setSearchText] = useState("");
 
-  const [links, setLinks] = useState<SchedulingLink[]>([]);
-  const [groups, setGroups] = useState<SchedulingLinkGroup[]>([]);
-  const [loading, setIsLoading] = useState<boolean>(false);
+  const { useFetchSchedulingLinks, useSchedulingLinksGroups, getSchedulingLinks } = useSchedulingLinks();
 
-  const { getSchedulingLinks, getSchedulingLinksGroups } = useSchedulingLinks();
+  const { data: schedulingLinksData, isLoading: schedulingLinksIsLoading } = useFetchSchedulingLinks();
+  const { data: schedulingLinksGroupsData, isLoading: schedulingLinksGroupsisLoading } = useSchedulingLinksGroups();
+
+  const isLoading = schedulingLinksIsLoading || schedulingLinksGroupsisLoading;
+
+  const { links, groups } = useMemo(
+    () =>
+      !schedulingLinksData || !schedulingLinksGroupsData
+        ? { links: [], groups: [] }
+        : {
+            links: schedulingLinksData,
+            groups: schedulingLinksGroupsData,
+          },
+    [schedulingLinksData, schedulingLinksGroupsData]
+  );
+
   const { currentUser } = useUser();
-
-  const fetchLinks = async () => {
-    setIsLoading(true);
-    const schedulingLinks = await getSchedulingLinks();
-    const schedulingGroups = await getSchedulingLinksGroups();
-    setLinks(schedulingLinks || []);
-    setGroups(schedulingGroups || []);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    void fetchLinks();
-  }, []);
 
   return (
     <List
-      isLoading={loading}
+      isLoading={isLoading}
       filtering={true}
       searchText={searchText}
       onSearchTextChange={setSearchText}

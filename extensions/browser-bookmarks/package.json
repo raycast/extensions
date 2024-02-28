@@ -2,14 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-bookmarks",
   "title": "Browser Bookmarks",
-  "description": "Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari or Vivaldi.",
-  "icon": "icon.png",
+  "description": "Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari, Arc or Vivaldi.",
+  "icon": "extension-icon.png",
   "author": "thomaslombart",
   "owner": "raycast",
   "access": "public",
   "contributors": [
     "sasivarnan",
-    "ahp"
+    "ahp",
+    "danulqua",
+    "juang970",
+    "tleo19",
+    "jum8ys"
   ],
   "categories": [
     "Web"
@@ -21,6 +25,14 @@
       "label": "Show Bookmark Domain",
       "name": "showDomain",
       "description": "When enabled, the domain of the bookmark will be displayed as a subtitle.",
+      "default": true,
+      "required": false
+    },
+    {
+      "type": "checkbox",
+      "label": "Open Bookmark's Browser",
+      "name": "openBookmarkBrowser",
+      "description": "When enabled, the extension will open the browser from which the bookmark originated, instead of your default browser.",
       "default": true,
       "required": false
     }
@@ -35,25 +47,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.0",
-    "@raycast/utils": "^1.9.0",
-    "fuse.js": "^6.6.2",
-    "ini": "^3.0.1",
+    "@raycast/api": "^1.64.0",
+    "@raycast/utils": "^1.10.0",
+    "fuse.js": "^7.0.0",
+    "ini": "^4.1.1",
     "simple-plist": "^1.4.0-0",
     "sql.js": "^1.8.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/ini": "^1.3.31",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/ini": "^1.3.32",
     "@types/node": "18.8.3",
-    "@types/plist": "^3.0.2",
-    "@types/react": "18.0.9",
-    "@types/sql.js": "^1.4.4",
-    "eslint": "^7.32.0",
-    "eslint-plugin-import": "^2.27.5",
+    "@types/plist": "^3.0.4",
+    "@types/react": "18.2.31",
+    "@types/sql.js": "^1.4.7",
+    "eslint": "^8.51.0",
+    "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "2.8.8",
-    "typescript": "^4.4.3"
+    "prettier": "3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

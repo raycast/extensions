@@ -1,5 +1,10 @@
 # Tim Changelog
 
+## [Fixes] - 2023-11-13
+
+- Resolved problem with tasks lacking tags
+- Resolved issue with openActiveRecord when no active record is present
+
 ## [Feature] - 2023-03-05
 
 - Introduced new command "Tasks" to view all tasks

@@ -1,7 +1,7 @@
-import { List, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
 import { useEffect, useState } from "react";
+import fileUriToPath from "file-uri-to-path";
 
-import { storeClipboardToTemp } from "./lib/util";
 import { uploadImage, getImageUrl } from "./lib/cloudinary";
 
 import type { Asset } from "./types/asset";
@@ -30,7 +30,13 @@ export default function main() {
       setLoading(true);
 
       try {
-        const filePath = storeClipboardToTemp();
+        const { file } = await Clipboard.read();
+
+        if (typeof file === "undefined") {
+          throw new Error("Missing image data.");
+        }
+
+        const filePath = fileUriToPath(file);
         const resource = await uploadImage(filePath);
         const asset = Object.fromEntries(Object.entries(resource).filter(([key]) => key !== "api_key"));
         setAsset(asset as Asset);

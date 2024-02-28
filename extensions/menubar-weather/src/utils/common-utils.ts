@@ -17,6 +17,7 @@ import {
   precipitationUnits,
   tempUnits,
   windAngle2Direction,
+  iconStyle,
 } from "./weather-utils";
 import { OpenMeteoWeather } from "../types/types";
 
@@ -25,6 +26,7 @@ export enum CacheKey {
   LOCATION = "Location",
   REFRESH_TIME = "Refresh Time",
 
+  ICON_STYLE = "Icon Style",
   CITY_NAME = "City Name",
   LONGITUDE = "Longitude",
   LATITUDE = "Latitude",
@@ -102,6 +104,7 @@ export function shouldRefresh(oldRefreshTime: number, newRefreshTime: number) {
 const cache = new Cache();
 
 export function preferencesChanged() {
+  const oldIconStyle = getCacheString(CacheKey.ICON_STYLE);
   const oldCityName = getCacheString(CacheKey.CITY_NAME);
   const oldLon = getCacheString(CacheKey.LONGITUDE);
   const oldLat = getCacheString(CacheKey.LATITUDE);
@@ -122,6 +125,8 @@ export function preferencesChanged() {
   const newLon = typeof longitude === "undefined" ? "" : longitude;
   const newLat = typeof latitude === "undefined" ? "" : latitude;
 
+  cache.set(CacheKey.ICON_STYLE, JSON.stringify(iconStyle));
+  cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.LATITUDE, JSON.stringify(newLat));
@@ -139,6 +144,7 @@ export function preferencesChanged() {
   cache.set(CacheKey.SHOW_UVI, JSON.stringify(showUVI));
 
   return (
+    oldIconStyle !== iconStyle ||
     oldCityName !== newCityName ||
     oldLon !== newLon ||
     oldLat !== newLat ||
@@ -158,10 +164,14 @@ export function preferencesChanged() {
 }
 
 function getCacheString(key: string, defaultValue = "") {
-  const cacheString = cache.get(key);
-  if (typeof cacheString == "string") {
-    return JSON.parse(cacheString) as string;
-  } else {
+  try {
+    const cacheString = cache.get(key);
+    if (typeof cacheString == "string") {
+      return JSON.parse(cacheString) as string;
+    } else {
+      return defaultValue;
+    }
+  } catch (e) {
     return defaultValue;
   }
 }
@@ -254,8 +264,8 @@ export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {
       Math.round(
         tempType == "apparent_temperature"
           ? weather?.hourly.apparent_temperature[timeHour()]
-          : weather?.current_weather?.temperature
-      ) + tempUnit
+          : weather?.current_weather?.temperature,
+      ) + tempUnit,
     );
     if (menuUVI && weather.daily?.uv_index_max.length != 0) {
       menuItems.push("☀ " + Math.round(weather.daily.uv_index_max[0]));
@@ -265,7 +275,7 @@ export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {
     }
     if (menuHumidity && weather.hourly?.relativehumidity_2m.length != 0) {
       menuItems.push(
-        "🜄 " + Math.round(weather.hourly.relativehumidity_2m[timeHour()]) + weather.hourly_units.relativehumidity_2m
+        "🜄 " + Math.round(weather.hourly.relativehumidity_2m[timeHour()]) + weather.hourly_units.relativehumidity_2m,
       );
     }
     if (menuWind) {
@@ -273,7 +283,7 @@ export function getMenuItem(weather: OpenMeteoWeather | undefined): string[] {
         windAngle2Direction(weather.current_weather.winddirection).icon +
           " " +
           Math.round(weather.current_weather.windspeed) +
-          windUnit
+          windUnit,
       );
     }
   }

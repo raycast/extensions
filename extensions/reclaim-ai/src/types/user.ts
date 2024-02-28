@@ -86,6 +86,7 @@ export interface UserFeatures {
       alwaysPrivate: boolean;
       minChunkSize: number;
       maxChunkSize: number;
+      onDeck: boolean;
     };
     autoWorkflowSettings: {
       category: string;
@@ -170,6 +171,7 @@ export interface UserFeatures {
     enabled: boolean;
     note: string;
     remindersMigrated: boolean;
+    shareTimesEnabled: boolean;
   };
   eventStorage: {
     enabled: boolean;

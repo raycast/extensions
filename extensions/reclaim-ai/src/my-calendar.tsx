@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import {
   addDays,
   differenceInHours,
@@ -20,11 +20,29 @@ type EventSection = { section: string; sectionTitle: string; events: Event[] };
 const EventActionsList = ({ event }: { event: Event }) => {
   const [eventActions, setEventActions] = useState<EventActions>([]);
 
-  const { getEventActions } = useEvent();
+  const { getEventActions, handleRescheduleTask } = useEvent();
 
   const loadEventActions = async () => {
     const actions = await getEventActions(event);
     setEventActions(actions);
+  };
+
+  const rescheduleTask = async (calendarId: string, eventId: string, reschedule: string) => {
+    await showToast(Toast.Style.Animated, "Rescheduling event...");
+    try {
+      const executeReschedule = await handleRescheduleTask(calendarId, eventId, reschedule);
+      if (executeReschedule) {
+        showToast(Toast.Style.Success, `Rescheduled"${event.title}" successfully!`);
+      } else {
+        throw new Error("Rescheduling failed.");
+      }
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error while rescheduling",
+        message: String(error),
+      });
+    }
   };
 
   useEffect(() => {
@@ -43,6 +61,58 @@ const EventActionsList = ({ event }: { event: Event }) => {
           }}
         />
       ))}
+      {event.reclaimManaged === true && (
+        <ActionPanel.Submenu title="Reschedule Event" icon={Icon.ArrowClockwise}>
+          <Action
+            title="15min"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_15M");
+            }}
+          />
+          <Action
+            title="30min"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_30M");
+            }}
+          />
+          <Action
+            title="1hr"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_1H");
+            }}
+          />
+          <Action
+            title="2hrs"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_2H");
+            }}
+          />
+          <Action
+            title="4hrs"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "FROM_NOW_4H");
+            }}
+          />
+          <Action
+            title="1 Day"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "TOMORROW");
+            }}
+          />
+          <Action
+            title="2 Days"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "IN_TWO_DAYS");
+            }}
+          />
+          <Action
+            title="1 Week"
+            onAction={() => {
+              rescheduleTask(String(event.calendarId), event.eventId, "NEXT_WEEK");
+            }}
+          />
+        </ActionPanel.Submenu>
+      )}
     </ActionPanel>
   );
 };
@@ -79,15 +149,18 @@ const ListSection = ({ events, sectionTitle }: { sectionTitle: string; events: E
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [eventsData, setEventsData] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const now = new Date();
 
-  const { fetchEvents } = useEvent();
+  const { useFetchEvents } = useEvent();
+
+  const { data: eventsData, isLoading } = useFetchEvents({
+    start: startOfDay(now),
+    end: addDays(now, 7),
+  });
 
   const events = useMemo<EventSection[]>(() => {
     if (!eventsData) return [];
 
-    const now = new Date();
     const today = startOfDay(now);
     const tomorrow = startOfDay(addDays(now, 1));
 
@@ -146,25 +219,6 @@ export default function Command() {
 
     return events.filter((event) => event.events.length > 0);
   }, [eventsData]);
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        setIsLoading(true);
-        const events = await fetchEvents({
-          start: startOfDay(new Date()),
-          end: addDays(new Date(), 7),
-        });
-        setEventsData(events || []);
-      } catch (error) {
-        console.error("Error loading events", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void loadEvents();
-  }, []);
 
   return (
     <List

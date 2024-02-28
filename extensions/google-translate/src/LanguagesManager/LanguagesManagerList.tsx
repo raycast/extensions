@@ -5,6 +5,7 @@ import { LanguageCodeSet } from "../types";
 import { isSameLanguageSet, usePreferencesLanguageSet, useSelectedLanguagesSet } from "../hooks";
 import { AddLanguageForm } from "./AddLanguageForm";
 import { formatLanguageSet, getLanguageSetObjects } from "../utils";
+import { getLanguageFlag } from "../languages";
 
 export function LanguagesManagerItem({
   languageSet,
@@ -21,7 +22,7 @@ export function LanguagesManagerItem({
 
   return (
     <List.Item
-      subtitle={`${langFrom.flag ?? "🏳"} -> ${langTo.flag ?? "🏳"}`}
+      subtitle={`${getLanguageFlag(langFrom)} -> ${getLanguageFlag(langTo)}`}
       title={`${langFrom.name} -> ${langTo.name}`}
       keywords={[langFrom.name, langFrom.code, langTo.name, langTo.code]}
       accessories={selected ? [{ icon: { tintColor: Color.Green, source: Icon.Checkmark } }] : undefined}

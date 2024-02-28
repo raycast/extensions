@@ -72,10 +72,17 @@
       "mode": "view"
     },
     {
-      "name": "project_search",
-      "title": "Search Project",
+      "name": "group_search",
+      "title": "Search Groups",
       "subtitle": "GitLab",
-      "description": "Search GitLab Project",
+      "description": "Search GitLab Groups",
+      "mode": "view"
+    },
+    {
+      "name": "project_search",
+      "title": "Search Projects",
+      "subtitle": "GitLab",
+      "description": "Search GitLab Projects",
       "mode": "view"
     },
     {
@@ -353,30 +360,35 @@
     "metakirby5",
     "macbookandrew",
     "shaoye",
-    "charlej"
+    "charlej",
+    "emlez",
+    "hendrikbunnick"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.60.0",
     "@raycast/utils": "^1.0.6",
     "apollo-link-context": "^1.0.20",
+    "cross-fetch": "^4.0.0",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "2.5",
     "open": "^8.2.1",
     "url-join": "^4.0.1",
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.3",
+    "@types/node": "^18.8.4",
     "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
+    "@types/react": "^18.2.27",
     "@types/url-join": "^4.0.1",
     "eslint": "^7.31.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

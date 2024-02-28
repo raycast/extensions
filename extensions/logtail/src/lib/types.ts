@@ -9,7 +9,7 @@ export type Log = {
   "fly.region": string;
   host: string;
   "log.level": string;
-  message: string;
+  message: string | null;
 } & { [key: string]: string };
 
 export type LogResponse = {

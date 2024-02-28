@@ -262,6 +262,11 @@
     "name": "Luxembourgish",
     "flag": "🇱🇺"
   },
+  "la": {
+    "code": "la",
+    "name": "Latin",
+    "flag": "🏛"
+  },
   "mk": {
     "code": "mk",
     "name": "Macedonian",

@@ -1,19 +1,31 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  confirmAlert,
+  Icon,
+  List,
+  LocalStorage,
+  showHUD,
+  useNavigation,
+} from "@raycast/api";
 import React, { useState } from "react";
-import { getWifiList, getWifiStatus } from "./hooks/hooks";
+import { useWifiList, useWifiStatus } from "./hooks/hooks";
 import { EmptyView } from "./components/empty-view";
 import EnterPassword from "./enter-password";
 import { WifiPasswordCache } from "./types/types";
 import { LocalStorageKey } from "./utils/constants";
 import { PrimaryActions } from "./components/primary-actions";
-import { getSignalIcon } from "./utils/common-utils";
+import { getSignalIcon, getSignalIconColor } from "./utils/common-utils";
 import { RefreshWifi } from "./components/refresh-wifi";
 
 export default function ScanWifi() {
-  const { push } = useNavigation();
   const [refresh, setRefresh] = useState<number>(0);
-  const { wifiPasswordCaches, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = getWifiList(refresh);
-  const { wifiStatus } = getWifiStatus();
+  const { wifiPasswordCaches, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = useWifiList(refresh);
+  const { wifiStatus } = useWifiStatus();
+  const { push } = useNavigation();
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>
@@ -32,7 +44,7 @@ export default function ScanWifi() {
               {
                 icon: {
                   source: getSignalIcon(curWifi[0].quality),
-                  tintColor: curWifi[0].quality < 40 ? Color.Red : curWifi[0].quality < 70 ? Color.Orange : Color.Green,
+                  tintColor: getSignalIconColor(curWifi[0].quality),
                 },
                 tooltip: curWifi[0].quality + "%",
               },
@@ -99,7 +111,7 @@ export default function ScanWifi() {
                               });
                               LocalStorage.setItem(
                                 LocalStorageKey.WIFI_PASSWORD,
-                                JSON.stringify(newWifiWithPasswordLis)
+                                JSON.stringify(newWifiWithPasswordLis),
                               );
                               setRefresh(Date.now());
                             },
@@ -152,12 +164,19 @@ export default function ScanWifi() {
                             wifiPasswordCaches={wifiPasswordCaches}
                             wifiNetWork={value}
                             setRefresh={setRefresh}
-                          />
+                          />,
                         );
                       }
                     }}
                   />
-                  <Action.CopyToClipboard title={"Copy Wi-FI"} content={value.ssid} />
+                  <Action
+                    icon={Icon.Clipboard}
+                    title={"Copy Wi-FI"}
+                    onAction={async () => {
+                      await Clipboard.copy(value.ssid);
+                      await showHUD(`🛜 Wi-FI Copied`);
+                    }}
+                  />
                   <RefreshWifi setRefresh={setRefresh} />
                 </ActionPanel>
               }

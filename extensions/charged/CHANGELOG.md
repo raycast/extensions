@@ -1,5 +1,9 @@
 # Charged Changelog
 
+## [Starknet Transaction Hash Update] - 2023-09-04
+
+Added support to calculate transaction hashes
+
 ## [Starknet Stats Command Update] - 2023-06-24
 
 Added support for MCPS (main calls per second) and SPS (steps per second)

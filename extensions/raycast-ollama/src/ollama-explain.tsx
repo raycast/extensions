@@ -1,11 +1,8 @@
-import ResultView from "./api/main";
-import { GetPrompt } from "./api/prompt";
-import { getPreferenceValues } from "@raycast/api";
-
-const preferences = getPreferenceValues();
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const prompt = GetPrompt(preferences.ollamaExplainSimpleTerms, "ollama-explain", "");
-
-  return ResultView(preferences.ollamaExplainSimpleTerms, prompt.prompt, prompt.tagEnd, true);
+  const c = "explain";
+  const p =
+    "Act as a writer. Explain the following text in simple and concise terms.\n\nOutput only with the modified text.\n";
+  return <AnswerView command={c} prompt={p} />;
 }

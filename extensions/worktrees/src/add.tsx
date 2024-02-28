@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useCachedPromise, useCachedState, useForm, usePromise } from "@raycast/utils";
 import { addWorktree, findRepos, formatPath, getBranches, getRootDir } from "./helpers";
@@ -24,6 +24,7 @@ export default function Command() {
   const rootDir = getRootDir();
   const { data: repos, isLoading: isLoadingRepos } = useCachedPromise((searchDir) => findRepos(searchDir), [rootDir]);
   const [repoConfig, setRepoConfig] = useCachedState<Record<string, RepoConfig>>("repoConfig", {});
+  const submitting = useRef(false);
 
   const {
     values: { repo, prefix, branch, startBranch },
@@ -43,13 +44,26 @@ export default function Command() {
       startBranch: FormValidation.Required,
     },
     async onSubmit({ repo, prefix, branch, startBranch }) {
+      if (submitting.current) {
+        return;
+      }
+
+      submitting.current = true;
+
       setRepoConfig({ ...repoConfig, [repo]: { prefix, startBranch } });
 
       const path = getPath(repo, prefix, branch);
 
       try {
+        await showToast({
+          title: "Adding worktree...",
+          style: Toast.Style.Animated,
+        });
         await addWorktree(repo, path, branch, startBranch);
-        await open(path, getPreferenceValues<ExtensionPreferences>().editorApp.bundleId);
+        const editor = getPreferenceValues<ExtensionPreferences>().editorApp;
+        if (editor) {
+          await open(path, editor.bundleId);
+        }
         await popToRoot();
       } catch (err) {
         await showToast({
@@ -57,6 +71,8 @@ export default function Command() {
           message: err instanceof Error ? err.message : undefined,
           style: Toast.Style.Failure,
         });
+      } finally {
+        submitting.current = false;
       }
     },
   });
@@ -112,14 +128,12 @@ export default function Command() {
         <Form.Description
           title="Summary"
           text={`A new worktree will be added to ${formatPath(repo)} at ${formatPath(
-            getPath(repo, prefix, branch)
+            getPath(repo, prefix, branch),
           )} with the branch ${branch} off of ${startBranch}`}
         />
       )}
       <Form.Dropdown title="Repo" isLoading={isLoadingRepos} storeValue {...itemProps.repo}>
-        {repos?.map((repo) => (
-          <Form.Dropdown.Item key={repo} value={repo} title={formatPath(repo)} />
-        ))}
+        {repos?.map((repo) => <Form.Dropdown.Item key={repo} value={repo} title={formatPath(repo)} />)}
       </Form.Dropdown>
       <Form.TextField
         title="Directory Prefix"

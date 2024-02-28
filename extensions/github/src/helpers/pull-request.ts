@@ -69,7 +69,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
         avatarUrl = reviewer.teamAvatarURL;
       }
 
-      return { id: reviewer.id, ...getGitHubUser({ name, login, avatarUrl }) };
+      return { id: "id" in reviewer ? reviewer.id : "", ...getGitHubUser({ name, login, avatarUrl }) };
     }
   });
 

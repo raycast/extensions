@@ -10,12 +10,8 @@ import {
 
 const CLOUDFLARE_BASE = 'https://dash.cloudflare.com';
 
-interface Preferences {
-  token: string;
-}
-
 function getToken() {
-  const { token } = getPreferenceValues<Preferences>();
+  const { token } = getPreferenceValues<ExtensionPreferences>();
   return token;
 }
 
@@ -31,7 +27,7 @@ function getSiteStatusIcon(status: ZoneStatus): Icon {
     case 'deleted':
     case 'deactivated':
     case 'read only':
-      return Icon.XmarkCircle;
+      return Icon.XMarkCircle;
   }
 }
 
@@ -42,7 +38,7 @@ function getDeploymentStatusIcon(status: DeploymentStatus): Icon {
     case 'success':
       return Icon.Checkmark;
     case 'failure':
-      return Icon.XmarkCircle;
+      return Icon.XMarkCircle;
   }
 }
 
@@ -62,7 +58,7 @@ function getMemberStatusIcon(status: MemberStatus): Icon {
     case 'accepted':
       return Icon.Checkmark;
     case 'rejected':
-      return Icon.XmarkCircle;
+      return Icon.XMarkCircle;
   }
 }
 

@@ -47,6 +47,7 @@ const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: 
 const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
 
 const copyURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
+const copyPDFURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "p" };
 const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
 const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
@@ -142,6 +143,10 @@ function getItemIcon(item: RefData): string {
       return "conferencePaper.png";
     case "document":
       return "document.png";
+    case "preprint":
+      return "preprint.png";
+    case "patent":
+      return "patent.png";
     default:
       return "default.png";
   }
@@ -252,6 +257,11 @@ export const View = ({
                       {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
 
                       <ActionPanel.Section>
+                        {item.attachment && item.attachment.key && item.attachment.key !== `` && (
+                          <PDFURLCopyToClipboardAction
+                            itemURL={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                          />
+                        )}
                         {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
                         {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
                         {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
@@ -277,6 +287,18 @@ function URLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
       title="Copy Original Link"
       shortcut={copyURLShortcut}
       message="Copied original URL to clipboard"
+    />
+  );
+}
+
+function PDFURLCopyToClipboardAction({ itemURL }: { itemURL: string }) {
+  return (
+    <CopyToClipboard
+      content={itemURL}
+      icon={Icon.Clipboard}
+      title="Copy PDF Link"
+      shortcut={copyPDFURLShortcut}
+      message="Copied PDF URL to clipboard"
     />
   );
 }

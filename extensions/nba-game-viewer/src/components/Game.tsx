@@ -10,7 +10,7 @@ const GameComponent = ({ game }: PropTypes) => {
   return (
     <List.Item
       key={game.id}
-      title={game.shortName}
+      title={game.name}
       icon={game.competitors[0].logo}
       accessories={generateGameAccessories(game)}
       actions={

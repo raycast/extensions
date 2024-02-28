@@ -1,14 +1,14 @@
 import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { addDays, differenceInHours, endOfDay, format, formatDistance, isWithinInterval, startOfDay } from "date-fns";
+import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
 import { useMemo } from "react";
 import { useEvent } from "./hooks/useEvent";
-import { ApiResponseEvents, ApiResponseMoment } from "./hooks/useEvent.types";
+import { useMoment } from "./hooks/useMoment";
+import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
-import { eventColors, truncateEventSize } from "./utils/events";
-import { parseEmojiField } from "./utils/string";
 import { miniDuration } from "./utils/dates";
+import { eventColors, getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
+import { parseEmojiField } from "./utils/string";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -54,33 +54,49 @@ const EventsSection = ({ events, sectionTitle }: { events: Event[]; sectionTitle
 };
 
 export default function Command() {
-  const { apiToken, apiUrl, upcomingEventsCount } = getPreferenceValues<NativePreferences>();
+  const { upcomingEventsCount } = getPreferenceValues<NativePreferences>();
+
+  const { currentUser } = useUser();
 
   const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
 
-  const fetchHeaders = {
-    Authorization: `Bearer ${apiToken}`,
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
+  const now = new Date();
 
-  const range = {
-    start: format(startOfDay(new Date()), "yyyy-MM-dd"),
-    end: format(addDays(new Date(), 2), "yyyy-MM-dd"),
-  };
+  const { useFetchEvents } = useEvent();
 
-  const { data: eventData, isLoading: isLoadingEvents } = useFetch<ApiResponseEvents>(
-    `${apiUrl}/events?sourceDetails=true&start=${range.start}&end=${range.end}`,
-    {
-      headers: fetchHeaders,
-      keepPreviousData: true,
-    }
-  );
-
-  const { data: eventMoment, isLoading: isLoadingMoment } = useFetch<ApiResponseMoment>(`${apiUrl}/moment/next`, {
-    headers: fetchHeaders,
-    keepPreviousData: true,
+  const { data: eventData, isLoading: isLoadingEvents } = useFetchEvents({
+    start: startOfDay(now),
+    end: addDays(now, 2),
   });
+
+  const { useFetchNext } = useMoment();
+
+  const { data: eventMomentData, isLoading: isLoadingMoment } = useFetchNext();
+
+  // if the events returned my moment/next are synced events then return the original event from the events call if it exists
+  const eventMoment = useMemo(() => {
+    if (!eventMomentData) return eventMomentData;
+
+    const findEvent = (event: Event | undefined | null) => {
+      if (!event || !eventData || eventData.length === 0) return event;
+
+      const originalEventID = getOriginalEventIDFromSyncEvent(event);
+      if (!originalEventID) return event;
+
+      return eventData.find((e) => e.eventId === originalEventID) ?? event;
+    };
+
+    const { event, nextEvent } = eventMomentData;
+
+    return {
+      event: findEvent(event),
+      nextEvent: findEvent(nextEvent),
+    };
+  }, [eventMomentData, eventData]);
+
+  const showDeclinedEvents = useMemo(() => {
+    return !!currentUser?.settings.showDeclinedEvents;
+  }, [currentUser]);
 
   const events = useMemo<EventSection[]>(() => {
     if (!eventData) return [];
@@ -93,6 +109,9 @@ export default function Command() {
         section: "NOW",
         sectionTitle: "Now",
         events: eventData
+          .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
           .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
@@ -110,6 +129,9 @@ export default function Command() {
         sectionTitle: "Upcoming events",
         events: eventData
           .filter((event) => {
+            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
+          })
+          .filter((event) => {
             return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
           })
           .filter((event) => {
@@ -124,7 +146,7 @@ export default function Command() {
     ];
 
     return events.filter((event) => event.events.length > 0);
-  }, [eventData]);
+  }, [eventData, showDeclinedEvents]);
 
   const handleOpenReclaim = () => {
     open("https://app.reclaim.ai");

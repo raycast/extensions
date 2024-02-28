@@ -63,7 +63,7 @@ const iconMap: { [key: string]: Icon } = {
 async function fetchPipelines(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
   if (!isReadyToFetch()) return [];
   const { nextToken, pipelines } = await new CodePipelineClient({}).send(
-    new ListPipelinesCommand({ nextToken: token })
+    new ListPipelinesCommand({ nextToken: token }),
   );
   const combinedPipelines = [...(accPipelines || []), ...(pipelines || [])];
 
@@ -80,7 +80,7 @@ async function fetchExecutionState(pipelineName?: string) {
   }
 
   const { pipelineExecutionSummaries } = await new CodePipelineClient({}).send(
-    new ListPipelineExecutionsCommand({ pipelineName })
+    new ListPipelineExecutionsCommand({ pipelineName }),
   );
   return pipelineExecutionSummaries?.[0];
 }

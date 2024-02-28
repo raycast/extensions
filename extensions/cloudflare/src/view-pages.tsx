@@ -53,7 +53,7 @@ function Command() {
           const account = accounts.find((account) => account.id === accountId);
           const name = account?.name || '';
           return (
-            <List.Section title={name}>
+            <List.Section title={name} key={accountId}>
               {accountPages.map((page) => (
                 <List.Item
                   key={page.name}
@@ -63,7 +63,7 @@ function Command() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        icon={Icon.TextDocument}
+                        icon={Icon.BlankDocument}
                         title="Show Details"
                         target={
                           <PageView accountId={accountId} name={page.name} />
@@ -93,13 +93,15 @@ function Command() {
                       <Action.OpenInBrowser
                         title="Open Page"
                         url={toUrl(page.subdomain)}
-                        shortcut={{ modifiers: ['cmd'], key: 'p' }}
+                        shortcut={{ modifiers: ['cmd'], key: 'o' }}
                       />
-                      <Action.OpenInBrowser
-                        title="Open Repo"
-                        url={getRepoUrl(page.source)}
-                        shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                      />
+                      {page.source && (
+                        <Action.OpenInBrowser
+                          title="Open Repo"
+                          url={getRepoUrl(page.source)}
+                          shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                        />
+                      )}
                       <Action.OpenInBrowser
                         title="Open on Cloudflare"
                         url={getPageUrl(accountId, page.name)}
@@ -160,10 +162,14 @@ function PageView(props: PageProps) {
   ## Status
 
   ${page.status}
-
+${
+  page.source
+    ? `
   ## Autopublish enabled
 
-  ${page.source.config.autopublishEnabled}
+  ${page.source.config.autopublishEnabled}`
+    : ''
+}
   `;
 
   return (
@@ -191,11 +197,13 @@ function PageView(props: PageProps) {
             url={toUrl(page.subdomain)}
             shortcut={{ modifiers: ['cmd'], key: 'p' }}
           />
-          <Action.OpenInBrowser
-            title="Open Repo"
-            url={getRepoUrl(page.source)}
-            shortcut={{ modifiers: ['cmd'], key: 'r' }}
-          />
+          {page.source && (
+            <Action.OpenInBrowser
+              title="Open Repo"
+              url={getRepoUrl(page.source)}
+              shortcut={{ modifiers: ['cmd'], key: 'r' }}
+            />
+          )}
           <Action.OpenInBrowser
             title="Open on Cloudflare"
             url={getPageUrl(accountId, page.name)}
@@ -243,7 +251,7 @@ function DeploymentListView(props: DeploymentListProps) {
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 title="Show Details"
                 target={
                   <DeploymentView

@@ -12,42 +12,18 @@ import { execFileSync } from "child_process";
 
 import { CLI_PATH, titleCaseWord } from "../utils";
 
-async function copyPassword(password: string): Promise<boolean> {
-  const applescript = `
-use AppleScript version "2.4"
-use framework "Foundation"
-use framework "AppKit"
-use scripting additions
-property NSPasteboardTypeString : a reference to current application's NSPasteboardTypeString
-on run argv
-  set textToCopy to item 1 of argv
-  set cb to current application's NSPasteboard's generalPasteboard() -- get pasteboard
-  cb's clearContents()
-  cb's setString:textToCopy forType:"org.nspasteboard.ConcealedType" -- http://nspasteboard.org/
-  cb's setString:textToCopy forType:"com.agilebits.onepassword" -- 1Password
-  cb's setString:textToCopy forType:NSPasteboardTypeString
-end run
-`;
-
-  try {
-    execFileSync("/usr/bin/osascript", ["-e", applescript, password]);
-    return true;
-  } catch (error) {
-    await Clipboard.copy(password);
-    return false;
-  }
-}
-
 export function CopyToClipboard({
   id,
   vault_id,
   shortcut,
   field = "password",
+  attribute,
 }: {
   id: string;
   field?: string;
   shortcut: Keyboard.Shortcut;
   vault_id: string;
+  attribute?: string;
 }) {
   return (
     <Action
@@ -60,8 +36,10 @@ export function CopyToClipboard({
           title: `Copying ${field}...`,
         });
         try {
-          const stdout = execFileSync(CLI_PATH!, ["read", `op://${vault_id}/${id}/${field}`]);
-          await copyPassword(stdout.toString().trim());
+          const attributeQueryParam = attribute ? `?attribute=${attribute}` : "";
+          const uri = `op://${vault_id}/${id}/${field}${attributeQueryParam}`;
+          const stdout = execFileSync(CLI_PATH!, ["read", uri]);
+          await Clipboard.copy(stdout.toString().trim(), { concealed: true });
 
           toast.style = Toast.Style.Success;
           toast.title = "Copied to clipboard";
@@ -79,7 +57,7 @@ export function CopyToClipboard({
             };
           }
         } finally {
-          const preferences = getPreferenceValues();
+          const preferences = getPreferenceValues<Preferences>();
           if (preferences.closeWindowAfterCopying) {
             await closeMainWindow();
           }

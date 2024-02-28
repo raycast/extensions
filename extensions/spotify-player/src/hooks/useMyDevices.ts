@@ -8,9 +8,9 @@ type UseMyDevicesProps = {
 };
 
 export function useMyDevices({ options }: UseMyDevicesProps = {}) {
-  const { data, error, isLoading } = useCachedPromise(() => getMyDevices(), [], {
+  const { data, error, isLoading, revalidate } = useCachedPromise(() => getMyDevices(), [], {
     execute: options?.execute !== false,
   });
 
-  return { myDevicesData: data, myDevicesError: error, myDevicesIsLoading: isLoading };
+  return { myDevicesData: data, myDevicesError: error, myDevicesIsLoading: isLoading, myDevicesRevalidate: revalidate };
 }

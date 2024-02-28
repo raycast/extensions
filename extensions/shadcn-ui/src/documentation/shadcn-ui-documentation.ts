@@ -3,7 +3,7 @@ Documentation pulled manually from https://github.com/shadcn/ui/tree/main/apps/w
 For now we upload this file manually and update the date here
  */
 
-const lastUpdated = "2023-07-24T15:44:18.731Z";
+const lastUpdated = "2024-01-15T12:03:16.024Z";
 
 const documentationBase = "https://ui.shadcn.com/docs";
 const documentationInstallation = `${documentationBase}/installation`;
@@ -21,6 +21,11 @@ export default [
         doc: "installation",
         name: "Installation",
         path: `${documentationBase}/installation`,
+      },
+      {
+        doc: "components.json",
+        name: "components.json",
+        path: `${documentationBase}/components-json`,
       },
       {
         doc: "theming",
@@ -88,9 +93,39 @@ export default [
         path: `${documentationInstallation}/astro`,
       },
       {
+        doc: "laravel",
+        name: "Laravel",
+        path: `${documentationInstallation}/laravel`,
+      },
+      {
         doc: "manual",
         name: "Manual",
         path: `${documentationInstallation}/manual`,
+      },
+    ],
+  },
+  {
+    name: "Dark Mode",
+    pages: [
+      {
+        doc: "next",
+        name: "Next.js",
+        path: `${documentationBase}/dark-mode/next`,
+      },
+      {
+        doc: "vite",
+        name: "Vite",
+        path: `${documentationBase}/dark-mode/vite`,
+      },
+      {
+        doc: "astro",
+        name: "Astro",
+        path: `${documentationBase}/dark-mode/astro`,
+      },
+      {
+        doc: "remix",
+        name: "Remix",
+        path: `${documentationBase}/dark-mode/remix`,
       },
     ],
   },

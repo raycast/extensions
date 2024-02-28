@@ -30,10 +30,10 @@ const MarkAllIncompleteAction = () => {
   };
   return (
     <Action
-      title="Mark All Incomplete"
+      icon={{ source: Icon.RotateAntiClockwise, tintColor: Color.Magenta }}
       onAction={handleMarkAllIncomplete}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
-      icon={{ source: Icon.RotateAntiClockwise, tintColor: Color.Magenta }}
+      title="Mark All Incomplete"
     />
   );
 };

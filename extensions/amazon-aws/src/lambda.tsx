@@ -59,7 +59,7 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
 
 async function fetchFunctions(
   nextMarker?: string,
-  functions?: FunctionConfiguration[]
+  functions?: FunctionConfiguration[],
 ): Promise<FunctionConfiguration[]> {
   if (!isReadyToFetch()) return [];
   const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));

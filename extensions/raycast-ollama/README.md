@@ -1,28 +1,35 @@
-# Raycast Ollama
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" height="128px" srcset="assets/icon@dark.png">
+    <img alt="logo" height="128px" src="assets/icon.png">
+  </picture>
+  <h1 align="center">Raycast Ollama</h1>
+</div>
+
 Use [Ollama](https://ollama.ai) for local llama inference on Raycast.
 
 ## Requirements
 
-1. Ollama installed and running.
-2. At least orca 3b model installed (is the default one).
-```bash
-ollama pull orca
-```
+[Ollama](https://ollama.ai) installed and running on your mac. At least one model need to be installed throw Ollama cli tools or with 'Manage Models' Command. You can find all available model [here](https://ollama.ai/library).
 
-## Use a different model
+## How to Use
 
-This plugin allows you to select a different model for each command. Keep in mind that you need to have the corresponding model installed on your machine.
+### Command: Chat With Ollama
 
-Install orca 3b
-```bash
-ollama pull orca
-```
-Install llama2 7b
-```bash
-ollama pull llama2
-```
+Chat with your preferred model from Raycast, with the following features:
 
-Install llama2 13b
-```bash
-ollama pull llama2
-```
+- Save conversation with `CMD+S` keyboard shortcut. You can access your saved conversation with `CMD+P` keyboard shortcut.
+- Change model with `CMD+M` keyboard shortcuts. For embedding is recommended to use a lower parameters model for better performance.
+- Copy your Question, Answer or even the entire Chat to the clipboard.
+- Chose how many messages use as memory with extention setting "Chat Memory Messages". By default it use the last 20 messages.
+
+#### Tags
+
+With tags you can add more data on the prompt. You can use one or more of the following tags on the prompt:
+
+- `/image`: Add the image on the clipboard or selected on the finder to the prompt. At least Ollama v0.1.15 and one multimodal model installed are required. Only PNG or JPG image are supported.
+- `/file`: Add information of one or more files on the prompt as knowledge. Select the files to use with `CMD+F` shortcuts (text based files and PDF are supported). By default it use 'Stuff' Chain, you can change Chain type from 'Document Loader' submenu. This feature is currently experimental.
+
+### Command: Create Custom Commands
+
+With '***Create Custom Command***' you can create your own custom Command using whatever model you want.

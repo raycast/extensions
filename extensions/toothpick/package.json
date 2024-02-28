@@ -5,7 +5,9 @@
   "description": "Manage Bluetooth connections in Raycast.",
   "author": "VladCuciureanu",
   "contributors": [
-    "briankosw"
+    "briankosw",
+    "oranja",
+    "sxn"
   ],
   "repository": {
     "type": "git",
@@ -17,25 +19,26 @@
     "publish": "ray publish",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\" --no-error-on-unmatched-pattern",
+    "format": "prettier --write \"./src/**/*.{ts,tsx,js,jsx}\" --no-error-on-unmatched-pattern",
     "svg:optimize": "find assets -type f -name '*.svg' -print0 | xargs -0 -n 1 -P 6 svgo"
   },
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.59.0",
     "fuzzball": "^2.1.2",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "svgo": "^3.0.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "eslint-config-prettier": "^9.0.0",
+    "react-devtools": "^4.28.0",
+    "svgo": "^3.0.2"
   },
   "commands": [
     {
@@ -97,8 +100,29 @@
       "disabledByDefault": true
     },
     {
+      "name": "disconnect-favorite-device-1",
+      "title": "Disconnect Favorite Device #1",
+      "description": "Shortcut for disconnecting from favorite device #1.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "disconnect-favorite-device-2",
+      "title": "Disconnect Favorite Device #2",
+      "description": "Shortcut for disconnecting from favorite device #2.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "disconnect-favorite-device-3",
+      "title": "Disconnect Favorite Device #3",
+      "description": "Shortcut for disconnecting from favorite device #3.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "view-mapped-devices",
-      "title": "[Dev] View mapped Devices",
+      "title": "View Mapped Devices",
       "subtitle": "Toothpick",
       "description": "A list of all mapped devices. Used for development.",
       "mode": "view",
@@ -110,7 +134,7 @@
       "name": "fuzzyRatio",
       "type": "textfield",
       "required": false,
-      "title": "Fuzzy Ratio",
+      "title": "Device Name Fuzzy Ratio",
       "description": "Minimum difference ratio for matching a device name.",
       "default": "98"
     },
@@ -142,6 +166,31 @@
       "title": "Options",
       "label": "Close window after successful connection.",
       "description": "If checked, Raycast will close after successfully connecting to a device."
+    },
+    {
+      "name": "bluetoothBackend",
+      "type": "dropdown",
+      "required": false,
+      "title": "Bluetooth Backend",
+      "description": "What tool Toothpick will use for Bluetooth related actions.",
+      "default": "applescript",
+      "data": [
+        {
+          "title": "AppleScript",
+          "value": "applescript"
+        },
+        {
+          "title": "blueutil (Experimental)",
+          "value": "blueutil"
+        }
+      ]
+    },
+    {
+      "name": "blueutilDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "Override Blueutil Directory",
+      "description": "Set a custom 'blueutil' location for Toothpick to use."
     }
   ],
   "categories": [

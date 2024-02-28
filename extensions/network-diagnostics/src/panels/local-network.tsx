@@ -92,6 +92,11 @@ export default function LocalNetworkListItem({ networkInfo }: ListItemProps) {
                   content={localNetInfo.defaultRoute?.interfaceAddr}
                 />
                 <Action.CopyToClipboard title="Copy Router IP Address" content={localNetInfo.defaultRoute?.gateway} />
+                <Action.OpenInBrowser
+                  title="Open Router Interface"
+                  url={`http://${localNetInfo?.defaultRoute?.gateway}`}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
               </>
             )}
           </ActionPanel.Section>

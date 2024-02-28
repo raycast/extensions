@@ -5,13 +5,14 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:55:16
- * Last modified  : 2023-07-06 15:48:02
+ * Last modified  : 2023-07-18 18:48:32
  */
 
 import { showToast, Toast } from "@raycast/api";
 
 import optimize from "./operations/optimizeOperation";
-import { cleanup, getSelectedImages, showErrorToast } from "./utilities/utils";
+import { getSelectedImages } from "./utilities/utils";
+import runOperation from "./operations/runOperation";
 
 export default async function Command(props: { arguments: { optimizationFactor: string } }) {
   const { optimizationFactor } = props.arguments;
@@ -26,21 +27,11 @@ export default async function Command(props: { arguments: { optimizationFactor: 
   }
 
   const selectedImages = await getSelectedImages();
-  if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-    await showToast({ title: "No images selected", style: Toast.Style.Failure });
-    return;
-  }
-
-  const toast = await showToast({ title: "Optimization in progress...", style: Toast.Style.Animated });
-
-  const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-  try {
-    await optimize(selectedImages, optimizationValue);
-    toast.title = `Optimized ${selectedImages.length.toString()} ${pluralized}`;
-    toast.style = Toast.Style.Success;
-  } catch (error) {
-    await showErrorToast(`Failed to optimize ${selectedImages.length.toString()} ${pluralized}`, error as Error, toast);
-  } finally {
-    await cleanup();
-  }
+  await runOperation({
+    operation: () => optimize(selectedImages, optimizationValue),
+    selectedImages,
+    inProgressMessage: "Optimization in progress...",
+    successMessage: "Optimized",
+    failureMessage: "Failed to optimize",
+  });
 }

@@ -33,7 +33,7 @@ export const Users = () => {
           accessories={[
             {
               text: '2FA',
-              icon: user.twoFactorEnabled
+              icon: user.mfa
                 ? {
                     source: Icon.Checkmark,
                     tintColor: Color.Green,

@@ -8,7 +8,7 @@ export enum SpotifyMetadataType {
 }
 
 export enum SpotifyContentLinkType {
-  Youtube = "youtube",
+  YouTube = "youTube",
   AppleMusic = "appleMusic",
   Tidal = "tidal",
   SoundCloud = "soundCloud",
@@ -38,5 +38,6 @@ export interface CacheData {
 }
 
 export interface ApiError {
-  error: string;
+  code: string;
+  message: string;
 }

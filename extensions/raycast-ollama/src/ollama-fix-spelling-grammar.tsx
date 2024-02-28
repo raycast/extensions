@@ -1,11 +1,8 @@
-import ResultView from "./api/main";
-import { GetPrompt } from "./api/prompt";
-import { getPreferenceValues } from "@raycast/api";
-
-const preferences = getPreferenceValues();
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const prompt = GetPrompt(preferences.ollamaFixSpellingGrammar, "ollama-fix-spelling-grammar", "");
-
-  return ResultView(preferences.ollamaFixSpellingGrammar, prompt.prompt, prompt.tagEnd, true);
+  const c = "fix";
+  const p =
+    "Act as a writer. Fix the following text from spelling and grammar error.\n\nOutput only with the fixed text.\n";
+  return <AnswerView command={c} prompt={p} />;
 }

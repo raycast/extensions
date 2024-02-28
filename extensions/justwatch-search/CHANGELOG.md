@@ -1,5 +1,8 @@
 # JustWatch Search Changelog
 
+## [Fix API] - 2023-06-16
+- Migrate JustWatch API from REST to GraphQL since REST no longer works
+
 ## [New Additions] - 2023-06-16
 
 - Add "Rent" and "Buy" to listing for easy distinction

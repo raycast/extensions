@@ -6,6 +6,10 @@
   "categories": [
     "Applications"
   ],
+  "contributors": [
+    "EvanZhouDev",
+    "mil3na"
+  ],
   "icon": "extension-icon.png",
   "owner": "raycast",
   "access": "public",

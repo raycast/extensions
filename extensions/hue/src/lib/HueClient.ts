@@ -49,7 +49,7 @@ export default class HueClient {
     setGroupedLights?: React.Dispatch<React.SetStateAction<GroupedLight[]>>,
     setRooms?: React.Dispatch<React.SetStateAction<Room[]>>,
     setZones?: React.Dispatch<React.SetStateAction<Zone[]>>,
-    setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>
+    setScenes?: React.Dispatch<React.SetStateAction<Scene[]>>,
   ) {
     this.http2Session = http2Session;
     this.bridgeConfig = bridgeConfig;
@@ -88,7 +88,7 @@ export default class HueClient {
 
   public async updateLight(light: Light, properties: LightRequest): Promise<Partial<Light>[]> {
     const response = await this.lightsQueue.enqueueRequest(() =>
-      this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties)
+      this.makeRequest("PUT", `/clip/v2/resource/light/${light.id}`, properties),
     );
 
     return response.data.data;
@@ -96,7 +96,7 @@ export default class HueClient {
 
   public async updateGroupedLight(groupedLight: GroupedLight, properties: Partial<GroupedLight>): Promise<any> {
     const response = await this.groupedLightsQueue.enqueueRequest(() =>
-      this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties)
+      this.makeRequest("PUT", `/clip/v2/resource/grouped_light/${groupedLight.id}`, properties),
     );
 
     return response.data.data;

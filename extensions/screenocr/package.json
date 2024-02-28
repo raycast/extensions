@@ -72,6 +72,14 @@
         {
           "title": "🇺🇦 Ukrainian (Ukraine)",
           "value": "uk-UA"
+        },
+        {
+          "title": "🇹🇭 Thai (Thailand)",
+          "value": "th-TH"
+        },
+        {
+          "title": "🇻🇳 Vietnamese (Vietnam)",
+          "value": "vi-VT"
         }
       ]
     },
@@ -83,14 +91,14 @@
       "type": "dropdown",
       "data": [
         {
-        "title": "Accurate",
-        "value": "accurate"
-      },
+          "title": "Accurate",
+          "value": "accurate"
+        },
         {
-        "title": "Fast",
-        "value": "fast"
-      }
-    ]
+          "title": "Fast",
+          "value": "fast"
+        }
+      ]
     },
     {
       "required": true,
@@ -100,6 +108,23 @@
       "type": "checkbox",
       "label": "Use Language Correction",
       "default": true
+    },
+    {
+      "required": false,
+      "name": "ignoreLineBreaks",
+      "title": "Ignore Line Breaks",
+      "description": "Ignores Line Breaks",
+      "type": "checkbox",
+      "label": "Ignore Line Breaks",
+      "default": false
+    },
+    {
+      "required": false,
+      "name": "customWordsList",
+      "title": "Custom Words List",
+      "description": "You can improve text recognition by providing a list of words that are special to your text",
+      "type": "textfield",
+      "label": "Custom Words List"
     }
   ],
   "commands": [

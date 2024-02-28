@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-23 14:19
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-17 22:48
+ * @lastEditTime: 2023-11-21 22:18
  * @fileName: easydict.tsx
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -100,8 +100,6 @@ export default function (props: LaunchProps<{ arguments: EasydictArguments }>) {
     if (inputText === undefined) {
       setup();
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText]);
 
   /**

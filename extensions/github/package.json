@@ -14,7 +14,14 @@
     "pernielsentikaer",
     "loxygenk",
     "oilbeater",
-    "LunaticMuch"
+    "LunaticMuch",
+    "aeorge",
+    "daquinoaldo",
+    "ppy",
+    "lin",
+    "marcotf",
+    "qeude",
+    "nesl247"
   ],
   "categories": [
     "Developer Tools",
@@ -77,6 +84,24 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "application",
+          "type": "appPicker",
+          "required": false,
+          "title": "IDE Application",
+          "default": "/Applications/Visual Studio Code.app",
+          "placeholder": "/Applications/Visual Studio Code.app",
+          "description": "Will be used to open the cloned repository."
+        },
+        {
+          "name": "baseClonePath",
+          "type": "directory",
+          "required": false,
+          "title": "Clone Path",
+          "default": "~/GitHub",
+          "placeholder": "~/GitHub",
+          "description": "Path in which the repositories will be cloned."
+        },
+        {
           "name": "includeForks",
           "type": "checkbox",
           "required": false,
@@ -102,6 +127,12 @@
           "description": "Display owner name alongside repository name in search results"
         }
       ]
+    },
+    {
+      "name": "my-latest-repositories",
+      "title": "My Latest Repositories",
+      "description": "List your repositories by latest updated",
+      "mode": "view"
     },
     {
       "name": "workflow-runs",
@@ -131,6 +162,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "search-discussions",
+      "title": "Search Discussions",
+      "description": "Search recent Discussions globally in all repositories",
+      "mode": "view"
     },
     {
       "name": "my-discussions",
@@ -172,21 +209,119 @@
       "interval": "15m",
       "preferences": [
         {
+          "name": "includeOpen",
+          "type": "checkbox",
+          "required": false,
+          "title": "Categories To Display",
+          "default": true,
+          "label": "Opened",
+          "description": "Includes pull request you opened in the menu list."
+        },
+        {
+          "name": "includeAssigned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "description": "Includes pull request you were assigned to in the menu list."
+        },
+        {
+          "name": "includeMentioned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes pull request you were mentioned in the menu list."
+        },
+        {
+          "name": "includeReviewRequests",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Review Requests",
+          "description": "Includes pull request you were requested to review in the menu list."
+        },
+        {
+          "name": "includeReviewed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Reviewed",
+          "description": "Includes pull request you reviewed in the menu list."
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
           "name": "maxitems",
-          "description": "Maximum Pull Requests shown",
+          "description": "Maximum Pull Requests shown per category.",
           "type": "textfield",
           "required": false,
-          "title": "Max. Pull Requests",
-          "placeholder": "10"
+          "title": "Max. Pull Requests per category",
+          "placeholder": "5"
         },
         {
           "name": "showtext",
           "description": "Show Pull Requests Count",
           "type": "checkbox",
           "required": false,
-          "label": "Show Count",
-          "title": "Appearance",
+          "label": "Show",
+          "title": "Icon Count",
           "default": true
+        },
+        {
+          "name": "includeOpenCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Icon Count Categories",
+          "label": "Opened",
+          "description": "Includes pull request you opened in the icon counter."
+        },
+        {
+          "name": "includeAssignedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "description": "Includes pull request you were assigned to in the icon counter."
+        },
+        {
+          "name": "includeMentionedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes pull request you were mentioned in the icon counter."
+        },
+        {
+          "name": "includeReviewRequestsCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Review Requests",
+          "description": "Includes pull request you were requested to review in the icon counter."
+        },
+        {
+          "name": "includeReviewedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Reviewed",
+          "description": "Includes pull request you reviewed in the icon counter."
+        },
+        {
+          "name": "includeRecentlyClosedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull request you recently closed in the icon counter."
         }
       ]
     }
@@ -200,32 +335,50 @@
       "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
+    },
+    {
+      "name": "defaultSearchTerms",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Search Terms",
+      "description": "Default search to be populated when searching issues, pull requests and discussions.",
+      "default": "author:@me"
+    },
+    {
+      "name": "numberOfResults",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of search results",
+      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "placeholder": "50"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.0",
-    "@raycast/utils": "^1.9.0",
-    "date-fns": "^2.29.3",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.12.4",
+    "date-fns": "^2.30.0",
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
-    "node-fetch": "^3.3.1",
-    "octokit": "^2.0.14"
+    "node-fetch": "^3.3.2",
+    "octokit": "^2.1.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.2.2",
     "@graphql-codegen/typescript": "^3.0.2",
     "@graphql-codegen/typescript-graphql-request": "^4.5.9",
     "@graphql-codegen/typescript-operations": "^3.0.2",
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/lodash": "^4.14.184",
-    "@types/node": "^18.15.11",
-    "concurrently": "^8.0.1",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.37.0",
-    "eslint-plugin-import": "^2.27.5",
-    "graphql": "^16.6.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.0.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.14.201",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "concurrently": "^8.2.2",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.53.0",
+    "eslint-plugin-import": "^2.29.0",
+    "graphql": "^16.8.1",
+    "prettier": "^3.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

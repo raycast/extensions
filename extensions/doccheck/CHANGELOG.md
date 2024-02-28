@@ -1,5 +1,9 @@
 # DocCheck Changelog
 
+## [Version 2.1.1] - 2023-09-04
+- Fixed: removed the option to open an article with just the right arrow key (→) when there is a search query (so you move the cursor again with it)
+- Fixed: changed the shortcut for "Open Article in Browser" to ⇧ + ⏎ (because ⌘ + ⏎ is now reserved by Raycast)
+
 ## [Version 2.1] - 2023-07-21
 - NEW: Favourites - pin an article to the main screen, you will see a "★" in front of the navigation title at the bottom if the article is a favourite (shortcut to favourite and unfavourite: ⌘ + F; you can also unfavourite an article in Home)
 - NEW: option to force reload Home with ⌘ + R

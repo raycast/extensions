@@ -1,5 +1,17 @@
 # Amazon AWS Changelog
 
+## [Step Functions command] - 2024-02-18
+
+- Added new command to find and open Step Functions ([#10801](https://github.com/raycast/extensions/pull/10801))
+
+## [Make Vault Optional] - 2023-11-16
+
+- Make vault optional for people who have it installed but do not want to use it.
+
+## [Fix Broken Secrets Manager Link] - 2023-08-14
+
+- Fix broken region-routing for secrets manager links.
+
 ## [Fix Broken Authentication] - 2023-05-06
 
 - Fix regression from AWS Vault changes that affected all non-aws-vault users.

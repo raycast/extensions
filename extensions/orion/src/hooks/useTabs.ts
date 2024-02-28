@@ -3,8 +3,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { Tab } from "../types";
 import { executeJxa, getOrionAppIdentifier } from "../utils";
 
-const fetchLocalTabs = (): Promise<Tab[]> =>
-  executeJxa(`
+async function fetchLocalTabs(): Promise<Tab[]> {
+  const res = await executeJxa(`
     const orion = Application("${getOrionAppIdentifier()}");
     const tabs = [];
     orion.windows().forEach(window => {
@@ -21,8 +21,10 @@ const fetchLocalTabs = (): Promise<Tab[]> =>
         })
       }
     });
-    return tabs;
-`);
+    tabs
+  `);
+  return res ? (JSON.parse(res) as Tab[]) : [];
+}
 
 const useLocalTabs = () => useCachedPromise(fetchLocalTabs, [], { keepPreviousData: true });
 

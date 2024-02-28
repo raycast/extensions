@@ -6,8 +6,7 @@ export type HistoryEntry = {
 };
 
 export type Tab = {
-  windowId: number;
-  tabId: number;
+  id: string;
   url: string;
   title: string;
   location: TabLocation;
@@ -20,9 +19,19 @@ export type Space = {
   title?: string;
 };
 
+export type NewTabSearchConfigs = {
+  google: string;
+  duckduckgo: string;
+  bing: string;
+  yahoo: string;
+  ecosia: string;
+  kagi: string;
+};
+
 export type SearchConfig = {
   search: string;
   suggestions: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   suggestionParser: ((json: any, suggestions: Suggestion[]) => void) | null;
 };
 
@@ -32,6 +41,7 @@ export type SearchConfigs = {
   bing: SearchConfig;
   yahoo: SearchConfig;
   ecosia: SearchConfig;
+  kagi: SearchConfig;
 };
 
 export type Suggestion = {
@@ -43,3 +53,18 @@ export type Suggestion = {
 export type URLArguments = {
   url?: string;
 };
+
+/** Suggestion Parsers */
+interface GoogleClientData {
+  bpc: boolean;
+  tlw: boolean;
+}
+
+interface GoogleSuggestItem {
+  "google:clientdata": GoogleClientData;
+  "google:suggesttype": string[];
+  "google:verbatimrelevance": number;
+}
+
+export type GoogleSuggestionParser = [string, string[], string[], string[], GoogleSuggestItem];
+export type EcosiaSuggestionParser = [string, string[]];

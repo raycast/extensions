@@ -2,7 +2,7 @@
 
 Use the Clipboard APIs to work with content from your clipboard. You can write contents to the clipboard through [`Clipboard.copy`](clipboard.md#clipboard.copy) and clear it through [`Clipboard.clear`](clipboard.md#clipboard.clear). The [`Clipboard.paste`](clipboard.md#clipboard.paste) function inserts text at the current cursor position in your frontmost app.
 
-The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytoclipboard) can be used to copy content of a selected list item to the clipboard and the action [`Action.Paste`](user-interface/actions.md#action.paste) can be used to insert text at in your frontmost app.
+The action [`Action.CopyToClipboard`](user-interface/actions.md#action.copytoclipboard) can be used to copy content of a selected list item to the clipboard and the action [`Action.Paste`](user-interface/actions.md#action.paste) can be used to insert text in your frontmost app.
 
 ## API Reference
 
@@ -39,8 +39,8 @@ export default async function Command() {
     console.log(`Could not copy file '${file}'. Reason: ${error}`);
   }
 
-  // copy transient data
-  await Clipboard.copy("my-secret-password", { transient: true });
+  // copy confidential data
+  await Clipboard.copy("my-secret-password", { concealed: true });
 }
 ```
 
@@ -162,7 +162,7 @@ export default async function Command() {
 
 #### Return
 
-A promise that resolves when the clipboard content was read as plain text.
+A promise that resolves once the clipboard content is read as plain text.
 
 ## Types
 
@@ -201,6 +201,6 @@ type Content =
 
 Type of options passed to `Clipboard.copy`.
 
-```typescript
-type CopyOptions = { transient: boolean };
-```
+#### Properties
+
+<InterfaceTableFromJSDoc name="Clipboard.CopyOptions" />

@@ -78,7 +78,7 @@ function ClubProfile(props: TeamTeam) {
 export default function Club() {
   const seasons = useSeasons();
   const [selectedSeason, setSeason] = useState<string>(
-    seasons[0]?.id.toString()
+    seasons[0]?.id.toString(),
   );
   const clubs = useClubs(selectedSeason);
 

@@ -5,6 +5,7 @@ import {
   VAULT_NAMESPACE_CACHE_KEY,
   VAULT_SECRET_ENGINE_CACHE_KEY,
   VAULT_TOKEN_CACHE_KEY,
+  VaultAuthUrlResponse,
   VaultEntity,
   VaultListEntry,
   VaultLoginResponse,
@@ -17,6 +18,7 @@ import {
 } from "./interfaces";
 import got from "got";
 import { Cache, Form, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import * as oauthService from "./oauth.service";
 import { homedir } from "os";
 import fs from "fs";
 import hdate from "human-date";
@@ -63,11 +65,14 @@ export function getVaultNamespace(): string {
   return namespaceInCache;
 }
 
-export function setVaultNamespace(newNamespace: string) {
+export async function setVaultNamespace(newNamespace: string) {
   const newNamespaceInCache = newNamespace === "" ? NO_NAMESPACE : newNamespace;
   cache.set(VAULT_NAMESPACE_CACHE_KEY, newNamespaceInCache);
   // remove cached token as namespace changes
   cache.remove(VAULT_TOKEN_CACHE_KEY);
+  if (preferences.loginMethod === "oidc") {
+    await oauthService.clearTokens();
+  }
 }
 
 export function setSecretEngine(secretEngine: string) {
@@ -90,7 +95,10 @@ export function getFavoriteNamespaces(): string[] {
   return preferences.favoriteNamespaces ? preferences.favoriteNamespaces.split(" ") : [];
 }
 
-export function getUserToken(): string {
+export async function getUserToken(): Promise<string> {
+  if (preferences.loginMethod === "oidc") {
+    return await oauthService.authorize();
+  }
   const tokenCache = parseTokenFromCache();
   return tokenCache ? tokenCache.token : "";
 }
@@ -131,16 +139,7 @@ export async function getVaultClient(): Promise<NodeVault.client> {
         throw new ConfigurationError("Ldap method needs ldap and password to be set in preferences");
       }
       console.info("Login with ldap...");
-      const body: VaultLoginResponse = await got
-        .post(`${vaultUrl}/v1/auth/ldap/login/${preferences.ldap}`, {
-          json: { password: preferences.password },
-          headers: {
-            "Content-Type": "application/json",
-            "X-Vault-Namespace": getVaultNamespace(),
-          },
-          responseType: "json",
-        })
-        .json();
+      const body = await callLoginWithLdap();
       // set token cache
       tokenCache = {
         token: body.auth.client_token,
@@ -155,6 +154,8 @@ export async function getVaultClient(): Promise<NodeVault.client> {
         throw new ConfigurationError("Token method needs token to be set in preferences");
       }
       token = preferences.token;
+    } else if (preferences.loginMethod === "oidc") {
+      token = await oauthService.authorize();
     } else {
       throw new Error("Unknown login method");
     }
@@ -163,7 +164,7 @@ export async function getVaultClient(): Promise<NodeVault.client> {
   // return node vault client
   return NodeVault({
     apiVersion: "v1",
-    endpoint: vaultUrl,
+    endpoint: getVaultUrl(),
     namespace: getVaultNamespace(),
     token: token,
     noCustomHTTPVerbs: true,
@@ -410,6 +411,43 @@ export async function callGetSysMounts(): Promise<VaultMount[]> {
     }))
     .filter((mount) => mount.type === "kv")
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function callLoginWithLdap(): Promise<VaultLoginResponse> {
+  return got
+    .post(`${getVaultUrl()}/v1/auth/ldap/login/${preferences.ldap}`, {
+      json: { password: preferences.password },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Vault-Namespace": getVaultNamespace(),
+      },
+      responseType: "json",
+    })
+    .json();
+}
+
+export async function callOidcAuthUrl(redirectUri: string): Promise<VaultAuthUrlResponse> {
+  return got
+    .post(`${getVaultUrl()}/v1/auth/oidc/oidc/auth_url`, {
+      json: { redirect_uri: redirectUri },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Vault-Namespace": getVaultNamespace(),
+      },
+      responseType: "json",
+    })
+    .json();
+}
+
+export async function callLoginWthOidc(code: string, state: string): Promise<VaultLoginResponse> {
+  return got
+    .get(`${getVaultUrl()}/v1/auth/oidc/oidc/callback?code=${code}&state=${state}`, {
+      headers: {
+        "X-Vault-Namespace": getVaultNamespace(),
+      },
+      responseType: "json",
+    })
+    .json();
 }
 
 export async function listFavorites(): Promise<VaultListEntry[]> {

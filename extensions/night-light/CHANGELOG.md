@@ -1,5 +1,8 @@
 # Night Light Changelog
 
+## [Add Custom Path] - 2023-11-25
+- Support custom installation path
+
 ## [Add Extension Preferences] - 2023-06-01
 
 - Add preference setting to close Raycast window

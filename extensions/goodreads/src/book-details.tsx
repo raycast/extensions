@@ -1,3 +1,4 @@
+import React from "react";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { AsyncStatus, fetchBookDetails } from "./goodreads-api";
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
@@ -53,23 +54,73 @@ const getMarkdown = (data: BookDetails): string => {
 
   ${convertHtmlToCommonMark(data.description)}
 
-  ## Community Reviews
+  ${getCommunityReviewSummaryMarkdown(data)}
+
+  ##
+
+  ${getRatingsHistogramMarkdown(data)}  
+
+  ##
   ---
+  ##
 
   ${data.reviews?.map((review) => getReviewsMarkdown(review)).join("")}
-
   `;
 };
 
-const getReviewsMarkdown = (review: Review): string => {
+const getCommunityReviewSummaryMarkdown = (data: BookDetails): string => {
   return `
-### ${review.reviewerName}
-*${review.reviewDate}*
+  ## Community Reviews
 
-${review.review.substring(0, 400)}
+  ${data.ratingStatistics}
+  `;
+};
 
----
-`;
+const getRatingsHistogramMarkdown = (data: BookDetails): string => {
+  if (!data.ratingHistogram) {
+    return "";
+  }
+
+  return data.ratingHistogram.reduce((markdown, histogram, index) => {
+    const starRating = 5 - index;
+    markdown += `**${starRating} stars** &emsp; ${getHistogramBar(histogram.percentage)} &emsp; ${histogram.count} (${
+      histogram.percentage
+    }%) \n\n`;
+
+    return markdown;
+  }, "");
+};
+
+const HISTOGRAM_BAR_WIDTH = 18;
+
+const getHistogramBar = (count: number): string => {
+  const fillCount = Math.ceil((count * HISTOGRAM_BAR_WIDTH) / 100);
+  const emptyCount = HISTOGRAM_BAR_WIDTH - fillCount;
+
+  return "█".repeat(fillCount) + "—".repeat(emptyCount);
+};
+
+const getReviewsMarkdown = (review: Review): string => {
+  let reviewMarkdown = `### ${review.reviewerName} \n\n`;
+
+  if (review.rating) {
+    reviewMarkdown += "⭐️".repeat(review.rating);
+    reviewMarkdown += "&nbsp; &nbsp; · &nbsp; &nbsp;";
+    reviewMarkdown += review.reviewDate;
+  } else {
+    reviewMarkdown += review.reviewDate;
+  }
+
+  reviewMarkdown += `
+
+  ${review.reviewBody.substring(0, 400)} ${review.reviewUrl ? `[...more](${review.reviewUrl})` : ""}
+  
+  ##
+  ---
+  ##
+  `;
+
+  return reviewMarkdown;
 };
 
 interface MetadataProps {
@@ -88,7 +139,16 @@ function Metadata(props: MetadataProps) {
       <Detail.Metadata.Link title={STRINGS.authorLabel} text={book.author} target={book.authorDetailsPageUrl} />
       <Detail.Metadata.Label title={STRINGS.formatLabel} text={book.format} />
       <Detail.Metadata.Label title={STRINGS.publishedLabel} text={book.published} />
-      <Detail.Metadata.Label title={STRINGS.communityReviews} text={book.ratingStatistics} />
+
+      {book.communityReviewUrl ? (
+        <Detail.Metadata.Link
+          title={STRINGS.communityReviews}
+          text={book.ratingStatistics}
+          target={book.communityReviewUrl}
+        />
+      ) : (
+        <Detail.Metadata.Label title={STRINGS.communityReviews} text={book.ratingStatistics} />
+      )}
 
       <Detail.Metadata.Separator />
 

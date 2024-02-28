@@ -53,7 +53,7 @@ export async function authorize() {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);
@@ -68,7 +68,8 @@ export async function fetchTokens(
   });
 
   if (!response.ok) {
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   return (await response.json()) as OAuth.TokenResponse;
@@ -86,12 +87,14 @@ export async function refreshTokens(refreshToken: string): Promise<OAuth.TokenRe
   });
 
   if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const error: any = await response.json();
     if (error.error === "invalid_grant") {
       oauthClient.removeTokens();
       authorize();
     }
-    throw new Error(response.statusText);
+    const responseText = await response.text();
+    throw new Error(`Error while fetching tokens: ${response.status} (${response.statusText})\n${responseText}`);
   }
 
   const tokens = (await response.json()) as OAuth.TokenResponse;

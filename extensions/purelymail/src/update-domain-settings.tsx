@@ -1,19 +1,9 @@
-import {
-  openExtensionPreferences,
-  showToast,
-  Detail,
-  Toast,
-  ActionPanel,
-  Action,
-  Form,
-  LaunchProps,
-  popToRoot,
-  Icon,
-} from "@raycast/api";
+import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, popToRoot, Icon } from "@raycast/api";
 import { useForm, FormValidation, getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getDomains, updateDomainSettings } from "./utils/api";
 import { Domain, Response, UpdateDomainSettingsRequest } from "./utils/types";
+import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
   domains?: Domain[];
@@ -125,14 +115,7 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
   showError();
 
   return state.error ? (
-    <Detail
-      markdown={"⚠️" + state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+    <ErrorComponent error={state.error} />
   ) : (
     <Form
       isLoading={state.domains === undefined || state.isLoading}

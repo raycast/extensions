@@ -3,14 +3,16 @@ import { resolve } from "path";
 import { useSQL } from "@raycast/utils";
 import { Message, Preferences, SearchType } from "./types";
 import { getPreferenceValues } from "@raycast/api";
+import { calculateLookBackMinutes } from "./utils";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
 function getBaseQuery() {
   const preferences = getPreferenceValues<Preferences>();
-  const lookBackDays = parseInt(preferences?.lookBackDays || "1") || 1;
-  const lookBackMinutes = lookBackDays * 24 * 60;
-  return `
+  const lookBackUnit = preferences.lookBackUnit;
+  const lookBackAmount = parseInt(preferences?.lookBackAmount || "1");
+  const lookBackMinutes = calculateLookBackMinutes(lookBackUnit, lookBackAmount);
+  let baseQuery = `
     select
       message.guid,
       message.rowid,
@@ -26,7 +28,9 @@ function getBaseQuery() {
       and message.text is not null
       and length(message.text) > 0
       and datetime(message.date / 1000000000 + strftime('%s', '2001-01-01'), 'unixepoch', 'localtime') >= datetime('now', '-${lookBackMinutes} minutes', 'localtime')
-  `;
+	`;
+  if (preferences.ignoreRead) baseQuery += " and message.is_read = 0";
+  return baseQuery;
 }
 
 function getQuery(options: { searchText?: string; searchType: SearchType }) {
@@ -34,13 +38,13 @@ function getQuery(options: { searchText?: string; searchType: SearchType }) {
 
   if (options.searchType === "code") {
     baseQuery = `${baseQuery} \nand (
-      message.text glob '*[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9]*'
+      message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
       or message.text glob '*[0-9][0-9][0-9]-[0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
-      or message.text glob '*[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or message.text glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
     )`;
   }
 

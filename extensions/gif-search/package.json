@@ -5,45 +5,37 @@
   "description": "Search the Internet for animated GIFs",
   "icon": "command-icon.png",
   "author": "josephschmitt",
+  "contributors": [
+    "tm.wrnr",
+    "j3lte"
+  ],
   "license": "MIT",
   "categories": [
     "Media",
     "Fun",
     "Web"
   ],
+  "keywords": [
+    "Tenor",
+    "Giphy",
+    "Finer",
+    "clips"
+  ],
   "commands": [
     {
       "name": "search",
       "title": "Search for GIFs",
-      "description": "Search for GIFs across multiple services...",
+      "description": "Search for GIFs across multiple services…",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "layoutType",
-      "type": "dropdown",
-      "required": false,
-      "title": "Results Layout",
-      "description": "Layout style for displaying GIF search results",
-      "default": "grid",
-      "data": [
-        {
-          "title": "List",
-          "value": "list"
-        },
-        {
-          "title": "Grid",
-          "value": "grid"
-        }
-      ]
-    },
-    {
       "name": "gridItemSize",
       "type": "dropdown",
       "required": false,
       "title": "Grid Item Size",
-      "description": "When using Grid layout, control the size of individual grid cells",
+      "description": "Control the size of individual grid cells",
       "default": "medium",
       "data": [
         {
@@ -65,7 +57,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Grid Trending Item Size",
-      "description": "When using Grid layout, control the size of individual grid cells in the Trending view",
+      "description": "Control the size of individual grid cells in the Trending view",
       "default": "medium",
       "data": [
         {
@@ -125,6 +117,10 @@
         {
           "title": "Open in Browser",
           "value": "openUrlInBrowser"
+        },
+        {
+          "title": "Download GIF",
+          "value": "downloadFile"
         }
       ]
     },
@@ -148,10 +144,10 @@
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
     "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.9.1",
     "@saekitominaga/file-size-format": "^1.0.2",
     "date-fns": "^2.28.0",
     "node-fetch": "^3.2.1",
-    "run-applescript": "^6.0.0",
     "tempy": "^2.0.0"
   },
   "devDependencies": {

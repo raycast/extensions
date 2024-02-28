@@ -1,5 +1,30 @@
 # Apple Music Changelog
 
+## [New Command] - 2024-02-10
+
+- Added a new command that removes the currently playing track from the current playlist and skips to the next track. 
+
+## [Update] - 2023-10-12
+
+- Added macos version check in the "favorite" command in order to make it compatible with version older than Sonoma.
+
+## [Update] - 2023-10-11
+
+- Apple recently updated Music and renamed the "love" functionality to "favorite". This updates the necessary commands for that.
+
+## [Fix `start-playlist`] - 2023-08-31
+
+- Fixed a bug in `start-playlist` where item title could be empty or undefined.
+
+## [Dislike & Skip] - 2023-08-10
+
+- Add command to dislike and then skip a track
+
+## [Fix] - 2023-08-05
+
+- Fixed HUD confirmations from showing an unknown character
+- Swapped deprecated 'accessoryTitle' to 'accessories' in lists
+
 ## [Fix] - 2023-06-12
 
 - Fixed a few bugs that caused some commands not to open correct

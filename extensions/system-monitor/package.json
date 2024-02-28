@@ -25,7 +25,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.52.0",
+    "@raycast/utils": "^1.10.0",
     "os-utils": "0.0.14",
+    "systeminformation": "^5.21.24",
     "usehooks-ts": "^2.6.0"
   },
   "devDependencies": {
@@ -40,6 +42,38 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint --fix"
+  },
+  "preferences": [
+    {
+      "name": "defaultView",
+      "description": "Select active tab upon launch",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default tab",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "System Info",
+          "value": "system-info"
+        },
+        {
+          "title": "CPU",
+          "value": "cpu"
+        },
+        {
+          "title": "Memory",
+          "value": "memory"
+        },
+        {
+          "title": "Power",
+          "value": "power"
+        },
+        {
+          "title": "Network",
+          "value": "network"
+        }
+      ]
+    }
+  ]
 }

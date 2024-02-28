@@ -1,5 +1,24 @@
 # Library Genesis Changelog
 
+## [Ignore HTTPS Errors] - 2024-02-17
+
+- Fixed an issue where `library.lol` gives certificate errors (ignore SSL errors) (#10798)
+- Added an extra description in download error where the user is instructed to either choose a different mirror or ignore https errors
+- Bump dependencies to latest version
+
+## [Housekeeping] - 2023-12-05
+
+- Removed [libgen](https://www.npmjs.com/package/libgen) dependency
+  - The library is not maintained and had issues with old mirrors
+- Removed `axios` because we can use `node-fetch` instead
+- Updated all (dev) dependencies to latest version
+- Added better code formatting and linting, cleaned up code
+- Updated download controller, this is now cancellable
+- Add Mirror List to the extension
+  - This is a list of all mirrors that are currently available in the extension
+- Cached fastest mirror
+  - This is now cached for 1 hour, so we don't have to check for the fastest mirror every time
+
 ## [Feature Updates] - 2022-07-21
 
 - Supported downloading to a default directory

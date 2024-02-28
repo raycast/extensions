@@ -28,6 +28,12 @@
       "title": "View Top Creators",
       "description": "View Aimlab Top Creators",
       "mode": "view"
+    },
+    {
+      "name": "view-tasks",
+      "title": "Search Tasks",
+      "description": "Search Tasks",
+      "mode": "view"
     }
   ],
   "preferences": [
