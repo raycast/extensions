@@ -1,5 +1,9 @@
 # Changelog
 
+## [Add copy actions] - 2024-02-28
+
+- Added copy actions in View Pages and View Sites commands. Fixed shortcuts of some actions.
+
 ## [Bug Fix] - 2023-12-21
 
 - Fixed an issue where Pages without a source would break the View Pages command.
