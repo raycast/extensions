@@ -108,7 +108,7 @@ export default function DailyQuestion() {
         text += `- ${value} questions in ${key} days \n`;
       });
     }
-    const markdown = `## you don't have any questions for today \n
+    const markdown = `## You don't have any questions for today \n
         ${text} 
     `;
     return <Detail markdown={markdown} />;
