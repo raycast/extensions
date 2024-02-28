@@ -18,6 +18,7 @@ export function useAPI<T>({
 
   return useFetch<T>(url.toString(), {
     headers: {
+      accept: "application/json",
       // This is not a private key, it's a public key that is used to access the API.
       "x-api-key": "0TvQnueqKa5mxJntVWt0w4LpLfEkrV1Ta8rQBb9Z",
     },
