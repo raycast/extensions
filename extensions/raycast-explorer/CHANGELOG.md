@@ -3,6 +3,7 @@
 ## [Fixes] - 2023-02-28
 
 - Fix custom prompt example.
+- Fix `npm audit` reported vulnerabilities.
 
 ## [Fixes] - 2023-12-05
 
