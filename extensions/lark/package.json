@@ -4,6 +4,10 @@
   "title": "Lark Documents",
   "version": "0.0.8",
   "description": "Quickly search documents from Feishu/Lark.",
+  "keywords": [
+    "feishu",
+    "lark"
+  ],
   "icon": "logo.png",
   "author": "tmk",
   "license": "MIT",
@@ -18,6 +22,20 @@
         "feishu",
         "docs",
         "document"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "search-minutes",
+      "title": "Search Minutes",
+      "subtitle": "Lark",
+      "description": "Search and open minutes in browser",
+      "icon": "minutes/logo.png",
+      "keywords": [
+        "lark",
+        "feishu",
+        "minutes",
+        "miaoji"
       ],
       "mode": "view"
     }

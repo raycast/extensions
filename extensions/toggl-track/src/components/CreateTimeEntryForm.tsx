@@ -1,15 +1,38 @@
+import { useMemo, useState } from "react";
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
 import { createTimeEntry, Project, Task } from "../api";
-import { useTimeEntryContext } from "../context/TimeEntryContext";
-import { useMemo, useState } from "react";
+import { useMe, useWorkspaces, useProjects, useClients, useTags, useTasks } from "../hooks";
+import { createProjectGroups } from "../helpers/createProjectGroups";
 
-function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
+interface CreateTimeEntryFormParams {
+  isLoading: boolean;
+  revalidateRunningTimeEntry: () => void;
+  project?: Project;
+  description?: string;
+}
+
+function CreateTimeEntryForm({
+  isLoading,
+  revalidateRunningTimeEntry,
+  project,
+  description,
+}: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
-  const { me, isLoading, projects, tags, tasks, projectGroups, revalidateRunningTimeEntry } = useTimeEntryContext();
+  const { me, isLoadingMe } = useMe();
+  const { workspaces, isLoadingWorkspaces } = useWorkspaces();
+  const { projects, isLoadingProjects } = useProjects();
+  const { clients, isLoadingClients } = useClients();
+  const { tags, isLoadingTags } = useTags();
+  const { tasks, isLoadingTasks } = useTasks();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [billable, setBillable] = useState<boolean>(false);
+
+  const projectGroups = useMemo(
+    () => createProjectGroups(projects, workspaces, clients),
+    [projects, workspaces, clients],
+  );
 
   async function handleSubmit(values: { description: string }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -20,6 +43,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
     }
 
     try {
+      await showToast(Toast.Style.Animated, "Starting time entry...");
       await createTimeEntry({
         projectId: selectedProject?.id,
         workspaceId,
@@ -28,10 +52,9 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         taskId: selectedTask?.id,
         billable,
       });
-      await showToast(Toast.Style.Animated, "Starting time entry...");
-      revalidateRunningTimeEntry();
       await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
+      revalidateRunningTimeEntry();
       await clearSearchBar();
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed to start time entry");
@@ -60,7 +83,15 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={
+        isLoading ||
+        isLoadingMe ||
+        isLoadingWorkspaces ||
+        isLoadingProjects ||
+        isLoadingClients ||
+        isLoadingTags ||
+        isLoadingTasks
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Time Entry" onSubmit={handleSubmit} />

@@ -16,11 +16,11 @@ import {
   updateIssue,
   updateIssueAssignee,
 } from "../api/issues";
+import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocompleteUsers, User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";

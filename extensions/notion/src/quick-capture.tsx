@@ -11,13 +11,14 @@ import {
   AI,
   Icon,
 } from "@raycast/api";
-import { useForm } from "@raycast/utils";
+import { useForm, withAccessToken } from "@raycast/utils";
 import { parseHTML } from "linkedom";
 import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { useSearchPages } from "./hooks";
 import { appendToPage, createDatabasePage, getPageIcon } from "./utils/notion";
+import { notionService } from "./utils/notion/oauth";
 
 const getPageDetail = async (url: string) => {
   try {
@@ -174,6 +175,4 @@ ${result?.content}
   );
 }
 
-export default function Command() {
-  return <QuickCapture />;
-}
+export default withAccessToken(notionService)(QuickCapture);

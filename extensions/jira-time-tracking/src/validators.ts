@@ -1,4 +1,4 @@
-import { IssueBody, ProjectBody, JiraErrorResponseBody } from "./types";
+import { IssueBody, ProjectBody, JiraErrorResponseBody, PaginationBody } from "./types";
 
 export const projectsValidator = (body: unknown): body is ProjectBody => {
   if (typeof body === "object" && body !== null && "values" in body) {
@@ -14,6 +14,10 @@ export const issuesValidator = (body: unknown): body is IssueBody => {
     return Array.isArray(partial.issues);
   }
   return false;
+};
+
+export const paginationValidator = (body: unknown): body is PaginationBody => {
+  return typeof body === "object" && body !== null && "total" in body && "startAt" in body && "maxResults" in body;
 };
 
 export const isJiraErrorResponseBody = (body: unknown): body is JiraErrorResponseBody =>

@@ -21,6 +21,8 @@ export const LOCAL_STORAGE_KEY = {
 export const VAULT_LOCK_MESSAGES = {
   TIMEOUT: "Vault timed out due to inactivity",
   MANUAL: "Manually locked by the user",
+  SYSTEM_LOCK: "Screen was locked",
+  SYSTEM_SLEEP: "System went to sleep",
 } as const;
 
 export const SHORTCUT_KEY_SEQUENCE: Keyboard.Shortcut["key"][] = [

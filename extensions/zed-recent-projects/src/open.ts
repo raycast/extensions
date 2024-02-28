@@ -1,7 +1,10 @@
-import { closeMainWindow, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getSelectedFinderItems, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { saveZedEntries } from "./lib/zedEntries";
-import { ZED_BUNDLE_ID } from "./lib/zed";
+import { getZedBundleId, ZedBuild } from "./lib/zed";
+
+const preferences: Record<string, string> = getPreferenceValues();
+const zedBuild: ZedBuild = preferences.build as ZedBuild;
 
 const getCurrentFinderPathScript = `
 try
@@ -41,7 +44,7 @@ export default async function openWithZed() {
     );
 
     for (const finderItem of selectedItems) {
-      await open(finderItem.path, ZED_BUNDLE_ID);
+      await open(finderItem.path, getZedBundleId(zedBuild));
     }
 
     await closeMainWindow();
