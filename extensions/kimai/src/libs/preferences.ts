@@ -4,7 +4,7 @@ interface Preferences {
   domain: string;
   password: string;
   email: string;
-  protocol: "https" | "http";
+  protocol?: "https" | "http";
   duration: string;
 }
 

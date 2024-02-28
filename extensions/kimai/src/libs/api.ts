@@ -46,7 +46,8 @@ interface TimesheetPayload {
 }
 
 const fetch = async (apiPath: string, init?: RequestInit | undefined) => {
-  const { domain, email, password, protocol } = getPreferences();
+  const { domain, email, password, protocol: _protocol } = getPreferences();
+  const protocol = _protocol || "https";
 
   const response = await nodeFetch(`${protocol}://${domain}/api/${apiPath}`, {
     ...(init || {}),
