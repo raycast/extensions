@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "View Applications",
+      "title": "View Fly.io Applications",
       "description": "View all of your Fly.io applications",
       "mode": "view"
     }
