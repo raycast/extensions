@@ -53,7 +53,7 @@ function Command() {
           const account = accounts.find((account) => account.id === accountId);
           const name = account?.name || '';
           return (
-            <List.Section title={name}>
+            <List.Section title={name} key={accountId}>
               {accountPages.map((page) => (
                 <List.Item
                   key={page.name}
@@ -310,7 +310,7 @@ function DeploymentListView(props: DeploymentListProps) {
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 title="Show Details"
                 target={
                   <DeploymentView

@@ -1,5 +1,13 @@
 # Changelog
 
+## [Feature] - 2024-02-21
+
+- Feature: Integrate awesome-chatgpt-prompts project
+
+## [Fix] - 2024-02-20
+
+- Fix: Inability to answer according to prompt rules or even refusal to answer
+
 ## [Added keywords] - 2024-12-02
 
 - Added a few keywords to make the extension easier to find in the store.

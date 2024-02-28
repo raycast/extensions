@@ -62,6 +62,8 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
       return `${AWS_URL_BASE}/sns/v3/home?region=${AWS_REGION}#/topic/${resourceId}`;
     case "AWS::DynamoDB::Table":
       return `${AWS_URL_BASE}/dynamodb/home?region=${AWS_REGION}#tables:selected=${resourceId}`;
+    case "AWS::StepFunctions::StateMachine":
+      return `${AWS_URL_BASE}/states/home?region=${AWS_REGION}#/statemachines/view/${resourceId}`;
     default:
       return "";
   }

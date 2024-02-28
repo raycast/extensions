@@ -1,7 +1,8 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
-import { getFieldTemplates } from "../api/fieldTemplates";
-import { CachedPromiseOptionsType } from "../types/utils";
+
+import { getFieldTemplates } from "@/api/fieldTemplates";
+import { CachedPromiseOptionsType } from "@/types/utils";
 
 type Props = {
   options?: CachedPromiseOptionsType<Awaited<ReturnType<typeof getFieldTemplates>>>;

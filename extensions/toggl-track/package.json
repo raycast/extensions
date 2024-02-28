@@ -22,6 +22,31 @@
       "title": "Start/Stop Time Entry",
       "description": "Start a new time entry or end the running time entry.",
       "mode": "view"
+    },
+    {
+      "name": "manageWorkspaces",
+      "title": "View Workspaces",
+      "description": "A list of all the workspace you have access to.",
+      "mode": "view",
+      "disabledByDefault": false
+    },
+    {
+      "name": "manageTags",
+      "title": "Manage Tags",
+      "description": "A list of all the tags you have access to.",
+      "mode": "view"
+    },
+    {
+      "name": "manageClients",
+      "title": "Manage Clients",
+      "description": "A list of all the clients you have access to.",
+      "mode": "view"
+    },
+    {
+      "name": "manageProjects",
+      "title": "Manage Projects",
+      "description": "A list of all the projects you have access to.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -32,14 +57,6 @@
       "required": true,
       "title": "Toggl API Token",
       "type": "password"
-    },
-    {
-      "name": "hideArchivedProjects",
-      "label": "Hide Archived Projects",
-      "description": "When checked, archived projects are hidden.",
-      "type": "checkbox",
-      "required": true,
-      "default": true
     }
   ],
   "dependencies": {

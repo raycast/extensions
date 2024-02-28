@@ -1,5 +1,13 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2024-02-26
+
+- Added support for setting a title
+
+## [New Swift Macro] - 2024-02-16
+
+- Upgrade to the latest version of Swift Macros
+
 ## [Enhancements] - 2023-11-30
 
 - Now using Raycast Swift Macro instead of manually compiling
