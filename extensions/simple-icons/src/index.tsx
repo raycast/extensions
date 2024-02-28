@@ -3,7 +3,6 @@ import { ActionPanel, Action, Grid, Icon, Detail, Color, Clipboard, Cache, Toast
 import { titleToSlug } from "simple-icons/sdk";
 import { loadLatestVersion, loadJson, loadSvg } from "./utils";
 import { IconJson, IconData } from "./types";
-import packageJson from "../package.json";
 
 export default function Command() {
   const [itemSize, setItemSize] = useState<Grid.ItemSize>(Grid.ItemSize.Small);
