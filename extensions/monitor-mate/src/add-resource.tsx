@@ -95,7 +95,7 @@ export default function AddResource(props: Props) {
         // return;
       }
 
-      await updateResourceList(newResource, index || -1);
+      await updateResourceList(newResource, index as number);
 
       const action = typeof index === "number" ? "Updated" : "Added";
       await showToast(

@@ -37,8 +37,9 @@ export const updateResourceList = async (resource: Resource, index: number) => {
 };
 
 export const deleteResource = async (resource: Resource) => {
+  
   const resources = (await fetchResources()) || [];
-  const newResources = resources.filter((r: Resource) => r.url !== resource.url);
+  const newResources = resources.filter((r: Resource) => r.url !== resource.url || r.port !== resource.port);
   await LocalStorage.setItem("resources", JSON.stringify(newResources));
 };
 
