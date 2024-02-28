@@ -16,7 +16,8 @@ export type Locale =
   | "pl"
   | "nl"
   | "tr"
-  | "el";
+  | "el"
+  | "uk";
 
 export function useLanguage() {
   return useCachedState<Locale>("language", "en");
@@ -44,4 +45,5 @@ export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇸🇽", title: "Dutch", value: "nl" },
   { icon: "🇹🇷", title: "Turkish", value: "tr" },
   { icon: "🇬🇷", title: "Greek", value: "el" },
+  { icon: "🇺🇦", title: "Ukraine", value: "uk" },
 ];

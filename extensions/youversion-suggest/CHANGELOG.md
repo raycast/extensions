@@ -1,5 +1,10 @@
 # YouVersion Bible Suggest Changelog
 
+## [v3.4.1] - 2024-02-20
+
+- Fixed a bug where verses containing line breaks (e.g. Psalm 23:1 NASB1995)
+  could not be copied to the clipboard
+
 ## [v3.4.0] - 2024-01-09
 
 - Added language support for Ukrainian (ukr)

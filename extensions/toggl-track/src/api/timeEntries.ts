@@ -1,8 +1,17 @@
+import type { ToggleItem } from "./types";
 import { get, post, patch } from "./togglClient";
 
-export async function getTimeEntries({ startDate, endDate }: { startDate: Date; endDate: Date }) {
-  const timeEntries = await get<TimeEntry[]>(
-    `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`,
+export async function getMyTimeEntries<Meta extends boolean = false>({
+  startDate,
+  endDate,
+  includeMetadata,
+}: {
+  startDate: Date;
+  endDate: Date;
+  includeMetadata?: Meta;
+}): Promise<(Meta extends false ? TimeEntry : TimeEntry & TimeEntryMetaData)[]> {
+  const timeEntries = await get<(Meta extends false ? TimeEntry : TimeEntry & TimeEntryMetaData)[]>(
+    `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}&meta=${includeMetadata ?? false}`,
   );
   return timeEntries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
 }
@@ -47,14 +56,45 @@ export function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: nu
 }
 
 // https://developers.track.toggl.com/docs/api/time_entries#response
-export interface TimeEntry {
-  at: string;
+export interface TimeEntry extends ToggleItem {
   billable: boolean;
   description: string;
-  id: number;
-  project_id: number;
-  start: string;
+  /**
+   * Time entry duration.
+   *
+   * For running entries should be negative, preferable -1
+   */
   duration: number;
+  /**
+   * Used to create a TE with a duration but without a stop time.
+   *
+   * @deprecated This field is deprecated for GET endpoints where the value will always be true.
+   */
+  duronly: boolean;
+  /**
+   * Project ID
+   *
+   * Can be null if project was not provided or project was later deleted
+   */
+  project_id: number | null;
+  start: string;
+  /**
+   * Stop time in UTC.
+   *
+   * Can be null if it's still running or created with "duration" and "duronly" fields.
+   */
+  stop: string | null;
+  tag_ids: number[] | null;
   tags: string[];
+  task_id: number | null;
+  /** Time Entry creator ID */
+  user_id: number;
   workspace_id: number;
+}
+
+export interface TimeEntryMetaData {
+  client_name?: string;
+  project_name?: string;
+  project_color?: string;
+  project_active?: boolean;
 }

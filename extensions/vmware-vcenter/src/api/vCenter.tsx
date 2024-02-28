@@ -11,18 +11,20 @@ import {
   VMStoragePolicyComplianceInfo,
   VmGuestNetworkingInterfacesInfo,
   HostSummary,
+  VmConsoleTicketsType,
+  VmConsoleTicketsCreateSpec,
+  VmConsoleTicketsSummary,
 } from "./types";
 import fetch from "node-fetch";
 
 export class vCenter {
   private readonly _credential: string;
-  private _token: string;
+  private _token: string | undefined;
   private readonly _fqdn: string;
 
   constructor(fqdn: string, username: string, password: string) {
     this._fqdn = fqdn;
     this._credential = Buffer.from(`${username}:${password}`).toString("base64");
-    this._token = "";
   }
 
   GetFqdn(): string {
@@ -66,7 +68,7 @@ export class vCenter {
   async ListVM(): Promise<VMSummary[] | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/vm`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -89,6 +91,7 @@ export class vCenter {
               ""
             );
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have permission to perform the operation", "");
@@ -112,7 +115,7 @@ export class vCenter {
   async GetVM(vm: string): Promise<VMInfo | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/vm/${vm}`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -129,6 +132,7 @@ export class vCenter {
 
         switch (response.status) {
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have permission to perform the operation", "");
@@ -154,7 +158,7 @@ export class vCenter {
   async GetVMStoragePolicy(vm: string): Promise<VmStoragePolicyInfo | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/vm/${vm}/storage/policy`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -171,6 +175,7 @@ export class vCenter {
 
         switch (response.status) {
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have permission to perform the operation", "");
@@ -194,7 +199,7 @@ export class vCenter {
   async GetNetworks(): Promise<NetworkSummary[] | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/network`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -217,6 +222,7 @@ export class vCenter {
               ""
             );
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have the required privileges", "");
@@ -244,7 +250,7 @@ export class vCenter {
   async GetStoragePolicy(): Promise<StoragePoliciesSummary[] | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/storage/policies`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -267,6 +273,7 @@ export class vCenter {
               ""
             );
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have the required privileges", "");
@@ -294,7 +301,7 @@ export class vCenter {
   async GetVMStoragePolicyCompliance(vm: string): Promise<VMStoragePolicyComplianceInfo | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/vm/${vm}/storage/policy/compliance`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -311,6 +318,7 @@ export class vCenter {
 
         switch (response.status) {
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have the required privileges", "");
@@ -338,7 +346,7 @@ export class vCenter {
   async GetVMGuestNetworkingInterfaces(vm: string): Promise<VmGuestNetworkingInterfacesInfo[] | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/vm/${vm}/guest/networking/interfaces`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -376,7 +384,7 @@ export class vCenter {
   async VMGuestPower(vm: string, action: VMGuestPowerAction): Promise<void> {
     const url = `https://${this._fqdn}/api/vcenter/vm/${vm}/guest/power?action=${action}`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -410,7 +418,7 @@ export class vCenter {
   async VMPower(vm: string, action: VMPowerAction): Promise<void> {
     const url = `https://${this._fqdn}/api/vcenter/vm/${vm}/power?action=${action}`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -425,6 +433,7 @@ export class vCenter {
           case 400:
             throw new ErrorApiGetToken(400, "the action is not supported by the server", "");
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have the required privileges", "");
@@ -448,7 +457,7 @@ export class vCenter {
   async ListHost(): Promise<HostSummary[] | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/host`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -471,6 +480,7 @@ export class vCenter {
               ""
             );
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have permission to perform the operation", "");
@@ -494,7 +504,7 @@ export class vCenter {
   async ListNetwork(): Promise<NetworkSummary[] | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/network`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -517,6 +527,7 @@ export class vCenter {
               ""
             );
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have permission to perform the operation", "");
@@ -540,7 +551,7 @@ export class vCenter {
   async ListDatastore(): Promise<DatastoreSummary[] | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/datastore`;
 
-    if (!this._token) {
+    while (!this._token) {
       await this.getToken();
     }
 
@@ -563,6 +574,7 @@ export class vCenter {
               ""
             );
           case 401:
+            this._token = undefined;
             throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
           case 403:
             throw new ErrorApiGetToken(403, "the user does not have permission to perform the operation", "");
@@ -581,5 +593,58 @@ export class vCenter {
       });
 
     return datastores;
+  }
+
+  async VMCreateConsoleTickets(
+    vm: string,
+    type: VmConsoleTicketsType = VmConsoleTicketsType.VMRC
+  ): Promise<VmConsoleTicketsSummary | undefined> {
+    const url = `https://${this._fqdn}/api/vcenter/vm/${vm}/console/tickets`;
+    const body: VmConsoleTicketsCreateSpec = {
+      type: type,
+    };
+
+    while (!this._token) {
+      await this.getToken();
+    }
+
+    const ticket: VmConsoleTicketsSummary | undefined = await fetch(url, {
+      method: "POST",
+      headers: {
+        "vmware-api-session-id": this._token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json() as Promise<VmConsoleTicketsSummary>;
+        }
+
+        switch (response.status) {
+          case 400:
+            throw new ErrorApiGetToken(400, "the action is not supported by the server", "");
+          case 401:
+            this._token = undefined;
+            throw new ErrorApiGetToken(401, "the user can not be authenticated", "");
+          case 403:
+            throw new ErrorApiGetToken(403, "the user does not have the required privileges", "");
+          case 404:
+            throw new ErrorApiGetToken(404, "virtual machine is not found", "");
+          case 500:
+            throw new ErrorApiGetToken(500, "system reports an error while responding to the request", "");
+          case 503:
+            throw new ErrorApiGetToken(503, "VMware Tools is not running on the virtual machine", "");
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        if (error instanceof ErrorApiGetToken) throw error;
+        if (error.code === "UNABLE_TO_VERIFY_LEAF_SIGNATURE")
+          throw new ErrorApiGetToken(500, "vCenter Certificate Error", "", error);
+        throw new ErrorApiGetToken(500, "vCenter unreachable", "Please check your vCenter status", error);
+      });
+
+    return ticket;
   }
 }

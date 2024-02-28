@@ -302,17 +302,32 @@
       "description": "Open the Arc Boost Gallery",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "new-note",
+      "title": "Open New Note",
+      "subtitle": "Arc",
+      "description": "Open a new note",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "new-easel",
+      "title": "Open New Easel",
+      "subtitle": "Arc",
+      "description": "Open a new easel",
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.53.0",
-    "@raycast/utils": "^1.4.16",
+    "@raycast/utils": "^1.12.4",
     "cross-fetch": "^3.1.6",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21",
     "nanoid": "^4.0.0",
-    "run-applescript": "^6.1.0",
     "semver": "^7.3.8"
   },
   "devDependencies": {

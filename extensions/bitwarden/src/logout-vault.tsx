@@ -15,9 +15,13 @@ async function logoutVaultCommand() {
 
     if (hasConfirmed) {
       const toast = await showToast(Toast.Style.Animated, "Logging out...");
-      const { error } = await new Bitwarden().logout();
+      const bitwarden = await new Bitwarden(toast).initialize();
+      const { error } = await bitwarden.logout();
+
       if (error instanceof NotLoggedInError) {
-        await showToast(Toast.Style.Failure, "No session found", "You are not logged in");
+        toast.style = Toast.Style.Failure;
+        toast.title = "No session found";
+        toast.message = "You are not logged in";
         return;
       }
 
