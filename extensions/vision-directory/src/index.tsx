@@ -87,7 +87,7 @@ function AppListItem({ app }: { app: App }) {
         mask: Image.Mask.RoundedRectangle,
       }}
       title={app.name ?? "No name"}
-      subtitle={app.subtitle ?? "No subtitle"}
+      subtitle={app.subtitle ?? ""}
       accessories={app.categories.length > 0 ? [{ text: app.categories[0].name }] : []}
       actions={
         <ActionPanel title={app.name}>
