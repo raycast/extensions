@@ -1,5 +1,10 @@
 # Color Picker Changelog
 
+## [Color Space fixes] - 2024-02-26
+
+- Make sure that colors picked on a P3 display are converted to sRGB when displayed as hex
+- Added different actions to copy colors in different formats directly
+
 ## [Enhancement] - 2024-02-26
 
 - Added support for setting a title

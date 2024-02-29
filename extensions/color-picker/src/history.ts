@@ -1,6 +1,6 @@
 import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { Color, HistoryItem } from "./types";
+import { Color, DeprecatedColor, HistoryItem } from "./types";
 import { getFormattedColor } from "./utils";
 
 const MAX_HISTORY_LENGTH = 200;
@@ -9,7 +9,7 @@ export function useHistory() {
   const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
   return {
     history,
-    remove: (color: Color) =>
+    remove: (color: Color | DeprecatedColor) =>
       setHistory((previousHistory) => {
         return previousHistory.filter((item) => getFormattedColor(item.color) !== getFormattedColor(color));
       }),
