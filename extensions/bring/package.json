@@ -34,7 +34,8 @@
       "name": "index",
       "title": "Add Items to List",
       "description": "add a new item to a Bring! shopping list",
-      "mode": "view"
+      "mode": "view",
+      "keywords": ["shopping", "bring", "groceries"]
     }
   ],
   "dependencies": {
