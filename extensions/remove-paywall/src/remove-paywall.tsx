@@ -24,7 +24,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>
 
     // Open the URL with the specified service
     open(`${service}/${url}`);
-
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
