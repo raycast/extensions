@@ -10,7 +10,6 @@ export function AddWork(props: {
   instance: string;
 }) {
   const [issue, setIssue] = useState<IssueExtended | null>(null);
-  const [submitted, setSubmitted] = useState(false);
   const { pop } = useNavigation();
   useEffect(() => {
     async function fetchIssueDetails() {
@@ -50,7 +49,6 @@ export function AddWork(props: {
     };
     try {
       await props.createWorkItemCb(workItem);
-      setSubmitted(true);
       toast.style = Toast.Style.Success;
       toast.title = "Work item added";
       toast.primaryAction = {
@@ -73,11 +71,7 @@ export function AddWork(props: {
     <Form
       actions={
         <ActionPanel>
-          {submitted ? (
-            <Action icon={Icon.ArrowLeft} title="Go Back" onAction={pop} />
-          ) : (
-            <Action.SubmitForm icon={Icon.Upload} title="Add Work" onSubmit={handleSubmit} />
-          )}
+          <Action.SubmitForm icon={Icon.Upload} title="Add Work" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
