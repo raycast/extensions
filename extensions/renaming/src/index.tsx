@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, useCachedState } from "@raycast/utils";
 import {
   Form,
   ActionPanel,
@@ -16,7 +16,7 @@ export default function Command() {
   const [newName, setNewName] = useState<string>("");
   const [prefix, setPrefix] = useState<string>("");
   const [suffix, setSuffix] = useState<string>("");
-  const [preserveName, setPreserveName] = useState<boolean>(false);
+  const [preserveName, setPreserveName] = useCachedState<boolean>("preserveName", false);
   const [preview, setPreview] = useState<string>("");
 
   const getSelectedFiles = async () => {
@@ -30,6 +30,7 @@ export default function Command() {
           style: Toast.Style.Failure,
           title: "Please select at least one file or open a Finder window",
         });
+        popToRoot();
         return;
       }
 
@@ -41,6 +42,7 @@ export default function Command() {
         title: "Failed to fetch files",
         message: "Please make sure a Finder window is open and files are selected",
       });
+      popToRoot();
     }
   };
 
@@ -96,7 +98,7 @@ export default function Command() {
 
   useEffect(() => {
     setPreview(generateNewName(0));
-  }, [newName, prefix, suffix, preserveName]);
+  }, [newName, prefix, suffix, preserveName, files]);
 
   return (
     <>
