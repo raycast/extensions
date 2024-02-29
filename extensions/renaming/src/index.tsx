@@ -25,16 +25,22 @@ export default function Command() {
       const fileList = files.map((file) => file.path);
       console.log("Fetched files:", fileList);
 
-      setFiles(fileList);
-
       if (fileList.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Please select at least one file",
+          title: "Please select at least one file or open a Finder window",
         });
+        return;
       }
+
+      setFiles(fileList);
     } catch (error) {
       console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch files",
+        message: "Please make sure a Finder window is open and files are selected",
+      });
     }
   };
 
