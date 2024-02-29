@@ -10,7 +10,7 @@ struct Color: Encodable {
 
 @raycast func pickColor() async -> Color? {
   let colorSampler = NSColorSampler()
-  guard let color = await colorSampler.sample() else { return nil }
+  guard let color = await colorSampler.sample()?.usingColorSpace(NSColorSpace.sRGB) else { return nil }
 
   return Color(
     red: lroundf(Float(color.redComponent) * 0xFF),

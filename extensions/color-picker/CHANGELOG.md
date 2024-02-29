@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Fix] - 2024-02-29
+
+- Forced to use sRGB color space
+
 ## [Enhancement] - 2024-02-26
 
 - Added support for setting a title
