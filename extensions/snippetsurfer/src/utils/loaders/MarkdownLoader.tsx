@@ -26,9 +26,19 @@ function extractMetadataContent(
   const content = lines.slice(contentStartIndex).join("\n").trim();
 
   let metadata;
+  let tags: string[] = [];
   let error = null;
   try {
     metadata = parse(rawMetadata);
+
+    // Parse tags
+    const rawTags = metadata?.["Tags"] ?? [];
+    if (!Array.isArray(rawTags) || rawTags.some((tag) => typeof tag !== "string")) {
+      tags = [];
+      error = new Error(`Invalid tags. All tags must be a string for ${relativePath}`);
+    } else {
+      tags = rawTags;
+    }
   } catch (e) {
     error = new Error(`Error parsing metadata for ${relativePath}`);
   }
@@ -36,6 +46,7 @@ function extractMetadataContent(
   const snippetContent: SnippetContent = {
     title: metadata?.["Title"],
     description: metadata?.["Description"],
+    tags: tags,
     content: content,
     rawMetadata: rawMetadata,
   };

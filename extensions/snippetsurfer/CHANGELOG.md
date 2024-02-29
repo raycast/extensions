@@ -6,3 +6,8 @@
 - Added more actions to the action panel
 - Better error handling
 - Support yaml files
+
+## [Enhancements] - 2024-02-29
+- Support tags for metadata
+- Support filtering by tags
+- Add the ability to select multiple snippet folders.
