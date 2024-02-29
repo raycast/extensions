@@ -23,7 +23,7 @@ interface TimezoneBuddy {
   avatar: string;
 }
 
-const ALL_TIMEZONES = (Intl as any).supportedValuesOf("timeZone");
+const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
 
 function formatZoneName(zoneName: string): string {
   return zoneName.replaceAll("/", " - ").replaceAll("_", " ");
