@@ -3,7 +3,13 @@ import { execSync } from "child_process";
 import checkAdbExists from "./utils";
 
 export default async function darkMode() {
-  const adbDir = await checkAdbExists();
+  let adbDir: string;
+  try {
+    adbDir = await checkAdbExists();
+  } catch (e) {
+    await showHUD(`${e}`);
+    return;
+  }
   const currentMode = execSync(`${adbDir} shell settings get secure ui_night_mode`).toString().trim();
   let toggleValue;
   if (currentMode == "1" || currentMode == "null" || currentMode == "0") {

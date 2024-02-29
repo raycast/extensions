@@ -6,22 +6,23 @@ import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } fro
 import { createTimeEntry, TimeEntry } from "./api";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { TimeEntryContextProvider, useTimeEntryContext } from "./context/TimeEntryContext";
+import { useTimeEntries, useRunningTimeEntry } from "./hooks";
+import { formatSeconds } from "./helpers/formatSeconds";
 
 dayjs.extend(duration);
 
 function ListView() {
-  const { isLoading, timeEntries, runningTimeEntry, projects, revalidateRunningTimeEntry, revalidateTimeEntries } =
-    useTimeEntryContext();
+  const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
+  const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
 
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
     (acc, timeEntry) =>
       acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
         ? acc
         : [...acc, timeEntry],
-    [] as TimeEntry[],
+    [] as typeof timeEntries,
   );
 
   const totalDurationToday = useMemo(() => {
@@ -33,20 +34,11 @@ function ListView() {
     return seconds;
   }, [timeEntries, runningTimeEntry]);
 
-  function formatSeconds(seconds: number) {
-    const h = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  }
-
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(Toast.Style.Animated, "Starting timer...");
     try {
       await createTimeEntry({
-        projectId: timeEntry.project_id,
+        projectId: timeEntry.project_id ?? undefined,
         workspaceId: timeEntry.workspace_id,
         description: timeEntry.description,
         tags: timeEntry.tags,
@@ -67,10 +59,7 @@ function ListView() {
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
       {runningTimeEntry && (
-        <RunningTimeEntry
-          project={projects.find(({ id }) => runningTimeEntry.project_id === id)}
-          {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }}
-        />
+        <RunningTimeEntry {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }} />
       )}
       <List.Section title="Actions">
         <List.Item
@@ -83,9 +72,7 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <TimeEntryContextProvider>
-                      <CreateTimeEntryForm />
-                    </TimeEntryContextProvider>
+                    <CreateTimeEntryForm {...{ isLoading, revalidateRunningTimeEntry }} />
                   </ExtensionContextProvider>
                 }
               />
@@ -98,14 +85,11 @@ function ListView() {
           {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
             <List.Item
               key={timeEntry.id}
-              keywords={[timeEntry.description, getProjectById(timeEntry.project_id)?.name || ""]}
+              keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
               title={timeEntry.description || "No description"}
-              subtitle={timeEntry.billable ? "$" : ""}
-              accessories={[
-                { text: getProjectById(timeEntry?.project_id)?.name },
-                { icon: { source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color } },
-              ]}
-              icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.project_id)?.color }}
+              subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
+              accessories={[...timeEntry.tags.map((tag) => ({ tag })), { text: timeEntry.billable ? "$" : "" }]}
+              icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>
                   <Action.SubmitForm
@@ -126,9 +110,7 @@ function ListView() {
 export default function Command() {
   return (
     <ExtensionContextProvider>
-      <TimeEntryContextProvider>
-        <ListView />
-      </TimeEntryContextProvider>
+      <ListView />
     </ExtensionContextProvider>
   );
 }

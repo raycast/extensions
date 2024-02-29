@@ -66,7 +66,7 @@ function Command() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        icon={Icon.TextDocument}
+                        icon={Icon.BlankDocument}
                         title="Show Details"
                         target={<SiteView accountId={accountId} id={site.id} />}
                       />
@@ -81,7 +81,7 @@ function Command() {
                         target={
                           <CachePurgeView accountId={accountId} id={site.id} />
                         }
-                        shortcut={{ modifiers: ['cmd'], key: 'p' }}
+                        shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
                       />
                       <Action
                         icon={Icon.Hammer}

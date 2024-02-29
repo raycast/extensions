@@ -1,5 +1,9 @@
 # Perplexity API Changelog
 
+## [Update] - 2024-02-22
+- Added Perplexity's new Sonar models `sonar-small-chat`, `sonar-medium-chat` and `sonar-small-online`, `sonar-medium-online`.
+- Updated pricing for MoE (8x7B) models.
+
 ## [Update] - 2024-02-13
 - The extension now uses the OpenAI client.
 - Streaming capability has been added for receiving responses, ensuring real-time interaction.

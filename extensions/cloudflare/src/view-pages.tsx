@@ -53,7 +53,7 @@ function Command() {
           const account = accounts.find((account) => account.id === accountId);
           const name = account?.name || '';
           return (
-            <List.Section title={name}>
+            <List.Section title={name} key={accountId}>
               {accountPages.map((page) => (
                 <List.Item
                   key={page.name}
@@ -63,7 +63,7 @@ function Command() {
                   actions={
                     <ActionPanel>
                       <Action.Push
-                        icon={Icon.TextDocument}
+                        icon={Icon.BlankDocument}
                         title="Show Details"
                         target={
                           <PageView accountId={accountId} name={page.name} />
@@ -93,7 +93,7 @@ function Command() {
                       <Action.OpenInBrowser
                         title="Open Page"
                         url={toUrl(page.subdomain)}
-                        shortcut={{ modifiers: ['cmd'], key: 'p' }}
+                        shortcut={{ modifiers: ['cmd'], key: 'o' }}
                       />
                       {page.source && (
                         <Action.OpenInBrowser
@@ -251,7 +251,7 @@ function DeploymentListView(props: DeploymentListProps) {
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 title="Show Details"
                 target={
                   <DeploymentView

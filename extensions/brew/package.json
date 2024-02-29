@@ -7,7 +7,8 @@
   "contributors": [
     "Aayush9029",
     "mathieudutour",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "ashokbaruaakas"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -39,6 +40,24 @@
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
       "mode": "no-view"
+    },
+    {
+      "name": "clean-up",
+      "title": "Clean Up",
+      "subtitle": "Brew",
+      "description": "Clean files and packages from the cache that are older than 120 days",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "withoutThreshold",
+          "title": "Clean Up",
+          "type": "checkbox",
+          "default": false,
+          "required": false,
+          "label": "Include --prune=all when cleaning",
+          "description": "Include --prune=all when cleaning files & packages from cache.\nThis option bypasses the 120 days threshold."
+        }
+      ]
     }
   ],
   "preferences": [

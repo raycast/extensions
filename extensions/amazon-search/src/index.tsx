@@ -1,5 +1,5 @@
-import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert, getPreferenceValues } from "@raycast/api";
+import { useCachedState, useFetch } from "@raycast/utils";
 import { useState } from "react";
 
 interface Preferences {
@@ -10,8 +10,11 @@ interface AutocompleteResponse {
   suggestions: { value: string }[];
 }
 
+const MAX_RECENT_SEARCHES = 7;
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const [recentSearches, setRecentSearches] = useCachedState<string[]>("recentSearches", []);
 
   const preferences: Preferences = getPreferenceValues();
   const tld = preferences.top_level_domain;
@@ -49,24 +52,88 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  const items = data ? data.suggestions.map((suggestion) => suggestion.value) : [];
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (text && !recentSearches.includes(text)) {
+      const updatedSearches = [text, ...recentSearches].slice(0, MAX_RECENT_SEARCHES);
+      setRecentSearches(updatedSearches);
+    }
+  };
+
+  const handleRemoveSearchItem = (query: string) => {
+    setRecentSearches(recentSearches.filter((item) => item !== query));
+  };
+
+  const handleClearSearchHistory = async () => {
+    const isConfirmed = await confirmAlert({
+      title: "Clear all recent searches?",
+      icon: Icon.Trash,
+      message: "This action cannot be undone.",
+      primaryAction: {
+        title: "Clear History",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (isConfirmed) {
+      setRecentSearches([]);
+    }
+  };
+
+  const suggestions = data ? data.suggestions.map((suggestion) => suggestion.value) : [];
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search Amazon..." onSearchTextChange={setSearchText} throttle>
-      <List.Section title="Suggestions" subtitle={`${items.length}`}>
-        {items.map((item, index) => (
-          <List.Item
-            key={index}
-            title={item}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      <List.EmptyView icon="amazon-emptyview.png" title="No Results" />
+    <List isLoading={isLoading} searchBarPlaceholder="Search Amazon..." onSearchTextChange={handleSearch} throttle>
+      {searchText.length > 0 && (
+        <List.Section title="Suggestions" subtitle={`${suggestions.length}`}>
+          {suggestions.map((item, index) => (
+            <List.Item
+              key={index}
+              title={item}
+              icon={Icon.MagnifyingGlass}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {searchText.length === 0 && (
+        <List.Section title="Recent Searches">
+          {recentSearches.map((item, index) => (
+            <List.Item
+              key={index}
+              title={item}
+              icon={Icon.MagnifyingGlass}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={`https://www.amazon.${tld}/s?k=${encodeURIComponent(item)}`} />
+                  <Action
+                    title="Remove Search Item"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => handleRemoveSearchItem(item)}
+                  />
+                  <Action
+                    title="Clear Search History"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={handleClearSearchHistory}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+
+      <List.EmptyView
+        icon={{ source: "amazon-emptyview.png", tintColor: Color.SecondaryText }}
+        title="What's on your wishlist?"
+      />
     </List>
   );
 }
