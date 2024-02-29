@@ -8,7 +8,11 @@ import { useSQL } from "@raycast/utils";
 
 function SearchHistory(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const { data, isLoading, permissionView } = useSQL<HistoryEntry>(historyDatabasePath, getHistoryQuery(searchText));
+  const escapedSearchText = searchText.replace(/"/g, '""');
+  const { data, isLoading, permissionView } = useSQL<HistoryEntry>(
+    historyDatabasePath,
+    getHistoryQuery(escapedSearchText)
+  );
 
   if (permissionView) {
     return permissionView;

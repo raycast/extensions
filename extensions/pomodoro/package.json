@@ -10,7 +10,8 @@
     "brodelp",
     "susan_thapa",
     "mikikiv",
-    "MartinGonzalez"
+    "MartinGonzalez",
+    "nathanjms"
   ],
   "keywords": [
     "pomodoro",
@@ -370,6 +371,24 @@
       "description": "Shows confetti when interval finishes",
       "default": false,
       "label": "Shows confetti when interval finishes"
+    },
+    {
+      "name": "enableQuote",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Quote",
+      "description": "Shows a random quote from quotable.io when interval finishes",
+      "default": false,
+      "label": "Shows quote when interval finishes"
+    },
+    {
+      "name": "enableImage",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Image",
+      "description": "Shows the image configured above when interval finishes",
+      "default": true,
+      "label": "Shows image when interval finishes"
     }
   ],
   "dependencies": {

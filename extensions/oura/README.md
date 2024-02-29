@@ -14,7 +14,7 @@ Get data from your [Oura ring experience](https://ouraring.com) to keep track of
 
 ## Getting set up
 In order to get your Oura data directly available in Raycast, follow these steps:
-1. Visit [Oura on the web](https://cloud.ouraring.com/)
+1. Visit [Oura on the web](https://cloud.ouraring.com/user/sign-in)
 2. From there, click the "Developer" icon in the bottom right. It looks like this "</>".
 3. You'll land on a "Cloud API for Developers" page. Don't worry if you're not sure what this is. Select "Personal Access Tokens" in the side navigation.
 4. Select the "Create New Personal Access Token" button. 

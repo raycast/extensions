@@ -6,7 +6,8 @@
   "icon": "bring-icon.png",
   "author": "amuelli",
   "contributors": [
-    "ilian"
+    "ilian",
+    "xilopaint"
   ],
   "categories": [
     "Productivity"
@@ -33,14 +34,14 @@
     {
       "name": "index",
       "title": "Add Items to List",
-      "description": "add a new item to a Bring! shopping list",
+      "description": "Add items to a Bring! list",
       "mode": "view",
       "keywords": ["shopping", "bring", "groceries"]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.3",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
     "axios": "^1.6.2"
   },
   "devDependencies": {

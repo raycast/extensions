@@ -3,7 +3,13 @@ import { execSync } from "child_process";
 import checkAdbExists from "./utils";
 
 export default async function airplane() {
-  const adbDir = await checkAdbExists();
+  let adbDir: string;
+  try {
+    adbDir = await checkAdbExists();
+  } catch (e) {
+    await showHUD(`${e}`);
+    return;
+  }
   const enabled = execSync(`${adbDir} shell settings get global airplane_mode_on`).toString().trim() === "1";
   let toggleValue;
   if (enabled) {

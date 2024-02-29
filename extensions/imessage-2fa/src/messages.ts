@@ -3,13 +3,15 @@ import { resolve } from "path";
 import { useSQL } from "@raycast/utils";
 import { Message, Preferences, SearchType } from "./types";
 import { getPreferenceValues } from "@raycast/api";
+import { calculateLookBackMinutes } from "./utils";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
 function getBaseQuery() {
   const preferences = getPreferenceValues<Preferences>();
-  const lookBackDays = parseInt(preferences?.lookBackDays || "1") || 1;
-  const lookBackMinutes = lookBackDays * 24 * 60;
+  const lookBackUnit = preferences.lookBackUnit;
+  const lookBackAmount = parseInt(preferences?.lookBackAmount || "1");
+  const lookBackMinutes = calculateLookBackMinutes(lookBackUnit, lookBackAmount);
   let baseQuery = `
     select
       message.guid,

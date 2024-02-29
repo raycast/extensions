@@ -947,7 +947,8 @@
   "dependencies": {
     "@iamtraction/google-translate": "^2.0.1",
     "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.16"
+    "@raycast/utils": "^1.4.16",
+    "google-tts-api": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -955,8 +956,8 @@
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
-    "prettier": "^3.0.1",
     "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.0.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
