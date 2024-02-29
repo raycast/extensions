@@ -8,10 +8,12 @@ import { isDev } from "./isDev";
  * There's a better way to write this, but not today
  * */
 
-const sourceRoots = ["~/.profile", "~/.bashrc", "~/.zprofile", "~/.zshrc"].map((s) => `source ${s}`);
+const commandsThatRunOnShellStartup = ["~/.profile", "~/.bashrc", "~/.zprofile", "~/.zshrc"].map(
+  (s) => `[[ -f ${s} ]] && source ${s}`,
+);
 
-$.shell = "/bin/bash";
-$.prefix = sourceRoots.join(";") + ";";
+$.shell = "/bin/zsh";
+$.prefix = commandsThatRunOnShellStartup.join(";") + ";";
 
 $.env = {
   PATH: `/usr/bin:/opt/homebrew/bin:/usr/bin/local;${process.env.PATH}`,

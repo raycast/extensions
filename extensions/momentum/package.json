@@ -398,8 +398,8 @@
     {
       "name": "project-vue",
       "icon": "icons/vue.png",
-      "title": "Create Vue Project in JS",
-      "description": "Create a project based on Vue & Javascript",
+      "title": "Create Vue Project",
+      "description": "Create a project based on Vue",
       "mode": "no-view",
       "keywords": [
         "vue",
@@ -414,6 +414,85 @@
           "placeholder": "my_new_project",
           "type": "text",
           "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "typescript",
+          "type": "checkbox",
+          "title": "Use Typescript",
+          "description": "Use Typescript instead of Javascript",
+          "default": true,
+          "required": true,
+          "label": "Use Typescript"
+        },
+        {
+          "name": "pkgManager",
+          "title": "Default package Manager",
+          "placeholder": "npm",
+          "description": "Package Manager",
+          "default": "npm",
+          "required": true,
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "npm",
+              "value": "npm"
+            },
+            {
+              "title": "yarn",
+              "value": "yarn"
+            },
+            {
+              "title": "pnpm",
+              "value": "pnpm"
+            },
+            {
+              "title": "bun",
+              "value": "bun"
+            }
+          ]
+        },
+        {
+          "title": "Preferred IDE",
+          "name": "editor",
+          "type": "appPicker",
+          "placeholder": "code",
+          "default": "Visual Studio Code",
+          "description": "Choose your favourite IDE",
+          "required": true
+        },
+        {
+          "name": "projectsLocation",
+          "title": "Projects location",
+          "default": "~/projects",
+          "required": true,
+          "description": "Location to save your newly created projects",
+          "type": "directory",
+          "placeholder": "~/projects"
+        },
+        {
+          "name": "eslint",
+          "label": "Adds Eslint",
+          "title": "Linting",
+          "description": "Add Eslint @recommended to the newly created project",
+          "default": true,
+          "required": true,
+          "type": "checkbox"
+        },
+        {
+          "name": "bundler",
+          "type": "dropdown",
+          "title": "Bundler",
+          "description": "The bundler to use, if you specified no bundler, no bundler will be installed",
+          "default": "vite",
+          "required": false,
+          "data": [
+            {
+              "title": "Vite",
+              "value": "vite"
+            }
+          ]
         }
       ]
     }
