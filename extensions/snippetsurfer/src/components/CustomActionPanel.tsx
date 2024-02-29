@@ -1,16 +1,20 @@
 import React, { ReactNode } from "react";
 import { getPastableContent } from "../utils/SnippetsLoader";
-import { Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Icon } from "@raycast/api";
 import type { Snippet } from "../types";
 
 const CustomActionPanel = ({
   handleAction,
   snippet,
   primaryAction,
+  reloadSnippets,
+  rootPath,
 }: {
   handleAction: (s: Snippet) => void;
   snippet: Snippet;
   primaryAction: string;
+  reloadSnippets: () => void;
+  rootPath: string;
 }) => {
   const actions = [
     <Action.CopyToClipboard
@@ -35,8 +39,12 @@ const CustomActionPanel = ({
   }
 
   return (
-    <ActionPanel title="Actions">
-      <ActionPanel.Section>{reorderedActions}</ActionPanel.Section>
+    <ActionPanel>
+      <ActionPanel.Section title="Actions">{reorderedActions}</ActionPanel.Section>
+      <ActionPanel.Section title="Others">
+        <Action.OpenWith title="Open Snippets Folder" path={rootPath} />
+        <Action title="Reload Snippets" icon={Icon.RotateAntiClockwise} onAction={reloadSnippets} />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 };

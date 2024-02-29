@@ -93,7 +93,7 @@ export const ItemsGrid = ({
     <Grid
       columns={5}
       searchText={searchText}
-      searchBarPlaceholder="What would you like to add?"
+      searchBarPlaceholder="I need"
       onSearchTextChange={onSearchTextChange}
       navigationTitle={`Add Items to ${list.name}`}
       inset={Grid.Inset.Medium}

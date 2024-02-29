@@ -23,11 +23,13 @@ export type CreatePageFormValues = {
 
 type CreatePageFormProps = {
   mutate?: () => Promise<void>;
+  launchContext?: CreatePageFormValues;
   defaults?: CreatePageFormValues;
 };
 
-export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
-  const initialDatabaseId = defaults?.database;
+export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
+  const defaultValues = launchContext ?? defaults;
+  const initialDatabaseId = defaultValues?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
@@ -42,7 +44,7 @@ export function CreatePageForm({ mutate, defaults }: CreatePageFormProps) {
   for (const { id, type } of databaseProperties) {
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
-    let value = defaults?.[key];
+    let value = defaultValues?.[key];
     if (type == "date" && value) value = new Date(value as string);
     initialValues[key] = value;
   }

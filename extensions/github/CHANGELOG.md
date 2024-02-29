@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix repository name after change] - 2024-02-21
+
+- Fixes an issue where a visited repository does not reflect the correct name after being changed on GitHub.
+
 ## [Use OAuth utils] - 2024-02-15
 
 - Use new OAuth utils

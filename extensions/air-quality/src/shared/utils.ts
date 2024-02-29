@@ -1,5 +1,27 @@
+import { AxiosResponse } from "axios";
 import dayjs from "./dayjs";
 import { AirQualityData, PollutionLevelAndImplication } from "./types";
+
+export function extractErrorMessage(response: AxiosResponse): string {
+  if (!response.data) {
+    return response.status !== 200 ? `Error code: ${response.status}` : "Unknown error";
+  }
+
+  return response.data?.msg || response.data?.data || response.data?.data?.msg || "Unknown error";
+}
+
+export function cleanCityName(cityName?: string): string {
+  return cityName
+    ? cityName
+        .toLowerCase()
+        .replace(/\s/g, "")
+        .replace(/@/g, "A")
+        .replace("https://aqicn.org/city/", "")
+        .replace("https://aqicn.org/station/", "")
+        .replace(/^\//, "")
+        .replace(/\/$/, "")
+    : "here";
+}
 
 export function getPollutionLevelAndImplication(aqi: number): PollutionLevelAndImplication {
   if (aqi <= 50) {
@@ -45,15 +67,17 @@ export function getPollutionLevelAndImplication(aqi: number): PollutionLevelAndI
 }
 
 export function getForecastRecords(data: AirQualityData) {
-  return data.forecast.daily.pm25
-    .map((record) => ({
-      ...record,
-      day: dayjs(record.day),
-      pollution: getPollutionLevelAndImplication(record.avg),
-    }))
-    .filter((record) => dayjs().isBefore(record.day, "day"))
-    .map((record) => ({
-      ...record,
-      day: record.day.format("dddd, MMMM D"),
-    }));
+  return data.forecast
+    ? data.forecast.daily.pm25
+        .map((record) => ({
+          ...record,
+          day: dayjs(record.day),
+          pollution: getPollutionLevelAndImplication(record.avg),
+        }))
+        .filter((record) => dayjs().isBefore(record.day, "day"))
+        .map((record) => ({
+          ...record,
+          day: record.day.format("dddd, MMMM D"),
+        }))
+    : [];
 }

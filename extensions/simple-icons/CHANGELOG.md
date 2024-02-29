@@ -1,5 +1,10 @@
 # Simple Icons Changelog
 
+## [Improvements & Fixes] - 2024-02-28
+
+- Adjust icon size in preview
+- Fix CDN links
+
 ## [Improvements] - 2024-02-20
 
 - Now we reached 3000+ icons!

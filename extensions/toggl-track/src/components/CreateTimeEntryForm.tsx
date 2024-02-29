@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
 import { createTimeEntry, Project, Task } from "../api";
-import { useMe, useWorkspaces, useClients, useTags, useTasks } from "../hooks";
+import { useMe, useWorkspaces, useProjects, useClients, useTags, useTasks } from "../hooks";
 import { createProjectGroups } from "../helpers/createProjectGroups";
 
 interface CreateTimeEntryFormParams {
   isLoading: boolean;
-  projects: Project[];
   revalidateRunningTimeEntry: () => void;
   project?: Project;
   description?: string;
@@ -14,7 +13,6 @@ interface CreateTimeEntryFormParams {
 
 function CreateTimeEntryForm({
   isLoading,
-  projects,
   revalidateRunningTimeEntry,
   project,
   description,
@@ -22,6 +20,7 @@ function CreateTimeEntryForm({
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
+  const { projects, isLoadingProjects } = useProjects();
   const { clients, isLoadingClients } = useClients();
   const { tags, isLoadingTags } = useTags();
   const { tasks, isLoadingTasks } = useTasks();
@@ -84,7 +83,15 @@ function CreateTimeEntryForm({
 
   return (
     <Form
-      isLoading={isLoading || isLoadingMe || isLoadingWorkspaces || isLoadingClients || isLoadingTags || isLoadingTasks}
+      isLoading={
+        isLoading ||
+        isLoadingMe ||
+        isLoadingWorkspaces ||
+        isLoadingProjects ||
+        isLoadingClients ||
+        isLoadingTags ||
+        isLoadingTasks
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Time Entry" onSubmit={handleSubmit} />

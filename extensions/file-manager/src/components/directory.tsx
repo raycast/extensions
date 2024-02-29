@@ -1,7 +1,7 @@
 import fs from "node:fs";
-import { Detail, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
-import { getDirectoryData, createItem } from "../utils";
+import { getDirectoryData, createItem, getStartDirectory, iCloudDrivePath } from "../utils";
 import { FileDataType } from "../types";
 
 export function Directory(props: { path: string }) {
@@ -17,6 +17,19 @@ export function Directory(props: { path: string }) {
     const nonDirectories = directoryData.filter((file) => file.type !== "directory");
     return (
       <List searchBarPlaceholder={`Search in ${props.path}/`}>
+        {props.path === getStartDirectory() && preferences.showiCloudDrive && (
+          <List.Section title="iCloud Drive">
+            <List.Item
+              title="iCloud Drive"
+              icon={{ source: "icloud.png" }}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="Open iCloud" target={<Directory path={iCloudDrivePath()} />} />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+        )}
         <List.Section title="Directories">
           {directories.map((data) =>
             createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences),
@@ -32,6 +45,18 @@ export function Directory(props: { path: string }) {
   } else {
     return (
       <List searchBarPlaceholder={`Search in ${props.path}/`}>
+        {props.path === getStartDirectory() && preferences.showiCloudDrive && (
+          <List.Item
+            title="iCloud Drive"
+            icon={{ source: "icloud.png" }}
+            actions={
+              <ActionPanel>
+                <Action.Push title="Open iCloud" target={<Directory path={iCloudDrivePath()} />} />
+              </ActionPanel>
+            }
+          />
+        )}
+
         {directoryData.map((data) =>
           createItem(data, () => setDirectoryData(getDirectoryData(props.path)), preferences),
         )}
