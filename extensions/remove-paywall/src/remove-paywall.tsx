@@ -2,7 +2,7 @@ import { Toast, getPreferenceValues, LaunchProps, open, showToast } from "@rayca
 import { getUrl } from "./utils";
 
 export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
-  let service;
+  let service: string;
   if (props.arguments.service) {
     service = props.arguments.service;
   } else {
@@ -18,8 +18,13 @@ export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>
       throw url;
     }
 
+    if (service === "https//freedium.cfd") {
+      open(service.concat(`/${url}`));
+    }
+
     // Open the URL with the specified service
     open(`${service}/${url}`);
+
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
