@@ -14,6 +14,7 @@
     {
       "name": "capture-fullscreen",
       "title": "Capture Fullscreen",
+      "subtitle": "Dropshare",
       "description": "Captures a full screen shot and uploads with Dropshare.",
       "mode": "no-view",
       "icon": "dropshare.png"
@@ -21,6 +22,7 @@
     {
       "name": "capture-selection",
       "title": "Capture Selection",
+      "subtitle": "Dropshare",
       "description": "Captures a  selection full screen shot and uploads with Dropshare.",
       "mode": "no-view",
       "icon": "dropshare.png"
@@ -28,6 +30,7 @@
     {
       "name": "capture-pretty",
       "title": "Capture Pretty",
+      "subtitle": "Dropshare",
       "description": "Captures a pretty screen shot and uploads with Dropshare.",
       "mode": "no-view",
       "icon": "dropshare.png"
@@ -35,6 +38,7 @@
     {
       "name": "capture-recording",
       "title": "Capture Recording",
+      "subtitle": "Dropshare",
       "description": "Captures a screen recording and uploads with Dropshare.",
       "mode": "no-view",
       "icon": "dropshare.png"
@@ -42,6 +46,7 @@
     {
       "name": "upload",
       "title": "Upload File",
+      "subtitle": "Dropshare",
       "description": "Uploads file with Dropshare.",
       "mode": "no-view",
       "icon": "dropshare.png",
