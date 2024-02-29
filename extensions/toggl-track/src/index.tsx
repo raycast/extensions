@@ -6,7 +6,7 @@ import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } fro
 import { createTimeEntry, TimeEntry } from "./api";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { useTimeEntries, useRunningTimeEntry, useProjects } from "./hooks";
+import { useTimeEntries, useRunningTimeEntry } from "./hooks";
 import { formatSeconds } from "./helpers/formatSeconds";
 
 dayjs.extend(duration);
@@ -14,16 +14,15 @@ dayjs.extend(duration);
 function ListView() {
   const { timeEntries, isLoadingTimeEntries, revalidateTimeEntries } = useTimeEntries();
   const { runningTimeEntry, isLoadingRunningTimeEntry, revalidateRunningTimeEntry } = useRunningTimeEntry();
-  const { projects, isLoadingProjects } = useProjects();
 
-  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry || isLoadingProjects;
+  const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
     (acc, timeEntry) =>
       acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
         ? acc
         : [...acc, timeEntry],
-    [] as TimeEntry[],
+    [] as typeof timeEntries,
   );
 
   const totalDurationToday = useMemo(() => {
@@ -60,10 +59,7 @@ function ListView() {
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
       {runningTimeEntry && (
-        <RunningTimeEntry
-          project={projects.find(({ id }) => runningTimeEntry.project_id === id)}
-          {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }}
-        />
+        <RunningTimeEntry {...{ runningTimeEntry, revalidateRunningTimeEntry, revalidateTimeEntries }} />
       )}
       <List.Section title="Actions">
         <List.Item
@@ -76,7 +72,7 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <CreateTimeEntryForm {...{ isLoading, projects, revalidateRunningTimeEntry }} />
+                    <CreateTimeEntryForm {...{ isLoading, revalidateRunningTimeEntry }} />
                   </ExtensionContextProvider>
                 }
               />
@@ -89,13 +85,10 @@ function ListView() {
           {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
             <List.Item
               key={timeEntry.id}
-              keywords={[timeEntry.description, timeEntry.project_name || ""]}
+              keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
               title={timeEntry.description || "No description"}
-              subtitle={timeEntry.billable ? "$" : ""}
-              accessories={[
-                { text: timeEntry.project_name },
-                { icon: { source: Icon.Dot, tintColor: timeEntry.project_color } },
-              ]}
+              subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
+              accessories={[...timeEntry.tags.map((tag) => ({ tag })), { text: timeEntry.billable ? "$" : "" }]}
               icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
               actions={
                 <ActionPanel>

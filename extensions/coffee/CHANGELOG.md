@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Update] - 2024-02-21
+
+- Fixed bug that created zombie processes
+
 ## [Update] - 2024-02-14
 
 - Added support for alternative icon Menu Bar icon.

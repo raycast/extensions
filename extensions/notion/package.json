@@ -67,11 +67,10 @@
     {
       "name": "notion_token",
       "type": "password",
-      "title": "Notion Token",
+      "title": "Internal Integration Secret",
       "required": false,
-      "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
-      "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
-      "link": "https://www.notion.so/my-integrations"
+      "description": "In Notion, go to Settings & members > My connections > Develop or manage integrations > New integration",
+      "placeholder": "secret_FGDeSrZNodQuaJEqWzvxcTyrPlpBHYvdLpTZykrWEu"
     },
     {
       "name": "open_in",
@@ -85,8 +84,8 @@
   "dependencies": {
     "@mozilla/readability": "^0.5.0",
     "@notionhq/client": "^2.2.14",
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^3.3.1",
     "linkedom": "^0.16.8",
@@ -95,9 +94,9 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.17",
-    "@types/react": "18.2.55",
-    "eslint": "^8.56.0",
+    "@types/node": "20.11.20",
+    "@types/react": "18.2.58",
+    "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"

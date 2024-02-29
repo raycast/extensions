@@ -10,6 +10,7 @@ export type Color = {
 export type HistoryItem = {
   date: string;
   color: Color;
+  title?: string;
 };
 
 export type PickColorCommandLaunchProps = LaunchProps<{

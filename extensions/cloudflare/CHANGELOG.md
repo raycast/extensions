@@ -1,5 +1,10 @@
 # Changelog
 
+## [Update reserved shortcuts] - 2024-02-23
+
+- Updated `View Sites > Purge Files from Cache by URL` shortcut
+- Updated `View Pages > Open Page` shortcut
+
 ## [Add token generation link] - 2024-02-15
 
 - Added link in README to streamline onboarding

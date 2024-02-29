@@ -7,9 +7,14 @@ import { getForecastRecords, getPollutionLevelAndImplication } from "./shared/ut
 export default function Command() {
   const { data, error, isLoading } = useCachedPromise(fetchAirQuality);
 
+  if (isLoading) {
+    return <List isLoading={true} searchBarPlaceholder="Loading..." />;
+  }
+
   if (error || !data) {
     return (
       <Detail
+        markdown={`Failed to load air quality data: ${error?.message}`}
         actions={
           <ActionPanel>
             <Action
@@ -57,7 +62,6 @@ export default function Command() {
           return (
             <List.Item
               key={record.day}
-              icon={Icon.Sun}
               title={record.day}
               subtitle={`AQI: ${record.avg}`}
               accessories={[
@@ -70,6 +74,7 @@ export default function Command() {
             />
           );
         })}
+        {!data.forecast ? <List.Item icon={Icon.QuestionMarkCircle} title="Unavailable in this station" /> : null}
       </List.Section>
       <List.Section title="Attribution">
         {data.attributions.map((attribution) => (

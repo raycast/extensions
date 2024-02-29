@@ -170,12 +170,24 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "title": "Android SDK",
+      "name": "androidSDK",
+      "description": "Locate Android SDK path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/Library/Android/sdk"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.52.1",
+    "expand-tilde": "^2.0.2",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/expand-tilde": "^2.0.2",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",

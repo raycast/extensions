@@ -1,13 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { createTimeEntry, Project, Task } from "../api";
-import { useMe, useWorkspaces, useClients, useTags, useTasks, useEffectWithCachedDeps } from "../hooks";
-import { createProjectGroups, ProjectGroup } from "../helpers/createProjectGroups";
+import { useMe, useWorkspaces, useProjects, useClients, useTags, useTasks } from "../hooks";
+import { createProjectGroups } from "../helpers/createProjectGroups";
 
 interface CreateTimeEntryFormParams {
   isLoading: boolean;
-  projects: Project[];
   revalidateRunningTimeEntry: () => void;
   project?: Project;
   description?: string;
@@ -15,7 +13,6 @@ interface CreateTimeEntryFormParams {
 
 function CreateTimeEntryForm({
   isLoading,
-  projects,
   revalidateRunningTimeEntry,
   project,
   description,
@@ -23,6 +20,7 @@ function CreateTimeEntryForm({
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
+  const { projects, isLoadingProjects } = useProjects();
   const { clients, isLoadingClients } = useClients();
   const { tags, isLoadingTags } = useTags();
   const { tasks, isLoadingTasks } = useTasks();
@@ -31,15 +29,9 @@ function CreateTimeEntryForm({
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [billable, setBillable] = useState<boolean>(false);
 
-  const [projectGroups, setProjectGroups] = useCachedState<ProjectGroup[]>("projectGroups", []);
-
-  useEffectWithCachedDeps(
-    () => {
-      const projectGroups = createProjectGroups(projects, workspaces, clients);
-      setProjectGroups(projectGroups);
-    },
+  const projectGroups = useMemo(
+    () => createProjectGroups(projects, workspaces, clients),
     [projects, workspaces, clients],
-    toggleArrayIsEqual,
   );
 
   async function handleSubmit(values: { description: string }) {
@@ -91,7 +83,15 @@ function CreateTimeEntryForm({
 
   return (
     <Form
-      isLoading={isLoading || isLoadingMe || isLoadingWorkspaces || isLoadingClients || isLoadingTags || isLoadingTasks}
+      isLoading={
+        isLoading ||
+        isLoadingMe ||
+        isLoadingWorkspaces ||
+        isLoadingProjects ||
+        isLoadingClients ||
+        isLoadingTags ||
+        isLoadingTasks
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Time Entry" onSubmit={handleSubmit} />
@@ -148,7 +148,3 @@ function CreateTimeEntryForm({
 }
 
 export default CreateTimeEntryForm;
-
-function toggleArrayIsEqual<T extends { id: number }[]>(original: T, updated: T) {
-  return original.length === updated.length && original.every((item, i) => item.id == updated[i].id);
-}

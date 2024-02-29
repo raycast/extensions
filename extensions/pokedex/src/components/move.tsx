@@ -11,7 +11,7 @@ export default function PokemonMoves(props: {
   const moves = props.moves.map((m) => {
     m.pokemon_v2_move.pokemon_v2_machines =
       m.pokemon_v2_move.pokemon_v2_machines.filter(
-        (tm) => tm.version_group_id === m.pokemon_v2_versiongroup.id
+        (tm) => tm.version_group_id === m.pokemon_v2_versiongroup.id,
       );
     return m;
   });
@@ -29,14 +29,14 @@ export default function PokemonMoves(props: {
   const pokemonMoves = useMemo(() => {
     const moves = versionGroup
       ? props.moves.filter(
-          (m) => m.pokemon_v2_versiongroup.id.toString() === versionGroup
+          (m) => m.pokemon_v2_versiongroup.id.toString() === versionGroup,
         )
       : props.moves;
 
     return groupBy(
       moves,
       (m) =>
-        m.pokemon_v2_movelearnmethod.pokemon_v2_movelearnmethodnames[0].name
+        m.pokemon_v2_movelearnmethod.pokemon_v2_movelearnmethodnames[0].name,
     );
   }, [versionGroup]);
 
@@ -64,7 +64,7 @@ export default function PokemonMoves(props: {
             ? methodMoves.sort(
                 (a, b) =>
                   a.pokemon_v2_move.pokemon_v2_machines[0].machine_number -
-                  b.pokemon_v2_move.pokemon_v2_machines[0].machine_number
+                  b.pokemon_v2_move.pokemon_v2_machines[0].machine_number,
               )
             : methodMoves;
 
@@ -114,7 +114,7 @@ export default function PokemonMoves(props: {
                             ? move.pokemon_v2_move.pokemon_v2_moveeffect.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(
                                 "$effect_chance",
                                 move.pokemon_v2_move.move_effect_chance?.toString() ??
-                                  ""
+                                  "",
                               )
                             : "",
                         },
