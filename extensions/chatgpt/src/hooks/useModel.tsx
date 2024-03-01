@@ -31,7 +31,7 @@ export function useModel(): ModelHook {
         .list({ httpAgent: proxy })
         .then((res) => {
           const models = res.data;
-          setOption(models.map((x) => x.id));
+          setOption(models.filter(x => provider === "groq" || x.id.startsWith("gpt")).map((x) => x.id));
         })
         .catch(async (err) => {
           console.error(err);
