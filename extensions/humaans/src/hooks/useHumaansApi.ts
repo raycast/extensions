@@ -51,7 +51,7 @@ const resolveToastOptions = ({
   if (data) {
     return {
       style: Success,
-      title: `${startCase(endpoint)} Loaded`,
+      title: `${startCase(endpoint)} loaded`,
     };
   }
 
