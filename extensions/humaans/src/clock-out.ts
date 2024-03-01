@@ -1,9 +1,11 @@
-import { showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { clockOut, getActiveTimesheetEntry } from "./api/timesheet-entries";
 import { getMe } from "./api/me";
 
 export default async () => {
   const now = new Date();
+
+  await closeMainWindow();
 
   await showToast({
     style: Toast.Style.Animated,
