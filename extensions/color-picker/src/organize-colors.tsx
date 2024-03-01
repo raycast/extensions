@@ -99,7 +99,7 @@ function Actions({ historyItem }: { historyItem: HistoryItem }) {
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.CopyToClipboard title={`Copy as HEX`} content={getFormattedColor(color, "hex")} />
-        <Action.CopyToClipboard title={`Copy as Lowercased HEX`} content={getFormattedColor(color, "hex-lower-case")} />
+        <Action.CopyToClipboard title={`Copy as lowercased HEX`} content={getFormattedColor(color, "hex-lower-case")} />
         <Action.CopyToClipboard title={`Copy as HEX Without #`} content={getFormattedColor(color, "hex-no-prefix")} />
         <Action.CopyToClipboard title={`Copy as RGB`} content={getFormattedColor(color, "rgba")} />
         <Action.CopyToClipboard
