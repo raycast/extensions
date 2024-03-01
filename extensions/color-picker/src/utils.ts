@@ -21,7 +21,7 @@ export function getFormattedColor(
       return color.to("srgb").toString({ format: "hex" }).toLowerCase();
     }
     case "hex-no-prefix": {
-      return getHexRaw(color);
+      return color.to("srgb").toString({ format: "hex" }).replace("#", "");
     }
     case "rgba": {
       return color.to("srgb").toString({ format: "rgba_number" });
