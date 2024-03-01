@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2024-03-01
+
+- Added HEX without prefix (#) color format
+
 ## [Fixes] - 2024-02-26
 
 - Make sure that colors picked on a P3 display are converted to sRGB when displayed as hex
