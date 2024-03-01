@@ -1,6 +1,6 @@
 # Groq
 
-Groq API offers a wide range of AI models such as Mistral and Meta's Llama model.
+Groq API offers a wide range of AI models, such as Mistral and Meta's Llama model, with insanely fast speed (8x7B with 500 t/s).
 With this powerful extension, you can boost your productivity using advanced AI models without having to leave your Raycast interface.
 
 ## Getting an API Key
