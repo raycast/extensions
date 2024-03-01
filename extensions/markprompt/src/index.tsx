@@ -5,6 +5,7 @@ import {
   ActionPanel,
   Cache,
   Icon,
+  Image,
   List,
   Toast,
   getPreferenceValues,
@@ -177,15 +178,13 @@ export default function Ask() {
       isShowingDetail={prompts.length > 0}
       onSearchTextChange={setPrompt}
       searchText={prompt}
-      navigationTitle="Ask Markprompt"
       searchBarPlaceholder="Ask Markprompt…"
       throttle={false}
       filtering={false}
       actions={actionPanel}
       selectedItemId={selectedPromptId}
     >
-      {prompts &&
-        prompts.length > 0 &&
+      {prompts && prompts.length > 0 ? (
         prompts.map((x) => (
           <List.Item
             key={x.id}
@@ -199,7 +198,17 @@ export default function Ask() {
               />
             }
           />
-        ))}
+        ))
+      ) : (
+        <List.EmptyView
+          icon={{
+            mask: Image.Mask.RoundedRectangle,
+            source: "emptyview-icon.png",
+          }}
+          title="No questions yet."
+          description="Ask the first question to your Markprompt project."
+        />
+      )}
     </List>
   );
 }

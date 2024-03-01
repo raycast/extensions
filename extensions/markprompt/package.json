@@ -49,7 +49,7 @@
       "description": "Get a token in the Markprompt Project settings",
       "type": "password",
       "required": true,
-      "title": "Project token"
+      "title": "Project Token"
     }
   ],
   "packageManager": "npm@10.4.0+sha256.0e4e5986526a578a6cdc5647cf862efba03dfcb063672f90bc525433b893fba9"
