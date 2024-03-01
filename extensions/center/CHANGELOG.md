@@ -1,5 +1,11 @@
 # Center Changelog
 
+## [Update Assets of Owner API to Center v2] - 2024-29-02
+
+- Update Assets of Owner API to Center v2 API to resolve broken search
+- Added token type (ERC720, ERC1155) in search as subtitle
+- Upgraded dependencies and configs to latest raycast versions
+
 ## [Initial Version] - 2023-05-05
 
 Center Raycast Extension ships with the initial features listed below! 💯🚀
