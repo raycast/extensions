@@ -1,44 +1,47 @@
 import { getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
-import { Color, HistoryItem } from "./types";
-import convert from "color-convert";
+import { Color, DeprecatedColor, HistoryItem } from "./types";
+import ColorJS from "colorjs.io";
 
 const preferences: Preferences = getPreferenceValues();
 
-export function getFormattedColor(color: Color) {
-  switch (preferences.colorFormat) {
+export function getFormattedColor(
+  _color: Color | DeprecatedColor,
+  format?: "hex" | "hex-lower-case" | "rgba" | "rgba-percentage" | "hsla" | "hsva",
+) {
+  const color =
+    "colorSpace" in _color
+      ? new ColorJS(_color.colorSpace, [_color.red, _color.green, _color.blue], _color.alpha)
+      : new ColorJS("srgb", [_color.red / 255, _color.green / 255, _color.blue / 255], _color.alpha);
+
+  switch (format || preferences.colorFormat) {
     case "hex": {
-      return getHex(color);
+      return color.to("srgb").toString({ format: "hex" }).toUpperCase();
     }
     case "hex-lower-case": {
-      return getHex(color).toLowerCase();
+      return color.to("srgb").toString({ format: "hex" }).toLowerCase();
     }
     case "rgba": {
-      const alpha = Math.round(color.alpha / 255);
-      return `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha})`;
+      return color.to("srgb").toString({ format: "rgba_number" });
     }
     case "rgba-percentage": {
-      const red = Math.round((color.red / 255) * 100);
-      const green = Math.round((color.green / 255) * 100);
-      const blue = Math.round((color.blue / 255) * 100);
-      const alpha = Math.round(color.alpha / 255);
-      return `rgba(${red}%, ${green}%, ${blue}%, ${alpha})`;
+      return color.to("srgb").toString({ format: "rgba" });
     }
     case "hsla": {
-      const hsl = convert.rgb.hsl(color.red, color.green, color.blue);
-      const alpha = Math.round(color.alpha / 255);
-      return `hsla(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%, ${alpha})`;
+      return color.to("hsl").toString({ format: "hsla" });
     }
     case "hsva": {
-      const hsv = convert.rgb.hsv(color.red, color.green, color.blue);
-      const alpha = Math.round(color.alpha / 255);
-      return `hsva(${hsv[0]}, ${hsv[1]}%, ${hsv[2]}%, ${alpha})`;
+      return color.to("hsv").toString({ format: "color" });
     }
   }
 }
 
-export function getHex(color: Color) {
-  const hex = convert.rgb.hex(color.red, color.green, color.blue);
-  return `#${hex}`;
+export function getHex(_color: Color | DeprecatedColor) {
+  const color =
+    "colorSpace" in _color
+      ? new ColorJS(_color.colorSpace, [_color.red, _color.green, _color.blue], _color.alpha)
+      : new ColorJS("srgb", [_color.red / 255, _color.green / 255, _color.blue / 255], _color.alpha);
+
+  return color.toString({ format: "hex" }).toUpperCase();
 }
 
 export function getShortcut(index: number) {
@@ -52,8 +55,8 @@ export function getShortcut(index: number) {
   return shortcut;
 }
 
-export function getIcon(color: string | Color) {
-  const hex = typeof color === "string" ? color : getFormattedColor(color);
+export function getIcon(color: string | Color | DeprecatedColor) {
+  const hex = typeof color === "string" ? color : getHex(color);
   if (!hex) {
     return undefined;
   }
