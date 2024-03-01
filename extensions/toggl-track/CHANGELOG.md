@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Enhancements]
+
+- Show tags, project, and client on time entries.
+
 ## [Bug Fixes] - 2024-02-21
 
 - Update the `project` from in `CreateTimeEntryFrom` when projects are changed.
