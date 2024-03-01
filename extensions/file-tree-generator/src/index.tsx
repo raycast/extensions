@@ -12,17 +12,19 @@ export default function Command() {
     rootDot: false,
   });
 
-  const onDropdownChange = (value: string) => {
-    if (value === "ascii" || value === "utf-8") setOptions({ ...options, charset: value });
+  const onDropdownChange = (value: "ascii" | "utf-8") => {
+    setOptions({ ...options, charset: value });
   };
 
-  const onCheckboxChange = (id: string) => {
+  const onCheckboxChange = (id: keyof GenerateTreeOptions) => {
     return (value: boolean) => setOptions({ ...options, [id]: value });
   };
 
   const onDescriptionChange = (value: string) => {
     setDescription(value);
   };
+
+  // console.log(options);
 
   return (
     <Form
@@ -33,7 +35,13 @@ export default function Command() {
       }
     >
       <Form.TextArea id="input" title="Input" value={description} onChange={onDescriptionChange} />
-      <Form.Dropdown id="charset" title="Charset" value={options.charset} onChange={onDropdownChange} storeValue>
+      <Form.Dropdown
+        id="charset"
+        title="Charset"
+        value={options.charset}
+        onChange={(value: string) => onDropdownChange(value as "ascii" | "utf-8")}
+        storeValue
+      >
         <Form.Dropdown.Item value="ascii" title="ASCII" />
         <Form.Dropdown.Item value="utf-8" title="UTF-8" />
       </Form.Dropdown>
@@ -57,7 +65,12 @@ export default function Command() {
         onChange={onCheckboxChange("rootDot")}
         storeValue
       />
-      <Form.TextArea id="output" title="Output" value={generateTree(parseInput(description), options)} />
+      <Form.TextArea
+        id="output"
+        title="Output"
+        value={generateTree(parseInput(description), options)}
+        onChange={() => {}}
+      />
     </Form>
   );
 }
