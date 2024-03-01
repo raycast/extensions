@@ -107,11 +107,9 @@ export default function AskView(props: { arguments: { query?: string }; fallback
         />
       )}
       <Form.Dropdown id="selectedModel" title="Selected Model" defaultValue={model_override} onChange={setUsedModel}>
-        {changeModels
-          .filter((model) => !model.id.includes("online"))
-          .map((model) => (
-            <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
-          ))}
+        {changeModels.map((model) => (
+          <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
+        ))}
       </Form.Dropdown>
     </Form>
   );
