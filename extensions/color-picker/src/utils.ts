@@ -47,11 +47,6 @@ export function getHex(_color: Color | DeprecatedColor) {
   return color.toString({ format: "hex" }).toUpperCase();
 }
 
-export function getHexRaw(color: Color) {
-  const hex = convert.rgb.hex(color.red, color.green, color.blue);
-  return `${hex}`;
-}
-
 export function getShortcut(index: number) {
   const key = index + 1;
 
