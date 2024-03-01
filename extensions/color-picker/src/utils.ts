@@ -6,7 +6,7 @@ const preferences: Preferences = getPreferenceValues();
 
 export function getFormattedColor(
   _color: Color | DeprecatedColor,
-  format?: "hex" | "hex-lower-case" | "rgba" | "rgba-percentage" | "hsla" | "hsva",
+  format?: "hex" | "hex-lower-case" | "hex-no-prefix" | "rgba" | "rgba-percentage" | "hsla" | "hsva",
 ) {
   const color =
     "colorSpace" in _color
