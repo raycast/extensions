@@ -3,8 +3,7 @@ import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import get from "lodash/get";
 import startCase from "lodash/startCase";
-
-const BASE_URL = "https://app.humaans.io/api/";
+import { BASE_URL, USER_AGENT } from "../constants";
 
 type ToastResolveProps = {
   isLoading: boolean;
@@ -85,6 +84,7 @@ export const useHumaansApi = (endpoint: string, { isList = false, shouldShowToas
     keepPreviousData: false,
     headers: {
       Authorization: `Bearer ${apiKey}`,
+      "User-Agent": USER_AGENT,
     },
   });
 
