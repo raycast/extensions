@@ -81,7 +81,7 @@
           "value": "hsla"
         },
         {
-          "title": "HSVA - hsva(0, 100%, 100%, 1)",
+          "title": "HSVA - color(hsv 43.082 81.145 100)",
           "value": "hsva"
         }
       ],
@@ -96,11 +96,10 @@
   "dependencies": {
     "@raycast/api": "^1.68.0",
     "@raycast/utils": "^1.10.1",
-    "color-convert": "^2.0.1"
+    "colorjs.io": "^0.4.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/color-convert": "^2.0.3",
     "@types/node": "^20.10.1",
     "@types/react": "^18.2.39",
     "eslint": "^8.54.0",
