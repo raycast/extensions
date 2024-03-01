@@ -145,11 +145,12 @@ export default function Ask(props: { conversation?: Conversation }) {
       searchBarAccessory={
         <ModelDropdown models={models.data} onModelChange={setSelectedModelId} selectedModel={selectedModelId} />
       }
-      onSelectionChange={(id) => {
-        if (id !== chats.selectedChatId) {
-          chats.setSelectedChatId(id);
-        }
-      }}
+      // FIXME: https://github.com/raycast/extensions/issues/10844
+      // onSelectionChange={(id) => {
+      //   if (id !== chats.selectedChatId) {
+      //     chats.setSelectedChatId(id);
+      //   }
+      // }}
       searchBarPlaceholder={chats.data.length > 0 ? "Ask another question..." : "Ask a question..."}
     >
       <ChatView

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Feature] - 2024-03-01
+
+- **Break Change**: Remove `useApiEndpoint` `useAzure` and `azureEndpoint` from the settings; use `apiEndpoint` instead `azureEndpoint`, use `apiEndpoint` empty or not instead originally enable checkbox
+- Feature: Integrate [Ollama](https://ollama.com/), [Groq](https://console.groq.com/playground)
+- Chore: remove `onSelectionChange` due to [issue](https://github.com/raycast/extensions/issues/10844)
+
 ## [Feature] - 2024-02-21
 
 - Feature: Integrate awesome-chatgpt-prompts project

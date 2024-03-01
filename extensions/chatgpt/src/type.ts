@@ -37,6 +37,7 @@ export interface Model {
   option: "gpt-3.5-turbo" | "gpt-3.5-turbo-0301" | "gpt-4" | "gpt-4-0314" | "gpt-4-32k" | "gpt-4-32k-0314" | string;
   temperature: string;
   pinned: boolean;
+  provider?: "openai" | "azure" | "ollama" | "groq";
 }
 
 type PromiseFunctionNoArg = () => Promise<void>;
@@ -103,12 +104,10 @@ export interface ChatViewProps extends ChangeModelProp {
 }
 
 export interface ConfigurationPreferences {
+  provider: "openai" | "azure" | "ollama" | "groq";
   apiKey: string;
-  useAzure: boolean;
-  azureEndpoint: string;
-  azureDeployment: string;
-  useApiEndpoint: boolean;
   apiEndpoint: string;
+  azureDeployment: string;
 }
 
 export interface CSVPrompt {

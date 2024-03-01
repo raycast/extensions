@@ -66,16 +66,59 @@
   ],
   "keywords": [
     "chat",
-    "gpt"
+    "gpt",
+    "ollama",
+    "groq"
   ],
   "preferences": [
     {
+      "name": "provider",
+      "label": "AI ability Provider",
+      "description": "Choose the AI ability provider",
+      "type": "dropdown",
+      "title": "AI Provider",
+      "default": "openai",
+      "data": [
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Azure OpenAI",
+          "value": "azure"
+        },
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        },
+        {
+          "title": "Groq",
+          "value": "groq"
+        }
+      ],
+      "required": false
+    },
+    {
       "name": "apiKey",
       "label": "Open AI API Key",
-      "description": "Enter your personal Open AI API Key",
+      "description": "Enter your personal API Key",
       "type": "password",
       "title": "API Key",
       "required": true
+    },
+    {
+      "description": "Custom API endpoint, and also mean Azure OpenAI endpoint",
+      "name": "apiEndpoint",
+      "required": false,
+      "title": "API Endpoint",
+      "type": "textfield"
+    },
+    {
+      "name": "azureDeployment",
+      "description": "Leave empty if you are not using Azure OpenAI",
+      "type": "textfield",
+      "title": "Azure Deployment",
+      "required": false
     },
     {
       "name": "useStream",
@@ -130,22 +173,6 @@
       "title": "Text-to-Speech",
       "required": false,
       "default": false
-    },
-    {
-      "default": false,
-      "description": "Change the OpenAI's default API endpoint to custom endpoint",
-      "label": "Change API Endpoint",
-      "name": "useApiEndpoint",
-      "required": false,
-      "title": "Use API Endpoint",
-      "type": "checkbox"
-    },
-    {
-      "description": "Custom API endpoint",
-      "name": "apiEndpoint",
-      "required": false,
-      "title": "API Endpoint",
-      "type": "textfield"
     },
     {
       "name": "useProxy",
@@ -208,29 +235,6 @@
       "description": "Leave empty if doesn't have",
       "type": "password",
       "title": "Proxy Password",
-      "required": false
-    },
-    {
-      "name": "useAzure",
-      "label": "Use Azure OpenAI",
-      "description": "Use Azure OPENAI rather than OPENAI",
-      "type": "checkbox",
-      "title": "Use Azure OpenAI",
-      "default": false,
-      "required": false
-    },
-    {
-      "name": "azureEndpoint",
-      "description": "Leave empty if you are not using Azure OpenAI",
-      "type": "textfield",
-      "title": "Azure Endpoint",
-      "required": false
-    },
-    {
-      "name": "azureDeployment",
-      "description": "Leave empty if you are not using Azure OpenAI",
-      "type": "textfield",
-      "title": "Azure Deployment",
       "required": false
     }
   ],

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Model, ModelHook } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useProxy } from "./useProxy";
+import fetch from "node-fetch";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -21,16 +22,16 @@ export function useModel(): ModelHook {
   const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
   const proxy = useProxy();
-  const { useAzure } = getConfiguration();
+  const { provider, apiEndpoint } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
 
   useEffect(() => {
-    if (!useAzure) {
+    if (["openai", "groq"].includes(provider)) {
       gpt.models
         .list({ httpAgent: proxy })
         .then((res) => {
           const models = res.data;
-          setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
+          setOption(models.map((x) => x.id));
         })
         .catch(async (err) => {
           console.error(err);
@@ -54,8 +55,19 @@ export function useModel(): ModelHook {
         .finally(() => {
           setFetching(false);
         });
-    } else {
+    } else if (provider === "azure") {
       setFetching(false);
+    } else {
+      // ollama
+      const endpoint = apiEndpoint.trim().length === 0 ? "http://localhost:11434" : apiEndpoint;
+      // https://github.com/ollama/ollama/blob/main/docs/api.md#list-local-models
+      const url = new URL(endpoint).origin + "/api/tags";
+      fetch(url)
+        .then(async (res) => {
+          const models: { models: { name: string }[] } = await res.json();
+          setOption(models.models.map((x) => x.name.replace(":latest", "")));
+        })
+        .finally(() => setFetching(false));
     }
   }, [gpt]);
 

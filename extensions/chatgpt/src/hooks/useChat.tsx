@@ -59,7 +59,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
     const getHeaders = function () {
       const config = getConfiguration();
-      if (!config.useAzure) {
+      if (config.provider !== "azure") {
         return { apiKey: {}, params: {} };
       }
       return {

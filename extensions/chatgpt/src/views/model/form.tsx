@@ -3,6 +3,7 @@ import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { CSVPrompt, Model, ModelHook } from "../../type";
 import { parse } from "csv-parse/sync";
+import { getConfiguration } from "../../hooks/useChatGPT";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
@@ -14,12 +15,13 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       if (typeof updatedModel.temperature === "string") {
         updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
       }
+      const { provider } = getConfiguration();
       if (props.model) {
         const toast = await showToast({
           title: "Update your model...",
           style: Toast.Style.Animated,
         });
-        use.models.update({ ...updatedModel, id: props.model.id, created_at: props.model.created_at });
+        use.models.update({ ...updatedModel, id: props.model.id, created_at: props.model.created_at, provider });
         toast.title = "Model updated!";
         toast.style = Toast.Style.Success;
       } else {
@@ -31,6 +33,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
           ...updatedModel,
           id: uuidv4(),
           created_at: new Date().toISOString(),
+          provider,
         });
         await showToast({
           title: "Model saved",
@@ -59,8 +62,8 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     initialValues: {
       name: model?.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
-      option: model?.option ?? "gpt-3.5-turbo",
-      prompt: model?.prompt ?? "",
+      option: model?.option,
+      prompt: model?.prompt ?? "You are a helpful assistant.",
       pinned: model?.pinned ?? false,
     },
   });

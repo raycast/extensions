@@ -43,7 +43,24 @@ export function chatTransfomer(chat: Chat[], prompt: string): Message[] {
 }
 
 export const getConfigUrl = (params: ConfigurationPreferences) => {
-  if (params.useAzure) return params.azureEndpoint + "/openai/deployments/" + params.azureDeployment;
-  if (params.useApiEndpoint) return params.apiEndpoint;
-  return "https://api.openai.com/v1";
+  let endpoint;
+  switch (params.provider) {
+    case "azure":
+      return params.apiEndpoint + "/openai/deployments/" + params.azureDeployment;
+    case "openai":
+      endpoint = "https://api.openai.com/v1";
+      break;
+    case "ollama":
+      // https://ollama.com/blog/openai-compatibility
+      endpoint = "https://localhost:11434/v1";
+      break;
+    case "groq":
+      // https://console.groq.com/docs/openai
+      endpoint = "https://api.groq.com/openai/v1";
+      break;
+  }
+  if (params.apiEndpoint.trim().length === 0) {
+    return endpoint;
+  }
+  return params.apiEndpoint;
 };
