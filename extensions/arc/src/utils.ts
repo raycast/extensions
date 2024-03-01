@@ -22,13 +22,11 @@ export function getSpaceTitle(space: Space) {
 }
 
 export function findSpaceInSpaces(spaceId: string, spaces: Space[]): string | undefined {
-  for (const s of spaces) {
-    const title = getSpaceTitle(s);
-    if (title.toLowerCase() === spaceId.toLowerCase() || s.id.toString() === spaceId) {
-      return title;
-    }
-  }
-  return undefined;
+  const space = spaces.find(s => 
+     getSpaceTitle(s).toLowerCase() === spaceId.toLowerCase() || 
+     s.id.toString() === spaceId
+  );
+  return space && getSpaceTitle(space);
 }
 
 export function getKey(tab: Tab) {
