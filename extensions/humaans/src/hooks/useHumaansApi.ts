@@ -49,9 +49,10 @@ const resolveToastOptions = ({
   }
 
   if (data) {
+    const startCased = startCase(endpoint);
     return {
       style: Success,
-      title: `${startCase(endpoint)} loaded`,
+      title: `${startCased[0] + startCased.slice(1).toLowerCase()} loaded`,
     };
   }
 
