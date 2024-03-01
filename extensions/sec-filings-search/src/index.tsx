@@ -40,6 +40,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push
                   title="Next"
+                  icon={Icon.AppWindowSidebarLeft}
                   target={<Company ticker={e.symbol} />}
                 />
               </ActionPanel>
