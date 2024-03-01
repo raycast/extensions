@@ -63,7 +63,7 @@
       "required": true,
       "data": [
         {
-          "title": "12ft.io",
+          "title": "12ft",
           "value": "https://12ft.io"
         },
         {
@@ -75,7 +75,7 @@
           "value": "https://www.removepaywall.com"
         },
         {
-          "title": "Freedium.cfd (freedium.cfd)",
+          "title": "Freedium (freedium.cfd)",
           "value": "https://freedium.cfd"
         }
       ]
