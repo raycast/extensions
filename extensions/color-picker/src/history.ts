@@ -16,7 +16,7 @@ export function useHistory() {
     edit: (historyItem: HistoryItem) =>
       setHistory((previousHistory) => {
         return previousHistory.map((item) =>
-          getFormattedColor(item.color) === getFormattedColor(item.color) ? historyItem : item,
+          getFormattedColor(item.color) === getFormattedColor(historyItem.color) ? historyItem : item,
         );
       }),
     add: (color: Color) => {
