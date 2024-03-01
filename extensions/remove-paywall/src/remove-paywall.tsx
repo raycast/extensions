@@ -1,6 +1,10 @@
 import { Toast, getPreferenceValues, LaunchProps, open, showToast } from "@raycast/api";
 import { getUrl } from "./utils";
 
+interface Preferences {
+  service: string;
+}
+
 export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>) => {
   let service: string;
   if (props.arguments.service) {
@@ -16,10 +20,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.RemovePaywall }>
 
     if (typeof url !== "string") {
       throw url;
-    }
-
-    if (service === "https//freedium.cfd") {
-      open(service.concat(`/${url}`));
     }
 
     // Open the URL with the specified service
