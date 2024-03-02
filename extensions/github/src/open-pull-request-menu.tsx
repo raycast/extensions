@@ -26,24 +26,19 @@ function getMaxPullRequestsPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxitems" });
 }
 
-function getCheckStateEmoji(pr: PullRequestFieldsFragment): string | null {
-  const checkState = pr.commits.nodes ? pr.commits.nodes[0]?.commit.statusCheckRollup?.state : null;
-  switch (checkState) {
+function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): { source: Icon | string } {
+  const pullRequestStatus = pr.commits.nodes ? pr.commits.nodes[0]?.commit.statusCheckRollup?.state : null;
+  switch (pullRequestStatus) {
     case "SUCCESS":
-      return "✅";
+      return { source: Icon.Check };
     case "ERROR":
     case "FAILURE":
-      return "⚠️";
+      return { source: Icon.Xmark };
     case "PENDING":
-      return "⏱️";
+      return { source: Icon.Clock };
     default:
-      return null;
+      return { source: "pull-request.svg" };
   }
-}
-
-function joinArray(ar: (string | null | undefined)[], separator: string): string {
-  const d = ar?.filter((e) => e);
-  return d?.join(separator) || "";
 }
 
 function OpenPullRequestMenu() {
@@ -120,8 +115,8 @@ function OpenPullRequestMenu() {
               return (
                 <MenuBarItem
                   key={i.id}
-                  title={`#${i.number} ${i.title} ${joinArray([getCheckStateEmoji(i)], "")}`}
-                  icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+                  title={`#${i.number} ${i.title}`}
+                  icon={getPullRequestStatusIcon(i)}
                   tooltip={i.repository.nameWithOwner}
                   onAction={() => open(i.permalink)}
                 />
