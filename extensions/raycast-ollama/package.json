@@ -157,10 +157,10 @@
       "mode": "view",
       "arguments": [
         {
-         "name": "language",
-         "placeholder": "To Language",
-         "type": "text",
-         "required": true
+          "name": "language",
+          "placeholder": "To Language",
+          "type": "text",
+          "required": true
         }
       ]
     },
@@ -226,6 +226,7 @@
   "dependencies": {
     "@raycast/api": "^1.55.2",
     "@raycast/utils": "^1.9.0",
+    "file-type": "^19.0.0",
     "langchain": "^0.0.183",
     "mime-types": "^2.1.35",
     "node-fetch": "^3.3.2",
