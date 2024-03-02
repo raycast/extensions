@@ -1,6 +1,8 @@
 import { Toast, showToast } from "@raycast/api";
 import { useVaultItemSubscriber } from "~/components/searchVault/context/vaultListeners";
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
+import { useBitwarden } from "~/context/bitwarden";
+import { useSession } from "~/context/session";
 import { Item } from "~/types/vault";
 
 /**
@@ -9,7 +11,18 @@ import { Item } from "~/types/vault";
  * Otherwise, it will wait for the value to be retrieved from the vault.
  */
 function useGetUpdatedVaultItem() {
+  const session = useSession();
+  const bitwarden = useBitwarden();
   const getItemFromVault = useVaultItemSubscriber();
+
+  async function getItemNoCache(id: string): Promise<Item> {
+    if (session.active && session.token) {
+      throw new Error("No session token available");
+    }
+    const itemsResult = await bitwarden.getItem(id);
+    if (itemsResult.error) throw itemsResult.error;
+    return itemsResult.result;
+  }
 
   async function getItem<TResult = Item>(
     possiblyCachedItem: Item,
@@ -20,7 +33,9 @@ function useGetUpdatedVaultItem() {
     if (!valueHasSensitiveValuePlaceholder(currentValue)) return currentValue;
 
     const toast = loadingMessage ? await showToast(Toast.Style.Animated, loadingMessage) : undefined;
-    const value = selector(await getItemFromVault(possiblyCachedItem.id));
+    const value = selector(
+      await Promise.race([getItemFromVault(possiblyCachedItem.id), getItemNoCache(possiblyCachedItem.id)])
+    );
     await toast?.hide();
 
     return value;
