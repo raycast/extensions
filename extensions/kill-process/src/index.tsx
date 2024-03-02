@@ -29,7 +29,7 @@ export default function ProcessList() {
   const refreshDuration = +preferences.refreshDuration;
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
-  const backRootAfterKill = preferences.backRootAfterKill;
+  const goToRootAfterKill = preferences.goToRootAfterKill;
   const [sortByMem, setSortByMem] = useState<boolean>(preferences.sortByMem);
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
@@ -99,7 +99,7 @@ export default function ProcessList() {
     if (closeWindowAfterKill) {
       closeMainWindow();
     }
-    if (backRootAfterKill) {
+    if (goToRootAfterKill) {
       popToRoot({ clearSearchBar: clearSearchBarAfterKill });
     }
     if (clearSearchBarAfterKill) {

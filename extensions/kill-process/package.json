@@ -102,9 +102,9 @@
       "type": "checkbox"
     },
     {
-      "description": "Back to root search after killing a process",
-      "label": "Back to Root Search",
-      "name": "backRootAfterKill",
+      "description": "Go back to root search after killing a process",
+      "label": "Go back to Root Search",
+      "name": "goToRootAfterKill",
       "required": false,
       "default": false,
       "type": "checkbox"
