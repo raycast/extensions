@@ -22,9 +22,8 @@ export function getSpaceTitle(space: Space) {
 }
 
 export function findSpaceInSpaces(spaceId: string, spaces: Space[]): string | undefined {
-  const space = spaces.find(s => 
-     getSpaceTitle(s).toLowerCase() === spaceId.toLowerCase() || 
-     s.id.toString() === spaceId
+  const space = spaces.find(
+    (s) => getSpaceTitle(s).toLowerCase() === spaceId.toLowerCase() || s.id.toString() === spaceId
   );
   return space && getSpaceTitle(space);
 }
