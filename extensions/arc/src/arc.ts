@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { Space, Tab } from "./types";
 import { findSpaceInSpaces } from "./utils";
 

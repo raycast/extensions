@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import { getPriorityIcon } from "./helpers";
-import { List, Reminder, useData } from "./hooks/useData";
+import { List, Reminder, useLists } from "./hooks/useData";
 
 type Frequency = "daily" | "weekly" | "monthly" | "yearly";
 export type NewReminder = {
@@ -58,9 +58,9 @@ type CreateReminderFormProps = {
 
 export function CreateReminderForm({ draftValues, listId, mutate }: CreateReminderFormProps) {
   const { pop } = useNavigation();
-  const { data } = useData();
+  const { data, isLoading } = useLists();
 
-  const defaultList = data?.lists.find((list) => list.isDefault);
+  const defaultList = data?.find((list) => list.isDefault);
 
   const { selectDefaultList } = getPreferenceValues<Preferences.CreateReminder>();
   const { itemProps, handleSubmit, focus, values, setValue } = useForm<CreateReminderValues>({
@@ -196,6 +196,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />
@@ -263,7 +264,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       </Form.Dropdown>
 
       <Form.Dropdown {...itemProps.listId} title="List" storeValue>
-        {data?.lists.map((list) => {
+        {data?.map((list) => {
           return (
             <Form.Dropdown.Item
               key={list.id}

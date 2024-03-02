@@ -57,7 +57,8 @@ export default function Ask(props: { conversation?: Conversation }) {
         <QuestionForm
           initialQuestion={question.data}
           onSubmit={(question) => {
-            chats.ask(question, conversation.model), pop();
+            chats.ask(question, conversation.model);
+            pop();
           }}
           models={models.data}
           selectedModel={selectedModelId}
@@ -93,12 +94,13 @@ export default function Ask(props: { conversation?: Conversation }) {
 
   useEffect(() => {
     const selectedModel = models.data.find((x) => x.id === selectedModelId);
+    //console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
       ...conversation,
       model: selectedModel ?? { ...conversation.model },
       updated_at: new Date().toISOString(),
     });
-  }, [selectedModelId]);
+  }, [selectedModelId, models.data]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>
@@ -117,9 +119,9 @@ export default function Ask(props: { conversation?: Conversation }) {
   return (
     <List
       searchText={question.data}
-      isShowingDetail={chats.data.length > 0 ? true : false}
+      isShowingDetail={chats.data.length > 0}
       filtering={false}
-      isLoading={isLoading ? isLoading : question.isLoading ? question.isLoading : chats.isLoading}
+      isLoading={isLoading || question.isLoading || chats.isLoading || models.isLoading}
       onSearchTextChange={question.update}
       throttle={false}
       navigationTitle={"Ask"}

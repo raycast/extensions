@@ -60,6 +60,14 @@
       "type": "textfield",
       "required": true,
       "default": "~/Library/Android/sdk"
+    },
+    {
+      "title": "Android AVD",
+      "name": "androidAVD",
+      "description": "Locate Android AVD path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/.android/avd"
     }
   ],
   "scripts": {

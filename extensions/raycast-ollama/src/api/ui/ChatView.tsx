@@ -7,7 +7,12 @@ import {
   RaycastChatMessage,
   RaycastImage,
 } from "../types";
-import { ErrorOllamaCustomModel, ErrorOllamaModelNotInstalled } from "../errors";
+import {
+  ErrorOllamaCustomModel,
+  ErrorOllamaModelNotInstalled,
+  ErrorOllamaModelNotMultimodal,
+  ErrorRaycastModelNotConfiguredOnLocalStorage,
+} from "../errors";
 import { SetModelView } from "./SetModelView";
 import * as React from "react";
 import { Action, ActionPanel, Detail, Icon, List, LocalStorage, Toast, showToast } from "@raycast/api";
@@ -110,8 +115,19 @@ export function ChatView(): JSX.Element {
    * @param {Error} err - Error object.
    */
   async function HandleError(err: Error) {
-    if (err instanceof ErrorOllamaModelNotInstalled) {
-      await showToast({ style: Toast.Style.Failure, title: err.message, message: err.suggest });
+    if (
+      err instanceof ErrorOllamaModelNotInstalled ||
+      err instanceof ErrorOllamaModelNotMultimodal ||
+      err == ErrorRaycastModelNotConfiguredOnLocalStorage
+    ) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+        message:
+          err instanceof ErrorOllamaModelNotInstalled || err instanceof ErrorOllamaModelNotMultimodal
+            ? err.suggest
+            : undefined,
+      });
       setLoading(false);
       setShowSelectModelForm(true);
       return;
@@ -130,177 +146,275 @@ export function ChatView(): JSX.Element {
   }
 
   /**
+   * Verify required Ollama version based on used tags.
+   *
+   * @param {PromptTags | undefined} tag - Tag used on prompt.
+   * @returns {Promise<boolean>} Return `false` if installed Ollama Version doesn't meat minimum required version otherwise `true`.
+   */
+  async function InferenceVerifyOllamaVersion(tag: PromptTags | undefined = undefined): Promise<boolean> {
+    const OllamaVersionMin = tag === PromptTags.IMAGE ? "0.1.15" : "0.1.14";
+    if (OllamaVersion && !VerifyOllamaVersion(OllamaVersion, OllamaVersionMin)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Ollama API version is outdated, at least ${OllamaVersionMin} is required.`,
+      });
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Verify required Model capabilities.
+   *
+   * @param {PromptTags | undefined} tag - Tag used on prompt.
+   * @returns {Promise<boolean>} Return `false` if required Model is not installed or configured.
+   */
+  async function InferenceVerifyModel(tag: PromptTags | undefined = undefined): Promise<boolean> {
+    switch (tag) {
+      case PromptTags.IMAGE:
+        if (!ModelImage) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "'/image' tag require a Model with Vision capabilities",
+          });
+          return false;
+        }
+        break;
+      default:
+        if (!ModelGenerate) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Model not configured",
+          });
+          return false;
+        }
+        break;
+    }
+    return true;
+  }
+
+  /**
+   * Get Images from Finder if no file is selected fallback to Clipboard.
+   *
+   * @returns {Promise<RaycastImage[] | undefined>}
+   */
+  async function InferenceTagImage(): Promise<RaycastImage[] | undefined> {
+    return await GetImage().catch(async (err) => {
+      showToast({ style: Toast.Style.Failure, title: err.message });
+      return undefined;
+    });
+  }
+
+  /**
+   * Get Document based on chosed tag.
+   *
+   * @param {string} prompt.
+   * @param {PromptTags} tag.
+   * @returns {Promise<Document<Record<string, any>>[] | undefined>}
+   */
+  async function InferenceTagDocument(
+    prompt: string,
+    tag: PromptTags
+  ): Promise<Document<Record<string, any>>[] | undefined> {
+    const Model = ModelEmbedding ? ModelEmbedding.name : ModelGenerate?.name;
+    if (!Model) return undefined;
+
+    const ChainType = ChainPreferences ? ChainPreferences.type : Chains.STUFF;
+    const ModelNumCtx = ModelGenerateModelfile?.parameter.num_ctx ? ModelGenerateModelfile.parameter.num_ctx : 2048;
+    const ModelTemplateLength = ModelGenerateModelfile?.template ? ModelGenerateModelfile.template.length : 0;
+    const ChainDocumentsChunkSize = ChainType === Chains.REFINE ? ModelNumCtx * 3.5 : undefined;
+
+    let ChainDocumentsNumber = 0;
+
+    switch (ChainType) {
+      case Chains.STUFF:
+        ChainDocumentsNumber = Math.trunc(((ModelNumCtx * 4 - prompt.length - ModelTemplateLength) / 1000) * 0.5);
+        break;
+      case Chains.REFINE:
+        ChainDocumentsNumber = ChainPreferences?.parameter?.docsNumber ? ChainPreferences.parameter.docsNumber : 5;
+        break;
+    }
+
+    await showToast({ style: Toast.Style.Animated, title: "📄 Loading Documents." });
+    return await GetDocument(prompt, Model, [tag], ChainDocumentsNumber, ChainDocumentsChunkSize).catch(
+      async (e: Error) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: e.message,
+        });
+        return undefined;
+      }
+    );
+  }
+
+  /**
+   * Get Messages History.
+   *
+   * @returns {OllamaApiChatMessage[] | undefined}
+   */
+  function InferenceHistoryMessages(): OllamaApiChatMessage[] | undefined {
+    const HistoryLength = Number(preferences.ollamaChatHistoryMessagesNumber)
+      ? Number(preferences.ollamaChatHistoryMessagesNumber)
+      : 20;
+    const History = ChatHistory.slice(ChatHistory.length - HistoryLength).flatMap((h) => h.messages);
+    if (History.length > 0) return History;
+    return undefined;
+  }
+
+  /**
+   * Get Inference Stream
+   *
+   * @param {string} prompt.
+   * @param {PromptTags | undefined} tag.
+   * @param {OllamaApiChatMessage[] | undefined} history.
+   * @returns {Promise<[EventEmitter | undefined, RaycastImage[] | undefined, Document<Record<string, any>>[] | undefined]>}
+   */
+  async function InferenceStream(
+    prompt: string,
+    tag: PromptTags | undefined = undefined,
+    history: OllamaApiChatMessage[] | undefined = undefined
+  ): Promise<[EventEmitter | undefined, RaycastImage[] | undefined, Document<Record<string, any>>[] | undefined]> {
+    let stream: EventEmitter | undefined;
+    let images: RaycastImage[] | undefined;
+    let docs: Document<Record<string, any>>[] | undefined;
+    switch (tag) {
+      case PromptTags.IMAGE:
+        images = await InferenceTagImage();
+        if (!images) return [stream, images, docs];
+        stream = await LLMChain(
+          prompt,
+          ModelImage?.name as string,
+          history,
+          images.map((i) => i.base64)
+        );
+        await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Images." });
+        break;
+      case PromptTags.FILE:
+        docs = await InferenceTagDocument(prompt, tag);
+        if (!docs) return [stream, images, docs];
+        switch (ChainPreferences?.type) {
+          case Chains.REFINE:
+            stream = await loadQARefineChain(prompt, ModelGenerate?.name as string, docs, history);
+            break;
+          default:
+            stream = await loadQAStuffChain(prompt, ModelGenerate?.name as string, docs, history);
+            break;
+        }
+        await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Documents." });
+        break;
+      default:
+        stream = await LLMChain(prompt, ModelGenerate?.name as string, history);
+        await showToast({ style: Toast.Style.Animated, title: "🧠 Inference." });
+        break;
+    }
+    return [stream, images, docs];
+  }
+
+  /**
+   * Start Inference Stream Listener
+   *
+   * @param {EventEmitter} stream.
+   * @param {string} prompt.
+   * @param {PromptTags | undefined} tags.
+   * @param {RaycastImage[] | undefined} images.
+   * @param {Document<Record<string, any>>[] | undefined} docs.
+   */
+  async function InferenceStreamListener(
+    stream: EventEmitter,
+    prompt: string,
+    tag: PromptTags | undefined = undefined,
+    images: RaycastImage[] | undefined = undefined,
+    docs: Document<Record<string, any>>[] | undefined
+  ): Promise<void> {
+    setQuery("");
+
+    SetChatHistory((prevState) => {
+      prevState.push({
+        model: ModelGenerate ? ModelGenerate.name : "",
+        created_at: "",
+        tags: tag ? [tag] : undefined,
+        sources: docs ? [...new Set(docs.map((d) => d.metadata.source))] : undefined,
+        images: images,
+        messages: [
+          { role: "user", content: prompt },
+          { role: "assistant", content: "" },
+        ],
+        done: false,
+      } as RaycastChatMessage);
+      setSelectedAnswer((prevState.length - 1).toString());
+      return [...prevState];
+    });
+
+    stream.on("data", (data) => {
+      SetChatHistory((prevState) => {
+        prevState[prevState.length - 1].messages[1].content += data;
+        return [...prevState];
+      });
+    });
+
+    stream.on("done", async (data) => {
+      await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
+      SetChatHistory((prevState) => {
+        const i = prevState.length - 1;
+        prevState[i].model = data.model;
+        prevState[i].created_at = data.created_at;
+        prevState[i].total_duration = data.total_duration;
+        prevState[i].load_duration = data.load_duration;
+        prevState[i].prompt_eval_count = data.prompt_eval_count;
+        prevState[i].prompt_eval_duration = data.prompt_eval_duration;
+        prevState[i].eval_count = data.eval_count;
+        prevState[i].eval_duration = data.eval_duration;
+        prevState[i].done = true;
+        return [...prevState];
+      });
+      setLoading(false);
+    });
+  }
+
+  /**
    * Start Inference with Ollama API.
    * @returns {Promise<void>}
    */
   async function Inference(): Promise<void> {
-    try {
-      const [prompt, tags] = GetTags(query);
+    setLoading(true);
 
-      setLoading(true);
-      setQuery("");
-
-      let docs: Document<Record<string, any>>[] | undefined = undefined;
-      let images: RaycastImage[] | undefined = undefined;
-
-      if (OllamaVersion && tags.length > 0 && tags.find((t) => t === PromptTags.IMAGE)) {
-        if (!VerifyOllamaVersion(OllamaVersion, "0.1.15")) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Ollama API version is outdated, at least v0.1.15 is required for this feature.",
-          });
-          setLoading(false);
-          return;
-        }
-        if (!ModelImage) {
-          await showToast({ style: Toast.Style.Failure, title: "No Image Model is selected." });
-          setLoading(false);
-          setShowSelectModelForm(true);
-          return;
-        }
-        images = await GetImage().catch(async (err) => {
-          showToast({ style: Toast.Style.Failure, title: err.message });
-          return undefined;
-        });
-        if (!images) {
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (tags.length > 0 && tags.find((t) => t !== PromptTags.IMAGE)) {
-        await showToast({ style: Toast.Style.Animated, title: "📄 Loading Documents." });
-
-        let DocsNumber: number | undefined;
-        if (ModelGenerateModelfile)
-          if (ChainPreferences === undefined || ChainPreferences.type === Chains.STUFF) {
-            DocsNumber = Math.trunc(
-              ((ModelGenerateModelfile.parameter.num_ctx * 4 - prompt.length - ModelGenerateModelfile.template.length) /
-                1000) *
-                0.5
-            );
-            if (ModelGenerate)
-              docs = await GetDocument(
-                prompt,
-                ModelEmbedding ? ModelEmbedding.name : ModelGenerate.name,
-                tags,
-                DocsNumber
-              );
-          } else if (ChainPreferences.type === Chains.REFINE && ChainPreferences.parameter?.docsNumber) {
-            DocsNumber = ChainPreferences.parameter.docsNumber;
-            if (ModelGenerate)
-              docs = await GetDocument(
-                prompt,
-                ModelEmbedding ? ModelEmbedding.name : ModelGenerate.name,
-                tags,
-                DocsNumber,
-                ModelGenerateModelfile.parameter.num_ctx * 3.5
-              );
-          }
-      }
-
-      let history: OllamaApiChatMessage[] | undefined = [];
-      const historyN = Number(preferences.ollamaChatHistoryMessagesNumber)
-        ? Number(preferences.ollamaChatHistoryMessagesNumber)
-        : 20;
-      ChatHistory.slice(ChatHistory.length - historyN).forEach((h) => history && history.push(...h.messages));
-      if (history.length === 0) history = undefined;
-
-      let stream: EventEmitter | undefined;
-      if (docs && docs.length > 0) {
-        if (ChainPreferences === undefined || ChainPreferences.type === Chains.STUFF) {
-          if (ModelImage && images) {
-            await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Documents and Images." });
-            stream = await loadQAStuffChain(
-              prompt,
-              ModelImage.name,
-              docs,
-              history,
-              images.map((i) => i.base64)
-            );
-          } else if (ModelGenerate) {
-            await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Documents." });
-            stream = await loadQAStuffChain(prompt, ModelGenerate.name, docs, history);
-          }
-        } else if (ChainPreferences.type === Chains.REFINE) {
-          if (ModelImage && images) {
-            await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Documents and Images." });
-            stream = await loadQARefineChain(
-              prompt,
-              ModelImage.name,
-              docs,
-              history,
-              images.map((i) => i.base64)
-            );
-          } else if (ModelGenerate) {
-            await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Documents." });
-            stream = await loadQARefineChain(prompt, ModelGenerate.name, docs, history);
-          }
-        }
-      } else {
-        if (ModelImage && images) {
-          await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Images." });
-          stream = await LLMChain(
-            prompt,
-            ModelImage.name,
-            history,
-            images.map((i) => i.base64)
-          );
-        } else if (ModelGenerate) {
-          await showToast({ style: Toast.Style.Animated, title: "🧠 Inference." });
-          stream = await LLMChain(prompt, ModelGenerate.name, history);
-        }
-      }
-
-      if (stream) {
-        SetChatHistory((prevState) => {
-          prevState.push({
-            model: ModelGenerate ? ModelGenerate.name : "",
-            created_at: "",
-            tags: tags.length > 0 ? tags : undefined,
-            sources: docs ? [...new Set(docs.map((d) => d.metadata.source))] : undefined,
-            images: images,
-            messages: [
-              { role: "user", content: prompt },
-              { role: "assistant", content: "" },
-            ],
-            done: false,
-          } as RaycastChatMessage);
-          setSelectedAnswer((prevState.length - 1).toString());
-          return [...prevState];
-        });
-
-        stream.on("data", (data) => {
-          SetChatHistory((prevState) => {
-            prevState[prevState.length - 1].messages[1].content += data;
-            return [...prevState];
-          });
-        });
-
-        stream.on("done", async (data) => {
-          await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
-          SetChatHistory((prevState) => {
-            const i = prevState.length - 1;
-            prevState[i].model = data.model;
-            prevState[i].created_at = data.created_at;
-            prevState[i].total_duration = data.total_duration;
-            prevState[i].load_duration = data.load_duration;
-            prevState[i].prompt_eval_count = data.prompt_eval_count;
-            prevState[i].prompt_eval_duration = data.prompt_eval_duration;
-            prevState[i].eval_count = data.eval_count;
-            prevState[i].eval_duration = data.eval_duration;
-            prevState[i].done = true;
-            return [...prevState];
-          });
-          setLoading(false);
-        });
-      } else {
-        await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
-        setLoading(false);
-      }
-    } catch (err) {
-      await HandleError(err as Error);
+    // Find Tags.
+    const [prompt, tags] = GetTags(query);
+    if (tags.length > 1) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Multiple tags is not allowed",
+      });
+      setLoading(false);
+      return;
     }
+    const inferenceTag = tags[0];
+
+    // Check required Ollama Version.
+    if (!(await InferenceVerifyOllamaVersion(inferenceTag))) {
+      setLoading(false);
+      return;
+    }
+
+    // Check Model is Configured
+    if (!(await InferenceVerifyModel(inferenceTag))) {
+      setLoading(false);
+      setShowSelectModelForm(true);
+      return;
+    }
+
+    // Loading Message History.
+    const history = InferenceHistoryMessages();
+
+    // Init Inferance Stream
+    const [stream, images, docs] = await InferenceStream(prompt, inferenceTag, history);
+    if (!stream) {
+      setLoading(false);
+      return;
+    }
+
+    // Listen on Inference Stream
+    await InferenceStreamListener(stream, prompt, inferenceTag, images, docs);
   }
 
   /**
@@ -527,7 +641,9 @@ export function ChatView(): JSX.Element {
       }
       searchBarPlaceholder="Ask..."
       searchText={query}
-      onSearchTextChange={setQuery}
+      onSearchTextChange={(t) => {
+        if (!loading) setQuery(t);
+      }}
       selectedItemId={selectedAnswer}
       actions={
         !(

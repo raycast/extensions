@@ -20,7 +20,9 @@
     "ppy",
     "lin",
     "marcotf",
-    "qeude"
+    "qeude",
+    "nesl247",
+    "xilopaint"
   ],
   "categories": [
     "Developer Tools",
@@ -211,7 +213,7 @@
           "name": "includeOpen",
           "type": "checkbox",
           "required": false,
-          "title": "Categories To Display",
+          "title": "Categories to Display",
           "default": true,
           "label": "Opened",
           "description": "Includes pull request you opened in the menu list."

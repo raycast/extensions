@@ -1,18 +1,11 @@
-import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
-import { getReminders, createReminder } from "swift:../swift/AppleReminders";
+import { createReminder, getLists } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
-import { Data } from "./hooks/useData";
 
-export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddReminder }) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
   try {
-    const data: Data = await getReminders();
-
-    const lists = data.lists.map((list) => {
-      return `${list.title}:${list.id}`;
-    });
-
     const preferences = getPreferenceValues<Preferences.QuickAddReminder>();
 
     if (preferences.shouldCloseMainWindow) {
@@ -20,6 +13,20 @@ export default async function Command(props: LaunchProps & { arguments: Argument
     } else {
       await showToast({ style: Toast.Style.Animated, title: "Adding to-do" });
     }
+
+    if (!environment.canAccess(AI) || preferences.dontUseAI) {
+      await createReminder({ title: props.arguments.text, description: props.arguments.notes });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Added "${props.arguments.text}" to default list`,
+      });
+      return;
+    }
+
+    const lists = (await getLists()).map((list) => {
+      return `${list.title}:${list.id}`;
+    });
 
     const now = new Date();
     const today = format(now, "yyyy-MM-dd");

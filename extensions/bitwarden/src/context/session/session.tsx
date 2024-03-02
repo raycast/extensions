@@ -42,6 +42,12 @@ export function SessionProvider(props: SessionProviderProps) {
 
       const restoredSession = await getSavedSession();
       if (restoredSession.token) bitwarden.setSessionToken(restoredSession.token);
+
+      if (bitwarden.wasCliUpdated) {
+        await bitwarden.logout("Bitwarden has been updated. Please login again.");
+        return;
+      }
+
       dispatch({ type: "loadSavedState", ...restoredSession });
       if (restoredSession.shouldLockVault) await bitwarden.lock(restoredSession.lockReason, true);
     } catch (error) {
