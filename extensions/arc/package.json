@@ -24,7 +24,6 @@
   ],
   "license": "MIT",
   "contributors": [
-    "pomdtr",
     "zach",
     "ankitchouhan1020",
     "pernielsentikaer",
@@ -35,6 +34,9 @@
     "loris",
     "bdsqqq",
     "xilopaint"
+  ],
+  "pastContributors": [
+    "pomdtr"
   ],
   "commands": [
     {
