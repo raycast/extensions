@@ -16,7 +16,7 @@ function useGetUpdatedVaultItem() {
   const getItemFromVault = useVaultItemSubscriber();
 
   async function getItemNoCache(id: string): Promise<Item> {
-    if (session.active && session.token) {
+    if (!session.active || !session.token) {
       throw new Error("No session token available");
     }
     const itemsResult = await bitwarden.getItem(id);
