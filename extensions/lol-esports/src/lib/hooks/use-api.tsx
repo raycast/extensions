@@ -11,7 +11,7 @@ export function useAPI<T>({
 }) {
   const url = new URL(`/persisted/gw/${query}`, "https://esports-api.lolesports.com");
 
-  url.searchParams.set("hl", Intl.DateTimeFormat().resolvedOptions().locale);
+  url.searchParams.set("hl", "en-US");
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value ?? "");
   }
