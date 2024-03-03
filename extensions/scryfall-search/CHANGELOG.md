@@ -9,3 +9,4 @@
 - Add search list component and data quering.
 - Add extension example assets.
 - Update details to display full art and full details on full view.
+- Update extension example assets.
