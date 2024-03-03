@@ -3,7 +3,7 @@ import "react";
 import { ASWindowOperations, ActionCommandDefaultProps } from "../core";
 import { ASItermCommand } from "../components";
 
-export const NetItermWindowCommand: React.FC<ActionCommandDefaultProps> = (props) => {
+export const NewItermWindowCommand: React.FC<ActionCommandDefaultProps> = (props) => {
   return (
     <ASItermCommand
       title={"Creating new iTerm window..."}

@@ -3,7 +3,7 @@ import "react";
 import { ASWindowOperations, ActionCommandDefaultProps } from "../core";
 import { ASItermCommand } from "../components";
 
-export const NetItermTabCommand: React.FC<ActionCommandDefaultProps> = (props) => {
+export const NewItermTabCommand: React.FC<ActionCommandDefaultProps> = (props) => {
   return (
     <ASItermCommand
       title={"Creating new tab..."}

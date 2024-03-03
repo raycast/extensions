@@ -1,4 +1,4 @@
-import { NetItermWindowCommand } from "./commands";
+import { NewItermWindowCommand } from "./commands";
 import { wrapActionCommand } from "./utils";
 
-export default wrapActionCommand(NetItermWindowCommand);
+export default wrapActionCommand(NewItermWindowCommand);

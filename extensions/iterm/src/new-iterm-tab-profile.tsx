@@ -1,4 +1,4 @@
-import { NetItermTabCommand } from "./commands";
+import { NewItermTabCommand } from "./commands";
 import { wrapActionWithProfileCommand } from "./utils";
 
-export default wrapActionWithProfileCommand(NetItermTabCommand);
+export default wrapActionWithProfileCommand(NewItermTabCommand);
