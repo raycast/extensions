@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Icon, List } from '@raycast/api';
 
 import { CardDetails, cardArt } from './CardDetails';
 
@@ -13,12 +13,12 @@ export const CardItem = ({ item }: CardItemProps) => (
     id={item.id}
     title={item.name}
     subtitle={`${item.set} ${item.collector_number}`}
-    detail={<CardDetails item={item} />}
+    detail={<List.Item.Detail markdown={cardArt(item, false)} />}
     actions={
       <ActionPanel>
         <Action.Push
-          title="View Art"
-          target={<Detail markdown={cardArt(item, true)} />}
+          title="View Details"
+          target={<CardDetails item={item} />}
           icon={Icon.BlankDocument}
         />
         <Action.OpenInBrowser url={item.url} title="Open in Scryfall" />
