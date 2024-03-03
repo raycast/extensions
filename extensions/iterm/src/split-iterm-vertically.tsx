@@ -1,4 +1,4 @@
-import { SplitItermHVerticallyCommand } from "./commands";
+import { SplitItermVerticallyCommand } from "./commands";
 import { wrapActionCommand } from "./utils";
 
-export default wrapActionCommand(SplitItermHVerticallyCommand);
+export default wrapActionCommand(SplitItermVerticallyCommand);

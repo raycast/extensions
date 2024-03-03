@@ -12,9 +12,9 @@ export const EditInItermCommand: React.FC<ActionCommandWithoutBashProps> = (prop
           errorTitle={"Failed to open files in iTerm"}
           scripts={[
             ASWindowOperations({
-              profile: props.profile,
               target: "currentWindow",
               fallbackTarget: "newWindow",
+              profile: props.profile,
               shellCommands: [`${DEFAULT_EDITOR} ${items.map((s) => `"${s}"`).join(" ")}`],
             }),
           ]}
