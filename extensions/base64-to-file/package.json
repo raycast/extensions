@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Convert base6 to file",
+      "title": "Convert base6 to File",
       "description": "Convert base64 text to file",
       "mode": "view"
     }
