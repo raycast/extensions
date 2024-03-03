@@ -15,10 +15,13 @@ import { useMeta } from './useMeta'
 const prefs = getPreferenceValues()
 
 export default function Command() {
-  const { isLoading, error } = useAuth()
+  const { isLoading: authIsLoading, error } = useAuth()
   if (error) {
     return (
-      <MenuBarExtra icon={{ source: 'command-icon.png' }} isLoading={isLoading}>
+      <MenuBarExtra
+        icon={{ source: 'command-icon.png' }}
+        isLoading={authIsLoading}
+      >
         <MenuBarExtra.Item
           title="Error: you have not signed in"
           icon={Icon.Alarm}
@@ -27,16 +30,13 @@ export default function Command() {
     )
   }
 
-  const { data: recentAllBookmarks, isLoading: recentAllBookmarksIsLoading } =
-    useRecents('all', 9)
+  const { data, isLoading } = useRecents('all', 9)
   const { data: metadata } = useMeta()
   const tags = metadata?.tags.slice(0, 10)
+  const recentAllBookmarks = data?.slice(0, 9)
 
   return (
-    <MenuBarExtra
-      icon={{ source: 'command-icon.png' }}
-      isLoading={recentAllBookmarksIsLoading}
-    >
+    <MenuBarExtra icon={{ source: 'command-icon.png' }} isLoading={isLoading}>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Dashboard"

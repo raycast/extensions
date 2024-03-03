@@ -18,7 +18,7 @@ import { typeToIcon } from '../utils/typeToIcon'
 type LinkItemProps = Bookmark
 
 const prefs = getPreferenceValues()
-const showDetail = prefs?.showDetailView || true
+const showDetail = prefs?.showDetailView
 
 export const LinkItem = ({
   title,
@@ -103,7 +103,7 @@ export const LinkItem = ({
       title={title}
       subtitle={showDetail ? '' : description || ''}
       icon={favicon}
-      accessories={accessories}
+      accessories={showDetail ? null : accessories}
       keywords={tags ?? []}
       actions={
         <ActionPanel>
