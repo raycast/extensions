@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [🕦 Show Fastest Lap] - 2024-02-26
+
+- Fixed an error when displaying DriverStats for not started seasons
+
 ## [🕦 Show Fastest Lap] - 2023-03-20
 
 - If available the fastest lap is now shown in race results

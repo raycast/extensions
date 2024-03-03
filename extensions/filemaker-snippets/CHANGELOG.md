@@ -4,6 +4,10 @@
 
 - Improved frecency sorting for recent/favorite files
 
+## [Update AppleScripts] - 2024-02-12
+
+- Now running version 4.0.4 of FmClipTools under the hood
+
 ## [Fixes] - 2024-02-05
 
 - Improved searching for recent/favorite files with additional keywords

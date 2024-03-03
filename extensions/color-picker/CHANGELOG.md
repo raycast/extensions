@@ -1,5 +1,19 @@
 # Color Picker Changelog
 
+## [Fixes] - 2024-02-26
+
+- Make sure that colors picked on a P3 display are converted to sRGB when displayed as hex
+- Added different actions to copy colors in different formats directly
+- Fixed a bug where setting a custom title overwrote other colors
+
+## [Enhancement] - 2024-02-26
+
+- Added support for setting a title
+
+## [New Swift Macro] - 2024-02-16
+
+- Upgrade to the latest version of Swift Macros
+
 ## [Enhancements] - 2023-11-30
 
 - Now using Raycast Swift Macro instead of manually compiling

@@ -3,14 +3,14 @@ import { useCachedPromise } from "@raycast/utils";
 import { trim } from "lodash";
 import { useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
-import View from "./components/View";
 import { IssueFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
 function SearchIssues() {
@@ -64,10 +64,4 @@ function SearchIssues() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <SearchIssues />
-    </View>
-  );
-}
+export default withGitHubClient(SearchIssues);

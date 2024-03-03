@@ -1,4 +1,5 @@
 import { ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { OAuthService, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import {
   ClearStatusAction,
@@ -12,17 +13,15 @@ import {
 } from "./actions";
 import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
-import { withOAuthSession } from "./oauth";
 import { usePresets } from "./presets";
-import { SlackOAuthSessionConfig, useSlackProfile } from "./slack";
+import { useSlackProfile } from "./slack";
 import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
 
-const slackOAuthConfig = new SlackOAuthSessionConfig({
-  clientId: "851756884692.5546927290212",
-  userScopes: ["emoji:read", "users.profile:write", "users.profile:read"],
-  defaultAccessToken: preferences.accessToken,
+const slack = OAuthService.slack({
+  scope: "emoji:read users.profile:write users.profile:read",
+  personalAccessToken: preferences.accessToken,
 });
 
 function StatusList() {
@@ -90,4 +89,4 @@ function StatusList() {
   );
 }
 
-export default withOAuthSession(StatusList, slackOAuthConfig);
+export default withAccessToken(slack)(StatusList);

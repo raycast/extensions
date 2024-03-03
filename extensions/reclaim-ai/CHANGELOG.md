@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Fixes] - 2024-02-17
+- Fix task form so that it honors user preferences for the Up Next and Visibility task settings. 
+
 ## [Update] - 2024-02-07
 - Resolves issue of updating task priority to "low priority"
 - Displays a warning icon in the task list if a task is "at risk".
