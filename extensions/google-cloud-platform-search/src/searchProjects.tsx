@@ -36,8 +36,8 @@ export function ProjectList() {
     return <Detail markdown={FAILURE_MESSAGE} />;
   }
 
-  // NB: we use manual search filtering because Raycast's native fuzzy search doesn't retain the order of the items.,
-  // so sorting by usage would only work with no search text.
+  // NB: we use manual search filtering because Raycast's native fuzzy search doesn't retain the order of the items.
+  //  Sorting by usage would only work with no search text.
   const [searchText, setSearchText] = useState<string>("");
   const searchLower = searchText.toLowerCase();
   const filteredProjects = (data ?? [])?.filter((project) => {

@@ -4,8 +4,8 @@ import { getProductsByUsage, updateUsage } from "./usageCache";
 import { useState } from "react";
 
 export function ProductList(props: { project: Project }) {
-  // NB: we use manual search filtering because Raycast's native fuzzy search doesn't retain the order of the items.,
-  // so sorting by usage would only work with no search text.
+  // NB: we use manual search filtering because Raycast's native fuzzy search doesn't retain the order of the items.
+  //  Sorting by usage would only work with no search text.
   const [searchText, setSearchText] = useState<string>("");
 
   const products = getProductsByUsage(props.project.projectId);
