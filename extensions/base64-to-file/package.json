@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "base64-to-file",
-  "title": "Base64 to file",
+  "title": "Base64 to File",
   "description": "convert base64 to file",
   "icon": "command-icon.png",
   "author": "forrestzh",
