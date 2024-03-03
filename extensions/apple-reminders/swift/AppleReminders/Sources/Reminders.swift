@@ -44,45 +44,6 @@ enum RemindersError: Error {
   case other
 }
 
-@raycast func getLists() throws -> [ReminderList] {
-  let eventStore = EKEventStore()
-  var listsData: [ReminderList] = []
-  var error: Error?
-
-  let dispatchGroup = DispatchGroup()
-
-  dispatchGroup.enter()
-
-  let completion: (Bool, Error?) -> Void = { (granted, _) in
-    guard granted else {
-      error = RemindersError.accessDenied
-      dispatchGroup.leave()
-      return
-    }
-
-    let calendars = eventStore.calendars(for: .reminder)
-    let defaultList = eventStore.defaultCalendarForNewReminders()
-
-    listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
-
-    dispatchGroup.leave()
-  }
-
-  if #available(macOS 14.0, *) {
-    eventStore.requestFullAccessToReminders(completion: completion)
-  } else {
-    eventStore.requestAccess(to: .reminder, completion: completion)
-  }
-
-  dispatchGroup.wait()
-
-  if let error {
-    throw error
-  }
-
-  return listsData
-}
-
 @raycast func getData(listId: String?) throws -> RemindersData {
   let eventStore = EKEventStore()
   var remindersData: [Reminder] = []

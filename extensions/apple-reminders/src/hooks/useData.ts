@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getData, getLists } from "swift:../../swift/AppleReminders";
+import { getData } from "swift:../../swift/AppleReminders";
 
 export type Priority = "low" | "medium" | "high" | null;
 
@@ -30,12 +30,6 @@ export type Data = {
   reminders: Reminder[];
   lists: List[];
 };
-
-export function useLists() {
-  return useCachedPromise(() => {
-    return getLists() as Promise<List[]>;
-  }, []);
-}
 
 export function useData(listId?: string) {
   return useCachedPromise(() => {
