@@ -40,16 +40,10 @@ export const CardDetails = ({ item }: CardDetailsProps) => (
         <Detail.Metadata.Label title="Type" text={item.type} />
         <Detail.Metadata.Separator />
         {item.oracle_text && (
-          <Detail.Metadata.Label
-            title="Oracle Text"
-            text={item.oracle_text}
-          />
+          <Detail.Metadata.Label title="Oracle Text" text={item.oracle_text} />
         )}
         {item.flavor_text && (
-          <Detail.Metadata.Label
-            title="Flavor Text"
-            text={item.flavor_text}
-          />
+          <Detail.Metadata.Label title="Flavor Text" text={item.flavor_text} />
         )}
         {(item.oracle_text || item.flavor_text) && (
           <Detail.Metadata.Separator />
@@ -60,9 +54,7 @@ export const CardDetails = ({ item }: CardDetailsProps) => (
             text={`${item.power}/${item.toughness}`}
           />
         )}
-        {(item.power || item.toughness) && (
-          <Detail.Metadata.Separator />
-        )}
+        {(item.power || item.toughness) && <Detail.Metadata.Separator />}
         <Detail.Metadata.Label title="Rarity" text={item.rarity} />
         <Detail.Metadata.Label title="Set" text={item.set_name} />
         <Detail.Metadata.Separator />

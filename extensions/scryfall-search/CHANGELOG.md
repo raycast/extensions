@@ -10,3 +10,4 @@
 - Add extension example assets.
 - Update details to display full art and full details on full view.
 - Update extension example assets.
+- Minor formatting corrections.
