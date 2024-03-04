@@ -1,8 +1,31 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Cache } from "@raycast/api";
 import assert from "node:assert";
 import fetch from "cross-fetch";
 import { URLSearchParams } from "url";
 import { BASE_URL, USER_AGENT } from "../constants";
+
+const cache = new Cache();
+
+function getApiKey(): string {
+  const { apiKey } = getPreferenceValues();
+
+  // required in manifest so this shouldn't be possible
+  assert(apiKey, "api key missing");
+
+  return apiKey;
+}
+
+export async function withCache<T>(key: string, callback: () => Promise<T>): Promise<T> {
+  const cacheKey = `${getApiKey()}:${key}`;
+
+  const cached = cache.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const res = await callback();
+  cache.set(cacheKey, JSON.stringify(res));
+
+  return res;
+}
 
 export async function apiRequest({
   endpoint,
@@ -15,12 +38,8 @@ export async function apiRequest({
   query?: Record<string, string>;
   body?: Record<string, unknown>;
 }): Promise<{ status: number; data: any }> {
-  const { apiKey } = getPreferenceValues();
-
-  // required in manifest so this shouldn't be possible
-  assert(apiKey, "api key missing");
-
   const signal = AbortSignal.timeout(5 * 1000);
+  const apiKey = getApiKey();
 
   try {
     const queryParams = new URLSearchParams(query);
