@@ -19,7 +19,7 @@ export default async function command(props: LaunchProps<{ arguments: URLArgumen
   const selectedText = await getSelectedText().catch(() => ""); // Ignore error, it's fine if there's no selected text.
 
   let newTabUrl = url || selectedText;
-  
+
   if (newTabUrl) {
     const newTabUrlAsSearch = `${config[newLittleArcPreferences.engine]}${encodeURIComponent(newTabUrl)}`;
     newTabUrl = isURL(newTabUrl) ? newTabUrl : newTabUrlAsSearch;

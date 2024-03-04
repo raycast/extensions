@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Fixes] - 2024-03-04
+
+- Fixed an issue in `Open New Little Arc Window` command where input in the URL field is not handled.
+
 ## [Fixes] - 2024-02-26
 
 - Fixed an issue in the `Search History` command where quotation marks in the search text were causing a syntax error.
