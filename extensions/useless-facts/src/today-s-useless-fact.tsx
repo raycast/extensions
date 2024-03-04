@@ -2,11 +2,14 @@ import { useFetch } from "@raycast/utils";
 import { API_URL } from "./constants";
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { UselessFact } from "./types";
+import ErrorComponent from "./ErrorComponent";
 
 export default function TodaysUselessFact() {
-  const { isLoading, data, revalidate } = useFetch<UselessFact>(API_URL + "today");
+  const { isLoading, data, revalidate, error } = useFetch<UselessFact>(API_URL + "today");
 
-  return (
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
     <Detail
       isLoading={isLoading}
       markdown={data?.text}
@@ -35,7 +38,7 @@ export default function TodaysUselessFact() {
               />
               <Action.CopyToClipboard
                 title="Copy All as JSON to Clipboard"
-                content={data.text}
+                content={JSON.stringify(data)}
                 icon={Icon.CopyClipboard}
               />
             </>
