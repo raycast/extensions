@@ -100,7 +100,7 @@
 /extensions/bitfinex                                 @Yukaii
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ofalvai @ubuntudroid
-/extensions/bitwarden                                @jomifepe @daniel-stoneuk @andreaselia @pernielsentikaer @eth-p @YamenSharaf @undefinedzack @anirudhganwal06
+/extensions/bitwarden                                @jomifepe @daniel-stoneuk @andreaselia @pernielsentikaer @eth-p @YamenSharaf @undefinedzack @anirudhganwal06 @ivaarsson
 /extensions/blockchain-explorer-search               @Namaskar-1F64F
 /extensions/blockchain-gas-tracker                   @vonernue
 /extensions/bluesky                                  @dkapila @peduarte
@@ -696,6 +696,7 @@
 /extensions/markdown-this                            @aravindballa
 /extensions/markdown-to-jira                         @theo-brlle
 /extensions/markdown-to-plain-text                   @skyline-123
+/extensions/markprompt                               @nickrttn
 /extensions/masked-link-generator                    @Visual-Studio-Coder
 /extensions/mastodon                                 @Sevichecc @Sevichecc @pernielsentikaer
 /extensions/mastodon-search                          @daveverwer
