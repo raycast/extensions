@@ -7,13 +7,15 @@
   "author": "jomifepe",
   "contributors": [
     "daniel-stoneuk",
-    "pomdtr",
     "andreaselia",
     "pernielsentikaer",
     "eth-p",
     "Yamen",
     "undefinedzack",
     "anirudhganwal06"
+  ],
+  "pastContributors": [
+    "pomdtr"
   ],
   "license": "MIT",
   "keywords": [
