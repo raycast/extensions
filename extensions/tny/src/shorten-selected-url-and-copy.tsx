@@ -7,7 +7,7 @@ import { Clipboard, showToast, Toast, showHUD } from "@raycast/api";
 export default async function Command() {
   const urlToShorten = await getSelectedUrlFromClipboard();
 
-  if (urlToShorten) {
+  if (!urlToShorten) {
     return;
   }
 
