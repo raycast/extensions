@@ -14,7 +14,7 @@ export default async (props: LaunchProps) => {
 
   try {
     const selectedText = await getSelectedText();
-  
+
     const escapedSelectedText = escapeDoubleQuotes(selectedText);
 
     runAppleScriptSync(`
@@ -27,12 +27,10 @@ export default async (props: LaunchProps) => {
     end tell
   `);
   } catch (error) {
-    console.log(error)
     if (error.message.includes("get selected text")) {
       showHUD("❌ Selected text is not available");
-    }
-    else {
-    showPermissionErrorHUD(testPermissionErrorType(error));
+    } else {
+      showPermissionErrorHUD(testPermissionErrorType(error));
     }
   }
 
