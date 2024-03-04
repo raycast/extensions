@@ -5,18 +5,10 @@ import { useMe, useWorkspaces, useProjects, useClients, useTags, useTasks } from
 import { createProjectGroups } from "../helpers/createProjectGroups";
 
 interface CreateTimeEntryFormParams {
-  isLoading: boolean;
   revalidateRunningTimeEntry: () => void;
-  project?: Project;
-  description?: string;
 }
 
-function CreateTimeEntryForm({
-  isLoading,
-  revalidateRunningTimeEntry,
-  project,
-  description,
-}: CreateTimeEntryFormParams) {
+function CreateTimeEntryForm({ revalidateRunningTimeEntry }: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -24,7 +16,7 @@ function CreateTimeEntryForm({
   const { clients, isLoadingClients } = useClients();
   const { tags, isLoadingTags } = useTags();
   const { tasks, isLoadingTasks } = useTasks();
-  const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
+  const [selectedProject, setSelectedProject] = useState<Project | undefined>();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [billable, setBillable] = useState<boolean>(false);
@@ -84,13 +76,7 @@ function CreateTimeEntryForm({
   return (
     <Form
       isLoading={
-        isLoading ||
-        isLoadingMe ||
-        isLoadingWorkspaces ||
-        isLoadingProjects ||
-        isLoadingClients ||
-        isLoadingTags ||
-        isLoadingTasks
+        isLoadingMe || isLoadingWorkspaces || isLoadingProjects || isLoadingClients || isLoadingTags || isLoadingTasks
       }
       actions={
         <ActionPanel>
@@ -98,7 +84,7 @@ function CreateTimeEntryForm({
         </ActionPanel>
       }
     >
-      <Form.TextField id="description" title="Description" defaultValue={description} />
+      <Form.TextField id="description" title="Description" />
       <Form.Dropdown
         id="project"
         title="Project"
