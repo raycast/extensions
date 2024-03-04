@@ -11,14 +11,10 @@ import { Item } from "~/types/vault";
  * Otherwise, it will wait for the value to be retrieved from the vault.
  */
 function useGetUpdatedVaultItem() {
-  const session = useSession();
   const bitwarden = useBitwarden();
   const getItemFromVault = useVaultItemSubscriber();
 
   async function getItemNoCache(id: string): Promise<Item> {
-    if (!session.active || !session.token) {
-      throw new Error("No session token available");
-    }
     const itemsResult = await bitwarden.getItem(id);
     if (itemsResult.error) throw itemsResult.error;
     return itemsResult.result;
