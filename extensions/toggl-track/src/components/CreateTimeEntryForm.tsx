@@ -123,14 +123,14 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
           ))}
         </Form.Dropdown>
       )}
+      {selectedProject?.billable && (
+        <Form.Checkbox id="billable" label="" title="Billable" value={billable} onChange={setBillable} />
+      )}
       <Form.TagPicker id="tags" title="Tags" onChange={onTagsChange}>
         {projectTags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
         ))}
       </Form.TagPicker>
-      {selectedProject?.billable && (
-        <Form.Checkbox id="billable" label="" title="Billable" value={billable} onChange={setBillable} />
-      )}
     </Form>
   );
 }
