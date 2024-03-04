@@ -3,6 +3,10 @@ import { runAppleScriptSync } from "run-applescript";
 import { setTimeout } from "timers/promises";
 import { testPermissionErrorType, showPermissionErrorHUD } from "./errors";
 
+function escapeDoubleQuotes(value: string) {
+  return value.replace(/"/g, '\\"');
+}
+
 export default async (props: LaunchProps) => {
   let currentClipboardContent: string | undefined;
 
@@ -10,10 +14,6 @@ export default async (props: LaunchProps) => {
 
   try {
     const selectedText = await getSelectedText();
-
-    function escapeDoubleQuotes(value: string) {
-      return value.replace(/"/g, '\\"');
-    }
   
     const escapedSelectedText = escapeDoubleQuotes(selectedText);
 
