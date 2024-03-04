@@ -40,7 +40,9 @@ export default function SimpleCommand({ children, draftValues, launchContext, on
           <Action.SubmitForm onSubmit={handleSubmit} title={"Toot"} icon={Icon.Upload} />
           {latestStatus && <Action.OpenInBrowser url={latestStatus.url} title={openActionText} />}
           {instance && <Action.OpenInBrowser url={`https://${instance}/home`} title="Open Mastodon in Browser" />}
-          <Action title="Add File From Clipboard" icon={Icon.Image} onAction={onAddFileFromClipboard} />
+          {onAddFileFromClipboard && (
+            <Action title="Add File From Clipboard" icon={Icon.Image} onAction={onAddFileFromClipboard} />
+          )}
         </ActionPanel>
       }
     >
