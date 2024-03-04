@@ -114,12 +114,7 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
         <Form.Dropdown id="task" title="Task" defaultValue="-1" onChange={onTaskChange}>
           <Form.Dropdown.Item value={"-1"} title={"No task"} icon={{ source: Icon.Circle }} />
           {projectTasks.map((task) => (
-            <Form.Dropdown.Item
-              key={task.id}
-              value={task.id.toString()}
-              title={task.name}
-              icon={{ source: Icon.Circle, tintColor: selectedProject.color }}
-            />
+            <Form.Dropdown.Item key={task.id} value={task.id.toString()} title={task.name} />
           ))}
         </Form.Dropdown>
       )}
