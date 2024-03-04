@@ -6,7 +6,7 @@ import { BASE_URL, USER_AGENT } from "../constants";
 
 const cache = new Cache();
 
-function getApiKey(): string {
+export function getApiKey(): string {
   const { apiKey } = getPreferenceValues();
 
   // required in manifest so this shouldn't be possible
