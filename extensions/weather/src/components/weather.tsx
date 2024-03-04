@@ -303,7 +303,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
 
   return (
     <>
-      <List.Section title={`Weather Report (${title}) ${observationRelative ? "• " + observationRelative : ""}`}>
+      <List.Section title={`Weather Report • ${title} ${observationRelative ? "• " + observationRelative : ""}`}>
         <List.Item
           title={getCurrentTemperature(curcon) || ""}
           subtitle={weatherDesc}
