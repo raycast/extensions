@@ -7,7 +7,7 @@ export default async () => {
 
   await closeMainWindow();
 
-  await showToast({
+  const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Clocking in...",
   });
@@ -17,28 +17,22 @@ export default async () => {
 
     const activeEntry = await getActiveTimesheetEntry({ personId });
     if (activeEntry) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "You have already clocked in",
-      });
+      toast.style = Toast.Style.Failure;
+      toast.title = "You have already clocked in";
       return;
     }
 
     await clockIn({ personId, time: now });
 
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Clocked in",
-    });
+    toast.style = Toast.Style.Success;
+    toast.title = "Clocked in";
   } catch (e) {
     const title =
       e && typeof e === "object" && "message" in e && typeof e.message === "string"
         ? e.message
         : "Something went wrong";
 
-    await showToast({
-      style: Toast.Style.Failure,
-      title,
-    });
+    toast.style = Toast.Style.Failure;
+    toast.title = title;
   }
 };
