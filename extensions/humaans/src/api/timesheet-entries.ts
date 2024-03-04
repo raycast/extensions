@@ -22,9 +22,12 @@ export async function getActiveTimesheetEntry({ personId }: { personId: string }
     },
   });
 
-  assert(data.data.length <= 1);
 
-  return data.data.length === 0 ? null : { id: data.data[0].id };
+  const timesheetEntriesLength = data.data.length
+
+  assert(timesheetEntriesLength <= 1);
+
+  return timesheetEntriesLength === 0 ? null : { id: data.data[0].id };
 }
 
 export async function clockIn({ personId, time }: { personId: string; time: Date }): Promise<void> {
