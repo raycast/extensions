@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keep-running",
+  "title": "Keep Running",
+  "description": "Reopen selected apps when they are closed. Useful for certain apps that you want to keep running all the time.",
+  "icon": "icon.png",
+  "author": "vimtor",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "select",
+      "title": "Select Apps",
+      "subtitle": "Keep Running",
+      "description": "Select apps to keep running.",
+      "mode": "view",
+      "interval": "1m"
+    },
+    {
+      "name": "interval",
+      "title": "Open Apps",
+      "subtitle": "Keep Running",
+      "description": "Open selected apps periodically. Should be opened a first time.",
+      "mode": "no-view",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
