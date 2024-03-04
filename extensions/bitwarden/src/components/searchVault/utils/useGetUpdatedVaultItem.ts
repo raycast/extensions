@@ -29,7 +29,7 @@ function useGetUpdatedVaultItem() {
 
     const toast = loadingMessage ? await showToast(Toast.Style.Animated, loadingMessage) : undefined;
     const value = selector(
-      await Promise.race([getItemFromVault(possiblyCachedItem.id), getItemNoCache(possiblyCachedItem.id)])
+      await Promise.race([waitForItemLoaded(possiblyCachedItem.id), getItemFromVault(possiblyCachedItem.id)])
     );
     await toast?.hide();
 
