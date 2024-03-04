@@ -9,16 +9,19 @@ import {
   open,
   openCommandPreferences,
 } from "@raycast/api";
+import { useWeather } from "./components/hooks";
 import {
   getCurrentTemperature,
-  getMetaData,
-  getDefaultQuery,
-  getDayWeatherIcon,
-  getWeekday,
   getDayTemperature,
+  getDayWeatherIcon,
+  getDefaultQuery,
+  getMetaData,
+  getWeekday,
   WttrDay,
 } from "./components/weather";
 import { getWeatherCodeIcon, WeatherIcons } from "./icons";
+import { getTemperatureUnit } from "./unit";
+import { convertToRelativeDate } from "./utils";
 import {
   Area,
   convertToTimeString,
@@ -41,9 +44,6 @@ import {
   WeatherConditions,
   WeatherData,
 } from "./wttr";
-import { useWeather } from "./components/hooks";
-import { convertToRelativeDate, getUVIndexIcon } from "./utils";
-import { getTemperatureUnit } from "./unit";
 
 function launchWeatherCommand() {
   launchCommand({ name: "index", type: LaunchType.UserInitiated });
@@ -67,13 +67,13 @@ function getAppearancePreferences(): { showMenuIcon: boolean; showMenuText: bool
   };
 }
 
-function getWeatherMenuIcon(curcon: WeatherConditions | undefined): Image.ImageLike | undefined {
+function getWeatherMenuIcon(curcon: WeatherConditions | undefined): string {
   const { showMenuIcon, showMenuText } = getAppearancePreferences();
   if (!showMenuIcon && !showMenuText) {
-    return Icon.Cloud;
+    return WeatherIcons.Cloud;
   }
   if (!showMenuIcon) {
-    return undefined;
+    return "";
   }
   return curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png";
 }
@@ -87,7 +87,7 @@ function FeelsLikeMenuItem(props: { curcon: WeatherConditions | undefined }) {
     <MenuBarExtra.Item
       title="Feels Like"
       subtitle={feelsLike.valueAndUnit}
-      icon={WeatherIcons.FeelsLike}
+      icon={{ source: WeatherIcons.FeelsLike, tintColor: Color.PrimaryText }}
       onAction={launchWeatherCommand}
     />
   );
@@ -101,7 +101,7 @@ function TemperatureMin(props: { weather: Weather | undefined }) {
   return (
     <MenuBarExtra.Item
       title="Min"
-      icon={Icon.ArrowDown}
+      icon={{ source: WeatherIcons.ArrowDown, tintColor: Color.PrimaryText }}
       subtitle={`${t.minTemp} ${getTemperatureUnit()}`}
       onAction={launchWeatherCommand}
     />
@@ -116,7 +116,7 @@ function TemperatureMax(props: { weather: Weather | undefined }) {
   return (
     <MenuBarExtra.Item
       title="Max"
-      icon={Icon.ArrowUp}
+      icon={{ source: WeatherIcons.ArrowUp, tintColor: Color.PrimaryText }}
       subtitle={`${t.maxTemp} ${getTemperatureUnit()}`}
       onAction={launchWeatherCommand}
     />
@@ -131,7 +131,7 @@ function RainMenuItem(props: { curcon: WeatherConditions | undefined }) {
   return (
     <MenuBarExtra.Item
       title="Rain"
-      icon={{ source: WeatherIcons.Rain, tintColor: r.value > 0 ? Color.Blue : undefined }}
+      icon={{ source: WeatherIcons.Rain, tintColor: Color.PrimaryText }}
       subtitle={r.valueAndUnit}
       onAction={launchWeatherCommand}
     />
@@ -146,7 +146,7 @@ function CloudCoverMenuItem(props: { curcon: WeatherConditions | undefined }) {
   return (
     <MenuBarExtra.Item
       title="Cloud Cover"
-      icon={WeatherIcons.Cloud}
+      icon={{ source: WeatherIcons.Cloud, tintColor: Color.PrimaryText }}
       subtitle={r.valueAndUnit}
       onAction={launchWeatherCommand}
     />
@@ -162,7 +162,7 @@ function UVIndexMenuItem(props: { curcon: WeatherConditions | undefined }) {
     <MenuBarExtra.Item
       title="UV Index"
       subtitle={uvIndex}
-      icon={getUVIndexIcon(uvIndex)}
+      icon={{ source: WeatherIcons.UVIndex, tintColor: Color.PrimaryText }}
       onAction={launchWeatherCommand}
     />
   );
@@ -177,7 +177,7 @@ function HumidityMenuItem(props: { curcon: WeatherConditions | undefined }) {
     <MenuBarExtra.Item
       title="Humidity"
       subtitle={hum.valueAndUnit}
-      icon={WeatherIcons.Humidity}
+      icon={{ source: WeatherIcons.Humidity, tintColor: Color.PrimaryText }}
       onAction={launchWeatherCommand}
     />
   );
@@ -211,7 +211,14 @@ function WindMenubarItem(props: { curcon: WeatherConditions | undefined }) {
     return null;
   }
   const wind = `${windCon.speed} ${windCon.unit} ${windCon.dirIcon} (${windCon.dirText})`;
-  return <MenuBarExtra.Item icon={WeatherIcons.Wind} title="Wind" subtitle={wind} onAction={launchWeatherCommand} />;
+  return (
+    <MenuBarExtra.Item
+      icon={{ source: WeatherIcons.Wind, tintColor: Color.PrimaryText }}
+      title="Wind"
+      subtitle={wind}
+      onAction={launchWeatherCommand}
+    />
+  );
 }
 
 function VisibilityMenubarItem(props: { curcon: WeatherConditions | undefined }) {
@@ -221,7 +228,7 @@ function VisibilityMenubarItem(props: { curcon: WeatherConditions | undefined })
   }
   return (
     <MenuBarExtra.Item
-      icon={WeatherIcons.Visibility}
+      icon={{ source: WeatherIcons.Visibility, tintColor: Color.PrimaryText }}
       title="Visibility"
       subtitle={vis.distanceAndUnit}
       onAction={launchWeatherCommand}
@@ -236,7 +243,7 @@ function PressureMenubarItem(props: { curcon: WeatherConditions | undefined }) {
   }
   return (
     <MenuBarExtra.Item
-      icon={WeatherIcons.Pressure}
+      icon={{ source: WeatherIcons.Pressure, tintColor: Color.PrimaryText }}
       title="Pressure"
       subtitle={p.valueAndUnit}
       onAction={launchWeatherCommand}
@@ -254,7 +261,7 @@ function LocationMenubarSection(props: { area: Area | undefined }) {
       {a.areaName && (
         <MenuBarExtra.Item
           title="Area"
-          icon={WeatherIcons.Area}
+          icon={{ source: WeatherIcons.Area, tintColor: Color.PrimaryText }}
           subtitle={a.areaName}
           onAction={launchWeatherCommand}
         />
@@ -263,7 +270,7 @@ function LocationMenubarSection(props: { area: Area | undefined }) {
         <MenuBarExtra.Item
           title="Region"
           subtitle={a.region}
-          icon={WeatherIcons.Region}
+          icon={{ source: WeatherIcons.Region, tintColor: Color.PrimaryText }}
           onAction={launchWeatherCommand}
         />
       )}
@@ -271,7 +278,7 @@ function LocationMenubarSection(props: { area: Area | undefined }) {
         <MenuBarExtra.Item
           title="Country"
           subtitle={a.country}
-          icon={WeatherIcons.Country}
+          icon={{ source: WeatherIcons.Country, tintColor: Color.PrimaryText }}
           onAction={launchWeatherCommand}
         />
       )}
@@ -279,7 +286,7 @@ function LocationMenubarSection(props: { area: Area | undefined }) {
         <MenuBarExtra.Item
           title="Lon, Lat"
           subtitle={`${a.longitude},${a.latitude}`}
-          icon={WeatherIcons.Coordinate}
+          icon={{ source: WeatherIcons.Coordinates, tintColor: Color.PrimaryText }}
           onAction={launchWeatherCommand}
         />
       )}
@@ -301,20 +308,20 @@ function SunMenubarSection(props: { data: Weather | undefined }) {
         <MenuBarExtra.Item
           title="Sun Hours"
           subtitle={sunHours.valueAndUnit}
-          icon={WeatherIcons.SunHours}
+          icon={{ source: WeatherIcons.SunHours, tintColor: Color.PrimaryText }}
           onAction={launchWeatherCommand}
         />
       )}
       <MenuBarExtra.Item
         title="Sunrise"
         subtitle={convertToTimeString(sun.sunrise)}
-        icon={WeatherIcons.Sunrise}
+        icon={{ source: WeatherIcons.Sunrise, tintColor: Color.PrimaryText }}
         onAction={launchWeatherCommand}
       />
       <MenuBarExtra.Item
         title="Sunset"
         subtitle={convertToTimeString(sun.sunset)}
-        icon={WeatherIcons.Sunset}
+        icon={{ source: WeatherIcons.Sunset, tintColor: Color.PrimaryText }}
         onAction={launchWeatherCommand}
       />
     </MenuBarExtra.Section>
@@ -333,14 +340,14 @@ function MoonMenubarSection(props: { data: Weather | undefined }) {
         title="Moonrise"
         subtitle={convertToTimeString(moon.moonrise)}
         tooltip={phase}
-        icon={WeatherIcons.Moonrise}
+        icon={{ source: WeatherIcons.Moonrise, tintColor: Color.PrimaryText }}
         onAction={launchWeatherCommand}
       />
       <MenuBarExtra.Item
         title="Moonset"
         subtitle={convertToTimeString(moon.moonset)}
         tooltip={phase}
-        icon={WeatherIcons.Moonset}
+        icon={{ source: WeatherIcons.Moonset, tintColor: Color.PrimaryText }}
         onAction={launchWeatherCommand}
       />
     </MenuBarExtra.Section>
@@ -358,7 +365,7 @@ function ObservationTimeMenubarItem(props: { curcon: WeatherConditions | undefin
       title="Observation"
       subtitle={relative}
       tooltip={`Observation Time from Weather Provider: ${obs}`}
-      icon={Icon.Clock}
+      icon={{ source: WeatherIcons.Observation, tintColor: Color.PrimaryText }}
       onAction={launchWeatherCommand}
     />
   );
@@ -372,7 +379,7 @@ function LastFetchTimeMenubarItem(props: { fetched: Date | undefined }) {
       title="Fetched"
       subtitle={relative}
       tooltip={`Fetched from Weather Provider: ${f ? f.toLocaleString() : "-"}`}
-      icon={Icon.Download}
+      icon={{ source: WeatherIcons.Fetched, tintColor: Color.PrimaryText }}
       onAction={launchWeatherCommand}
     />
   );
@@ -380,20 +387,20 @@ function LastFetchTimeMenubarItem(props: { fetched: Date | undefined }) {
 
 function WeatherForecastDay(props: { day: WeatherData; fullTitle: string }) {
   const d = props.day;
-  const valParts = [`⬆${getDayTemperature(d, "max")}`, `⬇${getDayTemperature(d, "min")}`];
+  const valParts = [`⬆ ${getDayTemperature(d, "max")}`, `⬇ ${getDayTemperature(d, "min")}`];
   const snow = getDaySnowInfo(d);
   if (d.sunHour) {
-    valParts.push(`☀️ ${d.sunHour}h`);
+    valParts.push(`☀ ${d.sunHour}h`);
   }
   if (snow && snow.value > 0) {
-    valParts.push(`❄️ ${snow.valueAndUnit}`);
+    valParts.push(`❄ ${snow.valueAndUnit}`);
   }
   const st = valParts.join(" ");
   const weekday = getWeekday(d.date);
   return (
     <MenuBarExtra.Item
       title={weekday}
-      icon={getDayWeatherIcon(d)}
+      icon={{ source: getDayWeatherIcon(d), tintColor: Color.PrimaryText }}
       subtitle={st}
       onAction={() => launchWeatherCommandWithDate({ day: { date: d.date, title: `${props.fullTitle} - ${weekday}` } })}
     />
@@ -412,13 +419,13 @@ export default function MenuCommand(): JSX.Element {
       data={data}
       error={error}
       title={showMenuText ? temp : undefined}
-      icon={getWeatherMenuIcon(curcon)}
+      icon={{ source: getWeatherMenuIcon(curcon), tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip={weatherDesc}
     >
       <MenuBarExtra.Section title="Weather">
         <MenuBarExtra.Item
-          icon={curcon ? getWeatherCodeIcon(curcon.weatherCode) : "weather.png"}
+          icon={{ source: getWeatherCodeIcon(curcon?.weatherCode), tintColor: Color.PrimaryText }}
           title="Condition"
           subtitle={weatherDesc}
           onAction={launchWeatherCommand}
@@ -426,7 +433,7 @@ export default function MenuCommand(): JSX.Element {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="Temperature">
         <MenuBarExtra.Item
-          icon={Icon.Temperature}
+          icon={{ source: WeatherIcons.Temperature, tintColor: Color.PrimaryText }}
           title="Temperature"
           subtitle={temp || "?"}
           onAction={launchWeatherCommand}
@@ -451,7 +458,7 @@ export default function MenuCommand(): JSX.Element {
       <LocationMenubarSection area={area} />
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon={Icon.Link}
+          icon={{ source: WeatherIcons.Source, tintColor: Color.PrimaryText }}
           title="Source"
           subtitle="wttr.in"
           onAction={() => open("https://wttr.in")}
@@ -459,8 +466,8 @@ export default function MenuCommand(): JSX.Element {
         <ObservationTimeMenubarItem curcon={curcon} />
         <LastFetchTimeMenubarItem fetched={fetchDate} />
         <MenuBarExtra.Item
-          title="Configure"
-          icon={Icon.Gear}
+          title="Settings…"
+          icon={{ source: WeatherIcons.Settings, tintColor: Color.PrimaryText }}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
         />
