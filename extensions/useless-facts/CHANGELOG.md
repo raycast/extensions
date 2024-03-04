@@ -1,3 +1,3 @@
 # Useless Facts Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-03-04
