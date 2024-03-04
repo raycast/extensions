@@ -53,6 +53,10 @@ export async function apiRequest({
     });
 
     if (!res.ok) {
+      if (res.status === 401) {
+        const { message } = await res.json();
+        throw new Error(`Unauthorized. ${message}`);
+      }
       if (res.status === 403) {
         const { message } = await res.json();
         throw new Error(`Permission error. ${message}`);
