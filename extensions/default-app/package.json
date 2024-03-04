@@ -14,19 +14,19 @@
   "commands": [
     {
       "name": "set-for-known-file-types-command",
-      "title": "Set For Known File Types",
+      "title": "Set for Known File Types",
       "description": "List known file types and set the default applications to open them.",
       "mode": "view"
     },
     {
       "name": "set-for-file-type-command",
-      "title": "Set For File Type",
+      "title": "Set for File Type",
       "description": "Set the default app to open all files of a particular type.",
       "mode": "view"
     },
     {
       "name": "set-for-file-command",
-      "title": "Set For File",
+      "title": "Set for File",
       "description": "Set the default app to open a file.",
       "mode": "view"
     }
