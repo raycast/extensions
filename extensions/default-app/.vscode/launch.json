@@ -1,0 +1,52 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "args": [],
+      "cwd": "${workspaceFolder:default-app-manager}/swift/MyExecutable",
+      "name": "Debug MyExecutable (swift/MyExecutable)",
+      "program": "${workspaceFolder:default-app-manager}/swift/MyExecutable/.build/debug/MyExecutable",
+      "preLaunchTask": "swift: Build Debug MyExecutable (swift/MyExecutable)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "args": [],
+      "cwd": "${workspaceFolder:default-app-manager}/swift/MyExecutable",
+      "name": "Release MyExecutable (swift/MyExecutable)",
+      "program": "${workspaceFolder:default-app-manager}/swift/MyExecutable/.build/release/MyExecutable",
+      "preLaunchTask": "swift: Build Release MyExecutable (swift/MyExecutable)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "args": [],
+      "cwd": "${workspaceFolder:default-app-manager}/swift/DefaultAppUtils",
+      "name": "Debug MyExecutable (swift/DefaultAppUtils)",
+      "program": "${workspaceFolder:default-app-manager}/swift/DefaultAppUtils/.build/debug/MyExecutable",
+      "preLaunchTask": "swift: Build Debug MyExecutable (swift/DefaultAppUtils)"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "args": [],
+      "cwd": "${workspaceFolder:default-app-manager}/swift/DefaultAppUtils",
+      "name": "Release MyExecutable (swift/DefaultAppUtils)",
+      "program": "${workspaceFolder:default-app-manager}/swift/DefaultAppUtils/.build/release/MyExecutable",
+      "preLaunchTask": "swift: Build Release MyExecutable (swift/DefaultAppUtils)"
+    }
+  ]
+}
