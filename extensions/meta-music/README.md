@@ -1,3 +1,3 @@
 # Meta Music
 
-Manage the ID3 tags of audio music directly in Raycast!
+Manage the ID3 tags of audio files directly in Raycast!

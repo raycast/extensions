@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "meta-music",
   "title": "Meta Music",
-  "description": "Manage the ID3 tags of audio music directly in Raycast!",
+  "description": "Manage the ID3 tags of audio files directly in Raycast!",
   "icon": "meta-music.png",
   "author": "teziovsky",
   "categories": [
@@ -14,7 +14,7 @@
     {
       "name": "manage-id3-tags",
       "title": "Manage ID3 Tags",
-      "description": "Manage the ID3 tags of audio music directly in Raycast!",
+      "description": "Manage the ID3 tags of audio files directly in Raycast!",
       "mode": "view"
     }
   ],
