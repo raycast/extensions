@@ -72,7 +72,10 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <TimeEntryForm revalidateRunningTimeEntry={revalidateRunningTimeEntry} />
+                    <TimeEntryForm
+                      revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                      revalidateTimeEntries={revalidateTimeEntries}
+                    />
                   </ExtensionContextProvider>
                 }
               />

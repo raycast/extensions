@@ -6,9 +6,10 @@ import { createProjectGroups } from "../helpers/createProjectGroups";
 
 interface CreateTimeEntryFormParams {
   revalidateRunningTimeEntry: () => void;
+  revalidateTimeEntries: () => void;
 }
 
-function CreateTimeEntryForm({ revalidateRunningTimeEntry }: CreateTimeEntryFormParams) {
+function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries }: CreateTimeEntryFormParams) {
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -47,6 +48,7 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry }: CreateTimeEntryForm
       await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
       revalidateRunningTimeEntry();
+      revalidateTimeEntries();
       await clearSearchBar();
     } catch (e) {
       await showToast(Toast.Style.Failure, "Failed to start time entry");
