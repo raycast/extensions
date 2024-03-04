@@ -363,18 +363,6 @@ export class Bitwarden {
     }
   }
 
-  async getPassword(id: string): Promise<MaybeError<string>> {
-    try {
-      const { stdout } = await this.exec(["get", "password", id], { resetVaultTimeout: true });
-      return { result: stdout };
-    } catch (execError) {
-      captureException("Failed to get password", execError);
-      const { error } = await this.handleCommonErrors(execError);
-      if (!error) throw execError;
-      return { error };
-    }
-  }
-
   async getItem(id: string): Promise<MaybeError<Item>> {
     try {
       const { stdout } = await this.exec(["get", "item", id], { resetVaultTimeout: true });
