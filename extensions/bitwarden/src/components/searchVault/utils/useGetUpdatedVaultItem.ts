@@ -11,9 +11,9 @@ import { Item } from "~/types/vault";
  */
 function useGetUpdatedVaultItem() {
   const bitwarden = useBitwarden();
-  const getItemFromVault = useVaultItemSubscriber();
+  const waitForItemLoaded = useVaultItemSubscriber();
 
-  async function getItemNoCache(id: string): Promise<Item> {
+  async function getItemFromVault(id: string): Promise<Item> {
     const itemsResult = await bitwarden.getItem(id);
     if (itemsResult.error) throw itemsResult.error;
     return itemsResult.result;
