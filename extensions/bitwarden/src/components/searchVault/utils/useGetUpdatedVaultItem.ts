@@ -2,7 +2,6 @@ import { Toast, showToast } from "@raycast/api";
 import { useVaultItemSubscriber } from "~/components/searchVault/context/vaultListeners";
 import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
-import { useSession } from "~/context/session";
 import { Item } from "~/types/vault";
 
 /**
