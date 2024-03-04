@@ -321,7 +321,7 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
             },
             {
               text: rain && rain.value > 0 ? rain.valueAndUnit : undefined,
-              icon: { source: WeatherIcons.Rain, tintColor: Color.SecondaryText },
+              icon: rain && rain.value > 0 ? { source: WeatherIcons.Rain, tintColor: Color.SecondaryText } : "",
             },
             {
               icon: { source: WeatherIcons.Humidity, tintColor: Color.SecondaryText },
