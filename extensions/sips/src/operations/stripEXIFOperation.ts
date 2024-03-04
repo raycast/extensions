@@ -52,7 +52,7 @@ export default async function stripEXIF(sourcePaths: string[], exifToolLocation:
       const newPath = newPaths[sourcePaths.indexOf(imagePath)];
       resultPaths.push(newPath);
 
-      execSync(`${exifCommand} -all= -o "${newPath}" "${imagePath}"`);
+      execSync(`${exifCommand} -all= "${newPath}" "${imagePath}"`);
     }
   }
 
