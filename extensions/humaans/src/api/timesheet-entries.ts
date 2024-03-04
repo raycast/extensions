@@ -22,8 +22,7 @@ export async function getActiveTimesheetEntry({ personId }: { personId: string }
     },
   });
 
-
-  const timesheetEntriesLength = data.data.length
+  const timesheetEntriesLength = data.data.length;
 
   assert(timesheetEntriesLength <= 1);
 
