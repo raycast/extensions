@@ -33,6 +33,13 @@
         "make note",
         "create note"
       ]
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "subtitle": "Notes",
+      "description": "Quickly capture selected text and create a new note in the Apple Notes app",
+      "mode": "no-view"
     }
   ],
   "preferences": [
