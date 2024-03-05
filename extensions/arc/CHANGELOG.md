@@ -3,7 +3,7 @@
 ## [Improvements] - 2024-03-05
 
 - Added the ability to filter by tab type in the 'Search Tabs' command.
-- Lets you toggle between showing a combination Favorites, Pinned, and Unpinned tabs.
+- Lets you toggle between All Tabs, Favorites, Pinned, and Unpinned tabs via a dropdown.
 
 ## [Fixes] - 2024-02-26
 
