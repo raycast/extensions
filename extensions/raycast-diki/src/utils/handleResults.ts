@@ -13,21 +13,16 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
   return items;
 }
 
-export async function getSearchResults(
-  searchText: string,
-  signal: AbortSignal
-): Promise<SearchResult[]> {
+export async function getSearchResults(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const response = await fetch(
-    `https://www.diki.pl/dictionary/autocomplete?q=${encodeURIComponent(
-      searchText
-    )}&langpair=en%3A%3Apl`,
+    `https://www.diki.pl/dictionary/autocomplete?q=${encodeURIComponent(searchText)}&langpair=en%3A%3Apl`,
     {
       method: "get",
       signal: signal,
       headers: {
         "Content-Type": "text/plain; charset=UTF-8",
       },
-    }
+    },
   );
 
   if (!response.ok) {
