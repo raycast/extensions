@@ -1,8 +1,17 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import fetch from "cross-fetch";
 
-type Values = {
+type InboxFormValues = {
   new_bullet_title: string;
   new_bullet_note: string;
   api_key: string;
@@ -14,7 +23,7 @@ interface Preferences {
   saveLocationUrl: string;
 }
 
-async function submitToWorkflowy(values: Values) {
+async function submitToWorkflowy(values: InboxFormValues) {
   const { apiKey, saveLocationUrl } = getPreferenceValues<Preferences>();
   const response = await fetch("https://beta.workflowy.com/api/bullets/create/", {
     method: "POST",
@@ -31,7 +40,7 @@ async function submitToWorkflowy(values: Values) {
   });
 
   const data = await response.json();
-  if (!data) {
+  if (!data || !response.ok) {
     throw new Error(
       "Failed to submit the bullet to Workflowy. Please check your API key and save location url and then try again.",
     );
@@ -49,40 +58,67 @@ async function validateWfApiKey() {
   });
 
   const data = await response.json();
-  if (!data) {
+  if (!data || !response.ok) {
     throw new Error("Invalid API Key. Set it in the extension preferences and try again.");
   }
 }
 
 export default function Command() {
+  const { handleSubmit, itemProps, reset } = useForm<InboxFormValues>({
+    async onSubmit(values) {
+      try {
+        await validateWfApiKey();
+        await submitToWorkflowy(values);
+        showToast({
+          style: Toast.Style.Success,
+          title: "Success!",
+          message: "Added the bullet to your Workflowy inbox.",
+        });
+        reset();
+      } catch {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message:
+            "Failed to submit the bullet to Workflowy. Please check your API key and save location url and then try again.",
+        });
+      }
+    },
+    validation: {
+      new_bullet_title: FormValidation.Required,
+    },
+  });
   const { saveLocationUrl } = getPreferenceValues<Preferences>();
-  async function handleSubmit(values: Values) {
-    try {
-      await validateWfApiKey();
-      await submitToWorkflowy(values);
-      showToast({ title: "Success!", message: "Added the bullet to your Workflowy inbox." });
-    } catch {
-      showToast({
-        title: "Error",
-        message:
-          "Failed to submit the bullet to Workflowy. Please check your API key and save location url and then try again.",
-      });
-    }
-  }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
-          <Action.OpenInBrowser title="Get Workflowy API Key" url="https://workflowy.com/api-key/" />
-          <Action.OpenInBrowser title="Open Workflowy Inbox" url={saveLocationUrl || ""} />
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action.SubmitForm icon={{ source: "send.svg" }} title="Send to Workflowy Inbox" onSubmit={handleSubmit} />
+          <Action.OpenInBrowser
+            icon={{ source: "key.svg" }}
+            title="Get Workflowy API Key"
+            url="https://workflowy.com/api-key/"
+          />
+          <Action.OpenInBrowser
+            icon={{ source: "inbox.svg" }}
+            title="Open Workflowy Inbox"
+            url={saveLocationUrl || ""}
+          />
+          <Action
+            icon={{ source: "settings.svg" }}
+            title="Open Extension Preferences"
+            onAction={openExtensionPreferences}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextField id="new_bullet_title" title="Bullet Text" placeholder="What would you like to remember?" />
-      <Form.TextArea id="new_bullet_note" title="Bullet Note / Comment" placeholder="Any comments?" />
+      <Form.TextField
+        title="Bullet Text"
+        placeholder="What would you like to remember?"
+        {...itemProps.new_bullet_title}
+      />
+      <Form.TextArea title="Bullet Note / Comment" placeholder="Any comments?" {...itemProps.new_bullet_note} />
     </Form>
   );
 }
