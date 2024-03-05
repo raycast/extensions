@@ -13,7 +13,6 @@
     {
       "name": "index",
       "title": "Search CCF Rankings",
-      "subtitle": "Fast loop up the CCF ranking of one publication.",
       "description": "Fast loop up the CCF ranking of one publication.",
       "mode": "view"
     }
