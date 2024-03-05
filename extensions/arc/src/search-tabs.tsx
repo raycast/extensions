@@ -4,7 +4,7 @@ import { groupBy } from "lodash";
 import { useState } from "react";
 import { getTabs } from "./arc";
 import { TabListItem } from "./list";
-import { getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations } from "./utils";
+import { getKey, getLocationTitle, getNumberOfTabs, getOrderedLocations, isTabTypeShown } from "./utils";
 import { VersionCheck } from "./version";
 
 function SearchTabs(props: LaunchProps) {
@@ -21,16 +21,18 @@ function SearchTabs(props: LaunchProps) {
       filtering={{ keepSectionOrder: true }}
       onSearchTextChange={setSearchText}
     >
-      {orderedLocations.map((location) => {
-        const tabs = groupedTabs[location];
-        return (
-          <List.Section key={location} title={getLocationTitle(location)} subtitle={getNumberOfTabs(tabs)}>
-            {tabs?.map((tab) => (
-              <TabListItem key={getKey(tab)} tab={tab} searchText={searchText} mutate={mutate} />
-            ))}
-          </List.Section>
-        );
-      })}
+      {orderedLocations
+        .filter((location) => isTabTypeShown(location))
+        .map((location) => {
+          const tabs = groupedTabs[location];
+          return (
+            <List.Section key={location} title={getLocationTitle(location)} subtitle={getNumberOfTabs(tabs)}>
+              {tabs?.map((tab) => (
+                <TabListItem key={getKey(tab)} tab={tab} searchText={searchText} mutate={mutate} />
+              ))}
+            </List.Section>
+          );
+        })}
     </List>
   );
 }
