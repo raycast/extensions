@@ -1,4 +1,4 @@
-import { showToast, Clipboard, Toast, List, Action, ActionPanel, confirmAlert } from "@raycast/api";
+import { showToast, Clipboard, Toast, List, Action, ActionPanel, confirmAlert, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
@@ -105,7 +105,12 @@ export default function Command() {
       actions={
         <ActionPanel title="Actions">
           <Action title="Parse URL" onAction={() => parseURL(inputText)} />
-          <Action title="Clear History" onAction={handleClear} />
+          <Action
+            title="Clear History"
+            style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            onAction={handleClear}
+          />
         </ActionPanel>
       }
     >
