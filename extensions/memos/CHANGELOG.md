@@ -2,7 +2,7 @@
 
 ## [Update] - 2024-03-05
 
-- 0.15.0 fix open in browser 403.
+- fix open in browser 403.
 
 ## [Update] - 2023-08-01
 
