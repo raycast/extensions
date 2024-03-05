@@ -1,5 +1,10 @@
 # Arc Changelog
 
+## [Improvements] - 2024-03-05
+
+- Added the ability to filter by tab type in the 'Search Tabs' command.
+- Lets you toggle between showing a combination Favorites, Pinned, and Unpinned tabs.
+
 ## [Fixes] - 2024-02-26
 
 - Fixed an issue in the `Search History` command where quotation marks in the search text were causing a syntax error.
