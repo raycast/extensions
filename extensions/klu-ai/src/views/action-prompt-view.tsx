@@ -54,7 +54,7 @@ const ActionPromptView = () => {
   return (
     <ActionPromptForm
       guid={selectedAction?.guid ?? ""}
-      variables={selectedAction?.meta_data.variables ?? []}
+      variables={selectedAction?.meta_data?.variables ?? []}
       isLoading={isActionsLoading || isAppsLoading}
     >
       <AppsActionSelection />
