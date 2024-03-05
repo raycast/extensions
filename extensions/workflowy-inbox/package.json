@@ -3,7 +3,7 @@
   "name": "workflowy-inbox",
   "title": "Workflowy Inbox",
   "description": "Quickly add items to your Workflowy inbox. This is an independent extension and is not created by Workflowy.",
-  "icon": "workflowy-logo.png",
+  "icon": "unofficial-workflowy-logo.png",
   "author": "cameron_pak",
   "categories": [
     "Productivity"
@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Add to Workflowy Inbox",
-      "description": "Add a note, task, or link to your Workflowy inbox with ease.",
+      "description": "Add a note, task, or link to your Workflowy inbox with ease.\n\nGet your API Key at https://workflowy.com/api-key/.",
       "mode": "view"
     }
   ],
