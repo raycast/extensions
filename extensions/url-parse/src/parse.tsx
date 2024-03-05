@@ -1,77 +1,79 @@
-import { showToast, Clipboard, Toast, List, Action, ActionPanel, confirmAlert, Keyboard } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { showToast, Toast, List, Action, ActionPanel, confirmAlert, Keyboard } from "@raycast/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
-function cleanURL(url: string) {
-  return decodeURIComponent(url.trim());
+function trim(url: string) {
+  return url.trim();
 }
 
-class UrlDetail {
+interface Detail {
   href: string;
   protocol: string;
   hostname: string;
   port: string;
   origin: string;
   hash?: string;
-  query?: Record<string, string | null | undefined>;
+  path?: string;
+  queries?: Record<string, string | null | undefined>;
+}
 
-  constructor(url: string) {
-    const instance = new URL(cleanURL(url));
-    this.href = instance.href;
-    this.protocol = instance.protocol;
-    this.hostname = instance.hostname;
-    this.port = instance.port;
-    this.origin = instance.origin;
-    this.hash = instance.hash;
-    this.query = [...instance.searchParams.keys()].reduce(
-      (o, k) => {
-        o[k] = instance.searchParams.get(k);
-        return o;
-      },
-      {} as Record<string, string | null>,
-    );
+function parse(url: string): Detail | undefined {
+  try {
+    const instance = new URL(url);
+    return {
+      href: instance.href,
+      protocol: instance.protocol,
+      hostname: instance.hostname,
+      port: instance.port,
+      origin: instance.origin,
+      hash: instance.hash,
+      path: decodeURIComponent(instance.pathname),
+      queries: [...instance.searchParams.keys()].reduce(
+        (o, k) => {
+          o[k] = instance.searchParams.get(k);
+          return o;
+        },
+        {} as Record<string, string | null>,
+      ),
+    };
+  } catch {
+    showToast({
+      title: "URL parse failed!",
+      style: Toast.Style.Failure,
+    });
   }
 }
 
-function toMarkdown(url: UrlDetail) {
-  return [
-    "## Input",
-    `- URL: [${url.href}](${url.href})`,
-    `- Length: ${url.href.length}`,
-    "## JSON",
-    `\`\`\`json\n${JSON.stringify(url, null, 2)}\n\`\`\``,
-  ].join("\n\n");
+function toMarkdown(url: Detail) {
+  return ["## Detail", `- ${url.href.length} characters.`, `\`\`\`json\n${JSON.stringify(url, null, 2)}\n\`\`\``].join(
+    "\n\n",
+  );
 }
 
 export default function Command() {
   const [inputText, setInputText] = useState("");
-  const [urls, setUrls] = useCachedState<UrlDetail[]>("urls", []);
-  const [filteredList, setFilteredList] = useState(urls);
+  const [urls, setUrls] = useCachedState<Detail[]>("urls", []);
+  const [filteredUrls, setFilteredUrls] = useState(urls.slice());
 
-  const parseURL = useCallback((text: string) => {
-    try {
-      const url = new UrlDetail(text);
-      setUrls((list) => {
-        const index = list.findIndex((item) => item.href === url.href);
-        if (index === -1) {
-          return [url].concat(...list);
-        } else {
-          const [item] = list.splice(index, 1);
-          return [item].concat(...list);
-        }
-      });
-      setInputText("");
-      showToast({
-        title: "Success",
-        style: Toast.Style.Success,
-      });
-    } catch (err) {
-      showToast({
-        title: "URL parse failed!",
-        style: Toast.Style.Failure,
-      });
+  const handleParse = useCallback(() => {
+    const text = trim(inputText);
+    if (!text) {
+      return;
     }
-  }, []);
+    if (urls.find((item) => item.href === text)) {
+      return;
+    }
+    const url = parse(text);
+    if (!url) {
+      return;
+    }
+    setUrls([url].concat(...urls));
+    setInputText("");
+    showToast({
+      title: "Success",
+      style: Toast.Style.Success,
+    });
+  }, [urls, inputText]);
 
   const handleClear = useCallback(async () => {
     if (await confirmAlert({ title: "Are you sure?" })) {
@@ -80,21 +82,17 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    Clipboard.readText().then((text) => {
-      if (!text) {
-        return;
-      }
-      parseURL(text);
-    });
-  }, [parseURL]);
-
-  useEffect(() => {
     if (inputText.trim()) {
-      setFilteredList(urls.filter((item) => item.href.indexOf(cleanURL(inputText)) !== -1));
+      setFilteredUrls(urls.filter((item) => item.href.indexOf(trim(inputText)) !== -1));
     } else {
-      setFilteredList([...urls]);
+      setFilteredUrls([...urls]);
     }
   }, [urls, inputText]);
+
+  const shouldShowParseAction = useMemo(
+    () => trim(inputText) && !urls.find((item) => item.href === trim(inputText)),
+    [urls, inputText],
+  );
 
   return (
     <List
@@ -104,19 +102,30 @@ export default function Command() {
       searchBarPlaceholder="Input to parse or search"
       actions={
         <ActionPanel title="Actions">
-          <Action title="Parse URL" onAction={() => parseURL(inputText)} />
+          <Action title="Parse URL" onAction={handleParse} />
           <Action
             title="Clear History"
             style={Action.Style.Destructive}
-            shortcut={Keyboard.Shortcut.Common.Remove}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
             onAction={handleClear}
           />
         </ActionPanel>
       }
     >
       <List.EmptyView description={inputText ? `Press Enter to parse ${inputText}` : `Input url to parse.`} />
-      {filteredList.map((url) => (
-        <List.Item key={url.href} title={url.href} detail={<List.Item.Detail markdown={toMarkdown(url)} />} />
+      {filteredUrls.map((url) => (
+        <List.Item
+          key={url.href}
+          title={url.href}
+          actions={
+            shouldShowParseAction && (
+              <ActionPanel>
+                <Action title="Parse URL" onAction={handleParse} />
+              </ActionPanel>
+            )
+          }
+          detail={<List.Item.Detail markdown={toMarkdown(url)} />}
+        />
       ))}
     </List>
   );
