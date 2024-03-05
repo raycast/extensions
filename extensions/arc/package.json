@@ -132,34 +132,7 @@
       "title": "Search Tabs",
       "subtitle": "Arc",
       "description": "Search and select your tabs.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "showFavorites",
-          "title": "Sections",
-          "label": "Show Favorites",
-          "description": "Show favorites in search results",
-          "type": "checkbox",
-          "required": false,
-          "default": true
-        },
-        {
-          "name": "showPinnedTabs",
-          "label": "Show Pinned Tabs",
-          "description": "Show pinned tabs in search results",
-          "type": "checkbox",
-          "required": false,
-          "default": true
-        },
-        {
-          "name": "showUnpinnedTabs",
-          "label": "Show Unpinned Tabs",
-          "description": "Show unpinned tabs in search results",
-          "type": "checkbox",
-          "required": false,
-          "default": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "new-incognito-window",
