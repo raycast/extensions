@@ -25,6 +25,10 @@ export const getSavedDirectory = () => {
   return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
 };
 
+const getFileType = (url: string) => {
+  return url.split(".").pop() || "png";
+};
+
 export const axiosGetImageArrayBuffer = async (url: string) => {
   const res = await axios({
     url: url,
@@ -37,7 +41,7 @@ export const axiosGetImageArrayBuffer = async (url: string) => {
 export async function downloadPicture(wallpaper: { title: string; url: string }) {
   await showToast(Toast.Style.Animated, "Downloading...");
 
-  const picturePath = `${getSavedDirectory()}/${wallpaper.title}.png`;
+  const picturePath = `${getSavedDirectory()}/${wallpaper.title}.${getFileType(wallpaper.url)}`;
   fse.writeFile(picturePath, Buffer.from(await axiosGetImageArrayBuffer(wallpaper.url)), async (error) => {
     if (error != null) {
       await showToast(Toast.Style.Failure, String(error));
@@ -165,9 +169,9 @@ export const autoSetWallpaper = async (wallpaper: RaycastWallpaper) => {
 };
 
 export const buildCachePath = (raycastWallpaper: RaycastWallpaper) => {
-  return cachePath.endsWith("/")
-    ? `${cachePath}${raycastWallpaper.title}.png`
-    : `${cachePath}/${raycastWallpaper.title}.png`;
+  const fileType = getFileType(raycastWallpaper.url);
+  const normalizedCachePath = cachePath.endsWith("/") ? cachePath : `${cachePath}/`;
+  return `${normalizedCachePath}${raycastWallpaper.title}.${fileType}`;
 };
 
 export const checkCache = (wallpaper: RaycastWallpaper) => {
