@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
-import { createTimeEntry, Project, Task } from "../api";
+import { createTimeEntry, Client, Project, Task } from "../api";
 import { useMe, useWorkspaces, useProjects, useClients, useTags, useTasks } from "../hooks";
-import { createProjectGroups } from "../helpers/createProjectGroups";
 
 interface CreateTimeEntryFormParams {
   revalidateRunningTimeEntry: () => void;
@@ -13,18 +12,15 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
   const navigation = useNavigation();
   const { me, isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
-  const { projects, isLoadingProjects } = useProjects();
   const { clients, isLoadingClients } = useClients();
-  const { tags, isLoadingTags } = useTags();
+  const { projects, isLoadingProjects } = useProjects();
   const { tasks, isLoadingTasks } = useTasks();
-  const [selectedProject, setSelectedProject] = useState<Project | undefined>();
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
+  const { tags, isLoadingTags } = useTags();
 
-  const projectGroups = useMemo(
-    () => createProjectGroups(projects, workspaces, clients),
-    [projects, workspaces, clients],
-  );
+  const [selectedClient, setSelectedClient] = useState<Client | undefined>();
+  const [selectedProject, setSelectedProject] = useState<Project | undefined>();
+  const [selectedTask, setSelectedTask] = useState<Task | undefined>();
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   async function handleSubmit(values: { description: string; billable?: boolean }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
@@ -53,20 +49,27 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
     }
   }
 
-  const projectTags = useMemo(() => {
-    return tags.filter((tag) => tag.workspace_id === selectedProject?.workspace_id);
-  }, [tags, selectedProject]);
-  const projectTasks = useMemo<Task[]>(
-    () => tasks.filter((task) => task.project_id == selectedProject?.id),
-    [tasks, selectedProject],
-  );
+  const filteredClients = useMemo(() => {
+    if (selectedProject) return clients.filter((client) => !client.archived && client.id == selectedProject.client_id);
+    else return clients.filter((client) => !client.archived);
+  }, [projects, selectedProject]);
+  const filteredProjects = useMemo(() => {
+    if (selectedClient)
+      return projects.filter((project) => project.client_id == selectedClient.id && project.status != "archived");
+    else return projects.filter((project) => project.status != "archived");
+  }, [projects, selectedClient]);
+  const filteredTasks = useMemo(() => {
+    if (selectedProject) return tasks.filter((task) => task.project_id == selectedProject.id);
+    else if (selectedClient)
+      return tasks.filter(
+        (task) => task.project_id == projects.find((project) => project.client_id == selectedClient.id)?.id,
+      );
+    else return tasks;
+  }, [tasks, selectedClient, selectedProject]);
 
   const onProjectChange = (projectId: string) => {
     const project = projects.find((project) => project.id === parseInt(projectId));
     if (project) setSelectedProject(project);
-  };
-  const onTagsChange = (tags: string[]) => {
-    setSelectedTags(tags);
   };
   const onTaskChange = (taskId: string) => {
     const task = tasks.find((task) => task.id == parseInt(taskId));
@@ -86,39 +89,49 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
     >
       <Form.TextField id="description" title="Description" />
       <Form.Dropdown
+        id="client"
+        title="Client"
+        defaultValue={selectedClient?.id.toString() ?? "-1"}
+        onChange={(clientId) =>
+          setSelectedClient(clientId == "-1" ? undefined : clients.find((client) => client.id == parseInt(clientId)))
+        }
+      >
+        <Form.Dropdown.Item key="-1" value="-1" title={"No Client"} />
+        {filteredClients.map((client) => (
+          <Form.Dropdown.Item key={client.id} value={client.id.toString()} title={client.name} />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
         id="project"
         title="Project"
         defaultValue={selectedProject?.id.toString() ?? "-1"}
         onChange={onProjectChange}
       >
         <Form.Dropdown.Item key="-1" value="-1" title={"No Project"} icon={{ source: Icon.Circle }} />
-        {projectGroups.map((group) => (
-          <Form.Dropdown.Section
-            key={group.key}
-            title={`${group.workspace.name} ${group.client?.name ? `(${group.client?.name})` : ""}`}
-          >
-            {group.projects.map((project) => (
-              <Form.Dropdown.Item
-                key={project.id}
-                value={project.id.toString()}
-                title={project.name}
-                icon={{ source: Icon.Circle, tintColor: project.color }}
-              />
-            ))}
-          </Form.Dropdown.Section>
+        {filteredProjects.map((project) => (
+          <Form.Dropdown.Item
+            key={project.id}
+            value={project.id.toString()}
+            title={project.name}
+            icon={{ source: Icon.Circle, tintColor: project.color }}
+          />
         ))}
       </Form.Dropdown>
-      {selectedProject && projectTasks.length > 0 && (
+      {selectedProject && filteredTasks.length > 0 && (
         <Form.Dropdown id="task" title="Task" defaultValue="-1" onChange={onTaskChange}>
           <Form.Dropdown.Item value={"-1"} title={"No task"} icon={{ source: Icon.Circle }} />
-          {projectTasks.map((task) => (
-            <Form.Dropdown.Item key={task.id} value={task.id.toString()} title={task.name} />
+          {filteredTasks.map((task) => (
+            <Form.Dropdown.Item
+              key={task.id}
+              value={task.id.toString()}
+              title={`${task.name} | ${projects.find((project) => project.id === task.project_id)?.name ?? "Uknown Project"}`}
+            />
           ))}
         </Form.Dropdown>
       )}
       {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
-      <Form.TagPicker id="tags" title="Tags" onChange={onTagsChange}>
-        {projectTags.map((tag) => (
+      <Form.TagPicker id="tags" title="Tags" onChange={setSelectedTags} value={selectedTags}>
+        {tags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
         ))}
       </Form.TagPicker>
