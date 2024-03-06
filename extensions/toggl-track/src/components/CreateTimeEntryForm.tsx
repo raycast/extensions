@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigation, Form, ActionPanel, Action, Icon, showToast, Toast, clearSearchBar } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { createTimeEntry, Client, Project, Task } from "../api";
 import { useMe, useWorkspaces, useProjects, useClients, useTags, useTasks } from "../hooks";
 
@@ -17,6 +18,7 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
   const { tasks, isLoadingTasks } = useTasks();
   const { tags, isLoadingTags } = useTags();
 
+  const [selectedWorkspace, setSelectedWorkspace] = useCachedState("defaultWorspace", workspaces.at(0));
   const [selectedClient, setSelectedClient] = useState<Client | undefined>();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
@@ -51,22 +53,33 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
 
   const filteredClients = useMemo(() => {
     if (selectedProject) return clients.filter((client) => !client.archived && client.id == selectedProject.client_id);
-    else return clients.filter((client) => !client.archived);
-  }, [projects, selectedProject]);
+    else return clients.filter((client) => !client.archived && client.wid == selectedWorkspace?.id);
+  }, [projects, selectedWorkspace, selectedProject]);
   const filteredProjects = useMemo(() => {
     if (selectedClient)
       return projects.filter((project) => project.client_id == selectedClient.id && project.status != "archived");
-    else return projects.filter((project) => project.status != "archived");
-  }, [projects, selectedClient]);
+    else
+      return projects.filter(
+        (project) => project.workspace_id == selectedWorkspace?.id && project.status != "archived",
+      );
+  }, [projects, selectedWorkspace, selectedClient]);
   const filteredTasks = useMemo(() => {
     if (selectedProject) return tasks.filter((task) => task.project_id == selectedProject.id);
     else if (selectedClient)
       return tasks.filter(
         (task) => task.project_id == projects.find((project) => project.client_id == selectedClient.id)?.id,
       );
-    else return tasks;
-  }, [tasks, selectedClient, selectedProject]);
+    else return tasks.filter((task) => task.workspace_id == selectedWorkspace?.id);
+  }, [tasks, selectedWorkspace, selectedClient, selectedProject]);
 
+  const onWorkspaceChange = (workspaceId: string) => {
+    const workspace = workspaces.find((workspace) => workspace.id === parseInt(workspaceId));
+    if (workspace) setSelectedWorkspace(workspace);
+    setSelectedClient(undefined);
+    setSelectedProject(undefined);
+    setSelectedTask(undefined);
+    setSelectedTags([]);
+  };
   const onProjectChange = (projectId: string) => {
     const project = projects.find((project) => project.id === parseInt(projectId));
     if (project) setSelectedProject(project);
@@ -87,7 +100,19 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
         </ActionPanel>
       }
     >
-      <Form.TextField id="description" title="Description" />
+      {workspaces.length > 1 && (
+        <Form.Dropdown
+          id="workspace"
+          title="Workspace"
+          defaultValue={selectedWorkspace?.id.toString()}
+          onChange={onWorkspaceChange}
+        >
+          {workspaces.map((workspace) => (
+            <Form.Dropdown.Item key={workspace.id} value={workspace.id.toString()} title={workspace.name} />
+          ))}
+        </Form.Dropdown>
+      )}
+      <Form.TextField id="description" title="Description" autoFocus />
       <Form.Dropdown
         id="client"
         title="Client"
@@ -131,9 +156,11 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
       )}
       {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
       <Form.TagPicker id="tags" title="Tags" onChange={setSelectedTags} value={selectedTags}>
-        {tags.map((tag) => (
-          <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
-        ))}
+        {tags
+          .filter((tag) => tag.workspace_id == selectedWorkspace?.id)
+          .map((tag) => (
+            <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
+          ))}
       </Form.TagPicker>
     </Form>
   );
