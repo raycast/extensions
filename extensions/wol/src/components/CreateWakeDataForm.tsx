@@ -71,7 +71,7 @@ export default function CreateWakeDataForm(props: { onCreate: (values: WakeData)
       <Form.TextField title="Machine Name" {...itemProps.name} />
       <Form.TextField title="MAC Address" {...itemProps.mac} />
       <Form.TextField title="IP Address" {...itemProps.ip} />
-      <Form.TextField title="Port" {...itemProps.port} />
+      <Form.TextField title="WOL Port" {...itemProps.port} />
     </Form>
   );
 }
