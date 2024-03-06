@@ -7,7 +7,8 @@
   "author": "josephschmitt",
   "contributors": [
     "tm.wrnr",
-    "j3lte"
+    "j3lte",
+    "samuelkraft"
   ],
   "license": "MIT",
   "categories": [
@@ -163,6 +164,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
