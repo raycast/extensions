@@ -26,7 +26,7 @@ const useActions = () => {
 
       const newActions = actions
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-        .sort((a, b) => (a.status === "ACTIVE" ? -1 : 1))
+        .sort((a) => (a.status === "ACTIVE" ? -1 : 1))
         .map(async (a) => {
           const action: Action = {
             ...a,
