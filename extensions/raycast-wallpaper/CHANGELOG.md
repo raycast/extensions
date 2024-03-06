@@ -1,5 +1,9 @@
 # Raycast Wallpaper Changelog
 
+## [Improve image loading speed] - 2024-03-06
+
+- Use smaller thumbnails for improved loading speed in grid/list view
+
 ## [Support new wallpapers] - 2024-03-05
 
 - Add support for other image formats (e.g. heic)
