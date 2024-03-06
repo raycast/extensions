@@ -13,6 +13,14 @@ export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
 
+export const getThumbnailUrl = (url: string) => {
+  return url.replace(`.${getFileType(url)}`, "-thumbnail.webp");
+};
+
+export const getPreviewUrl = (url: string) => {
+  return url.replace(`.${getFileType(url)}`, "-preview.png");
+};
+
 export const getSavedDirectory = () => {
   const directoryPreference = getPreferenceValues<Preferences>().picturesDirectory;
   let actualDirectory = directoryPreference;
