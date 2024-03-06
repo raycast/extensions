@@ -1,3 +1,3 @@
-# WOL
+# Wake on Lan
 
-wake on lan
+List and wake devices easily 
