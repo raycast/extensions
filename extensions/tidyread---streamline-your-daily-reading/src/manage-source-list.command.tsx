@@ -26,6 +26,7 @@ import { validateSources } from "./utils/validate";
 import SharableLinkAction from "./components/SharableLinkAction";
 import { usePromise } from "@raycast/utils";
 import Onboarding from "./components/Onboarding";
+import ShowRSSDetailAction from "./components/ShowRSSDetailAction";
 
 export default function SourceList() {
   const [sources, setSources] = useState<Source[]>();
@@ -280,6 +281,7 @@ export default function SourceList() {
                     target={<SourcesJson />}
                   />
                   {batchImportActionNode}
+                  {item.rssLink && <ShowRSSDetailAction rssLink={item.rssLink} url={item.url} />}
                   {item.rssLink && (
                     <Action.OpenInBrowser
                       shortcut={{ modifiers: ["cmd"], key: "l" }}

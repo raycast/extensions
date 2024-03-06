@@ -22,7 +22,7 @@ export default function RSSListItem(props: {
   actions?: ReactNode | null;
 }) {
   const { item, selected, actions = null } = props;
-  const [markdown, setMarkdown] = useState<string>("Fetching RSS data...");
+  const [markdown, setMarkdown] = useState<string>("Fetching RSS Detail...");
 
   useEffect(() => {
     if (selected) {
@@ -41,7 +41,7 @@ export default function RSSListItem(props: {
           setMarkdown(`> **Failed to fetch**, error is: \`${err.message}\``);
         });
     } else {
-      setMarkdown("Fetching RSS data...");
+      setMarkdown("Fetching RSS Detail...");
     }
   }, [selected]);
 

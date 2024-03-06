@@ -1,7 +1,8 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
 ## TODO
-- chore: change CATEGORIES
+- feat: Manage Sources Command add Show RSS Detail Action
+- chore: change CATEGORIES const
 
 ## [Support Categorized Digest And Fix Some Edge Case Bugs] - 2024-01-30
 - feat: digest can be categorized by tags
