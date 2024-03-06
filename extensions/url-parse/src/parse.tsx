@@ -85,6 +85,13 @@ export default function Command() {
     }
   }, []);
 
+  const handleDelete = useCallback(
+    (detail: Detail) => {
+      setUrls(urls.filter((item) => item.href !== detail.href));
+    },
+    [urls],
+  );
+
   useEffect(() => {
     if (inputText.trim()) {
       setFilteredUrls(urls.filter((item) => item.href.indexOf(trim(inputText)) !== -1));
@@ -123,7 +130,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               {CommonActions}
-              <Action title="Delete" shortcut={Keyboard.Shortcut.Common.Remove} style={Action.Style.Destructive} />
+              <Action
+                title="Delete"
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                style={Action.Style.Destructive}
+                onAction={() => handleDelete(url)}
+              />
             </ActionPanel>
           }
           detail={<List.Item.Detail markdown={toMarkdown(url)} />}
