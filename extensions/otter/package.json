@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Search Bookmarks",
       "subtitle": "Otter",
       "description": "Search Otter",
       "mode": "view",
@@ -22,7 +22,7 @@
     },
     {
       "name": "recent",
-      "title": "Recent",
+      "title": "Recent Bookmarks",
       "subtitle": "Otter",
       "description": "View recent Otter items",
       "mode": "view",
@@ -63,7 +63,7 @@
     {
       "name": "otterBasePath",
       "type": "textfield",
-      "title": "Otter instance url",
+      "title": "Otter Instance URL",
       "description": "e.g. https://otter.zander.wtf",
       "required": true,
       "default": "https://otter.zander.wtf"
@@ -71,7 +71,7 @@
     {
       "name": "supabaseUrl",
       "type": "textfield",
-      "title": "Supabase project url",
+      "title": "Supabase Project URL",
       "description": "Find this in your Supabase project API settings. e.g. https://ffpbylcvwtyozyrplqic.supabase.co",
       "required": true,
       "default": ""
@@ -88,7 +88,7 @@
       "name": "showDetailView",
       "type": "checkbox",
       "label": "Show detail view",
-      "title": "Show detail view to side or list view",
+      "title": "Show Detail Wiew to Side or List View",
       "description": "Show detail view to side or list view",
       "required": true,
       "default": true
