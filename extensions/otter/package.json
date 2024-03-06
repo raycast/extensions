@@ -88,7 +88,7 @@
       "name": "showDetailView",
       "type": "checkbox",
       "label": "Show detail view",
-      "title": "Show Detail Wiew to Side or List View",
+      "title": "Show Detail View to Side or List View",
       "description": "Show detail view to side or list view",
       "required": true,
       "default": true
