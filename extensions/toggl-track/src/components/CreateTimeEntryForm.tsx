@@ -20,14 +20,13 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
   const [selectedProject, setSelectedProject] = useState<Project | undefined>();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
-  const [billable, setBillable] = useState<boolean>(false);
 
   const projectGroups = useMemo(
     () => createProjectGroups(projects, workspaces, clients),
     [projects, workspaces, clients],
   );
 
-  async function handleSubmit(values: { description: string }) {
+  async function handleSubmit(values: { description: string; billable?: boolean }) {
     const workspaceId = selectedProject?.workspace_id || me?.default_workspace_id;
 
     if (!workspaceId) {
@@ -38,12 +37,11 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
     try {
       await showToast(Toast.Style.Animated, "Starting time entry...");
       await createTimeEntry({
+        ...values,
         projectId: selectedProject?.id,
         workspaceId,
-        description: values.description,
         tags: selectedTags,
         taskId: selectedTask?.id,
-        billable,
       });
       await showToast(Toast.Style.Success, "Started time entry");
       navigation.pop();
@@ -118,9 +116,7 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
           ))}
         </Form.Dropdown>
       )}
-      {selectedProject?.billable && (
-        <Form.Checkbox id="billable" label="" title="Billable" value={billable} onChange={setBillable} />
-      )}
+      {selectedProject?.billable && <Form.Checkbox id="billable" label="" title="Billable" />}
       <Form.TagPicker id="tags" title="Tags" onChange={onTagsChange}>
         {projectTags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />

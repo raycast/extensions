@@ -26,7 +26,7 @@ type CreateTimeEntryParameters = {
   description: string;
   tags: string[];
   taskId?: number;
-  billable: boolean;
+  billable?: boolean;
 };
 export function createTimeEntry({
   projectId,
