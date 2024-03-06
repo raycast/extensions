@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Devices",
+      "title": "List Devices",
       "description": "Show a list of all wake data.",
       "mode": "view"
     }

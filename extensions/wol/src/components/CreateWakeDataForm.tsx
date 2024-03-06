@@ -22,10 +22,16 @@ export default function CreateWakeDataForm(props: { onCreate: (values: WakeData)
       name: FormValidation.Required,
       ip: FormValidation.Required,
       mac: (value) => {
-        if (value && !/([a-fA-F0-9]{2}[:-]){5}([a-fA-F0-9]{2})/.test(value.trim())) {
-          return "Invalid MAC address";
-        } else if (!value) {
+        if (value === undefined || value.trim().length === 0) {
           return "The item is required";
+        }
+        // align with the wol.ts validate logic
+        if (value.trim().length !== 17) {
+          return "Invalid MAC address";
+        }
+        const mac = value.trim().replace(new RegExp(value[2], "g"), "");
+        if (mac.length !== 12 || mac.match(/[^a-fA-F0-9]/)) {
+          return "Invalid MAC address";
         }
       },
     },

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, Color, showToast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, LocalStorage, Color, showToast, Keyboard } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { PingJob, WakeData } from "./types";
 import { wake } from "./lib/wol";
@@ -158,6 +158,8 @@ export default function Command() {
               <CreateWakeAction onCreate={handleCreate} />
               <Action
                 title="Remove Wake Data"
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 onAction={() => handleDelete(index)}
               />
@@ -171,7 +173,7 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="MAC" text={item.mac} />
                   <List.Item.Detail.Metadata.Label title="IP" text={item.ip} />
-                  <List.Item.Detail.Metadata.Label title="Port" text={item.port} />
+                  <List.Item.Detail.Metadata.Label title="WOL Port" text={item.port} />
                 </List.Item.Detail.Metadata>
               }
             />
