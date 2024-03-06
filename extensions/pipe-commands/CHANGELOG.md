@@ -1,5 +1,9 @@
 # Pipe Commands Changelog
 
+## [Added new pipe command] - 2024-03-05
+
+- Added "Add bulletpoint to newline" command
+
 ## [Added new pipe command] - 2023-11-28
 
 - Add remove smart quotes command (helpful for some LLM prompting)
