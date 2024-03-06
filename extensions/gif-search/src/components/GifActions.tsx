@@ -61,7 +61,6 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
     })
       .then((toast) => {
         const isInFavorites = favIds?.get(service as ServiceName)?.has(id.toString());
-        console.log("isInFavorites", isInFavorites);
         return copyFileToClipboard(item.download_url, item.download_name, isInFavorites).then((file) => {
           toast.hide();
           showHUD(`Copied GIF "${file}" to clipboard`);
