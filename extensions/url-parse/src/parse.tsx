@@ -58,6 +58,10 @@ export default function Command() {
   const handleParse = useCallback(() => {
     const text = trim(inputText);
     if (!text) {
+      showToast({
+        title: "Please input a url!",
+        style: Toast.Style.Failure,
+      });
       return;
     }
     if (urls.find((item) => item.href === text)) {
@@ -89,10 +93,19 @@ export default function Command() {
     }
   }, [urls, inputText]);
 
-  const shouldShowParseAction = useMemo(
-    () => trim(inputText) && !urls.find((item) => item.href === trim(inputText)),
-    [urls, inputText],
-  );
+  const CommonActions = useMemo(() => {
+    return (
+      <>
+        <Action title="Parse URL" onAction={handleParse} />
+        <Action
+          title="Clear History"
+          style={Action.Style.Destructive}
+          shortcut={Keyboard.Shortcut.Common.RemoveAll}
+          onAction={handleClear}
+        />
+      </>
+    );
+  }, [handleParse, handleClear]);
 
   return (
     <List
@@ -100,17 +113,7 @@ export default function Command() {
       searchText={inputText}
       onSearchTextChange={(text) => setInputText(text)}
       searchBarPlaceholder="Input to parse or search"
-      actions={
-        <ActionPanel title="Actions">
-          <Action title="Parse URL" onAction={handleParse} />
-          <Action
-            title="Clear History"
-            style={Action.Style.Destructive}
-            shortcut={Keyboard.Shortcut.Common.RemoveAll}
-            onAction={handleClear}
-          />
-        </ActionPanel>
-      }
+      actions={<ActionPanel title="Actions">{CommonActions}</ActionPanel>}
     >
       <List.EmptyView description={inputText ? `Press Enter to parse ${inputText}` : `Input url to parse.`} />
       {filteredUrls.map((url) => (
@@ -118,11 +121,10 @@ export default function Command() {
           key={url.href}
           title={url.href}
           actions={
-            shouldShowParseAction && (
-              <ActionPanel>
-                <Action title="Parse URL" onAction={handleParse} />
-              </ActionPanel>
-            )
+            <ActionPanel>
+              {CommonActions}
+              <Action title="Delete" shortcut={Keyboard.Shortcut.Common.Remove} style={Action.Style.Destructive} />
+            </ActionPanel>
           }
           detail={<List.Item.Detail markdown={toMarkdown(url)} />}
         />
