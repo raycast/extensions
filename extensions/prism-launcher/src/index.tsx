@@ -10,7 +10,7 @@ import * as child_process from "child_process";
 import { When } from "react-if";
 
 const instancesPath = path.join(process.env.HOME!, "Library", "Application Support", "PrismLauncher", "instances");
-const prismLauncherPath = path.join("/Applications", "PrismLauncher.app");
+const prismLauncherPath = fs.pathExistsSync(path.join("/Applications", "PrismLauncher.app")) ? path.join("/Applications", "PrismLauncher.app") : path.join("/Applications", "Prism Launcher.app");
 
 export default function Command() {
   const [instances, setInstances] = useState<Instance[]>();
@@ -67,7 +67,7 @@ export default function Command() {
                     title="Launch Instance"
                     icon={"app-window-16"}
                     onAction={async () => {
-                      child_process.exec(`open -a "PrismLauncher" --args --launch "${instance.id}"`);
+                      child_process.exec(`open -b "org.prismlauncher.PrismLauncher" --args --launch "${instance.id}"`);
                       await closeMainWindow({
                         popToRootType: PopToRootType.Immediate,
                         clearRootSearch: true,
@@ -83,7 +83,7 @@ export default function Command() {
         <List.EmptyView
           icon={"x-mark-circle-16"}
           title={"Prism Launcher is not installed"}
-          description={`/Applications/PrismLauncher.app or ${instancesPath} is not present`}
+          description={`Prism Launcher not installed or ${instancesPath} is not present`}
         />
       </When>
     </List>
