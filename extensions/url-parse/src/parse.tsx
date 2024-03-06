@@ -1,4 +1,4 @@
-import { showToast, Toast, List, Action, ActionPanel, confirmAlert, Keyboard } from "@raycast/api";
+import { showToast, Toast, List, Action, ActionPanel, confirmAlert, Keyboard, Icon, Alert } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
@@ -80,9 +80,16 @@ export default function Command() {
   }, [urls, inputText]);
 
   const handleClear = useCallback(async () => {
-    if (await confirmAlert({ title: "Are you sure?" })) {
-      setUrls([]);
-    }
+    await confirmAlert({
+      title: "Are you sure?",
+      primaryAction: {
+        title: "Yes",
+        style: Alert.ActionStyle.Destructive,
+        onAction: () => {
+          setUrls([]);
+        },
+      },
+    });
   }, []);
 
   const handleDelete = useCallback(
@@ -103,9 +110,10 @@ export default function Command() {
   const CommonActions = useMemo(() => {
     return (
       <>
-        <Action title="Parse URL" onAction={handleParse} />
+        <Action title="Parse URL" onAction={handleParse} icon={Icon.Clipboard} />
         <Action
           title="Clear History"
+          icon={Icon.MinusCircle}
           style={Action.Style.Destructive}
           shortcut={Keyboard.Shortcut.Common.RemoveAll}
           onAction={handleClear}
@@ -134,6 +142,7 @@ export default function Command() {
                 title="Delete"
                 shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
+                icon={Icon.Trash}
                 onAction={() => handleDelete(url)}
               />
             </ActionPanel>
