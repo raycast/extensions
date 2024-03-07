@@ -35,6 +35,15 @@ ${rawCode}
     throw new Error(`Yaml error: code or content required for all snippets in ${relativePath}`);
   }
 
+  let tags: string[] = [];
+  // Parse tags
+  const rawTags = snippetRaw["tags"] ?? [];
+  if (!Array.isArray(rawTags) || rawTags.some((tag) => typeof tag !== "string")) {
+    throw new Error(`Invalid tags. All tags must be a string for ${relativePath}`);
+  } else {
+    tags = rawTags;
+  }
+
   const snippet: Snippet = {
     id: id,
     folder: path.dirname(relativePath),
@@ -42,6 +51,7 @@ ${rawCode}
     content: {
       title: title,
       description: description,
+      tags: tags,
       content: content,
       rawMetadata: title + description,
     },

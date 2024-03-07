@@ -14,6 +14,7 @@ import { useProjects } from "./hooks/useProjects";
 import { useActivities } from "./hooks/useActivities";
 import { saveTimesheet } from "./libs/api";
 import dayjs from "dayjs";
+import getPreferences from "./libs/preferences";
 
 interface FormValues {
   project: string;
@@ -26,6 +27,8 @@ interface FormValues {
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const LogTimeCommand = () => {
+  const { duration } = getPreferences();
+  const initialDuration = parseInt(duration);
   const { isLoading: isLoadingProjects, projects, visitItem: visitProject } = useProjects();
   const { isLoading: isLoadingActivities, activities, visitItem: visitActivity } = useActivities();
 
@@ -83,6 +86,7 @@ const LogTimeCommand = () => {
     },
     initialValues: {
       activityDate: new Date(),
+      duration: isNaN(initialDuration) ? "0" : String(initialDuration),
     },
   });
 

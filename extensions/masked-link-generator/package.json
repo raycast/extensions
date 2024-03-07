@@ -4,7 +4,7 @@
   "title": "Masked Link Generator",
   "description": "Input a destination URL and the title of the link and receive a masked link in your clipboard.",
   "icon": "command-icon.png",
-  "author": "Vaibhav-Satishkumar",
+  "author": "Visual-Studio-Coder",
   "categories": [
     "Web"
   ],

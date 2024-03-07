@@ -1,5 +1,10 @@
 # Arc Changelog
 
+## [Improvements] - 2024-02-15
+
+- Added an argument `space` to the `Open New Window` and `Open New Tab` commands to open a new window or tab in a specific space.
+- Edited the AppleScript commands to open a new window or tab to use the `space` argument.
+
 ## [Fixes] - 2024-02-26
 
 - Fixed an issue in the `Search History` command where quotation marks in the search text were causing a syntax error.

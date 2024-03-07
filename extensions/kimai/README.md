@@ -13,6 +13,7 @@ This [Raycast](https://raycast.com) extension lets you quickly add new time log 
 
 To connect the extension to your Kimai instance you need to add the following settings.
 
+- **Request protocol:** Protocol to be used to make API requests. If you are using local (self hosted) Kimai, set it to 'http', otherwise keep it as 'https'.
 - **Kimai Domain:** The domain of your Kimai instance like `your-organization.kimai.cloud`.
 - **Email:** Email you use to login into Kimai
 - **API Password:** Password different from password you use to login into Kimai. You need to create it in your `API Access` settings.
