@@ -1,9 +1,13 @@
 # Pipe Commands Changelog
 
-## [Added new dedicated clipboard command] - 2024-02-08
+## [Added new dedicated clipboard command] - 2024-03-07
 
 BREAKING CHANGE: the text command no longer falls back to the clipboard contents. Now, there is a dedicated clipboard
 command to pipe clipboard input.
+
+## [Added new pipe command] - 2024-03-05
+
+- Added "Add bulletpoint to newline" command
 
 ## [Added new pipe command] - 2023-11-28
 

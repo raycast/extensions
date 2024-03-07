@@ -14,6 +14,4 @@ For more information, visit [Tidyread](https://tidyread.info).
 
 > If you have any questions or would like to discuss further, feel free to [DM me on x](https://x.com/jaredliu_bravo).
 
-## Other Links
-
-- [Buy me a coffee](https://www.buymeacoffee.com/jaredliu)
+<a href="https://www.buymeacoffee.com/jaredliu" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>

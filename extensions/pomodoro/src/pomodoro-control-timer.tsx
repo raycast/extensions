@@ -13,7 +13,7 @@ import {
   resetInterval,
 } from "../lib/intervals";
 import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
-import { GiphyResponse } from "../lib/types";
+import { GiphyResponse, Quote } from "../lib/types";
 
 const createAction = (action: () => void) => () => {
   action();
@@ -107,8 +107,20 @@ const ActionsList = () => {
   );
 };
 
+const handleQuote = (): string => {
+  let quote = { content: "You did it!", author: "Unknown" };
+  const { isLoading, data } = useFetch<Quote[]>("https://api.quotable.io/quotes/random?limit=1", {
+    keepPreviousData: true,
+  });
+  if (!isLoading && data?.length) {
+    quote = data[0];
+  }
+
+  return `> ${quote.content} \n>\n> &dash; ${quote.author}`;
+};
+
 const EndOfInterval = () => {
-  let markdownImage;
+  let markdownContent = "# Interval Completed \n\n";
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
@@ -125,24 +137,36 @@ const EndOfInterval = () => {
     exec(`afplay /System/Library/Sounds/${preferences.sound}.aiff -v 10 && $$`);
   }
 
-  if (preferences.giphyAPIKey) {
-    const { isLoading, data } = useFetch(
-      `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
-      {
-        keepPreviousData: true,
+  if (preferences.enableQuote) {
+    markdownContent += handleQuote() + "\n\n";
+  }
+
+  if (preferences.enableImage) {
+    if (preferences.giphyAPIKey) {
+      const { isLoading, data } = useFetch(
+        `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
+        {
+          keepPreviousData: true,
+        }
+      );
+      if (!isLoading && data) {
+        const giphyResponse = data as GiphyResponse;
+        markdownContent += `![${giphyResponse.data.title}](${giphyResponse.data.images.fixed_height.url})`;
+        usingGiphy = true;
+      } else if (isLoading) {
+        ("You did it!");
+      } else {
+        markdownContent += `![${"You did it!"}](${preferences.completionImage})`;
       }
-    );
-    if (!isLoading && data) {
-      const giphyResponse = data as GiphyResponse;
-      markdownImage = `![${giphyResponse.data.title}](${giphyResponse.data.images.fixed_height.url})`;
-      usingGiphy = true;
-    } else if (isLoading) {
-      ("You did it!");
     } else {
-      markdownImage = `![${"You did it!"}](${preferences.completionImage})`;
+      markdownContent += preferences.completionImage
+        ? `![${"You did it!"}](${preferences.completionImage})`
+        : "You did it!";
     }
-  } else {
-    markdownImage = `![${"You did it!"}](${preferences.completionImage})`;
+  }
+
+  if (usingGiphy) {
+    markdownContent = `![powered by GIPHY](Poweredby_100px-White_VertLogo.png) \n\n` + markdownContent;
   }
 
   const executor = getNextIntervalExecutor();
@@ -150,7 +174,7 @@ const EndOfInterval = () => {
   return (
     <Detail
       navigationTitle={`Interval completed`}
-      markdown={`${usingGiphy ? `![powered by GIPHY](Poweredby_100px-White_VertLogo.png) \n \n` : ""}` + markdownImage}
+      markdown={markdownContent}
       actions={
         <ActionPanel title="Start Next Interval">
           <Action

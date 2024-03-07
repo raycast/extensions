@@ -22,35 +22,10 @@ type QRCodeAPIWrapper<T> = {
   data: T;
 };
 
-export interface User {
-  id: string;
-  name: string;
-  i18n_names: {
-    en_us: string;
-    ja_jp: string;
-    zh_cn: string;
-  };
+export interface QRCodeUser {
   status: number;
-  tenant: {
-    id: string;
-    name: string;
-    icon_url: string;
-    icon_key: string;
-    tenant_tag: number;
-    tenant_brand: string;
-    encrypted_tenant_key: string;
-    tenant_domain: string;
-    tenant_full_domain: string;
-  };
   avatar_url: string;
   avatar_key: string;
-  create_time: number;
-  last_login_time: number;
-  login_credential_id: string;
-  encrypted_role: string;
-  unit: string;
-  geo: string;
-  exclude_login: boolean;
 }
 
 export interface InitQRCodeResponse {
@@ -67,7 +42,7 @@ export interface PollingQRCodeResponse {
   step_info: {
     status: QRCodeStatus;
     token: string;
-    user: null | User;
+    user: null | QRCodeUser;
   };
 }
 
@@ -87,7 +62,7 @@ export async function initQRCode(): Promise<
   | false
   | {
       token: string;
-      polling: () => Promise<{ next_step: NextStep; status: QRCodeStatus; user: null | User; cookie?: string[] }>;
+      polling: () => Promise<{ next_step: NextStep; status: QRCodeStatus; user: null | QRCodeUser; cookie?: string[] }>;
     }
 > {
   try {
@@ -114,7 +89,7 @@ export async function initQRCode(): Promise<
   } catch (error) {
     let errorMessage = 'Load QR Code failed';
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ''}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);
