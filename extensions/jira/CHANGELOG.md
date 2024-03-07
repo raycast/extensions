@@ -1,5 +1,8 @@
 # Jira Changelog
 
+## [Change order of Assignee and Sprint dropdown when searching] - 2024-03-07
+- Move default value to bottom when searchign in the dropdowns for Assignee and Sprint.
+
 ## [Add OAuth utils] - 2024-02-13
 
 - Use new OAuth utils
