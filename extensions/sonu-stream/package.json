@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sonu-stream",
-  "title": "sonu.stream",
+  "title": "Sonu",
   "description": "Search sonu.stream for songs, artists, and vibes",
   "icon": "raycast-sona-icon.png",
   "author": "bobringer",
