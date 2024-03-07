@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { EnhancedTrack } from "../common/types";
 import { getImageUrl } from "../common/get-image-url";
 import { APP_BASE_URL } from "../common/constants";
