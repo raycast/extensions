@@ -16,6 +16,14 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.13.0
+
+- Added pagination support to `usePromise`, `useCachedPromise` and `useFetch`.
+
+### v1.12.5
+
+- Add string array support for OAuth scope (Thanks @tonka3000!).
+
 ### v1.12.4
 
 - Add `tokenResponseParser` and `tokenRefreshResponseParser` in the options of `OAuthService`.
