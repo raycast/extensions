@@ -82,7 +82,7 @@ function CreateTimeEntryForm({ revalidateRunningTimeEntry, revalidateTimeEntries
   };
   const onProjectChange = (projectId: string) => {
     const project = projects.find((project) => project.id === parseInt(projectId));
-    if (project) setSelectedProject(project);
+    setSelectedProject(project);
   };
   const onTaskChange = (taskId: string) => {
     const task = tasks.find((task) => task.id == parseInt(taskId));
