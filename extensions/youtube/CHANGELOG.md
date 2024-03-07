@@ -5,7 +5,7 @@
 - Added tooltips allowing users to see the full text of truncated item titles
 - Improved style and UX for actions with destructive consequences
 - Fixed an issue where the shortcuts for the Pin Video and Pin Channel actions were reserved by Raycast
-- Fixed an issue where the Pin Video action was rendered twice in the Action Panel
+- Fixed an issue where the Pin Video and the Pin Channel actions were rendered twice in the Action Panel
 
 ## [Sorting] - 2024-02-05
 

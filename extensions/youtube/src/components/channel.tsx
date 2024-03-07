@@ -145,11 +145,12 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
           />
         </ActionPanel.Section>
         {props.recent && <RecentChannelActions channelId={channel.id} refresh={refresh} />}
-        {props.pinned ? (
-          <PinnedChannelActions channelId={channel.id} refresh={refresh} />
-        ) : (
-          <PinChannel channelId={channel.id} refresh={refresh} />
-        )}
+        {!props.recent &&
+          (props.pinned ? (
+            <PinnedChannelActions channelId={channel.id} refresh={refresh} />
+          ) : (
+            <PinChannel channelId={channel.id} refresh={refresh} />
+          ))}
       </ActionPanel>
     );
   };
