@@ -127,7 +127,8 @@ export default function Command(props: { fallbackText?: string }) {
   const [batch, setBatch] = useState<string | null>(null);
   const { data, isLoading, pagination } = useFetch(
     ({ page }) =>
-      "https://api.ycombinator.com/v0.1/companies?" + getSearchParams(searchText, batch, page + 1).toString(),
+      "https://api.ycombinator.com/v0.1/companies?" +
+      getSearchParams(searchText, batch, searchText === "" ? page + 1 : page).toString(),
     {
       mapResult: (result: SearchResult) => {
         return { data: result.companies, hasMore: typeof result.nextPage !== "undefined" };
