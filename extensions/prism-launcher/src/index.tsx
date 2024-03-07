@@ -10,7 +10,9 @@ import * as child_process from "child_process";
 import { When } from "react-if";
 
 const instancesPath = path.join(process.env.HOME!, "Library", "Application Support", "PrismLauncher", "instances");
-const prismLauncherPath = fs.pathExistsSync(path.join("/Applications", "PrismLauncher.app")) ? path.join("/Applications", "PrismLauncher.app") : path.join("/Applications", "Prism Launcher.app");
+const prismLauncherPath = fs.pathExistsSync(path.join("/Applications", "PrismLauncher.app"))
+  ? path.join("/Applications", "PrismLauncher.app")
+  : path.join("/Applications", "Prism Launcher.app");
 
 export default function Command() {
   const [instances, setInstances] = useState<Instance[]>();
