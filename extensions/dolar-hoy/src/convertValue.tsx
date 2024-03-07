@@ -1,87 +1,60 @@
 import { Action, ActionPanel, Detail, Form, Toast, showToast, useNavigation } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { Currency, ResponseType } from "./types";
 import { API_URL } from "./constants";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { getCurrencyName } from "./utils";
 
-enum ConvertFormFields {
-  amount = "amount",
-  fromCurrency = "fromCurrency",
-  toCurrency = "toCurrency",
+interface ConvertFormValues {
+  amount: string;
+  fromCurrency: string;
+  toCurrency: string;
 }
-
-interface ConvertFormValue {
-  [ConvertFormFields.amount]: string;
-  [ConvertFormFields.fromCurrency]: Currency;
-  [ConvertFormFields.toCurrency]: Currency;
-}
-
-type ConvertFormErrors = {
-  [ConvertFormFields.amount]?: string;
-  [ConvertFormFields.fromCurrency]?: string;
-  [ConvertFormFields.toCurrency]?: string;
-};
 
 export default function Command() {
-  const [formErrors, setFormErrors] = useState<ConvertFormErrors>({});
   const { push } = useNavigation();
 
-  const onSubmit = ({ amount, fromCurrency, toCurrency }: ConvertFormValue) => {
-    let errors: ConvertFormErrors = { ...formErrors };
-    if (!amount) errors = { ...errors, amount: "This field is required" };
-    if (!fromCurrency) errors = { ...errors, fromCurrency: "This field is required" };
-    if (!toCurrency) errors = { ...errors, toCurrency: "This field is required" };
-    if (amount && Number.isNaN(amount)) errors = { ...errors, amount: "Should be a number" };
-
-    setFormErrors(errors);
-
-    if (Object.values(errors).some((error) => error)) return;
-    else push(<ConvertValue amount={parseFloat(amount)} fromCurrency={fromCurrency} toCurrency={toCurrency} />);
-  };
-
-  const dropErrorIfNeeded = (newValue: string, field: ConvertFormFields) => {
-    if (formErrors[field]) {
-      if (field === ConvertFormFields.amount) {
-        if (newValue && !Number.isNaN(newValue)) setFormErrors({ ...formErrors, [field]: undefined });
-      } else if (newValue) {
-        setFormErrors({ ...formErrors, [field]: undefined });
+  const { handleSubmit, itemProps } = useForm<ConvertFormValues>({
+    onSubmit: (values) => {
+      if (values.amount && values.fromCurrency && values.toCurrency) {
+        push(
+          <ConvertValue
+            amount={parseFloat(values.amount)}
+            fromCurrency={values.fromCurrency as Currency}
+            toCurrency={values.toCurrency as Currency}
+          />,
+        );
       }
-    }
-  };
+    },
+    validation: {
+      amount: (value) => {
+        if (!value) return "This field is required";
+        else if (value && Number.isNaN(value)) return "Should be a number";
+      },
+      fromCurrency: FormValidation.Required,
+      toCurrency: FormValidation.Required,
+    },
+    initialValues: {
+      fromCurrency: Currency.usd_blue,
+      toCurrency: Currency.ars,
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={onSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id={"amount"}
-        title={"Amount"}
-        error={formErrors.amount}
-        onChange={(value) => dropErrorIfNeeded(value, ConvertFormFields.amount)}
-      />
-      <Form.Dropdown
-        id={"fromCurrency"}
-        title={"From"}
-        defaultValue={Currency.usd_blue}
-        error={formErrors.fromCurrency}
-        onChange={(value) => dropErrorIfNeeded(value, ConvertFormFields.fromCurrency)}
-      >
+      <Form.TextField title={"Amount"} {...itemProps.amount} />
+      <Form.Dropdown title={"From"} {...itemProps.fromCurrency}>
         {Object.values(Currency).map((currency) => (
           <Form.Dropdown.Item value={currency} title={getCurrencyName(currency)} key={`from-currency-${currency}`} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown
-        id={"toCurrency"}
-        title={"To"}
-        defaultValue={Currency.ars}
-        error={formErrors.toCurrency}
-        onChange={(value) => dropErrorIfNeeded(value, ConvertFormFields.toCurrency)}
-      >
+      <Form.Dropdown title={"To"} {...itemProps.toCurrency}>
         {Object.values(Currency).map((currency) => (
           <Form.Dropdown.Item value={currency} title={getCurrencyName(currency)} key={`from-currency-${currency}`} />
         ))}

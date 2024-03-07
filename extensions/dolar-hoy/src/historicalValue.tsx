@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Form, Toast, showToast, useNavigation } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, useForm } from "@raycast/utils";
 import { Currency, ResponseType } from "./types";
 import { API_URL } from "./constants";
 import { useEffect, useState } from "react";
@@ -7,38 +7,33 @@ import { format, isFuture } from "date-fns";
 import { getCurrencyName } from "./utils";
 
 type HistoricalFormValues = {
-  date: Date;
+  date: Date | null;
 };
 
 export default function Command() {
-  const [dateError, setDateError] = useState<string | undefined>();
   const { push } = useNavigation();
 
-  const onSubmit = ({ date }: HistoricalFormValues) => {
-    if (isFuture(date)) {
-      setDateError("Date can not be future");
-    } else {
-      push(<HistoricalValue date={date} />);
-    }
-  };
-
-  const dropDateErrorIfNeeded = (date: Date | null) => {
-    if (dateError) {
-      if (date && !isFuture(date)) {
-        setDateError(undefined);
-      }
-    }
-  };
+  const { handleSubmit, itemProps } = useForm<HistoricalFormValues>({
+    onSubmit: (values) => {
+      values.date && push(<HistoricalValue date={values.date} />);
+    },
+    validation: {
+      date: (value) => {
+        if (!value) return "Date is required";
+        else if (value && isFuture(value)) return "Date can not be future";
+      },
+    },
+  });
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={onSubmit}></Action.SubmitForm>
+          <Action.SubmitForm onSubmit={handleSubmit}></Action.SubmitForm>
         </ActionPanel>
       }
     >
-      <Form.DatePicker id={"date"} title={"Date"} error={dateError} onChange={dropDateErrorIfNeeded} />
+      <Form.DatePicker title={"Date"} {...itemProps.date} />
     </Form>
   );
 }
