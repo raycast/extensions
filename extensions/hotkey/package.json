@@ -3,7 +3,7 @@
   "name": "hotkey",
   "title": "Hotkey",
   "description": "show hotkey for app",
-  "icon": "icon.png",
+  "icon": "extension-icon.png",
   "author": "Cooperk",
   "license": "MIT",
   "commands": [
