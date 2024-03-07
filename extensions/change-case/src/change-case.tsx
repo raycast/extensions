@@ -81,9 +81,10 @@ const setRecentCases = (recent: CaseType[]) => {
 };
 
 export default function Command(props: LaunchProps) {
-  const preferences = getPreferenceValues();
-  const preferredSource = preferences["source"];
-  const preferredAction = preferences["action"];
+  const preferences = getPreferenceValues<Preferences>();
+  const preferredSource = preferences.source;
+  const preferredAction = preferences.action;
+  const allowMultiple = preferences.allowMultiple;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
@@ -157,7 +158,11 @@ export default function Command(props: LaunchProps) {
           }
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
-          closeMainWindow();
+          if (allowMultiple) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     );
@@ -179,7 +184,11 @@ export default function Command(props: LaunchProps) {
           }
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
-          closeMainWindow();
+          if (allowMultiple) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     ) : null;
