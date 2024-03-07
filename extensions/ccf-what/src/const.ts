@@ -2,10 +2,13 @@ export const A_ICON = "../assets/tier.imageset/A-tier.svg";
 export const B_ICON = "../assets/tier.imageset/B-tier.svg";
 export const C_ICON = "../assets/tier.imageset/C-tier.svg";
 
-export const TOGGLE_ICON = "../assets/action.imageset/toggles.svg";
+export const TOGGLE_ICON_DARK = "../assets/action.imageset/toggles-dark.svg";
+export const TOGGLE_ICON_LIGHT = "../assets/action.imageset/toggles-light.svg";
 
 export const CONF_ICON_DARK = "../assets/conference.imageset/conference-paper@3x.png";
+export const CONF_ICON_LIGHT = "../assets/conference.imageset/conferencepaper@3x.png";
 export const JOUR_ICON_DARK = "../assets/journal.imageset/journal-article@3x-1.png";
+export const JOUR_ICON_LIGHT = "../assets/journal.imageset/journal-article@3x.png";
 
 export enum UPDATE_INTERVAL {
   NEVER = "never",
@@ -20,15 +23,17 @@ export const TYPE_LOCALIZATION = {
 };
 
 export const TYPE_ICON = {
-  Conference: CONF_ICON_DARK,
-  Journal: JOUR_ICON_DARK,
+  Conference: { dark: CONF_ICON_DARK, light: CONF_ICON_LIGHT },
+  Journal: { dark: JOUR_ICON_DARK, light: JOUR_ICON_LIGHT },
 };
 
 export const TIER_ICON = {
-  A: A_ICON,
-  B: B_ICON,
-  C: C_ICON,
+  A: { dark: A_ICON, light: A_ICON },
+  B: { dark: B_ICON, light: B_ICON },
+  C: { dark: C_ICON, light: C_ICON },
 };
+
+export const TOGGLE_ICON = { dark: TOGGLE_ICON_DARK, light: TOGGLE_ICON_LIGHT };
 
 export const DEFAULT_FETCH_INTERVAL = UPDATE_INTERVAL.NEVER;
 export const DEFAULT_FETCH_URL =

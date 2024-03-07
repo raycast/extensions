@@ -74,17 +74,18 @@ export default function Command() {
   );
 
   function PublicationListItem(props: Publication) {
-    const tier_icon = CONST.TIER_ICON[props.rank];
-    const type_icon = CONST.TYPE_ICON[props.type];
+    const tier_icons = CONST.TIER_ICON[props.rank];
+    const type_icons = CONST.TYPE_ICON[props.type];
+    const toggle_icons = CONST.TOGGLE_ICON;
     const category = data?.category[props.category_id];
     return (
       <List.Item
         key={props.id}
-        icon={tier_icon}
+        icon={{ source: tier_icons }}
         keywords={[props.abbr, props.name, category?.english ?? "no category", category?.chinese ?? "无分类"]}
         title={props.abbr}
         subtitle={showingSubtitle ? props.name : undefined}
-        accessories={[{ icon: type_icon }, { text: localization ? category?.chinese : category?.english }]}
+        accessories={[{ icon: { source: type_icons } }, { text: localization ? category?.chinese : category?.english }]}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
@@ -94,7 +95,7 @@ export default function Command() {
             />
             <Action
               title="Toggle Detail"
-              icon={CONST.TOGGLE_ICON}
+              icon={{ source: toggle_icons }}
               shortcut={{ modifiers: ["cmd"], key: "/" }}
               onAction={() => {
                 setShowingDetail(!showingDetail);
@@ -127,7 +128,7 @@ export default function Command() {
                 <List.Item.Detail.Metadata.Label title="Abbreviation" text={props.abbr} />
                 <List.Item.Detail.Metadata.Label title="Name" text={props.name} />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Tier" icon={tier_icon} />
+                <List.Item.Detail.Metadata.Label title="Tier" icon={{ source: tier_icons }} />
                 <List.Item.Detail.Metadata.Label
                   title="Category"
                   text={localization ? category?.chinese : category?.english}
@@ -135,7 +136,7 @@ export default function Command() {
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="Type"
-                  icon={type_icon}
+                  icon={{ source: type_icons }}
                   text={localization ? CONST.TYPE_LOCALIZATION[props.type] : props.type}
                 />
                 <List.Item.Detail.Metadata.Label title="Publisher" text={props.publisher} />
