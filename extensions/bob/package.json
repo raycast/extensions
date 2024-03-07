@@ -8,6 +8,9 @@
   ],
   "icon": "icon.png",
   "author": "ViGeng",
+  "contributors": [
+    "thuggyduck"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -23,11 +26,46 @@
       "subtitle": "Bob",
       "description": "Translate latest text in clipboard",
       "mode": "no-view"
+    },
+    {
+      "name": "captureText",
+      "title": "Capture Text (OCR)",
+      "subtitle": "Bob",
+      "description": "Capture text using Bob's OCR",
+      "mode": "no-view"
+    },
+    {
+      "name": "captureTextSilently",
+      "title": "Capture Text Silently (OCR)",
+      "subtitle": "Bob",
+      "description": "Capture text using Bob's OCR without Bob's Main Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "captureTextfromFinder",
+      "title": "Capture File's Text from Finder",
+      "subtitle": "Bob",
+      "description": "Capture File's text from your Finder",
+      "mode": "no-view"
+    },
+    {
+      "name": "selectTranslate",
+      "title": "Translate Selected",
+      "subtitle": "Bob",
+      "description": "Translate what is selected",
+      "mode": "no-view"
+    },
+    {
+      "name": "captureTranslate",
+      "title": "Translate Captured",
+      "subtitle": "Bob",
+      "description": "Translate what is captured",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.28.0",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
