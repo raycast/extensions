@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Icon, Color, showToast, Toast, Cache, getPreferenceValues } from "@raycast/api";
-import { VideoActionProps } from "./video";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Cache,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  getPreferenceValues,
+  showToast,
+} from "@raycast/api";
 import { Preferences } from "../lib/types";
+import { VideoActionProps } from "./video";
 
 const { griditemsize } = getPreferenceValues<Preferences>();
 
@@ -34,17 +45,35 @@ const removeVideo = (key: string, id: string) => {
   cache.set(key, JSON.stringify(videos.filter((v) => v !== id)));
 };
 
-const removeRecentVideo = (id: string) => removeVideo("recent-videos", id);
-const clearRecentVideos = () => cache.remove("recent-videos");
 const removePinnedVideo = (id: string) => removeVideo("pinned-videos", id);
 const clearPinnedVideos = () => cache.remove("pinned-videos");
+const removeRecentVideo = (id: string) => removeVideo("recent-videos", id);
+const clearRecentVideos = () => cache.remove("recent-videos");
+
+const handleClearRecentVideos = async (refresh?: () => void) => {
+  const confirmed = await confirmAlert({
+    title: "Clear all recent videos?",
+    icon: Icon.Trash,
+    message: "This action cannot be undone.",
+    primaryAction: {
+      title: "Clear All",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+
+  if (confirmed) {
+    clearRecentVideos();
+    showToast(Toast.Style.Success, "Cleared All Recent Videos");
+    if (refresh) refresh();
+  }
+};
 
 export const PinVideo = ({ video, refresh }: VideoActionProps): JSX.Element => {
   return (
     <Action
       title="Pin Video"
       icon={{ source: Icon.Pin, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       onAction={() => {
         addPinnedVideo(video.id);
         showToast(Toast.Style.Success, "Pinned Video");
@@ -57,13 +86,14 @@ export const PinVideo = ({ video, refresh }: VideoActionProps): JSX.Element => {
 export const PinnedVideoActions = ({ video, refresh }: VideoActionProps) => (
   <ActionPanel.Section>
     <Action
-      title="Remove From Pinned Videos"
+      title="Remove from Pinned Videos"
       onAction={() => {
         removePinnedVideo(video.id);
-        showToast(Toast.Style.Success, "Removed From Pinned Videos");
+        showToast(Toast.Style.Success, "Removed from Pinned Videos");
         if (refresh) refresh();
       }}
-      icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+      icon={Icon.XMarkCircle}
+      style={Action.Style.Destructive}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
     />
     <Action
@@ -73,7 +103,8 @@ export const PinnedVideoActions = ({ video, refresh }: VideoActionProps) => (
         showToast(Toast.Style.Success, "Cleared All Pinned Videos");
         if (refresh) refresh();
       }}
-      icon={{ source: Icon.Trash, tintColor: Color.Red }}
+      icon={Icon.Trash}
+      style={Action.Style.Destructive}
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
     />
   </ActionPanel.Section>
@@ -84,23 +115,21 @@ export const RecentVideoActions = ({ video, refresh }: VideoActionProps) => {
     <ActionPanel.Section>
       <PinVideo video={video} refresh={refresh} />
       <Action
-        title="Remove From Recent Videos"
+        title="Remove from Recent Videos"
         onAction={() => {
           removeRecentVideo(video.id);
-          showToast(Toast.Style.Success, "Removed From Recent Videos");
+          showToast(Toast.Style.Success, "Removed from Recent Videos");
           if (refresh) refresh();
         }}
-        icon={{ source: Icon.XMarkCircle, tintColor: Color.PrimaryText }}
+        icon={Icon.XMarkCircle}
+        style={Action.Style.Destructive}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
       />
       <Action
         title="Clear All Recent Videos"
-        onAction={() => {
-          clearRecentVideos();
-          showToast(Toast.Style.Success, "Cleared All Recent Videos");
-          if (refresh) refresh();
-        }}
-        icon={{ source: Icon.Trash, tintColor: Color.Red }}
+        onAction={() => handleClearRecentVideos(refresh)}
+        icon={Icon.Trash}
+        style={Action.Style.Destructive}
         shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
       />
     </ActionPanel.Section>
