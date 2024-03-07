@@ -196,6 +196,106 @@ export default function Command() {
 }
 ```
 
+## Pagination
+
+{% hint style="info" %}
+When paginating, the hook will only cache the result of the first page.
+{% endhint %}
+
+The hook has built-in support for pagination. In order to enable pagination, `fn`'s type needs to change from
+
+> an asynchronous function or a function that returns a Promise
+
+to
+
+> a function that returns an asynchronous function or a function that returns a Promise
+
+In practice, this means going from
+
+```ts
+const { isLoading, data } = useCachedPromise(
+  async (searchText: string) => {
+    const response = await fetch(`https://api.example?q=${searchText}`);
+    const data = await response.json();
+    return data;
+  },
+  [searchText],
+  {
+    // to make sure the screen isn't flickering when the searchText changes
+    keepPreviousData: true,
+  },
+);
+```
+
+to
+
+```ts
+const { isLoading, data, pagination } = useCachedPromise(
+  (searchText: string) => async (options) => {
+    const response = await fetch(`https://api.example?q=${searchText}&page=${options.page}`);
+    const data = await response.json();
+    const hasMore = options.page < 50;
+    return { data, hasMore };
+  },
+  [searchText],
+  {
+    // to make sure the screen isn't flickering when the searchText changes
+    keepPreviousData: true,
+  },
+);
+```
+
+You'll notice that, in the second case, the hook returns an additional item: `pagination`. This can be passed to Raycast's `List` or `Grid` components in order to enable pagination.
+Another thing to notice is that the async function receives a [PaginationOptions](#paginationoptions) argument, and returns a specific data format:
+
+```ts
+{
+  data: any[];
+  hasMore: boolean;
+}
+```
+
+Every time the promise resolves, the hook needs to figure out if it should paginate further, or if it should stop, and it uses `hasMore` for this.
+In addition to this, the hook also needs `data`, and needs it to be an array, because internally it appends it to a list, thus making sure the `data` that the hook _returns_ always contains the data for all of the pages that have been loaded so far.
+
+### Full Example
+
+```tsx
+import { setTimeout } from "node:timers/promises";
+import { useState } from "react";
+import { List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+
+export default function Command() {
+  const [searchText, setSearchText] = useState("");
+
+  const { isLoading, data, pagination } = useCachedPromise(
+    (searchText: string) => async (options: { page: number }) => {
+      await setTimeout(200);
+      const newData = Array.from({ length: 25 }, (_v, index) => ({
+        index,
+        page: options.page,
+        text: searchText,
+      }));
+      return { data: newData, hasMore: options.page < 10 };
+    },
+    [searchText],
+  );
+
+  return (
+    <List isLoading={isLoading} onSearchTextChange={setSearchText} pagination={pagination}>
+      {data?.map((item) => (
+        <List.Item
+          key={`${item.page} ${item.index} ${item.text}`}
+          title={`Page ${item.page} Item ${item.index}`}
+          subtitle={item.text}
+        />
+      ))}
+    </List>
+  );
+}
+```
+
 ## Types
 
 ### AsyncState
@@ -245,4 +345,18 @@ export type MutatePromise<T> = (
     shouldRevalidateAfter?: boolean;
   },
 ) => Promise<any>;
+```
+
+### PaginationOptions
+
+An object passed to a `PaginatedPromise`, it has two properties:
+
+- `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
+- `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+
+```ts
+export type PaginationOptions<T = any> = {
+  page: number;
+  lastItem?: T;
+};
 ```

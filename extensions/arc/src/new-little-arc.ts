@@ -1,4 +1,4 @@
-import { LaunchProps, closeMainWindow, showHUD, getSelectedText } from "@raycast/api";
+import { LaunchProps, closeMainWindow, getSelectedText, showHUD } from "@raycast/api";
 import { makeNewLittleArcWindow } from "./arc";
 import { newLittleArcPreferences } from "./preferences";
 import { NewTabSearchConfigs, URLArguments } from "./types";

@@ -1,4 +1,6 @@
 # Just Focus Changelog
+## [Make Commands Work During Timer Counting] - 2024-02-28
+- Stop timer before short break/long break/start to fix these commands can't work
 
 ## [Update Raycast API] - 2022-12-01
 

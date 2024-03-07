@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Fix] - 2024-03-06
+
+- Resolved an issue where the color in the Menu Bar was not displayed correctly.
+
 ## [Fixes] - 2024-02-26
 
 - Make sure that colors picked on a P3 display are converted to sRGB when displayed as hex
