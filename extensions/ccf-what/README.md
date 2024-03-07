@@ -5,3 +5,4 @@ Loop up the rankings of China Computer Federation (CCF) recommended publications
 ## Screenshot
 
 ![screenshot](./metadata/ccf-what-1.png)
+![screenshot](./metadata/ccf-what-2.png)

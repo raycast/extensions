@@ -1,57 +1,123 @@
-import { List, Action, ActionPanel } from "@raycast/api";
-import { useEffect, useState } from "react";
+import {
+  List,
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  showToast,
+  openExtensionPreferences,
+  Toast,
+} from "@raycast/api";
+import { usePromise, useFrecencySorting, useCachedState, useCachedPromise } from "@raycast/utils";
+import { useRef } from "react";
+import { fetch } from "cross-fetch";
 import * as CONST from "./const";
-import source = require("./resource/CCF_Ranking_2022.json");
-
-const CCF_RANKING_INS = source as CCFRanking;
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
-  const [showingDetail, setShowingDetail] = useState(true);
-  const [filteredList, filterList] = useState(CCF_RANKING_INS.list);
+  const localization = getPreferenceValues().Localization == "en" ? false : true;
+  const interval = getPreferenceValues().UpdateInterval ?? CONST.DEFAULT_FETCH_INTERVAL;
+  const fetchURL = getPreferenceValues().UpdateURL ?? CONST.DEFAULT_FETCH_URL;
 
-  useEffect(() => {
-    if (searchText.length >= 2) {
-      filterList(CCF_RANKING_INS.list.filter((item) => item.name.toLowerCase().includes(searchText.toLowerCase())));
+  const abortable = useRef<AbortController>();
+  const [showingDetail, setShowingDetail] = useCachedState("showingDetail", true);
+  const [showingSubtitle, setShowingSubtitle] = useCachedState("showingSubtitle", false);
+  const [lastFetch, setLastFetch] = useCachedState<number>("lastFetch", 0);
+  const { isLoading, data, revalidate } = useCachedPromise(
+    async () => {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Refreshing data",
+        primaryAction: {
+          title: "Open Preference",
+          onAction: (toast) => {
+            toast.hide();
+            openExtensionPreferences();
+          },
+        },
+      });
+      try {
+        const res = await fetch(fetchURL, { signal: abortable.current?.signal });
+        const jsonObj = await res.json();
+        const now = new Date();
+        setLastFetch(now.getTime());
+        toast.style = Toast.Style.Success;
+        toast.title = "Data fetched from " + fetchURL;
+        return jsonObj as unknown as CCFRanking | undefined;
+      } catch (err) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Fetch failed.";
+        toast.message = (err as Error).message;
+      }
+    },
+    [],
+    { keepPreviousData: true, execute: false },
+  );
+  const { isLoading: isChecking } = usePromise(async () => {
+    const diff = new Date().getTime() - lastFetch;
+    const itvl = CONST.parseInterval(interval);
+    if (lastFetch === 0 || (itvl > 0 && diff > itvl)) {
+      await revalidate();
     }
-  }, [searchText]);
+  });
+  const { data: sortedData, visitItem, resetRanking } = useFrecencySorting(data?.list, { key: (item) => item.id });
 
   return (
     <List
+      isLoading={isLoading || isChecking}
       isShowingDetail={showingDetail}
-      filtering={false}
-      onSearchTextChange={setSearchText}
-      navigationTitle="Search Publications"
+      filtering={true}
+      navigationTitle={data ? `Last updated at ${new Date(lastFetch).toLocaleDateString()}` : "No data..."}
       searchBarPlaceholder="Your paper is accepted by?"
     >
-      {filteredList.map((item, index) => PublicationListItem(item, index))}
+      {sortedData.map((item) => PublicationListItem(item))}
     </List>
   );
 
-  function PublicationListItem(props: Publication, index: number) {
-    const tier_icon = {
-      A: CONST.A_ICON,
-      B: CONST.B_ICON,
-      C: CONST.C_ICON,
-    }[props.rank];
-    const type_icon = {
-      Conference: CONST.CONF_ICON_DARK,
-      Journal: CONST.JOUR_ICON_DARK,
-    }[props.type];
-    const name = props.name.split(" (")[0];
-    const category = CCF_RANKING_INS.category[props.category_id];
-
+  function PublicationListItem(props: Publication) {
+    const tier_icon = CONST.TIER_ICON[props.rank];
+    const type_icon = CONST.TYPE_ICON[props.type];
+    const category = data?.category[props.category_id];
     return (
       <List.Item
-        key={index}
+        key={props.id}
         icon={tier_icon}
+        keywords={[props.abbr, props.name, category?.english ?? "no category", category?.chinese ?? "无分类"]}
         title={props.abbr}
-        accessories={[{ icon: type_icon }, { text: category.chinese }]}
+        subtitle={showingSubtitle ? props.name : undefined}
+        accessories={[{ icon: type_icon }, { text: localization ? category?.chinese : category?.english }]}
         actions={
           <ActionPanel>
-            <Action title="Toggle Detail" onAction={() => setShowingDetail(!showingDetail)} />
-            <Action.OpenInBrowser title="Search in DBLP" url={`https://dblp.uni-trier.de/search?q=${props.abbr}`} />
-            <Action.CopyToClipboard content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.OpenInBrowser
+              title="Search in DBLP"
+              url={`https://dblp.uni-trier.de/search?q=${props.abbr}`}
+              onOpen={() => visitItem(props)}
+            />
+            <Action
+              title="Toggle Detail"
+              icon={CONST.TOGGLE_ICON}
+              shortcut={{ modifiers: ["cmd"], key: "/" }}
+              onAction={() => {
+                setShowingDetail(!showingDetail);
+                setShowingSubtitle(!showingSubtitle);
+              }}
+            />
+            <Action.CopyToClipboard
+              content={props.name}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              onCopy={() => visitItem(props)}
+            />
+            <Action
+              title="Refetch Ranking Data"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={() => revalidate()}
+            />
+            <Action
+              title="Reset Frequency"
+              icon={Icon.ArrowCounterClockwise}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              onAction={() => resetRanking(props)}
+            />
           </ActionPanel>
         }
         detail={
@@ -59,13 +125,19 @@ export default function Command() {
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label title="Abbreviation" text={props.abbr} />
-                <List.Item.Detail.Metadata.Label title="Name" text={name} />
+                <List.Item.Detail.Metadata.Label title="Name" text={props.name} />
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label title="Tier" icon={tier_icon} />
-                <List.Item.Detail.Metadata.Label title="Category" text={category.english} />
-                <List.Item.Detail.Metadata.Label title="分类" text={category.chinese} />
+                <List.Item.Detail.Metadata.Label
+                  title="Category"
+                  text={localization ? category?.chinese : category?.english}
+                />
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.Label title="Type" icon={type_icon} text={props.type} />
+                <List.Item.Detail.Metadata.Label
+                  title="Type"
+                  icon={type_icon}
+                  text={localization ? CONST.TYPE_LOCALIZATION[props.type] : props.type}
+                />
                 <List.Item.Detail.Metadata.Label title="Publisher" text={props.publisher} />
                 <List.Item.Detail.Metadata.Separator />
               </List.Item.Detail.Metadata>
