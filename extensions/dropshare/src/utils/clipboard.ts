@@ -3,9 +3,6 @@ import { Clipboard } from "@raycast/api";
 export const getUrlFromClipboard = async () => {
     let content = await Clipboard.readText();
     content = typeof content == "undefined" ? "" : content;
-
-    console.log(content);
-
     if (isUrl(content)) {
         return content;
     }
