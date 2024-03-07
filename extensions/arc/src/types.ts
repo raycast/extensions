@@ -52,6 +52,11 @@ export type Suggestion = {
 
 export type URLArguments = {
   url?: string;
+  space?: string;
+};
+
+export type WindowArguments = {
+  space?: string;
 };
 
 /** Suggestion Parsers */

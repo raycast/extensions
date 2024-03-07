@@ -1,4 +1,3 @@
-export { useEffectWithCachedDeps } from "./useEffectWithCachedDeps";
 export { useClients } from "./useClients";
 export { useMe } from "./useMe";
 export { useOrganizations } from "./useOrganizations";

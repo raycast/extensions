@@ -77,7 +77,7 @@ OAuthService.asana: (options: ProviderWithDefaultClientOptions) => OAuthService
 ##### Example
 
 ```tsx
-const asana = OAuthService.asana({ scope: 'default' })
+const asana = OAuthService.asana({ scope: "default" });
 ```
 
 #### GitHub
@@ -91,7 +91,7 @@ OAuthService.github: (options: ProviderWithDefaultClientOptions) => OAuthService
 ##### Example
 
 ```tsx
-const github = OAuthService.github({ scope: 'repo user' })
+const github = OAuthService.github({ scope: "repo user" });
 ```
 
 #### Google
@@ -108,10 +108,10 @@ OAuthService.google: (options: ProviderOptions) => OAuthService
 
 ```tsx
 const google = OAuthService.google({
-  clientId: 'custom-client-id',
-  authorizeUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenUrl: 'https://oauth2.googleapis.com/token',
-  scope: 'https://www.googleapis.com/auth/drive.readonly',
+  clientId: "custom-client-id",
+  authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  tokenUrl: "https://oauth2.googleapis.com/token",
+  scope: "https://www.googleapis.com/auth/drive.readonly",
 });
 ```
 
@@ -129,10 +129,10 @@ OAuthService.jira: (options: ProviderOptions) => OAuthService
 
 ```tsx
 const jira = OAuthService.jira({
-  clientId: 'custom-client-id',
-  authorizeUrl: 'https://auth.atlassian.com/authorize',
-  tokenUrl: 'https://api.atlassian.com/oauth/token',
-  scope: 'read:jira-user read:jira-work offline_access'
+  clientId: "custom-client-id",
+  authorizeUrl: "https://auth.atlassian.com/authorize",
+  tokenUrl: "https://api.atlassian.com/oauth/token",
+  scope: "read:jira-user read:jira-work offline_access",
 });
 ```
 
@@ -147,7 +147,7 @@ OAuthService.linear: (options: ProviderOptions) => OAuthService
 ##### Example
 
 ```tsx
-const linear = OAuthService.linear({ scope: 'read write' })
+const linear = OAuthService.linear({ scope: "read write" });
 ```
 
 #### Slack
@@ -161,7 +161,7 @@ OAuthService.slack: (options: ProviderWithDefaultClientOptions) => OAuthService
 ##### Example
 
 ```tsx
-const slack = OAuthService.slack({ scope: 'emoji:read' })
+const slack = OAuthService.slack({ scope: "emoji:read" });
 ```
 
 #### Zoom
@@ -178,11 +178,11 @@ OAuthService.zoom: (options: ProviderOptions) => OAuthService
 
 ```tsx
 const zoom = OAuthService.zoom({
-  clientId: 'custom-client-id',
-  authorizeUrl: 'https://zoom.us/oauth/authorize',
-  tokenUrl: 'https://zoom.us/oauth/token',
-  scope: 'meeting:write',
-  personalAccessToken: 'personal-access-token',
+  clientId: "custom-client-id",
+  authorizeUrl: "https://zoom.us/oauth/authorize",
+  tokenUrl: "https://zoom.us/oauth/token",
+  scope: "meeting:write",
+  personalAccessToken: "personal-access-token",
 });
 ```
 
@@ -190,47 +190,47 @@ const zoom = OAuthService.zoom({
 
 ### OAuthServiceOptions
 
-| Property Name | Description | Type |
-|---------------|-------------|------|
-| client<mark style="color:red;">*</mark> | The PKCE Client defined using `OAuth.PKCEClient` from `@raycast/api` | `OAuth.PKCEClient` |
-| clientId<mark style="color:red;">*</mark> | The app's client ID | `string` |
-| scope<mark style="color:red;">*</mark> | The scope of the access requested from the provider | `string` |
-| authorizeUrl<mark style="color:red;">*</mark> | The URL to start the OAuth flow | `string` |
-| tokenUrl<mark style="color:red;">*</mark> | The URL to exchange the authorization code for an access token | `string` |
-| refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
-| personalAccessToken | A personal token if the provider supports it | `string` |
-| onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
-| extraParameters | The extra parameters you may need for the authorization request | `Record<string, string>` |
-| bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
-| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
-| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| Property Name                                  | Description                                                                                                                        | Type                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| client<mark style="color:red;">\*</mark>       | The PKCE Client defined using `OAuth.PKCEClient` from `@raycast/api`                                                               | `OAuth.PKCEClient`                           |
+| clientId<mark style="color:red;">\*</mark>     | The app's client ID                                                                                                                | `string`                                     |
+| scope<mark style="color:red;">\*</mark>        | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| authorizeUrl<mark style="color:red;">\*</mark> | The URL to start the OAuth flow                                                                                                    | `string`                                     |
+| tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
+| refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
+| personalAccessToken                            | A personal token if the provider supports it                                                                                       | `string`                                     |
+| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
+| extraParameters                                | The extra parameters you may need for the authorization request                                                                    | `Record<string, string>`                     |
+| bodyEncoding                                   | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
+| tokenResponseParser                            | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser                     | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
 
 ### ProviderOptions
 
-| Property Name | Description | Type |
-|---------------|-------------|------|
-| clientId<mark style="color:red;">*</mark> | The app's client ID | `string` |
-| scope<mark style="color:red;">*</mark> | The scope of the access requested from the provider | `string` |
-| authorizeUrl<mark style="color:red;">*</mark> | The URL to start the OAuth flow | `string` |
-| tokenUrl<mark style="color:red;">*</mark> | The URL to exchange the authorization code for an access token | `string` |
-| refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
-| personalAccessToken | A personal token if the provider supports it | `string` |
-| onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
-| bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
-| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
-| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| Property Name                                  | Description                                                                                                                        | Type                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| clientId<mark style="color:red;">\*</mark>     | The app's client ID                                                                                                                | `string`                                     |
+| scope<mark style="color:red;">\*</mark>        | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| authorizeUrl<mark style="color:red;">\*</mark> | The URL to start the OAuth flow                                                                                                    | `string`                                     |
+| tokenUrl<mark style="color:red;">\*</mark>     | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
+| refreshTokenUrl                                | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
+| personalAccessToken                            | A personal token if the provider supports it                                                                                       | `string`                                     |
+| onAuthorize                                    | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
+| bodyEncoding                                   | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
+| tokenResponseParser                            | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser                     | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
 
 ### ProviderWithDefaultClientOptions
 
-| Property Name | Description | Type |
-|---------------|-------------|------|
-| scope<mark style="color:red;">*</mark> | The scope of the access requested from the provider | `string` |
-| clientId | The app's client ID | `string` |
-| authorizeUrl | The URL to start the OAuth flow | `string` |
-| tokenUrl | The URL to exchange the authorization code for an access token | `string` |
-| refreshTokenUrl | The URL to refresh the access token if applicable | `string` |
-| personalAccessToken | A personal token if the provider supports it | `string` |
-| onAuthorize | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken` | `string` |
-| bodyEncoding | Specifies the format for sending the body of the request. | `json` \| `url-encoded`  |
-| tokenResponseParser | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
-| tokenRefreshResponseParser | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |
+| Property Name                           | Description                                                                                                                        | Type                                         |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| scope<mark style="color:red;">\*</mark> | The scope of the access requested from the provider                                                                                | `string` \| `Array<string>`                  |
+| clientId                                | The app's client ID                                                                                                                | `string`                                     |
+| authorizeUrl                            | The URL to start the OAuth flow                                                                                                    | `string`                                     |
+| tokenUrl                                | The URL to exchange the authorization code for an access token                                                                     | `string`                                     |
+| refreshTokenUrl                         | The URL to refresh the access token if applicable                                                                                  | `string`                                     |
+| personalAccessToken                     | A personal token if the provider supports it                                                                                       | `string`                                     |
+| onAuthorize                             | A callback function that is called once the user has been properly logged in through OAuth when used with `withAccessToken`        | `string`                                     |
+| bodyEncoding                            | Specifies the format for sending the body of the request.                                                                          | `json` \| `url-encoded`                      |
+| tokenResponseParser                     | Some providers returns some non-standard token responses. Specifies how to parse the JSON response to get the access token         | `(response: unknown) => OAuth.TokenResponse` |
+| tokenRefreshResponseParser              | Some providers returns some non-standard refresh token responses. Specifies how to parse the JSON response to get the access token | `(response: unknown) => OAuth.TokenResponse` |

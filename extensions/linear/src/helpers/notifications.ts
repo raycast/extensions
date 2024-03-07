@@ -87,8 +87,6 @@ export function getNotificationTitle(notification: NotificationResult) {
     }
   }
 
-  console.log(notification.type);
-
   return notificationTitles[notification.type] || "Unknown notification";
 }
 

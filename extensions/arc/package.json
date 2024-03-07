@@ -24,7 +24,6 @@
   ],
   "license": "MIT",
   "contributors": [
-    "pomdtr",
     "zach",
     "ankitchouhan1020",
     "pernielsentikaer",
@@ -34,7 +33,11 @@
     "tleo19",
     "loris",
     "bdsqqq",
-    "xilopaint"
+    "xilopaint",
+    "jayeshbhole"
+  ],
+  "pastContributors": [
+    "pomdtr"
   ],
   "commands": [
     {
@@ -49,7 +52,24 @@
       "title": "Open New Window",
       "description": "Create and open a new window",
       "mode": "no-view",
-      "subtitle": "Arc"
+      "subtitle": "Arc",
+      "preferences": [
+        {
+          "name": "space",
+          "title": "Space",
+          "description": "The Space to open the new tab in",
+          "type": "textfield",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "space",
+          "placeholder": "Space",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "new-blank-window",
@@ -168,12 +188,25 @@
           "description": "The URL to open in the new tab",
           "type": "textfield",
           "required": false
+        },
+        {
+          "name": "space",
+          "title": "Space",
+          "description": "The Space to open the new tab in",
+          "type": "textfield",
+          "required": false
         }
       ],
       "arguments": [
         {
           "name": "url",
           "placeholder": "URL",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "space",
+          "placeholder": "Space",
           "type": "text",
           "required": false
         }

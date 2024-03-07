@@ -58,7 +58,7 @@ type CreateReminderFormProps = {
 
 export function CreateReminderForm({ draftValues, listId, mutate }: CreateReminderFormProps) {
   const { pop } = useNavigation();
-  const { data } = useData();
+  const { data, isLoading } = useData();
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
@@ -196,6 +196,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />

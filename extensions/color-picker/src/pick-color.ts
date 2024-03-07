@@ -3,6 +3,7 @@ import { addToHistory } from "./history";
 import { Color, PickColorCommandLaunchProps } from "./types";
 import { getFormattedColor } from "./utils";
 import { pickColor } from "swift:../swift/color-picker";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function command(props: PickColorCommandLaunchProps) {
   await closeMainWindow();
@@ -26,11 +27,18 @@ export default async function command(props: PickColorCommandLaunchProps) {
     try {
       await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     } catch (e) {
-      console.error("Menu bar command failed to launch.");
+      console.log(e);
+      if (!(e instanceof Error && e.message.includes("must be activated"))) {
+        await showFailureToast(e);
+      }
     }
 
     if (props.launchContext?.source === "organize-colors") {
-      await launchCommand({ name: "organize-colors", type: LaunchType.UserInitiated });
+      try {
+        await launchCommand({ name: "organize-colors", type: LaunchType.UserInitiated });
+      } catch (e) {
+        await showFailureToast(e);
+      }
     }
   } catch (e) {
     console.error(e);
