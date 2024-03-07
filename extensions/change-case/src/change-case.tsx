@@ -308,7 +308,7 @@ export default function Command(props: LaunchProps) {
         {Object.entries(functions)
           .filter(
             ([key]) =>
-              preferences[key.replace(/ +/g, "")] &&
+              preferences[key.replace(/ +/g, "") as keyof ExtensionPreferences] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
           )
