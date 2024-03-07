@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hotkey",
   "title": "Hotkey",
-  "description": "show hotkey for app",
+  "description": "show hotkey for usual app",
   "icon": "hotkey-icon.png",
   "author": "Cooperk",
   "license": "MIT",
