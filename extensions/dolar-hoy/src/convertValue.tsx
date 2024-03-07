@@ -29,8 +29,8 @@ export default function Command() {
     validation: {
       amount: (value) => {
         if (!value) return "This field is required";
-        else if(Number.isNaN(Number(value))) return "Should be a number";
-        else if(Number(value) < 0) return "Number should be positive"
+        else if (Number.isNaN(Number(value))) return "Should be a number";
+        else if (Number(value) < 0) return "Number should be positive";
       },
       fromCurrency: FormValidation.Required,
       toCurrency: FormValidation.Required,
