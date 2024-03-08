@@ -43,26 +43,22 @@ export default function Command() {
     >
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          icon={Icon.Check}
-          title="Drink now"
-          subtitle={`Last was ${lastDrinkFromNowInMinutes} ${pluralize(lastDrinkFromNowInMinutes, "minute")} ago`}
+          title="Take a sip"
+          subtitle={`    Last was ${lastDrinkFromNowInMinutes} min ago`}
           onAction={onDrinkNow}
         />
-        <MenuBarExtra.Item
-          icon={Icon.Hourglass}
-          title={
-            nextDrinkReminder > 0
-              ? `Next reminder in ${nextDrinkReminder} ${pluralize(nextDrinkReminder, "minute")}`
-              : `You should've had water ${nextDrinkReminder * -1}  ${pluralize(nextDrinkReminder * -1, "minute")} ago`
-          }
-        />
       </MenuBarExtra.Section>
-      <MenuBarExtra.Section title="Delay reminder by...">
-        <MenuBarExtra.Item title="5 minutes" onAction={onDelay(5)} />
-        <MenuBarExtra.Item title="15 minutes" onAction={onDelay(15)} />
-        <MenuBarExtra.Item title="30 minutes" onAction={onDelay(30)} />
-        <MenuBarExtra.Item title="45 minutes" onAction={onDelay(45)} />
-        <MenuBarExtra.Item title="60 minutes" onAction={onDelay(60)} />
+      <MenuBarExtra.Section
+        title={
+          nextDrinkReminder > 0
+            ? `Next reminder in ${nextDrinkReminder} ${pluralize(nextDrinkReminder, "minute")}`
+            : `You should've had water ${nextDrinkReminder * -1}  ${pluralize(nextDrinkReminder * -1, "minute")} ago`
+        }
+      >
+        <MenuBarExtra.Item title="Delay by 5 minutes" onAction={onDelay(5)} />
+        <MenuBarExtra.Item title="Delay by 15 minutes" onAction={onDelay(15)} />
+        <MenuBarExtra.Item title="Delay by 30 minutes" onAction={onDelay(30)} />
+        <MenuBarExtra.Item title="Delay by 60 minutes" onAction={onDelay(60)} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
