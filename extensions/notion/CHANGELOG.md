@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Improve authentication docs] - 2024-03-08
+
+- Add ability to change order of properties in the CreatePageForm
+- Fix show/hide of properties in the CreatePageForm
+
 ## [Improve authentication docs] - 2024-02-27
 
 - Improve documentation on creating an internal integration
