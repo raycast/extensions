@@ -27,11 +27,7 @@ export default async (props: LaunchProps) => {
     end tell
   `);
   } catch (error) {
-    if (error.message.includes("get selected text")) {
-      showHUD("❌ Selected text is not available");
-    } else {
-      showPermissionErrorHUD(testPermissionErrorType(error));
-    }
+    showHUD("❌ Unable to get selected text");
   }
 
   // Simply give it a break before restoring the clipboard
