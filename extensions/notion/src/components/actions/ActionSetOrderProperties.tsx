@@ -23,10 +23,13 @@ export function ActionSetOrderProperties(props: {
     onChangeOrder(newOrder);
   };
 
-  const propertiesNameById = databaseProperties.reduce((acc, property) => {
-    acc[property.id] = property.name;
-    return acc;
-  }, {} as Record<string, string>);
+  const propertiesNameById = databaseProperties.reduce(
+    (acc, property) => {
+      acc[property.id] = property.name;
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
   return (
     <ActionPanel.Submenu
@@ -34,26 +37,22 @@ export function ActionSetOrderProperties(props: {
       icon={Icon.ChevronUpDown}
       shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "o" }}
     >
-      {propertiesOrder.map(
-        (propertyId, index) => {
-          const propertyName = propertiesNameById[propertyId];
+      {propertiesOrder.map((propertyId, index) => {
+        const propertyName = propertiesNameById[propertyId];
 
-          return propertyName && (
+        return (
+          propertyName && (
             <ActionPanel.Section key={propertyId}>
-              {!!index && <Action
-                icon={Icon.ChevronUp}
-                title={propertyName}
-                onAction={() => changeOrder(propertyId, "up")}
-              />}
-              {index < databaseProperties.length - 1 && <Action
-                icon={Icon.ChevronDown}
-                title={propertyName}
-                onAction={() => changeOrder(propertyId, "down")}
-              />}
+              {!!index && (
+                <Action icon={Icon.ChevronUp} title={propertyName} onAction={() => changeOrder(propertyId, "up")} />
+              )}
+              {index < databaseProperties.length - 1 && (
+                <Action icon={Icon.ChevronDown} title={propertyName} onAction={() => changeOrder(propertyId, "down")} />
+              )}
             </ActionPanel.Section>
-          );
-        }
-      )}
+          )
+        );
+      })}
     </ActionPanel.Submenu>
   );
 }

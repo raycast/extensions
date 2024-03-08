@@ -167,14 +167,15 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
                     ...databaseView,
                     create_properties: databaseView?.create_properties
                       ? [...databaseView.create_properties, propertyId]
-                      : [propertyId]
+                      : [propertyId],
                   });
                 }}
                 onUnselect={(propertyId) => {
                   setDatabaseView({
                     ...databaseView,
-                    create_properties: (databaseView?.create_properties || databasePropertyIds)
-                      .filter((pid) => pid !== propertyId)
+                    create_properties: (databaseView?.create_properties || databasePropertyIds).filter(
+                      (pid) => pid !== propertyId,
+                    ),
                   });
                 }}
               />
@@ -184,7 +185,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
                 onChangeOrder={(propertyIds) => {
                   setDatabaseView({
                     ...databaseView,
-                    create_properties: propertyIds
+                    create_properties: propertyIds,
                   });
                 }}
               />
