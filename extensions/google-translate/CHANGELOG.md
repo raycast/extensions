@@ -1,5 +1,10 @@
 # Google Translate Changelog
 
+## [Fix] - 2024-03-08
+
+ - Return back `CMD+Enter` shortcut for `Toggle Full Text` action
+ - Moved text-to-speech action, to execute it only with `CMD+T` keyboard shortcut
+
 ## [Fix] - 2024-02-26
 
  - Fixed issue when trying play text-to-speech continuously
