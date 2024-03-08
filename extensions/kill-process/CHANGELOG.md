@@ -1,5 +1,8 @@
 # Kill Process Changelog
 
+## [Back Root Search After Process Kiled] - 2024-03-01
+- Added preference to go back to root search after a process is killed
+
 ## [Kill Multiple] - 2023-11-09
 - Added preference to kill multiple processes without reopening Raycast
 

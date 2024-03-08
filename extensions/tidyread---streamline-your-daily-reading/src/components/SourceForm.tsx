@@ -2,10 +2,9 @@ import { Action, Form, Icon, Toast, showToast, useNavigation } from "@raycast/ap
 import { useEffect, useState } from "react";
 import { Source } from "../types";
 import { useForm, usePromise } from "@raycast/utils";
-import { isURL, withTimeout } from "../utils/util";
+import { isURL } from "../utils/util";
 import { CATEGORIES } from "../const";
 import { getSources, saveSources } from "../store";
-import { normalizePreference } from "../utils/preference";
 import { fetchMetadata, isValidRSSLink } from "../utils/request";
 import CustomActionPanel from "./CustomActionPanel";
 
@@ -48,15 +47,19 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
     },
     async onSubmit(values) {
       const newReadItem = { ...values, id: id ?? `${Date.now()}` };
-      const { requestTimeout } = normalizePreference();
 
       try {
         // 且跟进入时发生了变化，才需要验证
         if (values.rssLink && values.rssLink !== defaultValues?.rssLink) {
           showToast(Toast.Style.Animated, "Validating RSS Link");
-          const isValid = await withTimeout(isValidRSSLink(values.rssLink), requestTimeout);
-          if (!isValid) {
-            showToast(Toast.Style.Failure, "Invalid RSS Link");
+          try {
+            const isValid = await isValidRSSLink(values.rssLink);
+            if (!isValid) {
+              showToast(Toast.Style.Failure, "Invalid RSS Link");
+              return;
+            }
+          } catch (err: any) {
+            showToast(Toast.Style.Failure, "Failed To Fetch RSS Link", err.message);
             return;
           }
         }
@@ -114,8 +117,8 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
           showToast(Toast.Style.Success, "Fetching success");
           setValue("title", metadata.title);
           setFavicon(metadata.favicon);
-        } catch (error) {
-          showToast(Toast.Style.Failure, "Failed to fetch metadata");
+        } catch (error: any) {
+          showToast(Toast.Style.Failure, "Failed to fetch metadata", error.message);
         }
       }
     }
@@ -125,9 +128,12 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
 
   return (
     <Form
+      searchBarAccessory={
+        <Form.LinkAccessory target="https://tidyread.info/docs/where-to-find-rss" text="🤔 How To Find RSS?" />
+      }
       actions={
         <CustomActionPanel>
-          <Action.SubmitForm icon={Icon.SaveDocument} title="Save Source" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.SaveDocument} title="Save" onSubmit={handleSubmit} />
         </CustomActionPanel>
       }
       navigationTitle={navigationTitle}
@@ -153,8 +159,8 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
       <Form.TextField
         {...itemProps.rssLink}
         title="RSS Link"
-        placeholder="Enter RSS link (optional)"
-        info="Not required, used for daily digest"
+        placeholder="Enter RSS link for digest (optional)"
+        info="Used for generating digest. You can learn how to find rss through the documentation in the upper right corner."
       />
       {!!values.rssLink && (
         <Form.TextField
@@ -164,9 +170,10 @@ function InnerReadForm(props: { defaultValues?: Source; navigationTitle?: string
           info="Time span of the content pulled by rss, e.g.: 1 means 1 day. Maximum 7 days, minimum 1 day."
         />
       )}
+      {!values.rssLink && <Form.Description text="💁 If not filled, Digest feature will disable on this source" />}
       <Form.TagPicker {...itemProps.tags} title="Tags" placeholder="Select tags (optional)">
         {CATEGORIES.map((category) => (
-          <Form.TagPicker.Item key={category} value={category} title={category} />
+          <Form.TagPicker.Item key={category.value} value={category.value} title={category.value} />
         ))}
       </Form.TagPicker>
     </Form>

@@ -1,12 +1,12 @@
 import { Icon, Image } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { isBefore, isSameDay, parseISO } from "date-fns";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { isBefore, parseISO } from "date-fns";
 import { compareAsc } from "date-fns";
 import { partition } from "lodash";
-import { useMemo } from "react";
-import React from "react";
+import React, { useMemo } from "react";
+import { getCompletedReminders } from "swift:../../swift/AppleReminders";
 
-import { displayDueDate, isOverdue, parseDay } from "../helpers";
+import { displayDueDate, getDateString, isOverdue, isToday } from "../helpers";
 
 import { Data, Priority, Reminder } from "./useData";
 
@@ -91,13 +91,13 @@ export const groupByOptions: GroupByOptions = [
 ];
 
 export function groupByDueDates(reminders: Reminder[]) {
-  const [dated, notDated] = partition(reminders, (reminder: Reminder) => reminder.dueDate !== null);
+  const [dated, notDated] = partition(reminders, (reminder: Reminder) => !!reminder.dueDate);
   const [overdue, upcoming] = partition(dated, (reminder: Reminder) => reminder.dueDate && isOverdue(reminder.dueDate));
-  const allDueDates = [...new Set(upcoming.map((reminder) => parseDay(reminder.dueDate).toISOString()))];
+  const allDueDates = [...new Set(upcoming.map((reminder) => getDateString(reminder.dueDate as string)))];
   allDueDates.sort();
 
   const sections = allDueDates.map((date) => {
-    const remindersOnDate = upcoming.filter((reminder) => parseDay(reminder.dueDate).toISOString() === date);
+    const remindersOnDate = upcoming.filter((reminder) => getDateString(reminder.dueDate as string) === date);
     return {
       title: displayDueDate(date),
       reminders: remindersOnDate,
@@ -167,28 +167,38 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     false,
   );
 
+  const { data: completedRemindersData } = useCachedPromise(
+    (listId) => getCompletedReminders(listId === "all" ? undefined : listId),
+    [listId],
+    { execute: showCompletedReminders },
+  );
+
   const viewDefault = listId === "today" || listId === "scheduled" ? "dueDate" : "default";
 
   const [sortBy, setSortBy] = useCachedState<SortByOption>(`sort-by-${listId}`, viewDefault);
   const [groupBy, setGroupBy] = useCachedState<GroupByOption>(`group-by-${listId}`, viewDefault);
   const [orderBy, setOrderBy] = useCachedState<OrderByOption>(`order-by-${listId}`, "asc");
 
-  const reminders = useMemo(() => data?.reminders ?? [], [data]);
-
-  const filteredReminders = useMemo(() => {
-    return reminders.filter((reminder) => {
+  function filterRemindersByListId(listId: string) {
+    return (reminder: Reminder) => {
       if (listId === "all") return true;
       if (listId === "today")
-        return reminder.dueDate
-          ? isOverdue(reminder.dueDate) || isSameDay(new Date(reminder.dueDate), parseDay())
-          : false;
+        return reminder.dueDate ? isOverdue(reminder.dueDate) || isToday(reminder.dueDate) : false;
       if (listId === "scheduled") return !!reminder.dueDate;
       return reminder.list?.id === listId;
-    });
-  }, [listId, reminders]);
+    };
+  }
+
+  const reminders = useMemo(() => {
+    return data?.reminders.filter(filterRemindersByListId(listId)) ?? [];
+  }, [listId, data?.reminders]);
+
+  const completedReminders = useMemo(() => {
+    return completedRemindersData?.filter(filterRemindersByListId(listId)) ?? [];
+  }, [listId, completedRemindersData]);
 
   const { sortByProp, sortedReminders, orderByProp } = useMemo(() => {
-    const sortedReminders = [...filteredReminders];
+    const sortedReminders = [...reminders];
 
     switch (sortBy) {
       case "title":
@@ -239,12 +249,10 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     };
 
     return { sortedReminders, sortByProp, orderByProp };
-  }, [filteredReminders, sortBy, setSortBy, orderBy, setOrderBy]);
+  }, [reminders, sortBy, setSortBy, orderBy, setOrderBy]);
 
   const { sections, groupByProp } = useMemo(() => {
     let sections: Section[] = [];
-
-    const [completedReminders, incompleteReminders] = partition([...sortedReminders], "isCompleted");
 
     switch (groupBy) {
       case "default": {
@@ -259,23 +267,25 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
           title = data?.lists.find((list) => list.id === listId)?.title ?? "Reminders";
         }
 
-        sections = [{ title, reminders: incompleteReminders }];
+        sections = [{ title, reminders: sortedReminders }];
         break;
       }
       case "dueDate":
-        sections = groupByDueDates(incompleteReminders);
+        sections = groupByDueDates(sortedReminders);
         break;
       case "priority":
-        sections = groupByPriorities(incompleteReminders);
+        sections = groupByPriorities(sortedReminders);
         break;
     }
 
     if (showCompletedReminders) {
       sections.push({
         title: "Completed",
-        reminders: completedReminders.sort((a, b) => {
-          return isBefore(parseISO(b.completionDate), parseISO(a.completionDate)) ? -1 : 1;
-        }),
+        reminders: completedReminders
+          ? completedReminders.sort((a, b) => {
+              return isBefore(parseISO(b.completionDate), parseISO(a.completionDate)) ? -1 : 1;
+            })
+          : [],
       });
     }
 
@@ -293,7 +303,7 @@ export default function useViewReminders(listId: string, { data }: { data?: Data
     };
 
     return { sections, groupByProp };
-  }, [sortedReminders, groupBy, setGroupBy, showCompletedReminders, data, listId]);
+  }, [sortedReminders, groupBy, setGroupBy, completedReminders, showCompletedReminders, data, listId]);
 
   const viewProps: ViewProps = {
     groupBy: groupByProp,

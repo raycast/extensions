@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "read-ai",
   "title": "Read AI - Text to Speech",
-  "description": "Experience the seamless conversion of text to speech with OpenAI's advanced TTS technology, bringing your words to life.",
+  "description": "Revolutionize your reading with OpenAI's TTS technology—bringing words to your ears, ideal for auditory learners and the visually impaired.",
   "icon": "extension-icon.png",
   "categories": [
     "Productivity"
@@ -11,18 +11,25 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "read-seleted-text-audio-only",
+      "name": "read-selected-text-audio-only",
       "title": "Read Selected Text | Background Audio",
       "subtitle": "Read AI - Text to Speech",
       "description": "listen to the seleted text with subtitles",
       "mode": "no-view"
     },
     {
-      "name": "read-seleted-text-script",
+      "name": "read-selected-text-script",
       "title": "Read Selected Text | With Script",
       "subtitle": "Read AI - Text to Speech",
       "description": "Read and listen to the seleted text with script and subtitles",
       "mode": "view"
+    },
+    {
+      "name": "read-clipboard-image",
+      "title": "Read Clipboard Image | Background Audio",
+      "subtitle": "Read AI - Text to Speech",
+      "description": "Read and listen to the text in the image with subtitles",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -138,7 +145,7 @@
       "title": "GPT Model",
       "description": "Choose the GPT model to use for text script generation",
       "required": true,
-      "default": "gpt-3.5-turbo-1106",
+      "default": "gpt-3.5-turbo-16k",
       "label": "GPT Model",
       "data": [
         {
@@ -201,7 +208,7 @@
       "title": "Temperature",
       "description": "Adjust the creativity of the text-to-speech output",
       "required": true,
-      "default": "0.6",
+      "default": "0.7",
       "label": "Temperature",
       "data": [
         {

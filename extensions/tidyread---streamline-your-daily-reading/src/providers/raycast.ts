@@ -1,11 +1,19 @@
 import { AI, environment } from "@raycast/api";
 import { Provider, ProviderOptions } from "../types";
-import { withTimeout } from "../utils/util";
 // import { sendMessageToChatGPT } from "../utils/gpt";
+
+function normalizeModel(name?: string) {
+  if (!name) return "gpt-3.5-turbo-instruct";
+  if (!name.includes("raycast-")) return "gpt-3.5-turbo-instruct";
+  return name.replace("raycast-", "");
+}
 
 class RaycastProvider extends Provider {
   constructor(options: ProviderOptions) {
-    super(options);
+    super({
+      ...options,
+      apiModel: normalizeModel(options?.apiModel),
+    });
 
     if (!environment.canAccess(AI)) {
       this.available = false;
@@ -19,19 +27,15 @@ class RaycastProvider extends Provider {
       throw new Error("You do not have access to Raycast AI.");
     }
 
-    const message = `${summarizePrompt}\n\nHere is the content:\n\n${content}}`;
+    const message = `${summarizePrompt}\n\nHere is the content:\n\n${content}`;
 
-    console.log("raycast ai summarize prompt", message);
+    console.log("raycast ai summarize prompt:", message);
 
     try {
-      const resp = await withTimeout(
-        AI.ask(message, {
-          model: apiModel as any,
-          creativity: "low",
-        }),
-        200000,
-      );
-
+      const resp = await AI.ask(message, {
+        model: apiModel as any,
+        creativity: "low",
+      });
       console.log("raycast ai summarize resp", resp);
 
       return resp;
@@ -49,18 +53,15 @@ class RaycastProvider extends Provider {
     }
 
     const prompt = typeof translatePrompt === "function" ? translatePrompt(lang) : translatePrompt || "";
-    const message = `${prompt}\n\nHere is the content:\n\n${content}}`;
+    const message = `${prompt}\n\nHere is the content:\n\n${content}`;
 
     console.log("raycast ai translate prompt", message);
 
     try {
-      const resp = await withTimeout(
-        AI.ask(message, {
-          model: apiModel as any,
-          creativity: "low",
-        }),
-        200000,
-      );
+      const resp = await AI.ask(message, {
+        model: apiModel as any,
+        creativity: "low",
+      });
 
       console.log("raycast ai translate resp", resp);
 

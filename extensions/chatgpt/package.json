@@ -10,13 +10,15 @@
     "pernielsentikaer",
     "shichongrui",
     "timolins",
-    "pomdtr",
     "cruelmoney",
     "sykuang",
     "thanhlongb",
     "k8scat",
     "Nauxscript",
     "Lemon"
+  ],
+  "pastContributors": [
+    "pomdtr"
   ],
   "categories": [
     "Productivity",
@@ -63,6 +65,10 @@
       "description": "Collection of your custom and default model",
       "mode": "view"
     }
+  ],
+  "keywords": [
+    "chat",
+    "gpt"
   ],
   "preferences": [
     {
@@ -234,8 +240,9 @@
     "@raycast/api": "^1.48.8",
     "@raycast/utils": "^1.5.2",
     "@types/uuid": "^9.0.0",
-    "https-proxy-agent": "^7.0.2",
+    "csv-parse": "^5.5.3",
     "openai": "^4.24.3",
+    "proxy-agent": "^6.3.1",
     "say": "^0.16.0",
     "uuid": "^9.0.0"
   },

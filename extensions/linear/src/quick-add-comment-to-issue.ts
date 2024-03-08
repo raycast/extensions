@@ -1,6 +1,7 @@
 import { LinearClient } from "@linear/sdk";
 import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, showHUD } from "@raycast/api";
-import { authorize, oauthClient } from "./api/oauth";
+import { getAccessToken, withAccessToken } from "@raycast/utils";
+import { linear } from "./api/linearClient";
 
 const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) => {
   const { issueId, comment } = props.arguments;
@@ -13,9 +14,8 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
   const preferences = getPreferenceValues<Preferences.QuickAddCommentToIssue>();
 
   try {
-    const tokens = await oauthClient.getTokens();
-    const accessToken = tokens?.accessToken || (await authorize());
-    const linearClient = new LinearClient({ accessToken });
+    const { token } = getAccessToken();
+    const linearClient = new LinearClient({ accessToken: token });
 
     if (preferences.shouldCloseMainWindow) {
       await closeMainWindow();
@@ -67,4 +67,4 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
   }
 };
 
-export default command;
+export default withAccessToken(linear)(command);

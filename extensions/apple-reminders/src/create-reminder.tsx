@@ -14,10 +14,27 @@ import {
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
+import { createReminder } from "swift:../swift/AppleReminders";
 
-import { Frequency, NewReminder, createReminder } from "./api";
 import { getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
+
+type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+export type NewReminder = {
+  title: string;
+  listId?: string;
+  notes?: string;
+  dueDate?: string;
+  priority?: string;
+  recurrence?: {
+    frequency: Frequency;
+    interval: number;
+    endDate?: string;
+  };
+  address?: string;
+  proximity?: string;
+  radius?: number;
+};
 
 type CreateReminderValues = {
   title: string;
@@ -41,7 +58,7 @@ type CreateReminderFormProps = {
 
 export function CreateReminderForm({ draftValues, listId, mutate }: CreateReminderFormProps) {
   const { pop } = useNavigation();
-  const { data } = useData();
+  const { data, isLoading } = useData();
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
@@ -179,6 +196,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} title="Create Reminder" />

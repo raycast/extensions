@@ -8,7 +8,7 @@ export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): st
   return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));
 }
 
-export async function hashMasterPasswordForReprompting(password: string): Promise<string> {
+export function hashMasterPasswordForReprompting(password: string): Promise<string> {
   return new Promise((resolve, reject) => {
     pbkdf2(password, REPROMPT_HASH_SALT, 100000, 64, "sha512", (error, hashed) => {
       if (error != null) {

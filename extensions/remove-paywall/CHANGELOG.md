@@ -1,5 +1,9 @@
 # Remove Paywall Changelog
 
+## [Added freedium] - 2024-02-28
+
+- Added support for Freedium
+
 ## [Reintroduce URL argument] - 2024-01-19
 
 - Added back the URL argument to the "Remove Paywall" command

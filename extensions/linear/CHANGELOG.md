@@ -1,5 +1,21 @@
 # Linear Changelog
 
+## [Improve Notifications search] - 2024-03-01
+
+- It's possible to search your notifications by issue identifiers, issue titles, or usernames.
+
+## [Fix images in issues] - 2024-02-02
+
+- Images are now properly loaded when looking at the details of an issue.
+
+## [Use OAuth utils] - 2024-02-01
+
+- Use new OAuth utils
+
+## [Fix projects search not working] - 2024-01-30
+
+- The projects search was not working in case there were no roadmaps available. This is now fixed.
+
 ## [Add Favorites command] - 2024-01-05
 
 - Add `Favorites` command to browse your Linear favorites right from Raycast.

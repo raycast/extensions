@@ -1,6 +1,6 @@
-import { Clipboard, Icon, MenuBarExtra, openCommandPreferences, showHUD } from "@raycast/api";
+import { Clipboard, Icon, MenuBarExtra, open, openCommandPreferences, showHUD } from "@raycast/api";
 import { useCurWifi } from "./hooks/hooks";
-import { getSignalIcon, getSignalIconColor, getSignalTitle, toggleWifi } from "./utils/common-utils";
+import { getSignalIcon, getSignalIconColor, getSignalTitle } from "./utils/common-utils";
 import { showColorfulSignal } from "./types/preferences";
 
 export default function WifiSignal() {
@@ -68,7 +68,7 @@ export default function WifiSignal() {
           icon={curWifi === undefined ? Icon.Wifi : Icon.WifiDisabled}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
           onAction={async () => {
-            await toggleWifi();
+            await open("raycast://extensions/koinzhang/wi-fi/toggle-wi-fi?launchType=background");
           }}
         />
         <MenuBarExtra.Item

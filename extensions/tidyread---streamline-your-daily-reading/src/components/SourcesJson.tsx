@@ -1,4 +1,4 @@
-import { Action, Detail } from "@raycast/api";
+import { Action, Detail, useNavigation } from "@raycast/api";
 import CustomActionPanel from "./CustomActionPanel";
 import { usePromise } from "@raycast/utils";
 import { getSources } from "../store";
@@ -7,6 +7,7 @@ import { omit } from "lodash";
 
 export default function SourcesJson() {
   const { data: sources, isLoading } = usePromise(getSources);
+  const { pop } = useNavigation();
   const jsonStr = isLoading
     ? ""
     : JSON.stringify(
@@ -21,7 +22,13 @@ export default function SourcesJson() {
       navigationTitle="Export All Sources"
       actions={
         <CustomActionPanel>
-          <Action.CopyToClipboard title="Copy Content" content={jsonStr} />
+          <Action.CopyToClipboard
+            title="Copy Content"
+            content={jsonStr}
+            onCopy={() => {
+              pop();
+            }}
+          />
         </CustomActionPanel>
       }
       markdown={md}

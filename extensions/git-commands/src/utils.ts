@@ -21,3 +21,11 @@ export function typeColor(type: AliasType) {
     delete: Color.Red,
   }[type];
 }
+
+export function typeDescription(type: AliasType) {
+  return {
+    show: "The command only shows information, no changes are made.",
+    default: "The command can edit, move or delete files.",
+    delete: "The command is directly related to the deletion information.",
+  }[type];
+}

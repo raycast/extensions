@@ -1,5 +1,12 @@
 # System Monitor Changelog
 
+## [New Additions] - 2024-02-09
+
+- Add new System Info panel
+- Update screenshots
+- Use default _internal_ Raycast icons
+- Improve code readability
+
 ## [Update] - 2023-10-17
 
 - Improve performances

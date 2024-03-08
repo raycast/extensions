@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "ewgenius",
   "contributors": [
-    "tleo19"
+    "tleo19",
+    "jylamont"
   ],
   "categories": [
     "Developer Tools"
@@ -40,6 +41,26 @@
       "subtitle": "Zed",
       "description": "Opens a new Zed window.",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Code",
+      "description": "Select which build of Zed to use",
+      "data": [
+        {
+          "value": "Zed",
+          "title": "Zed"
+        },
+        {
+          "value": "Zed Preview",
+          "title": "Zed Preview"
+        }
+      ]
     }
   ],
   "dependencies": {

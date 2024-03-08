@@ -67,6 +67,7 @@ export type QuestionHook = BaseHook<string> & { update: PromiseFunctionWithOneAr
 export type ModelHook = Hook<Model> & {
   update: PromiseFunctionWithOneArg<Model>;
   option: Model["option"][];
+  isFetching: boolean;
 };
 
 export interface ChatHook {
@@ -108,4 +109,9 @@ export interface ConfigurationPreferences {
   azureDeployment: string;
   useApiEndpoint: boolean;
   apiEndpoint: string;
+}
+
+export interface CSVPrompt {
+  act: string;
+  prompt: string;
 }
