@@ -31,22 +31,16 @@ interface Detail {
 
 function parse(url: string): Detail | undefined {
   try {
-    const instance = new URL(url);
+    const { href, protocol, hostname, port, origin, hash, pathname: path, searchParams: queries } = new URL(url);
     return {
-      href: instance.href,
-      protocol: instance.protocol,
-      hostname: instance.hostname,
-      port: instance.port,
-      origin: instance.origin,
-      hash: instance.hash,
-      path: decodeURIComponent(instance.pathname),
-      queries: [...instance.searchParams.keys()].reduce(
-        (o, k) => {
-          o[k] = instance.searchParams.get(k);
-          return o;
-        },
-        {} as Record<string, string | null>,
-      ),
+      href,
+      protocol,
+      hostname,
+      port,
+      origin,
+      hash,
+      path: decodeURIComponent(path),
+      queries: Object.fromEntries(queries),
     };
   } catch {
     showToast({
@@ -123,11 +117,7 @@ export default function Command() {
   );
 
   useEffect(() => {
-    if (inputText.trim()) {
-      setFilteredUrls(urls.filter((item) => item.href.indexOf(trim(inputText)) !== -1));
-    } else {
-      setFilteredUrls([...urls]);
-    }
+    setFilteredUrls(inputText.trim() ? urls.filter((item) => item.href.includes(trim(inputText))) : urls);
   }, [urls, inputText]);
 
   const CommonActions = useMemo(() => {
