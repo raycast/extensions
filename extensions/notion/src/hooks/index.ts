@@ -70,7 +70,7 @@ export function useDatabasesView(databaseId: string) {
   }
 
   return {
-    data: data?.[databaseId],
+    data: data?.[databaseId] || {},
     isLoading,
     mutate,
     setDatabaseView,
