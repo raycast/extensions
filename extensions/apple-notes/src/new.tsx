@@ -31,7 +31,7 @@ export default async (props: LaunchProps) => {
     `);
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     showPermissionErrorHUD(testPermissionErrorType(error));
   }
 

@@ -6,7 +6,6 @@ function escapeDoubleQuotes(value: string) {
 }
 
 export default async (props: LaunchProps) => {
-
   await closeMainWindow();
 
   try {
