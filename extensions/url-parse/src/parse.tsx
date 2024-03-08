@@ -52,6 +52,11 @@ function toMarkdown(url: Detail) {
   ].join("\n\n");
 }
 
+function isURLLike(url: string) {
+  const reg = /^[a-zA-Z]+:\/\/.+/gi;
+  return reg.test(url.trim());
+}
+
 export default function Command() {
   const [inputText, setInputText] = useState("");
   const [urls, setUrls] = useCachedState<Detail[]>("urls", []);
@@ -66,6 +71,7 @@ export default function Command() {
       });
       return;
     }
+
     if (urls.find((item) => item.href === text)) {
       return;
     }
@@ -124,8 +130,6 @@ export default function Command() {
     );
   }, [handleClear]);
 
-  console.log(filteredUrls.length);
-
   return (
     <List
       isShowingDetail
@@ -148,8 +152,10 @@ export default function Command() {
         <List.Item
           key={url.href}
           title={url.href}
+          icon={`${url.origin}/favicon.ico`}
           actions={
             <ActionPanel>
+              {isURLLike(inputText) && <Action title="Parse URL" onAction={handleParse} icon={Icon.Globe} />}
               <ActionPanel.Submenu title="Copy" icon={Icon.CopyClipboard}>
                 <Action.CopyToClipboard title={"Href"} content={url.href} icon={Icon.CopyClipboard} />
                 <Action.CopyToClipboard title={"Protocol"} content={url.protocol} icon={Icon.CopyClipboard} />
