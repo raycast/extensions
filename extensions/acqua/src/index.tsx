@@ -34,6 +34,9 @@ export default function Command() {
         : "Time to drink some water!",
   });
 
+  const lastDrinkLabel =
+    lastDrinkFromNowInMinutes === 0 ? "Last was just now" : `Last was ${lastDrinkFromNowInMinutes} min ago`;
+
   return (
     <MenuBarExtra
       icon={{
@@ -42,11 +45,7 @@ export default function Command() {
       }}
     >
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item
-          title="Take a sip"
-          subtitle={`    Last was ${lastDrinkFromNowInMinutes} min ago`}
-          onAction={onDrinkNow}
-        />
+        <MenuBarExtra.Item title="Take a sip" subtitle={`    ${lastDrinkLabel}`} onAction={onDrinkNow} />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section
         title={
