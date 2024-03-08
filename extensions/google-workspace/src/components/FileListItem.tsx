@@ -85,7 +85,7 @@ export default function FileListItem({ file, email }: FileListItemProps) {
             <Action.CopyToClipboard
               content={{
                 html: `<a href="${file.webViewLink}" title="${file.name}">${file.name}</a>`,
-                text: file.name
+                text: file.name,
               }}
               title="Copy HTML Link"
               shortcut={{ modifiers: ["cmd", "shift"], key: "/" }}
