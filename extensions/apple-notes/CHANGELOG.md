@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Enhnacement] - 2024-03-08
+
+- Added Quick Capture command to create a new note from current selection
+
 ## [Enhnacement] - 2023-06-08
 
 - Added rich text support when copying an URL

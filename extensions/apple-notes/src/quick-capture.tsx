@@ -1,14 +1,11 @@
-import { getSelectedText, Clipboard, closeMainWindow, LaunchProps, showHUD } from "@raycast/api";
+import { getSelectedText, closeMainWindow, LaunchProps, showHUD } from "@raycast/api";
 import { runAppleScriptSync } from "run-applescript";
-import { setTimeout } from "timers/promises";
-import { testPermissionErrorType, showPermissionErrorHUD } from "./errors";
 
 function escapeDoubleQuotes(value: string) {
   return value.replace(/"/g, '\\"');
 }
 
 export default async (props: LaunchProps) => {
-  let currentClipboardContent: string | undefined;
 
   await closeMainWindow();
 
@@ -29,8 +26,4 @@ export default async (props: LaunchProps) => {
   } catch (error) {
     showHUD("❌ Unable to get selected text");
   }
-
-  // Simply give it a break before restoring the clipboard
-  await setTimeout(200);
-  Clipboard.copy(currentClipboardContent ?? "");
 };
