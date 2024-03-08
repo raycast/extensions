@@ -1,6 +1,18 @@
-import { showToast, Toast, List, Action, ActionPanel, confirmAlert, Keyboard, Icon, Alert, Color } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  List,
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Keyboard,
+  Icon,
+  Alert,
+  Color,
+  Image,
+} from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useCachedState } from "@raycast/utils";
+import { getFavicon, useCachedState } from "@raycast/utils";
 
 function trim(url: string) {
   return url.trim();
@@ -152,7 +164,7 @@ export default function Command() {
         <List.Item
           key={url.href}
           title={url.href}
-          icon={`${url.origin}/favicon.ico`}
+          icon={getFavicon(url.href, { mask: Image.Mask.Circle, fallback: "link.png" })}
           actions={
             <ActionPanel>
               {isURLLike(inputText) && <Action title="Parse URL" onAction={handleParse} icon={Icon.Globe} />}
