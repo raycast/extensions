@@ -5,6 +5,9 @@
   "description": "URL parse tool for developer.",
   "icon": "command-icon.png",
   "author": "Johnson",
+  "contributors": [
+    "pernielsentikaer
+  ],
   "categories": [
     "Developer Tools"
   ],
