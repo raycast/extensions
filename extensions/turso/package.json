@@ -27,7 +27,7 @@
     },
     {
       "name": "databases",
-      "title": "Databases",
+      "title": "List Databases",
       "subtitle": "Turso",
       "description": "List databases",
       "mode": "view"
