@@ -1,4 +1,4 @@
-import { showToast, Toast, List, Action, ActionPanel, confirmAlert, Keyboard, Icon, Alert } from "@raycast/api";
+import { showToast, Toast, List, Action, ActionPanel, confirmAlert, Keyboard, Icon, Alert, Color } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
@@ -45,9 +45,11 @@ function parse(url: string): Detail | undefined {
 }
 
 function toMarkdown(url: Detail) {
-  return ["## Detail", `- ${url.href.length} characters.`, `\`\`\`json\n${JSON.stringify(url, null, 2)}\n\`\`\``].join(
-    "\n\n",
-  );
+  return [
+    "## URL Details",
+    `- ${url.href.length} characters.`,
+    `\`\`\`json\n${JSON.stringify(url, null, 2)}\n\`\`\``,
+  ].join("\n\n");
 }
 
 export default function Command() {
@@ -82,6 +84,8 @@ export default function Command() {
   const handleClear = useCallback(async () => {
     await confirmAlert({
       title: "Are you sure?",
+      message: "Clearing the history can't be reverted",
+      icon: { source: Icon.MinusCircle, tintColor: Color.Red },
       primaryAction: {
         title: "Yes",
         style: Alert.ActionStyle.Destructive,
@@ -89,6 +93,7 @@ export default function Command() {
           setUrls([]);
         },
       },
+      rememberUserChoice: true,
     });
   }, []);
 
@@ -109,18 +114,17 @@ export default function Command() {
 
   const CommonActions = useMemo(() => {
     return (
-      <>
-        <Action title="Parse URL" onAction={handleParse} icon={Icon.Clipboard} />
-        <Action
-          title="Clear History"
-          icon={Icon.MinusCircle}
-          style={Action.Style.Destructive}
-          shortcut={Keyboard.Shortcut.Common.RemoveAll}
-          onAction={handleClear}
-        />
-      </>
+      <Action
+        title="Clear History"
+        icon={Icon.MinusCircle}
+        style={Action.Style.Destructive}
+        shortcut={Keyboard.Shortcut.Common.RemoveAll}
+        onAction={handleClear}
+      />
     );
-  }, [handleParse, handleClear]);
+  }, [handleClear]);
+
+  console.log(filteredUrls.length);
 
   return (
     <List
@@ -128,23 +132,58 @@ export default function Command() {
       searchText={inputText}
       onSearchTextChange={(text) => setInputText(text)}
       searchBarPlaceholder="Input to parse or search"
-      actions={<ActionPanel title="Actions">{CommonActions}</ActionPanel>}
     >
-      <List.EmptyView description={inputText ? `Press Enter to parse ${inputText}` : `Input url to parse.`} />
+      <List.EmptyView
+        description={inputText ? `Press Enter to parse ${inputText}` : `Input url to parse.`}
+        actions={
+          <ActionPanel title="Actions">
+            <>
+              <Action title="Parse URL" onAction={handleParse} icon={Icon.Globe} />
+              {filteredUrls.length > 0 && CommonActions}
+            </>
+          </ActionPanel>
+        }
+      />
       {filteredUrls.map((url) => (
         <List.Item
           key={url.href}
           title={url.href}
           actions={
             <ActionPanel>
-              {CommonActions}
-              <Action
-                title="Delete"
-                shortcut={Keyboard.Shortcut.Common.Remove}
-                style={Action.Style.Destructive}
-                icon={Icon.Trash}
-                onAction={() => handleDelete(url)}
-              />
+              <ActionPanel.Submenu title="Copy" icon={Icon.CopyClipboard}>
+                <Action.CopyToClipboard title={"Href"} content={url.href} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard title={"Protocol"} content={url.protocol} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard title={"Hostname"} content={url.hostname} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard title={"Port"} content={url.port} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard title={"Origin"} content={url.origin} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard title={"Hash"} content={url.hash ?? ""} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard title={"Path"} content={url.path ?? ""} icon={Icon.CopyClipboard} />
+                <Action.CopyToClipboard
+                  title={"Queries"}
+                  content={JSON.stringify(url.queries)}
+                  icon={Icon.CopyClipboard}
+                />
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu title="Paste" icon={Icon.CopyClipboard}>
+                <Action.Paste title={"Href"} content={url.href} icon={Icon.CopyClipboard} />
+                <Action.Paste title={"Protocol"} content={url.protocol} icon={Icon.CopyClipboard} />
+                <Action.Paste title={"Hostname"} content={url.hostname} icon={Icon.CopyClipboard} />
+                <Action.Paste title={"Port"} content={url.port} icon={Icon.CopyClipboard} />
+                <Action.Paste title={"Origin"} content={url.origin} icon={Icon.CopyClipboard} />
+                <Action.Paste title={"Hash"} content={url.hash ?? ""} icon={Icon.CopyClipboard} />
+                <Action.Paste title={"Path"} content={url.path ?? ""} icon={Icon.CopyClipboard} />
+                <Action.Paste title={"Queries"} content={JSON.stringify(url.queries)} icon={Icon.CopyClipboard} />
+              </ActionPanel.Submenu>
+              <ActionPanel.Section>
+                <Action
+                  title="Delete"
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
+                  icon={Icon.Trash}
+                  onAction={() => handleDelete(url)}
+                />
+                {CommonActions}
+              </ActionPanel.Section>
             </ActionPanel>
           }
           detail={<List.Item.Detail markdown={toMarkdown(url)} />}
