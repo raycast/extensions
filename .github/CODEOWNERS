@@ -1302,6 +1302,7 @@
 /extensions/uptime                                   @yarnaid
 /extensions/uptime-kuma                              @MarlBurroW @pernielsentikaer
 /extensions/urban-dictionary                         @pernielsentikaer @zhenpewu
+/extensions/url-parse                                @YES-Lee @pernielsentikaer
 /extensions/url-shortener                            @Visual-Studio-Coder
 /extensions/url-tools                                @joshauh46
 /extensions/url-unshortener                          @sebdanielsson @pernielsentikaer
