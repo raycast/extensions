@@ -8,6 +8,7 @@ import {
   List,
   showToast,
   Toast,
+  popToRoot,
 } from "@raycast/api";
 import { exec } from "child_process";
 import { useState, useEffect } from "react";
@@ -28,6 +29,7 @@ export default function ProcessList() {
   const refreshDuration = +preferences.refreshDuration;
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
+  const goToRootAfterKill = preferences.goToRootAfterKill;
   const [sortByMem, setSortByMem] = useState<boolean>(preferences.sortByMem);
   const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
 
@@ -96,6 +98,9 @@ export default function ProcessList() {
     setFetchResult(state.filter((p) => p.id !== process.id));
     if (closeWindowAfterKill) {
       closeMainWindow();
+    }
+    if (goToRootAfterKill) {
+      popToRoot({ clearSearchBar: clearSearchBarAfterKill });
     }
     if (clearSearchBarAfterKill) {
       clearSearchBar({ forceScrollToTop: true });

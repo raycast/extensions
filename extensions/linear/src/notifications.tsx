@@ -177,12 +177,20 @@ function Notifications() {
             {notifications.map((notification) => {
               const createdAt = new Date(notification.createdAt);
 
+              const displayName = notification.actor ? notification.actor.displayName : "Linear";
+
+              const keywords = [displayName];
+
+              if (notification.issue) {
+                keywords.push(...notification.issue.identifier.split("-"));
+                keywords.push(notification.issue.title);
+              }
+
               return (
                 <List.Item
-                  title={`${getNotificationTitle(notification)} by ${
-                    notification.actor ? notification.actor.displayName : "Linear"
-                  }`}
+                  title={`${getNotificationTitle(notification)} by ${displayName}`}
                   key={notification.id}
+                  keywords={keywords}
                   icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
                   {...(notification.issue
                     ? { subtitle: `${notification.issue?.identifier} ${notification.issue?.title}` }

@@ -12,12 +12,13 @@ Utility function designed for retrieving authorization tokens within a component
 function getAccessToken(): {
   token: string;
   type: "oauth" | "personal";
-}
+};
 ```
 
 ### Return
 
 The function returns an object containing the following properties:
+
 - `token`: A string representing the access token.
 - `type`: An optional string that indicates the type of token retrieved. It can either be `oauth` for OAuth tokens or `personal` for personal access tokens.
 
@@ -25,7 +26,7 @@ The function returns an object containing the following properties:
 
 ```tsx
 import { Detail } from "@raycast/api";
-import { authorize } from "./oauth"
+import { authorize } from "./oauth";
 
 function AuthorizedComponent() {
   const { token } = getAccessToken();

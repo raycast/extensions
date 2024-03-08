@@ -1,10 +1,18 @@
 # Perplexity API Changelog
 
+## [Update] - 2024-03-02
+
+- Renamed commands to match Raycast's built-in AI commands for easier discovery.
+- Added `Change Tone to Friendly` command.
+- Improved tooltips for configuration of command prompts.
+
 ## [Update] - 2024-02-22
+
 - Added Perplexity's new Sonar models `sonar-small-chat`, `sonar-medium-chat` and `sonar-small-online`, `sonar-medium-online`.
 - Updated pricing for MoE (8x7B) models.
 
 ## [Update] - 2024-02-13
+
 - The extension now uses the OpenAI client.
 - Streaming capability has been added for receiving responses, ensuring real-time interaction.
 - Prompts can now be edited directly in the extension's settings to allow for customization.

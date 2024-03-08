@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Improvements] - 2024-03-02
+
+- Decreased time to get passwords for large vaults by not waiting for all items to be loaded
+
 ## [Fixes and Improvements] - 2024-02-27
 
 - Added images to README

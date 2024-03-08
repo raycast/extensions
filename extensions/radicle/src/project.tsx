@@ -11,7 +11,8 @@ export interface Props {
 export function Project(props: { project: Project }) {
   const { id, name, head } = props.project;
   const preferences = getPreferenceValues();
-  const httpdURL = new URL(preferences.httpdAddress);
+  const httpdUrl = new URL(preferences.httpdAddress);
+  const node = httpdUrl.port ? `${httpdUrl.hostname}:${httpdUrl.port}` : httpdUrl.hostname;
   const readme = useFetch<Blob>(`${preferences.httpdAddress}/api/v1/projects/${id}/readme/${head}`);
   const remotes = useFetch<Remote[]>(`${preferences.httpdAddress}/api/v1/projects/${id}/remotes`);
 
@@ -30,7 +31,7 @@ export function Project(props: { project: Project }) {
       markdown={readme.data?.content || ""}
       actions={
         <ActionPanel title={name}>
-          <Action.OpenInBrowser url={`${preferences.webUrl}/nodes/${httpdURL.hostname}/${id}`} />
+          <Action.OpenInBrowser url={`${preferences.webUrl}/nodes/${node}/${id}`} />
           <Action.CopyToClipboard title="Copy Repository Id to Clipboard" content={id} />
           <Action
             icon={Icon.Repeat}

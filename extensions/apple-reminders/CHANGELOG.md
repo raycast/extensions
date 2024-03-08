@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Performance improvements & bug fixes] - 2024-03-01
+
+- Completed reminders are now loaded on demand and not upfront, which should fix heap memory errors
+- Add a limit of 1000 reminders so that the extension doesn't break with heap memory errors
+
 ## [Add a preference to not use AI for Quick Add Reminder] - 2024-02-23
 
 - You can now disable the AI in `Quick Add Reminder` if you want to quickly add raw reminders to your default list.

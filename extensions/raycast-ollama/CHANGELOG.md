@@ -1,5 +1,10 @@
 # raycast-ollama Changelog
 
+## [Improvement and BugFix] - 2024-03-02
+
+- [Improvement] [@AlexMcDermott] Screenshot on Clipboard can now be used on `Chat with Ollama` and `Describe Content of Image`.
+- [BugFix] Fixed error causing ModelView not showing if model was not configured.
+
 ## [BugFix] - 2024-01-24
 
 - Fixed `Cannot read properties of undefined (reading 'split')` caused by API route '/api/show' responding with empty 'parameters' value for some models.

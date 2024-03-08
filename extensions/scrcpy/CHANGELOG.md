@@ -1,5 +1,9 @@
 # scrcpy Changelog
 
+## [New Additions] - 2024-03-04
+
+- Add "--always-on-top" option
+
 ## [Enhancement] - 2023-08-25
 
 - Select previous used device automatically
