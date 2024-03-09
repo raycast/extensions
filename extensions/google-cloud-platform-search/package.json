@@ -17,7 +17,6 @@
       "description": "Enable this option to exclude Google Cloud projects that are automatically generated with a 'sys-' prefix whenever a new App Script project is created in Google Workspace.",
       "type": "checkbox",
       "required": false,
-      "title": "Skip sys- Prefixed Projects",
       "default": false,
       "label": "Skip 'sys-' prefixed projects"
     }
