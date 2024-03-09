@@ -1,5 +1,9 @@
 # Changelog
 
+## [Feature] - 2024-03-09
+
+- Feature: Allow to hide model selector when asking a question
+
 ## [Feature] - 2024-02-21
 
 - Feature: Integrate awesome-chatgpt-prompts project

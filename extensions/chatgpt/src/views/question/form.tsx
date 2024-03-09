@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
-import { QuestionFormProps } from "../../type";
+import { ConfigurationPreferences, QuestionFormProps } from "../../type";
 
 export const QuestionForm = ({
   initialQuestion,
@@ -11,6 +11,7 @@ export const QuestionForm = ({
   onSubmit,
 }: QuestionFormProps) => {
   const { pop } = useNavigation();
+  const { hideModelSelectionOnFullTextInput } = getPreferenceValues<ConfigurationPreferences>();
 
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
   const [error, setError] = useState<{ question: string }>({
@@ -52,22 +53,26 @@ export const QuestionForm = ({
           }
         }}
       />
-      <Form.Dropdown
-        id="model"
-        title="Model"
-        placeholder="Choose model"
-        defaultValue={selectedModel}
-        onChange={(id) => {
-          onModelChange(id);
-        }}
-      >
-        {defaultModel && <Form.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
-        <Form.Dropdown.Section title="Custom Models">
-          {separateDefaultModel.map((model) => (
-            <Form.Dropdown.Item value={model.id} title={model.name} key={model.id} />
-          ))}
-        </Form.Dropdown.Section>
-      </Form.Dropdown>
+      {!hideModelSelectionOnFullTextInput && (
+        <Form.Dropdown
+          id="model"
+          title="Model"
+          placeholder="Choose model"
+          defaultValue={selectedModel}
+          onChange={(id) => {
+            onModelChange(id);
+          }}
+        >
+          {defaultModel && (
+            <Form.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />
+          )}
+          <Form.Dropdown.Section title="Custom Models">
+            {separateDefaultModel.map((model) => (
+              <Form.Dropdown.Item value={model.id} title={model.name} key={model.id} />
+            ))}
+          </Form.Dropdown.Section>
+        </Form.Dropdown>
+      )}
     </Form>
   );
 };

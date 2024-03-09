@@ -125,6 +125,15 @@
       "required": false
     },
     {
+      "name": "hideModelSelectionOnFullTextInput",
+      "label": "Hide model selection on full text input mode",
+      "description": "The dropdown for choosing a model will be hidden when asking a question",
+      "type": "checkbox",
+      "title": "Hide model selection on full text input mode",
+      "required": false,
+      "default": false
+    },
+    {
       "name": "isAutoTTS",
       "label": "Enable text-to-speech for every response",
       "description": "Enable auto TTS everytime you get a generated answer",
@@ -134,20 +143,20 @@
       "default": false
     },
     {
-      "default": false,
+      "name": "useApiEndpoint",
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
       "label": "Change API Endpoint",
-      "name": "useApiEndpoint",
-      "required": false,
       "title": "Use API Endpoint",
-      "type": "checkbox"
+      "type": "checkbox",
+      "required": false,
+      "default": false
     },
     {
-      "description": "Custom API endpoint",
       "name": "apiEndpoint",
-      "required": false,
+      "description": "Custom API endpoint",
       "title": "API Endpoint",
-      "type": "textfield"
+      "type": "textfield",
+      "required": false
     },
     {
       "name": "useProxy",

@@ -109,6 +109,7 @@ export interface ConfigurationPreferences {
   azureDeployment: string;
   useApiEndpoint: boolean;
   apiEndpoint: string;
+  hideModelSelectionOnFullTextInput?: boolean;
 }
 
 export interface CSVPrompt {
