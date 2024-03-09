@@ -5,13 +5,8 @@
   "description": "Search and open recent projects from Zed",
   "icon": "icon.png",
   "author": "ewgenius",
-  "contributors": [
-    "tleo19",
-    "jylamont"
-  ],
-  "categories": [
-    "Developer Tools"
-  ],
+  "contributors": ["tleo19", "jylamont"],
+  "categories": ["Developer Tools"],
   "license": "MIT",
   "commands": [
     {
@@ -26,13 +21,6 @@
       "title": "Search Recent Projects",
       "subtitle": "Zed",
       "description": "Search and open recent projects with Zed",
-      "mode": "view"
-    },
-    {
-      "name": "import",
-      "title": "Import VS Code Projects",
-      "subtitle": "Zed",
-      "description": "Search for recent Visual Studio Code projects and import in Zed",
       "mode": "view"
     },
     {

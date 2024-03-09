@@ -6,6 +6,15 @@ const ZedBundleIdBuildMapping: Record<ZedBuild, ZedBundleId> = {
   "Zed Preview": "dev.zed.Zed-Preview",
 };
 
+const ZedDbNameMapping: Record<ZedBuild, string> = {
+  Zed: "0-stable",
+  "Zed Preview": "0-preview",
+};
+
 export function getZedBundleId(build: ZedBuild): ZedBundleId {
   return ZedBundleIdBuildMapping[build];
+}
+
+export function getZedDbName(build: ZedBuild): string {
+  return ZedDbNameMapping[build];
 }
