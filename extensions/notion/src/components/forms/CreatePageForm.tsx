@@ -28,19 +28,22 @@ type CreatePageFormProps = {
   defaults?: CreatePageFormValues;
 };
 
+const NON_EDITABLE_PROPETY_TYPES = ["formula"];
+const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
+
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
   const defaultValues = launchContext ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
-  const { data: databaseProperties } = useDatabaseProperties(databaseId);
+  const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
   const { setRecentPage } = useRecentPages();
 
-  const databasePropertyIds = databaseProperties?.map((dp) => dp.id) || [];
+  const databasePropertyIds = databaseProperties.map((dp) => dp.id) || [];
 
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
@@ -99,6 +102,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   function filterProperties(dp: DatabaseProperty) {
     return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
   }
+
   function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
     if (!databaseView?.create_properties) {
       if (a.type == "title") return -1;
@@ -114,6 +118,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   }
 
   type Quicklink = Action.CreateQuicklink.Props["quicklink"];
+
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
