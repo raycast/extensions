@@ -6,27 +6,17 @@ import {
   openExtensionPreferences,
 } from '@raycast/api'
 import { useAuth } from '../use-auth'
+import type { ReactNode } from 'react'
 
-export const Authenticated = ({
-  component: Component,
-}: {
-  component: React.ComponentType
-}) => {
+export const Authenticated = ({ children }: { children: ReactNode }) => {
   const { data: user, isLoading, error } = useAuth()
-
-  const markdown = error?.message.includes('Invalid login credentials')
-    ? error.message + '. Please open the preferences and try again.'
-    : error?.message
-
-  if (user) {
-    return <Component />
-  }
 
   if (isLoading) {
     return <Detail isLoading />
   }
 
-  if (error) {
+  if (error || !user) {
+    const markdown = `### Error: ${error?.name}\n\n${error?.message}`
     return (
       <Detail
         markdown={markdown}
@@ -42,4 +32,6 @@ export const Authenticated = ({
       />
     )
   }
+
+  return children
 }

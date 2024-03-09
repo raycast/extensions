@@ -42,5 +42,9 @@ export const RecentBookmarks = () => {
 }
 
 export default function Command() {
-  return <Authenticated component={RecentBookmarks} />
+  return (
+    <Authenticated>
+      <RecentBookmarks />
+    </Authenticated>
+  )
 }

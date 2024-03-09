@@ -89,6 +89,10 @@ const SearchBookmarks = () => {
   )
 }
 
-export default function Command() {
-  return <Authenticated component={SearchBookmarks} />
+export default function SearchCommand() {
+  return (
+    <Authenticated>
+      <SearchBookmarks />
+    </Authenticated>
+  )
 }
