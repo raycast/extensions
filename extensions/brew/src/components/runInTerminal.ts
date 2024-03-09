@@ -17,14 +17,14 @@ const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
   `,
   warp: (c: string) => `
     tell application "Warp" to activate
-	  tell application "System Events"
-		  tell process "Warp"
-			  keystroke "${c}\r"
+    tell application "System Events" to tell process "Warp"
+        keystroke "t" using command down
+        keystroke "${c}"
+        delay 1.0
 			  key code 36
-		  end tell
-	  end tell
+    end tell
 `,
-  /// Needs both \r and key code 36, warp does not provide an URI or anyway to pass commands so this was a workaround
+  /// warp does not provide an URI or anyway to pass commands so this was a workaround
 };
 
 export function runCommandInTerminal(command: string): void {
