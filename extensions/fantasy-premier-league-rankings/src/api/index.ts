@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig } from "axios";
 
 const endpoint = "https://fantasy.premierleague.com/api/";
 
-const showErrorToast = (error: any) => {
+const showErrorToast = (error: unknown) => {
   console.log(error);
   showToast(Toast.Style.Failure, "We are having issues connecting to the FPL API", "Please try again later");
 };
@@ -32,7 +32,7 @@ export const getUserLeagues = async (id: string) => {
 
   try {
     const { data } = await axios(config);
-
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     return data.leagues.classic.filter((league: any) => league.league_type === "x");
   } catch (error) {
     showErrorToast(error);
