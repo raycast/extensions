@@ -1,5 +1,9 @@
 # Changelog
 
+## [Chore] - 2024-03-09
+
+- Chore: Improve configuration preferences types
+
 ## [Feature] - 2024-02-21
 
 - Feature: Integrate awesome-chatgpt-prompts project
