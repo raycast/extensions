@@ -1,4 +1,9 @@
-import { closeMainWindow, getPreferenceValues, showHUD, updateCommandMetadata } from "@raycast/api";
+import {
+  closeMainWindow,
+  getPreferenceValues,
+  showHUD,
+  updateCommandMetadata,
+} from "@raycast/api";
 import { execAirPodsMenu } from "./airpods-menu";
 import { Prefs } from "./type";
 
@@ -9,4 +14,5 @@ export default async function main() {
   if (prefs.showHudCA && res) {
     showHUD(res);
     await updateCommandMetadata({ subtitle: `Status: ${res}` });
-  }}
+  }
+}

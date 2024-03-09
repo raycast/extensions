@@ -138,7 +138,7 @@ end tell
       return null;
     }
     default: {
-		await updateCommandMetadata({ subtitle: `Mode: ${res}` });
+      await updateCommandMetadata({ subtitle: `Mode: ${res}` });
       return res;
     }
   }
