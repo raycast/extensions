@@ -114,10 +114,10 @@ export interface ConfigurationPreferences {
   isAutoTTS?: boolean;
   useProxy?: boolean;
   proxyProtocol?: string;
-  proxyHost?: boolean;
-  proxyPort?: boolean;
-  proxyUsername?: boolean;
-  proxyPassword?: boolean;
+  proxyHost?: string;
+  proxyPort?: string;
+  proxyUsername?: string;
+  proxyPassword?: string;
   useAzure?: boolean;
   azureEndpoint?: string;
   azureDeployment?: string;
