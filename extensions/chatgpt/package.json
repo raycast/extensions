@@ -129,7 +129,7 @@
       "label": "Hide model selection on full text input mode",
       "description": "The dropdown for choosing a model will be hidden when asking a question",
       "type": "checkbox",
-      "title": "Hide model selection on full text input mode",
+      "title": "Hide Model Selector",
       "required": false,
       "default": false
     },
