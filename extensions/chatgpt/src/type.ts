@@ -104,11 +104,23 @@ export interface ChatViewProps extends ChangeModelProp {
 
 export interface ConfigurationPreferences {
   apiKey: string;
-  useAzure: boolean;
-  azureEndpoint: string;
-  azureDeployment: string;
-  useApiEndpoint: boolean;
-  apiEndpoint: string;
+  useStream: boolean;
+  isAutoSaveConversation: boolean;
+  apiEndpoint?: string;
+  useApiEndpoint?: boolean;
+  isHistoryPaused?: boolean;
+  isAutoLoadText?: boolean;
+  isAutoFullInput?: boolean;
+  isAutoTTS?: boolean;
+  useProxy?: boolean;
+  proxyProtocol?: string;
+  proxyHost?: boolean;
+  proxyPort?: boolean;
+  proxyUsername?: boolean;
+  proxyPassword?: boolean;
+  useAzure?: boolean;
+  azureEndpoint?: string;
+  azureDeployment?: string;
 }
 
 export interface CSVPrompt {
