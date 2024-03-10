@@ -44,7 +44,7 @@ enum RemindersError: Error {
   case other
 }
 
-@raycast func getReminders() throws -> RemindersData {
+@raycast func getData(listId: String?) throws -> RemindersData {
   let eventStore = EKEventStore()
   var remindersData: [Reminder] = []
   var listsData: [ReminderList] = []
@@ -61,7 +61,13 @@ enum RemindersError: Error {
       return
     }
 
-    let predicate = eventStore.predicateForReminders(in: nil)
+    var calendars: [EKCalendar]? = nil
+    if let listId = listId {
+      calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
+    }
+
+    let predicate = eventStore.predicateForIncompleteReminders(
+      withDueDateStarting: nil, ending: nil, calendars: calendars)
     eventStore.fetchReminders(matching: predicate) { reminders in
       guard let reminders = reminders else {
         error = RemindersError.noRemindersFound
@@ -69,7 +75,7 @@ enum RemindersError: Error {
         return
       }
 
-      remindersData = reminders.map { $0.toStruct() }
+      remindersData = reminders.prefix(1000).map { $0.toStruct() }
 
       let calendars = eventStore.calendars(for: .reminder)
       let defaultList = eventStore.defaultCalendarForNewReminders()
@@ -93,6 +99,57 @@ enum RemindersError: Error {
   }
 
   return RemindersData(reminders: remindersData, lists: listsData)
+}
+
+@raycast func getCompletedReminders(listId: String?) throws -> [Reminder] {
+  let eventStore = EKEventStore()
+  var remindersData: [Reminder] = []
+  var error: Error?
+
+  let dispatchGroup = DispatchGroup()
+
+  dispatchGroup.enter()
+
+  let completion: (Bool, Error?) -> Void = { (granted, _) in
+    guard granted else {
+      error = RemindersError.accessDenied
+      dispatchGroup.leave()
+      return
+    }
+
+    var calendars: [EKCalendar]? = nil
+    if let listId = listId {
+      calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
+    }
+
+    let predicate = eventStore.predicateForCompletedReminders(
+      withCompletionDateStarting: nil, ending: nil, calendars: calendars)
+    eventStore.fetchReminders(matching: predicate) { reminders in
+      guard let reminders = reminders else {
+        error = RemindersError.noRemindersFound
+        dispatchGroup.leave()
+        return
+      }
+
+      remindersData = reminders.prefix(1000).map { $0.toStruct() }
+
+      dispatchGroup.leave()
+    }
+  }
+
+  if #available(macOS 14.0, *) {
+    eventStore.requestFullAccessToReminders(completion: completion)
+  } else {
+    eventStore.requestAccess(to: .reminder, completion: completion)
+  }
+
+  dispatchGroup.wait()
+
+  if let error {
+    throw error
+  }
+
+  return remindersData
 }
 
 struct NewReminder: Decodable {

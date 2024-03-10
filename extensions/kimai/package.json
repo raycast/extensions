@@ -6,6 +6,10 @@
   "icon": "kimai-icon.png",
   "author": "marinsokol",
   "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
   "commands": [
     {
       "name": "log-time",
@@ -24,6 +28,24 @@
     }
   ],
   "preferences": [
+    {
+      "name": "protocol",
+      "type": "dropdown",
+      "required": false,
+      "title": "Request protocol",
+      "description": "If you are using local (self hosted) Kimai, set it to 'http', otherwise keep it as 'https'",
+      "default": "https",
+      "data": [
+        {
+          "title": "HTTPS",
+          "value": "https"
+        },
+        {
+          "title": "HTTP",
+          "value": "http"
+        }
+      ]
+    },
     {
       "name": "domain",
       "type": "textfield",

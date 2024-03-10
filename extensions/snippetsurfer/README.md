@@ -4,7 +4,7 @@ SnippetSurfer is a raycast extension designed to swiftly navigate through snippe
 
 ### Features
 - Raycast extension for quick navigation of text excerpts and code snippets.
-- Supports filtering by subfolders.
+- Supports filtering by folders or subfolders and by tags.
 - Supports both yaml and markdown formats for easy organization.
     - For markdown files, YAML Metadata support enables addition of titles and descriptions to snippets for better organization.
 - Streamlines personal workflows by automatically copying code snippets to the clipboard.
@@ -17,6 +17,8 @@ Title: Git init
 Description: |
     Create empty Git repo in specified directory.
     Run with noarguments to initialize the current directory as a git repository.
+Tags:
+  - git
 ---
 ```shell
 git init
@@ -30,6 +32,8 @@ snippets:
     description: "Create empty Git repo in specified directory"
     code: "git init"
     language: "shell"
+    tags:
+      - git
   - title: Git commit
     description: "Record changes to the repository"
     content: "Some content"

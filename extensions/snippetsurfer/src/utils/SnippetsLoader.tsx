@@ -1,5 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
+import os from "os";
+
 import type { Snippet } from "../types";
 import loadMarkdown from "./loaders/MarkdownLoader";
 import loadYaml from "./loaders/YamlLoader";
@@ -53,6 +55,14 @@ async function loadAllSnippets(startPath: string): Promise<{ snippets: Snippet[]
   return { snippets, errors };
 }
 
+function expandHomeDirectory(dirPath: string): string {
+  if (dirPath.startsWith("~")) {
+    return path.join(os.homedir(), dirPath.slice(1));
+  } else {
+    return dirPath;
+  }
+}
+
 function getPastableContent(content: string): string {
   if (!content) {
     return "";
@@ -67,4 +77,4 @@ function getPastableContent(content: string): string {
   return pastableContent;
 }
 
-export { loadAllSnippets, getPastableContent };
+export { loadAllSnippets, getPastableContent, expandHomeDirectory };
