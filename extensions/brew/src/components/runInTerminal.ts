@@ -21,7 +21,7 @@ const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
         keystroke "t" using command down
         keystroke "${c}"
         delay 1.0
-			  key code 36
+        key code 36
     end tell
 `,
   /// warp does not provide an URI or anyway to pass commands so this was a workaround
