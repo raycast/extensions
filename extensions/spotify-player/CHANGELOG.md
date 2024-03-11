@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Feature] - 2024-03-11
+
+- New command `removeSongFromPlaylist` to remove the current song from the playlist it's in.
+- Updated README with new commands.
+
 ## [Feature] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
