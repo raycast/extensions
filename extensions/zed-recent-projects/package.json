@@ -11,7 +11,7 @@
   "commands": [
     {
       "name": "open",
-      "title": "Open With Zed",
+      "title": "Open with Zed",
       "subtitle": "Zed",
       "description": "Opens the currently selected Finder item with Zed",
       "mode": "no-view"
