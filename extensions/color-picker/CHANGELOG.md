@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2024-03-08
+
+- Added HEX without prefix (#) color format
+
 ## [Fix] - 2024-03-06
 
 - Resolved an issue where the color in the Menu Bar was not displayed correctly.
