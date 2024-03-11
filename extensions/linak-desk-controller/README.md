@@ -20,3 +20,14 @@ pip3 install linak-controller
    ![Bluetility screenshot](media/bluetility.png)
 4. Run the extension and add the UUID and your preferred standing and sitting heights to the extension settings.
 5. (Optional) Set up keyboard shortcuts to toggle between your preferred heights 🥳
+
+## Troubleshooting
+
+Make sure that `linak-controller` is installed and available in your path. If linak-controller is installed and works in your terminal but not in Raycast run `which linak-controller` in your terminal and add the python bin path to the extension settings .i.e.
+
+```bash
+which linak-controller
+/opt/homebrew/bin/linak-controller
+```
+
+In this case you would add `/opt/homebrew/bin/` to the extension settings.
