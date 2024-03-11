@@ -1,43 +1,21 @@
-import { Color, Icon, MenuBarExtra, getPreferenceValues, updateCommandMetadata } from "@raycast/api";
+import { Color, Icon, MenuBarExtra } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-
-interface Preferences {
-  interval: string;
-}
-
-function pluralize(value: number, unit: string) {
-  return value === 1 ? unit : `${unit}s`;
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { pluralize, sleep, useDrinkTimes, useLastDrinkedAt } from "./common";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const [lastDrinkedAt, updateLastDrinkedAt] = useCachedState<Date | null>("lastDrinkedAt", null);
-  const [delay, setDelay] = useCachedState<number>("delay", 0);
+  const [, drinkNow] = useLastDrinkedAt();
+  const [, setDelay] = useCachedState<number>("delay", 0);
 
-  const lastDrinkFromNow = lastDrinkedAt ? new Date().getTime() - delay - lastDrinkedAt.getTime() : 0;
-  const lastDrinkFromNowInMinutes = Math.floor(lastDrinkFromNow / 1000 / 60);
-
-  const nextDrinkReminder = Number(preferences.interval) - lastDrinkFromNowInMinutes;
+  const { nextDrinkReminder, lastDrinkFromNowInMinutes } = useDrinkTimes();
 
   const onDrinkNow = async () => {
-    updateLastDrinkedAt(new Date());
-    setDelay(0);
+    drinkNow();
     await sleep(200);
   };
 
   const onDelay = (minutes: number) => () => {
     setDelay((delay) => delay + minutes * 60 * 1000);
   };
-  updateCommandMetadata({
-    subtitle:
-      nextDrinkReminder > 0
-        ? `Next reminder in ${nextDrinkReminder} ${pluralize(nextDrinkReminder, "minute")}`
-        : "Time to drink some water!",
-  });
 
   const lastDrinkLabel =
     lastDrinkFromNowInMinutes === 0 ? "Last was just now" : `Last was ${lastDrinkFromNowInMinutes} min ago`;
