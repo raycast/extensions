@@ -50,7 +50,7 @@
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince
 /extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia
-/extensions/arc                                      @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @jayeshbhole
+/extensions/arc                                      @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @omar-salama @jayeshbhole
 /extensions/archiver                                 @404J
 /extensions/ars-technica                             @edwin-dd-ong
 /extensions/arxiv                                    @koayon @pernielsentikaer
@@ -140,6 +140,7 @@
 /extensions/carbon-raycast                           @adelowo
 /extensions/cardpointers                             @emcro
 /extensions/cc0-lib                                  @0xN1
+/extensions/ccf-what                                 @CrackedPoly
 /extensions/center                                   @enesozturk
 /extensions/chakra-ui-docs                           @pgvr @Ansub
 /extensions/change-case                              @erics118 @pernielsentikaer @nagauta
@@ -467,7 +468,7 @@
 /extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko @crisboarna @andreaselia @rtyke @karolre @Aiee @nagauta @a-laughlin @tleo19
 /extensions/google-chrome-profiles                   @frouo @erics118
-/extensions/google-cloud-platform-search             @klaa97 @edomora97 @hisomura
+/extensions/google-cloud-platform-search             @klaa97 @edomora97 @hisomura @m-gentil
 /extensions/google-drive                             @vishaltelangre @nametake @daniel-stoneuk
 /extensions/google-fonts                             @GastroGeek @pernielsentikaer
 /extensions/google-maps-search                       @ratoru @aeither
@@ -477,7 +478,7 @@
 /extensions/google-tasks                             @elliotdes @pernielsentikaer
 /extensions/google-translate                         @gebeto @FezVrasta @metakirby5 @tangerine1202 @nirtamir2 @pernielsentikaer @rasitayaz
 /extensions/google-trends                            @kkange
-/extensions/google-workspace                         @thomaslombart @mathieudutour
+/extensions/google-workspace                         @thomaslombart @mathieudutour @marcmagn1
 /extensions/gopass                                   @bake
 /extensions/gradle-plugins                           @alex-w0
 /extensions/grafana                                  @Lp-Francois
@@ -615,6 +616,7 @@
 /extensions/kimai                                    @marinsokol
 /extensions/kinopio-inbox                            @pketh
 /extensions/kinopoisk                                @mattisssa
+/extensions/klu-ai                                   @abielzulio
 /extensions/knowwa                                   @d0utone
 /extensions/korean-spell-checker                     @jcha0713
 /extensions/kubectx                                  @oktaysenkan
@@ -851,6 +853,7 @@
 /extensions/osint-web-check                          @gksander
 /extensions/oss-browser                              @404J
 /extensions/ossinsight                               @k8scat @pernielsentikaer
+/extensions/otter                                    @mrmartineau
 /extensions/oura                                     @RobErskine
 /extensions/outline-page                             @praveenjuge
 /extensions/package-tracker                          @cojmeister
@@ -976,6 +979,7 @@
 /extensions/raycast-arcade                           @EvanZhouDev
 /extensions/raycast-bard-ai                          @EvanZhouDev @Visual-Studio-Coder
 /extensions/raycast-create-remix                     @nuno
+/extensions/raycast-diki                             @blazejkustra
 /extensions/raycast-explorer                         @thomaslombart @EvanZhouDev @mil3na @xilopaint
 /extensions/raycast-fly                              @devuo
 /extensions/raycast-gemini                           @EvanZhouDev
@@ -1244,6 +1248,7 @@
 /extensions/tldraw                                   @zephraph
 /extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart @j3lte
 /extensions/tmux-sessioner                           @louishuyng @sxn
+/extensions/tny                                      @stayallive @stayallive
 /extensions/todo-list                                @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer @telmen
 /extensions/todoist                                  @thomaslombart @AnishDe12020 @kud @casassg @Princeyadav05
 /extensions/toggl-track                              @franzwilhelm @bkeys818 @michaelfaisst
@@ -1264,6 +1269,7 @@
 /extensions/truth-or-dare                            @tandpfun
 /extensions/tunnelblick                              @SamuelNitsche @vkhitrin
 /extensions/tuple                                    @inxilpro
+/extensions/turso                                    @Spioune
 /extensions/tuya-smart                               @AndresMorelos
 /extensions/tw-colorsearch                           @magicjaqk
 /extensions/twitch                                   @dieserRobin @Aayush9029 @suth @pernielsentikaer @MiracleXYZ @Sheraff
@@ -1302,6 +1308,7 @@
 /extensions/uptime                                   @yarnaid
 /extensions/uptime-kuma                              @MarlBurroW @pernielsentikaer
 /extensions/urban-dictionary                         @pernielsentikaer @zhenpewu
+/extensions/url-parse                                @YES-Lee @pernielsentikaer
 /extensions/url-shortener                            @Visual-Studio-Coder
 /extensions/url-tools                                @joshauh46
 /extensions/url-unshortener                          @sebdanielsson @pernielsentikaer
