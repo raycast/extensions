@@ -107,7 +107,7 @@ export const LinkItem = ({
       keywords={tags ?? []}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={url} title="Open Url" />
+          <Action.OpenInBrowser url={url} title="Open URL" />
           <Action.OpenInBrowser
             url={urlJoin(prefs.otterBasePath, 'bookmark', id)}
             title="Open Item in Otter"
