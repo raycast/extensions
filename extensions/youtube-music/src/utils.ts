@@ -60,7 +60,7 @@ export async function runJSInYouTubeMusicTab(code: string) {
 }
 
 export const goToChapter = {
-  next: `function goToNextChapter() {
+  next: `(function() {
     const activeChapter = document.querySelector('ytd-macro-markers-list-item-renderer[active]');
     const nextChapter = activeChapter ? activeChapter.nextElementSibling : null;
     if (nextChapter) {
@@ -68,9 +68,8 @@ export const goToChapter = {
     } else {
       console.log('No next chapter found.');
     }
-  }
-  goToNextChapter();`,
-  previous: `function goToPreviousChapter() {
+  })();`,
+  previous: `(function(){
     const activeChapter = document.querySelector('ytd-macro-markers-list-item-renderer[active]');
     const previousChapter = activeChapter ? activeChapter.previousElementSibling : null;
     if (previousChapter) {
@@ -78,6 +77,5 @@ export const goToChapter = {
     } else {
       console.log('No previous chapter found.');
     }
-  }
-  goToPreviousChapter();`,
+  })();`,
 };

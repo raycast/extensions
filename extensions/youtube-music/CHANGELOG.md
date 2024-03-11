@@ -1,6 +1,6 @@
 # YouTube Music Changelog
 
-## [New Commands] = 2022-08-18
+## [New Commands] = 2024-03-06
 
 Add `fast-forward`, `rewind`, `next-chapter`, `previous-chapter`, youtube.com support.
 
