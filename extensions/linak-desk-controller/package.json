@@ -32,6 +32,14 @@
       "required": true,
       "title": "Standing height",
       "placeholder": "120"
+    },
+    {
+      "name": "python",
+      "type": "textfield",
+      "required": false,
+      "title": "Location of python bin",
+      "description": "Run 'which python' in the terminal to find out.",
+      "placeholder": "/usr/bin/python"
     }
   ],
   "license": "MIT",

@@ -3,6 +3,7 @@ import { promisify } from "util";
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 
 export function getLinakControllerPath() {
+  const preferences = getPreferenceValues<Preferences>();
   const commandFolderPath = execSync(`
   locations=(
       /usr/local/bin
@@ -13,6 +14,7 @@ export function getLinakControllerPath() {
       /opt/X11/bin
       /opt/homebrew/bin
       /usr/local/Cellar
+      ${preferences.python}
   )
   
   for location in "\${locations[@]}"
