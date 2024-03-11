@@ -9,6 +9,10 @@ function pluralize(value: number, unit: string) {
   return value === 1 ? unit : `${unit}s`;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [lastDrinkedAt, updateLastDrinkedAt] = useCachedState<Date | null>("lastDrinkedAt", null);
@@ -19,9 +23,10 @@ export default function Command() {
 
   const nextDrinkReminder = Number(preferences.interval) - lastDrinkFromNowInMinutes;
 
-  const onDrinkNow = () => {
+  const onDrinkNow = async () => {
     updateLastDrinkedAt(new Date());
     setDelay(0);
+    await sleep(200);
   };
 
   const onDelay = (minutes: number) => () => {
