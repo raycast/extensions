@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Add Pop to Root Preference] - 2024-03-07
+- Added pop to root as a default preference
+
 ## [Better Sentence Case] - 2024-01-28
 - Sentence case now handles punctuation better
 
