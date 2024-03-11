@@ -122,8 +122,9 @@ In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect scree
 #### How to use it?
 
 1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2. Open the command
-3. Press the hotkey, remember to tick `Save to Metadata`
+2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
+3. Open the command
+4. Press the hotkey, remember to tick `Save to Metadata`
 
 {% hint style="info" %}
 This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.
