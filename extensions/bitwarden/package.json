@@ -284,7 +284,7 @@
       "type": "textfield",
       "required": false,
       "title": "Bitwarden CLI Path",
-      "description": "The official Bitwarden CLI is downloaded by the extension, but if you wish to use your own, type here the location of your local binary. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
+      "description": "If you wish to use your own CLI, type here the location of your local installation. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
       "placeholder": "CLI Path"
     },
     {

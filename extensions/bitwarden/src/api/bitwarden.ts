@@ -78,6 +78,12 @@ export const cliInfo = {
       return process.arch === "arm64" ? this.arm64 : this.x64;
     },
     get bin() {
+      // TODO: Remove this when the issue is resolved
+      // CLI bin download is off for arm64 until bitwarden releases arm binaries
+      // https://github.com/bitwarden/clients/pull/2976
+      // https://github.com/bitwarden/clients/pull/7338
+      if (process.arch === "arm64") return this.installedBin;
+
       return !BinDownloadLogger.hasError() ? this.downloadedBin : this.installedBin;
     },
   },
@@ -126,7 +132,7 @@ export class Bitwarden {
 
   private async ensureCliBinary(): Promise<void> {
     if (this.checkCliBinIsReady(this.cliPath)) return;
-    if (this.cliPath === this.preferences.cliPath) {
+    if (this.cliPath === this.preferences.cliPath || this.cliPath === cliInfo.path.installedBin) {
       throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
     if (BinDownloadLogger.hasError()) BinDownloadLogger.clearError();
