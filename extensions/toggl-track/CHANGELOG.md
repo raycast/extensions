@@ -1,6 +1,10 @@
 # Toggl Track Changelog
 
-## [Enhancements]
+## [Enhancements] - 2024-03-06
+
+- Add workspace and project fields to time entry form.
+
+## [Enhancements] - 2024-02-27
 
 - Show tags, project, and client on time entries.
 
