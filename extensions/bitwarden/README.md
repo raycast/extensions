@@ -16,8 +16,8 @@
 
 Before you're able to use this extension, you need to complete the following steps:
 
-#### Step 0 - (arm64 only) Install the Bitwarden CLI
-> ⚠️ If you have an Intel-based Mac (`x64` architecture), you can skip this step and the CLI will be downloaded for you. You only need to complete this if you're using a arm-based Mac, meaning you have an Apple M1/2/3 Pro/Max/Ultra chip. You can check this by going to the top left ` Apple menu > About This Mac` or by executing `uname -m` in the terminal and check for `arm64`.
+#### Step 0 (arm64 only) - Install the Bitwarden CLI
+> ⚠️ If you have an Intel-based Mac (`x64` architecture), you can skip this step and the CLI will be downloaded for you. You only need to complete this if you're using a arm-based Mac, meaning you have an Apple M1/2/3 Pro/Max/Ultra chip. You can check this by going to the top left ` Apple menu > About This Mac` or by executing `uname -m` in the terminal and checking for `arm64`.
 >
 > We are working on removing this step and doing it for you 🙂
 >
