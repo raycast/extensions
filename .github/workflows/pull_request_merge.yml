@@ -18,12 +18,13 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ env.GITHUB_TOKEN }}
       - name: Setup GIT
         uses: raycast/github-actions/setup-git@master
+      - name: Get changed extensions
+        id: get_changed_extensions
+        uses: raycast/github-actions/get-changed-extensions@master
+        with:
+          pull_request_number: "${{ inputs.pr_number }}"
       - name: Checkout PR
         run: gh pr checkout ${{ github.event.inputs.pr_number }}
       - name: Update CHANGELOG.md
@@ -54,7 +55,12 @@ jobs:
           if [[ -n "$images" ]]; then
             echo "Images: $images"
             while IFS= read -r image; do
-              images_array+=("$image")
+              if [[ -f "$image" ]]; then
+                images_array+=("$image")
+              else
+                echo "$image does not exist"
+                exit 1
+              fi
             done <<< "$images"
           fi
           count=${#images_array[@]}
