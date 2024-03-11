@@ -22,7 +22,7 @@
     {
       "name": "musicDir",
       "description": "The path to the music folder",
-      "type": "textfield",
+      "type": "directory",
       "required": false,
       "title": "Default Music Dir",
       "placeholder": "~/Music",
