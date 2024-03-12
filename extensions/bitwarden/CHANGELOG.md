@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Improvement] - 2024-03-12
+
+- Improve CLI not found error message
+
 ## [Fix] - 2024-03-11
 
 - Temporarily disable CLI download for arm64 devices until bitwarden releases arm binaries
