@@ -2,7 +2,6 @@ import { Image, Icon, Color, Grid } from "@raycast/api";
 import { GIF_SERVICE, GRID_COLUMNS } from "../preferences";
 
 import { GifGridSection, GifGridSectionProps } from "./GifGridSection";
-import { shouldLoadMore } from "../lib/infiniteScroll";
 
 export interface GifGridProps {
   isLoading?: boolean;
@@ -26,6 +25,7 @@ export function GifGrid(props: GifGridProps) {
   return (
     <Grid
       columns={columns}
+      // TODO: Check out max results behavior
       pagination={{ onLoadMore: props.loadMoreGifs, pageSize: 10, hasMore: true }}
       searchBarAccessory={
         props.showDropdown ? (
