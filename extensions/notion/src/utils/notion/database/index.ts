@@ -149,6 +149,7 @@ type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
 // Create database page
 export async function createDatabasePage(values: Form.Values) {
+  console.log({ values });
   try {
     const notion = getNotionClient();
     const { database, content, ...props } = values;
@@ -179,7 +180,7 @@ export async function createDatabasePage(values: Form.Values) {
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to create page", undefined);
+    throw new Error("Failed to create page", { cause: err });
   }
 }
 
@@ -205,6 +206,7 @@ export async function deleteDatabase(databaseId: string) {
     return handleError(err, "Failed to delete database", undefined);
   }
 }
+
 export interface Database {
   id: string;
   last_edited_time: number;
