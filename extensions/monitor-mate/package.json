@@ -43,6 +43,7 @@
     {
       "name": "add-resource",
       "title": "Add Resource",
+      "subtitle": "MonitorMate",
       "subtitle": "Add a new resource to monitor",
       "description": "Add a new resource to monitor",
       "mode": "view"
