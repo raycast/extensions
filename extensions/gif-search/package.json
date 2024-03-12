@@ -147,7 +147,7 @@
     "@raycast/api": "^1.69.1",
     "@raycast/utils": "^1.13.1",
     "@saekitominaga/file-size-format": "^1.0.2",
-    "date-fns": "^3.4.0",
+    "date-fns": "^2.30.0",
     "node-fetch": "^3.3.2",
     "tempy": "^2.0.0"
   },
