@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Color, Icon, launchCommand, LaunchType, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, Color, Icon, launchCommand, LaunchType, Detail, Keyboard } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import { fetchResources, deleteResource, generateChartUrl } from "./utils";
 import moment from "moment";
