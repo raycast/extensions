@@ -154,7 +154,13 @@ export default function Command() {
             <ActionPanel>
               <Action icon={Icon.Eye} title="Details" onAction={() => handleDetails(resource)} />
               <Action icon={Icon.Pencil} title="Edit" onAction={() => handleEdit(resource, index)} />
-              <Action icon={Icon.Trash} title="Delete" onAction={() => handleDelete(resource)} />
+              <Action
+                icon={Icon.Trash}
+                title="Delete"
+                onAction={() => handleDelete(resource)}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+              />
             </ActionPanel>
           }
         />
