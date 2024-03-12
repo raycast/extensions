@@ -57,9 +57,6 @@ jobs:
             while IFS= read -r image; do
               if [[ -f "$image" ]]; then
                 images_array+=("$image")
-              else
-                echo "$image does not exist"
-                exit 1
               fi
             done <<< "$images"
           fi
