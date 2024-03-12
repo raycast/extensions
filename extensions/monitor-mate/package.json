@@ -51,6 +51,7 @@
     {
       "name": "check-status",
       "title": "Check Status",
+      "subtitle": "MonitorMate",
       "subtitle": "Check the status of a monitoring resources",
       "description": "Check the status of a monitoring resources",
       "mode": "no-view",
