@@ -39,7 +39,7 @@ export default function useLocalGifs(type: LocalType) {
         setIsLoadingIds(false);
       }
     },
-    [setLocalIds, setIsLoadingIds]
+    [setLocalIds, setIsLoadingIds],
   );
 
   const loadAllRecents = useCallback(
@@ -59,7 +59,7 @@ export default function useLocalGifs(type: LocalType) {
         setIsLoadingIds(false);
       }
     },
-    [setLocalIds]
+    [setLocalIds],
   );
 
   return [localIds, isLoadingIds, loadRecents, loadAllRecents] as const;
