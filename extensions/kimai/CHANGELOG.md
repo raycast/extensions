@@ -2,7 +2,7 @@
 
 ## [Fix] - 2024-03-11
 
-Added validation of request response data to prevent braking the extension, if data is not a valid JSON. 
+Added validation of request response data to prevent breaking the extension if the data is not valid JSON.
 
 ## [Update] - 2024-02-28
 
