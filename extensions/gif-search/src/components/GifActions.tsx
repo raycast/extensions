@@ -11,6 +11,8 @@ import { IGif } from "../models/gif";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
+import { removeGifFromCache } from "../lib/cachedGifs";
+import path from "path";
 
 interface GifActionsProps {
   item: IGif;
@@ -40,7 +42,17 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
   const removeFromRecents = () => safeDispatch({ type: "remove", save: true, recentIds: actionIds, service });
   const addToFav = () => safeDispatch({ type: "add", save: true, favIds: actionIds, service });
 
-  const removeFav = () => safeDispatch({ type: "remove", save: true, favIds: actionIds, service });
+  const removeFav = async () => {
+    safeDispatch({ type: "remove", save: true, favIds: actionIds, service });
+
+    // Remove the GIF from the cache if it exists
+    try {
+      const fileName = item.download_name || path.basename(item.download_url);
+      await removeGifFromCache(fileName);
+    } catch (error) {
+      console.error("Failed to remove GIF from cache:", error);
+    }
+  };
 
   const copyFileAction = () =>
     showToast({
@@ -48,7 +60,8 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       title: "Copying...",
     })
       .then((toast) => {
-        return copyFileToClipboard(item.download_url, item.download_name).then((file) => {
+        const isInFavorites = favIds?.get(service as ServiceName)?.has(id.toString());
+        return copyFileToClipboard(item.download_url, item.download_name, isInFavorites).then((file) => {
           toast.hide();
           showHUD(`Copied GIF "${file}" to clipboard`);
         });
