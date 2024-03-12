@@ -28,7 +28,6 @@
       "name": "alertSound",
       "title": "Alert Sound",
       "type": "checkbox",
-      "defaultValue": "true",
       "description": "Play a sound when a resource is down"
     }
   ],
