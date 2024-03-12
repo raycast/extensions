@@ -48,6 +48,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
+    if (type === 'formula') continue;
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
     let value = defaultValues?.[key];
@@ -66,7 +67,10 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
           values.database = initialDatabaseId;
         }
 
-        const page = await createDatabasePage(values);
+        const page = await createDatabasePage({
+          ...initialValues,
+          ...values,
+        });
 
         if (page) {
           await showToast({
