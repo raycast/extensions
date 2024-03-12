@@ -1,5 +1,5 @@
-import {LaunchProps, showToast, Toast} from '@raycast/api';
-import {exec} from 'child_process';
+import { LaunchProps, showToast, Toast } from "@raycast/api";
+import { exec } from "child_process";
 
 function isInteger(str: string): boolean {
   return Number.isInteger(parseInt(str, 10));
@@ -20,14 +20,14 @@ async function run(command: string): Promise<string> {
 export default async function Command(
   // "Index" here refers to the "name" property of this command
   // specified in package.json AND matches the name of this source file.
-  props: LaunchProps<{arguments: Arguments.Index}>
+  props: LaunchProps<{ arguments: Arguments.KillListeningProcess }>
 ) {
-  const {port} = props.arguments;
+  const { port } = props.arguments;
   if (!isInteger(port)) {
     showToast({
       style: Toast.Style.Failure,
-      title: 'Bad Port',
-      message: 'The port must be an integer.'
+      title: "Bad Port",
+      message: "The port must be an integer.",
     });
     return;
   }
@@ -36,17 +36,17 @@ export default async function Command(
 
   try {
     const pid = await run(command);
-    await run('kill ' + pid);
+    await run("kill " + pid);
     showToast({
       style: Toast.Style.Success,
-      title: 'Success',
-      message: `Process ${pid} was killed.`
+      title: "Success",
+      message: `Process ${pid} was killed.`,
     });
   } catch (error) {
     showToast({
       style: Toast.Style.Failure,
-      title: 'Error',
-      message: `No process is listening on port ${port}.`
+      title: "Error",
+      message: `No process is listening on port ${port}.`,
     });
   }
 }
