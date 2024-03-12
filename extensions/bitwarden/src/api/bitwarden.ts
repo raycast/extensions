@@ -85,14 +85,14 @@ export const cliInfo = {
       if (process.arch === "arm64") {
         const cache = new Cache();
         try {
-          if (cache.get("bwDownloadedBinWorks") === "true") return this.downloadedBin;
           if (!existsSync(this.downloadedBin)) throw new Error("No downloaded bin");
+          if (cache.get("downloadedBinWorks") === "true") return this.downloadedBin;
 
           execaSync(this.downloadedBin, ["--version"]);
-          cache.set("bwDownloadedBinWorks", "true");
+          cache.set("downloadedBinWorks", "true");
           return this.downloadedBin;
         } catch {
-          cache.set("bwDownloadedBinWorks", "false");
+          cache.set("downloadedBinWorks", "false");
           return this.installedBin;
         }
       }
