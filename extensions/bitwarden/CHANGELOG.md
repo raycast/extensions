@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2024-03-11
+
+- Temporarily disable CLI download for arm64 devices until bitwarden releases arm binaries
+
 ## [Improvements] - 2024-03-02
 
 - Decreased time to get passwords for large vaults by not waiting for all items to be loaded
