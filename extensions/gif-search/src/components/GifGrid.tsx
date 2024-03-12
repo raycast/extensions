@@ -1,5 +1,5 @@
 import { Image, Icon, Color, Grid } from "@raycast/api";
-import { GIF_SERVICE, GRID_COLUMNS } from "../preferences";
+import { GIF_SERVICE, GRID_COLUMNS, getMaxResults } from "../preferences";
 
 import { GifGridSection, GifGridSectionProps } from "./GifGridSection";
 
@@ -25,8 +25,7 @@ export function GifGrid(props: GifGridProps) {
   return (
     <Grid
       columns={columns}
-      // TODO: Check out max results behavior
-      pagination={{ onLoadMore: props.loadMoreGifs, pageSize: 10, hasMore: true }}
+      pagination={{ onLoadMore: props.loadMoreGifs, pageSize: getMaxResults(), hasMore: true }}
       searchBarAccessory={
         props.showDropdown ? (
           <Grid.Dropdown tooltip="Change GIF Provider" storeValue={true} onChange={props.onDropdownChange}>
