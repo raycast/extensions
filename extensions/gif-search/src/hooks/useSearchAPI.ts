@@ -96,7 +96,7 @@ export default function useSearchAPI({
         cancelRef.current?.abort();
       };
     },
-    [cancelRef, setIsLoading, setResults, term, results, offset]
+    [cancelRef, setIsLoading, setResults, term, results, offset],
   );
 
   const loadMore = () => setOffset(offset + limit);
