@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [New Command] - 2024-03-13
+
+- Add `Set Status` command to allow setting a custom status
+
 ## [Improve Search command UX] - 2023-04-16
 
 - Automatically close Slack right sidebar after navigating to a user chat
