@@ -42,14 +42,16 @@
       "subtitle": "Control timers from menu-bar and updates Slack status",
       "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
       "mode": "menu-bar",
-      "interval": "10s"
+      "interval": "10s",
+      "disabledByDefault": true
     },
     {
       "name": "slack-pomodoro-control-timer",
       "title": "Slack Control Pomodoro Timer",
       "subtitle": "Start / Stop Pomodoro Timer and update Slack status",
       "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
-      "mode": "view"
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
