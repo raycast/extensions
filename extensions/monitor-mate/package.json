@@ -36,6 +36,7 @@
     {
       "name": "index",
       "title": "Show Dashboard",
+      "subtitle": "MonitorMate",
       "subtitle": "See your Monitoring dashboard",
       "description": "See the status of all your monitoring resources",
       "mode": "view"
