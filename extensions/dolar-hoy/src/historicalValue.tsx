@@ -13,7 +13,7 @@ type HistoricalFormValues = {
 export default function Command() {
   const { push } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<HistoricalFormValues>({
+  const { handleSubmit, itemProps, setValidationError } = useForm<HistoricalFormValues>({
     onSubmit: (values) => {
       values.date && push(<HistoricalValue date={values.date} />);
     },
@@ -25,6 +25,14 @@ export default function Command() {
     },
   });
 
+  /*
+   * Note: we had to add a custom onChange handler to be able to reset errors when value changes.
+   */
+  const handleOnChange = (newValue: Date | null) => {
+    setValidationError("date", undefined);
+    itemProps?.date?.onChange && itemProps.date.onChange(newValue);
+  };
+
   return (
     <Form
       actions={
@@ -33,7 +41,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.DatePicker title={"Date"} {...itemProps.date} />
+      <Form.DatePicker title={"Date"} {...itemProps.date} onChange={handleOnChange} />
     </Form>
   );
 }

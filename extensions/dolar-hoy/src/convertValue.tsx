@@ -14,7 +14,7 @@ interface ConvertFormValues {
 export default function Command() {
   const { push } = useNavigation();
 
-  const { handleSubmit, itemProps } = useForm<ConvertFormValues>({
+  const { handleSubmit, itemProps, setValidationError } = useForm<ConvertFormValues>({
     onSubmit: (values) => {
       if (values.amount && values.fromCurrency && values.toCurrency) {
         push(
@@ -41,6 +41,14 @@ export default function Command() {
     },
   });
 
+  /*
+   * Note: we had to add a custom onChange handler to be able to reset errors when value changes.
+   */
+  const handleOnChange = (key: keyof ConvertFormValues, newValue: string) => {
+    setValidationError(key, undefined);
+    itemProps[key].onChange && itemProps[key].onChange!(newValue);
+  };
+
   return (
     <Form
       actions={
@@ -49,13 +57,25 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField title={"Amount"} {...itemProps.amount} />
-      <Form.Dropdown title={"From"} {...itemProps.fromCurrency}>
+      <Form.TextField
+        title={"Amount"}
+        {...itemProps.amount}
+        onChange={(newValue) => handleOnChange("amount", newValue)}
+      />
+      <Form.Dropdown
+        title={"From"}
+        {...itemProps.fromCurrency}
+        onChange={(newValue) => handleOnChange("fromCurrency", newValue)}
+      >
         {Object.values(Currency).map((currency) => (
           <Form.Dropdown.Item value={currency} title={getCurrencyName(currency)} key={`from-currency-${currency}`} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown title={"To"} {...itemProps.toCurrency}>
+      <Form.Dropdown
+        title={"To"}
+        {...itemProps.toCurrency}
+        onChange={(newValue) => handleOnChange("toCurrency", newValue)}
+      >
         {Object.values(Currency).map((currency) => (
           <Form.Dropdown.Item value={currency} title={getCurrencyName(currency)} key={`from-currency-${currency}`} />
         ))}
