@@ -149,7 +149,6 @@ type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
 // Create database page
 export async function createDatabasePage(values: Form.Values) {
-  console.log({ values });
   try {
     const notion = getNotionClient();
     const { database, content, ...props } = values;

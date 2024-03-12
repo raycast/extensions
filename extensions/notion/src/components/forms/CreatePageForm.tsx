@@ -33,14 +33,14 @@ import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 export type CreatePageFormValues = {
   database: string | undefined;
   [K: string]: Form.Value | undefined;
-  closeAfterSave: boolean;
+  closeAfterSave?: boolean;
   content: string;
 };
 
 type CreatePageFormProps = {
   mutate?: () => Promise<void>;
   launchContext?: CreatePageFormValues;
-  defaults?: CreatePageFormValues;
+  defaults?: Partial<CreatePageFormValues>;
 };
 
 type CreatePageFormPreferences = {
@@ -178,19 +178,10 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   const renderSubmitAction = (type: "main" | "second") => {
     const shortcut: Keyboard.Shortcut | undefined =
-      type === "second"
-        ? { modifiers: ["cmd", "shift"], key: "enter" }
-        : undefined;
+      type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
 
     if ((!preferences.closeAfterCreate && type === "main") || (preferences.closeAfterCreate && type === "second")) {
-      return (
-        <Action.SubmitForm
-          title="Create Page"
-          icon={Icon.Plus}
-          onSubmit={handleSubmit}
-          shortcut={shortcut}
-        />
-      );
+      return <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;
     } else {
       return (
         <Action.SubmitForm
