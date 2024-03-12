@@ -132,8 +132,14 @@ export class Bitwarden {
 
   private async ensureCliBinary(): Promise<void> {
     if (this.checkCliBinIsReady(this.cliPath)) return;
-    if (this.cliPath === this.preferences.cliPath || this.cliPath === cliInfo.path.installedBin) {
+    if (this.cliPath === this.preferences.cliPath) {
       throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
+    }
+    if (this.cliPath === cliInfo.path.installedBin) {
+      throw new CLINotFoundError(
+        `Bitwarden CLI not found at ${this.cliPath}` +
+          ", please make sure you installed it correctly. More information in the extension's description."
+      );
     }
     if (BinDownloadLogger.hasError()) BinDownloadLogger.clearError();
 
