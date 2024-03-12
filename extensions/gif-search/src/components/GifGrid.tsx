@@ -23,15 +23,10 @@ export interface GifGridProps {
 export function GifGrid(props: GifGridProps) {
   const columns = GRID_COLUMNS[props.itemSize];
 
-  function handleSelect(selectedItemId: string | null) {
-    if (selectedItemId && shouldLoadMore(selectedItemId, props.sections, columns)) {
-      props.loadMoreGifs();
-    }
-  }
-
   return (
     <Grid
       columns={columns}
+      pagination={{ onLoadMore: props.loadMoreGifs, pageSize: 10, hasMore: true }}
       searchBarAccessory={
         props.showDropdown ? (
           <Grid.Dropdown tooltip="Change GIF Provider" storeValue={true} onChange={props.onDropdownChange}>
@@ -73,7 +68,6 @@ export function GifGrid(props: GifGridProps) {
       throttle={true}
       searchBarPlaceholder={props.searchBarPlaceholder}
       onSearchTextChange={props.onSearchTextChange}
-      onSelectionChange={handleSelect}
     >
       {props.showEmpty ? (
         <Grid.EmptyView title={props.emptyStateText} icon={props.emptyStateIcon} />
