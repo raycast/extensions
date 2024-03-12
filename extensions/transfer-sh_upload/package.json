@@ -1,11 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transfer-sh_upload",
-  "title": "Transfer.sh Upload",
-  "description": "Allows you to upload a file directly to a transfer.sh instance",
+  "title": "Transfer.sh Uploader",
+  "description": "Upload a file directly to a transfer.sh instance",
   "icon": "upload-dark.png",
   "author": "PandaDEV",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "categories": [
     "Data",
     "Productivity",

@@ -37,16 +37,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "@raycast/utils": "^1.12.0",
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.11.16",
-    "@types/react": "^18.2.51",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.4",
+    "@types/node": "^20.11.20",
+    "@types/react": "^18.2.58",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   },
   "scripts": {

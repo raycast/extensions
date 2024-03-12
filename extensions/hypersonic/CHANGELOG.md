@@ -1,5 +1,11 @@
 # Hypersonic Changelog
 
+## [2.0.5] - 2024-02-13
+
+### Updated
+
+- Fixed a bug that caused extension to crash if menu bar action was disabled
+
 ## [2.0.4] - 2023-09-04
 
 #### Updated

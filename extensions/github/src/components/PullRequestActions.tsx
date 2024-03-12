@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, Toast, showToast } from "@raycast/api
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   MergeableState,
   MyPullRequestsQuery,
@@ -12,7 +13,6 @@ import {
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import PullRequestCommits from "./PullRequestCommits";

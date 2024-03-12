@@ -47,7 +47,7 @@
     {
       "name": "viewMode",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "View Mode",
       "data": [
         {

@@ -19,7 +19,7 @@ export function formatDatabaseProperty(...[type, value]: FormatDatabasePropertyP
     case "date": {
       if (!value) return;
       type DatePropertyTimeZone = Exclude<Extract<PageProperty, { type?: "date" }>["date"], null>["time_zone"];
-      const time = subMinutes(new Date(value), new Date().getTimezoneOffset()).toISOString().split("T")[0];
+      const time = subMinutes(new Date(value), new Date().getTimezoneOffset()).toISOString();
       if (Form.DatePicker.isFullDay(value)) {
         return formattedProperty(type, {
           start: time.split("T")[0],

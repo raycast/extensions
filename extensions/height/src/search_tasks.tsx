@@ -1,5 +1,5 @@
-import SearchTasks from "./components/SearchTasks";
-import View from "./components/View";
+import SearchTasks from "@/components/SearchTasks";
+import View from "@/components/View";
 
 export default function Command() {
   return (

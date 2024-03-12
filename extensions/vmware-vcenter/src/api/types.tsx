@@ -350,6 +350,14 @@ export interface StdNestedLocalizableMessage {
   params?: { [key: string]: StdLocalizationParam };
 }
 
+export interface VmConsoleTicketsCreateSpec {
+  type: VmConsoleTicketsType;
+}
+
+export interface VmConsoleTicketsSummary {
+  ticket: string;
+}
+
 export enum VmGuestNetworkingInterfacesIpAddressOrigin {
   OTHER = "OTHER",
   MANUAL = "MANUAL",
@@ -560,4 +568,9 @@ export enum VMPowerAction {
   START = "start",
   STOP = "stop",
   SUSPEND = "suspend",
+}
+
+export enum VmConsoleTicketsType {
+  VMRC = "VMRC",
+  WEBMKS = "WEBMKS",
 }

@@ -1,6 +1,6 @@
 import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { addToHistory } from "./history";
-import { PickColorCommandLaunchProps, Color } from "./types";
+import { Color, PickColorCommandLaunchProps } from "./types";
 import { getFormattedColor } from "./utils";
 import { pickColor } from "swift:../swift/color-picker";
 
@@ -8,7 +8,7 @@ export default async function command(props: PickColorCommandLaunchProps) {
   await closeMainWindow();
 
   try {
-    const pickedColor = await pickColor<Color | undefined>();
+    const pickedColor = (await pickColor()) as Color | undefined;
     if (!pickedColor) {
       return;
     }

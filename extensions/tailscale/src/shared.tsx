@@ -1,6 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execSync } from "node:child_process";
 
+export const MULLVAD_DEVICE_TAG = "tag:mullvad-exit-node";
+
 export interface Device {
   self: boolean;
   key: string;
@@ -14,6 +16,7 @@ export interface Device {
   lastseen: Date;
   exitnode: boolean;
   exitnodeoption: boolean;
+  tags?: string[];
 }
 
 export class InvalidPathError extends Error {}
@@ -32,6 +35,7 @@ export type StatusDevice = {
   LastSeen: string;
   UserID: number;
   HostName: string;
+  Tags?: string[];
 };
 
 /**
@@ -80,6 +84,7 @@ export function getDevices(status: StatusResponse) {
     lastseen: new Date(self.LastSeen),
     exitnode: self.ExitNode,
     exitnodeoption: self.ExitNodeOption,
+    tags: self.Tags,
   };
 
   devices.push(me);
@@ -98,10 +103,30 @@ export function getDevices(status: StatusResponse) {
       lastseen: new Date(peer.LastSeen),
       exitnode: peer.ExitNode,
       exitnodeoption: peer.ExitNodeOption,
+      tags: peer.Tags,
     };
     devices.push(device);
   }
   return devices;
+}
+
+export function sortDevices(devices: Device[]) {
+  devices.sort((a, b) => {
+    // self should always be first
+    if (a.self) {
+      return -1;
+    } else if (b.self) {
+      return 1;
+    }
+    // then sort by online status
+    if (a.online && !b.online) {
+      return -1;
+    } else if (!a.online && b.online) {
+      return 1;
+    }
+    // lastly, sort by name
+    return a.name.localeCompare(b.name);
+  });
 }
 
 const prefs = getPreferenceValues();

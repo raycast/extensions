@@ -1,5 +1,9 @@
 # Changelog
 
+## [Add token generation link] - 2024-02-15
+
+- Added link in README to streamline onboarding
+
 ## [Bug Fix] - 2023-12-21
 
 - Fixed an issue where Pages without a source would break the View Pages command.

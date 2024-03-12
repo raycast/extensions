@@ -1,5 +1,13 @@
 # Apple Reminders Changelog
 
+## [Add a preference to not use AI for Quick Add Reminder] - 2024-02-23
+
+- You can now disable the AI in `Quick Add Reminder` if you want to quickly add raw reminders to your default list.
+
+## [Fix SwiftError] - 2024-02-14
+
+- Fix an issue where recurring reminders in December would make it impossible to retrieve any data in `My Reminders`.
+
 ## [Use GPT-4 model for Quick Add Reminder command] - 2024-02-12
 
 - Improve `Quick Add Reminder` results by using GPT-4 instead of the default model (GPT-3.5 Turbo)

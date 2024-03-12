@@ -1,5 +1,9 @@
 # Random Data Generator Changelog
 
+## [Fix] - 2024-02-24
+
+- Fixed boolean "false" value not being displayed
+
 ## [Refactoring & Preferences] - 2024-02-04
 
 - Refactored code to make it more maintainable

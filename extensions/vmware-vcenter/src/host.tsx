@@ -184,7 +184,7 @@ export default function Command(): JSX.Element {
     if (Server && !IsLoadingServer && ServerSelected && !IsLoadingServerSelected) {
       GetHosts();
     } else if (Server && !IsLoadingServer && !ServerSelected && !IsLoadingServerSelected) {
-      const name = Object.keys(Server)[0];
+      const name = [...Server.keys()][0];
       LocalStorage.setItem("server_selected", name);
       RevalidateServerSelected();
     } else if (!IsLoadingServer && !Server) {
@@ -215,17 +215,16 @@ export default function Command(): JSX.Element {
       actions={GetHostAction()}
       searchBarAccessory={Server && GetSearchBar(Server)}
     >
-      {Hosts &&
-        Hosts.map((host) => (
-          <List.Item
-            key={`${host.server}_${host.summary.host}`}
-            id={`${host.server}_${host.summary.host}`}
-            title={host.summary.name}
-            icon={HostPowerStateIcon.get(host.summary.power_state)}
-            accessories={GetHostAccessory(host)}
-            actions={GetHostAction()}
-          />
-        ))}
+      {Hosts.map((host) => (
+        <List.Item
+          key={`${host.server}_${host.summary.host}`}
+          id={`${host.server}_${host.summary.host}`}
+          title={host.summary.name}
+          icon={HostPowerStateIcon.get(host.summary.power_state)}
+          accessories={GetHostAccessory(host)}
+          actions={GetHostAction()}
+        />
+      ))}
     </List>
   );
 }
