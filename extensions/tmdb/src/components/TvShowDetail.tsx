@@ -3,6 +3,8 @@ import { ShowResponse } from "moviedb-promise";
 import { format } from "date-fns";
 import { useCachedPromise } from "@raycast/utils";
 import { moviedb } from "../api";
+import Posters from "./Posters";
+import Backdrops from "./Backdrops";
 
 export default function TvShowDetail({ show }: { show: ShowResponse }) {
   const { data: details, isLoading: isLoadingDetails } = useCachedPromise(
@@ -85,6 +87,25 @@ export default function TvShowDetail({ show }: { show: ShowResponse }) {
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
           ) : null}
+          {details?.homepage && (
+            <Action.OpenInBrowser
+              title="Open Homepage"
+              url={details.homepage}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+            />
+          )}
+          <Action.Push
+            title="Show Posters"
+            icon={Icon.Image}
+            target={<Posters media={show} mediaType="show" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          />
+          <Action.Push
+            title="Show Backdrops"
+            icon={Icon.Image}
+            target={<Backdrops media={show} mediaType="show" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          />
         </ActionPanel>
       }
     />

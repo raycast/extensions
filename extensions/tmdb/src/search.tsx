@@ -6,6 +6,8 @@ import { MovieResponse, ShowResponse } from "moviedb-promise";
 import { format } from "date-fns";
 import MovieDetail from "./components/MovieDetail";
 import TvShowDetail from "./components/TvShowDetail";
+import Posters from "./components/Posters";
+import Backdrops from "./components/Backdrops";
 
 export default function Command() {
   const [query, setQuery] = useState("");
@@ -107,6 +109,18 @@ function Movie({ movie }: { movie: MovieResponse }) {
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
           ) : null}
+          <Action.Push
+            title="Show Posters"
+            icon={Icon.Image}
+            target={<Posters media={movie} mediaType="movie" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          />
+          <Action.Push
+            title="Show Backdrops"
+            icon={Icon.Painting}
+            target={<Backdrops media={movie} mediaType="movie" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          />
         </ActionPanel>
       }
     />
@@ -150,6 +164,25 @@ function Show({ show }: { show: ShowResponse }) {
         <ActionPanel>
           <Action.Push title="Show Details" icon={Icon.Sidebar} target={<TvShowDetail show={show} />} />
           <Action.OpenInBrowser url={`https://www.themoviedb.org/tv/${show.id ?? 0}`} />
+          {show.id ? (
+            <Action.CopyToClipboard
+              title={`Copy TMDB ID`}
+              content={show.id.toString()}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+            />
+          ) : null}
+          <Action.Push
+            title="Show Posters"
+            icon={Icon.Image}
+            target={<Posters media={show} mediaType="show" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          />
+          <Action.Push
+            title="Show Backdrops"
+            icon={Icon.Image}
+            target={<Backdrops media={show} mediaType="show" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          />
         </ActionPanel>
       }
     />
