@@ -74,28 +74,33 @@
       "title": "Fast Forward",
       "subtitle": "YouTube Music",
       "description": "Fast forwards the current track in YouTube Music.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "rewind",
       "title": "Rewind",
       "subtitle": "YouTube Music",
       "description": "Rewinds the current track in YouTube Music.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "next-chapter",
       "title": "Next Chapter",
       "subtitle": "YouTube Music",
       "description": "Skips to the next chapter in YouTube Music.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
+
     },
     {
       "name": "previous-chapter",
       "title": "Previous Chapter",
       "subtitle": "YouTube Music",
       "description": "Skips to the previous chapter in YouTube Music.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {
