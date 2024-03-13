@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
-import { ConfigurationPreferences, QuestionFormProps } from "../../type";
+import { QuestionFormProps } from "../../type";
+import { getConfiguration } from "../../hooks/useChatGPT";
 
 export const QuestionForm = ({
   initialQuestion,
@@ -11,7 +12,7 @@ export const QuestionForm = ({
   onSubmit,
 }: QuestionFormProps) => {
   const { pop } = useNavigation();
-  const { hideModelSelectionOnFullTextInput } = getPreferenceValues<ConfigurationPreferences>();
+  const { hideModelSelectionOnFullTextInput } = getConfiguration();
 
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
   const [error, setError] = useState<{ question: string }>({
