@@ -66,7 +66,7 @@ const authorize = async (): Promise<string> => {
     endpoint: `https://${instance}/oauth/authorize`,
     clientId: client_id,
     scope:
-      "read:statuses read:bookmarks read:accounts read:favourites write:favourites write:media write:bookmarks write:statuses",
+      "read:statuses read:bookmarks read:accounts read:favourites read:notifications write:favourites write:media write:bookmarks write:statuses write:notifications",
   });
 
   const { authorizationCode } = await client.authorize(authRequest);

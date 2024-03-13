@@ -11,6 +11,7 @@ import {
   UploadAttachResponse,
   Status,
   MastodonError,
+  Notification,
 } from "./types";
 import { client } from "./oauth";
 
@@ -24,6 +25,7 @@ const CONFIG = {
   bookmarkUrl: "/api/v1/bookmarks",
   homeTLUrl: "/api/v1/timelines/home",
   publicTLUrl: "/api/v1/timelines/public",
+  notificationsUrl: "/api/v1/notifications",
 };
 const sanitize = (instance: string): string =>
   instance.endsWith("/") ? instance.slice(0, -1).trim() : instance.trim();
@@ -81,7 +83,7 @@ const createApp = async (): Promise<Credentials> =>
     client_name: "Raycast - Mastodon",
     redirect_uris: "https://raycast.com/redirect?packageName=Extension",
     scopes:
-      "read:statuses read:bookmarks read:accounts read:favourites write:favourites write:media write:bookmarks write:statuses",
+      "read:statuses read:bookmarks read:accounts read:favourites read:notifications write:favourites write:media write:bookmarks write:statuses write:notifications",
     website: "https://raycast.com/SevicheCC/mastodon",
   });
 
@@ -148,6 +150,11 @@ const bookmarkStatus = async (id: string): Promise<Status> =>
 const undoBookmarkStatus = async (id: string): Promise<Status> =>
   requestApi<Status>("POST", `${CONFIG.statusesUrl}/${id}/unbookmark`);
 
+const getAllNotifications = async (): Promise<Notification[]> =>
+  requestApi<Notification[]>("GET", CONFIG.notificationsUrl);
+
+const dismissAllNotifications = async (): Promise<void> => requestApi<void>("POST", CONFIG.notificationsUrl + "/clear");
+
 export default {
   fetchToken,
   createApp,
@@ -166,4 +173,6 @@ export default {
   bookmarkStatus,
   undoBookmarkStatus,
   editStatus,
+  getAllNotifications,
+  dismissAllNotifications,
 };
