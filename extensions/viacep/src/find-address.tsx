@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
+import { BASE_URL } from "./utils/constants";
 
 interface ValidCepResponse {
   cep: string;
@@ -22,7 +23,7 @@ export default function Command(props: { arguments: Arguments.FindAddress }) {
   const cepRegex = /^[0-9]{5}-?[0-9]{3}$/;
   const isValidCep = cepRegex.test(cep);
 
-  const { data, isLoading } = useFetch<ApiResponse>(isValidCep ? `https://viacep.com.br/ws/${cep}/json/` : "", {
+  const { data, isLoading } = useFetch<ApiResponse>(`${BASE_URL}/${cep}/json/`, {
     execute: isValidCep,
   });
 
@@ -34,7 +35,7 @@ export default function Command(props: { arguments: Arguments.FindAddress }) {
       throttle
       searchText={cep}
     >
-      {data && !("erro" in data) && (
+      {data && !("erro" in data) && isValidCep && (
         <List.Item
           id={data.logradouro}
           title={`${data.logradouro}, ${data.bairro}, ${data.localidade}/${data.uf}`}
