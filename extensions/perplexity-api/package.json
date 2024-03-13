@@ -282,17 +282,17 @@
         {
           "name": "ask_sys_prompt",
           "title": "System Prompt",
-          "description": "Online LLMs use current date instead!",
+          "description": "System prompt for asking AI.",
           "type": "textfield",
           "default": "You are a helpful assistant.",
           "required": false
         },
         {
           "name": "ask_default_question",
-          "title": "User Prompt",
+          "title": "Default Question",
           "description": "Default question for selected text if none provided.",
           "type": "textfield",
-          "default": "Explain this as concise and simple as possible",
+          "default": "Explain as concise and simple as possible.",
           "required": false
         },
         {
