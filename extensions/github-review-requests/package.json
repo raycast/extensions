@@ -75,6 +75,7 @@
   "scripts": {
     "gen": "graphql-codegen --config codegen.yml",
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

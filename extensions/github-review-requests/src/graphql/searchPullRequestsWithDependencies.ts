@@ -15,7 +15,20 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
               return null;
             }
 
-            const { id, url, author, reviewRequests, reviews, number, title, comments, createdAt, updatedAt, repository, reviewDecision } = node;
+            const {
+              id,
+              url,
+              author,
+              reviewRequests,
+              reviews,
+              number,
+              title,
+              comments,
+              createdAt,
+              updatedAt,
+              repository,
+              reviewDecision,
+            } = node;
 
             return {
               id,

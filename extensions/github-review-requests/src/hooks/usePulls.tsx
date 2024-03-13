@@ -8,29 +8,27 @@ import { getPreferenceValues } from "@raycast/api";
 const { owners } = getPreferenceValues();
 
 const usePulls = () => {
-  const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, visitPull, updatePulls, fetchPulls} =
-    usePullStore();
+  const { isPullStoreLoading, updatedPulls, recentlyVisitedPulls, visitPull, updatePulls, fetchPulls } = usePullStore();
 
   const [isRemotePullsLoading, setIsRemotePullsLoading] = useState(true);
   const [login, setLogin] = useState("");
 
-
-  const userFilters: string = owners ? owners.split(",").map((user: string) => `user:${user.toString().trim()}`).join(" ") : '';
+  const userFilters: string = owners
+    ? owners
+        .split(",")
+        .map((user: string) => `user:${user.toString().trim()}`)
+        .join(" ")
+    : "";
   const exitShortcut = () => console.debug("usePulls: exitShortcut");
-  const defaultFilters: string[] = [
-    "is:open",
-    "draft:false",
-    "archived:false",
-    userFilters,
-  ];
+  const defaultFilters: string[] = ["is:open", "draft:false", "archived:false", userFilters];
 
   const runPullIteration = () =>
     Promise.resolve()
-      .then(() => console.debug('runPullIteration >>>>>>>>>'))
+      .then(() => console.debug("runPullIteration >>>>>>>>>"))
       .then(() => setIsRemotePullsLoading(true))
       .then(() => fetchPulls(defaultFilters))
       .then((pulls: PullRequestShort[]) => updatePulls(pulls))
-      .then(() => console.debug('<<<<<<<<< runPullIteration'))
+      .then(() => console.debug("<<<<<<<<< runPullIteration"))
       .finally(() => setIsRemotePullsLoading(false));
 
   useEffect(() => {

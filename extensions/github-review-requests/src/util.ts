@@ -28,7 +28,7 @@ interface DataItem {
 
 export const groupedByAttribute = (data: DataItem, attribute: string) =>
   data.reduce((acc: { [key: string]: DataItem[] }, obj: DataItem) => {
-    const key = _get(obj, attribute, '');
+    const key = _get(obj, attribute, "");
 
     if (!acc[key]) {
       acc[key] = [];
