@@ -93,7 +93,7 @@
     },
     {
       "name": "open-from-clipboard",
-      "title": "Open Issue From Clipboard",
+      "title": "Open Issue from Clipboard",
       "subtitle": "Jira",
       "description": "Open an issue by its key from the clipboard.",
       "mode": "view",
