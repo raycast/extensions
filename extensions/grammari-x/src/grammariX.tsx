@@ -32,7 +32,7 @@ type State = {
   chat: Chat;
 };
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.MyCommand }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.GrammariX }>) {
   const { add } = useHistory();
   const { text, grammarType } = props.arguments;
 
