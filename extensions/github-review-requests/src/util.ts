@@ -1,3 +1,4 @@
+import _get from "lodash/get";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import { environment, LaunchType } from "@raycast/api";
@@ -19,3 +20,19 @@ export const isActionUserInitiated = () => {
 
   return userInitiated;
 };
+
+interface DataItem {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+export const groupedByAttribute = (data: DataItem, attribute: string) =>
+  data.reduce((acc: { [key: string]: DataItem[] }, obj: DataItem) => {
+    const key = _get(obj, attribute, '');
+
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(obj);
+    return acc;
+  }, {});
