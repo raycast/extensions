@@ -44,7 +44,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -86,7 +86,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -128,7 +128,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -170,7 +170,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -212,7 +212,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -270,7 +270,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -329,7 +329,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -372,7 +372,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -415,7 +415,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -458,7 +458,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -501,7 +501,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -544,7 +544,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -587,7 +587,7 @@
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B"
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -621,7 +621,7 @@
         },
         {
           "value": "gemma-7b-it",
-          "title": "Gemma 7B"
+          "title": "Gemma 7B 8k"
         },
         {
           "value": "llama2-70b-4096",
