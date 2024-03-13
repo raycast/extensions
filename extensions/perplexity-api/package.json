@@ -67,7 +67,7 @@
     },
     {
       "name": "grammar",
-      "title": "Fix Spelling and Grammar",
+      "title": "Fix Spelling and Grammar.",
       "description": "Fix spelling and grammar of selected text.",
       "mode": "view",
       "preferences": [
@@ -367,7 +367,7 @@
           "title": "User Prompt",
           "description": "Default question for selected text if none provided.",
           "type": "textfield",
-          "default": "Explain the following code in detail. Start with a high-level overview",
+          "default": "Explain the following code in detail. Start with a high-level overview.",
           "required": false
         },
         {
@@ -724,7 +724,7 @@
           "title": "Prompt",
           "description": "Enter instructions for breaking down a project description into a list of tasks.",
           "type": "textfield",
-          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Write a summary of the project.'",
+          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Pick up parcel'",
           "required": false
         },
         {
