@@ -43,6 +43,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -79,6 +83,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
             },
             {
               "value": "llama2-70b-4096",
@@ -119,6 +127,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -157,6 +169,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -193,6 +209,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
             },
             {
               "value": "llama2-70b-4096",
@@ -247,6 +267,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
             },
             {
               "value": "llama2-70b-4096",
@@ -304,6 +328,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -341,6 +369,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
             },
             {
               "value": "llama2-70b-4096",
@@ -382,6 +414,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -419,6 +455,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
             },
             {
               "value": "llama2-70b-4096",
@@ -460,6 +500,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -497,6 +541,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
             },
             {
               "value": "llama2-70b-4096",
@@ -538,6 +586,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -566,6 +618,10 @@
         {
           "value": "mixtral-8x7b-32768",
           "title": "Mixtral 8x7b 32k"
+        },
+        {
+          "value": "gemma-7b-it",
+          "title": "Gemma 7B"
         },
         {
           "value": "llama2-70b-4096",
