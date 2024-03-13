@@ -2,17 +2,13 @@ import { encode } from "@nem035/gpt-3-encoder";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Mixtral 8x7b Instruct", id: "mixtral-8x7b-instruct" },
-  { name: "Mistral 7B Instruct", id: "mistral-7b-instruct" },
-  { name: "Llama2 70B Chat", id: "llama-2-70b-chat" },
-  { name: "Sonar small 7B Chat", id: "sonar-small-chat" },
-  { name: "Sonar medium 8x7B Chat", id: "sonar-medium-chat" },
-  { name: "Perplexity 70B Chat", id: "pplx-70b-chat" },
-  { name: "CodeLlama 34B Instruct", id: "codellama-34b-instruct" },
-  { name: "CodeLlama 70B Instruct", id: "codellama-70b-instruct" },
+  { name: "Mixtral 8x7b 16k", id: "mixtral-8x7b-instruct" },
+  { name: "Mistral 7B 16k", id: "mistral-7b-instruct" },
+  { name: "Sonar small 7B 16k", id: "sonar-small-chat" },
+  { name: "Sonar medium 8x7B 16k", id: "sonar-medium-chat" },
+  { name: "CodeLlama 70B 16k", id: "codellama-70b-instruct" },
   { name: "Sonar small 7B Online", id: "sonar-small-online" },
   { name: "Sonar medium 8x7B Online", id: "sonar-medium-online" },
-  { name: "Perplexity 70B Online", id: "pplx-70b-online" },
 ];
 
 export const currentDate = new Date().toLocaleString("en-US", {
