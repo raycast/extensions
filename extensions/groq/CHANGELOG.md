@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Initial Version] - 2024-03-13
+## [New Model] - 2024-03-13
 
 - Added new model `Gemma 7B`
 
