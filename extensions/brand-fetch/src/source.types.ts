@@ -22,7 +22,7 @@ export interface Font {
   type: string;
   origin: string;
   originId: null;
-  weights: any[];
+  weights: unknown[];
 }
 
 export interface Image {

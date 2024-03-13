@@ -40,8 +40,8 @@ export default function Command() {
       const data = await retrieveBrand(bfApiKey, values.textfield);
 
       setResp(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     }
 
     setIsLoading(false);
@@ -59,8 +59,8 @@ export default function Command() {
         style: Toast.Style.Success,
         title: `Saved To Downloads!`,
       });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     }
   }
 
