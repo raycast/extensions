@@ -7,6 +7,7 @@ import {
   Response,
   DeleteAppPasswordRequest,
   CreateAppPasswordRequest,
+  ModifyUserRequest,
 } from "./types";
 import fetch from "node-fetch";
 import { API_HEADERS, API_METHOD, API_URL } from "./constants";
@@ -49,6 +50,14 @@ const callApi = async (endpoint: string, body: RequestBody, animatedToastMessage
   }
 };
 
+export async function getUsers() {
+  const body = {};
+  return await callApi("listUser", body, "Fetching Users", "Fetched Users");
+}
+export async function modifyUser({ ...params }: ModifyUserRequest) {
+  const body = { ...params };
+  return await callApi("modifyUser", body);
+}
 export async function createUser({ ...params }: CreateUserRequest) {
   const body = { ...params };
   return await callApi("createUser", body);

@@ -1,5 +1,22 @@
 # Purelymail Changelog
 
+## [Added ListUser+ModifyUser Endpoints] - {PR_MERGE_DATE}
+
+### Enhancements
+
+- `Delete User` command moved from being a separate command to an action in `List Users`
+- You can now filter the domains by their "isShared" in `List Domains`
+
+### New Endpoints
+
+- List User
+- Modify User
+
+### Refactor:
+
+- remove redundant error toasts
+- separate useState items for better control
+
 ## [Added Billing and App Password Endpoints] - 2023-10-30
 
 ### Enhancements

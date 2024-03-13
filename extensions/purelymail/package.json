@@ -48,26 +48,18 @@
       "mode": "view"
     },
     {
+      "name": "list-users",
+      "title": "List Users",
+      "subtitle": "Purelymail",
+      "description": "List users in your Purelymail account",
+      "mode": "view"
+    },
+    {
       "name": "create-user",
       "title": "Create User",
       "subtitle": "Purelymail",
       "description": "Creates a new user",
       "mode": "view"
-    },
-    {
-      "name": "delete-user",
-      "title": "Delete User",
-      "subtitle": "Purelymail",
-      "description": "Deletes a user",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "userName",
-          "type": "text",
-          "placeholder": "USERNAME",
-          "required": true
-        }
-      ]
     },
     {
       "name": "list-routing-rules",
@@ -135,13 +127,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
+    "@raycast/api": "^1.68.0",
     "@raycast/utils": "^1.10.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
-    "@types/node": "18.18.4",
+    "@types/node": "^20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",

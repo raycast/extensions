@@ -35,6 +35,14 @@ export type CreateUserRequest = {
 export type DeleteUserRequest = {
   userName: string;
 };
+export type ModifyUserRequest = {
+  userName: string;
+  newUserName?: string;
+  newPassword?: string;
+  enableSearchIndexing?: boolean;
+  enablePasswordReset?: boolean;
+  requireTwoFactorAuthentication?: boolean;
+}
 export type CreateRoutingRequest = {
   domainName: string;
   prefix: boolean;
@@ -72,6 +80,7 @@ export type DeleteAppPasswordRequest = {
 export type RequestBody =
   | CreateUserRequest
   | DeleteUserRequest
+  | ModifyUserRequest
   | CreateRoutingRequest
   | DeleteRoutingRequest
   | AddDomainRequest
@@ -90,6 +99,7 @@ type SuccessResponse = {
     code?: string;
     credit?: string;
     appPassword?: string;
+    users?: string[];
   };
 };
 export type ErrorResponse = {
