@@ -1,6 +1,6 @@
 # Perplexity API Changelog
 
-## [Update] - 2024-03-02
+## [Update] - 2024-03-13
 
 - Removed deprecated models.
 - Adjusted pricing.
