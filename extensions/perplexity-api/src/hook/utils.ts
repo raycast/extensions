@@ -32,28 +32,20 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
   switch (model) {
     case "sonar-small-chat":
     case "mistral-7b-instruct":
-      price = ((prompt_token * 0.07) / 1_000_000 + (output_token * 0.28) / 1_000_000) * 100;
+      price = ((prompt_token * 0.2) / 1_000_000 + (output_token * 0.2) / 1_000_000) * 100;
       break;
     case "mixtral-8x7b-instruct":
     case "sonar-medium-chat":
-      price = ((prompt_token * 0.6) / 1_000_000 + (output_token * 1.8) / 1_000_000) * 100;
+      price = ((prompt_token * 0.6) / 1_000_000 + (output_token * 0.6) / 1_000_000) * 100;
       break;
-    case "codellama-34b-instruct":
-      price = ((prompt_token * 0.35) / 1_000_000 + (output_token * 1.4) / 1_000_000) * 100;
-      break;
-    case "llama-2-70b-chat":
     case "codellama-70b-instruct":
-    case "pplx-70b-chat":
-      price = ((prompt_token * 0.7) / 1_000_000 + (output_token * 2.8) / 1_000_000) * 100;
+      price = ((prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;
       break;
     case "sonar-small-online":
-      price = (5 / 1000 + (output_token * 0.28) / 1_000_000) * 100;
+      price = (5 / 1000 + (output_token * 0.2) / 1_000_000) * 100;
       break;
     case "sonar-medium-online":
-      price = (5 / 1000 + (output_token * 1.8) / 1_000_000) * 100;
-      break;
-    case "pplx-70b-online":
-      price = (5 / 1000 + (output_token * 2.8) / 1_000_000) * 100;
+      price = (5 / 1000 + (output_token * 0.6) / 1_000_000) * 100;
       break;
   }
   return naiveRound(price, 5);
