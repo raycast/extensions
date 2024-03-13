@@ -1,8 +1,8 @@
 {
   "$schema":"https://www.raycast.com/schemas/extension.json",
   "name":"figlet",
-  "title":"Figlet",
-  "description":"Generate a figlet",
+  "title":"FIGlet",
+  "description":"Generate a FIGlet",
   "icon":"icon.png",
   "author":"pernielsentikaer",
   "categories":[
@@ -12,8 +12,8 @@
   "commands":[
     {
       "name":"copy-figlet",
-      "title":"Copy Figlet to Clipboard",
-      "description":"Copy figlet to clipboard",
+      "title":"Copy FIGlet to Clipboard",
+      "description":"Copy FIGlet to clipboard",
       "mode":"no-view",
       "arguments":[
         {
@@ -1190,8 +1190,8 @@
     },
     {
       "name":"paste-figlet",
-      "title":"Paste Figlet to Active App",
-      "description":"Paste figlet to active app",
+      "title":"Paste FIGlet to Active App",
+      "description":"Paste FIGlet to active app",
       "mode":"no-view",
       "arguments":[
         {

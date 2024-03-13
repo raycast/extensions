@@ -1,12 +1,12 @@
-# Figlet
+# FIGlet
 
 ![](./assets/readme-logo.png)
 
-Generate a figlet directly from Raycast
+Generate a FIGlet directly from Raycast
 
 This extension offers two commands
 
-- Copy Figlet to Clipboard
-- Paste Figlet to Active App
+- Copy FIGlet to Clipboard
+- Paste FIGlet to Active App
 
-You can enter a text or use selected text
+You can either enter a text or use selected text

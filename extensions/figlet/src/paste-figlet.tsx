@@ -24,6 +24,6 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   const figletRender = await renderFiglet(figletFont, figgleText);
   if (figletRender) {
     await Clipboard.paste(figletRender);
-    await showToast({ title: "Success", message: "Figlet pasted to active application" });
+    await showToast({ title: "Success", message: "FIGlet pasted to active application" });
   }
 }
