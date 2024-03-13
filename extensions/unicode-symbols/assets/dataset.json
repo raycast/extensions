@@ -41,6 +41,11 @@
       "endCode": 1023
     },
     {
+      "blockName": "Latin Extended Additional",
+      "startCode": 7680,
+      "endCode": 7935
+    },
+    {
       "blockName": "General Punctuation",
       "startCode": 8192,
       "endCode": 8303
@@ -6817,6 +6822,1798 @@
       "value": "Ͽ",
       "code": 1023,
       "name": "GREEK CAPITAL REVERSED DOTTED LUNATE SIGMA SYMBOL",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḁ",
+      "code": 7680,
+      "name": "LATIN CAPITAL LETTER A WITH RING BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḁ",
+      "code": 7681,
+      "name": "LATIN SMALL LETTER A WITH RING BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḃ",
+      "code": 7682,
+      "name": "LATIN CAPITAL LETTER B WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḃ",
+      "code": 7683,
+      "name": "LATIN SMALL LETTER B WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḅ",
+      "code": 7684,
+      "name": "LATIN CAPITAL LETTER B WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḅ",
+      "code": 7685,
+      "name": "LATIN SMALL LETTER B WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḇ",
+      "code": 7686,
+      "name": "LATIN CAPITAL LETTER B WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḇ",
+      "code": 7687,
+      "name": "LATIN SMALL LETTER B WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḉ",
+      "code": 7688,
+      "name": "LATIN CAPITAL LETTER C WITH CEDILLA AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḉ",
+      "code": 7689,
+      "name": "LATIN SMALL LETTER C WITH CEDILLA AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḋ",
+      "code": 7690,
+      "name": "LATIN CAPITAL LETTER D WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḋ",
+      "code": 7691,
+      "name": "LATIN SMALL LETTER D WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḍ",
+      "code": 7692,
+      "name": "LATIN CAPITAL LETTER D WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḍ",
+      "code": 7693,
+      "name": "LATIN SMALL LETTER D WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḏ",
+      "code": 7694,
+      "name": "LATIN CAPITAL LETTER D WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḏ",
+      "code": 7695,
+      "name": "LATIN SMALL LETTER D WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḑ",
+      "code": 7696,
+      "name": "LATIN CAPITAL LETTER D WITH CEDILLA",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḑ",
+      "code": 7697,
+      "name": "LATIN SMALL LETTER D WITH CEDILLA",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḓ",
+      "code": 7698,
+      "name": "LATIN CAPITAL LETTER D WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḓ",
+      "code": 7699,
+      "name": "LATIN SMALL LETTER D WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḕ",
+      "code": 7700,
+      "name": "LATIN CAPITAL LETTER E WITH MACRON AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḕ",
+      "code": 7701,
+      "name": "LATIN SMALL LETTER E WITH MACRON AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḗ",
+      "code": 7702,
+      "name": "LATIN CAPITAL LETTER E WITH MACRON AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḗ",
+      "code": 7703,
+      "name": "LATIN SMALL LETTER E WITH MACRON AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḙ",
+      "code": 7704,
+      "name": "LATIN CAPITAL LETTER E WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḙ",
+      "code": 7705,
+      "name": "LATIN SMALL LETTER E WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḛ",
+      "code": 7706,
+      "name": "LATIN CAPITAL LETTER E WITH TILDE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḛ",
+      "code": 7707,
+      "name": "LATIN SMALL LETTER E WITH TILDE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḝ",
+      "code": 7708,
+      "name": "LATIN CAPITAL LETTER E WITH CEDILLA AND BREVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḝ",
+      "code": 7709,
+      "name": "LATIN SMALL LETTER E WITH CEDILLA AND BREVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḟ",
+      "code": 7710,
+      "name": "LATIN CAPITAL LETTER F WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḟ",
+      "code": 7711,
+      "name": "LATIN SMALL LETTER F WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḡ",
+      "code": 7712,
+      "name": "LATIN CAPITAL LETTER G WITH MACRON",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḡ",
+      "code": 7713,
+      "name": "LATIN SMALL LETTER G WITH MACRON",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḣ",
+      "code": 7714,
+      "name": "LATIN CAPITAL LETTER H WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḣ",
+      "code": 7715,
+      "name": "LATIN SMALL LETTER H WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḥ",
+      "code": 7716,
+      "name": "LATIN CAPITAL LETTER H WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḥ",
+      "code": 7717,
+      "name": "LATIN SMALL LETTER H WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḧ",
+      "code": 7718,
+      "name": "LATIN CAPITAL LETTER H WITH DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḧ",
+      "code": 7719,
+      "name": "LATIN SMALL LETTER H WITH DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḩ",
+      "code": 7720,
+      "name": "LATIN CAPITAL LETTER H WITH CEDILLA",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḩ",
+      "code": 7721,
+      "name": "LATIN SMALL LETTER H WITH CEDILLA",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḫ",
+      "code": 7722,
+      "name": "LATIN CAPITAL LETTER H WITH BREVE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḫ",
+      "code": 7723,
+      "name": "LATIN SMALL LETTER H WITH BREVE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḭ",
+      "code": 7724,
+      "name": "LATIN CAPITAL LETTER I WITH TILDE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḭ",
+      "code": 7725,
+      "name": "LATIN SMALL LETTER I WITH TILDE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḯ",
+      "code": 7726,
+      "name": "LATIN CAPITAL LETTER I WITH DIAERESIS AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḯ",
+      "code": 7727,
+      "name": "LATIN SMALL LETTER I WITH DIAERESIS AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḱ",
+      "code": 7728,
+      "name": "LATIN CAPITAL LETTER K WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḱ",
+      "code": 7729,
+      "name": "LATIN SMALL LETTER K WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḳ",
+      "code": 7730,
+      "name": "LATIN CAPITAL LETTER K WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḳ",
+      "code": 7731,
+      "name": "LATIN SMALL LETTER K WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḵ",
+      "code": 7732,
+      "name": "LATIN CAPITAL LETTER K WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḵ",
+      "code": 7733,
+      "name": "LATIN SMALL LETTER K WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḷ",
+      "code": 7734,
+      "name": "LATIN CAPITAL LETTER L WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḷ",
+      "code": 7735,
+      "name": "LATIN SMALL LETTER L WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḹ",
+      "code": 7736,
+      "name": "LATIN CAPITAL LETTER L WITH DOT BELOW AND MACRON",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḹ",
+      "code": 7737,
+      "name": "LATIN SMALL LETTER L WITH DOT BELOW AND MACRON",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḻ",
+      "code": 7738,
+      "name": "LATIN CAPITAL LETTER L WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḻ",
+      "code": 7739,
+      "name": "LATIN SMALL LETTER L WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḽ",
+      "code": 7740,
+      "name": "LATIN CAPITAL LETTER L WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḽ",
+      "code": 7741,
+      "name": "LATIN SMALL LETTER L WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ḿ",
+      "code": 7742,
+      "name": "LATIN CAPITAL LETTER M WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ḿ",
+      "code": 7743,
+      "name": "LATIN SMALL LETTER M WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṁ",
+      "code": 7744,
+      "name": "LATIN CAPITAL LETTER M WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṁ",
+      "code": 7745,
+      "name": "LATIN SMALL LETTER M WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṃ",
+      "code": 7746,
+      "name": "LATIN CAPITAL LETTER M WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṃ",
+      "code": 7747,
+      "name": "LATIN SMALL LETTER M WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṅ",
+      "code": 7748,
+      "name": "LATIN CAPITAL LETTER N WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṅ",
+      "code": 7749,
+      "name": "LATIN SMALL LETTER N WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṇ",
+      "code": 7750,
+      "name": "LATIN CAPITAL LETTER N WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṇ",
+      "code": 7751,
+      "name": "LATIN SMALL LETTER N WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṉ",
+      "code": 7752,
+      "name": "LATIN CAPITAL LETTER N WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṉ",
+      "code": 7753,
+      "name": "LATIN SMALL LETTER N WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṋ",
+      "code": 7754,
+      "name": "LATIN CAPITAL LETTER N WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṋ",
+      "code": 7755,
+      "name": "LATIN SMALL LETTER N WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṍ",
+      "code": 7756,
+      "name": "LATIN CAPITAL LETTER O WITH TILDE AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṍ",
+      "code": 7757,
+      "name": "LATIN SMALL LETTER O WITH TILDE AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṏ",
+      "code": 7758,
+      "name": "LATIN CAPITAL LETTER O WITH TILDE AND DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṏ",
+      "code": 7759,
+      "name": "LATIN SMALL LETTER O WITH TILDE AND DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṑ",
+      "code": 7760,
+      "name": "LATIN CAPITAL LETTER O WITH MACRON AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṑ",
+      "code": 7761,
+      "name": "LATIN SMALL LETTER O WITH MACRON AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṓ",
+      "code": 7762,
+      "name": "LATIN CAPITAL LETTER O WITH MACRON AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṓ",
+      "code": 7763,
+      "name": "LATIN SMALL LETTER O WITH MACRON AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṕ",
+      "code": 7764,
+      "name": "LATIN CAPITAL LETTER P WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṕ",
+      "code": 7765,
+      "name": "LATIN SMALL LETTER P WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṗ",
+      "code": 7766,
+      "name": "LATIN CAPITAL LETTER P WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṗ",
+      "code": 7767,
+      "name": "LATIN SMALL LETTER P WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṙ",
+      "code": 7768,
+      "name": "LATIN CAPITAL LETTER R WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṙ",
+      "code": 7769,
+      "name": "LATIN SMALL LETTER R WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṛ",
+      "code": 7770,
+      "name": "LATIN CAPITAL LETTER R WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṛ",
+      "code": 7771,
+      "name": "LATIN SMALL LETTER R WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṝ",
+      "code": 7772,
+      "name": "LATIN CAPITAL LETTER R WITH DOT BELOW AND MACRON",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṝ",
+      "code": 7773,
+      "name": "LATIN SMALL LETTER R WITH DOT BELOW AND MACRON",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṟ",
+      "code": 7774,
+      "name": "LATIN CAPITAL LETTER R WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṟ",
+      "code": 7775,
+      "name": "LATIN SMALL LETTER R WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṡ",
+      "code": 7776,
+      "name": "LATIN CAPITAL LETTER S WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṡ",
+      "code": 7777,
+      "name": "LATIN SMALL LETTER S WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṣ",
+      "code": 7778,
+      "name": "LATIN CAPITAL LETTER S WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṣ",
+      "code": 7779,
+      "name": "LATIN SMALL LETTER S WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṥ",
+      "code": 7780,
+      "name": "LATIN CAPITAL LETTER S WITH ACUTE AND DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṥ",
+      "code": 7781,
+      "name": "LATIN SMALL LETTER S WITH ACUTE AND DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṧ",
+      "code": 7782,
+      "name": "LATIN CAPITAL LETTER S WITH CARON AND DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṧ",
+      "code": 7783,
+      "name": "LATIN SMALL LETTER S WITH CARON AND DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṩ",
+      "code": 7784,
+      "name": "LATIN CAPITAL LETTER S WITH DOT BELOW AND DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṩ",
+      "code": 7785,
+      "name": "LATIN SMALL LETTER S WITH DOT BELOW AND DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṫ",
+      "code": 7786,
+      "name": "LATIN CAPITAL LETTER T WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṫ",
+      "code": 7787,
+      "name": "LATIN SMALL LETTER T WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṭ",
+      "code": 7788,
+      "name": "LATIN CAPITAL LETTER T WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṭ",
+      "code": 7789,
+      "name": "LATIN SMALL LETTER T WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṯ",
+      "code": 7790,
+      "name": "LATIN CAPITAL LETTER T WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṯ",
+      "code": 7791,
+      "name": "LATIN SMALL LETTER T WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṱ",
+      "code": 7792,
+      "name": "LATIN CAPITAL LETTER T WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṱ",
+      "code": 7793,
+      "name": "LATIN SMALL LETTER T WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṳ",
+      "code": 7794,
+      "name": "LATIN CAPITAL LETTER U WITH DIAERESIS BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṳ",
+      "code": 7795,
+      "name": "LATIN SMALL LETTER U WITH DIAERESIS BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṵ",
+      "code": 7796,
+      "name": "LATIN CAPITAL LETTER U WITH TILDE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṵ",
+      "code": 7797,
+      "name": "LATIN SMALL LETTER U WITH TILDE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṷ",
+      "code": 7798,
+      "name": "LATIN CAPITAL LETTER U WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṷ",
+      "code": 7799,
+      "name": "LATIN SMALL LETTER U WITH CIRCUMFLEX BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṹ",
+      "code": 7800,
+      "name": "LATIN CAPITAL LETTER U WITH TILDE AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṹ",
+      "code": 7801,
+      "name": "LATIN SMALL LETTER U WITH TILDE AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṻ",
+      "code": 7802,
+      "name": "LATIN CAPITAL LETTER U WITH MACRON AND DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṻ",
+      "code": 7803,
+      "name": "LATIN SMALL LETTER U WITH MACRON AND DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṽ",
+      "code": 7804,
+      "name": "LATIN CAPITAL LETTER V WITH TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṽ",
+      "code": 7805,
+      "name": "LATIN SMALL LETTER V WITH TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ṿ",
+      "code": 7806,
+      "name": "LATIN CAPITAL LETTER V WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ṿ",
+      "code": 7807,
+      "name": "LATIN SMALL LETTER V WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẁ",
+      "code": 7808,
+      "name": "LATIN CAPITAL LETTER W WITH GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẁ",
+      "code": 7809,
+      "name": "LATIN SMALL LETTER W WITH GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẃ",
+      "code": 7810,
+      "name": "LATIN CAPITAL LETTER W WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẃ",
+      "code": 7811,
+      "name": "LATIN SMALL LETTER W WITH ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẅ",
+      "code": 7812,
+      "name": "LATIN CAPITAL LETTER W WITH DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẅ",
+      "code": 7813,
+      "name": "LATIN SMALL LETTER W WITH DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẇ",
+      "code": 7814,
+      "name": "LATIN CAPITAL LETTER W WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẇ",
+      "code": 7815,
+      "name": "LATIN SMALL LETTER W WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẉ",
+      "code": 7816,
+      "name": "LATIN CAPITAL LETTER W WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẉ",
+      "code": 7817,
+      "name": "LATIN SMALL LETTER W WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẋ",
+      "code": 7818,
+      "name": "LATIN CAPITAL LETTER X WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẋ",
+      "code": 7819,
+      "name": "LATIN SMALL LETTER X WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẍ",
+      "code": 7820,
+      "name": "LATIN CAPITAL LETTER X WITH DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẍ",
+      "code": 7821,
+      "name": "LATIN SMALL LETTER X WITH DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẏ",
+      "code": 7822,
+      "name": "LATIN CAPITAL LETTER Y WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẏ",
+      "code": 7823,
+      "name": "LATIN SMALL LETTER Y WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẑ",
+      "code": 7824,
+      "name": "LATIN CAPITAL LETTER Z WITH CIRCUMFLEX",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẑ",
+      "code": 7825,
+      "name": "LATIN SMALL LETTER Z WITH CIRCUMFLEX",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẓ",
+      "code": 7826,
+      "name": "LATIN CAPITAL LETTER Z WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẓ",
+      "code": 7827,
+      "name": "LATIN SMALL LETTER Z WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẕ",
+      "code": 7828,
+      "name": "LATIN CAPITAL LETTER Z WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẕ",
+      "code": 7829,
+      "name": "LATIN SMALL LETTER Z WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẖ",
+      "code": 7830,
+      "name": "LATIN SMALL LETTER H WITH LINE BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẗ",
+      "code": 7831,
+      "name": "LATIN SMALL LETTER T WITH DIAERESIS",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẘ",
+      "code": 7832,
+      "name": "LATIN SMALL LETTER W WITH RING ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẙ",
+      "code": 7833,
+      "name": "LATIN SMALL LETTER Y WITH RING ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẚ",
+      "code": 7834,
+      "name": "LATIN SMALL LETTER A WITH RIGHT HALF RING",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẛ",
+      "code": 7835,
+      "name": "LATIN SMALL LETTER LONG S WITH DOT ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẜ",
+      "code": 7836,
+      "name": "LATIN SMALL LETTER LONG S WITH DIAGONAL STROKE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẝ",
+      "code": 7837,
+      "name": "LATIN SMALL LETTER LONG S WITH HIGH STROKE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẞ",
+      "code": 7838,
+      "name": "LATIN CAPITAL LETTER SHARP S",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẟ",
+      "code": 7839,
+      "name": "LATIN SMALL LETTER DELTA",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ạ",
+      "code": 7840,
+      "name": "LATIN CAPITAL LETTER A WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ạ",
+      "code": 7841,
+      "name": "LATIN SMALL LETTER A WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ả",
+      "code": 7842,
+      "name": "LATIN CAPITAL LETTER A WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ả",
+      "code": 7843,
+      "name": "LATIN SMALL LETTER A WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ấ",
+      "code": 7844,
+      "name": "LATIN CAPITAL LETTER A WITH CIRCUMFLEX AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ấ",
+      "code": 7845,
+      "name": "LATIN SMALL LETTER A WITH CIRCUMFLEX AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ầ",
+      "code": 7846,
+      "name": "LATIN CAPITAL LETTER A WITH CIRCUMFLEX AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ầ",
+      "code": 7847,
+      "name": "LATIN SMALL LETTER A WITH CIRCUMFLEX AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẩ",
+      "code": 7848,
+      "name": "LATIN CAPITAL LETTER A WITH CIRCUMFLEX AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẩ",
+      "code": 7849,
+      "name": "LATIN SMALL LETTER A WITH CIRCUMFLEX AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẫ",
+      "code": 7850,
+      "name": "LATIN CAPITAL LETTER A WITH CIRCUMFLEX AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẫ",
+      "code": 7851,
+      "name": "LATIN SMALL LETTER A WITH CIRCUMFLEX AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ậ",
+      "code": 7852,
+      "name": "LATIN CAPITAL LETTER A WITH CIRCUMFLEX AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ậ",
+      "code": 7853,
+      "name": "LATIN SMALL LETTER A WITH CIRCUMFLEX AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ắ",
+      "code": 7854,
+      "name": "LATIN CAPITAL LETTER A WITH BREVE AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ắ",
+      "code": 7855,
+      "name": "LATIN SMALL LETTER A WITH BREVE AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ằ",
+      "code": 7856,
+      "name": "LATIN CAPITAL LETTER A WITH BREVE AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ằ",
+      "code": 7857,
+      "name": "LATIN SMALL LETTER A WITH BREVE AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẳ",
+      "code": 7858,
+      "name": "LATIN CAPITAL LETTER A WITH BREVE AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẳ",
+      "code": 7859,
+      "name": "LATIN SMALL LETTER A WITH BREVE AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẵ",
+      "code": 7860,
+      "name": "LATIN CAPITAL LETTER A WITH BREVE AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẵ",
+      "code": 7861,
+      "name": "LATIN SMALL LETTER A WITH BREVE AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ặ",
+      "code": 7862,
+      "name": "LATIN CAPITAL LETTER A WITH BREVE AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ặ",
+      "code": 7863,
+      "name": "LATIN SMALL LETTER A WITH BREVE AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẹ",
+      "code": 7864,
+      "name": "LATIN CAPITAL LETTER E WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẹ",
+      "code": 7865,
+      "name": "LATIN SMALL LETTER E WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẻ",
+      "code": 7866,
+      "name": "LATIN CAPITAL LETTER E WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẻ",
+      "code": 7867,
+      "name": "LATIN SMALL LETTER E WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ẽ",
+      "code": 7868,
+      "name": "LATIN CAPITAL LETTER E WITH TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ẽ",
+      "code": 7869,
+      "name": "LATIN SMALL LETTER E WITH TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ế",
+      "code": 7870,
+      "name": "LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ế",
+      "code": 7871,
+      "name": "LATIN SMALL LETTER E WITH CIRCUMFLEX AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ề",
+      "code": 7872,
+      "name": "LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ề",
+      "code": 7873,
+      "name": "LATIN SMALL LETTER E WITH CIRCUMFLEX AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ể",
+      "code": 7874,
+      "name": "LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ể",
+      "code": 7875,
+      "name": "LATIN SMALL LETTER E WITH CIRCUMFLEX AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ễ",
+      "code": 7876,
+      "name": "LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ễ",
+      "code": 7877,
+      "name": "LATIN SMALL LETTER E WITH CIRCUMFLEX AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ệ",
+      "code": 7878,
+      "name": "LATIN CAPITAL LETTER E WITH CIRCUMFLEX AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ệ",
+      "code": 7879,
+      "name": "LATIN SMALL LETTER E WITH CIRCUMFLEX AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỉ",
+      "code": 7880,
+      "name": "LATIN CAPITAL LETTER I WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỉ",
+      "code": 7881,
+      "name": "LATIN SMALL LETTER I WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ị",
+      "code": 7882,
+      "name": "LATIN CAPITAL LETTER I WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ị",
+      "code": 7883,
+      "name": "LATIN SMALL LETTER I WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ọ",
+      "code": 7884,
+      "name": "LATIN CAPITAL LETTER O WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ọ",
+      "code": 7885,
+      "name": "LATIN SMALL LETTER O WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỏ",
+      "code": 7886,
+      "name": "LATIN CAPITAL LETTER O WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỏ",
+      "code": 7887,
+      "name": "LATIN SMALL LETTER O WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ố",
+      "code": 7888,
+      "name": "LATIN CAPITAL LETTER O WITH CIRCUMFLEX AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ố",
+      "code": 7889,
+      "name": "LATIN SMALL LETTER O WITH CIRCUMFLEX AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ồ",
+      "code": 7890,
+      "name": "LATIN CAPITAL LETTER O WITH CIRCUMFLEX AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ồ",
+      "code": 7891,
+      "name": "LATIN SMALL LETTER O WITH CIRCUMFLEX AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ổ",
+      "code": 7892,
+      "name": "LATIN CAPITAL LETTER O WITH CIRCUMFLEX AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ổ",
+      "code": 7893,
+      "name": "LATIN SMALL LETTER O WITH CIRCUMFLEX AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỗ",
+      "code": 7894,
+      "name": "LATIN CAPITAL LETTER O WITH CIRCUMFLEX AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỗ",
+      "code": 7895,
+      "name": "LATIN SMALL LETTER O WITH CIRCUMFLEX AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ộ",
+      "code": 7896,
+      "name": "LATIN CAPITAL LETTER O WITH CIRCUMFLEX AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ộ",
+      "code": 7897,
+      "name": "LATIN SMALL LETTER O WITH CIRCUMFLEX AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ớ",
+      "code": 7898,
+      "name": "LATIN CAPITAL LETTER O WITH HORN AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ớ",
+      "code": 7899,
+      "name": "LATIN SMALL LETTER O WITH HORN AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ờ",
+      "code": 7900,
+      "name": "LATIN CAPITAL LETTER O WITH HORN AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ờ",
+      "code": 7901,
+      "name": "LATIN SMALL LETTER O WITH HORN AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ở",
+      "code": 7902,
+      "name": "LATIN CAPITAL LETTER O WITH HORN AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ở",
+      "code": 7903,
+      "name": "LATIN SMALL LETTER O WITH HORN AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỡ",
+      "code": 7904,
+      "name": "LATIN CAPITAL LETTER O WITH HORN AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỡ",
+      "code": 7905,
+      "name": "LATIN SMALL LETTER O WITH HORN AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ợ",
+      "code": 7906,
+      "name": "LATIN CAPITAL LETTER O WITH HORN AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ợ",
+      "code": 7907,
+      "name": "LATIN SMALL LETTER O WITH HORN AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ụ",
+      "code": 7908,
+      "name": "LATIN CAPITAL LETTER U WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ụ",
+      "code": 7909,
+      "name": "LATIN SMALL LETTER U WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ủ",
+      "code": 7910,
+      "name": "LATIN CAPITAL LETTER U WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ủ",
+      "code": 7911,
+      "name": "LATIN SMALL LETTER U WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ứ",
+      "code": 7912,
+      "name": "LATIN CAPITAL LETTER U WITH HORN AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ứ",
+      "code": 7913,
+      "name": "LATIN SMALL LETTER U WITH HORN AND ACUTE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ừ",
+      "code": 7914,
+      "name": "LATIN CAPITAL LETTER U WITH HORN AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ừ",
+      "code": 7915,
+      "name": "LATIN SMALL LETTER U WITH HORN AND GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ử",
+      "code": 7916,
+      "name": "LATIN CAPITAL LETTER U WITH HORN AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ử",
+      "code": 7917,
+      "name": "LATIN SMALL LETTER U WITH HORN AND HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ữ",
+      "code": 7918,
+      "name": "LATIN CAPITAL LETTER U WITH HORN AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ữ",
+      "code": 7919,
+      "name": "LATIN SMALL LETTER U WITH HORN AND TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ự",
+      "code": 7920,
+      "name": "LATIN CAPITAL LETTER U WITH HORN AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ự",
+      "code": 7921,
+      "name": "LATIN SMALL LETTER U WITH HORN AND DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỳ",
+      "code": 7922,
+      "name": "LATIN CAPITAL LETTER Y WITH GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỳ",
+      "code": 7923,
+      "name": "LATIN SMALL LETTER Y WITH GRAVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỵ",
+      "code": 7924,
+      "name": "LATIN CAPITAL LETTER Y WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỵ",
+      "code": 7925,
+      "name": "LATIN SMALL LETTER Y WITH DOT BELOW",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỷ",
+      "code": 7926,
+      "name": "LATIN CAPITAL LETTER Y WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỷ",
+      "code": 7927,
+      "name": "LATIN SMALL LETTER Y WITH HOOK ABOVE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỹ",
+      "code": 7928,
+      "name": "LATIN CAPITAL LETTER Y WITH TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỹ",
+      "code": 7929,
+      "name": "LATIN SMALL LETTER Y WITH TILDE",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỻ",
+      "code": 7930,
+      "name": "LATIN CAPITAL LETTER MIDDLE-WELSH LL",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỻ",
+      "code": 7931,
+      "name": "LATIN SMALL LETTER MIDDLE-WELSH LL",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỽ",
+      "code": 7932,
+      "name": "LATIN CAPITAL LETTER MIDDLE-WELSH V",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỽ",
+      "code": 7933,
+      "name": "LATIN SMALL LETTER MIDDLE-WELSH V",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "Ỿ",
+      "code": 7934,
+      "name": "LATIN CAPITAL LETTER Y WITH LOOP",
+      "old_name": "",
+      "aliases": []
+    },
+    {
+      "value": "ỿ",
+      "code": 7935,
+      "name": "LATIN SMALL LETTER Y WITH LOOP",
       "old_name": "",
       "aliases": []
     },

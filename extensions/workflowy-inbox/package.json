@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "workflowy-inbox",
-  "title": "Workflowy Inbox",
-  "description": "Quickly add items to your Workflowy inbox. This is an independent extension and is not created by Workflowy.",
-  "icon": "unofficial-workflowy-logo.png",
+  "title": "Send to Workflowy Inbox",
+  "description": "Quickly add items to your Workflowy inbox. (This is an independent extension and is not created by Workflowy.)",
+  "icon": "send-to-workflowy.png",
   "author": "cameron_pak",
   "categories": [
     "Productivity"
@@ -12,14 +12,14 @@
   "commands": [
     {
       "name": "index",
-      "title": "Add to Workflowy Inbox",
-      "description": "Add a note, task, or link to your Workflowy inbox with ease.\n\nGet your API Key at https://workflowy.com/api-key/.",
+      "title": "Send to Workflowy Inbox",
+      "description": "Send a note, task, or link to your Workflowy inbox with ease.\n\nGet your API Key at https://workflowy.com/api-key/.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "label": "Workflowy API Key",
+      "label": "API Key",
       "type": "password",
       "description": "Get your Workflowy API key at https://workflowy.com/api-key/",
       "name": "apiKey",
@@ -28,7 +28,7 @@
       "required": true
     },
     {
-      "label": "Workflowy Save Location URL",
+      "label": "Save Location URL",
       "type": "textfield",
       "description": "Identify the bullet you want to be your inbox bullet and copy the internal link",
       "name": "saveLocationUrl",
@@ -38,7 +38,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
+    "@raycast/api": "^1.69.0",
     "@raycast/utils": "^1.12.5",
     "cross-fetch": "^4.0.0",
     "nanoid": "^5.0.6",

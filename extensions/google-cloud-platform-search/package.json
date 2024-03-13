@@ -11,6 +11,16 @@
     "m-gentil"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "skipSysPrefixedProjects",
+      "description": "Enable this option to exclude Google Cloud projects that are automatically generated with a 'sys-' prefix whenever a new App Script project is created in Google Workspace.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Skip 'sys-' prefixed projects"
+    }
+  ],
   "commands": [
     {
       "name": "searchProjects",

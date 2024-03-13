@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Improvements] - 2024-03-08
+
+- Add `Warp` as an option for terminal
+  
 ## [Improvements] - 2024-02-11
 
 - Add `cleanup` command
