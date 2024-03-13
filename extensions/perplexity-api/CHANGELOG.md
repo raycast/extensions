@@ -2,6 +2,12 @@
 
 ## [Update] - 2024-03-02
 
+- Removed deprecated models.
+- Adjusted pricing.
+- Changed system prompt behavior. Now, the system prompt always includes the current date.
+
+## [Update] - 2024-03-02
+
 - Renamed commands to match Raycast's built-in AI commands for easier discovery.
 - Added `Change Tone to Friendly` command.
 - Improved tooltips for configuration of command prompts.
