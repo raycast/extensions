@@ -15,7 +15,7 @@
     {
       "name": "summarize",
       "title": "Summarize",
-      "description": "Summarize selected text",
+      "description": "Summarize selected text.",
       "mode": "view",
       "preferences": [
         {
@@ -188,7 +188,7 @@
       "preferences": [
         {
           "name": "prompt_improve",
-          "title": "Make Longer Prompt",
+          "title": "Improve Text Prompt",
           "description": "The prompt for the improve command.",
           "type": "textfield",
           "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
@@ -225,7 +225,7 @@
     {
       "name": "ask",
       "title": "Ask AI",
-      "description": "Ask AI and use selected text",
+      "description": "Ask AI and use selected text.",
       "mode": "view",
       "arguments": [
         {
@@ -514,7 +514,7 @@
     {
       "name": "translate",
       "title": "Translate Text",
-      "description": "Translate selected text",
+      "description": "Translate selected text.",
       "mode": "view",
       "disabledByDefault": true,
       "preferences": [
