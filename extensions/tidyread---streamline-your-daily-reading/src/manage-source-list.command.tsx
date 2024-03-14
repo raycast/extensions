@@ -26,6 +26,7 @@ import { validateSources } from "./utils/validate";
 import SharableLinkAction from "./components/SharableLinkAction";
 import { usePromise } from "@raycast/utils";
 import Onboarding from "./components/Onboarding";
+import { parseOpmlToSources } from "./utils/parseOpmlToSources";
 
 export default function SourceList() {
   const [sources, setSources] = useState<Source[]>();
@@ -75,7 +76,13 @@ export default function SourceList() {
                 title="Save"
                 onSubmit={async (values) => {
                   try {
-                    const newSources = JSON.parse(values.sources) as Partial<Source>[];
+                    const type = values.type;
+                    let newSources:  Partial<Source>[]= []
+                    if (type === "opml") {
+                      newSources = await parseOpmlToSources(values.sources)
+                    } else {
+                      newSources = JSON.parse(values.sources) as Partial<Source>[];
+                    }
                     showToast(Toast.Style.Animated, "Validating sources json");
                     await validateSources(newSources);
                     const now = Date.now();
@@ -95,7 +102,7 @@ export default function SourceList() {
                     pop();
                     loadSources();
                   } catch (error: any) {
-                    showToast(Toast.Style.Failure, "Invalid sources json", error.message);
+                    showToast(Toast.Style.Failure, "Invalid sources value", error.message);
                   }
                 }}
               />
@@ -103,6 +110,10 @@ export default function SourceList() {
           }
           navigationTitle="Batch Import Sources"
         >
+          <Form.Dropdown id="type" placeholder="Enter Data Type" title="Data Type" defaultValue="json" >
+            <Form.Dropdown.Item value="json" title="json" />
+            <Form.Dropdown.Item value="opml" title="opml" />
+          </Form.Dropdown>
           <Form.TextArea id="sources" title="Sources" placeholder="Enter sources json here" />
         </Form>
       }
