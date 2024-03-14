@@ -43,8 +43,12 @@ export default function NotificationActions({ notification, userId, mutateList }
 
   async function openNotificationAndMarkAsRead() {
     try {
-      await open(url);
-      await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+      if (notification.subject.type === "RepositoryInvitation") {
+        open(`${notification.repository.html_url}/invitations`);
+      } else {
+        open(url);
+        await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+      }
       await mutateList();
     } catch (error) {
       await showToast({
@@ -85,7 +89,7 @@ export default function NotificationActions({ notification, userId, mutateList }
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Unsusbcribed",
+        title: "Unsubscribed",
       });
     } catch (error) {
       await showToast({

@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Repo Invite Open] - 2024-03-15
+
+- When receiving a Repo invite, the "open in browser"-command fails with an API error. So this change, checks the reason type of the notification and opens the invitation page for the repo instead.
+
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
 - Use Raycast's built-in icons for the My Pull Requests Menu Bar.
