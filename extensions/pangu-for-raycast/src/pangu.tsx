@@ -5,6 +5,8 @@ export default async () => {
   let text;
   try {
     text = await getSelectedText();
+  } catch (e) {
+    // ignored to use the content from clipboard
   } finally {
     if ((text || "").trim() === "") {
       text = (await Clipboard.readText()) || "";
