@@ -70,16 +70,14 @@
       "title": "Connect",
       "subtitle": "Tailscale",
       "description": "Tailscale up",
-      "mode": "no-view",
-      "interval": "30s"
+      "mode": "no-view"
     },
     {
       "name": "disconnect",
       "title": "Disconnect",
       "subtitle": "Tailscale",
       "description": "Tailscale down",
-      "mode": "no-view",
-      "interval": "30s"
+      "mode": "no-view"
     }
   ],
   "preferences": [
