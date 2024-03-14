@@ -47,6 +47,7 @@
           "description": "Hide the icon when decaffeinated",
           "type": "checkbox",
           "required": false,
+          "default": false,
           "title": "When Decaffeinated",
           "label": "Hide the icon"
         }
