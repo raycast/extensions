@@ -1,6 +1,6 @@
 import { setTimeout } from "node:timers/promises";
 import { useEffect, useState } from "react";
-import { Color, MenuBarExtra, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { Color, MenuBarExtra, Icon } from "@raycast/api";
 import apiServer from "./utils/api";
 import { getAccessToken } from "./utils/oauth";
 import { Notification } from "./utils/types";
