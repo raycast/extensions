@@ -46,12 +46,10 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
 
     try {
       console.log(query, data ?? buffer);
-      const messages = [
-        { role: "user", content: query}
-      ];
+      const messages = [{ role: "user", content: query }];
       const options = {
         provider: g4f.providers.GPT,
-        model: "gpt-4"
+        model: "gpt-4",
       };
       let response = await g4f.chatCompletion(messages, options);
       setMarkdown(response);

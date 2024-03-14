@@ -1,14 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Toast,
-  Icon,
-  showToast,
-  Form,
-  useNavigation,
-  confirmAlert,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Toast, Icon, showToast, Form, useNavigation, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as G4F from "g4f";
 const g4f = new G4F.G4F();
@@ -118,7 +108,7 @@ export default function Chat({ launchContext }) {
 
                     const options = {
                       provider: g4f.providers.GPT,
-                      model: "gpt-4"
+                      model: "gpt-4",
                     };
 
                     let response = await g4f.chatCompletion(aiChat, options);
@@ -287,7 +277,7 @@ export default function Chat({ launchContext }) {
             try {
               const options = {
                 provider: g4f.providers.GPT,
-                model: "gpt-4"
+                model: "gpt-4",
               };
 
               let response = await g4f.chatCompletion(aiChat, options);
