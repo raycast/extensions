@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Color, MenuBarExtra, Icon, getPreferenceValues, open } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import apiServer from "./utils/api";
-import { getAccessToken } from "./utils/oauth";
+import { client, getAccessToken } from "./utils/oauth";
 import { Notification } from "./utils/types";
 import { groupNotifications } from "./utils/helpers";
 
@@ -28,19 +28,29 @@ export default function MenuBarNotifications() {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [menuBarIcon, setMenuBarIcon] = useCachedState("notifications-menu-bar-icon", iconClear);
-  const { instance } = getPreferenceValues();
+  const [needReauthorize, setNeedReauthorize] = useState(false);
 
   useEffect(() => {
     (async () => {
       await getAccessToken();
-      const notifications = await apiServer.getAllNotifications();
+      const { notifications, needReauthorize } = await apiServer
+        .getAllNotifications()
+        .then((notifications) => ({ notifications, needReauthorize: false }))
+        .catch(({ error }) => {
+          if (error === "This action is outside the authorized scopes") {
+            setNeedReauthorize(true);
+          }
+          return { notifications: [], needReauthorize: true };
+        });
+
       setNotifications(notifications);
-      setMenuBarIcon(notifications.length > 0 ? iconActive : iconClear);
+      setMenuBarIcon(needReauthorize || notifications.length > 0 ? iconActive : iconClear);
       setIsLoading(false);
     })();
   }, []);
 
   const groupedNotifications = groupNotifications(notifications);
+  const { instance } = getPreferenceValues();
 
   return (
     <MenuBarExtra
@@ -51,6 +61,15 @@ export default function MenuBarNotifications() {
       }}
     >
       <MenuBarExtra.Section>
+        {needReauthorize && (
+          <MenuBarExtra.Item
+            title="This feature requires re-authorize to use"
+            onAction={async () => {
+              await client.removeTokens();
+              await open("raycast://extensions/SevicheCC/mastodon/menu-bar-notifications");
+            }}
+          />
+        )}
         {Object.entries(groupedNotifications).map(([type, items = []]) => {
           const menu = menus[type];
           return (

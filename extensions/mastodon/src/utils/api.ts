@@ -13,7 +13,7 @@ import {
   MastodonError,
   Notification,
 } from "./types";
-import { client } from "./oauth";
+import { client, permissionScope } from "./oauth";
 
 const CONFIG = {
   tokenUrl: "/oauth/token",
@@ -82,8 +82,7 @@ const createApp = async (): Promise<Credentials> =>
   requestApi<Credentials>("POST", CONFIG.appUrl, {
     client_name: "Raycast - Mastodon",
     redirect_uris: "https://raycast.com/redirect?packageName=Extension",
-    scopes:
-      "read:statuses read:bookmarks read:accounts read:favourites read:notifications write:favourites write:media write:bookmarks write:statuses write:notifications",
+    scopes: permissionScope,
     website: "https://raycast.com/SevicheCC/mastodon",
   });
 
