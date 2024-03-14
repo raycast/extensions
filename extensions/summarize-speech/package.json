@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "summarize-speech",
+  "title": "Summarize Speech",
+  "description": "This extension allows you to summarize Voice Notes directly from your Raycast app.",
+  "icon": "command-icon.png",
+  "author": "alan",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Transcribe Voice Notes",
+      "description": "This allows you to transcribe Voice Notes directly from your Raycast app.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@mistralai/mistralai": "^0.1.3",
+    "@raycast/api": "^1.69.3",
+    "node-fetch": "^3.3.2"
+  },
+  "preferences": [
+    {
+      "type": "password",
+      "name": "gladiaApiKey",
+      "title": "Gladia API Key",
+      "description": "Your API key for the Gladia service.",
+      "required": true
+    },
+    {
+      "type": "password",
+      "name": "mistralApiKey",
+      "title": "Mistral API Key",
+      "description": "Your API key for the Mistral service.",
+      "required": true
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "axios": "^1.6.7",
+    "form-data": "^4.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
