@@ -1,5 +1,10 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2024-02-05
+
+- Improved searching for recent/favorite files with additional keywords
+- Added Frecency sorting to recent/favorite files, so the most used files are shown first
+
 ## [Recents and Favorites] - 2024-01-29
 
 - Added new commands to search recent/favorite FileMaker files

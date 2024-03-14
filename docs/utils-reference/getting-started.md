@@ -16,9 +16,31 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.12.4
+
+- Add `tokenResponseParser` and `tokenRefreshResponseParser` in the options of `OAuthService`.
+- Fix built-in Slack OAuthServices.
+
+### v1.12.3
+
+- Fixed bodyEncoding for some built-in OAuthServices.
+
+### v1.12.2
+
+- Fixed types for `OAuthService.slack`.
+
+### v1.12.1
+
+- Fixed the refresh flow of `OAuthService` that would return outdated tokens.
+
+### v1.12.0
+
+- Removed some default OAuth clientIDs that could not work with generic scopes.
+- Fixed `withAccessToken` when used in no-view commands.
+
 ### v1.11.1
 
-- Fixed Google OAuth configuration
+- Fixed Google OAuth configuration.
 
 ### v1.11.0
 

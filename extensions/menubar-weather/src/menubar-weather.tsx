@@ -68,7 +68,7 @@ export default function MenubarWeather() {
                       subtitle={` ${Math.round(weather?.hourly.apparent_temperature[timeHour()])}${tempUnit}`}
                       onAction={async () => {
                         await Clipboard.copy(
-                          `${Math.round(weather?.hourly.apparent_temperature[timeHour()])}${tempUnit}`
+                          `${Math.round(weather?.hourly.apparent_temperature[timeHour()])}${tempUnit}`,
                         );
                       }}
                     />
@@ -76,13 +76,13 @@ export default function MenubarWeather() {
                       title={"Min/Max"}
                       icon={getMenuIcon("Min/Max")}
                       subtitle={` ${parseInt(weather?.daily.temperature_2m_min[0] + "")}/${Math.round(
-                        weather?.daily.temperature_2m_max[0]
+                        weather?.daily.temperature_2m_max[0],
                       )}${tempUnit}`}
                       onAction={async () => {
                         await Clipboard.copy(
                           `${parseInt(weather?.daily.temperature_2m_min[0] + "")}/${Math.round(
-                            weather?.daily.temperature_2m_max[0]
-                          )}${tempUnit}`
+                            weather?.daily.temperature_2m_max[0],
+                          )}${tempUnit}`,
                         );
                       }}
                     />
@@ -104,7 +104,7 @@ export default function MenubarWeather() {
                       }`}
                       onAction={async () => {
                         await Clipboard.copy(
-                          `${weather?.hourly.surface_pressure[timeHour()]}${weather.hourly_units.surface_pressure}`
+                          `${weather?.hourly.surface_pressure[timeHour()]}${weather.hourly_units.surface_pressure}`,
                         );
                       }}
                     />
@@ -118,7 +118,7 @@ export default function MenubarWeather() {
                         await Clipboard.copy(
                           `${weather?.hourly.relativehumidity_2m[timeHour()]}${
                             weather.hourly_units.relativehumidity_2m
-                          }`
+                          }`,
                         );
                       }}
                     />
@@ -128,7 +128,7 @@ export default function MenubarWeather() {
                       subtitle={` ${weather?.hourly.visibility[timeHour()]}${weather.hourly_units.visibility}`}
                       onAction={async () => {
                         await Clipboard.copy(
-                          `${weather?.hourly.visibility[timeHour()]}${weather.hourly_units.visibility}`
+                          `${weather?.hourly.visibility[timeHour()]}${weather.hourly_units.visibility}`,
                         );
                       }}
                     />
@@ -259,6 +259,7 @@ export default function MenubarWeather() {
                       key={index + weather?.daily?.time[index] + weather?.daily?.temperature_2m_min[index]}
                       icon={icon}
                       title={description}
+                      subtitle={weather?.daily?.time[index].substring(5)}
                       onAction={async () => {
                         await Clipboard.copy(weather?.daily?.time[index] + " " + description);
                       }}
@@ -273,14 +274,15 @@ export default function MenubarWeather() {
                       key={index + weather?.daily?.time[index] + weather?.daily?.temperature_2m_min[index]}
                       icon={getDateIcon(weather?.daily?.time[index].substring(8))}
                       title={` ${parseInt(value + "")}~${Math.round(
-                        weather?.daily?.temperature_2m_max[index]
+                        weather?.daily?.temperature_2m_max[index],
                       )}${tempUnit}`}
+                      subtitle={weather?.daily?.time[index].substring(5)}
                       onAction={async () => {
                         await Clipboard.copy(
                           weather?.daily?.time[index] +
                             ` ${parseInt(value + "")}~${Math.round(
-                              weather?.daily?.temperature_2m_max[index]
-                            )}${tempUnit}`
+                              weather?.daily?.temperature_2m_max[index],
+                            )}${tempUnit}`,
                         );
                       }}
                     />
@@ -294,10 +296,11 @@ export default function MenubarWeather() {
                       key={index + weather?.daily?.time[index] + weather?.daily?.windspeed_10m_max[index]}
                       icon={getDateIcon(weather?.daily?.time[index].substring(8))}
                       title={` ${value}${windUnit}${windDirectionSimple(weather?.daily, index)}`}
+                      subtitle={weather?.daily?.time[index].substring(5)}
                       onAction={async () => {
                         await Clipboard.copy(
                           weather?.daily?.time[index] +
-                            ` ${value}${windUnit}${windDirectionSimple(weather?.daily, index)}`
+                            ` ${value}${windUnit}${windDirectionSimple(weather?.daily, index)}`,
                         );
                       }}
                     />
@@ -311,9 +314,10 @@ export default function MenubarWeather() {
                       key={index + weather?.daily?.time[index] + weather?.daily?.rain_sum[index]}
                       icon={getDateIcon(weather?.daily?.time[index].substring(8))}
                       title={` ${value}${weather?.daily_units?.rain_sum}`}
+                      subtitle={weather?.daily?.time[index].substring(5)}
                       onAction={async () => {
                         await Clipboard.copy(
-                          weather?.daily?.time[index] + ` ${value}${weather?.daily_units?.rain_sum}`
+                          weather?.daily?.time[index] + ` ${value}${weather?.daily_units?.rain_sum}`,
                         );
                       }}
                     />
@@ -328,6 +332,7 @@ export default function MenubarWeather() {
                         key={index + weather?.daily?.time[index] + Math.round(value)}
                         icon={getDateIcon(weather?.daily?.time[index].substring(8))}
                         title={` ${Math.round(value)}`}
+                        subtitle={weather?.daily?.time[index].substring(5)}
                         onAction={async () => {
                           await Clipboard.copy(weather?.daily?.time[index] + ` ` + Math.round(value));
                         }}
