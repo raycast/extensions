@@ -43,12 +43,35 @@ export default function NotificationActions({ notification, userId, mutateList }
 
   async function openNotificationAndMarkAsRead() {
     try {
-      if (notification.subject.type === "RepositoryInvitation") {
-        open(`${notification.repository.html_url}/invitations`);
-      } else {
-        open(url);
-        await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
-      }
+      await open(url);
+      await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+      await mutateList();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening notification",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function acceptInvitation() {
+    try {
+      // get all invitations
+      const invitations = await octokit.rest.repos.listInvitationsForAuthenticatedUser();
+
+      // find the invitation for the repository
+      const invitation = invitations.data.find(
+        (invitation) => invitation.repository.url === notification.repository.url,
+      );
+
+      // accept the invitation
+      await octokit.rest.repos.acceptInvitationForAuthenticatedUser({
+        invitation_id: invitation?.id || 0,
+      });
+
+      // open the repository
+      open(notification.repository.html_url);
       await mutateList();
     } catch (error) {
       await showToast({
@@ -103,11 +126,16 @@ export default function NotificationActions({ notification, userId, mutateList }
   return (
     <ActionPanel title={getNotificationSubtitle(notification)}>
       <Action
-        title="Open in Browser"
+        title={notification.subject.type === "RepositoryInvitation" ? "Accept Invitation" : "Open in Browser"}
         icon={Icon.Globe}
-        onAction={() => (notification.unread ? openNotificationAndMarkAsRead() : open(url))}
+        onAction={() =>
+          notification.subject && notification.subject.type === "RepositoryInvitation"
+            ? acceptInvitation()
+            : notification.unread
+              ? openNotificationAndMarkAsRead()
+              : open(url)
+        }
       />
-
       <ActionPanel.Section>
         {notification.unread ? (
           <>
@@ -134,7 +162,6 @@ export default function NotificationActions({ notification, userId, mutateList }
           onAction={unsubscribe}
         />
       </ActionPanel.Section>
-
       <ActionPanel.Section>
         <Action.CopyToClipboard
           content={url}
@@ -148,7 +175,6 @@ export default function NotificationActions({ notification, userId, mutateList }
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
-
       <ActionPanel.Section>
         <Action
           icon={Icon.ArrowClockwise}

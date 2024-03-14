@@ -2,7 +2,7 @@
 
 ## [Repo Invite Open] - 2024-03-15
 
-- When receiving a Repo invite, the "open in browser"-command fails with an API error. So this change, checks the reason type of the notification and opens the invitation page for the repo instead.
+- When receiving a Repo invite, the "open in browser"-command fails with an API error. So this change, checks the subject type of the notification and adds the option to accept the invite over the api and open the repo in the browser.
 
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
