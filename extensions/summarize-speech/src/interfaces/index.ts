@@ -1,4 +1,3 @@
-
 interface Preferences {
   gladiaApiKey: string;
   mistralApiKey: string;
@@ -26,7 +25,6 @@ enum TranscriptionStatus {
   COMPLETE,
 }
 
-
 interface TranscriptionResult {
   timestamps: string; // Text with timestamps
   noTimestamps: string; // Text without timestamps
@@ -47,20 +45,20 @@ interface SummaryViewProps {
 }
 
 interface SelectedMemoProps {
-    selectedMemo: VoiceMemo;
-    setSelectedMemo: (memo: VoiceMemo | null) => void;
-    cache: TranscriptionCache | null;
+  selectedMemo: VoiceMemo | null;
+  setSelectedMemo: (memo: VoiceMemo | null) => void;
+  cache: TranscriptionCache | null;
 }
 
 interface SummaryType {
-    value: string;
-    label: string;
+  value: string;
+  label: string;
 }
 
 interface CustomSummaryInputProps {
-    text: string;
-    onGenerateSummary: (summaryType: SummaryType, customSystemPrompt?: string, customUserPrompt?: string) => void;
-    isLoading: boolean;
+  text: string;
+  onGenerateSummary: (summaryType: SummaryType, customSystemPrompt?: string, customUserPrompt?: string) => void;
+  isLoading: boolean;
 }
 
 export {
@@ -71,7 +69,7 @@ export {
   TranscriptionCache,
   SummaryViewProps,
   Preferences,
-    SelectedMemoProps,
-    SummaryType,
-    CustomSummaryInputProps,
+  SelectedMemoProps,
+  SummaryType,
+  CustomSummaryInputProps,
 };
