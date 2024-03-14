@@ -19,7 +19,6 @@
       "name": "kill-listening-process",
       "title": "Kill Process Listening On",
       "description": "Kill the process listening on a given port",
-      "icon": "klp-icon.png",
       "mode": "no-view",
       "arguments": [
         {
