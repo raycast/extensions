@@ -57,9 +57,7 @@ export default function MenuBarNotifications() {
               key={type}
               icon={{ source: menu.icon ?? "" }}
               title={`${menu.title}: ${items.length}`}
-              onAction={() => {
-                launchCommand({ name: "home", type: LaunchType.UserInitiated });
-              }}
+              onAction={() => {}}
             />
           );
         })}
