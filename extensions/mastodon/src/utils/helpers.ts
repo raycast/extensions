@@ -87,7 +87,7 @@ export const isMyStatus = (account: Account) => {
   return username === account.acct;
 };
 
-export const groupNoficiations = (notifications: Notification[]) => {
+export const groupNotifications = (notifications: Notification[]) => {
   const grouped: Partial<Record<Notification["type"], Notification[]>> = {};
 
   for (const notification of notifications) {

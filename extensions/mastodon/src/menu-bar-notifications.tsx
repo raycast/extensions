@@ -1,11 +1,11 @@
 import { setTimeout } from "node:timers/promises";
 import { useEffect, useState } from "react";
-import { Color, MenuBarExtra, Icon } from "@raycast/api";
+import { Color, MenuBarExtra, Icon, getPreferenceValues, open } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import apiServer from "./utils/api";
 import { getAccessToken } from "./utils/oauth";
 import { Notification } from "./utils/types";
-import { groupNoficiations } from "./utils/helpers";
-import { useCachedState } from "@raycast/utils";
+import { groupNotifications } from "./utils/helpers";
 
 const menus: Record<string, { icon: string; title: string }> = {
   reblog: { icon: Icon.Repeat, title: "Boosts" },
@@ -28,6 +28,7 @@ export default function MenuBarNotifications() {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [menuBarIcon, setMenuBarIcon] = useCachedState("notifications-menu-bar-icon", iconClear);
+  const { instance } = getPreferenceValues();
 
   useEffect(() => {
     (async () => {
@@ -39,7 +40,7 @@ export default function MenuBarNotifications() {
     })();
   }, []);
 
-  const groupedNotifications = groupNoficiations(notifications);
+  const groupedNotifications = groupNotifications(notifications);
 
   return (
     <MenuBarExtra
@@ -50,14 +51,16 @@ export default function MenuBarNotifications() {
       }}
     >
       <MenuBarExtra.Section>
-        {Object.entries(groupedNotifications).map(([type, items]) => {
+        {Object.entries(groupedNotifications).map(([type, items = []]) => {
           const menu = menus[type];
           return (
             <MenuBarExtra.Item
               key={type}
               icon={{ source: menu.icon ?? "" }}
               title={`${menu.title}: ${items.length}`}
-              onAction={() => {}}
+              onAction={() => {
+                open(`https://${instance}/notifications`);
+              }}
             />
           );
         })}
