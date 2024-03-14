@@ -45,7 +45,7 @@ export const saveDigests = async (digests: Digest[]) => {
 export const getTodaysDigest = async () => {
   const digests = await getDigests();
   const target = digests.find((item) => {
-    return dayjs(item.createAt).get("date") === dayjs().get("date");
+    return dayjs(item.createAt).isSame(dayjs(), "date");
   });
 
   return target ?? null;
