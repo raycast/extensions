@@ -3,7 +3,7 @@
   "name": "raycast-g4f",
   "title": "GPT4Free",
   "description": "Use GPT-4 for FREE, on Raycast - no API Key required.",
-  "icon": "gemini-icon.png",
+  "icon": "gpt-icon.png",
   "author": "muzhen_gaming",
   "categories": [
     "Productivity",
@@ -17,7 +17,7 @@
       "subtitle": "GPT4Free",
       "description": "Ask GPT a question",
       "mode": "view",
-      "icon": "gemini-icon.png",
+      "icon": "gpt-icon.png",
       "arguments": [
         {
           "name": "query",
