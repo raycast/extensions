@@ -1,0 +1,142 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-g4f",
+  "title": "GPT4Free",
+  "description": "Use the powerful GPT-4 models for FREE, on Raycast - no API Key required.",
+  "icon": "gemini-icon.png",
+  "author": "muzhen_gaming",
+  "owner": "jmuzhen",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "subtitle": "GPT4Free",
+      "description": "Ask GPT a question",
+      "mode": "view",
+      "icon": "gemini-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "GPT4Free",
+      "description": "Chat with GPT",
+      "icon": "chat-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "subtitle": "GPT4Free",
+      "description": "Ask GPT about your selected text",
+      "mode": "view",
+      "icon": "clipboard-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize text",
+      "icon": "summarize-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain text",
+      "icon": "explain-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "description": "Add comments to code",
+      "icon": "code-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view"
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to professional",
+      "mode": "view"
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "icon": "synonym-icon.png",
+      "description": "Find synonym of selected word",
+      "mode": "view"
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "icon": "grammar-icon.png",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "icon": "longer-icon.png",
+      "description": "Make selected text longer",
+      "mode": "view"
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "icon": "shorten-icon.png",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.9.0",
+    "g4f": "^1.4.2",
+    "jimp": "^0.22.10",
+    "node-fetch-polyfill": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
