@@ -28,22 +28,7 @@
       "interval": "2h"
     }
   ],
-  "preferences": [
-    {
-      "name": "PERSONAL_ACCESS_TOKEN",
-      "type": "password",
-      "required": true,
-      "title": "Personal Access Token",
-      "description": "Log in to Figma and click settings to setup a token"
-    },
-    {
-      "name": "TEAM_ID",
-      "type": "textfield",
-      "required": true,
-      "title": "Team ID/s",
-      "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
-    }
-  ],
+
   "dependencies": {
     "@raycast/api": "^1.68.1",
     "@raycast/utils": "^1.12.5",
