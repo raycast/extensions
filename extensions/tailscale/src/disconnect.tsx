@@ -3,13 +3,11 @@ import { getErrorDetails, tailscale } from "./shared";
 
 export default async function Connect() {
   let subtitle: string;
-  subtitle = "Tailscale"
+  subtitle = "Tailscale";
   try {
-    tailscale("down")
-    
+    tailscale("down");
   } catch (err) {
     subtitle = getErrorDetails(err, "").title;
-  
   }
   await updateCommandMetadata({ subtitle });
 }
