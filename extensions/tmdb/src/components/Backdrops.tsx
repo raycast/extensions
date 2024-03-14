@@ -1,148 +1,106 @@
 import { useEffect, useState } from "react";
-import { Grid, ActionPanel, Action, showToast, ToastStyle, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Action, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { moviedb } from "../api";
-import { MovieResponse, ShowResponse } from "moviedb-promise";
-import { getRating } from "../helpers";
+import { MovieImagesResponse, TvImagesResponse, Language } from "moviedb-promise";
 
-type MediaProps = {
-  media: MovieResponse | ShowResponse;
-  mediaType: "movie" | "tv";
-};
+function Backdrops({ id, type }: { id: number; type: "movie" | "tv" }) {
+  const [backdrops, setBackdrops] = useState<MovieImagesResponse["backdrops"] | TvImagesResponse["backdrops"]>([]);
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function Backdrops({ media, mediaType }: MediaProps) {
-  const [language, setLanguage] = useState<string>("en");
-  const [languages, setLanguages] = useState<Array<{ title: string; value: string }>>([]);
-  const [languageMap, setLanguageMap] = useState<{ [key: string]: string }>({});
-
-  useEffect(() => {
-    async function fetchLanguages() {
-      try {
-        const languageList = await moviedb.languages();
-        const map: { [key: string]: string } = {};
-        languageList.forEach((lang) => {
-          map[lang.iso_639_1] = lang.english_name || lang.name;
-        });
-        setLanguageMap(map);
-      } catch (error) {
-        showToast(ToastStyle.Failure, "Failed to load languages");
-      }
-    }
-    fetchLanguages();
-  }, []);
-
-  const {
-    data: images,
-    isLoading,
-    error,
-  } = useCachedPromise(async () => {
-    if (media && media.id) {
-      let response;
-      if (mediaType === "movie") {
-        response = await moviedb.movieImages({ id: media.id });
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      let response: MovieImagesResponse | TvImagesResponse;
+      if (type === "movie") {
+        response = await moviedb.movieImages({ id });
       } else {
-        response = await moviedb.tvImages({ id: media.id });
+        response = await moviedb.tvImages({ id });
       }
-      if (response && response.backdrops) {
-        const languageSet = new Set(response.backdrops.map((backdrop) => backdrop.iso_639_1 || "none"));
-        let languageItems = Array.from(languageSet).map((langCode) => ({
-          title: langCode === "none" ? "No Language" : langCode.toUpperCase(),
-          value: langCode,
-        }));
+      setBackdrops(response.backdrops || []);
 
-        languageItems.sort((a, b) => {
-          if (a.value === "all" || a.value === "none") return -1;
-          if (b.value === "all" || b.value === "none") return 1;
-          return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
-        });
-
-        setLanguages([{ title: "All", value: "all" }, ...languageItems]);
-        return response.backdrops.filter(
-          (backdrop) =>
-            backdrop.iso_639_1 === language || language === "all" || (language === "none" && !backdrop.iso_639_1),
-        );
+      const backdropLanguages = (response.backdrops || []).map(b => b.iso_639_1 || "no-language").filter((value, index, self) => self.indexOf(value) === index);
+      const langResponse = await moviedb.languages();
+      const filteredLanguages = langResponse.filter(lang => lang.iso_639_1 && backdropLanguages.includes(lang.iso_639_1));
+      if (backdropLanguages.includes("no-language")) {
+        filteredLanguages.push({ iso_639_1: "no-language", english_name: "No Language" });
       }
+      setLanguages(filteredLanguages.sort((a, b) => (a.english_name || "").localeCompare(b.english_name || "")));
+    } catch (error) {
+      showToast(Toast.Style.Failure, "Failed to fetch data", error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsLoading(false);
     }
-    return [];
-  }, [media.id, mediaType, language]);
+  }
 
   useEffect(() => {
-    if (images) {
-      const newLanguages = images.reduce(
-        (acc, { iso_639_1 }) => {
-          const code = iso_639_1 || "none";
-          if (!acc.some((item) => item.value === code)) {
-            acc.push({
-              title: code === "none" ? "No Language" : languageMap[code] || code.toUpperCase(),
-              value: code,
-            });
-          }
-          return acc;
-        },
-        [{ title: "All", value: "all" }],
-      );
+    fetchData();
+  }, [id, type]);
 
-      newLanguages.sort((a, b) => a.title.localeCompare(b.title));
-      setLanguages(newLanguages);
-    }
-  }, [images, languageMap]);
-
-  if (error) {
-    showToast(ToastStyle.Failure, "Could not load backdrops", error.toString());
-  }
+  const filteredBackdrops = (backdrops || []).filter(backdrop => selectedLanguage === "all" || (selectedLanguage === "no-language" ? !backdrop.iso_639_1 : backdrop.iso_639_1 === selectedLanguage));
 
   return (
     <Grid
-      isLoading={isLoading}
-      searchBarPlaceholder="Search by Vote Avg., Language, or Dimensions"
       aspectRatio="16/9"
-      columns={3}
       fit={Grid.Fit.Fill}
+      isLoading={isLoading}
+      columns={3}
+      searchBarPlaceholder={`Filter ${type} backdrops by language`}
+      navigationTitle={`${type.charAt(0).toUpperCase() + type.slice(1)} Backdrops - ${languages.find(l => l.iso_639_1 === selectedLanguage)?.english_name || selectedLanguage.toUpperCase()}`}
       searchBarAccessory={
-        languages && (
-          <Grid.Dropdown tooltip="Select Language" onChange={setLanguage} storeValue>
-            {languages.map((item, idx) => {
-              // Generate a unique key for each item.
-              const key = item.value === "none" ? `none-${idx}` : item.value;
-              return <Grid.Dropdown.Item key={key} title={item.title} value={item.value} />;
-            })}
-          </Grid.Dropdown>
-        )
+        <Grid.Dropdown tooltip="Filter by Language" onChange={setSelectedLanguage} value={selectedLanguage}>
+          <Grid.Dropdown.Section title="Languages">
+            <Grid.Dropdown.Item title="All" value="all" />
+            {languages.map((lang) => (
+              <Grid.Dropdown.Item
+                key={lang.iso_639_1 || 'no-language'}
+                title={lang.english_name || "Unknown"}
+                value={lang.iso_639_1 || 'no-language'}
+              />
+            ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
-      {images
-        ?.sort((a, b) => b.vote_average - a.vote_average)
-        .map((backdrop, index) => (
+      {isLoading ? (
+        <></>
+      ) : filteredBackdrops.length > 0 ? (
+        filteredBackdrops.map((backdrop) => (
           <Grid.Item
-            key={index}
-            content={`https://image.tmdb.org/t/p/original${backdrop.file_path}`}
-            title={getRating(backdrop.vote_average)}
-            subtitle={`${backdrop.width}x${backdrop.height}`}
-            keywords={[
-              `${backdrop.width}x${backdrop.height}`,
-              languageMap[backdrop.iso_639_1] || "No Language",
-              Math.floor(backdrop.vote_average).toString(),
-            ]}
+            key={backdrop.file_path}
+            title={`${backdrop.width}x${backdrop.height}`}
             {...(backdrop.vote_count
               ? {
                   accessory: {
-                    icon: Icon.Ruler,
-                    tooltip: `${backdrop.width}x${backdrop.height}px`,
+                    icon: Icon.Star,
+                    tooltip: `${backdrop.vote_average} (${backdrop.vote_count} votes)`,
                   },
                 }
               : {})}
+            content={`https://image.tmdb.org/t/p/w780${backdrop.file_path}`}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={`https://image.tmdb.org/t/p/original${backdrop.file_path}`} />
-                <Action.CopyToClipboard
-                  title="Copy Backdrop URL"
-                  content={`https://image.tmdb.org/t/p/original${backdrop.file_path}`}
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
-                />
+              <Action.OpenInBrowser
+                title="Open Backdrop in Browser"
+                url={`https://image.tmdb.org/t/p/original${backdrop.file_path}`}
+                icon={Icon.Globe}
+              />
+              <Action.CopyToClipboard
+                title="Copy Backdrop URL to Clipboard"
+                content={`https://image.tmdb.org/t/p/original${backdrop.file_path}`}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+                icon={Icon.Clipboard}
+              />
               </ActionPanel>
             }
           />
-        ))}
+        ))
+      ) : (
+        <Grid.Item title="No backdrops available" content="" />
+      )}
     </Grid>
   );
 }
+
+export default Backdrops;

@@ -97,13 +97,13 @@ export default function TvShowDetail({ show }: { show: ShowResponse }) {
           <Action.Push
             title="Show Posters"
             icon={Icon.Image}
-            target={<Posters media={show} mediaType="show" />}
+            target={show.id !== undefined && <Posters id={show.id ?? 0} type="tv" />}
             shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           />
           <Action.Push
             title="Show Backdrops"
             icon={Icon.Image}
-            target={<Backdrops media={show} mediaType="show" />}
+            target={show.id !== undefined && <Backdrops id={show.id ?? 0} type="tv" />}
             shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
           />
         </ActionPanel>

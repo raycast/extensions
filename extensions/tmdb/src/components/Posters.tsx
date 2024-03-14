@@ -1,147 +1,106 @@
 import { useEffect, useState } from "react";
-import { Grid, ActionPanel, Action, showToast, ToastStyle, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Action, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { moviedb } from "../api";
-import { MovieResponse, ShowResponse } from "moviedb-promise";
-import { getRating } from "../helpers";
+import { MovieImagesResponse, TvImagesResponse, Language } from "moviedb-promise";
 
-type MediaProps = {
-  media: MovieResponse | ShowResponse;
-  mediaType: "movie" | "tv";
-};
+function Posters({ id, type }: { id: number; type: "movie" | "tv" }) {
+  const [posters, setPosters] = useState<MovieImagesResponse["posters"] | TvImagesResponse["posters"]>([]);
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function Posters({ media, mediaType }: MediaProps) {
-  const [language, setLanguage] = useState<string>("en");
-  const [languages, setLanguages] = useState<Array<{ title: string; value: string }>>([]);
-  const [languageMap, setLanguageMap] = useState<{ [key: string]: string }>({});
-
-  useEffect(() => {
-    async function fetchLanguages() {
-      try {
-        const languageList = await moviedb.languages();
-        const map: { [key: string]: string } = {};
-        languageList.forEach((lang) => {
-          map[lang.iso_639_1] = lang.english_name || lang.name;
-        });
-        setLanguageMap(map);
-      } catch (error) {
-        showToast(ToastStyle.Failure, "Failed to load languages");
-      }
-    }
-    fetchLanguages();
-  }, []);
-
-  const {
-    data: images,
-    isLoading,
-    error,
-  } = useCachedPromise(async () => {
-    if (media && media.id) {
-      let response;
-      if (mediaType === "movie") {
-        response = await moviedb.movieImages({ id: media.id });
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      let response: MovieImagesResponse | TvImagesResponse;
+      if (type === "movie") {
+        response = await moviedb.movieImages({ id });
       } else {
-        response = await moviedb.tvImages({ id: media.id });
+        response = await moviedb.tvImages({ id });
       }
-      if (response && response.posters) {
-        const languageSet = new Set(response.posters.map((poster) => poster.iso_639_1 || "none"));
-        let languageItems = Array.from(languageSet).map((langCode) => ({
-          title: langCode === "none" ? "No Language" : langCode.toUpperCase(),
-          value: langCode,
-        }));
+      setPosters(response.posters || []);
 
-        languageItems.sort((a, b) => {
-          if (a.value === "all" || a.value === "none") return -1;
-          if (b.value === "all" || b.value === "none") return 1;
-          return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
-        });
-
-        setLanguages([{ title: "All", value: "all" }, ...languageItems]);
-        return response.posters.filter(
-          (poster) => poster.iso_639_1 === language || language === "all" || (language === "none" && !poster.iso_639_1),
-        );
+      const posterLanguages = (response.posters || []).map(b => b.iso_639_1 || "no-language").filter((value, index, self) => self.indexOf(value) === index);
+      const langResponse = await moviedb.languages();
+      const filteredLanguages = langResponse.filter(lang => lang.iso_639_1 && posterLanguages.includes(lang.iso_639_1));
+      if (posterLanguages.includes("no-language")) {
+        filteredLanguages.push({ iso_639_1: "no-language", english_name: "No Language" });
       }
+      setLanguages(filteredLanguages.sort((a, b) => (a.english_name || "").localeCompare(b.english_name || "")));
+    } catch (error) {
+      showToast(Toast.Style.Failure, "Failed to fetch data", error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsLoading(false);
     }
-    return [];
-  }, [media.id, mediaType, language]);
+  }
 
   useEffect(() => {
-    if (images) {
-      const newLanguages = images.reduce(
-        (acc, { iso_639_1 }) => {
-          const code = iso_639_1 || "none";
-          if (!acc.some((item) => item.value === code)) {
-            acc.push({
-              title: code === "none" ? "No Language" : languageMap[code] || code.toUpperCase(),
-              value: code,
-            });
-          }
-          return acc;
-        },
-        [{ title: "All", value: "all" }],
-      );
+    fetchData();
+  }, [id, type]);
 
-      newLanguages.sort((a, b) => a.title.localeCompare(b.title));
-      setLanguages(newLanguages);
-    }
-  }, [images, languageMap]);
-
-  if (error) {
-    showToast(ToastStyle.Failure, "Could not load posters", error.toString());
-  }
+  const filteredPosters = (posters || []).filter(poster => selectedLanguage === "all" || (selectedLanguage === "no-language" ? !poster.iso_639_1 : poster.iso_639_1 === selectedLanguage));
 
   return (
     <Grid
-      isLoading={isLoading}
-      searchBarPlaceholder="Search by Vote Avg., Language, or Dimensions"
       aspectRatio="2/3"
-      columns={3}
       fit={Grid.Fit.Fill}
+      isLoading={isLoading}
+      columns={5}
+      searchBarPlaceholder={`Filter ${type} posters by language`}
+      navigationTitle={`${type.charAt(0).toUpperCase() + type.slice(1)} Posters - ${languages.find(l => l.iso_639_1 === selectedLanguage)?.english_name || selectedLanguage.toUpperCase()}`}
       searchBarAccessory={
-        languages && (
-          <Grid.Dropdown tooltip="Select Language" onChange={setLanguage} storeValue>
-            {languages.map((item, idx) => {
-              // Generate a unique key for each item.
-              const key = item.value === "none" ? `none-${idx}` : item.value;
-              return <Grid.Dropdown.Item key={key} title={item.title} value={item.value} />;
-            })}
-          </Grid.Dropdown>
-        )
+        <Grid.Dropdown tooltip="Filter by Language" onChange={setSelectedLanguage} value={selectedLanguage}>
+          <Grid.Dropdown.Section title="Languages">
+            <Grid.Dropdown.Item title="All" value="all" />
+            {languages.map((lang) => (
+              <Grid.Dropdown.Item
+                key={lang.iso_639_1 || 'no-language'}
+                title={lang.english_name || "Unknown"}
+                value={lang.iso_639_1 || 'no-language'}
+              />
+            ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
       }
     >
-      {images
-        ?.sort((a, b) => b.vote_average - a.vote_average)
-        .map((poster, index) => (
+      {isLoading ? (
+        <></>
+      ) : filteredPosters.length > 0 ? (
+        filteredPosters.map((poster) => (
           <Grid.Item
-            key={index}
-            content={`https://image.tmdb.org/t/p/original${poster.file_path}`}
-            title={getRating(poster.vote_average)}
-            subtitle={`${poster.width}x${poster.height}`}
-            keywords={[
-              `${poster.width}x${poster.height}`,
-              languageMap[poster.iso_639_1] || "No Language",
-              Math.floor(poster.vote_average).toString(),
-            ]}
+            key={poster.file_path}
+            title={`${poster.width}x${poster.height}`}
             {...(poster.vote_count
               ? {
                   accessory: {
-                    icon: Icon.Ruler,
-                    tooltip: `${poster.width}x${poster.height}px`,
+                    icon: Icon.Star,
+                    tooltip: `${poster.vote_average} (${poster.vote_count} votes)`,
                   },
                 }
               : {})}
+            content={`https://image.tmdb.org/t/p/w780${poster.file_path}`}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={`https://image.tmdb.org/t/p/original${poster.file_path}`} />
+                <Action.OpenInBrowser
+                  title="Open Poster in Browser"
+                  url={`https://image.tmdb.org/t/p/original${poster.file_path}`}
+                  icon={Icon.Globe}
+                />
                 <Action.CopyToClipboard
-                  title="Copy Poster URL"
+                  title="Copy Poster URL to Clipboard"
                   content={`https://image.tmdb.org/t/p/original${poster.file_path}`}
                   shortcut={{ modifiers: ["cmd"], key: "." }}
+                  icon={Icon.Clipboard}
                 />
               </ActionPanel>
             }
           />
-        ))}
+        ))
+      ) : (
+        <Grid.Item title="No posters available" content="" />
+      )}
     </Grid>
   );
 }
+
+export default Posters;

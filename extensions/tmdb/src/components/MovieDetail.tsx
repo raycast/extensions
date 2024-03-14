@@ -30,7 +30,7 @@ export default function MovieDetail({ movie }: { movie: MovieResponse }) {
   const title = movie.title ?? movie.original_title ?? "Unknown Movie";
   const releaseDate = movie.release_date ? format(new Date(movie.release_date ?? ""), "PP") : "Unknown";
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "No Ratings";
-  const posterUrl = `https://image.tmdb.org/t/p/original/${movie.poster_path}`;
+  // const posterUrl = `https://image.tmdb.org/t/p/original/${movie.poster_path}`;
 
   const markdown = `# ${title}\n![Movie Banner](https://image.tmdb.org/t/p/w500/${movie.backdrop_path})\n\n${
     movie.overview ?? ""
@@ -115,13 +115,13 @@ export default function MovieDetail({ movie }: { movie: MovieResponse }) {
           <Action.Push
             title="Show Posters"
             icon={Icon.Image}
-            target={<Posters media={movie} mediaType="movie" />}
+            target={movie.id !== undefined && <Posters id={movie.id} type="movie" />}
             shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
           />
           <Action.Push
             title="Show Backdrops"
             icon={Icon.Image}
-            target={<Backdrops media={movie} mediaType="movie" />}
+            target={movie.id !== undefined && <Backdrops id={movie.id} type="movie" />}
             shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
           />
         </ActionPanel>
