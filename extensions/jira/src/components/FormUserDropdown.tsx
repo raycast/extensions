@@ -15,8 +15,7 @@ const FormUserDropdown = forwardRef(
   ({ autocompleteUrl, ...formProps }: FormUserDropdownProps, ref: ForwardedRef<Form.Dropdown>) => {
     const { myself } = getJiraCredentials();
 
-    const defaultQueryValue = "";
-    const [query, setQuery] = useState(defaultQueryValue);
+    const [query, setQuery] = useState("");
 
     const { data: users, isLoading: isLoadingUsers } = useCachedPromise(
       async (autocompleteUrl, query) => {
@@ -40,8 +39,10 @@ const FormUserDropdown = forwardRef(
         onSearchTextChange={setQuery}
         storeValue
         throttle
+        filtering
       >
-        {query === defaultQueryValue && <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />}
+        <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
+
         {users?.map((user) => {
           const title = user.accountId === myself.accountId ? `${user.displayName} (me)` : user.displayName;
 
@@ -49,8 +50,6 @@ const FormUserDropdown = forwardRef(
             <Form.Dropdown.Item key={user.accountId} value={user.accountId} title={title} icon={getUserAvatar(user)} />
           );
         })}
-
-        {query !== defaultQueryValue && <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />}
       </Form.Dropdown>
     );
   },
