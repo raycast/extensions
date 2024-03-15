@@ -10,7 +10,7 @@ const callBobWithOcr = async () => {
       tell application id "com.hezongyidev.Bob" to request theParameter
     end callBob
 
-    callBob({|path|:"translate", body:{action:"pasteboardTranslate"}})
+    callBob({|path|:"translate", body:{action:"selectionTranslate"}})
     `;
 
   try {
