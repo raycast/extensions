@@ -102,12 +102,8 @@ export default function Chat({ launchContext }) {
                   try {
                     let currentChat = getChat(chatData.currentChat);
 
-                    // currently currentChat.messages is in the format of
-                    // prompt, answer.
-
-                    // we want to convert it to the format of
-                    // { role: "user", content: prompt },
-                    //     { role: "assistant", content: answer }.
+                    // currentChat.messages is stored in the format of [prompt, answer]. We first convert it to
+                    // { role: "user", content: prompt }, { role: "assistant", content: answer }, etc.
 
                     let aiChat = [];
                     // start from back
