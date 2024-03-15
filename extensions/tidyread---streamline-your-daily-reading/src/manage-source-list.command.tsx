@@ -37,7 +37,7 @@ function BatchImportForm(props: { onSubmit: (newSources: Source[]) => void }) {
   return (
     <Form
       searchBarAccessory={
-        <Form.LinkAccessory target="https://tidyread.info/docs/batch-import-sources" text="🤔 Learn How To Import" />
+        <Form.LinkAccessory target="https://tidyread.info/docs/batch-import-sources" text="🤔 Learn How to Import" />
       }
       actions={
         <ActionPanel>
