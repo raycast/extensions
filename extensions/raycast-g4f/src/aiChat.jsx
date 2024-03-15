@@ -1,7 +1,19 @@
-import { List, ActionPanel, Action, Toast, Icon, showToast, Form, useNavigation, confirmAlert } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Toast,
+  Icon,
+  showToast,
+  Form,
+  useNavigation,
+  confirmAlert,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as G4F from "g4f";
 const g4f = new G4F.G4F();
+import { g4f_providers } from "./api/gpt";
 import fetch from "node-fetch-polyfill";
 import { LocalStorage } from "@raycast/api";
 
@@ -106,11 +118,16 @@ export default function Chat({ launchContext }) {
 
                     aiChat.push({ role: "user", content: query });
 
+                    // load provider and model from preferences
+                    const preferences = getPreferenceValues();
+                    const providerString = preferences["gptProvider"];
+                    const [provider, model] = g4f_providers[providerString];
                     const options = {
-                      provider: g4f.providers.GPT,
-                      model: "gpt-4",
+                      provider: provider,
+                      model: model,
                     };
 
+                    // generate response
                     let response = await g4f.chatCompletion(aiChat, options);
 
                     setChatData((oldData) => {
@@ -273,13 +290,18 @@ export default function Chat({ launchContext }) {
           currentChat.messages[0].answer = "";
           console.log(toast);
           toast(Toast.Style.Animated, "Regenerating Last Message");
-          (async () => {
+          await (async () => {
             try {
+              // load provider and model from preferences
+              const preferences = getPreferenceValues();
+              const providerString = preferences["gptProvider"];
+              const [provider, model] = g4f_providers[providerString];
               const options = {
-                provider: g4f.providers.GPT,
-                model: "gpt-4",
+                provider: provider,
+                model: model,
               };
 
+              // generate response
               let response = await g4f.chatCompletion(aiChat, options);
 
               setChatData((oldData) => {

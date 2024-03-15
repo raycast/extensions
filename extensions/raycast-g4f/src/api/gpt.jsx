@@ -11,6 +11,7 @@ import {
   launchCommand,
   LaunchType,
   Icon,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch-polyfill";
@@ -47,10 +48,16 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
     try {
       console.log(query, data ?? buffer);
       const messages = [{ role: "user", content: query }];
+      // load provider and model from preferences
+      const preferences = getPreferenceValues();
+      const providerString = preferences["gptProvider"];
+      const [provider, model] = g4f_providers[providerString];
       const options = {
-        provider: g4f.providers.GPT,
-        model: "gpt-4",
+        provider: provider,
+        model: model,
       };
+
+      // generate response
       let response = await g4f.chatCompletion(messages, options);
       setMarkdown(response);
       setLastResponse(response);
@@ -170,4 +177,9 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       )}
     </Form>
   );
+};
+
+export const g4f_providers = {
+  GPT: [g4f.providers.GPT, "gpt-4"],
+  Bing: [g4f.providers.Bing, "gpt-4"],
 };
