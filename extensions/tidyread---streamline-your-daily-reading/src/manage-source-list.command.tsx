@@ -20,7 +20,7 @@ import { useEffect, useState } from "react";
 import { Source } from "./types";
 import SourceForm from "./components/SourceForm";
 import { capitalize, omit } from "lodash";
-import { getInterestsSelected, getSources, saveInterestsSelected, saveSources } from "./store";
+import { getInterestsSelected, getSources, saveDigests, saveInterestsSelected, saveSources } from "./store";
 import { filterByShownStatus, sleep } from "./utils/util";
 import CustomActionPanel from "./components/CustomActionPanel";
 import SourcesJson from "./components/SourcesJson";
@@ -318,6 +318,27 @@ export default function SourceList() {
                       title="Open RSS Link"
                     />
                   )}
+                  <Action
+                    style={Action.Style.Destructive}
+                    icon={Icon.Trash}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    title="Delete All Digests"
+                    onAction={async () => {
+                      const flag = await confirmAlert({
+                        title: "Delete All Digests",
+                        icon: Icon.Trash,
+                        primaryAction: {
+                          style: Alert.ActionStyle.Destructive,
+                          title: "Delete",
+                        },
+                        message: "Confirm delete all digests permanently?",
+                      });
+                      if (flag) {
+                        await saveDigests([]);
+                        showToast(Toast.Style.Success, "Digests all deleted");
+                      }
+                    }}
+                  />
                 </CustomActionPanel>
               }
             />

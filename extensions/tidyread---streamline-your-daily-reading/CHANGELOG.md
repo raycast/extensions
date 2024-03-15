@@ -3,6 +3,7 @@
 ## import sources by opml file
 - feat: import sources by opml file
 - feat: Manage Sources Command add Show RSS Detail Action
+- feat: add delete all digests action
 - chore: change CATEGORIES const
 - fix: solve getting wrong today's digest bug
 - fix: solve rss link invalid bug
