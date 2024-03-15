@@ -180,6 +180,6 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
 };
 
 export const g4f_providers = {
-  GPT: [g4f.providers.GPT, "gpt-4"],
+  GPT: [g4f.providers.GPT, "gpt-4-32k"],
   Bing: [g4f.providers.Bing, "gpt-4"],
 };
