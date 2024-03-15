@@ -46,9 +46,9 @@ function BatchImportForm(props: { onSubmit: (newSources: Source[]) => void }) {
             onSubmit={async (values) => {
               try {
                 const type = values.type;
-                const filePath = values.files[0];
                 let newSources: Partial<Source>[] = [];
                 if (type === "opml") {
+                  const filePath = values.files[0];
                   if (!fs.existsSync(filePath) || !fs.lstatSync(filePath).isFile()) {
                     return false;
                   }

@@ -1,11 +1,12 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
-## TODO
+## import sources by opml file
 - feat: import sources by opml file
 - feat: Manage Sources Command add Show RSS Detail Action
 - chore: change CATEGORIES const
 - fix: solve getting wrong today's digest bug
 - fix: solve rss link invalid bug
+- fix: trying to fix surrogate pairs error
 
 ## [Support Categorized Digest And Fix Some Edge Case Bugs] - 2024-01-30
 - feat: digest can be categorized by tags
