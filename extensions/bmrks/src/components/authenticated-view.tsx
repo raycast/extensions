@@ -28,13 +28,11 @@ export default function AuthenticatedView({
           title={"Problem fetching bookmarks"}
           description={errorMessage}
           icon={Icon.ExclamationMark}
-          actions={<ActionPanel>
-            <Action
-              title="Open Preferences"
-              icon={Icon.Gear}
-              onAction={() => openExtensionPreferences()}
-            />
-          </ActionPanel>}
+          actions={
+            <ActionPanel>
+              <Action title="Open Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
+            </ActionPanel>
+          }
         />
       </List>
     );
