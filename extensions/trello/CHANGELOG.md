@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Update] - 2024-03-15
+
+Update dependencies and make it more obvious to add preferences.
+
 ## [Update] - 2023-12-09
 
 Added toggle for closed boards in preferences.
