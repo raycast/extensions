@@ -1,4 +1,4 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { closeMainWindow } from "@raycast/api";
 
 const callBobWithOcr = async () => {

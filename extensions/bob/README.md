@@ -20,7 +20,7 @@ Control the [Bob](https://bobtranslate.com/) macOS app from Raycast.
 
 ## Screenshot
 
-![screenshot](./screenshot-02.png)
+![screenshot](./metadata/screenshot-02.png)
 
 ## Troubleshooting
 
