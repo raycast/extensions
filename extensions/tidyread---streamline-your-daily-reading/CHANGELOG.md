@@ -1,6 +1,6 @@
 # TidyRead - Streamline Your Daily Reading Changelog
 
-## import sources by opml file
+## [Import sources by opml file] - 2024-03-15
 - feat: import sources by opml file
 - feat: Manage Sources Command add Show RSS Detail Action
 - feat: add delete all digests action
