@@ -22,7 +22,7 @@ export default function RSSListItem(props: {
   actions?: ReactNode | null;
 }) {
   const { item, selected, actions = null } = props;
-  const [markdown, setMarkdown] = useState<string>("Fetching RSS data...");
+  const [markdown, setMarkdown] = useState<string>("Fetching RSS Detail...");
 
   useEffect(() => {
     if (selected) {
@@ -41,12 +41,14 @@ export default function RSSListItem(props: {
           setMarkdown(`> **Failed to fetch**, error is: \`${err.message}\``);
         });
     } else {
-      setMarkdown("Fetching RSS data...");
+      setMarkdown("Fetching RSS Detail...");
     }
   }, [selected]);
 
   const keywords = useMemo(() => {
-    return [item.description, item.url, silent(() => extractDomain(item.url!))].filter(Boolean) as string[];
+    return [item.description, item.url, new URL(item.url!).hostname, silent(() => extractDomain(item.url!))].filter(
+      Boolean,
+    ) as string[];
   }, [item]);
 
   return (
