@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { List, ActionPanel, Action as RaycastAction, Clipboard, LaunchProps, Icon, Action, Color, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action as RaycastAction,
+  Clipboard,
+  LaunchProps,
+  Icon,
+  Action,
+  Color,
+  closeMainWindow,
+  getPreferenceValues,
+} from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import pinsManager from "./pinsManager";
 import promptManager, { PromptProps } from "./promptManager";
@@ -14,19 +25,21 @@ const IDENTIFIER_PREFIX = "quickgpt-";
 const DEFAULT_ICON = "🔖";
 
 const supportedPrefixCMD: { [key: string]: string } = {
-  "c": "中文作答",
-  "ne": "NO EXPLANATION",
-  "np": "Do not use plugins and data analysis",
-  "cot": "Take a deep breath and work on this problem step-by-step",
-}
+  c: "中文作答",
+  ne: "NO EXPLANATION",
+  np: "Do not use plugins and data analysis",
+  cot: "Take a deep breath and work on this problem step-by-step",
+};
 
 const defaultPrefixCMD = ["c", "cot"];
 
 function processActionPrefixCMD(content: string, actionPrefixCMD: string | undefined) {
-  let currentPrefixCMD = defaultPrefixCMD.slice()
-  const actionPrefixes = actionPrefixCMD?.split(",")
+  let currentPrefixCMD = defaultPrefixCMD.slice();
+  const actionPrefixes = actionPrefixCMD?.split(",");
   actionPrefixes?.forEach((cmd) => {
-    cmd.startsWith('!') ? currentPrefixCMD = currentPrefixCMD.filter(c => c !== cmd.substring(1)) : currentPrefixCMD.push(cmd);
+    cmd.startsWith("!")
+      ? (currentPrefixCMD = currentPrefixCMD.filter((c) => c !== cmd.substring(1)))
+      : currentPrefixCMD.push(cmd);
   });
   currentPrefixCMD = [...new Set(currentPrefixCMD)];
 
@@ -71,13 +84,14 @@ function getPromptActions(formattedDescription: string) {
     {
       name: "openURL",
       condition: preferences.openURL,
-      action: createRaycastOpenInBrowser(
-        "Open URL",
-        preferences.openURL ?? "",
-        formattedDescription
-      ),
+      action: createRaycastOpenInBrowser("Open URL", preferences.openURL ?? "", formattedDescription),
     },
-    ...[path.join(__dirname, "assets/ChatGPT.applescript"), preferences.runScript1, preferences.runScript2, preferences.runScript3].map((script, index) => {
+    ...[
+      path.join(__dirname, "assets/ChatGPT.applescript"),
+      preferences.runScript1,
+      preferences.runScript2,
+      preferences.runScript3,
+    ].map((script, index) => {
       return {
         name: `runScript${index + 1}`,
         condition: script,
@@ -87,14 +101,14 @@ function getPromptActions(formattedDescription: string) {
             key={`runScript${index + 1}`}
             icon={Icon.Terminal}
             onAction={() => {
-              closeMainWindow()
+              closeMainWindow();
               Clipboard.copy(formattedDescription);
               const myScript = fs.readFileSync(script ?? "", "utf8");
               runAppleScript(myScript);
             }}
           />
         ),
-      }
+      };
     }),
     {
       name: "copyToClipboard",
@@ -109,11 +123,18 @@ function getPromptActions(formattedDescription: string) {
     },
   ];
 
-  return <>
-    {action
-      .sort((a, b) => (a.name == preferences.primaryAction || (a.name == preferences.secondaryAction && b.name != preferences.primaryAction) ? -1 : 0))
-      .map((option, index) => option.condition && React.cloneElement(option.action, { key: index }))}
-  </>
+  return (
+    <>
+      {action
+        .sort((a, b) =>
+          a.name == preferences.primaryAction ||
+          (a.name == preferences.secondaryAction && b.name != preferences.primaryAction)
+            ? -1
+            : 0
+        )
+        .map((option, index) => option.condition && React.cloneElement(option.action, { key: index }))}
+    </>
+  );
 }
 
 function PromptList({
@@ -141,94 +162,94 @@ function PromptList({
   const [, forceUpdate] = useState(0);
   const activeSearchText = searchMode ? "" : searchText;
   const replacements = { query: activeSearchText, clipboard: clipboardText, selection: selectionText };
-  const promptItems = prompts.sort((a, b) => Number(b.pinned) - Number(a.pinned)).map(prompt => {
-    const content = prompt.content ? processActionPrefixCMD(prompt.content, prompt.prefixCMD) : undefined;
-    const [formattedTitle, missingTitleTags] = contentFormat(prompt.title || "", replacements);
-    const [formattedDescription, missingDescriptionTags] = contentFormat(content || "", replacements);
+  const promptItems = prompts
+    .sort((a, b) => Number(b.pinned) - Number(a.pinned))
+    .map((prompt) => {
+      const content = prompt.content ? processActionPrefixCMD(prompt.content, prompt.prefixCMD) : undefined;
+      const [formattedTitle, missingTitleTags] = contentFormat(prompt.title || "", replacements);
+      const [formattedDescription, missingDescriptionTags] = contentFormat(content || "", replacements);
 
-    const missingPlaceholders = [...new Set([...missingTitleTags, ...missingDescriptionTags])].join(", ");
+      const missingPlaceholders = [...new Set([...missingTitleTags, ...missingDescriptionTags])].join(", ");
 
-    const isSubtitleMissingTags = missingPlaceholders.length > 0;
-    const subtitle = isSubtitleMissingTags
-      ? `missing Placeholders: ${missingPlaceholders}`
-      : undefined;
+      const isSubtitleMissingTags = missingPlaceholders.length > 0;
+      const subtitle = isSubtitleMissingTags ? `missing Placeholders: ${missingPlaceholders}` : undefined;
 
-    const promptTitle = isSubtitleMissingTags ? prompt.title : formattedTitle;
+      const promptTitle = isSubtitleMissingTags ? prompt.title : formattedTitle;
 
-    if (
-      activeSearchText &&
-      formattedTitle == prompt.title &&
-      prompt.title.toLowerCase().indexOf(activeSearchText.toLowerCase()) == -1 &&
-      !match(prompt.title, activeSearchText, { continuous: true })
-    ) {
-      return null;
-    }
+      if (
+        activeSearchText &&
+        formattedTitle == prompt.title &&
+        prompt.title.toLowerCase().indexOf(activeSearchText.toLowerCase()) == -1 &&
+        !match(prompt.title, activeSearchText, { continuous: true })
+      ) {
+        return null;
+      }
 
-    return (
-      <List.Item
-        key={promptTitle}
-        title={promptTitle.replace(/\n/g, " ")}
-        icon={prompt.icon ?? DEFAULT_ICON}
-        subtitle={subtitle}
-        accessories={[
-          prompt.pinned ? { tag: { value: "PIN", color: Color.SecondaryText } } : {},
-          {
-            icon: prompt.subprompts ? Icon.Folder : Icon.Paragraph,
-            tooltip:
-              prompt.content ??
-              prompt.subprompts?.map((subaction, index) => `${index + 1}. ${subaction.title} `).join("\n"),
-          },
-        ]}
-        actions={
-          <ActionPanel>
-            {prompt.subprompts && (
-              <RaycastAction.Push
-                title={promptTitle}
-                icon={prompt.icon ?? DEFAULT_ICON}
-                target={
-                  <PromptList
-                    searchMode={false}
-                    prompts={prompt.subprompts}
-                    clipboardText={clipboardText}
-                    selectionText={selectionText}
-                  />
-                }
-              />
-            )}
-            {getPromptActions(formattedDescription)}
+      return (
+        <List.Item
+          key={promptTitle}
+          title={promptTitle.replace(/\n/g, " ")}
+          icon={prompt.icon ?? DEFAULT_ICON}
+          subtitle={subtitle}
+          accessories={[
+            prompt.pinned ? { tag: { value: "PIN", color: Color.SecondaryText } } : {},
             {
-              <Action
-                title={prompt.pinned ? "Unpin" : "Pin"}
-                icon={Icon.Pin}
-                onAction={() => {
-                  prompt.pinned = !prompt.pinned;
-                  prompt.pinned
-                    ? pinsManager.pin(prompt.identifier)
-                    : pinsManager.unpin(prompt.identifier);
-                  forceUpdate((n) => n + 1);
-                }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              />
-            }
-            {<>
-              <RaycastAction.CopyToClipboard
-                title="Copy Identifier"
-                content={IDENTIFIER_PREFIX + prompt.identifier}
-                icon={Icon.Document}
-              />
-              <RaycastAction.CopyToClipboard
-                title="Copy Deeplink"
-                content={`raycast://extensions/ddhjy2012/quickgpt/index?arguments=${encodeURIComponent(
-                  JSON.stringify({ target: IDENTIFIER_PREFIX + prompt.identifier })
-                )}`}
-                icon={Icon.Link}
-              />
-            </>}
-          </ActionPanel>
-        }
-      />
-    );
-  });
+              icon: prompt.subprompts ? Icon.Folder : Icon.Paragraph,
+              tooltip:
+                prompt.content ??
+                prompt.subprompts?.map((subaction, index) => `${index + 1}. ${subaction.title} `).join("\n"),
+            },
+          ]}
+          actions={
+            <ActionPanel>
+              {prompt.subprompts && (
+                <RaycastAction.Push
+                  title={promptTitle}
+                  icon={prompt.icon ?? DEFAULT_ICON}
+                  target={
+                    <PromptList
+                      searchMode={false}
+                      prompts={prompt.subprompts}
+                      clipboardText={clipboardText}
+                      selectionText={selectionText}
+                    />
+                  }
+                />
+              )}
+              {getPromptActions(formattedDescription)}
+              {
+                <Action
+                  title={prompt.pinned ? "Unpin" : "Pin"}
+                  icon={Icon.Pin}
+                  onAction={() => {
+                    prompt.pinned = !prompt.pinned;
+                    prompt.pinned ? pinsManager.pin(prompt.identifier) : pinsManager.unpin(prompt.identifier);
+                    forceUpdate((n) => n + 1);
+                  }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                />
+              }
+              {
+                <>
+                  <RaycastAction.CopyToClipboard
+                    title="Copy Identifier"
+                    content={IDENTIFIER_PREFIX + prompt.identifier}
+                    icon={Icon.Document}
+                  />
+                  <RaycastAction.CopyToClipboard
+                    title="Copy Deeplink"
+                    content={`raycast://extensions/ddhjy2012/quickgpt/index?arguments=${encodeURIComponent(
+                      JSON.stringify({ target: IDENTIFIER_PREFIX + prompt.identifier })
+                    )}`}
+                    icon={Icon.Link}
+                  />
+                </>
+              }
+            </ActionPanel>
+          }
+        />
+      );
+    });
 
   return (
     <List onSearchTextChange={setSearchText} filtering={false}>
@@ -238,7 +259,11 @@ function PromptList({
 }
 
 export default function MainCommand(props: LaunchProps<{ arguments: Arguments.Index }>) {
-  const { selectionText: argumentSelectionText, clipboardText: argumentClipboardText, target: target } = props.arguments;
+  const {
+    selectionText: argumentSelectionText,
+    clipboardText: argumentClipboardText,
+    target: target,
+  } = props.arguments;
   const { clipboardText: currentClipboardText, selectionText: currentSelectionText } = useClipboardAndSelectionText();
   const clipboardText = argumentClipboardText ?? currentClipboardText;
   const selectionText = argumentSelectionText ?? currentSelectionText;
