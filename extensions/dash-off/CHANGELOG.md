@@ -1,5 +1,9 @@
 # Dash Off Changelog
 
+## [Update] - 2024-09-01
+
+- When using the "Compose Email" command, _only_ the first default address will be chcecked by defult.
+
 ## [Update] - 2024-08-01
 
 - Google has now approved our OAuth Consent Screen. Users no longer need to create their own Client ID

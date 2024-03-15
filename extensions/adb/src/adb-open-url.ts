@@ -1,14 +1,28 @@
-import { LaunchProps, showHUD } from "@raycast/api";
+import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import checkAdbExists from "./utils";
+import Style = Toast.Style;
 
 interface AdbUrlArguments {
   url: string;
 }
 
 export default async function openUrl(props: LaunchProps<{ arguments: AdbUrlArguments }>) {
-  const adbDir = await checkAdbExists();
+  let adbDir: string;
+  try {
+    adbDir = await checkAdbExists();
+  } catch (e) {
+    await showHUD(`${e}`);
+    return;
+  }
   const url = props.arguments.url;
+
+  if (!url.match("(.*):\\/\\/")) {
+    await showToast(Style.Failure, "URL must match yourapp:// or http(s)://");
+    return;
+  }
+
   await showHUD("️🌐 Opening " + url);
-  execSync(`${adbDir} shell am start -a android.intent.action.VIEW -d  '${url}'`);
+  const escapedUrl = `'"${url}"'`;
+  execSync(`${adbDir} shell am start -a android.intent.action.VIEW -d ${escapedUrl}`);
 }

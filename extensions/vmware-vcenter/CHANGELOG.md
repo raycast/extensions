@@ -1,5 +1,11 @@
 # VMware vCenter Changelog
 
+## [Feature and BugFix] - 2024-02-16
+
+- [BugFix] Fixed "Error: missing expected parameter key: value".
+- [BugFix] Fixed Power Action on VM.
+- [Feature] Implemented VMRC Console Tickets. Credentials is no longer required.
+
 ## [Feature] - 2024-01-30
 
 - [BREAKING] Moved vCenter configuration from extension preferences to LocalStorage. Is required to reconfigure vCenter Server.

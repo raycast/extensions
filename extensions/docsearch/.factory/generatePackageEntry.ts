@@ -1,27 +1,30 @@
-import data from "../src/data/apis";
 import packageData from "../package.json"
+import { API, data, DocID, Tags } from "../src/data/apis";
 import fs from 'fs'
 
-const langMap: { [key:string]: string} = {
-  "zh-Hans": "中文",
-}
-
 function generateCommand() {
-  return data.map((item) => ({
-    "name": (item.name.toLowerCase() + (item.lang ? '_'+item.lang: '')).replace(' ','_'),
-    "icon": item.icon.replace('../assets', ''),
-    "title": item.name + (item.lang ? `(${langMap[item.lang]})` : ''),
-    "subtitle": "DocSearch",
-    "description": `Search ${item.name}${item.lang && '(' + langMap[item.lang] + ')'} documentation`,
-    "arguments": [
-      {
-        "name": "search",
-        "placeholder": "Search...",
-        "type": "text"
-      }
-    ],
-    "mode": "view"
-  }))
+  return Object.keys(data).map((id: string) => {
+    const idNum = parseInt(id)
+    const itemList = data[idNum as DocID]
+    const defaultVersionDocs = Object.keys(itemList)[0]
+    const item = data[idNum as DocID][defaultVersionDocs as Tags] as API
+
+    return ({
+      "name": DocID[idNum].toLowerCase(),
+      "icon": item.icon.replace('../assets', ''),
+      "title": DocID[idNum].replace(/_/g, ' '),
+      "subtitle": "DocSearch",
+      "description": `Search ${DocID[idNum]} documentation`,
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Search...",
+          "type": "text"
+        }
+      ],
+      "mode": "view"
+    })
+  })
 }
 
 export default function generatePackageEntry() {

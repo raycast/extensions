@@ -27,7 +27,7 @@ export default function MemosListCommand(): JSX.Element {
   }, [data]);
 
   function getItemUrl(item: MemoInfoResponse) {
-    const url = getRequestUrl(`/m/${item.id}`);
+    const url = getRequestUrl(`/m/${item.name || item.id}`);
 
     return url;
   }

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-icons",
+  "title": "Simple Icons",
+  "description": "Browse, Search, and Copy 3000+ popular brand icons.",
+  "icon": "simpleicons-icon.png",
+  "author": "litomore",
+  "categories": [
+    "Design Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Simple Icons",
+      "description": "Browse, search, and copy 3000+ free SVG icons for popular brands",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "1.12.4",
+    "node-fetch": "3.3.2",
+    "simple-icons": "11.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

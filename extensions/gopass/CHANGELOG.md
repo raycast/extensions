@@ -1,5 +1,9 @@
 # pass Changelog
 
+## [New Features] - 2024-03-05
+
+- Add fuzzy matching to search
+
 ## [New Additions / Fix] - 2022-09-05
 
 - Add OTP code support.

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "intention-clarifier",
+  "title": "Intention Clarifier",
+  "description": "This Raycast extension helps you articulate your intentions, mood, and reasons behind your tasks. It guides you through a simple form to clarify what you want to achieve, the mindset you need, and why you're doing it. The extension then allows you to either paste this intention directly into your current application or copy it to your clipboard for later use.",
+  "icon": "extension_icon.png",
+  "author": "skyline-123",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clarify-intention",
+      "title": "Clarify Intention",
+      "description": "Opens a form to help you clarify and articulate your intention behind a task, including your desired mood and reasoning. After filling out the form, you can choose to paste your intention into your current application or copy it to your clipboard.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "customMoods",
+          "description": "Your custom mood tags separated by commas for options.",
+          "type": "textfield",
+          "required": true,
+          "title": "Custom Mood Tags",
+          "placeholder": "Enter your custom mood tags separated by commas."
+        },
+        {
+          "name": "defaultAction",
+          "type": "dropdown",
+          "description": "Select the default action for the form submission.",
+          "data": [
+            { "value": "copy", "title": "Copy to Clipboard" },
+            { "value": "paste", "title": "Paste Intention" }
+          ],
+          "required": false,
+          "title": "Default Action",
+          "default": "copy"
+        }
+      ]
+    },
+    {
+      "name": "select-moods",
+      "title": "Select Moods",
+      "description": "Allows you to select multiple moods and copy them to your clipboard, separated by commas.",
+      "mode": "view",
+      "preferences": []
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
