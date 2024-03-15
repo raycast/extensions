@@ -1,4 +1,13 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot, LaunchProps } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  List,
+  open,
+  popToRoot,
+  LaunchProps,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
