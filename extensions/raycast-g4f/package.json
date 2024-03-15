@@ -39,7 +39,7 @@
       "name": "askAboutSelectedText",
       "title": "Ask About Selected Text",
       "subtitle": "GPT4Free",
-      "description": "Ask GPT about your selected text",
+      "description": "Ask GPT about selected text",
       "mode": "view",
       "icon": "clipboard-icon.png",
       "arguments": [
@@ -80,6 +80,14 @@
       "mode": "view"
     },
     {
+      "name": "genImage",
+      "title": "Generate Images",
+      "subtitle": "GPT4Free",
+      "icon": "image-icon.png",
+      "description": "Generate images from a text prompt",
+      "mode": "view"
+    },
+    {
       "name": "professional",
       "title": "Change Tone to Professional",
       "icon": "text-icon.png",
@@ -90,7 +98,7 @@
       "name": "synonyms",
       "title": "Find Synonyms",
       "icon": "synonym-icon.png",
-      "description": "Find synonym of selected word",
+      "description": "Find synonyms of selected word",
       "mode": "view"
     },
     {
@@ -138,6 +146,24 @@
         }
       ],
       "default": "GPT"
+    },
+    {
+      "description": "Image Provider",
+      "name": "imageProvider",
+      "required": false,
+      "title": "Image Provider",
+      "type": "dropdown",
+      "data": [
+          {
+          "title": "Prodia",
+          "value": "Prodia"
+          },
+          {
+          "title": "ProdiaStableDiffusionXL",
+          "value": "ProdiaStableDiffusionXL"
+          }
+      ],
+      "default": "Prodia"
     }
   ],
 
