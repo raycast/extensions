@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quickgpt",
+  "title": "quickgpt",
+  "description": "quickgpt is a tool to provide prompt for chatgpt.",
+  "icon": "command-icon.png",
+  "author": "ddhjy2012",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "index",
+      "description": "运行quickgpt工具，该工具用于为 chatgpt 提供提示词。需要一个视图，并接受三个可选参数：剪贴板文本、选择文本和动作。",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "clipboardText",
+          "placeholder": "clipboardText",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "selectionText",
+          "placeholder": "selectionText",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "target",
+          "placeholder": "target",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customPrompts",
+      "title": "Prompts: Custom Prompts",
+      "required": false,
+      "description": "Use custom prompts",
+      "type": "file"
+    },
+    {
+      "name": "disableDefaultPrompts",
+      "title": "Prompts: Turn Off Default Prompts",
+      "required": false,
+      "label": "Turn Off Default Prompts",
+      "description": "Turn Off default prompts",
+      "type": "checkbox"
+    },
+    {
+      "name": "primaryAction",
+      "title": "Action: Primary Action",
+      "required": false,
+      "description": "Primary action to use",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "0",
+          "title": "Default"
+        },
+        {
+          "value": "copyToClipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "openURL",
+          "title": "Open URL"
+        },
+        {
+          "value": "runScript1",
+          "title": "Run Script 1"
+        },
+        {
+          "value": "runScript2",
+          "title": "Run Script 2"
+        },
+        {
+          "value": "runScript3",
+          "title": "Run Script 3"
+        }
+      ]
+    },
+    {
+      "name": "secondaryAction",
+      "title": "Action: Secondary Action",
+      "required": false,
+      "description": "Secondary action to use",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "0",
+          "title": "Default"
+        },
+        {
+          "value": "copyToClipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "openURL",
+          "title": "Open URL"
+        },
+        {
+          "value": "runScript1",
+          "title": "Run Script 1"
+        },
+        {
+          "value": "runScript2",
+          "title": "Run Script 2"
+        },
+        {
+          "value": "runScript3",
+          "title": "Run Script 3"
+        }
+      ]
+    },
+    {
+      "name": "openURL",
+      "title": "Action: Open URL",
+      "required": false,
+      "description": "open URL with default browser",
+      "type": "textfield"
+    },
+    {
+      "name": "runScript1",
+      "title": "Action: Run Apple Script 1",
+      "required": false,
+      "description": "Run Apple Script 1",
+      "type": "file"
+    },
+    {
+      "name": "runScript2",
+      "title": "Action: Run Apple Script 2",
+      "required": false,
+      "description": "Run Apple Script 2",
+      "type": "file"
+    },
+    {
+      "name": "runScript3",
+      "title": "Action: Run Apple Script 3",
+      "required": false,
+      "description": "Run Apple Script 3",
+      "type": "file"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.3",
+    "@raycast/utils": "^1.9.1",
+    "md5": "^2.3.0",
+    "pinyin-pro": "^3.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/md5": "^2.3.4",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "format": "prettier --write ."
+  }
+}
