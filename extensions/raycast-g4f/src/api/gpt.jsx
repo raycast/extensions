@@ -168,13 +168,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       }
     >
       <Form.TextArea title="Prompt" id="query" />
-      {!buffer.length && (
-        <>
-          <Form.Description title="Image" text="Image that you want GPT to analyze along with your prompt." />
-          <Form.FilePicker id="files" title="" allowMultipleSelection={false} />
-          <Form.Description text="Note that image data will not be carried over if you continue in Chat." />
-        </>
-      )}
+      {!buffer.length}
     </Form>
   );
 };
