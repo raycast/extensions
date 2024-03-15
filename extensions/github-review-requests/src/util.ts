@@ -1,4 +1,3 @@
-import _get from "lodash/get";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
 import { environment, LaunchType } from "@raycast/api";
@@ -28,7 +27,7 @@ interface DataItem {
 
 export const groupedByAttribute = (data: DataItem, attribute: string) =>
   data.reduce((acc: { [key: string]: DataItem[] }, obj: DataItem) => {
-    const key = _get(obj, attribute, "");
+    const key = obj?.[attribute] ?? "";
 
     if (!acc[key]) {
       acc[key] = [];

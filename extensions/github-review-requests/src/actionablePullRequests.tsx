@@ -10,18 +10,15 @@ interface PullRequestGroup {
 }
 
 const actionablePullRequests = () => {
-  const { isLoading, isReady, login, updatedPulls, recentlyVisitedPulls, visitPull, runPullIteration } = usePulls();
+  const { isLoading, isReady, login, openPulls, recentlyVisitedPulls, visitPull, runPullIteration } = usePulls();
 
-  const title = useMemo(() => (updatedPulls.length > 0 ? `${updatedPulls.length}` : "🎉"), [updatedPulls]);
+  const title = useMemo(() => (openPulls.length > 0 ? `${openPulls.length}` : "🎉"), [openPulls]);
 
-  const pullsByOwner = useMemo(
-    () => groupedByAttribute(updatedPulls, "owner.login") as PullRequestGroup,
-    [updatedPulls]
-  );
+  const pullsByOwner = useMemo(() => groupedByAttribute(openPulls, "owner") as PullRequestGroup, [openPulls]);
 
   return (
     <MenuBarExtra isLoading={isLoading} icon="icon.png" title={title} tooltip="Your Pull Requests">
-      {updatedPulls.length === 0 && (
+      {openPulls.length === 0 && (
         <MenuBarExtra.Section>
           <MenuBarExtra.Item title="🧹 No upcoming PRs." />
         </MenuBarExtra.Section>
@@ -39,29 +36,24 @@ const actionablePullRequests = () => {
             return null;
           }
 
-          // Pulls
-          const wfmPulls = pulls.filter(
+          const approvedPulls = pulls.filter(
             ({ reviewDecision, user }) => reviewDecision === ReviewDecision.APPROVED && user?.login === login
           );
-          const wfcPulls = pulls.filter(
+          const changeRequestedPulls = pulls.filter(
             ({ reviewDecision, user }) => reviewDecision === ReviewDecision.CHANGES_REQUESTED && user?.login === login
           );
-          const wfrPulls = pulls.filter(({ reviewDecision, user }) => reviewDecision === null && user?.login === login);
-          const nrrPulls = pulls.filter(({ user }) => user?.login !== login);
-
-          // Icons
-          const wfmIcon = wfmPulls.length > 0 ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Checkmark;
-          const wfcIcon = wfcPulls.length > 0 ? { source: Icon.Bug, tintColor: Color.Red } : Icon.Bug;
-          const wfrIcon = wfrPulls.length > 0 ? { source: Icon.Hourglass, tintColor: Color.Yellow } : Icon.Hourglass;
-          const nrrIcon = nrrPulls.length > 0 ? { source: Icon.Bell, tintColor: Color.Purple } : Icon.Bell;
+          const pendingReviewPulls = pulls.filter(
+            ({ reviewDecision, user }) => reviewDecision === null && user?.login === login
+          );
+          const reviewRequestedPulls = pulls.filter(({ user }) => user?.login !== login);
 
           return (
             <MenuBarExtra.Section title={owner ?? "Unknown"} key={owner}>
               <MenuBarExtra.Submenu
-                title={`Wait For Merge${wfmPulls.length ? ` (${wfmPulls.length})` : ""}`}
-                icon={wfmIcon}
+                title={`Wait For Merge${approvedPulls.length ? ` (${approvedPulls.length})` : ""}`}
+                icon={approvedPulls.length > 0 ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Checkmark}
               >
-                {wfmPulls.map((pull, index) => (
+                {approvedPulls.map((pull, index) => (
                   <PullRequestItem
                     key={pull.id}
                     pull={pull}
@@ -71,10 +63,10 @@ const actionablePullRequests = () => {
                 ))}
               </MenuBarExtra.Submenu>
               <MenuBarExtra.Submenu
-                title={`Wait For Change${wfcPulls.length ? ` (${wfcPulls.length})` : ""}`}
-                icon={wfcIcon}
+                title={`Wait For Change${changeRequestedPulls.length ? ` (${changeRequestedPulls.length})` : ""}`}
+                icon={changeRequestedPulls.length > 0 ? { source: Icon.Bug, tintColor: Color.Red } : Icon.Bug}
               >
-                {wfcPulls.map((pull, index) => (
+                {changeRequestedPulls.map((pull, index) => (
                   <PullRequestItem
                     key={pull.id}
                     pull={pull}
@@ -84,10 +76,12 @@ const actionablePullRequests = () => {
                 ))}
               </MenuBarExtra.Submenu>
               <MenuBarExtra.Submenu
-                title={`Wait For Review${wfrPulls.length ? ` (${wfrPulls.length})` : ""}`}
-                icon={wfrIcon}
+                title={`Wait For Review${pendingReviewPulls.length ? ` (${pendingReviewPulls.length})` : ""}`}
+                icon={
+                  pendingReviewPulls.length > 0 ? { source: Icon.Hourglass, tintColor: Color.Yellow } : Icon.Hourglass
+                }
               >
-                {wfrPulls.map((pull, index) => (
+                {pendingReviewPulls.map((pull, index) => (
                   <PullRequestItem
                     key={pull.id}
                     pull={pull}
@@ -97,10 +91,10 @@ const actionablePullRequests = () => {
                 ))}
               </MenuBarExtra.Submenu>
               <MenuBarExtra.Submenu
-                title={`New Review Request${nrrPulls.length ? ` (${nrrPulls.length})` : ""}`}
-                icon={nrrIcon}
+                title={`New Review Request${reviewRequestedPulls.length ? ` (${reviewRequestedPulls.length})` : ""}`}
+                icon={reviewRequestedPulls.length > 0 ? { source: Icon.Bell, tintColor: Color.Purple } : Icon.Bell}
               >
-                {nrrPulls.map((pull, index) => (
+                {reviewRequestedPulls.map((pull, index) => (
                   <PullRequestItem
                     key={pull.id}
                     pull={pull}

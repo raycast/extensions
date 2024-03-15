@@ -1,5 +1,5 @@
 import usePullStore from "./usePullStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getLogin } from "../integration/getLogin";
 import { isActionUserInitiated } from "../util";
 import { PullRequestShort } from "../types";
@@ -21,6 +21,15 @@ const usePulls = () => {
     : "";
   const exitShortcut = () => console.debug("usePulls: exitShortcut");
   const defaultFilters: string[] = ["is:open", "draft:false", "archived:false", userFilters];
+
+  const openPulls = useMemo(
+    () =>
+      updatedPulls.map(({ owner, ...rest }) => ({
+        owner: owner.login,
+        ...rest,
+      })),
+    [updatedPulls]
+  );
 
   const runPullIteration = () =>
     Promise.resolve()
@@ -48,7 +57,7 @@ const usePulls = () => {
   return {
     isLoading: isPullStoreLoading || isRemotePullsLoading,
     login,
-    updatedPulls,
+    openPulls,
     recentlyVisitedPulls,
     isReady: !isPullStoreLoading,
     visitPull,

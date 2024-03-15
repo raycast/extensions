@@ -43,8 +43,8 @@
       "type": "textfield",
       "required": false,
       "title": "Organizations/Owners",
-      "description": "Please specify the organizations or owners you want to focus on, separating them by commas.",
-      "placeholder": "(Optional) Include all orgs or owners."
+      "description": "Please specify the organizations or owners to include, separated by commas.",
+      "placeholder": "(Optional) Leave empty to get all owners."
     }
   ],
   "dependencies": {
@@ -52,7 +52,6 @@
     "graphql-request": "^4.0.0",
     "graphql-tag": "^2.12.6",
     "javascript-time-ago": "^2.3.9",
-    "lodash": "^4.17.21",
     "octokit": "^2.0.4"
   },
   "devDependencies": {
