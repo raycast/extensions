@@ -1,5 +1,8 @@
 # Obsidian Changelog
 
+## [Fix] Support using daily Note append as fallback command - 2024-03-15
+- Fixes a bug where the daily note append command would not work as a fallback command.
+
 ## [Bugfix for nested bookmarks] - 2024-02-06
 - Fixes a bug where nested bookmarks would not be displayed correctly in search
 

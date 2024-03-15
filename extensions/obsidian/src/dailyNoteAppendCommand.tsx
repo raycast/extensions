@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot, LaunchProps } from "@raycast/api";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
@@ -17,9 +17,11 @@ interface DailyNoteAppendArgs {
   text: string;
 }
 
-export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs }) {
+type DailyNoteAppendProps = { arguments: DailyNoteAppendArgs } & LaunchProps;
+
+export default function DailyNoteAppend(props: DailyNoteAppendProps) {
   const { vaults, ready } = useObsidianVaults();
-  const { text } = props.arguments;
+  const text = props.arguments.text ?? props.fallbackText;
   const { appendTemplate, heading, vaultName, silent } = getPreferenceValues<DailyNoteAppendPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
   const [content, setContent] = useState("");
