@@ -34,21 +34,21 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const slack = useSlack();
 
   useEffect(() => {
-    if (props.launchContext?.presetId) {
-      const presetId = props.launchContext.presetId;
-      const presetToLaunch = presets.find((p) => p.id === presetId);
+    (async () => {
+      if (props.launchContext?.presetId) {
+        const presetId = props.launchContext.presetId;
+        const presetToLaunch = presets.find((p) => p.id === presetId);
 
-      if (!presetToLaunch) {
-        console.error("No preset found with id: ", presetId);
-        showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
-      } else {
-        setStatusToPreset({ preset: presetToLaunch, slack, mutate });
-        popToRoot();
-        closeMainWindow();
+        if (!presetToLaunch) {
+          console.error("No preset found with id: ", presetId);
+          showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
+        } else {
+          await setStatusToPreset({ preset: presetToLaunch, slack, mutate });
+          popToRoot();
+          closeMainWindow();
+        }
       }
-
-      return;
-    }
+    })();
   }, [slack]);
 
   return (
