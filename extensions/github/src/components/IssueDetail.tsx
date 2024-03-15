@@ -2,6 +2,7 @@ import { Color, Detail } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   IssueDetailFieldsFragment,
   IssueFieldsFragment,
@@ -12,7 +13,6 @@ import {
 import { pluralize } from "../helpers";
 import { getIssueAuthor, getIssueStatus } from "../helpers/issue";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
 import { useViewer } from "../hooks/useViewer";
 
 import IssueActions from "./IssueActions";

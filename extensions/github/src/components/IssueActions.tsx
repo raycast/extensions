@@ -2,6 +2,7 @@ import { ActionPanel, confirmAlert, Action, Toast, showToast, Color, Icon, Clipb
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   IssueClosedStateReason,
   IssueDetailFieldsFragment,
@@ -12,7 +13,6 @@ import {
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
 import { useViewer } from "../hooks/useViewer";
 
 type Issue = IssueFieldsFragment | IssueDetailFieldsFragment;

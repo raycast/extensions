@@ -1,5 +1,13 @@
 # ngrok Changelog
 
+## [Enhancements] - 2024-02-25
+
+- Added the ability to create Cloud Edge tunnels
+- Added action to open ngrok interface
+- Added ngrok "Open documentation" link when creating tunnel
+- Enhanced the list of tunnels with tooltips for distinguishing between local and edge tunnels
+- Updated deps to latest version
+
 ## [Fixes & Enhancements] - 2024-02-01
 
 - Fix bug that prevented users to create tunnels on ngrok CLI installed with Homebrew

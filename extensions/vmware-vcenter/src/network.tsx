@@ -190,7 +190,7 @@ export default function Command(): JSX.Element {
     if (Server && !IsLoadingServer && ServerSelected && !IsLoadingServerSelected) {
       GetNetworks();
     } else if (Server && !IsLoadingServer && !ServerSelected && !IsLoadingServerSelected) {
-      const name = Object.keys(Server)[0];
+      const name = [...Server.keys()][0];
       LocalStorage.setItem("server_selected", name);
       RevalidateServerSelected();
     } else if (!IsLoadingServer && !Server) {
@@ -221,17 +221,16 @@ export default function Command(): JSX.Element {
       actions={GetHostAction()}
       searchBarAccessory={Server && GetSearchBar(Server)}
     >
-      {Networks &&
-        Networks.map((network) => (
-          <List.Item
-            key={`${network.server}_${network.summary.network}`}
-            id={`${network.server}_${network.summary.network}`}
-            title={network.summary.name}
-            icon={{ source: "icons/network/network.svg" }}
-            accessories={GetNetworkAccessory(network)}
-            actions={GetHostAction()}
-          />
-        ))}
+      {Networks.map((network) => (
+        <List.Item
+          key={`${network.server}_${network.summary.network}`}
+          id={`${network.server}_${network.summary.network}`}
+          title={network.summary.name}
+          icon={{ source: "icons/network/network.svg" }}
+          accessories={GetNetworkAccessory(network)}
+          actions={GetHostAction()}
+        />
+      ))}
     </List>
   );
 }

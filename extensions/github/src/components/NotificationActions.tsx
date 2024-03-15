@@ -2,9 +2,9 @@ import { Action, ActionPanel, Icon, showToast, open, Toast, launchCommand, Launc
 import { MutatePromise } from "@raycast/utils";
 import { useMemo } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
 import { getNotificationSubtitle, getNotificationTypeTitle, getGitHubURL } from "../helpers/notifications";
-import { getGitHubClient } from "../helpers/withGithubClient";
 import { NotificationsResponse } from "../notifications";
 
 export type Notification = NotificationsResponse["data"][0];

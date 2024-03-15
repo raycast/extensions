@@ -1,18 +1,23 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { Space, Tab } from "./types";
+import { findSpaceInSpaces } from "./utils";
 
 // Tabs
 
 export async function getTabs() {
   const response = await runAppleScript(`
     on escape_value(this_text)
+      set AppleScript's text item delimiters to the "\\\\"
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\\\"
+      set this_text to the item_list as string
       set AppleScript's text item delimiters to the "\\""
       set the item_list to every text item of this_text
       set AppleScript's text item delimiters to the "\\\\\\""
       set this_text to the item_list as string
       set AppleScript's text item delimiters to ""
       return this_text
-    end replace_chars
+    end escape_value
 
     set _output to ""
 
@@ -120,7 +125,7 @@ export async function reloadTab(tab: Tab) {
   await runAppleScriptActionOnTab(tab, "reload");
 }
 
-export async function makeNewTab(url: string) {
+export async function makeNewTab(url: string, space?: string) {
   await runAppleScript(`
     tell application "Arc"
       if (count of windows) is 0 then
@@ -128,6 +133,7 @@ export async function makeNewTab(url: string) {
       end if
 
       tell front window
+        ${space ? `tell space "${space}" to focus` : ""}
         make new tab with properties {URL:"${url}"}
       end tell
 
@@ -136,11 +142,23 @@ export async function makeNewTab(url: string) {
   `);
 }
 
+export async function getValidatedSpaceTitle(spaceId: string | undefined) {
+  if (spaceId) {
+    const spaces = await getSpaces();
+    if (spaces) {
+      return findSpaceInSpaces(spaceId, spaces);
+    }
+  }
+
+  return undefined;
+}
+
 // Windows
 
 export type MakeNewWindowOptions = {
   incognito?: boolean;
   url?: string;
+  space?: string;
 };
 
 export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise<void> {
@@ -149,6 +167,7 @@ export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise
       make new window with properties {incognito:${options.incognito ?? false}}
       activate
 
+      ${options.space ? `tell front window to tell space "${options.space}" to focus` : ""}
       ${options.url ? `tell front window to make new tab with properties {URL:"${options.url}"}` : ""}
     end tell
   `);
@@ -175,7 +194,6 @@ export async function makeNewLittleArcWindow(url: string) {
   await runAppleScript(`
     tell application "Arc"
       make new tab with properties {URL:"${url}"}
-
       activate
     end tell
   `);

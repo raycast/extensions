@@ -1,8 +1,29 @@
 # Apple Reminders Changelog
 
+## [Quick Add Reminder Fix] - 2024-03-12
+
+- Fixed an issue where reminder notes were not being saved properly when using the Quick Add feature.
+
+## [Performance improvements & bug fixes] - 2024-03-01
+
+- Completed reminders are now loaded on demand and not upfront, which should fix heap memory errors
+- Add a limit of 1000 reminders so that the extension doesn't break with heap memory errors
+
+## [Add a preference to not use AI for Quick Add Reminder] - 2024-02-23
+
+- You can now disable the AI in `Quick Add Reminder` if you want to quickly add raw reminders to your default list.
+
+## [Fix SwiftError] - 2024-02-14
+
+- Fix an issue where recurring reminders in December would make it impossible to retrieve any data in `My Reminders`.
+
+## [Use GPT-4 model for Quick Add Reminder command] - 2024-02-12
+
+- Improve `Quick Add Reminder` results by using GPT-4 instead of the default model (GPT-3.5 Turbo)
+
 ## [Fix Invalid time value error] - 2024-01-31
 
-Fix an error that occurs in "My Reminders" when a reminder does not have any due dates, but the list is grouped by due dates.
+- Fix an error that occurs in "My Reminders" when a reminder does not have any due dates, but the list is grouped by due dates.
 
 ## [Fix timezone bugs] - 2024-01-26
 

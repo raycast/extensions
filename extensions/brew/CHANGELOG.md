@@ -1,5 +1,17 @@
 # Brew Changelog
 
+## [Improvements] - 2024-03-08
+
+- Add `Warp` as an option for terminal
+  
+## [Improvements] - 2024-02-11
+
+- Add `cleanup` command
+
+## [Improvements] - 2024-01-10
+
+- Added `Quarantine` preference to enable or disable quarantine of files downloaded by brew
+
 ## [Bug fix] - 2022-12-01
 
 - Added `--ignore-pinned` flag to `brew upgrade` command to avoid problems on systems that have pinned packages installed

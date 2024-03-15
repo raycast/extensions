@@ -1,4 +1,4 @@
-import { Chat, ConfigurationPreferences, Message } from "../type";
+import { Chat, Message } from "../type";
 
 function countOpenAITokens(text: string): number {
   // 100 tokens ~= 75 words
@@ -42,7 +42,7 @@ export function chatTransfomer(chat: Chat[], prompt: string): Message[] {
   return messages;
 }
 
-export const getConfigUrl = (params: ConfigurationPreferences) => {
+export const getConfigUrl = (params: Preferences) => {
   if (params.useAzure) return params.azureEndpoint + "/openai/deployments/" + params.azureDeployment;
   if (params.useApiEndpoint) return params.apiEndpoint;
   return "https://api.openai.com/v1";

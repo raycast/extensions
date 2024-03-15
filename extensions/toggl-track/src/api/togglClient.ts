@@ -8,42 +8,38 @@ const base64encode = (str: string) => {
 const baseUrl = "https://api.track.toggl.com/api/v9";
 const authHeader = { Authorization: `Basic ${base64encode(`${togglApiToken}:api_token`)}` };
 
-export const get = async <T>(endpoint: string): Promise<T> => {
-  const response = await fetch(baseUrl + endpoint, {
-    headers: authHeader,
-  });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-  return (await response.json()) as T;
-};
+export const get = <T>(endpoint: string) => togglFetch<T>("GET", endpoint);
+export const post = <T = void>(endpoint: string, body?: unknown) => togglFetch<T>("POST", endpoint, body);
+export const patch = <T = void>(endpoint: string, body?: unknown) => togglFetch<T>("PATCH", endpoint, body);
+export const put = <T = void>(endpoint: string, body?: unknown) => togglFetch<T>("PUT", endpoint, body);
+export const remove = (endpoint: string) => togglFetch("DELETE", endpoint);
 
-export const post = async <T>(endpoint: string, body: unknown): Promise<T> => {
-  const response = await fetch(baseUrl + endpoint, {
-    method: "POST",
-    headers: {
-      ...authHeader,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
+async function togglFetch<T>(method: string, endpoint: string, body?: unknown): Promise<T>;
+async function togglFetch(method: "DELETE", endpoint: string): Promise<void>;
+async function togglFetch<T>(method: string, endpoint: string, body?: unknown): Promise<T | void> {
+  const headers: Record<string, string> = authHeader;
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const res = await fetch(baseUrl + endpoint, {
+    method: method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
   });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}, ${await response.text()}`);
+  if (!res.ok) {
+    if (res.status == 429) {
+      await delay(1000);
+      return await togglFetch(method, endpoint, body);
+    }
+    let msg = `${res.status} ${res.statusText}`;
+    const text = (await res.text()) as string;
+    if (text) msg += ", " + text;
+    throw new Error(msg);
   }
-  return (await response.json()) as T;
-};
+  try {
+    const json = (await res.json()) as T | null;
+    if (json !== null) return json;
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
+  }
+}
 
-export const patch = async <T>(endpoint: string, body: unknown): Promise<T> => {
-  const response = await fetch(baseUrl + endpoint, {
-    method: "PATCH",
-    headers: {
-      ...authHeader,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}, ${await response.text()}`);
-  }
-  return (await response.json()) as T;
-};
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
