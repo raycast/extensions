@@ -4,7 +4,7 @@
   "title": "Summarize Speech",
   "description": "This extension allows you to summarize Voice Notes directly from your Raycast app.",
   "icon": "command-icon.png",
-  "author": "Alan",
+  "author": "alan",
   "categories": [
     "Productivity"
   ],
