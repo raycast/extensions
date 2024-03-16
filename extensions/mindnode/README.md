@@ -2,7 +2,7 @@
 
 ---
 
-Every great idea starts with a single thought. And another. And a million more. Whether you’re sipping coffee or lying on a beach — [MindNode](https://www.mindnode.com) helps you capture those ideas and turn them into a clear visual.
+Every great idea starts with a single thought. And another. And a million more. Whether you’re sipping coffee or lying on a beach — [MindNode](https://apps.apple.com/us/app/mindnode-mind-map-outline/id1289197285?l=en-US&mt=12) helps you capture those ideas and turn them into a clear visual.
 
 ## Screenshot
 
