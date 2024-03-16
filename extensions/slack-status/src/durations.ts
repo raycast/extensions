@@ -7,6 +7,7 @@ export const durationTitleMap = {
   90: "1.5 hours",
   120: "2 hours",
   180: "3 hours",
+  300: "5 hours",
 };
 
 export function getTitleForDuration(duration: number): string {
