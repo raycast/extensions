@@ -12,18 +12,16 @@ export default function Command() {
   const { siteId, viewLayout, gridItemSize } = getPreferenceValues<Preferences>();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [recentSearches, setRecentSearches] = useCachedState<string[]>("recentSearches", []);
+  const url = `https://api.mercadolibre.com/sites/${siteId}/search?q=${searchQuery}`;
 
-  const { data, isLoading } = useFetch<MercadoLibreItem[]>(
-    `https://api.mercadolibre.com/sites/${siteId}/search?q=${searchQuery}`,
-    {
-      parseResponse: async (response: Response) => {
-        const json = await response.json();
-        return json.results;
-      },
-      execute: searchQuery.length > 0,
-      keepPreviousData: true,
+  const { data, isLoading } = useFetch<MercadoLibreItem[]>(url, {
+    parseResponse: async (response: Response) => {
+      const json = await response.json();
+      return json.results;
     },
-  );
+    execute: searchQuery.length > 0,
+    keepPreviousData: true,
+  });
 
   const handleSearchSelect = (query: string) => {
     setSearchQuery(query);
