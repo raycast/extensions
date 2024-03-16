@@ -91,10 +91,20 @@
       "required": true,
       "title": "",
       "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show iCloud Folder on Top of Start Directory",
+      "label": "Show iCloud Drive",
+      "name": "showiCloudDrive",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.1",
     "filesize": "^10.0.20"
   },
   "devDependencies": {
@@ -112,6 +122,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "lint:fix": "ray lint --fix"
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

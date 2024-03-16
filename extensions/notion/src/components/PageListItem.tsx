@@ -1,5 +1,16 @@
 import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
-import { Action, ActionPanel, Color, confirmAlert, getPreferenceValues, Icon, Image, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  open,
+  Image,
+  List,
+} from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
 
 import {
@@ -12,7 +23,7 @@ import {
   PagePropertyType,
   User,
 } from "../utils/notion";
-import { handleOnOpenPage, isNotionInstalled } from "../utils/openPage";
+import { handleOnOpenPage } from "../utils/openPage";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -117,18 +128,24 @@ export function PageListItem({
     ),
   };
 
-  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
-    handleOnOpenPage(page, setRecentPage, "app"),
-  );
-  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, () =>
-    handleOnOpenPage(page, setRecentPage, "web"),
-  );
-
   const { open_in } = getPreferenceValues<Preferences>();
-  const isDefaultNotionActionApp = open_in === "app";
+
+  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
+    handleOnOpenPage(page, setRecentPage),
+  );
+  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
+    if (!page.url) return;
+    if (open_in?.name === "Notion") {
+      open(page.url);
+    } else open(page.url, open_in);
+    await setRecentPage(page);
+    closeMainWindow();
+  });
+
+  const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
   let openInNotionDefaultAction;
   let openInNotionAlternativeAction;
-  if (!isNotionInstalled) {
+  if (!isDefaultNotionActionApp) {
     openInNotionDefaultAction = openInNotionBrowserAction;
   } else {
     openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;

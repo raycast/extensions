@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, LocalStorage, environment } from "@raycast/api";
 import fetch from "node-fetch";
-import { File, ProjectFiles, TeamFiles, TeamProjects } from "../types";
+import { ProjectFiles, TeamFiles, TeamProjects } from "../types";
 
 async function fetchTeamProjects(): Promise<TeamProjects[]> {
   const { PERSONAL_ACCESS_TOKEN, TEAM_ID } = getPreferenceValues();
@@ -24,11 +24,13 @@ async function fetchTeamProjects(): Promise<TeamProjects[]> {
       return json;
     } catch (error) {
       console.error(error);
-      showToast(Toast.Style.Failure, "Could not load team");
+      if (environment.launchType !== "background") {
+        showToast(Toast.Style.Failure, "Could not load team");
+      }
       return Promise.resolve({ name: "No team found", projects: [] });
     }
   });
-  return Promise.all(teams) as Promise<TeamProjects[]>;
+  return Promise.all(teams);
 }
 
 async function fetchFiles(): Promise<ProjectFiles[][]> {
@@ -49,10 +51,12 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
         });
 
         const json = (await response.json()) as ProjectFiles;
-        return { name: project.name, files: (json.files || []) as File[] };
+        return { name: project.name, files: json.files ?? [] };
       } catch (error) {
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not load files");
+        if (environment.launchType !== "background") {
+          showToast(Toast.Style.Failure, "Could not load files");
+        }
         return Promise.resolve([]);
       }
     });
@@ -63,7 +67,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
 
 export async function resolveAllFiles(): Promise<TeamFiles[]> {
   const teamFiles = await fetchFiles();
-  const teams = ((await LocalStorage.getItem<string>("teamNames")) || "").split(",");
+  const teams = ((await LocalStorage.getItem<string>("teamNames")) ?? "").split(",");
   const fi = teamFiles.map((projectFiles, index) => {
     return { name: teams[index], files: projectFiles } as TeamFiles;
   });

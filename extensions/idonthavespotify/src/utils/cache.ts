@@ -17,7 +17,12 @@ export const cacheLastSearch = (spotifyLink: string, spotifyContent: SpotifyCont
 
 export const getLastSearch = (): CacheData | undefined => {
   const lastSearch = cache.get(LAST_SEARCH_KEY);
+
   if (lastSearch) {
-    return JSON.parse(lastSearch);
+    const data = JSON.parse(lastSearch);
+
+    if (data.spotifyLink && Object.keys(data.spotifyContent ?? {}).length > 0) {
+      return data;
+    }
   }
 };

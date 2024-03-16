@@ -51,6 +51,8 @@ export default (props: Props) => {
 
   const defaults = useMemo(() => {
     // RAI-10338 respect user settings of no default due date and no default snooze date
+    const defaultAlwaysPrivate = currentUser?.features.taskSettings.defaults.alwaysPrivate;
+    const defaultOnDeck = currentUser?.features.taskSettings.defaults.onDeck;
     const defaultDueDatePreference = currentUser?.features.taskSettings.defaults.dueInDays;
     const defaultDueDate = getDefaultDueDate(defaultDueDatePreference);
     const defaultDelayedStartPreference = currentUser?.features.taskSettings.defaults.delayedStartInMinutes;
@@ -60,6 +62,8 @@ export default (props: Props) => {
     return {
       defaultDueDate: defaultDueDate,
       defaultSnoozeDate: defaultSnoozeDate,
+      alwaysPrivate: defaultAlwaysPrivate,
+      onDeck: defaultOnDeck,
       minDuration: (currentUser?.features.taskSettings.defaults.minChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
       maxDuration: (currentUser?.features.taskSettings.defaults.maxChunkSize || 1) * TIME_BLOCK_IN_MINUTES,
       duration: (currentUser?.features.taskSettings.defaults.timeChunksRequired || 1) * TIME_BLOCK_IN_MINUTES,
@@ -106,16 +110,19 @@ export default (props: Props) => {
       return;
     }
 
+    const _alwaysPrivate = defaults.alwaysPrivate === undefined ? false : defaults.alwaysPrivate;
+
     const created = await createTask({
-      category: selectedTimePolicy.taskCategory === "WORK" ? "WORK" : "PERSONAL",
       title,
+      timePolicy: selectedTimePolicy.id,
+      category: selectedTimePolicy.taskCategory === "WORK" ? "WORK" : "PERSONAL",
       timeNeeded: _timeNeeded,
       durationMin: _durationMin,
       durationMax: _durationMax,
       snoozeUntil,
-      timePolicy: selectedTimePolicy.id,
       due,
       notes,
+      alwaysPrivate: _alwaysPrivate,
       priority,
       onDeck,
     });
@@ -242,7 +249,7 @@ export default (props: Props) => {
       <Form.DatePicker value={due} onChange={setDue} type={Form.DatePicker.Type.DateTime} id="due" title="Due" />
       <Form.TextArea id="notes" title="Notes" />
       {defaults.schedulerVersion > 14 && (
-        <Form.Checkbox id="onDeck" title="Send to Up Next" label="" defaultValue={false} />
+        <Form.Checkbox id="onDeck" title="Send to Up Next" label="" defaultValue={defaults.onDeck} />
       )}
     </Form>
   );

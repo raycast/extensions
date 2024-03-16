@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dub-link-shortener",
   "title": "Dub Link Shortener",
-  "description": "Use https://dub.co API to shorten links",
+  "description": "Dub.co is the open-source link management infrastructure. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.",
   "icon": "command-icon.png",
   "author": "quuu",
   "categories": [
@@ -19,7 +19,19 @@
       "title": "Shorten Link",
       "subtitle": "Shorten a link with dub.co",
       "description": "Shorten links with dub.co",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text"
+        },
+        {
+          "name": "key",
+          "placeholder": "Key",
+          "type": "text"
+        }
+      ]
     },
     {
       "name": "search-links",

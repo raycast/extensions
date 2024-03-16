@@ -81,8 +81,9 @@ const setRecentCases = (recent: CaseType[]) => {
 };
 
 export default function Command(props: LaunchProps) {
-  const preferences = getPreferenceValues();
-  const preferredSource = preferences["source"];
+  const preferences = getPreferenceValues<Preferences>();
+  const preferredSource = preferences.source;
+  const preferredAction = preferences.action;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
@@ -90,7 +91,11 @@ export default function Command(props: LaunchProps) {
       const content = await readContent(preferredSource);
       const converted = functions[immediatelyConvertToCase](content);
 
-      Clipboard.copy(converted);
+      if (preferredAction === "paste") {
+        Clipboard.paste(converted);
+      } else {
+        Clipboard.copy(converted);
+      }
 
       showHUD(`Converted to ${immediatelyConvertToCase}`);
       popToRoot();
@@ -152,7 +157,11 @@ export default function Command(props: LaunchProps) {
           }
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     );
@@ -174,7 +183,11 @@ export default function Command(props: LaunchProps) {
           }
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     ) : null;
@@ -193,9 +206,9 @@ export default function Command(props: LaunchProps) {
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              {preferences["action"] === "paste" && <PasteToActiveApp {...props} />}
+              {preferredAction === "paste" && <PasteToActiveApp {...props} />}
               <CopyToClipboard {...props} />
-              {preferences["action"] === "copy" && <PasteToActiveApp {...props} />}
+              {preferredAction === "copy" && <PasteToActiveApp {...props} />}
             </ActionPanel.Section>
             <ActionPanel.Section>
               {!props.pinned ? (
@@ -295,7 +308,7 @@ export default function Command(props: LaunchProps) {
         {Object.entries(functions)
           .filter(
             ([key]) =>
-              preferences[key.replace(/ +/g, "")] &&
+              preferences[key.replace(/ +/g, "") as keyof ExtensionPreferences] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
           )

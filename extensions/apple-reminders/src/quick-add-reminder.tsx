@@ -1,16 +1,12 @@
-import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
+import { createReminder, getData } from "swift:../swift/AppleReminders";
 
-import { createReminder, getData } from "./api";
+import { NewReminder } from "./create-reminder";
+import { Data } from "./hooks/useData";
 
-export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddReminder }) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
   try {
-    const data = await getData();
-
-    const lists = data.lists.map((list) => {
-      return `${list.title}:${list.id}`;
-    });
-
     const preferences = getPreferenceValues<Preferences.QuickAddReminder>();
 
     if (preferences.shouldCloseMainWindow) {
@@ -18,6 +14,22 @@ export default async function Command(props: LaunchProps & { arguments: Argument
     } else {
       await showToast({ style: Toast.Style.Animated, title: "Adding to-do" });
     }
+
+    if (!environment.canAccess(AI) || preferences.dontUseAI) {
+      await createReminder({ title: props.arguments.text, notes: props.arguments.notes });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Added "${props.arguments.text}" to default list`,
+      });
+      return;
+    }
+
+    const data: Data = await getData(undefined);
+
+    const lists = data.lists.map((list) => {
+      return `${list.title}:${list.id}`;
+    });
 
     const now = new Date();
     const today = format(now, "yyyy-MM-dd");
@@ -56,7 +68,8 @@ Here's the JSON Object structure:
   "dueDate": <Task due date. Can either be a full day date (YYYY-MM-DD) or an ISO date if the time is specified (YYYY-MM-DDTHH:mm:ss.sssZ). Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. Never use dates before ${today} unless the specific month/day/year is provided. If the user includes a time before ${currentTime} and no date, assume they mean tomorrow>,
   "recurrence": {
     "frequency": <Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".>,
-    "interval": <Recurrence interval. An integer greater than 0 that specifies how often a pattern repeats. If a recurrence frequency is "weekly" rule and the interval is 1, then the pattern repeats every week. If a recurrence frequency is "monthly" rule and the interval is 3, then the pattern repeats every 3 months.>
+    "interval": <Recurrence interval. An integer greater than 0 that specifies how often a pattern repeats. If a recurrence frequency is "weekly" rule and the interval is 1, then the pattern repeats every week. If a recurrence frequency is "monthly" rule and the interval is 3, then the pattern repeats every 3 months.>,
+    "endDate": <Recurrence end date. A full day date (YYYY-MM-DD). If no end date is specified, the recurrence will repeat forever.>
   }
 }
 
@@ -91,50 +104,27 @@ Here are some examples to help you out:
 - Dad's birthday on ${recentDateMonth} ${recentDateDay}: {"title":"Dad's birthday","description":"'Dad's birthday' on ${nextRecentDate} to default list","dueDate":"${nextRecentDate}"}
 - Monthly breakfast with friends Saturday: {"title":"Monthly breakfast with friends","description":"'Monthly breakfast with friends' recurring monthly starting ${saturday} to default list","dueDate":"${saturday}","recurrence":{"frequency":"monthly","interval":1}}
 - Review budget every 2 months starting from tomorrow: {"title":"Review budget","description":"'Review budget' every 2 months starting ${tomorrow} to default list","dueDate":"${tomorrow}", "recurrence":{"frequency":"monthly","interval":2}}
+- Water the flowers every day from tomorrow until ${upcomingDateWeekday}: {"title":"Water the flowers","description":"'Water the flowers' every day from ${tomorrow} until ${upcomingDate} to default list","dueDate":"${tomorrow}","recurrence":{"frequency":"daily","interval":1,"endDate":"${upcomingDate}"}}
+- Cook meals until ${upcomingDateWeekday}: {"title":"Cook meals","description":"'Cook meals' every day until ${upcomingDate} to default list","dueDate":"${today}","recurrence":{"frequency":"daily","interval":1,"endDate":"${upcomingDate}"}}
 
 Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
-    const maxRetries = 3;
-    let retries = 0;
-    let json;
-    while (retries < maxRetries) {
-      try {
-        const result = await AI.ask(prompt);
-        console.log(result);
-        json = JSON.parse(result.trim());
-        if (json.recurrence && !json.dueDate) {
-          console.log("No recurrence due date included.");
-          throw new Error("Recurrence without dueDate");
-        }
-        // If no errors at this point, break the retry loop
-        break;
-      } catch (error) {
-        retries++;
-        console.log(`Retriying AI call. Retry count: ${retries}`);
-      }
+    const { description, ...newReminder } = await askAI(prompt);
+    if (props.arguments.notes) {
+      newReminder.notes = props.arguments.notes;
     }
 
-    // After exiting the loop, check if the retry limit was reached
-    if (retries === maxRetries) {
-      throw new Error("Max retries reached. Unable to get a valid response from AI.");
-    } else {
-      if (props.arguments.notes) {
-        json.notes = props.arguments.notes;
-      }
-    }
-
-    // The AI is assuming the user has a UTC timezone, so we need to adjust the date to actually match the user's timezone.
-    if (json.dueDate && json.dueDate.includes("T")) {
-      const date = new Date(json.dueDate);
+    if (newReminder.dueDate && newReminder.dueDate.includes("T")) {
+      const date = new Date(newReminder.dueDate);
       const timezoneOffset = date.getTimezoneOffset() * 60 * 1000;
-      json.dueDate = new Date(date.getTime() + timezoneOffset).toISOString();
+      newReminder.dueDate = new Date(date.getTime() + timezoneOffset).toISOString();
     }
 
-    await createReminder(json);
+    await createReminder(newReminder);
 
     await showToast({
       style: Toast.Style.Success,
-      title: "Added reminder: " + json.description,
+      title: "Added reminder: " + description,
     });
   } catch (error) {
     console.log(error);
@@ -146,4 +136,22 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
       message,
     });
   }
+}
+
+async function askAI(prompt: string): Promise<NewReminder & { description: string }> {
+  const maxRetries = 3;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const result = await AI.ask(prompt, { model: "gpt-4" });
+      const json = JSON.parse(result.trim());
+      if (json.recurrence && !json.dueDate) {
+        throw new Error("Recurrence without dueDate");
+      }
+      return json;
+    } catch (error) {
+      console.log(`Retriying AI call. Retry count: ${i}`);
+    }
+  }
+
+  throw new Error("Max retries reached. Unable to get a valid response from AI.");
 }

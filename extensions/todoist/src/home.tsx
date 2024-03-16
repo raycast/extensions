@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 
 import { handleError } from "./api";
 import CompletedTasks from "./components/CompletedTasks";
+import FilterTasks from "./components/FilterTasks";
 import InboxTasks from "./components/InboxTasks";
 import LabelTasks from "./components/LabelTasks";
 import ProjectTasks from "./components/ProjectTasks";
@@ -15,7 +16,14 @@ import { getProjectIcon } from "./helpers/projects";
 import { searchBarPlaceholder as defaultSearchBarPlaceholder } from "./helpers/tasks";
 import useSyncData from "./hooks/useSyncData";
 
-export type ViewType = "inbox" | "today" | "upcoming" | "completed" | `project_${string}` | `label_${string}`;
+export type ViewType =
+  | "inbox"
+  | "today"
+  | "upcoming"
+  | "completed"
+  | `project_${string}`
+  | `label_${string}`
+  | `filter_${string}`;
 
 export type QuickLinkView = {
   title: string;
@@ -67,6 +75,12 @@ export function Home({ launchContext }: LaunchProps) {
       searchBarPlaceholder = "Filter tasks by name, priority, project, or assignee";
       navigationTitle = labelName;
       component = <LabelTasks name={labelName} quickLinkView={{ title: navigationTitle, view }} />;
+    } else if (view.startsWith("filter_")) {
+      const filterName = view.replace("filter_", "");
+
+      searchBarPlaceholder = "Filter tasks by name, priority, project, or assignee";
+      navigationTitle = filterName;
+      component = <FilterTasks name={filterName} quickLinkView={{ title: navigationTitle, view }} />;
     }
 
     return { component, searchBarPlaceholder, navigationTitle };
@@ -78,6 +92,10 @@ export function Home({ launchContext }: LaunchProps) {
 
   const labels = useMemo(() => {
     return data?.labels.sort((a, b) => a.item_order - b.item_order) ?? [];
+  }, [data]);
+
+  const filters = useMemo(() => {
+    return data?.filters.sort((a, b) => a.item_order - b.item_order) ?? [];
   }, [data]);
 
   // If task we return earlier the taskDetail component directly
@@ -130,6 +148,21 @@ export function Home({ launchContext }: LaunchProps) {
                     title={label.name}
                     value={`label_${label.name}`}
                     icon={{ source: Icon.Tag, tintColor: getColorByKey(label.color).value }}
+                  />
+                );
+              })}
+            </List.Dropdown.Section>
+          ) : null}
+
+          {filters && filters.length > 0 ? (
+            <List.Dropdown.Section title="Filters">
+              {filters.map((filter) => {
+                return (
+                  <List.Dropdown.Item
+                    key={filter.id}
+                    title={filter.name}
+                    value={`filter_${filter.name}`}
+                    icon={{ source: Icon.Tag, tintColor: getColorByKey(filter.color).value }}
                   />
                 );
               })}

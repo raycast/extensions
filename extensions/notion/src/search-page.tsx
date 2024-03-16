@@ -1,8 +1,10 @@
 import { List } from "@raycast/api";
-import React, { useState } from "react";
+import { withAccessToken } from "@raycast/utils";
+import { useState } from "react";
 
-import { PageListItem, View } from "./components";
+import { PageListItem } from "./components";
 import { useRecentPages, useSearchPages, useUsers } from "./hooks";
+import { notionService } from "./utils/notion/oauth";
 
 function Search() {
   const { data: recentPages, setRecentPage, removeRecentPage } = useRecentPages();
@@ -46,10 +48,4 @@ function Search() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <Search />
-    </View>
-  );
-}
+export default withAccessToken(notionService)(Search);

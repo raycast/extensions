@@ -12,7 +12,7 @@ export default function Command() {
 
   const { data, isLoading, mutate } = useData();
 
-  const { sections, viewProps } = useViewReminders(listId ? listId : "today", { data });
+  const { sections, viewProps } = useViewReminders(listId ?? "today", { data });
 
   const placeholder =
     listId === "all" ? "Filter by title, notes, priority or list" : "Filter by title, notes or priority";

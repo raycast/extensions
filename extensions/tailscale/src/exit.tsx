@@ -1,6 +1,15 @@
 import { ActionPanel, List, Action, popToRoot, closeMainWindow, Image, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { StatusResponse, getStatus, getDevices, tailscale, ErrorDetails, getErrorDetails, Device } from "./shared";
+import {
+  StatusResponse,
+  getStatus,
+  getDevices,
+  tailscale,
+  sortDevices,
+  ErrorDetails,
+  getErrorDetails,
+  Device,
+} from "./shared";
 
 function loadExitNodes(status: StatusResponse) {
   const devices = getDevices(status);
@@ -33,6 +42,7 @@ export default function ExitNodeList() {
         const status = getStatus();
         const _list = loadExitNodes(status);
         setExitNodes(_list);
+        sortDevices(_list);
         if (isExitNodeActive(_list)) {
           setIsActive(true);
         }

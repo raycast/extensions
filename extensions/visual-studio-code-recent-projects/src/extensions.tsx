@@ -42,11 +42,13 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
               title="Copy Extension ID"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
-            <Action.CopyToClipboard
-              content={e.publisherDisplayName}
-              title="Copy Publisher Name"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-            />
+            {e.publisherDisplayName && (
+              <Action.CopyToClipboard
+                content={e.publisherDisplayName}
+                title="Copy Publisher Name"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              />
+            )}
             <Action.Open
               title="Open in Finder"
               target={e.fsPath}

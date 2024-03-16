@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Icon, showHUD } from "@raycast/api";
 import { WiFiNetwork } from "node-wifi";
 import { connectWifi } from "../utils/common-utils";
 import React, { Dispatch, SetStateAction } from "react";
@@ -24,7 +24,14 @@ export function PrimaryActions(props: {
           }
         }}
       />
-      <Action.CopyToClipboard title={"Copy Wi-FI"} content={wifiNetwork.ssid} />
+      <Action
+        icon={Icon.Clipboard}
+        title={"Copy Wi-FI"}
+        onAction={async () => {
+          await Clipboard.copy(wifiNetwork.ssid);
+          await showHUD(`🛜 Wi-FI Copied`);
+        }}
+      />
     </ActionPanel.Section>
   );
 }

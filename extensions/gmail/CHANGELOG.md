@@ -1,5 +1,9 @@
 # Gmail Changelog
 
+## [Fix] - 2023-12-27
+
+- Fix possible crashes
+
 ## [Fix] - 2023-10-21
 
 - Logout if OAuth token refresh fail. This enable re-login

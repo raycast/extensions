@@ -1,15 +1,14 @@
-import { Application, getApplications, Grid } from "@raycast/api";
+import { Application, getApplications, Grid, getPreferenceValues, LaunchProps } from "@raycast/api";
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { resolveAllFiles } from "./components/fetchFigmaData";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
 import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
 
-export default function Command() {
+export default function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
@@ -36,6 +35,7 @@ export default function Command() {
   const [filteredFiles, setFilteredFiles] = useState(data);
   const [isFiltered, setIsFiltered] = useState(false);
   const [desktopApp, setDesktopApp] = useState<Application>();
+  const [searchText, setSearchText] = useState<string>(launchContext?.query ?? "");
 
   useEffect(() => {
     getApplications()
@@ -106,6 +106,9 @@ export default function Command() {
     <Grid
       isLoading={isLoadingBlock}
       searchBarPlaceholder="Filter files by name..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={true}
       searchBarAccessory={filterDropdown()}
     >
       {!isFiltered && (
@@ -135,8 +138,8 @@ export default function Command() {
               extraKey={file.key + "-recent-file-item"}
               revalidate={revalidateStarredFiles}
               onVisit={visitFile}
-              starredFiles={starredFiles || []}
-              starredFilesCount={starredFiles?.length || 0}
+              starredFiles={starredFiles ?? []}
+              starredFilesCount={starredFiles?.length ?? 0}
             />
           ))}
         </Grid.Section>
@@ -162,8 +165,8 @@ export default function Command() {
                   file={file}
                   desktopApp={desktopApp}
                   onVisit={visitFile}
-                  starredFiles={starredFiles || []}
-                  starredFilesCount={starredFiles?.length || 0}
+                  starredFiles={starredFiles ?? []}
+                  starredFilesCount={starredFiles?.length ?? 0}
                 />
               ))}
             </Grid.Section>

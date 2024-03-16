@@ -1,111 +1,69 @@
-import { OmitIntersection } from "./util";
+import * as v from "valibot";
 
-export type VaultCredentialDto = {
-  title?: string;
-  email?: string;
-  login?: string;
-  password: string;
-  url?: string;
-  secondaryLogin?: string;
-  category?: string;
-  note?: string;
-  lastBackupTime: string;
-  autoProtected: "true" | "false";
-  autoLogin: "true" | "false";
-  subdomainOnly: "true" | "false";
-  useFixedUrl: "true" | "false";
-  otpSecret?: string;
-  appMetaData?: string;
-  status: "ACCOUNT_NOT_VERIFIED" | "ACCOUNT_VERIFIED" | "ACCOUNT_INVALID";
-  numberUse: string;
-  lastUse: string;
-  strength: string;
-  modificationDatetime: string;
-  checked: "true" | "false";
-  id: string;
-  anonId: string;
-  localeFormat: string;
-};
+const StringBooleanSchema = v.coerce(v.boolean(), (v) => v === "true");
+const StringNumberSchema = v.coerce(v.number(), (v) => (typeof v === "string" ? parseInt(v, 10) : 0));
 
-export type VaultCredential = OmitIntersection<
-  VaultCredentialDto,
-  {
-    /**
-     * timestamp
-     */
-    lastBackupTime: number;
-    autoProtected: boolean;
-    autoLogin: boolean;
-    subdomainOnly: boolean;
-    useFixedUrl: boolean;
-    /**
-     * info about linked mobile applications
-     */
-    appMetaData?: string;
-    numberUse: number;
-    /**
-     * timestamp
-     */
-    lastUse: number;
-    /**
-     * number between 0 and 100
-     */
-    strength: number;
-    /**
-     * timestamp
-     */
-    modificationDatetime: number;
-    checked: boolean;
-  }
->;
+export const VaultCredentialSchema = v.object({
+  id: v.string("ID is required."),
+  password: v.string("Password is required."),
+  title: v.optional(v.string()),
+  email: v.optional(v.string()),
+  login: v.optional(v.string()),
+  url: v.optional(v.string()),
+  secondaryLogin: v.optional(v.string()),
+  category: v.optional(v.string()),
+  note: v.optional(v.string()),
+  lastBackupTime: v.optional(StringNumberSchema),
+  autoProtected: v.optional(StringBooleanSchema),
+  autoLogin: v.optional(StringBooleanSchema),
+  subdomainOnly: v.optional(StringBooleanSchema),
+  useFixedUrl: v.optional(StringBooleanSchema),
+  otpSecret: v.optional(v.string()),
+  appMetaData: v.optional(v.string()),
+  status: v.optional(v.picklist(["ACCOUNT_NOT_VERIFIED", "ACCOUNT_VERIFIED", "ACCOUNT_INVALID"])),
+  numberUse: v.optional(StringNumberSchema, 0),
+  lastUse: v.optional(StringNumberSchema),
+  strength: v.optional(StringNumberSchema, 0),
+  modificationDatetime: v.optional(StringNumberSchema),
+  checked: v.optional(StringBooleanSchema),
+  anonId: v.optional(v.string()),
+  localeFormat: v.optional(v.string()),
+});
 
-export type VaultCredentialStatus = VaultCredential["status"];
+export type VaultCredential = v.Output<typeof VaultCredentialSchema>;
 
-export interface VaultNoteDto {
-  anonId: string;
-  /**
-   * Stringified JSON
-   */
-  attachments?: string;
-  category?: string;
-  creationDatetime?: string;
-  id: string;
-  lastBackupTime?: string;
-  secured?: "true" | "false";
-  title: string;
-  type: string;
-  updateDate?: string;
-  userModificationDatetime?: string;
-  content?: string;
-  creationDate?: string;
-  lastUse?: string;
-  localeFormat?: string;
-}
+const VaultNoteAttachmentSchema = v.object({
+  id: v.string("Attachment ID is required."),
+  filename: v.string("Filename is required."),
+  type: v.string("Type is required."),
+  creationDatetime: v.optional(v.number()),
+  cryptoKey: v.optional(v.string()),
+  downloadKey: v.optional(v.string()),
+  localSize: v.optional(v.number()),
+  owner: v.optional(v.string()),
+  remoteSize: v.optional(v.number()),
+  userModificationDatetime: v.optional(v.number()),
+  version: v.optional(v.number(), 1),
+});
 
-export type VaultNote = OmitIntersection<
-  VaultNoteDto,
-  {
-    attachments?: NoteAttachment[];
-    creationDatetime?: number;
-    lastBackupTime?: number;
-    secured?: boolean;
-    updateDate?: number;
-    userModificationDatetime?: number;
-    creationDate?: number;
-    lastUse?: number;
-  }
->;
+export type NoteAttachment = v.Output<typeof VaultNoteAttachmentSchema>;
 
-export interface NoteAttachment {
-  creationDatetime: number;
-  cryptoKey: string;
-  downloadKey: string;
-  filename: string;
-  id: string;
-  localSize: number;
-  owner: string;
-  remoteSize: number;
-  type: string;
-  userModificationDatetime: number;
-  version: number;
-}
+export const VaultNoteSchema = v.object({
+  id: v.string("ID is required."),
+  anonId: v.optional(v.string()),
+  title: v.optional(v.string(), "Untitled Note"),
+  content: v.optional(v.string()),
+  attachments: v.optional(v.array(VaultNoteAttachmentSchema), []),
+  category: v.optional(v.string()),
+  secured: v.optional(StringBooleanSchema, false),
+  type: v.optional(v.string()),
+  creationDatetime: v.optional(StringNumberSchema),
+  lastBackupTime: v.optional(StringNumberSchema),
+  updateDate: v.optional(StringNumberSchema),
+  userModificationDatetime: v.optional(StringNumberSchema),
+  creationDate: v.optional(StringNumberSchema),
+  lastUse: v.optional(StringNumberSchema),
+  localeFormat: v.optional(v.string()),
+});
+
+export type VaultNote = v.Output<typeof VaultNoteSchema>;

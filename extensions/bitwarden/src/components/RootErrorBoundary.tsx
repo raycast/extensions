@@ -36,7 +36,7 @@ export default class RootErrorBoundary extends Component<Props, State> {
 
   render() {
     try {
-      if (this.state.hasError) return <TroubleshootingGuide errorInfo={this.state.error} />;
+      if (this.state.hasError) return <TroubleshootingGuide error={this.state.error} />;
       return this.props.children;
     } catch {
       return <TroubleshootingGuide />;

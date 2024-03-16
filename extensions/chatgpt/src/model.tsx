@@ -73,8 +73,8 @@ export default function Model() {
 
   return (
     <List
-      isShowingDetail={filteredModels.length === 0 ? false : true}
-      isLoading={models.isLoading}
+      isShowingDetail={filteredModels.length !== 0}
+      isLoading={models.isLoading || models.isFetching}
       filtering={false}
       throttle={false}
       selectedItemId={selectedModelId || undefined}
@@ -87,7 +87,9 @@ export default function Model() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {models.data.length === 0 ? (
+      {models.isFetching ? (
+        <List.EmptyView />
+      ) : models.data.length === 0 ? (
         <List.EmptyView title="No custom models" description="Create new model with ⌘ + T shortcut" icon={Icon.Stars} />
       ) : (
         <>

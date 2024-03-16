@@ -157,6 +157,17 @@ export default async ({ github, context }: API) => {
     // ignore, it might not be there
   }
 
+  if (!owners.length) {
+    console.log("no maintainer for this extension");
+    await comment({
+      github,
+      context,
+      comment: `Thank you for opening this issue!
+
+Unfortunately it seems like nobody is maintaining this extension anymore. If you want to help, feel free to contribute to the extension :pray:`,
+    });
+  }
+
   const toNotify = owners.filter((x) => x !== sender);
 
   if (!toNotify.length) {
@@ -189,11 +200,14 @@ The author and contributors of \`${extension}\` can trigger bot actions by comme
 async function getCodeOwners({ github, context }: Pick<API, "github" | "context">) {
   const codeowners = await getGitHubFile(".github/CODEOWNERS", { github, context });
 
-  const regex = /(\/extensions\/[\w-]+) +(.+)/g;
+  const regex = /(\/extensions\/[\w-]+) +(.*)/g;
   const matches = codeowners.matchAll(regex);
 
   return Array.from(matches).reduce<{ [key: string]: string[] }>((prev, match) => {
-    prev[match[1]] = match[2].split(" ").map((x) => x.replace(/^@/, ""));
+    prev[match[1]] = match[2]
+      .split(" ")
+      .map((x) => x.replace(/^@/, ""))
+      .filter((x) => !!x);
     return prev;
   }, {});
 }

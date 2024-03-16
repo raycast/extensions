@@ -1,5 +1,18 @@
 # Notion Changelog
 
+## [Improve authentication docs] - 2024-02-27
+
+- Improve documentation on creating an internal integration
+- Use OAuth utils
+
+## [Properly allow date with time] - 2024-02-15
+
+- Fix a bug that prevented creating pages with time
+
+## [Open Notion page improvement] - 2024-01-02
+
+- Add the ability to open Notion in the browser of your choice or in the Notion app.
+
 ## [Add alternate open action] - 2023-12-03
 
 - Add an action that alternates with the primary open action. For example, if the primary action is set to open in Notion, the alternate action will open in the browser, and vice versa.
@@ -73,4 +86,3 @@ The extension has also been revamped under the hood to improve maintainability a
 
 - Added an Action to open the Notion Page after creating it
 - Added a TextArea to add some content to the page directly
-

@@ -1,5 +1,13 @@
 # File Manager Changelog
 
+## [Features] - 2023-02-22
+
+- Added `iCloud Drive` to the start directory.
+
+## [Features] - 2023-12-18
+
+- Added `Set Wallpaper` action for images.
+
 ## [Fixes] - 2023-12-01
 
 - Resolved an issue with deleting non-empty folders.

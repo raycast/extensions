@@ -29,7 +29,8 @@ export const DeleteExpense = async (id: number, mutate: any) => {
       await axios.get(`https://secure.splitwise.com/api/v3.0/delete_expense/${id}`, HEADER),
       {
         optimisticUpdate(expenses: Expense[]) {
-          return delete expenses[id];
+          const { [id]: _, ...remainingExpenses } = expenses;
+          return remainingExpenses;
         },
         revalidate: true,
         rollbackOnError: true,

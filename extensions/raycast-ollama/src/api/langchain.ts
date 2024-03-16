@@ -6,8 +6,14 @@ import { TextLoader } from "langchain/document_loaders/fs/text";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "langchain/document";
-import { OllamaApiGenerate, OllamaApiGenerateNoStream, parseOllamaUrlForLangchain } from "./ollama";
-import { DocumentLoaderFiles, OllamaApiGenerateRequestBody, PromptTags } from "./types";
+import { OllamaApiChat, OllamaApiGenerateNoStream, parseOllamaUrlForLangchain } from "./ollama";
+import {
+  DocumentLoaderFiles,
+  OllamaApiChatMessage,
+  OllamaApiChatRequestBody,
+  OllamaApiGenerateRequestBody,
+  PromptTags,
+} from "./types";
 import fs from "fs";
 import mime from "mime-types";
 import "./polyfill/node-fetch";
@@ -49,8 +55,7 @@ async function GetFilesFromLocalStorage(): Promise<DocumentLoaderFiles[]> {
 
 /**
  * Verify if cache can be used for DocumentLoader().
- * @param {DocumentLoaderFiles[]}
- * @returns
+ * @returns {Promise<Boolean>} Return 'true' value if cache can be used otherwise return 'false' value.
  */
 async function UseCacheDocumentLoader(): Promise<boolean> {
   let files = await GetFilesFromLocalStorage();
@@ -105,7 +110,7 @@ export async function UseCache(tags: PromptTags[]): Promise<boolean> {
  * Load documents contents from file.
  * @param {number} chunckSize - Number of character for each chunk.
  * @param {number} chunckOverlap - Number of character overlapping between nearby chunk.
- * @returns {Document<Record<string, any>>[]} Array of documents.
+ * @returns {Promise<Document<Record<string, any>>[]>} Array of documents.
  */
 async function DocumentLoader(chunckSize = 1000, chunckOverlap = 200): Promise<Document<Record<string, any>>[]> {
   const path = await GetFilesPathFromLocalStorage();
@@ -143,7 +148,7 @@ async function DocumentLoader(chunckSize = 1000, chunckOverlap = 200): Promise<D
  * @param {Document<Record<string,any>>[]} docs.
  * @param {number} chunckSize - Number of character for each chunk.
  * @param {number} chunckOverlap - Number of character overlapping between nearby chunk.
- * @returns {Document<Record<string,any>>[]} splitted documents.
+ * @returns {Promise<Document<Record<string,any>>[]>} splitted documents.
  */
 async function DocumentSplitter(
   docs: Document<Record<string, any>>[],
@@ -158,7 +163,7 @@ async function DocumentSplitter(
 }
 
 /**
- * Return Document based on chose tags.
+ * Return Document based on chosed tags.
  * Memory Vector Store is used only for large amount of data.
  * @param {string} prompt.
  * @param {string} model - Model used for embedding.
@@ -234,14 +239,16 @@ export function GetTags(prompt: string): [string, PromptTags[]] {
 export async function LLMChain(
   prompt: string,
   model: string,
-  context: number[] | undefined = undefined
+  messages: OllamaApiChatMessage[] | undefined = undefined,
+  images: string[] | undefined = undefined
 ): Promise<EventEmitter> {
-  const body: OllamaApiGenerateRequestBody = {
+  if (messages) messages.push({ role: "user", content: prompt, images: images } as OllamaApiChatMessage);
+  else messages = [{ role: "user", content: prompt, images: images } as OllamaApiChatMessage];
+  const body: OllamaApiChatRequestBody = {
     model: model,
-    prompt: prompt,
-    context: context,
+    messages: messages,
   };
-  return OllamaApiGenerate(body);
+  return OllamaApiChat(body);
 }
 
 /**
@@ -256,7 +263,8 @@ export async function loadQARefineChain(
   prompt: string,
   model: string,
   docs: Document<Record<string, any>>[],
-  context: number[] | undefined = undefined
+  messages: OllamaApiChatMessage[] | undefined = undefined,
+  images: string[] | undefined = undefined
 ): Promise<EventEmitter | undefined> {
   let LastResponse: string | undefined;
 
@@ -273,8 +281,24 @@ export async function loadQARefineChain(
         const Response = await OllamaApiGenerateNoStream(body);
         LastResponse = Response.response;
       } else {
-        body.context = context;
-        return OllamaApiGenerate(body);
+        if (messages) {
+          messages.push({ role: "system", content: SystemPrompt } as OllamaApiChatMessage);
+          messages.push({
+            role: "user",
+            content: `CONTEXT: ${doc.pageContent}`,
+            images: images,
+          } as OllamaApiChatMessage);
+        } else {
+          messages = [
+            { role: "system", content: SystemPrompt } as OllamaApiChatMessage,
+            { role: "user", content: `CONTEXT: ${doc.pageContent}`, images: images } as OllamaApiChatMessage,
+          ];
+        }
+        const body: OllamaApiChatRequestBody = {
+          model: model,
+          messages: messages,
+        };
+        return OllamaApiChat(body);
       }
     } else {
       const SystemPrompt = `Given the context information and no prior knowledge, answer the question: ${prompt}`;
@@ -301,16 +325,27 @@ export async function loadQAStuffChain(
   prompt: string,
   model: string,
   docs: Document<Record<string, any>>[],
-  context: number[] | undefined = undefined
+  messages: OllamaApiChatMessage[] | undefined = undefined,
+  images: string[] | undefined = undefined
 ): Promise<EventEmitter> {
   let docsContents = "";
   docs.forEach((doc) => {
     docsContents += doc.pageContent + "\n\n";
   });
-  const body: OllamaApiGenerateRequestBody = {
+  if (messages) {
+    messages.push({
+      role: "user",
+      content: `${prompt}\nCONTEXT: ${docsContents}`,
+      images: images,
+    } as OllamaApiChatMessage);
+  } else {
+    messages = [
+      { role: "user", content: `${prompt}\nCONTEXT: ${docsContents}`, images: images } as OllamaApiChatMessage,
+    ];
+  }
+  const body: OllamaApiChatRequestBody = {
     model: model,
-    prompt: `${prompt}\nCONTEXT: ${docsContents}`,
-    context: context,
+    messages: messages,
   };
-  return OllamaApiGenerate(body);
+  return OllamaApiChat(body);
 }

@@ -9,7 +9,7 @@ export default function CommonDirectory() {
   const preferences = getPreferenceValues<Preferences>();
 
   const { bingWallpaperHD, downloadedBingWallpapers, isLoading } = getBingWallpapers(
-    preferences.includeDownloadedWallpapers
+    preferences.includeDownloadedWallpapers,
   );
   autoDownloadWallpapers(bingWallpaperHD);
 

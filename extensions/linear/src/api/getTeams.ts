@@ -1,5 +1,5 @@
 import { Cycle, Organization, Project, Team } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type TeamResult = Pick<
   Team,

@@ -1,5 +1,47 @@
 # Bitwarden Changelog
 
+## [Fix] - 2024-03-12
+
+- Use downloaded CLI on arm64 devices that have it working
+
+## [Improvement] - 2024-03-12
+
+- Improve CLI not found error message
+
+## [Fix] - 2024-03-11
+
+- Temporarily disable CLI download for arm64 devices until bitwarden releases arm binaries
+
+## [Improvements] - 2024-03-02
+
+- Decreased time to get passwords for large vaults by not waiting for all items to be loaded
+
+## [Fixes and Improvements] - 2024-02-27
+
+- Added images to README
+- Bumped the downloaded CLI version from 2023.10.0 to 2024.2.0
+- Added new action to copy the errors captured during the command execution
+- Attempt to fix reported crashes with the new download CLI mechanism
+
+## [Improvements] - 2024-02-25
+
+- Download the official CLI binary upon launch if necessary, rather than relying on the user to install it
+- Improved troubleshooting screen content
+- Added a bug report data collection action
+
+## [New Timeout Option] - 2024-02-24
+
+- Added a new experimental option to lock the vault "On system lock"
+
+## [Fix] - 2024-02-23
+
+- Fixes timeout lock being removed due to lock command updating last activity time
+
+## [New Command and Fix] - 2024-01-06
+
+- Adds Create Folder command
+- Fixes issue with Loading Fallback
+
 ## [Error handling] - 2023-11-30
 
 - Improved error handling

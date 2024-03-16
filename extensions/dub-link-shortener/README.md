@@ -1,6 +1,6 @@
 # Dub Link Shortener
 
-Use https://dub.co API to shorten links 
+Dub.co is the open-source link management infrastructure. This extension allows you to shorten and retrieve your Dub links directly inside Raycast.
 
 # Instructions
 

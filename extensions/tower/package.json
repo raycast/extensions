@@ -5,6 +5,9 @@
   "description": "Navigate and open your repositories in Tower.",
   "icon": "icon.png",
   "author": "tdwesten",
+  "contributors": [
+    "sebduggan"
+  ],
   "version": "1.1.2",
   "license": "MIT",
   "commands": [

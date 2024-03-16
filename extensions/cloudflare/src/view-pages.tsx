@@ -53,58 +53,88 @@ function Command() {
           const account = accounts.find((account) => account.id === accountId);
           const name = account?.name || '';
           return (
-            <List.Section title={name}>
+            <List.Section title={name} key={accountId}>
               {accountPages.map((page) => (
                 <List.Item
                   key={page.name}
                   icon={getDeploymentStatusIcon(page.status)}
                   title={page.name}
-                  accessoryTitle={page.subdomain}
+                  accessories={[{ text: page.subdomain }]}
                   actions={
                     <ActionPanel>
-                      <Action.Push
-                        icon={Icon.TextDocument}
-                        title="Show Details"
-                        target={
-                          <PageView accountId={accountId} name={page.name} />
-                        }
-                      />
-                      <Action.Push
-                        icon={Icon.List}
-                        title="Show Deployments"
-                        target={
-                          <DeploymentListView
-                            accountId={accountId}
-                            pageName={page.name}
+                      <ActionPanel.Section>
+                        <Action.Push
+                          icon={Icon.Document}
+                          title="Show Details"
+                          target={
+                            <PageView accountId={accountId} name={page.name} />
+                          }
+                        />
+                        <Action.Push
+                          icon={Icon.Upload}
+                          title="Show Deployments"
+                          target={
+                            <DeploymentListView
+                              accountId={accountId}
+                              pageName={page.name}
+                            />
+                          }
+                        />
+                        <Action.Push
+                          icon={Icon.Globe}
+                          title="Show Domains"
+                          target={
+                            <DomainListView
+                              accountId={accountId}
+                              pageName={page.name}
+                            />
+                          }
+                          shortcut={{ modifiers: ['cmd'], key: 'd' }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section>
+                        <Action.OpenInBrowser
+                          title="Open Page"
+                          url={toUrl(page.subdomain)}
+                          shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                        />
+                        {page.source && (
+                          <Action.OpenInBrowser
+                            title="Open Repo"
+                            url={getRepoUrl(page.source)}
+                            shortcut={{ modifiers: ['cmd'], key: 'r' }}
                           />
-                        }
-                      />
-                      <Action.Push
-                        icon={Icon.List}
-                        title="Show Domains"
-                        target={
-                          <DomainListView
-                            accountId={accountId}
-                            pageName={page.name}
+                        )}
+                        <Action.OpenInBrowser
+                          title="Open on Cloudflare"
+                          url={getPageUrl(accountId, page.name)}
+                          shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section>
+                        <Action.CopyToClipboard
+                          title="Copy Page Name"
+                          content={page.name}
+                          shortcut={{ modifiers: ['cmd'], key: '.' }}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Page URL"
+                          content={toUrl(page.subdomain)}
+                          shortcut={{ modifiers: ['cmd', 'shift'], key: '.' }}
+                        />
+                        {page.source && (
+                          <Action.CopyToClipboard
+                            title="Copy Repo URL"
+                            content={getRepoUrl(page.source)}
+                            shortcut={{ modifiers: ['opt'], key: '.' }}
                           />
-                        }
-                        shortcut={{ modifiers: ['cmd'], key: 'd' }}
-                      />
-                      <Action.OpenInBrowser
-                        title="Open Page"
-                        url={toUrl(page.subdomain)}
-                        shortcut={{ modifiers: ['cmd'], key: 'p' }}
-                      />
-                      <Action.OpenInBrowser
-                        title="Open Repo"
-                        url={getRepoUrl(page.source)}
-                        shortcut={{ modifiers: ['cmd'], key: 'r' }}
-                      />
-                      <Action.OpenInBrowser
-                        title="Open on Cloudflare"
-                        url={getPageUrl(accountId, page.name)}
-                        shortcut={{ modifiers: ['cmd'], key: 'f' }}
-                      />
+                        )}
+                        <Action.CopyToClipboard
+                          title="Copy Cloudflare URL"
+                          content={getPageUrl(accountId, page.name)}
+                          shortcut={{ modifiers: ['opt', 'shift'], key: '.' }}
+                        />
+                      </ActionPanel.Section>
                     </ActionPanel>
                   }
                 />
@@ -160,10 +190,14 @@ function PageView(props: PageProps) {
   ## Status
 
   ${page.status}
-
+${
+  page.source
+    ? `
   ## Autopublish enabled
 
-  ${page.source.config.autopublishEnabled}
+  ${page.source.config.autopublishEnabled}`
+    : ''
+}
   `;
 
   return (
@@ -172,35 +206,68 @@ function PageView(props: PageProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.Push
-            icon={Icon.List}
-            title="Show Deployments"
-            target={
-              <DeploymentListView accountId={accountId} pageName={page.name} />
-            }
-          />
-          <Action.Push
-            icon={Icon.List}
-            title="Show Domains"
-            target={
-              <DomainListView accountId={accountId} pageName={page.name} />
-            }
-          />
-          <Action.OpenInBrowser
-            title="Open Page"
-            url={toUrl(page.subdomain)}
-            shortcut={{ modifiers: ['cmd'], key: 'p' }}
-          />
-          <Action.OpenInBrowser
-            title="Open Repo"
-            url={getRepoUrl(page.source)}
-            shortcut={{ modifiers: ['cmd'], key: 'r' }}
-          />
-          <Action.OpenInBrowser
-            title="Open on Cloudflare"
-            url={getPageUrl(accountId, page.name)}
-            shortcut={{ modifiers: ['cmd'], key: 'f' }}
-          />
+          <ActionPanel.Section>
+            <Action.Push
+              icon={Icon.Upload}
+              title="Show Deployments"
+              target={
+                <DeploymentListView
+                  accountId={accountId}
+                  pageName={page.name}
+                />
+              }
+            />
+            <Action.Push
+              icon={Icon.Globe}
+              title="Show Domains"
+              target={
+                <DomainListView accountId={accountId} pageName={page.name} />
+              }
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Open Page"
+              url={toUrl(page.subdomain)}
+              shortcut={{ modifiers: ['cmd'], key: 'o' }}
+            />
+            {page.source && (
+              <Action.OpenInBrowser
+                title="Open Repo"
+                url={getRepoUrl(page.source)}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+              />
+            )}
+            <Action.OpenInBrowser
+              title="Open on Cloudflare"
+              url={getPageUrl(accountId, page.name)}
+              shortcut={{ modifiers: ['cmd'], key: 'f' }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy Page Name"
+              content={page.name}
+              shortcut={{ modifiers: ['cmd'], key: '.' }}
+            />
+            <Action.CopyToClipboard
+              title="Copy Page URL"
+              content={toUrl(page.subdomain)}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: '.' }}
+            />
+            {page.source && (
+              <Action.CopyToClipboard
+                title="Copy Repo URL"
+                content={getRepoUrl(page.source)}
+                shortcut={{ modifiers: ['opt'], key: '.' }}
+              />
+            )}
+            <Action.CopyToClipboard
+              title="Copy Cloudflare URL"
+              content={getPageUrl(accountId, page.name)}
+              shortcut={{ modifiers: ['opt', 'shift'], key: '.' }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -243,7 +310,7 @@ function DeploymentListView(props: DeploymentListProps) {
           actions={
             <ActionPanel>
               <Action.Push
-                icon={Icon.TextDocument}
+                icon={Icon.BlankDocument}
                 title="Show Details"
                 target={
                   <DeploymentView
@@ -379,6 +446,23 @@ function DomainListView(props: DomainListProps) {
           key={domain.name}
           icon={getDomainStatusIcon(domain.status)}
           title={domain.name}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <Action.OpenInBrowser
+                  title="Open Domain"
+                  url={toUrl(domain.name)}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <Action.CopyToClipboard
+                  title="Copy Domain"
+                  content={toUrl(domain.name)}
+                  shortcut={{ modifiers: ['cmd'], key: '.' }}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
         />
       ))}
     </List>

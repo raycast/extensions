@@ -1,5 +1,5 @@
 import { Image, Icon, Color, Grid } from "@raycast/api";
-import { GIF_SERVICE, GRID_COLUMNS } from "../preferences";
+import { GIF_SERVICE, GRID_COLUMNS, getMaxResults } from "../preferences";
 
 import { GifGridSection, GifGridSectionProps } from "./GifGridSection";
 
@@ -20,9 +20,12 @@ export interface GifGridProps {
 }
 
 export function GifGrid(props: GifGridProps) {
+  const columns = GRID_COLUMNS[props.itemSize];
+
   return (
     <Grid
-      columns={GRID_COLUMNS[props.itemSize]}
+      columns={columns}
+      pagination={{ onLoadMore: props.loadMoreGifs, pageSize: getMaxResults(), hasMore: true }}
       searchBarAccessory={
         props.showDropdown ? (
           <Grid.Dropdown tooltip="Change GIF Provider" storeValue={true} onChange={props.onDropdownChange}>
@@ -77,7 +80,6 @@ export function GifGrid(props: GifGridProps) {
             hide={sProps.hide}
             service={sProps.service}
             isLocalGifSection={sProps.isLocalGifSection}
-            loadMoreGifs={props.loadMoreGifs}
           />
         ))
       )}

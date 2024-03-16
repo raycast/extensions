@@ -1,5 +1,21 @@
 # PromptLab Changelog
 
+## [PromptLab 1.2.3] - 2024-01-16
+
+- Added option to record previous runs of a command.
+- Added {{lastRun}} placeholder.
+- Fixed bug where commands that don't show a response view would hang if the prompt evaluated to an empty string.
+
+## [PromptLab 1.2.2] - 2024-01-09
+
+- Code cleanup. No user-facing changes.
+
+## [PromptLab 1.2.1] - 2023-12-31
+
+- Added transparency to the menu bar icon.
+- Updated default Raycast AI model to GPT-3.5 Turbo Instruct.
+- Updated dependencies, now using placeholders-toolkit package.
+
 ## [PromptLab 1.2.0] - 2023-08-15
 
 - Added support for several new browsers

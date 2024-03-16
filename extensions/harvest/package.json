@@ -71,6 +71,14 @@
       "mode": "no-view"
     },
     {
+      "name": "toggleTimer",
+      "icon": "toggle.png",
+      "title": "Toggle Timer",
+      "subtitle": "Harvest",
+      "description": "Toggles the most recently used Harvest Timer",
+      "mode": "no-view"
+    },
+    {
       "name": "menu-bar",
       "title": "Running Timer",
       "subtitle": "Harvest",
@@ -101,6 +109,15 @@
           "description": "URL to open when a running timer stops. See README for more info.",
           "type": "textfield",
           "required": false
+        },
+        {
+          "name": "statusFolder",
+          "title": "Status Folder",
+          "type": "directory",
+          "description": "Folder to write status files to. See README for more info.",
+          "required": false,
+          "label": "Status Folder",
+          "placeholder": "Select a directory"
         }
       ]
     }

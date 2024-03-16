@@ -1,5 +1,14 @@
 # Change Case Changelog
 
+## [Add Pop to Root Preference] - 2024-03-07
+- Added pop to root as a default preference
+
+## [Better Sentence Case] - 2024-01-28
+- Sentence case now handles punctuation better
+
+## [Fix Quicklink] - 2023-12-27
+- Fixed quicklinks not respecting the `Primary Action` preference.
+
 ## [Manual Refresh] - 2023-11-27
 - Added a manual refresh action to refresh the selected text/clipboard
 

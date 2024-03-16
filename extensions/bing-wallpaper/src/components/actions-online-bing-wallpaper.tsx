@@ -22,7 +22,7 @@ export function ActionsOnlineBingWallpaper(props: {
         onAction={() => {
           setWallpaper(
             getPictureName(bingImage.url) + "-" + bingImage.startdate,
-            buildBingImageURL(bingImage.url, "raw")
+            buildBingImageURL(bingImage.url, "raw"),
           ).then(() => "");
         }}
       />
@@ -34,7 +34,7 @@ export function ActionsOnlineBingWallpaper(props: {
         }}
       />
       <Action.Push
-        icon={Icon.Sidebar}
+        icon={Icon.Eye}
         title={"Preview Wallpaper"}
         shortcut={{ modifiers: ["cmd"], key: "y" }}
         target={
@@ -48,14 +48,14 @@ export function ActionsOnlineBingWallpaper(props: {
       />
       <ActionPanel.Section>
         <Action
-          icon={Icon.TwoArrowsClockwise}
+          icon={Icon.Repeat}
           title={"Set Random Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
             const randomImage = onlineImages[Math.floor(Math.random() * onlineImages.length)];
             setWallpaper(
               getPictureName(randomImage.url) + "-" + randomImage.startdate,
-              buildBingImageURL(randomImage.url, "raw")
+              buildBingImageURL(randomImage.url, "raw"),
             ).then(() => "");
           }}
         />

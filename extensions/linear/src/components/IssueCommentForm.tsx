@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { CommentResult, IssueResult } from "../api/getIssues";
 import { getErrorMessage } from "../helpers/errors";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { MutatePromise } from "@raycast/utils";
 
 type IssueCommentFormProps = {

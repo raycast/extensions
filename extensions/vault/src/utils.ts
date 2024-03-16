@@ -95,7 +95,10 @@ export function getFavoriteNamespaces(): string[] {
   return preferences.favoriteNamespaces ? preferences.favoriteNamespaces.split(" ") : [];
 }
 
-export function getUserToken(): string {
+export async function getUserToken(): Promise<string> {
+  if (preferences.loginMethod === "oidc") {
+    return await oauthService.authorize();
+  }
   const tokenCache = parseTokenFromCache();
   return tokenCache ? tokenCache.token : "";
 }

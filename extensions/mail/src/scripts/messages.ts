@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { simpleParser } from "mailparser";
 import TurndownService from "turndown";
 import juice from "juice";
@@ -8,7 +8,7 @@ import utf8 from "utf8";
 import { Account, Mailbox, Message, OutgoingMessage, OutgoingMessageAction, Preferences } from "../types";
 import { constructDate, formatMarkdown, stripHtmlComments, titleCase } from "../utils";
 import { Cache } from "../utils/cache";
-import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+import { isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { blockAnchors, hideElements } from "../utils/turndown";
 import { Validation } from "../utils/validation";
 
@@ -97,6 +97,36 @@ export const moveMessageTo = async (message: Message, mailbox: Mailbox, target: 
     await tellMessage(message, mailbox, `set mailbox of msg to first mailbox whose name is "${target.name}"`);
   } catch (error) {
     await showToast(Toast.Style.Failure, `Error moving message to ${titleCase(target.name)}`);
+    console.error(error);
+
+    Cache.invalidateMessages();
+  }
+};
+
+export const moveMessageToArchive = async (message: Message, account: Account, mailbox: Mailbox) => {
+  try {
+    const archiveMailbox = account.mailboxes.find(isArchiveMailbox);
+    if (archiveMailbox) {
+      const account = Cache.getAccount(message.account);
+      const mailboxes = account?.mailboxes || [];
+
+      if (account && mailboxes) {
+        mailboxes.forEach((innerMailbox) => {
+          if (innerMailbox.name === archiveMailbox.name) {
+            Cache.addMessage(message, account.id, innerMailbox.name);
+          } else {
+            Cache.deleteMessage(message.id, account.id, innerMailbox.name);
+          }
+        });
+      }
+
+      await showToast(Toast.Style.Success, "Moved message to Archive");
+      await tellMessage(message, mailbox, `move msg to mailbox "Archive"`);
+    } else {
+      await showToast(Toast.Style.Failure, "No Archive mailbox found");
+    }
+  } catch (error) {
+    await showToast(Toast.Style.Failure, "Error moving message to Archive");
     console.error(error);
 
     Cache.invalidateMessages();

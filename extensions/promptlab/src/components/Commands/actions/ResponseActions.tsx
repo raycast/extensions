@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import CommandChatView from "../../Chats/CommandChatView";
-import { CommandOptions, ExtensionPreferences } from "../../../utils/types";
-import { getMenubarOwningApplication } from "../../../utils/context-utils";
+import { ExtensionPreferences } from "../../../lib/preferences/types";
+import { CommandOptions } from "../../../lib/commands/types";
+import { getMenubarOwningApplication } from "../../../lib/context-utils";
 import { useEffect, useState } from "react";
-import { logDebug } from "../../../utils/dev-utils";
+import { logDebug } from "../../../lib/dev-utils";
 
 /**
  * A command action that pastes the provided text into the current application.

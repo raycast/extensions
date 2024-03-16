@@ -1,11 +1,26 @@
+export interface OllamaApiVersionResponse {
+  version: string;
+}
+
 export interface OllamaApiTagsResponse {
   models: OllamaApiTagsResponseModel[];
 }
 
 export interface OllamaApiShowResponse {
+  license?: string;
   modelfile: string;
   parameters: string;
   template: string;
+  system?: string;
+  detail?: OllamaApiShowDetail;
+}
+
+export interface OllamaApiShowDetail {
+  format: string;
+  family: string;
+  families: string[];
+  parameter_size: string;
+  quantization_level: string;
 }
 
 export interface OllamaApiShowModelfile {
@@ -40,15 +55,8 @@ export interface OllamaApiTagsResponseModel {
   name: string;
   modified_at: string;
   size: number;
-  download?: number;
-}
-
-export interface OllamaApiTagsExtended {
-  models: OllamaApiTagsModelExtended[];
-}
-
-export interface OllamaApiTagsModelExtended extends OllamaApiTagsResponseModel {
-  modelfile?: OllamaApiShowModelfile;
+  digest: string;
+  details: OllamaApiShowDetail;
 }
 
 export interface OllamaApiPullResponse {
@@ -62,13 +70,30 @@ export interface OllamaApiPullResponse {
 export interface OllamaApiGenerateRequestBody {
   model: string;
   prompt: string;
-  format?: string;
-  options?: OllamaApiGenerateOptionsRequestBody;
   system?: string;
   template?: string;
   context?: number[];
   stream?: boolean;
   raw?: boolean;
+  format?: string;
+  images?: string[];
+
+  options?: OllamaApiGenerateOptionsRequestBody;
+}
+
+export interface OllamaApiChatRequestBody {
+  model: string;
+  messages: OllamaApiChatMessage[];
+  stream?: boolean;
+  format?: string;
+
+  options?: OllamaApiGenerateOptionsRequestBody;
+}
+
+export interface OllamaApiChatMessage {
+  role: OllamaApiChatMessageRole;
+  content: string;
+  images?: string[];
 }
 
 export interface OllamaApiGenerateOptionsRequestBody {
@@ -106,82 +131,65 @@ export interface OllamaApiGenerateOptionsRequestBody {
   num_thread?: number;
 }
 
-export interface OllamaApiGenerateResponse {
+export interface OllamaApiGenerateStats {
   model: string;
   created_at: string;
-  response: string;
-  done: boolean;
-  context?: number[];
+
   total_duration?: number;
   load_duration?: number;
   prompt_eval_count?: number;
   prompt_eval_duration?: number;
   eval_count?: number;
   eval_duration?: number;
+
+  done: boolean;
+}
+
+export interface OllamaApiGenerateResponse extends OllamaApiGenerateStats {
+  response: string;
+  context?: number[];
+}
+
+export interface OllamaApiChatResponse extends OllamaApiGenerateStats {
+  message?: OllamaApiChatMessage;
 }
 
 export interface OllamaApiEmbeddingsResponse {
   embedding: number[];
 }
 
-export interface OllamaApiGenerateResponseMetadata {
-  model: string;
-  total_duration: number;
-  load_duration: number;
-  sample_count: number;
-  sample_duration: number;
-  prompt_eval_count: number;
-  prompt_eval_duration: number;
-  eval_count: number;
-  eval_duration: number;
-}
-
-export interface OllamaPromptFormat {
-  promptStart: string;
-  promptEnd: string;
-  tagEnd: string;
-}
-
-export interface OllamaPrompt {
-  prompt: string;
-  tagEnd: string;
-}
-
-export interface RaycastArgumentsOllamaAsk {
-  fallbackText?: string;
-  arguments: {
-    query: string;
-  };
-  launchType: string;
-  launchContext?: string;
-}
-
-export interface RaycastArgumentsOllamaAskCustom {
-  fallbackText?: string;
-  arguments: {
-    model: string;
-    query: string;
-  };
-  launchType: string;
-  launchContext?: string;
-}
-
-export interface RaycastArgumentsOllamaChatCustom {
-  fallbackText?: string;
-  arguments: {
-    model: string;
-  };
-  launchType: string;
-  launchContext?: string;
-}
-
 export interface RaycastArgumentsOllamaCommandCustom {
   fallbackText?: string;
   arguments: {
-    model: string;
+    prompt: string;
+    model?: string;
+    image?: string;
   };
   launchType: string;
   launchContext?: string;
+}
+
+export interface RaycastArgumentsOllamaCommandTranslate {
+  fallbackText?: string;
+  arguments: {
+    language: string;
+  };
+  launchType: string;
+  launchContext?: string;
+}
+
+export interface RaycastImage {
+  path: string;
+  html: string;
+  base64: string;
+}
+
+export interface RaycastChatMessage extends OllamaApiGenerateStats {
+  tags?: string[];
+  sources?: string[];
+  images?: RaycastImage[];
+
+  messages: OllamaApiChatMessage[];
 }
 
 export interface DocumentLoaderFiles {
@@ -198,6 +206,12 @@ export interface ChainPreferencesParameter {
   docsNumber?: number;
 }
 
+export enum OllamaApiChatMessageRole {
+  SYSTEM = "system",
+  USER = "user",
+  ASSISTANT = "assistant",
+}
+
 export enum Chains {
   STUFF = "Stuff",
   REFINE = "Refine",
@@ -205,4 +219,11 @@ export enum Chains {
 
 export enum PromptTags {
   FILE = "/file",
+  IMAGE = "/image",
+}
+
+export enum ModelType {
+  GENERATE = "generate",
+  EMBEDDING = "embedding",
+  IMAGE = "image",
 }

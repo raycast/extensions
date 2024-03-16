@@ -30,7 +30,7 @@ export default function ProjectIssues({ projectId, priorities, me, users }: Proj
       return [];
     }
 
-    if (milestone === "") {
+    if (!milestone || !milestones || milestones.length < 1) {
       return issues;
     }
 

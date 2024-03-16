@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Icon, Toast, showToast, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Toast, showToast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   MergeableState,
   MyPullRequestsQuery,
@@ -12,7 +13,6 @@ import {
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import AddPullRequestReview from "./AddPullRequestReview";
 import PullRequestCommits from "./PullRequestCommits";
@@ -240,6 +240,8 @@ export default function PullRequestActions({
         <AddProjectSubmenu pullRequest={pullRequest} mutate={mutate} />
 
         <SetMilestoneSubmenu pullRequest={pullRequest} mutate={mutate} />
+
+        <OpenPreviewSubmenu pullRequest={pullRequest} mutate={mutate} />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
@@ -625,5 +627,51 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
         </>
       )}
     </ActionPanel.Submenu>
+  );
+}
+
+function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
+  const { github } = getGitHubClient();
+
+  const { data, isLoading } = useCachedPromise(
+    async (pullRequest) => {
+      const data = await github.commentsForPullRequest({
+        owner: pullRequest.repository.owner.login,
+        name: pullRequest.repository.name,
+        number: pullRequest.number,
+      });
+
+      const comments = data?.repository?.pullRequest?.comments.nodes;
+      const lastVercelComments = comments?.filter((comment) => comment?.author?.login === "vercel");
+
+      if (!lastVercelComments?.length) return undefined;
+
+      const lastVercelComment = lastVercelComments.pop()?.body;
+
+      const vercelPreviewUrl = lastVercelComment
+        ?.match(/\[Visit Preview\]\([^)]+\)/)?.[0]
+        ?.replace("[Visit Preview](", "")
+        .replace(")", "");
+
+      return vercelPreviewUrl ?? undefined;
+    },
+    [pullRequest],
+  );
+
+  return (
+    <>
+      {isLoading ? (
+        <Action title="Loading..." />
+      ) : (
+        data && (
+          <Action.OpenInBrowser
+            title="Open Vercel Preview"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            url={data}
+            icon={{ source: "vercel.svg", tintColor: Color.PrimaryText }}
+          />
+        )
+      )}
+    </>
   );
 }
