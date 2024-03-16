@@ -2,10 +2,10 @@ import { getPreferenceValues } from "@raycast/api";
 import { existsSync } from "fs";
 import { safeParse } from "valibot";
 
-import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
 import { getMasterPassword } from "@/helper/master-password";
-import { execa } from "execa";
+import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
 import { exec } from "child_process";
+import { execa } from "execa";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -25,7 +25,7 @@ async function dcli(...args: string[]) {
     },
   });
   // reopen raycast as touchid closes the window
-  exec('open -a Raycast.app');
+  exec("open -a Raycast.app");
   if (stderr && stderr.length > 1) {
     throw new Error(`Failed to execute Dashlane CLI ${stderr}`);
   }
