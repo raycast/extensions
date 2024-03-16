@@ -5,6 +5,9 @@
   "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
   "icon": "dashlane-512.png",
   "author": "tm.wrnr",
+  "contributors": [
+    "huzef44"
+  ],
   "categories": [
     "Security"
   ],
@@ -30,6 +33,13 @@
       "subtitle": "Dashlane",
       "description": "Sync your Dashlane vault",
       "mode": "no-view"
+    },
+    {
+      "name": "master-password",
+      "title": "Set Master Password",
+      "subtitle": "Dashlane",
+      "description": "Set your Dashlane master password",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -41,11 +51,21 @@
       "required": false,
       "title": "Dashlane CLI path",
       "type": "textfield"
+    },
+    {
+      "default": true,
+      "description": "Use Touch ID for opening Vault",
+      "label": "Use Touch ID for opening Vault (Recommended)",
+      "name": "useTouchID",
+      "required": true,
+      "title": "Encrypted Vault",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.67.1",
     "@raycast/utils": "^1.12.4",
+    "execa": "^8.0.1",
     "valibot": "~0.28.1"
   },
   "devDependencies": {
@@ -60,6 +80,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/auth assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
