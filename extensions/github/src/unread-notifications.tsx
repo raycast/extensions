@@ -53,8 +53,12 @@ function UnreadNotifications() {
   async function openNotification(notification: Notification) {
     try {
       const openAndMarkNotificationAsRead = async () => {
-        await open(getGitHubURL(notification, viewer?.id));
-        await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        if (notification.subject.type === "RepositoryInvitation") {
+          open(`${notification.repository.html_url}/invitations`);
+        } else {
+          await open(getGitHubURL(notification, viewer?.id));
+          await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        }
       };
 
       await mutate(openAndMarkNotificationAsRead(), {
