@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import FormData from "form-data";
 import markdownToAdf from "md-to-adf";
 
+import { AddWorkLogFormValues } from "../components/AddWorkLogForm";
 import { IssueFormValues } from "../components/CreateIssueForm";
 import { CustomFieldSchema, getCustomFieldValue } from "../helpers/issues";
 
@@ -103,6 +104,27 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export async function AddWorkLog(issueId: string, values: AddWorkLogFormValues) {
+  const formatDate = (date: Date) => {
+    const [dateAsJSON] = date.toJSON().split("T")
+
+    return dateAsJSON + "T09:00:00.000+0000"
+  }
+
+  const requestBody: Record<string, unknown> = {
+    comment: values.comment,
+    started: formatDate(values.startDate),
+    timeSpent: values.time
+  }
+
+  console.log(requestBody)
+
+  return request(`/issue/${issueId}/worklog`, {
+    method: "POST",
+    body: JSON.stringify(requestBody),
+  })
 }
 
 export enum StatusCategoryKey {

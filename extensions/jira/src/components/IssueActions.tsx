@@ -22,6 +22,7 @@ import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
 
+import { AddWorkLogForm } from "./AddWorkLogForm";
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
 import IssueCommentForm from "./IssueCommentForm";
@@ -185,6 +186,13 @@ export default function IssueActions({
         />
 
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
+
+        <Action.Push 
+          title="Add Work Log"
+          icon={Icon.Clock}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          target={<AddWorkLogForm issue={issue} />}
+        />
 
         <Action.Push
           title="Add Comment"
