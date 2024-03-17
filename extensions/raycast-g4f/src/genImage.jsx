@@ -171,23 +171,23 @@ export default function genImage({ launchContext }) {
           icon={Icon.Folder}
           title="Show in Finder"
           onAction={async () => {
-            let found = false,
-              filePath = "";
+            let found = false;
             for (const message of getChat(chatData.currentChat).messages) {
               const path = message.answer;
               if (path) {
-                filePath = path;
-                found = true;
-                break;
+                try {
+                  await showInFinder(path);
+                  found = true;
+                  break;
+                } catch (e) {
+                  continue;
+                }
               }
             }
 
             if (!found) {
               toast(Toast.Style.Failure, "Image Chat is empty");
-              return;
             }
-
-            await showInFinder(filePath);
           }}
         />
         <ActionPanel.Section title="Manage Image Chats">
