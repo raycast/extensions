@@ -63,7 +63,16 @@ export default function Chat({ launchContext }) {
           title="Chat Name"
           text="In each chat, GPT will remember the previous messages you send in it."
         />
-        <Form.TextField id="chatName" />
+        <Form.TextField
+          id="chatName"
+          defaultValue={`New Chat ${new Date().toLocaleString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })}`}
+        />
       </Form>
     );
   };
@@ -250,6 +259,34 @@ export default function Chat({ launchContext }) {
               });
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+            style={Action.Style.Destructive}
+          />
+          <Action
+            icon={Icon.Trash}
+            title="Delete All Chats"
+            onAction={async () => {
+              await confirmAlert({
+                title: "Are you sure?",
+                message: "You cannot recover deleted chats!",
+                icon: Icon.Trash,
+                primaryAction: {
+                  title: "Delete ALL Chats Forever",
+                  style: Action.Style.Destructive,
+                  onAction: () => {
+                    setChatData({
+                      currentChat: "New Chat",
+                      chats: [
+                        {
+                          name: "New Chat",
+                          creationDate: new Date(),
+                          messages: [],
+                        },
+                      ],
+                    });
+                  },
+                },
+              });
+            }}
             style={Action.Style.Destructive}
           />
         </ActionPanel.Section>

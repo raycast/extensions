@@ -62,7 +62,16 @@ export default function genImage({ launchContext }) {
         }
       >
         <Form.Description title="Chat Name" text="Enter a chat name to help you organise your image chats." />
-        <Form.TextField id="chatName" />
+        <Form.TextField
+          id="chatName"
+          defaultValue={`New Image Chat ${new Date().toLocaleString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })}`}
+        />
       </Form>
     );
   };
@@ -233,7 +242,7 @@ export default function genImage({ launchContext }) {
         <ActionPanel.Section title="Danger zone">
           <Action
             icon={Icon.Trash}
-            title="Delete Chat"
+            title="Delete Image Chat"
             onAction={async () => {
               await confirmAlert({
                 title: "Are you sure?",
@@ -274,6 +283,34 @@ export default function genImage({ launchContext }) {
               });
             }}
             shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+            style={Action.Style.Destructive}
+          />
+          <Action
+            icon={Icon.Trash}
+            title="Delete All Image Chats"
+            onAction={async () => {
+              await confirmAlert({
+                title: "Are you sure?",
+                message: "You cannot recover deleted chats!",
+                icon: Icon.Trash,
+                primaryAction: {
+                  title: "Delete ALL Chats Forever",
+                  style: Action.Style.Destructive,
+                  onAction: () => {
+                    setChatData({
+                      currentChat: "New Image Chat",
+                      chats: [
+                        {
+                          name: "New Image Chat",
+                          creationDate: new Date(),
+                          messages: [],
+                        },
+                      ],
+                    });
+                  },
+                },
+              });
+            }}
             style={Action.Style.Destructive}
           />
         </ActionPanel.Section>
