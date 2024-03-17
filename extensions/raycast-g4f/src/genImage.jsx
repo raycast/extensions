@@ -296,16 +296,27 @@ export default function genImage({ launchContext }) {
                 primaryAction: {
                   title: "Delete ALL Chats Forever",
                   style: Action.Style.Destructive,
-                  onAction: () => {
-                    setChatData({
-                      currentChat: "New Image Chat",
-                      chats: [
-                        {
-                          name: "New Image Chat",
-                          creationDate: new Date(),
-                          messages: [],
+                  onAction: async () => {
+                    await confirmAlert({
+                      title: "Are you sure?",
+                      message: "Please confirm that you want to delete all chats!",
+                      icon: Icon.Trash,
+                      primaryAction: {
+                        title: "Delete ALL Chats Forever",
+                        style: Action.Style.Destructive,
+                        onAction: () => {
+                          setChatData({
+                            currentChat: "New Image Chat",
+                            chats: [
+                              {
+                                name: "New Image Chat",
+                                creationDate: new Date(),
+                                messages: [],
+                              },
+                            ],
+                          });
                         },
-                      ],
+                      },
                     });
                   },
                 },
