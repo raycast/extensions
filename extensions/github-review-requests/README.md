@@ -1,7 +1,7 @@
 <div align="center">
-    <img src="https://user-images.githubusercontent.com/6590356/140933922-60d05339-397b-40ec-ac42-a82628cbb9f4.png" width="50" />
-    <h1>GitHub Review Requests</h1>
-    <p>🚀 Stay on top of PR notifications to boost your working efficiency.</p>
+  <img src="https://user-images.githubusercontent.com/6590356/140933922-60d05339-397b-40ec-ac42-a82628cbb9f4.png" width="50" />
+  <h1>GitHub Review Requests</h1>
+  <p>🚀 Stay on top of PR notifications to boost your working efficiency.</p>
 </div>
 
 ## Key Features
@@ -15,7 +15,9 @@ PRs will be divided into 4 categories:
 - Wait For Review - Your PRs are still waiting for reviewers to decide.
 - New Request Review - **Other's** PRs that you haven't reviewed. Don't keep someone hanging for a long time.
 
-![image](https://github.com/raycast/extensions/assets/37981444/1c0424fa-a9bf-45fe-91b0-4f371b427a5c)
+<div align="center">
+  <img src="https://github.com/raycast/extensions/assets/37981444/1c0424fa-a9bf-45fe-91b0-4f371b427a5c" width="300" />
+</div>
 
 ## Getting Started
 
