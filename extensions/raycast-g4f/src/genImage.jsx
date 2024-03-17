@@ -375,12 +375,12 @@ export default function genImage({ launchContext }) {
   };
 
   return chatData === null ? (
-    <Grid columns={4} searchText={searchText} onSearchTextChange={setSearchText}>
+    <Grid columns={3} searchText={searchText} onSearchTextChange={setSearchText}>
       <Grid.EmptyView icon={Icon.Stars} title="Send a Prompt to GPT to get started." />
     </Grid>
   ) : (
     <Grid
-      columns={4}
+      columns={3}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Generate image..."
