@@ -1,5 +1,9 @@
 # Zotero Changelog
 
+## [Fixes] - 2024-03-17
+
+- Changed zotero-better-bibtex database path and schema
+
 ## [Enhancements] - 2023-11-21
 
 - Add action to copy PDF URL
