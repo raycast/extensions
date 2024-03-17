@@ -2,7 +2,7 @@
 
 ## [Update] - 2024-03-17
 
-- Fixed names of instruct models.
+- Fixed names of Mistral AI instruct models.
 
 ## [Update] - 2024-03-13
 
