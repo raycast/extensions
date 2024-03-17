@@ -1,5 +1,9 @@
 # Snake Changelog
 
+## [Update] - 2024-03-17
+
+- Add README file for readers.
+
 ## [New Additions & Refactor] - 2024-03-14
 
 - Menubar: Reorganize menu item order.
