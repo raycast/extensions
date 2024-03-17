@@ -68,10 +68,10 @@ WHERE itemTags.itemID = :id
 `;
 
 const BIBTEX_SQL = `
-SELECT citekeys.citekey AS citekey
-    FROM citekeys
-WHERE citekeys.itemKey = :key
-AND citekeys.libraryID = :lib
+SELECT citationkey.citationKey AS citekey
+    FROM citationkey
+WHERE citationkey.itemKey = :key
+AND citationkey.libraryID = :lib
 `;
 
 const METADATA_SQL = `
@@ -180,7 +180,7 @@ async function getBibtexKey(key: string, library: string): Promise<string> {
 async function openBibtexDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
+  const new_fPath = f_path.replace("zotero.sqlite", "better-bibtex.sqlite");
 
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
