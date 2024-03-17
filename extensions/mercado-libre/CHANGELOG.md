@@ -1,7 +1,8 @@
 # Mercado Libre Changelog
 
-## [Enhancements] - 2024-03-16
+## [Enhancements] - 2024-03-17
 
+- Add pagination support.
 - Improved behavior of the Recent Searches list.
 
 ## [Enhancements] - 2024-02-25

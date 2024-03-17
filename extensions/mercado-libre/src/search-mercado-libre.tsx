@@ -6,7 +6,7 @@ import { RecentSearchListItem } from "./components/RecentSearchListItem";
 import { ResultGridItem } from "./components/ResultGridItem";
 import { ResultListItem } from "./components/ResultListItem";
 import { MAX_RECENT_SEARCHES } from "./constants";
-import { MercadoLibreItem, Preferences } from "./types";
+import { MercadoLibreItem, MercadoLibreResponse, Preferences } from "./types";
 
 export default function Command() {
   const { siteId, viewLayout, gridItemSize } = getPreferenceValues<Preferences>();
@@ -14,10 +14,12 @@ export default function Command() {
   const [recentSearches, setRecentSearches] = useCachedState<string[]>("recentSearches", []);
   const url = `https://api.mercadolibre.com/sites/${siteId}/search?q=${searchQuery}`;
 
-  const { data, isLoading } = useFetch<MercadoLibreItem[]>(url, {
-    parseResponse: async (response: Response) => {
-      const json = await response.json();
-      return json.results;
+  const { isLoading, data, pagination } = useFetch<MercadoLibreResponse, unknown, MercadoLibreItem[]>(() => url, {
+    mapResult(result) {
+      return {
+        data: result.results,
+        hasMore: result.paging.offset < result.paging.total,
+      };
     },
     execute: searchQuery.length > 0,
     keepPreviousData: true,
@@ -79,6 +81,7 @@ export default function Command() {
     return viewLayout === "grid" ? (
       <Grid
         isLoading={isLoading}
+        pagination={pagination}
         columns={Number(gridItemSize)}
         searchBarPlaceholder="Search Mercado Libre"
         onSearchTextChange={setSearchQuery}
@@ -94,6 +97,7 @@ export default function Command() {
     ) : (
       <List
         isLoading={isLoading}
+        pagination={pagination}
         searchBarPlaceholder="Search Mercado Libre"
         onSearchTextChange={setSearchQuery}
         throttle
