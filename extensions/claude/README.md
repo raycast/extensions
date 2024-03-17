@@ -1,4 +1,4 @@
-Access LLMs on any API that conforms to the OpenAI API spec via raycast. Eg groq, perplexity, mistral, etc.
+Access Claude via raycast.
 
 ## Getting a Anthropic API Key
 

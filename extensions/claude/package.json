@@ -410,6 +410,7 @@
     }
   ],
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.18.0",
     "@nem035/gpt-3-encoder": "^1.1.7",
     "@raycast/api": "^1.67.1",
     "openai": "^4.27.0"
