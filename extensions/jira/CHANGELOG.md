@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Create Add Work Log action to issues details] - 2024-03-17
+
+- Add a new action in the issue details, to add a work log in the current issue.
+
 ## [Improve Assignee and Sprint dropdowns] - 2024-03-14
 
 - Remove the default value in the Assignee and Sprint dropdowns when searching.

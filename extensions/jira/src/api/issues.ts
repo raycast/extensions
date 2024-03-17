@@ -108,23 +108,23 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
 
 export async function AddWorkLog(issueId: string, values: AddWorkLogFormValues) {
   const formatDate = (date: Date) => {
-    const [dateAsJSON] = date.toJSON().split("T")
+    const [dateAsJSON] = date.toJSON().split("T");
 
-    return dateAsJSON + "T09:00:00.000+0000"
-  }
+    return dateAsJSON + "T09:00:00.000+0000";
+  };
 
   const requestBody: Record<string, unknown> = {
     comment: values.comment,
     started: formatDate(values.startDate),
-    timeSpent: values.time
-  }
+    timeSpent: values.time,
+  };
 
-  console.log(requestBody)
+  console.log(requestBody);
 
   return request(`/issue/${issueId}/worklog`, {
     method: "POST",
     body: JSON.stringify(requestBody),
-  })
+  });
 }
 
 export enum StatusCategoryKey {

@@ -187,7 +187,7 @@ export default function IssueActions({
 
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
 
-        <Action.Push 
+        <Action.Push
           title="Add Work Log"
           icon={Icon.Clock}
           shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
