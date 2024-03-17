@@ -8,6 +8,11 @@ import {
   useNavigation,
   confirmAlert,
   getPreferenceValues,
+  LocalStorage,
+  environment,
+  Grid,
+  Clipboard,
+  showInFinder,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import * as G4F from "g4f";
@@ -15,7 +20,6 @@ const g4f = new G4F.G4F();
 import { g4f_providers } from "./api/gpt";
 import fetch from "node-fetch-polyfill";
 import fs from "fs";
-import { LocalStorage, environment, Grid, Clipboard } from "@raycast/api";
 
 export default function genImage({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -164,16 +168,26 @@ export default function genImage({ launchContext }) {
           }}
         />
         <Action
-          icon={Icon.Clipboard}
-          title="Copy Image Path"
+          icon={Icon.Folder}
+          title="Show in Finder"
           onAction={async () => {
-            const filePath = getChat(chatData.currentChat).messages[0].answer;
-            if (!filePath) {
-              toast(Toast.Style.Failure, "Image does not exist");
+            let found = false,
+              filePath = "";
+            for (const message of getChat(chatData.currentChat).messages) {
+              const path = message.answer;
+              if (path) {
+                filePath = path;
+                found = true;
+                break;
+              }
+            }
+
+            if (!found) {
+              toast(Toast.Style.Failure, "Image Chat is empty");
               return;
             }
 
-            await Clipboard.copy(filePath);
+            await showInFinder(filePath);
           }}
         />
         <ActionPanel.Section title="Manage Image Chats">
@@ -428,7 +442,7 @@ export const image_providers = {
     g4f.providers.ProdiaStableDiffusionXL,
     {
       // list of available models: https://rentry.co/wfhsk8sv
-      model: "sd_xl_base_1.0.safetensors [be9edd61]",
+      model: "dreamshaperXL10_alpha2.safetensors [c8afe2ef]",
       height: 1024,
       width: 1024,
       samplingSteps: 25,
