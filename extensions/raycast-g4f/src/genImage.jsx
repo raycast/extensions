@@ -1,25 +1,23 @@
 import {
-  ActionPanel,
   Action,
-  Toast,
-  Icon,
-  showToast,
-  Form,
-  useNavigation,
+  ActionPanel,
   confirmAlert,
-  getPreferenceValues,
-  LocalStorage,
   environment,
+  Form,
+  getPreferenceValues,
   Grid,
-  Clipboard,
+  Icon,
+  LocalStorage,
   showInFinder,
+  showToast,
+  Toast,
+  useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as G4F from "g4f";
-const g4f = new G4F.G4F();
-import { g4f_providers } from "./api/gpt";
-import fetch from "node-fetch-polyfill";
 import fs from "fs";
+
+const g4f = new G4F.G4F();
 
 export default function genImage({ launchContext }) {
   let toast = async (style, title, message) => {
@@ -101,15 +99,7 @@ export default function genImage({ launchContext }) {
 
                 (async () => {
                   try {
-                    // load provider and model from preferences
-                    const preferences = getPreferenceValues();
-                    const providerString = preferences["imageProvider"];
-                    const [provider, providerOptions] = image_providers[providerString];
-                    const options = {
-                      provider: provider,
-                      providerOptions: providerOptions,
-                    };
-
+                    const options = loadImageOptions();
                     const base64Image = await g4f.imageGeneration(query, options);
 
                     // save image
@@ -434,7 +424,7 @@ export const image_providers = {
     {
       // list of available models: https://rentry.co/b6i53fnm
       model: "ICantBelieveItsNotPhotography_seco.safetensors [4e7a3dfd]",
-      samplingSteps: 15,
+      // samplingSteps: 15,
       cfgScale: 25,
     },
   ],
@@ -445,8 +435,29 @@ export const image_providers = {
       model: "dreamshaperXL10_alpha2.safetensors [c8afe2ef]",
       height: 1024,
       width: 1024,
-      samplingSteps: 25,
+      // samplingSteps: 25,
       cfgScale: 18,
     },
   ],
+};
+
+export const loadImageOptions = () => {
+  // load provider and model from preferences
+  const preferences = getPreferenceValues();
+  const providerString = preferences["imageProvider"],
+    imageQuality = preferences["imageQuality"];
+  const [provider, providerOptions] = image_providers[providerString];
+
+  // image quality and creativity settings are handled separately
+  // only initialise samplingSteps if supported by the provider
+  if (provider === g4f.providers.Prodia) {
+    providerOptions.samplingSteps = imageQuality === "Medium" ? 10 : imageQuality === "High" ? 15 : 20;
+  } else if (provider === g4f.providers.ProdiaStableDiffusionXL) {
+    providerOptions.samplingSteps = imageQuality === "Medium" ? 20 : imageQuality === "High" ? 25 : 30;
+  }
+
+  return {
+    provider: provider,
+    providerOptions: providerOptions,
+  };
 };

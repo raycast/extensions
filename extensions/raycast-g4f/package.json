@@ -164,6 +164,28 @@
           }
       ],
       "default": "Prodia"
+    },
+    {
+      "description": "Image Quality (higher takes longer to generate)",
+      "name": "imageQuality",
+      "required": false,
+      "title": "Image Quality",
+      "type": "dropdown",
+      "data": [
+          {
+          "title": "Medium",
+          "value": "Medium"
+          },
+          {
+          "title": "High",
+          "value": "High"
+          },
+          {
+          "title": "Extreme",
+          "value": "Extreme"
+          }
+      ],
+      "default": "High"
     }
   ],
 
