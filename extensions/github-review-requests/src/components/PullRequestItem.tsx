@@ -4,15 +4,14 @@ import { PullRequestShort } from "../types";
 type PullRequestItemParams = {
   pull: PullRequestShort;
   onAction: () => void;
-  showMyIcon?: boolean;
   index?: number;
 };
 
-const PullRequestItem = ({ pull, index, showMyIcon, onAction }: PullRequestItemParams) => (
+const PullRequestItem = ({ pull, index, onAction }: PullRequestItemParams) => (
   <MenuBarExtra.Item
     icon={pull.user.avatarUrl}
     key={pull.id}
-    title={(showMyIcon ? pull.myIcon + " " : "") + pull.title}
+    title={pull.title}
     onAction={() => onAction()}
     shortcut={
       index !== undefined && index <= 8 ? { modifiers: ["cmd"], key: (index + 1).toString() as ValidNumber } : undefined
