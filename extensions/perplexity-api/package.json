@@ -782,6 +782,14 @@
       "default": "sonar-medium-chat",
       "data": [
         {
+          "value": "sonar-small-chat",
+          "title": "Sonar Small 7B 16k"
+        },
+        {
+          "value": "sonar-medium-chat",
+          "title": "Sonar Medium 8x7B 16k"
+        },
+        {
           "value": "mixtral-8x7b-instruct",
           "title": "Mixtral 8x7b Instruct 16k"
         },
@@ -792,14 +800,6 @@
         {
           "value": "codellama-70b-instruct",
           "title": "CodeLlama 70B Instruct 16k"
-        },
-        {
-          "value": "sonar-small-chat",
-          "title": "Sonar Small 7B 16k"
-        },
-        {
-          "value": "sonar-medium-chat",
-          "title": "Sonar Medium 8x7B 16k"
         }
       ]
     },
