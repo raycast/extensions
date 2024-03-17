@@ -1,6 +1,6 @@
 # Changelog
 
-## Fix Turso authentication redirect - 2024-03-17
+## [Fix Turso authentication redirect] - 2024-03-17
 
 - Turso auth api doesn't accept extra query parameters anymore (like clientId, codeVerified, codeChallenge)
 
