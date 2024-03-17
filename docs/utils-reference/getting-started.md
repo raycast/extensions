@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.13.1
+
+- Added default OAuth URLs for Google, Jira, and Zoom
+
 ### v1.13.0
 
 - Added pagination support to `usePromise`, `useCachedPromise` and `useFetch`.
