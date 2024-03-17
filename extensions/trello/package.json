@@ -52,7 +52,7 @@
     },
     {
       "description": "Trello Access token, open this link to get one",
-      "default": "ttps://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1",
+      "default": "https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1",
       "name": "token",
       "required": true,
       "title": "Personal Access Token",
