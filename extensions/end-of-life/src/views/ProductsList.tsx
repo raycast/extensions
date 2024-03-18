@@ -25,7 +25,7 @@ function ProductsList() {
             // }
             actions={
               <ActionPanel title={product}>
-                <Action title={`View ${product} cycles`} onAction={() => push(<ProductDetails product={product} />)} />
+                <Action title={`View ${product} Cycles`} onAction={() => push(<ProductDetails product={product} />)} />
                 <Action.OpenInBrowser
                   title="View on endoflife.com"
                   url={`https://endoflife.date/${product}`}
@@ -42,7 +42,7 @@ function ProductsList() {
 }
 
 function EmptyView() {
-  return <List.EmptyView icon="empty-view.png" description="No products" />;
+  return <List.EmptyView icon="empty-view.png" description="No Products" />;
 }
 
 export default ProductsList;
