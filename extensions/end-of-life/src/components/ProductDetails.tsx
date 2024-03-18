@@ -50,7 +50,7 @@ function accessories(cycle: EndOfLifeProductDetails) {
 }
 
 function EmptyView() {
-  return <List.EmptyView icon="empty-view.png" description="No cycles" />;
+  return <List.EmptyView icon="empty-view.png" description="No Cycles" />;
 }
 
 function CycleView(product: string, cycle: EndOfLifeProductDetails) {
