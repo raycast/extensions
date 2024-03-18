@@ -1,8 +1,8 @@
 # GitHub Changelog
 
-## [Repo Invite Open] - 2024-03-15
+## [Accept Repository Invitations] - 2024-03-18
 
-- When receiving a Repo invite, the "open in browser"-command fails with an API error. So this change, checks the subject type of the notification and adds the option to accept the invite over the api and open the repo in the browser.
+When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
 
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
