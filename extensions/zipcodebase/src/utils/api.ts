@@ -70,15 +70,16 @@ export async function getPostalCodesByCity(city: string, country: string, state_
 
   const params = new URLSearchParams({ apikey: API_KEY, city, country, state_name, limit });
 
-  return (await callApi(`code/city?${params}`, `Fetching ${limit} Codes in ${city} (${country}) [${state_name || "null"}]`)) as
-    | ErrorResponse
-    | GetPostalCodesByCityResponse;
+  return (await callApi(
+    `code/city?${params}`,
+    `Fetching ${limit} Codes in ${city} (${country}) [${state_name || "null"}]`
+  )) as ErrorResponse | GetPostalCodesByCityResponse;
 }
 export async function getPostalCodesByState(state_name: string, country: string) {
   const limitIsValid = await checkIfDefaultLimitIsValid();
   if ("error" in limitIsValid) return limitIsValid as ErrorResponse;
   const limit = DEFAULT_LIMIT;
-  
+
   const params = new URLSearchParams({ apikey: API_KEY, state_name, country, limit });
 
   return (await callApi(`code/state?${params}`, `Fetching ${limit} Codes in ${state_name} (${country})`)) as
@@ -99,7 +100,7 @@ export async function getPostalCodeLocationInformation(codes: string, country: s
 }
 
 export async function getPostalCodeDistance(code: string, compare: string, country: string) {
-  const params = new URLSearchParams({ apikey: API_KEY, code, compare, country });
+  const params = new URLSearchParams({ apikey: API_KEY, code, compare, country, unit: DEFAULT_UNIT });
 
   return (await callApi(`distance?${params}`, `Fetching Distance between ${code} and ${compare} in ${country}`)) as
     | ErrorResponse
@@ -115,7 +116,7 @@ export async function getPostalCodesWithinRadius(code: string, radius: string, c
   )) as ErrorResponse | GetPostalCodesWithinRadiusResponse;
 }
 export async function getPostalCodesWithinDistance(codes: string, distance: string, country: string) {
-  const params = new URLSearchParams({ apikey: API_KEY, codes, distance, country });
+  const params = new URLSearchParams({ apikey: API_KEY, codes, distance, country, unit: DEFAULT_UNIT });
 
   return (await callApi(`match?${params}`, `Fetching Codes within ${distance}${DEFAULT_UNIT}`)) as
     | ErrorResponse

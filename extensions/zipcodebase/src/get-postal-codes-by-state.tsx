@@ -1,4 +1,3 @@
-import { DEFAULT_LIMIT } from "./utils/constants";
 import { Action, ActionPanel, Icon, LaunchProps, List, showToast } from "@raycast/api";
 import { ErrorResponse, GetPostalCodesByStateResponse } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
