@@ -21,27 +21,27 @@
       "name": "select-color",
       "title": "Select Color",
       "description": "Choose from a set of random colors.",
-      "mode": "view",
-      "preferences": [
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "data": [
         {
-          "data": [
-            {
-              "title": "Paste to Active App",
-              "value": "paste"
-            },
-            {
-              "title": "Copy to Clipboard",
-              "value": "copy"
-            }
-          ],
-          "default": "copy",
-          "description": "The primary action to perform on a selected color.",
-          "name": "primaryAction",
-          "required": false,
-          "title": "Primary Action",
-          "type": "dropdown"
+          "title": "Paste to Active App",
+          "value": "paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
         }
-      ]
+      ],
+      "default": "copy",
+      "description": "The primary action to perform on a selected color.",
+      "name": "primaryAction",
+      "required": false,
+      "title": "Primary Action",
+      "type": "dropdown"
     }
   ],
   "dependencies": {
