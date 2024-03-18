@@ -1,8 +1,12 @@
 # Mercado Libre Changelog
 
+## [Enhancements] - 2024-03-18
+
+- Update shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.
+
 ## [Enhancements] - 2024-03-17
 
-- Add pagination support.
+- Added pagination support.
 - Improved behavior of the Recent Searches list.
 
 ## [Enhancements] - 2024-02-25
