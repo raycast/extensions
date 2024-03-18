@@ -13,7 +13,6 @@
     {
       "name": "index",
       "title": "Can I PHP?",
-      "subtitle": "Developer Tools",
       "description": "Check if a certain function or method is available in different versions of PHP.",
       "mode": "view"
     }
