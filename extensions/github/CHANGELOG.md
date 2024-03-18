@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Fix shortcut conflict + npm audit vulnerabilities] - 2024-03-17
+
+- Fixes an issue where the shortcuts for `Re-Run Workflow` and `Delete Run` actions were reserved by Raycast.
+- Fixes vulnerabilities reported by `npm audit`.
+
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
 - Use Raycast's built-in icons for the My Pull Requests Menu Bar.

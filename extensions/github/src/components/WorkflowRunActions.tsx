@@ -132,7 +132,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
             title="Re-Run Workflow"
             icon={Icon.Clock}
             onAction={rerunWorkflow}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
         ) : null}
 
@@ -150,7 +150,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
             title="Cancel Run"
             icon={Icon.XMarkCircle}
             onAction={cancelRun}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
         ) : null}
 
@@ -159,7 +159,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
           title="Delete Run"
           style={Action.Style.Destructive}
           onAction={deleteRun}
-          shortcut={{ modifiers: ["cmd"], key: "delete" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
         />
       </ActionPanel.Section>
 
