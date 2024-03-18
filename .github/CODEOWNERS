@@ -445,14 +445,14 @@
 /extensions/git-repos                                @moored @nitishpdmn @go-dima @cameronsstone
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @azlekov
-/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint
+/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt
 /extensions/github-cli-manual                        @demartini
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy @LunaticMuch @pernielsentikaer
 /extensions/github-gist                              @koinzhang @Aayush9029 @LunaticMuch @pernielsentikaer @nbbaier
 /extensions/github-menu-bar                          @fe9lix
 /extensions/github-repository-search                 @thomaspaulmann @immint023 @mheidinger
-/extensions/github-review-requests                   @resessh @kudrykv
+/extensions/github-review-requests                   @resessh @kudrykv @Hephaest
 /extensions/github-stars                             @mrmartineau @Princeyadav05
 /extensions/github-status                            @FezVrasta
 /extensions/github-trending                          @mikqi
@@ -686,7 +686,7 @@
 /extensions/lyrics                                   @ajzbc
 /extensions/m3o                                      @andreaselia
 /extensions/macupdater                               @karlsander
-/extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer @fengtianze @tleo19
+/extensions/mail                                     @yug2005 @ikupenov @pernielsentikaer @fengtianze @tleo19 @Luk4h
 /extensions/mailboxlayer                             @xmok
 /extensions/mailerlite-stats                         @nklmilojevic
 /extensions/mailsy                                   @BalliAsghar
@@ -732,6 +732,7 @@
 /extensions/microsoft-teams-calling                  @svenwiegand
 /extensions/midjourney                               @CarterMcAlister
 /extensions/migadu                                   @xmok
+/extensions/mindnode                                 @natsustan
 /extensions/miniflux                                 @Sevichecc
 /extensions/minion-ipsum                             @vigosan
 /extensions/minisim                                  @okwasniewski
@@ -1127,7 +1128,7 @@
 /extensions/sitespeakai                              @hermanschutte
 /extensions/sketch                                   @aesign
 /extensions/slack                                    @momme-rtf @Elliot67
-/extensions/slack-status                             @PitNikola @johnhampton @thomaspaulmann
+/extensions/slack-status                             @PitNikola @johnhampton @thomaspaulmann @pernielsentikaer
 /extensions/sleep-timer                              @dtmzr @ThatNerdSquared @pernielsentikaer
 /extensions/slugify                                  @unreadablename
 /extensions/sm-ms                                    @koinzhang
@@ -1201,7 +1202,7 @@
 /extensions/tableplus                                @pernielsentikaer @nagauta
 /extensions/tabler                                   @zavbala
 /extensions/tabnews                                  @juniorodilton
-/extensions/tailscale                                @samlinville @rosszurowski @samlinville @itsmingjie @erics118
+/extensions/tailscale                                @samlinville @rosszurowski @samlinville @itsmingjie @erics118 @brandenwagner
 /extensions/tailwindcss                              @vimtor @cy-98 @emilshr @pernielsentikaer @erich2s
 /extensions/tana                                     @cheslip @birdmanmandbir
 /extensions/tapo-smart-devices                       @timrogers
