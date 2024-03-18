@@ -16,35 +16,35 @@ export default function DigSearchResultsList() {
       if (!query) {
         return {
           result: [],
-          validDomain: true
+          validDomain: true,
         };
       }
 
       // Only run if domain is found
       const queryArr = query.split(" ");
       const domainMatch = queryArr[0].match(
-        /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,16}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi
+        /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,16}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)?/gi,
       );
 
       if (!domainMatch) {
         return {
           result: [],
-          validDomain: false
+          validDomain: false,
         };
       }
 
       const result = await digByQuery(query, abortable.current?.signal);
       return {
         result,
-        validDomain: true
+        validDomain: true,
       };
     },
     [query],
     {
       initialData: { result: [], validDomain: true },
       keepPreviousData: true,
-      abortable
-    }
+      abortable,
+    },
   );
 
   return (
