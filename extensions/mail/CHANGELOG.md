@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [New Feature] - 2024-03-15
+
+Add `Move to Archive` Action on Mail list
+
 ## [Fix] - 2024-01-23
 
 Fix an issue when the `Mark all as read` Command was opening too many Mail windows

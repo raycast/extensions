@@ -1,5 +1,10 @@
 # Tailscale Changelog
 
+## [Add new features] 2024-03-14
+
+- Add connect (tailscale up)
+- Add disconnect (tailscale down)
+
 ## [Improvements] - 2024-02-10
 
 - Do not show Mullvad exit nodes in "All Devices" list

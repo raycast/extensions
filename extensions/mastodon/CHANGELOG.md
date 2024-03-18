@@ -1,5 +1,9 @@
 # Mastodon Changelog
 
+## [New feature] - 2024-03-13
+
+- Add menu bar icon for showing Masotodon notifications
+
 ## [Improvement] - 2024-03-04
 
 - Add a new action `Add File From Clipboard` to `Add Status` command
