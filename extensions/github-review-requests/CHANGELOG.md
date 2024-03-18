@@ -1,5 +1,14 @@
 # Snake Changelog
 
+## [New Additions & Fixes] - 2024-03-18
+
+- Add subtitle for menu bar item to improve readability.
+- Fix counting issue of Wait For Review category.
+
+## [Update] - 2024-03-17
+
+- Add README file for readers.
+
 ## [New Additions & Refactor] - 2024-03-14
 
 - Menubar: Reorganize menu item order.

@@ -25,12 +25,14 @@ export const RecentSearchListItem = ({
         <Action
           title="Remove Search Item"
           icon={Icon.Trash}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           style={Action.Style.Destructive}
           onAction={() => handleRemoveSearchItem(query)}
         />
         <Action
           title="Clear Search History"
           icon={Icon.Trash}
+          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
           style={Action.Style.Destructive}
           onAction={handleClearSearchHistory}
         />

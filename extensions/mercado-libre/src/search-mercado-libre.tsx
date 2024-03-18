@@ -57,7 +57,7 @@ export default function Command() {
   if (recentSearches.length === 0 && searchQuery === "") {
     return (
       <List searchBarPlaceholder="Search Mercado Libre" onSearchTextChange={setSearchQuery} throttle>
-        <ListEmptyView />;
+        <ListEmptyView />
       </List>
     );
   } else if (recentSearches.length > 0 && searchQuery === "") {
