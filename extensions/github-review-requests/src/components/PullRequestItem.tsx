@@ -12,6 +12,7 @@ const PullRequestItem = ({ pull, index, onAction }: PullRequestItemParams) => (
     icon={pull.user.avatarUrl}
     key={pull.id}
     title={pull.title}
+    subtitle={`(${pull.repo})`}
     onAction={() => onAction()}
     shortcut={
       index !== undefined && index <= 8 ? { modifiers: ["cmd"], key: (index + 1).toString() as ValidNumber } : undefined
