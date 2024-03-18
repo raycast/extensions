@@ -57,20 +57,16 @@ export default function NotificationActions({ notification, userId, mutateList }
 
   async function acceptInvitation() {
     try {
-      // get all invitations
       const invitations = await octokit.rest.repos.listInvitationsForAuthenticatedUser();
 
-      // find the invitation for the repository
       const invitation = invitations.data.find(
         (invitation) => invitation.repository.url === notification.repository.url,
       );
 
-      // accept the invitation
       await octokit.rest.repos.acceptInvitationForAuthenticatedUser({
         invitation_id: invitation?.id || 0,
       });
 
-      // open the repository
       open(notification.repository.html_url);
       await mutateList();
     } catch (error) {
