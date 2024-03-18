@@ -1,13 +1,11 @@
 import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, popToRoot, Icon } from "@raycast/api";
-import { useForm, FormValidation, getFavicon } from "@raycast/utils";
+import { useForm, FormValidation, getFavicon, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getDomains, updateDomainSettings } from "./utils/api";
 import { Domain, Response, UpdateDomainSettingsRequest } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
-  domains?: Domain[];
-  error?: string;
   forwardingEmail?: string;
   domainError?: string;
   isLoading: boolean;
@@ -25,8 +23,6 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
   const propDomain = props.arguments.domain;
 
   const [state, setState] = useState<State>({
-    domains: undefined,
-    error: "",
     forwardingEmail: "",
     domainError: "",
     isLoading: false,
@@ -35,27 +31,21 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
     symbolicSubaddressing: false,
     recheckDns: false,
   });
+  const [error, setError] = useState("");
+  const [domains, setDomains] = useCachedState<Domain[]>("domains");
+  const [isLoading, setIsLoading] = useState(true);
+
 
   useEffect(() => {
     async function getFromApi() {
       const response: Response = await getDomains();
 
-      switch (response.type) {
-        case "error":
-          setState((prevState) => {
-            return { ...prevState, error: response.message, isLoading: false };
-          });
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, error: "", domains: response.result.domains };
-          });
-          break;
-
-        default:
-          break;
+      if (response.type==="error") {
+        setError(response.message);
+      } else {
+        setDomains(response.result.domains);
       }
+      setIsLoading(false);
     }
 
     getFromApi();
@@ -63,62 +53,32 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
 
   const { handleSubmit, itemProps, setValue } = useForm<UpdateDomainSettingsRequest>({
     async onSubmit(values) {
-      setState((prevState: State) => {
-        return { ...prevState, isLoading: true };
-      });
+      setIsLoading(true);
 
       const response = await updateDomainSettings({ ...values });
-      switch (response.type) {
-        case "error":
-          await showToast(Toast.Style.Failure, "Purelymail Error", response.message);
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          return;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          await showToast(Toast.Style.Success, "Domain Settings Updated", "DOMAIN: " + values.name);
-          await popToRoot({
-            clearSearchBar: true,
-          });
-          break;
-
-        default:
-          setState((prevState: State) => {
-            return { ...prevState, isLoading: false };
-          });
-          break;
+      if (response.type==="success") {
+        await showToast(Toast.Style.Success, "Domain Settings Updated", "DOMAIN: " + values.name);
+        popToRoot({ clearSearchBar: true });
       }
     },
     validation: {
       name: FormValidation.Required,
     },
     initialValues: {
-      name: state.domains?.length ? propDomain : undefined,
+      name: domains?.length ? propDomain : undefined,
     },
   });
 
-  const showError = async () => {
-    if (state.error) {
-      await showToast(Toast.Style.Failure, "Purelymail Error", state.error);
-    }
-  };
-
   const handleDomainChange = (newDomain: string) => {
-    setValue("allowAccountReset", state.domains?.find((d) => d.name === newDomain)?.allowAccountReset || false);
-    setValue("symbolicSubaddressing", state.domains?.find((d) => d.name === newDomain)?.symbolicSubaddressing || false);
+    setValue("allowAccountReset", domains?.find((d) => d.name === newDomain)?.allowAccountReset || false);
+    setValue("symbolicSubaddressing", domains?.find((d) => d.name === newDomain)?.symbolicSubaddressing || false);
   };
 
-  showError();
-
-  return state.error ? (
-    <ErrorComponent error={state.error} />
+  return error ? (
+    <ErrorComponent error={error} />
   ) : (
     <Form
-      isLoading={state.domains === undefined || state.isLoading}
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Update Domain Settings" onSubmit={handleSubmit} icon={Icon.Check} />
@@ -126,7 +86,7 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
       }
     >
       <Form.Dropdown title="Domain" placeholder="Select a domain" {...itemProps.name} onChange={handleDomainChange}>
-        {state.domains?.map((domain) => (
+        {domains?.map((domain) => (
           <Form.Dropdown.Item
             key={domain.name}
             value={domain.name}

@@ -50,10 +50,10 @@ export default function ListUsers() {
 
       const response = await deleteUser(user);
       if (response.type==="success") {
-        setIsLoading(false);
         await showToast(Toast.Style.Success, "User Deleted", "USER: " + user);
         await getFromApi();
       }
+      setIsLoading(false);
     }
   };
 

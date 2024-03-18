@@ -48,11 +48,12 @@ export type CreateRoutingRequest = {
   prefix: boolean;
   matchUser: string;
   targetAddresses: string[];
+  catchall: boolean;
 };
 type DeleteRoutingRequest = {
   routingRuleId: number;
 };
-type AddDomainRequest = {
+export type AddDomainRequest = {
   domainName: string;
 };
 type ListDomainsRequest = {

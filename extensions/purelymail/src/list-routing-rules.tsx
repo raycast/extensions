@@ -10,13 +10,12 @@ import {
   confirmAlert,
   showToast,
   Toast,
-  popToRoot,
-  Detail,
+  popToRoot
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getRoutingRules, deleteRoutingRule } from "./utils/api";
 import { Response, Rule } from "./utils/types";
-import { getFavicon } from "@raycast/utils";
+import { getFavicon, useCachedState } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
@@ -28,37 +27,30 @@ interface State {
 
 export default function ListRoutingRules() {
   const [state, setState] = useState<State>({
-    rules: undefined,
-    error: "",
-    showDetails: false,
-    isLoading: false,
+    showDetails: false
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState("");
+  const [error, setError] = useState("");
+  const [rules, setRules] = useCachedState<Rule[]>("rules");
+  
+  async function getFromApi() {
+    setIsLoading(true);
+    const response: Response = await getRoutingRules();
 
-  useEffect(() => {
-    async function getFromApi() {
-      const response: Response = await getRoutingRules();
-
-      switch (response.type) {
-        case "error":
-          setState((prevState) => {
-            return { ...prevState, error: response.message, isLoading: false };
-          });
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, error: "", rules: response.result.rules };
-          });
-          break;
-
-        default:
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          break;
-      }
+    if (response.type==="error") {
+      setError(response.message);
+    } else {
+      setRules(response.result.rules);
+      await showToast({
+        title: "SUCCESS",
+        message: `Fetched ${response.result.rules?.length} rules`
+      })
     }
-
+    setIsLoading(false);
+    }
+  
+    useEffect(() => {
     getFromApi();
   }, []);
 
@@ -105,6 +97,9 @@ export default function ListRoutingRules() {
     });
   };
 
+  const filteredRules = !rules ? [] : filter==="" ? rules : rules.filter(rule => rule.domainName===filter);
+  const rulesTitle = `${filteredRules.length} of ${rules?.length || 0} rules`;
+
   const ruleDescription = (rule: Rule) => {
     const { prefix, catchall, matchUser, domainName, targetAddresses } = rule;
     const targets = targetAddresses.toString().replaceAll(",", "AND");
@@ -126,16 +121,20 @@ export default function ListRoutingRules() {
     return from + to;
   };
 
-  return state.error ? (
-    <ErrorComponent error={state.error} />
+  return error ? (
+    <ErrorComponent error={error} />
   ) : (
     <List
-      isLoading={state.rules === undefined || state.isLoading}
+      isLoading={isLoading}
       searchBarPlaceholder="Search for rule..."
       isShowingDetail={state.showDetails == true}
+      searchBarAccessory={<List.Dropdown tooltip="Select Domain" onChange={(newValue) => setFilter(newValue)}>
+        <List.Dropdown.Item title="All Domains" value="" icon={Icon.Dot} />
+        {Array.from(new Set(rules?.map(rule => rule.domainName).flat())).map(domainName => <List.Dropdown.Item key={domainName} title={domainName} value={domainName} icon={getFavicon(`https://${domainName}`, {fallback: Icon.List})} />)}
+      </List.Dropdown>}
     >
-      <List.Section title={`${state.rules?.length || 0} rules`}>
-        {(state.rules || []).map((rule) => (
+      <List.Section title={rulesTitle}>
+        {filteredRules.map((rule) => (
           <List.Item
             key={rule.id}
             icon={getFavicon(`https://${rule.domainName}`, { fallback: Icon.Forward })}
@@ -171,6 +170,7 @@ export default function ListRoutingRules() {
                   icon={Icon.DeleteDocument}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() => handleDelete(rule.id)}
+                  style={Action.Style.Destructive}
                 />
               </ActionPanel>
             }
@@ -213,6 +213,8 @@ export default function ListRoutingRules() {
             }
           />
         ))}
+      </List.Section>
+      <List.Section title="Commands">
         <List.Item
           title="Create New Routing Rule"
           icon={Icon.Plus}
