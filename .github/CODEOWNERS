@@ -293,7 +293,7 @@
 /extensions/dict-cc                                  @natterstefan
 /extensions/dictionary                               @DrChai
 /extensions/diff-checker                             @Destiner
-/extensions/dig                                      @danielbahl @pernielsentikaer
+/extensions/dig                                      @danielbahl @pernielsentikaer @j3lte
 /extensions/digitalocean                             @ShukantPal
 /extensions/directadmin-reseller                     @xmok
 /extensions/directus                                 @bryantgillespie
@@ -972,6 +972,7 @@
 /extensions/rain-radars                              @danieldbird @koinzhang
 /extensions/raindrop-io                              @lardissone @ShubhamVerma1811 @pernielsentikaer @sh-cho
 /extensions/ramda-documentation                      @jbroomer
+/extensions/random-color                             @srcrip
 /extensions/random-data-generator                    @loris @Calvein @pernielsentikaer @vimtor @j3lte @stefanmatar
 /extensions/random-email                             @rkjaer
 /extensions/random-password-generator                @textnav
