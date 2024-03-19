@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [New field: Only use Host] - 2024-01-31
+
+- Added the option to let users choose whether to use Host only for ssh connections without other parameters. e.g., `ssh Host`
+
 ## [Fix RemoteCommand parsing] - 2024-01-18
 
 - Fixed a bug where a remote command of a connection was not correctly parsed if the remote command contains multiple spaces.

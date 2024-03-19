@@ -5,6 +5,7 @@ export type SlackStatus = {
 };
 
 export type SlackStatusPreset = {
+  id?: string;
   emojiCode: string;
   title: string;
   defaultDuration: number; // 0 means "don't clear"
@@ -17,3 +18,7 @@ export type FormValues = {
   duration: string;
   pauseNotifications: boolean;
 };
+
+export interface CommandLinkParams {
+  presetId: string;
+}

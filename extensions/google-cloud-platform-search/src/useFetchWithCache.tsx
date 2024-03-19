@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 export function useFetchWithCache<S>(cacheKey: string, fetcher: () => Promise<S>) {
@@ -10,7 +10,7 @@ export function useFetchWithCache<S>(cacheKey: string, fetcher: () => Promise<S>
   }>({ isLoading: true, failureMessage: false });
   useEffect(() => {
     (async () => {
-      const cacheData = await getLocalStorageItem(cacheKey);
+      const cacheData = await LocalStorage.getItem(cacheKey);
       if (cacheData) {
         setState((oldState) => ({ ...oldState, data: JSON.parse(cacheData as string) }));
       }
@@ -18,7 +18,7 @@ export function useFetchWithCache<S>(cacheKey: string, fetcher: () => Promise<S>
       try {
         const newData = await fetcher();
         setState((oldState) => ({ ...oldState, data: newData }));
-        await setLocalStorageItem(cacheKey, JSON.stringify(newData));
+        await LocalStorage.setItem(cacheKey, JSON.stringify(newData));
       } catch (e) {
         setState((oldState) => ({ ...oldState, error: e as Error }));
         if (!cacheData) {

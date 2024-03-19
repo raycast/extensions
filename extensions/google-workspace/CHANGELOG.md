@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Added Copy Markdown Link and Copy HTML Link actions] - 2024-02-19
+
+- Add the ability to copy a link to a file list item to the clipboard as Markdown or HTML. This is useful for quickly sharing links in various applications.
+
 ## [Use OAuth utils] - 2024-02-12
 
 - Use new OAuth utils

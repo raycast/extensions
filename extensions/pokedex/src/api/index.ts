@@ -6,13 +6,13 @@ function showFailureToast() {
   showToast(
     Toast.Style.Failure,
     "Something went wrong",
-    "Please try again later"
+    "Please try again later",
   );
 }
 
 export const getPokemon = async (
   id: number,
-  language: number
+  language: number,
 ): Promise<PokemonV2Pokemon[]> => {
   const query = JSON.stringify({
     query: `query pokemon($language_id: Int, $pokemon_id: Int) {

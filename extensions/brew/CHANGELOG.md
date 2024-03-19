@@ -1,5 +1,14 @@
 # Brew Changelog
 
+## [Improvements] - 2024-03-08
+
+- Add `Warp` as an option for terminal
+- Use current terminal name for actions
+  
+## [Improvements] - 2024-02-11
+
+- Add `cleanup` command
+
 ## [Improvements] - 2024-01-10
 
 - Added `Quarantine` preference to enable or disable quarantine of files downloaded by brew

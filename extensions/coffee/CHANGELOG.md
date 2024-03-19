@@ -1,6 +1,19 @@
 # Coffee Changelog
 
+## [Update] - 2024-03-14
+
+- Added the possibility to hide the icon when decaffeinated
+
+## [Update] - 2024-02-21
+
+- Fixed bug that created zombie processes
+
+## [Update] - 2024-02-14
+
+- Added support for alternative icon Menu Bar icon.
+
 ## [Update] - 2024-02-06
+
 - Replace old taskbar icons with new SVG ones.
 
 ## [Fix] - 2023-11-26

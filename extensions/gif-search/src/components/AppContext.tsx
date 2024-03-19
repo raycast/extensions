@@ -75,12 +75,12 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
       case "replace":
         state.recentIds?.get(service)?.clear();
         recentServiceIds.forEach(
-          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id)
+          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id),
         );
         break;
       case "add":
         recentServiceIds.forEach(
-          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id)
+          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id),
         );
         break;
       case "remove":

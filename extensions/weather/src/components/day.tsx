@@ -1,8 +1,8 @@
 import { Color, List } from "@raycast/api";
 import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
-import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
+import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
+import { clockFormat } from "../utils";
 import { Hourly, WeatherData, getHourlyCloudCover, getHourlyRain, getHourlyThunder } from "../wttr";
-import { clockFormat, getUVIndexIcon } from "../utils";
 
 function getTime(time: string): string {
   const t = parseInt(time);
@@ -94,7 +94,7 @@ export function DayList(props: { day: WeatherData; title: string; isLoading?: bo
                   tooltip: cloudCover ? `Cloud Cover: ${cloudCover.valueAndUnit}` : undefined,
                 },
                 {
-                  icon: day.uvIndex ? getUVIndexIcon(day.uvIndex) : undefined,
+                  icon: day.uvIndex ? WeatherIcons.UVIndex : undefined,
                   tooltip: day.uvIndex ? `UV Index: ${day.uvIndex}` : undefined,
                 },
                 {

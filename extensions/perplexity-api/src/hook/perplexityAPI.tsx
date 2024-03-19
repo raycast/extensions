@@ -17,14 +17,11 @@ export default function ResultView(props: ResultViewProps) {
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
   async function getChatResponse(prompt: string, selectedText: string, model: string, temp: number) {
-    if (model.includes("online")) {
-      prompt = `Current date: ${currentDate}.`;
-    }
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
         messages: [
-          { role: "system", content: prompt },
+          { role: "system", content: `Current date: ${currentDate}. ${prompt}` },
           { role: "user", content: selectedText + (user_extra_msg ? `\n\n${user_extra_msg}` : "") },
         ],
         temperature: temp,
@@ -127,12 +124,7 @@ export default function ResultView(props: ResultViewProps) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             >
               {changeModels
-                .filter(
-                  (newModel) =>
-                    newModel.id !== model &&
-                    (!user_extra_msg ? !newModel.id.includes("online") : true) &&
-                    newModel.id !== "global",
-                )
+                .filter((newModel) => newModel.id !== model && newModel.id !== "global")
                 .map((newModel) => (
                   <Action
                     key={newModel.id}

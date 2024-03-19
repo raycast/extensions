@@ -5,7 +5,7 @@
   "description": "Upload a file directly to a transfer.sh instance",
   "icon": "upload-dark.png",
   "author": "PandaDEV",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "categories": [
     "Data",
     "Productivity",

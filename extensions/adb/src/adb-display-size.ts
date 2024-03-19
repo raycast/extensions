@@ -7,7 +7,13 @@ interface AdbDisplayDensityArguments {
 }
 
 export default async function displayDensity(props: LaunchProps<{ arguments: AdbDisplayDensityArguments }>) {
-  const adbDir = await checkAdbExists();
+  let adbDir: string;
+  try {
+    adbDir = await checkAdbExists();
+  } catch (e) {
+    await showHUD(`${e}`);
+    return;
+  }
   const factor = Number(props.arguments.factor);
   const currentDensities = execSync(`${adbDir} shell wm density`).toString();
   let defaultDensity = 0;
@@ -22,13 +28,14 @@ export default async function displayDensity(props: LaunchProps<{ arguments: Adb
     density = defaultDensity;
   } else if (factor == 2) {
     density = defaultDensity + 50;
-  } else if (factor == 3) {
+  } else if (factor >= 3) {
     density = defaultDensity + 100;
-  } else if (factor == 0.5) {
+  } else if (factor <= 0.5) {
     density = 374;
   } else {
     density = factor;
   }
+
   await showHUD(`🔎 Setting display density to ${density}`);
   execSync(`${adbDir} shell wm density ${density}`);
 }

@@ -1,8 +1,10 @@
-import { ActionPanel, Detail, Icon, List, getPreferenceValues } from "@raycast/api";
-import { OAuthService, useCachedState, withAccessToken } from "@raycast/utils";
+import { ActionPanel, Detail, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { OAuthService, useCachedState, withAccessToken, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   ClearStatusAction,
+  CopyDeeplinkPresetAction,
+  CreateQuicklinkPresetAction,
   CreateStatusPresetAction,
   DeleteStatusPresetAction,
   EditStatusPresetAction,
@@ -15,8 +17,9 @@ import {
 import { getPresetDurationsTitle } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
-import { useSlackAuthInfo, useSlackDndInfo, useSlackProfile } from "./slack";
-import { getStatusIcon, getStatusSubtitle, getStatusTitle, slackScopes } from "./utils";
+import { CommandLinkParams } from "./types";
+import { useSlack, useSlackAuthInfo, useSlackDndInfo, useSlackProfile } from "./slack";
+import { getStatusIcon, getStatusSubtitle, getStatusTitle, setStatusToPreset, slackScopes } from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
 
@@ -25,7 +28,7 @@ const slack = OAuthService.slack({
   personalAccessToken: preferences.accessToken,
 });
 
-function StatusListWrapper() {
+function StatusListWrapper(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const { isLoading: isLoadingAuth, data: authData } = useSlackAuthInfo();
   const [hasCheckedAuth, setHasCheckedAuth] = useCachedState("slack-status-checked-auth", false);
 
@@ -52,14 +55,33 @@ function StatusListWrapper() {
     return <Detail isLoading />;
   }
 
-  return <StatusList />;
+  return <StatusList {...props} />;
 }
 
-function StatusList() {
+function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data, mutate } = useSlackProfile();
   const { isLoading: isLoadingDnd, data: dndData, mutate: mutateDnd } = useSlackDndInfo();
   const [presets, setPresets] = usePresets();
+  const slack = useSlack();
+
+  useEffect(() => {
+    (async () => {
+      if (props.launchContext?.presetId) {
+        const presetId = props.launchContext.presetId;
+        const presetToLaunch = presets.find((p) => p.id === presetId);
+
+        if (!presetToLaunch) {
+          console.error("No preset found with id: ", presetId);
+          showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
+        } else {
+          await setStatusToPreset({ preset: presetToLaunch, slack, mutate, mutateDnd });
+          popToRoot();
+          closeMainWindow();
+        }
+      }
+    })();
+  }, [slack]);
 
   return (
     <List isLoading={isLoading || isLoadingDnd} onSearchTextChange={setSearchText} filtering>
@@ -110,6 +132,8 @@ function StatusList() {
                       setPresets(presets.map((p) => (p === preset ? editedPreset : p)));
                     }}
                   />
+                  <CreateQuicklinkPresetAction preset={preset} />
+                  <CopyDeeplinkPresetAction preset={preset} />
                   <DeleteStatusPresetAction onDelete={() => setPresets(presets.filter((p) => p !== preset))} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

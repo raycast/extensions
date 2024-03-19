@@ -1,8 +1,11 @@
 import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
 import moment from "moment";
 import pluralize from "pluralize";
+import { SlackStatusPreset } from "./types";
 import { getEmojiForCode } from "./emojis";
+import { WebClient } from "@slack/web-api";
 import { DndInfoResponse } from "@slack/web-api";
 
 function isTomorrowOrAlmostTomorrow(date: moment.Moment) {
@@ -133,6 +136,61 @@ export function getStatusSubtitle(profile: Profile | undefined, dndData: DndInfo
   }
 
   return `${getTextForExpiration(profile.status_expiration)}${dndText}`;
+}
+
+export function setStatusToPreset({
+  slack,
+  preset,
+  mutate,
+  mutateDnd
+}: {
+  slack: WebClient;
+  preset: SlackStatusPreset;
+  mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>
+}) {
+  return showToastWithPromise(
+    async () => {
+      let expiration = 0;
+      if (preset.defaultDuration > 0) {
+        const expirationDate = new Date();
+        expirationDate.setMinutes(expirationDate.getMinutes() + preset.defaultDuration);
+        expiration = Math.floor(expirationDate.getTime() / 1000);
+      }
+
+      const profile: Profile = {
+        status_emoji: preset.emojiCode,
+        status_text: preset.title,
+        status_expiration: expiration,
+      };
+
+      await mutate(
+        slack.users.profile.set({
+          profile: JSON.stringify(profile),
+        }),
+        {
+          optimisticUpdate() {
+            return profile;
+          },
+        },
+      );
+
+      if (preset.pauseNotifications && expiration > 0) {
+        await mutateDnd(
+          slack.dnd.setSnooze({
+            num_minutes: preset.defaultDuration,
+          }),
+        );
+      } else {
+        await mutateDnd(slack.dnd.endSnooze());
+      }
+    },
+    {
+      loading: "Setting status…",
+      success: `Set status to ${preset.title}`,
+      error: "Failed setting status",
+    },
+  );
 }
 
 export const slackScopes = ["emoji:read", "users.profile:write", "users.profile:read", "dnd:read", "dnd:write"];

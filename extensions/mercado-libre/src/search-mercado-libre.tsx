@@ -1,110 +1,114 @@
-import { Action, ActionPanel, Grid, List, getPreferenceValues } from "@raycast/api";
+import { Alert, Grid, Icon, List, confirmAlert, getPreferenceValues } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
-
-interface MercadoLibreItem {
-  id: string;
-  title: string;
-  thumbnail: string;
-  price: number;
-  currency_id: string;
-  permalink: string;
-}
-
-interface Preferences {
-  siteId: string;
-  viewLayout: string;
-  gridItemSize: number;
-}
+import { useState } from "react";
+import { ListEmptyView } from "./components/ListEmptyView";
+import { RecentSearchListItem } from "./components/RecentSearchListItem";
+import { ResultGridItem } from "./components/ResultGridItem";
+import { ResultListItem } from "./components/ResultListItem";
+import { MAX_RECENT_SEARCHES } from "./constants";
+import { MercadoLibreItem, MercadoLibreResponse, Preferences } from "./types";
 
 export default function Command() {
   const { siteId, viewLayout, gridItemSize } = getPreferenceValues<Preferences>();
-  const [searchQuery, setSearchQuery] = useCachedState<string>("searchQuery", "");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [recentSearches, setRecentSearches] = useCachedState<string[]>("recentSearches", []);
+  const url = `https://api.mercadolibre.com/sites/${siteId}/search?q=${searchQuery}`;
 
-  const { data, isLoading } = useFetch<MercadoLibreItem[]>(
-    `https://api.mercadolibre.com/sites/${siteId}/search?q=${searchQuery}`,
-    {
-      execute: searchQuery.length > 0,
-      keepPreviousData: true,
-      parseResponse: async (response) => {
-        const json = await response.json();
-        return json.results;
-      },
+  const { isLoading, data, pagination } = useFetch<MercadoLibreResponse, unknown, MercadoLibreItem[]>(() => url, {
+    mapResult(result) {
+      return {
+        data: result.results,
+        hasMore: result.paging.offset < result.paging.total,
+      };
     },
-  );
+    execute: searchQuery.length > 0,
+    keepPreviousData: true,
+  });
 
-  const siteToLocaleMap: Record<string, string> = {
-    MLA: "es-AR", // Argentina
-    MBO: "es-BO", // Bolivia
-    MLB: "pt-BR", // Brazil
-    MLC: "es-CL", // Chile
-    MCO: "es-CO", // Colombia
-    MCR: "es-CR", // Costa Rica
-    MRD: "es-DO", // Dominican Republic
-    MSV: "es-SV", // El Salvador
-    MGT: "es-GT", // Guatemala
-    MHN: "es-HN", // Honduras
-    MLM: "es-MX", // Mexico
-    MNI: "es-NI", // Nicaragua
-    MPA: "es-PA", // Panama
-    MPY: "es-PY", // Paraguay
-    MPE: "es-PE", // Peru
-    MLU: "es-UY", // Uruguay
-    MLV: "es-VE", // Venezuela
+  const handleSearchSelect = (query: string) => {
+    setSearchQuery(query);
   };
 
-  const formatPrice = (price: number, currency: string) => {
-    const locale = siteToLocaleMap[siteId];
-    return new Intl.NumberFormat(locale, { style: "currency", currency }).format(price);
+  const handleSearchOpen = (query: string) => {
+    const updatedSearches = [query, ...recentSearches.filter((item) => item !== query)].slice(0, MAX_RECENT_SEARCHES);
+    setRecentSearches(updatedSearches);
   };
 
-  return viewLayout === "grid" ? (
-    <Grid
-      isLoading={isLoading}
-      columns={Number(gridItemSize)}
-      searchBarPlaceholder="Search Mercado Libre"
-      onSearchTextChange={setSearchQuery}
-      throttle
-    >
-      <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
-        {data?.map((item) => (
-          <Grid.Item
-            key={item.id}
-            content={item.thumbnail.replace(/^http:/, "https:")}
-            title={item.title}
-            subtitle={formatPrice(item.price, item.currency_id)}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`${item.permalink}`} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </Grid.Section>
-      <Grid.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />
-    </Grid>
-  ) : (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search Mercado Libre"
-      onSearchTextChange={setSearchQuery}
-      throttle
-    >
-      <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
-        {data?.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.title}
-            accessories={[{ text: formatPrice(item.price, item.currency_id) }]}
-            icon={item.thumbnail.replace(/^http:/, "https:")}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={`${item.permalink}`} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-      <List.EmptyView icon="mercado-libre-emptyview.png" title="No Results" />
-    </List>
-  );
+  const handleRemoveSearchItem = (query: string) => {
+    setRecentSearches(recentSearches.filter((item) => item !== query));
+  };
+
+  const handleClearSearchHistory = async () => {
+    const isConfirmed = await confirmAlert({
+      title: "Clear all recent searches?",
+      icon: Icon.Trash,
+      message: "This action cannot be undone.",
+      primaryAction: {
+        title: "Clear History",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (isConfirmed) {
+      setRecentSearches([]);
+    }
+  };
+
+  if (recentSearches.length === 0 && searchQuery === "") {
+    return (
+      <List searchBarPlaceholder="Search Mercado Libre" onSearchTextChange={setSearchQuery} throttle>
+        <ListEmptyView />
+      </List>
+    );
+  } else if (recentSearches.length > 0 && searchQuery === "") {
+    return (
+      <List searchBarPlaceholder="Search Mercado Libre" onSearchTextChange={setSearchQuery} throttle>
+        <List.Section title="Recent Searches">
+          {recentSearches.map((query, index) => (
+            <RecentSearchListItem
+              key={index}
+              query={query}
+              index={index}
+              handleSearchSelect={handleSearchSelect}
+              handleRemoveSearchItem={handleRemoveSearchItem}
+              handleClearSearchHistory={handleClearSearchHistory}
+            />
+          ))}
+        </List.Section>
+      </List>
+    );
+  } else {
+    return viewLayout === "grid" ? (
+      <Grid
+        isLoading={isLoading}
+        pagination={pagination}
+        columns={Number(gridItemSize)}
+        searchBarPlaceholder="Search Mercado Libre"
+        onSearchTextChange={setSearchQuery}
+        throttle
+        searchText={searchQuery}
+      >
+        <Grid.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+          {data?.map((item) => (
+            <ResultGridItem key={item.id} item={item} handleSearchOpen={() => handleSearchOpen(searchQuery)} />
+          ))}
+        </Grid.Section>
+      </Grid>
+    ) : (
+      <List
+        isLoading={isLoading}
+        pagination={pagination}
+        searchBarPlaceholder="Search Mercado Libre"
+        onSearchTextChange={setSearchQuery}
+        throttle
+        searchText={searchQuery}
+      >
+        <List.Section title="Results" subtitle={`${data?.length} ${data?.length === 1 ? "item" : "items"}`}>
+          {data?.map((item) => (
+            <ResultListItem key={item.id} item={item} handleSearchOpen={() => handleSearchOpen(searchQuery)} />
+          ))}
+        </List.Section>
+      </List>
+    );
+  }
 }
