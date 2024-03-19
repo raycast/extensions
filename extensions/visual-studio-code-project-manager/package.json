@@ -11,7 +11,8 @@
     "theherk",
     "TobiasYin",
     "yossizahn",
-    "eduwass"
+    "eduwass",
+    "grrrck"
   ],
   "license": "MIT",
   "commands": [
@@ -26,11 +27,10 @@
   "preferences": [
     {
       "name": "projectManagerDataPath",
-      "type": "textfield",
+      "type": "directory",
       "required": false,
-      "default": "",
-      "title": "Path of the 'Projects Location' of the Project Manager",
-      "description": "Only used if you have moved the 'Projects Location', otherwise leave blank"
+      "title": "Projects Location",
+      "description": "Only used if you have changed the 'Projects Location' in Project Manager settings, otherwise leave blank."
     },
     {
       "name": "groupProjectsByTag",
@@ -51,50 +51,28 @@
       "description": "Hide projects without tag"
     },
     {
-      "name": "terminalAppPath",
-      "type": "textfield",
+      "name": "terminalApp",
+      "type": "appPicker",
       "required": false,
       "default": "/Applications/iTerm.app",
       "title": "Terminal app path",
       "description": "Path to the terminal app"
     },
     {
-      "name": "gitClientAppPath",
-      "type": "textfield",
+      "name": "gitClientApp",
+      "type": "appPicker",
       "required": false,
       "default": "/Applications/Fork.app",
       "title": "Git client app path",
       "description": "Path to the Git client app"
     },
     {
-      "name": "build",
-      "type": "dropdown",
+      "name": "vscodeApp",
+      "type": "appPicker",
       "required": false,
-      "title": "Build",
-      "default": "Code",
-      "description": "Select which build of Visual Studio Code to use",
-      "data": [
-        {
-          "value": "Code",
-          "title": "Visual Studio Code"
-        },
-        {
-          "value": "Code - Insiders",
-          "title": "Visual Studio Code - Insiders"
-        },
-        {
-          "value": "VSCodium",
-          "title": "VSCodium"
-        },
-        {
-          "value": "VSCodium < 1.71",
-          "title": "VSCodium < 1.71"
-        },
-        {
-          "value": "Cursor",
-          "title": "Cursor"
-        }
-      ]
+      "title": "VSCode",
+      "default": "/Applications/Visual Studio Code.app",
+      "description": "Path to the VSCode app"
     }
   ],
   "dependencies": {
