@@ -1,4 +1,4 @@
-# brand-fetch
+# Brandfetch
 
 Fetch Brand Logos using the BrandFetch API.
 

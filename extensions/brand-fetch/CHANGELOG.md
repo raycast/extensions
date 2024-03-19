@@ -1,3 +1,3 @@
-# brand-fetch Changelog
+# Brandfetch Changelog
 
 ## [Initial Version] - 2024-03-12
