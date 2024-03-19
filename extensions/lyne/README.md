@@ -2,23 +2,11 @@
 
 Lyne empowers designers and developers to achieve pixel perfection. Create and organize on-screen Guides for precise design and coding.
 
-### Create Horizontal Line
-
-> It takes a position (number) and an optional layout name and creates a horizontal line.
-
-- lyne://create-horizontal?line=`NUMBER`&layout=`STRING?`
-
 ### Create Horizontal Lines
 
 > It takes a list of positions (number) and an optional layout name and creates a multiple horizontal lines.
 
 - lyne://create-horizontal?lines=[`NUMBER`,`NUMBER`,`NUMBER`]&layout=`STRING?`
-
-### Create Vertical Line
-
-> It takes a position (number) and an optional layout name and creates a vertical line.
-
-- lyne://create-vertical?line=`NUMBER`&layout=`STRING?`
 
 ### Create Vertical Lines
 
