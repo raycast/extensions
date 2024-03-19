@@ -53,15 +53,15 @@ export default function Translate(): ReactElement {
                   <ActionPanel.Section>
                     <Action.CopyToClipboard title="Copy" content={r.translatedText} />
                     <Action
+                      title="Toggle Full Text"
+                      icon={Icon.Text}
+                      onAction={() => setIsShowingDetail(!isShowingDetail)}
+                    />
+                    <Action
                       title="Play Text-To-Speech"
                       icon={Icon.Play}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => playTTS(r.translatedText, r.langTo)}
-                    />
-                    <Action
-                      title="Toggle Full Text"
-                      icon={Icon.Text}
-                      onAction={() => setIsShowingDetail(!isShowingDetail)}
                     />
                     <Action.OpenInBrowser
                       title="Open in Google Translate"

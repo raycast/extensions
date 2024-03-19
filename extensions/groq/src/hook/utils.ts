@@ -4,6 +4,7 @@ export const allModels = [
   { name: "Follow global model", id: "global" },
   { name: "Mixtral 8x7b 32k", id: "mixtral-8x7b-32768" },
   { name: "Llama2 70B 4k", id: "llama2-70b-4096" },
+  { name: "Gemma 7B 8k", id: "gemma-7b-it" },
 ];
 
 export const currentDate = new Date().toLocaleString("en-US", {
@@ -30,6 +31,9 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       break;
     case "llama2-70b-4096":
       price = ((prompt_token * 0.7) / 1_000_000 + (output_token * 0.8) / 1_000_000) * 100;
+      break;
+    case "gemma-7b-it":
+      price = ((prompt_token * 0.1) / 1_000_000 + (output_token * 0.1) / 1_000_000) * 100;
       break;
   }
   return naiveRound(price, 5);

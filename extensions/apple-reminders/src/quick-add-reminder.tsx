@@ -16,7 +16,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      await createReminder({ title: props.arguments.text, description: props.arguments.notes });
+      await createReminder({ title: props.arguments.text, notes: props.arguments.notes });
 
       await showToast({
         style: Toast.Style.Success,

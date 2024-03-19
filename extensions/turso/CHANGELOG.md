@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix Turso authentication redirect] - 2024-03-17
+
+- Turso auth api doesn't accept extra query parameters anymore (like clientId, codeVerified, codeChallenge)
+
 ## [Initial release] - March, 4 2024
 
 Introducing Turso for Raycast. Manage and explore your Turso databases from your command bar.

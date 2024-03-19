@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Accept Repository Invitations] - 2024-03-18
+
+When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
+
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
 - Use Raycast's built-in icons for the My Pull Requests Menu Bar.

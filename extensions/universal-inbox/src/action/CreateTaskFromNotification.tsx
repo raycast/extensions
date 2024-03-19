@@ -53,6 +53,7 @@ export function CreateTaskFromNotification({ notification, mutate }: CreateTaskF
   const { handleSubmit, itemProps } = useForm<TaskCreationFormValues>({
     initialValues: {
       title: notification.title,
+      project: projects?.find((p) => p.name === "Inbox")?.source_id,
       dueAt: new Date(),
       priority: `${TaskPriority.P4 as number}`,
     },
