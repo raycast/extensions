@@ -148,7 +148,7 @@
     },
     {
       "name": "get-postal-codes-by-city",
-      "title": "Get Postal Codes By City",
+      "title": "Get Postal Codes by City",
       "subtitle": "Zipcodebase",
       "description": "List of postal codes based on a city",
       "mode": "view",
