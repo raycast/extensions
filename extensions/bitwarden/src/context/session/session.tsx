@@ -48,7 +48,7 @@ export function SessionProvider(props: SessionProviderProps) {
         .setActionCallback("logout", handleLogout);
 
       const [token, passwordHash, lastActivityTimeString, lastVaultStatus] = await SessionStorage.getSavedSession();
-      if (!token || !passwordHash) throw new LockVaultError("No saved session found");
+      if (!token || !passwordHash) throw new LockVaultError();
 
       dispatch({ type: "loadState", token, passwordHash });
       bitwarden.setSessionToken(token);
