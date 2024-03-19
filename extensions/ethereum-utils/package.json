@@ -63,7 +63,7 @@
     },
     {
       "name": "resolve-name",
-      "title": "Resolve a Name",
+      "title": "Resolve Name",
       "subtitle": "Ethereum (EVM) Utils",
       "description": "Resolves decentralized naming service (e.g. ENS) records",
       "mode": "view"
