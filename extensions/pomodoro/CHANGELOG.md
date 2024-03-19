@@ -2,7 +2,7 @@
 
 ## [Enhancement] - 2024-02-27
 
-Added support for slack to change status during interval
+Added support for slack to change status during interval, the two new commands are disabled by default
 
 ## [Enhancement] - 2024-02-16
 
