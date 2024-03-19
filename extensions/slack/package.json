@@ -7,7 +7,7 @@
   "author": "mommertf",
   "contributors": [
     "Elliot67",
-    "sammcj"
+    "sam_mcleod"
   ],
   "categories": [
     "Communication",
@@ -78,7 +78,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.2",
+    "@raycast/api": "^1.69.3",
     "@slack/web-api": "^6.12.0",
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21",
@@ -87,8 +87,8 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.0",
-    "@types/node": "~18.19.23",
-    "@types/react": "^17.0.76",
+    "@types/node": "~18.19.25",
+    "@types/react": "^17.0.79",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^7.32.0",
