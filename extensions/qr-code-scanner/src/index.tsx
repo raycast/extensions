@@ -7,7 +7,7 @@ import {
   PopToRootType,
   showHUD,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
 import { exec } from "child_process";
 import open from "open";
@@ -45,7 +45,7 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
 }
 
 function trigger(randName: string, preferences: Preferences, displayNumber = 1) {
-  closeMainWindow({popToRootType: PopToRootType.Suspended});
+  closeMainWindow({ popToRootType: PopToRootType.Suspended });
 
   function captureScreenCommand(): string {
     switch (preferences.captureMode) {
@@ -79,7 +79,7 @@ function trigger(randName: string, preferences: Preferences, displayNumber = 1) 
               title: "Open",
               onAction: () => {
                 open(data).then(() => {
-                  closeMainWindow({clearRootSearch: true, popToRootType: PopToRootType.Immediate});
+                  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
                 });
               },
             },
