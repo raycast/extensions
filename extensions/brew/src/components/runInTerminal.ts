@@ -3,6 +3,13 @@ import { runAppleScript } from "run-applescript";
 import { preferences } from "../preferences";
 
 const terminalApp = preferences.terminalApp || "terminal";
+
+const names: { [key in typeof terminalApp]: string } = {
+  terminal: "Terminal",
+  iterm: "iTerm",
+  warp: "Warp",
+};
+
 const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
   terminal: (c: string) => `
     tell application "Terminal"
@@ -26,6 +33,10 @@ const appleScripts: { [key in typeof terminalApp]: (c: string) => string } = {
 `,
   /// warp does not provide an URI or anyway to pass commands so this was a workaround
 };
+
+export function terminalName(): string {
+  return names[terminalApp];
+}
 
 export function runCommandInTerminal(command: string): void {
   runAppleScript(appleScripts[terminalApp](command));

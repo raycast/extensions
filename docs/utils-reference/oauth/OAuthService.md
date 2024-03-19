@@ -109,8 +109,6 @@ OAuthService.google: (options: ProviderOptions) => OAuthService
 ```tsx
 const google = OAuthService.google({
   clientId: "custom-client-id",
-  authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenUrl: "https://oauth2.googleapis.com/token",
   scope: "https://www.googleapis.com/auth/drive.readonly",
 });
 ```
@@ -130,8 +128,6 @@ OAuthService.jira: (options: ProviderOptions) => OAuthService
 ```tsx
 const jira = OAuthService.jira({
   clientId: "custom-client-id",
-  authorizeUrl: "https://auth.atlassian.com/authorize",
-  tokenUrl: "https://api.atlassian.com/oauth/token",
   scope: "read:jira-user read:jira-work offline_access",
 });
 ```
@@ -179,10 +175,7 @@ OAuthService.zoom: (options: ProviderOptions) => OAuthService
 ```tsx
 const zoom = OAuthService.zoom({
   clientId: "custom-client-id",
-  authorizeUrl: "https://zoom.us/oauth/authorize",
-  tokenUrl: "https://zoom.us/oauth/token",
   scope: "meeting:write",
-  personalAccessToken: "personal-access-token",
 });
 ```
 

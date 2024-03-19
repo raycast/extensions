@@ -2,7 +2,7 @@ import { exec } from "child_process";
 
 const ntfyCurlCommand = (
   reminderTopic: string,
-  ntfyTopic: string
+  ntfyTopic: string,
 ) => `curl -H "Click: https://www.raycast.com/comoser/simple-reminder" \
     -H "Tags: bell" \
     -H "Priority: urgent" \

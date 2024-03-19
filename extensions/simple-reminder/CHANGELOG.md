@@ -1,8 +1,12 @@
 # Simple Reminder Changelog
 
+## [Fix] - 2024-03-18
+
+- Fix issue with topics having quoted words not triggering notifications
+
 ## [Fix] - 2023-11-24
 
-- Optimized import to reduce build size
+- Optimize import to reduce build size
 
 ## [Improved input parsing] - 2023-10-30
 

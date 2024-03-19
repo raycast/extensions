@@ -1,5 +1,9 @@
 # Port Manager Changelog
 
+## [New Command] - 2024-03-14
+
+- Added a new command to quickly kill a port 
+
 ## [Improved Menu Bar Command] - 2024-01-18
 
 - Improved menu bar commands

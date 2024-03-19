@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-02-27
+
+Added support for slack to change status during interval, the two new commands are disabled by default
+
 ## [Enhancement] - 2024-02-16
 
 Added option to use a quote on timer completion, and added option to disable the image on timer completion.

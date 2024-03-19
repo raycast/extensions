@@ -9,6 +9,19 @@ export const client = new OAuth.PKCEClient({
   description: "Connect to your Mastodon account",
 });
 
+export const permissionScope = [
+  "read:statuses",
+  "read:bookmarks",
+  "read:accounts",
+  "read:favourites",
+  "read:notifications",
+  "write:favourites",
+  "write:media",
+  "write:bookmarks",
+  "write:statuses",
+  "write:notifications",
+].join(" ");
+
 const requestAccessToken = async (
   clientId: string,
   clientSecret: string,
@@ -65,8 +78,7 @@ const authorize = async (): Promise<string> => {
   const authRequest = await client.authorizationRequest({
     endpoint: `https://${instance}/oauth/authorize`,
     clientId: client_id,
-    scope:
-      "read:statuses read:bookmarks read:accounts read:favourites write:favourites write:media write:bookmarks write:statuses",
+    scope: permissionScope,
   });
 
   const { authorizationCode } = await client.authorize(authRequest);
