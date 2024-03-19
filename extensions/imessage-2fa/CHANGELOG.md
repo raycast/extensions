@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-03-18
+
+- Allow alphanumeric codes
+
 ## [Update] - 2024-02-20
 
 - Add temporal unit options for searching iMessage for 2FA codes
