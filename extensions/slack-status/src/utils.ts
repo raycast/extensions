@@ -142,12 +142,12 @@ export function setStatusToPreset({
   slack,
   preset,
   mutate,
-  mutateDnd
+  mutateDnd,
 }: {
   slack: WebClient;
   preset: SlackStatusPreset;
   mutate: MutatePromise<Profile | undefined>;
-  mutateDnd: MutatePromise<DndInfoResponse | undefined>
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
 }) {
   return showToastWithPromise(
     async () => {

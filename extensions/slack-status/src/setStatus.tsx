@@ -1,4 +1,13 @@
-import { ActionPanel, Detail, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  Icon,
+  LaunchProps,
+  List,
+  closeMainWindow,
+  getPreferenceValues,
+  popToRoot,
+} from "@raycast/api";
 import { OAuthService, useCachedState, withAccessToken, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
