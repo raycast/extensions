@@ -18,7 +18,7 @@ export default function Command() {
         responseType: "json",
       });
 
-      showToast({ title: "Event added", message: "Successfully submitted values" });
+      showToast({ title: "Event added", message: "Processing and adding event" });
     } catch (error) {
       console.error(error);
       showToast({ title: "Error", message: "Failed to submit values" });
