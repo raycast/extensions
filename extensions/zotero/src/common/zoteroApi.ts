@@ -184,7 +184,7 @@ async function getBibtexKey(key: string, library: string): Promise<string> {
   }
 }
 
-async function openBibtexDb(): [SQL.Database, boolean] {
+async function openBibtexDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
   let new_fPath = f_path.replace("zotero.sqlite", "better-bibtex.sqlite");
