@@ -1,6 +1,6 @@
 # Zipcodebase Changelog
 
-## [default_limit in Preferences and state_name in GetPostalCodesByCity] - {PR_MERGE_DATE}
+## [default_limit in Preferences and state_name in GetPostalCodesByCity] - 2024-03-19
 
 ### Enhancements 
 
