@@ -5,6 +5,9 @@
   "description": "Search SVG logos via svgl",
   "icon": "command-icon.png",
   "author": "davidho0403",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools"

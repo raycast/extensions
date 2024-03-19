@@ -8,10 +8,16 @@ export interface Svg {
         dark: string;
         light: string;
       };
+  wordmark:
+    | string
+    | {
+      dark: string;
+      light: string;
+    }
   url: string;
 }
 
 export interface Category {
-  category: string;
+  category: string | string[];
   total: number;
 }
