@@ -11,9 +11,9 @@ export interface Svg {
   wordmark:
     | string
     | {
-      dark: string;
-      light: string;
-    }
+        dark: string;
+        light: string;
+      };
   url: string;
 }
 
