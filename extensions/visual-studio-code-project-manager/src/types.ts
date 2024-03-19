@@ -1,4 +1,4 @@
-import { Application } from '@raycast/api'
+import { Application } from "@raycast/api";
 
 export interface ProjectEntry {
   name: string;

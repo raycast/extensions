@@ -78,6 +78,7 @@
   "dependencies": {
     "@raycast/api": "1.48.8",
     "parse-git-config": "^3.0.0",
+    "prettier": "^3.2.5",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
