@@ -134,12 +134,7 @@ export default function NotificationActions({ notification, userId, mutateList }
       />
       {notification.unread ? (
         <>
-          <Action
-            title="Mark as Read"
-            icon={Icon.Circle}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-            onAction={markNotificationAsRead}
-          />
+          <Action title="Mark as Read" icon={Icon.Circle} onAction={markNotificationAsRead} />
 
           <Action
             title="Mark All as Read"
