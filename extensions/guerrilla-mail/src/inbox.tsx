@@ -83,6 +83,7 @@ export default function Inbox({ email }: { email: string }) {
                 <ActionPanel>
                   <Action.Push
                     title="Display Email"
+                    icon={{ source: Icon.Envelope }}
                     target={<Mail email_id={email.mail_id} sid_token={emailListData.sid_token} />}
                   />
                   <Action

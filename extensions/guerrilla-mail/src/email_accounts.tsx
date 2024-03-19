@@ -30,7 +30,7 @@ export default function Command() {
               title={email}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Show Inbox" target={<Inbox email={email} />} />
+                  <Action.Push title="Show Inbox" icon={{ source: Icon.Folder }} target={<Inbox email={email} />} />
                   <Action
                     title="Copy Email Address"
                     icon={{ source: Icon.CopyClipboard, tintColor: "#A9C939" }}
