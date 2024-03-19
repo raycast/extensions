@@ -77,19 +77,19 @@
       "type": "dropdown",
       "required": false,
       "title": "Volume Step",
-      "default": "1",
+      "default": "2",
       "data": [
         {
-          "value": "1",
-          "title": "Slow (Finer control)"
+          "value": "2",
+          "title": "Small"
         },
         {
           "value": "5",
-          "title": "Medium (Balanced control)"
+          "title": "Medium"
         },
         {
           "value": "10",
-          "title": "Fast (Quicker adjustments)"
+          "title": "Large"
         }
       ]
     }
