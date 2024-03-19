@@ -1,13 +1,13 @@
 # GitHub Changelog
 
-## [Fix shortcut conflict + npm audit vulnerabilities] - 2024-03-17
+## [Fix shortcut conflict + npm audit vulnerabilities] - 2024-03-19
 
-- Fixes an issue where the shortcuts for `Re-Run Workflow` and `Delete Run` actions were reserved by Raycast.
+- Fixes an issue where the shortcuts for `Re-Run Workflow` and `Delete Run` were not rendered.
 - Fixes vulnerabilities reported by `npm audit`.
 
 ## [Accept Repository Invitations] - 2024-03-18
 
-When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
+- When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
 
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
