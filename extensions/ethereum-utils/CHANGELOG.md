@@ -1,8 +1,8 @@
 # Changelog
 
-## Add "Resolve a Name" (2023-03-07)
+## Add "Resolve a Name" command (2024-03-19)
 
-Added a new command to resolve a name using decentralized naming protocols. Currently, only ENS is supported.
+Added a new command to resolve names using decentralized naming protocols. Currently, only ENS is supported.
 Fixed a bug in the "Search Chains" where searching by chain id was not working.
 Bumped all dependencies to their latest versions.
 
