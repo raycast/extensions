@@ -12,9 +12,8 @@
   "commands": [
     {
       "name": "pangu",
-      "title": "Pangu",
-      "subtitle": "Format with spaces",
-      "description": "Add spaces between Chinese and English, number or symbols using https://github.com/vinta/pangu.js.",
+      "title": "Format with Pangu Spaces",
+      "description": "Add spaces between Chinese and English, number or symbols using https://github.com/vinta/pangu.js",
       "mode": "no-view"
     }
   ],
