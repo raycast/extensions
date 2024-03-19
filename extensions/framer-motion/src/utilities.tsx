@@ -1,9 +1,8 @@
-import { Action, ActionPanel, environment, List } from '@raycast/api';
+import { Action, ActionPanel, List } from '@raycast/api';
 
 import { UTILITY_ITEMS } from './data';
 
 export default function Command() {
-  console.log(environment.appearance);
   return (
     <List>
       {UTILITY_ITEMS.map((items) => (
