@@ -1,21 +1,24 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
-import { readdir } from 'fs/promises';
+import { readdir } from "fs/promises";
 
 // 新增检查 Setapp 目录的函数
 async function isMindNodeInstalledInSetapp() {
-  const setappApplicationsPath = '/Applications/Setapp';
+  const setappApplicationsPath = "/Applications/Setapp";
   try {
     const files = await readdir(setappApplicationsPath);
-    return files.some(file => file.includes('MindNode'));
+    return files.some((file) => file.includes("MindNode"));
   } catch (error) {
-    console.error('Error reading Setapp applications directory:', error);
+    console.error("Error reading Setapp applications directory:", error);
     return false;
   }
 }
 
 async function isMindNodeInstalled() {
   const applications = await getApplications();
-  const isInstalledRegular = applications.some(({ bundleId }) => bundleId === "com.ideasoncanvas.mindnode.macos-setapp" || bundleId === "com.ideasoncanvas.mindnode.macos");
+  const isInstalledRegular = applications.some(
+    ({ bundleId }) =>
+      bundleId === "com.ideasoncanvas.mindnode.macos-setapp" || bundleId === "com.ideasoncanvas.mindnode.macos",
+  );
   const isInstalledSetapp = await isMindNodeInstalledInSetapp();
   return isInstalledRegular || isInstalledSetapp;
 }
