@@ -6,8 +6,7 @@ import { useState } from "react";
 
 function Posters({ id, type }: { id: number; type: "movie" | "tv" }) {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
-
-  const fetchPostersAndLanguages = async () => {
+  const fetchPostersAndLanguages = async (id: number, type: "movie" | "tv") => {
     let response: MovieImagesResponse | TvImagesResponse;
     if (type === "movie") {
       response = await moviedb.movieImages({ id });
@@ -32,7 +31,7 @@ function Posters({ id, type }: { id: number; type: "movie" | "tv" }) {
     };
   };
 
-  const { data: postData, isLoading } = useCachedPromise(fetchPostersAndLanguages, [], {
+  const { data: postData, isLoading } = useCachedPromise(fetchPostersAndLanguages, [id, type], {
     onError: async (error) => {
       await showToast(Toast.Style.Failure, "Failed to fetch data", error.message);
     },

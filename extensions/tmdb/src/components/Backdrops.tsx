@@ -7,7 +7,7 @@ import { useState } from "react";
 function Backdrops({ id, type }: { id: number; type: "movie" | "tv" }) {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
 
-  const fetchBackdropsAndLanguages = async () => {
+  const fetchBackdropsAndLanguages = async (id: number, type: "movie" | "tv") => {
     let response: MovieImagesResponse | TvImagesResponse;
     if (type === "movie") {
       response = await moviedb.movieImages({ id });
@@ -34,7 +34,7 @@ function Backdrops({ id, type }: { id: number; type: "movie" | "tv" }) {
     };
   };
 
-  const { data: backdropData, isLoading } = useCachedPromise(fetchBackdropsAndLanguages, [], {
+  const { data: backdropData, isLoading } = useCachedPromise(fetchBackdropsAndLanguages, [id, type], {
     onError: async (error) => {
       await showToast(Toast.Style.Failure, "Failed to fetch data", error.message);
     },
