@@ -79,10 +79,8 @@ Raycast extension to search and favorite npm packages
 
 ### Screencast
 
-https://user-images.githubusercontent.com/64883/166630703-962ac4de-5da5-40f6-8895-25aeb92bcfb6.mp4
-
-![package list item](https://user-images.githubusercontent.com/64883/166632417-89e2e5dd-b01e-43af-984c-e4b29740f53f.gif)
+https://github.com/raycast/extensions/assets/64883/e94be63a-50c9-4fa5-9f7c-788ebbb4ca72
 
 ### Options
 
-<img width="311" alt="image" src="https://user-images.githubusercontent.com/64883/228140967-2fe2a8cf-77cf-4f7c-9bbd-3bfcae380d52.png">
+<img width="311" alt="image" src="https://github.com/raycast/extensions/assets/64883/a4953656-6678-4f72-ac50-2e6b54a21172">

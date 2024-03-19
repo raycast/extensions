@@ -1,9 +1,8 @@
 import { Toast, showToast } from "@raycast/api";
 
-import { checkIfInstalled } from "@/helper/install-check";
 import { syncVault } from "@/lib/dcli";
 
-export default checkIfInstalled(async () => {
+export default async function sync() {
   try {
     const toast = await showToast({
       title: "Syncing with Dashlane",
@@ -20,4 +19,4 @@ export default checkIfInstalled(async () => {
       style: Toast.Style.Failure,
     });
   }
-});
+}

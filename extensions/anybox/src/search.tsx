@@ -33,10 +33,14 @@ function looseMatch(query: string, content: string): boolean {
 let tagsResult: TagProp[] = [];
 let foldersResult: FolderProp[] = [];
 fetchTags().then((res) => {
-  tagsResult = res;
+  if (Array.isArray(res)) {
+    tagsResult = res;
+  }
 });
 fetchFolders().then((res) => {
-  foldersResult = res;
+  if (Array.isArray(res)) {
+    foldersResult = res;
+  }
 });
 
 export default function SearchResult() {

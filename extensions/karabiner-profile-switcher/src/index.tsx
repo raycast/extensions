@@ -72,7 +72,7 @@ export default function Command() {
           key={source.id}
           icon={source.active ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
           title={source.title}
-          accessoryTitle={source.active ? "Current Profile" : ""}
+          accessories={[{ text: source.active ? "Current Profile" : "" }]}
           keywords={[source.id]}
           actions={
             <ActionPanel>

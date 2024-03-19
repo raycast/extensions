@@ -1,39 +1,46 @@
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { Space, Tab } from "./types";
+import { findSpaceInSpaces } from "./utils";
 
 // Tabs
 
 export async function getTabs() {
   const response = await runAppleScript(`
     on escape_value(this_text)
+      set AppleScript's text item delimiters to the "\\\\"
+      set the item_list to every text item of this_text
+      set AppleScript's text item delimiters to "\\\\\\\\"
+      set this_text to the item_list as string
       set AppleScript's text item delimiters to the "\\""
       set the item_list to every text item of this_text
       set AppleScript's text item delimiters to the "\\\\\\""
       set this_text to the item_list as string
       set AppleScript's text item delimiters to ""
       return this_text
-    end replace_chars
+    end escape_value
 
     set _output to ""
 
     tell application "Arc"
-      set _window_index to 1
-      set _tab_index to 1
-      
-      repeat with _tab in tabs of first window
+      tell first window
+        set allTabs to properties of every tab
+      end tell
+      set tabsCount to count of allTabs
+      repeat with i from 1 to tabsCount
+        set _tab to item i of allTabs
         set _title to my escape_value(get title of _tab)
         set _url to get URL of _tab
+        set _id to get id of _tab
         set _location to get location of _tab
+          
+        set _output to (_output & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"id\\": \\"" & _id & "\\", \\"location\\": \\"" & _location & "\\" }")
         
-        set _output to (_output & "{ \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"windowId\\": " & _window_index & ", \\"tabId\\": " & _tab_index & " , \\"location\\": \\"" & _location & "\\" }")
-        
-        if _tab_index < (count tabs of first window) then
+        if i < tabsCount then
           set _output to (_output & ",\\n")
         else
           set _output to (_output & "\\n")
         end if
-        
-        set _tab_index to _tab_index + 1
+
       end repeat
     end tell
     
@@ -87,42 +94,46 @@ export async function findTab(url: string) {
   return response ? (JSON.parse(response) as Tab) : undefined;
 }
 
-export async function selectTab(tab: Tab) {
-  await runAppleScript(`
+function runAppleScriptActionOnTab(tab: Tab, action: string, activate = false) {
+  return runAppleScript(`
     tell application "Arc"
-      tell window (${tab.windowId} as number)
-        tell tab (${tab.tabId} as number) to select
-      end tell
-
-      activate
+    if (count of windows) is 0 then
+    make new window
+  end if
+      set tabIndex to 1
+      repeat with aTab in every tab of first window
+        if id of aTab is "${tab.id}" then
+          tell tab tabIndex of window 1 to ${action}
+          ${activate ? "activate" : ""}
+          return tabIndex
+        end if
+        set tabIndex to tabIndex + 1
+      end repeat
     end tell
   `);
+}
+
+export async function selectTab(tab: Tab) {
+  await runAppleScriptActionOnTab(tab, "select", true);
 }
 
 export async function closeTab(tab: Tab) {
-  await runAppleScript(`
-    tell application "Arc"
-      tell window (${tab.windowId} as number)
-        tell tab (${tab.tabId} as number) to close
-      end tell
-    end tell
-  `);
+  await runAppleScriptActionOnTab(tab, "close");
 }
 
 export async function reloadTab(tab: Tab) {
-  await runAppleScript(`
-    tell application "Arc"
-      tell window (${tab.windowId} as number)
-        tell tab (${tab.tabId} as number) to reload
-      end tell
-    end tell
-  `);
+  await runAppleScriptActionOnTab(tab, "reload");
 }
 
-export async function makeNewTab(url: string) {
+export async function makeNewTab(url: string, space?: string) {
   await runAppleScript(`
     tell application "Arc"
+      if (count of windows) is 0 then
+        make new window
+      end if
+
       tell front window
+        ${space ? `tell space "${space}" to focus` : ""}
         make new tab with properties {URL:"${url}"}
       end tell
 
@@ -131,11 +142,23 @@ export async function makeNewTab(url: string) {
   `);
 }
 
+export async function getValidatedSpaceTitle(spaceId: string | undefined) {
+  if (spaceId) {
+    const spaces = await getSpaces();
+    if (spaces) {
+      return findSpaceInSpaces(spaceId, spaces);
+    }
+  }
+
+  return undefined;
+}
+
 // Windows
 
 export type MakeNewWindowOptions = {
   incognito?: boolean;
   url?: string;
+  space?: string;
 };
 
 export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise<void> {
@@ -144,6 +167,7 @@ export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise
       make new window with properties {incognito:${options.incognito ?? false}}
       activate
 
+      ${options.space ? `tell front window to tell space "${options.space}" to focus` : ""}
       ${options.url ? `tell front window to make new tab with properties {URL:"${options.url}"}` : ""}
     end tell
   `);
@@ -151,17 +175,17 @@ export async function makeNewWindow(options: MakeNewWindowOptions = {}): Promise
 export async function makeNewBlankWindow(): Promise<void> {
   await runAppleScript(`
     tell application "Arc"
-	    activate
+      activate
     end tell
     delay(0.5)
     tell application "Arc"
-	    activate
+      activate
     end tell
 
     tell application "System Events"
-	    tell process "Arc"
-		    click menu item "Blank window" of menu "File" of menu bar 1
-	    end tell
+      tell process "Arc"
+        click menu item "Blank window" of menu "File" of menu bar 1
+      end tell
     end tell
   `);
 }
@@ -170,7 +194,6 @@ export async function makeNewLittleArcWindow(url: string) {
   await runAppleScript(`
     tell application "Arc"
       make new tab with properties {URL:"${url}"}
-
       activate
     end tell
   `);

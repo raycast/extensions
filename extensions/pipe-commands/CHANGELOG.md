@@ -1,5 +1,25 @@
 # Pipe Commands Changelog
 
+## [Added new commands] - 2024-03-15
+
+- Copy plain text to rich text clipboard
+- Remove blank lines in a string
+- Add url decode
+
+## [Added new dedicated clipboard command] - 2024-03-07
+
+BREAKING CHANGE: the text command no longer falls back to the clipboard contents. Now, there is a dedicated clipboard
+command to pipe clipboard input.
+
+## [Added new pipe command] - 2024-03-05
+
+- Added "Add bulletpoint to newline" command
+
+## [Added new pipe command] - 2023-11-28
+
+- Add remove smart quotes command (helpful for some LLM prompting)
+- Fixed code on the tab-to-newline
+
 ## [Pipe to text enhancement] - 2023-10-24
 
 - Fallback to clipboard when text selection fails (new error type)

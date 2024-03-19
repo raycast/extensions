@@ -14,7 +14,9 @@
     "thomaslombart",
     "erics118",
     "bkeys818",
-    "alexs"
+    "alexs",
+    "yakitrak",
+    "tleo19"
   ],
   "categories": [
     "Applications",
@@ -65,50 +67,39 @@
     {
       "name": "notion_token",
       "type": "password",
-      "title": "Notion Token",
+      "title": "Internal Integration Secret",
       "required": false,
-      "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
-      "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
-      "link": "https://www.notion.so/my-integrations"
+      "description": "In Notion, go to Settings & members > My connections > Develop or manage integrations > New integration",
+      "placeholder": "secret_FGDeSrZNodQuaJEqWzvxcTyrPlpBHYvdLpTZykrWEu"
     },
     {
       "name": "open_in",
-      "type": "dropdown",
+      "type": "appPicker",
       "title": "Open Page in",
       "required": false,
-      "default": "app",
-      "data": [
-        {
-          "title": "Notion Application",
-          "value": "app"
-        },
-        {
-          "title": "Default Browser",
-          "value": "web"
-        }
-      ],
+      "default": "Notion",
       "description": "Choose where to open Notion page."
     }
   ],
   "dependencies": {
-    "@mozilla/readability": "^0.4.4",
-    "@notionhq/client": "^2.2.13",
-    "@raycast/api": "^1.61.2",
-    "@raycast/utils": "^1.10.1",
+    "@mozilla/readability": "^0.5.0",
+    "@notionhq/client": "^2.2.14",
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
     "@tryfabric/martian": "^1.2.4",
-    "date-fns": "^2.30.0",
-    "linkedom": "^0.15.6",
+    "date-fns": "^3.3.1",
+    "linkedom": "^0.16.8",
     "node-fetch": "^3.3.2",
     "notion-to-md": "^3.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.37",
-    "eslint": "^8.53.0",
-    "eslint-plugin-import": "^2.29.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "20.11.20",
+    "@types/react": "18.2.58",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

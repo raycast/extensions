@@ -20,6 +20,8 @@ export const ListItemPassword = ({ item }: Props) => {
 
   const keywords = [item.title, item.url, item.email, item.login, item.secondaryLogin].filter(Boolean);
 
+  if (!itemName) return null;
+
   return (
     <List.Item
       key={item.id}
@@ -44,7 +46,7 @@ export const ListItemPassword = ({ item }: Props) => {
             />
           )}
 
-          <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          {item.url && <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />}
           <ShowNoteAction item={item} />
           <ActionPanel.Section title="Item Actions">
             <FavoriteActions item={item} />
@@ -56,7 +58,7 @@ export const ListItemPassword = ({ item }: Props) => {
   );
 };
 
-function isValidURL(url?: string) {
+function isValidURL(url?: string): url is string {
   if (!url) return false;
 
   try {

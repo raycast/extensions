@@ -60,7 +60,11 @@ export function VaultProvider(props: VaultProviderProps) {
       let items: Item[] = [];
       let folders: Folder[] = [];
       try {
-        [items, folders] = await Promise.all([bitwarden.listItems(), bitwarden.listFolders()]);
+        const [itemsResult, foldersResult] = await Promise.all([bitwarden.listItems(), bitwarden.listFolders()]);
+        if (itemsResult.error) throw itemsResult.error;
+        if (foldersResult.error) throw foldersResult.error;
+        items = itemsResult.result;
+        folders = foldersResult.result;
         items.sort(favoriteItemsFirstSorter);
       } catch (error) {
         publishItems(new FailedToLoadVaultItemsError());
@@ -92,7 +96,7 @@ export function VaultProvider(props: VaultProviderProps) {
     }
   }
 
-  async function setCurrentFolder(folderOrId: Nullable<string | Folder>) {
+  function setCurrentFolder(folderOrId: Nullable<string | Folder>) {
     setCurrentFolderId(typeof folderOrId === "string" ? folderOrId : folderOrId?.id);
   }
 

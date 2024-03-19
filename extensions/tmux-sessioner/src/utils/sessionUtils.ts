@@ -1,6 +1,6 @@
-import { ChildProcess, exec, ExecException, execSync } from "child_process";
+import { ChildProcess, exec, ExecException } from "child_process";
 import { env } from "../config";
-import { closeMainWindow, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
+import { showHUD, showToast, Toast } from "@raycast/api";
 import { openTerminal } from "./terminalUtils";
 
 export function getAllSession(
@@ -9,7 +9,7 @@ export function getAllSession(
   return exec(`tmux list-sessions | awk '{print $1}' | sed 's/://'`, { env }, callback);
 }
 
-export function creatNewSession(
+export function createNewSession(
   sessionName: string,
   callback: (error: ExecException | null, stdout: string, stderr: string) => void
 ): ChildProcess {

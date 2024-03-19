@@ -28,3 +28,8 @@ export function getVAT(number, keepAsNumber) {
 export function numberWithVAT(number) {
   return (getVAT(number, vat, true) + equationToNumber(number)).toFixed(2);
 }
+
+export function getNetPrice(number) {
+  number = equationToNumber(number);
+  return (number / (1 + vat / 100)).toFixed(2);
+}

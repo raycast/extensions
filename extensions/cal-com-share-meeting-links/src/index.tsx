@@ -30,6 +30,7 @@ export default function Command() {
           key={item.id}
           title={item.title}
           accessories={getAccessories(item)}
+          keywords={item.length ? [item.length.toString()] : []}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard

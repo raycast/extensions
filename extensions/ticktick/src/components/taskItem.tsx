@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useMemo, useRef, useState } from "react";
 import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
 import { addSpaceBetweenEmojiAndText } from "../utils/text";
 import { toggleTask } from "../service/osScript";
+import { formatPrettyDateTime } from "../utils/date";
 
 const TaskItem: React.FC<{
   id: Task["id"];
@@ -14,9 +15,29 @@ const TaskItem: React.FC<{
   actionType: "today" | "week" | "project";
   detailMarkdown: string;
   copyContent: string;
+  dueDate?: Task["dueDate"];
+  startDate?: Task["startDate"];
+  isAllDay: Task["isAllDay"];
+  isFloating: Task["isFloating"];
+  timeZone: Task["timeZone"];
   refresh: () => void;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType, detailMarkdown, tags, copyContent, refresh } = props;
+  const {
+    id,
+    title,
+    priority,
+    projectId,
+    actionType,
+    dueDate,
+    startDate,
+    isFloating,
+    isAllDay,
+    timeZone,
+    detailMarkdown,
+    tags,
+    copyContent,
+    refresh,
+  } = props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
@@ -61,6 +82,37 @@ const TaskItem: React.FC<{
     return `ticktick://widget.view.task.in.smartproject/${actionType}/${id}`;
   }, [actionType, id, projectId]);
 
+  const dateSections = useMemo(() => {
+    if (!startDate) {
+      return null;
+    } else if (!dueDate || startDate === dueDate) {
+      return (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="Date"
+            text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
+          />
+          <List.Item.Detail.Metadata.Separator />
+        </>
+      );
+    } else {
+      return (
+        <>
+          <List.Item.Detail.Metadata.Label
+            title="Start"
+            text={formatPrettyDateTime(startDate, timeZone, isFloating, isAllDay)}
+          />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label
+            title="End"
+            text={formatPrettyDateTime(dueDate, timeZone, isFloating, isAllDay)}
+          />
+          <List.Item.Detail.Metadata.Separator />
+        </>
+      );
+    }
+  }, [startDate, dueDate, timeZone, isFloating, isAllDay]);
+
   return (
     <List.Item
       title={title || "Untitled"}
@@ -69,7 +121,7 @@ const TaskItem: React.FC<{
         <ActionPanel>
           <Action.Open title="View" target={target} icon={Icon.Eye} />
           <Action
-            title="Compete"
+            title="Complete"
             onAction={async () => {
               if (togglingRef.current) return;
               togglingRef.current = true;
@@ -103,6 +155,7 @@ const TaskItem: React.FC<{
                 icon={{ source: Icon.Dot, tintColor: checkboxColor }}
               />
               <List.Item.Detail.Metadata.Separator />
+              {dateSections}
               {tags.length ? (
                 <>
                   <List.Item.Detail.Metadata.Label title="Tags" text={tags.join(", ")} />

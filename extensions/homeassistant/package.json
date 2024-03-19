@@ -6,7 +6,8 @@
   "author": "tonka3000",
   "contributors": [
     "altrdev",
-    "rspeicher"
+    "rspeicher",
+    "amuelli"
   ],
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
@@ -385,6 +386,59 @@
           "placeholder": "cover.mycover1,cover.bath*"
         }
       ]
+    },
+    {
+      "name": "entitymenu01",
+      "title": "Entity Menu 1",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu02",
+      "title": "Entity Menu 2",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu03",
+      "title": "Entity Menu 3",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -455,13 +509,30 @@
       "title": "Camera Refresh Interval (ms)",
       "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
       "placeholder": "3000"
+    },
+    {
+      "name": "preferredapp",
+      "description": "Preferred Application to Open",
+      "type": "dropdown",
+      "required": false,
+      "title": "Preferred Application",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Companion",
+          "value": "companion"
+        }
+      ]
     }
   ],
   "categories": [
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
+    "@raycast/api": "^1.66.0",
     "@raycast/utils": "^1.5.2",
     "home-assistant-js-websocket": "^8.1.0",
     "javascript-time-ago": "^2.5.9",
@@ -478,14 +549,16 @@
     "@raycast/eslint-config": "^1.0.5",
     "@types/lodash-es": "^4.17.6",
     "@types/multicast-dns": "^7.2.1",
-    "@types/node": "^18.8.3",
+    "@types/node": "^20.8.10",
     "@types/node-fetch": "^2.5.12",
     "@types/ping": "^0.4.1",
     "@types/plist": "^3.0.2",
+    "@types/react": "^18.2.27",
     "@types/url-join": "^4.0.1",
     "@types/ws": "^8.2.0",
     "eslint": "^7.31.0",
     "prettier": "^3.0.0",
+    "react": "^18.2.0",
     "typescript": "^4.3.5"
   },
   "scripts": {

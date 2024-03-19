@@ -28,6 +28,16 @@
           "description": "Use Copilot Mode?",
           "placeholder": "Use Copilot? (y/n)"
         }
+      ],
+      "preferences": [
+        {
+          "label": "Fallback with Copilot enabled",
+          "description": "This will enable Perplexity's Copilot mode when using this command as a Fallback",
+          "default": false,
+          "type": "checkbox",
+          "name": "fallbackCopilot",
+          "required": false
+        }
       ]
     }
   ],

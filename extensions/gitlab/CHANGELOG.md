@@ -1,5 +1,19 @@
 # GitLab Changelog
 
+## [Standardize Project Actions and List Items] - 2024-02-22
+
+- Standardize project actions between Search Projects and Groups > Show Group views
+- Reuse `<ProjectListItem>` for consistent future behavior
+
+## [Add Issue State Filter] - 2024-02-16
+
+- Add dropdown filter for issue state
+
+## [Add Group Search] - 2024-01-26
+
+- Add `Search Groups` command
+- Update keyboard shortcut for project `Pipelines` command to `cmd`+`shift`+`P` to remove conflict with reserved shortcut for Raycast core
+
 ## [Fix] - 2023-10-21
 
 - Fix possible crash in todo commands if the title is empty

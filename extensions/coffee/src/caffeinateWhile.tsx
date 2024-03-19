@@ -33,7 +33,7 @@ export default function Command() {
           <Action.SubmitForm
             title="Caffeinate"
             onSubmit={async () => {
-              await startCaffeinate(true);
+              await startCaffeinate({ menubar: true, status: true });
               popToRoot();
             }}
           />

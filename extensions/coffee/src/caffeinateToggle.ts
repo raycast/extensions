@@ -5,8 +5,8 @@ export default async () => {
   try {
     execSync("pgrep caffeinate");
 
-    await stopCaffeinate(true, "Your Mac is now decaffeinated");
+    await stopCaffeinate({ menubar: true, status: true }, "Your Mac is now decaffeinated");
   } catch (error) {
-    await startCaffeinate(true, "Your Mac is now caffeinated");
+    await startCaffeinate({ menubar: true, status: true }, "Your Mac is now caffeinated");
   }
 };

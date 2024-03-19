@@ -1,4 +1,4 @@
-import { runPrivateInternetAcessCmd } from "./utils";
+import { connectToPIA } from "./utils";
 export default async () => {
-  await runPrivateInternetAcessCmd("connect", "Connecting to Private Internet Access...");
+  await connectToPIA();
 };

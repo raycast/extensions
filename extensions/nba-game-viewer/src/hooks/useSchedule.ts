@@ -39,9 +39,11 @@ const useSchedule = () => {
               .map((competitor: any): Competitor => {
                 return {
                   displayName: competitor.team.displayName,
+                  abbreviation: competitor.team.abbreviation,
                   shortName: competitor.team.shortDisplayName,
                   logo: competitor.team.logo,
                   home: competitor.homeAway,
+                  score: competitor.score,
                 };
               })
               .sort((a: Competitor) => {

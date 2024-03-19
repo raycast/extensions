@@ -76,12 +76,6 @@
       "mode": "view"
     },
     {
-      "name": "join-meeting",
-      "title": "Join Meeting",
-      "description": "Quickly join your current meeting",
-      "mode": "no-view"
-    },
-    {
       "name": "my-calendar",
       "title": "My Calendar",
       "description": "View & manage your upcoming calendar events for the day",
@@ -114,7 +108,6 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/date-fns": "^2.6.0",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",

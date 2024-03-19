@@ -132,7 +132,7 @@ export default function TickTickCreate() {
       // Hiding the toast
       toast.hide();
     },
-    500,
+    1000,
     []
   );
 

@@ -1,38 +1,25 @@
-import { open, Toast } from "@raycast/api";
-import { fetchBookmarks } from "./utils/api";
-import { HTTPError } from "got";
-import { ReadState } from "./utils/types";
+import { open, showToast, Toast } from "@raycast/api";
+import { ReadState } from "./lib/api";
+import { sample } from "lodash";
+import { createPocketClient } from "./lib/oauth/client";
 
-export default async function () {
-  const toast = new Toast({
+export default async function openRandomBookmark() {
+  const pocket = await createPocketClient();
+
+  const toast = await showToast({
     title: "Searching bookmarks",
     style: Toast.Style.Animated,
   });
 
-  toast.show();
+  const bookmarks = await pocket.getBookmarks({ state: ReadState.Unread });
 
-  try {
-    const bookmarks = await fetchBookmarks({ state: ReadState.Unread });
-
-    if (bookmarks.length === 0) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "No bookmarks found";
-    } else {
-      const bookmark = bookmarks[Math.floor(Math.random() * bookmarks.length)];
-      await open(bookmark.pocketUrl);
-    }
-  } catch (error) {
+  if (bookmarks.length === 0) {
     toast.style = Toast.Style.Failure;
-
-    if (error instanceof HTTPError) {
-      if (error.response.statusCode === 401 || error.response.statusCode === 403) {
-        toast.title = "Invalid Credentials";
-        toast.message = "Check you Pocket extension preferences";
-      } else {
-        throw error;
-      }
-    } else {
-      throw error;
-    }
+    toast.title = "No bookmarks found";
+  } else {
+    toast.style = Toast.Style.Success;
+    toast.title = "Bookmark opened";
+    const bookmark = sample(bookmarks)!;
+    await open(bookmark.pocketUrl);
   }
 }

@@ -10,23 +10,26 @@ type API = {
   core: typeof Core;
 };
 
-module.exports = async ({ github, context }: API) => {
-  const changedFiles: string[] = JSON.parse(process.env.CHANGED_FILES || "[]");
-  const codeowners = await getCodeOwners({ github, context });
+export default async ({ github, context }: API) => {
+  console.log("changed extensions", process.env.CHANGED_EXTENSIONS);
 
+  if (!process.env.CHANGED_EXTENSIONS) {
+    console.log("No changed extensions");
+    return;
+  }
   const touchedExtensions = new Set(
-    changedFiles
-      .filter((x) => x.startsWith("extensions"))
-      .map((x) => {
-        const parts = x.split("/");
-        return parts[1];
-      })
+    process.env.CHANGED_EXTENSIONS?.split(",")
+      .map((x) => x.split("extensions/").filter(Boolean)[1])
+      .map((x) => x.split("/")[0])
   );
+  console.log("changed extensions", touchedExtensions);
 
   if (touchedExtensions.size > 1) {
     console.log("We only notify people when updating a single extension");
     return;
   }
+
+  const codeowners = await getCodeOwners({ github, context });
 
   const sender = context.payload.sender.login;
 
@@ -64,7 +67,7 @@ module.exports = async ({ github, context }: API) => {
       await comment({
         github,
         context,
-        comment: `Congratulation on your new Raycast extension! :rocket:\n\nWe will review it shortly. Once the PR is approved and merged, the extension will be available on the Store.`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`,
       });
       return;
     }
@@ -75,6 +78,17 @@ module.exports = async ({ github, context }: API) => {
       repo: context.repo.repo,
       labels: ["extension fix / improvement", await extensionLabel(extensionFolder, { github, context })],
     });
+
+    if (!owners.length) {
+      console.log("no maintainer for this extension");
+      await comment({
+        github,
+        context,
+        comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:
+
+This is especially helpful since there were no maintainers for this extension :pray:`,
+      });
+    }
 
     if (owners[0] === sender) {
       await github.rest.issues.addLabels({
@@ -98,7 +112,9 @@ module.exports = async ({ github, context }: API) => {
     await comment({
       github,
       context,
-      comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:\n\n🔔 ${owners
+      comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:
+
+🔔 ${owners
         .filter((x) => x !== sender)
         .map((x) => `@${x}`)
         .join(" ")} you might want to have a look.`,
@@ -111,11 +127,14 @@ module.exports = async ({ github, context }: API) => {
 async function getCodeOwners({ github, context }: Pick<API, "github" | "context">) {
   const codeowners = await getGitHubFile(".github/CODEOWNERS", { github, context });
 
-  const regex = /(\/extensions\/[\w-]+) +(.+)/g;
+  const regex = /(\/extensions\/[\w-]+) +(.*)/g;
   const matches = codeowners.matchAll(regex);
 
   return Array.from(matches).reduce<{ [key: string]: string[] }>((prev, match) => {
-    prev[match[1]] = match[2].split(" ").map((x) => x.replace(/^@/, ""));
+    prev[match[1]] = match[2]
+      .split(" ")
+      .map((x) => x.replace(/^@/, ""))
+      .filter((x) => !!x);
     return prev;
   }, {});
 }

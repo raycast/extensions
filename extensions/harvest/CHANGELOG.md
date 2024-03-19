@@ -1,5 +1,11 @@
 # Harvest Changelog
 
+## [Toggle Timer Entry Command] - 2024-01-02
+
+- Added: New command to toggle the timer on the most recent time entry
+- Added: New preference to save the currently running timer to a JSON file of the user's choice. This can be used to trigger other apps or scripts when a timer is started or stopped without using the callback URL feature (which takes away Raycast from the foreground)
+- Fixed: Check for when the extentions is rate-limited by Harvest and automatically retry after the timeout
+
 ## [Menu Bar Fixes] - 2023-07-24
 
 - Fix: Menu bar widget snows the running timer in the format based on the user's preference

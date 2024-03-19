@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "verify-number",
+  "title": "Verify Number",
+  "description": "Global Phone Number Validation & Lookup JSON API from APILayer",
+  "icon": "verify-number.png",
+  "author": "xmok",
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "description": "API Key from APILayer",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "countries",
+      "title": "Search Countries",
+      "subtitle": "Verify Number",
+      "description": "List of supported areas, including country names and dialling codes",
+      "mode": "view"
+    },
+    {
+      "name": "validate-number",
+      "title": "Validate Number",
+      "subtitle": "Verify Number",
+      "description": "Phone number validation and information lookup for a total of 232 countries around the world",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "number",
+          "type": "text",
+          "required": true,
+          "placeholder": "Number"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,25 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-02-27
+
+Added support for slack to change status during interval, the two new commands are disabled by default
+
+## [Enhancement] - 2024-02-16
+
+Added option to use a quote on timer completion, and added option to disable the image on timer completion.
+
+## [Enhancement] - 2024-01-29
+
+Added confetti parameter to display confetti after interval completes
+
+## [Enhancement] - 2024-01-26
+
+Added starting of next interval based on previous interval
+
+## [Enhancement] - 2023-12-06
+
+Added an option to display random gifs from giphy (using giphy api key)
+
 ## [Enhancement] - 2023-07-13
 
 Changed the progress indicator on Menu Bar from Circle to Pomodoro icon

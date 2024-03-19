@@ -11,7 +11,8 @@
     "rosszurowski",
     "kradalby",
     "itsmingjie",
-    "erics118"
+    "erics118",
+    "brandenw"
   ],
   "categories": [
     "Developer Tools",
@@ -63,6 +64,20 @@
       "description": "Show Tailscale's connection status.",
       "mode": "no-view",
       "interval": "30s"
+    },
+    {
+      "name": "connect",
+      "title": "Connect",
+      "subtitle": "Tailscale",
+      "description": "Tailscale up",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "Tailscale",
+      "description": "Tailscale down",
+      "mode": "no-view"
     }
   ],
   "preferences": [

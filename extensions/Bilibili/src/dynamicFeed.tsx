@@ -1,8 +1,9 @@
 import { useDynamicFeed } from "./hooks";
-import { checkLogin, formatUrl } from "./utils";
+import { checkLogin, formatUrl, getVideoInfo, postHeartbeat } from "./utils";
 import { NoLoginView, Post, Video } from "./components";
-import { List } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import { useCachedState } from "@raycast/utils";
 
 type KindType = { id: string; name: string };
 
@@ -10,13 +11,13 @@ function DrinkDropdown(props: { kindTypes: KindType[]; onKindTypeChange: (newVal
   const { kindTypes, onKindTypeChange } = props;
   return (
     <List.Dropdown
-      tooltip="Select Filter Options"
+      tooltip="Select Drink Type"
       storeValue={true}
       onChange={(newValue) => {
         onKindTypeChange(newValue);
       }}
     >
-      <List.Dropdown.Section title="Filter Options">
+      <List.Dropdown.Section title="Alcoholic Beverages">
         {kindTypes.map((kindType) => (
           <List.Dropdown.Item key={kindType.id} title={kindType.name} value={kindType.id} />
         ))}
@@ -29,7 +30,8 @@ export default function Command() {
   if (!checkLogin()) return <NoLoginView />;
 
   const [filterType, setFilterType] = useState("");
-  const { dynamicItems, isLoading } = useDynamicFeed();
+  const { dynamicItems, isLoading, refetch } = useDynamicFeed();
+  const [watchedList, setWatchedList] = useCachedState<Array<string>>("watchedList", []);
 
   const videoTypes = ["DYNAMIC_TYPE_LIVE_RCMD", "DYNAMIC_TYPE_AV"];
 
@@ -52,6 +54,131 @@ export default function Command() {
     setFilterType(newValue);
   };
 
+  const dynamicComponentSelector = (item: Bilibili.DynamicItem) => {
+    const { pub_ts, mid, name, face } = item.modules.module_author;
+
+    if (item.type === "DYNAMIC_TYPE_AV") {
+      const { aid, title, cover, jump_url, bvid, duration_text, badge, stat, last_play_time } =
+        item.modules.module_dynamic.major.archive;
+
+      return (
+        <Video
+          title={title}
+          cover={cover}
+          url={jump_url}
+          bvid={bvid}
+          uploader={{
+            mid,
+            name,
+            face,
+          }}
+          duration={duration_text}
+          pubdate={pub_ts}
+          stat={{
+            highlight: badge.text,
+            view: stat.play,
+            danmaku: stat.danmaku,
+          }}
+          onOpenCallback={() => {
+            if (watchedList.includes(bvid)) return;
+
+            setWatchedList([bvid, ...watchedList].slice(0, 200));
+            refetch({});
+          }}
+          markAsWatchedCallback={
+            last_play_time === 0
+              ? async () => {
+                  try {
+                    const videoInfo = await getVideoInfo(aid);
+
+                    await postHeartbeat(videoInfo.aid, videoInfo.cid);
+                    if (!watchedList.includes(bvid)) setWatchedList([bvid, ...watchedList].slice(0, 200));
+
+                    refetch({});
+                    await showToast({ style: Toast.Style.Success, title: "Make as watched successfully" });
+                  } catch {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Make as watched failed, please retry later",
+                    });
+                  }
+                }
+              : undefined
+          }
+        />
+      );
+    } else if (["DYNAMIC_TYPE_FORWARD", "DYNAMIC_TYPE_WORD", "DYNAMIC_TYPE_DRAW"].includes(item.type)) {
+      const { text } = (item as Bilibili.DynamicPost).modules.module_dynamic.desc;
+      const { like, forward, comment } = item.modules.module_stat;
+
+      return (
+        <Post
+          desc={text}
+          pubdate={pub_ts}
+          url={`https://www.bilibili.com/opus/${item.id_str}`}
+          uploader={{
+            mid,
+            name,
+            face,
+          }}
+          stat={{
+            comment: comment.count,
+            forward: forward.count,
+            like: like.count,
+          }}
+          type={item.type}
+        />
+      );
+    } else if (item.type === "DYNAMIC_TYPE_MUSIC") {
+      const { major, desc } = item.modules.module_dynamic;
+      const { like, forward, comment } = item.modules.module_stat;
+
+      return (
+        <Post
+          title={major.music.title}
+          desc={desc.text}
+          pubdate={pub_ts}
+          url={formatUrl(major.music.jump_url)}
+          uploader={{
+            mid,
+            name,
+            face,
+          }}
+          stat={{
+            comment: comment.count,
+            forward: forward.count,
+            like: like.count,
+          }}
+          type={item.type}
+        />
+      );
+    } else if (item.type === "DYNAMIC_TYPE_LIVE_RCMD") {
+      const liveDate = JSON.parse(item.modules.module_dynamic.major.live_rcmd.content);
+      const { like, forward, comment } = item.modules.module_stat;
+
+      return (
+        <Post
+          title={liveDate.live_play_info.title}
+          desc={liveDate.live_play_info.title}
+          pubdate={pub_ts}
+          url={formatUrl(liveDate.live_play_info.link)}
+          cover={formatUrl(liveDate.live_play_info.cover)}
+          uploader={{
+            mid,
+            name,
+            face,
+          }}
+          stat={{
+            comment: comment.count,
+            forward: forward.count,
+            like: like.count,
+          }}
+          type={item.type}
+        />
+      );
+    }
+  };
+
   return (
     <List
       filtering={false}
@@ -61,95 +188,7 @@ export default function Command() {
     >
       {dynamicItems
         ?.filter((item: Bilibili.DynamicItem) => filterMap[filterType as keyof typeof filterMap](item))
-        .map((item) => {
-          switch (item.type) {
-            case "DYNAMIC_TYPE_AV":
-              return (
-                <Video
-                  title={item.modules.module_dynamic.major.archive.title}
-                  cover={item.modules.module_dynamic.major.archive.cover}
-                  url={item.modules.module_dynamic.major.archive.jump_url}
-                  uploader={{
-                    name: item.modules.module_author.name,
-                    face: item.modules.module_author.face,
-                    mid: item.modules.module_author.mid,
-                  }}
-                  duration={item.modules.module_dynamic.major.archive.duration_text}
-                  pubdate={item.modules.module_author.pub_ts}
-                  stat={{
-                    highlight: item.modules.module_dynamic.major.archive.badge.text,
-                    view: item.modules.module_dynamic.major.archive.stat.play,
-                    danmaku: item.modules.module_dynamic.major.archive.stat.danmaku,
-                  }}
-                />
-              );
-            case "DYNAMIC_TYPE_FORWARD":
-            case "DYNAMIC_TYPE_WORD":
-            case "DYNAMIC_TYPE_DRAW":
-              return (
-                <Post
-                  desc={item.modules.module_dynamic.desc.text}
-                  pubdate={item.modules.module_author.pub_ts}
-                  url={`https://www.bilibili.com/opus/${item.id_str}`}
-                  uploader={{
-                    mid: item.modules.module_author.mid,
-                    name: item.modules.module_author.name,
-                    face: item.modules.module_author.face,
-                  }}
-                  stat={{
-                    comment: item.modules.module_stat.comment.count,
-                    forward: item.modules.module_stat.forward.count,
-                    like: item.modules.module_stat.like.count,
-                  }}
-                  type={item.type}
-                />
-              );
-            case "DYNAMIC_TYPE_MUSIC":
-              return (
-                <Post
-                  title={item.modules.module_dynamic.major.music.title}
-                  desc={item.modules.module_dynamic.desc.text}
-                  pubdate={item.modules.module_author.pub_ts}
-                  url={formatUrl(item.modules.module_dynamic.major.music.jump_url)}
-                  uploader={{
-                    mid: item.modules.module_author.mid,
-                    name: item.modules.module_author.name,
-                    face: item.modules.module_author.face,
-                  }}
-                  stat={{
-                    comment: item.modules.module_stat.comment.count,
-                    forward: item.modules.module_stat.forward.count,
-                    like: item.modules.module_stat.like.count,
-                  }}
-                  type={item.type}
-                />
-              );
-            case "DYNAMIC_TYPE_LIVE_RCMD":
-              // eslint-disable-next-line no-case-declarations
-              const liveDate = JSON.parse(item.modules.module_dynamic.major.live_rcmd.content);
-
-              return (
-                <Post
-                  title={liveDate.live_play_info.title}
-                  desc={liveDate.live_play_info.title}
-                  pubdate={item.modules.module_author.pub_ts}
-                  url={formatUrl(liveDate.live_play_info.link)}
-                  cover={formatUrl(liveDate.live_play_info.cover)}
-                  uploader={{
-                    mid: item.modules.module_author.mid,
-                    name: item.modules.module_author.name,
-                    face: item.modules.module_author.face,
-                  }}
-                  stat={{
-                    comment: item.modules.module_stat.comment.count,
-                    forward: item.modules.module_stat.forward.count,
-                    like: item.modules.module_stat.like.count,
-                  }}
-                  type={item.type}
-                />
-              );
-          }
-        })}
+        .map(dynamicComponentSelector)}
     </List>
   );
 }

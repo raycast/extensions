@@ -1,26 +1,5 @@
-import { LocalStorage } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { runAppleScript } from "@raycast/utils";
-
-/**
- * Sets the value of a local storage key.
- * @param key The key to set the value of.
- * @param value The string value to set the key to.
- */
-export const setStorage = async (key: string, value: unknown) => {
-  await LocalStorage.setItem(key, JSON.stringify(value));
-};
-
-/**
- * Gets the value of a local storage key.
- * @param key The key to get the value of.
- * @returns The JSON-parsed value of the key.
- */
-export const getStorage = async (key: string) => {
-  const localStorage = await LocalStorage.getItem<string>(key);
-  const storageString = typeof localStorage === "undefined" ? "" : localStorage;
-  return storageString == "" ? [] : JSON.parse(storageString);
-};
 
 /**
  * Runs a terminal command asynchronously.
@@ -76,4 +55,14 @@ export const runCommandInTerminal = async (command: string): Promise<string> => 
  */
 export const cutoff = (str: string, cutoff: number) => {
   return `${str.substring(0, cutoff)}${str.length > cutoff ? "..." : ""}`;
+};
+
+/**
+ * Pluralizes a string based on a count.
+ * @param str The string to pluralize.
+ * @param count The count to base the pluralization on.
+ * @returns The pluralized string.
+ */
+export const pluralize = (str: string, count: number) => {
+  return `${str}${count === 1 ? "" : "s"}`;
 };

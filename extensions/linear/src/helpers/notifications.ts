@@ -1,5 +1,5 @@
 import { Icon, Image } from "@raycast/api";
-import emojis from "node-emoji";
+import * as emojis from "node-emoji";
 import { NotificationResult } from "../api/getNotifications";
 import { getStatusIcon, StateType } from "./states";
 
@@ -87,8 +87,6 @@ export function getNotificationTitle(notification: NotificationResult) {
     }
   }
 
-  console.log(notification.type);
-
   return notificationTitles[notification.type] || "Unknown notification";
 }
 
@@ -102,4 +100,11 @@ export function getNotificationMenuBarIcon(unreadNotifications: NotificationResu
 
 export function getNotificationMenuBarTitle(unreadNotifications: NotificationResult[]) {
   return unreadNotifications.length !== 0 ? String(unreadNotifications.length) : undefined;
+}
+
+export function getNotificationURL(notification: NotificationResult) {
+  if (notification.comment?.url) return notification.comment.url;
+  if (notification.projectUpdate?.url) return notification.projectUpdate.url;
+  if (notification.project?.url) return notification.project.url;
+  if (notification.issue?.url) return notification.issue.url;
 }

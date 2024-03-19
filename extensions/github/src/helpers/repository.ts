@@ -51,7 +51,7 @@ const VISITED_REPOSITORIES_LENGTH = 25;
 
 export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment) {
   const { application, baseClonePath } = getPreferenceValues<Preferences.SearchRepositories>();
-  const applicationPath = application.path.replaceAll(" ", "\\ ");
+  const applicationPath = application?.path.replaceAll(" ", "\\ ");
   const clonePath = `${baseClonePath}/${repository.nameWithOwner}`;
   const openCommand = `open -a ${applicationPath} ${clonePath}`;
 
@@ -115,7 +115,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   }, [migratedHistory]);
 
   function visitRepository(repository: ExtendedRepositoryFieldsFragment) {
-    const nextRepositories = [repository, ...(history?.filter((item) => item !== repository) ?? [])].slice(
+    const nextRepositories = [repository, ...(history?.filter((item) => item.id !== repository.id) ?? [])].slice(
       0,
       VISITED_REPOSITORIES_LENGTH,
     );

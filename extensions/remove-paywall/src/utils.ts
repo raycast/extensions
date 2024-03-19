@@ -1,28 +1,34 @@
 import { Clipboard, getSelectedText } from "@raycast/api";
 
-export function isUrl(text: string): boolean {
-  return /^https?:\/\//.test(text);
+const urlRegex = /(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/;
+
+function isUrl(text: string): boolean {
+  return urlRegex.test(text);
 }
 
-export async function getExistingText(fallbackText = ""): Promise<string> {
-  let selectedText = "";
-  let clipboardText: string | undefined = "";
-  fallbackText = fallbackText?.trim() ?? "";
+export async function getUrl(urlArgument: string | undefined): Promise<string | Error> {
+  let url: string | undefined;
 
-  // Get the selected text (if any)
-  try {
-    selectedText = (await getSelectedText()).trim();
-  } catch {
-    // Ignore errors
+  if (urlArgument) {
+    // If the user has provided a URL, use that
+    url = urlArgument;
+  } else {
+    try {
+      // If the user has selected text, use that as the URL
+      url = await getSelectedText();
+    } catch {
+      // Otherwise, use the clipboard
+      url = await Clipboard.readText();
+    }
   }
 
-  // Get the clipboard text (if any)
-  try {
-    clipboardText = await Clipboard.readText();
-    clipboardText = clipboardText ? clipboardText.trim() : "";
-  } catch {
-    // Ignore errors
+  if (!url) {
+    return new Error("No URL provided.");
   }
 
-  return [selectedText, fallbackText, clipboardText].find((v) => !!v) ?? "";
+  if (!isUrl(url)) {
+    return new Error(`Invalid URL: "${url}"`);
+  }
+
+  return url.trim();
 }

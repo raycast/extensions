@@ -3,7 +3,8 @@ import { useState } from "react";
 import { nightlight } from "./utils";
 
 export default function Main() {
-  const { closeWindow } = getPreferenceValues<{ closeWindow: boolean }>();
+  const closeWindow = getPreferenceValues<Preferences>().closeWindow;
+
   const [temperatureError, setTemperatureError] = useState<string | undefined>();
 
   function validate(temperature: string): boolean {
@@ -32,7 +33,7 @@ export default function Main() {
                 if (closeWindow) closeMainWindow();
                 else await popToRoot({ clearSearchBar: true });
 
-                await nightlight(["temp", temperature]);
+                await nightlight(`temp ${temperature}`, `Set color temperature to ${temperature}`);
               }
             }}
           />

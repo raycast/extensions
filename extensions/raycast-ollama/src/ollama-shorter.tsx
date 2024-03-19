@@ -1,7 +1,8 @@
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const systemPrompt =
+  const c = "shorter";
+  const p =
     "Act as a writer. Make the following text shorter while keeping the core idea.\n\nOutput only with the modified text.\n";
-  return ResultView("shorter", systemPrompt);
+  return <AnswerView command={c} prompt={p} />;
 }

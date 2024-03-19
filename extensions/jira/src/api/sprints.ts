@@ -31,7 +31,7 @@ export async function getSprints({ fieldName, fieldValue }: GetSprintsParams) {
       } catch (error) {
         return null;
       }
-    })
+    }),
   );
 
   const filteredSprints = allSprints.filter((sprint) => sprint !== null) as DetailedSprint[];

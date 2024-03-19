@@ -1,10 +1,31 @@
+import { getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import { useMemo } from "react";
+import { NativePreferences } from "../types/preferences";
 import { Task } from "../types/task";
 import { axiosPromiseData } from "../utils/axiosPromise";
 import reclaimApi from "./useApi";
-import { ApiResponseTasks, CreateTaskProps } from "./useTask.types";
+import { CreateTaskProps } from "./useTask.types";
 
 const useTask = () => {
   const { fetcher } = reclaimApi();
+
+  const { apiUrl, apiToken } = getPreferenceValues<NativePreferences>();
+
+  const headers = useMemo(
+    () => ({
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    }),
+    [apiToken]
+  );
+
+  const useFetchTasks = () =>
+    useFetch<[Task]>(`${apiUrl}/tasks?instances=true`, {
+      headers,
+      keepPreviousData: true,
+    });
 
   const createTask = async (task: CreateTaskProps) => {
     try {
@@ -18,6 +39,7 @@ const useTask = () => {
         minChunkSize: task.durationMin,
         maxChunkSize: task.durationMax,
         notes: task.notes,
+        alwaysPrivate: task.alwaysPrivate,
         priority: task.priority,
         onDeck: task.onDeck,
       };
@@ -56,16 +78,6 @@ const useTask = () => {
     }
   };
 
-  const getAllTasks = async () => {
-    try {
-      const [tasks, error] = await axiosPromiseData<ApiResponseTasks>(fetcher("/tasks"));
-      if (!tasks && error) throw error;
-      return tasks;
-    } catch (error) {
-      console.error("Error while fetching tasks", error);
-    }
-  };
-
   // Add time
   const addTime = async (task: Task, time: number) => {
     try {
@@ -80,20 +92,19 @@ const useTask = () => {
   };
 
   // Update task
-  const updateTask = async (task: Task) => {
+  const updateTask = async (task: Partial<Task>, payload: Partial<Task>) => {
     try {
-      const [updatedTask, error] = await axiosPromiseData(
+      const [updatedTask] = await axiosPromiseData(
         fetcher(`/tasks/${task.id}`, {
-          method: "PUT",
+          method: "PATCH",
           responseType: "json",
-          data: task,
+          data: payload,
         })
       );
-
-      if (!updatedTask || error) throw error;
       return updatedTask;
     } catch (error) {
       console.error("Error while updating task", error);
+      throw error;
     }
   };
 
@@ -124,10 +135,10 @@ const useTask = () => {
   };
 
   return {
+    useFetchTasks,
     createTask,
     handleStartTask,
     handleStopTask,
-    getAllTasks,
     addTime,
     updateTask,
     doneTask,

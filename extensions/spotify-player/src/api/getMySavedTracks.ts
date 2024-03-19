@@ -18,7 +18,7 @@ export async function getMySavedTracks({ limit = 50 }: GetMySavedTracksProps = {
       };
     });
 
-    return { items: tracks as SimplifiedTrackObject[] };
+    return { items: tracks as SimplifiedTrackObject[], total: response?.total ?? 0 };
   } catch (err) {
     const error = getErrorMessage(err);
     console.log("getMySavedTracks.ts Error:", error);

@@ -78,6 +78,13 @@ export default function TvShowDetail({ show }: { show: ShowResponse }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in TMDB" url={`https://www.themoviedb.org/tv/${show.id ?? 0}`} />
+          {show.id ? (
+            <Action.CopyToClipboard
+              title={`Copy TMDB ID`}
+              content={show.id.toString()}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

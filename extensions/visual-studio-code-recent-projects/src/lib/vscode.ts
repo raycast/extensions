@@ -9,7 +9,7 @@ interface ExtensionMetaRoot {
   identifier: ExtensionIdentifier;
   version: string;
   location: ExtensionLocation | string;
-  metadata: ExtensionMetadata;
+  metadata?: ExtensionMetadata;
 }
 
 interface ExtensionIdentifier {
@@ -26,8 +26,8 @@ interface ExtensionLocation {
 
 interface ExtensionMetadata {
   id: string;
-  publisherId: string;
-  publisherDisplayName: string;
+  publisherId?: string;
+  publisherDisplayName?: string;
   targetPlatform?: string;
   isApplicationScoped?: boolean;
   updated?: boolean;
@@ -44,8 +44,8 @@ export interface Extension {
   icon?: string;
   updated?: boolean;
   fsPath: string;
-  publisherId: string;
-  publisherDisplayName: string;
+  publisherId?: string;
+  publisherDisplayName?: string;
   preview?: boolean;
   installedTimestamp?: number;
 }
@@ -157,8 +157,8 @@ export async function getLocalExtensions(): Promise<Extension[] | undefined> {
           icon: pkgInfo?.icon,
           updated: e.metadata?.updated,
           fsPath: extFsPath,
-          publisherId: e.metadata.publisherId,
-          publisherDisplayName: e.metadata.publisherDisplayName,
+          publisherId: e.metadata?.publisherId,
+          publisherDisplayName: e.metadata?.publisherDisplayName,
           preview: pkgInfo?.preview,
           installedTimestamp: e.metadata?.installedTimestamp,
         });

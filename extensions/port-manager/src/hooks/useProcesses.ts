@@ -1,18 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import Process from "../models/Process";
 
-export default function useProcesses(): [Process[], () => Promise<void>] {
-  const [processes, setProcesses] = useState<Process[]>([]);
-  const reloadProcesses = useCallback(async () => {
-    const processes = await Process.getCurrent();
-    setProcesses(processes);
-  }, [setProcesses]);
+export default function useProcesses() {
+  const { data, revalidate, isLoading, mutate, error } = useCachedPromise(Process.getCurrent);
 
-  useEffect(() => {
-    (async () => {
-      reloadProcesses();
-    })();
-  }, []);
-
-  return [processes, reloadProcesses];
+  return {
+    processes: data,
+    revalidateProcesses: revalidate,
+    isLoadingProcesses: isLoading,
+    mutateProcesses: mutate,
+    processesError: error,
+  };
 }

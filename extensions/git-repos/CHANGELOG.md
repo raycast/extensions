@@ -1,5 +1,15 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2024-02-10
+
+- Make find command handle errors better
+    - Changed exit code to be always zero so execp doesn't throw
+    - Filter out error commands due to unreadable directories in the path
+
+## [Enhancement] - 2023-12-07
+
+- Added sotring of results based on usage recency - most used paths will appear on top
+
 ## [Bug Fix] - 2023-10-21
 
 - Resolved issue with binary plist for reading default browser. Now checks against all known browser paths as a fallback.

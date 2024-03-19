@@ -1,5 +1,5 @@
 import { Image, environment } from "@raycast/api";
-import emojis from "node-emoji";
+import * as emojis from "node-emoji";
 import fs from "fs";
 
 type GetIconParams = {

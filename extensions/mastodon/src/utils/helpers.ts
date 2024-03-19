@@ -2,7 +2,7 @@ import { Account, Status, VisibilityScope } from "./types";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { Icon } from "@raycast/api";
 import { showToast, Toast } from "@raycast/api";
-import { MastodonError } from "../utils/types";
+import { MastodonError, Notification } from "../utils/types";
 import { useMe } from "../hooks/useMe";
 
 const nhm = new NodeHtmlMarkdown();
@@ -28,13 +28,13 @@ export const dateTimeFormatter = (time: Date, type: "short" | "long") => {
 
 export const statusParser = (
   { content, media_attachments, account, created_at, card }: Status,
-  type: "id" | "date" | "idAndDate"
+  type: "id" | "date" | "idAndDate",
 ) => {
   const images = media_attachments.filter((attachment) => attachment.type === "gifv" || attachment.type === "image");
   const parsedImages = images.reduce(
     (link, image) =>
       link + `![${image.description ?? ""}](${image.preview_url || image.remote_url || image.preview_remote_url})`,
-    ""
+    "",
   );
 
   const date = new Date(created_at);
@@ -85,4 +85,18 @@ export const isVisiblityPrivate = (visibility: VisibilityScope) => visibility ==
 export const isMyStatus = (account: Account) => {
   const { username } = useMe();
   return username === account.acct;
+};
+
+export const groupNotifications = (notifications: Notification[]) => {
+  const grouped: Partial<Record<Notification["type"], Notification[]>> = {};
+
+  for (const notification of notifications) {
+    if (grouped[notification.type]) {
+      grouped[notification.type]?.push(notification);
+    } else {
+      grouped[notification.type] = [notification];
+    }
+  }
+
+  return grouped;
 };

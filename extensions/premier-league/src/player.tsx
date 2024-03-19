@@ -12,6 +12,8 @@ const awardMap: { [key: string]: string } = {
   GOAL_OF_THE_MONTH: "Goal of the Month",
   GOLDEN_BOOT: "Golden Boot",
   PLAYER_OF_THE_SEASON: "Player of the Season",
+  SAVE_OF_THE_MONTH: "Save of the Month",
+  MANAGER_OF_THE_MONTH: "Manager of the Month",
 };
 
 const months = [
@@ -58,7 +60,7 @@ function PlayerProfile(props: PlayerContent) {
           .map(([key, awards]) => {
             return [
               {
-                h3: awardMap[key],
+                h3: awardMap[key] || key,
               },
               {
                 ul: awards.map((award: Award) => {

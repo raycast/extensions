@@ -1,13 +1,31 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "schoology",
-  "title": "Schoology",
-  "description": "This extension will help you view your grades and course lists quickly using Raycast.",
+  "title": "Schoology - Grade Viewer",
+  "description": "View your courselists, grades, graphs, and individual assignments quickly using Raycast.",
   "icon": "command-icon.png",
-  "author": "Vaibhav-Satishkumar",
+  "author": "Visual-Studio-Coder",
+  "contributors": [
+    "giantsquidgamer",
+    "akshay_mahajan",
+    "air-rn"
+  ],
   "categories": [
     "Other",
     "Productivity"
+  ],
+  "keywords": [
+    "schoology",
+    "grades",
+    "courses",
+    "classes",
+    "LMS",
+    "Learning",
+    "GPA",
+    "Raycast",
+    "Vaibhav",
+    "Satishkumar",
+    "School"
   ],
   "license": "MIT",
   "commands": [
@@ -15,7 +33,16 @@
       "name": "showGrades",
       "title": "Show Grades",
       "description": "You will be able to see an updated list of your courses and their corresponding grades.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "View list of grades."
+    },
+    {
+      "name": "showNotifications",
+      "title": "Check for Grade Updates",
+      "description": "If you have a new assignment's grade posted, you will receive a notification.",
+      "mode": "no-view",
+      "subtitle": "Receive notifications on grade updates",
+      "interval": "20m"
     }
   ],
   "preferences": [
@@ -38,7 +65,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.57.0",
-    "schoologyapi": "^3.1.2"
+    "@raycast/utils": "1.11.1",
+    "quickchart-js": "^3.1.3",
+    "schoologyapi": "^4.0.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

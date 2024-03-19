@@ -5,37 +5,23 @@
   "description": "Lists CopyQ clipboard entries and allows user to paste them.",
   "icon": "command-icon.png",
   "author": "andrewcincotta",
-  "categories": [
-    "Productivity"
+  "contributors": [
+    "pernielsentikaer"
   ],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
       "name": "view-clipboard-entries",
-      "title": "View Clipboard Entries",
-      "description": "Lists CopyQ clipboard entries and allows user to select/paste them.",
+      "title": "View Clipboard",
+      "description": "Lists CopyQ clipboard contents and allows the user to select a tab.",
       "mode": "view",
       "preferences": [
-        {
-          "type": "textfield",
-          "name": "copyq_path",
-          "title": "CopyQ Path",
-          "description": "Path to CopyQ executable",
-          "required": true
-        },
         {
           "type": "textfield",
           "name": "default_tab",
           "title": "Default Tab",
           "description": "Name of Default CopyQ Tab",
-          "required": true
-        },
-        {
-          "type": "textfield",
-          "name": "default_num_items",
-          "title": "Default Number of Items",
-          "description": "Default Number of Items to Display",
-          "default": "10",
           "required": true
         }
       ]

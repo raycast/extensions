@@ -15,6 +15,11 @@ const taskObject2Task = (object: Record<string, unknown>): Task => {
     items: object.items as Task["items"],
     kind: object.kind as Task["kind"],
     tags: (object.tags || []) as Task["tags"],
+    startDate: object.startDate as Task["startDate"],
+    dueDate: object.dueDate as Task["dueDate"],
+    isAllDay: object.isAllDay as Task["isAllDay"],
+    isFloating: object.isFloating as Task["isFloating"],
+    timeZone: object.timeZone as Task["timeZone"],
   };
 };
 

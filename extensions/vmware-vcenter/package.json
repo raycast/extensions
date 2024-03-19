@@ -15,28 +15,12 @@
   },
   "preferences": [
     {
-      "name": "vcenter_fqdn",
-      "description": "vCenter FQDN or IP",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "vCenter FQDN or IP",
-      "title": "vCenter FQDN"
-    },
-    {
-      "name": "vcenter_username",
-      "description": "vCenter Username",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "vCenter Username",
-      "title": "vCenter Username"
-    },
-    {
-      "name": "vcenter_password",
-      "description": "vCenter Password",
-      "type": "password",
-      "required": true,
-      "placeholder": "vCenter Password",
-      "title": "vCenter Password"
+      "name": "certificate",
+      "description": "Uncheck for Disable Certificate Validation",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Certificate Validation Enabled"
     }
   ],
   "commands": [
@@ -71,12 +55,13 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.10.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"

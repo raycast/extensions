@@ -50,7 +50,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   const { data: users } = useCachedPromise(() => getUsers());
@@ -150,7 +150,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { data: issueMetadataSummary } = useCachedPromise(
     (projectId) => getCreateIssueMetadataSummary(projectId),
     [values.projectId],
-    { execute: !!values.projectId }
+    { execute: !!values.projectId },
   );
 
   const selectedProject = projects?.find((project) => project.id === values.projectId);
@@ -162,7 +162,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { data: issueMetadata } = useCachedPromise(
     (projectId, issueTypeId) => getCreateIssueMetadata(projectId, issueTypeId),
     [values.projectId, values.issueTypeId],
-    { execute: !!values.projectId && !!values.issueTypeId }
+    { execute: !!values.projectId && !!values.issueTypeId },
   );
 
   const issueTypes = issueMetadata?.[0]?.issuetypes;

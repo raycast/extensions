@@ -21,7 +21,10 @@
     "stevensd2m",
     "erics118",
     "hjoelh",
-    "hobhouse"
+    "hobhouse",
+    "bkeys818",
+    "jatindotdev",
+    "devbear"
   ],
   "license": "MIT",
   "preferences": [
@@ -151,6 +154,14 @@
       "mode": "no-view"
     },
     {
+      "name": "addPlayingSongToPlaylist",
+      "title": "Add Playing Song to Playlist",
+      "subtitle": "Spotify",
+      "description": "Adds the current song to a playlist of your choice.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
       "name": "next",
       "title": "Next",
       "subtitle": "Spotify",
@@ -179,6 +190,13 @@
       "description": "Dislike the current song.",
       "mode": "no-view",
       "disabledByDefault": true
+    },
+    {
+      "name": "devices",
+      "title": "Select Device",
+      "subtitle": "Spotify",
+      "description": "Select a device to play music on.",
+      "mode": "view"
     },
     {
       "name": "volume",
@@ -315,6 +333,14 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "subtitle": "Spotify",
+      "description": "See your queue.",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "dependencies": {

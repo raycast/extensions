@@ -1340,7 +1340,7 @@ const raycast: Prompt[] = [
     model: "openai_gpt35_turbo",
     example: {
       selection: "The best cuzine in da world is the brasilian!",
-      output: 'Selection: "The best cuisine in the world is the Brazilian!"',
+      output: "The best cuisine in the world is the Brazilian!",
     },
   },
   {

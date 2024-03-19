@@ -1,7 +1,8 @@
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const systemPrompt =
+  const c = "fix";
+  const p =
     "Act as a writer. Fix the following text from spelling and grammar error.\n\nOutput only with the fixed text.\n";
-  return ResultView("fix", systemPrompt);
+  return <AnswerView command={c} prompt={p} />;
 }

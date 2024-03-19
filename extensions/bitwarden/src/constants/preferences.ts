@@ -9,6 +9,8 @@ const VAULT_TIMEOUT_OPTIONS = {
   EIGHT_HOURS: "28800000",
   ONE_DAY: "86400000",
   NEVER: "-1",
+  SYSTEM_LOCK: "-2",
+  SYSTEM_SLEEP: "-3",
 } as const satisfies Record<string, Preferences["repromptIgnoreDuration"]>;
 
 export const VAULT_TIMEOUT = Object.entries(VAULT_TIMEOUT_OPTIONS).reduce((acc, [key, value]) => {

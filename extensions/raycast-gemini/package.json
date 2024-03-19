@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-gemini",
+  "title": "Google Gemini",
+  "description": "Use the powerful new Google Gemini Pro models from the comfort of Raycast.",
+  "icon": "gemini-icon.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini Pro",
+      "mode": "view",
+      "icon": "gemini-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "Google Gemini",
+      "description": "Chat with Google's Gemini Pro",
+      "icon": "chat-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "askAboutScreen",
+      "title": "Ask About Screen Content",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini Pro about what's on your screen",
+      "mode": "no-view",
+      "icon": "screen-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "subtitle": "Google Gemini",
+      "description": "Ask Google's Gemini Pro about your selected text",
+      "mode": "view",
+      "icon": "clipboard-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize text",
+      "icon": "summarize-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain text",
+      "icon": "explain-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "description": "Add comments to code",
+      "icon": "code-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view"
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to professional",
+      "mode": "view"
+    },
+    {
+      "name": "synonym",
+      "title": "Find Synonym",
+      "icon": "synonym-icon.png",
+      "description": "Find synonym of selected word",
+      "mode": "view"
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "icon": "grammar-icon.png",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "icon": "longer-icon.png",
+      "description": "Make selected text longer",
+      "mode": "view"
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "icon": "shorten-icon.png",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Gemini API Key",
+      "name": "apiKey",
+      "required": true,
+      "title": "Gemini API Key",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.9.0",
+    "gemini-ai": "^1.1.0",
+    "jimp": "^0.22.10",
+    "node-fetch-polyfill": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

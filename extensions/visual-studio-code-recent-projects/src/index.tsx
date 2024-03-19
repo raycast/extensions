@@ -3,10 +3,10 @@ import { useState } from "react";
 import { basename, dirname } from "path";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { useRecentEntries } from "./db";
+import { RemoveMethods, useRecentEntries } from "./db";
 import { getBuildScheme } from "./lib/vscode";
-import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows } from "./preferences";
-import { EntryLike, EntryType, RemoteEntry, PinMethods, RemoteWorkspaceEntry } from "./types";
+import { bundleIdentifier, build, keepSectionOrder, closeOtherWindows, terminalApp } from "./preferences";
+import { EntryLike, EntryType, PinMethods } from "./types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
@@ -29,7 +29,7 @@ import { usePinnedEntries } from "./pinned";
 import { runAppleScriptSync } from "run-applescript";
 
 export default function Command() {
-  const { data, isLoading, error } = useRecentEntries();
+  const { data, isLoading, error, ...removeMethods } = useRecentEntries();
   const [type, setType] = useState<EntryType | null>(null);
   const { pinnedEntries, ...pinnedMethods } = usePinnedEntries();
 
@@ -62,7 +62,7 @@ export default function Command() {
     >
       <ListOrGridSection title="Pinned Projects">
         {pinnedEntries.filter(filterEntriesByType(type)).map((entry: EntryLike, index: number) => (
-          <EntryItem key={`pinned-${index}`} entry={entry} pinned={true} {...pinnedMethods} />
+          <EntryItem key={`pinned-${index}`} entry={entry} pinned={true} {...pinnedMethods} {...removeMethods} />
         ))}
       </ListOrGridSection>
       <ListOrGridSection title="Recent Projects">
@@ -70,7 +70,7 @@ export default function Command() {
           ?.filter(filterUnpinnedEntries(pinnedEntries))
           ?.filter(filterEntriesByType(type))
           .map((entry: EntryLike, index: number) => (
-            <EntryItem key={index} entry={entry} {...pinnedMethods} />
+            <EntryItem key={index} entry={entry} {...pinnedMethods} {...removeMethods} />
           ))}
       </ListOrGridSection>
     </ListOrGrid>
@@ -98,7 +98,7 @@ function EntryTypeDropdown(props: { onChange: (type: EntryType) => void }) {
   );
 }
 
-function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods) {
+function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods & RemoveMethods) {
   if (isWorkspaceEntry(props.entry)) {
     return <LocalItem {...props} uri={props.entry.workspace.configPath} />;
   } else if (isFolderEntry(props.entry)) {
@@ -130,12 +130,33 @@ function EntryItem(props: { entry: EntryLike; pinned?: boolean } & PinMethods) {
   }
 }
 
-function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & PinMethods) {
+function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & PinMethods & RemoveMethods) {
   const name = decodeURIComponent(basename(props.uri));
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
   const keywords = path.split("/");
+
+  const getTitle = (revert = false) => {
+    return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
+  };
+
+  const getAction = (revert = false) => {
+    return () => {
+      if (closeOtherWindows !== revert) {
+        runAppleScriptSync(`
+        tell application "System Events"
+          tell process "${build}"
+            repeat while window 1 exists
+              click button 1 of window 1
+            end repeat
+          end tell
+        end tell
+        `);
+      }
+      open(props.uri, bundleIdentifier);
+    };
+  };
 
   return (
     <ListOrGridItem
@@ -148,26 +169,27 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action
-              title={`Open in ${build}`}
-              icon="action-icon.png"
-              onAction={() => {
-                if (closeOtherWindows) {
-                  runAppleScriptSync(`
-                    tell application "System Events"
-                      tell process "${build}"
-                        repeat while window 1 exists
-                          click button 1 of window 1
-                        end repeat
-                      end tell
-                    end tell
-                  `);
-                }
-                open(props.uri, bundleIdentifier);
-              }}
-            />
+            <Action title={getTitle()} icon="action-icon.png" onAction={getAction()} />
             <Action.ShowInFinder path={path} />
+            <Action
+              title={getTitle(true)}
+              icon="action-icon.png"
+              onAction={getAction(true)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
             <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            {isFolderEntry(props.entry) && terminalApp && (
+              <Action
+                title={`Open With ${terminalApp.name}`}
+                icon={{ fileIcon: terminalApp.path }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                onAction={() =>
+                  open(path, terminalApp).catch(() =>
+                    showToast(Toast.Style.Failure, `Failed to open with ${terminalApp?.name}`)
+                  )
+                }
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
@@ -177,6 +199,7 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
+          <RemoveActionSection {...props} />
           <PinActionSection {...props} />
         </ActionPanel>
       }
@@ -184,10 +207,29 @@ function LocalItem(props: { entry: EntryLike; uri: string; pinned?: boolean } & 
   );
 }
 
-function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods) {
+function RemoteItem(
+  props: { entry: EntryLike; uri: string; subtitle?: string; pinned?: boolean } & PinMethods & RemoveMethods
+) {
   const remotePath = decodeURI(basename(props.uri));
   const scheme = getBuildScheme();
+
   const uri = props.uri.replace("vscode-remote://", `${scheme}://vscode-remote/`);
+
+  const getTitle = (revert = false) => {
+    return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;
+  };
+
+  const getUrl = (uri: string, revert = false) => {
+    const url = new URL(uri);
+    if (closeOtherWindows !== revert) {
+      // close other windows
+      url.searchParams.delete("windowId");
+    } else {
+      // don't close other windows
+      url.searchParams.set("windowId", "_blank");
+    }
+    return url.toString();
+  };
 
   return (
     <ListOrGridItem
@@ -199,8 +241,15 @@ function RemoteItem(props: { entry: EntryLike; uri: string; subtitle?: string; p
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title={`Open in ${build}`} icon="action-icon.png" url={uri} />
+            <Action.OpenInBrowser title={getTitle()} icon="action-icon.png" url={getUrl(uri)} />
+            <Action.OpenInBrowser
+              title={getTitle(true)}
+              icon="action-icon.png"
+              url={getUrl(uri, true)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
           </ActionPanel.Section>
+          <RemoveActionSection {...props} />
           <PinActionSection {...props} />
         </ActionPanel>
       }
@@ -287,6 +336,28 @@ function PinActionSection(props: { entry: EntryLike; pinned?: boolean } & PinMet
           props.unpinAll();
           await showToast({ title: "Unpinned all entries" });
         }}
+      />
+    </ActionPanel.Section>
+  );
+}
+
+function RemoveActionSection(props: { entry: EntryLike } & RemoveMethods) {
+  return (
+    <ActionPanel.Section>
+      <Action
+        icon={Icon.Trash}
+        title="Remove from Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => props.removeEntry(props.entry)}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      />
+
+      <Action
+        icon={Icon.Trash}
+        title="Remove All Recent Projects"
+        style={Action.Style.Destructive}
+        onAction={() => props.removeAllEntries()}
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
       />
     </ActionPanel.Section>
   );

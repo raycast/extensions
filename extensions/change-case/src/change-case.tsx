@@ -81,8 +81,9 @@ const setRecentCases = (recent: CaseType[]) => {
 };
 
 export default function Command(props: LaunchProps) {
-  const preferences = getPreferenceValues();
-  const preferredSource = preferences["source"];
+  const preferences = getPreferenceValues<Preferences>();
+  const preferredSource = preferences.source;
+  const preferredAction = preferences.action;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
@@ -90,7 +91,11 @@ export default function Command(props: LaunchProps) {
       const content = await readContent(preferredSource);
       const converted = functions[immediatelyConvertToCase](content);
 
-      Clipboard.copy(converted);
+      if (preferredAction === "paste") {
+        Clipboard.paste(converted);
+      } else {
+        Clipboard.copy(converted);
+      }
 
       showHUD(`Converted to ${immediatelyConvertToCase}`);
       popToRoot();
@@ -98,7 +103,7 @@ export default function Command(props: LaunchProps) {
     return;
   }
 
-  const [clipboard, setClipboard] = useState<string>("");
+  const [content, setContent] = useState<string>("");
   const [frontmostApp, setFrontmostApp] = useState<Application>();
 
   const [pinned, setPinned] = useState<CaseType[]>([]);
@@ -118,19 +123,23 @@ export default function Command(props: LaunchProps) {
     setRecentCases(recent);
   }, [recent]);
 
+  const refreshContent = async () => {
+    try {
+      setContent(await readContent(preferredSource));
+    } catch (error) {
+      if (error instanceof NoTextError) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to convert",
+          message: "Please ensure that text is either selected or copied",
+        });
+      }
+    }
+  };
+
   useEffect(() => {
-    readContent(preferredSource)
-      .then((c) => setClipboard(c))
-      .catch((error) => {
-        if (error instanceof NoTextError) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Nothing to convert",
-            message: "Please ensure that text is either selected or copied",
-          });
-        }
-      });
-  }, [preferredSource]);
+    refreshContent();
+  }, []);
 
   const CopyToClipboard = (props: {
     case: CaseType;
@@ -148,7 +157,11 @@ export default function Command(props: LaunchProps) {
           }
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     );
@@ -170,7 +183,11 @@ export default function Command(props: LaunchProps) {
           }
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     ) : null;
@@ -189,9 +206,9 @@ export default function Command(props: LaunchProps) {
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              {preferences["action"] === "paste" && <PasteToActiveApp {...props} />}
+              {preferredAction === "paste" && <PasteToActiveApp {...props} />}
               <CopyToClipboard {...props} />
-              {preferences["action"] === "copy" && <PasteToActiveApp {...props} />}
+              {preferredAction === "copy" && <PasteToActiveApp {...props} />}
             </ActionPanel.Section>
             <ActionPanel.Section>
               {!props.pinned ? (
@@ -251,6 +268,14 @@ export default function Command(props: LaunchProps) {
                 quicklink={{ name: `Convert to ${props.case}`, link: deeplink }}
               />
             </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action
+                title="Refresh Content"
+                icon={Icon.RotateAntiClockwise}
+                shortcut={{ key: "r", modifiers: ["cmd"] }}
+                onAction={refreshContent}
+              />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -264,7 +289,7 @@ export default function Command(props: LaunchProps) {
           <CaseItem
             key={key}
             case={key as CaseType}
-            modified={modifyCasesWrapper(clipboard, functions[key])}
+            modified={modifyCasesWrapper(content, functions[key])}
             pinned={true}
           />
         ))}
@@ -274,7 +299,7 @@ export default function Command(props: LaunchProps) {
           <CaseItem
             key={key}
             case={key as CaseType}
-            modified={modifyCasesWrapper(clipboard, functions[key])}
+            modified={modifyCasesWrapper(content, functions[key])}
             recent={true}
           />
         ))}
@@ -283,12 +308,12 @@ export default function Command(props: LaunchProps) {
         {Object.entries(functions)
           .filter(
             ([key]) =>
-              preferences[key.replace(/ +/g, "")] &&
+              preferences[key.replace(/ +/g, "") as keyof ExtensionPreferences] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
           )
           .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(clipboard, func)} />
+            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(content, func)} />
           ))}
       </List.Section>
     </List>

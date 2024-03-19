@@ -11,14 +11,23 @@ type Props = {
 
 export const ListItemNote = ({ note }: Props) => {
   const { isInitialLoaded } = useNotesContext();
-  const hasAttachments = (note.attachments?.length ?? 0) > 0;
+  const hasAttachments = note.attachments.length > 0;
+  const markdown = isInitialLoaded ? note.content : undefined;
+  const accessories = hasAttachments
+    ? [
+        {
+          icon: Icon.Paperclip,
+          tooltip: "Attachments",
+        },
+      ]
+    : undefined;
 
   return (
     <List.Item
       title={note.title}
       detail={
         <List.Item.Detail
-          markdown={isInitialLoaded ? note.content : undefined}
+          markdown={markdown}
           metadata={
             hasAttachments && (
               <List.Item.Detail.Metadata>
@@ -34,12 +43,7 @@ export const ListItemNote = ({ note }: Props) => {
           }
         />
       }
-      accessories={[
-        {
-          icon: hasAttachments ? Icon.Paperclip : undefined,
-          tooltip: hasAttachments ? "Attachments" : undefined,
-        },
-      ]}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Item Actions">

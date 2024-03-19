@@ -1,5 +1,9 @@
 # TMDB Changelog
 
+## [Copy Movie/TV Show ID] - 2023-12-01
+
+- Add the ability to copy the TMDB ID of a movie or TV show to the clipboard.
+
 ## [Many improvements] - 2023-11-17
 
 - Combine the "Search Movies" and "Search TV Shows" commands into a unified "Search" command.

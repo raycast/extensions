@@ -1,7 +1,8 @@
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(): JSX.Element {
-  const systemPrompt =
+  const c = "longher";
+  const p =
     "Act as a writer. Make the following text longer and more rich while keeping the core idea.\n\nOutput only with the modified text.\n";
-  return ResultView("longher", systemPrompt);
+  return <AnswerView command={c} prompt={p} />;
 }

@@ -8,20 +8,12 @@
  * Last modified  : 2023-07-06 15:47:53
  */
 
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  List,
-  openCommandPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
 
 import convert from "./operations/convertOperation";
-import { cleanup, getSelectedImages, showErrorToast } from "./utilities/utils";
+import { getSelectedImages } from "./utilities/utils";
 import { ConvertPreferences, ExtensionPreferences } from "./utilities/preferences";
+import runOperation from "./operations/runOperation";
 
 /**
  * All supported image formats for conversion.
@@ -54,30 +46,6 @@ export default function Command() {
   const preferences = getPreferenceValues<ConvertPreferences & ExtensionPreferences>();
   const enabledFormats = FORMATS.filter((format) => preferences[`show${format}`]);
 
-  const performConversion = async (desiredType: string) => {
-    const selectedImages = await getSelectedImages();
-    if (selectedImages.length === 0 || (selectedImages.length === 1 && selectedImages[0] === "")) {
-      await showToast({ title: "No images selected", style: Toast.Style.Failure });
-      return;
-    }
-
-    const toast = await showToast({ title: "Conversion in progress...", style: Toast.Style.Animated });
-    const pluralized = `image${selectedImages.length === 1 ? "" : "s"}`;
-    try {
-      await convert(selectedImages, desiredType);
-      toast.title = `Converted ${selectedImages.length.toString()} ${pluralized} to ${desiredType}`;
-      toast.style = Toast.Style.Success;
-    } catch (error) {
-      await showErrorToast(
-        `Failed to convert ${selectedImages.length.toString()} ${pluralized} to ${desiredType}`,
-        error as Error,
-        toast
-      );
-    } finally {
-      await cleanup();
-    }
-  };
-
   return (
     <List searchBarPlaceholder="Search image transformations...">
       <List.EmptyView
@@ -101,7 +69,19 @@ export default function Command() {
             key={format}
             actions={
               <ActionPanel>
-                <Action title={`Convert to ${format}`} onAction={async () => await performConversion(format)} />
+                <Action
+                  title={`Convert to ${format}`}
+                  onAction={async () => {
+                    const selectedImages = await getSelectedImages();
+                    await runOperation({
+                      operation: () => convert(selectedImages, format),
+                      selectedImages,
+                      inProgressMessage: "Conversion in progress...",
+                      successMessage: "Converted",
+                      failureMessage: "Failed to convert",
+                    });
+                  }}
+                />
               </ActionPanel>
             }
           />

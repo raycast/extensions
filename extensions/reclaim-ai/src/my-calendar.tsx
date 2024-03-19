@@ -62,7 +62,7 @@ const EventActionsList = ({ event }: { event: Event }) => {
         />
       ))}
       {event.reclaimManaged === true && (
-        <ActionPanel.Submenu title="Reschule Event" icon={Icon.ArrowClockwise}>
+        <ActionPanel.Submenu title="Reschedule Event" icon={Icon.ArrowClockwise}>
           <Action
             title="15min"
             onAction={() => {
@@ -149,15 +149,18 @@ const ListSection = ({ events, sectionTitle }: { sectionTitle: string; events: E
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [eventsData, setEventsData] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const now = new Date();
 
-  const { fetchEvents } = useEvent();
+  const { useFetchEvents } = useEvent();
+
+  const { data: eventsData, isLoading } = useFetchEvents({
+    start: startOfDay(now),
+    end: addDays(now, 7),
+  });
 
   const events = useMemo<EventSection[]>(() => {
     if (!eventsData) return [];
 
-    const now = new Date();
     const today = startOfDay(now);
     const tomorrow = startOfDay(addDays(now, 1));
 
@@ -216,25 +219,6 @@ export default function Command() {
 
     return events.filter((event) => event.events.length > 0);
   }, [eventsData]);
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        setIsLoading(true);
-        const events = await fetchEvents({
-          start: startOfDay(new Date()),
-          end: addDays(new Date(), 7),
-        });
-        setEventsData(events || []);
-      } catch (error) {
-        console.error("Error loading events", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void loadEvents();
-  }, []);
 
   return (
     <List

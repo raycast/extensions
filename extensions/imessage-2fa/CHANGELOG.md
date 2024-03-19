@@ -1,5 +1,17 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-02-20
+
+- Add temporal unit options for searching iMessage for 2FA codes
+
+## [Update] - 2023-12-13
+
+- Resolves an issue where only "read" messages are shown when `ignoreRead` option is disabled
+
+## [Update] - 2023-11-14
+
+- Add option to ignore messages that have been read
+
 ## [Update] - 2023-09-23
 
 - Resolves an issue where text codes would not be detected if their pattern resembled a phone number shortcode

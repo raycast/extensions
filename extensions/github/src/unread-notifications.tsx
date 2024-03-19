@@ -11,8 +11,8 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
+import { getGitHubClient } from "./api/githubClient";
 import { Notification } from "./components/NotificationListItem";
-import View from "./components/View";
 import {
   getGitHubIcon,
   getGitHubURL,
@@ -20,7 +20,7 @@ import {
   getNotificationSubtitle,
   getNotificationTooltip,
 } from "./helpers/notifications";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
 const preferences = getPreferenceValues<Preferences.UnreadNotifications>();
@@ -53,8 +53,12 @@ function UnreadNotifications() {
   async function openNotification(notification: Notification) {
     try {
       const openAndMarkNotificationAsRead = async () => {
-        await open(getGitHubURL(notification, viewer?.id));
-        await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        if (notification.subject.type === "RepositoryInvitation") {
+          open(`${notification.repository.html_url}/invitations`);
+        } else {
+          await open(getGitHubURL(notification, viewer?.id));
+          await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        }
       };
 
       await mutate(openAndMarkNotificationAsRead(), {
@@ -162,10 +166,4 @@ function UnreadNotifications() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <UnreadNotifications />
-    </View>
-  );
-}
+export default withGitHubClient(UnreadNotifications);

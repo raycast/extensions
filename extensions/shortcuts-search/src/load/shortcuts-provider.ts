@@ -1,6 +1,5 @@
 import { Shortcuts } from "../model/internal/internal-models";
 import { ShortcutsParser } from "./input-parser";
-import Validator from "./validator";
 import { AllApps } from "../model/input/input-models";
 import useKeyCodes from "./key-codes-provider";
 import fetch from "cross-fetch";
@@ -37,19 +36,17 @@ export default function useAllShortcuts(props?: Properties): UseAllShortcutsResu
       if (!keyCodesResult.data) return undefined;
       console.log("Fetching shortcuts");
       const res = await fetch("https://shortcuts.solomk.in/data/combined-apps.json");
-      const json: AllApps = await res.json();
-      const updatedShortcuts = new ShortcutsProvider(
-        json,
-        new ShortcutsParser(),
-        new Validator(keyCodesResult.data)
-      ).getShortcuts();
+      const allApps: AllApps = await res.json();
+      const updatedShortcuts = {
+        applications: new ShortcutsParser(keyCodesResult.data).parseInputShortcuts(allApps.list),
+      };
       return updatedShortcuts;
     },
     {
       dataParser: (v) => {
         return v ? v : emptyShortcuts;
       },
-      execute: !keyCodesResult.data,
+      execute: !!keyCodesResult.data,
     }
   );
 
@@ -61,19 +58,4 @@ export default function useAllShortcuts(props?: Properties): UseAllShortcutsResu
   }, [keyCodesResult, refreshableCachedState]);
 
   return refreshableCachedState;
-}
-
-class ShortcutsProvider {
-  constructor(
-    private readonly allApps: AllApps,
-    private readonly parser: ShortcutsParser,
-    private readonly validator: Validator
-  ) {}
-
-  public getShortcuts(): Shortcuts {
-    this.validator.validate(this.allApps.list);
-    return {
-      applications: this.parser.parseInputShortcuts(this.allApps.list),
-    };
-  }
 }

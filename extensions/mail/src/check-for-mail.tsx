@@ -1,5 +1,5 @@
 import { showHUD } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 export default async function CheckForMail() {
   await showHUD("Checking For New Mail");

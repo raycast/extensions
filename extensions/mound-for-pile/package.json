@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mound-for-pile",
+  "title": "Mound",
+  "description": "A Raycast extension for the Pile journaling app",
+  "icon": "logo-v2.png",
+  "author": "desmondsofua",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Post",
+      "subtitle": "Pile",
+      "description": "Creates a post in Pile journaling application",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.61.2",
+    "gray-matter": "^4.0.3",
+    "rehype-parse": "^9.0.0",
+    "rehype-remark": "^10.0.0",
+    "remark": "^15.0.1",
+    "remove-markdown": "^0.5.0",
+    "snarkdown": "^2.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.27",
+    "@types/remove-markdown": "^0.3.4",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.0.7",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cr34t1ve/pile-raycast.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cr34t1ve/pile-raycast/issues"
+  },
+  "homepage": "https://github.com/cr34t1ve/pile-raycast#readme"
+}

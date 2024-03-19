@@ -13,7 +13,8 @@
     "rifont",
     "gavinroderick",
     "lusit",
-    "literallyjustroy"
+    "literallyjustroy",
+    "mheidinger"
   ],
   "owner": "raycast",
   "access": "public",
@@ -88,11 +89,27 @@
       "subtitle": "Jira",
       "description": "Search issues globally in all projects.",
       "mode": "view"
+    },
+    {
+      "name": "open-from-clipboard",
+      "title": "Open Issue from Clipboard",
+      "subtitle": "Jira",
+      "description": "Open an issue by its key from the clipboard.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "baseUrl",
+          "type": "textfield",
+          "required": false,
+          "title": "Jira Base URL",
+          "description": "Optional Base URL for Self-Hosted Jira (e.g. https://jira.acme-inc.com). Defaults to the public Jira."
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.1",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.64.3",
+    "@raycast/utils": "^1.12.4",
     "date-fns": "^2.30.0",
     "filesize": "^10.1.0",
     "form-data": "^4.0.0",
@@ -104,14 +121,14 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.201",
-    "@types/node": "18.8.3",
-    "@types/react": "18.2.37",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "20.10.5",
+    "@types/react": "18.2.45",
     "@types/remove-markdown": "^0.3.4",
-    "eslint": "^7.32.0",
-    "eslint-plugin-import": "^2.29.0",
-    "prettier": "^2.8.8",
-    "typescript": "^4.9.5"
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

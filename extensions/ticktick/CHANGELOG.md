@@ -1,5 +1,15 @@
 # TickTick Changelog
 
+## [Fixed] - 2024-01-22
+
+- Resolve the issue of the 'Auto Fill with AI' executing too frequently.
+
+## [Added] - 2024-01-09
+
+- Add `dueDate` and `startDate` to task detail view.
+
+## [Fixed spelling error] - 2023-11-27
+
 ## [Added] - 2023-11-14
 
 - Add `Default Title` preference that allows you to set a default task title from your clipboard or selection when using the `Add Task` command.

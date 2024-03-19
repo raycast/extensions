@@ -8,7 +8,8 @@
   "contributors": [
     "bibixx",
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "oasaleh"
   ],
   "license": "MIT",
   "commands": [
@@ -39,7 +40,18 @@
       "subtitle": "Coffee",
       "description": "Get the status of the current caffeination in your menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "hidenWhenDecaffeinated",
+          "description": "Hide the icon when decaffeinated",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "When Decaffeinated",
+          "label": "Hide the icon"
+        }
+      ]
     },
     {
       "name": "caffeinateToggle",
@@ -56,12 +68,12 @@
       "mode": "view"
     },
     {
-        "name": "status",
-        "title": "Caffeinate Status",
-        "description": "Show the current caffeination status",
-        "mode": "no-view",
-        "interval": "1m"
-      }
+      "name": "status",
+      "title": "Caffeinate Status",
+      "description": "Show the current caffeination status",
+      "mode": "no-view",
+      "interval": "1m"
+    }
   ],
   "preferences": [
     {
@@ -88,19 +100,45 @@
       "required": false,
       "default": true,
       "label": "Prevent Disk Sleep"
+    },
+    {
+      "name": "icon",
+      "description": "Select icon set for Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "coffee-pot",
+      "title": "Menu Bar Icon",
+      "data": [
+        {
+          "title": "Coffee Pot",
+          "value": "coffee-pot"
+        },
+        {
+          "title": "Coffee Mug 1",
+          "value": "coffee-mug-1"
+        },
+        {
+          "title": "Coffee Mug 2",
+          "value": "coffee-mug-2"
+        },
+        {
+          "title": "Coffee Paper Cup",
+          "value": "paper-cup"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.2",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.68.0",
+    "@raycast/utils": "^1.12.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.37",
-    "eslint": "^8.53.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.57",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

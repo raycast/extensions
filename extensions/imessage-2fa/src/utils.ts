@@ -1,3 +1,5 @@
+import { LookBackUnitType } from "./types";
+
 /**
  * try to extract iMessage 2FA Code, empty result if not found any code
  *
@@ -90,4 +92,23 @@ export function extractCode(original: string) {
   }
 
   return code;
+}
+
+// This object maps each unit of time to the number of minutes it contains.
+const unitToMinutesMap: { [unit in LookBackUnitType]: number } = {
+  DAYS: 24 * 60,
+  HOURS: 60,
+  MINUTES: 1,
+};
+
+/**
+ * Calculates the total minutes based on a specified look back unit and amount.
+ *
+ * @param lookBackUnit - The time unit ('DAYS', 'HOURS', 'MINUTES') for the look back period.
+ * @param lookBackAmount - The quantity of the specified unit, defaults to 1.
+ * @returns The total minutes for the look back period. Returns 0 for unrecognized units.
+ */
+export function calculateLookBackMinutes(lookBackUnit: LookBackUnitType, lookBackAmount = 1): number {
+  const unitMinutes = unitToMinutesMap[lookBackUnit] || 0;
+  return unitMinutes * lookBackAmount;
 }

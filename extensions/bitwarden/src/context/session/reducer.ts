@@ -50,7 +50,14 @@ export const useSessionReducer = () => {
         };
       }
       case "logout": {
-        return { ...state, token: undefined, passwordHash: undefined, isAuthenticated: false };
+        return {
+          ...state,
+          token: undefined,
+          passwordHash: undefined,
+          isLocked: true,
+          isAuthenticated: false,
+          isLoading: false,
+        };
       }
       case "vaultTimeout": {
         return { ...state, isLocked: true };

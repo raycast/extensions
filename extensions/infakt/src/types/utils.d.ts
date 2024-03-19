@@ -1,5 +1,6 @@
 import { useFetch } from "@raycast/utils";
-import { paymentMethods, printTypes, locales, currencies } from "../utils";
+
+import { currencies, locales, paymentMethods, printTypes } from "@/utils";
 
 export type PaymentMethod = (typeof paymentMethods)[number]["name"];
 

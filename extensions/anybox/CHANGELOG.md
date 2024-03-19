@@ -1,5 +1,10 @@
 # Anybox Changelog
 
+## [Bug Fixes] - 2023-12-01
+
+- Fix some issues reported by Raycast.
+- Update Raycast API version to the latest.
+
 ## [New Feature] - 2023-11-01
 
 - Option to show search resutls as icons.
