@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
-interface Preferences {
-  interval: string;
-}
-
 export function useDrinkDelay() {
   return useCachedState<number>("delay", 0);
 }

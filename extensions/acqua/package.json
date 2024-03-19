@@ -14,11 +14,12 @@
       "name": "drinknow",
       "title": "Take a sip of water",
       "description": "Log you water intake and reset the timer",
-      "mode": "view"
+      "mode": "view",
+      "interval": "1m"
     },
     {
       "name": "menubar",
-      "title": "Water Reminder",
+      "title": "Menubar Reminder",
       "description": "Show the Acqua water reminder menu bar",
       "mode": "menu-bar",
       "interval": "1m"
