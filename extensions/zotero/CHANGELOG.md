@@ -2,7 +2,7 @@
 
 ## [Fixes] - 2024-03-17
 
-- Changed zotero-better-bibtex database path and schema
+- Update zotero-better-bibtex database path and schema
 
 ## [Enhancements] - 2023-11-21
 
