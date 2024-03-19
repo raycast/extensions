@@ -27,8 +27,6 @@ const packageManager = (name: PackageManagerName, specs: PackageManagerSpecs = d
   const install = async ({ packageName, dev, root, global }: ProjectInstallOpts) => {
     await showToast(Toast.Style.Animated, "installing", `${name} is installing at ${root}`);
 
-    const command = [name, specs.installCommand || defaultSpecs.installCommand, packageName];
-
     // some combinations make no sense
     if (global && root) {
       throw new Error("can't pass a directory for a global install");
@@ -45,6 +43,8 @@ const packageManager = (name: PackageManagerName, specs: PackageManagerSpecs = d
     if (dev && !specs.devFlag) {
       throw new Error(`${name} does not support dev installations`);
     }
+
+    const command = [name, specs.installCommand || defaultSpecs.installCommand, packageName];
 
     if (global) {
       command.push(specs.globalFlag || defaultSpecs.globalFlag);

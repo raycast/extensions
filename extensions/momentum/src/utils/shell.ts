@@ -8,16 +8,12 @@ import { isDev } from "./isDev";
  * There's a better way to write this, but not today
  * */
 
-const commandsThatRunOnShellStartup = ["~/.profile", "~/.bashrc", "~/.zprofile", "~/.zshrc"].map(
+const commandsThatRunOnShellStartup = ["~/.zprofile", "~/.zshrc"].map(
   (s) => `[[ -f ${s} ]] && source ${s}`,
 );
 
 $.shell = "/bin/zsh";
 $.prefix = commandsThatRunOnShellStartup.join(";") + ";";
-
-$.env = {
-  PATH: `/usr/bin:/opt/homebrew/bin:/usr/bin/local;${process.env.PATH}`,
-};
 
 // bug with zx + zsh, had to fix it manually
 $.quote = function quote(arg: string) {
@@ -39,8 +35,6 @@ $.quote = function quote(arg: string) {
     "'"
   );
 };
-
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 
 if (isDev()) {
   console.log("running development mode");
