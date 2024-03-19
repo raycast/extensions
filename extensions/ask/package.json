@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ask",
+  "title": "Ask AI",
+  "description": "Custom shortcuts for Gemini.",
+  "icon": "icon.png",
+  "author": "jul-sh",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "prompt",
+      "title": "Ask AI",
+      "subtitle": "Ask",
+      "description": "Have AI answer your request",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Which API type is the endpoint?",
+      "name": "apiType",
+      "required": true,
+      "title": "API Type",
+      "type": "dropdown",
+      "default": "openai",
+      "data": [
+        {
+          "title": "OpenAI Spec (OpenAi, OpenRouter, Mixtral)",
+          "value": "openai"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        }
+      ]
+    },
+    {
+      "description": "API Endpoint to use",
+      "name": "apiEndpoint",
+      "required": true,
+      "title": "API Endpoint",
+      "type": "textfield",
+      "default": "https://openrouter.ai/api/v1"
+    },
+    {
+      "description": "API Key to use for authentication",
+      "name": "apiKey",
+      "required": true,
+      "title": "API Key",
+      "type": "password"
+    },
+    {
+      "description": "AI Model to use for new prompts",
+      "name": "defaultModel",
+      "required": true,
+      "default": "anthropic/claude-3-opus:beta",
+      "title": "Model",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.3.1",
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.9.0",
+    "match-sorter": "^6.3.4",
+    "openai": "^4.29.2",
+    "undici": "^6.9.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@types/uuid": "^9.0.8",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
