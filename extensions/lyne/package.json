@@ -12,20 +12,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "create-horizontal-line",
-      "title": "Create Horizontal Line",
-      "subtitle": "Lyne",
-      "description": "Create Horizontal Lines",
-      "mode": "view"
-    },
-    {
-      "name": "create-vertical-line",
-      "title": "Create Vertical Line",
-      "subtitle": "Lyne",
-      "description": "Create Vertical Line",
-      "mode": "view"
-    },
-    {
       "name": "create-horizontal-lines",
       "title": "Create Horizontal Lines",
       "subtitle": "Lyne",

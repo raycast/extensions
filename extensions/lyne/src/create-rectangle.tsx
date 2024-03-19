@@ -2,8 +2,11 @@ import open from "open";
 import { showHUD, closeMainWindow, getApplications, Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 
 export default function Command() {
-
-  async function createRectangle(hPositions: string | null | undefined, vPositions: string | null | undefined, layout: string | null | undefined) {
+  async function createRectangle(
+    hPositions: string | null | undefined,
+    vPositions: string | null | undefined,
+    layout: string | null | undefined,
+  ) {
     if (await isAppInstalled()) {
       if (!hPositions) {
         const options: Toast.Options = {
@@ -32,9 +35,9 @@ export default function Command() {
         };
         await showToast(options);
       } else {
-        const hNumbers = hPositions.split(',').map(position => parseInt(position.trim()));
-        const vNumbers = vPositions.split(',').map(position => parseInt(position.trim()));
-        createRectangleLyne(hNumbers, vNumbers, layout)
+        const hNumbers = hPositions.split(",").map((position) => parseInt(position.trim()));
+        const vNumbers = vPositions.split(",").map((position) => parseInt(position.trim()));
+        createRectangleLyne(hNumbers, vNumbers, layout);
       }
     } else {
       const options: Toast.Options = {
@@ -53,19 +56,15 @@ export default function Command() {
     }
   }
 
-  function isNumber(arg: any): boolean {
-    return typeof arg === 'number' || (!isNaN(Number(arg)) && arg !== '');
-  }
-
   async function isAppInstalled() {
     const applications = await getApplications();
-    return applications.some(({ bundleId }) => bundleId ? ["net.lyneapp.lyne"].includes(bundleId) : false);
+    return applications.some(({ bundleId }) => (bundleId ? ["net.lyneapp.lyne"].includes(bundleId) : false));
   }
 
   async function createRectangleLyne(hPositions: number[], vPositions: number[], layout: string | null | undefined) {
-    let url = "lyne://create-rectangle?hlines=" + hPositions.join(',') + "&vlines=" + vPositions.join(',')
-    if (layout && layout.trim() !== '') {
-      url += ("&layout=" + layout);
+    let url = "lyne://create-rectangle?hlines=" + hPositions.join(",") + "&vlines=" + vPositions.join(",");
+    if (layout && layout.trim() !== "") {
+      url += "&layout=" + layout;
     }
     open(url);
     await closeMainWindow();
@@ -73,7 +72,17 @@ export default function Command() {
   }
 
   return (
-    <Form actions={<ActionPanel><Action.SubmitForm onSubmit={(values) => createRectangle(values.horizontal_line_positions, values.vertical_line_positions, values.rectangle_layout)} /></ActionPanel>}>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            onSubmit={(values) =>
+              createRectangle(values.horizontal_line_positions, values.vertical_line_positions, values.rectangle_layout)
+            }
+          />
+        </ActionPanel>
+      }
+    >
       <Form.Description
         title="Create Vertical Lines"
         text="It takes a list of horizontal and vertical positions (numbers separated by comma) and an optional layout name and creates a rectangle."
