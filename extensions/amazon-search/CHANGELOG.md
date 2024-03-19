@@ -3,7 +3,7 @@
 ## [Enhancements] - 2024-03-19
 
 - Improved behavior of the Recent Searches list.
-- Update shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.
+- Updated shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.
 
 ## [Enhancement] - 2024-03-02
 
