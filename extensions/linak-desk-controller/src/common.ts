@@ -1,6 +1,6 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, open } from "@raycast/api";
 
 export function getLinakControllerPath() {
   const preferences = getPreferenceValues<Preferences>();
@@ -52,6 +52,12 @@ export async function moveTo(height: number) {
       title: "Couldn't find linak-controller CLI",
       message:
         "Please install linak-controller CLI according to the instructions and make sure it's available in your path.",
+      primaryAction: {
+        title: "Download from GitHub",
+        onAction: () => {
+          open("https://github.com/rhyst/linak-controller");
+        },
+      },
     });
   }
 
