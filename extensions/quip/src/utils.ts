@@ -6,6 +6,7 @@ import mime from 'mime-types';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 
 export const preferences = getPreferenceValues<Preferences>();
+
 type Preferences = {
   personalAccessToken: string;
   endpoint: string;
