@@ -226,6 +226,7 @@ It can be used to open files or folders in a specific application. Use [getAppli
 | name<mark style="color:red;">*</mark> | The display name of the application. | <code>string</code> |
 | path<mark style="color:red;">*</mark> | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, | <code>string</code> |
 | bundleId | The bundle identifier of the application, e.g. `com.raycast.macos`. | <code>string</code> |
+| localizedName | The localized name of the application. | <code>string</code> |
 
 ### PathLike
 
