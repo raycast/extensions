@@ -8,19 +8,32 @@ export default function MenuBarMove() {
         <MenuBarExtra.Item
           title="Stand Up"
           icon={Icon.ChevronUp}
-          onAction={() => launchCommand({ name: "move-to-stand", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              launchCommand({ name: "move-to-stand", type: LaunchType.UserInitiated });
+            } catch (e) {
+              () => {};
+            }
+          }}
           shortcut={{ modifiers: ["cmd"], key: "1" }}
         />
         <MenuBarExtra.Item
           title="Sit Down"
           icon={Icon.ChevronDown}
-          onAction={() => launchCommand({ name: "move-to-sit", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              launchCommand({ name: "move-to-sit", type: LaunchType.UserInitiated });
+            } catch (e) {
+              () => {};
+            }
+          }}
           shortcut={{ modifiers: ["cmd"], key: "2" }}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Extension"
+          icon={Icon.Gear}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openExtensionPreferences}
         />
