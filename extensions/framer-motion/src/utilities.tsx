@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List } from '@raycast/api';
+import { Action, ActionPanel, List } from "@raycast/api";
 
-import { UTILITY_ITEMS } from './data';
+import { UTILITY_ITEMS } from "./data";
 
 export default function Command() {
   return (
