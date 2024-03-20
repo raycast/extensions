@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
-import { FC, FormEvent, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { Base64, Paper } from "../types";
 import { decode } from "../utils/base64";
 import { useGetConfig } from "../hooks/useGetConfig";
@@ -7,6 +7,7 @@ import { useGetCategories } from "../hooks/useGetCategories";
 import { encode } from "../utils/base64";
 import { updateConfigFile } from "../utils/updateConfigFile";
 import { ListMode } from "./ListMode";
+import { FormValidation, useForm } from "@raycast/utils";
 
 type EditModeProps = {
   paper: Paper;
@@ -18,65 +19,42 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
   const { push } = useNavigation();
+  const { handleSubmit, itemProps, setValue } = useForm<{
+    name: string;
+    createdAt: Date | null;
+    content: string;
+    category: string;
+    description?: string;
+  }>({
+    async onSubmit(values) {
+      try {
+        const toast = await showToast({
+          style: Toast.Style.Animated,
+          title: `Editing ${values.name} paper`,
+        });
 
-  const [name, setName] = useState<string>(paper.name || "");
-  const [nameError, setNameError] = useState<string | undefined>();
+        const objFormated: Paper = {
+          name: values.name,
+          description: values.description || "",
+          content: encode(values.content) as Base64,
+          createdAt: new Date(values.createdAt as Date).getTime(),
+        };
+        const newPaperRawData = { ...paperDataRaw };
 
-  const [createdAt, setCreatedAt] = useState<Date | null>(new Date(paper.createdAt) || "");
-  const [createdAtError, setCreatedAtError] = useState<string | undefined>();
+        if (values.category !== paperCategory) {
+          newPaperRawData[paperCategory].papers.splice(index, 1);
+          newPaperRawData[values.category].papers.push(objFormated);
 
-  const [content, setContent] = useState<string>(paper.content || "");
+          await updateConfigFile(newPaperRawData);
 
-  const [category, setCategory] = useState<string>(paperCategory || "");
+          toast.style = Toast.Style.Success;
+          toast.title = "Success";
 
-  const [description, setDescription] = useState<string>(paper.description || "");
+          push(<ListMode />);
+          return;
+        }
 
-  const onBlurName = (event: unknown) => {
-    if (((event as FormEvent<HTMLInputElement>).target as HTMLInputElement).value.length <= 0) {
-      if (nameError) return;
-
-      setNameError("Enter name");
-      return;
-    }
-
-    if (nameError === undefined) return;
-    setNameError(undefined);
-  };
-
-  const onBlurCreatedAt = (event: unknown) => {
-    if (((event as FormEvent<HTMLSelectElement>).target as HTMLSelectElement).value === null) {
-      if (createdAtError) return;
-
-      setCreatedAtError("Enter date");
-      return;
-    }
-
-    if (createdAtError === undefined) return;
-    setCreatedAtError(undefined);
-  };
-
-  useEffect(() => {
-    setContent(decode(paper.content));
-  }, []);
-
-  const onSubmit = async (formValues: Paper & { category: string }) => {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Editing ${formValues.name} paper`,
-    });
-
-    try {
-      const objFormated: Paper = {
-        name: formValues.name,
-        description: formValues.description || "",
-        content: encode(formValues.content) as Base64,
-        createdAt: new Date(formValues.createdAt).getTime(),
-      };
-      const newPaperRawData = { ...paperDataRaw };
-
-      if (formValues.category !== paperCategory) {
-        newPaperRawData[paperCategory].papers.splice(index, 1);
-        newPaperRawData[formValues.category].papers.push(objFormated);
+        newPaperRawData[values.category].papers[index] = { ...objFormated };
 
         await updateConfigFile(newPaperRawData);
 
@@ -84,22 +62,26 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
         toast.title = "Success";
 
         push(<ListMode />);
-        return;
+      } catch (error) {
+        return false;
       }
+    },
+    validation: {
+      name: FormValidation.Required,
+      createdAt: FormValidation.Required,
+      category: FormValidation.Required,
+    },
+    initialValues: {
+      name: paper.name,
+      createdAt: new Date(paper.createdAt),
+      category: paperCategory,
+      description: paper.description || "",
+    },
+  });
 
-      newPaperRawData[formValues.category].papers[index] = { ...objFormated };
-
-      await updateConfigFile(newPaperRawData);
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Success";
-
-      push(<ListMode />);
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Oups.. An error occured, please try again";
-    }
-  };
+  useEffect(() => {
+    setValue("content", decode(paper.content));
+  }, []);
 
   return (
     <Form
@@ -107,59 +89,31 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
       navigationTitle={`Edit ${paper.name}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={`Edit ${paper.name}`} onSubmit={onSubmit} />
+          <Action.SubmitForm title={`Edit ${paper.name}`} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        value={name}
-        onChange={setName}
-        title="Name of your paper"
-        storeValue={true}
-        error={nameError}
-        onBlur={onBlurName}
-      />
+      <Form.TextField title="Name of your paper" storeValue={true} {...itemProps.name} />
       <Form.DatePicker
-        id="createdAt"
-        value={createdAt}
-        onChange={setCreatedAt}
         title="Created at"
         storeValue={true}
         // @ts-expect-error Raycast Type
         type={Form.DatePicker.Date}
-        error={createdAtError}
-        onBlur={onBlurCreatedAt}
+        {...itemProps.createdAt}
       />
-      <Form.TextArea
-        id="content"
-        value={content}
-        storeValue={true}
-        title="Content"
-        onChange={setContent}
-        enableMarkdown={true}
-      />
-      <Form.Dropdown
-        id="category"
-        title="Category"
-        value={category}
-        onChange={setCategory}
-        storeValue={true}
-        throttle={true}
-      >
+      <Form.TextArea storeValue={true} title="Content" enableMarkdown={true} {...itemProps.content} />
+      <Form.Dropdown title="Category" storeValue={true} throttle={true} {...itemProps.category}>
         {categories.map((category, index) => {
           if (category === "Deleted") return null;
           return <Form.Dropdown.Item title={category} value={category.toLowerCase()} key={index} />;
         })}
       </Form.Dropdown>
       <Form.TextField
-        id="description"
         placeholder="Enter a description"
         info="Optional field"
         storeValue={true}
-        value={description}
-        onChange={setDescription}
         title="Description"
+        {...itemProps.description}
       />
     </Form>
   );

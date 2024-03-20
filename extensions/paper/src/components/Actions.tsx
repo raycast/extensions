@@ -84,7 +84,12 @@ export const Actions: FC<ActionsProps> = ({ mode, paper, category, index }) => {
             icon={Icon.Pencil}
             onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}
           />
-          <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)} />
+          <Action
+            title="Create Paper"
+            icon={Icon.Plus}
+            onAction={() => push(<CreatePaper />)}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
         </>
       ) : (
         <>
@@ -94,18 +99,23 @@ export const Actions: FC<ActionsProps> = ({ mode, paper, category, index }) => {
             onAction={() => push(<EditMode paper={paper} index={index} paperCategory={category} />)}
           />
           <Action title="List Papers" icon={Icon.List} onAction={() => push(<ListMode />)} />
-          <Action title="Create Paper" icon={Icon.Plus} onAction={() => push(<CreatePaper />)} />
+          <Action
+            title="Create Paper"
+            icon={Icon.Plus}
+            onAction={() => push(<CreatePaper />)}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
         </>
       )}
       <Action
         title="Create New Category"
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
         icon={Icon.NewDocument}
         onAction={() => push(<CreateCategory />)}
       />
       <Action
         title="Update Category"
-        shortcut={{ modifiers: ["cmd"], key: "u" }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
         icon={Icon.Switch}
         onAction={() => push(<UpdateCategory />)}
       />
