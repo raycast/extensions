@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "upload-file",
-      "title": "Upload file",
+      "title": "Upload File",
       "subtitle": "Crossbell",
       "description": "Upload file from your system clipboard or local file to IPFS",
       "mode": "no-view"
