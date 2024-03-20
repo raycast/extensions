@@ -8,9 +8,9 @@ Create or search notes in iA Writer with Raycast.
 
 ## Screenshots
 
-<img width="1000" src="https://github.com/xvvhang/raycast-ia-writer/blob/4ef1eba6e0f14fc551cc3733fc5c55b3e37aa752/assets/quick-note.png" alt="Quick Search Screenshot" />
+![Quick Note](./metadata/quick-note.png)
 
-<img width="1000" src="https://github.com/xvvhang/raycast-ia-writer/blob/4ef1eba6e0f14fc551cc3733fc5c55b3e37aa752/assets/quick-search.png" alt="Quick Search Screenshot" />
+![Quick Search](./metadata/quick-search.png)
 
 ## Feature
 

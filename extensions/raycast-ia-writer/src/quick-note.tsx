@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Form, ActionPanel, Action, showHUD, showToast, closeMainWindow, popToRoot } from "@raycast/api";
 import { defaultName } from "./preference";
 import { write } from "./api";
+import { checkInstallation } from "./utils";
 
 export default function QuickNote() {
+  checkInstallation();
+
   const [name, setName] = useState(defaultName());
   const [text, setText] = useState(defaultText());
 
