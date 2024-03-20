@@ -4,7 +4,7 @@
   "title": "Induced",
   "description": "A raycast wrapper for Induced's beta APIs",
   "icon": "command-icon.png",
-  "author": "Induced.ai",
+  "author": "induced",
   "categories": [
     "Applications",
     "Productivity"
