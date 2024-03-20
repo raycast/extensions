@@ -3,7 +3,7 @@
   "name": "toggle-natural-scrolling",
   "title": "Toggle Natural Scrolling",
   "description": "Toggle natural scrolling Raycast extension",
-  "icon": "extension_icon",
+  "icon": "extension_icon.png",
   "author": "stpnvntn",
   "categories": [
     "System"
