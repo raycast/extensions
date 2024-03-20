@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "drinknow",
-      "title": "Take a sip of water",
+      "title": "Take a Sip of Water",
       "description": "Log you water intake and reset the timer",
       "mode": "view",
       "interval": "1m"
