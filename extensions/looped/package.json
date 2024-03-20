@@ -13,7 +13,6 @@
     {
       "name": "index",
       "title": "Loop It",
-      "subtitle": "Loop is open. If it is, quit it and reopen it. If it's not open, open it.",
       "description": "If loop has an error, this command restarts Loop and removes the settings popup",
       "mode": "no-view"
     }
