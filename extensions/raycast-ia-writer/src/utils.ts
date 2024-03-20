@@ -1,4 +1,4 @@
-import { getApplications, showToast, Toast, open } from "@raycast/api"
+import { getApplications, showToast, Toast, open } from "@raycast/api";
 import dayjs from "dayjs";
 
 export function getTimeStamp(value: string | Date, format: string): string {
@@ -8,7 +8,7 @@ export function getTimeStamp(value: string | Date, format: string): string {
 
 export async function checkInstallation() {
   const apps = await getApplications();
-  const installed = apps.some(({ bundleId }) => bundleId === 'pro.writer.mac');
+  const installed = apps.some(({ bundleId }) => bundleId === "pro.writer.mac");
 
   if (!installed) {
     const options: Toast.Options = {
@@ -16,12 +16,12 @@ export async function checkInstallation() {
       title: "iA Writer is not installed",
       message: "Get iA Writer",
       primaryAction: {
-        title: 'Go to https://ia.net/writer',
+        title: "Go to https://ia.net/writer",
         onAction: (toast) => {
-          open('https://ia.net/writer');
+          open("https://ia.net/writer");
           toast.hide();
-        }
-      }
+        },
+      },
     };
     await showToast(options);
   }
