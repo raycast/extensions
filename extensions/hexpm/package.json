@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hexpm",
+  "title": "Hex.pm",
+  "description": "Search packages on Hex and open previously visited ones faster.",
+  "icon": "icon.png",
+  "author": "yordis",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-packages",
+      "title": "Search Packages",
+      "subtitle": "Hex",
+      "description": "Search packages on Hex and open previously visited ones faster.",
+      "mode": "view"
+    },
+    {
+      "name": "create-mix-project",
+      "title": "Create Mix Project",
+      "subtitle": "mix",
+      "description": "Create a new Elixir project with Mix.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "search_sorting",
+      "type": "dropdown",
+      "required": false,
+      "title": "Search Sorting",
+      "description": "The sorting of the search results.",
+      "default": "total_downloads",
+      "label": "Search Sorting",
+      "data": [
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Total Downloads",
+          "value": "total_downloads"
+        },
+        {
+          "title": "Recent Downloads",
+          "value": "recent_downloads"
+        },
+        {
+          "title": "Inserted At",
+          "value": "inserted_at"
+        },
+        {
+          "title": "Updated At",
+          "value": "updated_at"
+        }
+      ]
+    },
+    {
+      "name": "visitedPackageHistoryCount",
+      "type": "textfield",
+      "title": "Visited Package History Count",
+      "description": "How many items to store in your visited package history",
+      "required": false,
+      "default": "30",
+      "value": "30"
+    }
+  ],
+  "contributors": [],
+  "categories": [
+    "Developer Tools"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "raycast:publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.69.3",
+    "@raycast/utils": "^1.13.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.11.30",
+    "@types/react": "18.2.67",
+    "eslint": "8.57.0",
+    "prettier": "3.2.5",
+    "typescript": "5.4.2"
+  }
+}
