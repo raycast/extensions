@@ -1,3 +1,3 @@
-# acqua Changelog
+# Acqua Changelog
 
-## [Initial Version] - 2024-03-08
+## [Initial Version] - {PR_MERGE_DATE}
