@@ -52,12 +52,15 @@ async function readContent(preferredSource: string) {
 }
 
 function modifyCasesWrapper(input: string, case_: CaseFunction) {
-  const modifiedArr: string[] = [];
+  const modifiedRawArr: string[] = [];
+  const modifiedMarkddownArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
-    modifiedArr.push(case_(line));
+    const modified = case_(line);
+    modifiedRawArr.push(modified);
+    modifiedMarkddownArr.push(modified + "\n");
   }
-  return modifiedArr.join("\n");
+  return { rawText: modifiedRawArr.join("\n"), markdown: modifiedMarkddownArr.join("\n") };
 }
 
 const cache = new Cache();
@@ -193,7 +196,13 @@ export default function Command(props: LaunchProps) {
     ) : null;
   };
 
-  const CaseItem = (props: { case: CaseType; modified: string; pinned?: boolean; recent?: boolean }): JSX.Element => {
+  const CaseItem = (props: {
+    case: CaseType;
+    modified: string;
+    detail: string;
+    pinned?: boolean;
+    recent?: boolean;
+  }): JSX.Element => {
     const context = encodeURIComponent(`{"case":"${props.case}"}`);
     const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
@@ -202,7 +211,7 @@ export default function Command(props: LaunchProps) {
         id={props.case}
         title={props.case}
         accessories={[{ text: props.modified }]}
-        detail={<List.Item.Detail markdown={props.modified} />}
+        detail={<List.Item.Detail markdown={props.detail} />}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
@@ -285,24 +294,32 @@ export default function Command(props: LaunchProps) {
   return (
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
-        {pinned?.map((key) => (
-          <CaseItem
-            key={key}
-            case={key as CaseType}
-            modified={modifyCasesWrapper(content, functions[key])}
-            pinned={true}
-          />
-        ))}
+        {pinned?.map((key) => {
+          const modified = modifyCasesWrapper(content, functions[key]);
+          return (
+            <CaseItem
+              key={key}
+              case={key as CaseType}
+              modified={modified.rawText}
+              detail={modified.markdown}
+              pinned={true}
+            />
+          );
+        })}
       </List.Section>
       <List.Section title="Recent">
-        {recent.map((key) => (
-          <CaseItem
-            key={key}
-            case={key as CaseType}
-            modified={modifyCasesWrapper(content, functions[key])}
-            recent={true}
-          />
-        ))}
+        {recent.map((key) => {
+          const modified = modifyCasesWrapper(content, functions[key]);
+          return (
+            <CaseItem
+              key={key}
+              case={key as CaseType}
+              modified={modified.rawText}
+              detail={modified.markdown}
+              recent={true}
+            />
+          );
+        })}
       </List.Section>
       <List.Section title="All Cases">
         {Object.entries(functions)
@@ -312,9 +329,10 @@ export default function Command(props: LaunchProps) {
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
           )
-          .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(content, func)} />
-          ))}
+          .map(([key, func]) => {
+            const modified = modifyCasesWrapper(content, func);
+            return <CaseItem key={key} case={key as CaseType} modified={modified.rawText} detail={modified.markdown} />;
+          })}
       </List.Section>
     </List>
   );
