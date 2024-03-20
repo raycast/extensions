@@ -6,6 +6,11 @@ import mime from 'mime-types';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 
 export const preferences = getPreferenceValues<Preferences>();
+type Preferences = {
+  personalAccessToken: string;
+  endpoint: string;
+  onlyMatchTitles?: boolean;
+};
 
 export async function downloadBlob(src: string) {
   // src should look like /blob/{threadId}/{blobId}
