@@ -5,12 +5,6 @@ import fetch from 'node-fetch';
 import mime from 'mime-types';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 
-type Preferences = {
-  personalAccessToken: string;
-  endpoint: string;
-  onlyMatchTitles?: boolean;
-};
-
 export const preferences = getPreferenceValues<Preferences>();
 
 export async function downloadBlob(src: string) {
