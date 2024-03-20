@@ -14,6 +14,7 @@
     {
       "name": "index",
       "title": "Create Session",
+      "subtitle": "Induced API",
       "description": "Run a new session using Induced's API",
       "mode": "view"
     }
