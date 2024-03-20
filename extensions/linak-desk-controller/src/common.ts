@@ -47,7 +47,12 @@ export async function moveTo(height: number) {
   const preferences = getPreferenceValues<Preferences>();
 
   if (!isLinakControllerInstalled()) {
-    throw new Error("linak-controller is not installed");
+    return await showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't find linak-controller CLI",
+      message:
+        "Please install linak-controller CLI according to the instructions and make sure it's available in your path.",
+    });
   }
 
   const toast = await showToast({
