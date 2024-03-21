@@ -1,7 +1,10 @@
 import { existsSync, readdirSync, readFile } from "fs";
 import { promisify } from "util";
 
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState, useStreamJSON } from "@raycast/utils";
+import { useCallback, useMemo } from "react";
+
+import { Bookmark, fuzzyMatch } from "../helpers/search";
 
 const read = promisify(readFile);
 
@@ -20,13 +23,6 @@ type BookmarkFolder = {
 };
 
 type BookmarkItem = BookmarkURL | BookmarkFolder;
-
-type BookmarksRoot = {
-  roots: {
-    bookmark_bar: BookmarkFolder;
-    other: BookmarkFolder;
-  };
-};
 
 function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   const bookmarks = [];
@@ -104,11 +100,12 @@ type UseChromiumBookmarksParams = {
   browserIcon: string;
   browserName: string;
   browserBundleId: string;
+  query?: string;
 };
 
 export default function useChromiumBookmarks(
   enabled: boolean,
-  { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams,
+  { path, browserIcon, browserName, browserBundleId, query }: UseChromiumBookmarksParams,
 ) {
   const [currentProfile, setCurrentProfile] = useCachedState(`${browserName}-profile`, "");
 
@@ -130,45 +127,67 @@ export default function useChromiumBookmarks(
     [enabled, path],
   );
 
-  const { data, isLoading, mutate } = useCachedPromise(
-    async (profile, enabled, path) => {
-      if (!profile || !enabled || !existsSync(`${path}/${profile}/Bookmarks`)) {
-        return;
-      }
-
-      const file = await read(`${path}/${profile}/Bookmarks`);
-      return JSON.parse(file.toString()) as BookmarksRoot;
+  const transformBookmarks = useCallback(getBookmarks, []);
+  const filterBookmarks = useCallback(
+    (item: Bookmark) => {
+      if (!query) return true;
+      return fuzzyMatch(item, query);
     },
-    [currentProfile, enabled, path],
+    [query],
   );
 
-  const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
-  const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
+  const execute = useMemo(() => {
+    return !!currentProfile && enabled && existsSync(`${path}/${currentProfile}/Bookmarks`);
+  }, [currentProfile, enabled, path]);
 
-  const otherBookmarks = data ? getBookmarks(data.roots.other) : [];
-  const otherFolders = data ? getFolders(data.roots.other) : [];
+  const fullPath = `file://${path}/${currentProfile}/Bookmarks`;
 
-  const bookmarks = [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
-    return {
-      ...bookmark,
-      id: `${bookmark.id}-${browserBundleId}`,
-      browser: browserBundleId,
-    };
+  const {
+    data: dataBookmarks,
+    isLoading: isLoadingBookmarks,
+    mutate,
+  } = useStreamJSON(fullPath, {
+    dataPath: /^roots.(bookmark_bar|other|synced).children$/,
+    transform: transformBookmarks,
+    filter: filterBookmarks,
+    pageSize: 100,
+    execute,
   });
 
-  const folders = [...toolbarFolders, ...otherFolders].map((folder) => {
-    return {
-      ...folder,
-      id: `${folder.id}-${browserBundleId}`,
-      icon: browserIcon,
-      browser: browserBundleId,
-    };
+  const transformFolders = useCallback(getFolders, []);
+  const filterFolders = useCallback(() => true, []);
+
+  const { data: dataFolders, isLoading: isLoadingFolders } = useStreamJSON(fullPath, {
+    dataPath: /^roots.(bookmark_bar|other|synced).children$/,
+    transform: transformFolders,
+    filter: filterFolders,
+    pageSize: 100,
+    execute,
   });
+
+  const bookmarks =
+    dataBookmarks?.map((bookmark) => {
+      return {
+        ...bookmark,
+        id: `${bookmark.id}-${browserBundleId}`,
+        browser: browserBundleId,
+      };
+    }) ?? [];
+
+  const folders =
+    dataFolders?.map((folder) => {
+      return {
+        ...folder,
+        id: `${folder.id}-${browserBundleId}`,
+        icon: browserIcon,
+        browser: browserBundleId,
+      };
+    }) ?? [];
 
   return {
-    bookmarks,
-    folders,
-    isLoading,
+    bookmarks: enabled ? bookmarks : [],
+    folders: enabled ? folders : [],
+    isLoading: isLoadingBookmarks || isLoadingFolders,
     mutate,
     profiles: profiles || [],
     currentProfile,

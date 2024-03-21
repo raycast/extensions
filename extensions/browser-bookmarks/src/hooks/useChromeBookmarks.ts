@@ -5,11 +5,12 @@ import useChromiumBookmarks from "./useChromiumBookmarks";
 
 const CHROME_PATH = `${homedir()}/Library/Application Support/Google/Chrome`;
 
-export default function useChromeBookmarks(enabled: boolean) {
+export default function useChromeBookmarks(enabled: boolean, query: string) {
   return useChromiumBookmarks(enabled, {
     path: CHROME_PATH,
     browserName: "Chrome",
     browserIcon: "chrome.png",
     browserBundleId: BROWSERS_BUNDLE_ID.chrome,
+    query,
   });
 }

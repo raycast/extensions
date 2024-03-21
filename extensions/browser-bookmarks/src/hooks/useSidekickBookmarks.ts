@@ -5,11 +5,12 @@ import useChromiumBookmarks from "./useChromiumBookmarks";
 
 const SIDEKICK_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/Sidekick`;
 
-export default function useSidekickBookmarks(enabled: boolean) {
+export default function useSidekickBookmarks(enabled: boolean, query: string) {
   return useChromiumBookmarks(enabled, {
     path: SIDEKICK_BOOKMARKS_PATH,
     browserName: "Sidekick",
     browserIcon: "sidekick.png",
     browserBundleId: BROWSERS_BUNDLE_ID.sidekick,
+    query,
   });
 }

@@ -1,385 +1,47 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  Keyboard,
-  List,
-  LocalStorage,
-  Toast,
-  getPreferenceValues,
-  showToast,
-} from "@raycast/api";
-import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
-import Fuse from "fuse.js";
-import { useState, useMemo, useEffect } from "react";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
+import { useState } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
-import useArcBookmarks from "./hooks/useArcBookmarks";
-import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
-import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
-import useBraveBookmarks from "./hooks/useBraveBookmarks";
-import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
-import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
-import useChromeBookmarks from "./hooks/useChromeBookmarks";
-import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
-import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
-import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
-import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
-import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
-import useSafariBookmarks from "./hooks/useSafariBookmarks";
-import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
-import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
-import { getMacOSDefaultBrowser } from "./utils/browsers";
-// Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
-import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
-
-type Bookmark = {
-  id: string;
-  browser: string;
-  title: string;
-  url: string;
-  folder: string;
-  domain: string;
-  bookmarkFrecency?: BookmarkFrecency;
-};
-
-type Folder = {
-  id: string;
-  icon: string;
-  browser: string;
-  title: string;
-};
+import SelectProfileSubmenu from "./components/SelectProfileSubmenu";
+import { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
+import useBookmarks from "./hooks/useBookmarks";
 
 export default function Command() {
-  const { data: availableBrowsers } = useAvailableBrowsers();
+  const [query, setQuery] = useState("");
+  const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
 
   const {
-    data: storedBrowsers,
-    isLoading: isLoadingBrowsers,
-    mutate: mutateBrowsers,
-  } = useCachedPromise(
-    async (browsers) => {
-      // If the user only has one browser, let's not bother with LocalStorage stuff
-      if (browsers && browsers.length === 1) {
-        return [browsers[0].bundleId as string];
-      }
-
-      // We pull the default browser to enable it to eliminate the need for the user to select this on first run
-      const defaultBrowser = await getMacOSDefaultBrowser();
-      const browsersItem = await LocalStorage.getItem("browsers");
-
-      return browsersItem ? (JSON.parse(browsersItem.toString()) as string[]) : [defaultBrowser];
+    bookmarks,
+    folders,
+    isLoading,
+    error,
+    mutate,
+    availableBrowsers,
+    browsers,
+    setBrowsers,
+    updateFrecency,
+    removeFrecency,
+    hooks: {
+      arc,
+      brave,
+      braveBeta,
+      braveNightly,
+      chrome,
+      chromeBeta,
+      chromeDev,
+      edge,
+      edgeCanary,
+      edgeDev,
+      firefox,
+      vivaldi,
     },
-    [availableBrowsers],
-  );
+  } = useBookmarks({ query, selectedFolderId });
 
-  async function setBrowsers(browsers: string[]) {
-    await LocalStorage.setItem("browsers", JSON.stringify(browsers));
-    mutateBrowsers();
-  }
-
-  const {
-    data: storedFrecencies,
-    isLoading: isLoadingFrecencies,
-    mutate: mutateFrecencies,
-  } = useCachedPromise(async () => {
-    const frecenciesItem = await LocalStorage.getItem("frecencies");
-
-    return frecenciesItem
-      ? (JSON.parse(frecenciesItem.toString()) as Record<string, BookmarkFrecency | undefined>)
-      : {};
-  });
-
-  const browsers = useMemo(() => storedBrowsers ?? [], [storedBrowsers]);
-  const frecencies = useMemo(() => storedFrecencies ?? {}, [storedFrecencies]);
-
-  const [query, setQuery] = useState("");
-  const [selectedFolderId, setSelectedFolderId] = useState("");
-
-  const hasArc = browsers.includes(BROWSERS_BUNDLE_ID.arc) ?? false;
-  const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
-  const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
-  const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
-  const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
-  const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
-  const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
-  const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
-  const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
-  const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
-  const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
-  const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
-  const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
-  const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
-  const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
-
-  const arc = useArcBookmarks(hasArc);
-  const brave = useBraveBookmarks(hasBrave);
-  const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
-  const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
-  const chrome = useChromeBookmarks(hasChrome);
-  const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
-  const chromeDev = useChromeDevBookmarks(hasChromeDev);
-  const edge = useEdgeBookmarks(hasEdge);
-  const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
-  const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
-  const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
-  const safari = useSafariBookmarks(hasSafari);
-  const sidekick = useSidekickBookmarks(hasSidekick);
-  const vivaldi = useVivaldiBookmarks(hasVivaldi);
-
-  const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
-  const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
-
-  useEffect(() => {
-    const bookmarks = [
-      ...arc.bookmarks,
-      ...brave.bookmarks,
-      ...braveBeta.bookmarks,
-      ...braveNightly.bookmarks,
-      ...chrome.bookmarks,
-      ...chromeBeta.bookmarks,
-      ...chromeDev.bookmarks,
-      ...edge.bookmarks,
-      ...edgeCanary.bookmarks,
-      ...edgeDev.bookmarks,
-      ...firefox.bookmarks,
-      ...safari.bookmarks,
-      ...sidekick.bookmarks,
-      ...vivaldi.bookmarks,
-    ]
-      .map((item) => {
-        let domain;
-        try {
-          domain = new URL(item.url).hostname;
-        } catch (error) {
-          console.error(`Invalid URL: ${item.url}`);
-          domain = "";
-        }
-
-        return { ...item, domain, bookmarkFrecency: frecencies[item.id] };
-      })
-      .sort((a, b) => {
-        // If a has a frecency, but b doesn't, a should come first
-        if (a.bookmarkFrecency && !b.bookmarkFrecency) {
-          return -1;
-        }
-
-        // If b has a frecency, but a doesn't, b should come first
-        if (!a.bookmarkFrecency && b.bookmarkFrecency) {
-          return 1;
-        }
-
-        // If both frecencies are defined,put the one with the higher frecency first
-        if (a.bookmarkFrecency && b.bookmarkFrecency) {
-          return b.bookmarkFrecency.frecency - a.bookmarkFrecency.frecency;
-        }
-
-        // If both frecencies are undefined, sort by title
-        return a.title?.localeCompare(b.title);
-      });
-
-    setBookmarks(bookmarks);
-  }, [
-    arc.bookmarks,
-    brave.bookmarks,
-    braveBeta.bookmarks,
-    braveNightly.bookmarks,
-    chrome.bookmarks,
-    chromeBeta.bookmarks,
-    chromeDev.bookmarks,
-    edge.bookmarks,
-    edgeCanary.bookmarks,
-    edgeDev.bookmarks,
-    firefox.bookmarks,
-    safari.bookmarks,
-    sidekick.bookmarks,
-    vivaldi.bookmarks,
-    frecencies,
-    setBookmarks,
-  ]);
-
-  useEffect(() => {
-    const folders = [
-      ...arc.folders,
-      ...brave.folders,
-      ...braveBeta.folders,
-      ...braveNightly.folders,
-      ...chrome.folders,
-      ...chromeBeta.folders,
-      ...chromeDev.folders,
-      ...edge.folders,
-      ...edgeCanary.folders,
-      ...edgeDev.folders,
-      ...firefox.folders,
-      ...safari.folders,
-      ...sidekick.folders,
-      ...vivaldi.folders,
-    ];
-
-    setFolders(folders);
-  }, [
-    arc.folders,
-    brave.folders,
-    braveBeta.folders,
-    braveNightly.folders,
-    chrome.folders,
-    chromeBeta.folders,
-    chromeDev.folders,
-    edge.folders,
-    edgeCanary.folders,
-    edgeDev.folders,
-    firefox.folders,
-    safari.folders,
-    sidekick.folders,
-    vivaldi.folders,
-    setFolders,
-  ]);
-
-  const folderBookmarks = useMemo(() => {
-    return bookmarks.filter((item) => {
-      if (selectedFolderId === "") {
-        return true;
-      }
-
-      const folder = folders.find((folder) => folder.id === selectedFolderId);
-
-      if (!folder) {
-        return true;
-      }
-
-      return item.browser === folder.browser && item.folder.includes(folder.title);
-    });
-  }, [bookmarks, selectedFolderId, folders]);
-
-  const fuse = useMemo(() => {
-    return new Fuse(folderBookmarks, {
-      keys: [
-        { name: "title", weight: 3 },
-        { name: "domain", weight: 1 },
-        { name: "folder", weight: 0.5 },
-      ],
-      threshold: 0.4,
-      includeScore: true,
-      ignoreLocation: true,
-    });
-  }, [folderBookmarks]);
-
-  // Limit display to 100 bookmarks to avoid heap memory errors
-  // Use custom filtering instead of native filtering
-  const filteredBookmarks = useMemo(() => {
-    if (query === "") {
-      return folderBookmarks;
-    }
-
-    const searchResults = fuse.search(query);
-
-    return searchResults
-      .sort((a, b) => {
-        // If a has a frecency, but b doesn't, a should come first
-        if (a.item.bookmarkFrecency && !b.item.bookmarkFrecency) {
-          return -1;
-        }
-
-        // If b has a frecency, but a doesn't, b should come first
-        if (!a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
-          return 1;
-        }
-
-        // If both frecencies are defined,put the one with the higher frecency first
-        if (a.item.bookmarkFrecency && b.item.bookmarkFrecency) {
-          return b.item.bookmarkFrecency.frecency - a.item.bookmarkFrecency.frecency;
-        }
-
-        // If both frecencies are undefined, sort by their score
-        return (a.score || 1) - (b.score || 1);
-      })
-      .map((result) => result.item);
-  }, [folderBookmarks, fuse, query]);
-
-  const filteredFolders = useMemo(() => {
-    return folders.filter((item) => {
-      if (!item.title) {
-        return false;
-      }
-
-      return bookmarks.some((bookmark) => bookmark.browser === item.browser && bookmark.folder.includes(item.title));
-    });
-  }, [folders, bookmarks]);
-
-  function mutateBookmarks() {
-    if (hasArc) {
-      arc.mutate();
-    }
-    if (hasBrave) {
-      brave.mutate();
-    }
-    if (hasBraveBeta) {
-      braveBeta.mutate();
-    }
-    if (hasBraveNightly) {
-      braveNightly.mutate();
-    }
-    if (hasChrome) {
-      chrome.mutate();
-    }
-    if (hasChromeBeta) {
-      chromeBeta.mutate();
-    }
-    if (hasChromeDev) {
-      chromeDev.mutate();
-    }
-    if (hasEdge) {
-      edge.mutate();
-    }
-    if (hasEdgeCanary) {
-      edge.mutate();
-    }
-    if (hasEdgeDev) {
-      edge.mutate();
-    }
-    if (hasFirefox || hasFirefoxDev) {
-      firefox.mutate();
-    }
-    if (hasSafari) {
-      safari.mutate();
-    }
-    if (hasSidekick) {
-      sidekick.mutate();
-    }
-    if (hasVivaldi) {
-      vivaldi.mutate();
-    }
-  }
-
-  async function updateFrecency(item: { id: string; title: string; url: string; folder: string }) {
-    const frecency = frecencies[item.id];
-
-    await LocalStorage.setItem(
-      "frecencies",
-      JSON.stringify({
-        ...frecencies,
-        [item.id]: getBookmarkFrecency(frecency),
-      }),
-    );
-
-    mutateFrecencies();
-  }
-
-  async function removeFrecency(item: { id: string; title: string; url: string; folder: string }) {
-    try {
-      delete frecencies[item.id];
-      await LocalStorage.setItem("frecencies", JSON.stringify(frecencies));
-      await showToast({ style: Toast.Style.Success, title: "Reset bookmark's ranking" });
-      mutateFrecencies();
-    } catch {
-      await showToast({ style: Toast.Style.Failure, title: "Could not reset bookmark's ranking" });
-    }
-  }
-
-  if (safari.error?.message.includes("operation not permitted")) {
+  if (error?.message.includes("operation not permitted")) {
     return <PermissionErrorScreen />;
   }
 
@@ -390,31 +52,15 @@ export default function Command() {
 
   return (
     <List
-      isLoading={
-        isLoadingBrowsers ||
-        isLoadingFrecencies ||
-        arc.isLoading ||
-        brave.isLoading ||
-        braveBeta.isLoading ||
-        braveNightly.isLoading ||
-        chrome.isLoading ||
-        chromeBeta.isLoading ||
-        chromeDev.isLoading ||
-        edge.isLoading ||
-        edgeCanary.isLoading ||
-        edgeDev.isLoading ||
-        firefox.isLoading ||
-        safari.isLoading ||
-        sidekick.isLoading ||
-        vivaldi.isLoading
-      }
+      isLoading={isLoading}
+      throttle
       searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
       searchBarAccessory={
         <List.Dropdown tooltip="Folder" onChange={setSelectedFolderId}>
           <List.Dropdown.Item icon={Icon.Globe} title="All" value="" />
 
-          {filteredFolders?.map((folder) => {
+          {folders?.map((folder) => {
             const folderParts = folder.title.split("/");
 
             return (
@@ -429,7 +75,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredBookmarks.slice(0, 100).map((item) => {
+      {bookmarks.map((item) => {
         return (
           <List.Item
             key={item.id}
@@ -508,7 +154,7 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.chromeBeta}
                     name="Chrome Beta"
                     icon="chrome-beta.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "c" }}
                     profiles={chromeBeta.profiles}
                     currentProfile={chromeBeta.currentProfile}
                     setCurrentProfile={chromeBeta.setCurrentProfile}
@@ -517,7 +163,7 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.chromeDev}
                     name="Chrome Dev"
                     icon="chrome-dev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
                     profiles={chromeDev.profiles}
                     currentProfile={chromeDev.currentProfile}
                     setCurrentProfile={chromeDev.setCurrentProfile}
@@ -535,7 +181,7 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
                     name="Edge Canary"
                     icon="edge.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "e" }}
                     profiles={edgeCanary.profiles}
                     currentProfile={edgeCanary.currentProfile}
                     setCurrentProfile={edgeCanary.setCurrentProfile}
@@ -544,7 +190,7 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.edgeDev}
                     name="Edge Dev"
                     icon="edge.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={{ modifiers: ["opt", "shift"], key: "e" }}
                     profiles={edgeDev.profiles}
                     currentProfile={edgeDev.currentProfile}
                     setCurrentProfile={edgeDev.setCurrentProfile}
@@ -562,7 +208,7 @@ export default function Command() {
                     bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
                     name="Firefox Dev"
                     icon="firefoxDev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "f" }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
@@ -583,7 +229,7 @@ export default function Command() {
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={mutateBookmarks}
+                    onAction={mutate}
                   />
                 </ActionPanel.Section>
               </ActionPanel>
@@ -598,7 +244,12 @@ export default function Command() {
         icon="empty-state.png"
         actions={
           <ActionPanel>
-            <SelectBrowserAction browsers={browsers} setBrowsers={setBrowsers} />
+            <Action.Push
+              title="Select Browsers"
+              icon={Icon.CheckCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              target={<SelectBrowserAction browsers={browsers} setBrowsers={setBrowsers} />}
+            />
           </ActionPanel>
         }
       />
@@ -609,7 +260,6 @@ export default function Command() {
 type SelectBrowsersAction = {
   browsers: string[];
   setBrowsers: (browsers: string[]) => void;
-  availableBrowsers?: string[];
 };
 
 function SelectBrowserAction({ browsers, setBrowsers }: SelectBrowsersAction) {
@@ -620,47 +270,5 @@ function SelectBrowserAction({ browsers, setBrowsers }: SelectBrowsersAction) {
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
       target={<SelectBrowsers browsers={browsers} onSelect={setBrowsers} />}
     />
-  );
-}
-
-type SelectProfileSubmenuProps = {
-  bundleId: string;
-  name: string;
-  icon: string;
-  shortcut: Keyboard.Shortcut;
-  profiles: { path: string; name: string }[];
-  currentProfile: string;
-  setCurrentProfile: (path: string) => void;
-};
-
-function SelectProfileSubmenu({
-  bundleId,
-  name,
-  icon,
-  shortcut,
-  profiles,
-  currentProfile,
-  setCurrentProfile,
-}: SelectProfileSubmenuProps) {
-  const { data: availableBrowsers } = useAvailableBrowsers();
-
-  const hasBrowser = availableBrowsers?.map((browser) => browser.bundleId).includes(bundleId);
-  if (!hasBrowser || profiles.length <= 1) {
-    return null;
-  }
-
-  return (
-    <ActionPanel.Submenu title={`Select ${name} Profile`} icon={icon} shortcut={shortcut}>
-      {profiles.map((profile) => {
-        return (
-          <Action
-            autoFocus={profile.path === currentProfile}
-            key={profile.name}
-            title={profile.name}
-            onAction={() => setCurrentProfile(profile.path)}
-          />
-        );
-      })}
-    </ActionPanel.Submenu>
   );
 }

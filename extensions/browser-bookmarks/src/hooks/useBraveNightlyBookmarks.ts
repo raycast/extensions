@@ -5,11 +5,12 @@ import useChromiumBookmarks from "./useChromiumBookmarks";
 
 const BRAVE_NIGHTLY_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/BraveSoftware/Brave-Browser-Nightly`;
 
-export default function useBraveBookmarks(enabled: boolean) {
+export default function useBraveBookmarks(enabled: boolean, query: string) {
   return useChromiumBookmarks(enabled, {
     path: BRAVE_NIGHTLY_BOOKMARKS_PATH,
     browserName: "Brave Nightly",
     browserIcon: "brave-nightly.png",
     browserBundleId: BROWSERS_BUNDLE_ID.braveNightly,
+    query,
   });
 }

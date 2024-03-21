@@ -1,5 +1,7 @@
 # Browser Bookmarks Changelog
 
+## [Fix heap memory errors] - 2024-04-09
+
 ## [Support for Chrome Beta] - 2024-01-12
 
 - Add support for `Chrome Beta` browser.

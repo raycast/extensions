@@ -5,11 +5,12 @@ import useChromiumBookmarks from "./useChromiumBookmarks";
 
 const CHROME_DEV_PATH = `${homedir()}/Library/Application Support/Google/Chrome Dev`;
 
-export default function useChromeDevBookmarks(enabled: boolean) {
+export default function useChromeDevBookmarks(enabled: boolean, query: string) {
   return useChromiumBookmarks(enabled, {
     path: CHROME_DEV_PATH,
     browserName: "Chrome Dev",
     browserIcon: "chrome-dev.png",
     browserBundleId: BROWSERS_BUNDLE_ID.chromeDev,
+    query,
   });
 }

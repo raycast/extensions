@@ -5,11 +5,12 @@ import useChromiumBookmarks from "./useChromiumBookmarks";
 
 const BRAVE_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/BraveSoftware/Brave-Browser`;
 
-export default function useBraveBookmarks(enabled: boolean) {
+export default function useBraveBookmarks(enabled: boolean, query: string) {
   return useChromiumBookmarks(enabled, {
     path: BRAVE_BOOKMARKS_PATH,
     browserName: "Brave",
     browserIcon: "brave.png",
     browserBundleId: BROWSERS_BUNDLE_ID.brave,
+    query,
   });
 }

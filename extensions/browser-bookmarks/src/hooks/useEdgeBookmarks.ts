@@ -5,11 +5,12 @@ import useChromiumBookmarks from "./useChromiumBookmarks";
 
 const EDGE_BOOKMARKS_PATH = `${homedir()}/Library/Application Support/Microsoft Edge`;
 
-export default function useEdgeBookmarks(enabled: boolean) {
+export default function useEdgeBookmarks(enabled: boolean, query: string) {
   return useChromiumBookmarks(enabled, {
     path: EDGE_BOOKMARKS_PATH,
     browserName: "Edge",
     browserIcon: "edge.png",
     browserBundleId: BROWSERS_BUNDLE_ID.edge,
+    query,
   });
 }
