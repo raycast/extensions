@@ -1,7 +1,7 @@
 import { stat, readFile, writeFile, copyFile } from "fs/promises";
 import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
 import * as utils from "./utils";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import Fuse from "fuse.js";
 import initSqlJs from "sql.js";
 import path = require("path");
@@ -68,6 +68,13 @@ WHERE itemTags.itemID = :id
 `;
 
 const BIBTEX_SQL = `
+SELECT citationkey.citationKey AS citekey
+    FROM citationkey
+WHERE citationkey.itemKey = :key
+AND citationkey.libraryID = :lib
+`;
+
+const BIBTEX_SQL_OLD = `
 SELECT citekeys.citekey AS citekey
     FROM citekeys
 WHERE citekeys.itemKey = :key
@@ -162,8 +169,8 @@ async function openDb() {
 }
 
 async function getBibtexKey(key: string, library: string): Promise<string> {
-  const db = await openBibtexDb();
-  const st = db.prepare(BIBTEX_SQL);
+  const [db, isBBTUpdated] = await openBibtexDb();
+  const st = db.prepare(isBBTUpdated ? BIBTEX_SQL : BIBTEX_SQL_OLD);
   st.bind({ ":key": key, ":lib": library });
   st.step();
   const res = st.getAsObject();
@@ -180,12 +187,17 @@ async function getBibtexKey(key: string, library: string): Promise<string> {
 async function openBibtexDb() {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  const new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
+  let new_fPath = f_path.replace("zotero.sqlite", "better-bibtex.sqlite");
+  let isBBTUpdated = true;
+  if (!existsSync(new_fPath)) {
+    new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
+    isBBTUpdated = false;
+  }
 
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
   const db = readFileSync(new_fPath);
-  return new SQL.Database(db);
+  return [new SQL.Database(db), isBBTUpdated];
 }
 
 async function getLatestModifyDate(): Promise<Date> {
