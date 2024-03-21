@@ -53,14 +53,14 @@ async function readContent(preferredSource: string) {
 
 function modifyCasesWrapper(input: string, case_: CaseFunction) {
   const modifiedRawArr: string[] = [];
-  const modifiedMarkddownArr: string[] = [];
+  const modifiedMarkdownArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
     const modified = case_(line);
     modifiedRawArr.push(modified);
-    modifiedMarkddownArr.push(modified + "\n");
+    modifiedMarkdownArr.push(modified + "\n");
   }
-  return { rawText: modifiedRawArr.join("\n"), markdown: modifiedMarkddownArr.join("\n") };
+  return { rawText: modifiedRawArr.join("\n"), markdown: modifiedMarkdownArr.join("\n") };
 }
 
 const cache = new Cache();
