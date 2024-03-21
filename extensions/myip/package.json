@@ -26,7 +26,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.3",
+    "@raycast/api": "^1.70.2",
     "@raycast/utils": "^1.13.3",
     "cheerio": "1.0.0-rc.12",
     "ip": "^2.0.1",
@@ -35,10 +35,10 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/ip": "^1.1.3",
-    "@types/node": "^20.11.28",
+    "@types/node": "^20.11.30",
     "eslint": "^8.57.0",
     "react-devtools": "^4.28.4",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",

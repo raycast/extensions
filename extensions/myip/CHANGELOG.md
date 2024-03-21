@@ -5,7 +5,6 @@
 - Remove `axios`, rewritten fetch using `node-fetch` & `@raycast/utils`
 - Bugfix where ip lookup was not working properly (#11290)
 - Updated dependencies
-- Added IPv4 lookup
 
 ## [Update] - 2023-03-11
 
