@@ -56,9 +56,9 @@ function modifyCasesWrapper(input: string, case_: CaseFunction) {
   const modifiedMarkdownArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
-    const modified = line.length === 0 ? "\u200B" : case_(line);
+    const modified = case_(line);
     modifiedRawArr.push(modified);
-    modifiedMarkdownArr.push(modified + "\n");
+    modifiedMarkdownArr.push((modified.length === 0 ? "\u200B" : modified) + "\n");
   }
   return { rawText: modifiedRawArr.join("\n"), markdown: modifiedMarkdownArr.join("\n") };
 }
