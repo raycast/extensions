@@ -47,6 +47,7 @@
     {
       "name": "move-to-stand",
       "title": "Stand Up",
+      "subtitle": "Linak Desk Controller",
       "description": "Move your desk to your standing height",
       "mode": "no-view",
       "icon": "stand.png",
@@ -59,6 +60,7 @@
     {
       "name": "move-to-sit",
       "title": "Sit Down",
+      "subtitle": "Linak Desk Controller",
       "description": "Move your desk to your sitting height",
       "mode": "no-view",
       "icon": "sit.png",
@@ -71,6 +73,7 @@
     {
       "name": "move-to-custom",
       "title": "Move Desk to Custom Height",
+      "subtitle": "Linak Desk Controller",
       "description": "Move your desk to custom height",
       "mode": "no-view",
       "disabledByDefault": true,
@@ -87,6 +90,7 @@
     {
       "name": "menubar-move",
       "title": "Move Desk",
+      "subtitle": "Linak Desk Controller",
       "description": "Move your desk",
       "mode": "menu-bar"
     }
