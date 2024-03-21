@@ -11,12 +11,12 @@ interface CalendarEvent {
 
 async function getCalendars() {
   const result = await runAppleScript(`
-      set output to ""
-        tell application "Calendar"
-        set output to name of calendars where writable is true
-        end tell
-      return output
-    `);
+    set output to ""
+      tell application "Calendar"
+      set output to name of calendars where writable is true
+      end tell
+    return output
+  `);
   return result.split(",").map((name) => ({ name: name.trim() }));
 }
 
