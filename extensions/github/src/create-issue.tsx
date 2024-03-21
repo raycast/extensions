@@ -123,7 +123,6 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   const milestones = data?.repository?.milestones?.nodes;
 
   useEffect(() => {
-    setValue("title", "");
     setValue("description", "");
     setValue("assignees", []);
     setValue("labels", []);

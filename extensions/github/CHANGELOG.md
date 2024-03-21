@@ -1,8 +1,21 @@
 # GitHub Changelog
 
+## [Changing repo while creating issue or pull request clears title field] - 2024-03-21
+
+- Fixes an issue where the title is cleared when changing repository for Create Issue and Create Pull Request.
+
+## [Fix shortcut conflict + npm audit vulnerabilities] - 2024-03-21
+
+- Fixes an issue where the shortcuts for `Re-Run Workflow` and `Delete Run` were not rendered.
+- Fixes vulnerabilities reported by `npm audit`.
+
+## [Remove Section in Action Panel] - 2024-03-21
+
+- The "Mark as Read" action and its shortcut was not rendered and also did not work. This is because this action was considered a primary action. Removing this section makes the action secondary and it is now rendered and works as expected.
+
 ## [Accept Repository Invitations] - 2024-03-18
 
-When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
+- When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
 
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 

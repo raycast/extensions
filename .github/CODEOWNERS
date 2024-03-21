@@ -50,7 +50,7 @@
 /extensions/apple-devices                            @madza91
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince
-/extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia
+/extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia @jondelga
 /extensions/arc                                      @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @jayeshbhole @hinzed1127 @omar-salama
 /extensions/archiver                                 @404J
 /extensions/ars-technica                             @edwin-dd-ong
@@ -448,7 +448,7 @@
 /extensions/git-repos                                @moored @nitishpdmn @go-dima @cameronsstone
 /extensions/gitee                                    @koinzhang
 /extensions/gitfox                                   @azlekov
-/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt
+/extensions/github                                   @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt @bangerang
 /extensions/github-cli-manual                        @demartini
 /extensions/github-codespaces                        @mkwng
 /extensions/github-for-enterprise                    @Kinbaum @emanguy @LunaticMuch @pernielsentikaer
@@ -494,6 +494,7 @@
 /extensions/groq                                     @maximilianzuern
 /extensions/groq-tools                               @juice49
 /extensions/growthbook                               @farisaziz12
+/extensions/guerrilla-mail                           @krsntn
 /extensions/guitar-chords                            @GastroGeek
 /extensions/gyazo-uploader                           @udus122
 /extensions/habr-media                               @khlebobul
@@ -1115,7 +1116,7 @@
 /extensions/shiori                                   @namiwang
 /extensions/shopify-developer-changelog              @sandypockets
 /extensions/short-io                                 @koinzhang
-/extensions/shortcut                                 @Yukaii @robertn702 @BrianHicks
+/extensions/shortcut                                 @Yukaii @robertn702 @BrianHicks @vinsg
 /extensions/shortcuts-search                         @solomkinmv
 /extensions/shroud-email                             @xmok
 /extensions/signal                                   @leeraymond78
@@ -1149,7 +1150,7 @@
 /extensions/solana-explorer                          @TrGiLong @AnishDe12020
 /extensions/solusvm-1-client                         @xmok
 /extensions/sonarr                                   @Aayush9029
-/extensions/sonos                                    @AntonNiklasson
+/extensions/sonos                                    @AntonNiklasson @pastenes
 /extensions/sonu-stream                              @bob-obringer
 /extensions/sort-mentions                            @YamenSharaf
 /extensions/soundboard                               @pernielsentikaer @andreaselia @FrankreedX @jarntz
@@ -1260,7 +1261,7 @@
 /extensions/tl-dr-ai-summary-tool                    @crazygo
 /extensions/tldr                                     @pomdtr
 /extensions/tldraw                                   @zephraph
-/extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart @j3lte
+/extensions/tmdb                                     @Aayush9029 @andreaselia @thomaslombart @j3lte @joeynotjoe
 /extensions/tmux-sessioner                           @louishuyng @sxn
 /extensions/tny                                      @stayallive @stayallive
 /extensions/todo-list                                @maggie-j-liu @joshkorol @madza91 @bkeys818 @pernielsentikaer @telmen
