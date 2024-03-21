@@ -27,7 +27,7 @@ export default function Command() {
   const iconSource =
     nextDrinkReminder == null || nextDrinkReminder > interval / 2
       ? "drop-full-v1.png"
-      : nextDrinkReminder !== 0
+      : nextDrinkReminder > 0
         ? "drop-half-v1.png"
         : "drop-empty-v1.png";
 
