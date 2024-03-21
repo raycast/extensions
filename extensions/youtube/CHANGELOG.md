@@ -1,5 +1,9 @@
 # YouTube Changelog
 
+## [Enhancement] - 2024-03-17
+
+- Update shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.
+
 ## [Fixes and Improvements] - 2024-03-07
 
 - Added tooltips allowing users to see the full text of truncated item titles
