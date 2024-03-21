@@ -11,9 +11,11 @@ export default function Command() {
     drinkNow();
     updateCommandMetadata({
       subtitle:
-        nextDrinkReminder > 0
-          ? `Next reminder in ${nextDrinkReminder} ${pluralize(nextDrinkReminder, "minute")}`
-          : "Time to drink some water!",
+        nextDrinkReminder == null
+          ? "Take your first sip to start!"
+          : nextDrinkReminder > 0
+            ? `Next reminder in ${nextDrinkReminder} ${pluralize(nextDrinkReminder, "minute")}`
+            : `You should've had water ${nextDrinkReminder * -1}  ${pluralize(nextDrinkReminder * -1, "minute")} ago`,
     });
     popToRoot();
   }, []);
