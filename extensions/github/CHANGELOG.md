@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Remove Section in Action Panel] - 2024-03-19
+
+- The "Mark as Read" action and its shortcut was not rendered and also did not work. This is because this action was considered a primary action. Removing this section makes the action secondary and it is now rendered and works as expected.
+
 ## [Accept Repository Invitations] - 2024-03-18
 
 When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
