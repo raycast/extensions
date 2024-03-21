@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
 import { formatDate } from "date-fns";
+import pMinDelay from "p-min-delay";
 
 interface CalendarEvent {
   title: string;
@@ -26,20 +27,21 @@ async function addEventsToCalendar(calendar: string, events: CalendarEvent[]) {
     message: events.length > 1 ? `${events.length} events` : events[0].title,
   });
 
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  await runAppleScript(`
-    tell application "Calendar"
-      tell calendar "${calendar}"
-        ${events
-          .map((event) => {
-            const dateFormat = "EEEE, MMMM d, yyyy HH:mm";
-            return `make new event with properties { summary: "${event.title}", start date:(date "${formatDate(event.startDate, dateFormat)}"), end date:(date "${formatDate(event.endDate, dateFormat)}") }`;
-          })
-          .join("\n")}
+  await pMinDelay(
+    runAppleScript(`
+      tell application "Calendar"
+        tell calendar "${calendar}"
+          ${events
+            .map((event) => {
+              const dateFormat = "EEEE, MMMM d, yyyy HH:mm";
+              return `make new event with properties { summary: "${event.title}", start date:(date "${formatDate(event.startDate, dateFormat)}"), end date:(date "${formatDate(event.endDate, dateFormat)}") }`;
+            })
+            .join("\n")}
+        end tell
       end tell
-    end tell
-  `);
+    `),
+    500,
+  );
 
   toast.title = `Event${events.length > 1 ? "s" : ""} added to ${calendar}`;
   toast.style = Toast.Style.Success;
