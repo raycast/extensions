@@ -122,7 +122,8 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
           const titleProperty = databaseProperties?.find((dp) => dp.type == "title");
           titleProperty && focus(createPropertyId(titleProperty));
         }
-      } catch {
+      } catch (error) {
+        console.error(error);
         if (closeAfterSave) {
           await showHUD("Failed to create page ⚠️", { popToRootType: PopToRootType.Suspended, clearRootSearch: false });
         } else {
