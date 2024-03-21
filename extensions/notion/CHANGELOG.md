@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Improve authentication docs] - 2024-03-21
+
+- Add settings to close Raycast after Create Database Page
+
 ## [Improve authentication docs] - 2024-02-27
 
 - Improve documentation on creating an internal integration
