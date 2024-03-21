@@ -60,7 +60,7 @@ if (!Array.prototype.mergeObjectsById) {
       this.reduce((acc, obj) => {
         acc[obj.id] = !acc[obj.id] ? obj : { ...acc[obj.id], ...obj };
         return acc;
-      }, {})
+      }, {}),
     );
   };
 }

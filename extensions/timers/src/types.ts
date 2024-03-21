@@ -5,6 +5,7 @@ export interface Timer {
   secondsSet: number;
   timeLeft: number;
   originalFile: string;
+  timeEnds: Date;
 }
 
 export interface Stopwatch {
@@ -29,13 +30,16 @@ export interface CustomTimer {
   name: string;
   timeInSeconds: number;
   selectedSound: string;
+  showInMenuBar: boolean;
 }
 
 export interface Preferences {
+  showMenuBarIconWhen: "never" | "onlyWhenRunning" | "onlyWhenNotRunning" | "always";
   selectedSound: string;
   ringContinuously: boolean;
   copyOnSwStop: boolean;
   volumeSetting: string;
+  showTitleInMenuBar: boolean;
 }
 
 export interface CTInlineArgs {
@@ -67,4 +71,14 @@ export interface SoundData {
   title: string;
   icon: Icon;
   value: string;
+}
+
+export interface CommandLinkParams {
+  timerID: string;
+}
+
+export interface DefaultTimerPreset {
+  key: string;
+  title: string;
+  seconds: number;
 }

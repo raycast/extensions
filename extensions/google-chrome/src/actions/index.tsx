@@ -74,19 +74,31 @@ export async function openNewTab({
     case SettingsProfileOpenBehaviour.Default:
       script =
         `
-    tell application "Google Chrome"
-      activate
-      tell window 1
-          set newTab to make new tab ` +
+        set winExists to false
+        tell application "Google Chrome"
+            repeat with win in every window
+                if index of win is 1 then
+                    set winExists to true
+                    exit repeat
+                end if
+            end repeat
+            
+            if not winExists then
+                make new window
+            end if
+            
+            tell window 1
+                set newTab to make new tab ` +
         (url
           ? `with properties {URL:"${url}"}`
           : query
           ? 'with properties {URL:"https://www.google.com/search?q=' + query + '"}'
           : "") +
-        ` 
-      end tell
-    end tell
-    return true
+        `
+            end tell
+        end tell
+        return true
+        
   `;
       break;
     case SettingsProfileOpenBehaviour.ProfileCurrent:

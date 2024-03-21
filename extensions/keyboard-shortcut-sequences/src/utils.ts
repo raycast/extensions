@@ -6,15 +6,24 @@ export const runShortcutSequence = async (sequence: Sequence) => {
   /* Runs each shortcut of a sequence in rapid succession. */
   const currentApplication = await getFrontmostApplication();
   sequence.shortcuts.forEach(async (shortcut) => {
-    await runAppleScript(`tell application "${currentApplication.name}"
+    const keystroke = (function getKeystroke() {
+      if (shortcut.keystrokes.includes("ASCII character")) {
+        return `(${shortcut.keystrokes})`;
+      }
+      if (shortcut.keystrokes.includes("key code")) {
+        return shortcut.keystrokes;
+      }
+      return `"${shortcut.keystrokes}"`;
+    })();
+    const modifier = shortcut.modifiers.length
+      ? `using ${shortcut.modifiers.length > 1 ? `[${shortcut.modifiers.join(", ")}]` : shortcut.modifiers[0]}`
+      : "";
+    const script = `tell application "${currentApplication.name}"
             tell application "System Events"
-                keystroke ${
-                  shortcut.keystrokes.includes("ASCII character")
-                    ? `(${shortcut.keystrokes})`
-                    : `"${shortcut.keystrokes}"`
-                } using ${shortcut.modifiers.length > 1 ? `[${shortcut.modifiers.join(", ")}]` : shortcut.modifiers[0]}
+                keystroke ${keystroke} ${modifier}
             end tell
-        end tell`);
+        end tell`;
+    await runAppleScript(script);
   });
   await showHUD(`Ran Shortcut Sequence: ${sequence.name}`);
 };

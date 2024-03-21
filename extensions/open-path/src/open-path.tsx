@@ -4,12 +4,13 @@ import {
   isEmail,
   isEmpty,
   isFileOrFolderPath,
+  isIPUrlWithoutHttp,
   Preference,
   showHud,
 } from "./utils/common-utils";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { isIPv4 } from "net";
+import { isIP, isIPv4 } from "net";
 import { filePathOperation, OpenURL } from "./utils/path-utils";
 
 export default async () => {
@@ -41,8 +42,8 @@ export default async () => {
   }
 
   //Open IP
-  if (isIPv4(path)) {
-    if (path == "127.0.0.1") {
+  if (isIP(path) !== 0 || isIPUrlWithoutHttp(path)) {
+    if (path.startsWith("127.0.0.1")) {
       await open("http://www." + path);
     } else {
       await open("http://" + path);

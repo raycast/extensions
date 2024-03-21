@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, open, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, open, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useExec } from "@raycast/utils";
 import { exec } from "child_process";
@@ -6,16 +6,40 @@ import { exec } from "child_process";
 export default function Command() {
   const [commands, setCommands] = useState<BTTTrigger[]>([]);
   const [showDisabledTriggers, setShowDisabledTriggers] = useState(false);
+  const preferences: Preferences.Trigger = getPreferenceValues();
+  const shared_secret = preferences.bttSharedSecret;
+  const sharedSecretString = shared_secret ? `{ shared_secret: "${shared_secret}"}` : "";
   const namedTriggerId = 643;
   const getTriggersJXA = `function run(argv) {
     let BetterTouchTool = Application('BetterTouchTool');
-    return BetterTouchTool.get_triggers(${namedTriggerId ? `{trigger_id: ${namedTriggerId} }` : ""});
+    return BetterTouchTool.get_triggers(${
+      namedTriggerId
+        ? `{trigger_id: ${namedTriggerId}${shared_secret ? ", ..." + sharedSecretString : ""} }`
+        : sharedSecretString
+    });
   } run();`;
   const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA]);
 
+  const checkError = (data: string) => {
+    if (!data || data === "null" || data.includes("error:")) {
+      const errorMessage =
+        data === "null"
+          ? "No data returned from BTT. Have you configured a shared secret?"
+          : data.replace("error:", "").trim() || "Unknown error";
+      showToast({
+        title: "Error:",
+        message: errorMessage,
+        style: Toast.Style.Failure,
+      });
+      return true;
+    }
+    return null;
+  };
+
   useEffect(() => {
-    if (data) {
+    if (data && !checkError(data || "")) {
       const jsonData = JSON.parse(data);
+
       const filteredTriggers = jsonData.filter(
         (trigger: BTTTrigger) =>
           !!trigger.BTTTriggerName && (showDisabledTriggers || (trigger.BTTEnabled === 1 && trigger.BTTEnabled2 === 1))

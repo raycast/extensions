@@ -1,7 +1,8 @@
 import { LocalStorage, Clipboard, showToast, Toast } from "@raycast/api";
+import { LocalStorageValue } from "./types";
 
 export default async function Command() {
-  const entries = await LocalStorage.allItems<LocalStorage.Values>();
+  const entries = await LocalStorage.allItems<LocalStorageValue>();
 
   const jsonData = JSON.stringify(entries);
   await Clipboard.copy(jsonData);

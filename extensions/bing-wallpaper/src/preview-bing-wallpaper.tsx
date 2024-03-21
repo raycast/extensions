@@ -24,20 +24,19 @@ export default function PreviewBingWallpaper(props: {
     <Detail
       navigationTitle={
         pageIndex.isOnline
-          ? onlineImages[pageIndex.index].title
+          ? getPictureName(onlineImages[pageIndex.index].url)
           : downloadedImage[pageIndex.index - onlineImages.length].name
       }
       markdown={`<img src="${
         pageIndex.isOnline
           ? buildBingImageURL(onlineImages[pageIndex.index].url, "icon", 960, 540)
           : fileUrl(downloadedImage[pageIndex.index - onlineImages.length].path)
-      }" alt="" height="400" />`}
+      }" alt="" height="360" />`}
       actions={
         <ActionPanel>
           <Action
             icon={Icon.ChevronDown}
             title={"Next"}
-            shortcut={{ modifiers: ["cmd"], key: "pageDown" }}
             onAction={() => {
               if (pageIndex.index === imagesLength - 1) return;
               setPageIndex({ index: pageIndex.index + 1, isOnline: pageIndex.index + 1 < onlineImages.length });
@@ -46,43 +45,44 @@ export default function PreviewBingWallpaper(props: {
           <Action
             icon={Icon.ChevronUp}
             title={"Previous"}
-            shortcut={{ modifiers: ["cmd"], key: "pageUp" }}
             onAction={() => {
               if (pageIndex.index === 0) return;
               setPageIndex({ index: pageIndex.index - 1, isOnline: pageIndex.index - 1 < onlineImages.length });
             }}
           />
-          <Action
-            icon={Icon.Desktop}
-            title={"Set Desktop Wallpaper"}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={() => {
-              if (pageIndex.isOnline) {
-                setWallpaper(
-                  getPictureName(onlineImages[pageIndex.index].url),
-                  buildBingImageURL(onlineImages[pageIndex.index].url, "raw")
-                ).then(() => "");
-              } else {
-                setDownloadedWallpaper(downloadedImage[pageIndex.index - onlineImages.length].path).then(() => "");
-              }
-            }}
-          />
-          {pageIndex.isOnline && (
+          <ActionPanel.Section>
             <Action
-              icon={Icon.Download}
-              title={"Download Wallpaper"}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
-              onAction={async () => {
-                await downloadPicture(downloadSize, onlineImages[pageIndex.index]);
+              icon={Icon.Desktop}
+              title={"Set Desktop Wallpaper"}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onAction={() => {
+                if (pageIndex.isOnline) {
+                  setWallpaper(
+                    getPictureName(onlineImages[pageIndex.index].url),
+                    buildBingImageURL(onlineImages[pageIndex.index].url, "raw"),
+                  ).then(() => "");
+                } else {
+                  setDownloadedWallpaper(downloadedImage[pageIndex.index - onlineImages.length].path).then(() => "");
+                }
               }}
             />
-          )}
-          <Action
-            icon={Icon.Circle}
-            title={"Back"}
-            shortcut={{ modifiers: ["cmd"], key: "y" }}
-            onAction={useNavigation().pop}
-          />
+            {pageIndex.isOnline && (
+              <Action
+                icon={Icon.Download}
+                title={"Download Wallpaper"}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={async () => {
+                  await downloadPicture(downloadSize, onlineImages[pageIndex.index]);
+                }}
+              />
+            )}
+            <Action
+              icon={Icon.ChevronLeft}
+              title={"Back"}
+              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              onAction={useNavigation().pop}
+            />
+          </ActionPanel.Section>
           <ActionOpenExtensionPreferences />
         </ActionPanel>
       }

@@ -4,17 +4,18 @@
   "title": "File Manager",
   "description": "Manage files from Raycast",
   "icon": "command-icon.png",
-  "author": "es183923",
+  "author": "erics118",
   "contributors": [
     "BalliAsghar",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "fengtianze"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "manage-files",
       "title": "Manage Files",
-      "subtitle": "Files",
+      "subtitle": "File Manager",
       "description": "Traverse the file system and create files in Raycast",
       "mode": "view"
     }
@@ -81,24 +82,47 @@
       "required": true,
       "title": "",
       "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Use ctrl + x to Move to Trash, ctrl + shift + x to Delete",
+      "label": "Standard Action Shortcuts",
+      "name": "standardShortcuts",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
+      "description": "Show iCloud Folder on Top of Start Directory",
+      "label": "Show iCloud Drive",
+      "name": "showiCloudDrive",
+      "required": true,
+      "title": "",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.0",
-    "filesize": "^10.0.7"
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.1",
+    "filesize": "^10.0.20"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "~20.6.0",
+    "@types/react": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^9.0.0",
+    "react-devtools": "^4.28.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -48,6 +48,14 @@ export default function Matchday(props: PropsType) {
           });
         }
 
+        const keywords = match.teams
+          .map((t) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id, ...rest } = t.team.club;
+            return Object.values(rest);
+          })
+          .flat();
+
         return (
           <List.Item
             key={match.id}
@@ -59,6 +67,7 @@ export default function Matchday(props: PropsType) {
             }
             icon={icon}
             accessories={accessories}
+            keywords={keywords}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser

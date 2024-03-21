@@ -4,7 +4,7 @@ import { useForm, FormValidation } from "@raycast/utils";
 import useTeams from "../hooks/useTeams";
 import useUsers from "../hooks/useUsers";
 
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getTeamIcon } from "../helpers/teams";
 import { getUserIcon } from "../helpers/users";
 import { projectStatuses, projectStatusIcon, projectStatusText } from "../helpers/projects";

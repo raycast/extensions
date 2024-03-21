@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Version 2.1.1] - 2024-01-29
+
+Sunset. Added a new view to let users know they must update.
+
 ## [Version 2] - 2023-04-27
 
 ### Spotify Player v2

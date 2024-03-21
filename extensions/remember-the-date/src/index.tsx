@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Icon, Color, Toast, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Icon, Color, popToRoot } from "@raycast/api";
 import { Item } from "./types";
 import { getItems, saveItems } from "./storage";
 import { nanoid } from "nanoid";
@@ -35,7 +35,7 @@ export default function Command() {
       <Form.Dropdown id="color" title="Color" defaultValue="">
         <Form.Dropdown.Item value="" title="No Color" />
         {Object.entries(Color).map(([k, v]) => (
-          <Form.Dropdown.Item value={v} key={k} title={k} icon={{ source: Icon.Dot, tintColor: v }} />
+          <Form.Dropdown.Item value={`${v}`} key={k} title={k} icon={{ source: Icon.Dot, tintColor: v }} />
         ))}
       </Form.Dropdown>
     </Form>

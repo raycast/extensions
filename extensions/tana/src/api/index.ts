@@ -1,1 +1,1 @@
-export * from "./createNode";
+export { createPlainNode } from "./helpers";

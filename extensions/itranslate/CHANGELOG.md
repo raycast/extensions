@@ -1,5 +1,15 @@
 # iTranslate Changelog
 
+
+## [Bug Fix] - 2022-06-06
+
+- Fix the bug of the translation selected text
+
+## [Optimize Experience] - 2022-05-25
+
+- Optimize TTS
+- Support `Chinese-Traditional` language
+
 ## [Optimize Experience] - 2022-04-28
 
 - Added the option to disable Google Free Translate

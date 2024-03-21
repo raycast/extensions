@@ -1,23 +1,18 @@
 import { List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
-import { getIssues } from "./api/issues";
 import { IssueListEmptyView } from "./components/IssueListEmptyView";
 import IssueListFallback from "./components/IssueListFallback";
 import IssueListItem from "./components/IssueListItem";
 import { withJiraCredentials } from "./helpers/withJiraCredentials";
+import useIssues from "./hooks/useIssues";
 
 export function RecentlyUpdatedIssues() {
   const [query, setQuery] = useState("");
 
   const showFallbackCommand = query.length > 0;
 
-  const {
-    data: issues,
-    isLoading,
-    mutate,
-  } = useCachedPromise(() => getIssues({ jql: "updated >= -1w ORDER BY updated DESC" }));
+  const { issues, isLoading, mutate } = useIssues("updated >= -1w ORDER BY updated DESC");
 
   return (
     <List
@@ -43,6 +38,4 @@ export function RecentlyUpdatedIssues() {
   );
 }
 
-export default function Command() {
-  return withJiraCredentials(<RecentlyUpdatedIssues />);
-}
+export default withJiraCredentials(RecentlyUpdatedIssues);

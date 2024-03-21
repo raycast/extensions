@@ -5,10 +5,12 @@ export interface Preferences {
   showProgressBar: boolean;
   countdownDateFirst: boolean;
   birthdayEveryDay: boolean;
+  commandMetadata: string;
   birthday: string;
   weekStart: string;
   iconTheme: string;
   progressSymbol: string;
 }
 
-export const { weekStart, birthdayEveryDay, birthday, iconTheme, progressSymbol } = getPreferenceValues<Preferences>();
+export const { weekStart, birthdayEveryDay, commandMetadata, birthday, iconTheme, progressSymbol } =
+  getPreferenceValues<Preferences>();

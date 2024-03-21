@@ -1,5 +1,5 @@
 import { getPreferenceValues, Color, Icon, Form } from "@raycast/api";
-import { Preference, VisibilityOption } from "../utils/types";
+import { VisibilityOption } from "../utils/types";
 
 const visibilityOptions: VisibilityOption[] = [
   { value: "public", title: "Public", icon: Icon.Livestream },
@@ -10,10 +10,10 @@ const visibilityOptions: VisibilityOption[] = [
 ];
 
 const VisibilityDropdown = () => {
-  const { defaultVisibility }: Preference = getPreferenceValues();
+  const { defaultVisibility }: Preferences = getPreferenceValues();
 
   return (
-    <Form.Dropdown id="visibility" title="Visibility" storeValue={true} defaultValue={defaultVisibility}>
+    <Form.Dropdown id="visibility" title="Visibility" storeValue={true} defaultValue={defaultVisibility || undefined}>
       {visibilityOptions.map(({ value, title, icon }) => (
         <Form.Dropdown.Item
           key={value}

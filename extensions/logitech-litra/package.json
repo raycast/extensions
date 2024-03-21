@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "logitech-litra",
   "title": "Logitech Litra",
-  "description": "Manage Logitech Litra Glow and Logitech Litra Beam lights from Raycast",
+  "description": "Manage USB-connected Logitech Litra Glow, Litra Beam and Litra Beam LX lights from Raycast",
   "icon": "command-icon.png",
   "author": "timrogers",
   "categories": [
@@ -14,7 +14,7 @@
       "name": "manage-devices",
       "title": "Manage Devices",
       "subtitle": "Turn on and off, and set brightness and temperature",
-      "description": "Turn your Logitech Litra devices on or off, and set their brightness and temperature",
+      "description": "Turn your USB-connected Logitech Litra devices on or off, and set their brightness and temperature",
       "mode": "view"
     },
     {
@@ -34,33 +34,26 @@
   ],
   "preferences": [
     {
-      "name": "cliDirectory",
+      "name": "litraBinaryPath",
       "type": "textfield",
       "required": true,
-      "title": "CLI directory",
-      "description": "The path to the directory where the executable files from the `litra` npm package are installed. Install the CLI with `npm install -g litra`, then run `dirname $(which litra-on)` in your shell to find the correct path."
-    },
-    {
-      "name": "nodeBinaryPath",
-      "type": "textfield",
-      "required": false,
-      "title": "Node.js binary path",
-      "description": "The path to the Node.js binary. If not specified, the `node` binary in your `PATH` will be used. You should only specify this if you get an error like `env: node: No such file or directory` when trying to use the extension. You can get the correct path by running `which node` in your shell."
+      "title": "`litra` binary path",
+      "description": "The path to the `litra` binary. You can install the `litra` command line tool by following the instructions at https://github.com/timrogers/litra-rs, and then running `which litra` to get the path."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.50.2",
-    "semver": "^7.5.0"
+    "@raycast/api": "^1.58.0",
+    "semver": "^7.5.4"
   },
   "devDependencies": {
-    "@types/node": "18.15.11",
-    "@types/react": "18.0.35",
-    "@typescript-eslint/eslint-plugin": "^5.58.0",
-    "@typescript-eslint/parser": "^5.59.2",
-    "eslint": "^8.38.0",
-    "eslint-config-prettier": "^8.8.0",
-    "prettier": "^2.8.8",
-    "typescript": "^5.0.4"
+    "@types/node": "20.10.7",
+    "@types/react": "18.2.6",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

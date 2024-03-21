@@ -9,10 +9,10 @@ import {
   Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { model, openai } from "./api";
+import { global_model, openai } from "./api";
 import { countToken, estimatePrice, sentToSideNote } from "./util";
 
-export default function ResultView(prompt: string, toast_title: string) {
+export default function ResultView(prompt: string, model_override: string, toast_title: string) {
   const pref = getPreferenceValues();
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
@@ -21,7 +21,7 @@ export default function ResultView(prompt: string, toast_title: string) {
   let response_ = "";
   const [cumulative_tokens, setCumulativeTokens] = useState(0);
   const [cumulative_cost, setCumulativeCost] = useState(0);
-  const [model_override, setModelOverride] = useState(model);
+  const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
 
   async function getResult() {
     const now = new Date();
@@ -45,7 +45,7 @@ export default function ResultView(prompt: string, toast_title: string) {
       try {
         const stream = await openai.createChatCompletion(
           {
-            model: model_override,
+            model: model,
             messages: [
               { role: "system", content: prompt },
               { role: "user", content: selectedText },
@@ -107,7 +107,7 @@ export default function ResultView(prompt: string, toast_title: string) {
   }
 
   async function retryWithGPT4() {
-    setModelOverride("gpt-4");
+    setModel("gpt-4");
     setLoading(true);
     setResponse("");
     getResult();
@@ -120,7 +120,7 @@ export default function ResultView(prompt: string, toast_title: string) {
   useEffect(() => {
     if (loading == false) {
       setCumulativeTokens(cumulative_tokens + prompt_token_count + response_token_count);
-      setCumulativeCost(cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model_override));
+      setCumulativeCost(cumulative_cost + estimatePrice(prompt_token_count, response_token_count, model));
     }
   }, [loading]);
 
@@ -148,7 +148,7 @@ export default function ResultView(prompt: string, toast_title: string) {
             <Action.CopyToClipboard title="Copy Results" content={response} />
             <Action.Paste title="Paste Results" content={response} />
             <Action title="Retry" onAction={retry} shortcut={{ modifiers: ["cmd"], key: "r" }} icon={Icon.Repeat} />
-            {model_override != "gpt-4" && (
+            {model != "gpt-4" && (
               <Action
                 title="Retry with GPT-4"
                 onAction={retryWithGPT4}
@@ -162,14 +162,14 @@ export default function ResultView(prompt: string, toast_title: string) {
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Current Model" text={model_override} />
+          <Detail.Metadata.Label title="Current Model" text={model} />
           <Detail.Metadata.Label title="Prompt Tokens" text={prompt_token_count.toString()} />
           <Detail.Metadata.Label title="Response Tokens" text={response_token_count.toString()} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Total Tokens" text={(prompt_token_count + response_token_count).toString()} />
           <Detail.Metadata.Label
             title="Total Cost"
-            text={estimatePrice(prompt_token_count, response_token_count, model_override).toString() + " cents"}
+            text={estimatePrice(prompt_token_count, response_token_count, model).toString() + " cents"}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />

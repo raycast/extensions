@@ -29,18 +29,23 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
 
   const refreshCommands = async () => {
     const { commands, invalid } = await parseScriptCommands();
+
+    // treat clipboard commands the same as text, just different source
+    const transformedInputType = props.inputType === "clipboard" ? "text" : props.inputType;
+
     const filteredCommands = commands.filter((command) => {
       switch (command.metadatas.mode) {
         case "pipe":
           // If the input is not defined, we assume it's a text input
           if (!command.metadatas.inputType?.type) {
-            return props.inputType === "text";
+            return transformedInputType === "text";
           }
-          return command.metadatas.inputType.type === props.inputType;
+          return command.metadatas.inputType.type === transformedInputType;
         default:
-          return command.metadatas.argument1.type === props.inputType;
+          return command.metadatas.argument1.type === transformedInputType;
       }
     });
+
     setState({ commands: await sortByAccessTime(filteredCommands), invalid });
   };
 
@@ -48,8 +53,19 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
     refreshCommands();
   }, []);
 
+  function generatePlaceholder(inputType: string | undefined) {
+    switch (inputType) {
+      case "text":
+        return "Pipe selected text or clipboard contents to";
+      case "url":
+        return "Pipe active browser tab URL to";
+      default:
+        return `Pipe ${inputType} to`;
+    }
+  }
+
   return (
-    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={`Pipe ${props.inputType} to`}>
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder={generatePlaceholder(props.inputType)}>
       <List.Section title="Commands">
         {state?.commands.map((command) => (
           <PipeCommand key={command.path} command={command} inputFrom={props.inputType} onTrash={refreshCommands} />
@@ -96,16 +112,22 @@ export function getRaycastIcon(script: ScriptCommand): Image.ImageLike {
 
 async function getInput(inputType: InputType) {
   switch (inputType) {
-    case "text": {
-      const selection = await getSelectedText();
-      if (selection) {
-        return selection;
-      }
+    case "clipboard": {
       const clipboard = await Clipboard.readText();
       if (!clipboard) {
         throw new Error("No text in clipboard");
       }
       return clipboard;
+    }
+
+    case "text": {
+      const selection = await getSelectedText();
+
+      if (selection) {
+        return selection;
+      } else {
+        throw new Error("No text selected");
+      }
     }
     case "file": {
       const selection = await getSelectedFinderItems();
@@ -171,13 +193,17 @@ function PipeCommand(props: { command: ScriptCommand; inputFrom?: InputType; onT
 async function runCommand(command: ScriptCommand, inputType: InputType) {
   const toast = await showToast(Toast.Style.Animated, "Running...");
   const input = await getInput(inputType);
+
   let args: string[];
+
   if (command.metadatas.mode === "silent") {
     args = command.metadatas.argument1.percentEncoded ? [encodeURIComponent(input)] : [input];
   } else {
     args = [];
   }
+
   chmodSync(command.path, "755");
+
   const { stdout, stderr, status } = spawnSync(command.path, args, {
     encoding: "utf-8",
     cwd: command.metadatas.currentDirectoryPath
@@ -185,6 +211,7 @@ async function runCommand(command: ScriptCommand, inputType: InputType) {
       : path.dirname(command.path),
     input: command.metadatas.mode === "pipe" ? input : undefined,
     env: {
+      // TODO this is a lttle scary and doesn't seem like best practice?
       PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
     },
     maxBuffer: 10 * 1024 * 1024,

@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { LocalStorageKey, RAYCAST_WALLPAPER_LIST_URL } from "../utils/constants";
-import { RaycastWallpaper } from "../types/types";
+import { RaycastWallpaper, RaycastWallpaperWithInfo } from "../types/types";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { cachePicture, checkCache } from "../utils/common-utils";
+import { cache, cachePicture, checkCache } from "../utils/common-utils";
 import axios from "axios";
 import Style = Toast.Style;
 
-export const getRaycastWallpaperList = () => {
-  const [raycastWallpapers, setRaycastWallpapers] = useState<RaycastWallpaper[]>([]);
+export const getRaycastWallpaperList = (refresh: number) => {
+  const [raycastWallpapers, setRaycastWallpapers] = useState<RaycastWallpaperWithInfo[]>([]);
 
   const fetchData = useCallback(async () => {
     //get wallpaper list
@@ -16,7 +16,18 @@ export const getRaycastWallpaperList = () => {
       const _wallpaperList =
         typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as RaycastWallpaper[]);
 
-      setRaycastWallpapers(_wallpaperList);
+      const _excludeCache = cache.get(LocalStorageKey.EXCLUDE_LIST_CACHE);
+      const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
+
+      const _raycastWallpaperWithInfo1 = _wallpaperList.map((value) => {
+        return {
+          title: value.title,
+          url: value.url,
+          exclude: _excludeList.includes(value.url),
+        } as RaycastWallpaperWithInfo;
+      });
+
+      setRaycastWallpapers(_raycastWallpaperWithInfo1);
       //cache picture
       await axios({
         method: "GET",
@@ -27,7 +38,14 @@ export const getRaycastWallpaperList = () => {
       })
         .then((axiosRes) => {
           const _raycastWallpaper = axiosRes.data as RaycastWallpaper[];
-          setRaycastWallpapers(_raycastWallpaper);
+          const _raycastWallpaperWithInfo2 = _raycastWallpaper.map((value) => {
+            return {
+              title: value.title,
+              url: value.url,
+              exclude: _excludeList.includes(value.url),
+            } as RaycastWallpaperWithInfo;
+          });
+          setRaycastWallpapers(_raycastWallpaperWithInfo2);
 
           //cache list
           LocalStorage.setItem(LocalStorageKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
@@ -44,7 +62,7 @@ export const getRaycastWallpaperList = () => {
     } catch (e) {
       await showToast(Style.Failure, String(e));
     }
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     void fetchData();

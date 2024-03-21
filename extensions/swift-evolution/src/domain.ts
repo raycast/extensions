@@ -109,12 +109,18 @@ function getRepos(proposal: ProposalJson): string[] {
 
 function getImplementations(proposal: ProposalJson): { title: string; url: string }[] {
   const implementations = proposal.implementation ?? [];
-  return implementations.map((x) => {
-    return {
+  const initialValue: { title: string; url: string }[] = [];
+  return implementations.reduce((accumulator, x) => {
+    const mapped = {
       title: `${x.repository}#${x.id}`,
-      url: `https://github.com/apple/swift/pull/${x.id}`,
+      url: `https://github.com/${x.account}/${x.repository}/${x.type}/${x.id}`,
     };
-  });
+    // Ignore duplications
+    if (accumulator.find((impl) => impl.url == mapped.url)) {
+      return accumulator;
+    }
+    return accumulator.concat(mapped);
+  }, initialValue);
 }
 
 function isNew(proposal: ProposalJson): boolean {

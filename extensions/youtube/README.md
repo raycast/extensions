@@ -47,18 +47,37 @@ Raycast extension to create, search and modify issues, manage merge requests, pr
 
 - Search Videos
 - Search Channels
+- Popular Videos
 
 and more
 
 ## How to get a YouTube enabled Google API Key
 
-- Goto [Google Developers Console](https://console.developers.google.com) and [obtain authorization credentials](https://developers.google.com/youtube/registering_an_application)  
-  Make sure that you logged in with the Google Account which will be associated with your API Key
-- Create a project e.g. `raycast`
-- Make sure to enable `youtube data api v3` [here](https://console.cloud.google.com/apis/library/youtube.googleapis.com)
-  Enable the API via the dashboard. Click on the to activate APIs on the top of the website and search for `youtube data api v3`
-- Now create credentials and restrict it to `youtube data api v3`  
-  You should see a green checkmark next to your credentials
-- Set the API token from the previous step into the `API Key` field in this extension preferences
+⚠️ The following description can change over time. Make sure to obtain an `API key` and not an `OAuth key`!
+You can search on YouTube to get a video about the process like [this video](https://www.youtube.com/watch?v=LLAZUTbc97I).
+
+- Goto [Google Developers Console](https://console.developers.google.com)
+
+  Make sure that you logged in with the Google Account which will be associated with your new API Key
+
+- Create a project and named it e.g. `Raycast`
+
+  This step take some seconds until the project is created.
+
+- Enable the `Youtube Data API v3`
+
+  1. Click [here](https://console.cloud.google.com/apis/library/youtube.googleapis.com)
+  2. Press the `Enable` button
+
+- Create credentials
+
+  1. Click [here](https://console.cloud.google.com/apis/credentials)
+  2. Click on `Create Credentials` in the upper menu bar
+  3. Click on `API key`
+  4. When you get asked which `Credential Type` you wanna use click on `Public data`.
+  5. You should now see your API key
+  6. Copy the `API key` to the clipboard
+
+- Use the API key from the previous step in the `API Key` field of this extension
 
 Now you should be able to search videos and channels on YoutTube with Raycast 🚀.

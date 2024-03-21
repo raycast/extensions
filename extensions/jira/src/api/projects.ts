@@ -5,7 +5,7 @@ export type Project = {
   id: string;
   key: string;
   name: string;
-  avatarUrls: Avatar;
+  avatarUrls?: Avatar;
   style: "classic" | "next-gen";
 };
 

@@ -4,10 +4,9 @@ import { IssuePriorityValue, User } from "@linear/sdk";
 import { IssueUpdateInput } from "@linear/sdk/dist/_generated_documents";
 import { format } from "date-fns";
 
-import { IssueResult, IssueDetailResult } from "../../api/getIssues";
+import { IssueResult, IssueDetailResult, Attachment } from "../../api/getIssues";
 
-import { getLinearClient } from "../../helpers/withLinearClient";
-import { isLinearInstalled } from "../../helpers/isLinearInstalled";
+import { getLinearClient } from "../../api/linearClient";
 
 import { getEstimateScale } from "../../helpers/estimates";
 import { getErrorMessage } from "../../helpers/errors";
@@ -24,12 +23,18 @@ import StateSubmenu from "./StateSubmenu";
 import EditIssueForm from "../EditIssueForm";
 import IssueComments from "../IssueComments";
 import IssueCommentForm from "../IssueCommentForm";
+import IssueAttachments from "../IssueAttachments";
+import CreateSubIssues from "../CreateSubIssues";
+import MilestoneSubmenu from "./MilestoneSubmenu";
+import OpenInLinear from "../OpenInLinear";
 
 type IssueActionsProps = {
   issue: IssueResult;
   mutateList?: MutatePromise<IssueResult[] | undefined>;
   mutateDetail?: MutatePromise<IssueDetailResult>;
   mutateSubIssues?: MutatePromise<IssueResult[] | undefined>;
+  showAttachmentsAction?: boolean;
+  attachments?: Attachment[];
   priorities: IssuePriorityValue[] | undefined;
   users: User[] | undefined;
   me: User | undefined;
@@ -50,6 +55,8 @@ export default function IssueActions({
   mutateList,
   mutateSubIssues,
   mutateDetail,
+  showAttachmentsAction,
+  attachments,
   priorities,
   users,
   me,
@@ -355,11 +362,7 @@ export default function IssueActions({
 
   return (
     <>
-      {isLinearInstalled ? (
-        <Action.Open title="Open Issue in Linear" icon="linear.png" target={issue.url} application="Linear" />
-      ) : (
-        <Action.OpenInBrowser url={issue.url} title="Open Issue in Browser" />
-      )}
+      <OpenInLinear title="Open Issue" url={issue.url} />
 
       <ActionPanel.Section>
         <Action.Push
@@ -462,6 +465,8 @@ export default function IssueActions({
 
         <ProjectSubmenu issue={issue} updateIssue={updateIssue} />
 
+        <MilestoneSubmenu issue={issue} updateIssue={updateIssue} />
+
         <ParentIssueSubmenu issue={issue} updateIssue={updateIssue} />
 
         <Action
@@ -480,6 +485,22 @@ export default function IssueActions({
           target={<SubIssues issue={issue} mutateList={mutateList} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
         />
+
+        <Action.Push
+          title="Break Issues Into Sub-Issues"
+          icon={Icon.Stars}
+          target={<CreateSubIssues issue={issue} />}
+          shortcut={{ modifiers: ["opt", "shift"], key: "m" }}
+        />
+
+        {showAttachmentsAction ? (
+          <Action.Push
+            title="Show Issue Links"
+            icon={Icon.Link}
+            target={<IssueAttachments attachments={attachments ?? []} />}
+            shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "l" }}
+          />
+        ) : null}
 
         <Action.Push
           title="Add Comment"

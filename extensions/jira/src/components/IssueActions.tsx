@@ -8,18 +8,24 @@ import {
   getIssuePriorities,
   getIssueTransitions,
   Issue,
-  IssueDetail as TIssueDetail,
   Priority,
+  startWatchingIssue,
+  stopWatchingIssue,
+  IssueDetail as TIssueDetail,
   Transition,
   updateIssue,
   updateIssueAssignee,
 } from "../api/issues";
+import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocompleteUsers, User } from "../api/users";
+import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
+import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
+import IssueCommentForm from "./IssueCommentForm";
+import IssueComments from "./IssueComments";
 import IssueDetail from "./IssueDetail";
 
 type IssueActionsProps = {
@@ -104,6 +110,39 @@ export default function IssueActions({
     }
   }
 
+  const isWatchedByMe = issue.fields?.watches?.isWatching;
+
+  async function watchIssue() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Changing watching status" });
+
+      await mutateWithOptimisticUpdate({
+        asyncUpdate: isWatchedByMe ? stopWatchingIssue(issue.key, myself.accountId) : startWatchingIssue(issue.key),
+        optimisticUpdate(issue) {
+          return {
+            ...issue,
+            fields: {
+              ...issue.fields,
+              watches: { isWatching: !isWatchedByMe },
+            },
+          };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Changed watching status",
+        message: `${isWatchedByMe ? "Stopped watching" : "Started watching"} ${issue.key}`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed changing watching status",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   return (
     <ActionPanel title={issue.key}>
       <ActionPanel.Section>
@@ -133,12 +172,41 @@ export default function IssueActions({
 
         <Action
           title={isAssignedToMe ? "Un-Assign From Me" : "Assign to Me"}
-          icon={myself.avatarUrls["32x32"]}
+          icon={getUserAvatar(myself)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onAction={assignToMe}
         />
 
+        <Action
+          title={isWatchedByMe ? "Stop Watching" : "Start Watching"}
+          icon={isWatchedByMe ? Icon.EyeDisabled : Icon.Eye}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+          onAction={watchIssue}
+        />
+
         <ChangeStatusSubmenu issue={issue} mutate={mutateWithOptimisticUpdate} />
+
+        <Action.Push
+          title="Add Comment"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          target={<IssueCommentForm issue={issue} />}
+        />
+        <Action.Push
+          title="Show Comments"
+          icon={Icon.Bubble}
+          target={<IssueComments issue={issue} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.Push
+          title="Create Issue"
+          icon={Icon.NewDocument}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          target={<CreateIssueForm />}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
@@ -254,7 +322,7 @@ function ChangePrioritySubmenu({ issue, mutate }: SubmenuProps) {
           return (
             <Action
               key={priority.id}
-              title={priority.name}
+              title={priority.name ?? "Unknown priority name"}
               icon={priority.iconUrl}
               onAction={() => changePriority(priority)}
               autoFocus={priority.id === issue.fields.priority?.id}
@@ -286,7 +354,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
       return autocompleteUsers(autocompleteURL, query);
     },
     [query],
-    { execute: !!autocompleteURL }
+    { execute: !!autocompleteURL },
   );
 
   async function changeAssignee(assignee: User | null) {
@@ -337,7 +405,7 @@ function ChangeAssigneeSubmenu({ issue, mutate }: SubmenuProps) {
           <Action
             key={user.accountId}
             title={title}
-            icon={user.avatarUrls["32x32"]}
+            icon={getUserAvatar(user)}
             autoFocus={user.accountId === issue.fields.assignee?.accountId}
             onAction={() => changeAssignee(user)}
           />
@@ -402,7 +470,13 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
             return null;
           }
 
-          return <Action key={transition.id} title={transition.name} onAction={() => changeTransition(transition)} />;
+          return (
+            <Action
+              key={transition.id}
+              title={transition.name ?? "Unknown status name"}
+              onAction={() => changeTransition(transition)}
+            />
+          );
         })
       )}
     </ActionPanel.Submenu>

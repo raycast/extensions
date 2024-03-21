@@ -2,9 +2,15 @@
 
 export const VAULT_TOKEN_CACHE_KEY = "vault-token";
 export const VAULT_NAMESPACE_CACHE_KEY = "vault-namespace";
+export const VAULT_SECRET_ENGINE_CACHE_KEY = "vault-secret-engine";
 
 export enum DisplayMode {
   list = "list",
+  json = "json",
+}
+
+export enum ExportMode {
+  env = "env",
   json = "json",
 }
 
@@ -29,6 +35,12 @@ export interface VaultListEntry {
   label: string;
   folder: boolean;
   favorite: boolean;
+}
+
+export interface VaultAuthUrlResponse {
+  data: {
+    auth_url: string;
+  };
 }
 
 export interface VaultLoginResponse {
@@ -77,8 +89,9 @@ export interface VaultAlias {
   name: string;
 }
 
-export interface VaultAuth {
+export interface VaultMount {
   name: string;
+  description: string;
   type: string;
   accessor: string;
 }

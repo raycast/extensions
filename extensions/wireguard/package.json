@@ -15,15 +15,26 @@
       "name": "index",
       "title": "Wireguard",
       "subtitle": "Control Wireguard",
-      "description": "Control wireguard connections.",
+      "description": "Control Wireguard connections.",
       "mode": "view"
     },
     {
       "name": "disconnectAllWireguardConnections",
       "title": "Disconnect All Connections",
       "subtitle": "Wireguard",
-      "description": "Disconnect all wireguard connections.",
+      "description": "Disconnect all Wireguard connections.",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showFlag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Options",
+      "label": "Show national flag.",
+      "description": "If checked, raycast will show the national flag. The country code needs to be included at the beginning of the Wireguard configuration name, eg: us-xxx, gb09-xxx, etc. Ignore the number after the country code.",
+      "default": true
     }
   ],
   "dependencies": {

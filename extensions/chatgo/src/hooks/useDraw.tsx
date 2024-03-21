@@ -1,4 +1,4 @@
-import { ChatHook, DrawChat, DrawHook, DrawQuestionOpsSize } from "../type";
+import { DrawChat, DrawHook, DrawQuestionOpsSize } from "../type";
 import { useCallback, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useChatGo } from "./useChatGo";

@@ -4,12 +4,12 @@ import { UnknownError } from "./unknownError";
 import { Account } from "../cli";
 import { isValidUrl } from "../utils";
 
-export const AccountDetail = (args: { getData: () => Promise<Account> }) => {
+export const AccountDetail = (args: { showPassword: boolean; getData: () => Promise<Account> }) => {
   const [data, setData] = useState<Account>();
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<string>();
 
   useEffect(() => {
-    (async () => args.getData().then(setData, setError))();
+    (async () => args.getData().then(setData, (err) => setError(err.message)))();
   }, []);
 
   return error ? (
@@ -24,7 +24,9 @@ export const AccountDetail = (args: { getData: () => Promise<Account> }) => {
             <Detail.Metadata.Label title="ID" text={data.id} />
             {isValidUrl(data.url) && <Detail.Metadata.Label title="Url" text={data.url} />}
             {data.username && <Detail.Metadata.Label title="Username" text={data.username} />}
-            {data.password && <Detail.Metadata.Label title="Password" text={data.password} />}
+            {data.password && (
+              <Detail.Metadata.Label title="Password" text={args.showPassword ? data.password : "*".repeat(12)} />
+            )}
             {data.group && <Detail.Metadata.Label title="Group" text={data.group} />}
             {data.fullname && <Detail.Metadata.Label title="Full Name" text={data.fullname} />}
             <Detail.Metadata.Label

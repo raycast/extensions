@@ -1,6 +1,4 @@
 {
   "root": true,
-  "extends": [
-    "@raycast"
-  ]
+  "extends": ["@raycast"]
 }

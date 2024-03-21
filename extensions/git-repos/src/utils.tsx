@@ -20,6 +20,7 @@ export interface Preferences {
   repoScanPath: string;
   repoScanDepth?: number;
   includeSubmodules?: boolean;
+  searchKeys?: string;
   openWith1: OpenWith;
   openWith2: OpenWith;
   openWith3?: OpenWith;
@@ -27,11 +28,19 @@ export interface Preferences {
   openWith5?: OpenWith;
 }
 
+export enum GitRepoType {
+  All = "All",
+  Repo = "Repo",
+  Submodule = "Submodule",
+  Worktree = "Worktree",
+}
+
 export interface GitRepo {
   name: string;
   fullPath: string;
   icon: string;
   defaultBrowserId: string;
+  repoType: GitRepoType;
   remotes: RemoteRepo[];
 }
 
@@ -166,6 +175,7 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
           icon: "git-submodule-icon.png",
           fullPath: fullPath,
           defaultBrowserId: "",
+          repoType: GitRepoType.Submodule,
           remotes: remotes,
         };
       });
@@ -174,14 +184,23 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
       const fullPath = path.replace("/.git", "");
       const name = fullPath.split("/").pop() ?? "unknown";
       const remotes = gitRemotes(fullPath);
-      return { name: name, icon: "git-icon.png", fullPath: fullPath, defaultBrowserId: "", remotes: remotes };
+      return {
+        name: name,
+        icon: "git-icon.png",
+        fullPath: fullPath,
+        defaultBrowserId: "",
+        repoType: GitRepoType.Repo,
+        remotes: remotes,
+      };
     });
   }
 }
 
 async function findSubmodules(path: string): Promise<string[]> {
   const { stdout } = await execp(
-    `grep "\\[submodule"  ${path + "/.gitmodules"} | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`
+    `grep -E "^\\s+path\\s*="  ${
+      path.replace(/(\s+)/g, "\\$1") + "/.gitmodules"
+    } | sed -E "s%[[:space:]]+path[[:space:]]*=[[:space:]]*%\${1%/.git}/%g"`
   );
   const paths = stdout.split("\n").filter((e) => e);
   const submodulePaths = paths.map((subPath) => {
@@ -193,13 +212,17 @@ async function findSubmodules(path: string): Promise<string[]> {
 
 async function findWorktrees(path: string, maxDepth: number): Promise<GitRepo[]> {
   let foundRepos: GitRepo[] = [];
-  const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type f`;
+  const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -name .git -type f -print || true`;
   const { stdout, stderr } = await execp(findCmd);
-  if (!stderr) {
+  const filteredStderr = stderr
+    .split("\n")
+    .filter((line) => !/Permission denied|Operation not permitted/.test(line))
+    .join("\n");
+  if (!filteredStderr) {
     const repoPaths = stdout.split("\n").filter((e) => e);
     const repos = parseRepoPaths(path, repoPaths, false);
     foundRepos = foundRepos.concat(repos);
-    foundRepos.map((repo) => (repo.icon = "git-worktree-icon.png"));
+    foundRepos.map((repo) => ((repo.icon = "git-worktree-icon.png"), (repo.repoType = GitRepoType.Worktree)));
   }
   return foundRepos;
 }
@@ -208,9 +231,16 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type d`;
+      const findCmd = `find -L ${path.replace(
+        /(\s+)/g,
+        "\\$1"
+      )} -maxdepth ${maxDepth} -type d -name .git -print || true`;
       const { stdout, stderr } = await execp(findCmd);
-      if (stderr) {
+      const filteredStderr = stderr
+        .split("\n")
+        .filter((line) => !/Permission denied|Operation not permitted/.test(line))
+        .join("\n");
+      if (filteredStderr) {
         showToast(Toast.Style.Failure, "Find Failed", stderr);
         return [];
       }
@@ -253,10 +283,14 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
     }
     return 0;
   });
-  const defaultBrowser = await getDefaultBrowser();
-  foundRepos.map((repo) => {
-    repo.defaultBrowserId = defaultBrowser.id;
-  });
+  try {
+    const defaultBrowser = await getDefaultBrowser();
+    foundRepos.map((repo) => {
+      repo.defaultBrowserId = defaultBrowser.id;
+    });
+  } catch (e) {
+    // ignore, repo.defaultBrowserId will stay as ""
+  }
 
   return foundRepos;
 }

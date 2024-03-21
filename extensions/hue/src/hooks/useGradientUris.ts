@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
-import { createGradientPngUri } from "../lib/createGradientUri";
-import { GradientUri, GradientUriCache, Id, Palette } from "../lib/types";
+import { createGradientPngUri } from "../helpers/createGradientUri";
+import { Id, Palette, PngUri, PngUriCache } from "../lib/types";
 import { Cache } from "@raycast/api";
-import chroma from "chroma-js";
 
 const gradientCache = new Cache({ namespace: "hue-scene-gradients" });
 
 export default function useGradientUris(idsToPalettes: Map<Id, Palette>, width: number, height: number) {
-  const [gradientUris, setGradientUris] = useState<GradientUriCache>(new Map<Id, GradientUri>());
+  const [gradientUris, setGradientUris] = useState<PngUriCache>(new Map<Id, PngUri>());
 
   useMemo(() => {
     idsToPalettes.forEach((palette, id) => {
@@ -15,9 +14,7 @@ export default function useGradientUris(idsToPalettes: Map<Id, Palette>, width: 
         return;
       }
 
-      palette.sort((a, b) => chroma(a).get("hsl.h") - chroma(b).get("hsl.h"));
-
-      const key = `${width}x${height}_${palette.join("_")}`;
+      const key = `${palette.join("_")}_${width}x${height}`;
       const cached = gradientCache.get(key);
 
       if (cached) {
@@ -31,5 +28,5 @@ export default function useGradientUris(idsToPalettes: Map<Id, Palette>, width: 
     });
   }, [idsToPalettes]);
 
-  return { gradientUris: gradientUris };
+  return { gradientUris };
 }

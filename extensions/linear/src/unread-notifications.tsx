@@ -6,11 +6,18 @@ import {
   launchCommand,
   LaunchType,
   getPreferenceValues,
+  openExtensionPreferences,
+  Icon,
 } from "@raycast/api";
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
-import { getNotificationMenuBarIcon, getNotificationMenuBarTitle, getNotificationTitle } from "./helpers/notifications";
+import {
+  getNotificationMenuBarIcon,
+  getNotificationMenuBarTitle,
+  getNotificationTitle,
+  getNotificationURL,
+} from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
@@ -37,7 +44,8 @@ function UnreadNotifications() {
   async function openNotification(notification: NotificationResult) {
     const applications = await getApplications();
     const linearApp = applications.find((app) => app.bundleId === "com.linear");
-    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
+    const url = getNotificationURL(notification);
+    url ? await open(url, linearApp) : await openInbox();
     await markNotificationAsRead(notification);
   }
 
@@ -77,24 +85,31 @@ function UnreadNotifications() {
         />
 
         {unreadNotifications.map((notification) => {
-          const baseTitle = `${getNotificationTitle(notification)} by ${
+          const title = `${getNotificationTitle(notification)} by ${
             notification.actor ? notification.actor.displayName : "Linear"
           }`;
+
+          const icon = notification.actor ? getUserIcon(notification.actor) : "linear.png";
+          const subtitle = notification.issue?.title ? truncate(notification.issue.title, 20) : "";
+          const tooltip = `${notification.issue?.identifier}: ${notification.issue?.title}`;
 
           return (
             <MenuBarExtra.Item
               key={notification.id}
-              icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
-              title={baseTitle}
-              subtitle={notification.issue?.title ? truncate(notification.issue.title, 20) : ""}
-              tooltip={`${notification.issue?.identifier}: ${notification.issue?.title}`}
-              onAction={async (event: MenuBarExtra.ActionEvent) => {
-                if (event.type === "left-click") {
-                  await openNotification(notification);
-                } else if (event.type === "right-click") {
-                  await markNotificationAsRead(notification);
-                }
-              }}
+              icon={icon}
+              title={title}
+              subtitle={subtitle}
+              tooltip={tooltip}
+              onAction={() => openNotification(notification)}
+              alternate={
+                <MenuBarExtra.Item
+                  icon={icon}
+                  title={title}
+                  subtitle="Mark as Read"
+                  tooltip={tooltip}
+                  onAction={() => markNotificationAsRead(notification)}
+                />
+              }
             />
           );
         })}
@@ -102,13 +117,18 @@ function UnreadNotifications() {
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
+          icon={Icon.Eye}
           title="View All Notifications"
           onAction={() => launchCommand({ name: "notifications", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
           title="Configure Command"
+          icon={Icon.Gear}
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={() => openCommandPreferences()}
+          alternate={
+            <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          }
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

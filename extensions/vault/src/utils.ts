@@ -1,13 +1,16 @@
 import NodeVault from "node-vault";
 import {
   DeleteMode,
+  ExportMode,
   VAULT_NAMESPACE_CACHE_KEY,
+  VAULT_SECRET_ENGINE_CACHE_KEY,
   VAULT_TOKEN_CACHE_KEY,
-  VaultAuth,
+  VaultAuthUrlResponse,
   VaultEntity,
   VaultListEntry,
   VaultLoginResponse,
   VaultMetaDataResponse,
+  VaultMount,
   VaultReadMetadataResponse,
   VaultReadResponse,
   VaultTokenCache,
@@ -15,13 +18,16 @@ import {
 } from "./interfaces";
 import got from "got";
 import { Cache, Form, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import * as oauthService from "./oauth.service";
 import { homedir } from "os";
 import fs from "fs";
 import hdate from "human-date";
 import Values = Form.Values;
 
-const preferences = getPreferenceValues<ExtensionPreferences>();
-const vaultUrl = (preferences.url || "").replace(/\/$/, "");
+const NO_NAMESPACE = "<EMPTY>";
+
+const preferences = getPreferenceValues<Preferences.Vault>();
+const vaultUrl = preferences.url.replace(/\/$/, "");
 const cache = new Cache();
 
 export function writeEnabled(): boolean {
@@ -47,14 +53,38 @@ export function getVaultUrl(): string {
   return vaultUrl;
 }
 
-export function getVaultNamespace(): string | undefined {
+export function getVaultNamespaceConfiguration(): string | null | undefined {
   return cache.get(VAULT_NAMESPACE_CACHE_KEY);
 }
 
-export function setVaultNamespace(newNamespace: string) {
-  cache.set(VAULT_NAMESPACE_CACHE_KEY, newNamespace);
+export function getVaultNamespace(): string {
+  const namespaceInCache = cache.get(VAULT_NAMESPACE_CACHE_KEY);
+  if (!namespaceInCache || namespaceInCache === NO_NAMESPACE) {
+    return "";
+  }
+  return namespaceInCache;
+}
+
+export async function setVaultNamespace(newNamespace: string) {
+  const newNamespaceInCache = newNamespace === "" ? NO_NAMESPACE : newNamespace;
+  cache.set(VAULT_NAMESPACE_CACHE_KEY, newNamespaceInCache);
   // remove cached token as namespace changes
   cache.remove(VAULT_TOKEN_CACHE_KEY);
+  if (preferences.loginMethod === "oidc") {
+    await oauthService.clearTokens();
+  }
+}
+
+export function setSecretEngine(secretEngine: string) {
+  cache.set(VAULT_SECRET_ENGINE_CACHE_KEY, secretEngine);
+}
+
+export function getSecretEngine(): string {
+  const secretEngineInCache = cache.get(VAULT_SECRET_ENGINE_CACHE_KEY);
+  if (!secretEngineInCache) {
+    return preferences.secretEngine;
+  }
+  return secretEngineInCache;
 }
 
 export function getTechnicalPaths(): string[] {
@@ -65,7 +95,10 @@ export function getFavoriteNamespaces(): string[] {
   return preferences.favoriteNamespaces ? preferences.favoriteNamespaces.split(" ") : [];
 }
 
-export function getUserToken(): string {
+export async function getUserToken(): Promise<string> {
+  if (preferences.loginMethod === "oidc") {
+    return await oauthService.authorize();
+  }
   const tokenCache = parseTokenFromCache();
   return tokenCache ? tokenCache.token : "";
 }
@@ -75,6 +108,10 @@ export function parseTokenFromCache(): VaultTokenCache | undefined {
   if (tokenCacheString) {
     return JSON.parse(tokenCacheString) as VaultTokenCache;
   }
+}
+
+function nothingFound(error: any) {
+  return error?.response?.statusCode === 404 && error?.response?.body?.errors?.length === 0;
 }
 
 export class ConfigurationError extends Error {}
@@ -102,16 +139,7 @@ export async function getVaultClient(): Promise<NodeVault.client> {
         throw new ConfigurationError("Ldap method needs ldap and password to be set in preferences");
       }
       console.info("Login with ldap...");
-      const body: VaultLoginResponse = await got
-        .post(`${vaultUrl}/v1/auth/ldap/login/${preferences.ldap}`, {
-          json: { password: preferences.password },
-          headers: {
-            "Content-Type": "application/json",
-            "X-Vault-Namespace": getVaultNamespace(),
-          },
-          responseType: "json",
-        })
-        .json();
+      const body = await callLoginWithLdap();
       // set token cache
       tokenCache = {
         token: body.auth.client_token,
@@ -126,6 +154,8 @@ export async function getVaultClient(): Promise<NodeVault.client> {
         throw new ConfigurationError("Token method needs token to be set in preferences");
       }
       token = preferences.token;
+    } else if (preferences.loginMethod === "oidc") {
+      token = await oauthService.authorize();
     } else {
       throw new Error("Unknown login method");
     }
@@ -134,20 +164,30 @@ export async function getVaultClient(): Promise<NodeVault.client> {
   // return node vault client
   return NodeVault({
     apiVersion: "v1",
-    endpoint: vaultUrl,
+    endpoint: getVaultUrl(),
     namespace: getVaultNamespace(),
     token: token,
+    noCustomHTTPVerbs: true,
   });
 }
 
-export async function saveSecretToFile(secret: object, path: string) {
+function env(secret: any): string {
+  let result = "";
+  for (const key of Object.keys(secret)) {
+    result += key + "=" + secret[key] + "\n";
+  }
+  return result;
+}
+
+export async function exportSecretToFile(secret: object, path: string, mode: ExportMode) {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Saving secet",
+    title: "Saving secret",
   });
   if (secret) {
-    const filePath = `${homedir()}/Downloads/secret${path.replaceAll("/", "_")}.json`;
-    fs.writeFile(filePath, stringify(secret), async (err) => {
+    const filePath = `${homedir()}/Downloads/secret${path.replaceAll("/", "_")}.${mode}`;
+    const content = mode === ExportMode.json ? stringify(secret) : env(secret);
+    fs.writeFile(filePath, content, async (err) => {
       if (err) {
         toast.style = Toast.Style.Failure;
         toast.message = "Failed to save secret to " + filePath + "\n" + String(err);
@@ -165,25 +205,33 @@ export async function saveSecretToFile(secret: object, path: string) {
 
 export async function callTree(path: string): Promise<VaultListEntry[]> {
   console.info("Calling tree", path);
-  const response = await (await getVaultClient()).list("secret/metadata" + path, {});
-  const favorites = (await listFavorites()).map(({ key }) => key);
-  return response.data.keys.map((key: string) => ({
-    key: path + key,
-    label: key,
-    folder: key.endsWith("/"),
-    favorite: favorites.includes(path + key),
-  }));
+  try {
+    const response = await (await getVaultClient()).list(getSecretEngine() + "/metadata" + path, {});
+    const favorites = (await listFavorites()).map(({ key }) => key);
+    return response.data.keys.map((key: string) => ({
+      key: path + key,
+      label: key,
+      folder: key.endsWith("/"),
+      favorite: favorites.includes(path + key),
+    }));
+  } catch (error) {
+    console.log(">>>", error);
+    if (nothingFound(error)) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function callRead(path: string): Promise<VaultReadResponse> {
   console.info("Calling read", path);
-  const response = await (await getVaultClient()).read("secret/data" + path, {});
+  const response = await (await getVaultClient()).read(getSecretEngine() + "/data" + path, {});
   return response.data;
 }
 
 export async function callReadMetadata(path: string): Promise<VaultReadMetadataResponse> {
   console.info("Calling read metadata", path);
-  const response = await (await getVaultClient()).read("secret/metadata" + path, {});
+  const response = await (await getVaultClient()).read(getSecretEngine() + "/metadata" + path, {});
   let currentVersion: VaultVersion | undefined;
   const versions = Object.getOwnPropertyNames(response.data.versions)
     .map((versionStr) => {
@@ -213,14 +261,14 @@ export async function callReadMetadata(path: string): Promise<VaultReadMetadataR
 
 export async function callWrite(path: string, newSecret: object): Promise<VaultMetaDataResponse> {
   console.info("Calling write", path);
-  const response = await (await getVaultClient()).write("secret/data" + path, { data: newSecret }, {});
+  const response = await (await getVaultClient()).write(getSecretEngine() + "/data" + path, { data: newSecret }, {});
   return response.data;
 }
 
 export async function callDelete(path: string, deleteMode: DeleteMode, version?: number) {
   console.info("Calling delete", path, deleteMode);
   if (deleteMode === DeleteMode.deleteVersion) {
-    await (await getVaultClient()).delete("secret/data" + path, {});
+    await (await getVaultClient()).delete(getSecretEngine() + "/data" + path, {});
   } else if (deleteMode === DeleteMode.destroyVersion) {
     if (!version) {
       throw new Error("Version is mandatory to destroy specific version");
@@ -228,14 +276,14 @@ export async function callDelete(path: string, deleteMode: DeleteMode, version?:
     await (
       await getVaultClient()
     ).request({
-      path: "/secret/destroy" + path,
+      path: "/" + getSecretEngine() + "/destroy" + path,
       method: "POST",
       json: {
         versions: [version],
       },
     });
   } else if (deleteMode === DeleteMode.destroyAllVersions) {
-    await (await getVaultClient()).delete("secret/metadata" + path, {});
+    await (await getVaultClient()).delete(getSecretEngine() + "/metadata" + path, {});
   }
 }
 
@@ -247,7 +295,7 @@ export async function callUndelete(path: string, version?: number) {
   await (
     await getVaultClient()
   ).request({
-    path: "/secret/undelete" + path,
+    path: "/" + getSecretEngine() + "/undelete" + path,
     method: "POST",
     json: {
       versions: [version],
@@ -257,13 +305,20 @@ export async function callUndelete(path: string, version?: number) {
 
 export async function callListEntities(): Promise<string[]> {
   console.info("Calling list entities");
-  const response = await (
-    await getVaultClient()
-  ).request({
-    path: "/identity/entity/id",
-    method: "LIST",
-  });
-  return response.data.keys;
+  try {
+    const response = await (
+      await getVaultClient()
+    ).request({
+      path: "/identity/entity/id",
+      method: "LIST",
+    });
+    return response.data.keys;
+  } catch (error) {
+    if (nothingFound(error)) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 export async function callGetEntity(entityId: string): Promise<VaultEntity> {
@@ -315,7 +370,7 @@ export async function callCreateAlias(entityId: string, aliasName: string, alias
   });
 }
 
-export async function callGetSysAuth(): Promise<VaultAuth[]> {
+export async function callGetSysAuth(): Promise<VaultMount[]> {
   const response = await (
     await getVaultClient()
   ).request({
@@ -325,6 +380,7 @@ export async function callGetSysAuth(): Promise<VaultAuth[]> {
   return Object.keys(response.data).map((name) => ({
     name: name.substring(0, name.length - 1),
     type: response.data[name].type,
+    description: response.data[name].description,
     accessor: response.data[name].accessor,
   }));
 }
@@ -337,6 +393,61 @@ export async function callGetPolicies(): Promise<string[]> {
     method: "LIST",
   });
   return response.data.keys;
+}
+
+export async function callGetSysMounts(): Promise<VaultMount[]> {
+  const response = await (
+    await getVaultClient()
+  ).request({
+    path: "/sys/mounts",
+    method: "GET",
+  });
+  return Object.keys(response.data)
+    .map((name) => ({
+      name: name.substring(0, name.length - 1),
+      type: response.data[name].type,
+      description: response.data[name].description,
+      accessor: response.data[name].accessor,
+    }))
+    .filter((mount) => mount.type === "kv")
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function callLoginWithLdap(): Promise<VaultLoginResponse> {
+  return got
+    .post(`${getVaultUrl()}/v1/auth/ldap/login/${preferences.ldap}`, {
+      json: { password: preferences.password },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Vault-Namespace": getVaultNamespace(),
+      },
+      responseType: "json",
+    })
+    .json();
+}
+
+export async function callOidcAuthUrl(redirectUri: string): Promise<VaultAuthUrlResponse> {
+  return got
+    .post(`${getVaultUrl()}/v1/auth/oidc/oidc/auth_url`, {
+      json: { redirect_uri: redirectUri },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Vault-Namespace": getVaultNamespace(),
+      },
+      responseType: "json",
+    })
+    .json();
+}
+
+export async function callLoginWthOidc(code: string, state: string): Promise<VaultLoginResponse> {
+  return got
+    .get(`${getVaultUrl()}/v1/auth/oidc/oidc/callback?code=${code}&state=${state}`, {
+      headers: {
+        "X-Vault-Namespace": getVaultNamespace(),
+      },
+      responseType: "json",
+    })
+    .json();
 }
 
 export async function listFavorites(): Promise<VaultListEntry[]> {

@@ -1,6 +1,6 @@
 import { Form, ActionPanel, popToRoot, Action } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { runAppleScript } from "run-applescript";
 import { Process } from "./interfaces";
 import { startCaffeinate } from "./utils";
 
@@ -11,12 +11,12 @@ export default function Command() {
     (async () => {
       const ids = (
         await runAppleScript(
-          `tell application "System Events" to get the unix id of every process whose background only is false`
+          `tell application "System Events" to get the unix id of every process whose background only is false`,
         )
       ).split(", ");
       const names = (
         await runAppleScript(
-          `tell application "System Events" to get the name of every process whose background only is false`
+          `tell application "System Events" to get the name of every process whose background only is false`,
         )
       ).split(", ");
       const arr: Process[] = names.map((value, index) => ({ [value]: ids[index] }));
@@ -33,7 +33,7 @@ export default function Command() {
           <Action.SubmitForm
             title="Caffeinate"
             onSubmit={async () => {
-              await startCaffeinate(true);
+              await startCaffeinate({ menubar: true, status: true });
               popToRoot();
             }}
           />

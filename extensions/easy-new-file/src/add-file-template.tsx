@@ -1,8 +1,9 @@
-import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, environment, Form, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { checkIsFile, getChooseFile, getSelectedFile } from "./utils/common-utils";
+import { checkIsFile, getSelectedFile, isEmpty } from "./utils/common-utils";
 import fse from "fs-extra";
 import { parse } from "path";
+import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 
 export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
@@ -11,15 +12,17 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
           return;
         }
       : props.setRefresh;
-  const [path, setPath] = useState<string>("");
+  const [filePaths, setFilePaths] = useState<string[]>([]);
   const [name, setName] = useState<string>("");
   const [pathError, setPathError] = useState<string | undefined>();
 
   useEffect(() => {
     async function _fetchFilePath() {
       const _path = await fetchFilePath(true);
-      setPath(_path);
-      setName(parse(_path).name);
+      if (!isEmpty(_path)) {
+        setFilePaths(new Array(_path));
+        setName(parse(_path).name);
+      }
     }
 
     _fetchFilePath().then();
@@ -32,70 +35,63 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         <ActionPanel>
           <Action
             title={"Add File Template"}
-            icon={Icon.Document}
+            icon={Icon.NewDocument}
             onAction={async () => {
-              if (path.length === 0) {
-                setPathError("The field should't be empty!");
+              if (filePaths.length === 0) {
+                setPathError("Select a file first!");
                 return;
               }
-              await addFileTemplate(name, path, setPathError);
+              let finalName = name;
+              if (isEmpty(name)) {
+                finalName = parse(filePaths[0]).name;
+              }
+              await addFileTemplate(finalName, filePaths[0], setPathError);
               setRefresh(Date.now());
             }}
           />
 
-          <ActionPanel.Section title="File Path Action">
+          <ActionPanel.Section>
             <Action
               title={"Fetch File Path"}
               icon={Icon.Repeat}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => {
                 const _path = await fetchFilePath();
-                setPath(_path);
                 setName(parse(_path).name);
               }}
             />
-            <Action
-              title={"Choose File Path"}
-              icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "ctrl"], key: "c" }}
-              onAction={() => {
-                getChooseFile().then((path) => {
-                  open("raycast://").then();
-                  setPath(path);
-                  setName(parse(path).name);
-                });
-              }}
-            />
           </ActionPanel.Section>
+          <ActionOpenCommandPreferences />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="Information"
+        title="Tips"
         text={`Templates added will automatically be available in the New File Here command.`}
       />
-      <Form.TextArea
+      <Form.FilePicker
         id={"path"}
         title={"Path"}
-        placeholder={"/xxx/xxx"}
-        value={path}
+        value={filePaths}
         error={pathError}
+        allowMultipleSelection={false}
+        showHiddenFiles={false}
+        canChooseDirectories={false}
         onChange={(newValue) => {
-          setPath(newValue);
+          setFilePaths(newValue);
+          setName(parse(newValue[0]).name);
           if (newValue.length > 0) {
             setPathError(undefined);
           }
         }}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
-            setPathError("The field should't be empty!");
+            setPathError("Select a file first!");
           } else {
             setPathError(undefined);
           }
         }}
-        info={
-          "Insert the full path of the file used for the template. If you select a file before opening this command, its path is automatically added."
-        }
+        info={"If you select a file before opening this command, its filePaths is automatically added."}
       />
       <Form.TextField
         id={"name"}
@@ -104,7 +100,6 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         value={name}
         onChange={setName}
       />
-      <Form.Description title={"Extension"} text={parse(path).ext} />
     </Form>
   );
 }
@@ -119,7 +114,7 @@ const fetchFilePath = async (enterCommand = false) => {
     return _finderItems[0];
   } else {
     if (!enterCommand) {
-      await showToast(Toast.Style.Failure, "Fetch nothing.", "Please select a file or input manually.");
+      await showToast(Toast.Style.Failure, "Fetch nothing.", "Please select a file.");
     }
     return "";
   }
@@ -128,7 +123,7 @@ const fetchFilePath = async (enterCommand = false) => {
 const addFileTemplate = async (
   name: string,
   path: string,
-  setPathError: Dispatch<SetStateAction<string | undefined>>
+  setPathError: Dispatch<SetStateAction<string | undefined>>,
 ) => {
   if (fse.existsSync(path)) {
     if (checkIsFile(path)) {
@@ -139,10 +134,12 @@ const addFileTemplate = async (
         return;
       }
 
+      console.log("filepath " + path);
+      console.log(templateFolderPath);
       fse.ensureDirSync(templateFolderPath);
       fse.copyFileSync(path, desPath);
 
-      await showHUD("Template added");
+      await showHUD("📃 Template added");
       await popToRoot({ clearSearchBar: false });
     } else {
       setPathError("Folder path is not supported!");

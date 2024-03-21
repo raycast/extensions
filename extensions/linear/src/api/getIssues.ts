@@ -1,7 +1,17 @@
-import { Comment, Cycle, Issue, IssueRelation, Project, Team, User, WorkflowState } from "@linear/sdk";
+import {
+  Comment,
+  Cycle,
+  Issue,
+  IssueRelation,
+  Project,
+  ProjectMilestone,
+  Team,
+  User,
+  WorkflowState,
+} from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 import { LabelResult } from "./getLabels";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 import { getPaginated, PageInfo } from "./pagination";
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -77,6 +87,10 @@ export const IssueFragment = `
     icon
     color
   }
+  projectMilestone {
+    id
+    name
+  }
 `;
 
 export type IssueState = Pick<WorkflowState, "id" | "type" | "name" | "color">;
@@ -112,6 +126,8 @@ export type IssueResult = Pick<
   parent?: Pick<Issue, "id" | "title" | "number"> & { state: Pick<WorkflowState, "type" | "color"> };
 } & {
   project?: Pick<Project, "id" | "name" | "icon" | "color">;
+} & {
+  projectMilestone?: Pick<ProjectMilestone, "id" | "name" | "targetDate">;
 };
 
 export async function getLastUpdatedIssues() {
@@ -125,7 +141,7 @@ export async function getLastUpdatedIssues() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.issues.nodes;
@@ -143,7 +159,7 @@ export async function searchIssues(query: string) {
         }
       }
     `,
-    { query }
+    { query },
   );
 
   return data?.issueSearch.nodes;
@@ -160,7 +176,7 @@ export async function getLastCreatedIssues() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.issues.nodes;
@@ -182,7 +198,7 @@ export async function getAssignedIssues() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.viewer.assignedIssues.nodes;
@@ -204,7 +220,7 @@ export async function getCreatedIssues() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.viewer.createdIssues.nodes;
@@ -240,12 +256,12 @@ export async function getActiveCycleIssues(cycleId?: string) {
             }
           }
         `,
-        { cycleId, cursor }
+        { cycleId, cursor },
       ),
     (r) => r.data?.cycle.issues.pageInfo,
     (accumulator: IssueResult[], currentValue) => accumulator.concat(currentValue.data?.cycle.issues.nodes || []),
     [],
-    pageLimit
+    pageLimit,
   );
 
   return nodes;
@@ -263,7 +279,25 @@ export async function getProjectIssues(projectId: string) {
         }
       }
     `,
-    { projectId }
+    { projectId },
+  );
+
+  return data?.issues.nodes;
+}
+
+export async function getProjectMilestoneIssues(milestoneId: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
+    `
+      query($milestoneId: ID) {
+        issues(filter: { projectMilestone: { id: { eq: $milestoneId } } }) {
+          nodes {
+            ${IssueFragment}
+          }
+        }
+      }
+    `,
+    { milestoneId },
   );
 
   return data?.issues.nodes;
@@ -287,7 +321,7 @@ export async function getSubIssues(issueId: string) {
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {
@@ -328,7 +362,7 @@ export async function getComments(issueId: string) {
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {
@@ -338,15 +372,29 @@ export async function getComments(issueId: string) {
   return data.issue.comments.nodes;
 }
 
+export type Attachment = {
+  id: string;
+  title: string;
+  subtitle: string;
+  source?: {
+    imageUrl?: string;
+  };
+  url: string;
+  updatedAt: string;
+};
+
 export type IssueDetailResult = IssueResult &
   Pick<Issue, "description" | "dueDate"> & {
-    relations: {
+    attachments?: {
+      nodes: Attachment[];
+    };
+    relations?: {
       nodes: [
         Pick<IssueRelation, "id" | "type"> & {
           relatedIssue: Pick<Issue, "identifier" | "title"> & {
             state: Pick<WorkflowState, "type" | "color">;
           };
-        }
+        },
       ];
     };
   };
@@ -359,6 +407,16 @@ export async function getIssueDetail(issueId: string) {
       query($issueId: String!) {
         issue(id: $issueId) {
           ${IssueFragment}
+          attachments {
+            nodes {
+              id
+              title
+              subtitle
+              source
+              url
+              updatedAt
+            }
+          }
           description
           relations {
             nodes {
@@ -378,7 +436,7 @@ export async function getIssueDetail(issueId: string) {
         }
       }
     `,
-    { issueId }
+    { issueId },
   );
 
   if (!data) {

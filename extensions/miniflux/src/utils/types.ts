@@ -1,11 +1,11 @@
-export interface Preferences {
-  baseUrl: string;
-  apiKey: string;
-  searchLimit?: number;
-  feedLimit?: number;
-  entryStarred?: boolean;
-  readwiseToken?: string;
-}
+// export interface Preferences {
+//   baseUrl: string;
+//   apiKey: string;
+//   searchLimit?: number;
+//   feedLimit?: number;
+//   entryStarred?: boolean;
+//   readwiseToken?: string;
+// }
 
 export interface State {
   isLoading: boolean;

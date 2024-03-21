@@ -94,7 +94,6 @@ function extractBookmarksV3(obj: GitfoxRepositoryV3[], parents?: string): Bookma
     }
 
     const item = new Bookmark(bookmark.kind?.repository?.url.relative, name, bookmark.id);
-    console.log(item.folder);
 
     if (fs.existsSync(item.getPath)) {
       bookmarks.push(item);
@@ -115,8 +114,6 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
     const migratedToV3 = obj.didMigrateOldRepositoryManagerTreeNodes2;
     const itemsKey = migratedToV3 ? "repositoryManagerOutlineItems" : "repositoryManagerRepositoriesRootNode";
     const repos = (await bplist.parseFile(obj[itemsKey]))[0];
-
-    console.log(repos);
 
     const bookmarks = extractBookmarks(migratedToV3, repos);
 

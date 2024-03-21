@@ -1,5 +1,12 @@
 # HubSpot Changelog
 
+## [Added new commands] - 2024-02-02
+- Search Companies
+
+## [Fix] - 2023-10-03
+
+- Fixed a bug that caused the extension to crash.
+
 ## [Enhancements] - 2022-02-27
 
 - Added a call to fetch account info (portalId, uiDomain) to open contact and deal URLs in the browser.

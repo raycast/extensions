@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "getsound",
+  "title": "GetSound",
+  "description": "Get focused with GetSound.AI",
+  "icon": "logo.png",
+  "author": "asgudev",
+  "access": "public",
+  "owner": "getsound-ai",
+  "categories": ["Productivity",  "Media", "Fun"],
+  "contributors": [
+    "adigold1",
+    "lior_nitzan"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play",
+      "title": "Start Music",
+      "subtitle": "Focus",
+      "description": "Begin your focused session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Music",
+      "subtitle": "Focus",
+      "description": "Stop the soundscape.",
+      "mode": "no-view"
+    },
+    {
+      "name": "skip",
+      "title": "Skip Track",
+      "subtitle": "Focus",
+      "description": "Skip current soundscape",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.44.0",
+    "@raycast/utils": "^1.4.11",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

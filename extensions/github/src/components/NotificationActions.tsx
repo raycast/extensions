@@ -2,9 +2,9 @@ import { Action, ActionPanel, Icon, showToast, open, Toast, launchCommand, Launc
 import { MutatePromise } from "@raycast/utils";
 import { useMemo } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
 import { getNotificationSubtitle, getNotificationTypeTitle, getGitHubURL } from "../helpers/notifications";
-import { getGitHubClient } from "../helpers/withGithubClient";
 import { NotificationsResponse } from "../notifications";
 
 export type Notification = NotificationsResponse["data"][0];
@@ -55,6 +55,29 @@ export default function NotificationActions({ notification, userId, mutateList }
     }
   }
 
+  async function acceptInvitation() {
+    try {
+      const invitations = await octokit.rest.repos.listInvitationsForAuthenticatedUser();
+
+      const invitation = invitations.data.find(
+        (invitation) => invitation.repository.url === notification.repository.url,
+      );
+
+      await octokit.rest.repos.acceptInvitationForAuthenticatedUser({
+        invitation_id: invitation?.id || 0,
+      });
+
+      open(notification.repository.html_url);
+      await mutateList();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening notification",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   async function markAllNotificationsAsRead() {
     await showToast({ style: Toast.Style.Animated, title: "Marking all notifications as read" });
 
@@ -85,7 +108,7 @@ export default function NotificationActions({ notification, userId, mutateList }
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Unsusbcribed",
+        title: "Unsubscribed",
       });
     } catch (error) {
       await showToast({
@@ -99,11 +122,16 @@ export default function NotificationActions({ notification, userId, mutateList }
   return (
     <ActionPanel title={getNotificationSubtitle(notification)}>
       <Action
-        title="Open in Browser"
+        title={notification.subject.type === "RepositoryInvitation" ? "Accept Invitation" : "Open in Browser"}
         icon={Icon.Globe}
-        onAction={() => (notification.unread ? openNotificationAndMarkAsRead() : open(url))}
+        onAction={() =>
+          notification.subject && notification.subject.type === "RepositoryInvitation"
+            ? acceptInvitation()
+            : notification.unread
+              ? openNotificationAndMarkAsRead()
+              : open(url)
+        }
       />
-
       <ActionPanel.Section>
         {notification.unread ? (
           <>
@@ -130,7 +158,6 @@ export default function NotificationActions({ notification, userId, mutateList }
           onAction={unsubscribe}
         />
       </ActionPanel.Section>
-
       <ActionPanel.Section>
         <Action.CopyToClipboard
           content={url}
@@ -140,11 +167,10 @@ export default function NotificationActions({ notification, userId, mutateList }
 
         <Action.CopyToClipboard
           content={notification.subject.title}
-          title={`Copy ${notification.subject.type} Title`}
+          title={`Copy ${getNotificationTypeTitle(notification)} Title`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
-
       <ActionPanel.Section>
         <Action
           icon={Icon.ArrowClockwise}

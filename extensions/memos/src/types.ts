@@ -1,7 +1,9 @@
 import { VISIBILITY } from "./constant";
 
 export interface Preferences {
-  openApi: string;
+  openApi?: string;
+  host?: string;
+  token?: string;
 }
 
 export enum ROLE {
@@ -40,6 +42,7 @@ interface ResourceObj {
 
 export interface MemoInfoResponse {
   id: number;
+  name?: string;
   rowStatus: string;
   creatorId: number;
   createdTs: number;

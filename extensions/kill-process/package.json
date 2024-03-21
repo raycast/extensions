@@ -2,43 +2,67 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kill-process",
   "title": "Kill Process",
-  "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+  "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
   "icon": "icon.png",
   "author": "rolandleth",
   "contributors": [
-    "crazyones110"
+    "crazyones110",
+    "zhenpewu",
+    "Saafo",
+    "erics118"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Kill Process",
-      "description": "Lists all running processes, ordered by CPU usage and allows killing one",
+      "description": "Lists all running processes, ordered by CPU or memory usage and allows killing one",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name.",
-      "label": "Filtering should search process paths",
+      "label": "Search Process Paths",
       "name": "shouldSearchInPaths",
       "required": false,
+      "default": false,
       "title": "Filtering",
       "type": "checkbox"
     },
     {
       "description": "Determines whether the pid of the process should be searched for the query, or only the process name.",
-      "label": "Filtering should search process pid",
+      "label": "Search Process PID",
       "name": "shouldSearchInPid",
       "required": false,
+      "default": false,
       "title": "",
       "type": "checkbox"
     },
     {
       "description": "Determines whether apps are listed before other results when filtering.",
-      "label": "Prioritize apps when filtering",
+      "label": "Prioritize Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
       "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether processes are sorted by CPU or memory usage.",
+      "label": "Sort by Memory Usage",
+      "name": "sortByMem",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determines whether aggregate processes belong to the same app.",
+      "label": "Aggregate Apps",
+      "name": "aggregateApps",
+      "required": false,
+      "default": false,
       "title": "",
       "type": "checkbox"
     },
@@ -47,35 +71,72 @@
       "label": "Show PID",
       "name": "shouldShowPID",
       "required": false,
+      "default": false,
       "title": "Display",
       "type": "checkbox"
     },
     {
-      "description": "Show process Path.",
+      "description": "Show process path.",
       "label": "Show Process Path",
       "name": "shouldShowPath",
       "required": false,
+      "default": false,
       "title": "",
       "type": "checkbox"
+    },
+    {
+      "description": "Close window after killing a process",
+      "label": "Close Window",
+      "name": "closeWindowAfterKill",
+      "required": false,
+      "default": true,
+      "title": "After Killing",
+      "type": "checkbox"
+    },
+    {
+      "description": "Clear search bar after killing a process",
+      "label": "Clear Search Bar",
+      "name": "clearSearchBarAfterKill",
+      "required": false,
+      "default": true,
+      "type": "checkbox"
+    },
+    {
+      "description": "Go back to root search after killing a process",
+      "label": "Go back to Root Search",
+      "name": "goToRootAfterKill",
+      "required": false,
+      "default": false,
+      "type": "checkbox"
+    },
+    {
+      "description": "Refresh duration in milliseconds. The minimum value is 1000ms and to disable auto-refresh, set it to 0.",
+      "label": "Refresh Duration",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Refresh Duration",
+      "type": "textfield",
+      "default": "3000",
+      "placeholder": "3000"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.61.2",
+    "pretty-bytes": "^6.1.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.37",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "publish": "ray publish"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

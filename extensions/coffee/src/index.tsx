@@ -1,51 +1,46 @@
-import { environment, MenuBarExtra, updateCommandMetadata } from "@raycast/api";
+import { Color, LaunchProps, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { useEffect } from "react";
 import { stopCaffeinate, startCaffeinate } from "./utils";
 
-export default function Command() {
-  const hasLaunchContext = environment.launchContext?.caffinated !== undefined;
+export default function Command(props: LaunchProps) {
+  const hasLaunchContext = props.launchContext?.caffeinated !== undefined;
 
-  const { isLoading, data, mutate } = useExec("ps aux | pgrep caffeinate", [], {
+  const { isLoading, data, mutate } = useExec("pgrep caffeinate", [], {
     shell: true,
     execute: hasLaunchContext ? false : true,
     parseOutput: (output) => output.stdout.length > 0,
   });
 
-  const caffinateStatus = hasLaunchContext ? environment.launchContext?.caffinated : data;
-  const caffinateLoader = hasLaunchContext ? false : isLoading;
+  const caffeinateStatus = hasLaunchContext ? props.launchContext?.caffeinated : data;
+  const caffeinateLoader = hasLaunchContext ? false : isLoading;
+  const preferences = getPreferenceValues<Preferences.Index>();
 
-  useEffect(() => {
-    const updateSubtitle = async () => {
-      updateCommandMetadata({ subtitle: `Status: ${caffinateStatus ? "Caffinated" : "Decaffinated"}` });
-    };
-
-    updateSubtitle();
-  }, [caffinateStatus]);
+  if (preferences.hidenWhenDecaffeinated && !caffeinateStatus && !isLoading) {
+    return null;
+  }
 
   return (
     <MenuBarExtra
-      isLoading={caffinateLoader}
+      isLoading={caffeinateLoader}
       icon={
-        caffinateStatus
-          ? { source: { light: "coffee.png", dark: "coffeedark.png" } }
-          : { source: { light: "coffee-off.png", dark: "coffeedark-off.png" } }
+        caffeinateStatus
+          ? { source: `${preferences.icon}-filled.svg`, tintColor: Color.PrimaryText }
+          : { source: `${preferences.icon}-empty.svg`, tintColor: Color.PrimaryText }
       }
     >
       {isLoading ? null : (
         <>
-          <MenuBarExtra.Section title={`Your mac is ${caffinateStatus ? "caffeinated" : "decaffeinated"}`} />
+          <MenuBarExtra.Section title={`Your mac is ${caffeinateStatus ? "caffeinated" : "decaffeinated"}`} />
           <MenuBarExtra.Item
-            title={caffinateStatus ? "Decaffeinate" : "Caffeinate"}
+            title={caffeinateStatus ? "Decaffeinate" : "Caffeinate"}
             onAction={async () => {
-              if (!caffinateStatus) {
+              if (caffeinateStatus) {
+                // Kill caffeinate process
+                await mutate(stopCaffeinate({ menubar: false, status: true }), { optimisticUpdate: () => false });
+              } else {
                 // Spawn a new process to run caffeinate
-                await mutate(startCaffeinate(false), { optimisticUpdate: () => true });
-                return;
+                await mutate(startCaffeinate({ menubar: false, status: true }), { optimisticUpdate: () => true });
               }
-
-              // Kill caffeinate process
-              await mutate(stopCaffeinate(false), { optimisticUpdate: () => false });
             }}
           />
         </>

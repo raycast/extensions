@@ -1,4 +1,4 @@
-import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { confirmAlert, getPreferenceValues, List, open, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   addToCache,
@@ -29,7 +29,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
   async function refresh(): Promise<void> {
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Authy",
+      title: "Twilio’s Authy",
       message: "Refreshing",
     });
     await toast.show();
@@ -48,7 +48,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       if (error instanceof Error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: error.message,
         });
         return;
@@ -60,7 +60,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
     await toast.hide();
     await showToast({
       style: Toast.Style.Success,
-      title: "Authy",
+      title: "Twilio’s Authy",
       message: "Data has been synced",
     });
   }
@@ -120,7 +120,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       if (error instanceof Error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Authy",
+          title: "Twilio’s Authy",
           message: error.message,
         });
       } else {
@@ -132,6 +132,36 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
   useEffect(() => {
     loadData();
   }, [props.isLogin]);
+
+  // error checking
+  useEffect(() => {
+    if (otpList.length === 0) return;
+    // filter out all the corrupted otp
+    const all = otpList.filter((otp) => otp.generate() !== "corrupted");
+    // if none of the otp are valid assume there is a problem with the password
+    if (all.length === 0) {
+      confirmAlert({
+        title: "No valid OTP",
+        message: "Check your Authy Backup Password in settings",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => openCommandPreferences(),
+        },
+        dismissAction: {
+          title: "Cancel",
+          onAction: () =>
+            confirmAlert({
+              title: "No valid OTP",
+              message: "Check Q&A in store",
+              primaryAction: {
+                title: "Open Store Page",
+                onAction: () => open("https://www.raycast.com/guga4ka/authy"),
+              },
+            }),
+        },
+      });
+    }
+  }, [otpList]);
 
   const isLoading = otpList.length === 0;
 

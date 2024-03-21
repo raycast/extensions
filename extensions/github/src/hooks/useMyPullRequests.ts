@@ -2,9 +2,9 @@ import { useCachedPromise } from "@raycast/utils";
 import { subDays, format, compareDesc } from "date-fns";
 import { uniqBy } from "lodash";
 
+import { getGitHubClient } from "../api/githubClient";
 import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 export function useMyPullRequests(repository: string | null) {
   const { github } = getGitHubClient();
@@ -32,7 +32,7 @@ export function useMyPullRequests(repository: string | null) {
         numberOfClosedItems: 20,
       });
     },
-    [repository]
+    [repository],
   );
 
   const created = data?.createdOpen.pullRequests;
@@ -49,7 +49,7 @@ export function useMyPullRequests(repository: string | null) {
       ...(data?.reviewRequestsClosed.pullRequests || []),
       ...(data?.reviewedByClosed.pullRequests || []),
     ],
-    "pullRequest.id"
+    "pullRequest.id",
   );
 
   const prIds: string[] = [];
@@ -60,17 +60,17 @@ export function useMyPullRequests(repository: string | null) {
   }
 
   const sections = [
-    { title: "Open", pullRequests: created },
-    { title: "Assigned", pullRequests: assigned },
-    { title: "Mentioned", pullRequests: mentioned },
-    { title: "Review Requests", pullRequests: reviewRequests },
-    { title: "Reviewed", pullRequests: reviewedBy },
-    { title: "Recently Closed", pullRequests: recentlyClosed },
+    { type: SectionType.Open, pullRequests: created },
+    { type: SectionType.Assigned, pullRequests: assigned },
+    { type: SectionType.Mentioned, pullRequests: mentioned },
+    { type: SectionType.ReviewRequests, pullRequests: reviewRequests },
+    { type: SectionType.Reviewed, pullRequests: reviewedBy },
+    { type: SectionType.RecentlyClosed, pullRequests: recentlyClosed },
   ]
     .filter((section) => section.pullRequests && section.pullRequests.length > 0)
     .map((section) => {
       const pullRequests = getPullRequestsWithoutDuplicates(
-        section.pullRequests?.map((pr) => pr?.pullRequest as PullRequestFieldsFragment)
+        section.pullRequests?.map((pr) => pr?.pullRequest as PullRequestFieldsFragment),
       );
       pullRequests?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
 
@@ -80,4 +80,13 @@ export function useMyPullRequests(repository: string | null) {
     });
 
   return { data: sections, ...rest };
+}
+
+export enum SectionType {
+  Open = "Open",
+  Assigned = "Assigned",
+  Mentioned = "Mentioned",
+  ReviewRequests = "Review Requests",
+  Reviewed = "Reviewed",
+  RecentlyClosed = "Recently Closed",
 }

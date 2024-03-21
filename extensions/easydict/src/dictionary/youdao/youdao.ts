@@ -16,12 +16,12 @@ import qs from "qs";
 import util from "util";
 import { downloadAudio, downloadWordAudioWithURL, getWordAudioPath, playWordAudio } from "../../audio";
 import { requestCostTime } from "../../axiosConfig";
-import { userAgent, YoudaoErrorCode } from "../../consts";
+import { YoudaoErrorCode, userAgent } from "../../consts";
 import { autoDetectLanguageItem, englishLanguageItem } from "../../language/consts";
 import { AppKeyStore, myPreferences } from "../../preferences";
-import { DicionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
+import { DictionaryType, QueryType, QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo, md5 } from "../../utils";
-import { formateYoudaoWebDictionaryModel, formatYoudaoDictionaryResult } from "./formatData";
+import { formatYoudaoDictionaryResult, formatYoudaoWebDictionaryModel } from "./formatData";
 import { QueryWordInfo, YoudaoDictionaryResult, YoudaoWebDictionaryModel, YoudaoWebTranslateResult } from "./types";
 import { getYoudaoWebDictionaryLanguageId, isValidYoudaoWebTranslateLanguage } from "./utils";
 
@@ -94,7 +94,7 @@ export function requestYoudaoAPITranslate(
 ): Promise<QueryTypeResult> {
   console.log(`---> start request Youdao api dictionary`);
 
-  const type = queryType ?? DicionaryType.Youdao;
+  const type = queryType ?? DictionaryType.Youdao;
 
   const { fromLanguage, toLanguage, word } = queryWordInfo;
   function truncate(q: string): string {
@@ -172,7 +172,7 @@ export function requestYoudaoWebDictionary(
 ): Promise<QueryTypeResult> {
   console.log(`---> start requestYoudaoWebDictionary`);
 
-  const type = queryType ?? DicionaryType.Youdao;
+  const type = queryType ?? DictionaryType.Youdao;
 
   // * Note: "fanyi" only works when responese dicts has only one item ["meta"]
   const dicts = [["web_trans", "ec", "ce", "newhh", "baike", "wikipedia_digest"]];
@@ -214,7 +214,7 @@ export function requestYoudaoWebDictionary(
         console.warn(`---> youdao web dict cost: ${res.headers[requestCostTime]} ms`);
 
         const youdaoWebModel = res.data as YoudaoWebDictionaryModel;
-        const youdaoFormatResult = formateYoudaoWebDictionaryModel(youdaoWebModel);
+        const youdaoFormatResult = formatYoudaoWebDictionaryModel(youdaoWebModel);
         const youdaoQueryWordInfo = youdaoFormatResult.queryWordInfo;
 
         if (!youdaoQueryWordInfo.hasDictionaryEntries) {
@@ -227,7 +227,7 @@ export function requestYoudaoWebDictionary(
           return resolve(youdaoTypeResult);
         }
 
-        // * Note: Youdao web dict from-to language may be incorrect, eg: 鶗鴂, so we need to update it.
+        // * Note: Youdao web dict from-to language may be incorrect, eg: 鶗鴂，so we need to update it.
         if (queryWordInfo.fromLanguage !== autoDetectLanguageItem.youdaoLangCode) {
           youdaoQueryWordInfo.fromLanguage = queryWordInfo.fromLanguage;
           youdaoQueryWordInfo.toLanguage = queryWordInfo.toLanguage;
@@ -402,7 +402,7 @@ function getYoudaoErrorInfo(errorCode: string): RequestErrorInfo {
   }
 
   const errorInfo: RequestErrorInfo = {
-    type: DicionaryType.Youdao,
+    type: DictionaryType.Youdao,
     code: errorCode,
     message: errorMessage,
   };

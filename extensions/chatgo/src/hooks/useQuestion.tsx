@@ -1,20 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QuestionHook } from "../type";
-import { Toast, getSelectedText, showToast } from "@raycast/api";
+import { Toast, getSelectedText, showToast, getPreferenceValues } from "@raycast/api";
 
 export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: boolean }): QuestionHook {
   const { initialQuestion, disableAutoLoad } = props;
   const [data, setData] = useState<string>(initialQuestion);
   const [isLoading, setLoading] = useState<boolean>(false);
-  //   const [isAutoLoadText] = useState<boolean>(() => {
-  //     return getPreferenceValues<{
-  //       isAutoLoadText: boolean;
-  //     }>().isAutoLoadText;
-  //   });
+  const [isAutoLoadText] = useState<boolean>(() => {
+    return getPreferenceValues<{
+      isAutoLoadText: boolean;
+    }>().isAutoLoadText;
+  });
 
   useEffect(() => {
+    if (initialQuestion) {
+      return;
+    }
     (async () => {
-      if (!disableAutoLoad) {
+      if (isAutoLoadText && !disableAutoLoad) {
         setLoading(true);
         try {
           const selectedText = await getSelectedText();
@@ -26,11 +29,7 @@ export function useQuestion(props: { initialQuestion: string; disableAutoLoad?: 
             });
           }
         } catch (error) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Selected text couldn't load",
-            message: String(error),
-          });
+          console.log(error);
         }
         setLoading(false);
       }

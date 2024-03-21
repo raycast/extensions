@@ -1,65 +1,41 @@
 import { Form, showToast, Toast, Action, Icon, ActionPanel, open, Clipboard } from "@raycast/api";
-import { App, AppSlug } from "./api/types";
-import { useEffect, useState } from "react";
+import { AppSlug } from "./api/types";
+import { useState } from "react";
 import { fetchApps } from "./api/apps";
 import { fetchWorkflows } from "./api/workflows";
 import { startBuild } from "./api/builds";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 
 interface FormValues {
   appSlug: string;
-  workflow: string;
+  workflow_or_pipeline: string;
   branch?: string;
   message?: string;
 }
 
-interface State {
-  apps?: App[];
-  workflows?: string[];
-  isLoading: boolean;
-  error?: Error;
-}
-
 export default function Command() {
-  const [state, setState] = useState<State>({ isLoading: false });
   const [appSlug, setAppSlug] = useState<AppSlug | null>(null);
 
-  useEffect(() => {
-    async function fetch() {
-      try {
-        setState((previous) => ({ ...previous, isLoading: true }));
-        const apps = await fetchApps();
-        const appList = Array.from(apps.apps.values()).flat();
-        setState({ apps: appList, isLoading: false });
-      } catch (error) {
-        setState(() => ({
-          isLoading: false,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        }));
-      }
-    }
-    fetch();
-  }, []);
+  const appsState = useCachedPromise(
+    async () => {
+      const apps = await fetchApps();
+      return apps.map((appsByOwner) => appsByOwner.apps).flat();
+    },
+    [],
+    { initialData: [] }
+  );
 
-  useEffect(() => {
-    async function fetch() {
+  const workflowsState = usePromise(
+    async (appSlug) => {
       if (!appSlug) return;
-      try {
-        setState((previous) => ({ ...previous, isLoading: true }));
-        const workflows = await fetchWorkflows(appSlug);
-        setState((previous) => ({ ...previous, isLoading: false, workflows: workflows }));
-      } catch (error) {
-        setState(() => ({
-          isLoading: false,
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        }));
-      }
-    }
-    fetch();
-  }, [appSlug]);
+      return await fetchWorkflows(appSlug);
+    },
+    [appSlug]
+  );
 
   return (
     <Form
-      isLoading={state.isLoading}
+      isLoading={workflowsState.isLoading || appsState.isLoading}
       actions={
         <ActionPanel>
           <StartBuildAction />
@@ -67,14 +43,21 @@ export default function Command() {
       }
     >
       <Form.Dropdown id="appSlug" title="App" value={appSlug ?? undefined} onChange={setAppSlug}>
-        {state.apps?.map((app) => (
+        {appsState.data.map((app) => (
           <Form.Dropdown.Item value={app.slug} title={app.title} key={app.slug} icon={app.avatar_url ?? Icon.Box} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="workflow" title="Workflow" storeValue>
-        {state.workflows?.map((workflow) => (
-          <Form.Dropdown.Item value={workflow} title={workflow} key={workflow} />
-        ))}
+      <Form.Dropdown id="workflow_or_pipeline" title="Workflow" storeValue>
+        <Form.Dropdown.Section title="Pipelines">
+          {workflowsState.data?.active_pipelines?.map((pipeline) => (
+            <Form.Dropdown.Item value={"++pipeline++" + pipeline.name} title={pipeline.name} key={pipeline.name} />
+          ))}
+        </Form.Dropdown.Section>
+        <Form.Dropdown.Section title="Workflows">
+          {workflowsState.data?.active_workflows?.map((workflow) => (
+            <Form.Dropdown.Item value={workflow.name} title={workflow.name} key={workflow.name} />
+          ))}
+        </Form.Dropdown.Section>
       </Form.Dropdown>
       <Form.TextField id="branch" title="Branch" placeholder="Enter git branch (optional)" />
       <Form.TextArea id="message" title="Message" placeholder="Enter message (optional)" />
@@ -89,7 +72,7 @@ function StartBuildAction() {
       return;
     }
 
-    if (!values.workflow) {
+    if (!values.workflow_or_pipeline) {
       await showSubmitError("Invalid parameters", "No workflow selected");
       return;
     }
@@ -99,8 +82,19 @@ function StartBuildAction() {
       title: "Starting build",
     });
 
+    let pipeline_id: string | undefined;
+    let workflow_id: string | undefined;
+    if (values.workflow_or_pipeline.startsWith("++pipeline++")) {
+      pipeline_id = values.workflow_or_pipeline.split("++pipeline++")[1];
+      workflow_id = undefined;
+    } else {
+      pipeline_id = undefined;
+      workflow_id = values.workflow_or_pipeline;
+    }
+
     const response = await startBuild(values.appSlug, {
-      workflow_id: values.workflow,
+      pipeline_id: pipeline_id,
+      workflow_id: workflow_id,
       branch: values.branch,
       commit_message: values.message,
     });

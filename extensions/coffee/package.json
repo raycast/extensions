@@ -8,7 +8,8 @@
   "contributors": [
     "bibixx",
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "oasaleh"
   ],
   "license": "MIT",
   "commands": [
@@ -35,11 +36,22 @@
     },
     {
       "name": "index",
-      "title": "Caffeinate Status Menubar",
+      "title": "Caffeinate Status Menu Bar",
       "subtitle": "Coffee",
-      "description": "Get the status of the current caffeination in your menubar",
+      "description": "Get the status of the current caffeination in your menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "hidenWhenDecaffeinated",
+          "description": "Hide the icon when decaffeinated",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "When Decaffeinated",
+          "label": "Hide the icon"
+        }
+      ]
     },
     {
       "name": "caffeinateToggle",
@@ -54,6 +66,13 @@
       "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping for a certain time",
       "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Caffeinate Status",
+      "description": "Show the current caffeination status",
+      "mode": "no-view",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -64,7 +83,6 @@
       "required": false,
       "default": true,
       "title": "Options",
-      "placeholder": "Prevent Display Sleep",
       "label": "Prevent Display Sleep"
     },
     {
@@ -73,40 +91,60 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Options",
-      "placeholder": "Prevent System Sleep",
       "label": "Prevent System Sleep"
     },
     {
       "name": "preventDisk",
-      "description": "Prevent the disc from sleeping",
+      "description": "Prevent the disk from sleeping",
       "type": "checkbox",
       "required": false,
       "default": true,
-      "title": "Options",
-      "placeholder": "Prevent Disk Sleep",
       "label": "Prevent Disk Sleep"
+    },
+    {
+      "name": "icon",
+      "description": "Select icon set for Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "coffee-pot",
+      "title": "Menu Bar Icon",
+      "data": [
+        {
+          "title": "Coffee Pot",
+          "value": "coffee-pot"
+        },
+        {
+          "title": "Coffee Mug 1",
+          "value": "coffee-mug-1"
+        },
+        {
+          "title": "Coffee Mug 2",
+          "value": "coffee-mug-2"
+        },
+        {
+          "title": "Coffee Paper Cup",
+          "value": "paper-cup"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.68.0",
+    "@raycast/utils": "^1.12.5"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.57",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

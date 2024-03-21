@@ -102,6 +102,7 @@ export function useCurrentUser() {
 export function useEventTypes() {
   return useCachedPromise(async () => {
     const data = await calAPI<CalEventTypeResp>({ url: "/event-types" });
-    return data.event_types;
+    const sortedEventTypes = data.event_types.sort((a, b) => b.position - a.position);
+    return sortedEventTypes;
   }, []);
 }

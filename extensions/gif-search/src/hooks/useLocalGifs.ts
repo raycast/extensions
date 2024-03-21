@@ -19,8 +19,7 @@ export default function useLocalGifs(type: LocalType) {
   const [localIds, setLocalIds] = useState<LocalIdsState>();
 
   const loadRecents = useCallback(
-    async function loadFavs(service?: ServiceName, opt?: LoadFavOpt) {
-      const { offset = 0 } = opt || {};
+    async function loadFavs(service?: ServiceName) {
       if (!service) {
         return;
       }
@@ -40,12 +39,11 @@ export default function useLocalGifs(type: LocalType) {
         setIsLoadingIds(false);
       }
     },
-    [setLocalIds, setIsLoadingIds]
+    [setLocalIds, setIsLoadingIds],
   );
 
   const loadAllRecents = useCallback(
-    async function loadAllFavs(opt?: LoadFavOpt) {
-      const { offset = 0 } = opt || {};
+    async function loadAllFavs() {
       setIsLoadingIds(true);
 
       try {
@@ -61,7 +59,7 @@ export default function useLocalGifs(type: LocalType) {
         setIsLoadingIds(false);
       }
     },
-    [setLocalIds]
+    [setLocalIds],
   );
 
   return [localIds, isLoadingIds, loadRecents, loadAllRecents] as const;

@@ -2,10 +2,10 @@ import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast, o
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
-import View from "./components/View";
+import { getGitHubClient } from "./api/githubClient";
 import { getErrorMessage } from "./helpers/errors";
 import { getIssueStatus } from "./helpers/issue";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
 
 type BranchFormValues = {
@@ -38,7 +38,7 @@ export function BranchForm({ draftValues }: BranchFormProps) {
       return github.repositoryIssues({ owner: selectedRepository.owner.login, name: selectedRepository.name });
     },
     [repositoryId],
-    { execute: !!repositoryId }
+    { execute: !!repositoryId },
   );
 
   const issues = data?.repository?.issues?.nodes?.filter((node) => node?.linkedBranches.totalCount == 0);
@@ -151,7 +151,7 @@ export function BranchForm({ draftValues }: BranchFormProps) {
               value={issue.id}
               {...getIssueStatus(issue)}
             />
-          ) : null
+          ) : null,
         )}
       </Form.Dropdown>
 
@@ -179,10 +179,4 @@ export function BranchForm({ draftValues }: BranchFormProps) {
   );
 }
 
-export default function Command(props: { draftValues?: BranchFormValues }) {
-  return (
-    <View>
-      <BranchForm draftValues={props.draftValues} />
-    </View>
-  );
-}
+export default withGitHubClient(BranchForm);

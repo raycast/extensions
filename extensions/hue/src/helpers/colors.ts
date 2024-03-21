@@ -1,6 +1,12 @@
 import { Rgb, Xy } from "../lib/types";
-import { BRIGHTNESSES, MIRED_ADJUSTMENT, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
+import { BRIGHTNESSES, MIRED_MAX, MIRED_MIN, MIRED_STEP } from "./constants";
 import chroma from "chroma-js";
+
+/**
+ * The mired from Hue’s API is too warm, so we make it cooler by an arbitrary amount
+ */
+const CT_MIRED_ADJUSTMENT = -50;
+const CT_HUE_ADJUSTMENT = 8;
 
 /**
  * Converts an RGB value to a CIE (x, y) color representation
@@ -124,10 +130,11 @@ export function xyToRgbHexString(xy: Xy, brightness = 100) {
  * @returns {string} RGB string
  */
 export function miredToRgb(mireds: number, brightness = 100): Rgb {
-  const hecTemp = 1_000_000 / (mireds + MIRED_ADJUSTMENT);
+  const hecTemp = 1_000_000 / (mireds + CT_MIRED_ADJUSTMENT);
 
-  const [r, g, b] = chroma
-    .temperature(hecTemp)
+  const color = chroma.temperature(hecTemp);
+  const [r, g, b] = color
+    .set("hsl.h", color.get("hsl.h") + CT_HUE_ADJUSTMENT)
     .darken(1 - brightness / 100)
     .rgb();
 

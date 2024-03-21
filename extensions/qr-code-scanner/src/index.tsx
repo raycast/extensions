@@ -1,12 +1,13 @@
 import {
+  Clipboard,
   closeMainWindow,
   confirmAlert,
-  copyTextToClipboard,
   getPreferenceValues,
   popToRoot,
+  PopToRootType,
   showHUD,
   showToast,
-  ToastStyle,
+  Toast,
 } from "@raycast/api";
 import { exec } from "child_process";
 import open from "open";
@@ -26,7 +27,7 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
       return;
     }
     if (err) {
-      showToast(ToastStyle.Failure, "Image decoder error...");
+      showToast(Toast.Style.Failure, "Image decoder error...");
       return;
     }
     const result = jsQR(new Uint8ClampedArray(image.bitmap.data.buffer), image.bitmap.width, image.bitmap.height, {
@@ -44,7 +45,7 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
 }
 
 function trigger(randName: string, preferences: Preferences, displayNumber = 1) {
-  closeMainWindow();
+  closeMainWindow({ popToRootType: PopToRootType.Suspended });
 
   function captureScreenCommand(): string {
     switch (preferences.captureMode) {
@@ -66,10 +67,10 @@ function trigger(randName: string, preferences: Preferences, displayNumber = 1) 
       if (!data && preferences.captureMode === "fullscreen") {
         trigger(randName, preferences, displayNumber + 1);
       } else if (!data) {
-        showHUD("No QR Code Found :(");
+        showHUD("Found No Data in the QR Code :(");
         popToRoot();
       } else if (typeof data === "string") {
-        copyTextToClipboard(data);
+        Clipboard.copy(data);
         if (data.match(/[a-zA-z]+:\/\/[^\s]*/)) {
           confirmAlert({
             title: "Open in Browser?",
@@ -78,8 +79,7 @@ function trigger(randName: string, preferences: Preferences, displayNumber = 1) 
               title: "Open",
               onAction: () => {
                 open(data).then(() => {
-                  closeMainWindow();
-                  popToRoot();
+                  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
                 });
               },
             },
@@ -97,7 +97,7 @@ function trigger(randName: string, preferences: Preferences, displayNumber = 1) 
   });
 }
 
-export default async function main() {
+export default function main() {
   const randName = randomInt(100, 999).toString();
   const preferences = getPreferenceValues<Preferences>();
   trigger(randName, preferences);

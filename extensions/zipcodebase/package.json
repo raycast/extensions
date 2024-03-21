@@ -1,0 +1,242 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zipcodebase",
+  "title": "Zipcodebase",
+  "description": "Lookup postal codes, calculate distances and much more with Zipcodebase.",
+  "icon": "zipcodebase.png",
+  "author": "xmok",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "description": "API Key from your Zipcodebase account",
+      "title": "API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "default_unit",
+      "description": "Default Unit for supported commands",
+      "title": "Default Unit",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "km",
+          "value": "km"
+        },
+        {
+          "title": "miles",
+          "value": "miles"
+        }
+      ]
+    },
+    {
+      "name": "default_limit",
+      "description": "Default Limit for supported commands",
+      "title": "Default Limit",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    }
+  ],
+  "commands": [
+    {
+      "name": "get-postal-code-location-information",
+      "title": "Get Postal Code Location Information",
+      "subtitle": "Zipcodebase",
+      "description": "Receive information for one or multiple given postal codes",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "codes",
+          "placeholder": "PO_1,PO_2...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "country",
+          "placeholder": "COUNTRY_CODE",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "get-postal-code-distance",
+      "title": "Get Postal Code Distance",
+      "subtitle": "Zipcodebase",
+      "description": "Calculate the distance between one and another (or multiple) postal codes",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "code",
+          "placeholder": "PO_1",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "compare",
+          "placeholder": "PO_2,PO_3...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "country",
+          "placeholder": "COUNTRY_CODE",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-postal-codes-within-radius",
+      "title": "Get Postal Codes Within Radius",
+      "subtitle": "Zipcodebase",
+      "description": "Convert a list of submitted postal codes into a list of postal code pairs that are located within given distance to each other",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "code",
+          "placeholder": "PO",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "radius",
+          "placeholder": "RADIUS<500",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "country",
+          "placeholder": "COUNTRY_CODE",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-postal-codes-within-distance",
+      "title": "Get Postal Codes Within Distance",
+      "subtitle": "Zipcodebase",
+      "description": "List of postal code pairs that are within a given distance to each other",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "codes",
+          "placeholder": "PO_1,PO_2...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "distance",
+          "placeholder": "DISTANCE<500",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "country",
+          "placeholder": "COUNTRY_CODE",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-postal-codes-by-city",
+      "title": "Get Postal Codes by City",
+      "subtitle": "Zipcodebase",
+      "description": "List of postal codes based on a city",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "city",
+          "placeholder": "CITY",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "country",
+          "placeholder": "COUNTRY_CODE",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "state_name",
+          "placeholder": "STATE_NAME",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "get-postal-codes-by-state",
+      "title": "Get Postal Codes By State",
+      "subtitle": "Zipcodebase",
+      "description": "List of postal codes based on a state",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "state_name",
+          "placeholder": "STATE",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "country",
+          "placeholder": "COUNTRY_CODE",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-states-by-country",
+      "title": "Get States By Country",
+      "subtitle": "Zipcodebase",
+      "description": "List of provinces / states of a given country",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "country",
+          "placeholder": "COUNTRY_CODE",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get-remaining-requests",
+      "title": "Get Remaining Requests",
+      "subtitle": "Zipcodebase",
+      "description": "Get Remaining Requests",
+      "mode": "no-view",
+      "interval": "1h"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0",
+    "@raycast/utils": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -2,8 +2,8 @@ import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { DiscussionFieldsFragment } from "../generated/graphql";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { DiscussionListItem } from "./DiscussionListItem";
 
@@ -36,7 +36,7 @@ export function RepositoryDiscussionList(props: { repository: string }) {
       });
       return result.searchDiscussions.nodes?.map((d) => d as DiscussionFieldsFragment);
     },
-    [searchText, filterText]
+    [searchText, filterText],
   );
 
   return (
@@ -48,9 +48,7 @@ export function RepositoryDiscussionList(props: { repository: string }) {
       searchBarAccessory={<DiscussionFilterDropdown onChange={setFilter} />}
     >
       <List.Section title="Discussions" subtitle={`${data?.length}`}>
-        {data?.map((d) => (
-          <DiscussionListItem key={d.id} discussion={d} />
-        ))}
+        {data?.map((d) => <DiscussionListItem key={d.id} discussion={d} />)}
       </List.Section>
     </List>
   );

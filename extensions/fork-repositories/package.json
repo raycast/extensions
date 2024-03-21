@@ -37,14 +37,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.39.2",
-    "@raycast/utils": "1.3.1"
+    "@raycast/api": "1.53.4",
+    "@raycast/utils": "1.8.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "5.36.1",
-    "@typescript-eslint/parser": "5.36.1",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^18.8.3",
     "eslint": "8.23.0",
-    "eslint-config-prettier": "8.5.0",
     "eslint-plugin-react-hooks": "4.6.0",
     "react-devtools": "4.25.0",
     "typescript": "4.8.2"

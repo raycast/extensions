@@ -1,7 +1,7 @@
 import { closeMainWindow, open } from "@raycast/api";
 
-export default async () => {
+export default async function Command() {
   const url = "cleanshot://restore-recently-closed";
-  open(url);
   await closeMainWindow();
-};
+  open(url);
+}

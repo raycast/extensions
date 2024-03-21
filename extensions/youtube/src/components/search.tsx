@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Color, LocalStorage, Icon, List, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { formatDateShort } from "../lib/utils";
 
@@ -156,7 +156,7 @@ export function RecentSearchesList(props: {
 export function useRecentSearch(
   key: string,
   uuid: string,
-  setSearchText?: React.Dispatch<React.SetStateAction<string | undefined>>
+  setSearchText?: React.Dispatch<React.SetStateAction<string | undefined>>,
 ): {
   data: RecentSearch[] | undefined;
   appendRecentSearches: (text: string) => Promise<void>;

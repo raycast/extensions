@@ -1,28 +1,28 @@
-import { LaunchType } from "@raycast/api";
+import { LaunchProps } from "@raycast/api";
 
 export type Color = {
   alpha: number;
-  red: number;
-  green: number;
-  blue: number;
+  red: number; // between 0 and 1
+  green: number; // between 0 and 1
+  blue: number; // between 0 and 1
+  colorSpace: string;
+};
+
+export type DeprecatedColor = {
+  alpha: number;
+  red: number; // between 0 and 255
+  green: number; // between 0 and 255
+  blue: number; // between 0 and 255
 };
 
 export type HistoryItem = {
   date: string;
-  color: Color;
+  color: Color | DeprecatedColor;
+  title?: string;
 };
 
-export type OrganizeColorsCommandPreferences = {
-  primaryAction: "copy" | "paste";
-};
-
-export type ExtensionPreferences = {
-  colorFormat: "hex" | "hex-lower-case" | "rgba" | "rgba-percentage" | "hsla" | "hsva";
-};
-
-export type PickColorCommandLaunchProps = {
-  launchType: LaunchType;
+export type PickColorCommandLaunchProps = LaunchProps<{
   launchContext: {
     source?: "menu-bar" | "organize-colors";
   };
-};
+}>;

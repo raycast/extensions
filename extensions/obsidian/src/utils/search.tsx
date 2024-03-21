@@ -35,7 +35,7 @@ export function filterNotes(notes: Note[], input: string, byContent: boolean) {
  * @returns - A list of media filtered according to the input search string
  */
 export function filterMedia(mediaList: Media[], input: string, notes: Note[]) {
-  if (input.length === 0) {
+  if (input?.length === 0) {
     return mediaList;
   }
 

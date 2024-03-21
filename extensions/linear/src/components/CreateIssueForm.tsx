@@ -23,6 +23,7 @@ import useTeams from "../hooks/useTeams";
 import useCycles from "../hooks/useCycles";
 import useIssues from "../hooks/useIssues";
 import useProjects from "../hooks/useProjects";
+import useMilestones from "../hooks/useMilestones";
 
 import { getEstimateScale } from "../helpers/estimates";
 import { getOrderedStates, getStatusIcon } from "../helpers/states";
@@ -34,12 +35,14 @@ import { getProjectIcon, projectStatusText } from "../helpers/projects";
 import { getTeamIcon } from "../helpers/teams";
 
 import IssueDetail from "./IssueDetail";
+import { getMilestoneIcon } from "../helpers/milestones";
 
 type CreateIssueFormProps = {
   assigneeId?: string;
   cycleId?: string;
   teamId?: string;
   projectId?: string;
+  milestoneId?: string;
   parentId?: string;
   priorities: IssuePriorityValue[] | undefined;
   users: User[] | undefined;
@@ -61,6 +64,7 @@ export type CreateIssueValues = {
   dueDate: Date | null;
   cycleId: string;
   projectId: string;
+  milestoneId: string;
   parentId: string;
   attachments: string[];
 };
@@ -108,6 +112,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           ...(values.assigneeId ? { assigneeId: values.assigneeId } : {}),
           ...(values.cycleId ? { cycleId: values.cycleId } : {}),
           ...(values.projectId ? { projectId: values.projectId } : {}),
+          ...(values.milestoneId ? { projectId: values.milestoneId } : {}),
           ...(values.parentId ? { parentId: values.parentId } : {}),
           priority: parseInt(values.priority),
         };
@@ -142,7 +147,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
             attachments: [],
           });
 
-          hasMoreThanOneTeam ? focus(autofocusField) : focus("title");
+          hasMoreThanOneTeam && autofocusField ? focus(autofocusField) : focus("title");
 
           if (values.attachments.length > 0) {
             const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
@@ -154,8 +159,8 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                   createAttachment({
                     issueId: issue.id,
                     url: attachment,
-                  })
-                )
+                  }),
+                ),
               );
               toast.message = `Successfully uploaded ${attachmentWord}`;
             } catch (error) {
@@ -189,6 +194,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
       dueDate: props.draftValues?.dueDate,
       cycleId: props.draftValues?.cycleId || props.cycleId,
       projectId: props.draftValues?.projectId || props.projectId,
+      milestoneId: props.draftValues?.milestoneId || props.milestoneId,
       parentId: props.draftValues?.parentId || props.parentId,
     },
   });
@@ -198,6 +204,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const { cycles } = useCycles(values.teamId);
   const { issues } = useIssues(getLastCreatedIssues);
   const { projects } = useProjects(values.teamId);
+  const { milestones } = useMilestones(values.projectId, { execute: !!values.projectId });
 
   useEffect(() => {
     if (teams?.length === 1) {
@@ -223,6 +230,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
   const hasLabels = labels && labels.length > 0;
   const hasCycles = cycles && cycles.length > 0;
   const hasProjects = projects && projects.length > 0;
+  const hasMilestones = milestones && milestones.length > 0;
   const hasIssues = issues && issues.length > 0;
 
   return (
@@ -239,7 +247,15 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
         <>
           <Form.Dropdown title="Team" storeValue {...itemProps.teamId}>
             {teams.map((team) => {
-              return <Form.Dropdown.Item title={team.name} value={team.id} key={team.id} icon={getTeamIcon(team)} />;
+              return (
+                <Form.Dropdown.Item
+                  title={team.name}
+                  value={team.id}
+                  key={team.id}
+                  keywords={[team.key]}
+                  icon={getTeamIcon(team)}
+                />
+              );
             })}
           </Form.Dropdown>
           <Form.Separator />
@@ -359,6 +375,23 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
                 value={project.id}
                 key={project.id}
                 icon={getProjectIcon(project)}
+              />
+            );
+          })}
+        </Form.Dropdown>
+      ) : null}
+
+      {hasMilestones ? (
+        <Form.Dropdown title="Milestone" storeValue {...itemProps.milestoneId}>
+          <Form.Dropdown.Item title="No Milestone" value="" icon={{ source: "linear-icons/no-milestone.svg" }} />
+
+          {milestones.map((milestone) => {
+            return (
+              <Form.Dropdown.Item
+                title={`${milestone.name} (${milestone.targetDate || "No Target Date"})`}
+                value={milestone.id}
+                key={milestone.id}
+                icon={getMilestoneIcon(milestone)}
               />
             );
           })}

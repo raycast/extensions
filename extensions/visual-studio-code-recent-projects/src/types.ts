@@ -18,20 +18,22 @@ export type RemoteEntry = {
   label: string;
 };
 
-export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
+export type RemoteWorkspaceEntry = {
+  workspace: {
+    configPath: string;
+  };
+  remoteAuthority: string;
+  label?: string;
+};
+
+export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry | RemoteWorkspaceEntry;
 
 export enum VSCodeBuild {
   Code = "Code",
+  Cursor = "Cursor",
   Insiders = "Code - Insiders",
   VSCodium = "VSCodium",
 }
-
-export type Preferences = {
-  build: VSCodeBuild;
-  keepSectionOrder: boolean;
-  layout: "grid" | "list";
-  closeOtherWindows: boolean;
-};
 
 export type RecentEntries = {
   entries: string;
@@ -41,6 +43,7 @@ export enum EntryType {
   Workspaces = "Workspaces",
   Folders = "Folders",
   RemoteFolders = "Remote Folders",
+  RemoteWorkspace = "Remote Workspace",
   Files = "Files",
   AllTypes = "All Types",
 }

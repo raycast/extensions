@@ -24,7 +24,7 @@ export default function StateIssueList({ mutateList, issues, priorities, me, use
 
   const states = uniqBy(
     issues.map((issue) => issue.state),
-    (state) => state.id
+    (state) => state.id,
   );
 
   const orderedStates = getOrderedStates(states || [], [

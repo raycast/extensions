@@ -1,13 +1,48 @@
 # DocSearch Changelog
 
+## [Fix Bugs] - 2024-3-19
+
+- 🐛 Fix icon of docs not found
+
+## [New feature] - 2024-2-3
+
+- 🌟 Use searchBarAccessory to switch different version of docs
+
+## [New feature and documentation] - 2024-01-16
+
+- 📄 Support [Element Plus](https://element-plus.org/en-US/)
+
+## [New feature and documentation] - 2023-10-22
+
+- 📄 Support [NvChad](https://nvchad.com/)
+
+## [New feature and documentation] - 2023-08-12
+
+- 🌟 Support auto generate entry file and config
+- 📄 Support [taro](https://docs.taro.zone/docs/)
+
+## [Support for new documentation] - 2023-08-11
+
+- 📄 Support [Antd](https://ant.design/)
+- 📄 Support [Antdv](https://antdv.com/components/overview)
+
+## [Fix SearchDocumentation Component] - 2023-05-25
+
+- 🐛 Fix the title of the documentation is not displayed.
+
+## [Supoort Meilisearch] - 2023-05-23
+
+- 🌟 Support Meilisearch
+- 📄 Move RSSHub to use MeiliSearch as an entry point.
+
 ## [Fix searchbar text] - 2021-12-31
 
 - 🐛 Fix searchbar text disappearing each time the query is changed by the user.
 - 📄 add algolia keyword to package.json
 
-## [Fix for TailwindCSS V3] - 20220-11-17
+## [Support for new documentation] - 2022-11-23
 
-- 🐛 Fix TailwindCSS V3 which was searching results not just is V3
+- 📄 Support [Flet](https://flet.dev)
 
 ## [Support for new documentation] - 2022-11-11
 

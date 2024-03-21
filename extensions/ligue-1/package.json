@@ -5,6 +5,9 @@
   "description": "View all the latest news about Ligue 1 Uber Eats (calendar, results, ranking, video...) and all live games.",
   "icon": "icon.png",
   "author": "anhthang",
+  "contributors": [
+    "loris"
+  ],
   "license": "MIT",
   "categories": [
     "Fun"

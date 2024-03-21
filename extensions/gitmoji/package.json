@@ -5,6 +5,9 @@
   "description": "Gitmoji is an emoji guide for your commit messages",
   "icon": "icon.png",
   "author": "ricoberger",
+  "contributors": [
+    "danny_seidel"
+  ],
   "license": "MIT",
   "commands": [
     {

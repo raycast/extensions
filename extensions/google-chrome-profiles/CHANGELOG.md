@@ -1,5 +1,8 @@
 # Google Chrome Profiles Changelog
 
+## [Quicklinks] - 2023-09-22
+- Support quicklinks to open a chosen profile.
+
 ## [Update] - 2023-02-13
 
 - Detect whether the input text is a URL and provide and "Go to" option if so

@@ -1,9 +1,9 @@
 import { useCachedPromise } from "@raycast/utils";
 import { subDays, format, compareDesc } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
 import { IssueFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 export function useOpenIssues(repository: string | null) {
   const { github } = getGitHubClient();
@@ -22,7 +22,7 @@ export function useOpenIssues(repository: string | null) {
         numberOfOpenItems: 20,
       });
     },
-    [repository]
+    [repository],
   );
 
   const assignedIssues = data?.assignedOpen.nodes as IssueFieldsFragment[];

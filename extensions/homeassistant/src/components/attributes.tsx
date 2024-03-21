@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action } from "@raycast/api";
-import { State } from "../haapi";
-import { formatToHumanDateTime, stringToDate } from "../utils";
+import { State } from "@lib/haapi";
+import { formatToHumanDateTime, stringToDate } from "@lib/utils";
 
 function ListAttributeItem(props: {
   attributeKey: string;

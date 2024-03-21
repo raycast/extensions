@@ -54,7 +54,7 @@ export function ActionNewTemplateFileHere(props: {
           shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
           onAction={async () => {
             await Clipboard.copy({ file: template.path });
-            await showHUD(`${template.name} copied to clipboard`);
+            await showHUD(`📋 ${template.name} copied to clipboard`);
           }}
         />
         <Action
@@ -63,7 +63,7 @@ export function ActionNewTemplateFileHere(props: {
           shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
           onAction={async () => {
             await Clipboard.paste({ file: template.path });
-            await showHUD(`${template.name} pasted to front app`);
+            await showHUD(`📋 ${template.name} pasted to front app`);
           }}
         />
       </ActionPanel.Section>
@@ -89,7 +89,7 @@ export function ActionNewTemplateFileHere(props: {
                 fse.removeSync(template.path);
                 setRefresh(Date.now());
                 await showToast(Toast.Style.Success, "Remove template success!");
-              }
+              },
             );
           }}
         />

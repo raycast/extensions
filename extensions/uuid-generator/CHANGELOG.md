@@ -1,5 +1,13 @@
 # UUID Generator Changelog
 
+## [Added support for UUID v7] - 2023-10-02
+
+- You can now generate v7 UUIDs
+
+## [Added support for ULID] - 2023-07-16
+
+- You can now generates ULIDs
+
 ## [Fix default action issue] - 2023-05-03
 
 - Fix the issue with the default action

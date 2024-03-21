@@ -1,5 +1,63 @@
 # Home Assistant Changelog
 
+## [Update] - 2024-01-27
+
+- Add three Single Entity Menu Commands, two disabled by default
+
+## [Update] - 2024-01-19
+
+- Make use of cache for faster loading of entities
+
+## [Companion] - 2023-12-22
+
+- Add support for Home Assistant Companion app
+
+## [New Logo] - 2023-09-30
+
+- Use the new Home Assistant logo
+
+## [Fix] - 2023-09-10
+
+- Notifications could not be opened from the Menubar and instead throw an error
+- Fix possible crashes when commands are not enable
+
+## [Fix] - 2023-08-15
+
+- Updates from HACS will be shown in the menu regardless of the update entity states
+
+## [HACS-Menu] - 2023-08-03
+
+- Add HACS updates to menubar
+- Add `Update without Backup` menu to support updates for integration which does not support backups
+
+## [Menu] - 2023-07-25
+
+- Add Media Player Menu Bar command
+- Add Entities Menu Bar command to allow to add specific entities in the Menu Bar
+- Add Lights Menu Bar command
+- Add Covers Menu Bar command
+- Add Batteries Menu Bar command
+- Notifications menu now contains battery low battery states as well as updates
+
+## [Modernize] - 2023-07-16
+
+- Add support for switching assist pipelines
+- Persistent Notifications can now be dismissed in the menu bar
+
+## [Fix] - 2023-06-25
+
+- Use nearest resolve url also for http requests
+
+## [Fix] - 2023-06-24
+
+- Get persistent notifications via websocket API instead of entities because since 2023.06 the entity option does not exist anymore.
+
+## [Update] - 2023-06-14
+
+- Add home network detection to switch between an internal url and an external one
+- Add `Connection Check` root command
+- Add support for `.local` urls (mDNS)
+
 ## [Update] - 2023-05-04
 
 - Hide hidden or disabled entities

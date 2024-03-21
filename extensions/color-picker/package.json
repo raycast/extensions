@@ -9,7 +9,9 @@
     "otakustay",
     "EmersonEmerson",
     "pernielsentikaer",
-    "arronhunt"
+    "arronhunt",
+    "kvdo2",
+    "thomaslombart"
   ],
   "categories": [
     "Design Tools"
@@ -67,6 +69,10 @@
           "value": "hex-lower-case"
         },
         {
+          "title": "HEX No Prefix - FF6363",
+          "value": "hex-no-prefix"
+        },
+        {
           "title": "RGBA - rgba(255, 99, 99, 1)",
           "value": "rgba"
         },
@@ -79,7 +85,7 @@
           "value": "hsla"
         },
         {
-          "title": "HSVA - hsva(0, 100%, 100%, 1)",
+          "title": "HSVA - color(hsv 43.082 81.145 100)",
           "value": "hsva"
         }
       ],
@@ -92,26 +98,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.4.7",
-    "@types/execa": "^2.0.0",
-    "color-convert": "^2.0.1",
-    "execa": "^6.1.0"
+    "@raycast/api": "^1.68.0",
+    "@raycast/utils": "^1.10.1",
+    "colorjs.io": "^0.4.5"
   },
   "devDependencies": {
-    "@types/color-convert": "^2.0.0",
-    "@types/node": "^18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.10.1",
+    "@types/react": "^18.2.39",
+    "eslint": "^8.54.0",
+    "prettier": "^3.1.0",
+    "react": "^18.2.0",
+    "typescript": "^5.3.2"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/color-picker assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

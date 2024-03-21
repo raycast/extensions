@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export type Set<T> = React.Dispatch<React.SetStateAction<T>>;
 
 export interface Question {
@@ -157,16 +155,22 @@ export interface ChatViewProps extends ChangeTemplateModelProp {
   use: { chats: ChatHook; conversations: ConversationsHook; savedChats: SavedChatHook };
 }
 
-export interface TemplateBase {
+export interface TemplateBaseOps {
   id: number;
   name: string;
-  type: 1;
+  type: 1 | 2 | 3; // 官方仓库 | 我的 | 社区
   description: string;
   content: string;
   tags: string[];
+  avatar: string;
+  is_pub: boolean;
+  hot_index: number;
+  sample: string;
+}
+
+export interface TemplateBase extends TemplateBaseOps {
   owner_id: number;
   temperature: number;
-  avatar: string;
   create_time: string;
   update_time: string;
 }
@@ -178,4 +182,10 @@ export interface TemplateFavorite {
   chat_q: string;
   chat_a: string;
   create_time: string;
+}
+
+export interface UserInfo {
+  userId: number;
+  email: string;
+  createTime: string;
 }

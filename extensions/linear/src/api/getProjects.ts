@@ -1,5 +1,5 @@
 import { Project, User } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+import { getLinearClient } from "../api/linearClient";
 
 export type ProjectResult = Pick<
   Project,
@@ -58,7 +58,7 @@ export async function getProjects(teamId?: string) {
             }
           }
         }
-      `
+      `,
     );
 
     return data?.projects.nodes;
@@ -78,7 +78,7 @@ export async function getProjects(teamId?: string) {
           }
         }
       `,
-      { teamId }
+      { teamId },
     );
 
     return data?.team.projects.nodes;
@@ -109,7 +109,7 @@ export async function getRoadmaps() {
           }
         }
       }
-    `
+    `,
   );
 
   return data?.roadmaps.nodes;

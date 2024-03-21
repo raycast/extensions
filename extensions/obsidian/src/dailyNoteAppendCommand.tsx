@@ -11,6 +11,7 @@ import {
   useObsidianVaults,
   vaultPluginCheck,
 } from "./utils/utils";
+import { clearCache } from "./utils/data/cache";
 
 interface DailyNoteAppendArgs {
   text: string;
@@ -24,8 +25,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
   const [content, setContent] = useState("");
   useEffect(() => {
     async function getContent() {
-      const withTemplate = appendTemplate ? appendTemplate + text : text;
-      const content = await applyTemplates(withTemplate);
+      const content = await applyTemplates(text, appendTemplate);
       setContent(content);
     }
     getContent();
@@ -62,6 +62,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
       silent: silent,
     });
     open(target);
+    clearCache();
     popToRoot();
     closeMainWindow();
   }

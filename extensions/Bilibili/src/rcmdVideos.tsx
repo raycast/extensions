@@ -15,11 +15,11 @@ export default function Command() {
 
   return (
     <List
-      enableFiltering={false}
+      filtering={false}
       isLoading={isLoading}
       isShowingDetail={true}
       onSelectionChange={(id) => {
-        setCountSet(countSet.add(id));
+        setCountSet(countSet.add(id || ""));
 
         if (countSet.size % 16 === 0) setIdx(idx + 1);
       }}
@@ -29,6 +29,8 @@ export default function Command() {
           title={item.title}
           cover={item.pic}
           url={item.uri}
+          bvid={item.bvid}
+          cid={item.cid}
           uploader={{
             mid: item.owner.mid,
             name: item.owner.name,

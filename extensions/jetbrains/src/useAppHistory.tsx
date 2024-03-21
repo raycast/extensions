@@ -1,5 +1,12 @@
-import { Application } from "@raycast/api";
-import { AppHistory, getHistory, getJetBrainsToolboxApp, loadAppEntries, recentEntry } from "./util";
+import {
+  AppHistory,
+  ToolboxApp,
+  getHistory,
+  getJetBrainsToolboxApp,
+  getV2History,
+  loadAppEntries,
+  recentEntry,
+} from "./util";
 import { FavList } from "raycast-hooks/src/hooks/useFavorites";
 import { useFavorites, usePreferences } from "raycast-hooks";
 import { useEffect, useReducer } from "react";
@@ -7,7 +14,7 @@ import { sortTools } from "./sortTools";
 
 function appHistorySorter(results: AppHistory[], sortOrder: string) {
   let order = String(sortOrder).split(",");
-  if (order.length === 0) {
+  if (sortOrder === "" || order.length === 0) {
     order = results.map((ah) => ah.title).sort();
   }
   return results.sort(sortTools(order));
@@ -16,6 +23,9 @@ function appHistorySorter(results: AppHistory[], sortOrder: string) {
 function projectsReducer(state: State, action: Action): State {
   switch (action.type) {
     case "setToolboxApp":
+      if (action.results === undefined) {
+        return { ...state, toolboxApp: false, isLoading: false };
+      }
       return { ...state, toolboxApp: action.results };
     case "setHistory":
       return { ...state, history: action.results };
@@ -66,7 +76,7 @@ export interface State {
   isLoading: boolean;
   sortOrder: string;
   filter: string;
-  toolboxApp?: Application;
+  toolboxApp?: ToolboxApp | false;
   history?: AppHistory[];
   appHistory: AppHistory[];
   favourites: FavList;
@@ -75,7 +85,7 @@ export interface State {
 }
 
 export type Action =
-  | { type: "setToolboxApp"; results: Application | undefined }
+  | { type: "setToolboxApp"; results: ToolboxApp | undefined }
   | { type: "setHistory"; results: AppHistory[] }
   | { type: "setEntries"; results: AppHistory[] }
   | { type: "setSortOrder"; results: string }
@@ -95,7 +105,7 @@ export function myFavReducer(favourites: FavList, all: recentEntry[]): recentEnt
 
 export interface appHistoryReturn {
   isLoading: boolean;
-  toolboxApp: Application | undefined;
+  toolboxApp: ToolboxApp | undefined | false;
   appHistory: AppHistory[];
   myFavs: recentEntry[];
   filter: string;
@@ -125,8 +135,18 @@ export function useAppHistory(): appHistoryReturn {
 
   useEffect(() => {
     getJetBrainsToolboxApp().then((toolboxApp) => dispatch({ type: "setToolboxApp", results: toolboxApp }));
-    getHistory().then((history) => dispatch({ type: "setHistory", results: history }));
   }, []);
+
+  useEffect(() => {
+    if (toolboxApp === undefined || toolboxApp === false) {
+      return;
+    }
+    if (toolboxApp.isV2) {
+      getV2History().then((history) => dispatch({ type: "setHistory", results: history }));
+    } else {
+      getHistory().then((history) => dispatch({ type: "setHistory", results: history }));
+    }
+  }, [toolboxApp]);
 
   useEffect(() => {
     if (history === undefined) return;

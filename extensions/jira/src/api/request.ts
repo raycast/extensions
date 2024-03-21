@@ -1,6 +1,6 @@
 import fetch, { RequestInit } from "node-fetch";
 
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
+import { getJiraCredentials } from "../api/jiraCredentials";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -12,8 +12,14 @@ type RequestOptions = Partial<{
   useAgileApi: boolean;
 }>;
 
+export const getBaseUrl = () => {
+  const { cloudId } = getJiraCredentials();
+
+  return `https://api.atlassian.com/ex/jira/${cloudId}`;
+};
+
 export async function request<T>(path: string, options: RequestOptions = { method: "GET" }) {
-  const { cloudId, authorizationHeader } = getJiraCredentials();
+  const { authorizationHeader } = getJiraCredentials();
 
   const { params, headers, useAgileApi, ...rest } = options;
   const queryParams = params ? `?${new URLSearchParams(params).toString()}` : "";
@@ -21,9 +27,7 @@ export async function request<T>(path: string, options: RequestOptions = { metho
   const additionalHeaders = headers || { "Content-Type": "application/json" };
 
   const response = await fetch(
-    `https://api.atlassian.com/ex/jira/${cloudId}/${
-      useAgileApi ? "rest/agile/1.0" : "rest/api/3"
-    }${path}${queryParams}`,
+    `${getBaseUrl()}/${useAgileApi ? "rest/agile/1.0" : "rest/api/3"}${path}${queryParams}`,
     {
       headers: {
         Authorization: authorizationHeader,
@@ -31,7 +35,7 @@ export async function request<T>(path: string, options: RequestOptions = { metho
         ...additionalHeaders,
       },
       ...rest,
-    }
+    },
   );
 
   if (response.ok) {
@@ -45,6 +49,23 @@ export async function request<T>(path: string, options: RequestOptions = { metho
     throw new Error(JSON.stringify(result));
   }
 }
+
+export const getAuthenticatedUri = async (uri: string, contentType: string) => {
+  const { authorizationHeader } = getJiraCredentials();
+  const response = await fetch(uri, {
+    headers: {
+      Authorization: authorizationHeader,
+    },
+  });
+
+  if (response.ok) {
+    const dataUri = `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+    return dataUri;
+  } else {
+    const result = await response.json();
+    throw new Error(JSON.stringify(result));
+  }
+};
 
 export async function autocomplete<T>(url: string, queryParams: Record<string, string>) {
   const { authorizationHeader } = getJiraCredentials();

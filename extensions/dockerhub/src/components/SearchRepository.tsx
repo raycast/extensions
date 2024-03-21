@@ -104,7 +104,7 @@ export default function SearchRepository() {
       fn();
       return () => abortCtrl.abort();
     },
-    [setResult, setLoading]
+    [setResult, setLoading],
   );
 
   useEffect(() => {

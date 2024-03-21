@@ -253,7 +253,15 @@ export default function Command() {
     if (draft.preferPrepend) {
       return (
         <Action.CreateQuicklink
-          quicklink={{ link: CallbackBasUrls.PREPEND_TO_DRAFT + "uuid=" + draft.uuid + "&text={text}" }}
+          quicklink={{
+            link:
+              CallbackBasUrls.PREPEND_TO_DRAFT +
+              "uuid=" +
+              draft.uuid +
+              "&text=" +
+              encodeURIComponent(draft.prefix) +
+              "{text}",
+          }}
           icon={Icon.Link}
           title={'Create Quicklink to Prepend to Draft "' + draft.title + '"'}
         />
@@ -261,7 +269,15 @@ export default function Command() {
     } else {
       return (
         <Action.CreateQuicklink
-          quicklink={{ link: CallbackBasUrls.APPEND_TO_DRAFT + "uuid=" + draft.uuid + "&text={text}" }}
+          quicklink={{
+            link:
+              CallbackBasUrls.APPEND_TO_DRAFT +
+              "uuid=" +
+              draft.uuid +
+              "&text=" +
+              encodeURIComponent(draft.prefix) +
+              "{text}",
+          }}
           icon={Icon.Link}
           title={'Create Quicklink to Append to Draft "' + draft.title + '"'}
         />

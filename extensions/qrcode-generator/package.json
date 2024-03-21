@@ -5,6 +5,9 @@
   "description": "Generate QR code for an URL",
   "icon": "command-icon.png",
   "author": "Melvynx",
+  "contributors": [
+    "d2a"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,16 +15,23 @@
       "title": "Generate QR Code",
       "description": "Generate a QR code from a URL in PNG format that will be automatically opened.",
       "mode": "view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Generate QR Code From Clipboard",
+      "description": "Generate a QR Code from Clipboard and show it directly in Raycast",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1",
+    "@raycast/api": "^1.55.1",
     "qrcode": "^1.5.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/qrcode": "^1.4.2",
-    "@types/react": "^17.0.28",
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/qrcode": "^1.5.1",
+    "@types/react": "18.0.9",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

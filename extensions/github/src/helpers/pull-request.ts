@@ -69,7 +69,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
         avatarUrl = reviewer.teamAvatarURL;
       }
 
-      return { id: reviewer.id, ...getGitHubUser({ name, login, avatarUrl }) };
+      return { id: "id" in reviewer ? reviewer.id : "", ...getGitHubUser({ name, login, avatarUrl }) };
     }
   });
 
@@ -77,7 +77,7 @@ export function getPullRequestReviewers(pullRequest: PullRequestDetailsFieldsFra
     pullRequest.reviews?.nodes?.map((review) => {
       return { id: review?.author?.id, ...getGitHubUser(review?.author) };
     }),
-    "id"
+    "id",
   );
 
   return [...(requests ?? []), ...(reviews ?? [])];
@@ -105,9 +105,9 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
       return { icon: { source: Icon.Check, tintColor: Color.Green }, tooltip: "Checks: Success" };
     case "ERROR":
     case "FAILURE":
-      return { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: "Checks: Failure" };
+      return { icon: { source: Icon.Xmark, tintColor: Color.Red }, tooltip: "Checks: Failure" };
     case "PENDING":
-      return { icon: { source: Icon.Clock, tintColor: Color.SecondaryText }, tooltip: "Checks: Pending" };
+      return { icon: { source: Icon.Clock, tintColor: Color.Orange }, tooltip: "Checks: Pending" };
     default:
       return null;
   }
@@ -116,7 +116,7 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
 export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {
   switch (reviewDecision) {
     case "REVIEW_REQUIRED":
-      return { tag: { value: "Review requested", color: Color.Orange } };
+      return { tag: { value: "Review required", color: Color.Orange } };
     case "CHANGES_REQUESTED":
       return { tag: { value: "Changes requested", color: Color.Red } };
     case "APPROVED":

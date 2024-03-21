@@ -7,7 +7,6 @@ import { Chat } from "./type";
 import { CopyActionSection } from "./actions/copy";
 import { DestructiveAction, TextToSpeechAction } from "./actions";
 import { SaveActionSection } from "./actions/save";
-import { getAvatarIcon } from "@raycast/utils";
 
 export default function History() {
   const savedChat = useSavedChat();
@@ -82,7 +81,7 @@ export default function History() {
     >
       {history.data.length === 0 ? (
         <List.EmptyView
-          title="No History"
+          title="No history"
           description="Your recent questions will be showed up here"
           icon={Icon.Stars}
         />
@@ -94,7 +93,7 @@ export default function History() {
                 title={answer.question}
                 id={answer.id}
                 key={answer.id}
-                icon={getAvatarIcon(answer.question)}
+                // icon={getAvatarIcon(answer.question)}
                 accessories={[{ text: new Date(answer.created_at ?? 0).toLocaleDateString() }]}
                 detail={<AnswerDetailView chat={answer} />}
                 actions={answer && selectedAnswerId === answer.id ? getActionPanel(answer) : undefined}

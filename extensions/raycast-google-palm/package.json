@@ -1,0 +1,195 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-google-palm",
+  "title": "Google PaLM",
+  "description": "Use the Google PaLM 2 API in Raycast.",
+  "icon": "command-icon.png",
+  "author": "EvanZhouDev",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "subtitle": "Google PaLM",
+      "description": "Ask Google PaLM",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "subtitle": "Google PaLM",
+      "description": "Summarize selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "subtitle": "Google PaLM",
+      "description": "Explain selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "subtitle": "Google PaLM",
+      "description": "Add comments to code",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "subtitle": "Google PaLM",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "subtitle": "Google PaLM",
+      "description": "Change tone of selected text to professional",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "synonym",
+      "title": "Find Synonym",
+      "subtitle": "Google PaLM",
+      "description": "Find synonym of selected word",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "subtitle": "Google PaLM",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "subtitle": "Google PaLM",
+      "description": "Make selected text longer",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "subtitle": "Google PaLM",
+      "description": "Make selected text shorter",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "PaLM API Key",
+      "name": "apiKey",
+      "required": true,
+      "title": "PaLM API Key",
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.56.0",
+    "@raycast/utils": "^1.9.0",
+    "node-fetch": "^3.3.2",
+    "palm-api": "^1.0.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

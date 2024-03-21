@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "groq-tools",
+  "title": "GROQ Tools",
+  "description": "Format GROQ queries and parse Sanity query URLs.",
+  "icon": "groq.png",
+  "author": "juice49",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "format-groq",
+      "title": "Format",
+      "subtitle": "GROQ",
+      "description": "Format a GROQ query.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "required": false,
+          "type": "text",
+          "placeholder": "Input"
+        }
+      ]
+    },
+    {
+      "name": "format-groq-from-clipboard",
+      "title": "Format from Clipboard",
+      "subtitle": "GROQ",
+      "description": "Format a GROQ query from your clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "format-groq-in-place",
+      "title": "Format in Place",
+      "subtitle": "GROQ",
+      "description": "Format and replace the selected GROQ.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@groqfmt/wasm": "^1.0.0",
+    "@raycast/api": "^1.58.1",
+    "suspend-react": "^0.1.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "move-groqfmt": "mkdir -p ./assets && cp ./node_modules/@groqfmt/wasm/dist/groqfmt.wasm ./assets",
+    "postinstall": "npm run move-groqfmt"
+  }
+}

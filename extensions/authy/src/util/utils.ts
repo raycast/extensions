@@ -17,7 +17,7 @@ export function decryptSeed(encryptedSeed: string, salt: string, password: strin
   if (decrypted === null || !isBase32(decrypted)) {
     decrypted = decryptAES(salt, password, encryptedSeed, true);
   }
-  return decrypted;
+  return decrypted !== null && isBase32(decrypted) ? decrypted : null;
 }
 
 function isBase32(value: string): boolean {

@@ -1,8 +1,9 @@
-import natural from "natural";
+import { WordPunctTokenizer } from "natural/lib/natural/tokenizers/index";
 import * as chrono from "chrono-node";
+import { removeWhiteSpacesFromQuotedWords } from "./removeWhiteSpacesFromQuotedWords";
 
-const tokenizer = new natural.WordTokenizer();
-const EXCLUDED_TOKENS = ["remind", "me", "to", "on"];
+const tokenizer = new WordPunctTokenizer();
+const EXCLUDED_INITIAL_TOKENS_REGEX = /(remind me to|remind me)\s*/i;
 
 export function extractTopicAndDateFromInputText(inputText: string) {
   const targetDate = chrono.parseDate(inputText, new Date(), {
@@ -10,12 +11,13 @@ export function extractTopicAndDateFromInputText(inputText: string) {
   });
   const { text: timeText } = chrono.parse(inputText, new Date())[0];
   const dateTimeRelatedTokens = tokenizer.tokenize(timeText);
-  const inputTextTokens = tokenizer.tokenize(inputText);
-  const tokensToRemoveForTopic = [...dateTimeRelatedTokens, ...EXCLUDED_TOKENS];
+  const inputTextTokens = tokenizer.tokenize(inputText.replace(EXCLUDED_INITIAL_TOKENS_REGEX, ""));
+
+  const tokensToRemoveForTopic = [...dateTimeRelatedTokens];
   const extractedTopicTokens = inputTextTokens.filter((token) => !tokensToRemoveForTopic.includes(token));
 
   return {
     date: targetDate,
-    topic: extractedTopicTokens.join(" "),
+    topic: removeWhiteSpacesFromQuotedWords(extractedTopicTokens.join(" ")),
   };
 }

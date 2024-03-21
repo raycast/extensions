@@ -1,5 +1,46 @@
 # Toothpick Changelog
 
+## [QoL Improvements] - 2023-11-30
+
+- Extended favorite devices functionality to disconnecting from specific devices
+
+## [QoL Improvements and Device Additions] - 2023-10-13
+
+- Added rudimentary mappings for the following devices:
+  - Samsung Galaxy Buds+ (custom icon)
+- Added the option to provide a custom 'blueutil' directory
+
+## [QoL Improvement] - 2023-10-05
+
+- Made bluetooth backend preference an optional preference.
+
+## [QoL Improvements and Device Additions] - 2023-09-28
+
+- Added rudimentary mappings for the following devices:
+  - Bose Noise Cancelling Headphones 700 (custom icon)
+- Made 'Mapped devices' dev menu toggle state via any item.
+
+## [Blueutil Bluetooth Backend] - 2023-09-01
+
+- Added 'blueutil' as experimental Bluetooth backend
+- Fixed 'Connect device' & 'Disconnect device' toast notifications
+- Updated dependencies
+
+## [QoL Improvements and Device Additions] - 2023-06-14
+
+- Added rudimentary mappings for the following devices:
+  - Logitech MX Master 3 (custom icon)
+  - Logitech MX Master 3S (custom icon)
+  - Sony WH-1000XM5 (custom icon)
+  - Sony WH-1000XM4 (custom icon)
+  - Sony WH-1000XM3 (custom icon)
+  - Bose QC 35 (custom icon)
+  - Bose QC 35 II (custom icon)
+- Hooked favorite device commands' subtitles to corresponding device's name
+- Configured SVG optimization
+- Cleaned up codebase a little bit
+- Added a guide for setting up favorite devices in README.md
+
 ## [Partial Device Support Addition] - 2023-02-17
 
 - Added rudimentary mappings for the following devices:

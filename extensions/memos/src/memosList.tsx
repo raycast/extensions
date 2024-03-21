@@ -17,15 +17,17 @@ export default function MemosListCommand(): JSX.Element {
   };
 
   useEffect(() => {
-    setFilterList(data?.data?.filter((item) => item.content.includes(searchText)) || []);
+    const dataList = data?.data || data || [];
+    setFilterList(dataList.filter((item) => item.content.includes(searchText)) || []);
   }, [searchText]);
 
   useEffect(() => {
-    setFilterList(data?.data || []);
+    const dataList = data?.data || data || [];
+    setFilterList(dataList);
   }, [data]);
 
   function getItemUrl(item: MemoInfoResponse) {
-    const url = getRequestUrl(`/m/${item.id}`);
+    const url = getRequestUrl(`/m/${item.name || item.id}`);
 
     return url;
   }
@@ -35,7 +37,7 @@ export default function MemosListCommand(): JSX.Element {
     let markdown = content;
 
     resourceList.forEach((resource, index) => {
-      const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
+      const resourceUrl = getRequestUrl(`/o/r/${resource.id}?thumbnail=1`);
 
       if (index === 0) {
         markdown += "\n\n";
