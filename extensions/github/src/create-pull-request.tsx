@@ -168,7 +168,6 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   useEffect(() => {
     setValue("from", "");
     setValue("into", "");
-    setValue("title", "");
     setValue("description", "");
     setValue("reviewers", []);
     setValue("assignees", []);

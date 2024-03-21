@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Changing repo while creating issue or pull request clears title field] - 2024-03-21
+
+- Fixes an issue where the title is cleared when changing repository for Create Issue and Create Pull Request.
+
 ## [Fix shortcut conflict + npm audit vulnerabilities] - 2024-03-21
 
 - Fixes an issue where the shortcuts for `Re-Run Workflow` and `Delete Run` were not rendered.
