@@ -1,5 +1,9 @@
 # Acqua Changelog
 
+## [Bug Fixes] - 2024-03-21
+
+- The empty drop icon would be displayed only if the time left was exactly 0, and not if it was a negative number.
+
 ## [Improvements] - 2024-03-20
 
 - The menu bar icon now has 3 states: full, half, and empty. The icon changes based on the time left until the next reminder.
