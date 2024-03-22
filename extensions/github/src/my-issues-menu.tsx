@@ -27,9 +27,11 @@ function getMaxIssuesPreference(): number {
 function MyIssuesMenu() {
   const { data: sections, isLoading } = useMyIssues(null);
 
+  const issuesCount = sections?.reduce((acc, section) => acc + section.issues.length, 0);
+
   return (
     <MenuBarRoot
-      title={displayTitlePreference() ? `${sections?.length}` : undefined}
+      title={displayTitlePreference() ? `${issuesCount}` : undefined}
       icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip="GitHub My Issues"
