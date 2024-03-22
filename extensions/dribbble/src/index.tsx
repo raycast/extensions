@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ActionPanel, Detail, Action, Grid, Color } from "@raycast/api";
 import { fetchShots, Shot } from "./data";
-import { usePromise, useCachedPromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 
 const createShotMarkdown = (item: Shot) => {
   return `## ${item.title}
@@ -11,7 +11,7 @@ const createShotMarkdown = (item: Shot) => {
 
 export default function Command() {
   const [filter, setFilter] = useState("recent");
-  const { data, isLoading, pagination } = usePromise(
+  const { data, isLoading, pagination } = useCachedPromise(
     (filter) =>
       async ({ page }) => {
         const shots = await fetchShots(filter, page + 1);
