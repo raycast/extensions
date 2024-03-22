@@ -43,7 +43,13 @@ export default function QuickNote() {
       }
     >
       <Form.TextField id="name" title="Filename" value={name} onChange={(name) => setName(name)} />
-      <Form.TextArea id="text" title="Content" value={text} onChange={(text) => setText(text)} />
+      <Form.TextArea
+        id="text"
+        title="Content"
+        value={text}
+        autoFocus={defaultText() !== ""}
+        onChange={(text) => setText(text)}
+      />
     </Form>
   );
 }
