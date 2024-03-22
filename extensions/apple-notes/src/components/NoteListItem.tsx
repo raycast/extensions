@@ -8,6 +8,7 @@ import {
   Color,
   Keyboard,
   showToast,
+  Toast,
 } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { NoteItem, useNotes } from "../useNotes";
@@ -92,7 +93,7 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
   const openInNotesAction = <Action title="Open in Notes" icon={Icon.Document} onAction={() => openNote()} />;
 
   const openInSeparateWindowAction = (
-    <Action title="Open in a Separate Window" icon={Icon.Document} onAction={() => openNote({ separately: true })} />
+    <Action title="Open in a Separate Window" icon={Icon.NewDocument} onAction={() => openNote({ separately: true })} />
   );
 
   return (
@@ -150,7 +151,13 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
-              onAction={mutate}
+              onAction={async () => {
+                await mutate;
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Refreshed notes",
+                });
+              }}
               shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel.Section>
