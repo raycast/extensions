@@ -16,7 +16,6 @@ export type Shot = {
   };
 };
 
-
 export const fetchShots = async (filter: string, page: number) => {
   const data = await got(`https://dribbble.com/shots/${filter}?page=${page}`).text();
   const document = parse(data);
