@@ -51,7 +51,7 @@ function MyIssuesMenu() {
               <MenuBarItem
                 key={i.id}
                 title={`#${i.number} ${i.title}`}
-                icon="issue-opened.svg"
+                icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
                 tooltip={i.repository.nameWithOwner}
                 onAction={() => open(i.url)}
               />
