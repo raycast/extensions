@@ -2,6 +2,8 @@ import { Endpoints } from "@octokit/types";
 import { Color, Icon } from "@raycast/api";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
+
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
 // from https://github.com/manosim/gitify/blob/c3683dcfd84afc74fd391b2b17ae7b36dfe779a7/src/utils/helpers.ts#L19-L27
@@ -54,15 +56,35 @@ export function getGitHubURL(notification: Notification, userId?: string) {
 export function getNotificationIcon(notification: Notification) {
   let icon;
 
+  const { octokit } = getGitHubClient();
+
+  if (notification.subject.type === "PullRequest") {
+    octokit.rest.pulls
+      .get({
+        owner: notification.repository.owner.login,
+        repo: notification.repository.name,
+        pull_number: parseInt(notification.subject.url.split("/").at(-1)!),
+      })
+      .then((pullRequest) => {
+        if (pullRequest.data.merged == true) {
+          icon = { value: "merge.svg", tooltip: "Merged" };
+        } else if (pullRequest.data.state == "closed") {
+          icon = { value: "pull-request-closed.svg", tooltip: "Closed" };
+        } else if (pullRequest.data.draft == true && pullRequest.data.draft !== null) {
+          icon = { value: "pull-request-draft.svg", tooltip: "Draft" };
+        } else {
+          icon = { value: "pull-request.svg", tooltip: "Open" };
+        }
+        return icon;
+      });
+  }
+
   switch (notification.subject.type) {
     case "Commit":
       icon = { value: "commit.svg", tooltip: "Commit" };
       break;
     case "Issue":
       icon = { value: "issue-opened.svg", tooltip: "Issue" };
-      break;
-    case "PullRequest":
-      icon = { value: "pull-request.svg", tooltip: "Pull Request" };
       break;
     case "Release":
       icon = { value: "tag.svg", tooltip: "Release" };
