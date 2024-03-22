@@ -5,13 +5,13 @@ import IssueListEmptyView from "./components/IssueListEmptyView";
 import IssueListItem from "./components/IssueListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
 import { withGitHubClient } from "./helpers/withGithubClient";
-import { useOpenIssues } from "./hooks/useOpenIssues";
+import { useMyIssues } from "./hooks/useMyIssues";
 import { useViewer } from "./hooks/useViewer";
 
-function OpenIssues() {
+function MyIssues() {
   const viewer = useViewer();
   const [selectedRepository, setSelectedRepository] = useState<string | null>(null);
-  const { data: sections, isLoading, mutate: mutateList } = useOpenIssues(selectedRepository);
+  const { data: sections, isLoading, mutate: mutateList } = useMyIssues(selectedRepository);
 
   return (
     <List
@@ -34,4 +34,4 @@ function OpenIssues() {
   );
 }
 
-export default withGitHubClient(OpenIssues);
+export default withGitHubClient(MyIssues);
