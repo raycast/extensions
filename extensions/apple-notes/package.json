@@ -82,7 +82,6 @@
   "dependencies": {
     "@raycast/api": "^1.70.2",
     "@raycast/utils": "^1.13.4",
-    "file-url": "^4.0.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
