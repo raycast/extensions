@@ -386,7 +386,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "concurrently \"ray develop -t internal\" \"yarn generate --watch\"",
+    "dev": "concurrently \"ray develop\" \"yarn generate --watch\"",
     "format": "ray lint --fix",
     "lint": "ray lint",
     "generate": "graphql-codegen --config codegen.ts"
