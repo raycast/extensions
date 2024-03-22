@@ -5,6 +5,9 @@
   "description": "Control your Sonos system",
   "icon": "sonos.png",
   "author": "AntonNiklasson",
+  "contributors": [
+    "pastenes"
+  ],
   "categories": [
     "Applications",
     "Media",
@@ -65,6 +68,30 @@
       "disabledByDefault": true,
       "description": "Skip to the previous track in the active group",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "volumeStep",
+      "description": "Adjust the increment change in volume levels.",
+      "type": "dropdown",
+      "required": false,
+      "title": "Volume Step",
+      "default": "2",
+      "data": [
+        {
+          "value": "2",
+          "title": "Small"
+        },
+        {
+          "value": "5",
+          "title": "Medium"
+        },
+        {
+          "value": "10",
+          "title": "Large"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -1,5 +1,4 @@
 import { Color, Icon, LaunchType, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { useState } from "react";
 
 import {
   MenuBarItem,
@@ -41,10 +40,9 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): { source: Icon
   }
 }
 
-function OpenPullRequestMenu() {
-  const preferences = getPreferenceValues<Preferences.OpenPullRequestMenu>();
-  const [selectedRepository] = useState<string | null>(null);
-  const { data: sections, isLoading } = useMyPullRequests(selectedRepository);
+function MyPullRequestMenu() {
+  const preferences = getPreferenceValues<Preferences.MyPullRequestMenu>();
+  const { data: sections, isLoading } = useMyPullRequests(null);
 
   function displayTitle() {
     if (displayTitlePreference() !== true) {
@@ -139,4 +137,4 @@ function OpenPullRequestMenu() {
   );
 }
 
-export default withGitHubClient(OpenPullRequestMenu);
+export default withGitHubClient(MyPullRequestMenu);
