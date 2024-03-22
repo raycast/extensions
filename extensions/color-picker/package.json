@@ -69,6 +69,10 @@
           "value": "hex-lower-case"
         },
         {
+          "title": "HEX No Prefix - FF6363",
+          "value": "hex-no-prefix"
+        },
+        {
           "title": "RGBA - rgba(255, 99, 99, 1)",
           "value": "rgba"
         },

@@ -8,7 +8,8 @@
     "Aayush9029",
     "mathieudutour",
     "urwrstkn8mare",
-    "ashokbaruaakas"
+    "ashokbaruaakas",
+    "millerapps"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -81,6 +82,10 @@
         {
           "title": "iTerm",
           "value": "iterm"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
         }
       ],
       "description": "The terminal application/emulator to use when using any Run in Terminal action."

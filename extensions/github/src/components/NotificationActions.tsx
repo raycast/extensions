@@ -55,6 +55,29 @@ export default function NotificationActions({ notification, userId, mutateList }
     }
   }
 
+  async function acceptInvitation() {
+    try {
+      const invitations = await octokit.rest.repos.listInvitationsForAuthenticatedUser();
+
+      const invitation = invitations.data.find(
+        (invitation) => invitation.repository.url === notification.repository.url,
+      );
+
+      await octokit.rest.repos.acceptInvitationForAuthenticatedUser({
+        invitation_id: invitation?.id || 0,
+      });
+
+      open(notification.repository.html_url);
+      await mutateList();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed opening notification",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
   async function markAllNotificationsAsRead() {
     await showToast({ style: Toast.Style.Animated, title: "Marking all notifications as read" });
 
@@ -85,7 +108,7 @@ export default function NotificationActions({ notification, userId, mutateList }
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Unsusbcribed",
+        title: "Unsubscribed",
       });
     } catch (error) {
       await showToast({
@@ -99,38 +122,35 @@ export default function NotificationActions({ notification, userId, mutateList }
   return (
     <ActionPanel title={getNotificationSubtitle(notification)}>
       <Action
-        title="Open in Browser"
+        title={notification.subject.type === "RepositoryInvitation" ? "Accept Invitation" : "Open in Browser"}
         icon={Icon.Globe}
-        onAction={() => (notification.unread ? openNotificationAndMarkAsRead() : open(url))}
+        onAction={() =>
+          notification.subject && notification.subject.type === "RepositoryInvitation"
+            ? acceptInvitation()
+            : notification.unread
+              ? openNotificationAndMarkAsRead()
+              : open(url)
+        }
       />
+      {notification.unread ? (
+        <>
+          <Action title="Mark as Read" icon={Icon.Circle} onAction={markNotificationAsRead} />
 
-      <ActionPanel.Section>
-        {notification.unread ? (
-          <>
-            <Action
-              title="Mark as Read"
-              icon={Icon.Circle}
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
-              onAction={markNotificationAsRead}
-            />
+          <Action
+            title="Mark All as Read"
+            icon={Icon.Circle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            onAction={markAllNotificationsAsRead}
+          />
+        </>
+      ) : null}
 
-            <Action
-              title="Mark All as Read"
-              icon={Icon.Circle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              onAction={markAllNotificationsAsRead}
-            />
-          </>
-        ) : null}
-
-        <Action
-          title="Unsubscribe"
-          icon={Icon.BellDisabled}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
-          onAction={unsubscribe}
-        />
-      </ActionPanel.Section>
-
+      <Action
+        title="Unsubscribe"
+        icon={Icon.BellDisabled}
+        shortcut={{ modifiers: ["cmd"], key: "." }}
+        onAction={unsubscribe}
+      />
       <ActionPanel.Section>
         <Action.CopyToClipboard
           content={url}
@@ -144,7 +164,6 @@ export default function NotificationActions({ notification, userId, mutateList }
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
-
       <ActionPanel.Section>
         <Action
           icon={Icon.ArrowClockwise}

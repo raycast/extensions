@@ -2,11 +2,13 @@ import {
   AI,
   Action,
   ActionPanel,
+  Alert,
   Icon,
   Keyboard,
   Toast,
   clearSearchBar,
   confirmAlert,
+  environment,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -17,7 +19,8 @@ import { getCodeForEmoji, getEmojiForCode } from "./emojis";
 import { StatusForm } from "./form";
 import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
-import { showToastWithPromise } from "./utils";
+import { setStatusToPreset, showToastWithPromise } from "./utils";
+import { nanoid } from "nanoid";
 
 // Status Actions
 
@@ -132,38 +135,10 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
       title="Set Status"
       icon={Icon.Pencil}
       onAction={async () => {
-        showToastWithPromise(
-          async () => {
-            let expiration = 0;
-            if (props.preset.defaultDuration > 0) {
-              const expirationDate = new Date();
-              expirationDate.setMinutes(expirationDate.getMinutes() + props.preset.defaultDuration);
-              expiration = Math.floor(expirationDate.getTime() / 1000);
-            }
-
-            const profile: Profile = {
-              status_emoji: props.preset.emojiCode,
-              status_text: props.preset.title,
-              status_expiration: expiration,
-            };
-
-            await props.mutate(
-              slack.users.profile.set({
-                profile: JSON.stringify(profile),
-              }),
-              {
-                optimisticUpdate() {
-                  return profile;
-                },
-              },
-            );
-          },
-          {
-            loading: "Setting status...",
-            success: "Set status",
-            error: "Failed setting status",
-          },
-        );
+        setStatusToPreset({
+          ...props,
+          slack,
+        });
       }}
     />
   );
@@ -300,6 +275,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              id: nanoid(),
             });
 
             pop();
@@ -316,6 +292,32 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
   );
 }
 
+function createLink(preset: SlackStatusPreset) {
+  const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+  const contextPreset = encodeURIComponent(JSON.stringify({ presetId: preset.id }));
+  return `${protocol}extensions/petr/${environment.extensionName}/setStatus?context=${contextPreset}`;
+}
+
+export function CreateQuicklinkPresetAction(props: { preset: SlackStatusPreset }) {
+  const link = createLink(props.preset);
+
+  return (
+    <Action.CreateQuicklink
+      title="Create Quicklink"
+      quicklink={{ link: link, name: props.preset.title }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    />
+  );
+}
+
+export function CopyDeeplinkPresetAction(props: { preset: SlackStatusPreset }) {
+  const link = createLink(props.preset);
+
+  return (
+    <Action.CopyToClipboard title="Copy Deeplink" content={link} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+  );
+}
+
 export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
   return (
     <Action
@@ -329,6 +331,10 @@ export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
           title: "Delete preset?",
           message: "Are you sure you want to delete this preset permanently?",
           rememberUserChoice: true,
+          primaryAction: {
+            title: "Confirm",
+            style: Alert.ActionStyle.Destructive,
+          },
         });
 
         if (!confirmed) {
@@ -366,6 +372,7 @@ export function EditStatusPresetAction(props: {
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              id: props.preset.id ?? nanoid(),
             });
 
             pop();

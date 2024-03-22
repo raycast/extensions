@@ -1,8 +1,13 @@
 # Notion Changelog
 
-## [Improve authentication docs] - 2024-03-21
+## [Close Raycast after create new database page] - 2024-03-22
 
-- Add settings to close Raycast after Create Database Page
+- Add settings to close Raycast after create a new database
+
+## [Change Properties order in Create Database Page] - 2024-03-22
+
+- Add ability to change order of properties when creating a new database page
+- Fix showing/hiding properties when creating a new database page
 
 ## [Improve authentication docs] - 2024-02-27
 
