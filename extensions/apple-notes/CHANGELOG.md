@@ -1,6 +1,6 @@
 # Apple Notes Changelog
 
-## [Better search] - 2024-03-25
+## [Better search] - 2024-03-22
 
 - Improve note search to include more details on folders and snippets
 - Make notes open faster
