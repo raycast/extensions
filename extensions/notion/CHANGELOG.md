@@ -1,9 +1,9 @@
 # Notion Changelog
 
-## [Improve authentication docs] - 2024-03-08
+## [Change Properties order in Create Database Page] - 2024-03-22
 
-- Add ability to change order of properties in the CreatePageForm
-- Fix show/hide of properties in the CreatePageForm
+- Add ability to change order of properties when creating a new database page
+- Fix showing/hiding properties when creating a new database page
 
 ## [Improve authentication docs] - 2024-02-27
 
