@@ -1,34 +1,23 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useFetch } from "@raycast/utils";
+import { address } from "ip";
+import { useState } from "react";
+
 import LookUp from "./lookup";
 import Torrent from "./torrent";
-import { address } from "ip";
-
-export type LoadingStatus = "loading" | "success" | "failure";
+import { headers } from "./util";
 
 export default function Command() {
-  const [status, setStatus] = useState<LoadingStatus>("loading");
-  const [ip, setIp] = useState("");
   const { pop } = useNavigation();
   const [localIp] = useState(() => address("public", "ipv4").toString());
 
-  useEffect(() => {
-    async function getIp() {
-      try {
-        const { data } = await axios.get("https://api64.ipify.org");
-        setIp(data);
-        setStatus("success");
-      } catch (error) {
-        setIp("Failure");
-        setStatus("failure");
-      }
-    }
-    getIp();
-  }, []);
+  const { isLoading, data, error, revalidate } = useFetch<string>("https://api64.ipify.org", {
+    headers,
+    keepPreviousData: true,
+  });
 
   return (
-    <List isLoading={status === "loading"}>
+    <List isLoading={isLoading}>
       <List.Item
         icon={Icon.Desktop}
         title={localIp}
@@ -41,6 +30,12 @@ export default function Command() {
                   pop();
                 }}
               />
+              <Action
+                title="Refresh"
+                onAction={() => revalidate()}
+                icon={Icon.Repeat}
+                shortcut={{ key: "r", modifiers: ["cmd"] }}
+              />
             </ActionPanel>
           )
         }
@@ -51,20 +46,26 @@ export default function Command() {
         ]}
       />
       <List.Item
-        subtitle={ip === "" ? "Loading..." : ""}
+        subtitle={!data && isLoading ? "Loading..." : error ? "Failed to load" : undefined}
         icon={Icon.Globe}
-        title={ip}
+        title={data || "Loading..."}
         actions={
-          status === "success" && (
+          !isLoading && !!data ? (
             <ActionPanel>
               <Action.CopyToClipboard
-                content={ip}
+                content={data}
                 onCopy={() => {
                   pop();
                 }}
               />
+              <Action
+                title="Refresh"
+                onAction={() => revalidate()}
+                icon={Icon.Repeat}
+                shortcut={{ key: "r", modifiers: ["cmd"] }}
+              />
             </ActionPanel>
-          )
+          ) : null
         }
         accessories={[
           {
@@ -72,15 +73,15 @@ export default function Command() {
           },
         ]}
       />
-      {status === "success" && (
+      {!isLoading && !error && !!data ? (
         <>
           <List.Item
-            icon={ip === "" ? "" : Icon.Eye}
+            icon={data === "" ? "" : Icon.Eye}
             title=""
             subtitle="IP Lookup"
             actions={
               <ActionPanel>
-                <Action.Push title="IP Lookup" target={<LookUp ip={ip} />} icon={Icon.Eye} />
+                <Action.Push title="IP Lookup" target={<LookUp ip={data} />} icon={Icon.Eye} />
               </ActionPanel>
             }
             accessories={[
@@ -90,12 +91,12 @@ export default function Command() {
             ]}
           />
           <List.Item
-            icon={ip === "" ? "" : Icon.Download}
+            icon={data === "" ? "" : Icon.Download}
             title=""
             subtitle="Torrent History"
             actions={
               <ActionPanel>
-                <Action.Push title="Torrent History" target={<Torrent ip={ip} />} icon={Icon.Download} />
+                <Action.Push title="Torrent History" target={<Torrent ip={data} />} icon={Icon.Download} />
               </ActionPanel>
             }
             accessories={[
@@ -105,7 +106,7 @@ export default function Command() {
             ]}
           />
         </>
-      )}
+      ) : null}
     </List>
   );
 }
