@@ -1,5 +1,11 @@
 # GitHub Changelog
 
+## [Add "My Issues" command and improve "My Pull Requests"] - 2024-03-22
+
+- You can now see all of your issues into a single command called `My Issues`. As a result, `Created Issues` and `Open Issues` were removed.
+- The `Open Issues Menu Bar` is now renamed to `My Issues Menu Bar` and shows more issues such as the ones you created or the ones you were mentioned in
+- `My Pull Requests` should also load faster from now on
+
 ## [Changing repo while creating issue or pull request clears title field] - 2024-03-21
 
 - Fixes an issue where the title is cleared when changing repository for Create Issue and Create Pull Request.
