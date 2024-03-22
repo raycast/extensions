@@ -34,6 +34,7 @@ export function getLinakControllerPath() {
   if (commandFolderPath) {
     return commandFolderPath.replace(/\n/gi, "") + "/linak-controller";
   }
+
   return "";
 }
 
