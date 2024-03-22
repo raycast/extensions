@@ -10,8 +10,7 @@ export type NoteItem = {
   folder: string;
   snippet: string;
   account: string;
-}
-
+};
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
