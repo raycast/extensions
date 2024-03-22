@@ -1,8 +1,8 @@
 # GitHub Changelog
 
-## [Fix icon color for My Issues Menu Bar] - 2024-03-22
+## [Fix icon colors for My Issues Menu Bar] - 2024-03-22
 
-- Fixes an issue where icon colors for the `My Issues Menu Bar` were not adjusted to the dark mode.
+- Fixes an issue where icon colors for `My Issues Menu Bar` were not adjusted to the dark mode.
 
 ## [Add "My Issues" command and improve "My Pull Requests"] - 2024-03-22
 
