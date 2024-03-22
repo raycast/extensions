@@ -9,6 +9,7 @@ import {
   Keyboard,
   showToast,
   Toast,
+  closeMainWindow,
 } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { NoteItem, useNotes } from "../useNotes";
@@ -23,15 +24,16 @@ type NoteListItemProps = {
 };
 
 export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemProps) {
-  async function openNote({ separately }: { separately?: boolean } = {}) {
+  async function openNoteInSeparateWindow() {
     try {
       await runAppleScript(`tell application "Notes"
           set theNote to note id "${escapeDoubleQuotes(note.id)}"
           set theFolder to container of theNote
           show theFolder
-          show theNote${separately ? " with separately" : ""}
+          show theNote with separately
           activate
         end tell`);
+      await closeMainWindow();
     } catch (error) {
       await showFailureToast(error, { title: "Could not open note" });
     }
@@ -90,11 +92,31 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
     });
   }
 
-  const openInNotesAction = <Action title="Open in Notes" icon={Icon.Document} onAction={() => openNote()} />;
+  const openInNotesAction = (
+    <Action.Open
+      title="Open in Notes"
+      target={`notes://showNote?identifier=${note.UUID}`}
+      icon={Icon.Document}
+      application="com.apple.notes"
+    />
+  );
 
   const openInSeparateWindowAction = (
-    <Action title="Open in a Separate Window" icon={Icon.NewDocument} onAction={() => openNote({ separately: true })} />
+    <Action title="Open in a Separate Window" icon={Icon.NewDocument} onAction={openNoteInSeparateWindow} />
   );
+
+  const keywords = [];
+  if (note.folder) {
+    keywords.push(...note.folder.split(" "));
+  }
+
+  if (note.account) {
+    keywords.push(...note.account.split(" "));
+  }
+
+  if (note.snippet) {
+    keywords.push(...note.snippet.split(" "));
+  }
 
   return (
     <List.Item
@@ -102,12 +124,23 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
       icon={isDeleted ? { source: Icon.Trash, tintColor: Color.SecondaryText } : "notes-icon.png"}
       title={note.title || ""}
       subtitle={note.snippet}
-      keywords={[`${note.folder}`, `${note.account}`].concat(note.snippet ? [note.snippet] : [])}
+      keywords={keywords}
       accessories={accessories}
       actions={
         <ActionPanel>
-          {preferences.openSeparately ? openInSeparateWindowAction : openInNotesAction}
-          {preferences.openSeparately ? openInNotesAction : openInSeparateWindowAction}
+          {isDeleted ? (
+            openInNotesAction
+          ) : preferences.openSeparately ? (
+            <>
+              {openInSeparateWindowAction}
+              {openInNotesAction}
+            </>
+          ) : (
+            <>
+              {openInNotesAction}
+              {openInSeparateWindowAction}
+            </>
+          )}
 
           {isDeleted ? (
             <Action
@@ -152,10 +185,11 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={async () => {
-                await mutate;
+                await mutate();
                 await showToast({
                   style: Toast.Style.Success,
                   title: "Refreshed notes",
+                  message: "If you don't see your updates, please close and reopen the command.",
                 });
               }}
               shortcut={Keyboard.Shortcut.Common.Refresh}

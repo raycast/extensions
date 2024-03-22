@@ -1,5 +1,12 @@
 # Apple Notes Changelog
 
+## [Better search] - 2024-03-22
+
+- Improve note search to include more details on folders and snippets
+- Make notes open faster
+- Fix `Refresh` action
+- Add more details on permission screen
+
 ## [Improvements & bug fixes] - 2024-03-22
 
 - Fix `database disk image is malformed` error
@@ -18,7 +25,7 @@
 - Moved Recently Deleted notes to their own section at the bottom
 - Fixed Open Note action not working on notes outside of the current account
 
-## [Improvements] - 2023-03-31
+## [Open note in separate windows] - 2023-03-31
 
 - Added the function to open notes in separate windows. 
 
