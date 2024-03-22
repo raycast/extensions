@@ -23,7 +23,7 @@ export default function Command() {
   const [activeNotes, deletedNotes] = partition(notes, (note) => note.folder != "Recently Deleted");
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search notes">
+    <List isLoading={isLoading} searchBarPlaceholder="Search notes by title, folder, or description">
       {activeNotes.map((note) => (
         <NoteListItem key={note.id} note={note} mutate={mutate} />
       ))}

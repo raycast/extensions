@@ -62,4 +62,5 @@ const query = `
     ORDER BY modDate DESC
   `;
 
-export const useNotes = () => useSQL<NoteItem>(NOTES_DB, query);
+export const useNotes = () =>
+  useSQL<NoteItem>(NOTES_DB, query, { permissionPriming: "This is required to search your Apple Notes." });
