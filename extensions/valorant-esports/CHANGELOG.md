@@ -1,5 +1,7 @@
 # Valorant Esports Changelog
 
+## [Minor Fixes] - 2024-03-22
+
 ## [Calendar & Focus] - 2024-03-21
 
 - New `Add to Calendar` action for the `Show Schedule` command to add the match to your calendar
