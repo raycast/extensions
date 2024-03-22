@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Display Workflow Result] - 2024-03-22
+
+- Display the result of a workflow run in the notifications list
+
 ## [Fix icon color for My Issues Menu Bar] - 2024-03-22
 
 - Fixes an issue where icon colors for the `My Issues Menu Bar` were not adjusted to the dark mode.
