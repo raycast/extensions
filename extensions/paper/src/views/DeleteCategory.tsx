@@ -1,15 +1,13 @@
-import { Form, confirmAlert, Alert, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
+import { Form, confirmAlert, Alert, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import { FC, useState } from "react";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { updateConfigFile } from "../utils/updateConfigFile";
-import { ListMode } from "./ListMode";
 
 export const DeleteCategory: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
   const [category, setCategory] = useState<string>();
-  const { push } = useNavigation();
 
   const onSubmit = async (formValues: { category: string }) => {
     const userWanteDelete = await confirmAlert({
@@ -46,7 +44,7 @@ export const DeleteCategory: FC = () => {
       toast.style = Toast.Style.Success;
       toast.title = "Category deleted";
 
-      push(<ListMode />);
+      popToRoot();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Oups.. An error occured, please try again";

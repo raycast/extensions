@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Action, Toast, showToast, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, Action, Toast, showToast, popToRoot } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { FC } from "react";
 import { Base64 } from "../types";
@@ -6,12 +6,10 @@ import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { encode } from "../utils/base64";
 import { updateConfigFile } from "../utils/updateConfigFile";
-import { ListMode } from "./ListMode";
 
 export const CreatePaper: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
-  const { push } = useNavigation();
   const { handleSubmit, itemProps } = useForm<{
     name: string;
     createdAt: Date | null;
@@ -41,7 +39,7 @@ export const CreatePaper: FC = () => {
         toast.style = Toast.Style.Success;
         toast.title = "Paper Created";
 
-        push(<ListMode />);
+        popToRoot();
       } catch (error) {
         return false;
       }

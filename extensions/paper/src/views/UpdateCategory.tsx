@@ -1,14 +1,12 @@
-import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, popToRoot } from "@raycast/api";
 import { FC, useState, useRef, FormEvent } from "react";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { updateConfigFile } from "../utils/updateConfigFile";
-import { ListMode } from "./ListMode";
 
 export const UpdateCategory: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
-  const { push } = useNavigation();
 
   const [category, setCategory] = useState<string>();
 
@@ -65,7 +63,7 @@ export const UpdateCategory: FC = () => {
 
       toast.style = Toast.Style.Success;
       toast.title = "Category updated";
-      push(<ListMode />);
+      popToRoot();
     } catch (error: Error | unknown) {
       toast.style = Toast.Style.Failure;
 

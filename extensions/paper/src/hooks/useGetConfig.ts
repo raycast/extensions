@@ -30,5 +30,6 @@ export function useGetConfig() {
   return {
     isLoading,
     paperDataRaw,
+    setPaperDataRaw,
   };
 }

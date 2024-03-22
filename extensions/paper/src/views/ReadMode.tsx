@@ -1,32 +1,23 @@
 import { Detail } from "@raycast/api";
 import { FC, useEffect, useState } from "react";
 import { decode } from "../utils/base64";
-import { Paper } from "../types";
-import { Actions } from "../components/Actions";
+import { Base64 } from "../types";
 
 type ReadModeProps = {
-  paper: Paper;
-  category: string;
-  index: number;
+  content: Base64;
+  paperName: string;
 };
 
-export const ReadMode: FC<ReadModeProps> = ({ paper, category, index }) => {
+export const ReadMode: FC<ReadModeProps> = ({ content, paperName }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [markdown, setMarkdown] = useState<string>("");
 
   useEffect(() => {
-    setMarkdown(decode(paper.content));
+    setMarkdown(decode(content));
     setIsLoading(false);
   }, []);
 
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={markdown}
-      navigationTitle={paper.name}
-      actions={<Actions mode="read" paper={paper} category={category} index={index} />}
-    />
-  );
+  return <Detail isLoading={isLoading} markdown={markdown} navigationTitle={paperName} />;
 };
 
 ReadMode.displayName = "ReadMode";

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
 import { FC, useEffect } from "react";
 import { Base64, Paper } from "../types";
 import { decode } from "../utils/base64";
@@ -6,7 +6,6 @@ import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { encode } from "../utils/base64";
 import { updateConfigFile } from "../utils/updateConfigFile";
-import { ListMode } from "./ListMode";
 import { FormValidation, useForm } from "@raycast/utils";
 
 type EditModeProps = {
@@ -18,7 +17,6 @@ type EditModeProps = {
 export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
-  const { push } = useNavigation();
   const { handleSubmit, itemProps, setValue } = useForm<{
     name: string;
     createdAt: Date | null;
@@ -50,7 +48,7 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
           toast.style = Toast.Style.Success;
           toast.title = "Success";
 
-          push(<ListMode />);
+          popToRoot();
           return;
         }
 
@@ -61,7 +59,7 @@ export const EditMode: FC<EditModeProps> = ({ paper, paperCategory, index }) => 
         toast.style = Toast.Style.Success;
         toast.title = "Success";
 
-        push(<ListMode />);
+        popToRoot();
       } catch (error) {
         return false;
       }

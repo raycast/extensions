@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Paper",
-      "description": "Start Writing Papers",
+      "title": "Paper List",
+      "description": "List all your papers",
       "mode": "view"
     }
   ],

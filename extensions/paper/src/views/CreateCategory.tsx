@@ -1,10 +1,9 @@
-import { Form, Icon, Color, ActionPanel, Action, Toast, showToast, useNavigation } from "@raycast/api";
+import { Form, Icon, Color, ActionPanel, Action, Toast, showToast, popToRoot } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { FC, useRef } from "react";
 import { useGetConfig } from "../hooks/useGetConfig";
 import { useGetCategories } from "../hooks/useGetCategories";
 import { updateConfigFile } from "../utils/updateConfigFile";
-import { ListMode } from "./ListMode";
 
 type onSubmitValues = {
   category: string;
@@ -14,7 +13,6 @@ type onSubmitValues = {
 export const CreateCategory: FC = () => {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
-  const { push } = useNavigation();
   const colorsAsArray = useRef<Array<string>>(Object.keys(Color));
   const { handleSubmit, itemProps } = useForm<onSubmitValues>({
     async onSubmit(values) {
@@ -35,7 +33,7 @@ export const CreateCategory: FC = () => {
         toast.style = Toast.Style.Success;
         toast.title = `${values.category} created`;
 
-        push(<ListMode />);
+        popToRoot();
       } catch (error) {
         return false;
       }
