@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinyvideo",
+  "title": "TinyVideo",
+  "description": "Compress selected videos in Finder with TinyVideo.",
+  "icon": "tiny-video-icon.png",
+  "author": "mersocarlin",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compressVideo",
+      "title": "Compress Videos",
+      "subtitle": "TinyVideo",
+      "description": "Compress selected videos with TinyVideo",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "path",
+      "description": "The PATH environment variable used by the shell to locate ffmpeg executable",
+      "type": "textfield",
+      "required": true,
+      "title": "PATH env",
+      "placeholder": "Use `echo $PATH` on the terminal to get the value"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "fluent-ffmpeg": "^2.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
