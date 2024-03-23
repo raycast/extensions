@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Strip EXIF Data Fix] - 2024-03-04
+
+- Fixed EXIF command failing on some images.
+
 ## [WebP Hotfix] - 2024-01-29
 
 - Fixed some commands (e.g. convert) looking for WebP binaries in the wrong location
