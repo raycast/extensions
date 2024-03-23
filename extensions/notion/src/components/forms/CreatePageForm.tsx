@@ -1,9 +1,17 @@
 import {
-  ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast, getPreferenceValues,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  Form,
+  showToast,
+  useNavigation,
+  Action,
+  Toast,
+  getPreferenceValues,
   closeMainWindow,
   PopToRootType,
   showHUD,
-  Keyboard
+  Keyboard,
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
@@ -14,7 +22,7 @@ import {
   useDatabasesView,
   useRecentPages,
   useRelations,
-  useUsers
+  useUsers,
 } from "../../hooks";
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
@@ -87,7 +95,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
         const page = await createDatabasePage({
           ...initialValues,
-          ...pageValues
+          ...pageValues,
         });
 
         if (!closeAfterSave) {
@@ -97,17 +105,17 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
             primaryAction: {
               title: "Open Page",
               shortcut: { modifiers: ["cmd"], key: "o" },
-              onAction: () => handleOnOpenPage(page, setRecentPage)
+              onAction: () => handleOnOpenPage(page, setRecentPage),
             },
             secondaryAction: page.url
               ? {
-                title: "Copy URL",
-                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-                onAction: () => {
-                  Clipboard.copy(page.url as string);
+                  title: "Copy URL",
+                  shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                  onAction: () => {
+                    Clipboard.copy(page.url as string);
+                  },
                 }
-              }
-              : undefined
+              : undefined,
           });
         } else {
           await showHUD("Page created ✅", { popToRootType: PopToRootType.Immediate, clearRootSearch: true });
@@ -129,7 +137,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
           await showToast({ style: Toast.Style.Failure, title: "Failed to create page" });
         }
       }
-    }
+    },
   });
 
   function filterProperties(dp: DatabaseProperty) {
@@ -163,7 +171,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     showToast({
       style: Toast.Style.Failure,
       title: "No databases found",
-      message: "Please make sure you have access to at least one database"
+      message: "Please make sure you have access to at least one database",
     });
   }
 
@@ -173,7 +181,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
       ...(itemProps[id] as FieldProps<T>),
       title: property.name,
       key: id,
-      id
+      id,
     };
   }
 
@@ -224,15 +232,15 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
                     ...databaseView,
                     create_properties: databaseView?.create_properties
                       ? [...databaseView.create_properties, propertyId]
-                      : [propertyId]
+                      : [propertyId],
                   });
                 }}
                 onUnselect={(propertyId) => {
                   setDatabaseView({
                     ...databaseView,
                     create_properties: (databaseView?.create_properties || databasePropertyIds).filter(
-                      (pid) => pid !== propertyId
-                    )
+                      (pid) => pid !== propertyId,
+                    ),
                   });
                 }}
               />
@@ -242,7 +250,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
                 onChangeOrder={(propertyIds) => {
                   setDatabaseView({
                     ...databaseView,
-                    create_properties: propertyIds
+                    create_properties: propertyIds,
                   });
                 }}
               />
