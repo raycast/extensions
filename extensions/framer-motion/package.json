@@ -14,12 +14,14 @@
     {
       "name": "index",
       "title": "Search Documentation",
+      "subtitle": "Framer Motion",
       "description": "Search Framer Motion documentation",
       "mode": "view"
     },
     {
       "name": "utilities",
       "title": "Search Utilities",
+      "subtitle": "Framer Motion",
       "description": "Search Framer Motion utilities to copy",
       "mode": "view"
     }

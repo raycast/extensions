@@ -10,7 +10,7 @@ export default function Command() {
           {items.documents.map((item) => (
             <List.Item
               key={item.page}
-              icon={environment.appearance === "dark" ? "list-icon-dark.png" : "list-icon-light.png"}
+              icon={environment.appearance === "dark" ? "hooks-icon-dark.png" : "hooks-icon-light.png"}
               title={item.page}
               actions={
                 <ActionPanel>
