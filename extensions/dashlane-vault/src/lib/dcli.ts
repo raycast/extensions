@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { existsSync } from "fs";
 import { safeParse } from "valibot";
 
-import { execFilePromis } from "@/helper/exec";
+import { execFilePromise } from "@/helper/exec";
 import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -12,7 +12,7 @@ const CLI_PATH =
 
 async function dcli(...args: string[]) {
   if (CLI_PATH) {
-    const { stdout } = await execFilePromis(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
+    const { stdout } = await execFilePromise(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
     return stdout;
   }
 
