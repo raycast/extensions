@@ -87,7 +87,7 @@ function AddJournalEntry() {
       <Form.Checkbox
         label="Append at the top"
         {...itemProps.appendAtTop}
-        info="Will try to append the content at the top of the page with the current date"
+        info="Will try to append the content at the top of the page"
       />
       <Form.Checkbox
         label="Append with a date divider"
