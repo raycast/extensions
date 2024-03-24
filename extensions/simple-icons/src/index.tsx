@@ -109,9 +109,9 @@ export default function Command() {
                               <Detail.Metadata.Label title="Title" text={icon.title} />
                               {aliases.length > 0 && (
                                 <Detail.Metadata.TagList title="Aliases">
-                                  {aliases.map((alias, index) => (
+                                  {aliases.map((alias) => (
                                     <Detail.Metadata.TagList.Item
-                                      key={index}
+                                      key={alias}
                                       text={alias}
                                       onAction={async () => {
                                         Clipboard.copy(alias);

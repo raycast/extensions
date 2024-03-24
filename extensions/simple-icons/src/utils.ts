@@ -77,5 +77,5 @@ export const getAliases = (icon: IconData) => {
   const aka = icon.aliases?.aka ?? [];
   const dup = icon.aliases?.dup?.map((d) => [d.title, ...Object.values(d.loc ?? {})]).flat() ?? [];
   const loc = Object.values(icon.aliases?.loc ?? {});
-  return [...aka, ...dup, ...loc];
+  return [...new Set([...aka, ...dup, ...loc])];
 };
