@@ -1,12 +1,11 @@
-import { Action, ActionPanel, Form, LocalStorage, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getMasterPassword } from "./helper/master-password";
+import { DASHLANE_KEYCHAIN_KEY_NAME, getMasterPassword } from "./helper/master-password";
 import { setKeychainItem } from "./lib/authcli";
 import { encryptVault } from "./lib/dcli";
 
 export default function SetMasterPassword() {
   const [password, setPasswordInput] = useState("");
-  const [keyName, setKeyName] = useState("");
   const [passwordExists, setPasswordExists] = useState(false);
 
   const fetchKeyNameAndCheckPassword = async () => {
@@ -14,9 +13,6 @@ export default function SetMasterPassword() {
     if (existingPassword) {
       setPasswordExists(true);
       setPasswordInput(existingPassword);
-    } else {
-      const keyName = `dashlane-vault-master-password-${Math.random().toString(36).substring(2, 15)}`;
-      setKeyName(keyName);
     }
   };
 
@@ -26,9 +22,8 @@ export default function SetMasterPassword() {
       return;
     }
     try {
-      await setKeychainItem(keyName, password);
+      await setKeychainItem(DASHLANE_KEYCHAIN_KEY_NAME, password);
       await encryptVault();
-      await LocalStorage.setItem(keyName, "");
       showToast({
         style: Toast.Style.Success,
         title: passwordExists ? "Password updated successfully" : "Password set successfully",

@@ -80,7 +80,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/auth assets",
+    "prebuild": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/auth assets && chmod 755 assets/auth",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

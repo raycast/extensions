@@ -1,17 +1,11 @@
 import { getKeychainItem } from "@/lib/authcli";
-import { LocalStorage } from "@raycast/api";
 
-export const findDashlaneKey = async () => {
-  const allKeys = await LocalStorage.allItems();
-  return Object.keys(allKeys).find((key) => key.includes("dashlane-vault-master-password"));
-};
+export const DASHLANE_KEYCHAIN_KEY_NAME = "dashlane-vault-master-password";
 
 export const getMasterPassword = async (): Promise<string | null> => {
-  const keyName = await findDashlaneKey();
-  if (!keyName) {
-    return null;
-  }
-  const password = await getKeychainItem(keyName!);
+  const password = await getKeychainItem(DASHLANE_KEYCHAIN_KEY_NAME);
+  console.log(password);
+  
   if (!password) {
     return null;
   }

@@ -3,10 +3,11 @@ import { execa } from "execa";
 import { chmod } from "fs/promises";
 import { join } from "path";
 
+const CLI_PATH = join(environment.assetsPath, "auth");
+
 const executeCommand = async (args: string[]) => {
-  const command = join(environment.assetsPath, "auth");
-  await chmod(command, "755");
-  return await execa(command, args);
+  await chmod(CLI_PATH, "755");
+  return await execa(CLI_PATH, args);
 };
 
 const setKeychainItem = async (key: string, secret: string) => {
