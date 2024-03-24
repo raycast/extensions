@@ -10,9 +10,7 @@
 
 - Update pacakge to ESM
 - Use `got` instead of `node-fetch`
-- Bump all dependencies to latest version
-
-- Bump package dependencies
+- Bump all dependencies to the latest version
 
 ## [Improvements] - 2024-03-07
 
