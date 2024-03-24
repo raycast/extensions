@@ -65,7 +65,7 @@
     },
     {
       "name": "add-journal-entry",
-      "title": "Add a journal entry",
+      "title": "Add a Journal Entry",
       "subtitle": "Notion",
       "description": "Add a journal entry to a Notion designated journal page.",
       "mode": "view"
