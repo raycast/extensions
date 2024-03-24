@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion",
   "title": "Notion",
-  "description": "The fastest way to search and create Notion pages.",
+  "description": "The fastest way to search, create and update Notion pages.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
   "owner": "notion",
@@ -17,7 +17,8 @@
     "alexs",
     "yakitrak",
     "tleo19",
-    "dariuszpaluch"
+    "dariuszpaluch",
+    "brian-xu-vlt"
   ],
   "categories": [
     "Applications",
@@ -61,6 +62,13 @@
       "name": "quick-capture",
       "title": "Quick Capture",
       "description": "Capture something and put it out in a Notion page.",
+      "mode": "view"
+    },
+    {
+      "name": "add-journal-entry",
+      "title": "Add a journal entry",
+      "subtitle": "Notion",
+      "description": "Add a journal entry to a Notion designated journal page.",
       "mode": "view"
     }
   ],
