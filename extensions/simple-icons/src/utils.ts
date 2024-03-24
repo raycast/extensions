@@ -12,7 +12,11 @@ export const loadLatestVersion = async () => {
 
 export const loadJson = async (version: string) => {
   const json = await got
-    .get(`https://cdn.jsdelivr.net/npm/simple-icons@${version}/_data/simple-icons.json`)
+    .get(`https://cdn.jsdelivr.net/npm/simple-icons@${version}/_data/simple-icons.json`, {
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    })
     .json<IconJson>();
   return json;
 };
