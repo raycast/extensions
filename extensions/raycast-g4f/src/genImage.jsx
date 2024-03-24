@@ -466,6 +466,11 @@ export default function genImage({ launchContext }) {
   );
 }
 
+export const _NegativePrompt =
+  "low quality disfigured bad gross disgusting mutation ugly morbid mutated deformed mutilated mangled poorly drawn face" +
+  " extra limb missing limb floating limbs disconnected limbs malformed limbs oversaturated duplicate bodies cloned" +
+  " faces low-res blurry blur out of focus out of frame extra missing";
+
 export const image_providers = {
   Prodia: [
     g4f.providers.Prodia,
@@ -474,6 +479,7 @@ export const image_providers = {
       model: "ICantBelieveItsNotPhotography_seco.safetensors [4e7a3dfd]",
       // samplingSteps: 15,
       cfgScale: 25,
+      negativePrompt: _NegativePrompt,
     },
   ],
   ProdiaStableDiffusionXL: [
@@ -485,6 +491,7 @@ export const image_providers = {
       width: 1024,
       // samplingSteps: 25,
       cfgScale: 18,
+      negativePrompt: _NegativePrompt,
     },
   ],
 };
