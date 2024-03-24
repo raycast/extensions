@@ -111,7 +111,7 @@ export default function MenuCommand(): JSX.Element {
           shortcut={{ modifiers: ["cmd"], key: "m" }}
           onAction={() => {
             launchCommand({
-              name: "view-feeds",
+              name: "all-feeds",
               type: LaunchType.UserInitiated,
             });
           }}
