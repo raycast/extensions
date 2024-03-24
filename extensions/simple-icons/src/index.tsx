@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Cache, Clipboard, Detail, Grid, Icon, Toast, showHUD, showToast } from "@raycast/api";
 import { titleToSlug } from "simple-icons/sdk";
-import { Supports, CopySvg, OpenWith } from "./actions";
-import { loadLatestVersion, loadJson, cleanSavedPaths, initSavePath } from "./utils";
-import { IconJson, IconData } from "./types";
+import { Supports, CopySvg, OpenWith } from "./actions.js";
+import { loadLatestVersion, loadJson, cleanSavedPaths, initSavePath, getAliases } from "./utils.js";
+import { IconJson, IconData } from "./types.js";
 
 const itemDisplayColumns = {
   small: 8,
@@ -81,6 +81,7 @@ export default function Command() {
           const simpleIconsCdnLink = `https://cdn.simpleicons.org/${slug}`;
           const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg`;
           const unpkgCdnLink = `https://unpkg.com/simple-icons@${version}/icons/${slug}.svg`;
+          const aliases = getAliases(icon);
 
           return (
             <Grid.Item
@@ -106,6 +107,20 @@ export default function Command() {
                           metadata={
                             <Detail.Metadata>
                               <Detail.Metadata.Label title="Title" text={icon.title} />
+                              {aliases.length > 0 && (
+                                <Detail.Metadata.TagList title="Aliases">
+                                  {aliases.map((alias, index) => (
+                                    <Detail.Metadata.TagList.Item
+                                      key={index}
+                                      text={alias}
+                                      onAction={async () => {
+                                        Clipboard.copy(alias);
+                                        await showHUD("Copied to Clipboard");
+                                      }}
+                                    />
+                                  ))}
+                                </Detail.Metadata.TagList>
+                              )}
                               <Detail.Metadata.TagList title="Slug">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.slug}

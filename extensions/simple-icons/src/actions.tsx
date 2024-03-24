@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Action, Clipboard, Icon, Toast, showHUD, showToast } from "@raycast/api";
-import { loadSvg, makeCopyToDownload } from "./utils";
+import { loadSvg, makeCopyToDownload } from "./utils.js";
 
 export const CopySvg = ({ slug, version }: { slug: string; version: string }) => (
   <Action

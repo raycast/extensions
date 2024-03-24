@@ -1,5 +1,19 @@
 # Simple Icons Changelog
 
+## [Improvements] - 2024-3-24
+
+### Features
+
+- Add aliases field
+
+### Chore
+
+- Update pacakge to ESM
+- Use `got` instead of `node-fetch`
+- Bump all dependencies to latest version
+
+- Bump package dependencies
+
 ## [Improvements] - 2024-03-07
 
 - Apply brand colors to grid view
