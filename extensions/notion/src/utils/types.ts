@@ -9,6 +9,12 @@ export interface DatabaseView {
   kanban?: KanbanView;
 }
 
+export interface JournalEntry {
+  pageId: string;
+  dateDivider: boolean;
+  appendAtTop: boolean;
+}
+
 export interface KanbanView {
   property_id: string;
   backlog_ids: string[];
