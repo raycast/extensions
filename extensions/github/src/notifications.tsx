@@ -2,7 +2,7 @@ import { Endpoints } from "@octokit/types";
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import NotificationListItem from "./components/NotificationListItem";
@@ -28,13 +28,9 @@ function Notifications() {
     return response.data;
   });
 
-  const notifications = useMemo(() => {
-    if (selectedRepository) {
-      return data?.filter((notification) => notification.repository.full_name === selectedRepository);
-    }
-
-    return data;
-  }, [data, selectedRepository]);
+  const notifications = selectedRepository
+    ? data?.filter((notification) => notification.repository.full_name === selectedRepository)
+    : data;
 
   const [unreadNotifications, readNotifications] = partition(notifications, (notification) => notification.unread);
 
