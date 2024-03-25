@@ -11,6 +11,7 @@ import { getServerUrlPreference } from "~/utils/preferences";
 import {
   CLINotFoundError,
   EnsureCliBinError,
+  InstalledCLINotFoundError,
   ManuallyThrownError,
   NotLoggedInError,
   tryExec,
@@ -136,7 +137,7 @@ export class Bitwarden {
       throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
     if (this.cliPath === cliInfo.path.installedBin) {
-      throw new CLINotFoundError(
+      throw new InstalledCLINotFoundError(
         `Bitwarden CLI not found at ${this.cliPath}` +
           ", please make sure you installed it correctly. More information in the extension's description."
       );
