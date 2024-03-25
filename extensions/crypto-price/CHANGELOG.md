@@ -1,4 +1,9 @@
-# Bitcoin Price
+# Crypto Price
+
+## [Configure coins with text] - 2024-03-25
+
+- Configure coins with text: default value is 'BTC ETH BNB SOL XRP'
+- Only display one specific coin: e.g. set value to 'ETH'
 
 ## [Initial Version] - 2024-02-18
 
