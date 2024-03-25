@@ -28,7 +28,7 @@ export default function Command() {
     async function fetchServerParams() {
       try {
         const response = await fetch(`${preferences.serverUrl}/api/v1/params`);
-        const data = await response.json() as ServerParams;
+        const data = (await response.json()) as ServerParams;
         setServerParams(data);
       } catch (error) {
         showToast({ style: Toast.Style.Failure, title: "Failed to fetch server parameters" });
@@ -63,13 +63,13 @@ export default function Command() {
       generatePin();
     }
   }, [serverParams.pin_size]);
-  
+
   async function handleSubmit() {
     if (expiration > serverParams.max_exp_sec) {
       showToast({ style: Toast.Style.Failure, title: "Expiration time exceeds server limit" });
       return;
     }
-    
+
     try {
       const response = await fetch(`${preferences.serverUrl}/api/v1/message`, {
         method: "POST",
@@ -78,7 +78,7 @@ export default function Command() {
       });
 
       if (response.ok) {
-        const data = await response.json() as MessageResponse;
+        const data = (await response.json()) as MessageResponse;
         const secretUrl = `${preferences.serverUrl}/message/${data.key}`;
         await Clipboard.copy(`${secretUrl}\nPIN: ${pin}`);
         showToast({ style: Toast.Style.Success, title: "Secret created and copied to clipboard" });
