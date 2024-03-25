@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2024-03-25
+
+- Prevent crash when CLI is not installed and display troubleshooting screen instead
+
 ## [Improvement] - 2024-03-12
 
 - Improve CLI not found error message
