@@ -2,8 +2,9 @@
 
 ## [Configure coins with text] - 2024-03-25
 
-- Configure coins with text: default value is 'BTC ETH BNB SOL XRP'
-- Only display one specific coin: e.g. set value to 'ETH'
+- Configure coins with text: default coins value is 'BTC | ETH BNB SOL XRP'
+- Display multiple coins on the system menu bar: e.g. set coins to 'BTC ETH | BNB SOL XRP'
+- Display one specific coin on the system menu bar: e.g. set value to 'ETH'
 
 ## [Initial Version] - 2024-02-18
 

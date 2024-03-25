@@ -17,11 +17,9 @@ export interface Coin {
   more: Record<string, string>;
 }
 
-export interface CoinInfo {
-  name: string;
-  symbol: string;
-}
-
 export type SourceName = (typeof sourceNames)[number];
 
-export type UseSource = (currency: string, coinInfos: CoinInfo[]) => { isLoading: boolean; coins: Coin[] | undefined };
+export type UseSource = (
+  currency: string,
+  symbols: string[]
+) => { isLoading: boolean; coins: Record<string, Coin> | undefined };

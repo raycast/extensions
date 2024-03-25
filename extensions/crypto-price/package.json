@@ -92,9 +92,9 @@
     {
       "title": "Coins",
       "name": "coins",
-      "description": "Coins to enable, default is BTC ETH BNB SOL XRP",
+      "description": "Coins to enable, default is BTC | ETH BNB SOL XRP",
       "type": "textfield",
-      "default": "BTC ETH BNB SOL XRP",
+      "default": "BTC | ETH BNB SOL XRP",
       "required": false
     }
   ],

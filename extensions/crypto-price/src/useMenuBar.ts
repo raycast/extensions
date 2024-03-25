@@ -1,35 +1,40 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { Perferences, Coin } from "#/types";
 import { useSource } from "#/sources";
-import { formatCurrency, formatNumber, formatPercent, getCoinInfos } from "./utils";
+import { formatCurrency, formatNumber, formatPercent, processCoinsText } from "./utils";
 
 export function useMenuBar() {
   const { source, currency, style, coins: coinsText } = getPreferenceValues<Perferences>();
 
-  const coinInfos = getCoinInfos(coinsText);
-  const { isLoading, coins } = useSource(source, currency, coinInfos);
+  const coinsConfig = processCoinsText(coinsText);
+  const { isLoading, coins } = useSource(source, currency, coinsConfig.symbols);
 
-  if (isLoading || !coins) {
-    return { isLoading, title: "Loading...", coinItems: [], moreItems: [] };
+  let title = "Loading...";
+  let items: string[] = [];
+  let sections: { title: string; items: string[] }[] = [];
+
+  if (!isLoading && coins) {
+    const primarySymbols = coinsConfig.symbols.slice(0, coinsConfig.primaryCount);
+    const secondarySymbols = coinsConfig.symbols.slice(coinsConfig.primaryCount);
+    title = primarySymbols.map((symbol) => genTitle(coins[symbol], style, currency)).join(" | ");
+    items = secondarySymbols.map((symbol) => {
+      const coin = coins[symbol];
+      return `${coin.symbol}: ${coin.priceDisplay}`;
+    });
+    sections = primarySymbols.map((symbol) => {
+      const coin = coins[symbol];
+      return {
+        title: coin.name,
+        items: Object.entries(coin.more).map(([name, value]) => `${name}: ${value}`),
+      };
+    });
   }
 
-  const [mainCoin, ...restCoins] = coins;
-  const title = genTitle(mainCoin, style, currency);
-  const coinItems = restCoins.map((coin) => ({
-    title: `${coin.symbol}: ${coin.priceDisplay}`,
-    onAction: () => null,
-  }));
-  const moreTitle = mainCoin.name;
-  const moreItems = Object.entries(mainCoin.more).map(([name, value]) => ({
-    title: `${name}: ${value}`,
-    onAction: () => null,
-  }));
-
   return {
+    isLoading,
     title,
-    coinItems,
-    moreTitle,
-    moreItems,
+    items,
+    sections,
   };
 }
 
