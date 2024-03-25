@@ -2,13 +2,13 @@ import { MenuBarExtra, openCommandPreferences } from "@raycast/api";
 import { useMenuBar } from "./useMenuBar";
 
 export default function Command() {
-  const { isLoading, title, moreItems, coinItems } = useMenuBar();
+  const { isLoading, title, moreTitle, moreItems, coinItems } = useMenuBar();
   return (
     <MenuBarExtra isLoading={isLoading} title={title}>
       {coinItems.map((item) => (
         <MenuBarExtra.Item key={item.title} {...item} />
       ))}
-      <MenuBarExtra.Section title="Bitcoin">
+      <MenuBarExtra.Section title={moreTitle}>
         {moreItems.map((item) => (
           <MenuBarExtra.Item key={item.title} {...item} />
         ))}

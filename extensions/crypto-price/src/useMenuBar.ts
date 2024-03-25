@@ -1,32 +1,34 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Perferences, Coin, IsCoinEnabled } from "#/types";
+import type { Perferences, Coin } from "#/types";
 import { useSource } from "#/sources";
-import { formatCurrency, formatNumber, formatPercent } from "./utils";
+import { formatCurrency, formatNumber, formatPercent, getCoinInfos } from "./utils";
 
 export function useMenuBar() {
-  const { source, currency, style, ...rest } = getPreferenceValues<Perferences>();
+  const { source, currency, style, coins: coinsText } = getPreferenceValues<Perferences>();
 
-  const coinSymbols = getCoinSymbols(rest);
-  const { isLoading, coins } = useSource(source, currency, coinSymbols);
+  const coinInfos = getCoinInfos(coinsText);
+  const { isLoading, coins } = useSource(source, currency, coinInfos);
 
   if (isLoading || !coins) {
     return { isLoading, title: "Loading...", coinItems: [], moreItems: [] };
   }
 
-  const { BTC, ...restCoins } = coins;
-  const title = genTitle(BTC, style, currency);
-  const moreItems = Object.entries(BTC.more).map(([name, value]) => ({
-    title: `${name}: ${value}`,
+  const [mainCoin, ...restCoins] = coins;
+  const title = genTitle(mainCoin, style, currency);
+  const coinItems = restCoins.map((coin) => ({
+    title: `${coin.symbol}: ${coin.priceDisplay}`,
     onAction: () => null,
   }));
-  const coinItems = Object.values(restCoins).map((coin) => ({
-    title: `${coin.symbol}: ${coin.priceDisplay}`,
+  const moreTitle = mainCoin.name;
+  const moreItems = Object.entries(mainCoin.more).map(([name, value]) => ({
+    title: `${name}: ${value}`,
     onAction: () => null,
   }));
 
   return {
     title,
     coinItems,
+    moreTitle,
     moreItems,
   };
 }
@@ -51,13 +53,4 @@ function genTitle(coin: Coin, style: string, currency: string) {
       throw new Error(`Invalid style: ${style}`);
     }
   }
-}
-
-function getCoinSymbols({ isETHEnabled, isBNBEnabled, isSOLEnabled, isXRPEnabled }: IsCoinEnabled): string[] {
-  const symbols = ["BTC"];
-  if (isETHEnabled) symbols.push("ETH");
-  if (isBNBEnabled) symbols.push("BNB");
-  if (isSOLEnabled) symbols.push("SOL");
-  if (isXRPEnabled) symbols.push("XRP");
-  return symbols;
 }

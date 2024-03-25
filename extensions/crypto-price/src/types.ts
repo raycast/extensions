@@ -1,19 +1,14 @@
 import { sourceNames } from "#/sources/useSource";
 
-export interface IsCoinEnabled {
-  isETHEnabled: boolean;
-  isBNBEnabled: boolean;
-  isSOLEnabled: boolean;
-  isXRPEnabled: boolean;
-}
-
-export interface Perferences extends IsCoinEnabled {
+export interface Perferences {
   source: string;
   currency: string;
   style: string;
+  coins: string;
 }
 
 export interface Coin {
+  name: string;
   symbol: string;
   price: number;
   high24h: number;
@@ -22,9 +17,11 @@ export interface Coin {
   more: Record<string, string>;
 }
 
+export interface CoinInfo {
+  name: string;
+  symbol: string;
+}
+
 export type SourceName = (typeof sourceNames)[number];
 
-export type UseSource = (
-  currency: string,
-  coinSymbols: string[]
-) => { isLoading: boolean; coins: Record<string, Coin> | undefined };
+export type UseSource = (currency: string, coinInfos: CoinInfo[]) => { isLoading: boolean; coins: Coin[] | undefined };
