@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Icon, ActionPanel, Action, confirmAlert, Color, showToast, Toast, useNavigation } from "@raycast/api";
 import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import { User } from "../api/users";
+import { Project, addProject, removeProject } from "../api/projects";
 import { useUsers } from "../hooks/useUsers";
+import { useProjects } from "../hooks/useProjects";
 import { asanaToRaycastColor } from "../helpers/colors";
 import { getErrorMessage } from "../helpers/errors";
 import { Task, updateTask, deleteTask as apiDeleteTask, CustomField, EnumValue } from "../api/tasks";
+import { format } from "date-fns";
 
 type TaskActionProps = {
   task: Task;
@@ -160,6 +163,8 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
 
       <ActionPanel.Section>
         <UsersSubmenu workspace={workspace} task={task} mutate={mutate} />
+        <DueOnSubMenu task={task} mutate={mutate} />
+        <ProjectsSubmenu workspace={workspace} task={task} mutate={mutate} />
 
         {task.custom_fields &&
           task.custom_fields.length > 0 &&
@@ -220,6 +225,9 @@ type UsersSubmenuProps = {
   mutate: (params: MutateParams) => void;
 };
 
+type ProjectsSubmenuProps = UsersSubmenuProps;
+type DueOnSubmenuProps = UsersSubmenuProps;
+
 function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
   const [load, setLoad] = useState(false);
   const { data: users, isLoading } = useUsers(workspace, { execute: load });
@@ -277,6 +285,131 @@ function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
         </>
       )}
     </ActionPanel.Submenu>
+  );
+}
+
+function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
+  const [load, setLoad] = useState(false);
+  const { data: projects, isLoading } = useProjects(workspace);
+  const [selectedProjects, setSelectedProjects] = useState<Project[]>(task.projects);
+
+  const changeProject = async (project: Project | null, action: "add" | "remove") => {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: `Changing project` });
+
+      let asyncUpdate;
+      if (action === "add" && project) {
+        asyncUpdate = addProject(task.gid, project?.gid || "");
+        setSelectedProjects((prev) => [...prev, project]);
+      } else {
+        asyncUpdate = removeProject(task.gid, project?.gid || "");
+        setSelectedProjects((prev) => prev.filter((p) => p.gid !== project?.gid));
+      }
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate: (task) => {
+          if (action === "add" && project) {
+            return { ...task, projects: [...task.projects, project] };
+          } else {
+            const updatedProjects = task.projects.filter((p) => p.gid !== project?.gid);
+            return { ...task, projects: updatedProjects };
+          }
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Changed project`,
+        message: project ? `Assigned to ${project.name}` : "Task unassigned",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change project",
+        message: getErrorMessage(error),
+      });
+    }
+  };
+
+  return (
+    <ActionPanel.Submenu
+      title="Update Project"
+      icon={Icon.Folder}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+      onOpen={() => setLoad(true)}
+    >
+      {isLoading ? (
+        <Action title="Loading..." />
+      ) : (
+        <>
+          <ActionPanel.Submenu title="Add Project" icon={Icon.Check}>
+            {projects
+              ?.filter((project) => !selectedProjects.includes(project))
+              .map((project) => (
+                <Action
+                  key={project.gid}
+                  title={project.name}
+                  icon={getAvatarIcon(project.name)}
+                  onAction={() => changeProject(project, "add")}
+                />
+              ))}
+          </ActionPanel.Submenu>
+
+          <ActionPanel.Submenu title="Remove Project" icon={Icon.XMarkCircle}>
+            {selectedProjects.map((project) => (
+              <Action
+                key={project.gid}
+                title={project.name}
+                icon={getAvatarIcon(project.name)}
+                onAction={() => changeProject(project, "remove")}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        </>
+      )}
+    </ActionPanel.Submenu>
+  );
+}
+
+function DueOnSubMenu({ task, mutate }: DueOnSubmenuProps) {
+  async function changeDueOn(dueOn: Date | null) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Changing due date" });
+
+      // Adjust the date to UTC
+      const utcDueOn = dueOn ? new Date(Date.UTC(dueOn.getFullYear(), dueOn.getMonth(), dueOn.getDate())) : null;
+
+      const asyncUpdate = updateTask(task.gid, { due_on: utcDueOn });
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, due_on: utcDueOn };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Changed due date",
+        message: utcDueOn ? `Due on ${format(utcDueOn, "d MMM yyyy")}` : "No due date",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change due date",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  return (
+    <Action.PickDate
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      icon={Icon.Calendar}
+      title="Set Due Date…"
+      onChange={changeDueOn}
+    />
   );
 }
 
