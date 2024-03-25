@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-icons",
   "title": "Simple Icons",
-  "description": "Browse, Search, and Copy 3000+ brand icons.",
+  "description": "Browse, Search, and Copy 3000+ popular brand icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "categories": [

@@ -1,40 +1,45 @@
-import { Clipboard, closeMainWindow, LaunchProps } from "@raycast/api";
-import { runAppleScriptSync } from "run-applescript";
-import { setTimeout } from "timers/promises";
-import { testPermissionErrorType, showPermissionErrorHUD } from "./errors";
+import { closeMainWindow, getSelectedText, LaunchProps, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { escapeDoubleQuotes } from "./utils";
 
-export default async (props: LaunchProps) => {
-  const fallingBack = !!props.fallbackText && props.fallbackText.length > 0;
-  let currentClipboardContent: string | undefined;
-
-  // Copy the fallback text to the clipboard if it exists
-  if (fallingBack) {
-    // Save the current clipboard content if possible
-    currentClipboardContent = await Clipboard.readText();
-    await Clipboard.copy(props.fallbackText ?? "");
-  }
-
+export default async (props: LaunchProps<{ arguments: Arguments.New }>) => {
   await closeMainWindow();
 
+  let text = "";
   try {
-    runAppleScriptSync(`
-    tell application "Notes" to activate
-    tell application "System Events" to keystroke "0" using command down
-    tell application "System Events" to tell process "Notes" to ¬
-    click menu item 1 of menu 1 of ¬
-    menu bar item 3 of menu bar 1
-  `);
-
-    if (fallingBack) {
-      runAppleScriptSync(`
-      tell application "System Events" to keystroke "v" using command down
-    `);
-    }
-  } catch (error) {
-    showPermissionErrorHUD(testPermissionErrorType(error));
+    text = await getSelectedText();
+  } catch {
+    // fails silently
   }
 
-  // Simply give it a break before restoring the clipboard
-  await setTimeout(200);
-  Clipboard.copy(currentClipboardContent ?? "");
+  if (props.fallbackText) {
+    text = props.fallbackText;
+  }
+
+  if (props.arguments.text) {
+    text = props.arguments.text;
+  }
+
+  try {
+    const script = text.trim()
+      ? `
+    set noteContent to "${escapeDoubleQuotes(text)}"
+    tell application "Notes"
+      activate
+      set newNote to make new note at folder "Notes"
+      set body of newNote to noteContent
+      set selection to newNote
+    end tell
+    `
+      : `
+    tell application "Notes"
+      activate
+      make new note at folder "Notes"
+    end tell
+    `;
+
+    await runAppleScript(script);
+  } catch (error) {
+    showToast({ style: Toast.Style.Failure, title: "Could not create a new note." });
+  }
 };

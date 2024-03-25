@@ -4,7 +4,7 @@ We generally recommend altering this or top_p but not both.
 
 Default: 0.7`;
 
-export const model = `The model which will generate the completion. Some models are more sutiable for certain tasks than others. "gpt-4-1106-preview" is the most powerful one, but "gpt-3.5-turbo-1106" is cheaper, faster, and almost as capable`;
+export const model = `The model which will generate the completion. Some models are more sutiable for certain tasks than others. "gpt-4-0125-preview" is the most powerful one, but "gpt-3.5-turbo-0125" is cheaper, faster, and almost as capable`;
 
 export const maxTokens = `The maximum number of tokens to generate in the completion.
 

@@ -39,6 +39,7 @@ const FormUserDropdown = forwardRef(
         onSearchTextChange={setQuery}
         storeValue
         throttle
+        filtering
       >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 

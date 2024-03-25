@@ -74,7 +74,7 @@ export default function useGifPopulator() {
 
       setIsLoadingGifs(false);
     },
-    [setIsLoadingGifs, setItems]
+    [setIsLoadingGifs, setItems],
   );
 
   const populateAll = useCallback(
@@ -133,7 +133,7 @@ export default function useGifPopulator() {
 
       setIsLoadingGifs(false);
     },
-    [setIsLoadingGifs, setItems]
+    [setIsLoadingGifs, setItems],
   );
 
   return [items, isLoadingGifs, populate, populateAll] as const;

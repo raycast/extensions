@@ -1,5 +1,5 @@
-import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
+import { Cache, environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue, execaSync } from "execa";
 import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
 import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
@@ -9,8 +9,8 @@ import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
-  CLINotFoundError,
   EnsureCliBinError,
+  InstalledCLINotFoundError,
   ManuallyThrownError,
   NotLoggedInError,
   tryExec,
@@ -80,6 +80,25 @@ export const cliInfo = {
       return process.arch === "arm64" ? this.arm64 : this.x64;
     },
     get bin() {
+      // TODO: Remove this when the issue is resolved
+      // CLI bin download is off for arm64 until bitwarden releases arm binaries
+      // https://github.com/bitwarden/clients/pull/2976
+      // https://github.com/bitwarden/clients/pull/7338
+      if (process.arch === "arm64") {
+        const cache = new Cache();
+        try {
+          if (!existsSync(this.downloadedBin)) throw new Error("No downloaded bin");
+          if (cache.get("downloadedBinWorks") === "true") return this.downloadedBin;
+
+          execaSync(this.downloadedBin, ["--version"]);
+          cache.set("downloadedBinWorks", "true");
+          return this.downloadedBin;
+        } catch {
+          cache.set("downloadedBinWorks", "false");
+          return this.installedBin;
+        }
+      }
+
       return !BinDownloadLogger.hasError() ? this.downloadedBin : this.installedBin;
     },
   },
@@ -126,8 +145,8 @@ export class Bitwarden {
 
   private async ensureCliBinary(): Promise<void> {
     if (this.checkCliBinIsReady(this.cliPath)) return;
-    if (this.cliPath === this.preferences.cliPath) {
-      throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
+    if (this.cliPath === this.preferences.cliPath || this.cliPath === cliInfo.path.installedBin) {
+      throw new InstalledCLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
     if (BinDownloadLogger.hasError()) BinDownloadLogger.clearError();
 

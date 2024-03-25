@@ -1,11 +1,11 @@
 # OAuth
 
-Dealing with OAuth can be tedious. So we've built a set of utilities to make that task way easier. There's two part to our utilities:
+Dealing with OAuth can be tedious. So we've built a set of utilities to make that task way easier. There are two part to our utilities:
 
 1. Authenticating with a service using [OAuthService](./OAuthService.md) or built-in providers (e.g GitHub with `OAuthService.github`)
 2. Bringing authentication to Raycast commands using [withAccessToken](./withAccessToken.md) and [`getAccessToken`](./getAccessToken.md)
 
-`OAuthService`, `withAccessToken`, and `getAccessToken` are designed to work together. You'll find below different use-cases for which you can use these utils.
+`OAuthService`, `withAccessToken`, and `getAccessToken` are designed to work together. You'll find below different use cases for which you can use these utils.
 
 ## Using a built-in provider
 
@@ -15,8 +15,8 @@ We provide built-in providers that you can use out of the box, such as GitHub or
 import { Detail, LaunchProps } from "@raycast/api";
 import { withAccessToken, getAccessToken, OAuthService } from "@raycast/utils";
 
-const github = OAuthService.github({ 
-  scopes: "notifications repo read:org read:user read:project" 
+const github = OAuthService.github({
+  scopes: "notifications repo read:org read:user read:project",
 });
 
 function AuthorizedComponent(props: LaunchProps) {
@@ -27,7 +27,7 @@ function AuthorizedComponent(props: LaunchProps) {
 export default withAccessToken(github)(AuthorizedComponent);
 ```
 
-You can see our different providers in the following page: [OAuthService](./OAuthService.md)
+You can see our different providers on the following page: [OAuthService](./OAuthService.md)
 
 ## Using your own client
 
