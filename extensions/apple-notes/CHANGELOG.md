@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Improvements] - 2024-03-29
+
+- Add locked accessory
+
 ## [Better search] - 2024-03-22
 
 - Improve note search to include more details on folders and snippets

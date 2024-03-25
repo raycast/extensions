@@ -10,57 +10,37 @@ export type NoteItem = {
   folder: string;
   snippet: string;
   account: string;
+  locked: 0 | 1;
 };
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
 
 const query = `
     SELECT
-        'x-coredata://' || z_uuid || '/ICNote/p' || xcoreDataID AS id,
-        noteTitle AS title,
-        folderTitle AS folder,
-        datetime(modDate + 978307200, 'unixepoch') AS modifiedAt,
-        snippet,
-        accountName AS account,
-        UUID as UUID
-    FROM (
-        SELECT
-            c.ztitle1 AS noteTitle,
-            c.zfolder AS noteFolderID,
-            c.zmodificationdate1 AS modDate,
-            c.z_pk AS xcoredataID,
-            c.zaccount4 AS noteAccountID,
-            c.zsnippet AS snippet,
-            c.zidentifier AS UUID
-        FROM
-            ziccloudsyncingobject AS c
-        WHERE
-            noteTitle IS NOT NULL AND
-            modDate IS NOT NULL AND
-            xcoredataID IS NOT NULL AND
-            c.zmarkedfordeletion != 1
-    ) AS notes
-    INNER JOIN (
-        SELECT
-            z_pk AS folderID,
-            ztitle2 AS folderTitle,
-            zfoldertype AS isRecentlyDeletedFolder
-        FROM ziccloudsyncingobject
-        WHERE
-            folderTitle IS NOT NULL AND
-            zmarkedfordeletion != 1
-    ) AS folders ON noteFolderID = folderID
-    LEFT JOIN (
-        SELECT
-            z_pk AS accountID,
-            zname AS accountName
-        FROM ziccloudsyncingobject
-    ) as accounts on accountID = noteAccountID
-    LEFT JOIN (
-        SELECT z_uuid FROM z_metadata
-    )
-    ORDER BY modDate DESC
-  `;
+        'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS id,
+        note.ztitle1 AS title,
+        folder.ztitle2 AS folder,
+        datetime(note.zmodificationdate1 + 978307200, 'unixepoch') AS modifiedAt,
+        note.zsnippet AS snippet,
+        acc.zname AS account,
+        note.zidentifier AS UUID,
+        (note.zispasswordprotected = 1) as locked
+    FROM 
+        ziccloudsyncingobject AS note
+    INNER JOIN ziccloudsyncingobject AS folder 
+        ON note.zfolder = folder.z_pk
+    LEFT JOIN ziccloudsyncingobject AS acc 
+        ON note.zaccount4 = acc.z_pk
+    LEFT JOIN z_metadata AS zmd ON 1=1
+    WHERE
+        note.ztitle1 IS NOT NULL AND
+        note.zmodificationdate1 IS NOT NULL AND
+        note.z_pk IS NOT NULL AND
+        note.zmarkedfordeletion != 1 AND
+        folder.zmarkedfordeletion != 1
+    ORDER BY
+        note.zmodificationdate1 DESC
+`;
 
 export const useNotes = () =>
   useSQL<NoteItem>(NOTES_DB, query, { permissionPriming: "This is required to search your Apple Notes." });

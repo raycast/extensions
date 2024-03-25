@@ -24,6 +24,7 @@ type NoteListItemProps = {
 };
 
 export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemProps) {
+  console.log(note);
   async function openNoteInSeparateWindow() {
     try {
       await runAppleScript(`tell application "Notes"
@@ -74,6 +75,14 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
   }
 
   const accessories = [];
+
+  if (preferences.locked && note.locked === 1) {
+    accessories.push({
+      icon: Icon.Lock,
+      tooltip: "Password-protected note",
+    });
+  }
+
   if (preferences.accounts && note.account) {
     accessories.push({
       text: preferences.folders ? `${note.account || ""} -> ${note.folder || ""}` : `${note.account || ""}`,
@@ -116,6 +125,10 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
 
   if (note.snippet) {
     keywords.push(...note.snippet.split(" "));
+  }
+
+  if (note.locked === 1) {
+    keywords.push("locked");
   }
 
   return (

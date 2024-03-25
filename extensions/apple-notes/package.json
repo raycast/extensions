@@ -70,12 +70,20 @@
       "required": false
     },
     {
+      "name": "locked",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show a lock icon next to each note if it is password-protected",
+      "description": "Show a lock icon next to each note if it is password-protected",
+      "required": false
+    },
+    {
       "name": "openSeparately",
       "title": "Note actions",
       "type": "checkbox",
       "default": false,
       "label": "Open notes in separate windows by default",
-      "description": "Use ⌘+return to open separately if turned off",
+      "description": "Use ⌘ + ⏎ to open separately if turned off",
       "required": false
     }
   ],
