@@ -10,7 +10,11 @@ export type NoteItem = {
   folder: string;
   snippet: string;
   account: string;
-  locked: 0 | 1;
+  // the booleans below are stored as 0 or 1 in the database
+  locked: boolean;
+  pinned: boolean;
+  checklist: boolean;
+  checklistInProgress: boolean;
 };
 
 const NOTES_DB = resolve(homedir(), "Library/Group Containers/group.com.apple.notes/NoteStore.sqlite");
@@ -24,7 +28,10 @@ const query = `
         note.zsnippet AS snippet,
         acc.zname AS account,
         note.zidentifier AS UUID,
-        (note.zispasswordprotected = 1) as locked
+        (note.zispasswordprotected = 1) as locked,
+        (note.zispinned = 1) as pinned,
+        (note.zhaschecklist = 1) as checklist,
+        (note.zhaschecklistinprogress = 1) as checklistInProgress
     FROM 
         ziccloudsyncingobject AS note
     INNER JOIN ziccloudsyncingobject AS folder 

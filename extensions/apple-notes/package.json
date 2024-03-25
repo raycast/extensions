@@ -49,7 +49,7 @@
       "title": "Note accessories",
       "type": "checkbox",
       "default": false,
-      "label": "Show account name next to each note",
+      "label": "Show account name",
       "description": "Show the account name next to a note",
       "required": false
     },
@@ -57,7 +57,7 @@
       "name": "folders",
       "type": "checkbox",
       "default": true,
-      "label": "Show folder name next to each note",
+      "label": "Show folder name",
       "description": "Show the folder name next to a note",
       "required": false
     },
@@ -65,15 +65,23 @@
       "name": "modificationDate",
       "type": "checkbox",
       "default": false,
-      "label": "Show the modification date next to each note",
+      "label": "Show modification date",
       "description": "Show the modification date next to each note",
+      "required": false
+    },
+    {
+      "name": "checklist",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show checklist status",
+      "description": "Show a checklist icon with its status next to each note",
       "required": false
     },
     {
       "name": "locked",
       "type": "checkbox",
       "default": true,
-      "label": "Show a lock icon next to each note if it is password-protected",
+      "label": "Show if a note is password-protected",
       "description": "Show a lock icon next to each note if it is password-protected",
       "required": false
     },

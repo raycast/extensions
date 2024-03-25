@@ -64,10 +64,17 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
 
   const accessories = [];
 
-  if (preferences.locked && note.locked === 1) {
+  if (preferences.locked && note.locked) {
     accessories.push({
       icon: Icon.Lock,
       tooltip: "Password-protected note",
+    });
+  }
+
+  if (preferences.checklist && note.checklist) {
+    accessories.push({
+      icon: note.checklistInProgress ? Icon.Circle : Icon.CheckCircle,
+      tooltip: note.checklistInProgress ? "Checklist in progress" : "Checklist completed",
     });
   }
 
@@ -115,7 +122,12 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
     keywords.push(...note.snippet.split(" "));
   }
 
-  if (note.locked === 1) {
+  if (note.checklist) {
+    keywords.push(...["checklist", "todo", "task", "to-do"]);
+    keywords.push(...(note.checklistInProgress ? ["progress", "active"] : ["done", "completed"]));
+  }
+
+  if (note.locked) {
     keywords.push("locked");
   }
 
