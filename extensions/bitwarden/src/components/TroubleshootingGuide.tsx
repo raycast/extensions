@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Detail, getPreferenceValues, environment } from "@raycast/api";
 import { BugReportCollectDataAction, BugReportOpenAction } from "~/components/actions";
 import { BUG_REPORT_URL } from "~/components/actions/BugReportOpenAction";
-import { EnsureCliBinError, getErrorString } from "~/utils/errors";
+import { EnsureCliBinError, InstalledCLINotFoundError, getErrorString } from "~/utils/errors";
 
 const LINE_BREAK = "\n\n";
 const CLI_INSTALLATION_HELP_URL = "https://bitwarden.com/help/cli/#download-and-install";
@@ -18,7 +18,7 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
   const errorString = getErrorString(error);
   const localCliPath = getPreferenceValues<Preferences>().cliPath;
   const isCliDownloadError = error instanceof EnsureCliBinError;
-  const needsCliInstallGuide = localCliPath || isCliDownloadError;
+  const needsToInstallCli = localCliPath || isCliDownloadError || error instanceof InstalledCLINotFoundError;
 
   const messages: Messages[] = [
     "# 💥 Whoops! Something went wrong",
@@ -29,16 +29,14 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
     messages.push("We couldn't download the Bitwarden CLI, you can always install your own by following this guide:");
   }
 
-  if (needsCliInstallGuide) {
-    const cliPathString = localCliPath ? `(${localCliPath})` : "";
+  const cliPathString = localCliPath ? ` (${localCliPath})` : "";
 
-    messages.push(
-      "## Troubleshooting Guide",
-      `1. The [Bitwarden CLI](${CLI_INSTALLATION_HELP_URL}) is correctly installed ${cliPathString}`,
-      "2. If you did not install the Bitwarden CLI [using Homebrew](https://formulae.brew.sh/formula/bitwarden-cli), please check that the path of the installation matches the `Bitwarden CLI Installation Path` extension setting.",
-      "   - 💡 Run the `which bw` command to check your installation path."
-    );
-  }
+  messages.push(
+    "## Troubleshooting Guide",
+    needsToInstallCli &&
+      `- Make sure the [Bitwarden CLI](${CLI_INSTALLATION_HELP_URL}) is correctly installed${cliPathString}.`,
+    "> Please read the `Setup` section in the [extension's description](https://www.raycast.com/jomifepe/bitwarden) to ensure that everything is properly configured."
+  );
 
   messages.push(
     `**Please try restarting the command. If the issue persists, consider [reporting a bug on GitHub](${BUG_REPORT_URL}) to help us fix it.**`
@@ -63,7 +61,7 @@ const TroubleshootingGuide = ({ error }: TroubleshootingGuideProps) => {
             <BugReportOpenAction />
             <BugReportCollectDataAction />
           </ActionPanel.Section>
-          {needsCliInstallGuide && (
+          {needsToInstallCli && (
             <>
               <Action.CopyToClipboard title="Copy Homebrew Installation Command" content="brew install bitwarden-cli" />
               <Action.OpenInBrowser title="Open Installation Guide" url={CLI_INSTALLATION_HELP_URL} />
