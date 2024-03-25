@@ -11,11 +11,25 @@ export const enum PveVmStatus {
 
 export interface PveVm {
   id: string;
+  type: string;
   name: string;
+
+  cpu: number;
+  disk: number;
+  mem: number;
+  maxcpu: number;
+  maxdisk: number;
+  maxmem: number;
+
+  diskread: number;
+  diskwrite: number;
+  netin: number;
+  netout: number;
+
   node: string;
   status: PveVmStatus;
-  uptime: string;
-  vmid: string;
+  uptime: number;
+  vmid: number;
 }
 
 interface ApiResponse<T> {
@@ -24,13 +38,17 @@ interface ApiResponse<T> {
 
 type FetchOptions<T> = Parameters<typeof useFetch<T>>[1];
 
+function buildHeaders() {
+  const preferences = getPreferenceValues<Preferences>();
+  return {
+    Authorization: `PVEAPIToken=${preferences.tokenId}=${preferences.tokenSecret}`,
+  };
+}
 async function pveFetch<T = unknown>(url: string, options?: RequestInit) {
   const preferences = getPreferenceValues<Preferences>();
   const fetchUrl = new URL(url, preferences.serverUrl).toString();
   const fetchOptions = Object.assign({}, options, {
-    headers: {
-      Authorization: `PVEAPIToken=${preferences.tokenId}=${preferences.tokenSecret}`,
-    },
+    headers: buildHeaders(),
   });
 
   const response = await fetch(fetchUrl, fetchOptions);
@@ -41,9 +59,7 @@ function usePveFetch<T>(url: string, options?: RequestInit) {
   const preferences = getPreferenceValues<Preferences>();
   const fetchUrl = new URL(url, preferences.serverUrl).toString();
   const fetchOptions: FetchOptions<T> = Object.assign({}, options, {
-    headers: {
-      Authorization: `PVEAPIToken=${preferences.tokenId}=${preferences.tokenSecret}`,
-    },
+    headers: buildHeaders(),
     async parseResponse(response: Response) {
       const apiResponse = (await response.json()) as ApiResponse<T>;
       return apiResponse.data;
@@ -55,7 +71,7 @@ function usePveFetch<T>(url: string, options?: RequestInit) {
   useEffect(() => {
     const handle = setInterval(() => {
       result.revalidate();
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(handle);
   }, [result.revalidate]);
