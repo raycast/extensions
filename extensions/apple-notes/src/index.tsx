@@ -1,7 +1,8 @@
-import { List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useNotes } from "./useNotes";
 import { partition } from "lodash";
 import NoteListItem from "./components/NoteListItem";
+import { createNote } from "./api";
 
 export default function Command() {
   const { data, isLoading, permissionView, mutate } = useNotes();
@@ -33,6 +34,22 @@ export default function Command() {
           <NoteListItem key={note.id} note={note} mutate={mutate} isDeleted />
         ))}
       </List.Section>
+
+      <List.EmptyView
+        title="No notes were found"
+        description="Create a new note by pressing ⏎"
+        actions={
+          <ActionPanel>
+            <Action icon={Icon.Plus} title="Create New Note" onAction={createNote} />
+            <Action
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={() => mutate()}
+            />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }

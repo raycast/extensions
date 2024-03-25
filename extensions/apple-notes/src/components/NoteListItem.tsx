@@ -11,9 +11,9 @@ import {
   Toast,
   closeMainWindow,
 } from "@raycast/api";
-import { runAppleScript, showFailureToast } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import { NoteItem, useNotes } from "../useNotes";
-import { escapeDoubleQuotes } from "../utils";
+import { deleteNoteById, restoreNoteById, openNoteSeparately } from "../api";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -27,13 +27,7 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
   console.log(note);
   async function openNoteInSeparateWindow() {
     try {
-      await runAppleScript(`tell application "Notes"
-          set theNote to note id "${escapeDoubleQuotes(note.id)}"
-          set theFolder to container of theNote
-          show theFolder
-          show theNote with separately
-          activate
-        end tell`);
+      await openNoteSeparately(note.id);
       await closeMainWindow();
     } catch (error) {
       await showFailureToast(error, { title: "Could not open note" });
@@ -49,9 +43,7 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
           icon: { source: Icon.Trash, tintColor: Color.Red },
         })
       ) {
-        await runAppleScript(`tell application "Notes"
-        delete note id "${escapeDoubleQuotes(note.id)}"
-        end tell`);
+        await deleteNoteById(note.id);
         await mutate();
         await showToast({ title: "Deleted note", message: `"${note.title}" has been deleted` });
       }
@@ -62,11 +54,7 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
 
   async function restoreNote() {
     try {
-      await runAppleScript(`tell application "Notes"
-        set theNote to note id "${escapeDoubleQuotes(note.id)}"
-        set theFolder to default folder of account 1
-        move theNote to theFolder
-      end tell`);
+      await restoreNoteById(note.id);
       await mutate();
       await showToast({ title: "Restored note", message: `"${note.title}" has been restored` });
     } catch (error) {
