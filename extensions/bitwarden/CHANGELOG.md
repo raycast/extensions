@@ -1,5 +1,21 @@
 # Bitwarden Changelog
 
+## [Fix] - 2024-03-25
+
+- Prevent crash when CLI is not installed and display troubleshooting screen instead
+
+## [Fix] - 2024-03-12
+
+- Use downloaded CLI on arm64 devices that have it working
+
+## [Improvement] - 2024-03-12
+
+- Improve CLI not found error message
+
+## [Fix] - 2024-03-11
+
+- Temporarily disable CLI download for arm64 devices until bitwarden releases arm binaries
+
 ## [Improvements] - 2024-03-02
 
 - Decreased time to get passwords for large vaults by not waiting for all items to be loaded

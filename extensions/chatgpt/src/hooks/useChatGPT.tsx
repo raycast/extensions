@@ -1,12 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
 import { useState } from "react";
-import { ConfigurationPreferences } from "../type";
 import { getConfigUrl } from "../utils";
 
 export function useChatGPT(): OpenAI {
   const [chatGPT] = useState(() => {
-    const preferences = getPreferenceValues<ConfigurationPreferences>();
+    const preferences = getPreferenceValues<Preferences>();
 
     return new OpenAI({
       apiKey: preferences.apiKey,
@@ -16,6 +15,6 @@ export function useChatGPT(): OpenAI {
   return chatGPT;
 }
 
-export function getConfiguration(): ConfigurationPreferences {
-  return getPreferenceValues<ConfigurationPreferences>();
+export function getConfiguration(): Preferences {
+  return getPreferenceValues<Preferences>();
 }

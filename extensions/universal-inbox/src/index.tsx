@@ -3,6 +3,7 @@ import { GoogleMailNotificationListItem } from "./integrations/google-mail/listi
 import { TodoistNotificationListItem } from "./integrations/todoist/listitem/TodoistNotificationListItem";
 import { GithubNotificationListItem } from "./integrations/github/listitem/GithubNotificationListItem";
 import { LinearNotificationListItem } from "./integrations/linear/listitem/LinearNotificationListItem";
+import { SlackNotificationListItem } from "./integrations/slack/listitem/SlackNotificationListItem";
 import { Notification, NotificationListItemProps } from "./notification";
 import { NotificationActions } from "./action/NotificationActions";
 import { Page, UniversalInboxPreferences } from "./types";
@@ -73,6 +74,8 @@ function NotificationListItem({ notification, mutate }: NotificationListItemProp
       return <LinearNotificationListItem notification={notification} mutate={mutate} />;
     case "GoogleMail":
       return <GoogleMailNotificationListItem notification={notification} mutate={mutate} />;
+    case "Slack":
+      return <SlackNotificationListItem notification={notification} mutate={mutate} />;
     case "Todoist":
       return <TodoistNotificationListItem notification={notification} mutate={mutate} />;
     default:
@@ -110,6 +113,7 @@ function NotificationKindDropdown({ value, onNotificationKindChange }: Notificat
         <List.Dropdown.Item key="Github" title="Github" value="Github" />
         <List.Dropdown.Item key="Linear" title="Linear" value="Linear" />
         <List.Dropdown.Item key="GoogleMail" title="Google Mail" value="GoogleMail" />
+        <List.Dropdown.Item key="Slack" title="Slack" value="Slack" />
         <List.Dropdown.Item key="Todoist" title="Todoist" value="Todoist" />
       </List.Dropdown.Section>
     </List.Dropdown>

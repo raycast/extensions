@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "Kang",
   "contributors": [
-    "iwyvi"
+    "iwyvi",
+    "j3lte"
   ],
   "categories": [
     "System",
@@ -25,22 +26,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "axios": "^0.26.1",
+    "@raycast/api": "^1.70.2",
+    "@raycast/utils": "^1.13.3",
     "cheerio": "1.0.0-rc.12",
-    "ip": "^1.1.8"
+    "ip": "^2.0.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/ip": "^1.1.0",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/ip": "^1.1.3",
+    "@types/node": "^20.11.30",
+    "eslint": "^8.57.0",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "publish": "ray publish"
+    "lint:fix": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

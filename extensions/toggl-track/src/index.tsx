@@ -4,7 +4,7 @@ import duration from "dayjs/plugin/duration";
 import RunningTimeEntry from "./components/RunningTimeEntry";
 import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
 import { createTimeEntry, TimeEntry } from "./api";
-import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
+import TimeEntryForm from "./components/CreateTimeEntryForm";
 import { ExtensionContextProvider } from "./context/ExtensionContext";
 import { useTimeEntries, useRunningTimeEntry } from "./hooks";
 import { formatSeconds } from "./helpers/formatSeconds";
@@ -76,7 +76,10 @@ function ListView() {
                 icon={{ source: Icon.Clock }}
                 target={
                   <ExtensionContextProvider>
-                    <CreateTimeEntryForm {...{ isLoading, revalidateRunningTimeEntry }} />
+                    <TimeEntryForm
+                      revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                      revalidateTimeEntries={revalidateTimeEntries}
+                    />
                   </ExtensionContextProvider>
                 }
               />

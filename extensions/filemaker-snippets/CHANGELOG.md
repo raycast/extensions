@@ -1,5 +1,9 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2024-03-20
+
+- Fix snippet creation from clipboard
+
 ## [Fixes] - 2024-03-04
 
 - Improved frecency sorting for recent/favorite files

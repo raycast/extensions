@@ -84,7 +84,7 @@ export function getCurrentInterval(): Interval | undefined {
   }
 }
 
-function getCompletedPomodoroCount(): number {
+export function getCompletedPomodoroCount(): number {
   const result = cache.get(COMPLETED_POMODORO_COUNT_CACHE_KEY)
   if (result) {
     return parseInt(result, 10)

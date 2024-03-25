@@ -7,7 +7,7 @@ import {
   Action,
   Toast,
 } from '@raycast/api';
-import { formatUnits, parseUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits } from 'ethers';
 
 interface FormValues {
   input: string;
@@ -50,8 +50,8 @@ export default function Command() {
     const outputDecimalsNumber = parseInt(outputDecimals);
 
     try {
-      const parsedInput = parseUnits(input, inputDecimals);
-      const output = formatUnits(parsedInput, outputDecimals);
+      const parsedInput = parseUnits(input, inputDecimalsNumber);
+      const output = formatUnits(parsedInput, outputDecimalsNumber);
 
       push(
         <ConvertionView
