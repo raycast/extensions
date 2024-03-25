@@ -208,6 +208,15 @@ export class SlackClient {
     await slackWebClient.dnd.endSnooze();
   }
 
+  public static async setStatus(text: string, emoji: string): Promise<void> {
+    await slackWebClient.users.profile.set({
+      profile: JSON.stringify({
+        status_text: text,
+        status_emoji: emoji,
+      }),
+    });
+  }
+
   public static async getUnreadConversations(conversationIds: string[]): Promise<UnreadChannelInfo[]> {
     if (conversationIds.length > 30) {
       throw new Error("Too many conversations");

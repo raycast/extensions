@@ -6,10 +6,10 @@
 2. Click Button `Create New App`
 3. Select `From an app manifest`
 4. Select a workspace to which you want to grant the extension access.
-5. Copy and paste the following manifest (Select `YAML`):  
+5. Copy and paste the following manifest (Select `YAML`):
    _Feel free to exclude permission scope groups - see comments - if you don't want to have the full experience of this extension._
 
-    ```
+    ```yaml
     display_information:
       name: Raycast - Slack
     oauth_config:
@@ -39,6 +39,9 @@
           # Command: Set Presence
           - users:write
 
+          # Command: Set Status (optional - needed for setting custom status)
+          - users.profile:write
+
           # Command: Set Snooze
           - dnd:read
           - dnd:write
@@ -50,7 +53,7 @@
 
 6. Confirm creation of app
 7. Press `Install to Workspace`
-8. Get your personal access token from `Features -> OAuth & Permissions` (section `OAuth Tokens for Your Workspace`).  
+8. Get your personal access token from `Features -> OAuth & Permissions` (section `OAuth Tokens for Your Workspace`).
    Your personal access token will start with `xoxp-`.
 
 ## Validate your Slack API Token after extension updates
