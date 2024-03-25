@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, getPreferenceValues, Clipboard, popToRoot } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch from "node-fetch";
 import moment from "moment";
@@ -82,6 +82,7 @@ export default function Command() {
         const secretUrl = `${preferences.serverUrl}/message/${data.key}`;
         await Clipboard.copy(`${secretUrl}\nPIN: ${pin}`);
         showToast({ style: Toast.Style.Success, title: "Secret created and copied to clipboard" });
+        await popToRoot();
       } else {
         showToast({ style: Toast.Style.Failure, title: "Failed to create secret" });
       }
