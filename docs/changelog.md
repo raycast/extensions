@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.70.0 - 2024-03-20
+
+### 💎 Improvements
+
+- **Grid & List:** The placeholders shown while waiting for the next page to load are now animated
+- **Application info:** Application object now returns the localized name if the application is running
+
+### 🐞 Fixes
+
+- **Forms:** Fixed an issue which made it impossible to select a value of a controlled Dropdown after changing its value programmatically
+- **Grid:** Fixed an issue where pagination would not work when scrolling to the bottom while `isLoading` is initially false
+- **List:** Fixed an issue where pagination would not work if there was an empty section at the end
+- Fixed a rare case where, when an extension throws an error, a different error saying “Could not communicate with command worker” would be thrown instead
+
 ## 1.69.0 - 2024-03-07
 
 ### ✨ New

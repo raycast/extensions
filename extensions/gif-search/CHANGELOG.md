@@ -1,5 +1,11 @@
 # GIF Search Changelog
 
+## [Use native pagination] - 2024-03-12
+
+- Switched to using native pagination for better scrolling experience
+- Allows for retrieving more results as the user scrolls with the mouse
+- Updated dependencies for improved compatibility and performance
+
 ## [Cache favorite GIFs locally] - 2024-03-06
 
 - Cache favorite GIFs locally to improve performance.

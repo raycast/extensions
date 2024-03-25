@@ -27,7 +27,7 @@ export default function Command() {
     // Get all folders in instances folder
     const instanceFolders = await async.asyncFilter(await fs.readdir(instancesPath), async (instanceId) => {
       const stats = await fs.stat(path.join(instancesPath, instanceId));
-      return stats.isDirectory() && !["_LAUNCHER_TEMP", "_MMC_TEMP", ".LAUNCHER_TEMP"].includes(instanceId);
+      return stats.isDirectory() && !["_LAUNCHER_TEMP", "_MMC_TEMP", ".LAUNCHER_TEMP", ".tmp"].includes(instanceId);
     });
 
     // Get all instances and their details

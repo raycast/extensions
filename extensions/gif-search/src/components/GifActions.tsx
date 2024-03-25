@@ -76,7 +76,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
             onAction: (toast) => Clipboard.copy(toast.message ?? ""),
             shortcut: { modifiers: ["cmd"], key: "c" },
           },
-        })
+        }),
       );
 
   const downloadGIFAction = async () => {

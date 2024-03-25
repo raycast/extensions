@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Fix to View of Detail] - 2024-03-20
+- Fixed so that line breaks are displayed as new lines
+
 ## [Add Pop to Root Preference] - 2024-03-07
 - Added pop to root as a default preference
 
