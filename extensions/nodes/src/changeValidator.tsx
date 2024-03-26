@@ -7,7 +7,7 @@ function ChangeValidatorCommand() {
 
   return (
     <List isLoading={isLoading} isShowingDetail>
-      {!!data
+      {data
         ? data
             .sort((a, b) => b.activated_stake - a.activated_stake)
             ?.map((validator) => (
@@ -77,7 +77,7 @@ function ValidatorDetails(props: ValidatorDetailsProps) {
           <List.Item.Detail.Metadata.Label title="Voting Success Rate" text={`${validator.vote_success}%`} />
           <List.Item.Detail.Metadata.Label title="Uptime (30d)" text={`${validator.uptime}%`} />
           <List.Item.Detail.Metadata.Separator />
-          {!!validator.website && (
+          {validator.website && (
             <>
               <List.Item.Detail.Metadata.Link
                 title="Website"
