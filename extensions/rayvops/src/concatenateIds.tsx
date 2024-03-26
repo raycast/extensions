@@ -20,7 +20,7 @@ export default function ConcatenateIds() {
         markdown={`# Concat result\n\n\`${result}\``}
         actions={
           <ActionPanel>
-            <Action title="Copy result" onAction={() => Clipboard.copy(result)} />
+            <Action title="Copy Result" onAction={() => Clipboard.copy(result)} />
           </ActionPanel>
         }
       />
@@ -31,7 +31,7 @@ export default function ConcatenateIds() {
     <Form
       actions={
         <ActionPanel>
-          <Action title="Concat and display" onAction={handleConcatenate} />
+          <Action title="Concat and Display" onAction={handleConcatenate} />
         </ActionPanel>
       }
     >

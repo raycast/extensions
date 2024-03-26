@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, ToastStyle, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 
 interface Modification {
@@ -7,8 +7,10 @@ interface Modification {
   newValue: string;
 }
 
+type JsonItem = Record<string, unknown>;
+
 export default function ModifyAndFilterJsonValues() {
-  const [originalJson, setOriginalJson] = useState<any[]>([]);
+  const [originalJson, setOriginalJson] = useState<JsonItem[]>([]);
   const [fields, setFields] = useState<string[]>([]);
   const [modifications, setModifications] = useState<Modification[]>([]);
   const [checkedFields, setCheckedFields] = useState<{ [key: string]: boolean }>({});
@@ -29,7 +31,7 @@ export default function ModifyAndFilterJsonValues() {
           }, {});
           setCheckedFields(allChecked);
         } catch (error) {
-          showToast(ToastStyle.Failure, "Error", "Clipboard content is not valid JSON.");
+          showToast(Toast.Style.Failure, "Error", "Clipboard content is not valid JSON.");
         }
       }
     });
@@ -43,9 +45,9 @@ export default function ModifyAndFilterJsonValues() {
 
   const handleApplyChanges = () => {
     const modifiedJson = originalJson.map(obj => {
-      const filteredObj: Record<string, any> = Object.keys(obj)
+      const filteredObj: Record<string, unknown> = Object.keys(obj)
         .filter(key => checkedFields[key])
-        .reduce((acc: Record<string, any>, key) => {
+        .reduce((acc: Record<string, unknown>, key) => {
           acc[key] = obj[key];
           return acc;
         }, {});
@@ -60,7 +62,7 @@ export default function ModifyAndFilterJsonValues() {
     });
 
     Clipboard.copy(JSON.stringify(modifiedJson, null, 2)).then(() =>
-      showToast(ToastStyle.Success, "Modifications Applied", "Modified JSON has been copied to clipboard.")
+      showToast(Toast.Style.Success, "Modifications Applied", "Modified JSON has been copied to clipboard.")
     );
   };
 

@@ -10,6 +10,7 @@
   "preferences": [
     {
       "name": "baseUrl",
+      "required": false,
       "identifier": "baseUrl",
       "type": "textfield",
       "title": "Base URL",
