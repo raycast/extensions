@@ -1,5 +1,24 @@
 import { getProgressIcon, getFavicon as getF } from "@raycast/utils";
 import { Color, Image, Icon } from "@raycast/api";
+import fetch from "node-fetch";
+import type { PageSpeedData } from "./types";
+import { addItem } from "./storage";
+
+export const fetchPageSpeed = async (url: string) => {
+  const stripped = stripProtocol(url);
+  const pageSpeedAPI = `https://page-speed.dev/api/run/${stripped}`;
+  try {
+    const response = await fetch(pageSpeedAPI, { signal: AbortSignal.timeout(5000) });
+    const fetched = (await response.json()) as Omit<PageSpeedData, "url">;
+    await addItem({
+      ...fetched,
+      url: stripped,
+    });
+    return fetched;
+  } catch (error) {
+    throw new Error("Failed to fetch data");
+  }
+};
 
 export const getFavicon = (url: string) => {
   const u = "https://" + url;
@@ -25,7 +44,7 @@ export const getColor = (score: number) => {
 
 const domainAndUrlRegEx = /^(((http|https):\/\/|)?[a-z0-9]+([-.]{1}[a-z0-9]+)*\.[a-z]{2,6}(:[0-9]{1,5})?(\/.*)?)$/;
 
-export const isURL = (url: string) => {
+export const isDomain = (url: string | undefined) => {
   if (!url) return false;
   return domainAndUrlRegEx.test(url);
 };

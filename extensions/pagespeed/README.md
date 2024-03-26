@@ -8,6 +8,6 @@ A simple Raycast extension to check the performance of a website using page spee
 ![screenshot](./metadata/page-speed-2.png)
 ![screenshot](./metadata/page-speed-3.png)
 
-## Aknowledgements
+## Credits
 
 This extension is built on top of page-speed.dev API, kindly provided by [Daniel Roe](https://github.com/danielroe). The source code for the API can be found [here](https://github.com/danielroe/page-speed.dev)
