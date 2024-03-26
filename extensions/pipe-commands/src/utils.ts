@@ -48,13 +48,16 @@ export async function parseScriptCommands(): Promise<{
       return { path: scriptPath, content: script, metadatas };
     })
   );
-  commands = commands.filter((command) => !(command.metadatas.mode === "silent" && !command.metadatas.argument1));
+
+  // silent commands must have argument1, not inputType, in their metadata
+  commands = commands.filter((command) => command.metadatas.mode !== "silent" || command.metadatas.argument1);
 
   const schema = JSON.parse(await readFile(resolve(environment.assetsPath, "schema.json"), "utf-8"));
   const validator = new Validator();
 
   const valids = [] as ScriptCommand[];
   const invalid = [] as InvalidCommand[];
+
   for (const command of commands) {
     const res = validator.validate(command.metadatas, schema);
     if (res.valid) {
