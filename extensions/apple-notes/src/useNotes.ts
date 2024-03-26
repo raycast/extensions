@@ -1,6 +1,7 @@
 import { resolve } from "path";
 import { homedir } from "os";
 import { useSQL } from "@raycast/utils";
+import { partition } from "lodash";
 
 export type NoteItem = {
   id: string;
@@ -53,5 +54,26 @@ const query = `
         note.zmodificationdate1 DESC
 `;
 
-export const useNotes = () =>
-  useSQL<NoteItem>(NOTES_DB, query, { permissionPriming: "This is required to search your Apple Notes." });
+export const useNotes = () => {
+  const { data, ...rest } = useSQL<NoteItem>(NOTES_DB, query, {
+    permissionPriming: "This is required to search your Apple Notes.",
+  });
+
+  const alreadyFound: { [key: string]: boolean } = {};
+  const notes =
+    data
+      ?.filter((x) => {
+        const found = alreadyFound[x.id];
+        if (!found) alreadyFound[x.id] = true;
+        return !found;
+      })
+      .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1)) ?? [];
+
+  const [activeNotes, deletedNotes] = partition(notes, (note) => note.folder != "Recently Deleted");
+  const [pinnedNotes, unpinnedNotes] = partition(activeNotes, (note) => note.pinned);
+
+  return {
+    data: { pinnedNotes, unpinnedNotes, deletedNotes },
+    ...rest,
+  };
+};

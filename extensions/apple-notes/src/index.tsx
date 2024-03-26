@@ -1,6 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useNotes } from "./useNotes";
-import { partition } from "lodash";
 import NoteListItem from "./components/NoteListItem";
 import { createNote } from "./api";
 
@@ -11,35 +10,22 @@ export default function Command() {
     return permissionView;
   }
 
-  const alreadyFound: { [key: string]: boolean } = {};
-  const notes =
-    data
-      ?.filter((x) => {
-        const found = alreadyFound[x.id];
-        if (!found) alreadyFound[x.id] = true;
-        return !found;
-      })
-      .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1)) ?? [];
-
-  const [activeNotes, deletedNotes] = partition(notes, (note) => note.folder != "Recently Deleted");
-  const [pinnedNotes, unpinnedNotes] = partition(activeNotes, (note) => note.pinned);
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search notes by title, folder, or description">
       <List.Section title="Pinned">
-        {pinnedNotes.map((note) => (
+        {data.pinnedNotes.map((note) => (
           <NoteListItem key={note.id} note={note} mutate={mutate} />
         ))}
       </List.Section>
 
       <List.Section title="Notes">
-        {unpinnedNotes.map((note) => (
+        {data.unpinnedNotes.map((note) => (
           <NoteListItem key={note.id} note={note} mutate={mutate} />
         ))}
       </List.Section>
 
       <List.Section title="Recently Deleted">
-        {deletedNotes.map((note) => (
+        {data.deletedNotes.map((note) => (
           <NoteListItem key={note.id} note={note} mutate={mutate} isDeleted />
         ))}
       </List.Section>

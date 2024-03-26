@@ -25,7 +25,6 @@ type NoteListItemProps = {
 };
 
 export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemProps) {
-  console.log(note);
   async function openNoteInSeparateWindow() {
     try {
       await openNoteSeparately(note.id);

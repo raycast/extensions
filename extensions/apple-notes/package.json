@@ -41,6 +41,23 @@
           "placeholder": "Text"
         }
       ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Notes",
+      "subtitle": "Notes",
+      "description": "View your recent and pinned notes in the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "maxResults",
+          "title": "Maximum Results",
+          "type": "textfield",
+          "default": "25",
+          "description": "The maximum number of notes to display in the menu bar",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

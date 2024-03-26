@@ -8,7 +8,7 @@ export default function NoteDetail({ note }: { note: NoteItem }) {
   const { data, isLoading } = useCachedPromise(
     async (id) => {
       const content = await getNoteById(id);
-      const nodeToMarkdown = new NodeHtmlMarkdown();
+      const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
       return nodeToMarkdown.translate(content);
     },
     [note.id],

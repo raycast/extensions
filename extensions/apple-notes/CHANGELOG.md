@@ -8,6 +8,7 @@
 - Pinned notes
 - Shared notes
 - View note
+- Menu Bar
 
 ## [Better search] - 2024-03-22
 
