@@ -6,7 +6,6 @@ import pluralize from "pluralize";
 import { SlackStatusPreset } from "./types";
 import { getEmojiForCode } from "./emojis";
 import { WebClient } from "@slack/web-api";
-import { DndInfoResponse } from "@slack/web-api";
 
 function isTomorrowOrAlmostTomorrow(date: moment.Moment) {
   // Slack treats "tomorrow" as 1 minute before midnight, hence this little hack
@@ -17,7 +16,13 @@ function isToday(date: moment.Moment) {
   return date.isSame(new Date(), "day");
 }
 
-function getRelativeDurationText(expirationDate: moment.Moment) {
+export function getTextForExpiration(expirationTimestamp: number) {
+  const expirationDate = moment((expirationTimestamp *= 1000));
+
+  if (moment().isAfter(expirationDate)) {
+    return undefined;
+  }
+
   const isTomorrow = isTomorrowOrAlmostTomorrow(expirationDate);
   if (isTomorrow) {
     return "Until tomorrow";
@@ -43,18 +48,6 @@ function getRelativeDurationText(expirationDate: moment.Moment) {
   } else {
     relativeDuration = "a minute";
   }
-
-  return relativeDuration;
-}
-
-export function getTextForExpiration(expirationTimestamp: number) {
-  const expirationDate = moment((expirationTimestamp *= 1000));
-
-  if (moment().isAfter(expirationDate)) {
-    return undefined;
-  }
-
-  const relativeDuration = getRelativeDurationText(expirationDate);
 
   return `Clears in ${relativeDuration}`;
 }
@@ -120,34 +113,30 @@ export function getStatusTitle(profile: Profile | undefined) {
   return profile.status_text;
 }
 
-export function getStatusSubtitle(profile: Profile | undefined, dndData: DndInfoResponse | undefined) {
+export function getStatusSubtitle(profile: Profile | undefined) {
   if (!profile) {
     return undefined;
   }
 
-  if (typeof profile.status_expiration !== "number" || !profile.status_text) {
+  if (!profile.status_expiration) {
     return undefined;
   }
-
-  const dndText = dndData?.snooze_enabled ? ` - Notifications paused` : "";
 
   if (profile.status_expiration === 0) {
     return "Don't clear";
   }
 
-  return `${getTextForExpiration(profile.status_expiration)}${dndText}`;
+  return getTextForExpiration(profile.status_expiration);
 }
 
 export function setStatusToPreset({
   slack,
   preset,
   mutate,
-  mutateDnd,
 }: {
   slack: WebClient;
   preset: SlackStatusPreset;
   mutate: MutatePromise<Profile | undefined>;
-  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
 }) {
   return showToastWithPromise(
     async () => {
@@ -174,16 +163,6 @@ export function setStatusToPreset({
           },
         },
       );
-
-      if (preset.pauseNotifications && expiration > 0) {
-        await mutateDnd(
-          slack.dnd.setSnooze({
-            num_minutes: preset.defaultDuration,
-          }),
-        );
-      } else {
-        await mutateDnd(slack.dnd.endSnooze());
-      }
     },
     {
       loading: "Setting status…",
@@ -192,5 +171,3 @@ export function setStatusToPreset({
     },
   );
 }
-
-export const slackScopes = ["emoji:read", "users.profile:write", "users.profile:read", "dnd:read", "dnd:write"];

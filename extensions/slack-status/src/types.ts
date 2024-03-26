@@ -9,14 +9,12 @@ export type SlackStatusPreset = {
   emojiCode: string;
   title: string;
   defaultDuration: number; // 0 means "don't clear"
-  pauseNotifications: boolean;
 };
 
 export type FormValues = {
   emoji: string;
   statusText: string;
   duration: string;
-  pauseNotifications: boolean;
 };
 
 export interface CommandLinkParams {
