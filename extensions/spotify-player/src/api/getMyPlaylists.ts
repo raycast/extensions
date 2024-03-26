@@ -1,13 +1,13 @@
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-type GetMySavedAlbumsProps = { limit?: number };
+type GetMySavedAlbumsProps = { limit?: number; offset?: number };
 
-export async function getMyPlaylists({ limit = 50 }: GetMySavedAlbumsProps = {}) {
+export async function getMyPlaylists({ limit = 50, offset }: GetMySavedAlbumsProps = {}) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
-    const response = await spotifyClient.getMePlaylists({ limit });
+    const response = await spotifyClient.getMePlaylists({ limit, offset });
     return response;
   } catch (err) {
     const error = getErrorMessage(err);

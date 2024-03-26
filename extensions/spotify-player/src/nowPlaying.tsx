@@ -284,8 +284,8 @@ ${description}
           {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
           {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
           {trackOrEpisodeActions}
-          {myPlaylistsData?.items && meData && uri && (
-            <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
+          {myPlaylistsData && meData && uri && (
+            <AddToPlaylistAction playlists={myPlaylistsData} meData={meData} uri={uri} />
           )}
           <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
             {myDevicesData?.devices

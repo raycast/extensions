@@ -238,7 +238,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       )}
       {menuItems}
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
-        {myPlaylistsData?.items
+        {myPlaylistsData
           ?.filter((playlist) => playlist.owner?.id === meData?.id)
           .map((playlist) => {
             return (

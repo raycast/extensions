@@ -41,8 +41,8 @@ export function TrackActionPanel({
       )}
       <StartRadioAction trackId={track.id} />
       {track.uri && <AddToQueueAction uri={track.uri} title={title} />}
-      {myPlaylistsData?.items && meData && track.uri && (
-        <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={track.uri} />
+      {myPlaylistsData && meData && track.uri && (
+        <AddToPlaylistAction playlists={myPlaylistsData} meData={meData} uri={track.uri} />
       )}
       <FooterAction url={track?.external_urls?.spotify} uri={track.uri} title={title} />
     </ActionPanel>
