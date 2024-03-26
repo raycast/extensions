@@ -125,10 +125,8 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 
 export default function Command() {
   if (!vscodeApp) {
-    return(
-      <Detail
-        markdown="Please configure the **Search Project Manager** Raycast extension to choose which version of Visual Studio Code to use."
-      />
+    return (
+      <Detail markdown="Please configure the **Search Project Manager** Raycast extension to choose which version of Visual Studio Code to use." />
     );
   }
 
