@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, Detail, Clipboard } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function ConcatenateIds() {
   const [input, setInput] = useState("");
@@ -8,7 +8,7 @@ export default function ConcatenateIds() {
   const handleConcatenate = async () => {
     const ids = input.split(/\s+/).filter(Boolean);
     const concatenated = `('${ids.join("', '")}')`;
-    
+
     await Clipboard.copy(concatenated);
 
     setResult(concatenated);

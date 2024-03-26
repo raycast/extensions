@@ -44,9 +44,9 @@ export default function ModifyAndFilterJsonValues() {
   };
 
   const handleApplyChanges = () => {
-    const modifiedJson = originalJson.map(obj => {
+    const modifiedJson = originalJson.map((obj) => {
       const filteredObj: Record<string, unknown> = Object.keys(obj)
-        .filter(key => checkedFields[key])
+        .filter((key) => checkedFields[key])
         .reduce((acc: Record<string, unknown>, key) => {
           acc[key] = obj[key];
           return acc;
@@ -62,14 +62,14 @@ export default function ModifyAndFilterJsonValues() {
     });
 
     Clipboard.copy(JSON.stringify(modifiedJson, null, 2)).then(() =>
-      showToast(Toast.Style.Success, "Modifications Applied", "Modified JSON has been copied to clipboard.")
+      showToast(Toast.Style.Success, "Modifications Applied", "Modified JSON has been copied to clipboard."),
     );
   };
 
   const handleSelectAllChange = (newValue: boolean) => {
     setSelectAll(newValue);
     const newCheckedFields = { ...checkedFields };
-    fields.forEach(field => {
+    fields.forEach((field) => {
       newCheckedFields[field] = newValue;
     });
     setCheckedFields(newCheckedFields);
@@ -82,7 +82,8 @@ export default function ModifyAndFilterJsonValues() {
           <Action title="Add Field Modification" onAction={handleAddFieldModification} />
           <Action title="Apply Changes" onAction={handleApplyChanges} />
         </ActionPanel>
-      }>
+      }
+    >
       {modifications.map((modification, index) => (
         <React.Fragment key={modification.id}>
           <Form.Dropdown
@@ -90,11 +91,12 @@ export default function ModifyAndFilterJsonValues() {
             title={`Field to Modify #${index + 1}`}
             value={modification.field}
             onChange={(field) => {
-              const newMods = modifications.map(mod => mod.id === modification.id ? { ...mod, field } : mod);
+              const newMods = modifications.map((mod) => (mod.id === modification.id ? { ...mod, field } : mod));
               setModifications(newMods);
               setCheckedFields({ ...checkedFields, [field]: true });
-            }}>
-            {fields.map(field => (
+            }}
+          >
+            {fields.map((field) => (
               <Form.Dropdown.Item key={field} title={field} value={field} />
             ))}
           </Form.Dropdown>
@@ -103,7 +105,7 @@ export default function ModifyAndFilterJsonValues() {
             title={`New Value for Field #${index + 1}`}
             value={modification.newValue}
             onChange={(newValue) => {
-              const newMods = modifications.map(mod => mod.id === modification.id ? { ...mod, newValue } : mod);
+              const newMods = modifications.map((mod) => (mod.id === modification.id ? { ...mod, newValue } : mod));
               setModifications(newMods);
             }}
           />
@@ -115,14 +117,14 @@ export default function ModifyAndFilterJsonValues() {
         value={selectAll}
         onChange={handleSelectAllChange}
       />
-      {fields.map(field => (
+      {fields.map((field) => (
         <Form.Checkbox
           key={field}
           id={`check-${field}`}
           label={field}
           value={!!checkedFields[field]}
           onChange={(newValue) => {
-            if (!modifications.some(mod => mod.field === field) || newValue) {
+            if (!modifications.some((mod) => mod.field === field) || newValue) {
               setCheckedFields({ ...checkedFields, [field]: newValue });
             }
           }}

@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 type JsonItem = Record<string, unknown>;
 
@@ -34,10 +34,10 @@ export default function ExtractJsonFieldValues() {
       showToast(Toast.Style.Failure, "No field selected");
       return;
     }
-    const fieldValues = json.map(item => item[selectedField]).filter(value => value !== undefined);
+    const fieldValues = json.map((item) => item[selectedField]).filter((value) => value !== undefined);
     // Copier les valeurs extraites dans le presse-papiers
-    Clipboard.copy(fieldValues.join("\n")).then(() => 
-      showToast(Toast.Style.Success, "Value extracted in your Clipboard")
+    Clipboard.copy(fieldValues.join("\n")).then(() =>
+      showToast(Toast.Style.Success, "Value extracted in your Clipboard"),
     );
   };
 
@@ -47,13 +47,10 @@ export default function ExtractJsonFieldValues() {
         <ActionPanel>
           <Action title="Extract and Copy" onAction={handleExtractAndCopy} />
         </ActionPanel>
-      }>
-      <Form.Dropdown
-        id="field"
-        title="Select a field"
-        value={selectedField}
-        onChange={setSelectedField}>
-        {fields.map(field => (
+      }
+    >
+      <Form.Dropdown id="field" title="Select a field" value={selectedField} onChange={setSelectedField}>
+        {fields.map((field) => (
           <Form.Dropdown.Item key={field} title={field} value={field} />
         ))}
       </Form.Dropdown>

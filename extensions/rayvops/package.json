@@ -5,7 +5,11 @@
   "description": "Usefull commands for Ops team <3",
   "icon": "rayVops.png",
   "author": "Bdo",
-  "categories": ["Productivity", "Data", "Applications"],
+  "categories": [
+    "Productivity",
+    "Data",
+    "Applications"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -33,13 +37,13 @@
     },
     {
       "name": "openMultipleTabs",
-      "title": "Open Multiple links",
+      "title": "Open Multiple Links",
       "description": "Paste a list of Ids and open multiples links in browser. \n\nEx : 123 456\n\n=> Open https://test.com/123 and https://test.com/456",
       "mode": "view"
     },
     {
       "name": "modifyAndFilterJsonValues",
-      "title": "Modify and Filter JSON values",
+      "title": "Modify and Filter JSON Values",
       "description": "Modify Json structure from your cliboard.\nYou can replace all values for an attribute in one time, and keep only and keep only those you need.\nEx :\n[\n  {\n    \"Id\": \"1234\",\n    \"Name\": \"Case 00001\",\n    \"Status\": \"Open\",\n    \"ClosedDate\": \"\"\n  },\n  {\n    \"Id\": \"5678\",\n    \"Name\": \"Case 00002\",\n    \"Status\": \"Open\",\n    \"ClosedDate\": \"\"\n  }\n]\n\nTo : \n[\n  {\n    \"Id\": \"1234\",\n    \"Status\": \"Closed\",\n    \"ClosedDate\": \"2024-03-25\"\n  },\n  {\n    \"Id\": \"5678\",\n    \"Status\": \"Closed\",\n    \"ClosedDate\": \"2024-03-25\"\n  }\n]",
       "mode": "view"
     }
