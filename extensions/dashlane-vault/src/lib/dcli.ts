@@ -4,9 +4,8 @@ import { safeParse } from "valibot";
 
 import { getMasterPassword } from "@/helper/master-password";
 import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { execa } from "execa";
-import { execFile } from "child_process";
 import util from "util";
 
 export const execFilePromis = util.promisify(execFile);
@@ -16,19 +15,20 @@ const CLI_PATH =
   preferences.cliPath ?? ["/usr/local/bin/dcli", "/opt/homebrew/bin/dcli"].find((path) => existsSync(path));
 
 async function dcli(...args: string[]) {
-  console.log(args);
-  
   if (!CLI_PATH) {
     throw new Error("Dashlane CLI is not found!");
   }
-  // const masterPassword = preferences.useTouchID ? await getMasterPassword() : null;
+  const masterPassword = preferences.useTouchID ? await getMasterPassword() : null;
 
-  const { stdout, stderr } = await execFilePromis(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
-
-  console.log(stdout, stderr);
+  const { stdout, stderr } = await execa(CLI_PATH, args, {
+    maxBuffer: 4096 * 1024,
+    env: {
+      ...(masterPassword ? { DASHLANE_MASTER_PASSWORD: masterPassword } : {}),
+    },
+  });
   // reopen raycast as touchid closes the window
-  // exec("open -a Raycast.app");
-  if (stderr && stderr.length > 1) {
+  exec("open -a Raycast.app");
+  if (stdout.length < 0 && stderr.length > 1) {
     throw new Error(`Failed to execute Dashlane CLI ${stderr}`);
   }
   return stdout;
