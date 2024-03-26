@@ -14,6 +14,7 @@ import {
 import { showFailureToast } from "@raycast/utils";
 import { NoteItem, useNotes } from "../useNotes";
 import { deleteNoteById, restoreNoteById, openNoteSeparately } from "../api";
+import NoteDetail from "./NoteDetail";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -103,19 +104,6 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
     });
   }
 
-  const openInNotesAction = (
-    <Action.Open
-      title="Open in Notes"
-      target={`notes://showNote?identifier=${note.UUID}`}
-      icon={Icon.Document}
-      application="com.apple.notes"
-    />
-  );
-
-  const openInSeparateWindowAction = (
-    <Action title="Open in a Separate Window" icon={Icon.NewDocument} onAction={openNoteInSeparateWindow} />
-  );
-
   const keywords = [];
   if (note.folder) {
     keywords.push(...note.folder.split(" "));
@@ -135,8 +123,35 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
   }
 
   if (note.locked) {
-    keywords.push("locked");
+    keywords.push(...["locked", "password", "protected"]);
   }
+
+  if (note.invitationLink) {
+    keywords.push(...["shared"]);
+  }
+
+  const getOpenNotesAction = (separately?: boolean, shortcut?: Keyboard.Shortcut) =>
+    separately ? (
+      <Action
+        title="Open in a Separate Window"
+        icon={Icon.NewDocument}
+        onAction={openNoteInSeparateWindow}
+        shortcut={shortcut}
+      />
+    ) : (
+      <Action.Open
+        title="Open in Notes"
+        target={`notes://showNote?identifier=${note.UUID}`}
+        icon={{ fileIcon: "/System/Applications/Notes.app" }}
+        application="com.apple.notes"
+        shortcut={shortcut}
+      />
+    );
+
+  const primaryOpen = isDeleted ? getOpenNotesAction() : getOpenNotesAction(preferences.openSeparately);
+  const secondaryOpen = isDeleted
+    ? null
+    : getOpenNotesAction(!preferences.openSeparately, Keyboard.Shortcut.Common.Open);
 
   return (
     <List.Item
@@ -148,19 +163,9 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
       accessories={accessories}
       actions={
         <ActionPanel>
-          {isDeleted ? (
-            openInNotesAction
-          ) : preferences.openSeparately ? (
-            <>
-              {openInSeparateWindowAction}
-              {openInNotesAction}
-            </>
-          ) : (
-            <>
-              {openInNotesAction}
-              {openInSeparateWindowAction}
-            </>
-          )}
+          {primaryOpen}
+          <Action.Push title="View Note" icon={Icon.Eye} target={<NoteDetail note={note} />} />
+          {secondaryOpen}
 
           {isDeleted ? (
             <Action

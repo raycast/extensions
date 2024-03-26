@@ -51,3 +51,12 @@ export async function restoreNoteById(id: string) {
     end tell
     `);
 }
+
+export async function getNoteById(id: string) {
+  return runAppleScript(`
+    tell application "Notes"
+      set theNote to note id "${escapeDoubleQuotes(id)}"
+      return body of theNote
+    end tell
+    `);
+}

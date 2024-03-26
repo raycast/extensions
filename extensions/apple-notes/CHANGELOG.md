@@ -7,6 +7,7 @@
 - Empty state
 - Pinned notes
 - Shared notes
+- View note
 
 ## [Better search] - 2024-03-22
 

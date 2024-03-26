@@ -99,14 +99,15 @@
       "type": "checkbox",
       "default": false,
       "label": "Open notes in separate windows by default",
-      "description": "Use ⌘ + ⏎ to open separately if turned off",
+      "description": "Pressing ⏎ will open notes in separate windows by default",
       "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.70.2",
     "@raycast/utils": "^1.13.4",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
