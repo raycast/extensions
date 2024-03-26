@@ -29,7 +29,7 @@ function ChangeValidatorCommand() {
                           "validator",
                           JSON.stringify({ address: validator.vote_identity, name: validator.name }),
                         ).then(() => {
-                          launchCommand({ name: "index", type: LaunchType.UserInitiated });
+                          launchCommand({ name: "menuBarStats", type: LaunchType.UserInitiated });
                         });
                       }}
                     />
