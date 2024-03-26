@@ -1,4 +1,18 @@
-import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Clipboard,
+  Icon,
+  Form,
+  showToast,
+  useNavigation,
+  Action,
+  Toast,
+  getPreferenceValues,
+  closeMainWindow,
+  PopToRootType,
+  showHUD,
+  Keyboard,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 
@@ -20,18 +34,29 @@ import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 export type CreatePageFormValues = {
   database: string | undefined;
   [K: string]: Form.Value | undefined;
+  closeAfterSave?: boolean;
+  content: string;
 };
 
 type CreatePageFormProps = {
   mutate?: () => Promise<void>;
   launchContext?: CreatePageFormValues;
-  defaults?: CreatePageFormValues;
+  defaults?: Partial<CreatePageFormValues>;
 };
+
+type CreatePageFormPreferences = {
+  closeAfterCreate: boolean;
+};
+
+type Quicklink = Action.CreateQuicklink.Props["quicklink"];
+
+const createPropertyId = (property: DatabaseProperty) => "property::" + property.type + "::" + property.id;
 
 const NON_EDITABLE_PROPETY_TYPES = ["formula"];
 const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
 
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
+  const preferences = getPreferenceValues<CreatePageFormPreferences>();
   const defaultValues = launchContext ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
@@ -48,7 +73,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
-    if (type === "formula") continue;
+    if (NON_EDITABLE_PROPETY_TYPES.includes(type)) continue;
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
     let value = defaultValues?.[key];
@@ -56,23 +81,24 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     initialValues[key] = value;
   }
 
-  const { itemProps, values, handleSubmit } = useForm<CreatePageFormValues>({
+  const { itemProps, values, handleSubmit, reset, focus } = useForm<CreatePageFormValues>({
     initialValues,
     validation,
     async onSubmit(values) {
+      const { closeAfterSave, ...pageValues } = values;
       try {
-        await showToast({ style: Toast.Style.Animated, title: "Creating page" });
-
-        if (initialDatabaseId) {
-          values.database = initialDatabaseId;
+        if (closeAfterSave) {
+          await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+        } else {
+          await showToast({ style: Toast.Style.Animated, title: "Creating page" });
         }
 
         const page = await createDatabasePage({
           ...initialValues,
-          ...values,
+          ...pageValues,
         });
 
-        if (page) {
+        if (!closeAfterSave) {
           await showToast({
             style: Toast.Style.Success,
             title: "Created page",
@@ -91,14 +117,25 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
                 }
               : undefined,
           });
-
-          if (mutate) {
-            mutate();
-            useNavigation().pop();
-          }
+        } else {
+          await showHUD("Page created ✅", { popToRootType: PopToRootType.Immediate, clearRootSearch: true });
         }
-      } catch {
-        await showToast({ style: Toast.Style.Failure, title: "Failed to create page" });
+
+        if (mutate) {
+          await mutate();
+          useNavigation().pop();
+        } else {
+          reset(initialValues);
+          const titleProperty = databaseProperties?.find((dp) => dp.type == "title");
+          titleProperty && focus(createPropertyId(titleProperty));
+        }
+      } catch (error) {
+        console.error(error);
+        if (closeAfterSave) {
+          await showHUD("Failed to create page ⚠️", { popToRootType: PopToRootType.Suspended, clearRootSearch: false });
+        } else {
+          await showToast({ style: Toast.Style.Failure, title: "Failed to create page" });
+        }
       }
     },
   });
@@ -121,8 +158,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     return 0;
   }
 
-  type Quicklink = Action.CreateQuicklink.Props["quicklink"];
-
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
@@ -141,7 +176,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   }
 
   function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
-    const id = "property::" + property.type + "::" + property.id;
+    const id = createPropertyId(property);
     return {
       ...(itemProps[id] as FieldProps<T>),
       title: property.name,
@@ -152,6 +187,26 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
 
+  const renderSubmitAction = (type: "main" | "second") => {
+    const shortcut: Keyboard.Shortcut | undefined =
+      type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
+
+    if ((!preferences.closeAfterCreate && type === "main") || (preferences.closeAfterCreate && type === "second")) {
+      return <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;
+    } else {
+      return (
+        <Action.SubmitForm
+          title="Create Page and Close"
+          icon={Icon.Plus}
+          onSubmit={async (values: CreatePageFormValues) => {
+            handleSubmit({ ...values, closeAfterSave: true });
+          }}
+          shortcut={shortcut}
+        />
+      );
+    }
+  };
+
   return (
     <Form
       isLoading={isLoadingDatabases || isLoadingRelationPages}
@@ -159,7 +214,8 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} />
+            {renderSubmitAction("main")}
+            {renderSubmitAction("second")}
             <Action.CreateQuicklink
               title="Create Deeplink to Command as Configured"
               quicklink={getQuicklink()}
@@ -239,6 +295,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
       {databaseProperties?.filter(filterProperties).sort(sortProperties).map(convertToField)}
       <Form.Separator />
       <Form.TextArea
+        {...itemProps["content"]}
         id="content"
         title="Page Content"
         enableMarkdown

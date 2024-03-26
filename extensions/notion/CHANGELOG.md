@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Close Raycast after create new database page] - 2024-03-22
+
+- Add settings to close Raycast after create a new database
+
 ## [Change Properties order in Create Database Page] - 2024-03-22
 
 - Add ability to change order of properties when creating a new database page

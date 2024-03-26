@@ -1,7 +1,7 @@
 import { List, Image } from "@raycast/api";
 
 import { notionColorToTintColor, Page, DatabaseProperty, DatabasePropertyOption, User } from "../utils/notion";
-import { DatabaseView } from "../utils/types";
+import type { DatabaseView } from "../utils/types";
 
 import { PageListItem } from "./PageListItem";
 import { ActionEditPageProperty } from "./actions";
