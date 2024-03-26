@@ -21,7 +21,7 @@ export type ScriptMetadatas = {
     }
   | {
       mode: "pipe";
-      inputType?: ScriptInput;
+      inputType?: ScriptInput | InputType;
       outputType?: ScriptOutput;
     }
 );
