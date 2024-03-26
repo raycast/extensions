@@ -64,6 +64,13 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
 
   const accessories = [];
 
+  if (preferences.shared && note.invitationLink) {
+    accessories.push({
+      icon: Icon.Person,
+      tooltip: "Shared note",
+    });
+  }
+
   if (preferences.locked && note.locked) {
     accessories.push({
       icon: Icon.Lock,
@@ -73,7 +80,7 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
 
   if (preferences.checklist && note.checklist) {
     accessories.push({
-      icon: note.checklistInProgress ? Icon.Circle : Icon.CheckCircle,
+      icon: note.checklistInProgress ? Icon.Circle : { source: Icon.CheckCircle, tintColor: Color.Green },
       tooltip: note.checklistInProgress ? "Checklist in progress" : "Checklist completed",
     });
   }
@@ -191,6 +198,14 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
               }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
+            {note.invitationLink ? (
+              <Action.CopyToClipboard
+                title="Copy Invitation Link"
+                icon={Icon.Link}
+                content={note.invitationLink}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              />
+            ) : null}
           </ActionPanel.Section>
 
           <ActionPanel.Section>

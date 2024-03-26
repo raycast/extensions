@@ -86,6 +86,14 @@
       "required": false
     },
     {
+      "name": "shared",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show if a note is shared with someone else",
+      "description": "Show a person icon next to each note if it is shared with someone else",
+      "required": false
+    },
+    {
       "name": "openSeparately",
       "title": "Note actions",
       "type": "checkbox",

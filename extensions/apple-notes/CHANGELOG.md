@@ -6,6 +6,7 @@
 - Add checklist accessory
 - Empty state
 - Pinned notes
+- Shared notes
 
 ## [Better search] - 2024-03-22
 

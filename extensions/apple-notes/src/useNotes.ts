@@ -10,6 +10,7 @@ export type NoteItem = {
   folder: string;
   snippet: string;
   account: string;
+  invitationLink: string | null;
   // the booleans below are stored as 0 or 1 in the database
   locked: boolean;
   pinned: boolean;
@@ -31,7 +32,8 @@ const query = `
         (note.zispasswordprotected = 1) as locked,
         (note.zispinned = 1) as pinned,
         (note.zhaschecklist = 1) as checklist,
-        (note.zhaschecklistinprogress = 1) as checklistInProgress
+        (note.zhaschecklistinprogress = 1) as checklistInProgress,
+        inv.zshareurl AS invitationLink
     FROM 
         ziccloudsyncingobject AS note
     INNER JOIN ziccloudsyncingobject AS folder 
@@ -39,6 +41,8 @@ const query = `
     LEFT JOIN ziccloudsyncingobject AS acc 
         ON note.zaccount4 = acc.z_pk
     LEFT JOIN z_metadata AS zmd ON 1=1
+    LEFT JOIN zicinvitation AS inv 
+        ON note.zinvitation = inv.z_pk
     WHERE
         note.ztitle1 IS NOT NULL AND
         note.zmodificationdate1 IS NOT NULL AND
