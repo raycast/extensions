@@ -1,8 +1,8 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 
-import { VM, VMState, VMAction } from "./types";
 import { findVMs, openVM, runVMAction } from "./actions";
-import { stateToDescription, iconForVM } from "./utils";
+import { VM, VMAction, VMState } from "./types";
+import { iconAction, iconForVM, stateToDescription } from "./utils";
 
 export default function Command() {
   const state = findVMs();
@@ -28,20 +28,67 @@ function VMItem({ vm }: { vm: VM }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {vm.state == VMState.Running && <Action title="Open" onAction={() => openVM(vm)} />}
-            {vm.state == VMState.Suspended && (
-              <Action title="Resume" onAction={() => runVMAction(vm, VMAction.Resume)} />
+            {vm.state == VMState.Running && (
+              <Action title="Open" icon={{ source: "actions/open.png" }} onAction={() => openVM(vm)} />
             )}
-            {vm.state == VMState.Stopped && <Action title="Start" onAction={() => runVMAction(vm, VMAction.Start)} />}
+            {vm.state == VMState.Suspended && (
+              <Action
+                title="Resume"
+                icon={iconAction(VMAction.Resume)}
+                onAction={() => runVMAction(vm, VMAction.Resume)}
+              />
+            )}
+            {vm.state == VMState.Stopped && (
+              <Action
+                title="Start"
+                icon={iconAction(VMAction.Start)}
+                onAction={() => runVMAction(vm, VMAction.Start)}
+              />
+            )}
+            {vm.state == VMState.Running && (
+              <Action
+                title="Restart"
+                icon={iconAction(VMAction.Restart)}
+                onAction={() => runVMAction(vm, VMAction.Restart)}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             {vm.state == VMState.Running && (
-              <Action title="Suspend" onAction={() => runVMAction(vm, VMAction.Suspend)} />
+              <Action
+                title="Pause"
+                icon={iconAction(VMAction.Pause)}
+                onAction={() => runVMAction(vm, VMAction.Pause)}
+              />
+            )}
+            {vm.state == VMState.Running && (
+              <Action
+                title="Suspend"
+                icon={iconAction(VMAction.Suspend)}
+                onAction={() => runVMAction(vm, VMAction.Suspend)}
+              />
+            )}
+            {vm.state == VMState.Running && (
+              <Action
+                title="Shutdown"
+                icon={iconAction(VMAction.Shutdown)}
+                onAction={() => runVMAction(vm, VMAction.Shutdown)}
+              />
+            )}
+            {vm.state == VMState.Running && (
+              <Action
+                title="Restart"
+                icon={iconAction(VMAction.Restart)}
+                onAction={() => runVMAction(vm, VMAction.Restart)}
+              />
             )}
             {vm.state == VMState.Suspended && (
               <Action title="Resume" onAction={() => runVMAction(vm, VMAction.Resume)} />
             )}
-            {vm.state == VMState.Stopped && <Action title="Start" onAction={() => runVMAction(vm, VMAction.Start)} />}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action title="Stop" icon={iconAction(VMAction.Stop)} onAction={() => runVMAction(vm, VMAction.Stop)} />
+            <Action title="Reset" icon={iconAction(VMAction.Reset)} onAction={() => runVMAction(vm, VMAction.Reset)} />
           </ActionPanel.Section>
         </ActionPanel>
       }

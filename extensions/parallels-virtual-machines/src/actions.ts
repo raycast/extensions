@@ -47,8 +47,19 @@ function runVMAction(vm: VM, action: VMAction): void {
       exec(`prlctl suspend ${vm.id}`);
       break;
     case VMAction.Stop:
-      exec(`prlctl stop ${vm.id}`);
+      exec(`prlctl stop ${vm.id} --kill`);
       break;
+    case VMAction.Restart:
+      exec(`prlctl restart ${vm.id}`);
+      break;
+    case VMAction.Reset:
+      exec(`prlctl reset ${vm.id}`);
+      break;
+    case VMAction.Pause:
+      exec(`prlctl pause ${vm.id}`);
+      break;
+    case VMAction.Shutdown:
+      exec(`prlctl stop ${vm.id} --acpi`);
   }
 }
 

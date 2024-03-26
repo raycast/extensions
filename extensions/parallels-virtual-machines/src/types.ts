@@ -1,5 +1,5 @@
 export type { SearchState, VM };
-export { VMState, VMAction };
+export { VMState, VMAction, IconsColorType };
 
 interface VM {
   id: string;
@@ -17,11 +17,20 @@ enum VMState {
   Unknown,
 }
 
+enum IconsColorType {
+  Color,
+  Mono,
+}
+
 enum VMAction {
   Start,
   Suspend,
   Resume,
   Stop,
+  Restart,
+  Reset,
+  Pause,
+  Shutdown,
 }
 
 interface SearchState {
