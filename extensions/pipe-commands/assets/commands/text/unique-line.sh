@@ -7,4 +7,4 @@
 # @raycast.mode pipe
 # @raycast.inputType text
 
-uniq
+awk '!seen[$0]++'
