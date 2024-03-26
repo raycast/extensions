@@ -17,7 +17,7 @@ const terminalPath = preferences.terminalApp?.path || "";
 const terminalInstalled = existsSync(terminalPath);
 
 const { vscodeApp } = preferences;
-const vscodeAppNameShort = vscodeApp.name.replace(/^Visual Studio /, "");
+const vscodeAppNameShort = vscodeApp?.name.replace(/^Visual Studio /, "") || "";
 const vscodeAppCLI: string = vscodeAppNameShort.replace(/[ -]+/g, "-").toLowerCase();
 
 const STORAGE = `${homedir()}/Library/Application Support/${vscodeAppNameShort}/User/globalStorage/alefragnani.project-manager`;
@@ -124,6 +124,14 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 }
 
 export default function Command() {
+  if (!vscodeApp) {
+    return(
+      <Detail
+        markdown="Please configure the **Search Project Manager** Raycast extension to choose which version of Visual Studio Code to use."
+      />
+    );
+  }
+
   const elements: ReactElement[] = [];
   const projectEntries = getProjectEntries();
   const projectTags = getProjectTags(projectEntries);
@@ -135,7 +143,7 @@ export default function Command() {
       <Detail
         markdown="To use this extension, the Visual Studio Extension
       [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)
-       is required."
+       is required and at least one project must be saved in the Project Manager."
       />
     );
   }
