@@ -1,5 +1,3 @@
-import { SlackStatusPreset } from "./types";
-
 export const durationTitleMap = {
   0: "Don't clear",
   15: "15 minutes",
@@ -14,12 +12,4 @@ export const durationTitleMap = {
 
 export function getTitleForDuration(duration: number): string {
   return durationTitleMap[duration];
-}
-
-export function getPresetDurationsTitle(preset: SlackStatusPreset) {
-  if (!preset.pauseNotifications) {
-    return getTitleForDuration(preset.defaultDuration);
-  }
-
-  return `${getTitleForDuration(preset.defaultDuration)} - Pause notifications`;
 }

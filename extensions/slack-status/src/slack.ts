@@ -1,6 +1,5 @@
 import { getAccessToken, usePromise } from "@raycast/utils";
-import { UsePromiseReturnType } from "@raycast/utils/dist/types";
-import { DndInfoResponse, WebClient } from "@slack/web-api";
+import { WebClient } from "@slack/web-api";
 
 let webClient: WebClient;
 
@@ -18,27 +17,5 @@ export function useSlackProfile() {
       throw Error("Failed to fetch profile");
     }
     return response.profile;
-  });
-}
-
-export function useSlackDndInfo(): UsePromiseReturnType<DndInfoResponse | undefined> {
-  const slack = useSlack();
-  return usePromise(async () => {
-    const response = await slack.dnd.info();
-    if (!response.ok) {
-      throw Error("Failed to fetch dnd info");
-    }
-    return response as DndInfoResponse | undefined;
-  });
-}
-
-export function useSlackAuthInfo() {
-  const slack = useSlack();
-  return usePromise(async () => {
-    const response = await slack.auth.test();
-    if (!response.ok) {
-      throw Error("Failed to fetch auth info");
-    }
-    return response;
   });
 }
