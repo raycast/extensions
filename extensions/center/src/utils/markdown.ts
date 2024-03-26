@@ -16,7 +16,7 @@ export function markdownCollectionDetail(
   imageUrl: string | undefined,
   name: string | undefined,
   floorPrice?: FloorPriceResponse,
-  volumeData?: VolumeResponse
+  volumeData?: VolumeResponse,
 ) {
   const handleRoundValue = (value: number | undefined) => {
     if (!value) return "-";
@@ -35,9 +35,9 @@ ${
 | Floor | 1 Day | 7 Days | 30 Days | 
 | -------- | -------- | -------- | -------- |
 | ${handleRoundValue(floorPrice?.amount?.wholeAmount)} | ${handleRoundValue(
-        volumeData?.oneDayVolume?.wholeAmount
+        volumeData?.oneDayVolume?.wholeAmount,
       )} | ${handleRoundValue(volumeData?.sevenDayVolume?.wholeAmount)} | ${handleRoundValue(
-        volumeData?.thirtyDayVolume?.wholeAmount
+        volumeData?.thirtyDayVolume?.wholeAmount,
       )}  |
 `
     : "(No volume data)"

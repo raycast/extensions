@@ -10,9 +10,9 @@ type CollectionDetailProps = {
 
 // 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D
 export default function CollectionDetail({ address }: CollectionDetailProps) {
-  const { data } = useCollectionDetails({ address });
-  const { data: floorPriceData } = useFloorPrice({ address });
-  const { data: volumeData } = useVolumeData({ address });
+  const { data } = useCollectionDetails(address);
+  const { data: floorPriceData } = useFloorPrice(address);
+  const { data: volumeData } = useVolumeData(address);
 
   return (
     <Detail

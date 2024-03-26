@@ -1,4 +1,5 @@
 import { useFetch } from "@raycast/utils";
+import fetch from "node-fetch";
 import { getAPIKey } from "../utils/preferences";
 import {
   AssetDetailsResponse,
@@ -6,7 +7,7 @@ import {
   FloorPriceResponse,
   SearchResponse,
   TransferHistoryResponse,
-  UseContractsOfOwnersResponse,
+  ContractsOfOwnersResponse,
   VolumeResponse,
 } from "../types";
 import { ApiUrls } from "../constants/endpoints";
@@ -21,6 +22,18 @@ export const useAssetDetails = ({ address, tokenId }: { address: string; tokenId
   return { data };
 };
 
+/** not a hook */
+export const getAssetDetails = async ({ address, tokenId }: { address: string; tokenId: string }) => {
+  const apiKey = getAPIKey();
+  const response = await fetch(ApiUrls.getAsset(address, tokenId), {
+    method: "GET",
+    headers: { accept: "application/json", "X-API-Key": apiKey },
+  });
+  const data = (await response.json()) as AssetDetailsResponse;
+
+  return { data };
+};
+
 export const useTransferHistory = ({ address, tokenId }: { address: string; tokenId: string }) => {
   const apiKey = getAPIKey();
   const { data } = useFetch<TransferHistoryResponse>(ApiUrls.getAssetTransfers("ethereum-mainnet", address, tokenId), {
@@ -31,7 +44,7 @@ export const useTransferHistory = ({ address, tokenId }: { address: string; toke
   return { data };
 };
 
-export const useCollectionDetails = ({ address }: { address: string }) => {
+export const useCollectionDetails = (address: string) => {
   const apiKey = getAPIKey();
   const { data } = useFetch<CollectionResponse>(ApiUrls.getCollection("ethereum-mainnet", address), {
     method: "GET",
@@ -41,7 +54,7 @@ export const useCollectionDetails = ({ address }: { address: string }) => {
   return { data };
 };
 
-export const useFloorPrice = ({ address }: { address: string }) => {
+export const useFloorPrice = (address: string) => {
   const apiKey = getAPIKey();
   const { data } = useFetch<FloorPriceResponse>(ApiUrls.getFloorPriceOfCollection("ethereum-mainnet", address), {
     method: "GET",
@@ -51,7 +64,7 @@ export const useFloorPrice = ({ address }: { address: string }) => {
   return { data };
 };
 
-export const useVolumeData = ({ address }: { address: string }) => {
+export const useVolumeData = (address: string) => {
   const apiKey = getAPIKey();
   const { data } = useFetch<VolumeResponse>(ApiUrls.getVolumeOfCollection("ethereum-mainnet", address), {
     method: "GET",
@@ -61,7 +74,7 @@ export const useVolumeData = ({ address }: { address: string }) => {
   return { data };
 };
 
-export const useSearch = ({ searchText }: { searchText: string }) => {
+export const useSearch = (searchText: string) => {
   const apiKey = getAPIKey();
   const { data } = useFetch<SearchResponse>(ApiUrls.search("ethereum-mainnet", searchText), {
     method: "GET",
@@ -71,12 +84,15 @@ export const useSearch = ({ searchText }: { searchText: string }) => {
   return { data };
 };
 
-export const useContractsOfOwner = ({ searchText }: { searchText: string }) => {
+export const useContractsOfOwner = (address: string) => {
   const apiKey = getAPIKey();
-  const { data } = useFetch<UseContractsOfOwnersResponse>(ApiUrls.getContractsOfOwner("ethereum-mainnet", searchText), {
-    method: "GET",
-    headers: { accept: "application/json", "X-API-Key": apiKey },
-  });
+  const { data, isLoading } = useFetch<ContractsOfOwnersResponse>(
+    ApiUrls.getContractsOfOwner("ethereum-mainnet", address),
+    {
+      method: "GET",
+      headers: { accept: "application/json", "X-API-Key": apiKey },
+    },
+  );
 
-  return { data };
+  return { data, isLoading };
 };

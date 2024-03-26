@@ -41,7 +41,7 @@ export default function AssetDetail({ address, tokenId }: AssetDetailProps) {
           <Detail.Metadata.Link
             title="URL"
             target={`https://center.app/collections/${data?.address}/${data?.tokenId}`}
-            text={"Center"}
+            text="Center"
           />
         </Detail.Metadata>
       }
@@ -57,13 +57,13 @@ export default function AssetDetail({ address, tokenId }: AssetDetailProps) {
                     title={`${data.collectionName} / ${data.name} - Transfer History`}
                     address={data.address}
                     tokenId={data.tokenId}
-                  />
+                  />,
                 )
               }
             />
           ) : null}
           <Action.OpenInBrowser
-            title="See on Center.app"
+            title="Go to Center"
             icon={Icon.Globe}
             url={getAssetCenterUrl("ethereum-mainnet", data.address, data?.tokenId)}
           />

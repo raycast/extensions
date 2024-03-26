@@ -1,11 +1,14 @@
 {
-  "version": "0.0.3",
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "center",
   "title": "Center",
-  "description": "Interact with NFTs in any blockchain, right in your command bar.",
+  "description": "Interact with NFTs on any blockchain.",
   "icon": "command-icon.png",
   "author": "enesozturk",
+  "access": "public",
+  "contributors": [
+    "artivilla"
+  ],
   "categories": [
     "Media",
     "Productivity",
@@ -57,7 +60,7 @@
       "name": "get-asset",
       "title": "Asset Details",
       "subtitle": "Center NFTs",
-      "description": "Get NFT asset in the blockchain in milliseconds.",
+      "description": "Get NFTs owned by address.",
       "mode": "view",
       "arguments": [
         {
@@ -91,19 +94,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.50.2",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^1.68.1",
+    "@raycast/utils": "^1.12.5",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "4.24.6",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.2.61",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

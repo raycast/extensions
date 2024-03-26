@@ -76,23 +76,27 @@ export type SearchResponse = {
   }[];
 };
 
-export type UseContractsOfOwnersResponse = {
-  contracts: {
+export type ContractsOfOwnersResponse = {
+  items: {
+    network: string;
     address: string;
-    isSpam: boolean;
-    media: {
-      gateway: string;
-      raw: string;
-    };
-    name: string;
-    numDistinctTokensOwned: number;
-    ownedCount: number;
-    symbol: string;
     tokenID: string;
-    tokenType: string;
-    totalBalance: number;
+    collection: {
+      address: string;
+      name: string;
+      symbol: string;
+    };
+    blockNumber: number;
+    contractType: string;
+    quantity: number;
+    image?: string;
   }[];
-  totalCount: 2;
+  paging: {
+    itemsReturned: number;
+    limit: number;
+    offset: number;
+    onLastPage: boolean;
+  };
 };
 
 export type TransferHistoryResponse = {

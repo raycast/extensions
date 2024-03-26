@@ -7,9 +7,6 @@ import CollectionDetail from "./CollectionDetail";
 import { useSearch } from "./hooks/center";
 import { SearchResponse } from "./types";
 
-interface GetContractsOfOwnerArguments {
-  query: string;
-}
 type SearchItem = SearchResponse["results"][0];
 
 const resultTypes = [
@@ -40,18 +37,18 @@ function ResultTypeDropdown(props: {
   );
 }
 
-export default function Command(props: LaunchProps<{ arguments: GetContractsOfOwnerArguments }>) {
-  const query = props?.arguments.query || "";
+export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
+  const query = props?.arguments?.query || "";
   const [searchText, setSearchText] = useState(query || "");
   const [resultType, setResultType] = useState("all");
 
   const { push } = useNavigation();
-  const { data } = useSearch({ searchText });
+  const { data } = useSearch(searchText);
 
   let results = data?.results;
 
   if (resultType !== "All") {
-    results = results?.filter((item: any) => item.type === resultType);
+    results = results?.filter((item) => item.type === resultType);
   }
 
   return (
@@ -97,7 +94,7 @@ export default function Command(props: LaunchProps<{ arguments: GetContractsOfOw
                             title={`${item.name} Transfer History`}
                             address={item.address}
                             tokenId={item.tokenId}
-                          />
+                          />,
                         )
                       }
                     />
