@@ -10,10 +10,10 @@ import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
 
-const gitClientPath = preferences.gitClientApp.path || "";
+const gitClientPath = preferences.gitClientApp?.path || "";
 const gitClientInstalled = existsSync(gitClientPath);
 
-const terminalPath = preferences.terminalApp.path || "";
+const terminalPath = preferences.terminalApp?.path || "";
 const terminalInstalled = existsSync(terminalPath);
 
 const { vscodeApp } = preferences;
