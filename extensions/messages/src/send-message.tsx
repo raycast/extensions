@@ -31,7 +31,7 @@ export default function Command({
   draftValues,
   launchContext,
 }: LaunchProps<{ draftValues: Values; launchContext: { contactId: string; address: string; text: string } }>) {
-  const [ contactAddresses, setContactAddresses ] = useState<string[]|undefined>([]);
+  const [contactAddresses, setContactAddresses] = useState<string[] | undefined>([]);
   const { data: contacts, isLoading } = useCachedPromise(async () => {
     const contacts = await fetchAllContacts();
     return contacts as Contact[];
@@ -123,13 +123,15 @@ export default function Command({
       }
       enableDrafts
     >
-      <Form.Dropdown 
+      <Form.Dropdown
         {...itemProps.contact}
         title="Contact"
-        onChange={(newContact) => setContactAddresses(() => { 
-          let selection = contacts?.find((c) => c.id === newContact)
-          return [...(selection?.phoneNumbers ?? []), ...(selection?.emailAddresses ?? [])]
-        })}
+        onChange={(newContact) =>
+          setContactAddresses(() => {
+            const selection = contacts?.find((c) => c.id === newContact);
+            return [...(selection?.phoneNumbers ?? []), ...(selection?.emailAddresses ?? [])];
+          })
+        }
         storeValue
       >
         {contacts?.map((contact, i) => {
@@ -147,13 +149,7 @@ export default function Command({
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.address} title="Address" storeValue>
         {contactAddresses?.map((address) => {
-          return (
-            <Form.Dropdown.Item
-              key={address}
-              title={address}
-              value={address}
-            />
-          );
+          return <Form.Dropdown.Item key={address} title={address} value={address} />;
         })}
       </Form.Dropdown>
       <Form.TextArea {...itemProps.text} title="Message" />
