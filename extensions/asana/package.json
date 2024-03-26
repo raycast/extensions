@@ -5,6 +5,9 @@
   "description": "Create, access, and modify tasks.",
   "icon": "asana.png",
   "author": "thomaslombart",
+  "contributors": [
+    "Spacedolphin"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [
