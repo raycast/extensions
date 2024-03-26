@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-03-25
+
+- Fix time entries refresh
+
 ## [Enhancements] - 2024-03-06
 
 - Add workspace and project fields to time entry form.
