@@ -47,7 +47,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.Open target={data.file} onOpen={() => openFileCallback(outline.page)} title="Open File" />
-              <Action.OpenWith path={data.file} onOpen={() => openFileCallback(outline.page)} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+              <Action.OpenWith
+                path={data.file}
+                onOpen={() => openFileCallback(outline.page)}
+                shortcut={{ modifiers: ["cmd"], key: "enter" }}
+              />
             </ActionPanel>
           }
           detail={<Detail outline={outline} filepath={data.file} />}

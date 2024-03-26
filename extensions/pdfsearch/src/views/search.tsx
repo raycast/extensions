@@ -123,7 +123,11 @@ export default function SearchCollection(props: { collectionName: string }) {
                 <ActionPanel>
                   <Action.Open target={result.file} onOpen={() => openFileCallback(result.page)} title="Open File" />
                   <Action.ToggleQuickLook />
-                  <Action.OpenWith path={result.file} onOpen={() => openFileCallback(result.page)} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+                  <Action.OpenWith
+                    path={result.file}
+                    onOpen={() => openFileCallback(result.page)}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  />
                   <Action.ShowInFinder path={result.file} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
                 </ActionPanel>
               }
