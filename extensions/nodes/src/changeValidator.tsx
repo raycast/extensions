@@ -2,10 +2,6 @@ import { Action, ActionPanel, Icon, LaunchType, List, LocalStorage, launchComman
 import { useFetch } from "@raycast/utils";
 import { ValidatorStats } from "./types";
 
-function slicePublicKey(publicKey: string) {
-  return `${publicKey.slice(0, 4)}...${publicKey.slice(-4)}`;
-}
-
 function ChangeValidatorCommand() {
   const { isLoading, data } = useFetch<ValidatorStats[]>("https://api.stakewiz.com/validators");
 
