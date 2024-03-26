@@ -1,5 +1,14 @@
-import { Action, ActionPanel, Icon, LaunchType, List, LocalStorage, launchCommand } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  LaunchType,
+  List,
+  LocalStorage,
+  Toast,
+  launchCommand,
+  showToast,
+} from "@raycast/api";import { useFetch } from "@raycast/utils";
 import { ValidatorStats } from "./types";
 
 function ChangeValidatorCommand() {
@@ -25,6 +34,11 @@ function ChangeValidatorCommand() {
                           "validator",
                           JSON.stringify({ address: validator.vote_identity, name: validator.name }),
                         ).then(() => {
+                          showToast({
+                            title: "Validator changed",
+                            message: `Selected ${validator.name}`,
+                            style: Toast.Style.Success,
+                          });
                           launchCommand({ name: "menuBarStats", type: LaunchType.UserInitiated });
                         });
                       }}
