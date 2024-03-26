@@ -21,17 +21,21 @@ import { useSlack } from "./slack";
 import { SlackStatusPreset } from "./types";
 import { setStatusToPreset, showToastWithPromise } from "./utils";
 import { nanoid } from "nanoid";
+import { DndInfoResponse } from "@slack/web-api";
 
 // Status Actions
 
-export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+export function ClearStatusAction(props: {
+  mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
+}) {
   const slack = useSlack();
   return (
     <Action
       title="Clear Status"
       icon={Icon.XMarkCircle}
       onAction={async () => {
-        await showToastWithPromise(
+        const promise = Promise.all([
           props.mutate(
             slack.users.profile.set({
               profile: JSON.stringify({
@@ -46,12 +50,31 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
               },
             },
           ),
-          {
-            loading: "Clearing status...",
-            success: "Cleared status",
-            error: "Failed clearing status",
-          },
-        );
+          props.mutateDnd(slack.dnd.endSnooze()),
+        ]);
+
+        await showToastWithPromise(promise, {
+          loading: "Clearing status...",
+          success: "Cleared status",
+          error: "Failed clearing status",
+        });
+      }}
+    />
+  );
+}
+
+export function ResumeNotificationsAction(props: { mutate: MutatePromise<DndInfoResponse | undefined> }) {
+  const slack = useSlack();
+  return (
+    <Action
+      title="Resume Notifications"
+      icon={Icon.Bell}
+      onAction={async () => {
+        await showToastWithPromise(props.mutate(slack.dnd.endSnooze()), {
+          loading: "Resuming notifications...",
+          success: "Resumed notifications",
+          error: "Failed resuming notifications",
+        });
       }}
     />
   );
@@ -128,7 +151,11 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
   );
 }
 
-export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: MutatePromise<Profile | undefined> }) {
+export function SetStatusAction(props: {
+  preset: SlackStatusPreset;
+  mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
+}) {
   const slack = useSlack();
   return (
     <Action
@@ -147,6 +174,7 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
 export function SetStatusWithDuration(props: {
   preset: SlackStatusPreset;
   mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
 }) {
   const slack = useSlack();
 
@@ -186,6 +214,16 @@ export function SetStatusWithDuration(props: {
                       },
                     },
                   );
+
+                  if (props.preset.pauseNotifications && parsedDuration > 0) {
+                    await props.mutateDnd(
+                      slack.dnd.setSnooze({
+                        num_minutes: parsedDuration,
+                      }),
+                    );
+                  } else {
+                    await props.mutateDnd(slack.dnd.endSnooze());
+                  }
                 },
                 {
                   loading: "Setting status with duration...",
@@ -201,7 +239,10 @@ export function SetStatusWithDuration(props: {
   );
 }
 
-export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | undefined> }) {
+export function SetCustomStatusAction(props: {
+  mutate: MutatePromise<Profile | undefined>;
+  mutateDnd: MutatePromise<DndInfoResponse | undefined>;
+}) {
   const slack = useSlack();
   const { pop } = useNavigation();
 
@@ -242,6 +283,16 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
                   },
                 );
 
+                if (values.pauseNotifications && duration > 0) {
+                  await props.mutateDnd(
+                    slack.dnd.setSnooze({
+                      num_minutes: duration,
+                    }),
+                  );
+                } else {
+                  await props.mutateDnd(slack.dnd.endSnooze());
+                }
+
                 pop();
               },
               {
@@ -276,6 +327,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
               id: nanoid(),
+              pauseNotifications: values.pauseNotifications,
             });
 
             pop();
@@ -353,7 +405,6 @@ export function EditStatusPresetAction(props: {
   onEdit: (editedPreset: SlackStatusPreset) => void;
 }) {
   const { pop } = useNavigation();
-
   return (
     <Action.Push
       title="Edit Preset"
@@ -366,12 +417,14 @@ export function EditStatusPresetAction(props: {
             emoji: props.preset.emojiCode,
             statusText: props.preset.title,
             duration: props.preset.defaultDuration.toString(),
+            pauseNotifications: props.preset.pauseNotifications,
           }}
           onSubmit={async (values) => {
             props.onEdit({
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
+              pauseNotifications: values.pauseNotifications,
               id: props.preset.id ?? nanoid(),
             });
 

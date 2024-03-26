@@ -1,5 +1,14 @@
-import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { OAuthService, withAccessToken, showFailureToast } from "@raycast/utils";
+import {
+  ActionPanel,
+  Detail,
+  Icon,
+  LaunchProps,
+  List,
+  closeMainWindow,
+  getPreferenceValues,
+  popToRoot,
+} from "@raycast/api";
+import { OAuthService, useCachedState, withAccessToken, showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   ClearStatusAction,
@@ -8,28 +17,60 @@ import {
   CreateStatusPresetAction,
   DeleteStatusPresetAction,
   EditStatusPresetAction,
+  ResumeNotificationsAction,
   SetCustomStatusAction,
   SetStatusAction,
   SetStatusWithAIAction,
   SetStatusWithDuration,
 } from "./actions";
-import { getTitleForDuration } from "./durations";
+import { getPresetDurationsTitle } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
 import { CommandLinkParams } from "./types";
-import { useSlack, useSlackProfile } from "./slack";
-import { getStatusIcon, getStatusSubtitle, getStatusTitle, setStatusToPreset } from "./utils";
+import { useSlack, useSlackAuthInfo, useSlackDndInfo, useSlackProfile } from "./slack";
+import { getStatusIcon, getStatusSubtitle, getStatusTitle, setStatusToPreset, slackScopes } from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
 
 const slack = OAuthService.slack({
-  scope: "emoji:read users.profile:write users.profile:read",
+  scope: slackScopes.join(" "),
   personalAccessToken: preferences.accessToken,
 });
+
+function StatusListWrapper(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
+  const { isLoading: isLoadingAuth, data: authData } = useSlackAuthInfo();
+  const [hasCheckedAuth, setHasCheckedAuth] = useCachedState("slack-status-checked-auth", false);
+
+  useEffect(() => {
+    if (isLoadingAuth || hasCheckedAuth) return;
+
+    const checkAuthorization = async () => {
+      const userScopes = authData?.response_metadata?.scopes;
+      const hasNeededScopes = slackScopes.every((scope) => userScopes?.includes(scope));
+
+      if (!hasNeededScopes) {
+        await slack.client.removeTokens();
+        await slack.authorize();
+        return;
+      }
+
+      setHasCheckedAuth(true);
+    };
+
+    checkAuthorization();
+  }, [hasCheckedAuth, authData, isLoadingAuth]);
+
+  if (isLoadingAuth && !hasCheckedAuth) {
+    return <Detail isLoading />;
+  }
+
+  return <StatusList {...props} />;
+}
 
 function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data, mutate } = useSlackProfile();
+  const { isLoading: isLoadingDnd, data: dndData, mutate: mutateDnd } = useSlackDndInfo();
   const [presets, setPresets] = usePresets();
   const slack = useSlack();
 
@@ -43,7 +84,7 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
           console.error("No preset found with id: ", presetId);
           showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
         } else {
-          await setStatusToPreset({ preset: presetToLaunch, slack, mutate });
+          await setStatusToPreset({ preset: presetToLaunch, slack, mutate, mutateDnd });
           popToRoot();
           closeMainWindow();
         }
@@ -52,7 +93,7 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   }, [slack]);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchText} filtering>
+    <List isLoading={isLoading || isLoadingDnd} onSearchTextChange={setSearchText} filtering>
       <List.EmptyView
         icon={Icon.Stars}
         title={searchText ? `Set status to '${searchText}'` : undefined}
@@ -66,10 +107,15 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
           key="current-status"
           icon={getStatusIcon(data)}
           title={getStatusTitle(data)}
-          subtitle={getStatusSubtitle(data)}
+          subtitle={getStatusSubtitle(data, dndData)}
           actions={
             <ActionPanel>
-              {data?.status_text ? <ClearStatusAction mutate={mutate} /> : <SetCustomStatusAction mutate={mutate} />}
+              {data?.status_text ? (
+                <ClearStatusAction mutate={mutate} mutateDnd={mutateDnd} />
+              ) : (
+                <SetCustomStatusAction mutate={mutate} mutateDnd={mutateDnd} />
+              )}
+              {!!dndData?.snooze_enabled && <ResumeNotificationsAction mutate={mutateDnd} />}
               <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
             </ActionPanel>
           }
@@ -81,12 +127,12 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
             key={JSON.stringify(preset)}
             icon={getEmojiForCode(preset.emojiCode)}
             title={preset.title}
-            subtitle={getTitleForDuration(preset.defaultDuration)}
+            subtitle={getPresetDurationsTitle(preset)}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <SetStatusAction preset={preset} mutate={mutate} />
-                  <SetStatusWithDuration preset={preset} mutate={mutate} />
+                  <SetStatusAction preset={preset} mutate={mutate} mutateDnd={mutateDnd} />
+                  <SetStatusWithDuration preset={preset} mutate={mutate} mutateDnd={mutateDnd} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <EditStatusPresetAction
@@ -101,8 +147,8 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <CreateStatusPresetAction onCreate={(newPreset) => setPresets([...presets, newPreset])} />
-                  <SetCustomStatusAction mutate={mutate} />
-                  <ClearStatusAction mutate={mutate} />
+                  <SetCustomStatusAction mutate={mutate} mutateDnd={mutateDnd} />
+                  <ClearStatusAction mutate={mutate} mutateDnd={mutateDnd} />
                 </ActionPanel.Section>
               </ActionPanel>
             }
@@ -113,4 +159,4 @@ function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   );
 }
 
-export default withAccessToken(slack)(StatusList);
+export default withAccessToken(slack)(StatusListWrapper);

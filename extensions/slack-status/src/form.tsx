@@ -10,7 +10,7 @@ export function StatusForm(props: {
   initalValues?: FormValues;
   onSubmit: (values: FormValues) => void;
 }) {
-  const { handleSubmit, itemProps } = useForm<FormValues>({
+  const { handleSubmit, itemProps, values, setValue } = useForm<FormValues>({
     initialValues: props.initalValues,
     validation: {
       statusText: FormValidation.Required,
@@ -32,11 +32,28 @@ export function StatusForm(props: {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Status" placeholder="What's your status?" {...itemProps.statusText} />
-      <Form.Dropdown title="Duration" storeValue={props.initalValues?.emoji === undefined} {...itemProps.duration}>
+      <Form.Dropdown
+        title="Duration"
+        storeValue={props.initalValues?.emoji === undefined}
+        {...itemProps.duration}
+        onChange={(newValue) => {
+          setValue("duration", newValue);
+          if (newValue === "0") {
+            setValue("pauseNotifications", false);
+          }
+        }}
+      >
         {Object.entries(durationTitleMap).map(([duration, title]) => (
           <Form.Dropdown.Item key={duration} title={title} value={duration.toString()} />
         ))}
       </Form.Dropdown>
+      {values.duration !== "0" && (
+        <Form.Checkbox
+          label="Pause notifications"
+          storeValue={props.initalValues?.emoji === undefined}
+          {...itemProps.pauseNotifications}
+        />
+      )}
     </Form>
   );
 }

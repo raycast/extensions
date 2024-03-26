@@ -4,6 +4,10 @@
 
 - You can now create quicklinks from the `Set Status` command making it possible to set your favorite Slack status from Raycast's root search.
 
+## [Add option to pause notifications] - 2024-02-15
+
+- Add pause notifications option to presets
+
 ## [Use OAuth utils] - 2024-02-15
 
 - Use new OAuth utils
