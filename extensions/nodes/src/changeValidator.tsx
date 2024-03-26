@@ -8,7 +8,8 @@ import {
   Toast,
   launchCommand,
   showToast,
-} from "@raycast/api";import { useFetch } from "@raycast/utils";
+} from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { ValidatorStats } from "./types";
 
 function ChangeValidatorCommand() {
