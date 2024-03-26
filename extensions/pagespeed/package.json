@@ -19,8 +19,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "pagespeed",
-      "title": "Run Pagespeed Test",
+      "name": "form",
+      "title": "Run Pagespeed Report",
       "description": "Run a pagespeed test on a given domain",
       "mode": "view"
     },
