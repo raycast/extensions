@@ -85,14 +85,14 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
   } else if (preferences.folders) {
     accessories.push({
       text: `${note.folder || ""}`,
-      tooltip: "Folder",
+      tooltip: `Folder: ${note.folder}`,
     });
   }
 
   if (preferences.modificationDate && note.modifiedAt) {
     accessories.push({
       date: new Date(note.modifiedAt),
-      tooltip: "Last Modified",
+      tooltip: `Last modified: ${new Date(note.modifiedAt).toLocaleString()}`,
     });
   }
 

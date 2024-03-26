@@ -22,12 +22,21 @@ export default function Command() {
       .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1)) ?? [];
 
   const [activeNotes, deletedNotes] = partition(notes, (note) => note.folder != "Recently Deleted");
+  const [pinnedNotes, unpinnedNotes] = partition(activeNotes, (note) => note.pinned);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search notes by title, folder, or description">
-      {activeNotes.map((note) => (
-        <NoteListItem key={note.id} note={note} mutate={mutate} />
-      ))}
+      <List.Section title="Pinned">
+        {pinnedNotes.map((note) => (
+          <NoteListItem key={note.id} note={note} mutate={mutate} />
+        ))}
+      </List.Section>
+
+      <List.Section title="Notes">
+        {unpinnedNotes.map((note) => (
+          <NoteListItem key={note.id} note={note} mutate={mutate} />
+        ))}
+      </List.Section>
 
       <List.Section title="Recently Deleted">
         {deletedNotes.map((note) => (

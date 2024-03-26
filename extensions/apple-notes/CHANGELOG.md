@@ -5,6 +5,7 @@
 - Add locked accessory
 - Add checklist accessory
 - Empty state
+- Pinned notes
 
 ## [Better search] - 2024-03-22
 
