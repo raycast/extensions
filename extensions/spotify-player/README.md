@@ -2,7 +2,7 @@
    <img src="https://user-images.githubusercontent.com/372831/227213056-29a98faf-f897-4cd0-9c39-ca8f218a4190.png">
  </p>
 
-Spotify's most common features, now at your fingertips. Search for music and podcasts, browse your library, and control the playback. Glance at what's currently playing directly from the menu bar.
+Spotify's most common features, now at your fingertips. Search for music and podcasts, browse My Library, and control the playback. Glance at what's currently playing directly from the menu bar.
 
 ## Commands
 
@@ -10,7 +10,7 @@ Spotify's most common features, now at your fingertips. Search for music and pod
 
 A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
 
-### Your Library
+### My Library
 
 Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
 

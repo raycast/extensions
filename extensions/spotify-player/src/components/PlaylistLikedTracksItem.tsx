@@ -4,7 +4,7 @@ import { ListOrGridItem } from "./ListOrGridItem";
 import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
 import { TracksList } from "./TracksList";
-import { useYourLibrary } from "../hooks/useYourLibrary";
+import { useMyLibrary } from "../hooks/useMyLibrary";
 
 type PlaylistLikedTracksItemProps = {
   type: "grid" | "list";
@@ -15,7 +15,7 @@ export default function PlaylistLikedTracksItem({ type }: PlaylistLikedTracksIte
   const title = "Liked Songs";
   const icon: Image.ImageLike = { source: "https://misc.scdn.co/liked-songs/liked-songs-64.png" };
   const uri = `spotify:user:${meData?.id}:collection`;
-  const { myLibraryData } = useYourLibrary({
+  const { myLibraryData } = useMyLibrary({
     keepPreviousData: true,
   });
 

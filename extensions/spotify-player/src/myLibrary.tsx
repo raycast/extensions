@@ -1,7 +1,7 @@
 import { ComponentProps, useState } from "react";
 import { Grid, List } from "@raycast/api";
 import { View } from "./components/View";
-import { useYourLibrary } from "./hooks/useYourLibrary";
+import { useMyLibrary } from "./hooks/useMyLibrary";
 import { ArtistsSection } from "./components/ArtistsSection";
 import { AlbumsSection } from "./components/AlbumsSection";
 import { TracksSection } from "./components/TracksSection";
@@ -22,15 +22,15 @@ const filters = {
 
 type FilterValue = keyof typeof filters;
 
-function YourLibraryCommand() {
+function MyLibraryCommand() {
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<FilterValue>(getPreferenceValues()["Default-View"] ?? filters.all);
-  const { myLibraryData, myLibraryIsLoading } = useYourLibrary({
+  const { myLibraryData, myLibraryIsLoading } = useMyLibrary({
     keepPreviousData: true,
   });
 
   const sharedProps: ComponentProps<typeof List> = {
-    searchBarPlaceholder: "Search your library",
+    searchBarPlaceholder: "Search My Library",
     isLoading: myLibraryIsLoading,
     searchText,
     onSearchTextChange: setSearchText,
@@ -121,7 +121,7 @@ function YourLibraryCommand() {
 export default function Command() {
   return (
     <View>
-      <YourLibraryCommand />
+      <MyLibraryCommand />
     </View>
   );
 }
