@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alarm",
+  "title": "Alarm Clock",
+  "description": "Create custom alarms and timers",
+  "icon": "alarm-clock.png",
+  "author": "aurnik",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Alarm",
+      "description": "Schedules an alarm based on the provided text",
+      "subtitle": "Alarms & Timers",
+      "mode": "no-view",
+      "keywords": [
+        "timer",
+        "alarm",
+        "schedule",
+        "reminder",
+        "start",
+        "create"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "15m, 2:40pm, noon",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list",
+      "title": "List Alarms",
+      "description": "View and stop alarms that are currently running",
+      "subtitle": "Alarms & Timers",
+      "mode": "view",
+      "keywords": [
+        "stop"
+      ]
+    },
+    {
+      "name": "refresh",
+      "title": "Refresh Alarms",
+      "description": "Refreshes the alarms in case the system has been restarted",
+      "mode": "no-view",
+      "interval": "1h"
+    }
+  ],
+  "keywords": [
+    "timer",
+    "alarm",
+    "schedule",
+    "reminder"
+  ],
+  "preferences": [
+    {
+      "name": "alertEnabled",
+      "description": "Useful when notifications are hidden based on your Focus settings",
+      "type": "checkbox",
+      "required": false,
+      "label": "Use alert box instead of notification banner",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.4",
+    "dayjs": "^1.11.7",
+    "sherlockjs": "^1.4.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
