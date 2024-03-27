@@ -6,6 +6,7 @@ import { NotionToMarkdown } from "notion-to-md";
 
 import { UnwrapRecord } from "../types";
 
+import { getDateMention } from "./block";
 import { handleError, pageMapper } from "./global";
 import { getNotionClient } from "./oauth";
 
@@ -94,6 +95,42 @@ export async function fetchPageContent(pageId: string) {
     };
   } catch (err) {
     return handleError(err, "Failed to fetch page content", undefined);
+  }
+}
+
+export async function fetchPageFirstBlockId(pageId: string) {
+  try {
+    const notion = getNotionClient();
+    const { results } = await notion.blocks.children.list({
+      block_id: pageId,
+    });
+    return results[0].id;
+  } catch (err) {
+    return handleError(err, "Failed to fetch page content", undefined);
+  }
+}
+
+export async function addJournalEntry(
+  pageId: string,
+  children: BlockObjectRequest[],
+  prepend: boolean = false,
+  addDateDivider: boolean = false,
+) {
+  try {
+    const notion = getNotionClient();
+
+    const childrenToInsert = addDateDivider ? [{ divider: {} }, getDateMention(), ...children] : children;
+    const insertAfter = prepend ? await fetchPageFirstBlockId(pageId) : undefined;
+
+    const { results } = await notion.blocks.children.append({
+      block_id: pageId,
+      children: childrenToInsert,
+      after: insertAfter,
+    });
+
+    return results;
+  } catch (err) {
+    return handleError(err, "Failed to add content to the page", undefined);
   }
 }
 
