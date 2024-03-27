@@ -2,21 +2,15 @@ import { runAppleScript } from "@raycast/utils";
 import { escapeDoubleQuotes } from "./utils";
 
 export async function createNote(text?: string) {
-  if (!text) {
-    return runAppleScript(`
-    tell application "Notes"
-      activate
-      set newNote to make new note at folder "Notes"
-      set selection to newNote
-    end tell
-    `);
-  }
+  const escapedText = text ? escapeDoubleQuotes(text) : "";
 
   return runAppleScript(`
     tell application "Notes"
       activate
       set newNote to make new note at folder "Notes"
-      set body of newNote to "${escapeDoubleQuotes(text)}"
+      if ("${escapedText}" is not "") then
+        set body of newNote to "${escapedText}"
+      end if
       set selection to newNote
     end tell
     `);

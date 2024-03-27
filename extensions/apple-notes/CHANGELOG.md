@@ -9,6 +9,7 @@
 - Shared notes
 - View note
 - Menu Bar
+- AI notes
 
 ## [Better search] - 2024-03-22
 

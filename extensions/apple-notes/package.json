@@ -43,6 +43,26 @@
       ]
     },
     {
+      "name": "ai",
+      "title": "AI Note",
+      "subtitle": "Notes",
+      "description": "Create a new note filled with AI in the Apple Notes app.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text",
+          "required": true
+        },
+        {
+          "name": "instructions",
+          "type": "text",
+          "placeholder": "Additional instructions"
+        }
+      ]
+    },
+    {
       "name": "menu-bar",
       "title": "Menu Bar Notes",
       "subtitle": "Notes",

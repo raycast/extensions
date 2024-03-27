@@ -14,7 +14,7 @@ export default function Command() {
       {data.pinnedNotes.length > 0 ? (
         <MenuBarExtra.Section title="Pinned">
           {data.pinnedNotes.slice(0, max).map((note) => (
-            <NoteItem key={note.id} note={note} openSeparately={openSeparately} />
+            <NoteMenuBarItem key={note.id} note={note} openSeparately={openSeparately} />
           ))}
         </MenuBarExtra.Section>
       ) : null}
@@ -22,7 +22,7 @@ export default function Command() {
       {maxUnpinnedNotes > 0 && data.unpinnedNotes.length > 0 ? (
         <MenuBarExtra.Section title="Notes">
           {data.unpinnedNotes.slice(0, maxUnpinnedNotes).map((note) => (
-            <NoteItem key={note.id} note={note} openSeparately={openSeparately} />
+            <NoteMenuBarItem key={note.id} note={note} openSeparately={openSeparately} />
           ))}
         </MenuBarExtra.Section>
       ) : null}
@@ -46,12 +46,12 @@ export default function Command() {
   );
 }
 
-type NoteItemProps = {
+type NoteMenuBarItemProps = {
   note: NoteItem;
   openSeparately: boolean;
 };
 
-function NoteItem({ note, openSeparately }: NoteItemProps) {
+function NoteMenuBarItem({ note, openSeparately }: NoteMenuBarItemProps) {
   const title = note.title.length > 40 ? note.title.substring(0, 40) + "…" : note.title;
 
   return (

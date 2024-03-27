@@ -1,5 +1,6 @@
-import { closeMainWindow, getSelectedText, LaunchProps, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getSelectedText, LaunchProps } from "@raycast/api";
 import { createNote } from "./api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async (props: LaunchProps<{ arguments: Arguments.New }>) => {
   await closeMainWindow();
@@ -22,6 +23,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.New }>) => {
   try {
     await createNote(text.trim());
   } catch (error) {
-    showToast({ style: Toast.Style.Failure, title: "Could not create a new note." });
+    showFailureToast(error, { title: "Could not create a new note." });
   }
 };
