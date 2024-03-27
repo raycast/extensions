@@ -1,0 +1,223 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-g4f",
+  "title": "GPT4Free",
+  "description": "Use GPT-4 for FREE, on Raycast - no API Key required.",
+  "icon": "gpt-icon.png",
+  "author": "muzhen_gaming",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "subtitle": "GPT4Free",
+      "description": "Ask GPT a question",
+      "mode": "view",
+      "icon": "gpt-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "subtitle": "GPT4Free",
+      "description": "Chat with GPT",
+      "icon": "chat-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "subtitle": "GPT4Free",
+      "description": "Ask GPT about selected text",
+      "mode": "view",
+      "icon": "clipboard-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize text",
+      "icon": "summarize-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain text",
+      "icon": "explain-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "comment",
+      "title": "Add Comments to Code",
+      "description": "Add comments to code",
+      "icon": "code-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view"
+    },
+    {
+      "name": "genImage",
+      "title": "Generate Images",
+      "subtitle": "GPT4Free",
+      "icon": "image-icon.png",
+      "description": "Generate images from a text prompt",
+      "mode": "view"
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to professional",
+      "mode": "view"
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "icon": "synonym-icon.png",
+      "description": "Find synonyms of word/phrase",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "phrase",
+          "type": "text",
+          "placeholder": "word/phrase (or selected text)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "icon": "grammar-icon.png",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "icon": "longer-icon.png",
+      "description": "Make selected text longer",
+      "mode": "view"
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "icon": "shorten-icon.png",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    }
+  ],
+
+  "preferences": [
+    {
+      "description": "GPT Provider",
+      "name": "gptProvider",
+      "required": false,
+      "title": "GPT Provider",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "chatgpt.ai (gpt-4-32k)",
+          "value": "GPT"
+        },
+        {
+          "title": "Bing (gpt-4)",
+          "value": "Bing"
+        },
+        {
+          "title": "ChatBase (gpt-3.5-turbo)",
+          "value": "ChatBase"
+        }
+      ],
+      "default": "GPT"
+    },
+    {
+      "description": "Image Provider",
+      "name": "imageProvider",
+      "required": false,
+      "title": "Image Provider",
+      "type": "dropdown",
+      "data": [
+          {
+          "title": "Prodia",
+          "value": "Prodia"
+          },
+          {
+          "title": "ProdiaStableDiffusionXL",
+          "value": "ProdiaStableDiffusionXL"
+          }
+      ],
+      "default": "Prodia"
+    },
+    {
+      "description": "Image Quality (higher takes longer to generate)",
+      "name": "imageQuality",
+      "required": false,
+      "title": "Image Quality",
+      "type": "dropdown",
+      "data": [
+          {
+          "title": "Medium",
+          "value": "Medium"
+          },
+          {
+          "title": "High",
+          "value": "High"
+          },
+          {
+          "title": "Extreme",
+          "value": "Extreme"
+          }
+      ],
+      "default": "High"
+    }
+  ],
+
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.9.0",
+    "g4f": "^1.4.2",
+    "jimp": "^0.22.10",
+    "node-fetch-polyfill": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
