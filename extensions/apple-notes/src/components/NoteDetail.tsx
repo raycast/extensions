@@ -1,10 +1,17 @@
 import { Detail } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { NodeHtmlMarkdown } from "node-html-markdown";
-import { NoteItem } from "../useNotes";
+import { NoteItem, useNotes } from "../useNotes";
 import { getNoteById } from "../api";
+import NoteActions from "./NoteActions";
 
-export default function NoteDetail({ note }: { note: NoteItem }) {
+type NoteDetailProps = {
+  note: NoteItem;
+  isDeleted?: boolean;
+  mutate: ReturnType<typeof useNotes>["mutate"];
+};
+
+export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps) {
   const { data, isLoading } = useCachedPromise(
     async (id) => {
       const content = await getNoteById(id);
@@ -14,5 +21,11 @@ export default function NoteDetail({ note }: { note: NoteItem }) {
     [note.id],
   );
 
-  return <Detail markdown={data} isLoading={isLoading} />;
+  return (
+    <Detail
+      markdown={data}
+      isLoading={isLoading}
+      actions={<NoteActions note={note} isDeleted={isDeleted} mutate={mutate} isDetail />}
+    />
+  );
 }
