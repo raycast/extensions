@@ -27,10 +27,11 @@
   "preferences": [
     {
       "name": "projectManagerDataPath",
-      "type": "directory",
+      "type": "textfield",
       "required": false,
+      "default": "",
       "title": "Projects Location",
-      "description": "Only used if you have changed the 'Projects Location' in Project Manager settings, otherwise leave blank."
+      "description": "If you have changed the 'Projects Location' setting for the VSCode Project Manager extension, set this to the same directory. Otherwise, leave blank."
     },
     {
       "name": "groupProjectsByTag",
