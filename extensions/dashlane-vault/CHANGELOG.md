@@ -1,5 +1,9 @@
 # Dashlane Vault Changelog
 
+## [Update] - 2024-03-23
+
+- Update to add compatibility for Dashlane CLI version 6.2412.0
+
 ## [Fixes] - 2024-02-10
 
 - Fix crash if a favorite item id does not exist anymore
