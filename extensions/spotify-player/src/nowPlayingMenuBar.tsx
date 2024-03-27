@@ -372,9 +372,9 @@ function NothingPlaying({ title = "Nothing is playing right now", isLoading }: {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Your library"
+          title="My Library"
           icon={Icon.Book}
-          onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+          onAction={() => launchCommand({ name: "myLibrary", type: LaunchType.UserInitiated })}
         />
         <MenuBarExtra.Item
           title="Search"

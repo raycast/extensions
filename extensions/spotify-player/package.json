@@ -24,7 +24,8 @@
     "hobhouse",
     "bkeys818",
     "jatindotdev",
-    "devbear"
+    "devbear",
+    "lukah"
   ],
   "license": "MIT",
   "preferences": [
@@ -47,8 +48,8 @@
       "mode": "view"
     },
     {
-      "name": "yourLibrary",
-      "title": "Your Library",
+      "name": "myLibrary",
+      "title": "My Library",
       "subtitle": "Spotify",
       "description": "See your saved artists, albums, songs, playlists, and podcasts. Similar to the \"Search\" command, it includes a category dropdown and contextual actions.",
       "mode": "view",

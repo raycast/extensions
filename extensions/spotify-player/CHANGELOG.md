@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Improvement] - 2024-03-26
+
+- Renamed 'Your Library' to 'My Library' to follow Raycast style.
+
 ## [Feature] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
@@ -73,14 +77,14 @@ Spotify Player v2 is a complete re-write, focusing on performance, maintainabili
 - Updated Extension icon
 - Updated Menu Bar icon
 - Support Podcasts and Episodes in "Now Playing"/"Menu Bar Player"
-- Support Podcasts and Episodes in "Search"/"Your Library"
+- Support Podcasts and Episodes in "Search"/"My Library"
 - Support "Transfer Playback" action, available in "Now Playing"/"Menu Bar Player"
 - Support "Add to Playlist" action, available in "Now Playing"/"Menu Bar Player"
 
 #### New Commands
 
 - **Search:** A single unified search command. Use this to search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.
-- **Your Library:** Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
+- **My Library:** Use this to see your saved artists, albums, songs, playlists, and podcasts. Similar to the "Search" command, it includes a category dropdown and contextual actions.
 - **Quick Actions:** This is a list of lots of Spotify actions. For example: Play/Pause, Like/Dislike current song, Change Volume, and more. If you'd like to have any of these available as a Root Command, you can create Quicklinks via the actions menu (⌘ K).
 - **Toggle Play/Pause:** Use this to toggle the playback of the current song.
 - **Next:** Use this to skip to the next song/episode.

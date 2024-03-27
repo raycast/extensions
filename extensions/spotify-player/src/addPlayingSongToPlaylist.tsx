@@ -37,8 +37,8 @@ function AddToPlaylistCommand() {
             <ActionPanel>
               <Action
                 icon={Icon.Book}
-                title="Your Library"
-                onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+                title="My Library"
+                onAction={() => launchCommand({ name: "myLibrary", type: LaunchType.UserInitiated })}
               />
               <Action
                 title="Search"

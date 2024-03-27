@@ -11,7 +11,7 @@ type UseMyLibraryProps = {
   keepPreviousData?: boolean;
 };
 
-export function useYourLibrary(options: UseMyLibraryProps = {}) {
+export function useMyLibrary(options: UseMyLibraryProps = {}) {
   const {
     data = [],
     error,
