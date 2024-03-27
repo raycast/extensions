@@ -26,13 +26,6 @@
   ],
   "preferences": [
     {
-      "name": "projectManagerDataPath",
-      "type": "directory",
-      "required": false,
-      "title": "Projects Location",
-      "description": "Only used if you have changed the 'Projects Location' in Project Manager settings, otherwise leave blank."
-    },
-    {
       "name": "groupProjectsByTag",
       "type": "checkbox",
       "required": false,
@@ -51,6 +44,22 @@
       "description": "Hide projects without tag"
     },
     {
+      "name": "vscodeApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "VSCode",
+      "default": "/Applications/Visual Studio Code.app",
+      "description": "Path to the VSCode app"
+    },
+    {
+      "name": "projectManagerDataPath",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Projects Location",
+      "description": "If you have changed the 'Projects Location' setting for the VSCode Project Manager extension, set this to the same directory. Otherwise, leave blank."
+    },
+    {
       "name": "terminalApp",
       "type": "appPicker",
       "required": false,
@@ -65,14 +74,6 @@
       "default": "/Applications/Fork.app",
       "title": "Git client app path",
       "description": "Path to the Git client app"
-    },
-    {
-      "name": "vscodeApp",
-      "type": "appPicker",
-      "required": false,
-      "title": "VSCode",
-      "default": "/Applications/Visual Studio Code.app",
-      "description": "Path to the VSCode app"
     }
   ],
   "dependencies": {

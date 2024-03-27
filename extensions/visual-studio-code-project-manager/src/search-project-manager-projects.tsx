@@ -76,15 +76,21 @@ const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): Pro
 
 function getPreferencesPath(): string | undefined {
   const path = preferences.projectManagerDataPath;
-  if (path && existsSync(path)) {
-    const stat = lstatSync(path);
-    if (stat.isDirectory()) {
-      return path;
-    }
-    if (stat.isFile()) {
-      return dirname(path);
-    }
+  if (!path) return;
+  if (!existsSync(path)) {
+    // TODO: Tell the user their path was invalid
+    console.error(`Projects Location path does not exist: ${path}`);
+    return;
   }
+
+  const stat = lstatSync(path);
+  if (stat.isDirectory()) {
+    return path;
+  }
+  if (stat.isFile()) {
+    return dirname(path);
+  }
+  // TODO: Tell the user path isn't a file or directory
 }
 
 function getSortedProjects(projects: ProjectEntry[]): ProjectEntry[] {
