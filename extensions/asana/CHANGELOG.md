@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Added copy name and url in Markdown format] - 2024-03-27
+
+- Added a new task command - "Copy Task Name and URL in Markdown format"
+
 ## [Use OAuth utils] - 2024-02-01
 
 - Use new OAuth utils

@@ -191,6 +191,12 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
           shortcut={{ modifiers: ["cmd"], key: "." }}
         />
 
+        <Action.CopyToClipboard
+          title="Copy Task Name and URL in Markdown Format"
+          content={`[${task.name}](${task.permalink_url})`}
+          shortcut={{ modifiers: ["cmd", "ctrl"], key: "." }}
+        />
+
         <Action.CopyToClipboard title="Copy Task ID" content={task.gid} shortcut={{ modifiers: ["cmd"], key: "i" }} />
       </ActionPanel.Section>
 
