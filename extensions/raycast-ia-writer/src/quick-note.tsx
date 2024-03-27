@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, ActionPanel, Action, showHUD, showToast, closeMainWindow, popToRoot } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, closeMainWindow, popToRoot } from "@raycast/api";
 import { defaultName } from "./preference";
 import { write } from "./api";
 import { checkInstallation } from "./utils";
