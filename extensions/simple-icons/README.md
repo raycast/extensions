@@ -8,13 +8,12 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 
 ## Features
 
-- Copy SVG source code to clipboard
-- Copy brand color to clipboard
+- View and copy SVG sources
+- View and copy brand colors
 - Copy CDN links from `cdn.simpleicons.org`, jsDelivr, or unpkg to clipboard
 - Open file with a specific application
-- View brand guidelines
-- View brand source
-- View brand license
+- View brand aliases, aka-names, and localizations
+- View brand guidelines, sources, and licenses
 - Keep updating every week
 
 ## Links
