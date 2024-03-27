@@ -26,14 +26,6 @@
   ],
   "preferences": [
     {
-      "name": "projectManagerDataPath",
-      "type": "textfield",
-      "required": false,
-      "default": "",
-      "title": "Projects Location",
-      "description": "If you have changed the 'Projects Location' setting for the VSCode Project Manager extension, set this to the same directory. Otherwise, leave blank."
-    },
-    {
       "name": "groupProjectsByTag",
       "type": "checkbox",
       "required": false,
@@ -58,6 +50,14 @@
       "title": "VSCode",
       "default": "/Applications/Visual Studio Code.app",
       "description": "Path to the VSCode app"
+    },
+    {
+      "name": "projectManagerDataPath",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Projects Location",
+      "description": "If you have changed the 'Projects Location' setting for the VSCode Project Manager extension, set this to the same directory. Otherwise, leave blank."
     },
     {
       "name": "terminalApp",
