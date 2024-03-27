@@ -14,10 +14,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "upload-file",
-      "title": "Upload File",
+      "name": "upload-file-from-clipboard",
+      "title": "Upload File From Clipboard",
       "subtitle": "Crossbell",
-      "description": "Upload selected file items from Finder or file from clipboard to IPFS",
+      "description": "Upload file from clipboard to IPFS",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-file-from-finder",
+      "title": "Upload File From Finder",
+      "subtitle": "Crossbell",
+      "description": "Upload selected file items from Finder to IPFS",
       "mode": "no-view"
     },
     {
