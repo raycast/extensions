@@ -1,5 +1,9 @@
 # Dashlane Vault Changelog
 
+## [Added] - 2024-03-17
+
+- Add TouchID authentication for opening vault
+
 ## [Fixes] - 2024-02-10
 
 - Fix crash if a favorite item id does not exist anymore

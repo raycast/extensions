@@ -10,3 +10,4 @@ raycast-env.d.ts
 .DS_Store
 
 example-data
+.build
