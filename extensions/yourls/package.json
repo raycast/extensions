@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yourls",
+  "title": "Yourls Link Shortener",
+  "description": "Create a shortened link using Yourls",
+  "icon": "icon.png",
+  "author": "firhan_ramadhan",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten-link",
+      "title": "Create Shortened Link",
+      "subtitle": "Yourls",
+      "description": "Create a shortened link",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api",
+      "title": "Yourls API URL",
+      "description": "Your Yourls API URL",
+      "type": "textfield",
+      "placeholder": "http://your-own-domain-here.com/yourls-api.php",
+      "required": true
+    },
+    {
+      "name": "signature",
+      "title": "Yourls Signature",
+      "placeholder": "Your secret signature token",
+      "type": "password",
+      "required": true,
+      "description": "Your Yourls signature token"
+    }
+  ],
+  "dependencies": {
+    "@braintree/sanitize-url": "^7.0.1",
+    "@raycast/api": "^1.69.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
