@@ -5,11 +5,10 @@
   "description": "Create, access, and modify tasks.",
   "icon": "asana.png",
   "author": "thomaslombart",
+  "contributors": ["tuzemec"],
   "owner": "raycast",
   "access": "public",
-  "categories": [
-    "Productivity"
-  ],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
