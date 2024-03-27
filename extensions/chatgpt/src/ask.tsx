@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
+import { ActionPanel, clearSearchBar, getPreferenceValues, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { PrimaryAction } from "./actions";
@@ -40,22 +40,31 @@ export default function Ask(props: { conversation?: Conversation }) {
     props.conversation ? props.conversation.model.id : "default"
   );
 
-  const [isAutoFullInput] = useState(() => {
+  const [{ isAutoFullInput, isAutoLoadText }] = useState(() => {
     return getPreferenceValues<{
       isAutoFullInput: boolean;
-    }>().isAutoFullInput;
+      isAutoLoadText: boolean;
+    }>();
   });
 
   const { push, pop } = useNavigation();
 
   useEffect(() => {
-    if (
-      isAutoFullInput &&
-      (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0))
-    ) {
+    if (!isAutoFullInput) {
+      setLoading(false);
+      return;
+    }
+    // fix https://github.com/raycast/extensions/issues/11420
+    if (isAutoLoadText && question.data.length === 0) {
+      setLoading(false);
+      return;
+    }
+    if (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0)) {
+      const questionText = question.data;
+      clearSearchBar();
       push(
         <QuestionForm
-          initialQuestion={question.data}
+          initialQuestion={questionText}
           onSubmit={(question) => {
             chats.ask(question, conversation.model);
             pop();
@@ -145,11 +154,8 @@ export default function Ask(props: { conversation?: Conversation }) {
       searchBarAccessory={
         <ModelDropdown models={models.data} onModelChange={setSelectedModelId} selectedModel={selectedModelId} />
       }
-      onSelectionChange={(id) => {
-        if (id !== chats.selectedChatId) {
-          chats.setSelectedChatId(id);
-        }
-      }}
+      // https://github.com/raycast/extensions/issues/10844
+      // `onSelectionChange` may cause race condition
       searchBarPlaceholder={chats.data.length > 0 ? "Ask another question..." : "Ask a question..."}
     >
       <ChatView
