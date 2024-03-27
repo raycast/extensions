@@ -64,7 +64,7 @@
     },
     {
       "name": "askAgent",
-      "title": "Ask A Dust Agent",
+      "title": "Ask a Dust Agent",
       "description": "Select an agent to ask a question",
       "mode": "view"
     }
