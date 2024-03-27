@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Improvements] - 2024-04-17
+
+- Add pagination when searching issues
+- Rename "Assigned Issues" to "My Issues"
+
 ## [Enhanced Notifications] - 2024-03-12
 
 - Notifications now include links to comments, project updates, and projects, making it easier to navigate directly to the relevant content in Linear.
