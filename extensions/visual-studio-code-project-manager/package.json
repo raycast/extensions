@@ -52,6 +52,14 @@
       "description": "Hide projects without tag"
     },
     {
+      "name": "vscodeApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "VSCode",
+      "default": "/Applications/Visual Studio Code.app",
+      "description": "Path to the VSCode app"
+    },
+    {
       "name": "terminalApp",
       "type": "appPicker",
       "required": false,
@@ -66,14 +74,6 @@
       "default": "/Applications/Fork.app",
       "title": "Git client app path",
       "description": "Path to the Git client app"
-    },
-    {
-      "name": "vscodeApp",
-      "type": "appPicker",
-      "required": false,
-      "title": "VSCode",
-      "default": "/Applications/Visual Studio Code.app",
-      "description": "Path to the VSCode app"
     }
   ],
   "dependencies": {
