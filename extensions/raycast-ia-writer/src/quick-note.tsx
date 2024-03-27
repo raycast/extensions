@@ -20,7 +20,6 @@ export default function QuickNote() {
 
   async function onSaved(success: boolean, message?: string) {
     if (success) {
-      await showHUD("Note Saved");
       await closeMainWindow();
       await popToRoot({ clearSearchBar: true });
     } else {
