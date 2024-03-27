@@ -29,15 +29,17 @@ export default function ShowSchedule() {
 
   const commonEventDistance = chain(schedule?.events)
     .filter((event) => event.type === "match")
-    .filter((event) => event.state === "unstarted")
+    .takeRight(10)
     .map((event, index, events) => {
       const nextEvent = events[index + 1];
       if (!nextEvent) {
         return 0;
       }
-      return differenceInMinutes(nextEvent.startTime, event.startTime);
+      const matches = event.match.strategy.count || 1;
+      const minutes = differenceInMinutes(nextEvent.startTime, event.startTime);
+      return minutes / matches;
     })
-    .filter((distance) => distance > 0 && distance < 300)
+    .filter((distance) => distance > 0 && distance <= 300)
     .groupBy()
     .entries()
     .orderBy(([, values]) => values.length, "desc")
@@ -49,7 +51,7 @@ export default function ShowSchedule() {
   return (
     <List
       isLoading={isLoading}
-      selectedItemId={schedule?.events.find((event) => event.state !== "completed")?.match.id}
+      selectedItemId={schedule?.events.find((event) => event.state !== "completed")?.match?.id}
       searchBarPlaceholder="Search teams and days"
       searchBarAccessory={<LeagueDropdown value={leagueId} onChange={setLeagueId} />}
     >
