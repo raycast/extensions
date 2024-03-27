@@ -1,21 +1,24 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
-import { CACHE_KEYS } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
+import { Cache } from "~/utils/cache";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { getLabelForTimeoutPreference } from "~/utils/preferences";
 
+type UnlockFormProps = {
+  pendingAction?: Promise<void>;
+};
+
 /** Form for unlocking or logging in to the Bitwarden vault. */
-const UnlockForm = () => {
+const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const bitwarden = useBitwarden();
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
 
   const [isLoading, setLoading] = useState(false);
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
-  const [lockReason, setLockReason] = useCachedState<string>(CACHE_KEYS.LOCK_REASON);
+  const lockReason = Cache.vaultLockReason.get();
 
   async function onSubmit({ password }: { password: string }) {
     if (password.length === 0) return;
@@ -24,6 +27,8 @@ const UnlockForm = () => {
     try {
       setLoading(true);
       setUnlockError(undefined);
+
+      await pendingAction;
 
       const { error, result: vaultState } = await bitwarden.status();
       if (error) throw error;
@@ -45,7 +50,7 @@ const UnlockForm = () => {
       }
 
       await bitwarden.unlock(password);
-      setLockReason(undefined);
+      Cache.vaultLockReason.remove();
       await toast.hide();
     } catch (error) {
       const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);

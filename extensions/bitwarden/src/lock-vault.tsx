@@ -16,7 +16,7 @@ async function lockVaultCommand() {
 
     const bitwarden = await new Bitwarden(toast).initialize();
 
-    await bitwarden.withSession(token).lock(VAULT_LOCK_MESSAGES.MANUAL);
+    await bitwarden.withSession(token).lock({ reason: VAULT_LOCK_MESSAGES.MANUAL });
     await SessionStorage.clearSession();
 
     toast.style = Toast.Style.Success;

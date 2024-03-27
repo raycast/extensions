@@ -1,9 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
-import { createContext, PropsWithChildren, useContext, useMemo } from "react";
+import { createContext, PropsWithChildren, useContext, useMemo, useRef } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
-import { CACHE_KEYS, VAULT_LOCK_MESSAGES } from "~/constants/general";
+import { VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { VAULT_TIMEOUT } from "~/constants/preferences";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSessionReducer } from "~/context/session/reducer";
@@ -13,7 +12,7 @@ import {
   SessionStorage,
 } from "~/context/session/utils";
 import { SessionState } from "~/types/session";
-import { Cache as Cache } from "~/utils/cache";
+import { Cache } from "~/utils/cache";
 import { captureException } from "~/utils/development";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 import { hashMasterPasswordForReprompting } from "~/utils/passwords";
@@ -36,7 +35,7 @@ export type SessionProviderProps = PropsWithChildren<{
 export function SessionProvider(props: SessionProviderProps) {
   const bitwarden = useBitwarden();
   const [state, dispatch] = useSessionReducer();
-  const [_, setLockReason] = useCachedState<string>(CACHE_KEYS.LOCK_REASON);
+  const pendingActionRef = useRef<Promise<any>>(Promise.resolve());
 
   useOnceEffect(bootstrapSession, bitwarden);
 
@@ -80,14 +79,11 @@ export function SessionProvider(props: SessionProviderProps) {
       dispatch({ type: "finishLoadingSavedState" });
     } catch (error) {
       if (error instanceof LockVaultError) {
-        await handleLock(error.message);
-        await bitwarden.lock(error.message, true);
+        pendingActionRef.current = bitwarden.lock({ reason: error.message, immediate: true, checkVaultStatus: true });
       } else if (error instanceof LogoutVaultError) {
-        await handleLogout(error.message);
-        await bitwarden.logout();
+        pendingActionRef.current = bitwarden.logout({ reason: error.message, immediate: true });
       } else {
-        await handleLock();
-        await bitwarden.lock();
+        pendingActionRef.current = bitwarden.lock({ immediate: true });
         dispatch({ type: "failLoadingSavedState" });
         captureException("Failed to load saved session state", error);
       }
@@ -97,20 +93,20 @@ export function SessionProvider(props: SessionProviderProps) {
   async function handleUnlock(password: string, token: string) {
     const passwordHash = await hashMasterPasswordForReprompting(password);
     await SessionStorage.saveSession(token, passwordHash);
-    setLockReason(undefined);
+    Cache.vaultLockReason.remove();
     dispatch({ type: "unlock", token, passwordHash });
   }
 
   async function handleLock(reason?: string) {
-    if (reason) setLockReason(reason);
+    if (reason) Cache.vaultLockReason.set(reason);
     await SessionStorage.clearSession();
     dispatch({ type: "lock" });
   }
 
   async function handleLogout(reason?: string) {
-    if (reason) setLockReason(reason);
     await SessionStorage.clearSession();
     Cache.clear();
+    if (reason) Cache.vaultLockReason.set(reason);
     dispatch({ type: "logout" });
   }
 
@@ -135,9 +131,10 @@ export function SessionProvider(props: SessionProviderProps) {
 
   const showUnlockForm = state.isLocked || !state.isAuthenticated;
   const children = state.token ? props.children : null;
+
   return (
     <SessionContext.Provider value={contextValue}>
-      {showUnlockForm && props.unlock ? <UnlockForm /> : children}
+      {showUnlockForm && props.unlock ? <UnlockForm pendingAction={pendingActionRef.current} /> : children}
     </SessionContext.Provider>
   );
 }

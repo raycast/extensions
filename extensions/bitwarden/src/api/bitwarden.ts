@@ -50,6 +50,17 @@ type ExecProps = {
   input?: string;
 };
 
+type LockOptions = {
+  reason?: string;
+  checkVaultStatus?: boolean;
+  immediate?: boolean;
+};
+
+type LogoutOptions = {
+  reason?: string;
+  immediate?: boolean;
+};
+
 const { supportPath } = environment;
 
 const Δ = "2"; // changing this forces a new bin download for people that had a failed one
@@ -316,9 +327,9 @@ export class Bitwarden {
 
   async login(): Promise<MaybeError> {
     try {
+      await this.callListeners("login");
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
       await this.saveLastVaultStatus("login", "unlocked");
-      await this.callListeners("login");
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to login", execError);
@@ -328,11 +339,15 @@ export class Bitwarden {
     }
   }
 
-  async logout(reason?: string): Promise<MaybeError> {
+  async logout(options?: LogoutOptions): Promise<MaybeError> {
+    const { reason, immediate = false } = options ?? {};
     try {
+      if (immediate) await this.handlePostLogout(reason);
+
       await this.exec(["logout"], { resetVaultTimeout: false });
       await this.saveLastVaultStatus("logout", "unauthenticated");
-      await this.handlePostLogout(reason);
+
+      if (!immediate) await this.handlePostLogout(reason);
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to logout", execError);
@@ -342,9 +357,12 @@ export class Bitwarden {
     }
   }
 
-  async lock(reason?: string, shouldCheckVaultStatus?: boolean): Promise<MaybeError> {
+  async lock(options?: LockOptions): Promise<MaybeError> {
+    const { reason, checkVaultStatus = false, immediate = false } = options ?? {};
     try {
-      if (shouldCheckVaultStatus) {
+      if (immediate) await this.callListeners("lock", reason);
+
+      if (checkVaultStatus) {
         const { error, result } = await this.status();
         if (error) throw error;
         if (result.status === "unauthenticated") return { error: new NotLoggedInError("Not logged in") };
@@ -352,7 +370,8 @@ export class Bitwarden {
 
       await this.exec(["lock"], { resetVaultTimeout: false });
       await this.saveLastVaultStatus("lock", "locked");
-      await this.callListeners("lock", reason);
+
+      if (!immediate) await this.callListeners("lock", reason);
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to lock vault", execError);
