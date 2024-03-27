@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Add Pagination] - 2024-04-17
+
+- Add pagination to Search Page command
+
 ## [Change Properties order in Create Database Page] - 2024-03-22
 
 - Add ability to change order of properties when creating a new database page
