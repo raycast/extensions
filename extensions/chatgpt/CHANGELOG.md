@@ -1,5 +1,9 @@
 # Changelog
 
+## [Feature] - 2024-03-09
+
+- Feature: Allow to hide model selector when asking a question
+
 ## [Chore] - 2024-03-09
 
 - Chore: Retrieve `Preferences` dynamically directly from the generated type definition
