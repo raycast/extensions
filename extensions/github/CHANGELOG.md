@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Support different pull requests and workflows statuses] - 2024-03-24
+
+- Supports different pull request and workflow statuses in `Notifications` and `Unread Notifications` commands.
+- Changes icon color of `Unread Notifications` menu bar command for better visibility in the light menu bar.
+
 ## [Fix icon color for My Issues Menu Bar] - 2024-03-22
 
 - Fixes an issue where icon colors for the `My Issues Menu Bar` were not adjusted to the dark mode.
