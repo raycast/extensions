@@ -128,7 +128,7 @@ export function execAsync(
     const result: ExecResult = { stdout: "", stderr: "" };
 
     child.stdout?.on("data", (data) => {
-      console.log("stdout:", data);
+      console.debug("stdout:", data);
       handler?.onStdout?.(data);
       result.stdout += data;
     });

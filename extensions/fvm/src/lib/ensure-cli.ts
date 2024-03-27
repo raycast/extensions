@@ -78,9 +78,9 @@ export async function ensureCLI(): Promise<string> {
       if (fs.existsSync(kCliLastUpdateCheckFilePath)) {
         const lastCheckTime = (await afs.stat(kCliLastUpdateCheckFilePath)).mtimeMs;
         const currentTime = Date.now();
-        const twoDaysInMilliseconds = 2 * 24 * 60 * 60 * 1000;
+        const sixtyMinutesInMilliseconds = 60 * 60 * 1000;
 
-        if (currentTime - lastCheckTime < twoDaysInMilliseconds) {
+        if (currentTime - lastCheckTime < sixtyMinutesInMilliseconds) {
           console.debug("Skipping update check. Last check was within 2 days.");
 
           return getFvmExecPath;
