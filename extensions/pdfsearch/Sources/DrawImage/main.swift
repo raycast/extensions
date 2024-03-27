@@ -1,11 +1,11 @@
 import PDFKit
 
-/// Creates an rendered image of a pdf page with highlighted text
+/// Creates a rendered image of a pdf page with optional highlighted text
 /// - Parameters:
-///   - pdfDocument: PDF document page is contained in
-///   - pageIndex: Index of page to render
-///   - highlightRanges: Range of selection in the page to highlight
-func createHighlightedImage(from pdfDocument: PDFDocument, pageIndex: Int, range: NSRange) throws -> URL {
+///   - pdfDocument: PDF document the page is contained in
+///   - pageIndex: Index of the page to render
+///   - range: Optional range of selection in the page to highlight
+func createHighlightedImage(from pdfDocument: PDFDocument, pageIndex: Int, range: NSRange?) throws -> URL {
     guard let page = pdfDocument.page(at: pageIndex) else {
         fatalError("Could not get page!")
     }
@@ -25,32 +25,20 @@ func createHighlightedImage(from pdfDocument: PDFDocument, pageIndex: Int, range
 
     // Render the PDF page
     context.saveGState()
-    // context.translateBy(x: 0.0, y: 0.0)
-    // context.scaleBy(x: 1.0, y: 1.0)
     page.draw(with: .mediaBox, to: context)
     context.restoreGState()
     
-    // Draw highlights
-    context.setFillColor(NSColor.yellow.withAlphaComponent(0.5).cgColor)
-
-    // Convert range to CGRect and draw
-    guard let pageContent = page.string else {
-        fatalError("No page content detected!")
+    // Draw highlights if range is provided
+    if let highlightRange = range, let pageContent = page.string {
+        let safeRange = NSRange(location: min(highlightRange.location, pageContent.count),
+                                length: min(highlightRange.length, pageContent.count - highlightRange.location))
+        
+        if let selection = page.selection(for: safeRange) {
+            let selectionBounds = selection.bounds(for: page)
+            context.setFillColor(NSColor.yellow.withAlphaComponent(0.5).cgColor)
+            context.fill(selectionBounds)
+        }
     }
-
-    // Create an NSRange that is safe and within the bounds of the page content
-    let safeRange = NSRange(location: min(range.location, pageContent.count),
-                            length: min(range.length, pageContent.count - range.location))
-
-    // Create a PDFSelection from the range
-    guard let selection = page.selection(for: NSRange(location: safeRange.location, length: safeRange.length)) else {
-        fatalError("Error creating selection!")
-    }
-
-    // Get the bounds of the selection
-    let selectionBounds = selection.bounds(for: page)
-    context.fill(selectionBounds)
-
 
     image.unlockFocus()
 
@@ -70,19 +58,28 @@ func createHighlightedImage(from pdfDocument: PDFDocument, pageIndex: Int, range
     }
 }
 
-if CommandLine.argc < 5 {
-    print("Usage: DrawImage <file-path> <page-number> <lower-bound> <upper-bound>")
+// Verify the correct number of arguments are provided
+if CommandLine.argc != 3 && CommandLine.argc != 5 {
+    print("Usage: DrawImage <file-path> <page-number> [<lower-bound> <upper-bound>]")
     exit(1)
 }
 
 let filePath = CommandLine.arguments[1]
-guard let pageIndex = Int(CommandLine.arguments[2]),
-   let lowerBound = Int(CommandLine.arguments[3]),
-   let upperBound = Int(CommandLine.arguments[4]) else {
-    fatalError("Invalid arguments received!")
+guard let pageIndex = Int(CommandLine.arguments[2]) else {
+    fatalError("Invalid page number argument!")
 }
 
-let range = NSRange(location: lowerBound, length: upperBound - lowerBound)
+let range: NSRange?
+if CommandLine.argc == 5 {
+    guard let lowerBound = Int(CommandLine.arguments[3]),
+          let upperBound = Int(CommandLine.arguments[4]),
+          lowerBound < upperBound else {
+        fatalError("Invalid or incorrect bounds provided!")
+    }
+    range = NSRange(location: lowerBound, length: upperBound - lowerBound)
+} else {
+    range = nil
+}
 
 guard let pdfDocument = PDFDocument(url: URL(fileURLWithPath: filePath)) else {
     fatalError("Failed to load PDF Document \(filePath)")
