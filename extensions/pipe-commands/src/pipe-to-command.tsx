@@ -34,15 +34,25 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
     const transformedInputType = props.inputType === "clipboard" ? "text" : props.inputType;
 
     const filteredCommands = commands.filter((command) => {
+      // this is a bit confusing:
+      //   - inputType can either be a single string (file, text, url) or an object with a type property
+      //   - argument1 is the old way of defining inputType and must be a object with a type property and only
+      //     used with `silent` commands
+      //
+      // in the logic below we prioritize (1) inputType.type, (2) inputType, and then (3) argument1.type
+
       switch (command.metadatas.mode) {
         case "pipe":
-          // If the input is not defined, we assume it's a text input
-          if (!command.metadatas.inputType?.type) {
-            return transformedInputType === "text";
+          if (typeof command.metadatas.inputType == "object" && command.metadatas.inputType?.type) {
+            return command.metadatas.inputType.type === transformedInputType;
           }
-          return command.metadatas.inputType.type === transformedInputType;
+
+          // If the input is not defined, we assume it's a text input
+          return (command.metadatas.inputType ?? "text") === transformedInputType;
+
+        // default is always `silent` right now
         default:
-          return command.metadatas.argument1.type === transformedInputType;
+          return command.metadatas.argument1?.type === transformedInputType;
       }
     });
 
@@ -59,6 +69,8 @@ export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
         return "Pipe selected text or clipboard contents to";
       case "url":
         return "Pipe active browser tab URL to";
+      case "file":
+        return "Pipe selected Finder file to";
       default:
         return `Pipe ${inputType} to`;
     }

@@ -72,7 +72,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.3",
+    "@raycast/api": "^1.70.2",
     "globby": "^14.0.1",
     "jsonschema": "^1.4.1",
     "run-applescript": "^7.0.0",
@@ -87,7 +87,7 @@
     "prettier": "^2.5.1",
     "react-devtools": "^4.28.4",
     "typescript": "^4.4.3",
-    "typescript-json-schema": "^0.62.0"
+    "typescript-json-schema": "^0.63.0"
   },
   "scripts": {
     "schema": "typescript-json-schema src/types.ts ScriptMetadatas --required > assets/schema.json",
