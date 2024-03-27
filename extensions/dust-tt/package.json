@@ -70,7 +70,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
+    "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.10.1",
     "date-fns": "^3.0.0-alpha.2",
     "eventsource-parser": "^1.1.1",

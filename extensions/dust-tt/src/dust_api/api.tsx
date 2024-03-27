@@ -95,7 +95,7 @@ export class DustApi {
 
     if (!res.ok || !res.body) {
       console.error(`Error running streamed app: status_code=${res.status}  - message=${await res.text()}`);
-      return null;
+      throw new Error(`Error running streamed app: status_code=${res.status}`);
     }
 
     const pendingEvents: (
@@ -137,6 +137,7 @@ export class DustApi {
       });
       reader.on("error", (err) => {
         console.error("Error reading stream", err);
+        throw err;
       });
       while (!done) {
         if (pendingEvents.length > 0) {
@@ -176,12 +177,15 @@ export class DustApi {
         });
       if (agentMessages.length === 0) {
         console.error("Failed to retrieve agent message");
+        throw new Error("Failed to retrieve agent message");
       }
       const agentMessage = agentMessages[0];
-      const streamRes = await this.streamAgentMessageEvents({
-        conversationId,
-        messageId: agentMessage.sId,
-      });
+      const streamRes = agentMessage
+        ? await this.streamAgentMessageEvents({
+            conversationId,
+            messageId: agentMessage.sId,
+          })
+        : undefined;
       if (!streamRes) {
         return;
       }
@@ -195,11 +199,11 @@ export class DustApi {
         switch (event.type) {
           case "user_message_error": {
             console.error(`User message error: code: ${event.error.code} message: ${event.error.message}`);
-            return;
+            throw new Error(event.error.message, { cause: event.error.code });
           }
           case "agent_error": {
             console.error(`Agent message error: code: ${event.error.code} message: ${event.error.message}`);
-            return;
+            throw new Error(event.error.message, { cause: event.error.code });
           }
           case "agent_action_success": {
             action = event.action;
@@ -294,12 +298,17 @@ export class DustApi {
     const { apiKey, workspaceId } = this._credentials;
     const agentsUrl = `${DUST_API_URL}/${workspaceId}/assistant/agent_configurations`;
 
-    const response = await fetch(agentsUrl, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-    });
+    let response;
+    try {
+      response = await fetch(agentsUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+      });
+    } catch (error) {
+      return { error: `Could not get agents: ${error}` };
+    }
     if (!response.ok) {
       return { error: `Could not get agents: ${response.statusText}` };
     }
