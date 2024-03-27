@@ -3,32 +3,29 @@ import { SessionState } from "~/types/session";
 
 const initialState: SessionState = {
   token: undefined,
+  passwordHash: undefined,
+
   isLoading: true,
   isLocked: false,
   isAuthenticated: false,
-  passwordHash: undefined,
-  lastActivityTime: undefined,
-  lockReason: undefined,
 };
 
 type SessionReducerActions =
-  | { type: "lock"; lockReason?: string }
-  | { type: "unlock"; token: string; passwordHash: string }
+  | ({ type: "loadState" } & Partial<Omit<SessionState, "isLoading" | "isLocked" | "isAuthenticated">>)
+  | { type: "lock" }
+  | ({ type: "unlock" } & Pick<SessionState, "token" | "passwordHash">)
   | { type: "logout" }
   | { type: "vaultTimeout" }
-  | {
-      type: "loadSavedState";
-      token?: string;
-      passwordHash?: string;
-      lastActivityTime?: Date;
-      shouldLockVault?: boolean;
-      lockReason?: string;
-    }
-  | { type: "failedLoadSavedState" };
+  | { type: "finishLoadingSavedState" }
+  | { type: "failLoadingSavedState" };
 
 export const useSessionReducer = () => {
   return useReducer((state: SessionState, action: SessionReducerActions): SessionState => {
     switch (action.type) {
+      case "loadState": {
+        const { type: _, ...actionPayload } = action;
+        return { ...state, ...actionPayload };
+      }
       case "lock": {
         return {
           ...state,
@@ -36,7 +33,6 @@ export const useSessionReducer = () => {
           passwordHash: undefined,
           isLoading: false,
           isLocked: true,
-          lockReason: action.lockReason,
         };
       }
       case "unlock": {
@@ -46,7 +42,6 @@ export const useSessionReducer = () => {
           passwordHash: action.passwordHash,
           isLocked: false,
           isAuthenticated: true,
-          lockReason: undefined,
         };
       }
       case "logout": {
@@ -60,26 +55,34 @@ export const useSessionReducer = () => {
         };
       }
       case "vaultTimeout": {
-        return { ...state, isLocked: true };
-      }
-      case "loadSavedState": {
-        const hasToken = !!action.token;
         return {
           ...state,
-          token: action.token,
-          passwordHash: action.passwordHash,
-          lastActivityTime: action.lastActivityTime,
-          isLoading: false,
-          isLocked: action.shouldLockVault || !hasToken,
-          isAuthenticated: hasToken,
-          lockReason: action.lockReason,
+          isLocked: true,
         };
       }
-      case "failedLoadSavedState": {
-        return { ...state, isLoading: false, isLocked: true };
+      case "finishLoadingSavedState": {
+        if (!state.token || !state.passwordHash) {
+          throw new Error("Missing required fields: token, passwordHash");
+        }
+
+        const hasToken = !!state.token;
+        return {
+          ...state,
+          isLoading: false,
+          isLocked: !hasToken,
+          isAuthenticated: hasToken,
+        };
       }
-      default:
+      case "failLoadingSavedState": {
+        return {
+          ...state,
+          isLoading: false,
+          isLocked: true,
+        };
+      }
+      default: {
         return state;
+      }
     }
   }, initialState);
 };

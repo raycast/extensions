@@ -1,24 +1,24 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useBitwarden } from "~/context/bitwarden";
+import { Cache } from "~/utils/cache";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { getLabelForTimeoutPreference } from "~/utils/preferences";
 
-export type UnlockFormProps = {
-  lockReason?: string;
+type UnlockFormProps = {
+  pendingAction?: Promise<void>;
 };
 
 /** Form for unlocking or logging in to the Bitwarden vault. */
-const UnlockForm = (props: UnlockFormProps) => {
-  const { lockReason: lockReasonProp } = props;
-
+const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const bitwarden = useBitwarden();
-  const [isLoading, setLoading] = useState(false);
   const { userMessage, serverMessage, shouldShowServer } = useVaultMessages();
-  const lockReason = useRef(lockReasonProp ?? bitwarden.lockReason).current;
+
+  const [isLoading, setLoading] = useState(false);
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
+  const lockReason = Cache.vaultLockReason.get();
 
   async function onSubmit({ password }: { password: string }) {
     if (password.length === 0) return;
@@ -27,6 +27,8 @@ const UnlockForm = (props: UnlockFormProps) => {
     try {
       setLoading(true);
       setUnlockError(undefined);
+
+      await pendingAction;
 
       const { error, result: vaultState } = await bitwarden.status();
       if (error) throw error;
@@ -48,6 +50,7 @@ const UnlockForm = (props: UnlockFormProps) => {
       }
 
       await bitwarden.unlock(password);
+      Cache.vaultLockReason.remove();
       await toast.hide();
     } catch (error) {
       const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);

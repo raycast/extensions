@@ -34,10 +34,12 @@ type Env = {
 
 type ActionCallbacks = {
   login?: () => MaybePromise<void>;
-  logout?: () => MaybePromise<void>;
+  logout?: (reason?: string) => MaybePromise<void>;
   lock?: (reason?: string) => MaybePromise<void>;
   unlock?: (password: string, sessionToken: string) => MaybePromise<void>;
 };
+
+type ActionCallbackMap<T extends keyof ActionCallbacks = keyof ActionCallbacks> = Map<T, ActionCallbacks[T][]>;
 
 type MaybeError<T = undefined> = { result: T; error?: undefined } | { result?: undefined; error: ManuallyThrownError };
 
@@ -46,6 +48,17 @@ type ExecProps = {
   resetVaultTimeout: boolean;
   abortController?: AbortController;
   input?: string;
+};
+
+type LockOptions = {
+  reason?: string;
+  checkVaultStatus?: boolean;
+  immediate?: boolean;
+};
+
+type LogoutOptions = {
+  reason?: string;
+  immediate?: boolean;
 };
 
 const { supportPath } = environment;
@@ -115,12 +128,11 @@ export class Bitwarden {
   private env: Env;
   private initPromise: Promise<void>;
   private tempSessionToken?: string;
-  private callbacks: ActionCallbacks = {};
+  private callbacks: ActionCallbackMap = new Map();
   private preferences = getPreferenceValues<Preferences>();
   private cliPath: string;
   private toastInstance: Toast | undefined;
   wasCliUpdated = false;
-  lockReason: string | undefined;
 
   constructor(toastInstance?: Toast) {
     const { cliPath: cliPathPreference, clientId, clientSecret, serverCertsPath } = this.preferences;
@@ -139,7 +151,6 @@ export class Bitwarden {
     this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
       await this.checkServerUrl(serverUrl);
-      this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
     })();
   }
 
@@ -208,7 +219,26 @@ export class Bitwarden {
   }
 
   setActionCallback<TAction extends keyof ActionCallbacks>(action: TAction, callback: ActionCallbacks[TAction]): this {
-    this.callbacks[action] = callback;
+    const listeners = this.callbacks.get(action);
+    if (listeners && listeners.length > 0) {
+      listeners.push(callback);
+    } else {
+      this.callbacks.set(action, [callback]);
+    }
+    return this;
+  }
+
+  removeActionCallback<TAction extends keyof ActionCallbacks>(
+    action: TAction,
+    callback: ActionCallbacks[TAction]
+  ): this {
+    const listeners = this.callbacks.get(action);
+    if (listeners && listeners.length > 0) {
+      const index = listeners.indexOf(callback);
+      if (index >= 0) {
+        listeners.splice(index, 1);
+      }
+    }
     return this;
   }
 
@@ -270,18 +300,6 @@ export class Bitwarden {
     }
   }
 
-  private async setLockReason(reason: string): Promise<void> {
-    this.lockReason = reason;
-    await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
-  }
-
-  private async clearLockReason(): Promise<void> {
-    if (this.lockReason) {
-      await LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
-      this.lockReason = undefined;
-    }
-  }
-
   private async exec(args: string[], options: ExecProps): Promise<ExecaChildProcess> {
     const { abortController, input = "", resetVaultTimeout } = options ?? {};
 
@@ -309,9 +327,9 @@ export class Bitwarden {
 
   async login(): Promise<MaybeError> {
     try {
+      await this.callListeners("login");
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
-      await this.clearLockReason();
-      await this.callbacks.login?.();
+      await this.saveLastVaultStatus("login", "unlocked");
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to login", execError);
@@ -321,11 +339,15 @@ export class Bitwarden {
     }
   }
 
-  async logout(reason?: string): Promise<MaybeError> {
+  async logout(options?: LogoutOptions): Promise<MaybeError> {
+    const { reason, immediate = false } = options ?? {};
     try {
-      if (reason) await this.setLockReason(reason);
+      if (immediate) await this.handlePostLogout(reason);
+
       await this.exec(["logout"], { resetVaultTimeout: false });
-      await this.handlePostLogout();
+      await this.saveLastVaultStatus("logout", "unauthenticated");
+
+      if (!immediate) await this.handlePostLogout(reason);
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to logout", execError);
@@ -335,17 +357,21 @@ export class Bitwarden {
     }
   }
 
-  async lock(reason?: string, shouldCheckVaultStatus?: boolean): Promise<MaybeError> {
+  async lock(options?: LockOptions): Promise<MaybeError> {
+    const { reason, checkVaultStatus = false, immediate = false } = options ?? {};
     try {
-      if (shouldCheckVaultStatus) {
+      if (immediate) await this.callListeners("lock", reason);
+
+      if (checkVaultStatus) {
         const { error, result } = await this.status();
         if (error) throw error;
-        if (result.status !== "unauthenticated") return { error: new NotLoggedInError("Not logged in") };
+        if (result.status === "unauthenticated") return { error: new NotLoggedInError("Not logged in") };
       }
 
-      if (reason) await this.setLockReason(reason);
       await this.exec(["lock"], { resetVaultTimeout: false });
-      await this.callbacks.lock?.(reason);
+      await this.saveLastVaultStatus("lock", "locked");
+
+      if (!immediate) await this.callListeners("lock", reason);
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to lock vault", execError);
@@ -359,8 +385,8 @@ export class Bitwarden {
     try {
       const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"], { resetVaultTimeout: true });
       this.setSessionToken(sessionToken);
-      await this.clearLockReason();
-      await this.callbacks.unlock?.(password, sessionToken);
+      await this.saveLastVaultStatus("unlock", "unlocked");
+      await this.callListeners?.("unlock", password, sessionToken);
       return { result: sessionToken };
     } catch (execError) {
       captureException("Failed to unlock vault", execError);
@@ -463,11 +489,16 @@ export class Bitwarden {
   async checkLockStatus(): Promise<VaultStatus> {
     try {
       await this.exec(["unlock", "--check"], { resetVaultTimeout: false });
+      await this.saveLastVaultStatus("checkLockStatus", "unlocked");
       return "unlocked";
     } catch (error) {
       captureException("Failed to check lock status", error);
       const errorMessage = (error as ExecaError).stderr;
-      if (errorMessage === "Vault is locked.") return "locked";
+      if (errorMessage === "Vault is locked.") {
+        await this.saveLastVaultStatus("checkLockStatus", "locked");
+        return "locked";
+      }
+      await this.saveLastVaultStatus("checkLockStatus", "unauthenticated");
       return "unauthenticated";
     }
   }
@@ -495,13 +526,28 @@ export class Bitwarden {
     return stdout;
   }
 
+  // utils below
+
+  async saveLastVaultStatus(callName: string, status: VaultStatus): Promise<void> {
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LAST_STATUS, status);
+  }
+
+  async getLastSavedVaultStatus(): Promise<VaultStatus | undefined> {
+    const lastSavedStatus = await LocalStorage.getItem<VaultStatus>(LOCAL_STORAGE_KEY.VAULT_LAST_STATUS);
+    if (!lastSavedStatus) {
+      const vaultStatus = await this.status();
+      return vaultStatus.result?.status;
+    }
+    return lastSavedStatus;
+  }
+
   private isPromptWaitingForMasterPassword(result: ExecaReturnValue): boolean {
     return !!(result.stderr && result.stderr.includes("Master password"));
   }
 
-  private async handlePostLogout(): Promise<void> {
+  private async handlePostLogout(reason?: string): Promise<void> {
     this.clearSessionToken();
-    await this.callbacks.logout?.();
+    await this.callListeners?.("logout", reason);
   }
 
   private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
@@ -513,6 +559,22 @@ export class Bitwarden {
       return { error: new NotLoggedInError("Not logged in") };
     }
     return {};
+  }
+
+  private async callListeners<TAction extends keyof ActionCallbacks>(
+    action: TAction,
+    ...args: Parameters<NonNullable<ActionCallbacks[TAction]>>
+  ) {
+    const listeners = this.callbacks.get(action);
+    if (listeners && listeners.length > 0) {
+      for (const listener of listeners) {
+        try {
+          await (listener as any)?.(...args);
+        } catch (error) {
+          captureException(`Error calling bitwarden callback for ${action}`, error);
+        }
+      }
+    }
   }
 
   private showToast = async (toastOpts: Toast.Options): Promise<Toast & { restore: () => Promise<void> }> => {
