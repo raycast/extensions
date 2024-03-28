@@ -1,6 +1,6 @@
 import { Action, ActionPanel, environment, Form, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
 import { useForm, runAppleScript, useCachedPromise, FormValidation, getAvatarIcon } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { fetchAllContacts } from "swift:../swift/contacts";
 
 type Contact = {
@@ -31,7 +31,6 @@ export default function Command({
   draftValues,
   launchContext,
 }: LaunchProps<{ draftValues: Values; launchContext: { contactId: string; address: string; text: string } }>) {
-  const [contactAddresses, setContactAddresses] = useState<string[] | undefined>([]);
   const { data: contacts, isLoading } = useCachedPromise(async () => {
     const contacts = await fetchAllContacts();
     return contacts as Contact[];
@@ -42,10 +41,6 @@ export default function Command({
       const correspondingContact = contacts?.find((contact) => contact.id === values.contact);
       if (!correspondingContact) {
         showToast({ style: Toast.Style.Failure, title: "Could not send message", message: "Contact not found" });
-        return;
-      }
-      if (!values.address) {
-        showToast({ style: Toast.Style.Failure, title: "Could not send message", message: "No address selected" });
         return;
       }
 
@@ -96,9 +91,15 @@ export default function Command({
     },
     validation: {
       contact: FormValidation.Required,
+      address: FormValidation.Required,
       text: FormValidation.Required,
     },
   });
+
+  const contactAddresses = useMemo(() => {
+    const contact = contacts?.find((c) => c.id === values.contact);
+    return [...(contact?.phoneNumbers ?? []), ...(contact?.emailAddresses ?? [])];
+  }, [values.contact]);
 
   useEffect(() => {
     if (launchContext?.contactId) {
@@ -123,17 +124,7 @@ export default function Command({
       }
       enableDrafts
     >
-      <Form.Dropdown
-        {...itemProps.contact}
-        title="Contact"
-        onChange={(newContact) =>
-          setContactAddresses(() => {
-            const selection = contacts?.find((c) => c.id === newContact);
-            return [...(selection?.phoneNumbers ?? []), ...(selection?.emailAddresses ?? [])];
-          })
-        }
-        storeValue
-      >
+      <Form.Dropdown {...itemProps.contact} title="Contact" storeValue>
         {contacts?.map((contact, i) => {
           const name = getName(contact);
           return (
