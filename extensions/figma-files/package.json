@@ -11,6 +11,15 @@
   ],
   "version": "1.3.0",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "TEAM_ID",
+      "type": "textfield",
+      "required": true,
+      "title": "Team ID/s",
+      "description": "Find this in the url after navigating to your team page. Add multiple Team IDs separated by a comma."
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -28,7 +37,6 @@
       "interval": "2h"
     }
   ],
-
   "dependencies": {
     "@raycast/api": "^1.68.1",
     "@raycast/utils": "^1.12.5",
