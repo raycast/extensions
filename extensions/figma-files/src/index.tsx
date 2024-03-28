@@ -13,8 +13,10 @@ import { withAccessToken, getAccessToken } from "@raycast/utils";
 
 function Command() {
   const { token } = getAccessToken();
+  // console.log(token);
   const { data, isLoading, error } = useCachedPromise(
     async () => {
+      console.log("trstr");
       const results = await resolveAllFiles(token);
       return results;
     },
@@ -117,6 +119,7 @@ function Command() {
             <FileGridItem
               key={file.key + "-starred-file"}
               file={file}
+              accessTok={token}
               desktopApp={desktopApp}
               extraKey={file.key + "-starred-file-item"}
               revalidate={revalidateStarredFiles}
@@ -134,6 +137,7 @@ function Command() {
             <FileGridItem
               key={file.key + "-recent-file"}
               file={file}
+              accessTok={token}
               desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
               revalidate={revalidateStarredFiles}
@@ -160,6 +164,7 @@ function Command() {
               {project.files?.map((file) => (
                 <FileGridItem
                   key={file.key + "-file"}
+                  accessTok={token}
                   searchkeywords={project.name}
                   revalidate={revalidateStarredFiles}
                   file={file}

@@ -32,6 +32,7 @@ async function fetchTeamProjects(accessTok: string): Promise<TeamProjects[]> {
       return Promise.resolve({ name: "No team found", projects: [] });
     }
   });
+  // console.log(isOAuth);
   return Promise.all(teams) as Promise<TeamProjects[]>;
 }
 
