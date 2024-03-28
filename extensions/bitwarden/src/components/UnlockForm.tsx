@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
-import { Cache } from "~/utils/cache";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
+import { useLocalStorageItem } from "~/utils/localstorage";
 import { getLabelForTimeoutPreference } from "~/utils/preferences";
 
 type UnlockFormProps = {
@@ -18,7 +19,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
 
   const [isLoading, setLoading] = useState(false);
   const [unlockError, setUnlockError] = useState<string | undefined>(undefined);
-  const lockReason = Cache.vaultLockReason.get();
+  const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
 
   async function onSubmit({ password }: { password: string }) {
     if (password.length === 0) return;
@@ -50,7 +51,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
       }
 
       await bitwarden.unlock(password);
-      Cache.vaultLockReason.remove();
+      await clearLockReason();
       await toast.hide();
     } catch (error) {
       const { displayableError = "Please check your credentials", treatedError } = getUsefulError(error, password);

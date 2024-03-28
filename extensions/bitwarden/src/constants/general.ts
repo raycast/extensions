@@ -15,6 +15,7 @@ export const LOCAL_STORAGE_KEY = {
   SERVER_URL: "cliServer",
   LAST_ACTIVITY_TIME: "lastActivityTime",
   VAULT_FAVORITE_ORDER: "vaultFavoriteOrder",
+  VAULT_LOCK_REASON: "vaultLockReason",
   VAULT_LAST_STATUS: "lastVaultStatus",
 } as const;
 
@@ -76,7 +77,6 @@ export const CACHE_KEYS = {
   IV: "iv",
   VAULT: "vault",
   CURRENT_FOLDER_ID: "currentFolderId",
-  LOCK_REASON: "lockReason",
 } as const;
 
 export const ITEM_TYPE_TO_ICON_MAP: Record<ItemType, Icon> = {

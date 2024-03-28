@@ -1,8 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { createContext, PropsWithChildren, useContext, useMemo, useRef } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
-import { VAULT_LOCK_MESSAGES } from "~/constants/general";
+import { LOCAL_STORAGE_KEY, VAULT_LOCK_MESSAGES } from "~/constants/general";
 import { VAULT_TIMEOUT } from "~/constants/preferences";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSessionReducer } from "~/context/session/reducer";
@@ -93,20 +93,20 @@ export function SessionProvider(props: SessionProviderProps) {
   async function handleUnlock(password: string, token: string) {
     const passwordHash = await hashMasterPasswordForReprompting(password);
     await SessionStorage.saveSession(token, passwordHash);
-    Cache.vaultLockReason.remove();
+    await LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
     dispatch({ type: "unlock", token, passwordHash });
   }
 
   async function handleLock(reason?: string) {
-    if (reason) Cache.vaultLockReason.set(reason);
     await SessionStorage.clearSession();
+    if (reason) await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
     dispatch({ type: "lock" });
   }
 
   async function handleLogout(reason?: string) {
     await SessionStorage.clearSession();
     Cache.clear();
-    if (reason) Cache.vaultLockReason.set(reason);
+    if (reason) await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
     dispatch({ type: "logout" });
   }
 
