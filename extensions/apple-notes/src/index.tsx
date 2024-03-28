@@ -11,7 +11,11 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search notes by title, folder, or description">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search notes by title, folder, description, or accessories"
+      filtering={{ keepSectionOrder: true }}
+    >
       <List.Section title="Pinned">
         {data.pinnedNotes.map((note) => (
           <NoteListItem key={note.id} note={note} mutate={mutate} />
