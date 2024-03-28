@@ -4,6 +4,8 @@
   "title": "Apple Notes",
   "description": "Search and create notes within the Apple Notes application.",
   "icon": "command-icon.png",
+  "owner": "raycast",
+  "access": "public",
   "author": "tumtum",
   "contributors": [
     "ron-myers",

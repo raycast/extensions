@@ -1,15 +1,33 @@
 # Apple Notes Changelog
 
-## [Improvements] - 2024-03-29
+## [Big Update] - 2024-03-28
 
-- Add locked accessory
-- Add checklist accessory
-- Empty state
-- Pinned notes
-- Shared notes
-- View note
-- Menu Bar
-- AI notes
+The Apple Notes extension has been improved in every way to make Raycast the perfect companion for your notes. Here's what's new:
+
+### Menu bar command
+
+There's now a new command allowing you to quickly access your most recent notes from the menu bar. This ensures that you stay on top of your pinned notes or notes you worked on recently.
+
+### More accessories
+
+List items has more accessories allowing to view more details of a note such as:
+- If the note is password-protected or not
+- If the note has a checklist in progress or if the checklist is completed
+- If the note is shared with someone else
+
+It's also possible to search for these notes thanks to special keywords such as `locked`, `password`, `checklist`, `completed`, or `shared`.
+
+### Preview notes
+
+View your entire note from Raycast. Just press ⌘ + ⏎ from the list item and you'll see the formatted note. Super useful if you quickly want to look at something.
+
+### Pinned notes
+
+There's now proper support for pinned notes, just like on the Apple Notes native app.
+
+### AI Note command
+
+Let the AI quickly create notes for you whenever you think of something. Whether you want to get a grocery list for a barbecue, know what you can do in Paris for a week-end, or brainstorm name ideas for a new business, this new command got you covered.
 
 ## [Better search] - 2024-03-22
 
