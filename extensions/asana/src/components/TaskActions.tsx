@@ -192,7 +192,7 @@ export default function TaskActions({ task, workspace, isDetail, mutateList, mut
         />
 
         <Action.CopyToClipboard
-          title="Copy Task Name and URL in Markdown Format"
+          title="Copy Task Formatted URL"
           content={`[${task.name}](${task.permalink_url})`}
           shortcut={{ modifiers: ["cmd", "ctrl"], key: "." }}
         />
