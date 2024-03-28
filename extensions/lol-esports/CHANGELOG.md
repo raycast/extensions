@@ -1,6 +1,11 @@
 # LoL Esports Changelog
 
-## [Minor Fixes] - 2024-03-22
+## [Fixes & Improvements] - 2024-03-28
+
+- Fix ties not showing up in the `Show Standings` command
+- Improve how calendar event lengths are calculated
+- Change the calendar behavior so that the calendar app only opens after opening the submenu
+- Fix issue crashing the extension when no match was found for the initial selected item
 
 ## [Calendar & Focus] - 2024-03-21
 
