@@ -2,7 +2,7 @@
 
 ## [Fixes and Improvements] - 2024-03-27
 
-- Fixed bypassing the lock screen by increasing timeout
+- Fixed lock screen bypassing by increasing timeout
 - Lock and Logout commands now still succeed even if the CLI call fails
 - Improved safety and consistency of the lock screen
 

@@ -327,9 +327,9 @@ export class Bitwarden {
 
   async login(): Promise<MaybeError> {
     try {
-      await this.callListeners("login");
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
       await this.saveLastVaultStatus("login", "unlocked");
+      await this.callListeners("login");
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to login", execError);
@@ -346,7 +346,6 @@ export class Bitwarden {
 
       await this.exec(["logout"], { resetVaultTimeout: false });
       await this.saveLastVaultStatus("logout", "unauthenticated");
-
       if (!immediate) await this.handlePostLogout(reason);
       return { result: undefined };
     } catch (execError) {
@@ -361,7 +360,6 @@ export class Bitwarden {
     const { reason, checkVaultStatus = false, immediate = false } = options ?? {};
     try {
       if (immediate) await this.callListeners("lock", reason);
-
       if (checkVaultStatus) {
         const { error, result } = await this.status();
         if (error) throw error;
@@ -370,7 +368,6 @@ export class Bitwarden {
 
       await this.exec(["lock"], { resetVaultTimeout: false });
       await this.saveLastVaultStatus("lock", "locked");
-
       if (!immediate) await this.callListeners("lock", reason);
       return { result: undefined };
     } catch (execError) {
