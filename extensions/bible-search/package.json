@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Look Up Bible Verse",
-      "description": "",
+      "title": "Look up Bible Verse",
+      "description": "Search the Bible for a given reference. Accepts chapters, verses, and ranges.",
       "mode": "view",
       "arguments": [
         {
