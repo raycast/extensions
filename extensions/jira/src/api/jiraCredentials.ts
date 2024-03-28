@@ -1,5 +1,5 @@
-import { OAuthService } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
 import fetch from "node-fetch";
 
 import { User } from "./users";

@@ -1,5 +1,5 @@
-import { withAccessToken } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 
 import { jira, jiraWithApiToken } from "../api/jiraCredentials";
 
