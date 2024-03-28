@@ -495,6 +495,11 @@ export class Bitwarden {
     return stdout;
   }
 
+  async createSend(): Promise<string> {
+    const { stdout } = await this.exec(["send"], { resetVaultTimeout: true });
+    return stdout;
+  }
+
   private isPromptWaitingForMasterPassword(result: ExecaReturnValue): boolean {
     return !!(result.stderr && result.stderr.includes("Master password"));
   }

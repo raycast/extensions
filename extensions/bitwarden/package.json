@@ -193,6 +193,14 @@
         "log out",
         "account"
       ]
+    },
+    {
+      "name": "create-send",
+      "title": "New Send",
+      "subtitle": "Bitwarden",
+      "description": "Securely share information directly with anyone.",
+      "icon": "send.png",
+      "mode": "view"
     }
   ],
   "preferences": [
