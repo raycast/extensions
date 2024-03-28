@@ -47,24 +47,22 @@ function PackageListItem({ manifest }: { manifest: PackageInfo }) {
             <Action.OpenInBrowser
               title="Open SPI Page"
               url={manifest.spiURL}
-              shortcut={{ modifiers: [], key: "enter" }}
             />
             <Action.OpenInBrowser
               title="Open Author SPI Page"
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
               url={manifest.authorSPIURL}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="GitHub">
             <Action.OpenInBrowser
               title="Open GitHub Repo"
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
               url={manifest.githubURL}
+              shortcut={{ modifiers: ["opt"], key: "enter" }}
             />
             <Action.OpenInBrowser
               title="Open Author Github Page"
-              shortcut={{ modifiers: ["opt", "cmd"], key: "enter" }}
               url={manifest.authorGithubURL}
+              shortcut={{ modifiers: ["opt", "cmd"], key: "enter" }}
             />
           </ActionPanel.Section>
         </ActionPanel>
