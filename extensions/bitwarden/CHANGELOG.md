@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fixes and Improvements] - 2024-03-27
+## [Fixes and Improvements] - 2024-03-28
 
 - Fixed lock screen bypassing by increasing timeout
 - Lock and Logout commands now still succeed even if the CLI call fails
