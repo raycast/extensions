@@ -260,7 +260,7 @@
       "name": "clear-swift-package-manager-cache.command",
       "title": "Clear Swift Package Manager Cache",
       "subtitle": "Xcode",
-      "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory.",
+      "description": "Removes the ~/Library/Caches/org.swift.swiftpm directory.",
       "mode": "no-view"
     },
     {
