@@ -235,13 +235,6 @@
       "mode": "view"
     },
     {
-      "name": "clear-derived-data.command",
-      "title": "Clear Derived Data",
-      "subtitle": "Xcode",
-      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory.",
-      "mode": "no-view"
-    },
-    {
       "name": "open-url-in-simulator.command",
       "title": "Open URL in Simulator",
       "subtitle": "Xcode",
@@ -257,10 +250,24 @@
       ]
     },
     {
+      "name": "clear-derived-data.command",
+      "title": "Clear Derived Data",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory.",
+      "mode": "no-view"
+    },
+    {
       "name": "clear-swift-package-manager-cache.command",
       "title": "Clear Swift Package Manager Cache",
       "subtitle": "Xcode",
       "description": "Removes the ~/Library/Caches/org.swift.swiftpm directory.",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-swift-ui-previews-cache.command",
+      "title": "Clear SwiftUI Previews Cache",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Developer/Xcode/UserData/Previews directory.",
       "mode": "no-view"
     },
     {

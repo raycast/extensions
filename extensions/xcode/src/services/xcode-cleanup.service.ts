@@ -47,6 +47,13 @@ export class XcodeCleanupService {
   }
 
   /**
+   * Clear SwiftUI Previews Cache
+   */
+  static clearSwiftUIPreviewsCache(): Promise<void> {
+    return execAsync("rm -rf ~/Library/Developer/Xcode/UserData/Previews").then();
+  }
+
+  /**
    * Delete unsupported Simulators
    */
   static deleteUnsupportedSimulators(): Promise<void> {
