@@ -51,13 +51,17 @@ type ExecProps = {
 };
 
 type LockOptions = {
+  /** The reason for locking the vault */
   reason?: string;
   checkVaultStatus?: boolean;
+  /** The callbacks are called before the operation is finished (optimistic) */
   immediate?: boolean;
 };
 
 type LogoutOptions = {
+  /** The reason for locking the vault */
   reason?: string;
+  /** The callbacks are called before the operation is finished (optimistic) */
   immediate?: boolean;
 };
 

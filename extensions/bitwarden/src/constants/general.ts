@@ -14,8 +14,8 @@ export const LOCAL_STORAGE_KEY = {
   REPROMPT_HASH: "sessionRepromptHash",
   SERVER_URL: "cliServer",
   LAST_ACTIVITY_TIME: "lastActivityTime",
-  VAULT_FAVORITE_ORDER: "vaultFavoriteOrder",
   VAULT_LOCK_REASON: "vaultLockReason",
+  VAULT_FAVORITE_ORDER: "vaultFavoriteOrder",
   VAULT_LAST_STATUS: "lastVaultStatus",
 } as const;
 

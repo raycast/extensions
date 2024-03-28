@@ -1,15 +1,15 @@
 import { LocalStorage } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 
-type UseLocalStorageActions = {
+type LocalStorageItemActions = {
   isLoading: boolean;
   set: (value: string) => Promise<void>;
   remove: () => Promise<void>;
 };
 
-/** Reading and writing a single item in local storage. */
-export function useLocalStorageItem(key: string): [string | undefined, UseLocalStorageActions];
-export function useLocalStorageItem(key: string, defaultValue: string): [string, UseLocalStorageActions];
+/** Read and manage a single item in LocalStorage. */
+export function useLocalStorageItem(key: string): [string | undefined, LocalStorageItemActions];
+export function useLocalStorageItem(key: string, defaultValue: string): [string, LocalStorageItemActions];
 export function useLocalStorageItem(key: string, defaultValue?: string) {
   const { data: value, revalidate, isLoading } = usePromise(() => LocalStorage.getItem<string>(key));
 
