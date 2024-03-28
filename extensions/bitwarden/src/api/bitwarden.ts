@@ -32,14 +32,14 @@ type Env = {
   BW_SESSION?: string;
 };
 
-type ActionCallbacks = {
+type ActionListeners = {
   login?: () => MaybePromise<void>;
   logout?: (reason?: string) => MaybePromise<void>;
   lock?: (reason?: string) => MaybePromise<void>;
   unlock?: (password: string, sessionToken: string) => MaybePromise<void>;
 };
 
-type ActionCallbackMap<T extends keyof ActionCallbacks = keyof ActionCallbacks> = Map<T, ActionCallbacks[T][]>;
+type ActionListenersMap<T extends keyof ActionListeners = keyof ActionListeners> = Map<T, Set<ActionListeners[T]>>;
 
 type MaybeError<T = undefined> = { result: T; error?: undefined } | { result?: undefined; error: ManuallyThrownError };
 
@@ -132,7 +132,7 @@ export class Bitwarden {
   private env: Env;
   private initPromise: Promise<void>;
   private tempSessionToken?: string;
-  private callbacks: ActionCallbackMap = new Map();
+  private actionListeners: ActionListenersMap = new Map();
   private preferences = getPreferenceValues<Preferences>();
   private cliPath: string;
   private toastInstance: Toast | undefined;
@@ -222,30 +222,6 @@ export class Bitwarden {
     }
   }
 
-  setActionCallback<TAction extends keyof ActionCallbacks>(action: TAction, callback: ActionCallbacks[TAction]): this {
-    const listeners = this.callbacks.get(action);
-    if (listeners && listeners.length > 0) {
-      listeners.push(callback);
-    } else {
-      this.callbacks.set(action, [callback]);
-    }
-    return this;
-  }
-
-  removeActionCallback<TAction extends keyof ActionCallbacks>(
-    action: TAction,
-    callback: ActionCallbacks[TAction]
-  ): this {
-    const listeners = this.callbacks.get(action);
-    if (listeners && listeners.length > 0) {
-      const index = listeners.indexOf(callback);
-      if (index >= 0) {
-        listeners.splice(index, 1);
-      }
-    }
-    return this;
-  }
-
   setSessionToken(token: string): void {
     this.env = {
       ...this.env,
@@ -333,7 +309,7 @@ export class Bitwarden {
     try {
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
       await this.saveLastVaultStatus("login", "unlocked");
-      await this.callListeners("login");
+      await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to login", execError);
@@ -363,7 +339,7 @@ export class Bitwarden {
   async lock(options?: LockOptions): Promise<MaybeError> {
     const { reason, checkVaultStatus = false, immediate = false } = options ?? {};
     try {
-      if (immediate) await this.callListeners("lock", reason);
+      if (immediate) await this.callActionListeners("lock", reason);
       if (checkVaultStatus) {
         const { error, result } = await this.status();
         if (error) throw error;
@@ -372,7 +348,7 @@ export class Bitwarden {
 
       await this.exec(["lock"], { resetVaultTimeout: false });
       await this.saveLastVaultStatus("lock", "locked");
-      if (!immediate) await this.callListeners("lock", reason);
+      if (!immediate) await this.callActionListeners("lock", reason);
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to lock vault", execError);
@@ -387,7 +363,7 @@ export class Bitwarden {
       const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"], { resetVaultTimeout: true });
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");
-      await this.callListeners?.("unlock", password, sessionToken);
+      await this.callActionListeners("unlock", password, sessionToken);
       return { result: sessionToken };
     } catch (execError) {
       captureException("Failed to unlock vault", execError);
@@ -548,7 +524,7 @@ export class Bitwarden {
 
   private async handlePostLogout(reason?: string): Promise<void> {
     this.clearSessionToken();
-    await this.callListeners?.("logout", reason);
+    await this.callActionListeners("logout", reason);
   }
 
   private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
@@ -562,17 +538,35 @@ export class Bitwarden {
     return {};
   }
 
-  private async callListeners<TAction extends keyof ActionCallbacks>(
-    action: TAction,
-    ...args: Parameters<NonNullable<ActionCallbacks[TAction]>>
+  setActionListener<A extends keyof ActionListeners>(action: A, listener: ActionListeners[A]): this {
+    const listeners = this.actionListeners.get(action);
+    if (listeners && listeners.size > 0) {
+      listeners.add(listener);
+    } else {
+      this.actionListeners.set(action, new Set([listener]));
+    }
+    return this;
+  }
+
+  removeActionListener<A extends keyof ActionListeners>(action: A, listener: ActionListeners[A]): this {
+    const listeners = this.actionListeners.get(action);
+    if (listeners && listeners.size > 0) {
+      listeners.delete(listener);
+    }
+    return this;
+  }
+
+  private async callActionListeners<A extends keyof ActionListeners>(
+    action: A,
+    ...args: Parameters<NonNullable<ActionListeners[A]>>
   ) {
-    const listeners = this.callbacks.get(action);
-    if (listeners && listeners.length > 0) {
+    const listeners = this.actionListeners.get(action);
+    if (listeners && listeners.size > 0) {
       for (const listener of listeners) {
         try {
           await (listener as any)?.(...args);
         } catch (error) {
-          captureException(`Error calling bitwarden callback for ${action}`, error);
+          captureException(`Error calling bitwarden action listener for ${action}`, error);
         }
       }
     }

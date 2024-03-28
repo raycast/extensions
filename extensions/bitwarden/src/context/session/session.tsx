@@ -42,9 +42,9 @@ export function SessionProvider(props: SessionProviderProps) {
   async function bootstrapSession() {
     try {
       bitwarden
-        .setActionCallback("lock", handleLock)
-        .setActionCallback("unlock", handleUnlock)
-        .setActionCallback("logout", handleLogout);
+        .setActionListener("lock", handleLock)
+        .setActionListener("unlock", handleUnlock)
+        .setActionListener("logout", handleLogout);
 
       const [token, passwordHash, lastActivityTimeString, lastVaultStatus] = await SessionStorage.getSavedSession();
       if (!token || !passwordHash) throw new LockVaultError();
@@ -85,7 +85,7 @@ export function SessionProvider(props: SessionProviderProps) {
       } else {
         pendingActionRef.current = bitwarden.lock({ immediate: true });
         dispatch({ type: "failLoadingSavedState" });
-        captureException("Failed to load saved session state", error);
+        captureException("Failed to bootstrap session state", error);
       }
     }
   }
