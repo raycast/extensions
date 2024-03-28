@@ -2,7 +2,7 @@
 
 ## [Bug Fix] - 2024-03-22
 
-- Fixed various crashes that occurred due missing data.
+- Fixed various crashes that occurred due to missing data.
 
 ## [Improvements] - 2024-03-08
 
