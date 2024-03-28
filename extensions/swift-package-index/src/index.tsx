@@ -44,14 +44,8 @@ function PackageListItem({ manifest }: { manifest: PackageInfo }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Swift Package Index">
-            <Action.OpenInBrowser
-              title="Open SPI Page"
-              url={manifest.spiURL}
-            />
-            <Action.OpenInBrowser
-              title="Open Author SPI Page"
-              url={manifest.authorSPIURL}
-            />
+            <Action.OpenInBrowser title="Open SPI Page" url={manifest.spiURL} />
+            <Action.OpenInBrowser title="Open Author SPI Page" url={manifest.authorSPIURL} />
           </ActionPanel.Section>
           <ActionPanel.Section title="GitHub">
             <Action.OpenInBrowser
