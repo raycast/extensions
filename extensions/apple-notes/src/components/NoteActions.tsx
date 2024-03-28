@@ -6,15 +6,19 @@ import {
   confirmAlert,
   Color,
   Keyboard,
+  Clipboard,
   showToast,
   Toast,
   closeMainWindow,
   useNavigation,
+  showHUD,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { NoteItem, useNotes } from "../useNotes";
-import { deleteNoteById, restoreNoteById, openNoteSeparately } from "../api";
+import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api";
 import NoteDetail from "./NoteDetail";
+import { fileIcon } from "../helpers";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -71,6 +75,17 @@ export default function NoteActions({ note, isDeleted, isDetail, mutate }: NoteA
     }
   }
 
+  async function copyNoteContent(getContent: (noteId: string) => Promise<string>) {
+    try {
+      await closeMainWindow();
+      const content = await getContent(note.id);
+      await Clipboard.copy(content);
+      await showHUD("Copied to Clipboard");
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not copy note content" });
+    }
+  }
+
   const getOpenNotesAction = (separately?: boolean, shortcut?: Keyboard.Shortcut) =>
     separately ? (
       <Action
@@ -83,7 +98,7 @@ export default function NoteActions({ note, isDeleted, isDetail, mutate }: NoteA
       <Action.Open
         title="Open in Notes"
         target={`notes://showNote?identifier=${note.UUID}`}
-        icon={{ fileIcon: "/System/Applications/Notes.app" }}
+        icon={{ fileIcon }}
         application="com.apple.notes"
         shortcut={shortcut}
       />
@@ -124,30 +139,62 @@ export default function NoteActions({ note, isDeleted, isDetail, mutate }: NoteA
       <ActionPanel.Section>
         <Action.CopyToClipboard
           title="Copy Note URL"
-          icon={Icon.Link}
           content={{
             html: `<a href="notes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
             text: `notes://showNote?identifier=${note.UUID}`,
           }}
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
+
         <Action.CopyToClipboard
           title="Copy Mobile Note URL"
-          icon={Icon.Link}
           content={{
             html: `<a href="mobilenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
             text: `mobilenotes://showNote?identifier=${note.UUID}`,
           }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
         {note.invitationLink ? (
           <Action.CopyToClipboard
             title="Copy Invitation Link"
-            icon={Icon.Link}
             content={note.invitationLink}
             shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           />
         ) : null}
+
+        <Action.CopyToClipboard
+          title="Copy Note Title"
+          content={note.title}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
+        />
+
+        <ActionPanel.Submenu
+          title="Copy Note Content As"
+          icon={Icon.Clipboard}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        >
+          <Action
+            title="Plain Text"
+            onAction={() => copyNoteContent(getNotePlainText)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          />
+          <Action
+            title="HTML"
+            onAction={() => copyNoteContent(getNoteBody)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+          />
+          <Action
+            title="Markdown"
+            onAction={async () =>
+              copyNoteContent(async (noteId) => {
+                const content = await getNoteBody(noteId);
+                const nodeToMarkdown = new NodeHtmlMarkdown();
+                return nodeToMarkdown.translate(content);
+              })
+            }
+            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+          />
+        </ActionPanel.Submenu>
       </ActionPanel.Section>
 
       {!isDetail ? (

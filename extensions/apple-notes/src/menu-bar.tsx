@@ -1,6 +1,7 @@
 import { Icon, MenuBarExtra, getPreferenceValues, open, openCommandPreferences } from "@raycast/api";
 import { NoteItem, useNotes } from "./useNotes";
 import { createNote, openNoteSeparately } from "./api";
+import { fileIcon } from "./helpers";
 
 export default function Command() {
   const { data, isLoading } = useNotes();
@@ -10,7 +11,7 @@ export default function Command() {
   const maxUnpinnedNotes = max - data.pinnedNotes.length;
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={{ fileIcon: "/System/Applications/Notes.app" }}>
+    <MenuBarExtra isLoading={isLoading} icon={{ fileIcon }}>
       {data.pinnedNotes.length > 0 ? (
         <MenuBarExtra.Section title="Pinned">
           {data.pinnedNotes.slice(0, max).map((note) => (

@@ -1,6 +1,7 @@
 import { List, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { NoteItem, useNotes } from "../useNotes";
 import NoteActions from "./NoteActions";
+import { format } from "date-fns";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -48,7 +49,7 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
   if (preferences.modificationDate && note.modifiedAt) {
     accessories.push({
       date: new Date(note.modifiedAt),
-      tooltip: `Last modified: ${new Date(note.modifiedAt).toLocaleString()}`,
+      tooltip: `Last modified: ${format(note.modifiedAt, "PPp")}`,
     });
   }
 

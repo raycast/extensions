@@ -2,7 +2,7 @@ import { Detail } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { NoteItem, useNotes } from "../useNotes";
-import { getNoteById } from "../api";
+import { getNoteBody } from "../api";
 import NoteActions from "./NoteActions";
 
 type NoteDetailProps = {
@@ -14,7 +14,7 @@ type NoteDetailProps = {
 export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps) {
   const { data, isLoading } = useCachedPromise(
     async (id) => {
-      const content = await getNoteById(id);
+      const content = await getNoteBody(id);
       const nodeToMarkdown = new NodeHtmlMarkdown({ keepDataImages: true });
       return nodeToMarkdown.translate(content);
     },
