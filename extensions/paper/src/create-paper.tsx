@@ -1,13 +1,12 @@
 import { ActionPanel, Form, Action, Toast, showToast, popToRoot } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import { FC } from "react";
-import { Base64 } from "../types";
-import { useGetConfig } from "../hooks/useGetConfig";
-import { useGetCategories } from "../hooks/useGetCategories";
-import { encode } from "../utils/base64";
-import { updateConfigFile } from "../utils/updateConfigFile";
+import { Base64 } from "./types";
+import { useGetConfig } from "./hooks/useGetConfig";
+import { useGetCategories } from "./hooks/useGetCategories";
+import { encode } from "./utils/base64";
+import { updateConfigFile } from "./utils/updateConfigFile";
 
-export const CreatePaper: FC = () => {
+export default function Command() {
   const { isLoading, paperDataRaw } = useGetConfig();
   const categories = useGetCategories(paperDataRaw);
   const { handleSubmit, itemProps } = useForm<{
@@ -88,6 +87,4 @@ export const CreatePaper: FC = () => {
       />
     </Form>
   );
-};
-
-CreatePaper.displayName = "CreatePaper";
+}

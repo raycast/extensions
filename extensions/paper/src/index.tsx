@@ -13,7 +13,6 @@ import {
 import { FC, useState } from "react";
 import { ReadMode } from "./views/ReadMode";
 import { EditMode } from "./views/EditMode";
-import { CreatePaper } from "./views/CreatePaper";
 import { CreateCategory } from "./views/CreateCategory";
 import { UpdateCategory } from "./views/UpdateCategory";
 import { DeleteCategory } from "./views/DeleteCategory";
@@ -93,12 +92,6 @@ const ListWrapperItem: FC<ListWrapperItemProps> = ({ category, paperDataRaw, onD
                 title="Edit Paper"
                 icon={Icon.Pencil}
                 onAction={() => push(<EditMode paper={paper} index={i} paperCategory={category} />)}
-              />
-              <Action
-                title="Create Paper"
-                icon={Icon.Plus}
-                onAction={() => push(<CreatePaper />)}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
               />
               <Action
                 title="Delete Paper"

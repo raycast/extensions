@@ -17,6 +17,12 @@
       "title": "Paper List",
       "description": "List all your papers",
       "mode": "view"
+    },
+    {
+      "name": "create-paper",
+      "title": "Create New Paper",
+      "description": "Create a new paper with categories",
+      "mode": "view"
     }
   ],
   "dependencies": {
