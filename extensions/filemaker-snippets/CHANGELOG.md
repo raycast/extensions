@@ -4,6 +4,7 @@
 
 - Fix deeplinks for hosted snippets. Fetch dependency was not being loaded correctly.
 
+
 ## [Fixes] - 2024-03-20
 
 - Fix snippet creation from clipboard

@@ -48,12 +48,13 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 export default function Command() {
+  const maxTokensGPT40125Preview = 128000;
   const maxTokensGPT41106Preview = 128000;
+  const maxTokensGPT35Turbo0125 = 16385;
   const maxTokensGPT35Turbo1106 = 16385;
   const maxTokensGPT4 = 8192;
   const maxTokensGPT35Turbo = 4096;
-  const maxTokensDavinci = 4000;
-  const maxTokensAdaBabbageCurie = 2048;
+  const maxTokensBabbageDavinci = 16384;
   const [textPrompt, setTextPrompt] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,16 +66,17 @@ export default function Command() {
   const [topPError, setTopPError] = useState<string | undefined>();
   const [frequencyPenaltyError, setFrequencyPenaltyError] = useState<string | undefined>();
   const [presencePenaltyError, setPresencePenaltyError] = useState<string | undefined>();
-  const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensDavinci);
+  const [maxModelTokens, setMaxModelTokens] = useState<number>(maxTokensGPT35Turbo0125);
 
   const modelLimit = {} as modelTokenLimit;
+  modelLimit["gpt-4-0125-preview"] = maxTokensGPT40125Preview;
   modelLimit["gpt-4-1106-preview"] = maxTokensGPT41106Preview;
+  modelLimit["gpt-3.5-turbo-0125"] = maxTokensGPT35Turbo0125;
   modelLimit["gpt-3.5-turbo-1106"] = maxTokensGPT35Turbo1106;
   modelLimit["gpt-4"] = maxTokensGPT4;
   modelLimit["gpt-3.5-turbo"] = maxTokensGPT35Turbo;
-  modelLimit["text-curie-001"] = maxTokensAdaBabbageCurie;
-  modelLimit["text-babbage-001"] = maxTokensAdaBabbageCurie;
-  modelLimit["text-ada-001"] = maxTokensAdaBabbageCurie;
+  modelLimit["babbage-002"] = maxTokensBabbageDavinci;
+  modelLimit["davinci-002"] = maxTokensBabbageDavinci;
 
   function dropPromptErrorIfNeeded() {
     if (promptError && promptError.length > 0) {
@@ -127,7 +129,9 @@ export default function Command() {
         formRequest.model === "gpt-3.5-turbo" ||
         formRequest.model === "gpt-4" ||
         formRequest.model === "gpt-4-1106-preview" ||
-        formRequest.model === "gpt-3.5-turbo-1106"
+        formRequest.model === "gpt-3.5-turbo-1106" ||
+        formRequest.model === "gpt-3.5-turbo-0125" ||
+        formRequest.model === "gpt-4-0125-preview"
           ? await openai.createChatCompletion({
               model: formRequest.model,
               messages: [
@@ -156,7 +160,9 @@ export default function Command() {
         formRequest.model === "gpt-3.5-turbo" ||
         formRequest.model === "gpt-4" ||
         formRequest.model === "gpt-4-1106-preview" ||
-        formRequest.model === "gpt-3.5-turbo-1106"
+        formRequest.model === "gpt-3.5-turbo-1106" ||
+        formRequest.model === "gpt-3.5-turbo-0125" ||
+        formRequest.model === "gpt-4-0125-preview"
           ? `\n\n${completion.data.choices[0].message.content}`
           : completion.data.choices[0].text;
       setTextPrompt(textPrompt + response);

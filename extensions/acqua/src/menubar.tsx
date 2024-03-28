@@ -1,4 +1,4 @@
-import { Color, Icon, MenuBarExtra } from "@raycast/api";
+import { Color, MenuBarExtra } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { pluralize, sleep, useDrinkTimes, useLastDrinkedAt } from "./common";
 
@@ -6,7 +6,7 @@ export default function Command() {
   const [, drinkNow] = useLastDrinkedAt();
   const [, setDelay] = useCachedState<number>("delay", 0);
 
-  const { nextDrinkReminder, lastDrinkFromNowInMinutes } = useDrinkTimes();
+  const { nextDrinkReminder, lastDrinkFromNowInMinutes, interval } = useDrinkTimes();
 
   const onDrinkNow = async () => {
     drinkNow();
@@ -18,13 +18,24 @@ export default function Command() {
   };
 
   const lastDrinkLabel =
-    lastDrinkFromNowInMinutes === 0 ? "Last was just now" : `Last was ${lastDrinkFromNowInMinutes} min ago`;
+    nextDrinkReminder == null
+      ? "You haven't had water yet"
+      : lastDrinkFromNowInMinutes === 0
+        ? "Last was just now"
+        : `Last was ${lastDrinkFromNowInMinutes} min ago`;
+
+  const iconSource =
+    nextDrinkReminder == null || nextDrinkReminder > interval / 2
+      ? "drop-full-v1.png"
+      : nextDrinkReminder > 0
+        ? "drop-half-v1.png"
+        : "drop-empty-v1.png";
 
   return (
     <MenuBarExtra
       icon={{
-        source: Icon.Raindrop,
-        tintColor: nextDrinkReminder > 0 ? Color.PrimaryText : Color.Blue,
+        source: iconSource,
+        tintColor: Color.PrimaryText,
       }}
     >
       <MenuBarExtra.Section>
@@ -32,15 +43,21 @@ export default function Command() {
       </MenuBarExtra.Section>
       <MenuBarExtra.Section
         title={
-          nextDrinkReminder > 0
-            ? `Next reminder in ${nextDrinkReminder} ${pluralize(nextDrinkReminder, "minute")}`
-            : `You should've had water ${nextDrinkReminder * -1}  ${pluralize(nextDrinkReminder * -1, "minute")} ago`
+          nextDrinkReminder == null
+            ? "Take your first sip to start!"
+            : nextDrinkReminder > 0
+              ? `Next reminder in ${nextDrinkReminder} ${pluralize(nextDrinkReminder, "minute")}`
+              : `You should've had water ${nextDrinkReminder * -1}  ${pluralize(nextDrinkReminder * -1, "minute")} ago`
         }
       >
-        <MenuBarExtra.Item title="Delay by 5 minutes" onAction={onDelay(5)} />
-        <MenuBarExtra.Item title="Delay by 15 minutes" onAction={onDelay(15)} />
-        <MenuBarExtra.Item title="Delay by 30 minutes" onAction={onDelay(30)} />
-        <MenuBarExtra.Item title="Delay by 60 minutes" onAction={onDelay(60)} />
+        {nextDrinkReminder != null && (
+          <>
+            <MenuBarExtra.Item title="Delay by 5 minutes" onAction={onDelay(5)} />
+            <MenuBarExtra.Item title="Delay by 15 minutes" onAction={onDelay(15)} />
+            <MenuBarExtra.Item title="Delay by 30 minutes" onAction={onDelay(30)} />
+            <MenuBarExtra.Item title="Delay by 60 minutes" onAction={onDelay(60)} />
+          </>
+        )}
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

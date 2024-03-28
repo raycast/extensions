@@ -9,8 +9,8 @@ import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
-  CLINotFoundError,
   EnsureCliBinError,
+  InstalledCLINotFoundError,
   ManuallyThrownError,
   NotLoggedInError,
   tryExec,
@@ -145,14 +145,8 @@ export class Bitwarden {
 
   private async ensureCliBinary(): Promise<void> {
     if (this.checkCliBinIsReady(this.cliPath)) return;
-    if (this.cliPath === this.preferences.cliPath) {
-      throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
-    }
-    if (this.cliPath === cliInfo.path.installedBin) {
-      throw new CLINotFoundError(
-        `Bitwarden CLI not found at ${this.cliPath}` +
-          ", please make sure you installed it correctly. More information in the extension's description."
-      );
+    if (this.cliPath === this.preferences.cliPath || this.cliPath === cliInfo.path.installedBin) {
+      throw new InstalledCLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
     if (BinDownloadLogger.hasError()) BinDownloadLogger.clearError();
 

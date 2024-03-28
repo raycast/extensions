@@ -1,6 +1,20 @@
 # Apple Notes Changelog
 
-## [Enhnacement] - 2023-06-08
+## [Better search] - 2024-03-22
+
+- Improve note search to include more details on folders and snippets
+- Make notes open faster
+- Fix `Refresh` action
+- Add more details on permission screen
+
+## [Improvements & bug fixes] - 2024-03-22
+
+- Fix `database disk image is malformed` error
+- Quickly capture selected text with the `New Note` command
+- Add a text argument to `New Note`
+- Add a refresh action to get latest note updates
+
+## [Rich text support] - 2023-06-08
 
 - Added rich text support when copying an URL
 
@@ -11,21 +25,21 @@
 - Moved Recently Deleted notes to their own section at the bottom
 - Fixed Open Note action not working on notes outside of the current account
 
-## [Improvements] - 2023-03-31
+## [Open note in separate windows] - 2023-03-31
 
 - Added the function to open notes in separate windows. 
 
-## [Fix] - 2023-02-20
+## [Fix error handling] - 2023-02-20
 
 - Added error handling when Raycast doesn't have Accessibility/Automation permission.
 
-## [Improvements] - 2023-01-30
+## [Improve New Note to open with fallback text] - 2023-01-30
 
 - Added fallback behaviour to create notes with the input text.
 - Added a workaround to activate the window if there isn't one.
 - Updated Raycast API to the latest.
 
-## [Fix] - 2022-12-11
+## [Fix searching quotes] - 2022-12-11
 
 - Correct issue where searching for notes with quotes in titles failed
 
@@ -34,15 +48,15 @@
 - Fetching the Notes for the iCloud account will now be really fast
 - A preview of the content will be shows for iCloud notes
 
-## [Fix] - 2022-05-20
+## [Fix caching problem] - 2022-05-20
 
 - Ignore incompatible caches
 
-## [Fix] - 2022-05-11
+## [Fix duplicated notes] - 2022-05-11
 
 - Skip duplicate notes caused by smart folders.
 
-## [Fix] - 2022-04-26
+## [Fix New Note command] - 2022-04-26
 
 - New Note command now works on non-English systems.
 
