@@ -9,6 +9,7 @@ import { asanaToRaycastColor } from "../helpers/colors";
 import { getErrorMessage } from "../helpers/errors";
 import { Task, updateTask, deleteTask as apiDeleteTask, CustomField, EnumValue } from "../api/tasks";
 import { format } from "date-fns";
+import { partition } from "lodash";
 
 type TaskActionProps = {
   task: Task;
@@ -289,39 +290,30 @@ function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
 }
 
 function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
-  const [load, setLoad] = useState(false);
   const { data: projects, isLoading } = useProjects(workspace);
-  const [selectedProjects, setSelectedProjects] = useState<Project[]>(task.projects);
 
-  const changeProject = async (project: Project | null, action: "add" | "remove") => {
+  const changeProject = async (project: Project, action: "add" | "remove") => {
     try {
-      await showToast({ style: Toast.Style.Animated, title: `Changing project` });
+      await showToast({ style: Toast.Style.Animated, title: action === "add" ? "Adding project" : "Removing project" });
 
-      let asyncUpdate;
-      if (action === "add" && project) {
-        asyncUpdate = addProject(task.gid, project?.gid || "");
-        setSelectedProjects((prev) => [...prev, project]);
-      } else {
-        asyncUpdate = removeProject(task.gid, project?.gid || "");
-        setSelectedProjects((prev) => prev.filter((p) => p.gid !== project?.gid));
-      }
+      const asyncUpdate = action === "add" ? addProject(task.gid, project.gid) : removeProject(task.gid, project.gid);
 
-      mutate({
+      await mutate({
         asyncUpdate,
         optimisticUpdate: (task) => {
-          if (action === "add" && project) {
-            return { ...task, projects: [...task.projects, project] };
-          } else {
-            const updatedProjects = task.projects.filter((p) => p.gid !== project?.gid);
-            return { ...task, projects: updatedProjects };
-          }
+          const newProjects =
+            action === "add" ? [...task.projects, project] : task.projects.filter((p) => p.gid !== project.gid);
+          return { ...task, projects: newProjects };
         },
       });
 
       await showToast({
         style: Toast.Style.Success,
-        title: `Changed project`,
-        message: project ? `Assigned to ${project.name}` : "Task unassigned",
+        title: action === "add" ? "Added project" : "Removed project",
+        message:
+          action === "add"
+            ? `"${project.name}" added to "${task.name}"`
+            : `"${project.name}" removed from "${task.name}"`,
       });
     } catch (error) {
       await showToast({
@@ -332,21 +324,19 @@ function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
     }
   };
 
+  const [projectsToAdd, projectsToRemove] = partition(projects, (project) => {
+    return !task.projects.find((p) => p.gid === project.gid);
+  });
+
   return (
-    <ActionPanel.Submenu
-      title="Update Project"
-      icon={Icon.Folder}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-      onOpen={() => setLoad(true)}
-    >
+    <ActionPanel.Submenu title="Change Project" icon={Icon.Folder} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}>
       {isLoading ? (
         <Action title="Loading..." />
       ) : (
         <>
-          <ActionPanel.Submenu title="Add Project" icon={Icon.Check}>
-            {projects
-              ?.filter((project) => !selectedProjects.includes(project))
-              .map((project) => (
+          {projectsToAdd && projectsToAdd.length > 0 ? (
+            <ActionPanel.Submenu title="Add Project" icon={Icon.Plus}>
+              {projectsToAdd.map((project) => (
                 <Action
                   key={project.gid}
                   title={project.name}
@@ -354,18 +344,21 @@ function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
                   onAction={() => changeProject(project, "add")}
                 />
               ))}
-          </ActionPanel.Submenu>
+            </ActionPanel.Submenu>
+          ) : null}
 
-          <ActionPanel.Submenu title="Remove Project" icon={Icon.XMarkCircle}>
-            {selectedProjects.map((project) => (
-              <Action
-                key={project.gid}
-                title={project.name}
-                icon={getAvatarIcon(project.name)}
-                onAction={() => changeProject(project, "remove")}
-              />
-            ))}
-          </ActionPanel.Submenu>
+          {projectsToRemove && projectsToRemove.length > 0 ? (
+            <ActionPanel.Submenu title="Remove Project" icon={Icon.Minus}>
+              {projectsToRemove.map((project) => (
+                <Action
+                  key={project.gid}
+                  title={project.name}
+                  icon={getAvatarIcon(project.name)}
+                  onAction={() => changeProject(project, "remove")}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
         </>
       )}
     </ActionPanel.Submenu>
@@ -407,6 +400,7 @@ function DueOnSubMenu({ task, mutate }: DueOnSubmenuProps) {
     <Action.PickDate
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       icon={Icon.Calendar}
+      type={Action.PickDate.Type.Date}
       title="Set Due Date…"
       onChange={changeDueOn}
     />

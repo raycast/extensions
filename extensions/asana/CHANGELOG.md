@@ -4,6 +4,7 @@
 
 - Added the ability to add or remove projects from tasks
 - Added the ability to change the due date of tasks
+- Fix empty state flickering when loading tasks
 
 ## [Use OAuth utils] - 2024-02-01
 
