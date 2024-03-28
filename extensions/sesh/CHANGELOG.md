@@ -1,5 +1,11 @@
 # Sesh Changelog
 
+## Add config source - 03-28-24
+
+- Add config section between tmux and zoxide in list items
+- Combine to one sessions state object
+- Switch icon getter logic to switch case
+
 ## Visual improvements - 02-22-24
 
 - List sessions with `--json` flag for metadata
