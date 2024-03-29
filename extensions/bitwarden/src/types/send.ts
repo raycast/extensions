@@ -20,7 +20,7 @@ export enum SendDateOption {
 
 export type SendPayload = {
   name: string;
-  notes?: string;
+  notes?: string | null;
   type: 0;
   text: SendText;
   file?: string | null;

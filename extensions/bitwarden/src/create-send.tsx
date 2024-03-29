@@ -29,6 +29,7 @@ type FormValues = {
   customExpirationDate: Date | null;
   maxAccessCount: string;
   password: string;
+  notes: string;
 };
 
 const initialValues: FormValues = {
@@ -41,6 +42,7 @@ const initialValues: FormValues = {
   customExpirationDate: null,
   maxAccessCount: "",
   password: "",
+  notes: "",
 };
 
 const getDateOption = (option: SendDateOption | "", customDate: Date | null): string | null => {
@@ -53,18 +55,16 @@ const getDateOption = (option: SendDateOption | "", customDate: Date | null): st
   return date.toISOString();
 };
 
-const convertFormValuesToSendPayload = (values: FormValues): SendPayload => {
-  const { name, text, hidden, deletionDate, customDeletionDate, maxAccessCount } = values;
-
-  return {
-    name,
-    type: SendType.Text,
-    text: { text, hidden },
-    deletionDate: getDateOption(deletionDate as SendDateOption, customDeletionDate),
-    maxAccessCount: maxAccessCount ? parseInt(maxAccessCount) : null,
-    password: values.password || null,
-  };
-};
+const convertFormValuesToSendPayload = (values: FormValues): SendPayload => ({
+  name: values.name,
+  type: SendType.Text,
+  text: { text: values.text, hidden: values.hidden },
+  deletionDate: getDateOption(values.deletionDate as SendDateOption, values.customDeletionDate),
+  expirationDate: getDateOption(values.expirationDate as SendDateOption, values.customExpirationDate),
+  maxAccessCount: values.maxAccessCount ? parseInt(values.maxAccessCount) : null,
+  password: values.password || null,
+  notes: values.notes || null,
+});
 
 const validateOptionalDateUnder31Days = (value: Date | null | undefined): string | undefined => {
   if (!value) return;
@@ -179,6 +179,12 @@ function SendCommandContent() {
         title="Password"
         placeholder="Enter a password"
         info="Optionally require a password for users to access this Send."
+      />
+      <Form.TextArea
+        {...itemProps.notes}
+        title="Notes"
+        placeholder="Enter some notes"
+        info="Private notes about this Send."
       />
     </Form>
   );
