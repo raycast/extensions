@@ -16,7 +16,6 @@ function Command() {
   // console.log(token);
   const { data, isLoading, error } = useCachedPromise(
     async () => {
-      console.log("trstr");
       const results = await resolveAllFiles(token);
       return results;
     },
