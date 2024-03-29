@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import gopass from "./gopass";
 import Details from "./details";
 import { isDirectory } from "./utils";
+import Fuse from "fuse.js";
 
 export async function copyPassword(entry: string): Promise<void> {
   try {
@@ -95,7 +96,9 @@ export default function Main({ prefix = "" }): JSX.Element {
   useEffect((): void => {
     gopass
       .list({ limit: searchText ? -1 : 0, prefix, directoriesFirst: true, stripPrefix: true })
-      .then((data) => data.filter((item) => item.toLowerCase().includes(searchText.toLowerCase())))
+      .then((data) =>
+        new Fuse(data, { useExtendedSearch: true, keys: ["item"] }).search(searchText).map((item) => item.item)
+      )
       .then(setEntries)
       .catch(async (error) => {
         console.error(error);

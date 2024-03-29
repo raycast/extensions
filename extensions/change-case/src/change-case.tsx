@@ -52,12 +52,15 @@ async function readContent(preferredSource: string) {
 }
 
 function modifyCasesWrapper(input: string, case_: CaseFunction) {
-  const modifiedArr: string[] = [];
+  const modifiedRawArr: string[] = [];
+  const modifiedMarkdownArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
-    modifiedArr.push(case_(line));
+    const modified = case_(line);
+    modifiedRawArr.push(modified);
+    modifiedMarkdownArr.push((modified.length === 0 ? "\u200B" : modified) + "\n");
   }
-  return modifiedArr.join("\n");
+  return { rawText: modifiedRawArr.join("\n"), markdown: modifiedMarkdownArr.join("\n") };
 }
 
 const cache = new Cache();
@@ -81,8 +84,9 @@ const setRecentCases = (recent: CaseType[]) => {
 };
 
 export default function Command(props: LaunchProps) {
-  const preferences = getPreferenceValues();
-  const preferredSource = preferences["source"];
+  const preferences = getPreferenceValues<Preferences>();
+  const preferredSource = preferences.source;
+  const preferredAction = preferences.action;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
@@ -90,7 +94,11 @@ export default function Command(props: LaunchProps) {
       const content = await readContent(preferredSource);
       const converted = functions[immediatelyConvertToCase](content);
 
-      Clipboard.copy(converted);
+      if (preferredAction === "paste") {
+        Clipboard.paste(converted);
+      } else {
+        Clipboard.copy(converted);
+      }
 
       showHUD(`Converted to ${immediatelyConvertToCase}`);
       popToRoot();
@@ -152,7 +160,11 @@ export default function Command(props: LaunchProps) {
           }
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     );
@@ -174,13 +186,23 @@ export default function Command(props: LaunchProps) {
           }
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
-          closeMainWindow();
+          if (preferences.popToRoot) {
+            closeMainWindow();
+          } else {
+            popToRoot();
+          }
         }}
       />
     ) : null;
   };
 
-  const CaseItem = (props: { case: CaseType; modified: string; pinned?: boolean; recent?: boolean }): JSX.Element => {
+  const CaseItem = (props: {
+    case: CaseType;
+    modified: string;
+    detail: string;
+    pinned?: boolean;
+    recent?: boolean;
+  }): JSX.Element => {
     const context = encodeURIComponent(`{"case":"${props.case}"}`);
     const deeplink = `raycast://extensions/erics118/${environment.extensionName}/${environment.commandName}?context=${context}`;
 
@@ -189,13 +211,13 @@ export default function Command(props: LaunchProps) {
         id={props.case}
         title={props.case}
         accessories={[{ text: props.modified }]}
-        detail={<List.Item.Detail markdown={props.modified} />}
+        detail={<List.Item.Detail markdown={props.detail} />}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              {preferences["action"] === "paste" && <PasteToActiveApp {...props} />}
+              {preferredAction === "paste" && <PasteToActiveApp {...props} />}
               <CopyToClipboard {...props} />
-              {preferences["action"] === "copy" && <PasteToActiveApp {...props} />}
+              {preferredAction === "copy" && <PasteToActiveApp {...props} />}
             </ActionPanel.Section>
             <ActionPanel.Section>
               {!props.pinned ? (
@@ -272,36 +294,45 @@ export default function Command(props: LaunchProps) {
   return (
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
-        {pinned?.map((key) => (
-          <CaseItem
-            key={key}
-            case={key as CaseType}
-            modified={modifyCasesWrapper(content, functions[key])}
-            pinned={true}
-          />
-        ))}
+        {pinned?.map((key) => {
+          const modified = modifyCasesWrapper(content, functions[key]);
+          return (
+            <CaseItem
+              key={key}
+              case={key as CaseType}
+              modified={modified.rawText}
+              detail={modified.markdown}
+              pinned={true}
+            />
+          );
+        })}
       </List.Section>
       <List.Section title="Recent">
-        {recent.map((key) => (
-          <CaseItem
-            key={key}
-            case={key as CaseType}
-            modified={modifyCasesWrapper(content, functions[key])}
-            recent={true}
-          />
-        ))}
+        {recent.map((key) => {
+          const modified = modifyCasesWrapper(content, functions[key]);
+          return (
+            <CaseItem
+              key={key}
+              case={key as CaseType}
+              modified={modified.rawText}
+              detail={modified.markdown}
+              recent={true}
+            />
+          );
+        })}
       </List.Section>
       <List.Section title="All Cases">
         {Object.entries(functions)
           .filter(
             ([key]) =>
-              preferences[key.replace(/ +/g, "")] &&
+              preferences[key.replace(/ +/g, "") as keyof ExtensionPreferences] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
           )
-          .map(([key, func]) => (
-            <CaseItem key={key} case={key as CaseType} modified={modifyCasesWrapper(content, func)} />
-          ))}
+          .map(([key, func]) => {
+            const modified = modifyCasesWrapper(content, func);
+            return <CaseItem key={key} case={key as CaseType} modified={modified.rawText} detail={modified.markdown} />;
+          })}
       </List.Section>
     </List>
   );

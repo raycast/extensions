@@ -27,8 +27,8 @@ function CycleListItem({
   isLoading: boolean;
 }) {
   // CYCLE STUFF
-  const strain = formatStrain(cycle?.score?.strain);
-  const kilojoule = cycle?.score?.kilojoule;
+  const strain = formatStrain(cycle.score?.strain);
+  const kilojoule = cycle.score?.kilojoule;
   const kilocalories = calcCals(kilojoule);
 
   // SLEEP STUFF
@@ -66,7 +66,7 @@ function CycleListItem({
 
   return (
     <List.Item
-      title={formatDate(cycle.created_at, "MMM d", true)}
+      title={formatDate(cycle.created_at, "MMM d", true) || "n/a"}
       accessories={[
         { icon: getProgressIcon(recoveryScore / 100, getRecoveryColor(recoveryScore)) },
         { icon: getProgressIcon(strain / 21, WhoopColor.strain) },

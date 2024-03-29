@@ -43,7 +43,7 @@ function ProjectTasks({ projectId, quickLinkView }: ProjectTasksProps) {
         ...allSections.map((section) => ({
           name: section.name,
           tasks: sortedTasks?.filter((task) => task.section_id === section.id) || [],
-        }))
+        })),
       );
     }
   } else {

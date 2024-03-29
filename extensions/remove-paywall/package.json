@@ -2,11 +2,13 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "remove-paywall",
   "title": "Remove Paywall",
-  "description": "Remove the paywall from the specified URL.",
+  "description": "Remove the paywall from the selected or clipboard URL.",
   "icon": "command-icon.png",
   "author": "tegola",
   "contributors": [
-    "Whitespace"
+    "Whitespace",
+    "DannySeidel",
+    "artivilla"
   ],
   "categories": [
     "Web"
@@ -16,33 +18,52 @@
     {
       "name": "remove-paywall",
       "title": "Remove Paywall",
-      "description": "Remove the paywall from the specified URL.",
+      "description": "Remove the paywall from the selected or clipboard URL.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "url",
           "type": "text",
-          "placeholder": "URL (or selected text)"
+          "placeholder": "URL (or selection/clipboard)",
+          "required": false
+        },
+        {
+          "name": "service",
+          "type": "dropdown",
+          "placeholder": "Service",
+          "required": false,
+          "data": [
+            {
+              "title": "12ft.io",
+              "value": "https://12ft.io"
+            },
+            {
+              "title": "archive.is",
+              "value": "https://archive.is"
+            },
+            {
+              "title": "removepaywall.com",
+              "value": "https://www.removepaywall.com"
+            },
+            {
+              "title": "freedium.cfd",
+              "value": "https://freedium.cfd"
+            }
+          ]
         }
       ]
-    },
-    {
-      "name": "remove-paywall-using",
-      "title": "Remove Paywall Using...",
-      "description": "Remove the paywall with the specified URL using an alternative service.",
-      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "service",
       "title": "Service",
-      "description": "The service to use to remove the paywall.",
+      "description": "The default service to use to remove the paywall.",
       "type": "dropdown",
       "required": true,
       "data": [
         {
-          "title": "12ft.io",
+          "title": "12ft (12ft.io)",
           "value": "https://12ft.io"
         },
         {
@@ -52,12 +73,16 @@
         {
           "title": "RemovePaywall (removepaywall.com)",
           "value": "https://www.removepaywall.com"
+        },
+        {
+          "title": "Freedium (freedium.cfd)",
+          "value": "https://freedium.cfd"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.52.1"
+    "@raycast/api": "^1.68.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

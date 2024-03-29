@@ -6,6 +6,7 @@
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
+  "contributors": [],
   "commands": [
     {
       "name": "easydict",
@@ -52,21 +53,21 @@
     "chatgpt"
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.0",
+    "@raycast/api": "^1.62.0",
     "@vitalets/google-translate-api": "^9.1.0",
-    "axios": "^1.3.4",
+    "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
-    "crypto-js": "^4.1.1",
+    "crypto-js": "^4.2.0",
     "eventsource": "^2.0.2",
-    "node-fetch": "^3.3.0",
     "eventsource-parser": "^0.1.0",
     "execa": "^7.1.0",
     "file-type": "^18.2.0",
     "franc": "^6.1.0",
     "hpagent": "^1.2.0",
     "mac-system-proxy": "^1.0.4",
+    "node-fetch": "^3.3.0",
     "node-html-parser": "^6.1.5",
-    "play-sound": "^1.1.5",
+    "play-sound": "^1.1.6",
     "qs": "^6.11.0",
     "run-applescript": "^6.1.0",
     "tencentcloud-sdk-nodejs-tmt": "^4.0.559"
@@ -74,20 +75,20 @@
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",
     "@commitlint/config-conventional": "^17.4.4",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/crypto-js": "^4.1.1",
     "@types/eventsource": "^1.1.11",
-    "@types/node": "18.8.3",
+    "@types/node": "^20.8.10",
     "@types/play-sound": "^1.1.0",
     "@types/qs": "^6.9.7",
-    "@types/react": "18.0.25",
-    "@typescript-eslint/eslint-plugin": "^5.55.0",
-    "@typescript-eslint/parser": "^5.55.0",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/eslint-plugin": "^6.18.0",
     "eslint": "^8.36.0",
-    "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.0",
     "prettier": "^2.8.4",
+    "react": "^18.2.0",
     "typescript": "^4.9.5"
   },
   "scripts": {
@@ -537,6 +538,14 @@
       "default": true
     },
     {
+      "name": "enableBaiduLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Baidu Language Detect",
+      "required": false,
+      "description": "⚠️ If turn off it, the language detection will be slower, even cause timeout.",
+      "default": true
+    },
+    {
       "name": "enableAutomaticPlayWordAudio",
       "type": "checkbox",
       "label": "Play Word Pronunciation Automatically",
@@ -567,14 +576,6 @@
       "label": "Apple Translate",
       "required": false,
       "description": "⚠️ An `Apple Translate` shortcut needs to be installed, please see README for more details.",
-      "default": false
-    },
-    {
-      "name": "enableAppleLanguageDetect",
-      "type": "checkbox",
-      "label": "Apple Language Detect",
-      "required": false,
-      "description": "⚠️ An `Apple Language Detect` shortcut needs to be installed, please see README for more details.",
       "default": false
     },
     {
@@ -683,6 +684,14 @@
       "required": false,
       "description": "Your OpenAI API Key",
       "default": ""
+    },
+    {
+      "title": "OpenAI API URL",
+      "name": "openAIAPIURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Your OpenAI API URL",
+      "default": "https://api.openai.com/v1/chat/completions"
     },
     {
       "title": "DeepL Auth Key",

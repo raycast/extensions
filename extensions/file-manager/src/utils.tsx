@@ -19,6 +19,7 @@ import { DirectoryItem } from "./components/directory-item";
 import { FileItem } from "./components/file-item";
 import { SymlinkItem } from "./components/symlink-item";
 import { FileDataType, FileType } from "./types";
+import { runAppleScript } from "@raycast/utils";
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
   const options: Alert.Options = {
@@ -48,7 +49,7 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmdirSync(folderPath);
+        fs.rmSync(folderPath, { recursive: true, force: true });
         refresh();
         showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
       },
@@ -157,4 +158,23 @@ export function RenameForm(props: { filePath: string; refresh: () => void; typeN
       />
     </Form>
   );
+}
+
+export function isImageFile(file: FileDataType) {
+  const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp", "heic", "heif"];
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return extension && imageExtensions.includes(extension);
+}
+
+export async function handleSetWallpaper(filePath: string) {
+  await runAppleScript(
+    `tell application "System Events" to tell every desktop to set picture to "${filePath.replace(
+      /(["\\])/g,
+      "\\$1",
+    )}" as POSIX file`,
+  );
+}
+
+export function iCloudDrivePath(): string {
+  return `${homedir()}/Library/Mobile Documents/com~apple~CloudDocs`;
 }

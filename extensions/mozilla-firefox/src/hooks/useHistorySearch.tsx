@@ -6,7 +6,7 @@ import { getHistoryDbPath } from "../util";
 import { NotInstalledError } from "../components";
 
 const whereClauses = (terms: string[]) => {
-  return terms.map((t) => `moz_places.title LIKE ${t}`).join(" AND ");
+  return terms.map((t) => `moz_places.title LIKE '%${t}%'`).join(" AND ");
 };
 
 const getHistoryQuery = (query?: string) => {

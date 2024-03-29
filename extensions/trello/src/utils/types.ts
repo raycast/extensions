@@ -2,6 +2,7 @@ export type preferences = {
   token: string;
   apitoken: string;
   username?: string;
+  closedboards: boolean;
 };
 
 export type postValues = {

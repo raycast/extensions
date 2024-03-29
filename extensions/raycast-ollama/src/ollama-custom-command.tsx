@@ -1,6 +1,13 @@
 import { RaycastArgumentsOllamaCommandCustom } from "./api/types";
-import { ResultView } from "./api/main";
+import { AnswerView } from "./api/ui/AnswerView";
 
 export default function Command(props: RaycastArgumentsOllamaCommandCustom): JSX.Element {
-  return ResultView("", undefined, props.arguments.model);
+  return (
+    <AnswerView
+      command={!props.arguments.model ? "custom" : undefined}
+      model={props.arguments.model}
+      prompt={props.arguments.prompt}
+      image={props.arguments.image === "yes" ? true : false}
+    />
+  );
 }

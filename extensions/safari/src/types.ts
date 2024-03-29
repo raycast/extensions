@@ -5,7 +5,7 @@ export interface Bookmark {
     title: string;
   };
   ReadingListNonSync: {
-    Title: string;
+    Title?: string;
   };
   WebBookmarkUUID: string;
   WebBookmarkType: string;
@@ -24,7 +24,7 @@ export interface BookmarkPListResult {
     {
       Title: string;
       Children: Bookmark[] | BookmarkPListResult;
-    }
+    },
   ];
 }
 

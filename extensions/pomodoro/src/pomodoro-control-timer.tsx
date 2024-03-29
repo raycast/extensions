@@ -1,15 +1,19 @@
 import { Detail, launchCommand, LaunchType, closeMainWindow, popToRoot, List, Icon } from "@raycast/api";
 import { ActionPanel, Action } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { exec } from "child_process";
 import {
   continueInterval,
   createInterval,
   getCurrentInterval,
+  getNextIntervalExecutor,
   isPaused,
   pauseInterval,
   preferences,
   resetInterval,
 } from "../lib/intervals";
+import { FocusText, ShortBreakText, LongBreakText } from "../lib/constants";
+import { GiphyResponse, Quote } from "../lib/types";
 
 const createAction = (action: () => void) => () => {
   action();
@@ -103,29 +107,93 @@ const ActionsList = () => {
   );
 };
 
+const handleQuote = (): string => {
+  let quote = { content: "You did it!", author: "Unknown" };
+  const { isLoading, data } = useFetch<Quote[]>("https://api.quotable.io/quotes/random?limit=1", {
+    keepPreviousData: true,
+  });
+  if (!isLoading && data?.length) {
+    quote = data[0];
+  }
+
+  return `> ${quote.content} \n>\n> &dash; ${quote.author}`;
+};
+
 const EndOfInterval = () => {
+  let markdownContent = "# Interval Completed \n\n";
+  let usingGiphy = false;
+
+  if (preferences.enableConfetti) {
+    exec("open raycast://extensions/raycast/raycast/confetti", function (err, stdout, stderr) {
+      if (err) {
+        // handle error
+        console.error(err);
+        return;
+      }
+    });
+  }
+
   if (preferences.sound) {
     exec(`afplay /System/Library/Sounds/${preferences.sound}.aiff -v 10 && $$`);
   }
 
+  if (preferences.enableQuote) {
+    markdownContent += handleQuote() + "\n\n";
+  }
+
+  if (preferences.enableImage) {
+    if (preferences.giphyAPIKey) {
+      const { isLoading, data } = useFetch(
+        `https://api.giphy.com/v1/gifs/random?api_key=${preferences.giphyAPIKey}&tag=${preferences.giphyTag}&rating=${preferences.giphyRating}`,
+        {
+          keepPreviousData: true,
+        }
+      );
+      if (!isLoading && data) {
+        const giphyResponse = data as GiphyResponse;
+        markdownContent += `![${giphyResponse.data.title}](${giphyResponse.data.images.fixed_height.url})`;
+        usingGiphy = true;
+      } else if (isLoading) {
+        ("You did it!");
+      } else {
+        markdownContent += `![${"You did it!"}](${preferences.completionImage})`;
+      }
+    } else {
+      markdownContent += preferences.completionImage
+        ? `![${"You did it!"}](${preferences.completionImage})`
+        : "You did it!";
+    }
+  }
+
+  if (usingGiphy) {
+    markdownContent = `![powered by GIPHY](Poweredby_100px-White_VertLogo.png) \n\n` + markdownContent;
+  }
+
+  const executor = getNextIntervalExecutor();
+
   return (
     <Detail
       navigationTitle={`Interval completed`}
-      markdown={`${preferences.completionImage}`}
+      markdown={markdownContent}
       actions={
         <ActionPanel title="Start Next Interval">
           <Action
-            title="Focus"
+            title={executor.title}
+            onAction={createAction(executor.onStart)}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+          <Action
+            title={FocusText}
             onAction={createAction(() => createInterval("focus"))}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
           <Action
-            title="Short Break"
+            title={ShortBreakText}
             onAction={createAction(() => createInterval("short-break"))}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           <Action
-            title="Long Break"
+            title={LongBreakText}
             onAction={createAction(() => createInterval("long-break"))}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
           />

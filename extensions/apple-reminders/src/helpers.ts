@@ -1,53 +1,55 @@
+import { UTCDate } from "@date-fns/utc";
 import { Color, Icon } from "@raycast/api";
-import { addDays, format, isThisYear, isBefore, isSameDay, parseISO, startOfDay } from "date-fns";
+import { addDays, format, isThisYear, isBefore, formatISO, isSameDay } from "date-fns";
 
-import { Priority } from "./hooks/useData";
+import { Location, Priority } from "./hooks/useData";
 
-export function parseDay(date?: string | null): Date {
-  if (!date) {
-    // Default to today in local time.
-    return new Date(new Date().toDateString());
-  }
-  return new Date(parseISO(date).toDateString());
+export function isFullDay(date: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
+export function getDateString(date: string) {
+  return isFullDay(date) ? date : formatISO(date, { representation: "date" });
+}
+
+export function getTodayInLocalTime() {
+  return formatISO(new Date(), { representation: "date" });
 }
 
 export function isOverdue(date: string) {
-  const parsedDate = parseISO(date);
-
-  if (parsedDate.getHours() === 0 && parsedDate.getMinutes() === 0) {
-    return isBefore(startOfDay(parsedDate), startOfDay(new Date()));
-  } else {
-    return isBefore(parsedDate, new Date());
-  }
+  return isBefore(date, isFullDay(date) ? getTodayInLocalTime() : new Date());
 }
 
-export function displayDueDate(dateString: string) {
-  const date = new Date(dateString);
-  if (isOverdue(dateString)) {
-    return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
-  }
+export function isToday(date: string) {
+  return isSameDay(date, isFullDay(date) ? getTodayInLocalTime() : new Date());
+}
 
-  const today = startOfDay(new Date());
+export function isTomorrow(date: string) {
+  const today = isFullDay(date) ? getTodayInLocalTime() : new Date();
+  return isSameDay(date, addDays(today, 1));
+}
 
-  if (isSameDay(date, today)) {
+export function displayDueDate(date: string) {
+  if (isToday(date)) {
     return "Today";
   }
 
-  if (isSameDay(date, addDays(today, 1))) {
+  if (isTomorrow(date)) {
     return "Tomorrow";
   }
 
+  const today = getTodayInLocalTime();
   const nextWeek = addDays(today, 7);
 
   if (isBefore(date, nextWeek)) {
-    return format(date, "eeee");
+    return format(new UTCDate(date), "eeee");
   }
 
   if (isThisYear(date)) {
-    return format(date, "dd MMMM");
+    return format(new UTCDate(date), "dd MMMM");
   }
 
-  return format(date, "dd MMMM yyy");
+  return format(new UTCDate(date), "dd MMMM yyy");
 }
 
 export function getPriorityIcon(priority: Priority) {
@@ -75,13 +77,24 @@ export function getPriorityIcon(priority: Priority) {
   return undefined;
 }
 
-export function truncateMiddle(str: string, maxLength = 45): string {
+export function getLocationDescription(location: Location) {
+  const radius = Intl.NumberFormat("en", { style: "unit", unit: "meter", unitDisplay: "long" }).format(
+    location.radius ? location.radius : 100,
+  );
+
+  return `${location.proximity === "enter" ? "Arriving at:" : "Leaving:"} ${location.address} (within ${radius})`;
+}
+
+export function truncate(str: string, maxLength = 45): string {
   if (str.length <= maxLength) {
     return str;
   }
 
-  const startIndex = Math.ceil(maxLength / 2) - 2;
-  const endIndex = str.length - (maxLength - startIndex - 3);
+  return str.substring(0, maxLength) + "…";
+}
 
-  return str.substring(0, startIndex) + "…" + str.substring(endIndex);
+export function getIntervalValidationError(interval?: string): string | undefined {
+  if (!interval) return "Interval is required";
+  if (isNaN(Number(interval))) return "Interval must be a number";
+  if ((interval as unknown as number) < 1) return "Must be greater than 0";
 }

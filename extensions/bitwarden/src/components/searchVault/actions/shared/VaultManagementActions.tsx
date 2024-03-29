@@ -15,8 +15,13 @@ function VaultManagementActions() {
 
   const handleLogoutVault = async () => {
     const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
-    await bitwarden.logout();
-    await toast.hide();
+    try {
+      await bitwarden.logout();
+      await toast.hide();
+    } catch (error) {
+      toast.title = "Failed to logout";
+      toast.style = Toast.Style.Failure;
+    }
   };
 
   return (

@@ -10,7 +10,8 @@ import {
   Keyboard,
   showToast,
 } from "@raycast/api";
-import { setStorage, getStorage, cutoff } from "./lib/utils";
+import { cutoff, pluralize } from "./lib/utils";
+import { setStorage, getStorage } from "./lib/storage";
 import { ExtensionPreferences } from "./lib/preferences";
 import { PinForm } from "./components/PinForm";
 import { Direction, StorageKey } from "./lib/constants";
@@ -33,6 +34,7 @@ import {
   addExpirationDateAccessory,
   addFrequencyAccessory,
   addLastOpenedAccessory,
+  addTagAccessories,
   addTextFragmentAccessory,
 } from "./lib/accessories";
 import { getPinIcon } from "./lib/icons";
@@ -41,6 +43,7 @@ import CopyPinActionsSubmenu from "./components/actions/CopyPinActionsSubmenu";
 import DeletePinAction from "./components/actions/DeletePinAction";
 import { InstallExamplesAction } from "./components/actions/InstallExamplesAction";
 import { ViewPinsPreferences } from "./lib/preferences";
+import { getRecentApplications, useLocalData } from "./lib/LocalData";
 
 /**
  * Moves a pin up or down in the list of pins. Pins stay within their groups unless grouping is disabled in preferences.
@@ -101,11 +104,14 @@ const PlaceholdersGuideAction = () => {
 /**
  * Raycast command to view all pins in a list within the Raycast window.
  */
-export default function ViewPinsCommand() {
+export default function ViewPinsCommand(args: { launchContext?: { pinID?: number } }) {
   const { pins, setPins, loadingPins, revalidatePins } = usePins();
   const { groups, loadingGroups, revalidateGroups } = useGroups();
   const [examplesInstalled, setExamplesInstalled] = useState<LocalStorage.Value | undefined>(true);
   const preferences = getPreferenceValues<ExtensionPreferences & ViewPinsPreferences>();
+  const { localData, loadingLocalData } = useLocalData();
+  const [selectedPinID, setSelectedPinID] = useState<string | null>(null);
+  const [filteredTag, setFilteredTag] = useState<string>("all");
 
   useEffect(() => {
     Promise.resolve(LocalStorage.getItem(StorageKey.EXAMPLE_PINS_INSTALLED)).then((examplesInstalled) => {
@@ -113,6 +119,13 @@ export default function ViewPinsCommand() {
     });
     Promise.resolve(checkExpirations());
   }, []);
+
+  if (args.launchContext?.pinID) {
+    const pin = pins.find((pin) => pin.id == args.launchContext?.pinID);
+    if (pin) {
+      return <PinForm pin={pin} setPins={setPins} pins={pins} />;
+    }
+  }
 
   const maxTimesOpened = Math.max(...pins.map((pin) => pin.timesOpened || 0));
 
@@ -132,6 +145,7 @@ export default function ViewPinsCommand() {
       if (preferences.showExecutionVisibility) addExecutionVisibilityAccessory(pin, accessories);
       if (preferences.showFragment) addTextFragmentAccessory(pin, accessories);
       if (preferences.showFrequency) addFrequencyAccessory(pin, accessories, maxTimesOpened);
+      if (preferences.showTags) addTagAccessories(pin, accessories);
 
       const group = groups.find((group) => group.name == pin.group) || { name: "None", icon: "Minus", id: -1 };
       return (
@@ -140,12 +154,22 @@ export default function ViewPinsCommand() {
           subtitle={preferences.showSubtitles ? cutoff(pin.url, 30) : undefined}
           keywords={getPinKeywords(pin)}
           key={pin.id}
+          id={pin.id.toString()}
           icon={getPinIcon(pin)}
           accessories={accessories}
+          detail={pin.notes?.length ? <List.Item.Detail markdown={pin.notes} /> : undefined}
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Pin Actions">
-                <Action title="Open" icon={Icon.ChevronRight} onAction={async () => await openPin(pin, preferences)} />
+                <Action
+                  title="Open"
+                  icon={Icon.ChevronRight}
+                  shortcut={pin.shortcut}
+                  onAction={async () => {
+                    await getRecentApplications();
+                    await openPin(pin, preferences, localData as unknown as { [key: string]: unknown });
+                  }}
+                />
 
                 <Action.Push
                   title="Edit"
@@ -219,11 +243,40 @@ export default function ViewPinsCommand() {
     });
   };
 
+  const tagCounts = pins.reduce(
+    (acc, pin) => {
+      pin.tags?.forEach((tag) => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
+      return acc;
+    },
+    {} as { [key: string]: number },
+  );
+  const tagNames = Object.keys(tagCounts);
+
+  const pinsWithNotes = pins.filter((pin) => pin.notes?.length).map((pin) => pin.id.toString());
+
   return (
     <List
-      isLoading={loadingPins || loadingGroups}
+      isLoading={loadingPins || loadingGroups || loadingLocalData}
       searchBarPlaceholder="Search pins..."
       filtering={{ keepSectionOrder: true }}
+      onSelectionChange={(pinID) => selectedPinID != pinID && setSelectedPinID(pinID)}
+      isShowingDetail={pinsWithNotes.includes(selectedPinID || "")}
+      searchBarAccessory={
+        tagNames.length > 0 ? (
+          <List.Dropdown tooltip="Filter by Tag" isLoading={loadingPins} onChange={setFilteredTag}>
+            <List.Dropdown.Item title="All Tags" value="all" icon={Icon.Tag} />
+            {tagNames.map((tag) => (
+              <List.Dropdown.Item
+                title={`${tag} (${tagCounts[tag]} ${pluralize("pin", tagCounts[tag])})`}
+                value={tag}
+                icon={Icon.Tag}
+              />
+            ))}
+          </List.Dropdown>
+        ) : null
+      }
       actions={
         <ActionPanel>
           <CreateNewPinAction setPins={setPins} />
@@ -246,10 +299,20 @@ export default function ViewPinsCommand() {
       {[{ name: "None", icon: "Minus", id: -1 }].concat(groups).map((group) =>
         preferences.showGroups ? (
           <List.Section title={group.name == "None" ? "Other" : group.name} key={group.id}>
-            {getPinListItems(pins.filter((pin) => pin.group == group.name))}
+            {getPinListItems(
+              pins.filter(
+                (pin) =>
+                  (filteredTag === "all" || pin.tags?.some((tag) => tag === filteredTag)) && pin.group == group.name,
+              ),
+            )}
           </List.Section>
         ) : (
-          getPinListItems(pins.filter((pin) => pin.group == group.name))
+          getPinListItems(
+            pins.filter(
+              (pin) =>
+                (filteredTag === "all" || pin.tags?.some((tag) => tag === filteredTag)) && pin.group == group.name,
+            ),
+          )
         ),
       )}
 

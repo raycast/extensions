@@ -29,6 +29,8 @@ interface ViewCarProps {
     | "flash"
     | "enable_sentry"
     | "disable_sentry"
+    | "start_max_defrost"
+    | "stop_max_defrost"
     | "start_climate"
     | "stop_climate"
     | "vent_windows"

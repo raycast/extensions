@@ -2,25 +2,26 @@ import { closeMainWindow, getPreferenceValues, getApplications, open } from "@ra
 
 import { Page } from "./notion/page";
 
-export let openIn = "web";
+const open_in = getPreferenceValues<Preferences>().open_in;
 
-export async function checkOpenInApp() {
-  const preferences = getPreferenceValues<Preferences>();
-  let isNotionInstalled;
-
-  if (preferences.open_in === "app") {
-    const installedApplications = await getApplications();
-    isNotionInstalled = installedApplications.some((app) => app.bundleId === "notion.id");
-
-    openIn = isNotionInstalled ? "app" : "web";
-  } else {
-    openIn = "web";
-  }
+let hasCheckedDefault = false;
+export async function checkedDefaultOpenMethod() {
+  if (hasCheckedDefault) return;
+  hasCheckedDefault = true;
+  const apps = await getApplications();
+  const defaultApp = apps.find((app) => app.name === "Notion");
+  if (defaultApp) return defaultApp;
+  return open_in;
 }
 
 export async function handleOnOpenPage(page: Page, setRecentPage: (page: Page) => Promise<void>): Promise<void> {
   if (!page.url) return;
-  open(openIn === "app" ? page.url.replace("https", "notion") : page.url);
+  await checkedDefaultOpenMethod();
+  open(page.url, open_in);
   await setRecentPage(page);
   closeMainWindow();
+}
+
+export function urlForPreferredMethod(url: string) {
+  return open_in?.name === "Notion" ? url.replace("https", "notion") : url;
 }

@@ -1,6 +1,6 @@
-import { getPreferenceValues, showToast, Toast, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, LocalStorage, environment } from "@raycast/api";
 import fetch from "node-fetch";
-import { File, ProjectFiles, TeamFiles, TeamProjects } from "../types";
+import { ProjectFiles, TeamFiles, TeamProjects } from "../types";
 
 async function fetchTeamProjects(accessTok: string): Promise<TeamProjects[]> {
   const { PERSONAL_ACCESS_TOKEN, TEAM_ID } = getPreferenceValues();
@@ -28,7 +28,9 @@ async function fetchTeamProjects(accessTok: string): Promise<TeamProjects[]> {
       return json;
     } catch (error) {
       console.error(error);
-      showToast(Toast.Style.Failure, "Could not load team");
+      if (environment.launchType !== "background") {
+        showToast(Toast.Style.Failure, "Could not load team");
+      }
       return Promise.resolve({ name: "No team found", projects: [] });
     }
   });
@@ -60,10 +62,12 @@ async function fetchFiles(accessTok: string): Promise<ProjectFiles[][]> {
         });
 
         const json = (await response.json()) as ProjectFiles;
-        return { name: project.name, files: (json.files || []) as File[] };
+        return { name: project.name, files: json.files ?? [] };
       } catch (error) {
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not load files");
+        if (environment.launchType !== "background") {
+          showToast(Toast.Style.Failure, "Could not load files");
+        }
         return Promise.resolve([]);
       }
     });

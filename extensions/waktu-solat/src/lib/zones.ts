@@ -20,7 +20,7 @@ export async function extractZones(): Promise<Zone[] | undefined> {
       .map((z) => {
         const name = z.textContent.trim();
         const id = z.getAttribute("value") || "";
-        const state = z.closest("optgroup").getAttribute("label") || "";
+        const state = z.closest("optgroup")?.getAttribute("label") || "";
         return { id, name, state };
       })
       .filter(({ id, name }) => !!id && !!name);

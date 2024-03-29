@@ -90,6 +90,10 @@ export function renderPluralIfNeeded(itemsLength: number) {
   return `item${itemsLength > 1 ? "s" : ""}`;
 }
 
+export function uppercaseText(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export function getShortcut(index: number) {
   const key = index + 1;
 

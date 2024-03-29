@@ -6,27 +6,21 @@ import config from "parse-git-config";
 import { dirname } from "path";
 import { useState, ReactElement, Fragment } from "react";
 import tildify from "tildify";
-import { CachedProjectEntry, Preferences, ProjectEntry, VSCodeBuild } from "./types";
+import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
 
-const gitClientPath = preferences.gitClientAppPath || "";
+const gitClientPath = preferences.gitClientApp?.path || "";
 const gitClientInstalled = existsSync(gitClientPath);
 
-const terminalPath = preferences.terminalAppPath || "";
+const terminalPath = preferences.terminalApp?.path || "";
 const terminalInstalled = existsSync(terminalPath);
 
-const build: VSCodeBuild = preferences.build;
-const appKeyMapping = {
-  Code: "com.microsoft.VSCode",
-  "Code - Insiders": "com.microsoft.VSCodeInsiders",
-  "VSCodium < 1.71": "com.visualstudio.code.oss",
-  VSCodium: "com.vscodium",
-  Cursor: "Cursor",
-} as const;
-const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
+const { vscodeApp } = preferences;
+const vscodeAppNameShort = vscodeApp?.name.replace(/^Visual Studio /, "") || "";
+const vscodeAppCLI: string = vscodeAppNameShort.replace(/[ -]+/g, "-").toLowerCase();
 
-const STORAGE = `${homedir()}/Library/Application Support/${build}/User/globalStorage/alefragnani.project-manager`;
+const STORAGE = `${homedir()}/Library/Application Support/${vscodeAppNameShort}/User/globalStorage/alefragnani.project-manager`;
 
 const remotePrefix = "vscode-remote://";
 
@@ -130,6 +124,12 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 }
 
 export default function Command() {
+  if (!vscodeApp) {
+    return (
+      <Detail markdown="Please configure the **Search Project Manager** Raycast extension to choose which version of Visual Studio Code to use." />
+    );
+  }
+
   const elements: ReactElement[] = [];
   const projectEntries = getProjectEntries();
   const projectTags = getProjectTags(projectEntries);
@@ -141,7 +141,7 @@ export default function Command() {
       <Detail
         markdown="To use this extension, the Visual Studio Extension
       [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)
-       is required."
+       is required and at least one project must be saved in the Project Manager."
       />
     );
   }
@@ -201,15 +201,20 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
           <ActionPanel.Section>
             {isRemoteProject(path) ? (
               <Action
-                title={`Open in ${build} (Remote)`}
-                icon="command-icon.png"
+                title={`Open in ${vscodeApp.name} (Remote)`}
+                icon={{ fileIcon: vscodeApp.path }}
                 onAction={() => {
-                  exec("code --remote " + parseRemoteURL(path));
+                  exec(`${vscodeAppCLI} --remote ${parseRemoteURL(path)}`);
                   closeMainWindow();
                 }}
               />
             ) : (
-              <Action.Open title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
+              <Action.Open
+                title={`Open in ${vscodeAppNameShort}`}
+                icon={{ fileIcon: vscodeApp.path }}
+                target={path}
+                application={vscodeApp.path}
+              />
             )}
             {terminalInstalled && (
               <Action.Open

@@ -13,16 +13,39 @@
   "author": "franzwilhelm",
   "contributors": [
     "bkeys818",
-    "rogatty",
     "michaelfaisst"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Track Time",
-      "subtitle": "Toggl Track",
-      "description": "Start and stop time entries with Toggl Track",
+      "title": "Start/Stop Time Entry",
+      "description": "Start a new time entry or end the running time entry.",
+      "mode": "view"
+    },
+    {
+      "name": "manageWorkspaces",
+      "title": "View Workspaces",
+      "description": "A list of all the workspace you have access to.",
+      "mode": "view",
+      "disabledByDefault": false
+    },
+    {
+      "name": "manageTags",
+      "title": "Manage Tags",
+      "description": "A list of all the tags you have access to.",
+      "mode": "view"
+    },
+    {
+      "name": "manageClients",
+      "title": "Manage Clients",
+      "description": "A list of all the clients you have access to.",
+      "mode": "view"
+    },
+    {
+      "name": "manageProjects",
+      "title": "Manage Projects",
+      "description": "A list of all the projects you have access to.",
       "mode": "view"
     }
   ],
@@ -34,30 +57,21 @@
       "required": true,
       "title": "Toggl API Token",
       "type": "password"
-    },
-    {
-      "name": "hideArchivedProjects",
-      "label": "Hide Archived Projects",
-      "description": "When checked, archived projects are hidden.",
-      "type": "checkbox",
-      "required": true,
-      "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.5",
-    "dayjs": "^1.10.7",
-    "node-fetch": "^3.2.0"
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "dayjs": "^1.11.10",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@types/node": "~17.0.10",
-    "@types/react": "^17.0.38",
-    "@typescript-eslint/eslint-plugin": "^5.10.0",
-    "@typescript-eslint/parser": "^5.10.0",
-    "eslint": "^8.7.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.22.1",
-    "typescript": "^4.5.5"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "~20.8.10",
+    "@types/react": "~18.2.27",
+    "eslint": "^8.56.0",
+    "react-devtools": "~4.28.4",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

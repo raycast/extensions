@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import { COMMAND_CATEGORIES } from "../utils/constants";
+import { COMMAND_CATEGORIES } from "../lib/common/constants";
 export default function CategoryDropdown(props: { onSelection: (newValue: string) => void }) {
   const { onSelection } = props;
   return (

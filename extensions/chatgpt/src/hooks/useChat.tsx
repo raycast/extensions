@@ -2,12 +2,14 @@ import { clearSearchBar, getPreferenceValues, showToast, Toast } from "@raycast/
 import { useCallback, useMemo, useState } from "react";
 import say from "say";
 import { v4 as uuidv4 } from "uuid";
-import { Chat, ChatHook, CreateChatCompletionDeltaResponse, Model } from "../type";
+import { Chat, ChatHook, Model } from "../type";
 import { chatTransfomer } from "../utils";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useHistory } from "./useHistory";
 import { useProxy } from "./useProxy";
+import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
+import { Stream } from "openai/streaming";
 
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
@@ -58,16 +60,16 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     const getHeaders = function () {
       const config = getConfiguration();
       if (!config.useAzure) {
-        return { apiKey: "", params: {} };
+        return { apiKey: {}, params: {} };
       }
       return {
-        apiKey: config.apiKey,
-        params: { "api-version": "2023-03-15-preview" },
+        apiKey: { "api-key": config.apiKey },
+        params: { "api-version": "2023-06-01-preview" },
       };
     };
 
-    await chatGPT
-      .createChatCompletion(
+    await chatGPT.chat.completions
+      .create(
         {
           model: model.option,
           temperature: Number(model.temperature),
@@ -75,90 +77,59 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           stream: useStream,
         },
         {
-          responseType: useStream ? "stream" : undefined,
-          headers: { "api-key": getHeaders().apiKey },
-          params: getHeaders().params,
-          proxy: proxy,
+          httpAgent: proxy,
+          // https://github.com/openai/openai-node/blob/master/examples/azure.ts
+          // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
+          query: { ...getHeaders().params },
+          headers: { ...getHeaders().apiKey },
         }
       )
       .then(async (res) => {
         if (useStream) {
-          (res.data as any).on("data", (data: CreateChatCompletionDeltaResponse) => {
-            const lines = data
-              .toString()
-              .split("\n")
-              .filter((line: string) => line.trim() !== "");
+          const stream = res as Stream<ChatCompletionChunk>;
 
-            for (const line of lines) {
-              const message = line.replace(/^data: /, "");
-              if (message === "[DONE]") {
-                setData((prev) => {
-                  return prev.map((a) => {
-                    if (a.id === chat.id) {
-                      return chat;
-                    }
-                    return a;
-                  });
-                });
+          for await (const chunk of stream) {
+            try {
+              const content = chunk.choices[0]?.delta?.content;
 
-                setTimeout(async () => {
-                  setStreamData(undefined);
-                }, 5);
-
-                setLoading(false);
-
-                toast.title = "Got your answer!";
-                toast.style = Toast.Style.Success;
-
-                if (!isHistoryPaused) {
-                  history.add(chat);
-                }
-                return;
+              if (content) {
+                chat.answer += chunk.choices[0].delta.content;
+                setStreamData({ ...chat, answer: chat.answer });
               }
-              try {
-                const response: CreateChatCompletionDeltaResponse = JSON.parse(message);
-
-                const content = response.choices[0].delta?.content;
-
-                if (content) {
-                  chat.answer += response.choices[0].delta.content;
-                  setStreamData({ ...chat, answer: chat.answer });
-                }
-              } catch (error) {
-                toast.title = "Error";
-                toast.message = `Couldn't stream message`;
-                toast.style = Toast.Style.Failure;
-                setLoading(false);
-              }
-            }
-          });
-        } else {
-          chat = { ...chat, answer: res.data.choices.map((x) => x.message)[0]?.content ?? "" };
-
-          if (typeof chat.answer === "string") {
-            setLoading(false);
-
-            toast.title = "Got your answer!";
-            toast.style = Toast.Style.Success;
-
-            if (isAutoTTS) {
-              say.stop();
-              say.speak(chat.answer);
-            }
-
-            setData((prev) => {
-              return prev.map((a) => {
-                if (a.id === chat.id) {
-                  return chat;
-                }
-                return a;
-              });
-            });
-
-            if (!isHistoryPaused) {
-              history.add(chat);
+            } catch (error) {
+              toast.title = "Error";
+              toast.message = `Couldn't stream message: ${error}`;
+              toast.style = Toast.Style.Failure;
+              setLoading(false);
             }
           }
+
+          setTimeout(async () => {
+            setStreamData(undefined);
+          }, 5);
+        } else {
+          const completion = res as ChatCompletion;
+          chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
+
+          if (isAutoTTS) {
+            say.stop();
+            say.speak(chat.answer);
+          }
+        }
+        setLoading(false);
+        toast.title = "Got your answer!";
+        toast.style = Toast.Style.Success;
+
+        setData((prev) => {
+          return prev.map((a) => {
+            if (a.id === chat.id) {
+              return chat;
+            }
+            return a;
+          });
+        });
+        if (!isHistoryPaused) {
+          await history.add(chat);
         }
       })
       .catch((err) => {

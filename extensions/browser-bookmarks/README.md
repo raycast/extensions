@@ -1,6 +1,6 @@
 # Browser Bookmarks
 
-Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari, Arc, or Vivaldi.
+Integrate bookmarks from Chrome, Brave, Edge, Firefox, Safari, Arc, Sidekick or Vivaldi.
 
 ## Configuration
 

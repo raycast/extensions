@@ -11,6 +11,7 @@ type Values = {
   stayAwake: boolean;
   hidKeyboard: boolean;
   hidMouse: boolean;
+  alwaysOnTop: boolean;
 };
 
 export default function Command() {
@@ -26,6 +27,7 @@ export default function Command() {
         ${values["hidKeyboard"] ? "--hid-keyboard" : ""} \
         ${values["hidMouse"] ? "--hid-mouse" : ""} \
         ${values["disableAudio"] ? "--no-audio" : ""} \
+        ${values["alwaysOnTop"] ? "--always-on-top" : ""} \
         -m ${values["size"]} \
         -s ${serial}`,
       {
@@ -80,6 +82,7 @@ export default function Command() {
       <Form.Checkbox id="stayAwake" defaultValue={true} label="Stay awake" storeValue />
       <Form.Checkbox id="hidKeyboard" defaultValue={true} label="HID keyboard (USB only)" storeValue />
       <Form.Checkbox id="hidMouse" defaultValue={false} label="HID mouse (USB only)" storeValue />
+      <Form.Checkbox id="alwaysOnTop" defaultValue={false} label="Always on top" storeValue />
     </Form>
   );
 }

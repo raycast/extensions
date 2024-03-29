@@ -1,17 +1,17 @@
 # Remove Paywall
 
-Remove the paywall from the specified URL. It can be passed as an argument, taken from the currently selected text, from the search bar's text or taken from the clipboard, in this order.
+Remove the paywall from the selected or clipboard URL. It can be taken from the currently selected text or if none provided from the clipboard.
 
 ## List of commands
 
-- `Remove Paywall` - Remove the paywall from the specified URL.
-- `Remove Paywall Using` - Remove the paywall from the the URL using a specific service; useful if you want to use a service that is not the default one.
+- `Remove Paywall` - Remove the paywall from the selected or clipboard URL.
 
 ## Available services
 
 - [12ft](https://12ft.io)
 - [Archive](https://archive.is)
 - [RemovePaywall](https://www.removepaywall.com)
+- [Freedium](https://freedium.cfd)
 
 ## Author
 

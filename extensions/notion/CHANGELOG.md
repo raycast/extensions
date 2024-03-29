@@ -1,5 +1,27 @@
 # Notion Changelog
 
+## [Change Properties order in Create Database Page] - 2024-03-22
+
+- Add ability to change order of properties when creating a new database page
+- Fix showing/hiding properties when creating a new database page
+
+## [Improve authentication docs] - 2024-02-27
+
+- Improve documentation on creating an internal integration
+- Use OAuth utils
+
+## [Properly allow date with time] - 2024-02-15
+
+- Fix a bug that prevented creating pages with time
+
+## [Open Notion page improvement] - 2024-01-02
+
+- Add the ability to open Notion in the browser of your choice or in the Notion app.
+
+## [Add alternate open action] - 2023-12-03
+
+- Add an action that alternates with the primary open action. For example, if the primary action is set to open in Notion, the alternate action will open in the browser, and vice versa.
+
 ## [Fixes] - 2023-10-12
 
 - Fix duplicated recent and searched pages sometimes showing

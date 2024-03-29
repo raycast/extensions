@@ -3,7 +3,7 @@ import { ha } from "@lib/common";
 import open from "open";
 
 async function main(): Promise<void> {
-  const url = await ha.nearestDefinedURL();
+  const url = ha.preferCompanionApp ? ha.navigateUrl("") : await ha.nearestDefinedURL();
   open(url);
   showHUD("Open Dashboard");
   popToRoot();

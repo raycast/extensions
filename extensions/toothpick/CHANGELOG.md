@@ -1,5 +1,9 @@
 # Toothpick Changelog
 
+## [QoL Improvements] - 2023-11-30
+
+- Extended favorite devices functionality to disconnecting from specific devices
+
 ## [QoL Improvements and Device Additions] - 2023-10-13
 
 - Added rudimentary mappings for the following devices:

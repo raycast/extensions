@@ -1,6 +1,6 @@
 import fetch, { RequestInit } from "node-fetch";
 
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
+import { getJiraCredentials } from "../api/jiraCredentials";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -35,7 +35,7 @@ export async function request<T>(path: string, options: RequestOptions = { metho
         ...additionalHeaders,
       },
       ...rest,
-    }
+    },
   );
 
   if (response.ok) {

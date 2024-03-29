@@ -4,7 +4,7 @@ const COMMA_SEPARATED_FAVOURITE_LOCATION_IDS_KEY = "commaSeparatedFavouriteLocat
 
 export const getFavouriteLocationIds = async (): Promise<Set<string>> => {
   const commaSeparatedFavouriteLocationIds = await LocalStorage.getItem<string>(
-    COMMA_SEPARATED_FAVOURITE_LOCATION_IDS_KEY
+    COMMA_SEPARATED_FAVOURITE_LOCATION_IDS_KEY,
   );
 
   if (typeof commaSeparatedFavouriteLocationIds === "undefined") {

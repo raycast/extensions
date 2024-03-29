@@ -1,3 +1,4 @@
+import { Color } from "@raycast/api";
 export interface PilePost {
   content: string;
   data: PileDataI;
@@ -25,33 +26,52 @@ export interface PileSettings {
 
 export type NoteI = [string, PileDataI];
 
-export enum PostHightlightsI {
-  None = "None",
-  Highlight = "Highlight",
-  DoLater = "Do later",
-  NewIdea = "New idea",
-}
+export type PostHightlights = "Highlight" | "Do later" | "New idea" | null;
 
-export const PostHighlights = [
+export const PostHighlights: Array<{
+  highlight: PostHightlights;
+  highlightColor: string;
+  raycastColor: Color | "transparent";
+}> = [
   {
-    highlight: PostHightlightsI.None,
+    highlight: null,
     highlightColor: "transparent",
+    raycastColor: "transparent",
   },
   {
-    highlight: PostHightlightsI.Highlight,
+    highlight: "Highlight",
+    highlightColor: "#FF703A",
+    raycastColor: Color.Orange,
+  },
+  {
+    highlight: "Do later",
+    highlightColor: "#4de64d",
+    raycastColor: Color.Green,
+  },
+  {
+    highlight: "New idea",
+    highlightColor: "#017AFF",
+    raycastColor: Color.Blue,
+  },
+];
+
+export const PostHighlightsColors: Array<{ highlight: PostHightlights; highlightColor: string }> = [
+  {
+    highlight: "Highlight",
     highlightColor: "#FF703A",
   },
   {
-    highlight: PostHightlightsI.DoLater,
+    highlight: "Do later",
     highlightColor: "#4de64d",
   },
   {
-    highlight: PostHightlightsI.NewIdea,
+    highlight: "New idea",
     highlightColor: "#017AFF",
   },
 ];
 
 export interface HighlightI {
-  highlight: PostHightlightsI;
+  highlight: PostHightlights;
   highlightColor: string;
+  raycastColor: Color | "transparent";
 }

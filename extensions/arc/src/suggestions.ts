@@ -3,14 +3,21 @@ import { useCachedPromise } from "@raycast/utils";
 import { decode } from "iconv-lite";
 import { nanoid } from "nanoid";
 import { fetch } from "cross-fetch";
-import { Suggestion, SearchConfigs } from "./types";
+import {
+  Suggestion,
+  SearchConfigs,
+  GoogleSuggestionParser,
+  EcosiaSuggestionParser,
+  KagiSuggestionParser,
+} from "./types";
 import { searchArcPreferences } from "./preferences";
 
 const config: SearchConfigs = {
   google: {
     search: "https://www.google.com/search?q=",
     suggestions: "https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=",
-    suggestionParser: (json: any, suggestions: Suggestion[]) => {
+    suggestionParser: (json: GoogleSuggestionParser, suggestions: Suggestion[]) => {
+      console.log(json);
       json[1].map((item: string, i: number) => {
         const type = json[4]["google:suggesttype"][i];
         const description = json[2][i];
@@ -51,12 +58,27 @@ const config: SearchConfigs = {
   ecosia: {
     search: "https://www.ecosia.org/search?q=",
     suggestions: "https://ac.ecosia.org?type=list&q=",
-    suggestionParser: (json: any, suggestions: Suggestion[]) => {
-      json[1].map((item: string, i: number) => {
+    suggestionParser: (json: EcosiaSuggestionParser, suggestions: Suggestion[]) => {
+      console.log(json);
+      json[1].map((item: string) => {
         suggestions.push({
           id: nanoid(),
           query: item,
           url: `https://www.ecosia.org/search?q=${encodeURIComponent(item)}`,
+        });
+      });
+    },
+  },
+  kagi: {
+    search: "https://kagi.com/search?q=",
+    suggestions: "https://kagi.com/api/autosuggest?q=",
+    suggestionParser: (json: KagiSuggestionParser, suggestions: Suggestion[]) => {
+      console.log(json);
+      json[1].map((item: string) => {
+        suggestions.push({
+          id: nanoid(),
+          query: item,
+          url: `https://kagi.com/search?q=${encodeURIComponent(item)}`,
         });
       });
     },
@@ -70,6 +92,8 @@ async function parseResponse(response: Response) {
 
   const buffer = await response.arrayBuffer();
   const text = decode(Buffer.from(buffer), "iso-8859-1");
+
+  if (!text) return [];
   const json = JSON.parse(text);
 
   const suggestions: Suggestion[] = [];

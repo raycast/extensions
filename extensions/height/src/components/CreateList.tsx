@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Form, launchCommand, LaunchType, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { ApiList } from "../api/list";
-import { CreateListFormValues, CreateListPayload } from "../types/list";
-import { getTintColorFromHue, ListColors, ListIcons, ListTypes, ListVisualizations } from "../utils/list";
+
+import { createList } from "@/api/list";
+import { CreateListFormValues, CreateListPayload, ListIcon } from "@/types/list";
+import { ListColors, ListIcons, ListTypes, ListVisualizations, getTintColorFromHue } from "@/utils/list";
 
 export default function CreateList({ draftValues }: { draftValues?: CreateListFormValues }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -20,12 +21,12 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
         visualization: values.visualization,
         appearance: {
           hue: values.hue === "" ? null : Number(values.hue),
-          icon: values.icon,
+          icon: values.icon as ListIcon,
         },
       };
 
       try {
-        const [data, error] = await ApiList.create(payload);
+        const [data, error] = await createList(payload);
 
         if (data) {
           toast.style = Toast.Style.Success;
@@ -37,7 +38,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
             description: "",
             visualization: "list",
             hue: "",
-            icon: "",
+            icon: "list",
           });
 
           await launchCommand({ name: "search_lists", type: LaunchType.UserInitiated });
@@ -60,7 +61,7 @@ export default function CreateList({ draftValues }: { draftValues?: CreateListFo
       name: draftValues?.name ?? "",
       description: draftValues?.description ?? "",
       hue: draftValues?.hue ?? "",
-      icon: draftValues?.icon ?? "",
+      icon: draftValues?.icon ?? "list",
     },
     validation: {
       type: FormValidation.Required,

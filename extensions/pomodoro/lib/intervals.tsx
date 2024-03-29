@@ -1,30 +1,11 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
-
-export type Preferences = {
-  focusIntervalDuration: string;
-  shortBreakIntervalDuration: string;
-  longBreakIntervalDuration: string;
-  completionImage: string;
-  sound: string;
-  enableTimeOnMenuBar: boolean
-};
-
-export type IntervalType = "focus" | "short-break" | "long-break";
-
-type Part = {
-  startedAt: number;
-  pausedAt?: number;
-};
-
-export type Interval = {
-  parts: Part[];
-  length: number;
-  type: IntervalType;
-};
+import { FocusText, LongBreakText, ShortBreakText } from "./constants";
+import { Interval, IntervalExecutor, IntervalType } from "./types";
 
 const cache = new Cache();
 
-const CACHE_KEY = "pomodoro-interval/1.1";
+const CURRENT_INTERVAL_CACHE_KEY = "pomodoro-interval/1.1";
+const COMPLETED_POMODORO_COUNT_CACHE_KEY = "pomodoro-interval/completed-pomodoro-count"
 
 const currentTimestamp = () => Math.round(new Date().valueOf() / 1000);
 
@@ -45,7 +26,7 @@ export function isPaused({ parts }: Interval): boolean {
   return !!parts[parts.length - 1].pausedAt;
 }
 
-export function createInterval(type: IntervalType): Interval {
+export function createInterval(type: IntervalType, isFreshStart: boolean = true): Interval {
   const interval = {
     type,
     length: intervalDurations[type],
@@ -55,7 +36,13 @@ export function createInterval(type: IntervalType): Interval {
       },
     ],
   };
-  cache.set(CACHE_KEY, JSON.stringify(interval));
+  cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
+  if (isFreshStart) {
+    cache.set(COMPLETED_POMODORO_COUNT_CACHE_KEY, "0")
+  } else {
+    const lastCount = parseInt(cache.get(COMPLETED_POMODORO_COUNT_CACHE_KEY) ?? "0", 10)
+    cache.set(COMPLETED_POMODORO_COUNT_CACHE_KEY, `${lastCount + 1}`)
+  }
   return interval;
 }
 
@@ -68,7 +55,7 @@ export function pauseInterval() {
       ...interval,
       parts,
     };
-    cache.set(CACHE_KEY, JSON.stringify(interval));
+    cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   }
   return interval;
 }
@@ -81,20 +68,61 @@ export function continueInterval() {
       ...interval,
       parts,
     };
-    cache.set(CACHE_KEY, JSON.stringify(interval));
+    cache.set(CURRENT_INTERVAL_CACHE_KEY, JSON.stringify(interval));
   }
   return interval;
 }
 
 export function resetInterval() {
-  cache.remove(CACHE_KEY);
+  cache.remove(CURRENT_INTERVAL_CACHE_KEY);
 }
 
 export function getCurrentInterval(): Interval | undefined {
-  const result = cache.get(CACHE_KEY);
+  const result = cache.get(CURRENT_INTERVAL_CACHE_KEY);
   if (result) {
     return JSON.parse(result);
   }
+}
+
+export function getCompletedPomodoroCount(): number {
+  const result = cache.get(COMPLETED_POMODORO_COUNT_CACHE_KEY)
+  if (result) {
+    return parseInt(result, 10)
+  }
+
+  return 0
+}
+
+export function getNextIntervalExecutor(): IntervalExecutor {
+  const currentInterval = getCurrentInterval()
+  resetInterval()
+
+  const completedCount = getCompletedPomodoroCount()
+  const longBreakThreshold = parseInt(preferences.longBreakStartThreshold, 10)
+  let executor: IntervalExecutor | undefined
+  switch (currentInterval?.type) {
+    case "short-break":
+      executor = { title: FocusText, onStart: () => createInterval('focus', false) }
+      break
+    case "long-break":
+      executor = { title: FocusText, onStart: () => createInterval('focus') }
+      break
+    default:
+      if (completedCount === longBreakThreshold) {
+        executor = {
+          title: LongBreakText,
+          onStart: () => createInterval('long-break')
+        }
+      } else {
+        executor = {
+          title: ShortBreakText,
+          onStart: () => createInterval('short-break', false)
+        }
+      }
+      break
+  }
+
+  return executor
 }
 
 export const preferences = getPreferenceValues<Preferences>();

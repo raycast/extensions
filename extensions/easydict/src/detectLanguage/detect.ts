@@ -2,7 +2,7 @@
  * @author: tisfeng
  * @createTime: 2022-06-24 17:07
  * @lastEditor: tisfeng
- * @lastEditTime: 2023-03-23 17:46
+ * @lastEditTime: 2023-10-12 16:57
  * @fileName: detect.ts
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
@@ -17,7 +17,7 @@ import { hasTencentAppKey, tencentDetect } from "../translation/tencent";
 import { volcanoDetect } from "../translation/volcano/volcanoAPI";
 import { hasVolcanoAppKey } from "../translation/volcano/volcanoSign";
 import { RequestErrorInfo } from "../types";
-import { francLanguageDetect as francLanguageDetect } from "./franc";
+import { francLanguageDetect } from "./franc";
 import { DetectedLangModel, LanguageDetectType } from "./types";
 import {
   checkIfPreferredLanguagesContainChinese,
@@ -66,24 +66,19 @@ export function detectLanguage(text: string): Promise<DetectedLangModel> {
  */
 function getDetectAPIs() {
   const detectActionList = [bingDetect];
-  // Because Google detect must use proxy now, and set httpsAgent will block thread, so disable it.
-  // detectActionList.push(googleDetect);
 
-  if (myPreferences.enableBaiduTranslate) {
+  if (myPreferences.enableBaiduLanguageDetect) {
     detectActionList.push(baiduWebDetect);
   }
+
+  // Because Google detect must use proxy now, and set httpsAgent will block thread, so disable it.
+  // detectActionList.push(googleDetect);
 
   if (myPreferences.enableTencentTranslate && hasTencentAppKey()) {
     detectActionList.push(tencentDetect);
   }
   if (myPreferences.enableVolcanoTranslate && hasVolcanoAppKey()) {
     detectActionList.push(volcanoDetect);
-  }
-
-  // Apple detection is inaccurate, only use it when lacking detect API.
-  if (detectActionList.length < 2 && myPreferences.enableAppleLanguageDetect) {
-    // Since Apple detect may block the main thread, so we stop it for now and wait for a solution to be found later.
-    // detectActionList.push(appleLanguageDetect);
   }
 
   return detectActionList;
@@ -181,9 +176,15 @@ function handleDetectedLanguage(detectedLangModel: DetectedLangModel): Promise<D
       if (detectedIdenticalLanguages.length === 1) {
         // Mark two identical language as prior.
         detectedLangModel.prior = true;
-        if (isPreferredLanguage(detectedLangCode) && myPreferences.enableDetectLanguageSpeedFirst) {
+
+        const onlyOneDetectService = getDetectAPIs().length == 1;
+
+        if (
+          onlyOneDetectService ||
+          (isPreferredLanguage(detectedLangCode) && myPreferences.enableDetectLanguageSpeedFirst)
+        ) {
           detectedLangModel.confirmed = true;
-          console.warn(`---> Speed first, API detected 'two' identical 'preferred' language: ${detectedTypes}`);
+          console.warn(`---> Speed first, API detected language: ${detectedTypes}`);
           console.warn(`detected language: ${JSON.stringify(detectedLangModel, null, 4)}`);
           return resolve(detectedLangModel);
         }
@@ -191,7 +192,7 @@ function handleDetectedLanguage(detectedLangModel: DetectedLangModel): Promise<D
 
       if (detectedIdenticalLanguages.length >= 2) {
         detectedLangModel.confirmed = true;
-        console.warn(`---> API detected 'three' identical language`);
+        console.warn(`---> API detected >=2 identical language`);
         console.warn(`detected language: ${JSON.stringify(detectedLangModel, null, 4)}`);
         return resolve(detectedLangModel);
       }

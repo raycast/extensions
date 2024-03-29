@@ -23,9 +23,9 @@ export function Versions({ versions, slug }: Versions) {
                 <ActionPanel title="Plugin Version">
                   <Action.OpenInBrowser url={versions[version]} title="Download Version" icon={Icon.Download} />
                   <Action.CopyToClipboard
-                    content={`"wpackagist-plugin/${slug}": "${version}"`}
+                    content={`"wpackagist-plugin/${slug}":"${version}"`}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
-                    title="Copy WPackagist Composer Entry"
+                    title="Copy Composer Package Entry"
                   />
                 </ActionPanel>
               }

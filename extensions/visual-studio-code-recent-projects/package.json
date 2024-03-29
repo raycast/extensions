@@ -18,7 +18,8 @@
     "QIanGua",
     "hakob_nersesian",
     "erics118",
-    "tm.wrnr"
+    "tm.wrnr",
+    "tleo19"
   ],
   "keywords": [
     "vscode"
@@ -37,6 +38,13 @@
       "title": "Open With Visual Studio Code",
       "subtitle": "Visual Studio Code",
       "description": "Opens the currently selected Finder item with Visual Studio Code.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "subtitle": "Visual Studio Code",
+      "description": "Opens a new Visual Studio Code window.",
       "mode": "no-view"
     },
     {
@@ -137,7 +145,6 @@
     "lodash.get": "^4.4.2",
     "prettier": "^2.8.1",
     "run-applescript": "^6.1.0",
-    "sql.js": "^1.6.2",
     "tildify": "^3.0.0"
   },
   "devDependencies": {

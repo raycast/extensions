@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { alertDialog, getShortLinks } from "./hooks/hooks";
 import { isEmpty } from "./utils/common-utils";
@@ -8,7 +8,6 @@ import { ListEmptyView } from "./components/list-empty-view";
 import { deleteShortLink } from "./utils/axios-utils";
 import Style = Toast.Style;
 import EditLink from "./edit-link";
-import { ShortLink } from "./types/types";
 
 export default function SearchLinks() {
   const [refresh, setRefresh] = useState<number>(0);
@@ -88,7 +87,7 @@ export default function SearchLinks() {
                           } else {
                             await showToast(Style.Failure, "Error.", deleteResult.message);
                           }
-                        }
+                        },
                       );
                     }}
                   />

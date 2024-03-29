@@ -11,7 +11,9 @@
     "sasivarnan",
     "ahp",
     "danulqua",
-    "juang970"
+    "juang970",
+    "tleo19",
+    "jum8ys"
   ],
   "categories": [
     "Web"
@@ -45,7 +47,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
+    "@raycast/api": "^1.64.0",
     "@raycast/utils": "^1.10.0",
     "fuse.js": "^7.0.0",
     "ini": "^4.1.1",

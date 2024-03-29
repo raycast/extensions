@@ -1,9 +1,7 @@
-import { CustomPlaceholder } from "../utils/types";
-
 /**
  * Default custom placeholders that are included with the extension as examples.
  */
-export const defaultCustomPlaceholders: { [key: string]: CustomPlaceholder } = {
+export const defaultCustomPlaceholders = {
   "{{showDialog:(([^{]|{(?!{)|{{[\\s\\S]*?}})*?)}}": {
     name: "showDialog",
     description: "Displays a dialog window with the given text as its message.",

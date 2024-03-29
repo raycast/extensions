@@ -3,6 +3,8 @@ import { ShowResponse } from "moviedb-promise";
 import { format } from "date-fns";
 import { useCachedPromise } from "@raycast/utils";
 import { moviedb } from "../api";
+import Posters from "./Posters";
+import Backdrops from "./Backdrops";
 
 export default function TvShowDetail({ show }: { show: ShowResponse }) {
   const { data: details, isLoading: isLoadingDetails } = useCachedPromise(
@@ -78,6 +80,32 @@ export default function TvShowDetail({ show }: { show: ShowResponse }) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in TMDB" url={`https://www.themoviedb.org/tv/${show.id ?? 0}`} />
+          {show.id ? (
+            <Action.CopyToClipboard
+              title={`Copy TMDB ID`}
+              content={show.id.toString()}
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+            />
+          ) : null}
+          {details?.homepage && (
+            <Action.OpenInBrowser
+              title="Open Homepage"
+              url={details.homepage}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+            />
+          )}
+          <Action.Push
+            title="Show Posters"
+            icon={Icon.Image}
+            target={show.id !== undefined && <Posters id={show.id ?? 0} type="tv" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          />
+          <Action.Push
+            title="Show Backdrops"
+            icon={Icon.Image}
+            target={show.id !== undefined && <Backdrops id={show.id ?? 0} type="tv" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          />
         </ActionPanel>
       }
     />

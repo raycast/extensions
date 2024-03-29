@@ -13,10 +13,8 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure you use `MIT` in the `license` field
   - Ensure you are using the latest Raycast API version
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
-- Please check the terms of service of third-party services that your extension uses. If your extension doesn't comply with their terms, include a warning in your extension's README. The warning should be similar to:
-
-  > Warning: This extension is not compliant with the Terms of Service of \[service name]. Use at your own risk.
-
+- Please check the terms of service of third-party services that your extension uses.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -124,11 +122,12 @@ In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect scree
 #### How to use it?
 
 1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2. Open the command
-3. Press the hotkey, remember to tick `Save to Metadata`
+2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
+3. Open the command
+4. Press the hotkey, remember to tick `Save to Metadata`
 
 {% hint style="info" %}
-This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.
+This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you've made.
 
 You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
 {% endhint %}
@@ -245,7 +244,7 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
   - ❌ `Copy url`, `set project`, `Set priority`
 - Provide icons for actions if there are other actions with icons in the list
   - Avoid having a list of actions where some have icons and some don't
-- Add ellipses `…` for actions that will have a submenu. Don't repeat parent the action name in the submenu
+- Add ellipses `…` for actions that will have a submenu. Don't repeat the parent action name in the submenu
   - ✅ `Set Priority…` and submenu would have `Low`, `Medium`, `High`
   - ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
 
@@ -256,9 +255,8 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 ### Empty States
 
-- When you update lists with an empty array of elements, the "No results" view will be shown. Avoid introducing your own UI to achieve a similar effect (e.g. showing list item).
-  - **Known issue:** Sometimes, there is nothing you can show when the search query is empty, and an extension shows "No results" when you open it (often in search commands). We have plans to provide an API that would improve that experience. In the meantime, you might want to consider introducing some sections that could be helpful in an empty state – e.g. suggestions or recently visited items.
-- **Common mistake** – "flickering empty state view" on start
+- When you update lists with an empty array of elements, the "No results" view will be shown. You can customize this view by using the [List.EmptyView](../api-reference/user-interface/list.md#list.emptyview) or [Grid.EmptyView](../api-reference/user-interface/grid.md#grid.emptyview) components.
+- **Common mistake** - "flickering empty state view" on start
   - If you try rendering an empty list before real data arrives (e.g. from the network or disk), you might see a flickering "No results" view when opening the extension. To prevent this, make sure not to return an empty list of items before you get the data you want to display. In the meantime, you can show the loading indicator. See [this example](https://developers.raycast.com/information/best-practices#show-loading-indicator).
 
 ### Navigation Title

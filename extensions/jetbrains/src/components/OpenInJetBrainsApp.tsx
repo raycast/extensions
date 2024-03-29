@@ -8,8 +8,13 @@ interface OpenInJetBrainsAppActionProps {
 }
 
 export function openInApp(tool: AppHistory, recent: recentEntry | null, v2: boolean): () => Promise<Toast | undefined> {
-  const cmd = tool.tool ? `"${tool.tool}" "${recent?.path ?? ""}"` : `open ${tool.url}${recent?.title ?? ""}`;
+  const cmd = tool.tool
+    ? `"${tool.tool}" "${recent?.path ?? ""}"`
+    : tool.url
+    ? `open ${tool.url}${recent?.title ?? ""}`
+    : undefined;
   const toOpen = tool.app?.path ?? "";
+
   async function isRunning() {
     const grep = v2
       ? `ps aux | grep -v "grep" | grep "${tool.app?.path}"`
@@ -30,6 +35,14 @@ export function openInApp(tool: AppHistory, recent: recentEntry | null, v2: bool
   }
 
   return async function () {
+    if (cmd === undefined) {
+      return showToast(
+        Toast.Style.Failure,
+        "Failed",
+        "No script or url configured, have you enabled shell scripts in JetBrains Toolbox or enabled protocol urls in the extension config"
+      );
+    }
+
     if (toOpen === "" && tool.tool === false) {
       return showToast(Toast.Style.Failure, "Failed", "No app path");
     }

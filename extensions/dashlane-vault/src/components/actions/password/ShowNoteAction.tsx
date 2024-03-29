@@ -7,12 +7,13 @@ type Props = {
 };
 
 export default function ShowNoteAction({ item }: Props) {
-  if (!item.note) return;
+  const name = item.title ?? item.url;
+  if (!item.note || !name) return;
 
   return (
     <Action.Push
       title="Show Note"
-      target={<DetailNote name={item.title ?? item.url} note={item.note} />}
+      target={<DetailNote name={name} note={item.note} />}
       icon={Icon.Paragraph}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
     />

@@ -15,11 +15,11 @@ const FormSprintDropdown = forwardRef((props: FormSprintDropdownProps, ref: Forw
 
   const { data: sprints, isLoading } = useCachedPromise(
     async (query) => getSprints({ fieldName: props.name, fieldValue: query }),
-    [query]
+    [query],
   );
 
   return (
-    <Form.Dropdown ref={ref} {...props} isLoading={isLoading} onSearchTextChange={setQuery} throttle>
+    <Form.Dropdown ref={ref} {...props} isLoading={isLoading} onSearchTextChange={setQuery} throttle filtering>
       <Form.Dropdown.Item title="No Sprint" value="" />
 
       {sprints?.map((sprint) => {

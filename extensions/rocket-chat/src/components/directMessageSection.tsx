@@ -25,11 +25,11 @@ export function DirectMessageSection({ directMessages }: { directMessages: Direc
                         text: {
                           value: directMessage.involvedUsers[0]?.status,
                           color:
-                            directMessage.involvedUsers[0].status === "online"
+                            directMessage.involvedUsers[0]?.status === "online"
                               ? Color.Green
-                              : directMessage.involvedUsers[0].status === "busy"
+                              : directMessage.involvedUsers[0]?.status === "busy"
                                 ? Color.Red
-                                : directMessage.involvedUsers[0].status === "away"
+                                : directMessage.involvedUsers[0]?.status === "away"
                                   ? Color.Yellow
                                   : Color.SecondaryText,
                         },

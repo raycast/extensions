@@ -15,7 +15,8 @@ import path from "path";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { GetInstalledBrowsers } from "get-installed-browsers";
-import { GitRepo, Preferences, tildifyPath, GitRepoService, GitRepoType } from "./utils";
+import { GitRepo, Preferences, tildifyPath, GitRepoService, GitRepoType, OpenWith } from "./utils";
+import { useUsageBasedSort } from "./hooks/useUsageBasedSort";
 
 const installedBrowsers = GetInstalledBrowsers().map(
   // Safari gets found in /Applications here but actually exists in
@@ -39,6 +40,7 @@ export default function Command() {
   const [currentRepoType, onRepoTypeChange] = useState(GitRepoType.All);
 
   const gitRepos = gitReposState.data?.filter((gitRepo) => !favoriteGitReposState.data?.includes(gitRepo.fullPath));
+  const { data: sortedGitRepos, recordUsage } = useUsageBasedSort<GitRepo>(gitRepos || [], "gitRepos");
 
   return (
     <List
@@ -60,7 +62,7 @@ export default function Command() {
           ))}
       </List.Section>
       <List.Section title={favoriteGitRepos?.length ? "Repos" : undefined}>
-        {gitRepos
+        {sortedGitRepos
           ?.filter((repo) => currentRepoType === GitRepoType.All || currentRepoType === repo.repoType)
           .map((repo) => (
             <GitRepoListItem
@@ -69,6 +71,7 @@ export default function Command() {
               repo={repo}
               isFavorite={false}
               revalidate={favoriteGitReposState.revalidate}
+              recordUsageHook={recordUsage}
             />
           ))}
       </List.Section>
@@ -81,6 +84,7 @@ function GitRepoListItem(props: {
   repo: GitRepo;
   isFavorite: boolean;
   revalidate: () => void;
+  recordUsageHook?: (id: string | number) => void;
 }): JSX.Element {
   const preferences = props.preferences;
   const repo = props.repo;
@@ -96,18 +100,6 @@ function GitRepoListItem(props: {
     }
   })();
 
-  function getTarget(repo: GitRepo, app: Application): string {
-    // Should it return the repo fullPath or url?
-    if (
-      repo.remotes.length > 0 &&
-      repo.remotes[0].url.length > 0 &&
-      (app.bundleId?.toLowerCase() === repo.defaultBrowserId.toLowerCase() ||
-        installedBrowsers.includes(path.basename(app.path)))
-    ) {
-      return repo.remotes[0].url;
-    }
-    return repo.fullPath;
-  }
   return (
     <List.Item
       title={repo.name}
@@ -117,42 +109,29 @@ function GitRepoListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Open
-              title={`Open in ${preferences.openWith1.name}`}
-              icon={{ fileIcon: preferences.openWith1.path }}
-              target={`${getTarget(repo, preferences.openWith1)}`}
-              application={preferences.openWith1.bundleId}
-            />
-            <Action.Open
-              title={`Open in ${preferences.openWith2.name}`}
-              icon={{ fileIcon: preferences.openWith2.path }}
-              target={`${getTarget(repo, preferences.openWith2)}`}
-              application={preferences.openWith2.bundleId}
-            />
+            <GitRepoOpenAction openWith={preferences.openWith1} repo={repo} recordUsageHook={props.recordUsageHook} />
+            <GitRepoOpenAction openWith={preferences.openWith2} repo={repo} recordUsageHook={props.recordUsageHook} />
             {preferences.openWith3 && (
-              <Action.Open
-                title={`Open in ${preferences.openWith3.name}`}
-                icon={{ fileIcon: preferences.openWith3.path }}
-                target={`${getTarget(repo, preferences.openWith3)}`}
-                application={preferences.openWith3.bundleId}
+              <GitRepoOpenAction
+                openWith={preferences.openWith3}
+                repo={repo}
+                recordUsageHook={props.recordUsageHook}
                 shortcut={{ modifiers: ["opt"], key: "return" }}
               />
             )}
             {preferences.openWith4 && (
-              <Action.Open
-                title={`Open in ${preferences.openWith4.name}`}
-                icon={{ fileIcon: preferences.openWith4.path }}
-                target={`${getTarget(repo, preferences.openWith4)}`}
-                application={preferences.openWith4.bundleId}
+              <GitRepoOpenAction
+                openWith={preferences.openWith4}
+                repo={repo}
+                recordUsageHook={props.recordUsageHook}
                 shortcut={{ modifiers: ["ctrl"], key: "return" }}
               />
             )}
             {preferences.openWith5 && (
-              <Action.Open
-                title={`Open in ${preferences.openWith5.name}`}
-                icon={{ fileIcon: preferences.openWith5.path }}
-                target={`${getTarget(repo, preferences.openWith5)}`}
-                application={preferences.openWith5.bundleId}
+              <GitRepoOpenAction
+                openWith={preferences.openWith5}
+                repo={repo}
+                recordUsageHook={props.recordUsageHook}
                 shortcut={{ modifiers: ["shift"], key: "return" }}
               />
             )}
@@ -302,4 +281,35 @@ function GitRepoPropertyDropdown(props: {
         ))}
     </List.Dropdown>
   );
+}
+
+function GitRepoOpenAction(props: {
+  repo: GitRepo;
+  openWith: OpenWith;
+  shortcut?: Keyboard.Shortcut;
+  recordUsageHook?: (id: string | number) => void;
+}): JSX.Element {
+  return (
+    <Action.Open
+      title={`Open in ${props.openWith.name}`}
+      icon={{ fileIcon: props.openWith.path }}
+      target={`${getTarget(props.repo, props.openWith)}`}
+      application={props.openWith.bundleId}
+      shortcut={props.shortcut}
+      onOpen={() => props.recordUsageHook?.(props.repo.name)}
+    />
+  );
+}
+
+function getTarget(repo: GitRepo, app: Application): string {
+  // Should it return the repo fullPath or url?
+  if (
+    repo.remotes.length > 0 &&
+    repo.remotes[0].url.length > 0 &&
+    (app.bundleId?.toLowerCase() === repo.defaultBrowserId.toLowerCase() ||
+      installedBrowsers.includes(path.basename(app.path)))
+  ) {
+    return repo.remotes[0].url;
+  }
+  return repo.fullPath;
 }

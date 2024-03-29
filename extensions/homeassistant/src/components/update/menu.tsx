@@ -2,7 +2,7 @@ import { Icon, MenuBarExtra } from "@raycast/api";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
 import { getIcon, getStateValue } from "@components/state/utils";
-import { MenuBarSubmenu, OpenInBrowserMenubarItem } from "@components/menu";
+import { MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
 import { HACSRepo, callUpdateInstallService, callUpdateSkipService, getHACSRepositories } from "./utils";
 import { ha } from "@lib/common";
@@ -12,7 +12,7 @@ function UpdateOpenReleaseUrlMenubarItem(props: { state: State }) {
   if (!url) {
     return null;
   }
-  return <OpenInBrowserMenubarItem title="Open Release Notes" url={url} />;
+  return <OpenInMenubarItem title="Open Release Notes" url={url} />;
 }
 
 function UpdateInstallMenubarItem(props: { state: State; backup?: boolean }) {
@@ -67,7 +67,7 @@ function HACSMenubarItem(props: { repo: HACSRepo | undefined; state: State }) {
       subtitle={`${r.installed_version} => ${r.available_version}`}
       icon="hacs.svg"
     >
-      <OpenInBrowserMenubarItem title="Open HACS in Browser" url={ha.urlJoin("hacs/entry")} />
+      <OpenInMenubarItem action="Open HACS In" url={ha.navigateUrl("hacs/entry")} />
       <CopyEntityIDToClipboard state={props.state} />
     </MenuBarSubmenu>
   );

@@ -3,10 +3,10 @@ import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
-import View from "./components/View";
 import { WorkflowRunListItem } from "./components/WorkflowRunListItem";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 
 export type WorkflowRunsResponse = Endpoints["GET /repos/{owner}/{repo}/actions/runs"]["response"];
 
@@ -55,10 +55,4 @@ function WorkflowRuns() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <WorkflowRuns />
-    </View>
-  );
-}
+export default withGitHubClient(WorkflowRuns);

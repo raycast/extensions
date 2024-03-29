@@ -259,5 +259,40 @@ declare global {
     export interface VideoInfoResponse extends Omit<BaseResponse, "data"> {
       data: Video;
     }
+
+    interface OutlinePart {
+      timestamp: number;
+      content: string;
+    }
+
+    interface Outline {
+      title: string;
+      part_outline: OutlinePart[];
+      timestamp: number;
+    }
+
+    interface ModelResult {
+      result_type: number;
+      summary: string;
+      outline: Outline[];
+    }
+
+    export interface VideoConclusionResponseData {
+      code: number;
+      dislike_num: number;
+      like_num: number;
+      model_result: ModelResult;
+    }
+    export interface VideoConclusionResponse extends Omit<BaseResponse, "data"> {
+      data: VideoConclusionResponseData;
+    }
+
+    interface CidInfo {
+      cid: number;
+    }
+
+    export interface BvidGetCidResponse extends Omit<BaseResponse, "data"> {
+      data: CidInfo[];
+    }
   }
 }

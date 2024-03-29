@@ -1,5 +1,84 @@
 # Apple Reminders Changelog
 
+## [Fix interval error validation] - 2024-03-20
+
+- `interval` error validation now checks for `0` and `negative` values.
+
+## [Quick Add Reminder Fix] - 2024-03-12
+
+- Fixed an issue where reminder notes were not being saved properly when using the Quick Add feature.
+
+## [Performance improvements & bug fixes] - 2024-03-01
+
+- Completed reminders are now loaded on demand and not upfront, which should fix heap memory errors
+- Add a limit of 1000 reminders so that the extension doesn't break with heap memory errors
+
+## [Add a preference to not use AI for Quick Add Reminder] - 2024-02-23
+
+- You can now disable the AI in `Quick Add Reminder` if you want to quickly add raw reminders to your default list.
+
+## [Fix SwiftError] - 2024-02-14
+
+- Fix an issue where recurring reminders in December would make it impossible to retrieve any data in `My Reminders`.
+
+## [Use GPT-4 model for Quick Add Reminder command] - 2024-02-12
+
+- Improve `Quick Add Reminder` results by using GPT-4 instead of the default model (GPT-3.5 Turbo)
+
+## [Fix Invalid time value error] - 2024-01-31
+
+- Fix an error that occurs in "My Reminders" when a reminder does not have any due dates, but the list is grouped by due dates.
+
+## [Fix timezone bugs] - 2024-01-26
+
+- Fix multiple timezone issues that result in reminders not being displayed in the correct section or with incorrect dates.
+
+## [Bug fixes] - 2024-01-26
+
+- Fix a bug where it wasn't possible to remove the priority from a list item
+- Fix a bug where it wasn't possible to remove the due date from a list item
+- Fix a bug where it wasn't possible to change the due date from the menu bar
+- Migrate codebase to use new Swift macros
+
+## [Allow to open Reminders app from the menu bar] - 2024-01-25
+
+- Add menu item that allows to open the Reminders app from the menu bar.
+
+## [Fixes pop to root issue after creating reminders] - 2024-01-16
+
+- Fix an issue where `Create Reminder and Close Window` would stay on the `Create Reminder` screen after opening up Raycast again. Now, it should immediately pops to root after closing the window.
+
+## [Add location-based reminders] - 2024-01-12
+
+- Add support for location-based reminders. You can now see which reminders have locations and easily create new ones with locations.
+
+## [Improvements and bug fixes] - 2024-01-11
+
+- Add an option to display the title of the first reminder next to the menu bar icon.
+- Fix a bug where an overdue reminder wouldn't be updated in the native app when changing the due date from Raycast.
+- Fix a bug where setting a due date from Raycast wouldn't add any notifications to it.
+
+## [Improve NLP in Quick Add Reminder] - 2023-12-08
+
+- Improve NLP parsing in the `Quick Add Reminder` command by adding an endDate for recurring reminders.
+
+## [Add option to hide menu bar count when empty] - 2023-12-20
+
+- Allow hiding the menu bar count when there are zero reminders.
+
+## [Fix Create Reminder command] - 2023-12-18
+
+- Fix a bug where the priority value wouldn't be saved
+- Remove the minimum date constraint for the due date
+
+## [Improve NLP in Quick Add Reminder] - 2023-12-04
+
+- Improve the NLP parsing in `Quick Add Reminder`.
+
+## [Date display bug] - 2023-12-01
+
+- Fix a bug that displays full-day dates with time in the tooltips of reminder items.
+
 ## [Minor improvements] - 2023-11-25
 
 - Add list filtering to the menu bar

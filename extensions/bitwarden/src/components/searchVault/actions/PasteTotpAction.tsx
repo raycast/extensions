@@ -18,7 +18,9 @@ function PasteTotpAction() {
     const toast = await showToast(Toast.Style.Animated, "Getting TOTP code...");
     try {
       const id = await getUpdatedVaultItem(selectedItem, (item) => item.id);
-      const totp = await bitwarden.getTotp(id);
+      const { error, result: totp } = await bitwarden.getTotp(id);
+      if (error) throw error;
+
       await toast?.hide();
       await Clipboard.paste(totp);
     } catch (error) {

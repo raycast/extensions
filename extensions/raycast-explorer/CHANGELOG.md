@@ -1,8 +1,17 @@
 # Prompt Explorer Extension Changelog
 
+## [Fixes] - 2023-02-28
+
+- Fix custom prompt example.
+- Fix `npm audit` reported vulnerabilities.
+
+## [Fixes] - 2023-12-05
+
+- Fix importing prompts in Raycast.
+
 ## [Adding prompts] - 2023-08-31
 
-**Adding default Raycast prompts.**
+- Add default Raycast prompts.
 
 ## [Random Theme Button] - 2023-08-01
 
@@ -15,6 +24,7 @@
 **Introducing Raycast Explorer: an extension to make the most of snippets, AI commands, and custom themes.**
 
 This extension has three different commands:
+
 - 📋 Explore Snippets: browse, select, add and share snippets
 - ✨ Explore Prompts: browse, select, upvote, add and share prompts
 - 🎨 Explore Themes: browse, select, and add themes
