@@ -5,7 +5,10 @@
   "description": "Create, access, and modify tasks.",
   "icon": "asana.png",
   "author": "thomaslombart",
-  "contributors": ["tuzemec"],
+  "contributors": [
+    "Spacedolphin",
+    "tuzemec"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": ["Productivity"],
