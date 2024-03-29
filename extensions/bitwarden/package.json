@@ -201,6 +201,14 @@
       "description": "Securely share information directly with anyone.",
       "icon": "create-send.png",
       "mode": "view"
+    },
+    {
+      "name": "list-sends",
+      "title": "List All Sends",
+      "subtitle": "Bitwarden",
+      "description": "List all the Sends owned by you.",
+      "icon": "list-send.png",
+      "mode": "view"
     }
   ],
   "preferences": [

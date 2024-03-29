@@ -44,7 +44,9 @@ export type Send = {
   name: string;
   notes: string | null;
   key: string;
-  type: SendText;
+  type: SendType;
+  text: SendText | null;
+  file: SendFile | null;
   maxAccessCount: number | null;
   accessCount: number;
   revisionDate: string;
@@ -53,5 +55,4 @@ export type Send = {
   passwordSet: boolean;
   disabled: boolean;
   hideEmail: boolean;
-  text: SendText;
 };
