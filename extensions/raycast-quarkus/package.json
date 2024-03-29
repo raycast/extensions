@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-quarkus",
+  "title": "Raycast Quarkus",
+  "description": "The Raycast Quarkus Extension is a productivity tool designed to simplify the process of referencing Quarkus extensions, creating and downloading dependency snippets.",
+  "icon": "command-icon.png",
+  "author": "nelreina",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Quarkus Extensions",
+      "description": "Generate a project with desired extensions, dependencies, and properties, providing a tailored and efficient Quarkus application setup process.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "artifactId",
+          "title": "Artifact ID",
+          "description": "The artifact ID of the project.",
+          "type": "text",
+          "required": false,
+          "placeholder": "code-with-quarkus"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.5",
+    "decompress": "^4.2.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/decompress": "^4.2.7",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "preferences": [
+    {
+      "name": "platform",
+      "title": "Quarkus Platform",
+      "description": "Select the Quarkus platform to generate the project.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "value": "io.quarkus.platform:3.8",
+          "title": "Quarkus 3.8"
+        },
+        {
+          "value": "io.quarkus.platform:3.9",
+          "title": "Quarkus 3.9"
+        },
+        {
+          "value": "io.quarkus.platform:3.2",
+          "title": "Quarkus 3.2"
+        }
+      ],
+      "default": "io.quarkus.platform:3.8"
+    },
+    {
+      "name": "buildTool",
+      "title": "Build Tool",
+      "description": "Select the build tool to generate the project.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Maven",
+          "value": "MAVEN"
+        },
+        {
+          "title": "Gradle",
+          "value": "GRADLE"
+        }
+      ],
+      "default": "MAVEN"
+    },
+    {
+      "name": "groupId",
+      "title": "Group ID",
+      "description": "The group ID of the project.",
+      "type": "textfield",
+      "required": true,
+      "default": "org.acme"
+    },
+    {
+      "name": "version",
+      "title": "Version",
+      "description": "The version of the project.",
+      "type": "textfield",
+      "required": true,
+      "default": "1.0.0-SNAPSHOT"
+    },
+    {
+      "name": "directory",
+      "title": "Downloads Directory",
+      "description": "Dowload the project in the specified directory",
+      "type": "directory",
+      "required": true,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "unzip",
+      "label": "Unzip Project",
+      "description": "Unzip the project after downloading.",
+      "type": "checkbox",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
