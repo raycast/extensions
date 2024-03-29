@@ -4,17 +4,20 @@ import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { loadStarredFiles } from "./components/starFiles";
+import { figma } from "./components/oauth";
+import { withAccessToken, getAccessToken } from "@raycast/utils";
 
-export default function Command() {
+function Command() {
+  const { token } = getAccessToken();
   const { data, isLoading, error } = useCachedPromise(
     async () => {
-      const results = await resolveAllFiles();
+      const results = await resolveAllFiles(token);
       return results;
     },
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const { data: starredFiles, isLoading: isLoadingStarredFiles } = useCachedPromise(
@@ -25,7 +28,7 @@ export default function Command() {
     [],
     {
       keepPreviousData: true,
-    },
+    }
   );
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
@@ -109,3 +112,5 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
+export default withAccessToken(figma)(Command);
