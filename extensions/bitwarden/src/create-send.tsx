@@ -30,6 +30,8 @@ type FormValues = {
   maxAccessCount: string;
   password: string;
   notes: string;
+  hideEmail: boolean;
+  disabled: boolean;
 };
 
 const initialValues: FormValues = {
@@ -43,6 +45,8 @@ const initialValues: FormValues = {
   maxAccessCount: "",
   password: "",
   notes: "",
+  hideEmail: false,
+  disabled: false,
 };
 
 const getDateOption = (option: SendDateOption | "", customDate: Date | null): string | null => {
@@ -64,6 +68,8 @@ const convertFormValuesToSendPayload = (values: FormValues): SendPayload => ({
   maxAccessCount: values.maxAccessCount ? parseInt(values.maxAccessCount) : null,
   password: values.password || null,
   notes: values.notes || null,
+  hideEmail: values.hideEmail,
+  disabled: values.disabled,
 });
 
 const validateOptionalDateUnder31Days = (value: Date | null | undefined): string | undefined => {
@@ -186,6 +192,8 @@ function SendCommandContent() {
         placeholder="Enter some notes"
         info="Private notes about this Send."
       />
+      <Form.Checkbox {...itemProps.hideEmail} label="Hide my email address from recipients." />
+      <Form.Checkbox {...itemProps.disabled} label="Deactivate this Send so no one can access it." />
     </Form>
   );
 }
