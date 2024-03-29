@@ -4,6 +4,8 @@ interface Preferences {
   domain: string;
   password: string;
   email: string;
+  protocol?: "https" | "http";
+  duration: string;
 }
 
 const getPreferences = () => {

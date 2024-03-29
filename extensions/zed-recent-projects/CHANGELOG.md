@@ -1,5 +1,10 @@
 # zed-recent-projects Changelog
 
+## [Switch to builtin Zed recent projects] - 2024-03-09
+
+- `Search Recent Projects` switched to use the builtin Zed recent projects.
+- Removed `Import VS Code Projects` command.
+
 ## [Enhancements] - 2024-02-12
 
 - `Search Recent Projects` command now allows to pin and order projects to the top of the list.

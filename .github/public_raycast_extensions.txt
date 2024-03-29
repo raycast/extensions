@@ -33,3 +33,4 @@ notion
 stablecog
 apple-reminders
 whitebit
+markprompt

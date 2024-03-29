@@ -1,7 +1,6 @@
 import {
   ChainPreferences,
   ModelType,
-  OllamaApiGenerateResponse,
   OllamaApiShowModelfile,
   OllamaApiTagsResponseModel,
   RaycastChatMessage,
@@ -9,7 +8,7 @@ import {
 } from "./types";
 import { getSelectedFinderItems, Clipboard, LocalStorage } from "@raycast/api";
 import fs from "fs";
-import mime from "mime-types";
+import { fileTypeFromBuffer } from "file-type/core";
 import fetch from "node-fetch";
 import { OllamaApiShow, OllamaApiShowParseModelfile, OllamaApiTags } from "./ollama";
 import {
@@ -62,19 +61,18 @@ export async function GetImageFromUrl(url: string): Promise<RaycastImage | undef
  * Get Image from disk.
  * @param {string} file
  */
-export async function GetImageFromFile(file: string) {
+export async function GetImageFromFile(file: string): Promise<RaycastImage> {
   if (!file.match(/(file:)?([/|.|\w|\s|-])/g)) throw new Error("Only PNG and JPG are supported");
 
   file = file.replace("file://", "");
-  const contentType = mime.lookup(file);
-  if (contentType === "image/jpeg" || contentType === "image/png") {
-    const blob = fs.readFileSync(file);
-    const base64 = Buffer.from(blob).toString("base64");
+  const buffer = fs.readFileSync(decodeURI(file));
+  const fileType = await fileTypeFromBuffer(buffer);
+  if (fileType && (fileType.mime === "image/jpeg" || fileType.mime === "image/png")) {
     return {
       path: file,
       html: `<img src="${file}" alt="image" height="180" width="auto">`,
-      base64: base64,
-    } as RaycastImage;
+      base64: buffer.toString("base64"),
+    };
   } else {
     throw new Error("Only PNG and JPG are supported");
   }
@@ -186,10 +184,6 @@ export async function GetChatHistory(chat: string): Promise<RaycastChatMessage[]
   if (json) {
     const history: Map<string, RaycastChatMessage[]> = new Map(JSON.parse(json as string));
     if (history.has(chat)) return history.get(chat) as RaycastChatMessage[];
-  } else {
-    console.debug("Converting old history");
-    const history = await ConvertOldChatHistory();
-    if (history && history.has(chat)) return history.get(chat) as RaycastChatMessage[];
   }
   return [];
 }
@@ -232,45 +226,4 @@ export async function GetChatHistoryKeys(): Promise<string[]> {
     return [...history.keys()];
   }
   return ["Current"];
-}
-
-/**
- * Convert old chat history to new format and save to LocalStorage.
- * @returns {Promise<Map<string, RaycastChatMessage[]> | undefined>} Return chat history in the new format.
- */
-export async function ConvertOldChatHistory(): Promise<Map<string, RaycastChatMessage[]> | undefined> {
-  const json = await LocalStorage.getItem("answerListHistory");
-  if (json) {
-    const newHistory: Map<string, RaycastChatMessage[]> = new Map();
-    const oldHistory: Map<string, [string, string, OllamaApiGenerateResponse][]> = new Map(JSON.parse(json as string));
-    [...oldHistory.keys()].forEach((key) => {
-      const oldConversation = oldHistory.get(key);
-      if (oldConversation) {
-        const newConversation = oldConversation.map((c) => {
-          return {
-            model: c[2].model,
-            created_at: c[2].created_at,
-
-            messages: [
-              { role: "user", content: c[0] },
-              { role: "assistant", content: c[1] },
-            ],
-
-            total_duration: c[2].total_duration,
-            load_duration: c[2].load_duration,
-            prompt_eval_count: c[2].prompt_eval_count,
-            prompt_eval_duration: c[2].prompt_eval_duration,
-            eval_count: c[2].eval_count,
-            eval_duration: c[2].eval_duration,
-            done: c[2].done,
-          } as RaycastChatMessage;
-        });
-        newHistory.set(key, newConversation);
-      }
-    });
-    await LocalStorage.setItem("chat_history", JSON.stringify([...newHistory]));
-    await LocalStorage.removeItem("answerListHistory");
-    return newHistory;
-  }
-  return undefined;
 }

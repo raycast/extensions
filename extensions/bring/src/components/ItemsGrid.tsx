@@ -25,22 +25,20 @@ export const ItemsGrid = ({
   searchText,
   isLoading,
   showAddedItemsOnTop,
-  canSwitchList,
   onSearchTextChange,
   onAddAction,
   onRemoveAction,
-  onResetList,
+  DropdownComponent,
 }: {
   list: BringListInfo;
   sections: Section[];
   searchText: string;
   isLoading: boolean;
   showAddedItemsOnTop: boolean;
-  canSwitchList: boolean;
   onSearchTextChange: (text: string) => void;
   onAddAction: (item: Item, specification?: string) => void;
   onRemoveAction: (item: Item) => void;
-  onResetList: () => void;
+  DropdownComponent: () => JSX.Element;
 }) => {
   function getGridItem(item: Item, keywords?: string[]): JSX.Element {
     const { itemId, name, image, fallback, isInPurchaseList, specification } = item;
@@ -60,21 +58,16 @@ export const ItemsGrid = ({
         actions={
           <ActionPanel title="Bring!">
             {!isInPurchaseList ? (
-              <ActionPanel.Section>
-                <Action title="Add to List" onAction={() => onAddAction(item)} />
-                {/* <Action title="Add to List with Specification" onAction={() => addWithSpecification(name)} /> */}
-              </ActionPanel.Section>
-            ) : (
-              <ActionPanel.Section>
-                <Action title="Remove from List" onAction={() => onRemoveAction(item)} />
-                {/* <Action title="Edit Specification" onAction={() => addWithSpecification(name)} /> */}
-              </ActionPanel.Section>
-            )}
-            {canSwitchList && (
               <Action
-                title="Switch to Another List"
-                onAction={onResetList}
-                shortcut={{ modifiers: ["cmd"], key: "l" }}
+                title="Add to List"
+                onAction={() => onAddAction(item)}
+                icon={{ source: Icon.PlusCircle, tintColor: Color.Green }}
+              />
+            ) : (
+              <Action
+                title="Remove from List"
+                onAction={() => onRemoveAction(item)}
+                icon={{ source: Icon.MinusCircle, tintColor: Color.Red }}
               />
             )}
           </ActionPanel>
@@ -92,6 +85,7 @@ export const ItemsGrid = ({
   return (
     <Grid
       columns={5}
+      aspectRatio="4/3"
       searchText={searchText}
       searchBarPlaceholder="I need"
       onSearchTextChange={onSearchTextChange}
@@ -99,6 +93,7 @@ export const ItemsGrid = ({
       inset={Grid.Inset.Medium}
       isLoading={isLoading}
       filtering={true}
+      searchBarAccessory={DropdownComponent()}
     >
       {showAddedItemsOnTop && getAddedItems(sections).map((item) => getGridItem(item))}
       {sections.map(({ sectionId, name: sectionName, items }) => (

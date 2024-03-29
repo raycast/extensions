@@ -1,7 +1,5 @@
 // codes from https://raw.githubusercontent.com/chubin/wttr.in/master/lib/constants.py
 
-import { Icon } from "@raycast/api";
-
 export function getWeatherCodeIcon(weatherCode: string | undefined): string {
   if (!weatherCode) {
     return "";
@@ -70,52 +68,28 @@ export const WWO_CODE: { [key: string]: string } = {
 };
 
 export const WEATHER_SYMBOL: { [key: string]: string } = {
-  Unknown: "✨",
-  Cloudy: "☁️",
-  Fog: "🌫",
-  HeavyRain: "🌧",
-  HeavyShowers: "🌧",
-  HeavySnow: "❄️",
-  HeavySnowShowers: "❄️",
-  LightRain: "🌦",
-  LightShowers: "🌦",
-  LightSleet: "🌧",
-  LightSleetShowers: "🌧",
-  LightSnow: "🌨",
-  LightSnowShowers: "🌨",
-  PartlyCloudy: "⛅️",
-  Sunny: "☀️",
-  ThunderyHeavyRain: "🌩",
-  ThunderyShowers: "⛈",
-  ThunderySnowShowers: "⛈",
-  VeryCloudy: "☁️",
+  Unknown: "sparkles.svg",
+  Cloudy: "cloud.fog.svg",
+  Fog: "fog.svg",
+  HeavyRain: "cloud.heavyrain.svg",
+  HeavyShowers: "cloud.heavyrain.svg",
+  HeavySnow: "cloud.snow.svg",
+  HeavySnowShowers: "cloud.snow.svg",
+  LightRain: "cloud.rain.svg",
+  LightShowers: "cloud.rain.svg",
+  LightSleet: "cloud.sleet.svg",
+  LightSleetShowers: "cloud.sleet.svg",
+  LightSnow: "cloud.snow.svg",
+  LightSnowShowers: "cloud.snow.svg",
+  PartlyCloudy: "cloud.svg",
+  Sunny: "sun.max.svg",
+  ThunderyHeavyRain: "cloud.bolt.rain.svg",
+  ThunderyShowers: "cloud.bolt.rain.svg",
+  ThunderySnowShowers: "cloud.bolt.rain.svg",
+  VeryCloudy: "cloud.svg",
 };
 
-/*const WEATHER_SYMBOL_WIDTH_VTE: Record<string, number> = {
-    "✨": 2,
-    "☁️": 1,
-    "🌫": 2,
-    "🌧": 2,
-    "🌧": 2,
-    "❄️": 1,
-    "❄️": 1,
-    "🌦": 1,
-    "🌦": 1,
-    "🌧": 1,
-    "🌧": 1,
-    "🌨": 2,
-    "🌨": 2,
-    "⛅️": 2,
-    "☀️": 1,
-    "🌩": 2,
-    "⛈": 1,
-    "⛈": 1,
-    "☁️": 1,
-};*/
-
 export const WIND_DIRECTION = ["↓", "↙", "←", "↖", "↑", "↗", "→", "↘"];
-
-export const MOON_PHASES = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
 
 export const LOCALE = {
   af: "af_ZA",
@@ -180,25 +154,32 @@ export const LOCALE = {
 };
 
 export enum WeatherIcons {
-  Temperature = "temperature-16", // Icon.Temperature,
-  FeelsLike = "person-16", // Icon.Person,
-  UVIndex = "sun-16", // Icon.Sun,
-  Humidity = "humitidy.svg",
-  Wind = "wind.svg",
-  Visibility = "eye-16", // Icon.Eye,
-  Coordinate = "geopin-16", // Icon.Geopin,
-  Area = "building-16", //Icon.Building,
-  Region = "map-16", // Icon.Map,
-  Country = "pin-16", // Icon.Pin,
-  Sunrise = "sun-16", // Icon.Sun,
-  Sunset = "sunrise-16", // Icon.Sunrise,
-  SunHours = "clock-16", // Icon.Clock,
-  Pressure = "bar-code-16", // Icon.BarCode,
-  Moon = "moon-16", // Icon.Moon,
-  Moonrise = "moon-16", // Icon.Moon,
+  Area = "building.2.svg",
+  ArrowDown = "arrow.down.svg",
+  ArrowUp = "arrow.up.svg",
+  Cloud = "cloud.svg",
+  Coordinates = "mappin.svg",
+  Country = "map.svg",
+  FeelsLike = "thermometer.variable.and.figure.svg",
+  Fetched = "square.and.arrow.down.svg",
+  Humidity = "humidity.svg",
+  Pressure = "barometer.svg",
+  Moon = "moon.svg",
+  Moonrise = "moonrise.svg",
   Moonset = "moonset.svg",
-  Rain = "raindrop-16", // Icon.Raindrop,
-  Cloud = "cloud-16", // Icon.Cloud,
-  Snow = "snowflake-16", // Icon.Snowflake,
-  Thunder = "bolt-16", // Icon.Bolt,
+  Observation = "clock.svg",
+  Rain = "drop.svg",
+  Region = "mappin.and.ellipse.svg",
+  Settings = "gear.svg",
+  Snow = "snowflake.svg",
+  Source = "link.svg",
+  Sun = "sun.max.svg",
+  SunHours = "clock.svg",
+  Sunrise = "sunrise.svg",
+  Sunset = "sunset.svg",
+  Temperature = "thermometer.medium.svg",
+  Thunder = "bolt.svg",
+  UVIndex = "rays.svg",
+  Visibility = "eye.svg",
+  Wind = "wind.svg",
 }

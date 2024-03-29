@@ -102,6 +102,14 @@
       "type": "checkbox"
     },
     {
+      "description": "Go back to root search after killing a process",
+      "label": "Go back to Root Search",
+      "name": "goToRootAfterKill",
+      "required": false,
+      "default": false,
+      "type": "checkbox"
+    },
+    {
       "description": "Refresh duration in milliseconds. The minimum value is 1000ms and to disable auto-refresh, set it to 0.",
       "label": "Refresh Duration",
       "name": "refreshDuration",

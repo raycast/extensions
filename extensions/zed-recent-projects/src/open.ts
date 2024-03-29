@@ -1,6 +1,5 @@
 import { closeMainWindow, getSelectedFinderItems, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { saveZedEntries } from "./lib/zedEntries";
 import { getZedBundleId, ZedBuild } from "./lib/zed";
 
 const preferences: Record<string, string> = getPreferenceValues();
@@ -35,13 +34,6 @@ export default async function openWithZed() {
     } else {
       selectedItems = finderItems.map((i) => ({ path: i.path }));
     }
-
-    await saveZedEntries(
-      selectedItems.map((item) => ({
-        uri: `file://${item.path}`,
-        lastOpened: Date.now(),
-      }))
-    );
 
     for (const finderItem of selectedItems) {
       await open(finderItem.path, getZedBundleId(zedBuild));

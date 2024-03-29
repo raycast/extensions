@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
 import { PullRequestReviewEvent } from "../generated/graphql";
