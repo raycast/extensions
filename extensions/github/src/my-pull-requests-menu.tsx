@@ -40,8 +40,8 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): { source: Icon
   }
 }
 
-function MyPullRequestMenu() {
-  const preferences = getPreferenceValues<Preferences.MyPullRequestMenu>();
+function MyPullRequestsMenu() {
+  const preferences = getPreferenceValues<Preferences.MyPullRequestsMenu>();
   const { data: sections, isLoading } = useMyPullRequests(null);
 
   function displayTitle() {
@@ -137,4 +137,4 @@ function MyPullRequestMenu() {
   );
 }
 
-export default withGitHubClient(MyPullRequestMenu);
+export default withGitHubClient(MyPullRequestsMenu);
