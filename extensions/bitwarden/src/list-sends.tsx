@@ -4,6 +4,7 @@ import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { Send, SendType } from "~/types/send";
+import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
 const LoadingFallback = () => <List isLoading />;
 
@@ -52,9 +53,15 @@ const getItemAccessories = (send: Send): NonNullable<List.Item.Props["accessorie
   return accessories;
 };
 
+const usePasteActionTitle = () => {
+  const currentApplication = useFrontmostApplicationName();
+  return currentApplication ? `Paste URL into ${currentApplication}` : "Paste URL";
+};
+
 function ListSendCommandContent() {
   const bitwarden = useBitwarden();
   const { data, isLoading } = usePromise(() => bitwarden.listSends());
+  const pasteActionTitle = usePasteActionTitle();
 
   const { result: sends = [] } = data ?? {};
 
@@ -69,6 +76,7 @@ function ListSendCommandContent() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy URL" content={send.accessUrl} />
+              <Action.Paste title={pasteActionTitle} content={send.accessUrl} />
             </ActionPanel>
           }
         />

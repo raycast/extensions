@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Toast, open, showToast, useNavigation } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -7,14 +7,15 @@ import { SendDateOption, SendPayload, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import { SendDateOptionsToHourOffsetMap, SendTypeOptions } from "~/constants/send";
 import { PremiumFeatureError } from "~/utils/errors";
+import ListSendCommand from "~/list-sends";
 
 const LoadingFallback = () => <Form isLoading />;
 
-const SendCommand = () => (
+const CreateSendCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
       <SessionProvider unlock>
-        <SendCommandContent />
+        <CreateSendCommandContent />
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
@@ -89,7 +90,8 @@ const initialValues: FormValues = {
   disabled: false,
 };
 
-function SendCommandContent() {
+function CreateSendCommandContent() {
+  const { push } = useNavigation();
   const bitwarden = useBitwarden();
   const [type, setType] = useCachedState("sendType", SendType.File);
   const [shouldCopyOnSave, setShouldCopyOnSave] = useCachedState("sendShouldCopyOnSave", false);
@@ -129,6 +131,8 @@ function SendCommandContent() {
       }
       toast.style = Toast.Style.Success;
       toast.title = "Send created";
+      push(<ListSendCommand />);
+      await open("raycast://extensions/jomifepe/bitwarden/list-sends");
     } catch (error) {
       if (error instanceof PremiumFeatureError) {
         toast.message = "This feature is only available to Premium users.";
@@ -238,4 +242,4 @@ function SendCommandContent() {
   );
 }
 
-export default SendCommand;
+export default CreateSendCommand;
