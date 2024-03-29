@@ -22,6 +22,8 @@ import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAva
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
+import { Send, SendPayload } from "~/types/send";
+import { prepareSendPayload } from "~/api/bitwarden.helpers";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -422,7 +424,9 @@ export class Bitwarden {
 
   async createFolder(name: string): Promise<MaybeError> {
     try {
-      const folder = await this.getTemplate("folder");
+      const { error, result: folder } = await this.getTemplate("folder");
+      if (error) throw error;
+
       folder.name = name;
       const encodedFolder = await this.encode(JSON.stringify(folder));
       await this.exec(["create", "folder", encodedFolder], { resetVaultTimeout: true });
@@ -472,10 +476,10 @@ export class Bitwarden {
     }
   }
 
-  async getTemplate(type: string): Promise<any> {
+  async getTemplate<T = any>(type: string): Promise<MaybeError<T>> {
     try {
       const { stdout } = await this.exec(["get", "template", type], { resetVaultTimeout: true });
-      return JSON.parse(stdout);
+      return { result: JSON.parse<T>(stdout) };
     } catch (execError) {
       captureException("Failed to get template", execError);
       const { error } = await this.handleCommonErrors(execError);
@@ -495,9 +499,22 @@ export class Bitwarden {
     return stdout;
   }
 
-  async createSend(): Promise<string> {
-    const { stdout } = await this.exec(["send"], { resetVaultTimeout: true });
-    return stdout;
+  async createSend(values: SendPayload): Promise<MaybeError<Send>> {
+    try {
+      const { error, result: template } = await this.getTemplate("send.text");
+      if (error) throw error;
+
+      const payload = prepareSendPayload(template, values);
+      const encodedPayload = await this.encode(JSON.stringify(payload));
+      const { stdout } = await this.exec(["send", "create", encodedPayload], { resetVaultTimeout: true });
+
+      return { result: JSON.parse<Send>(stdout) };
+    } catch (execError) {
+      captureException("Failed to create send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   private isPromptWaitingForMasterPassword(result: ExecaReturnValue): boolean {

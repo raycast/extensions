@@ -1,8 +1,10 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Toast, showToast } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { SendPayload, SendType } from "~/types/send";
+import { captureException } from "~/utils/development";
 
 const LoadingFallback = () => <Form isLoading />;
 
@@ -30,8 +32,17 @@ const initialValues: FormValues = {
   hidden: false,
 };
 
+const convertFormValuesToSendPayload = (values: FormValues): SendPayload => ({
+  name: values.name,
+  type: SendType.Text,
+  text: {
+    text: values.text,
+  },
+});
+
 function SendCommandContent() {
   const bitwarden = useBitwarden();
+  const [copyOnSave, setCopyOnSave] = useCachedState("copySendOnSave", false);
   const { itemProps, handleSubmit } = useForm({
     initialValues,
     onSubmit,
@@ -41,7 +52,31 @@ function SendCommandContent() {
     },
   });
 
-  function onSubmit(values: FormValues) {}
+  async function onSubmit(values: FormValues) {
+    const toast = await showToast({ title: "Creating Send...", style: Toast.Style.Animated });
+    try {
+      const { error, result } = await bitwarden.createSend(convertFormValuesToSendPayload(values));
+      if (error) throw error;
+      if (copyOnSave) {
+        await Clipboard.copy(result.accessUrl);
+        toast.message = "URL copied to clipboard";
+      } else {
+        toast.primaryAction = {
+          title: "Copy URL",
+          onAction: async () => {
+            await Clipboard.copy(result.accessUrl);
+            toast.message = "URL copied to clipboard";
+          },
+        };
+      }
+      toast.style = Toast.Style.Success;
+      toast.title = "Send created";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to create Send";
+      captureException("Failed to create Send", error);
+    }
+  }
 
   return (
     <Form
@@ -51,9 +86,22 @@ function SendCommandContent() {
         </ActionPanel>
       }
     >
-      <Form.TextField title="Name" placeholder="Enter name" {...itemProps.name} />
-      <Form.TextArea title="Text" placeholder="The text you want to send" {...itemProps.text} />
+      <Form.TextField
+        title="Name"
+        placeholder="Enter a name"
+        info="A friendly name to describe this send"
+        {...itemProps.name}
+      />
+      <Form.TextArea title="Text" placeholder="Enter some text" info="The text you want to send" {...itemProps.text} />
       <Form.Checkbox label="Hide this Send's text by default" {...itemProps.hidden} />
+      <Form.Separator />
+      <Form.Checkbox
+        title="Share"
+        id="copySendOnSave"
+        label="Copy this Send's to clipboard upon save"
+        value={copyOnSave}
+        onChange={setCopyOnSave}
+      />
     </Form>
   );
 }

@@ -199,7 +199,7 @@
       "title": "New Send",
       "subtitle": "Bitwarden",
       "description": "Securely share information directly with anyone.",
-      "icon": "send.png",
+      "icon": "create-send.png",
       "mode": "view"
     }
   ],
