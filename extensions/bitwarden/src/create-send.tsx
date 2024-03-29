@@ -27,6 +27,7 @@ type FormValues = {
   customDeletionDate: Date | null;
   expirationDate: string;
   customExpirationDate: Date | null;
+  maxAccessCount: string;
 };
 
 const initialValues: FormValues = {
@@ -37,6 +38,7 @@ const initialValues: FormValues = {
   customDeletionDate: null,
   expirationDate: "",
   customExpirationDate: null,
+  maxAccessCount: "",
 };
 
 const getDateOption = (option: SendDateOption | "", customDate: Date | null): string | null => {
@@ -50,13 +52,14 @@ const getDateOption = (option: SendDateOption | "", customDate: Date | null): st
 };
 
 const convertFormValuesToSendPayload = (values: FormValues): SendPayload => {
-  const { name, text, hidden, deletionDate, customDeletionDate } = values;
+  const { name, text, hidden, deletionDate, customDeletionDate, maxAccessCount } = values;
 
   return {
     name,
     type: SendType.Text,
     text: { text, hidden },
     deletionDate: getDateOption(deletionDate as SendDateOption, customDeletionDate),
+    maxAccessCount: maxAccessCount ? parseInt(maxAccessCount) : null,
   };
 };
 
@@ -65,6 +68,12 @@ const validateOptionalDateUnder31Days = (value: Date | null | undefined): string
   const date = new Date();
   date.setDate(date.getDate() + 31);
   if (value > date) return "Must be under 31 days from now.";
+};
+
+const validateOptionalPositiveNumber = (value: string | undefined): string | undefined => {
+  if (!value) return;
+  const number = parseInt(value);
+  if (isNaN(number) || number <= 0) return "Must be a positive number.";
 };
 
 function SendCommandContent() {
@@ -78,6 +87,7 @@ function SendCommandContent() {
       text: FormValidation.Required,
       customDeletionDate: validateOptionalDateUnder31Days,
       customExpirationDate: validateOptionalDateUnder31Days,
+      maxAccessCount: validateOptionalPositiveNumber,
     },
   });
 
@@ -116,13 +126,13 @@ function SendCommandContent() {
       }
     >
       <Form.TextField
+        {...itemProps.name}
         title="Name"
         placeholder="Enter a name"
         info="A friendly name to describe this send"
-        {...itemProps.name}
       />
-      <Form.TextArea title="Text" placeholder="Enter some text" info="The text you want to send" {...itemProps.text} />
-      <Form.Checkbox label="Hide this Send's text by default" {...itemProps.hidden} />
+      <Form.TextArea {...itemProps.text} title="Text" placeholder="Enter some text" info="The text you want to send" />
+      <Form.Checkbox {...itemProps.hidden} label="Hide this Send's text by default" />
       <Form.Checkbox
         title="Share"
         id="copySendOnSave"
@@ -140,7 +150,7 @@ function SendCommandContent() {
         ))}
       </Form.Dropdown>
       {itemProps.deletionDate.value === SendDateOption.Custom && (
-        <Form.DatePicker title="Custom deletion date" {...itemProps.customDeletionDate} />
+        <Form.DatePicker {...itemProps.customDeletionDate} title="Custom deletion date" />
       )}
       <Form.Dropdown
         {...itemProps.expirationDate}
@@ -153,8 +163,14 @@ function SendCommandContent() {
         ))}
       </Form.Dropdown>
       {itemProps.expirationDate.value === SendDateOption.Custom && (
-        <Form.DatePicker title="Custom expiration date" {...itemProps.customExpirationDate} />
+        <Form.DatePicker {...itemProps.customExpirationDate} title="Custom expiration date" />
       )}
+      <Form.TextField
+        {...itemProps.maxAccessCount}
+        title="Maximum Access Count"
+        placeholder="Enter a number"
+        info="If set, user will no longer be able to access this Send once the maximum access count is reached."
+      />
     </Form>
   );
 }
