@@ -43,6 +43,7 @@
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.76",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

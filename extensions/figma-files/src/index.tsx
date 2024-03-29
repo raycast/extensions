@@ -21,7 +21,7 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
     [],
     {
       keepPreviousData: true,
-    }
+    },
   );
 
   const {
@@ -186,8 +186,8 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
             >
               <Grid.Item key={project.name + "-file-empty"} content="emptyProject.svg" title="Empty project" />
             </Grid.Section>
-          )
-        )
+          ),
+        ),
       )}
     </Grid>
   );
