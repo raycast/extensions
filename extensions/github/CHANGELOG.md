@@ -1,9 +1,8 @@
 # GitHub Changelog
 
-## [Support different pull requests and workflows statuses] - 2024-03-24
+## [Fix icons for My Issues Menu Bar] - 2024-03-29
 
-- Supports different pull request and workflow statuses in `Notifications` and `Unread Notifications` commands.
-- Changes icon color of `Unread Notifications` menu bar command for better visibility in the light menu bar.
+- Fixes icons for "Closed as not planned" and "Closed as completed" statuses in the `My Issues Menu Bar`.
 
 ## [Fix icon color for My Issues Menu Bar] - 2024-03-22
 
@@ -12,8 +11,8 @@
 ## [Add "My Issues" command and improve "My Pull Requests"] - 2024-03-22
 
 - You can now see all of your issues into a single command called `My Issues`. As a result, `Created Issues` and `Open Issues` were removed.
-- The `Open Issues Menu Bar` is now renamed to `My Issues Menu Bar` and shows more issues such as the ones you created or the ones you were mentioned in
-- `My Pull Requests` should also load faster from now on
+- The `Open Issues Menu Bar` is now renamed to `My Issues Menu Bar` and shows more issues such as the ones you created or the ones you were mentioned in.
+- `My Pull Requests` should also load faster from now on.
 
 ## [Changing repo while creating issue or pull request clears title field] - 2024-03-21
 

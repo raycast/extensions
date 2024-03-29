@@ -1,5 +1,5 @@
-import { List } from "@raycast/api";
-import { MutatePromise, useCachedPromise } from "@raycast/utils";
+import { Color, List } from "@raycast/api";
+import { MutatePromise } from "@raycast/utils";
 
 import {
   getNotificationIcon,
@@ -22,24 +22,12 @@ type NotificationListItemProps = {
 export default function NotificationListItem({ notification, userId, mutateList }: NotificationListItemProps) {
   const updatedAt = new Date(notification.updated_at);
 
-  const { data: icon, isLoading } = useCachedPromise(
-    async (notification: Notification) => {
-      return getNotificationIcon(notification);
-    },
-    [notification],
-    {
-      keepPreviousData: true,
-    },
-  );
-
-  if (isLoading || !icon) {
-    return null;
-  }
+  const icon = getNotificationIcon(notification);
 
   return (
     <List.Item
       icon={{
-        value: icon.value,
+        value: { source: icon.value, tintColor: Color.PrimaryText },
         tooltip: getNotificationTypeTitle(notification),
       }}
       title={notification.subject.title}

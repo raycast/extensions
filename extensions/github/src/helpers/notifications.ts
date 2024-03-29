@@ -2,8 +2,6 @@ import { Endpoints } from "@octokit/types";
 import { Color, Icon } from "@raycast/api";
 import { format } from "date-fns";
 
-import { getGitHubClient } from "../api/githubClient";
-
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
 // from https://github.com/manosim/gitify/blob/c3683dcfd84afc74fd391b2b17ae7b36dfe779a7/src/utils/helpers.ts#L19-L27
@@ -53,66 +51,36 @@ export function getGitHubURL(notification: Notification, userId?: string) {
   return notification.url;
 }
 
-export async function getNotificationIcon(notification: Notification) {
-  if (notification.subject.type === "PullRequest") {
-    const { octokit } = getGitHubClient();
-    const pullRequest = await octokit.rest.pulls.get({
-      owner: notification.repository.owner.login,
-      repo: notification.repository.name,
-      pull_number: parseInt(notification.subject.url.split("/").at(-1)!),
-    });
-
-    if (pullRequest.data.merged) {
-      return { value: { source: "merge.svg", tintColor: Color.Purple }, tooltip: "Merged" };
-    } else if (pullRequest.data.state === "closed") {
-      return { value: { source: "pull-request-closed.svg", tintColor: Color.Red }, tooltip: "Closed" };
-    } else if (pullRequest.data.draft) {
-      return { value: { source: "pull-request-draft.svg", tintColor: Color.SecondaryText }, tooltip: "Draft" };
-    } else {
-      return { value: { source: "pull-request.svg", tintColor: Color.Green }, tooltip: "Open" };
-    }
-  }
-
+export function getNotificationIcon(notification: Notification) {
   let icon;
+
   switch (notification.subject.type) {
     case "Commit":
-      icon = { value: { source: "commit.svg", tintColor: Color.SecondaryText }, tooltip: "Commit" };
+      icon = { value: "commit.svg", tooltip: "Commit" };
       break;
     case "Issue":
-      icon = { value: { source: "issue-opened.svg", tintColor: Color.Green }, tooltip: "Issue" };
+      icon = { value: "issue-opened.svg", tooltip: "Issue" };
+      break;
+    case "PullRequest":
+      icon = { value: "pull-request.svg", tooltip: "Pull Request" };
       break;
     case "Release":
-      icon = { value: { source: "tag.svg", tintColor: Color.SecondaryText }, tooltip: "Release" };
+      icon = { value: "tag.svg", tooltip: "Release" };
       break;
     case "CheckSuite":
-      icon = {
-        value: {
-          source: notification.subject.title.match(/(succeeded)/i)
-            ? Icon.CheckCircle
-            : notification.subject.title.match(/(failed)/i)
-              ? Icon.XMarkCircle
-              : notification.subject.title.match(/(skipped|cancelled)/i)
-                ? Icon.MinusCircle
-                : Icon.QuestionMarkCircle,
-          tintColor: Color.SecondaryText,
-        },
-        tooltip: "Workflow Run",
-      };
+      icon = { value: Icon.CheckCircle, tooltip: "Workflow" };
       break;
     case "Discussion":
-      icon = { value: { source: "comment-discussion.svg", tintColor: Color.SecondaryText }, tooltip: "Comment" };
+      icon = { value: "comment-discussion.svg", tooltip: "Comment" };
       break;
     case "RepositoryInvitation":
-      icon = { value: { source: "mail.svg", tintColor: Color.SecondaryText }, tooltip: "Repository Invitation" };
+      icon = { value: "mail.svg", tooltip: "Repository Invitation" };
       break;
     case "RepositoryVulnerabilityAlert":
-      icon = {
-        value: { source: "alert.svg", tintColor: Color.SecondaryText },
-        tooltip: "Repository Vulnerability Alert",
-      };
+      icon = { value: "alert.svg", tooltip: "Repository} Vulnerability Alert" };
       break;
     default:
-      icon = { value: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "Unknown" };
+      icon = { value: Icon.Circle, tooltip: "Unknown" };
       break;
   }
 
@@ -187,9 +155,9 @@ export function getNotificationTooltip(date: Date) {
 }
 
 export function getGitHubIcon(tinted = false) {
-  const overrideTintColor = tinted ? Color.Blue : undefined;
+  const overrideTintColor = tinted ? Color.Orange : undefined;
   return {
     source: "github.svg",
-    tintColor: overrideTintColor ? overrideTintColor : Color.PrimaryText,
+    tintColor: overrideTintColor ? overrideTintColor : { light: "#000000", dark: "#FFFFFF", adjustContrast: false },
   };
 }

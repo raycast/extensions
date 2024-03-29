@@ -1,4 +1,4 @@
-import { List, Color, Icon } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
 import {
@@ -17,7 +17,7 @@ export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | Pu
 
   if (pullRequest.closed) {
     return {
-      icon: { source: "pull-request-closed.svg", tintColor: Color.Red },
+      icon: { source: "pull-request.svg", tintColor: Color.Red },
       text: "Closed",
       color: Color.Red,
     };
