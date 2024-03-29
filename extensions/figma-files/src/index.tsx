@@ -10,7 +10,7 @@ import { loadStarredFiles } from "./components/starFiles";
 import { figma } from "./components/oauth";
 import { withAccessToken, getAccessToken } from "@raycast/utils";
 
-function Command() {
+function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { token } = getAccessToken();
   // console.log(token);
   const { data, isLoading, error } = useCachedPromise(
