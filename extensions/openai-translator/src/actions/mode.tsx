@@ -9,7 +9,7 @@ const table: [TranslateMode, Icon][] = [
   ["what", Icon.QuestionMark],
 ];
 
-export const getModeActionSection = (callback: (arg0: TranslateMode) => void) => (
+export const getModeActionSection = (callback: (_arg0: TranslateMode) => void) => (
   <ActionPanel.Submenu title="Mode" icon={Icon.Paragraph} shortcut={{ modifiers: ["cmd"], key: "m" }}>
     {table.map((m) => (
       <Action
