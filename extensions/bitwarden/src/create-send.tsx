@@ -3,8 +3,9 @@ import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
-import { SendPayload, SendType } from "~/types/send";
+import { SendDeletionDateOption, SendPayload, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
+import { SendDeletionDateOptionsToHourOffsetMap } from "~/constants/send";
 
 const LoadingFallback = () => <Form isLoading />;
 
@@ -18,27 +19,41 @@ const SendCommand = () => (
   </RootErrorBoundary>
 );
 
-// {"object":"send","name":"Send name","notes":"Some notes about this send.","type":0,"text":{"text":"Text contained in the send.","hidden":false},"file":null,"maxAccessCount":null,"deletionDate":"2024-04-04T20:21:03.080Z","expirationDate":null,"password":null,"disabled":false,"hideEmail":false}
-
 type FormValues = {
   name: string;
   text: string;
   hidden: boolean;
+  deletionDate: string;
+  customDeletionDate: Date | null;
 };
 
 const initialValues: FormValues = {
   name: "",
   text: "",
   hidden: false,
+  deletionDate: SendDeletionDateOption.SevenDays,
+  customDeletionDate: null,
 };
 
-const convertFormValuesToSendPayload = (values: FormValues): SendPayload => ({
-  name: values.name,
-  type: SendType.Text,
-  text: {
-    text: values.text,
-  },
-});
+const getDeletionDate = (deletionDate: SendDeletionDateOption, customDeletionDate: Date | null): string | null => {
+  if (deletionDate === SendDeletionDateOption.Custom) return customDeletionDate?.toISOString() ?? null;
+  const hourOffset = SendDeletionDateOptionsToHourOffsetMap[deletionDate];
+  if (!hourOffset) return null;
+  const date = new Date();
+  date.setHours(date.getHours() + hourOffset);
+  return date.toISOString();
+};
+
+const convertFormValuesToSendPayload = (values: FormValues): SendPayload => {
+  const { name, text, deletionDate, customDeletionDate } = values;
+
+  return {
+    name,
+    type: SendType.Text,
+    text: { text },
+    deletionDate: getDeletionDate(deletionDate as SendDeletionDateOption, customDeletionDate),
+  };
+};
 
 function SendCommandContent() {
   const bitwarden = useBitwarden();
@@ -49,6 +64,12 @@ function SendCommandContent() {
     validation: {
       name: FormValidation.Required,
       text: FormValidation.Required,
+      customDeletionDate: (value) => {
+        if (!value) return;
+        const date = new Date();
+        date.setDate(date.getDate() + 31);
+        if (value > date) return "Must be under 31 days from now.";
+      },
     },
   });
 
@@ -94,7 +115,6 @@ function SendCommandContent() {
       />
       <Form.TextArea title="Text" placeholder="Enter some text" info="The text you want to send" {...itemProps.text} />
       <Form.Checkbox label="Hide this Send's text by default" {...itemProps.hidden} />
-      <Form.Separator />
       <Form.Checkbox
         title="Share"
         id="copySendOnSave"
@@ -102,6 +122,14 @@ function SendCommandContent() {
         value={copyOnSave}
         onChange={setCopyOnSave}
       />
+      <Form.Dropdown title="Deletion date" {...itemProps.deletionDate}>
+        {Object.values(SendDeletionDateOption).map((value) => (
+          <Form.Dropdown.Item key={value} value={value} title={value} />
+        ))}
+      </Form.Dropdown>
+      {itemProps.deletionDate.value === SendDeletionDateOption.Custom && (
+        <Form.DatePicker title="Custom" {...itemProps.customDeletionDate} />
+      )}
     </Form>
   );
 }

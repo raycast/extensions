@@ -8,6 +8,16 @@ export type SendText = {
   hidden?: false;
 };
 
+export enum SendDeletionDateOption {
+  OneHour = "1 hour",
+  OneDay = "1 day",
+  TwoDays = "2 days",
+  ThreeDays = "3 days",
+  SevenDays = "7 days",
+  ThirtyDays = "30 days",
+  Custom = "Custom",
+}
+
 export type SendPayload = {
   name: string;
   notes?: string;
