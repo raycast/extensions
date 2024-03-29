@@ -5,10 +5,10 @@ export enum SendType {
 
 export type SendText = {
   text: string;
-  hidden?: false;
+  hidden: boolean;
 };
 
-export enum SendDeletionDateOption {
+export enum SendDateOption {
   OneHour = "1 hour",
   OneDay = "1 day",
   TwoDays = "2 days",

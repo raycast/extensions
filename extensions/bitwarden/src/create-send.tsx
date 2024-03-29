@@ -3,9 +3,9 @@ import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
-import { SendDeletionDateOption, SendPayload, SendType } from "~/types/send";
+import { SendDateOption, SendPayload, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
-import { SendDeletionDateOptionsToHourOffsetMap } from "~/constants/send";
+import { SendDateOptionsToHourOffsetMap } from "~/constants/send";
 
 const LoadingFallback = () => <Form isLoading />;
 
@@ -25,19 +25,24 @@ type FormValues = {
   hidden: boolean;
   deletionDate: string;
   customDeletionDate: Date | null;
+  expirationDate: string;
+  customExpirationDate: Date | null;
 };
 
 const initialValues: FormValues = {
   name: "",
   text: "",
   hidden: false,
-  deletionDate: SendDeletionDateOption.SevenDays,
+  deletionDate: SendDateOption.SevenDays,
   customDeletionDate: null,
+  expirationDate: "",
+  customExpirationDate: null,
 };
 
-const getDeletionDate = (deletionDate: SendDeletionDateOption, customDeletionDate: Date | null): string | null => {
-  if (deletionDate === SendDeletionDateOption.Custom) return customDeletionDate?.toISOString() ?? null;
-  const hourOffset = SendDeletionDateOptionsToHourOffsetMap[deletionDate];
+const getDateOption = (option: SendDateOption | "", customDate: Date | null): string | null => {
+  if (!option) return null;
+  if (option === SendDateOption.Custom) return customDate?.toISOString() ?? null;
+  const hourOffset = SendDateOptionsToHourOffsetMap[option];
   if (!hourOffset) return null;
   const date = new Date();
   date.setHours(date.getHours() + hourOffset);
@@ -45,14 +50,21 @@ const getDeletionDate = (deletionDate: SendDeletionDateOption, customDeletionDat
 };
 
 const convertFormValuesToSendPayload = (values: FormValues): SendPayload => {
-  const { name, text, deletionDate, customDeletionDate } = values;
+  const { name, text, hidden, deletionDate, customDeletionDate } = values;
 
   return {
     name,
     type: SendType.Text,
-    text: { text },
-    deletionDate: getDeletionDate(deletionDate as SendDeletionDateOption, customDeletionDate),
+    text: { text, hidden },
+    deletionDate: getDateOption(deletionDate as SendDateOption, customDeletionDate),
   };
+};
+
+const validateOptionalDateUnder31Days = (value: Date | null | undefined): string | undefined => {
+  if (!value) return;
+  const date = new Date();
+  date.setDate(date.getDate() + 31);
+  if (value > date) return "Must be under 31 days from now.";
 };
 
 function SendCommandContent() {
@@ -64,12 +76,8 @@ function SendCommandContent() {
     validation: {
       name: FormValidation.Required,
       text: FormValidation.Required,
-      customDeletionDate: (value) => {
-        if (!value) return;
-        const date = new Date();
-        date.setDate(date.getDate() + 31);
-        if (value > date) return "Must be under 31 days from now.";
-      },
+      customDeletionDate: validateOptionalDateUnder31Days,
+      customExpirationDate: validateOptionalDateUnder31Days,
     },
   });
 
@@ -122,13 +130,30 @@ function SendCommandContent() {
         value={copyOnSave}
         onChange={setCopyOnSave}
       />
-      <Form.Dropdown title="Deletion date" {...itemProps.deletionDate}>
-        {Object.values(SendDeletionDateOption).map((value) => (
+      <Form.Dropdown
+        {...itemProps.deletionDate}
+        title="Deletion date"
+        info="The Send will be permanently deleted on the specified date and time."
+      >
+        {Object.values(SendDateOption).map((value) => (
           <Form.Dropdown.Item key={value} value={value} title={value} />
         ))}
       </Form.Dropdown>
-      {itemProps.deletionDate.value === SendDeletionDateOption.Custom && (
-        <Form.DatePicker title="Custom" {...itemProps.customDeletionDate} />
+      {itemProps.deletionDate.value === SendDateOption.Custom && (
+        <Form.DatePicker title="Custom deletion date" {...itemProps.customDeletionDate} />
+      )}
+      <Form.Dropdown
+        {...itemProps.expirationDate}
+        title="Expiration date"
+        info="If set, access to this Send will expire on the specified date and time."
+      >
+        <Form.Dropdown.Item value="" title="Never" />
+        {Object.values(SendDateOption).map((value) => (
+          <Form.Dropdown.Item key={value} value={value} title={value} />
+        ))}
+      </Form.Dropdown>
+      {itemProps.expirationDate.value === SendDateOption.Custom && (
+        <Form.DatePicker title="Custom expiration date" {...itemProps.customExpirationDate} />
       )}
     </Form>
   );
