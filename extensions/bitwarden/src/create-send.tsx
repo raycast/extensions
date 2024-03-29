@@ -28,6 +28,7 @@ type FormValues = {
   expirationDate: string;
   customExpirationDate: Date | null;
   maxAccessCount: string;
+  password: string;
 };
 
 const initialValues: FormValues = {
@@ -39,6 +40,7 @@ const initialValues: FormValues = {
   expirationDate: "",
   customExpirationDate: null,
   maxAccessCount: "",
+  password: "",
 };
 
 const getDateOption = (option: SendDateOption | "", customDate: Date | null): string | null => {
@@ -60,6 +62,7 @@ const convertFormValuesToSendPayload = (values: FormValues): SendPayload => {
     text: { text, hidden },
     deletionDate: getDateOption(deletionDate as SendDateOption, customDeletionDate),
     maxAccessCount: maxAccessCount ? parseInt(maxAccessCount) : null,
+    password: values.password || null,
   };
 };
 
@@ -170,6 +173,12 @@ function SendCommandContent() {
         title="Maximum Access Count"
         placeholder="Enter a number"
         info="If set, user will no longer be able to access this Send once the maximum access count is reached."
+      />
+      <Form.PasswordField
+        {...itemProps.password}
+        title="Password"
+        placeholder="Enter a password"
+        info="Optionally require a password for users to access this Send."
       />
     </Form>
   );
