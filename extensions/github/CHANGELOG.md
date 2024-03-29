@@ -3,7 +3,8 @@
 ## [Fix various icons] - 2024-03-29
 
 - Fixes icons for "Closed as not planned" and "Closed as completed" statuses in the `My Issues Menu Bar`.
-- Fixes workflow icons for statuses other than "succeeded" in `Unread Notifications` command.
+- Fixes workflow icons for statuses other than "succeeded" in `Unread Notifications` menu bar command.
+- Changes icon color of `Unread Notifications` menu bar command for better visibility in the light menu bar.
 
 ## [Fix icon color for My Issues Menu Bar] - 2024-03-22
 

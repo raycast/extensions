@@ -164,9 +164,9 @@ export function getNotificationTooltip(date: Date) {
 }
 
 export function getGitHubIcon(tinted = false) {
-  const overrideTintColor = tinted ? Color.Orange : undefined;
+  const overrideTintColor = tinted ? Color.Blue : undefined;
   return {
     source: "github.svg",
-    tintColor: overrideTintColor ? overrideTintColor : { light: "#000000", dark: "#FFFFFF", adjustContrast: false },
+    tintColor: overrideTintColor ? overrideTintColor : Color.PrimaryText,
   };
 }
