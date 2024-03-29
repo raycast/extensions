@@ -13,6 +13,7 @@ import {
   InstalledCLINotFoundError,
   ManuallyThrownError,
   NotLoggedInError,
+  PremiumFeatureError,
   tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
@@ -533,6 +534,9 @@ export class Bitwarden {
     if (/not logged in/i.test(errorMessage)) {
       await this.handlePostLogout();
       return { error: new NotLoggedInError("Not logged in") };
+    }
+    if (/Premium status/i.test(errorMessage)) {
+      return { error: new PremiumFeatureError() };
     }
     return {};
   }

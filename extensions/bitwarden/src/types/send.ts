@@ -1,3 +1,17 @@
+export type SendPayload = {
+  name: string;
+  notes?: string | null;
+  type: SendType;
+  text?: SendText | null;
+  file?: SendFile | null;
+  maxAccessCount?: number | null;
+  deletionDate?: string | null;
+  expirationDate?: string | null;
+  password?: string | null;
+  disabled?: boolean;
+  hideEmail?: boolean;
+};
+
 export enum SendType {
   Text = 0,
   File = 1,
@@ -18,18 +32,8 @@ export enum SendDateOption {
   Custom = "Custom",
 }
 
-export type SendPayload = {
-  name: string;
-  notes?: string | null;
-  type: 0;
-  text: SendText;
-  file?: string | null;
-  maxAccessCount?: number | null;
-  deletionDate?: string | null;
-  expirationDate?: string | null;
-  password?: string | null;
-  disabled?: boolean;
-  hideEmail?: boolean;
+export type SendFile = {
+  fileName: string;
 };
 
 export type Send = {

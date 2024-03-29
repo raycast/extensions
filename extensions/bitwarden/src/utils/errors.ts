@@ -50,6 +50,13 @@ export class NotLoggedInError extends ManuallyThrownError {
   }
 }
 
+export class PremiumFeatureError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "Premium status is required to use this feature", stack);
+    this.name = "PremiumFeatureError";
+  }
+}
+
 /* -- error utils below -- */
 
 export class EnsureCliBinError extends DisplayableError {
