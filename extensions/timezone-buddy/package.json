@@ -15,6 +15,12 @@
       "title": "Timezone Buddy",
       "description": "View buddies and the time for their timezones.",
       "mode": "view"
+    },
+    {
+      "name": "timezone-buddy-menubar",
+      "title": "Timezone Buddy Menu Bar",
+      "description": "See your buddies at a glance",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {

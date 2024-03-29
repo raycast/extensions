@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Color,
   Form,
   Icon,
   List,
@@ -15,38 +14,15 @@ import {
 } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-
-interface TimezoneBuddy {
-  name: string;
-  twitter_handle?: string;
-  tz: string;
-  avatar: string;
-}
+import { getCurrentTimeForTz } from "./helpers/getCurrentTimeForTz";
+import { getOffsetForTz } from "./helpers/getOffsetForTz";
+import { formatZoneName } from "./helpers/formatZoneName";
+import { getTooltipForTz } from "./helpers/getTooltipForTz";
+import { TimezoneBuddy } from "./interfaces/TimezoneBuddy";
+import { getColorForTz } from "./helpers/getColorForTz";
+import { getIconForTz } from "./helpers/getIconForTz";
 
 const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
-
-function formatZoneName(zoneName: string): string {
-  return zoneName.replaceAll("/", " - ").replaceAll("_", " ");
-}
-
-function getCurrentTimeForTz(tz: string): string {
-  const formatter = new Intl.DateTimeFormat([], {
-    timeZone: tz,
-    hour: "numeric",
-    minute: "numeric",
-  });
-  return formatter.format(new Date());
-}
-
-function getHourForTz(tz: string): number {
-  const formatter = new Intl.DateTimeFormat(["en-GB"], {
-    timeZone: tz,
-    hour: "numeric",
-    hour12: false,
-  });
-
-  return Number(formatter.format(new Date()));
-}
 
 function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }): JSX.Element {
   const { pop } = useNavigation();
@@ -81,7 +57,7 @@ function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }): J
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Buddy" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Buddy" onSubmit={handleSubmit} icon={Icon.AddPerson} />
         </ActionPanel>
       }
     >
@@ -98,8 +74,80 @@ function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }): J
           }
         }}
       />
-      <Form.TextField id="twitter_handle" title="Twitter/X handle" />
+      <Form.TextField id="twitter_handle" title="Twitter/X handle (optional)" info="Used to fetch profile images" />
       <Form.Dropdown id="timezone" title="Select Timezone">
+        {allTimezones &&
+          allTimezones.map((tz: string) => <Form.Dropdown.Item value={tz} key={tz} title={formatZoneName(tz)} />)}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
+function EditBuddyForm(props: {
+  buddy: TimezoneBuddy;
+  index: number;
+  onUpdate: (buddy: TimezoneBuddy, index: number) => void;
+}): JSX.Element {
+  const { pop } = useNavigation();
+  const allTimezones = useMemo(() => ALL_TIMEZONES, []);
+  const [nameError, setNameError] = useState<string | undefined>();
+  const nameRequiredError = "The name field is required";
+
+  function dropNameErrorIfNeeded() {
+    if (nameError && nameError.length > 0) {
+      setNameError(undefined);
+    }
+  }
+
+  function handleSubmit(values: { name: string; twitter_handle: string; timezone: string }): void {
+    if (values.name?.length == 0) {
+      setNameError(nameRequiredError);
+      return;
+    }
+
+    props.onUpdate(
+      {
+        name: values.name,
+        twitter_handle: values.twitter_handle || "",
+        tz: values.timezone,
+        avatar: values.twitter_handle
+          ? `https://unavatar.io/twitter/${values.twitter_handle}?fallback=https://source.boringavatars.com/beam/${values.twitter_handle}`
+          : getAvatarIcon(values.name),
+      },
+      props.index,
+    );
+    pop();
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Update Buddy" onSubmit={handleSubmit} icon={Icon.Pencil} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="name"
+        title="Name"
+        defaultValue={props.buddy.name}
+        error={nameError}
+        onChange={dropNameErrorIfNeeded}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setNameError(nameRequiredError);
+          } else {
+            dropNameErrorIfNeeded();
+          }
+        }}
+      />
+      <Form.TextField
+        id="twitter_handle"
+        title="Twitter/X handle (optional)"
+        info="Used to fetch profile images"
+        defaultValue={props.buddy.twitter_handle}
+      />
+      <Form.Dropdown id="timezone" title="Select Timezone" defaultValue={props.buddy.tz}>
         {allTimezones &&
           allTimezones.map((tz: string) => <Form.Dropdown.Item value={tz} key={tz} title={formatZoneName(tz)} />)}
       </Form.Dropdown>
@@ -110,10 +158,25 @@ function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }): J
 function CreateBuddyAction(props: { onCreate: (buddy: TimezoneBuddy) => void }) {
   return (
     <Action.Push
-      icon={Icon.Pencil}
+      icon={Icon.AddPerson}
       title="Add Buddy"
       shortcut={{ modifiers: ["cmd"], key: "n" }}
       target={<CreateBuddyForm onCreate={props.onCreate} />}
+    />
+  );
+}
+
+function EditBuddyAction(props: {
+  index: number;
+  buddy: TimezoneBuddy;
+  onUpdate: (buddy: TimezoneBuddy, index: number) => void;
+}) {
+  return (
+    <Action.Push
+      icon={Icon.Pencil}
+      title={'Edit "' + props.buddy.name + '"'}
+      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      target={<EditBuddyForm buddy={props.buddy} index={props.index} onUpdate={props.onUpdate} />}
     />
   );
 }
@@ -123,59 +186,11 @@ function DeleteBuddyAction(props: { onDelete: () => void }) {
     <Action
       icon={Icon.Trash}
       title="Delete Buddy"
+      style={Action.Style.Destructive}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
       onAction={props.onDelete}
     />
   );
-}
-
-function getIconForTz(tz: string) {
-  const hour = getHourForTz(tz);
-  if ((hour >= 8 && hour < 9) || (hour >= 19 && hour < 23)) {
-    return Icon.Warning;
-  }
-
-  if (hour >= 23 || hour <= 7) {
-    return Icon.Moon;
-  }
-
-  return Icon.Emoji;
-}
-
-function getColorForTz(tz: string) {
-  const hour = getHourForTz(tz);
-
-  if ((hour >= 8 && hour < 9) || (hour >= 19 && hour < 23)) {
-    return Color.Yellow;
-  }
-
-  if (hour >= 23 || hour <= 7) {
-    return Color.Red;
-  }
-
-  return Color.Green;
-}
-
-function getTooltipForTz(tz: string) {
-  const hour = getHourForTz(tz);
-
-  if (hour >= 5 && hour <= 7) {
-    return "It's early, they might be sleeping";
-  }
-
-  if (hour >= 8 && hour < 9) {
-    return "It's early, they might be busy";
-  }
-
-  if (hour >= 9 && hour <= 18) {
-    return "It's a good time to reach out";
-  }
-
-  if (hour >= 19 && hour < 23) {
-    return "It's getting late, they might be busy";
-  }
-
-  return "It's late, they might be sleeping";
 }
 
 export default function Command() {
@@ -212,6 +227,29 @@ export default function Command() {
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to add buddy";
+      if (err instanceof Error) {
+        toast.message = err.message;
+      }
+    }
+  }
+
+  async function handleUpdate(buddy: TimezoneBuddy, index: number) {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Updating buddy...",
+    });
+    console.log(buddy, index);
+    try {
+      const newBuddies = [...buddies];
+      newBuddies.splice(index, 1, buddy);
+      setBuddies(newBuddies);
+      await LocalStorage.setItem("buddies", JSON.stringify(newBuddies));
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Buddy updated";
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to update buddy";
       if (err instanceof Error) {
         toast.message = err.message;
       }
@@ -271,9 +309,12 @@ export default function Command() {
           <List.Item
             key={index}
             title={buddy.name}
-            subtitle={formatZoneName(buddy.tz)}
+            subtitle={getOffsetForTz(buddy.tz)}
             icon={{ source: buddy.avatar, mask: Image.Mask.Circle }}
             accessories={[
+              {
+                text: formatZoneName(buddy.tz),
+              },
               {
                 tag: {
                   value: getCurrentTimeForTz(buddy.tz),
@@ -287,6 +328,7 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanel.Section>
                   <CreateBuddyAction onCreate={handleCreate} />
+                  <EditBuddyAction index={index} buddy={buddy} onUpdate={handleUpdate} />
                   <DeleteBuddyAction onDelete={() => handleDelete(index)} />
                 </ActionPanel.Section>
               </ActionPanel>
