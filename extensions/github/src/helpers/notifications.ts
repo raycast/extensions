@@ -68,7 +68,16 @@ export function getNotificationIcon(notification: Notification) {
       icon = { value: "tag.svg", tooltip: "Release" };
       break;
     case "CheckSuite":
-      icon = { value: Icon.CheckCircle, tooltip: "Workflow" };
+      icon = {
+        value: notification.subject.title.match(/(succeeded)/i)
+          ? Icon.CheckCircle
+          : notification.subject.title.match(/(failed)/i)
+            ? Icon.XMarkCircle
+            : notification.subject.title.match(/(skipped|cancelled)/i)
+              ? Icon.MinusCircle
+              : Icon.QuestionMarkCircle,
+        tooltip: "Workflow Run",
+      };
       break;
     case "Discussion":
       icon = { value: "comment-discussion.svg", tooltip: "Comment" };
