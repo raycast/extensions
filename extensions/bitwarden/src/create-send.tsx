@@ -6,6 +6,7 @@ import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { SendDateOption, SendPayload, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import { SendDateOptionsToHourOffsetMap } from "~/constants/send";
+import { useState } from "react";
 
 const LoadingFallback = () => <Form isLoading />;
 
@@ -87,7 +88,8 @@ const validateOptionalPositiveNumber = (value: string | undefined): string | und
 
 function SendCommandContent() {
   const bitwarden = useBitwarden();
-  const [copyOnSave, setCopyOnSave] = useCachedState("copySendOnSave", false);
+  const [shouldCopyOnSave, setShouldCopyOnSave] = useCachedState("shouldCopySendOnSave", false);
+  const [shouldShowMoreOptions, setShouldShowMoreOptions] = useState(false);
   const { itemProps, handleSubmit } = useForm({
     initialValues,
     onSubmit,
@@ -105,7 +107,7 @@ function SendCommandContent() {
     try {
       const { error, result } = await bitwarden.createSend(convertFormValuesToSendPayload(values));
       if (error) throw error;
-      if (copyOnSave) {
+      if (shouldCopyOnSave) {
         await Clipboard.copy(result.accessUrl);
         toast.message = "URL copied to clipboard";
       } else {
@@ -146,54 +148,68 @@ function SendCommandContent() {
         title="Share"
         id="copySendOnSave"
         label="Copy this Send's to clipboard upon save"
-        value={copyOnSave}
-        onChange={setCopyOnSave}
+        value={shouldCopyOnSave}
+        onChange={setShouldCopyOnSave}
       />
-      <Form.Dropdown
-        {...itemProps.deletionDate}
-        title="Deletion date"
-        info="The Send will be permanently deleted on the specified date and time."
-      >
-        {Object.values(SendDateOption).map((value) => (
-          <Form.Dropdown.Item key={value} value={value} title={value} />
-        ))}
-      </Form.Dropdown>
-      {itemProps.deletionDate.value === SendDateOption.Custom && (
-        <Form.DatePicker {...itemProps.customDeletionDate} title="Custom deletion date" />
+      <Form.Description text="" />
+      <Form.Checkbox
+        title={`${shouldShowMoreOptions ? "↓" : "→"}    Show more options`}
+        id="showMoreOptions"
+        label=""
+        value={shouldShowMoreOptions}
+        onChange={setShouldShowMoreOptions}
+      />
+      {shouldShowMoreOptions && (
+        <>
+          <Form.Separator />
+          <Form.Description text="" />
+          <Form.Dropdown
+            {...itemProps.deletionDate}
+            title="Deletion date"
+            info="The Send will be permanently deleted on the specified date and time."
+          >
+            {Object.values(SendDateOption).map((value) => (
+              <Form.Dropdown.Item key={value} value={value} title={value} />
+            ))}
+          </Form.Dropdown>
+          {itemProps.deletionDate.value === SendDateOption.Custom && (
+            <Form.DatePicker {...itemProps.customDeletionDate} title="Custom deletion date" />
+          )}
+          <Form.Dropdown
+            {...itemProps.expirationDate}
+            title="Expiration date"
+            info="If set, access to this Send will expire on the specified date and time."
+          >
+            <Form.Dropdown.Item value="" title="Never" />
+            {Object.values(SendDateOption).map((value) => (
+              <Form.Dropdown.Item key={value} value={value} title={value} />
+            ))}
+          </Form.Dropdown>
+          {itemProps.expirationDate.value === SendDateOption.Custom && (
+            <Form.DatePicker {...itemProps.customExpirationDate} title="Custom expiration date" />
+          )}
+          <Form.TextField
+            {...itemProps.maxAccessCount}
+            title="Maximum Access Count"
+            placeholder="Enter a number"
+            info="If set, user will no longer be able to access this Send once the maximum access count is reached."
+          />
+          <Form.PasswordField
+            {...itemProps.password}
+            title="Password"
+            placeholder="Enter a password"
+            info="Optionally require a password for users to access this Send."
+          />
+          <Form.TextArea
+            {...itemProps.notes}
+            title="Notes"
+            placeholder="Enter some notes"
+            info="Private notes about this Send."
+          />
+          <Form.Checkbox {...itemProps.hideEmail} label="Hide my email address from recipients." />
+          <Form.Checkbox {...itemProps.disabled} label="Deactivate this Send so no one can access it." />
+        </>
       )}
-      <Form.Dropdown
-        {...itemProps.expirationDate}
-        title="Expiration date"
-        info="If set, access to this Send will expire on the specified date and time."
-      >
-        <Form.Dropdown.Item value="" title="Never" />
-        {Object.values(SendDateOption).map((value) => (
-          <Form.Dropdown.Item key={value} value={value} title={value} />
-        ))}
-      </Form.Dropdown>
-      {itemProps.expirationDate.value === SendDateOption.Custom && (
-        <Form.DatePicker {...itemProps.customExpirationDate} title="Custom expiration date" />
-      )}
-      <Form.TextField
-        {...itemProps.maxAccessCount}
-        title="Maximum Access Count"
-        placeholder="Enter a number"
-        info="If set, user will no longer be able to access this Send once the maximum access count is reached."
-      />
-      <Form.PasswordField
-        {...itemProps.password}
-        title="Password"
-        placeholder="Enter a password"
-        info="Optionally require a password for users to access this Send."
-      />
-      <Form.TextArea
-        {...itemProps.notes}
-        title="Notes"
-        placeholder="Enter some notes"
-        info="Private notes about this Send."
-      />
-      <Form.Checkbox {...itemProps.hideEmail} label="Hide my email address from recipients." />
-      <Form.Checkbox {...itemProps.disabled} label="Deactivate this Send so no one can access it." />
     </Form>
   );
 }
