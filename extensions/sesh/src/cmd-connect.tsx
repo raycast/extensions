@@ -118,7 +118,7 @@ export default function ConnectCommand() {
             ]}
             actions={
               <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Path)} />
+                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
               </ActionPanel>
             }
           />
@@ -134,7 +134,7 @@ export default function ConnectCommand() {
             accessories={[{ text: formatScore(session.Score), icon: Icon.Racket, tooltip: "Score" }]}
             actions={
               <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Path)} />
+                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
               </ActionPanel>
             }
           />
@@ -150,7 +150,7 @@ export default function ConnectCommand() {
             accessories={[{ text: formatScore(session.Score), icon: Icon.Racket, tooltip: "Score" }]}
             actions={
               <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Path)} />
+                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
               </ActionPanel>
             }
           />

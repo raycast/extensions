@@ -5,6 +5,8 @@
 - Add config section between tmux and zoxide in list items
 - Combine to one sessions state object
 - Switch icon getter logic to switch case
+- Use session name for connecting instead of path
+- Wrap connect command argument in quotes
 
 ## Visual improvements - 02-22-24
 
