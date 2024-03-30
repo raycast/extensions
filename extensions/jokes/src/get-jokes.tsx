@@ -1,4 +1,4 @@
-import fetch, { FetchError } from "node-fetch";
+import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Color, Detail, Icon, LaunchProps, List, Toast, showToast } from "@raycast/api";
 import { ErrorResponse, JokeResponse, SingleJoke, TwoPartJoke } from "./types";
@@ -55,19 +55,20 @@ export default function GetJoke(props: LaunchProps<{ arguments: Arguments.GetJok
           style: Toast.Style.Success,
         });
       }
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown Error";
       setError({
         error: true,
         internalError: false,
         code: 0,
-        message: err.message,
+        message,
         causedBy: [],
         timestamp: Date.now(),
         additionalInfo: "-",
       });
       await showToast({
         title: "ERROR",
-        message: err.message,
+        message,
         style: Toast.Style.Failure,
       });
     } finally {
