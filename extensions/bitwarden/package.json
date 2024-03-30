@@ -199,7 +199,7 @@
       "title": "Create New Send",
       "subtitle": "Bitwarden",
       "description": "Securely share information directly with anyone.",
-      "icon": "create-send.png",
+      "icon": "sends-create.png",
       "mode": "view"
     },
     {
@@ -207,7 +207,7 @@
       "title": "List All Sends",
       "subtitle": "Bitwarden",
       "description": "List all the Sends owned by you.",
-      "icon": "list-sends.png",
+      "icon": "sends-list.png",
       "mode": "view"
     }
   ],

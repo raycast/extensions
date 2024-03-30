@@ -1,9 +1,13 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { MutableRefObject, useRef } from "react";
+import { Bitwarden } from "~/api/bitwarden";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
+import CreateSendCommand from "~/create-send";
 import { Send, SendType } from "~/types/send";
+import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
 const LoadingFallback = () => <List isLoading />;
@@ -58,15 +62,80 @@ const usePasteActionTitle = () => {
   return currentApplication ? `Paste URL into ${currentApplication}` : "Paste URL";
 };
 
+const loadSends = async (bitwarden: Bitwarden, isFirstLoadRef: MutableRefObject<boolean>) => {
+  const toast = isFirstLoadRef.current
+    ? await showToast({ title: "Loading Sends....", style: Toast.Style.Animated })
+    : undefined;
+  try {
+    return await bitwarden.listSends();
+  } finally {
+    isFirstLoadRef.current = false;
+    await toast?.hide();
+  }
+};
+
 function ListSendCommandContent() {
   const bitwarden = useBitwarden();
-  const { data, isLoading } = usePromise(() => bitwarden.listSends());
+  const isFirstLoadRef = useRef(true);
+  const { data, isLoading, revalidate: refresh } = usePromise(() => loadSends(bitwarden, isFirstLoadRef));
   const pasteActionTitle = usePasteActionTitle();
 
   const { result: sends = [] } = data ?? {};
 
+  if (isLoading && sends.length === 0) {
+    return (
+      <List>
+        <List.EmptyView title="Loading Sends...." icon={Icon.ArrowClockwise} description="Please wait." />
+      </List>
+    );
+  }
+
+  if (sends.length === 0) {
+    return (
+      <List>
+        <List.EmptyView
+          title="There are no items to list."
+          icon="sends-empty-list.svg"
+          actions={
+            <ActionPanel>
+              <Action.Push target={<CreateSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
+              <Action onAction={refresh} title="Sync Sends" icon={Icon.ArrowClockwise} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  const getDeleteHandler = (sendId: string) => async () => {
+    const toast = await showToast({ title: "Deleting Send....", style: Toast.Style.Animated });
+    try {
+      await bitwarden.deleteSend(sendId);
+      await refresh();
+      toast.style = Toast.Style.Success;
+      toast.title = "Send deleted";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to delete Send";
+      captureException("Failed to delete Send", error);
+    }
+  };
+
+  const onSync = async () => {
+    const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
+    try {
+      await refresh();
+      toast.style = Toast.Style.Success;
+      toast.title = "Sends synced";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to sync Sends";
+      captureException("Failed to sync Sends", error);
+    }
+  };
+
   return (
-    <List isLoading={isLoading}>
+    <List>
       {sends.map((send) => (
         <List.Item
           key={send.id}
@@ -77,6 +146,16 @@ function ListSendCommandContent() {
             <ActionPanel>
               <Action.CopyToClipboard title="Copy URL" content={send.accessUrl} />
               <Action.Paste title={pasteActionTitle} content={send.accessUrl} />
+              <Action onAction={getDeleteHandler(send.id)} title="Delete Send" icon={Icon.Trash} />
+              <ActionPanel.Section title="Send Management">
+                <Action.Push target={<CreateSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
+                <Action
+                  onAction={onSync}
+                  title="Sync Sends"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ key: "r", modifiers: ["cmd"] }}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

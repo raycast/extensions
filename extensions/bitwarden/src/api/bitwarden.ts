@@ -500,6 +500,18 @@ export class Bitwarden {
     return stdout;
   }
 
+  async listSends(): Promise<MaybeError<Send[]>> {
+    try {
+      const { stdout } = await this.exec(["send", "list"], { resetVaultTimeout: true });
+      return { result: JSON.parse<Send[]>(stdout) };
+    } catch (execError) {
+      captureException("Failed to list sends", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
   async createSend(values: SendPayload): Promise<MaybeError<Send>> {
     try {
       const { error, result: template } = await this.getTemplate("send.text");
@@ -518,10 +530,11 @@ export class Bitwarden {
     }
   }
 
-  async listSends(): Promise<MaybeError<Send[]>> {
+  async deleteSend(id: string): Promise<MaybeError> {
     try {
-      const { stdout } = await this.exec(["send", "list"], { resetVaultTimeout: true });
-      return { result: JSON.parse<Send[]>(stdout) };
+      const { stdout } = await this.exec(["send", "delete", id], { resetVaultTimeout: true });
+      console.log(stdout);
+      return { result: undefined };
     } catch (execError) {
       captureException("Failed to list sends", execError);
       const { error } = await this.handleCommonErrors(execError);
