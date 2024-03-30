@@ -1,5 +1,8 @@
 # Spotify Player Changelog
 
+## [Automatically Trigger Current Track] - 2024-03-30
+- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous)
+
 ## [Feature] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
