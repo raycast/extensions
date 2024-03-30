@@ -1,11 +1,11 @@
-export type SendPayload = {
+export type SendCreatePayload = {
   name: string;
   notes?: string | null;
   type: SendType;
   text?: SendText | null;
   file?: SendFile | null;
   maxAccessCount?: number | null;
-  deletionDate?: string | null;
+  deletionDate?: string;
   expirationDate?: string | null;
   password?: string | null;
   disabled?: boolean;

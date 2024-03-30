@@ -1,43 +1,32 @@
-import { Action, ActionPanel, Clipboard, Form, Toast, open, showToast, useNavigation } from "@raycast/api";
+import { Form, useNavigation } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
-import { SendDateOption, SendPayload, SendType } from "~/types/send";
-import { captureException } from "~/utils/development";
-import { SendDateOptionsToHourOffsetMap, SendTypeOptions } from "~/constants/send";
-import { PremiumFeatureError } from "~/utils/errors";
+import { SendDateOption, SendCreatePayload, SendType, Send } from "~/types/send";
+import { SendDateOptionsToHourOffsetMap } from "~/constants/send";
+import { CreateEditSendForm, SendFormValues, sendFormInitialValues } from "~/components/send/CreateEditSendForm";
 import ListSendCommand from "~/list-sends";
 
 const LoadingFallback = () => <Form isLoading />;
 
-const CreateSendCommand = () => (
+type CreateEditSendCommandProps = {
+  send?: Send;
+  onSuccess?: (send: Send) => void;
+};
+
+const CreateEditSendCommand = (props: CreateEditSendCommandProps) => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
       <SessionProvider loadingFallback={<LoadingFallback />} unlock>
-        <CreateSendCommandContent />
+        <CreateEditSendCommandContent {...props} />
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
 );
 
-type FormValues = {
-  name: string;
-  text: string;
-  hidden: boolean;
-  file: string[] | undefined;
-  deletionDate: string;
-  customDeletionDate: Date | null;
-  expirationDate: string;
-  customExpirationDate: Date | null;
-  maxAccessCount: string;
-  password: string;
-  notes: string;
-  hideEmail: boolean;
-  disabled: boolean;
-};
-
-const getStringFromDateOption = (option: SendDateOption | "", customDate: Date | null) => {
+function getStringFromDateOption(option: SendDateOption, customDate: Date | null): string;
+function getStringFromDateOption(option: SendDateOption | "", customDate: Date | null): string | null;
+function getStringFromDateOption(option: SendDateOption | "", customDate: Date | null) {
   if (!option) return null;
   if (option === SendDateOption.Custom) return customDate?.toISOString() ?? null;
   const hourOffset = SendDateOptionsToHourOffsetMap[option];
@@ -45,15 +34,15 @@ const getStringFromDateOption = (option: SendDateOption | "", customDate: Date |
   const date = new Date();
   date.setHours(date.getHours() + hourOffset);
   return date.toISOString();
-};
+}
 
-const convertFormValuesToSendPayload = (type: SendType, values: FormValues): SendPayload => ({
+const convertFormValuesToCreatePayload = (type: SendType, values: SendFormValues): SendCreatePayload => ({
   type,
   name: values.name,
   text: values.text ? { text: values.text, hidden: values.hidden } : null,
   file: values.file?.[0] ? { fileName: values.file[0] } : null,
   deletionDate: getStringFromDateOption(values.deletionDate as SendDateOption, values.customDeletionDate),
-  expirationDate: getStringFromDateOption(values.expirationDate as SendDateOption, values.customExpirationDate),
+  expirationDate: getStringFromDateOption(values.expirationDate as SendDateOption | "", values.customExpirationDate),
   maxAccessCount: values.maxAccessCount ? parseInt(values.maxAccessCount) : null,
   password: values.password || null,
   notes: values.notes || null,
@@ -61,185 +50,78 @@ const convertFormValuesToSendPayload = (type: SendType, values: FormValues): Sen
   disabled: values.disabled,
 });
 
-const validateOptionalDateUnder31Days = (value: Date | null | undefined) => {
-  if (!value) return;
-  const date = new Date();
-  date.setDate(date.getDate() + 31);
-  if (value > date) return "Must be under 31 days from now.";
+const convertFormValuesToEditPayload = (send: Send, type: SendType, values: SendFormValues): Send => ({
+  ...send,
+  ...convertFormValuesToCreatePayload(type, values),
+});
+
+const parseDateOptionString = (
+  dateString: string | null
+): { option: SendDateOption | undefined; customDate: Date | null } => {
+  if (!dateString) return { option: undefined, customDate: null };
+  // TODO: Figure out a reliable way of mapping dates to SendDateOption
+  return { option: SendDateOption.Custom, customDate: new Date(dateString) };
 };
 
-const validateOptionalPositiveNumber = (value: string | undefined) => {
-  if (!value) return;
-  const number = parseInt(value);
-  if (isNaN(number) || number <= 0) return "Must be a positive number.";
+const getInitialValues = (send?: Send): SendFormValues => {
+  if (!send) return sendFormInitialValues;
+
+  const deletionDate = parseDateOptionString(send.deletionDate);
+  const expirationDate = parseDateOptionString(send.expirationDate);
+
+  return {
+    ...sendFormInitialValues,
+    name: send.name,
+    text: send.text?.text || sendFormInitialValues.text,
+    hidden: send.text?.hidden || sendFormInitialValues.hidden,
+    file: send.file ? [send.file.fileName] : sendFormInitialValues.file,
+    deletionDate: deletionDate.option || sendFormInitialValues.deletionDate,
+    customDeletionDate: deletionDate.customDate || sendFormInitialValues.customDeletionDate,
+    expirationDate: expirationDate.option || sendFormInitialValues.expirationDate,
+    customExpirationDate: expirationDate.customDate || sendFormInitialValues.customExpirationDate,
+    maxAccessCount: send.maxAccessCount ? String(send.maxAccessCount) : sendFormInitialValues.maxAccessCount,
+    notes: send.notes || sendFormInitialValues.notes,
+    hideEmail: send.hideEmail || sendFormInitialValues.hideEmail,
+    disabled: send.disabled || sendFormInitialValues.disabled,
+  };
 };
 
-const initialValues: FormValues = {
-  name: "",
-  text: "",
-  hidden: false,
-  file: undefined,
-  deletionDate: SendDateOption.SevenDays,
-  customDeletionDate: null,
-  expirationDate: "",
-  customExpirationDate: null,
-  maxAccessCount: "",
-  password: "",
-  notes: "",
-  hideEmail: false,
-  disabled: false,
-};
-
-function CreateSendCommandContent() {
+function CreateEditSendCommandContent({ send, onSuccess: parentOnSuccess }: CreateEditSendCommandProps) {
   const { push } = useNavigation();
   const bitwarden = useBitwarden();
-  const [type, setType] = useCachedState("sendType", SendType.File);
-  const [shouldCopyOnSave, setShouldCopyOnSave] = useCachedState("sendShouldCopyOnSave", false);
 
-  const { itemProps, handleSubmit } = useForm({
-    initialValues,
-    onSubmit,
-    validation: {
-      name: FormValidation.Required,
-      text: type === SendType.Text ? FormValidation.Required : undefined,
-      file: type === SendType.File ? FormValidation.Required : undefined,
-      customDeletionDate: validateOptionalDateUnder31Days,
-      customExpirationDate: validateOptionalDateUnder31Days,
-      maxAccessCount: validateOptionalPositiveNumber,
-    },
-  });
-
-  async function onSubmit(values: FormValues) {
-    const toast = await showToast({ title: "Creating Send...", style: Toast.Style.Animated });
-    try {
-      const newLocal = convertFormValuesToSendPayload(type, values);
-      console.log(newLocal);
-
-      const { error, result } = await bitwarden.createSend(newLocal);
+  async function onSave(type: SendType, values: SendFormValues) {
+    if (!send) {
+      const payload = convertFormValuesToCreatePayload(type, values);
+      const { error, result } = await bitwarden.createSend(payload);
       if (error) throw error;
-      if (shouldCopyOnSave) {
-        await Clipboard.copy(result.accessUrl);
-        toast.message = "URL copied to clipboard";
-      } else {
-        toast.primaryAction = {
-          title: "Copy URL",
-          onAction: async () => {
-            await Clipboard.copy(result.accessUrl);
-            toast.message = "URL copied to clipboard";
-          },
-        };
-      }
-      toast.style = Toast.Style.Success;
-      toast.title = "Send created";
-      push(<ListSendCommand />);
-      await open("raycast://extensions/jomifepe/bitwarden/list-sends");
-    } catch (error) {
-      if (error instanceof PremiumFeatureError) {
-        toast.message = "This feature is only available to Premium users.";
-      }
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create Send";
-      captureException("Failed to create Send", error);
+
+      return result;
+    } else {
+      const payload = convertFormValuesToEditPayload(send, type, values);
+      const { error, result } = await bitwarden.editSend(payload);
+      if (error) throw error;
+
+      return result;
     }
   }
 
-  const onTypeChange = (value: string) => setType(parseInt(value));
+  const onSuccess = (send: Send) => {
+    if (parentOnSuccess) {
+      parentOnSuccess(send);
+    } else {
+      push(<ListSendCommand />);
+    }
+  };
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField
-        {...itemProps.name}
-        title="Name"
-        placeholder="Enter a name"
-        info="A friendly name to describe this send."
-      />
-      <Form.Dropdown id="type" value={String(type)} onChange={onTypeChange} title="What type of Send is this?">
-        {Object.entries(SendTypeOptions).map(([value, title]) => (
-          <Form.Dropdown.Item key={value} value={value} title={title} />
-        ))}
-      </Form.Dropdown>
-      {type === SendType.Text && (
-        <>
-          <Form.TextArea
-            {...itemProps.text}
-            title="Text"
-            placeholder="Enter the text you want to send"
-            info="The text you want to send"
-          />
-          <Form.Checkbox {...itemProps.hidden} label="Hide this Send's text by default" />
-        </>
-      )}
-      {type === SendType.File && (
-        <Form.FilePicker
-          {...itemProps.file}
-          title="File"
-          info="The file you want to send."
-          allowMultipleSelection={false}
-        />
-      )}
-      <Form.Checkbox
-        title="Share"
-        id="copySendOnSave"
-        label="Copy this Send's to clipboard upon save"
-        value={shouldCopyOnSave}
-        onChange={setShouldCopyOnSave}
-      />
-      <Form.Description text="" />
-      <Form.Separator />
-      <Form.Description text="Options" />
-      <Form.Dropdown
-        {...itemProps.deletionDate}
-        title="Deletion date"
-        info="The Send will be permanently deleted on the specified date and time."
-      >
-        {Object.values(SendDateOption).map((value) => (
-          <Form.Dropdown.Item key={value} value={value} title={value} />
-        ))}
-      </Form.Dropdown>
-      {itemProps.deletionDate.value === SendDateOption.Custom && (
-        <Form.DatePicker {...itemProps.customDeletionDate} title="Custom deletion date" />
-      )}
-      <Form.Dropdown
-        {...itemProps.expirationDate}
-        title="Expiration date"
-        info="If set, access to this Send will expire on the specified date and time."
-      >
-        <Form.Dropdown.Item value="" title="Never" />
-        {Object.values(SendDateOption).map((value) => (
-          <Form.Dropdown.Item key={value} value={value} title={value} />
-        ))}
-      </Form.Dropdown>
-      {itemProps.expirationDate.value === SendDateOption.Custom && (
-        <Form.DatePicker {...itemProps.customExpirationDate} title="Custom expiration date" />
-      )}
-      <Form.TextField
-        {...itemProps.maxAccessCount}
-        title="Maximum Access Count"
-        placeholder="Enter a maximum number of accesses"
-        info="If set, user will no longer be able to access this Send once the maximum access count is reached."
-      />
-      <Form.PasswordField
-        {...itemProps.password}
-        title="Password"
-        placeholder="Enter a password"
-        info="Optionally require a password for users to access this Send."
-      />
-      <Form.TextArea
-        {...itemProps.notes}
-        title="Notes"
-        placeholder="Enter notes"
-        info="Private notes about this Send."
-      />
-      <Form.Checkbox {...itemProps.hideEmail} label="Hide my email address from recipients" />
-      <Form.Checkbox {...itemProps.disabled} label="Deactivate this Send so no one can access it" />
-    </Form>
+    <CreateEditSendForm
+      mode={send ? "edit" : "create"}
+      initialValues={getInitialValues(send)}
+      onSave={onSave}
+      onSuccess={onSuccess}
+    />
   );
 }
 
-export default CreateSendCommand;
+export default CreateEditSendCommand;

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { MutableRefObject, useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
@@ -6,7 +6,7 @@ import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
-import CreateSendCommand from "~/create-send";
+import CreateEditSendCommand from "~/create-send";
 import { Send, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
@@ -76,6 +76,7 @@ const loadSends = async (bitwarden: Bitwarden, isFirstLoadRef: MutableRefObject<
 };
 
 function ListSendCommandContent() {
+  const { pop } = useNavigation();
   const bitwarden = useBitwarden();
   const isFirstLoadRef = useRef(true);
   const { data, isLoading, revalidate: refresh } = usePromise(() => loadSends(bitwarden, isFirstLoadRef));
@@ -124,6 +125,12 @@ function ListSendCommandContent() {
     }
   };
 
+  const onEditSuccess = async (_: Send) => {
+    pop();
+    // TODO: Optimistically update the list of sends instead of syncing
+    await onSync();
+  };
+
   if (isLoading && sends.length === 0) {
     return (
       <List searchBarPlaceholder="Search Sends">
@@ -140,7 +147,7 @@ function ListSendCommandContent() {
           icon="sends-empty-list.svg"
           actions={
             <ActionPanel>
-              <Action.Push target={<CreateSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
+              <Action.Push target={<CreateEditSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
               <Action onAction={refresh} title="Sync Sends" icon={Icon.ArrowClockwise} />
             </ActionPanel>
           }
@@ -161,6 +168,11 @@ function ListSendCommandContent() {
             <ActionPanel>
               <Action.CopyToClipboard title="Copy URL" content={send.accessUrl} />
               <Action.Paste title={pasteActionTitle} content={send.accessUrl} />
+              <Action.Push
+                target={<CreateEditSendCommand send={send} onSuccess={onEditSuccess} />}
+                title="Edit Send"
+                icon={Icon.Pencil}
+              />
               <Action onAction={() => onDeleteSend(send.id)} title="Delete Send" icon={Icon.Trash} />
               {send.passwordSet && (
                 <Action
@@ -170,7 +182,7 @@ function ListSendCommandContent() {
                 />
               )}
               <ActionPanel.Section title="Send Management">
-                <Action.Push target={<CreateSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
+                <Action.Push target={<CreateEditSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
                 <Action
                   onAction={onSync}
                   title="Sync Sends"

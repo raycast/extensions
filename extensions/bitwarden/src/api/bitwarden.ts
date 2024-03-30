@@ -23,7 +23,7 @@ import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAva
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
-import { Send, SendPayload } from "~/types/send";
+import { Send, SendCreatePayload } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
 
 type Env = {
@@ -512,7 +512,7 @@ export class Bitwarden {
     }
   }
 
-  async createSend(values: SendPayload): Promise<MaybeError<Send>> {
+  async createSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
     try {
       const { error, result: template } = await this.getTemplate("send.text");
       if (error) throw error;
@@ -530,10 +530,23 @@ export class Bitwarden {
     }
   }
 
+  async editSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
+    try {
+      const encodedPayload = await this.encode(JSON.stringify(values));
+      const { stdout } = await this.exec(["send", "edit", encodedPayload], { resetVaultTimeout: true });
+      console.log({ stdout });
+      return { result: JSON.parse<Send>(stdout) };
+    } catch (execError) {
+      captureException("Failed to delete send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
   async deleteSend(id: string): Promise<MaybeError> {
     try {
-      const { stdout } = await this.exec(["send", "delete", id], { resetVaultTimeout: true });
-      console.log(stdout);
+      await this.exec(["send", "delete", id], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to delete send", execError);
