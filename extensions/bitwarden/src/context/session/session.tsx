@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useMemo } from "react";
+import { createContext, PropsWithChildren, ReactNode, useContext, useMemo } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 import { useBitwarden } from "~/context/bitwarden";
@@ -22,6 +22,7 @@ export type Session = {
 export const SessionContext = createContext<Session | null>(null);
 
 export type SessionProviderProps = PropsWithChildren<{
+  loadingFallback?: ReactNode;
   unlock?: boolean;
 }>;
 
@@ -30,6 +31,8 @@ export type SessionProviderProps = PropsWithChildren<{
  * @param props.unlock If true, an unlock form will be displayed if the vault is locked or unauthenticated.
  */
 export function SessionProvider(props: SessionProviderProps) {
+  const { children, loadingFallback = <VaultLoadingFallback />, unlock } = props;
+
   const bitwarden = useBitwarden();
   const [state, dispatch] = useSessionReducer();
 
@@ -91,13 +94,13 @@ export function SessionProvider(props: SessionProviderProps) {
     [state, confirmMasterPassword]
   );
 
-  if (state.isLoading) return <VaultLoadingFallback />;
+  if (state.isLoading) return loadingFallback;
 
   const showUnlockForm = state.isLocked || !state.isAuthenticated;
-  const children = state.token ? props.children : null;
+  const _children = state.token ? children : null;
   return (
     <SessionContext.Provider value={contextValue}>
-      {showUnlockForm && props.unlock ? <UnlockForm lockReason={state.lockReason} /> : children}
+      {showUnlockForm && unlock ? <UnlockForm lockReason={state.lockReason} /> : _children}
     </SessionContext.Provider>
   );
 }

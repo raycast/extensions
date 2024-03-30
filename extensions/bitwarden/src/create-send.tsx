@@ -14,7 +14,7 @@ const LoadingFallback = () => <Form isLoading />;
 const CreateSendCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
-      <SessionProvider unlock>
+      <SessionProvider loadingFallback={<LoadingFallback />} unlock>
         <CreateSendCommandContent />
       </SessionProvider>
     </BitwardenProvider>

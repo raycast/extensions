@@ -11,12 +11,12 @@ import { Send, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
-const LoadingFallback = () => <List isLoading />;
+const LoadingFallback = () => <List searchBarPlaceholder="Search Sends" isLoading />;
 
 const ListSendCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
-      <SessionProvider unlock>
+      <SessionProvider loadingFallback={<LoadingFallback />} unlock>
         <ListSendCommandContent />
       </SessionProvider>
     </BitwardenProvider>
@@ -126,7 +126,7 @@ function ListSendCommandContent() {
 
   if (isLoading && sends.length === 0) {
     return (
-      <List>
+      <List searchBarPlaceholder="Search Sends">
         <ListLoadingView title="Loading Sends..." description="Please wait." />
       </List>
     );
@@ -150,7 +150,7 @@ function ListSendCommandContent() {
   }
 
   return (
-    <List>
+    <List searchBarPlaceholder="Search Sends">
       {sends.map((send) => (
         <List.Item
           key={send.id}
