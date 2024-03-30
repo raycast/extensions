@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mute-unmute-microphone",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Mute Microphone",
   "description": "Mute Microphone Globally",
   "icon": "logo.png",
@@ -35,7 +35,6 @@
       "title":"Show Mic Status on Menu Bar",
       "subtitle":"Microphone status on the menu bar",
       "description":"Get microphone volume",
-      "interval": "1m",
       "mode": "menu-bar"
     }
   ],

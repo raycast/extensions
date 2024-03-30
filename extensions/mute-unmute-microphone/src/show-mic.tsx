@@ -5,6 +5,10 @@ const cache = new Cache({
   namespace: "mic",
 });
 
+const waitTime = async (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 export default function Command() {
   const volume = cache.get("inputVolume");
   const [currentVolume, setCurrentVolume] = useState<number>(Number(volume) || 0);
@@ -29,6 +33,7 @@ export default function Command() {
     setCurrentVolume(Number(getVolume));
     cache.set("inputVolume", getVolume);
     await showHUD(`Set input volume to ${getVolume}%`);
+    await waitTime(100);
   };
 
   const mute = async () => {
@@ -36,6 +41,7 @@ export default function Command() {
     cache.set("inputVolume", "0");
     setCurrentVolume(0);
     await showHUD("Set input volume to 0%");
+    await waitTime(100);
   };
 
   const unmute = async () => {
@@ -43,13 +49,12 @@ export default function Command() {
     cache.set("inputVolume", "100");
     setCurrentVolume(100);
     await showHUD("Set input volume to 100%");
+    await waitTime(100);
   };
   return (
     <MenuBarExtra
       icon={
-        currentVolume === 0
-          ? { source: Icon.MicrophoneDisabled, tintColor: Color.Red }
-          : { source: Icon.Microphone, tintColor: Color.Green }
+        currentVolume === 0 ? { source: Icon.MicrophoneDisabled, tintColor: Color.Red } : { source: Icon.Microphone }
       }
     >
       <MenuBarExtra.Item title="Toggle" onAction={toggle} />
