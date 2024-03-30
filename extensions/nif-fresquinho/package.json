@@ -3,7 +3,7 @@
   "name": "nif-fresquinho",
   "title": "Nif Fresquinho",
   "description": "Get a new Portuguese tax registration number",
-  "icon": "command-icon.png",
+  "icon": "nif-icon.png",
   "author": "poor666",
   "categories": [
     "Data"
