@@ -18,6 +18,7 @@ enum IssueNotificationType {
   issueDue = "issueDue",
   issueSubscribed = "issueSubscribed",
   issueReminder = "issueReminder",
+  issueAddedInView = "issueAddedInView",
 }
 
 enum ProjectNotificationType {
@@ -39,6 +40,7 @@ const notificationIcons: Record<string, Image.ImageLike> = {
   [IssueNotificationType.issueDue]: Icon.Calendar,
   [IssueNotificationType.issueSubscribed]: Icon.Bell,
   [IssueNotificationType.issueReminder]: Icon.Clock,
+  [IssueNotificationType.issueAddedInView]: Icon.Plus,
   [ProjectNotificationType.projectUpdatePrompt]: Icon.Heartbeat,
   [ProjectNotificationType.projectUpdateMentionPrompt]: Icon.Bubble,
 };
@@ -51,6 +53,9 @@ export function getNotificationIcon(notification: NotificationResult) {
 
     if (notification.type === IssueNotificationType.issueCommentReaction && notification.reactionEmoji) {
       return emojis.get(notification.reactionEmoji) || Icon.Bubble;
+    }
+    if (notification.type === IssueNotificationType.issueAddedInView) {
+      return Icon.Plus;
     }
   }
 
@@ -71,6 +76,7 @@ const notificationTitles: Record<string, string> = {
   [IssueNotificationType.issueDue]: "Due soon, due, or overdue",
   [IssueNotificationType.issueSubscribed]: "Subscribed to the issue",
   [IssueNotificationType.issueReminder]: "Reminded about the issue",
+  [IssueNotificationType.issueAddedInView]: "New issue added in view",
   [ProjectNotificationType.projectUpdatePrompt]: "Reminded to provide a project update",
   [ProjectNotificationType.projectUpdateMentionPrompt]: "Mentioned in a project update",
 };
