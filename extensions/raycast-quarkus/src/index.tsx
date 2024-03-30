@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActionPanel, open, List, Action, Icon, LocalStorage, Toast, showToast, Clipboard } from "@raycast/api";
+import { ActionPanel, open, List, Action, Icon, LocalStorage, Toast, showToast, Clipboard, trash } from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
@@ -40,10 +40,9 @@ const removeDuplicatesIds = (result: any) => {
 
 const generateUrl = (host: string, path: string, queries: { [key: string]: string }, extensions: any) => {
   let url = `${host}${path}`;
-  const sortedQueries = {};
+  const sortedQueries: { [key: string]: string } = {};
   if (queries) {
     // Sort the queries
-    const sortedQueries: { [key: string]: string } = {};
     Object.keys(queries)
       .sort()
       .forEach(function (key) {
@@ -89,11 +88,11 @@ export default function Command(props: any) {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading... " });
     let { artifactId } = props.arguments;
     const { directory, platform, buildTool, groupId, version, unzip } = preferences;
-    const query = { platform, buildTool, groupId, version };
     let exists = false;
     if (!artifactId) {
       artifactId = "code-with-quarkus";
     }
+    const query = { platform, buildTool, groupId, version };
     const path = `${directory}/${artifactId}`;
     try {
       await access(path);
@@ -123,7 +122,7 @@ export default function Command(props: any) {
           return;
         }
         await decompress(filePath, directory);
-        // await trash(filePath);
+        await trash(filePath);
         await Clipboard.copy(path);
       } catch (error) {
         console.error(error);
