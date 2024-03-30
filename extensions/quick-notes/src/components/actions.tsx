@@ -29,29 +29,27 @@ const Actions = ({
     <ActionPanel>
       <ActionPanel.Section>
         {!noNotes && (
-          <>
-            <Action.Push
-              title="Edit Note"
-              icon={{
-                source: Icon.Pencil,
-                tintColor: colors.find((c) => c.name === "sky")?.tintColor,
-              }}
-              target={
-                <CreateEditNoteForm isDraft={isDraft} title={title} note={note} tags={tags} createdAt={createdAt} />
-              }
-            />
-            <Action.Push
-              title="New Note"
-              icon={{
-                source: Icon.BlankDocument,
-                tintColor: colors.find((c) => c.name === "green")?.tintColor,
-              }}
-              target={<CreateEditNoteForm isDraft={true} />}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-            />
-            <DeleteNoteAction createdAt={createdAt} />
-          </>
+          <Action.Push
+            title="Edit Note"
+            icon={{
+              source: Icon.Pencil,
+              tintColor: colors.find((c) => c.name === "sky")?.tintColor,
+            }}
+            target={
+              <CreateEditNoteForm isDraft={isDraft} title={title} note={note} tags={tags} createdAt={createdAt} />
+            }
+          />
         )}
+        <Action.Push
+          title="New Note"
+          icon={{
+            source: Icon.BlankDocument,
+            tintColor: colors.find((c) => c.name === "green")?.tintColor,
+          }}
+          target={<CreateEditNoteForm isDraft={true} />}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+        />
+        {!noNotes && <DeleteNoteAction createdAt={createdAt} />}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <ActionPanel.Submenu
