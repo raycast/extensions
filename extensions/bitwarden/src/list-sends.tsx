@@ -32,13 +32,13 @@ const getItemIcon = (send: Send): NonNullable<List.Item.Props["icon"]> => {
 const getItemAccessories = (send: Send): NonNullable<List.Item.Props["accessories"]> => {
   const accessories: NonNullable<List.Item.Props["accessories"]> = [];
   if (send.passwordSet) {
-    accessories.push({ icon: Icon.Lock, tooltip: "Password protected." });
+    accessories.push({ icon: Icon.Key, tooltip: "Password protected." });
   }
   if (send.maxAccessCount) {
     accessories.push({ icon: Icon.Person, tooltip: `Has a max Access Count of ${send.maxAccessCount}.` });
   }
   if (send.disabled) {
-    accessories.push({ icon: Icon.EyeDisabled, tooltip: "Deactivated and no one can access it." });
+    accessories.push({ icon: Icon.Warning, tooltip: "Deactivated and no one can access it." });
   }
   if (send.expirationDate) {
     accessories.push({
@@ -82,6 +82,47 @@ function ListSendCommandContent() {
 
   const { result: sends = [] } = data ?? {};
 
+  const onDeleteSend = async (id: string) => {
+    const toast = await showToast({ title: "Deleting Send....", style: Toast.Style.Animated });
+    try {
+      await bitwarden.deleteSend(id);
+      await refresh();
+      toast.style = Toast.Style.Success;
+      toast.title = "Send deleted";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to delete Send";
+      captureException("Failed to delete Send", error);
+    }
+  };
+
+  const onSync = async () => {
+    const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
+    try {
+      await refresh();
+      toast.style = Toast.Style.Success;
+      toast.title = "Sends synced";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to sync Sends";
+      captureException("Failed to sync Sends", error);
+    }
+  };
+
+  const onRemoveSendPassword = async (id: string) => {
+    const toast = await showToast({ title: "Removing Send Password....", style: Toast.Style.Animated });
+    try {
+      await bitwarden.removeSendPassword(id);
+      await refresh();
+      toast.style = Toast.Style.Success;
+      toast.title = "Send Password removed";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to remove Send Password";
+      captureException("Failed to remove Send Password", error);
+    }
+  };
+
   if (isLoading && sends.length === 0) {
     return (
       <List>
@@ -107,33 +148,6 @@ function ListSendCommandContent() {
     );
   }
 
-  const getDeleteHandler = (sendId: string) => async () => {
-    const toast = await showToast({ title: "Deleting Send....", style: Toast.Style.Animated });
-    try {
-      await bitwarden.deleteSend(sendId);
-      await refresh();
-      toast.style = Toast.Style.Success;
-      toast.title = "Send deleted";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to delete Send";
-      captureException("Failed to delete Send", error);
-    }
-  };
-
-  const onSync = async () => {
-    const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
-    try {
-      await refresh();
-      toast.style = Toast.Style.Success;
-      toast.title = "Sends synced";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to sync Sends";
-      captureException("Failed to sync Sends", error);
-    }
-  };
-
   return (
     <List>
       {sends.map((send) => (
@@ -146,7 +160,14 @@ function ListSendCommandContent() {
             <ActionPanel>
               <Action.CopyToClipboard title="Copy URL" content={send.accessUrl} />
               <Action.Paste title={pasteActionTitle} content={send.accessUrl} />
-              <Action onAction={getDeleteHandler(send.id)} title="Delete Send" icon={Icon.Trash} />
+              <Action onAction={() => onDeleteSend(send.id)} title="Delete Send" icon={Icon.Trash} />
+              {send.passwordSet && (
+                <Action
+                  onAction={() => onRemoveSendPassword(send.id)}
+                  title="Remove Password"
+                  icon={Icon.LockUnlocked}
+                />
+              )}
               <ActionPanel.Section title="Send Management">
                 <Action.Push target={<CreateSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
                 <Action

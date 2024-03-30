@@ -536,7 +536,20 @@ export class Bitwarden {
       console.log(stdout);
       return { result: undefined };
     } catch (execError) {
-      captureException("Failed to list sends", execError);
+      captureException("Failed to delete send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async removeSendPassword(id: string): Promise<MaybeError> {
+    try {
+      const { stdout } = await this.exec(["send", "remove-password", id], { resetVaultTimeout: true });
+      console.log(stdout);
+      return { result: undefined };
+    } catch (execError) {
+      captureException("Failed to remove send password", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
