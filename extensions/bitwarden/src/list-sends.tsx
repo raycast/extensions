@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@rayca
 import { usePromise } from "@raycast/utils";
 import { MutableRefObject, useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
+import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -126,7 +127,7 @@ function ListSendCommandContent() {
   if (isLoading && sends.length === 0) {
     return (
       <List>
-        <List.EmptyView title="Loading Sends...." icon={Icon.ArrowClockwise} description="Please wait." />
+        <ListLoadingView title="Loading Sends..." description="Please wait." />
       </List>
     );
   }
