@@ -1,5 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActionPanel, open, List, Action, Icon, LocalStorage, Toast, showToast, Clipboard, trash } from "@raycast/api";
+import {
+  ActionPanel,
+  open,
+  List,
+  Action,
+  Icon,
+  LocalStorage,
+  Toast,
+  showToast,
+  Clipboard,
+  trash,
+  Form,
+} from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import { useFetch } from "@raycast/utils";
@@ -77,21 +89,18 @@ const getDependcyString = (extensionId: string) => {
 </dependency>`;
 };
 
-export default function Command(props: any) {
+export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [selectedExtensionIds, setSelectedExtensionIds] = useState<string[]>([]);
   const [selectedExtensions, setSelectedExtensions] = useState<object[] | null>([]);
   const [data, setData] = useState<string | null>(null);
   const { isLoading, data: extensionList } = useFetch(host + "/api/extensions", { mapResult: removeDuplicatesIds });
 
-  const downloadProject = async () => {
+  const downloadProject = async (values: any) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading... " });
-    let { artifactId } = props.arguments;
-    const { directory, platform, buildTool, groupId, version, unzip } = preferences;
+    const { artifactId, groupId, unzip } = values;
+    const { directory, platform, buildTool, version } = preferences;
     let exists = false;
-    if (!artifactId) {
-      artifactId = "code-with-quarkus";
-    }
     const query = { platform, buildTool, groupId, version };
     const path = `${directory}/${artifactId}`;
     try {
@@ -200,9 +209,25 @@ export default function Command(props: any) {
                     }}
                   />
                   <Action title="Copy Dependency" onAction={() => copyDependency(extension?.id)} />
-                  <Action
+                  <Action.Push
                     title="Download Project"
-                    onAction={downloadProject}
+                    target={
+                      <Form
+                        actions={
+                          <ActionPanel>
+                            <Action.SubmitForm
+                              title="Download Project"
+                              onSubmit={(values) => downloadProject(values)}
+                            />
+                          </ActionPanel>
+                        }
+                        navigationTitle={`Download Project with ${selectedExtensionIds?.length}  extensions`}
+                      >
+                        <Form.TextField id="artifactId" title="Artifact Id" defaultValue="code-with-quarkus" />
+                        <Form.TextField id="groupId" title="Group Id" defaultValue={preferences.groupId} />
+                        <Form.Checkbox id="unzip" label="Unzip when finish download?" defaultValue={true} />
+                      </Form>
+                    }
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
                   <Action
@@ -238,11 +263,28 @@ export default function Command(props: any) {
                     }}
                   />
                   <Action title="Copy Dependency" onAction={() => copyDependency(extension?.id)} />
-                  <Action
+                  <Action.Push
                     title="Download Project"
-                    onAction={downloadProject}
+                    target={
+                      <Form
+                        actions={
+                          <ActionPanel>
+                            <Action.SubmitForm
+                              title="Download Project"
+                              onSubmit={(values) => downloadProject(values)}
+                            />
+                          </ActionPanel>
+                        }
+                        navigationTitle={`Download Project with ${selectedExtensionIds?.length}  extensions`}
+                      >
+                        <Form.TextField id="artifactId" title="Artifact Id" defaultValue="code-with-quarkus" />
+                        <Form.TextField id="groupId" title="Group Id" defaultValue={preferences.groupId} />
+                        <Form.Checkbox id="unzip" label="Unzip when finish download?" defaultValue={true} />
+                      </Form>
+                    }
                     shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
+
                   <Action
                     title="See Extension Guide"
                     onAction={() => showExtensionGuide(extension?.guide)}

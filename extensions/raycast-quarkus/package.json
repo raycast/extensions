@@ -15,17 +15,7 @@
       "name": "index",
       "title": "List Quarkus Extensions",
       "description": "Generate a project with desired extensions, dependencies, and properties, providing a tailored and efficient Quarkus application setup process.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "artifactId",
-          "title": "Artifact ID",
-          "description": "The artifact ID of the project.",
-          "type": "text",
-          "required": false,
-          "placeholder": "code-with-quarkus"
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -86,8 +76,8 @@
     },
     {
       "name": "groupId",
-      "title": "Group ID",
-      "description": "The group ID of the project.",
+      "title": "Default Group ID",
+      "description": "The default group ID of the project.",
       "type": "textfield",
       "required": true,
       "default": "org.acme"
@@ -107,13 +97,6 @@
       "type": "directory",
       "required": true,
       "default": "~/Downloads"
-    },
-    {
-      "name": "unzip",
-      "label": "Unzip Project",
-      "description": "Unzip the project after downloading.",
-      "type": "checkbox",
-      "required": true
     }
   ],
   "scripts": {
