@@ -63,12 +63,20 @@ const usePasteActionTitle = () => {
   return currentApplication ? `Paste URL into ${currentApplication}` : "Paste URL";
 };
 
+const sortSendsByName = (send1: Send, send2: Send) => {
+  return send1.name.localeCompare(send2.name);
+};
+
 const loadSends = async (bitwarden: Bitwarden, isFirstLoadRef: MutableRefObject<boolean>) => {
   const toast = isFirstLoadRef.current
     ? await showToast({ title: "Loading Sends....", style: Toast.Style.Animated })
     : undefined;
   try {
-    return await bitwarden.listSends();
+    const listSends = await bitwarden.listSends();
+    if (listSends.result) {
+      listSends.result.sort(sortSendsByName);
+    }
+    return listSends;
   } finally {
     isFirstLoadRef.current = false;
     await toast?.hide();
@@ -79,8 +87,10 @@ function ListSendCommandContent() {
   const { pop } = useNavigation();
   const bitwarden = useBitwarden();
   const isFirstLoadRef = useRef(true);
-  const { data, isLoading, revalidate: refresh } = usePromise(() => loadSends(bitwarden, isFirstLoadRef));
   const pasteActionTitle = usePasteActionTitle();
+
+  const listSends = () => loadSends(bitwarden, isFirstLoadRef);
+  const { data, isLoading, revalidate: refresh, mutate } = usePromise(listSends);
 
   const { result: sends = [] } = data ?? {};
 
@@ -101,6 +111,7 @@ function ListSendCommandContent() {
   const onSync = async () => {
     const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
     try {
+      await bitwarden.sync();
       await refresh();
       toast.style = Toast.Style.Success;
       toast.title = "Sends synced";
@@ -125,10 +136,25 @@ function ListSendCommandContent() {
     }
   };
 
-  const onEditSuccess = async (_: Send) => {
+  const onEditSuccess = async (updatedSend: Send) => {
     pop();
-    // TODO: Optimistically update the list of sends instead of syncing
-    await onSync();
+    await mutate(listSends(), {
+      optimisticUpdate: (currentData) => {
+        if (!currentData?.result) return { result: [updatedSend] };
+        const index = currentData?.result.findIndex((send) => send.id === updatedSend.id);
+        const result = [...currentData.result];
+        if (index === -1) {
+          result.push(updatedSend);
+        } else {
+          result[index] = updatedSend;
+        }
+
+        result.sort(sortSendsByName);
+        return { result };
+      },
+      rollbackOnError: true,
+      shouldRevalidateAfter: true,
+    });
   };
 
   if (isLoading && sends.length === 0) {
