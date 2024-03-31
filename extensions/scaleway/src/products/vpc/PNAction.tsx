@@ -3,7 +3,7 @@ import type { VPC } from '@scaleway/sdk'
 import { getPrivateNetworkUrl } from './urls'
 
 type PNActionProps = {
-  privateNetwork: VPC.v1.PrivateNetwork
+  privateNetwork: VPC.v2.PrivateNetwork
   toggleIsDetailOpen: () => void
 }
 

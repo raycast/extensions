@@ -1,15 +1,15 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
+import { getPreferenceUser } from 'helpers/getPreferenceUser'
 import { useReducer } from 'react'
 import { PNAction } from './PNAction'
 import { PNDetail } from './PNDetail'
-import { useAllZonesPrivateNetworksQuery } from './queries'
+import { useAllRegionsPrivateNetworksQuery } from './queries'
 
 export const PNetworks = () => {
   const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
-  const { data: privateNetworks = [], isLoading } = useAllZonesPrivateNetworksQuery({
+  const { data: privateNetworks = [], isLoading } = useAllRegionsPrivateNetworksQuery({
     orderBy: 'created_at_asc',
     organizationId: clientSetting.defaultOrganizationId,
   })
