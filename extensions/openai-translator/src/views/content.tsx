@@ -1,4 +1,4 @@
-import { Action, ActionPanel, confirmAlert, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, getPreferenceValues, Icon, List, showToast, Toast, Clipboard } from "@raycast/api";
 import capitalize from "capitalize";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -108,13 +108,22 @@ export const ContentView = (props: ContentViewProps) => {
     query.updateQuerying(false);
   }
 
+  async function copy2Clipboard(text: string) {
+    await Clipboard.copy(text);
+    await showToast({
+      title: "Translation copied to Clipboard",
+      style: Toast.Style.Success,
+    });
+  }
+
   function onTranslationStop(finishReason: FinishReason) {
     const { toast, detectFrom, detectTo, text, img } = finishReason;
-    toast.title = "Got your translation!";
-    toast.style = Toast.Style.Success;
+    // toast.title = "Got your translation!";
+    // toast.style = Toast.Style.Success;
     const txt = translatedText;
     const newText = ["”", '"', "」"].indexOf(txt[txt.length - 1]) >= 0 ? txt.slice(0, -1) : txt;
     setTranslatedText(newText);
+    copy2Clipboard(newText);
     const record: Record = {
       id: uuidv4(),
       mode,

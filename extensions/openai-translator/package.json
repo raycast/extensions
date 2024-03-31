@@ -5,6 +5,9 @@
   "description": "Translation based on ChatGPT API.",
   "icon": "extension_icon.png",
   "author": "douo",
+  "contributors": [
+    "JoyG"
+  ],
   "categories": [
     "Applications",
     "Productivity"
