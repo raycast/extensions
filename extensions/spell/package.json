@@ -3,7 +3,7 @@
   "name": "spell",
   "title": "Spell",
   "description": "Struggling to spell a word? With this extension, even with typos, you can type the word and receive a list of matching suggestions using the OneLook API.",
-  "icon": "icon.png",
+  "icon": "extension_icon.png",
   "author": "Gorzog",
   "categories": ["Productivity", "Other"],
   "license": "MIT",
