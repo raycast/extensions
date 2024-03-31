@@ -3,7 +3,7 @@
   "name": "simple-icons",
   "title": "Simple Icons",
   "type": "module",
-  "description": "Browse, Search, and Copy 3000+ popular brand icons.",
+  "description": "Browse, Search, and Copy 3100+ popular brand icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "categories": [
@@ -15,14 +15,14 @@
     {
       "name": "index",
       "title": "Search Simple Icons",
-      "description": "Browse, search, and copy 3000+ free SVG icons for popular brands",
+      "description": "Browse, search, and copy 3100+ free SVG icons for popular brands",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.70.2",
     "got": "^14.2.1",
-    "simple-icons": "^11.10.0"
+    "simple-icons": "^11.11.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

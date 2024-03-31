@@ -2,6 +2,8 @@
 
 ## [Improvements] - 2024-3-24
 
+Now we reached 3100+ icons!
+
 ### Features
 
 - Add aliases field

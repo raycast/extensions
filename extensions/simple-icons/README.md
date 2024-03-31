@@ -1,6 +1,6 @@
 # simple-icons-raycast
 
-Browse, search, and copy 3000+ free SVG icons for popular brands.
+Browse, search, and copy 3100+ free SVG icons for popular brands.
 
 ## Disclaimer
 
