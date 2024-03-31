@@ -122,6 +122,8 @@ Both the note name and note content support these templates:
 - `{clipboard}`, `{clip}`
 - `{\n}`, `{nl}`, `{newline}`
 
+But also the table of tokens defined in the [luxon documentation](https://moment.github.io/luxon/#/formatting?id=table-of-tokens) (such as dd, MM, YYYY,...).
+
 <img width="1000" alt="Create Note Command" src="https://user-images.githubusercontent.com/67844154/178248345-bb1718d9-1c29-44b1-b50b-87286e121003.png">
 
 ## Daily Note

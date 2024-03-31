@@ -2,8 +2,8 @@ import { ProviderOptions } from "../types";
 import { OpenaiProvider } from "./openai";
 
 function normalizeModel(name?: string) {
-  if (!name) return "moonshot-v1-32k";
-  if (!name.includes("moonshot")) return "moonshot-v1-32k";
+  if (!name) return "moonshot-v1-8k";
+  if (!name.includes("moonshot")) return "moonshot-v1-8k";
   return name;
 }
 

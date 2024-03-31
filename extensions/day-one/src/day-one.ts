@@ -27,8 +27,8 @@ export async function isDayOneInstalled(): Promise<CLIState> {
 }
 
 async function addEntry(entry: Entry) {
-  const date = entry.date.toISOString().split("T")[0];
-  let command = `dayone2 new "${entry.body}" --date "${date}"`;
+  const date = entry.date.toISOString().split(".")[0] + "Z";
+  let command = `dayone2 new "${entry.body}" --isoDate "${date}"`;
 
   if (entry.journal) {
     command = `${command} --journal ${entry.journal}`;

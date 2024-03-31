@@ -12,18 +12,19 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { batchUpdateTask, getTask, updateTask } from "../api/task";
-import { FieldTemplateObject, Label } from "../types/fieldTemplate";
-import { ListObject } from "../types/list";
-import { TaskObject } from "../types/task";
-import { UserObject } from "../types/user";
-import { CachedPromiseMutateType } from "../types/utils";
-import { WorkspaceObject } from "../types/workspace";
-import { isHeightInstalled } from "../utils/application";
-import { getTintColorFromHue, ListColors } from "../utils/list";
-import { getIconByStatusState, getPriorityIcon } from "../utils/task";
-import DetailsTask from "./DetailsTask";
-import UpdateTask from "./UpdateTask";
+
+import { batchUpdateTask, getTask, updateTask } from "@/api/task";
+import DetailsTask from "@/components/DetailsTask";
+import UpdateTask from "@/components/UpdateTask";
+import { FieldTemplateObject, Label } from "@/types/fieldTemplate";
+import { ListObject } from "@/types/list";
+import { TaskObject } from "@/types/task";
+import { UserObject } from "@/types/user";
+import { CachedPromiseMutateType } from "@/types/utils";
+import { WorkspaceObject } from "@/types/workspace";
+import { isHeightInstalled } from "@/utils/application";
+import { getTintColorFromHue, ListColors } from "@/utils/list";
+import { getIconByStatusState, getPriorityIcon } from "@/utils/task";
 
 type Props = {
   task: TaskObject;
@@ -55,7 +56,7 @@ export default function ActionsTask({
   detailsTaskRevalidate,
 }: Props) {
   const { push } = useNavigation();
-  const { theme } = environment;
+  const { appearance } = environment;
 
   return (
     <ActionPanel>
@@ -140,7 +141,7 @@ export default function ActionsTask({
                 tintColor: user?.pictureUrl
                   ? undefined
                   : `hsl(${user?.hue ?? "0"}, 80%, ${
-                      typeof user?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                      typeof user?.hue === "number" ? "60%" : appearance === "dark" ? "100%" : "0"
                     })`,
               }}
               onAction={async () => {
@@ -171,7 +172,7 @@ export default function ActionsTask({
               icon={{
                 source: getIconByStatusState(status.id, fieldTemplatesStatuses),
                 tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
-                  typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                  typeof status?.hue === "number" ? "60%" : appearance === "dark" ? "100%" : "0"
                 })`,
               }}
               onAction={async () => {
@@ -248,7 +249,7 @@ export default function ActionsTask({
               icon={{
                 source: getPriorityIcon(priority.value),
                 tintColor: `hsl(${priority?.hue ?? "0"}, 80%, ${
-                  typeof priority?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                  typeof priority?.hue === "number" ? "60%" : appearance === "dark" ? "100%" : "0"
                 })`,
               }}
               onAction={async () => {

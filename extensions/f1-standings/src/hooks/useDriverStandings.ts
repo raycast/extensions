@@ -30,7 +30,7 @@ const useDriverStandings = (season: string | null): [DriverStanding[], boolean] 
         setState((previous) => ({
           ...previous,
           isLoading: false,
-          driverStandings: data.MRData.StandingsTable.StandingsLists[0].DriverStandings,
+          driverStandings: data.MRData.StandingsTable.StandingsLists[0]?.DriverStandings ?? [],
         }));
       } catch (error) {
         await showToast({

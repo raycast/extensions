@@ -4,7 +4,7 @@ import { usePromise } from "@raycast/utils";
 import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
 import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
-import { doubleWayTranslate } from "./simple-translate";
+import { doubleWayTranslate, playTTS } from "./simple-translate";
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
@@ -56,6 +56,12 @@ export default function Translate(): ReactElement {
                       title="Toggle Full Text"
                       icon={Icon.Text}
                       onAction={() => setIsShowingDetail(!isShowingDetail)}
+                    />
+                    <Action
+                      title="Play Text-To-Speech"
+                      icon={Icon.Play}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      onAction={() => playTTS(r.translatedText, r.langTo)}
                     />
                     <Action.OpenInBrowser
                       title="Open in Google Translate"

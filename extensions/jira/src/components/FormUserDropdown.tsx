@@ -2,10 +2,10 @@ import { Form, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ForwardedRef, forwardRef, useState } from "react";
 
+import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocomplete } from "../api/request";
 import { User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 type FormUserDropdownProps = {
   autocompleteUrl?: string;
@@ -39,6 +39,7 @@ const FormUserDropdown = forwardRef(
         onSearchTextChange={setQuery}
         storeValue
         throttle
+        filtering
       >
         <Form.Dropdown.Item title="Unassigned" value="" icon={Icon.Person} />
 

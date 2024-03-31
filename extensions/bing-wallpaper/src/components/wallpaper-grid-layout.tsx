@@ -1,4 +1,4 @@
-import { Grid } from "@raycast/api";
+import { Grid, Icon } from "@raycast/api";
 import React, { useState } from "react";
 import { BingImage, DownloadedBingImage } from "../types/types";
 import { WallpaperTag, wallpaperTags } from "../utils/constants";
@@ -41,11 +41,9 @@ export function WallpaperGridLayout(props: {
               <Grid.Item
                 id={index + bingImage.url}
                 key={index + bingImage.startdate}
-                content={{
-                  value: buildBingImageURL(bingImage.url, "icon", 960, 540),
-                  tooltip: bingImage.title + "\n" + bingImage.copyright,
-                }}
+                content={buildBingImageURL(bingImage.url, "icon", 960, 540)}
                 title={getPictureName(bingImage.url)}
+                accessory={{ icon: Icon.Info, tooltip: bingImage.copyright }}
                 actions={
                   <ActionsOnlineBingWallpaper
                     index={index}

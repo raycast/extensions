@@ -12,7 +12,8 @@
   ],
   "contributors": [
     "basix",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "litomore"
   ],
   "license": "MIT",
   "commands": [
@@ -80,6 +81,14 @@
           "placeholder": "default value : 20"
         }
       ]
+    },
+    {
+      "name": "menu-bar-notifications",
+      "title": "Menu Bar Notifications",
+      "subtitle": "Mastodon",
+      "description": "Menu Bar notifications",
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "preferences": [
@@ -88,7 +97,7 @@
       "type": "textfield",
       "required": true,
       "title": "Instance's URL",
-      "description": "Your Mastodon  instance's URL",
+      "description": "Your Mastodon instance's URL",
       "placeholder": "such as: mastodon.social"
     },
     {

@@ -26,7 +26,9 @@ export function useTunnelSessions() {
       const foundTunnels: TunelSessionData["tunnels"] = tunnels
         .filter((tunnel) => tunnel.tunnel_session.id === tunnelSession.id)
         .map((tunnel) => {
-          const foundLocalTunnel = localTunnels.find((localTunnel) => localTunnel.public_url === tunnel.public_url);
+          const foundLocalTunnel = localTunnels.find(
+            (localTunnel) => localTunnel.public_url === tunnel.public_url || localTunnel.ID === tunnel.id,
+          );
 
           return {
             ...tunnel,

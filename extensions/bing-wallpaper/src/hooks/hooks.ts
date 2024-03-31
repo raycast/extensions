@@ -22,7 +22,7 @@ export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
               //Remove duplicate elements
               (second_data as BingResponseData).images.shift();
               const _bingWallpaperHD = (first_data as BingResponseData).images.concat(
-                (second_data as BingResponseData).images
+                (second_data as BingResponseData).images,
               );
 
               setBingWallpaperHD(_bingWallpaperHD);
@@ -30,7 +30,15 @@ export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
                 setDownloadedBingWallpapers(getDownloadedBingWallpapers());
               }
               setIsLoading(false);
+            })
+            .catch(async (e) => {
+              await showToast(Toast.Style.Failure, String(e));
+              setIsLoading(false);
             });
+        })
+        .catch(async (e) => {
+          await showToast(Toast.Style.Failure, String(e));
+          setIsLoading(false);
         });
     } catch (e) {
       if (e instanceof AbortError) {

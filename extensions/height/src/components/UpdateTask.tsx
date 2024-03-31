@@ -1,15 +1,16 @@
 import { Action, ActionPanel, environment, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useState } from "react";
-import { batchUpdateTask, getTask, updateTask } from "../api/task";
-import useFieldTemplates from "../hooks/useFieldTemplates";
-import useLists from "../hooks/useLists";
-import useTasks from "../hooks/useTasks";
-import useUsers from "../hooks/useUsers";
-import { TaskObject, UpdateBatchTaskPayload, UpdateTaskFormValues, UpdateTaskPayload } from "../types/task";
-import { CachedPromiseMutateType } from "../types/utils";
-import { getTintColorFromHue, ListColors } from "../utils/list";
-import { getIconByStatusState } from "../utils/task";
+
+import { batchUpdateTask, getTask, updateTask } from "@/api/task";
+import useFieldTemplates from "@/hooks/useFieldTemplates";
+import useLists from "@/hooks/useLists";
+import useTasks from "@/hooks/useTasks";
+import useUsers from "@/hooks/useUsers";
+import { TaskObject, UpdateBatchTaskPayload, UpdateTaskFormValues, UpdateTaskPayload } from "@/types/task";
+import { CachedPromiseMutateType } from "@/types/utils";
+import { getTintColorFromHue, ListColors } from "@/utils/list";
+import { getIconByStatusState } from "@/utils/task";
 
 type Props = {
   task: TaskObject;
@@ -19,7 +20,7 @@ type Props = {
 };
 
 export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskRevalidate }: Props) {
-  const { theme } = environment;
+  const { appearance } = environment;
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -165,7 +166,7 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
             icon={{
               source: getIconByStatusState(status.id, fieldTemplatesStatuses),
               tintColor: `hsl(${status?.hue ?? "0"}, 80%, ${
-                typeof status?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                typeof status?.hue === "number" ? "60%" : appearance === "dark" ? "100%" : "0"
               })`,
             }}
           />
@@ -183,7 +184,7 @@ export default function UpdateList({ task, mutateTask, detailsPage, detailsTaskR
               tintColor: user?.pictureUrl
                 ? undefined
                 : `hsl(${user?.hue ?? "0"}, 80%, ${
-                    typeof user?.hue === "number" ? "60%" : theme === "dark" ? "100%" : "0"
+                    typeof user?.hue === "number" ? "60%" : appearance === "dark" ? "100%" : "0"
                   })`,
             }}
           />

@@ -102,11 +102,7 @@ export interface ChatViewProps extends ChangeModelProp {
   use: { chats: ChatHook; conversations: ConversationsHook; savedChats: SavedChatHook };
 }
 
-export interface ConfigurationPreferences {
-  apiKey: string;
-  useAzure: boolean;
-  azureEndpoint: string;
-  azureDeployment: string;
-  useApiEndpoint: boolean;
-  apiEndpoint: string;
+export interface CSVPrompt {
+  act: string;
+  prompt: string;
 }

@@ -41,11 +41,7 @@ const MissingDomain = () => {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Open Extension Preferences"
-            onAction={openExtensionPreferences}
-            shortcut={{ key: 'enter', modifiers: [] }}
-          />
+          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

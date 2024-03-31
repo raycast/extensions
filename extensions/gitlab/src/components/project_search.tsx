@@ -1,83 +1,9 @@
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
-import { getErrorMessage, projectIcon, showErrorToast } from "../utils";
-import {
-  CloneProjectInGitPod,
-  CloneProjectInVSCodeAction,
-  CopyProjectIDToClipboardAction,
-  CopyCloneUrlToClipboardAction,
-  CreateNewProjectIssuePushAction,
-  OpenProjectBranchesPushAction,
-  OpenProjectIssuesPushAction,
-  OpenProjectLabelsInBrowserAction,
-  OpenProjectMergeRequestsPushAction,
-  OpenProjectMilestonesPushAction,
-  OpenProjectPipelinesPushAction,
-  OpenProjectSecurityComplianceInBrowserAction,
-  OpenProjectSettingsInBrowserAction,
-  OpenProjectWikiInBrowserAction,
-  ProjectDefaultActions,
-  ShowProjectLabels,
-} from "./project_actions";
-import { CacheActionPanelSection } from "./cache_actions";
-import { ProjectListEmptyView } from "./project";
-
-export function ProjectListItem(props: { project: Project }): JSX.Element {
-  const project = props.project;
-  const accessories = [];
-  if (project.archived) {
-    accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
-  }
-  accessories.push({
-    text: project.star_count.toString(),
-    icon: {
-      source: Icon.Star,
-      tintColor: project.star_count > 0 ? Color.Yellow : null,
-    },
-    tooltip: `Number of stars: ${project.star_count}`,
-  });
-  return (
-    <List.Item
-      id={project.id.toString()}
-      title={project.name_with_namespace}
-      accessories={accessories}
-      icon={projectIcon(project)}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section title={project.name_with_namespace}>
-            <ProjectDefaultActions project={project} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <CopyProjectIDToClipboardAction project={project} />
-            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <OpenProjectIssuesPushAction project={project} />
-            <OpenProjectMergeRequestsPushAction project={project} />
-            <OpenProjectBranchesPushAction project={project} />
-            <OpenProjectPipelinesPushAction project={project} />
-            <OpenProjectMilestonesPushAction project={project} />
-            <OpenProjectWikiInBrowserAction project={project} />
-            <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Open in Browser">
-            <CreateNewProjectIssuePushAction project={project} />
-            <OpenProjectLabelsInBrowserAction project={project} />
-            <OpenProjectSecurityComplianceInBrowserAction project={project} />
-            <OpenProjectSettingsInBrowserAction project={project} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="IDE">
-            <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
-            <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
-          </ActionPanel.Section>
-          <CacheActionPanelSection />
-        </ActionPanel>
-      }
-    />
-  );
-}
+import { getErrorMessage, showErrorToast } from "../utils";
+import { ProjectListEmptyView, ProjectListItem } from "./project";
 
 export function ProjectSearchList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
