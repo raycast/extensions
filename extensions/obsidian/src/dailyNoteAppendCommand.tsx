@@ -1,4 +1,14 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  List,
+  open,
+  popToRoot,
+  getSelectedText,
+  Clipboard,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
@@ -19,14 +29,21 @@ interface DailyNoteAppendArgs {
 
 export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs }) {
   const { vaults, ready } = useObsidianVaults();
-  const { text } = props.arguments;
   const { appendTemplate, heading, vaultName, silent } = getPreferenceValues<DailyNoteAppendPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
   const [content, setContent] = useState("");
   useEffect(() => {
     async function getContent() {
-      const content = await applyTemplates(text, appendTemplate);
-      setContent(content);
+      try {
+        const selectedText = await getSelectedText();
+        const { text: clipboardText } = await Clipboard.read();
+        const text = props.arguments.text || selectedText || clipboardText;
+        const content = await applyTemplates(text, appendTemplate);
+        setContent(content);
+      } catch (error) {
+        closeMainWindow();
+        console.error("Error in getting content", error);
+      }
     }
     getContent();
   }, []);

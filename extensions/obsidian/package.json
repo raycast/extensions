@@ -14,7 +14,8 @@
     "pernielsentikaer",
     "ofalvai",
     "adamadamsmusic",
-    "fservais"
+    "fservais",
+    "ShinningFinger"
   ],
   "license": "MIT",
   "preferences": [
@@ -264,8 +265,7 @@
         {
           "name": "text",
           "placeholder": "Take out the trash",
-          "type": "text",
-          "required": true
+          "type": "text"
         }
       ],
       "preferences": [
@@ -395,6 +395,13 @@
           "default": ""
         }
       ]
+    },
+    {
+      "name": "createNoteFromSelectedTextCommand",
+      "title": "Create Note from Selected Text",
+      "subtitle": "Obsidian",
+      "description": "Create a new note from selected text",
+      "mode": "view"
     },
     {
       "name": "randomNoteCommand",
