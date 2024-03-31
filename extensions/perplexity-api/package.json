@@ -55,7 +55,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -105,7 +105,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -155,7 +155,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -205,7 +205,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -255,7 +255,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -317,7 +317,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "mistral-7b-instruct",
@@ -396,7 +396,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -447,7 +447,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -498,7 +498,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -549,7 +549,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -600,7 +600,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -651,7 +651,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -702,7 +702,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -753,7 +753,7 @@
             },
             {
               "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8x7b Instruct 16k"
+              "title": "Mixtral 8x7B Instruct 16k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -791,7 +791,7 @@
         },
         {
           "value": "mixtral-8x7b-instruct",
-          "title": "Mixtral 8x7b Instruct 16k"
+          "title": "Mixtral 8x7B Instruct 16k"
         },
         {
           "value": "mistral-7b-instruct",
