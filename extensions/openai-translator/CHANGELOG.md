@@ -1,5 +1,10 @@
 # OpenAI Translator Changelog
 
+## [Toggle Auto copy to clipboard after translation]
+
+- Add preference to auto on/off copy to clipboard after translation @joyg
+
+
 ## [Toggle metadata visiability] - 2023-09-14
 
 - Add preference and action to show/hide metadata in DetailView by @aiyogg

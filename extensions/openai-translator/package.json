@@ -560,6 +560,14 @@
       "required": false
     },
     {
+        "name": "isAutoCopy2Clipboard",
+        "label": "Enable auto-copy to clipboard after translation",
+        "description": "Auto copy the response to clipboard after translation",
+        "type": "checkbox",
+        "default": true,
+        "required": false
+    },
+    {
       "name": "maxHistorySize",
       "description": "Enter a *number* as max history size",
       "type": "textfield",

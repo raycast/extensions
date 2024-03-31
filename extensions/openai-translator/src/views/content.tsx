@@ -55,6 +55,10 @@ const { alwayShowMetadata } = getPreferenceValues<{
   alwayShowMetadata: boolean;
 }>();
 
+const { isAutoCopy2Clipboard } = getPreferenceValues<{
+    isAutoCopy2Clipboard: boolean;
+}>();
+
 export const ContentView = (props: ContentViewProps) => {
   const { query, history, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
   const agent = useProxy();
@@ -118,12 +122,15 @@ export const ContentView = (props: ContentViewProps) => {
 
   function onTranslationStop(finishReason: FinishReason) {
     const { toast, detectFrom, detectTo, text, img } = finishReason;
-    // toast.title = "Got your translation!";
-    // toast.style = Toast.Style.Success;
     const txt = translatedText;
     const newText = ["”", '"', "」"].indexOf(txt[txt.length - 1]) >= 0 ? txt.slice(0, -1) : txt;
     setTranslatedText(newText);
-    copy2Clipboard(newText);
+    if (isAutoCopy2Clipboard) {
+      copy2Clipboard(newText);
+    } else {
+        toast.title = "Got your translation!";
+        toast.style = Toast.Style.Success;
+    }
     const record: Record = {
       id: uuidv4(),
       mode,
