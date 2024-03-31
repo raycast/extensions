@@ -11,7 +11,7 @@ export default function Command() {
       new URLSearchParams({ sp: searchText }),
     {
       parseResponse: parseFetchResponse,
-    }
+    },
   );
 
   return (
@@ -22,9 +22,7 @@ export default function Command() {
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + " Found"}>
-        {data?.map((searchResult) => (
-          <SearchListItem key={searchResult.word} searchResult={searchResult} />
-        ))}
+        {data?.map((searchResult) => <SearchListItem key={searchResult.word} searchResult={searchResult} />)}
       </List.Section>
     </List>
   );
