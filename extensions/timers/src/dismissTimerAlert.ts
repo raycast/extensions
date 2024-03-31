@@ -1,6 +1,5 @@
-import { closeMainWindow, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { unlinkSync } from "fs";
-import { getTimers } from "./timerUtils";
+import { closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getTimers, stopTimer } from "./timerUtils";
 import { Timer } from "./types";
 
 export default async () => {
@@ -18,6 +17,5 @@ export default async () => {
     });
   }
   await closeMainWindow();
-  const dismissFile = finishedTimers[0].originalFile.replace(".timer", ".dismiss");
-  unlinkSync(environment.supportPath + "/" + dismissFile);
+  stopTimer(finishedTimers[0].originalFile);
 };

@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_51_988)">
+<rect width="64" height="64" fill="white" fill-opacity="0.4"/>
+<g opacity="0.45">
+<rect x="8" y="2" width="1" height="60" fill="black" fill-opacity="0.2"/>
+<rect x="16" y="2" width="1" height="60" fill="black" fill-opacity="0.2"/>
+<rect x="24" y="2" width="1" height="60" fill="black" fill-opacity="0.2"/>
+<rect x="32" y="2" width="1" height="60" fill="black" fill-opacity="0.2"/>
+<rect x="40" y="2" width="1" height="60" fill="black" fill-opacity="0.2"/>
+<rect x="48" y="2" width="1" height="60" fill="black" fill-opacity="0.2"/>
+<rect x="56" y="2" width="1" height="60" fill="black" fill-opacity="0.2"/>
+<rect x="2" y="8" width="60" height="1" fill="black" fill-opacity="0.2"/>
+<rect x="2" y="16" width="60" height="1" fill="black" fill-opacity="0.2"/>
+<rect x="2" y="24" width="60" height="1" fill="black" fill-opacity="0.2"/>
+<rect x="2" y="32" width="60" height="1" fill="black" fill-opacity="0.2"/>
+<rect x="2" y="40" width="60" height="1" fill="black" fill-opacity="0.2"/>
+<rect x="2" y="48" width="60" height="1" fill="black" fill-opacity="0.2"/>
+<rect x="2" y="56" width="60" height="1" fill="black" fill-opacity="0.2"/>
+</g>
+<path d="M6 58C17.96 6 22.64 6 58 6" stroke="#FF6600" stroke-width="2" stroke-linecap="round"/>
+<rect x="2.5" y="2.5" width="59" height="59" rx="4.5" stroke="black"/>
+</g>
+<defs>
+<clipPath id="clip0_51_988">
+<rect width="64" height="64" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { MutatePromise, getFavicon } from "@raycast/utils";
+import { getFavicon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { cloneAndOpen, WEB_IDES } from "../helpers/repository";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";

@@ -1,5 +1,10 @@
 # Copy Path Changelog
 
+## [Optimize Copy URL] - 2024-02-27
+
+- Add multiple setting items
+- Optimize the ability to copy URLs
+
 ## [Copy Browser Tab URL] - 2023-10-10
 
 - Added the ability to copy the URL of the current tab of the browser

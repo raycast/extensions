@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Application, Clipboard, Detail, List, getFrontmostApplication } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ProcessOutput } from "zx";
-import { commandNotFoundMd, noContentMd } from "./messages";
-import { NormalizedEspansoMatch } from "./types";
-import { getEspansoConfig, getMatches, sortMatches } from "./utils";
+import { commandNotFoundMd, noContentMd } from "./content/messages";
+import { NormalizedEspansoMatch } from "./lib/types";
+import { getEspansoConfig, getMatches, sortMatches } from "./lib/utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,12 +20,15 @@ export default function Command() {
   const pasteTitle = `Paste to ${application?.name}`;
 
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       try {
         const { packages: packageFilesDirectory, match: matchFilesDirectory } = await getEspansoConfig();
+
         const packageMatches = getMatches(packageFilesDirectory, { packagePath: true });
+
         const userMatches = getMatches(matchFilesDirectory);
-        const combinedMatches: NormalizedEspansoMatch[] = userMatches.concat(packageMatches);
+
+        const combinedMatches: NormalizedEspansoMatch[] = [...userMatches, ...packageMatches];
 
         const sortedMatches = sortMatches(combinedMatches);
 
@@ -35,13 +38,13 @@ export default function Command() {
         setError(err instanceof ProcessOutput ? err : null);
         setIsLoading(false);
       }
-    }
+    };
 
     fetchData();
   }, []);
 
   if (error) {
-    const notFound = Boolean(error.stderr.match("command not found"));
+    const notFound = Boolean(/command not found/.exec(error.stderr));
 
     return notFound ? <Detail markdown={commandNotFoundMd} /> : <Detail markdown={error.stderr} />;
   }
@@ -55,7 +58,7 @@ export default function Command() {
       {items.map(({ triggers, replace, label }, index) => (
         <List.Item
           key={index}
-          title={label || triggers.join(", ")}
+          title={label ?? triggers.join(", ")}
           subtitle={!label ? "" : triggers.join(", ")}
           detail={<List.Item.Detail markdown={replace} />}
           actions={

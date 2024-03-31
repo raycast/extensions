@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-history",
   "title": "Browser History",
-  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge, Brave, Vivaldi, Arc, Opera, Iridium and Orion.",
+  "description": "Search and open tabs from history in Chrome, Firefox, Safari, Edge, Brave, Vivaldi, Arc, Opera, Iridium, Orion and Sidekick.",
   "icon": "icon.png",
   "author": "crisboarna",
   "categories": [
@@ -66,6 +66,10 @@
             {
               "title": "Orion",
               "value": "Orion"
+            },
+            {
+              "title": "Sidekick",
+              "value": "Sidekick"
             }
           ]
         },
@@ -123,6 +127,10 @@
             {
               "title": "Orion",
               "value": "Orion"
+            },
+            {
+              "title": "Sidekick",
+              "value": "Sidekick"
             }
           ]
         },
@@ -208,6 +216,14 @@
           "label": "Orion"
         },
         {
+          "name": "enableSidekick",
+          "type": "checkbox",
+          "required": false,
+          "description": "Enable Sidekick history to show up in results",
+          "default": false,
+          "label": "Sidekick"
+        },
+        {
           "name": "profilePathChrome",
           "type": "textfield",
           "required": false,
@@ -286,6 +302,14 @@
           "title": "Orion Profile Path",
           "description": "Path to Orion profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Orion/Defaults",
           "placeholder": "/Users/username/Library/Application Support/Orion/Defaults"
+        },
+        {
+          "name": "profilePathSidekick",
+          "type": "textfield",
+          "required": false,
+          "title": "Sidekick Profile Path",
+          "description": "Path to Sidekick profile folder. Leave empty to use default profile. Default at /Users/username/Library/Application Support/Sidekick/Default",
+          "placeholder": "/Users/username/Library/Application Support/Sidekick/Default"
         }
       ]
     }

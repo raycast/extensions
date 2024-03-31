@@ -21,6 +21,9 @@ import DigestDetail from "./components/DigestDetail";
 import SharableLinkAction from "./components/SharableLinkAction";
 import CustomActionPanel from "./components/CustomActionPanel";
 import GenTodaysDigestPanel from "./components/GenTodaysDigestPanel";
+import RedirectRoute from "./components/RedirectRoute";
+import GenDigestInBGAction from "./components/GenDigestInBGAction";
+import ShowRSSDetailAction from "./components/ShowRSSDetailAction";
 
 export default function DailyReadCommand(props: LaunchProps<{ launchContext: { autoGenDigest: boolean } }>) {
   const autoGenDigest = props?.launchContext?.autoGenDigest ?? false;
@@ -71,7 +74,7 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
 
   const manageSourceListActionNode = (
     <Action
-      title="Manage Source List"
+      title="Manage Sources"
       shortcut={Keyboard.Shortcut.Common.Edit}
       icon={Icon.Pencil}
       onAction={() => {
@@ -81,146 +84,158 @@ export default function DailyReadCommand(props: LaunchProps<{ launchContext: { a
   );
 
   return (
-    <List isLoading={!todayItems && !otherItems}>
-      {itemsLength === 0 ? (
-        <List.EmptyView
-          actions={<CustomActionPanel>{manageSourceListActionNode}</CustomActionPanel>}
-          title="No Sources Found"
-          description="Go to manage your sources"
-        />
-      ) : (
-        <>
-          <List.Section title="Daily Digest">
-            {todaysDigest ? (
-              <DigestListItem
-                digest={todaysDigest}
-                itemProps={{
-                  actions: (
+    <RedirectRoute>
+      <List isLoading={!todayItems && !otherItems}>
+        {itemsLength === 0 ? (
+          <List.EmptyView
+            actions={<CustomActionPanel>{manageSourceListActionNode}</CustomActionPanel>}
+            title="No Source Found"
+            description="Press `Enter` to manage your sources"
+          />
+        ) : (
+          <>
+            <List.Section title="Daily Digest">
+              {todaysDigest ? (
+                <DigestListItem
+                  digest={todaysDigest}
+                  itemProps={{
+                    actions: (
+                      <CustomActionPanel>
+                        <Action.Push
+                          icon={Icon.Eye}
+                          title="View Detail"
+                          target={<DigestDetail digest={todaysDigest} />}
+                        />
+                        {generateDigestActionNode}
+                        <GenDigestInBGAction onSuccess={revalidate} autoFocus />
+                        <SharableLinkAction
+                          actionTitle="Share This Digest"
+                          articleTitle={todaysDigest.title}
+                          articleContent={todaysDigest.content}
+                        />
+                        {manageSourceListActionNode}
+                      </CustomActionPanel>
+                    ),
+                  }}
+                />
+              ) : (
+                <List.Item
+                  title={"Your digest for today has not been generated yet"}
+                  subtitle="press Enter to generate"
+                  actions={
                     <CustomActionPanel>
-                      <Action.Push
-                        icon={Icon.Eye}
-                        title="View Detail"
-                        target={<DigestDetail digest={todaysDigest} />}
-                      />
                       {generateDigestActionNode}
-                      <SharableLinkAction
-                        actionTitle="Share This Digest"
-                        articleTitle={todaysDigest.title}
-                        articleContent={todaysDigest.content}
-                      />
+                      <GenDigestInBGAction autoFocus onSuccess={revalidate} />
                     </CustomActionPanel>
-                  ),
-                }}
-              />
-            ) : (
-              <List.Item
-                title={"Your digest for today has not been generated yet"}
-                subtitle="press Enter to generate"
-                actions={<CustomActionPanel>{generateDigestActionNode}</CustomActionPanel>}
-              />
-            )}
-          </List.Section>
-          <List.Section title="Today">
-            {(todayItems || []).map((item, index) => (
-              <List.Item
-                key={index}
-                title={item.title}
-                // subtitle={item.url}
-                icon={item.favicon || Icon.Book}
-                accessories={filterByShownStatus([
-                  {
-                    icon: "./rssicon.svg",
-                    tooltip: "This source has a rss link which can be used for daily digest.",
-                    show: !!item.rssLink,
-                  },
-                  {
-                    tag: {
-                      value: `${(item.tags || [])?.join?.(", ")}`,
-                      color: Color.Blue,
+                  }
+                />
+              )}
+            </List.Section>
+            <List.Section title="Today">
+              {(todayItems || []).map((item, index) => (
+                <List.Item
+                  key={index}
+                  title={item.title}
+                  // subtitle={item.url}
+                  icon={item.favicon || Icon.Book}
+                  accessories={filterByShownStatus([
+                    {
+                      icon: "./rssicon.svg",
+                      tooltip: "This source has a rss link which can be used for daily digest.",
+                      show: !!item.rssLink,
                     },
-                    show: item.tags?.length > 0,
-                  },
-                  {
-                    tag: {
-                      value: item.schedule === "custom" ? item.customDays?.join?.(", ") : capitalize(item.schedule),
-                      color: Color.SecondaryText,
+                    {
+                      tag: {
+                        value: `${(item.tags || [])?.join?.(", ")}`,
+                        color: Color.Blue,
+                      },
+                      show: (item.tags || [])?.length > 0,
                     },
-                    show: true,
-                  },
-                ])}
-                actions={
-                  <CustomActionPanel>
-                    <Action.OpenInBrowser url={addUtmSourceToUrl(item.url)} title="Open URL" />
-                    <Action
-                      icon={Icon.ArrowNe}
-                      title="Open All Today's Sources"
-                      onAction={() => openMultipleUrls(todayItems!)}
-                    />
-                    {manageSourceListActionNode}
-                    {generateDigestActionNode}
-                    {item.rssLink && (
-                      <Action.OpenInBrowser
-                        shortcut={{ modifiers: ["cmd"], key: "l" }}
-                        url={item.rssLink}
-                        title="Open RSS Link"
+                    {
+                      tag: {
+                        value: item.schedule === "custom" ? item.customDays?.join?.(", ") : capitalize(item.schedule),
+                        color: Color.SecondaryText,
+                      },
+                      show: true,
+                    },
+                  ])}
+                  actions={
+                    <CustomActionPanel>
+                      <Action.OpenInBrowser url={addUtmSourceToUrl(item.url)} title="Open URL" />
+                      <Action
+                        icon={Icon.ArrowNe}
+                        title="Open All Today's Sources"
+                        onAction={() => openMultipleUrls(todayItems!)}
                       />
-                    )}
-                  </CustomActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-          <List.Section title="Others">
-            {(otherItems || []).map((item, index) => (
-              <List.Item
-                key={index}
-                title={item.title}
-                // subtitle={item.url}
-                icon={item.favicon || Icon.Book}
-                accessories={filterByShownStatus([
-                  {
-                    icon: "./rssicon.svg",
-                    tooltip: "This source has a rss link which can be used for daily digest.",
-                    show: !!item.rssLink,
-                  },
-                  {
-                    tag: {
-                      value: `${(item.tags || [])?.join?.(", ")}`,
-                      color: Color.Blue,
+                      {manageSourceListActionNode}
+                      {generateDigestActionNode}
+                      <GenDigestInBGAction onSuccess={revalidate} />
+                      {item.rssLink && <ShowRSSDetailAction rssLink={item.rssLink} url={item.url} />}
+                      {item.rssLink && (
+                        <Action.OpenInBrowser
+                          shortcut={{ modifiers: ["cmd"], key: "l" }}
+                          url={item.rssLink}
+                          title="Open RSS Link"
+                        />
+                      )}
+                    </CustomActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+            <List.Section title="Others">
+              {(otherItems || []).map((item, index) => (
+                <List.Item
+                  key={index}
+                  title={item.title}
+                  // subtitle={item.url}
+                  icon={item.favicon || Icon.Book}
+                  accessories={filterByShownStatus([
+                    {
+                      icon: "./rssicon.svg",
+                      tooltip: "This source has a rss link which can be used for daily digest.",
+                      show: !!item.rssLink,
                     },
-                    show: item.tags?.length > 0,
-                  },
-                  {
-                    tag: {
-                      value: item.schedule === "custom" ? item.customDays?.join?.(", ") : capitalize(item.schedule),
-                      color: Color.SecondaryText,
+                    {
+                      tag: {
+                        value: `${(item.tags || [])?.join?.(", ")}`,
+                        color: Color.Blue,
+                      },
+                      show: (item.tags || [])?.length > 0,
                     },
-                    show: true,
-                  },
-                ])}
-                actions={
-                  <CustomActionPanel>
-                    <Action.OpenInBrowser url={addUtmSourceToUrl(item.url)} title="Open URL" />
-                    <Action
-                      icon={Icon.ArrowNe}
-                      title="Open All Other's Sources"
-                      onAction={() => openMultipleUrls(otherItems!)}
-                    />
-                    {manageSourceListActionNode}
-                    {item.rssLink && (
-                      <Action.OpenInBrowser
-                        shortcut={{ modifiers: ["cmd"], key: "l" }}
-                        url={item.rssLink}
-                        title="Open RSS Link"
+                    {
+                      tag: {
+                        value: item.schedule === "custom" ? item.customDays?.join?.(", ") : capitalize(item.schedule),
+                        color: Color.SecondaryText,
+                      },
+                      show: true,
+                    },
+                  ])}
+                  actions={
+                    <CustomActionPanel>
+                      <Action.OpenInBrowser url={addUtmSourceToUrl(item.url)} title="Open URL" />
+                      <Action
+                        icon={Icon.ArrowNe}
+                        title="Open All Other's Sources"
+                        onAction={() => openMultipleUrls(otherItems!)}
                       />
-                    )}
-                  </CustomActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        </>
-      )}
-    </List>
+                      {manageSourceListActionNode}
+                      {item.rssLink && <ShowRSSDetailAction rssLink={item.rssLink} url={item.url} />}
+                      {item.rssLink && (
+                        <Action.OpenInBrowser
+                          shortcut={{ modifiers: ["cmd"], key: "l" }}
+                          url={item.rssLink}
+                          title="Open RSS Link"
+                        />
+                      )}
+                    </CustomActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          </>
+        )}
+      </List>
+    </RedirectRoute>
   );
 }

@@ -46,8 +46,18 @@ export function useDatabases() {
   return { ...value, data: value.data ?? [] };
 }
 
-export function useDatabaseProperties(databaseId: string | null) {
-  const value = useCachedPromise((id) => fetchDatabaseProperties(id), [databaseId], { execute: !!databaseId });
+export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
+  const value = useCachedPromise(
+    (id): Promise<DatabaseProperty[]> =>
+      fetchDatabaseProperties(id).then((databaseProperties) => {
+        if (databaseProperties && filter) {
+          return databaseProperties.filter(filter);
+        }
+        return databaseProperties;
+      }),
+    [databaseId],
+    { execute: !!databaseId },
+  );
 
   return { ...value, data: value.data ?? [] };
 }
@@ -70,7 +80,7 @@ export function useDatabasesView(databaseId: string) {
   }
 
   return {
-    data: data?.[databaseId],
+    data: data?.[databaseId] || {},
     isLoading,
     mutate,
     setDatabaseView,
@@ -121,10 +131,11 @@ export function useRecentPages() {
       await Promise.all(
         recentPages.map((p) => {
           // convert each RecentPage object into a Page object
+          // don't error if the page is not found
           if (p.type === "page") {
-            return fetchPage(p.id);
+            return fetchPage(p.id, true);
           } else {
-            return fetchDatabase(p.id);
+            return fetchDatabase(p.id, true);
           }
         }),
       )

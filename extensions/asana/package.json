@@ -5,11 +5,13 @@
   "description": "Create, access, and modify tasks.",
   "icon": "asana.png",
   "author": "thomaslombart",
+  "contributors": [
+    "Spacedolphin",
+    "tuzemec"
+  ],
   "owner": "raycast",
   "access": "public",
-  "categories": [
-    "Productivity"
-  ],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -37,7 +39,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.53.4",
-    "@raycast/utils": "^1.4.9",
+    "@raycast/utils": "^1.12.3",
     "axios": "^0.27.2",
     "date-fns": "^2.29.1",
     "lodash": "^4.17.21",

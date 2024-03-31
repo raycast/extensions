@@ -26,6 +26,11 @@ export type Issue = {
   };
 };
 
+export type Result = {
+  total: number;
+  data: Issue[] | Project[];
+};
+
 export type IssueBody = {
   issues: Issue[];
 } & unknown;
@@ -33,6 +38,12 @@ export type IssueBody = {
 export type ProjectBody = {
   values: { key: string; name: string }[];
 } & unknown;
+
+export type PaginationBody = {
+  maxResults: number;
+  startAt: number;
+  total: number;
+};
 
 export type JiraErrorResponseBody = {
   message?: string;

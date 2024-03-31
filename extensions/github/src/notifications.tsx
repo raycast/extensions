@@ -2,12 +2,12 @@ import { Endpoints } from "@octokit/types";
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import NotificationListItem from "./components/NotificationListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
-import View from "./components/View";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
 export type NotificationsResponse = Endpoints["GET /notifications"]["response"];
@@ -75,10 +75,4 @@ function Notifications() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <Notifications />
-    </View>
-  );
-}
+export default withGitHubClient(Notifications);

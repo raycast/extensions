@@ -7,6 +7,7 @@ import {
   LaunchType,
   Toast,
   launchCommand,
+  popToRoot,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -20,6 +21,7 @@ import DigestDetail from "./DigestDetail";
 import dayjs from "dayjs";
 import { pick } from "lodash";
 import { formatSeconds } from "../utils/util";
+import GenDigestInBGAction from "./GenDigestInBGAction";
 
 const navTitleMap = {
   generating: "Generating Digest",
@@ -79,14 +81,16 @@ export default function GenTodaysDigestPanel({
   const [failedItemsNum, setFailedItemsNum] = useState(0);
   const [rawItemsNum, setRawItemsNum] = useState(0);
 
-  const md = `
+  const middleStageStr =
+    status === "success"
+      ? ""
+      : `
   ${
-    status === "failed"
-      ? `> ❗**Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed) to know more.\n`
+    translateStatus !== "waiting"
+      ? `
+  🔄 \`Translate Titles\`  ${translateStatusMap[translateStatus]}\n`
       : ""
   }
-  📊 \`Total Items\`  ${pullItemsStatus === "success" ? `**${total}**` : pullItemsStatusMap[pullItemsStatus]}\n
-  🔄 \`Translate Titles\`  ${translateStatusMap[translateStatus]}\n
   ${
     sumarizeItemStatus === "start"
       ? `
@@ -96,16 +100,33 @@ export default function GenTodaysDigestPanel({
   `
       : ""
   }\n
+  `;
+
+  const genBgGuide = `> 👋 If you don't want to wait here, you can generate in background by pressing \`⌘ + B\`.\n\n
+  ---\n\n`;
+
+  const md = `
+  ${status === "generating" ? genBgGuide : ""}
+  ${
+    status === "failed"
+      ? `> ❗**Digest failed to generate**, error is: \`${errorMessage}\`. View related [doc](https://tidyread.info/docs/why-digest-failed) to know more.\n`
+      : ""
+  }
+  📊 \`Total Items\`  ${pullItemsStatus === "success" ? `**${total}**` : pullItemsStatusMap[pullItemsStatus]}\n
+  ${middleStageStr}
   ⌛ \`Total Time\`  ${totalTime ? `**${formatSeconds(totalTime)}**` : "--"}
-  
+
+  ${status === "success" ? "![digest_complete](./digest_done.svg)" : ""}
+
   ### 💡 Tips
   - Can't stand manually generating? Check [this](https://tidyread.info/docs/automate-daily-digest) to free your hand.
   - Generating process is too slow? Check [this](https://tidyread.info/docs/why-digest-failed#excessive-execution-time) to speed up.
+  - Looking for more reading sources? Check [this](https://tidyread.info/docs/where-to-find-rss) to solve it.
   `;
 
   const manageSourceListActionNode = (
     <Action
-      title="Manage Source List"
+      title="Manage Sources"
       shortcut={Keyboard.Shortcut.Common.Edit}
       icon={Icon.Pencil}
       onAction={() => {
@@ -129,7 +150,8 @@ export default function GenTodaysDigestPanel({
             setTotal(stage.data);
             console.log("pullitems stage.data", stage.data);
           } else if (status === "failed") {
-            setPullItemsStatus("failed");
+            // 无需关注错误情况，会在简报中生成相应的错误提示
+            // setPullItemsStatus("failed");
           }
         }
 
@@ -200,6 +222,22 @@ export default function GenTodaysDigestPanel({
     }
   };
 
+  const retry = async () => {
+    setStatus("generating");
+    setPullItemsStatus("waiting");
+    setTranslateStatus("waiting");
+    setSumarizeItemStatus("waiting");
+    setDigest(null);
+    setErrorMessage("");
+    setTotal(0);
+    setTotalTime(0);
+    setSuccessItemsNum(0);
+    setFailedItemsNum(0);
+    setRawItemsNum(0);
+
+    await handleGenDigest();
+  };
+
   useEffect(() => {
     handleGenDigest();
   }, []);
@@ -218,6 +256,13 @@ export default function GenTodaysDigestPanel({
               }}
             />
           )}
+          {status === "failed" && <Action title="Retry" onAction={retry}></Action>}
+          <GenDigestInBGAction
+            autoFocus
+            onClick={async () => {
+              await popToRoot();
+            }}
+          />
           {status !== "generating" && (
             <>
               <Action.CopyToClipboard title="Copy Content" content={md} />
