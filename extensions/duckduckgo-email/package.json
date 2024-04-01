@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "duckduckgo-email",
   "version": "1.0.0",
-  "title": "DuckDuckGo-Email",
+  "title": "DuckDuckGo Email",
   "description": "A simple extension that generate DuckDuckGo email alias",
-  "icon": "command-icon.png",
+  "icon": "duckduckgo-icon.jpeg",
   "author": "Hugo-Persson",
   "categories": [
     "Productivity"
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "icon": "duckduckgo-icon.jpeg",
-      "title": "Generate email alias",
+      "title": "Generate Email Alias",
       "description": "Generates email and copies it to your clipboard",
       "mode": "no-view"
     }
