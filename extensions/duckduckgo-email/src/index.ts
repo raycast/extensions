@@ -12,16 +12,13 @@ interface EmailResponse {
 async function getEmail() {
   const preferences = getPreferenceValues<Preferences>();
   console.log(preferences);
-  let response = await fetch(
-    "https://quack.duckduckgo.com/api/email/addresses",
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${preferences.token}`,
-      },
-      redirect: "follow",
+  const response = await fetch("https://quack.duckduckgo.com/api/email/addresses", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${preferences.token}`,
     },
-  );
+    redirect: "follow",
+  });
   const parsedResponse = (await response.json()) as EmailResponse;
   return parsedResponse.address + "@duck.com";
 }

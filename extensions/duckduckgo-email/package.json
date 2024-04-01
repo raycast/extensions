@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "title": "DuckDuckGo Email",
   "description": "A simple extension that generate DuckDuckGo email alias",
-  "icon": "duckduckgo-icon.jpeg",
+  "icon": "duckduckgo-icon.png",
   "author": "Hugo-Persson",
   "categories": [
     "Productivity"
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "index",
-      "icon": "duckduckgo-icon.jpeg",
+      "icon": "duckduckgo-icon.png",
       "title": "Generate Email Alias",
       "description": "Generates email and copies it to your clipboard",
       "mode": "no-view"
