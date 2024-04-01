@@ -1,4 +1,14 @@
-import { Action, ActionPanel, confirmAlert, getPreferenceValues, Icon, List, showToast, Toast, Clipboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
 import capitalize from "capitalize";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -56,7 +66,7 @@ const { alwayShowMetadata } = getPreferenceValues<{
 }>();
 
 const { isAutoCopy2Clipboard } = getPreferenceValues<{
-    isAutoCopy2Clipboard: boolean;
+  isAutoCopy2Clipboard: boolean;
 }>();
 
 export const ContentView = (props: ContentViewProps) => {
@@ -128,8 +138,8 @@ export const ContentView = (props: ContentViewProps) => {
     if (isAutoCopy2Clipboard) {
       copy2Clipboard(newText);
     } else {
-        toast.title = "Got your translation!";
-        toast.style = Toast.Style.Success;
+      toast.title = "Got your translation!";
+      toast.style = Toast.Style.Success;
     }
     const record: Record = {
       id: uuidv4(),

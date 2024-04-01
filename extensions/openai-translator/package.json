@@ -560,12 +560,12 @@
       "required": false
     },
     {
-        "name": "isAutoCopy2Clipboard",
-        "label": "Enable auto-copy to clipboard after translation",
-        "description": "Auto copy the response to clipboard after translation",
-        "type": "checkbox",
-        "default": true,
-        "required": false
+      "name": "isAutoCopy2Clipboard",
+      "label": "Enable auto-copy to clipboard after translation",
+      "description": "Auto copy the response to clipboard after translation",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     },
     {
       "name": "maxHistorySize",
@@ -631,6 +631,8 @@
     "iso-639-1": "^2.1.15",
     "iso-639-3-to-1": "^1.0.0",
     "node-fetch": "^3.3.0",
+    "ray": "^0.0.1",
+    "raycast": "^1.0.8",
     "socks-proxy-agent": "^7.0.0",
     "uuid": "^9.0.0"
   },
