@@ -1,7 +1,7 @@
-import fetch from 'node-fetch';
-import { random } from '../utils/api';
-import { useState, useEffect } from 'react';
-import { Card } from '../types/types';
+import fetch from "node-fetch";
+import { random } from "../utils/api";
+import { useState, useEffect } from "react";
+import { Card } from "../types/types";
 
 export const drawCards = (n: number) => {
   const [cards, setCards] = useState<Card[] | null>(null);

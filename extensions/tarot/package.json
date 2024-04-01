@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "draw-a-card",
-      "title": "Draw a card",
+      "title": "Draw a Card",
       "description": "Draw a card from a virtual tarot deck and see it's meaning.",
       "mode": "view"
     }
