@@ -265,7 +265,8 @@
         {
           "name": "text",
           "placeholder": "Take out the trash",
-          "type": "text"
+          "type": "text",
+          "required": false
         }
       ],
       "preferences": [
@@ -398,7 +399,7 @@
     },
     {
       "name": "createNoteFromSelectedTextCommand",
-      "title": "Create Note from Selected Text",
+      "title": "Create Note From Selected Text",
       "subtitle": "Obsidian",
       "description": "Create a new note from selected text",
       "mode": "view"
