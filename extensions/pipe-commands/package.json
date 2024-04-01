@@ -72,8 +72,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "globby": "^14.0.0",
+    "@raycast/api": "^1.69.3",
+    "globby": "^14.0.1",
     "jsonschema": "^1.4.1",
     "run-applescript": "^7.0.0",
     "untildify": "^5.0.0"

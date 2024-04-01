@@ -1,6 +1,11 @@
-import { LocalStorage } from "@raycast/api";
+import fs from "fs";
+import { homedir } from "os";
+import { useSQL } from "@raycast/utils";
+import { getPreferenceValues } from "@raycast/api";
+import { getZedDbName, type ZedBuild } from "./zed";
 
-const STORAGE_KEY = "entries";
+const preferences: Record<string, string> = getPreferenceValues();
+const zedBuild: ZedBuild = preferences.build as ZedBuild;
 
 export interface ZedEntry {
   uri: string;
@@ -9,40 +14,52 @@ export interface ZedEntry {
 
 export type ZedEntries = Record<string, ZedEntry>;
 
-export async function getZedEntires(): Promise<ZedEntries> {
-  const data = await LocalStorage.getItem<string>(STORAGE_KEY);
-  if (data) {
-    try {
-      return JSON.parse(data);
-    } catch (e) {
-      console.log(e);
-    }
+function getPath() {
+  return `${homedir()}/Library/Application Support/Zed/db/${getZedDbName(zedBuild)}/db.sqlite`;
+}
+
+interface Workspace {
+  workspace_location: string;
+  timestamp: number;
+}
+
+interface ZedRecentWorkspaces {
+  entries: ZedEntries;
+  isLoading?: boolean;
+}
+
+export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
+  const path = getPath();
+
+  if (!fs.existsSync(path)) {
+    return {
+      entries: {},
+    };
   }
 
-  return {};
-}
+  const { data, isLoading } = useSQL<Workspace>(path, "SELECT workspace_location, timestamp FROM workspaces");
 
-export function setZedEntries(entries: ZedEntries) {
-  return LocalStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-}
-
-export async function saveZedEntry(entry: ZedEntry) {
-  const stored = await getZedEntires();
-  await setZedEntries({
-    ...stored,
-    [entry.uri]: entry,
-  });
-}
-
-export async function saveZedEntries(entries: ZedEntry[]) {
-  const stored = await getZedEntires();
-  await setZedEntries(
-    entries.reduce(
-      (acc, e) => ({
-        ...acc,
-        [e.uri]: e,
-      }),
-      stored
-    )
-  );
+  return {
+    entries: data
+      ? data
+          .filter((d) => !!d.workspace_location)
+          .map<ZedEntry>((d) => {
+            const pathStart = d.workspace_location.indexOf("/");
+            return {
+              uri: "file://" + d.workspace_location.substring(pathStart),
+              lastOpened: new Date(d.timestamp).getTime(),
+            };
+          })
+          .reduce<ZedEntries>((acc, d) => {
+            if (!d.uri) {
+              return acc;
+            }
+            return {
+              ...acc,
+              [d.uri]: d,
+            };
+          }, {})
+      : {},
+    isLoading,
+  };
 }

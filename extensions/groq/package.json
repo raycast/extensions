@@ -15,7 +15,7 @@
     {
       "name": "summarize",
       "title": "Summarize",
-      "description": "Summarize selected text",
+      "description": "Summarize selected text.",
       "mode": "view",
       "preferences": [
         {
@@ -41,6 +41,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -81,6 +85,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -117,6 +125,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -157,6 +169,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -172,7 +188,7 @@
       "preferences": [
         {
           "name": "prompt_improve",
-          "title": "Make Longer Prompt",
+          "title": "Improve Text Prompt",
           "description": "The prompt for the improve command.",
           "type": "textfield",
           "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
@@ -195,6 +211,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -205,7 +225,7 @@
     {
       "name": "ask",
       "title": "Ask AI",
-      "description": "Ask AI and use selected text",
+      "description": "Ask AI and use selected text.",
       "mode": "view",
       "arguments": [
         {
@@ -247,6 +267,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -304,6 +328,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -341,6 +369,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -382,6 +414,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -419,6 +455,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -460,6 +500,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k 8k"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -470,7 +514,7 @@
     {
       "name": "translate",
       "title": "Translate Text",
-      "description": "Translate selected text",
+      "description": "Translate selected text.",
       "mode": "view",
       "disabledByDefault": true,
       "preferences": [
@@ -497,6 +541,10 @@
             {
               "value": "mixtral-8x7b-32768",
               "title": "Mixtral 8x7b 32k"
+            },
+            {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
             },
             {
               "value": "llama2-70b-4096",
@@ -538,6 +586,10 @@
               "title": "Mixtral 8x7b 32k"
             },
             {
+              "value": "gemma-7b-it",
+              "title": "Gemma 7B 8k"
+            },
+            {
               "value": "llama2-70b-4096",
               "title": "Llama2 70B 4k"
             }
@@ -566,6 +618,10 @@
         {
           "value": "mixtral-8x7b-32768",
           "title": "Mixtral 8x7b 32k"
+        },
+        {
+          "value": "gemma-7b-it",
+          "title": "Gemma 7B 8k"
         },
         {
           "value": "llama2-70b-4096",

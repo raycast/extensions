@@ -1,5 +1,13 @@
 # Apple Reminders Changelog
 
+## [Fix interval error validation] - 2024-03-20
+
+- `interval` error validation now checks for `0` and `negative` values.
+
+## [Quick Add Reminder Fix] - 2024-03-12
+
+- Fixed an issue where reminder notes were not being saved properly when using the Quick Add feature.
+
 ## [Performance improvements & bug fixes] - 2024-03-01
 
 - Completed reminders are now loaded on demand and not upfront, which should fix heap memory errors

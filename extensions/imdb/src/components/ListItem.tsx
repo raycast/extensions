@@ -1,73 +1,60 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  getPreferenceValues,
-} from '@raycast/api';
-import { ListItemProps, ItemResponse } from '../types';
+import { ActionPanel, Action, List, Icon } from '@raycast/api';
 import ItemDetail from './ItemDetail';
 import { Color } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
-import { processSeasons } from '../utils';
-import { Preferences } from '../types';
+import { mapTypeToTitle, processSeasons } from '../utils';
+import {
+  DetailedItem,
+  getDetailsEndpoint,
+  parseDetailsResponse,
+} from '../data/fetchDetails';
+import { BaseItem } from '../data/fetchList';
+import { usePreferences } from '../hooks/usePreferences';
+import ActionViewDetails from './actions/ActionViewDetails';
+import ActionOpenInBrowserIMDb from './actions/ActionOpenInBrowserIMDb';
 
-const ListItem = ({ item: { imdbID } }: ListItemProps) => {
-  const { token } = getPreferenceValues<Preferences>();
-  const { data } = useFetch<ItemResponse>(
-    `https://www.omdbapi.com/?i=${imdbID}&plot=full&apikey=${token}`
-  );
+interface ListItemProps {
+  item: BaseItem;
+  showType?: boolean;
+}
+export const ListItem = ({ item: { imdbID }, showType }: ListItemProps) => {
+  const { token, openIn } = usePreferences();
+  const { data } = useFetch(getDetailsEndpoint(imdbID, token), {
+    parseResponse: parseDetailsResponse,
+  });
 
-  if (!data) return null;
+  if (!data) {
+    return null;
+  }
 
-  const {
-    Director = 'N/A',
-    imdbRating = 'N/A',
-    Poster,
-    Title,
-    totalSeasons = 'N/A',
-    Type,
-    Year,
-  } = data;
-  const isMovie = Type === 'movie';
+  const { Poster, Title, Year } = data;
 
   return (
     <List.Item
       title={Title}
       subtitle={`(${Year})`}
       icon={{ source: Poster }}
-      accessories={[
-        {
-          text: isMovie ? Director : processSeasons(totalSeasons),
-          icon: {
-            source: `${isMovie ? 'director' : 'number'}.png`,
-            tintColor: Color.SecondaryText,
-          },
-          tooltip: isMovie ? 'Director' : 'Total Seasons',
-        },
-        {
-          text: { value: imdbRating },
-          icon: { source: Icon.Star },
-          tooltip: 'IMDb Rating',
-        },
-      ]}
+      accessories={getAccessories(data, showType)}
       actions={
         <ActionPanel>
-          {data && (
-            <Action.Push
-              title="View Details"
-              target={<ItemDetail item={data} />}
-              icon={Icon.AppWindowSidebarRight}
-            />
+          {openIn == 'raycast' ? (
+            <>
+              <ActionViewDetails item={data} />
+              <ActionOpenInBrowserIMDb imdbID={imdbID} />
+            </>
+          ) : (
+            <>
+              <ActionOpenInBrowserIMDb imdbID={imdbID} />
+              <ActionViewDetails item={data} />
+            </>
           )}
-          <Action.OpenInBrowser url={`https://www.imdb.com/title/${imdbID}/`} />
           <Action.OpenInBrowser
             title="YouTube Trailer"
             url={`https://www.youtube.com/results?search_query=${Title.replace(
               /\s/g,
-              '+'
+              '+',
             )}+trailer`}
-            icon={{ source: 'youtube.png', tintColor: Color.PrimaryText }}
+            icon={Icon.Play}
             shortcut={{ modifiers: ['shift', 'cmd'], key: 'y' }}
           />
           <Action.CopyToClipboard
@@ -81,4 +68,58 @@ const ListItem = ({ item: { imdbID } }: ListItemProps) => {
   );
 };
 
-export default ListItem;
+type ItemAccessory = Exclude<
+  React.ComponentProps<typeof List.Item>['accessories'],
+  null | undefined
+>[number];
+function getAccessories(
+  item: DetailedItem,
+  showType?: boolean,
+): ItemAccessory[] {
+  const accessories = [];
+
+  if (showType) {
+    accessories.push({
+      tag: mapTypeToTitle(item.Type),
+    });
+  }
+
+  const typeSpecificAccessory = getTypeSpecificAccessory(item);
+  if (typeSpecificAccessory !== undefined) {
+    accessories.push(typeSpecificAccessory);
+  }
+
+  accessories.push({
+    text: { value: item.imdbRating ?? 'N/A' },
+    icon: { source: Icon.Star },
+    tooltip: 'IMDb Rating',
+  });
+
+  return accessories;
+}
+
+function getTypeSpecificAccessory(
+  item: DetailedItem,
+): ItemAccessory | undefined {
+  if (item.Type === 'movie') {
+    return {
+      text: item.Director ?? 'N/A',
+      icon: {
+        source: 'director.png',
+        tintColor: Color.SecondaryText,
+      },
+      tooltip: 'Director',
+    };
+  }
+
+  if (item.Type === 'series') {
+    return {
+      text: processSeasons(item.totalSeasons ?? 'N/A'),
+      icon: {
+        source: Icon.Hashtag,
+        tintColor: Color.SecondaryText,
+      },
+      tooltip: 'Total Seasons',
+    };
+  }
+}

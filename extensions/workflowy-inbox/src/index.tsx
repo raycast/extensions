@@ -6,7 +6,10 @@ import {
   Toast,
   getPreferenceValues,
   openExtensionPreferences,
+  closeMainWindow,
+  PopToRootType,
 } from "@raycast/api";
+import { setTimeout } from "timers/promises";
 import { useForm, FormValidation } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import fetch from "cross-fetch";
@@ -23,7 +26,7 @@ interface Preferences {
   saveLocationUrl: string;
 }
 
-async function submitToWorkflowy(values: InboxFormValues) {
+async function submitToWorkflowy(values: InboxFormValues): Promise<void> {
   const { apiKey, saveLocationUrl } = getPreferenceValues<Preferences>();
   const response = await fetch("https://beta.workflowy.com/api/bullets/create/", {
     method: "POST",
@@ -47,7 +50,7 @@ async function submitToWorkflowy(values: InboxFormValues) {
   }
 }
 
-async function validateWfApiKey() {
+async function validateWfApiKey(): Promise<void> {
   const { apiKey } = getPreferenceValues<Preferences>();
   const response = await fetch("https://beta.workflowy.com/api/me/", {
     method: "GET",
@@ -63,13 +66,13 @@ async function validateWfApiKey() {
   }
 }
 
-export default function Command() {
+export default function Command(): React.ReactElement {
   const { handleSubmit, itemProps, reset } = useForm<InboxFormValues>({
     async onSubmit(values) {
       try {
         await validateWfApiKey();
         await submitToWorkflowy(values);
-        showToast({
+        await showToast({
           style: Toast.Style.Success,
           title: "Success!",
           message: "Added the bullet to your Workflowy inbox.",
@@ -94,7 +97,17 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={{ source: "send.svg" }} title="Send to Workflowy Inbox" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={{ source: "send.svg" }}
+            title="Send and Close"
+            onSubmit={async (values) => {
+              await handleSubmit(values as InboxFormValues);
+              // This allows the success message to show for a second before closing the window.
+              await setTimeout(1000);
+              await closeMainWindow({ popToRootType: PopToRootType.Immediate });
+            }}
+          />
+          <Action.SubmitForm icon={{ source: "send.svg" }} title="Send and Add Another" onSubmit={handleSubmit} />
           <Action.OpenInBrowser
             icon={{ source: "key.svg" }}
             title="Get Workflowy API Key"

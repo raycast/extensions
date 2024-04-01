@@ -22,7 +22,7 @@
       "description": "Default Unit for supported commands",
       "title": "Default Unit",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "data": [
         {
           "title": "km",
@@ -33,6 +33,14 @@
           "value": "miles"
         }
       ]
+    },
+    {
+      "name": "default_limit",
+      "description": "Default Limit for supported commands",
+      "title": "Default Limit",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
     }
   ],
   "commands": [
@@ -126,7 +134,7 @@
         },
         {
           "name": "distance",
-          "placeholder": "DISTANCE km",
+          "placeholder": "DISTANCE<500",
           "type": "text",
           "required": true
         },
@@ -140,7 +148,7 @@
     },
     {
       "name": "get-postal-codes-by-city",
-      "title": "Get Postal Codes By City",
+      "title": "Get Postal Codes by City",
       "subtitle": "Zipcodebase",
       "description": "List of postal codes based on a city",
       "mode": "view",
@@ -158,8 +166,8 @@
           "required": true
         },
         {
-          "name": "limit",
-          "placeholder": "LIMIT=10",
+          "name": "state_name",
+          "placeholder": "STATE_NAME",
           "type": "text",
           "required": false
         }
@@ -183,12 +191,6 @@
           "placeholder": "COUNTRY_CODE",
           "type": "text",
           "required": true
-        },
-        {
-          "name": "limit",
-          "placeholder": "LIMIT=10",
-          "type": "text",
-          "required": false
         }
       ]
     },
@@ -212,20 +214,22 @@
       "title": "Get Remaining Requests",
       "subtitle": "Zipcodebase",
       "description": "Get Remaining Requests",
-      "mode": "no-view"
+      "mode": "no-view",
+      "interval": "1h"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.68.0",
+    "@raycast/utils": "^1.10.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

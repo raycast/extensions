@@ -15,7 +15,7 @@ export function GifDetails(props: { item: IGif; service?: ServiceName }) {
         {metadata.tags.map((tag, index) => (
           <Detail.Metadata.TagList.Item text={tag} key={index} />
         ))}
-      </Detail.Metadata.TagList>
+      </Detail.Metadata.TagList>,
     );
   }
   const labels = metadata?.labels

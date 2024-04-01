@@ -26,14 +26,15 @@ export function extractCode(original: string) {
     // examples:
     //   "2773 is your Microsoft account verification code"
     code = m[1];
-  } else if ((m = /(code\s*:|is\s*:|码)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // "code:" OR "is:", optional whitespace, then 4-8 consecutive digits
+  } else if ((m = /(code\s*:|is\s*:|码)\s*(\w{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    // "code:" OR "is:", optional whitespace, then 4-8 consecutive alphanumeric characters
     // examples:
     //   "Your Airbnb verification code is: 1234."
     //   "Your verification code is: 1234, use it to log in"
     //   "Here is your authorization code:9384"
     //   "【抖音】验证码9316，用于手机验证"
     //   "Your healow verification code is : 7579."
+    //   "TRUSTED LOCATION PASSCODE: mifsuc"
     code = m[2];
   } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
     // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits

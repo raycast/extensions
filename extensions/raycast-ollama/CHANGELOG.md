@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [BugFix] - 2024-03-12
+
+- [@almoce] Fixed missing first word in answer on `Chat with Ollama`.
+
 ## [Improvement and BugFix] - 2024-03-02
 
 - [Improvement] [@AlexMcDermott] Screenshot on Clipboard can now be used on `Chat with Ollama` and `Describe Content of Image`.
