@@ -2,7 +2,7 @@
 
 ## Description
 
-The Vade Mecum extension for Raycast provides a quick and efficient way to access and navigate Brazilian legislation.
+The Vade Mecum extension for Raycast provides a quick and efficient way to access and navigate relevant Brazilian legislation.
 
 ## Author
 
