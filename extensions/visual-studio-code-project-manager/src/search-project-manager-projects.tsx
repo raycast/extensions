@@ -74,7 +74,7 @@ const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): Pro
   return projects.filter((project) => (selectedTag ? project.tags?.find((tag) => tag === selectedTag) : true));
 };
 
-function getProjectsLocationPath(): { path?: string; error?: string } {
+function getProjectsLocationPath(): { path: string; error?: string } {
   let path = preferences.projectManagerDataPath;
   if (!path) {
     return { path: STORAGE };
