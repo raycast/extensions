@@ -24,8 +24,7 @@ const STORAGE = `${homedir()}/Library/Application Support/${vscodeAppNameShort}/
 
 const remotePrefix = "vscode-remote://";
 
-function getProjectEntries(): ProjectEntry[] {
-  const storagePath = getPreferencesPath() || STORAGE;
+function getProjectEntries(storagePath: string): ProjectEntry[] {
   const savedProjectsFile = `${storagePath}/projects.json`;
   const cachedProjectsFiles = [
     `${storagePath}/projects_cache_git.json`,
@@ -74,23 +73,25 @@ const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): Pro
   return projects.filter((project) => (selectedTag ? project.tags?.find((tag) => tag === selectedTag) : true));
 };
 
-function getPreferencesPath(): string | undefined {
-  const path = preferences.projectManagerDataPath;
-  if (!path) return;
+function getProjectsLocationPath(): { path?: string; error?: string } {
+  let path = preferences.projectManagerDataPath;
+  if (!path) {
+    return { path: STORAGE };
+  }
+
   if (!existsSync(path)) {
-    // TODO: Tell the user their path was invalid
-    console.error(`Projects Location path does not exist: ${path}`);
-    return;
+    return { path, error: `Projects Location path does not exist: ${path}` };
   }
 
   const stat = lstatSync(path);
   if (stat.isDirectory()) {
-    return path;
+    return { path };
   }
   if (stat.isFile()) {
-    return dirname(path);
+    return { path: dirname(path) };
   }
-  // TODO: Tell the user path isn't a file or directory
+
+  return { path, error: `Projects Location path is not a directory: ${path}` };
 }
 
 function getSortedProjects(projects: ProjectEntry[]): ProjectEntry[] {
@@ -131,29 +132,41 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 
 export default function Command() {
   if (!vscodeApp) {
-    return (
-      <Detail markdown="Please configure the **Search Project Manager** Raycast extension to choose which version of Visual Studio Code to use." />
+    return ExtensionError(
+      "Please configure the **Search Project Manager** Raycast extension" +
+        "to choose which version of Visual Studio Code to use.",
     );
   }
 
-  const elements: ReactElement[] = [];
-  const projectEntries = getProjectEntries();
+  const { path: projectsLocationPath, error: projectsLocationError } = getProjectsLocationPath();
+  if (projectsLocationError) {
+    return ExtensionError(
+      "## Invalid Projects Location" +
+        "\n\n```\n" +
+        projectsLocationPath +
+        "\n```\n\n" +
+        "Please review the **Projects Location** setting in the extension configuration. " +
+        "\n\n" +
+        "This setting should only be set if Projects Location is also customized in the VS Code Project Manager extension settings.",
+    );
+  }
+
+  const projectEntries = getProjectEntries(projectsLocationPath);
   const projectTags = getProjectTags(projectEntries);
 
   const [selectedTag, setSelectedTag] = useState("");
 
   if (!projectEntries || projectEntries.length === 0) {
-    return (
-      <Detail
-        markdown="To use this extension, the Visual Studio Extension
-      [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)
-       is required and at least one project must be saved in the Project Manager."
-      />
+    return ExtensionError(
+      "To use this extension, the VS Code Extension " +
+        "[Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager) " +
+        "is required and at least one project must be saved in the Project Manager.",
     );
   }
 
   const sortedProjects = getSortedProjects(projectEntries);
 
+  const elements: ReactElement[] = [];
   if (preferences.groupProjectsByTag && !selectedTag) {
     // don't group if filtering
     const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
@@ -258,6 +271,25 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>
+      }
+    />
+  );
+}
+
+function ExtensionError(detail: string) {
+  const { path } = getProjectsLocationPath();
+
+  return (
+    <Detail
+      markdown={detail}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="VS Code App" text={vscodeApp.name} />
+          <Detail.Metadata.Label
+            title={`Projects Location${path ? "" : " (Default)"}`}
+            text={tildify(path || STORAGE)}
+          />
+        </Detail.Metadata>
       }
     />
   );
