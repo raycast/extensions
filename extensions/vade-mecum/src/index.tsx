@@ -33,7 +33,7 @@ export default function Command() {
   };
 
   return (
-    <List>
+    <List searchBarPlaceholder="Search law">
       {pinnedLaws.length > 0 && (
         <List.Section title="Pinned">
           {pinnedLaws.map((lawNumber) => {
