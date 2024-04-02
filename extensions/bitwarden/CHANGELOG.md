@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2024-03-25
+
+- Prevent crash when CLI is not installed and display troubleshooting screen instead
+
 ## [Fix] - 2024-03-12
 
 - Use downloaded CLI on arm64 devices that have it working

@@ -87,13 +87,16 @@ export default function Command() {
           onChange={(newValue) => setSelectCategory(newValue)}
         >
           <Grid.Dropdown.Section title="Logo Categories">
-            {categories.map((category) => (
-              <Grid.Dropdown.Item
-                key={category.category}
-                title={category.category + " - " + category.total}
-                value={category.category}
-              />
-            ))}
+            {categories.map(
+              (category) =>
+                typeof category.category === "string" && (
+                  <Grid.Dropdown.Item
+                    key={category.category}
+                    title={category.category + " - " + category.total}
+                    value={category.category}
+                  />
+                ),
+            )}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
@@ -114,7 +117,7 @@ export default function Command() {
                 tooltip: svg.title,
               }}
               title={svg.title}
-              subtitle={svg.category}
+              subtitle={Array.isArray(svg.category) ? svg.category.join("-") : svg.category}
               actions={<SvgAction svg={svg} category={selectCategory} />}
             />
           ))}

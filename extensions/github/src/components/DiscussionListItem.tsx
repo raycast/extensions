@@ -1,4 +1,4 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 
 import { DiscussionFieldsFragment } from "../generated/graphql";

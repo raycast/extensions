@@ -13,6 +13,7 @@ import {
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { ActionSetVisibleProperties } from "../actions";
+import { ActionSetOrderProperties } from "../actions";
 
 import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 
@@ -27,21 +28,27 @@ type CreatePageFormProps = {
   defaults?: CreatePageFormValues;
 };
 
+const NON_EDITABLE_PROPETY_TYPES = ["formula"];
+const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
+
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
   const defaultValues = launchContext ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
-  const { data: databaseProperties } = useDatabaseProperties(databaseId);
+  const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
   const { setRecentPage } = useRecentPages();
 
+  const databasePropertyIds = databaseProperties.map((dp) => dp.id) || [];
+
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
+    if (type === "formula") continue;
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
     let value = defaultValues?.[key];
@@ -60,7 +67,10 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
           values.database = initialDatabaseId;
         }
 
-        const page = await createDatabasePage(values);
+        const page = await createDatabasePage({
+          ...initialValues,
+          ...values,
+        });
 
         if (page) {
           await showToast({
@@ -96,10 +106,14 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   function filterProperties(dp: DatabaseProperty) {
     return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
   }
+
   function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
-    if (a.type == "title") return -1;
-    if (b.type == "title") return 1;
-    if (!databaseView?.create_properties) return 0;
+    if (!databaseView?.create_properties) {
+      if (a.type == "title") return -1;
+      if (b.type == "title") return 1;
+      return 0;
+    }
+
     const valueA = databaseView.create_properties.indexOf(a.id);
     const valueB = databaseView.create_properties.indexOf(b.id);
     if (valueA > valueB) return 1;
@@ -108,6 +122,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   }
 
   type Quicklink = Action.CreateQuicklink.Props["quicklink"];
+
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
@@ -151,15 +166,15 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
               icon={Icon.Link}
             />
           </ActionPanel.Section>
-          {databaseView && setDatabaseView ? (
+          {databaseView && databaseProperties ? (
             <ActionPanel.Section title="View options">
               <ActionSetVisibleProperties
-                databaseProperties={databaseProperties?.filter((dp) => dp.id !== "title") || []}
-                selectedPropertiesIds={databaseView?.create_properties || databaseProperties.map((x) => x.id)}
+                databaseProperties={databaseProperties.filter((dp) => dp.id !== "title")}
+                selectedPropertiesIds={databaseView?.create_properties || databasePropertyIds}
                 onSelect={(propertyId) => {
                   setDatabaseView({
                     ...databaseView,
-                    create_properties: databaseView.create_properties
+                    create_properties: databaseView?.create_properties
                       ? [...databaseView.create_properties, propertyId]
                       : [propertyId],
                   });
@@ -167,7 +182,19 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
                 onUnselect={(propertyId) => {
                   setDatabaseView({
                     ...databaseView,
-                    create_properties: databaseView.create_properties?.filter((pid) => pid !== propertyId),
+                    create_properties: (databaseView?.create_properties || databasePropertyIds).filter(
+                      (pid) => pid !== propertyId,
+                    ),
+                  });
+                }}
+              />
+              <ActionSetOrderProperties
+                databaseProperties={databaseProperties}
+                propertiesOrder={databaseView?.create_properties || databasePropertyIds}
+                onChangeOrder={(propertyIds) => {
+                  setDatabaseView({
+                    ...databaseView,
+                    create_properties: propertyIds,
                   });
                 }}
               />
@@ -215,8 +242,8 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
         id="content"
         title="Page Content"
         enableMarkdown
-        info="Parses Markdown to Notion Blocks. 
-        
+        info="Parses Markdown to Notion Blocks.
+
 It supports:
 - Headings (levels 4 to 6 are treated as 3 on Notion)
 - Numbered, bulleted, and to-do lists

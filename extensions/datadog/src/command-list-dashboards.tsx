@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Action } from "@raycast/api";
+import { ActionPanel, List, Icon, Action, Color } from "@raycast/api";
 import { linkDomain } from "./util";
 import { useState } from "react";
 import { useDashboards } from "./useDashboards";
@@ -14,7 +14,7 @@ export default function CommandListDashboards() {
         {dashboards.map(({ id, is_favorite, title, author, is_shared, popularity, url }) => (
           <List.Item
             key={id}
-            icon={is_favorite ? Icon.Star : undefined}
+            icon={{ source: Icon.Star, tintColor: is_favorite ? Color.Yellow : Color.SecondaryText }}
             title={title || "No title"}
             accessories={[
               { icon: is_shared ? Icon.Link : "", tooltip: "Shared" },
@@ -28,6 +28,7 @@ export default function CommandListDashboards() {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={`https://${linkDomain()}${url}`} />
+                <Action.CopyToClipboard content={`https://${linkDomain()}${url}`} />
               </ActionPanel>
             }
           />

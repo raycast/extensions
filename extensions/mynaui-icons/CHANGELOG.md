@@ -1,5 +1,10 @@
 # MynaUI Icons Changelog
 
+## [Update Icons Version] - 2024-03-21
+
+- Updated mynaui-icons package to the latest version (v0.2.2)
+- Update README
+
 ## [Update Icons Version] - 2023-12-26
 
 - Updated mynaui-icons package to the latest version (v0.2.0)

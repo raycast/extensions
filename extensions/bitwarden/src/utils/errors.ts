@@ -21,6 +21,14 @@ export class CLINotFoundError extends DisplayableError {
   }
 }
 
+export class InstalledCLINotFoundError extends DisplayableError {
+  constructor(message: string, stack?: string) {
+    super(message ?? "Bitwarden CLI not found", stack);
+    this.name = "InstalledCLINotFoundError";
+    this.stack = stack;
+  }
+}
+
 export class FailedToLoadVaultItemsError extends ManuallyThrownError {
   constructor(message?: string, stack?: string) {
     super(message ?? "Failed to load vault items", stack);

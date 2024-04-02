@@ -322,10 +322,12 @@ An object passed to a `PaginatedRequestInfo`, it has two properties:
 
 - `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
 - `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+- `cursor`: this is the `cursor` property returned after the previous execution of `PaginatedPromise`. Useful when working with APIs that provide the next cursor explicitly.
 
 ```ts
 export type PaginationOptions<T = any> = {
   page: number;
   lastItem?: T;
+  cursor?: any;
 };
 ```
