@@ -3,6 +3,8 @@
 ## [Update] - 2024-03-27
 
 - Restore the previous behavior of the "Projects Location" setting.
+- Improved error messages when the Projects Location file is invalid or when the extension isn't found in the selected VS Code build.
+- The "Projects Location" setting now supports using `~/` to represent the user's home directory.
 
 ## [Update] - 2024-03-19
 
