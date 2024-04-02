@@ -38,32 +38,34 @@ export default function LawListItem({
         <ActionPanel>
           <Action.Push title="View Articles" icon={Icon.Paragraph} target={<ArticleListDetail law={law} />} />
           <Action.OpenInBrowser url={law.url} />
-          <Action
-            title={isPinned ? "Unpin Law" : "Pin Law"}
-            icon={isPinned ? Icon.PinDisabled : Icon.Pin}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
-            onAction={togglePin}
-          />
-          {isPinned && (
-            <>
-              {pinnedLaws.indexOf(law.fullNumber) > 0 && (
-                <Action
-                  title="Move Up in Pinned"
-                  icon={Icon.ChevronUp}
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
-                  onAction={() => onMoveUpInPinned(law.fullNumber)}
-                />
-              )}
-              {pinnedLaws.indexOf(law.fullNumber) < pinnedLaws.length - 1 && (
-                <Action
-                  title="Move Down in Pinned"
-                  icon={Icon.ChevronDown}
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
-                  onAction={() => onMoveDownInPinned(law.fullNumber)}
-                />
-              )}
-            </>
-          )}
+          <ActionPanel.Section>
+            <Action
+              title={isPinned ? "Unpin Law" : "Pin Law"}
+              icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "p" }}
+              onAction={togglePin}
+            />
+            {isPinned && (
+              <>
+                {pinnedLaws.indexOf(law.fullNumber) > 0 && (
+                  <Action
+                    title="Move Up in Pinned"
+                    icon={Icon.ChevronUp}
+                    shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
+                    onAction={() => onMoveUpInPinned(law.fullNumber)}
+                  />
+                )}
+                {pinnedLaws.indexOf(law.fullNumber) < pinnedLaws.length - 1 && (
+                  <Action
+                    title="Move Down in Pinned"
+                    icon={Icon.ChevronDown}
+                    shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
+                    onAction={() => onMoveDownInPinned(law.fullNumber)}
+                  />
+                )}
+              </>
+            )}
+          </ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Law Number" content={law.fullNumber} />
           <Action.CopyToClipboard title="Copy Law Name" content={law.name} />
         </ActionPanel>
