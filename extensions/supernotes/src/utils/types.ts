@@ -34,7 +34,6 @@ export interface ICard {
   links: Record<string, IParentLink>;
 }
 
-
 export type ICardMembership = {
   id: string;
   liked: boolean | null;
@@ -49,15 +48,15 @@ export type ICardMembership = {
   opened_when: string | null;
   auto_publish_children: boolean | null;
   view: {
-      display_type: number;
-      sort_type: number;
-      sort_ascending: boolean;
+    display_type: number;
+    sort_type: number;
+    sort_ascending: boolean;
   } | null;
   visibility: Visibility;
   status: Status;
   total_child_count: number;
   share_link_count: number;
-}
+};
 
 export interface ICardData {
   id: string;

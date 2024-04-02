@@ -15,16 +15,12 @@ const CardListItem = ({ card, removeFromList }: CardListItemProps) => {
   return (
     <List.Item
       title={card.data.name}
-      subtitle={card.data.name === "" ? 'Untitled' : undefined}
+      subtitle={card.data.name === "" ? "Untitled" : undefined}
       icon={{
         source: Icon.Circle,
         tintColor: determineCardColor(card),
       }}
-      detail={
-        <List.Item.Detail
-          markdown={card.data.markup}
-        />
-      }
+      detail={<List.Item.Detail markdown={card.data.markup} />}
       actions={
         <ActionPanel>
           <Action.Push title="View Card" icon={Icon.BlankDocument} target={<CardDetail card={card} />} />
