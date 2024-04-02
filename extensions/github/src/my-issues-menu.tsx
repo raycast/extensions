@@ -7,6 +7,7 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/Menu";
+import { getIssueStatus } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyIssues } from "./hooks/useMyIssues";
 
@@ -47,15 +48,18 @@ function MyIssuesMenu() {
             )}
             emptyElement={<MenuBarItem title="No Issues" />}
           >
-            {section.issues?.map((i) => (
-              <MenuBarItem
-                key={i.id}
-                title={`#${i.number} ${i.title}`}
-                icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
-                tooltip={i.repository.nameWithOwner}
-                onAction={() => open(i.url)}
-              />
-            ))}
+            {section.issues?.map((i) => {
+              const status = getIssueStatus(i);
+
+              return (
+                <MenuBarItem
+                  key={i.id}
+                  title={`#${i.number} ${i.title}`}
+                  icon={{ source: status.icon.source, tintColor: Color.PrimaryText }}
+                  onAction={() => open(i.url)}
+                />
+              );
+            })}
           </MenuBarSection>
         );
       })}

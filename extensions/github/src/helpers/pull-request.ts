@@ -1,4 +1,4 @@
-import { List, Color, Icon } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
 import {
