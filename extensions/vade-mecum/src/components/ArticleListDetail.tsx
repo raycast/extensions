@@ -128,13 +128,14 @@ export default function ArticleListDetail({ law }: ArticleListDetailsProps) {
 
   return (
     <List
+      filtering={false}
       isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder="Search articles"
+      navigationTitle={law.name}
       onSearchTextChange={setSearchText}
-      filtering={false}
     >
-      <List.Section title={law.name}>
+      <List.Section title="Articles">
         {filteredArticles.map((article, index) => (
           <List.Item
             key={index}
