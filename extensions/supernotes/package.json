@@ -14,8 +14,10 @@
     "Productivity"
   ],
   "contributors": [
+    "acnebs",
+    "tobias",
     "peduarte"
-],
+  ],
   "commands": [
     {
       "name": "create",
