@@ -4,8 +4,10 @@ import { useRef } from "react";
 import { usePromise } from "@raycast/utils";
 
 const clientId = "T1iAo3TazydG1xjfyURTWGiUVj0x1KOAIeGNQQND";
-const tokenURL = "https://raycast-pkce-proxy-splitwise.fly.dev/token";
-const authorizeURL = "https://raycast-pkce-proxy-splitwise.fly.dev/authorize";
+const tokenURL =
+  "https://pkce-proxy.fly.dev/2Ym4xYHu29FSJdVAznxotnu98e%2FbWBhRZlUcYzEsuUQADrnlmNyTL%2F2H%2FyGgHn%2Bp3zOuQm1%2Fza8RW3fyCng2R6cQs%2FDX0TEuqVKaz38KoKIJC176LrHc6vkwyS647pA8VK7x9hzu5%2BFeAZB5o7nUkywn6sUNfnmqudHVvCNtdnPIxoa0JQwa13kJ1OkeVBY5bScZB9BikJYWDmphsZPI/token";
+const authorizeURL =
+  "https://pkce-proxy.fly.dev/2Ym4xYHu29FSJdVAznxotnu98e%2FbWBhRZlUcYzEsuUQADrnlmNyTL%2F2H%2FyGgHn%2Bp3zOuQm1%2Fza8RW3fyCng2R6cQs%2FDX0TEuqVKaz38KoKIJC176LrHc6vkwyS647pA8VK7x9hzu5%2BFeAZB5o7nUkywn6sUNfnmqudHVvCNtdnPIxoa0JQwa13kJ1OkeVBY5bScZB9BikJYWDmphsZPI/authorize";
 
 export const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
