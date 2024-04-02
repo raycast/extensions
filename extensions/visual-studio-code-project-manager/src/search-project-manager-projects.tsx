@@ -6,6 +6,7 @@ import config from "parse-git-config";
 import { dirname } from "path";
 import { useState, ReactElement, Fragment } from "react";
 import tildify from "tildify";
+import untildify from "untildify";
 import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
@@ -78,6 +79,8 @@ function getProjectsLocationPath(): { path?: string; error?: string } {
   if (!path) {
     return { path: STORAGE };
   }
+
+  path = untildify(path);
 
   if (!existsSync(path)) {
     return { path, error: `Projects Location path does not exist: ${path}` };
