@@ -1,6 +1,6 @@
 # Xcode Changelog
 
-## [Clear SwiftUI Previews Cache] - 2024-03-29
+## [Clear SwiftUI Previews Cache] - 2024-04-03
 
 - Added "Clear SwiftUI Previews Cache" command to remove the ~/Library/Developer/Xcode/UserData/Previews directory
 - Improved "Clear Swift Package Manager Cache" command
