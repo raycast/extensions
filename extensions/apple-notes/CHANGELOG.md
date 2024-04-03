@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Improve AI Note command UX] - 2024-04-03
+
+From now on, the new note is immediately displayed once it is created by the AI Note command. This allows you to start editing it right away.
+
 ## [Fix invitations] - 2024-04-03
 
 ## [Big Update] - 2024-03-28
@@ -13,6 +17,7 @@ There's now a new command allowing you to quickly access your most recent notes 
 ### More accessories
 
 List items has more accessories allowing to view more details of a note such as:
+
 - If the note is password-protected or not
 - If the note has a checklist in progress or if the checklist is completed
 - If the note is shared with someone else
