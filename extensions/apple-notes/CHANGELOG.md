@@ -2,7 +2,7 @@
 
 ## [Improve AI Note command UX] - 2024-04-03
 
-From now on, the new note is immediately displayed once it is created by the AI Note command. This allows you to start editing it right away.
+The new note created by the `AI Note` command is now instantly displayed for immediate editing.
 
 ## [Fix invitations] - 2024-04-03
 
