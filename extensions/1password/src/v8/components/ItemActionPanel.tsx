@@ -4,7 +4,15 @@ import { Item, User } from "../types";
 import { ActionID, hrefToOpenInBrowser } from "../utils";
 import resetCache from "../../reset-cache";
 
-export function ItemActionPanel({ account, item, actions }: { account: User | undefined; item: Item; actions: ActionID[] }) {
+export function ItemActionPanel({
+  account,
+  item,
+  actions,
+}: {
+  account: User | undefined;
+  item: Item;
+  actions: ActionID[];
+}) {
   return (
     <ActionPanel>
       {actions.map((actionId) => {
@@ -40,7 +48,7 @@ function OpenIn1Password(account: User | undefined, item: Item) {
       />
     );
   } else {
-    return null
+    return null;
   }
 }
 

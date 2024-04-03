@@ -62,7 +62,7 @@ export function useOp<T>(args: string[]) {
   return usePromise<() => Promise<T>>(async () => {
     const data = op([...args, "--format=json"]);
     return JSON.parse(data);
-  })
+  });
 }
 
 export function useCachedOp<T>(args: string[], cacheKey: string) {
