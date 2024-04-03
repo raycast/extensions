@@ -11,6 +11,7 @@ import {
   showToast,
   Toast,
   Image,
+  Color,
 } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
@@ -260,6 +261,7 @@ export default function Command() {
     if (
       await confirmAlert({
         title: "Delete this buddy?",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
         message: "This action cannot be undone.",
         primaryAction: {
           title: "Delete",
@@ -293,10 +295,6 @@ export default function Command() {
   return (
     <List
       isLoading={loading}
-      navigationTitle={`Current Time: ${new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "numeric",
-      })}`}
       searchBarPlaceholder="Search your buddies..."
       actions={
         <ActionPanel>
@@ -304,37 +302,46 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {buddies &&
-        buddies.map((buddy, index) => (
-          <List.Item
-            key={index}
-            title={buddy.name}
-            subtitle={getOffsetForTz(buddy.tz)}
-            icon={{ source: buddy.avatar, mask: Image.Mask.Circle }}
-            accessories={[
-              {
-                text: formatZoneName(buddy.tz),
-              },
-              {
-                tag: {
-                  value: getCurrentTimeForTz(buddy.tz),
-                  color: getColorForTz(buddy.tz),
+      <List.Section
+        title={`Current Time: ${new Date().toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "numeric",
+        })}`}
+      >
+        {buddies &&
+          buddies.map((buddy, index) => (
+            <List.Item
+              key={index}
+              title={buddy.name}
+              subtitle={getOffsetForTz(buddy.tz)}
+              icon={{ source: buddy.avatar, mask: Image.Mask.Circle }}
+              accessories={[
+                {
+                  text: formatZoneName(buddy.tz),
                 },
-                tooltip: getTooltipForTz(buddy.tz),
-                icon: getIconForTz(buddy.tz),
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <CreateBuddyAction onCreate={handleCreate} />
-                  <EditBuddyAction index={index} buddy={buddy} onUpdate={handleUpdate} />
-                  <DeleteBuddyAction onDelete={() => handleDelete(index)} />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
+                {
+                  tag: {
+                    value: getCurrentTimeForTz(buddy.tz),
+                    color: getColorForTz(buddy.tz),
+                  },
+                  tooltip: getTooltipForTz(buddy.tz),
+                  icon: getIconForTz(buddy.tz),
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <CreateBuddyAction onCreate={handleCreate} />
+                    <EditBuddyAction index={index} buddy={buddy} onUpdate={handleUpdate} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <DeleteBuddyAction onDelete={() => handleDelete(index)} />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+      </List.Section>
     </List>
   );
 }
