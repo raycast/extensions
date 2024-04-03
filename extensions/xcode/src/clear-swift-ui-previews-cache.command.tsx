@@ -5,8 +5,8 @@ import { Alert, confirmAlert, Icon } from "@raycast/api";
 export default async () => {
   const alertOptions: Alert.Options = {
     icon: Icon.Trash,
-    title: "Clear derived data",
-    message: "Are you sure you want to clear the derived data directory?",
+    title: "Clear SwiftUI Previews cache",
+    message: "Are you sure you want to clear the SwiftUI Previews cache?",
     primaryAction: {
       title: "Clear",
       style: Alert.ActionStyle.Destructive,
@@ -16,9 +16,9 @@ export default async () => {
     return;
   }
   await operationWithUserFeedback(
-    "Clearing derived data",
-    "Successfully cleared derived data",
-    "An error occurred while trying to clear the derived data directory",
-    XcodeCleanupService.clearDerivedData
+    "Clearing SwiftUI Previews cache",
+    "Successfully cleared SwiftUI Previews cache",
+    "An error occurred while trying to clear the SwiftUI Previews cache",
+    XcodeCleanupService.clearSwiftUIPreviewsCache
   );
 };
