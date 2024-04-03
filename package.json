@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-git-assistant",
+  "title": "AI Git Assistant",
+  "description": "Your personal AI assistant for Git commit operarations such as generating commit messages",
+  "icon": "extension-icon.png",
+  "author": "popalay",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Commit Message",
+      "description": "Transform your git diff and status output into a commit message uding AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "path-to-git-repos",
+      "description": "Path to git repositories used to search the latest edited repository",
+      "type": "directory",
+      "required": true,
+      "title": "Path to git repositories",
+      "placeholder": "~src/"
+    },
+    {
+      "name": "commit-prompt",
+      "description": "GPT prompt for commit message generation",
+      "type": "textfield",
+      "required": false,
+      "title": "Commit message prompt",
+      "default": "Behave like a Git commit message generator. I will provide you with a git diff and status output.\nYou can then use this information to create a commit message. Short summary, only a single sentence, no period at the end, up to 60 characters. Write your commit message in the imperative: 'Fix bug' and not 'Fixed bug' or 'Fixes bug.'. More detailed explanatory text. Wrap it to 72 characters. The blank line separating the summary from the body is critical (unless you omit the body entirely). Bullet points are recommended. Typically a hyphen or asterisk is used for the bullet, followed by a single space. Use a hanging indent. The ticket number is optional but recommended. You can get it from the branch name. Example1: dev/ABC-fix the ticket number is only ABC. Example2: dev/ABC-1234-fix the ticket number is ABC-1234. Example3: dev/fix-smth there is no ticket number. Place it in the subject in a format like [ticket number]:."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.13.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
