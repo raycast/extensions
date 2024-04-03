@@ -1,6 +1,6 @@
 import { resolve } from "path";
 import { homedir } from "os";
-import { useSQL } from "@raycast/utils";
+import { showFailureToast, useSQL } from "@raycast/utils";
 import { partition } from "lodash";
 
 export type NoteItem = {
@@ -33,8 +33,7 @@ const query = `
         (note.zispasswordprotected = 1) as locked,
         (note.zispinned = 1) as pinned,
         (note.zhaschecklist = 1) as checklist,
-        (note.zhaschecklistinprogress = 1) as checklistInProgress,
-        inv.zshareurl AS invitationLink
+        (note.zhaschecklistinprogress = 1) as checklistInProgress
     FROM 
         ziccloudsyncingobject AS note
     INNER JOIN ziccloudsyncingobject AS folder 
@@ -42,8 +41,6 @@ const query = `
     LEFT JOIN ziccloudsyncingobject AS acc 
         ON note.zaccount4 = acc.z_pk
     LEFT JOIN z_metadata AS zmd ON 1=1
-    LEFT JOIN zicinvitation AS inv 
-        ON note.zinvitation = inv.z_pk
     WHERE
         note.ztitle1 IS NOT NULL AND
         note.zmodificationdate1 IS NOT NULL AND
@@ -54,9 +51,30 @@ const query = `
         note.zmodificationdate1 DESC
 `;
 
+const invitationQuery = `
+    SELECT
+        inv.zshareurl AS invitationLink,
+        'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS noteId
+    FROM
+        ziccloudsyncingobject AS note
+    LEFT JOIN zicinvitation AS inv 
+        ON note.zinvitation = inv.z_pk
+    LEFT JOIN z_metadata AS zmd ON 1=1
+    WHERE
+        note.zmarkedfordeletion != 1
+`;
+
 export const useNotes = () => {
   const { data, ...rest } = useSQL<NoteItem>(NOTES_DB, query, {
     permissionPriming: "This is required to search your Apple Notes.",
+  });
+
+  // Split the query into two to avoid a SQL error if the zcinivitation table doesn't exist
+  const { data: invitations } = useSQL<{ invitationLink: string | null; noteId: string }>(NOTES_DB, invitationQuery, {
+    execute: data && data.length > 0,
+    onError(error) {
+      showFailureToast(error, { title: "Couldn't get invitations for notes" });
+    },
   });
 
   const alreadyFound: { [key: string]: boolean } = {};
@@ -69,7 +87,15 @@ export const useNotes = () => {
       })
       .sort((a, b) => (a.modifiedAt && b.modifiedAt && a.modifiedAt < b.modifiedAt ? 1 : -1)) ?? [];
 
-  const [activeNotes, deletedNotes] = partition(notes, (note) => note.folder != "Recently Deleted");
+  const notesWithInvitations = notes.map((note) => {
+    const invitation = invitations?.find((inv) => inv.noteId === note.id);
+    return {
+      ...note,
+      invitationLink: invitation?.invitationLink ?? null,
+    };
+  });
+
+  const [activeNotes, deletedNotes] = partition(notesWithInvitations, (note) => note.folder != "Recently Deleted");
   const [pinnedNotes, unpinnedNotes] = partition(activeNotes, (note) => note.pinned);
 
   return {

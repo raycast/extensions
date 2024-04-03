@@ -1,5 +1,7 @@
 # Apple Notes Changelog
 
+## [Fix invitations] - 2024-04-03
+
 ## [Big Update] - 2024-03-28
 
 The Apple Notes extension has been improved in every way to make Raycast the perfect companion for your notes. Here's what's new:
