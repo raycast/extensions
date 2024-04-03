@@ -2,7 +2,7 @@
 
 ## [Fix icon] - 2024-04-02
 
-- Fix icon for closed pull requests.
+- Fixes icon for closed pull requests.
 
 ## [Fix various icons] - 2024-03-29
 
