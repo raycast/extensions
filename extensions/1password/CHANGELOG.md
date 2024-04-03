@@ -2,7 +2,9 @@
 
 ## [Enhancements] - 2024-04-03
 
-- Adds cached data visualization while updates are fetched.
+- Adds Optimistic Updates for items and account
+- Adds auto renewal of Authorization
+- Improves performance by removing some unnecessary re-renders
 
 ## [Bug fixes] - 2024-02-04
 

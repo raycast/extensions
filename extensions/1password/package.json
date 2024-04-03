@@ -34,6 +34,20 @@
         "login"
       ],
       "mode": "view"
+    },
+    {
+      "name": "renew-auth",
+      "title": "Auto Renew Authorization",
+      "subtitle": "1Password",
+      "description": "Renews the authorization each 9 minutes. Avoiding the prompt for user's password each use after 10 minutes.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "interval": "9m",
+      "mode": "no-view"
     }
   ],
   "preferences": [

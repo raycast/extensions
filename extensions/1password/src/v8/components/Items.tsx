@@ -3,28 +3,35 @@ import { useCachedState } from "@raycast/utils";
 
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Item, User } from "../types";
-import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, useOp, actionsForItem } from "../utils";
+import { getCategoryIcon, ITEMS_CACHE_NAME, ACCOUNT_CACHE_NAME, actionsForItem, useCachedOp } from "../utils";
 import { Guide } from "./Guide";
 import { ItemActionPanel } from "./ItemActionPanel";
+import { useEffect } from "react";
 
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
+  const [categoryItems, setCategoryItems] = useCachedState<Item[]>("category_items", []);
 
   const {
     data: account,
     error: accountError,
     isLoading: accountIsLoading,
-  } = useOp<User>(["whoami"], ACCOUNT_CACHE_NAME);
+  } = useCachedOp<User>(["whoami"], ACCOUNT_CACHE_NAME);
   const {
     data: items,
     error: itemsError,
     isLoading: itemsIsLoading,
-  } = useOp<Item[]>(["item", "list", "--long"], ITEMS_CACHE_NAME);
+  } = useCachedOp<Item[]>(["item", "list", "--long"], ITEMS_CACHE_NAME);
 
-  const categoryItems =
-    category === DEFAULT_CATEGORY
-      ? items
-      : items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase());
+  useEffect(() => {
+    if (!items) return;
+    if (category === DEFAULT_CATEGORY) {
+      setCategoryItems(items);
+    } else {
+      setCategoryItems(items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase()));
+    }
+  }, [items]);
+
   const onCategoryChange = (newCategory: string) => {
     category !== newCategory && setCategory(newCategory);
   };
@@ -60,7 +67,7 @@ export function Items() {
                     : {},
                   { text: item.vault?.name },
                 ]}
-                actions={<ItemActionPanel account={account!} item={item} actions={actionsForItem(item)} />}
+                actions={<ItemActionPanel account={account} item={item} actions={actionsForItem(item)} />}
               />
             ))}
       </List.Section>

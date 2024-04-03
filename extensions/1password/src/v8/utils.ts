@@ -2,9 +2,9 @@ import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
-import { useEffect, useState } from "react";
 
 import { CategoryName, Item } from "./types";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 
 export type ActionID = string;
 
@@ -58,61 +58,24 @@ export function op(args: string[]) {
   throw Error("1Password CLI is not found!");
 }
 
-const CACHE_TIMEOUTS: { [key: string]: number } = {
-  [CATEGORIES_CACHE_NAME]: 1000 * 60 * 10,
-  [ITEMS_CACHE_NAME]: 1000 * 60 * 10,
-  [ACCOUNT_CACHE_NAME]: 1000 * 60 * 10,
-};
+export function useOp<T>(args: string[]) {
+  return usePromise<() => Promise<T>>(async () => {
+    const data = op([...args, "--format=json"]);
+    return JSON.parse(data);
+  })
+}
 
-const DEFAULT_CACHE_TIMEOUT = 1000 * 60 * 10;
-
-export function useOp<T>(args: string[], cacheKey?: string) {
-  const [data, setData] = useState<T>();
-  const [error, setError] = useState<unknown>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const lastUpdatedKey = `${cacheKey}_lastUpdated`;
-
-  const fetchDataFromCache = (cacheKey: string) => {
-    const cachedData = cache.get(cacheKey) as string;
-    setData(JSON.parse(cachedData));
-  };
-
-  const fetchData = async () => {
-    try {
-      const items = op([...args, "--format=json"]);
-
-      if (cacheKey) {
-        cache.set(cacheKey, items);
-        cache.set(lastUpdatedKey, Date.now().toString());
-      }
-
-      setData(JSON.parse(items));
-    } catch (error) {
-      setError(error);
-    } finally {
-      setIsLoading(false);
+export function useCachedOp<T>(args: string[], cacheKey: string) {
+  return useCachedPromise<(cacheKey: string) => Promise<T>>(
+    async () => {
+      const data = op([...args, "--format=json"]);
+      return JSON.parse(data);
+    },
+    [cacheKey],
+    {
+      keepPreviousData: true,
     }
-  };
-
-  useEffect(() => {
-    if (cacheKey && cache.has(cacheKey) && cache.has(lastUpdatedKey)) {
-      const lastUpdatedString = cache.get(lastUpdatedKey) as string;
-      const lastUpdated = parseInt(lastUpdatedString, 10);
-      const timeSinceLastUpdate = Date.now() - lastUpdated;
-      const cacheTimeout = CACHE_TIMEOUTS[cacheKey] || DEFAULT_CACHE_TIMEOUT;
-
-      fetchDataFromCache(cacheKey);
-      if (timeSinceLastUpdate > cacheTimeout) {
-        setIsLoading(false);
-      } else {
-        fetchData();
-      }
-    } else {
-      fetchData();
-    }
-  }, [cacheKey]);
-
-  return { data, error, isLoading };
+  );
 }
 
 export function clearCache(key?: string) {

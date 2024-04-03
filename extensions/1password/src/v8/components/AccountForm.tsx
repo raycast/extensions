@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
 
 import { Items } from "./Items";
 import { Guide } from "./Guide";
 import { User } from "../types";
 import { op, ACCOUNT_CACHE_NAME, useOp, cache } from "../utils";
+import { useCachedState } from "@raycast/utils";
 
 export function AccountForm() {
-  const [hasAccount, setHasAccount] = useState<boolean | undefined>(cache.has(ACCOUNT_CACHE_NAME));
+  const [hasAccount, setHasAccount] = useCachedState<boolean | undefined>(ACCOUNT_CACHE_NAME, cache.has(ACCOUNT_CACHE_NAME));
   const { data, error, isLoading } = useOp<User[]>(["account", "list"]);
 
   if (error) return <Guide />;

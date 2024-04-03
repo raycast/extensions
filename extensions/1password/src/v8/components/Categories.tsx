@@ -2,16 +2,16 @@ import { Icon, List } from "@raycast/api";
 
 import { Guide } from "./Guide";
 import { Category, CategoryName } from "../types";
-import { CATEGORIES_CACHE_NAME, getCategoryIcon, useOp } from "../utils";
+import { CATEGORIES_CACHE_NAME, getCategoryIcon, useCachedOp } from "../utils";
 
 export const DEFAULT_CATEGORY = "null";
 
 export function Categories({ onCategoryChange }: { onCategoryChange: (newCategory: string) => void }) {
-  const { data, error, isLoading } = useOp<Category[]>(["item", "template", "list"], CATEGORIES_CACHE_NAME);
+  const { data, error, isLoading } = useCachedOp<Category[]>(["item", "template", "list"], CATEGORIES_CACHE_NAME);
 
   if (error) return <Guide />;
-  return !isLoading ? (
-    <List.Dropdown defaultValue={DEFAULT_CATEGORY} onChange={onCategoryChange} tooltip="Select Category" storeValue>
+  return (
+    <List.Dropdown defaultValue={DEFAULT_CATEGORY}  isLoading={isLoading} onChange={onCategoryChange} tooltip="Select Category" storeValue>
       <List.Dropdown.Item key={"000"} icon={Icon.AppWindowGrid3x3} title="All Categories" value={DEFAULT_CATEGORY} />
       {(data || [])
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -24,5 +24,5 @@ export function Categories({ onCategoryChange }: { onCategoryChange: (newCategor
           />
         ))}
     </List.Dropdown>
-  ) : null;
+  );
 }
