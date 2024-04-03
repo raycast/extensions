@@ -2,7 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "simple-icons",
   "title": "Simple Icons",
-  "description": "Browse, Search, and Copy 3000+ popular brand icons.",
+  "type": "module",
+  "description": "Browse, Search, and Copy 3100+ popular brand icons.",
   "icon": "simpleicons-icon.png",
   "author": "litomore",
   "categories": [
@@ -14,23 +15,22 @@
     {
       "name": "index",
       "title": "Search Simple Icons",
-      "description": "Browse, search, and copy 3000+ free SVG icons for popular brands",
+      "description": "Browse, search, and copy 3100+ free SVG icons for popular brands",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/utils": "1.12.4",
-    "node-fetch": "3.3.2",
-    "simple-icons": "11.4.0"
+    "@raycast/api": "^1.70.2",
+    "got": "^14.2.1",
+    "simple-icons": "^11.11.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.69",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",

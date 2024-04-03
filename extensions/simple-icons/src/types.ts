@@ -2,12 +2,17 @@ type DuplicateAlias = {
   title: string;
   hex?: string;
   guidelines?: string;
+  loc?: Localization;
+};
+
+export type Localization = {
+  [languageCode: string]: string;
 };
 
 export type Aliases = {
   aka?: string[];
   dup?: DuplicateAlias[];
-  loc?: { [key: string]: string };
+  loc?: Localization;
 };
 
 export type IconData = {
