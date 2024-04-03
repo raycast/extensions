@@ -24,7 +24,7 @@ export function getSessions() {
 
 export function connectToSession(session: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    exec(`sesh connect --switch ${session}`, { env }, (error, _, stderr) => {
+    exec(`sesh connect --switch "${session}"`, { env }, (error, _, stderr) => {
       if (error || stderr) {
         console.error("error ", error);
         console.error("stderr ", stderr);

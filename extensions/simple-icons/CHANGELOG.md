@@ -1,5 +1,19 @@
 # Simple Icons Changelog
 
+## [Improvements] - 2024-3-24
+
+Now we reached 3100+ icons!
+
+### Features
+
+- Add aliases field
+
+### Chore
+
+- Update pacakge to ESM
+- Use `got` instead of `node-fetch`
+- Bump all dependencies to the latest version
+
 ## [Improvements] - 2024-03-07
 
 - Apply brand colors to grid view

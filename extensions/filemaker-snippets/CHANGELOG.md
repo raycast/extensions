@@ -1,5 +1,10 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2024-03-28
+
+- Fix deeplinks for hosted snippets. Fetch dependency was not being loaded correctly.
+
+
 ## [Fixes] - 2024-03-20
 
 - Fix snippet creation from clipboard

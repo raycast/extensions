@@ -1,7 +1,5 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { LOCAL_STORAGE_KEY, VAULT_LOCK_MESSAGES } from "~/constants/general";
-import { VAULT_TIMEOUT } from "~/constants/preferences";
-import { SessionState } from "~/types/session";
+import { LocalStorage } from "@raycast/api";
+import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { exec as callbackExec, PromiseWithChild } from "child_process";
 import { promisify } from "util";
 import { captureException, debugLog } from "~/utils/development";
@@ -14,6 +12,7 @@ export const SessionStorage = {
       LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SESSION_TOKEN),
       LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.REPROMPT_HASH),
       LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME),
+      LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LAST_STATUS),
     ]);
   },
   clearSession: async () => {
@@ -34,58 +33,14 @@ export const SessionStorage = {
       LocalStorage.removeItem(LOCAL_STORAGE_KEY.SESSION_TOKEN),
       LocalStorage.removeItem(LOCAL_STORAGE_KEY.REPROMPT_HASH),
       LocalStorage.removeItem(LOCAL_STORAGE_KEY.LAST_ACTIVITY_TIME),
-      LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON),
     ]);
   },
 };
 
-export type SavedSessionState = {
-  token?: SessionState["token"];
-  passwordHash?: SessionState["passwordHash"];
-  lastActivityTime?: SessionState["lastActivityTime"];
-  shouldLockVault?: boolean;
-  lockReason?: string;
-};
-
-export async function getSavedSession(): Promise<SavedSessionState> {
-  const [token, passwordHash, lastActivityTimeString] = await SessionStorage.getSavedSession();
-  if (!token || !passwordHash) return { shouldLockVault: true };
-
-  const loadedState: SavedSessionState = { token, passwordHash };
-  if (!lastActivityTimeString) return { ...loadedState, shouldLockVault: false };
-
-  const lastActivityTime = new Date(lastActivityTimeString);
-  loadedState.lastActivityTime = lastActivityTime;
-  const vaultTimeoutMs = +getPreferenceValues<Preferences>().repromptIgnoreDuration;
-  if (vaultTimeoutMs === VAULT_TIMEOUT.NEVER) return { ...loadedState, shouldLockVault: false };
-
-  if (vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_LOCK) {
-    return {
-      ...loadedState,
-      shouldLockVault: await checkSystemLockedSinceLastAccess(lastActivityTime),
-      lockReason: VAULT_LOCK_MESSAGES.SYSTEM_LOCK,
-    };
-  }
-  if (vaultTimeoutMs === VAULT_TIMEOUT.SYSTEM_SLEEP) {
-    return {
-      ...loadedState,
-      shouldLockVault: await checkSystemSleptSinceLastAccess(lastActivityTime),
-      lockReason: VAULT_LOCK_MESSAGES.SYSTEM_SLEEP,
-    };
-  }
-
-  const timeElapseSinceLastPasswordEnter = Date.now() - lastActivityTime.getTime();
-  if (vaultTimeoutMs === VAULT_TIMEOUT.IMMEDIATELY || timeElapseSinceLastPasswordEnter >= vaultTimeoutMs) {
-    return { ...loadedState, shouldLockVault: true, lockReason: VAULT_LOCK_MESSAGES.TIMEOUT };
-  }
-
-  return { ...loadedState, shouldLockVault: false };
-}
-
-const checkSystemLockedSinceLastAccess = (lastActivityTime: Date) => {
+export const checkSystemLockedSinceLastAccess = (lastActivityTime: Date) => {
   return checkSystemLogTimeAfter(lastActivityTime, (time: number) => getLastSyslog(time, "handleUnlockResult"));
 };
-const checkSystemSleptSinceLastAccess = (lastActivityTime: Date) => {
+export const checkSystemSleptSinceLastAccess = (lastActivityTime: Date) => {
   return checkSystemLogTimeAfter(lastActivityTime, (time: number) => getLastSyslog(time, "sleep 0"));
 };
 
