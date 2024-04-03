@@ -1,11 +1,31 @@
-import { useState } from "react";
-import { Form, ActionPanel, Action, showToast, closeMainWindow, popToRoot } from "@raycast/api";
+import { useEffect, useState } from "react";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  closeMainWindow,
+  popToRoot,
+  List,
+  Icon,
+  open,
+  Color,
+} from "@raycast/api";
 import { defaultName } from "./preference";
 import { write } from "./api";
 import { checkInstallation } from "./utils";
 
 export default function QuickNote() {
-  checkInstallation();
+  const [loading, setIsLoading] = useState(true);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const checkAndPush = async () => {
+      setInstalled(await checkInstallation(false));
+      setIsLoading(false);
+    };
+    checkAndPush();
+  }, []);
 
   const [name, setName] = useState(defaultName());
   const [text, setText] = useState(defaultText());
@@ -30,6 +50,31 @@ export default function QuickNote() {
   function resetForm() {
     setName(defaultName());
     setText(defaultText());
+  }
+
+  if (loading) {
+    return <Form isLoading={true}></Form>;
+  }
+
+  if (!installed) {
+    return (
+      <List>
+        <List.EmptyView
+          title="iA Writer is not installed"
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action
+                title={"Get iA Writer"}
+                onAction={() => {
+                  open("https://ia.net/writer");
+                }}
+              />
+            </ActionPanel>
+          }
+        ></List.EmptyView>
+      </List>
+    );
   }
 
   return (

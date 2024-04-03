@@ -6,7 +6,7 @@ export function getTimeStamp(value: string | Date, format: string): string {
   return dayjs(value).format(format);
 }
 
-export async function checkInstallation() {
+export async function checkInstallation(showToastMessage: boolean) {
   const apps = await getApplications();
   const installed = apps.some(({ bundleId }) => bundleId === "pro.writer.mac");
 
@@ -23,6 +23,11 @@ export async function checkInstallation() {
         },
       },
     };
-    await showToast(options);
+
+    if (showToastMessage) {
+      await showToast(options);
+    }
+    return false;
   }
+  return true;
 }
