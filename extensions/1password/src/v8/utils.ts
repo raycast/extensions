@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 
 import { CategoryName, Item } from "./types";
 
-export type ActionID = Preferences["primaryAction"];
+export type ActionID = string;
 
 export const cache = new Cache();
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 
 export const CLI_PATH =
   preferences.cliPath || ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
@@ -66,42 +66,99 @@ const CACHE_TIMEOUTS: { [key: string]: number } = {
 
 const DEFAULT_CACHE_TIMEOUT = 1000 * 60 * 10;
 
+// export function useOp<T>(args: string[], cacheKey?: string) {
+//   const [data, setData] = useState<T>();
+//   const [error, setError] = useState<unknown>();
+//   const [isLoading, setIsLoading] = useState<boolean>(true);
+//   const lastUpdatedKey = `${cacheKey}_lastUpdated`;
+
+//   const fetchData = async () => {
+//     try {
+//       const items = op([...args, "--format=json"]);
+//       if (cacheKey) {
+//         cache.set(cacheKey, items);
+//         cache.set(lastUpdatedKey, Date.now().toString());
+//       }
+//       console.log(`Setting ${cacheKey} from CLI.`);
+//       setData(JSON.parse(items));
+//     } catch (error: unknown) {
+//       setError(error);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useMemo(() => {
+//     if (cacheKey && cache.has(cacheKey) && cache.has(lastUpdatedKey)) {
+//       const lastUpdatedString = cache.get(lastUpdatedKey) as string;
+//       const lastUpdated = parseInt(lastUpdatedString, 10);
+//       const timeSinceLastUpdate = Date.now() - lastUpdated;
+//       const cacheTimeout = CACHE_TIMEOUTS[cacheKey] || DEFAULT_CACHE_TIMEOUT;
+//       const cachedData = cache.get(cacheKey) as string;
+
+//       if (timeSinceLastUpdate < cacheTimeout) {
+//         // setIsLoading(false);
+//         console.log(`Setting ${cacheKey} from cache.`);
+//         return setData(JSON.parse(cachedData));
+//       } else {
+//         console.log(`Setting ${cacheKey} from cache.`);
+//         setData(JSON.parse(cachedData));
+//       }
+//     }
+//     fetchData();
+//   }, [cacheKey]);
+
+//   useEffect(() => {
+//     fetchData();
+//   }, [cacheKey]);
+
+//   return { data, error, isLoading };
+// }
+
 export function useOp<T>(args: string[], cacheKey?: string) {
   const [data, setData] = useState<T>();
   const [error, setError] = useState<unknown>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const lastUpdatedKey = `${cacheKey}_lastUpdated`;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const items = op([...args, "--format=json"]);
-        if (cacheKey) {
-          cache.set(cacheKey, items);
-          cache.set(lastUpdatedKey, Date.now().toString());
-        }
-        setData(JSON.parse(items));
-      } catch (error: unknown) {
-        setError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchDataFromCache = (cacheKey: string) => {
+    const cachedData = cache.get(cacheKey) as string;
+    setData(JSON.parse(cachedData));
+  };
 
+  const fetchData = async () => {
+    try {
+      const items = op([...args, "--format=json"]);
+
+      if (cacheKey) {
+        cache.set(cacheKey, items);
+        cache.set(lastUpdatedKey, Date.now().toString());
+      }
+
+      setData(JSON.parse(items));
+    } catch (error) {
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (cacheKey && cache.has(cacheKey) && cache.has(lastUpdatedKey)) {
       const lastUpdatedString = cache.get(lastUpdatedKey) as string;
       const lastUpdated = parseInt(lastUpdatedString, 10);
       const timeSinceLastUpdate = Date.now() - lastUpdated;
       const cacheTimeout = CACHE_TIMEOUTS[cacheKey] || DEFAULT_CACHE_TIMEOUT;
 
+      fetchDataFromCache(cacheKey);
       if (timeSinceLastUpdate < cacheTimeout) {
-        const cachedData = cache.get(cacheKey) as string;
         setIsLoading(false);
-        return setData(JSON.parse(cachedData));
+      } else {
+        fetchData();
       }
+    } else {
+      fetchData();
     }
-
-    fetchData();
   }, [cacheKey]);
 
   return { data, error, isLoading };

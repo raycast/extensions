@@ -1,8 +1,12 @@
 # 1Password Changelog
 
+## [Enhancements] - 2024-04-03
+
+- Adds cached data visualization while updates are fetched.
+
 ## [Bug fixes] - 2024-02-04
 
-- Fix the problem of synchronization with the 1password client in v8 verison 
+- Fix the problem of synchronization with the 1password client in v8 verison
 
 ## [Enhancements] - 2023-12-05
 
