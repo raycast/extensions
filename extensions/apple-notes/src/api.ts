@@ -12,6 +12,7 @@ export async function createNote(text?: string) {
         set body of newNote to "${escapedText}"
       end if
       set selection to newNote
+      show newNote
     end tell
     `);
 }
