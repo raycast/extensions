@@ -1,10 +1,12 @@
 # Apple Notes Changelog
 
-## [Improve AI Note command UX] - 2024-04-03
+## [Improve AI Note command UX] - 2024-04-04
 
 The new note created by the `AI Note` command is now instantly displayed for immediate editing.
 
 ## [Fix invitations] - 2024-04-03
+
+Fix a bug where notes can't be loaded at all if there is no invitations table.
 
 ## [Big Update] - 2024-03-28
 
