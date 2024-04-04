@@ -2,14 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chat",
   "title": "Proxy Chat",
-  "description": "Query ChatGPT",
+  "description": "Query ChatGPT from raycast with controls for token usage and model selection.",
   "icon": "command-icon.png",
   "author": "michael_d_angelo",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "chat",
+      "title": "Chat",
       "description": "Ask chat something",
       "mode": "view"
     }
