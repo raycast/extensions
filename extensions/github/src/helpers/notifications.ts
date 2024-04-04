@@ -59,10 +59,10 @@ export function getNotificationIcon(notification: Notification) {
       icon = { value: "commit.svg", tooltip: "Commit" };
       break;
     case "Issue":
-      icon = { value: "issue-opened.svg", tooltip: "Issue" };
+      icon = { value: "issue-open.svg", tooltip: "Issue" };
       break;
     case "PullRequest":
-      icon = { value: "pull-request.svg", tooltip: "Pull Request" };
+      icon = { value: "pull-request-open.svg", tooltip: "Pull Request" };
       break;
     case "Release":
       icon = { value: "tag.svg", tooltip: "Release" };
