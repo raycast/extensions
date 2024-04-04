@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
-  "title": "Azure DevOps Search Git repositories",
-  "description": "Search Azure DevOps for git repositories",
-  "icon": "Azure-DevOps.svg",
-  "author": "willemvanlent",
+  "title": "Azure DevOps Git Repositories Search",
+  "description": "Search Azure DevOps for Git repositories",
+  "icon": "Azure-DevOps.png",
+  "author": "willem_van_lent",
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "search-ado-repos",
-      "title": "Search Azure DevOps repositories",
-      "description": "Search and open Azure DevOps repositories",
+      "title": "Azure DevOps Repositories Search",
+      "description": "Search and open Azure DevOps Repositories",
       "mode": "view"
     }
   ],
