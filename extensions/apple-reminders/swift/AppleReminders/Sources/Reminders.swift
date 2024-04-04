@@ -44,7 +44,7 @@ enum RemindersError: Error {
   case other
 }
 
-@raycast func getData(listId: String?) throws -> RemindersData {
+@raycast func getData() throws -> RemindersData {
   let eventStore = EKEventStore()
   var remindersData: [Reminder] = []
   var listsData: [ReminderList] = []
@@ -61,13 +61,8 @@ enum RemindersError: Error {
       return
     }
 
-    var calendars: [EKCalendar]? = nil
-    if let listId = listId {
-      calendars = [eventStore.calendar(withIdentifier: listId)].compactMap { $0 }
-    }
-
     let predicate = eventStore.predicateForIncompleteReminders(
-      withDueDateStarting: nil, ending: nil, calendars: calendars)
+      withDueDateStarting: nil, ending: nil, calendars: nil)
     eventStore.fetchReminders(matching: predicate) { reminders in
       guard let reminders = reminders else {
         error = RemindersError.noRemindersFound
