@@ -1,13 +1,15 @@
 # Multi Changelog
 
-## [Initial Version] - 2024-03-11
+## [Initial Version] - 2024-04-04
 
-Add initial set of commands:
+Added initial set of commands:
 
 - Start New Session
-- Copy Session Link for Later
+- Copy Session Link
+- Join Room
+- Call Teammate
+- Join Session Via Link
 - Toggle Microphone
 - Toggle Camera
 - Toggle Screen Sharing
-- Join Room
-- Call Teammate
+- Leave Session
