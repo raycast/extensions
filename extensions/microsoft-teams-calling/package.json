@@ -56,7 +56,7 @@
         {"title": "Classic Teams", "value": "classic"}, 
         {"title": "New Teams", "value": "new"}
       ],
-      "default": "classic",
+      "default": "new",
       "required": true
     }
   ],
