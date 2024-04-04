@@ -1,5 +1,10 @@
 # Pipe Commands Changelog
 
+## [Added new commands] - 2024-04-03
+
+- Adding copy file contents to clipboard command
+- Adding titlecase command
+
 ## [Added new commands] - 2024-03-15
 
 - Copy plain text to rich text clipboard
