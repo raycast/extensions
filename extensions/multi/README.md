@@ -59,14 +59,14 @@ Raycast extension to see rooms & teammates, join sessions, control devices and m
 
 ### Start New Session
 
-![toggle](https://raw.githubusercontent.com/multi-software-co/raycast-extension/master/metadata/1-start-new-session.png?raw=true)
+![Start New Session](./metadata/1-start-new-session.png)
 
 ### Call Teammates
 
-![online](https://github.com/multi-software-co/raycast-extension/blob/master/metadata/2-teammates.png?raw=true)
+![Call Teammates](./metadata/2-teammates.png)
 
 ### Join Rooms
 
-![rooms](https://github.com/multi-software-co/raycast-extension/blob/master/metadata/3-rooms.png?raw=true)
+![Join Rooms](./metadata/3-rooms.png)
 
 
