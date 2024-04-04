@@ -1,17 +1,29 @@
 import { List, Action, ActionPanel, Icon, Color, closeMainWindow, PopToRootType } from "@raycast/api";
 import { Room, copyCallLink, getRooms, joinRoom } from "./lib/multi";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { showMultiScriptErrorToast } from "./lib/showMultiScriptErrorToast";
 
 export default function Command() {
-  const [rooms, isLoading] = useGetRooms();
+  const { isLoading, data } = useCachedPromise(
+    async () => {
+      const response = await getRooms();
+      return response.rooms;
+    },
+    [],
+    {
+      onError: (error) => {
+        console.error("Error getting rooms", error);
+        showMultiScriptErrorToast(error);
+      },
+    },
+  );
 
   return (
     <List isLoading={isLoading}>
-      {rooms.length === 0 ? (
+      {data === undefined || data.length === 0 ? (
         <List.EmptyView title={isLoading ? "Loading..." : "No rooms found"} />
       ) : (
-        rooms.map((room) => (
+        data.map((room) => (
           <List.Item
             key={room.id}
             title={room.name}
@@ -23,30 +35,6 @@ export default function Command() {
       )}
     </List>
   );
-}
-
-function useGetRooms(): [Room[], boolean] {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function loadRooms() {
-    setIsLoading(true);
-    try {
-      const response = await getRooms();
-      setRooms(response.rooms);
-    } catch (error) {
-      console.error("Error getting rooms", error);
-      showMultiScriptErrorToast(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadRooms();
-  }, []);
-
-  return [rooms, isLoading];
 }
 
 function getIcon(room: Room): { source: Icon; tintColor: Color } {

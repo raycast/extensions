@@ -1,17 +1,29 @@
 import { List, Icon, Color, Action, ActionPanel, closeMainWindow, PopToRootType } from "@raycast/api";
 import { User, getUsers, inviteUser } from "./lib/multi";
-import { useEffect, useState } from "react";
 import { showMultiScriptErrorToast } from "./lib/showMultiScriptErrorToast";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const [users, isLoading] = useGetUsers();
+  const { isLoading, data } = useCachedPromise(
+    async () => {
+      const response = await getUsers();
+      return response.users;
+    },
+    [],
+    {
+      onError: (error) => {
+        console.error("Error getting users", error);
+        showMultiScriptErrorToast(error);
+      },
+    },
+  );
 
   return (
     <List isLoading={isLoading}>
-      {users.length === 0 ? (
+      {data === undefined || data.length === 0 ? (
         <List.EmptyView title={isLoading ? "Loading..." : "No teammates found"} />
       ) : (
-        users.map((user) => (
+        data.map((user) => (
           <List.Item
             key={user.id}
             title={user.fullname}
@@ -23,30 +35,6 @@ export default function Command() {
       )}
     </List>
   );
-}
-
-function useGetUsers(): [User[], boolean] {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function loadUsers() {
-    setIsLoading(true);
-    try {
-      const response = await getUsers();
-      setUsers(response.users);
-    } catch (error) {
-      console.error("Error getting users", error);
-      showMultiScriptErrorToast(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  return [users, isLoading];
 }
 
 function getIcon(user: User): { source: Icon; tintColor: Color } {
