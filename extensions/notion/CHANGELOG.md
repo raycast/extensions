@@ -91,3 +91,7 @@ The extension has also been revamped under the hood to improve maintainability a
 
 - Added an Action to open the Notion Page after creating it
 - Added a TextArea to add some content to the page directly
+
+## [Improvement to the Create Database Page Command] - 2024-04-04
+
+- Increased the number of database items listed from 20 to 100 of the most recently edited
