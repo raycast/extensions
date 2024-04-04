@@ -118,7 +118,7 @@ export async function queryDatabase(
     const notion = getNotionClient();
     const database = await notion.databases.query({
       database_id: databaseId,
-      page_size: 20,
+      page_size: 100,
       sorts: [
         {
           direction: "descending",
