@@ -3,6 +3,14 @@ import { getAppleScriptErrorCode } from "./multi";
 
 export function showMultiScriptErrorToast(error: unknown) {
   switch (getAppleScriptErrorCode(error)) {
+    case -1743:
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Permission denied",
+        message: "Enable Raycast Automation permission to control Multi and try again.",
+      });
+      return;
+
     case -2700:
       showToast({
         style: Toast.Style.Failure,
