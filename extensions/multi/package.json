@@ -100,7 +100,7 @@
     },
     {
       "name": "joinCallFromLink",
-      "title": "Join Session via Link",
+      "title": "Join Session Via Link",
       "subtitle": "Multi",
       "arguments": [
         {

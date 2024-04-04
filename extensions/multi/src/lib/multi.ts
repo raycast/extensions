@@ -154,13 +154,13 @@ async function executeScript(script: string): Promise<string> {
         language: "JavaScript",
       });
 
-      const latencyMs = new Date().getTime() - startDate.getTime()
+      const latencyMs = new Date().getTime() - startDate.getTime();
 
       console.log("response", `${latencyMs}ms`, response !== "", response);
 
       return response;
     } catch (error) {
-      const latencyMs = new Date().getTime() - startDate.getTime()
+      const latencyMs = new Date().getTime() - startDate.getTime();
 
       console.warn("multiScript error", `${latencyMs}ms`, error);
 
