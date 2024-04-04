@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, showToast, open } from "@raycast/api";
 import { getAppleScriptErrorCode } from "./multi";
 
 export function showMultiScriptErrorToast(error: unknown) {
@@ -8,6 +8,12 @@ export function showMultiScriptErrorToast(error: unknown) {
         style: Toast.Style.Failure,
         title: "Permission denied",
         message: "Enable Raycast Automation permission to control Multi and try again.",
+        primaryAction: {
+          title: "Go to Automation Permissions",
+          onAction: () => {
+            open("x-apple.systempreferences:com.apple.preference.security?Privacy_Automation");
+          },
+        },
       });
       return;
 
