@@ -47,7 +47,7 @@ export function showMultiScriptErrorToast(error: unknown) {
       });
       return;
 
-    case 1004:
+    case -1004:
       showToast({
         style: Toast.Style.Failure,
         title: "Multi is logging out",
