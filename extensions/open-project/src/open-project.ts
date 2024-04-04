@@ -1,50 +1,50 @@
-import path from "path";
-import fs from "node:fs/promises";
+import path from 'path'
+import fs from 'node:fs/promises'
 
 export async function getProjects(parentDir: string) {
-  const codeDir = (await fs.readdir(parentDir)).filter(isHidden);
-  const choices: Array<{ dir: string; fullPath: string }> = [];
+  const codeDir = (await fs.readdir(parentDir)).filter(isHidden)
+  const choices: Array<{ dir: string; fullPath: string }> = []
   for (const dir of codeDir) {
-    let fullPath = dir;
+    let fullPath = dir
     if (!path.isAbsolute(dir)) {
-      fullPath = path.join(parentDir, dir);
+      fullPath = path.join(parentDir, dir)
     }
-    if (fullPath.includes("/node_modules/")) continue;
-    if (fullPath.includes("/build/")) continue;
-    if (fullPath.includes("/dist/")) continue;
-    if (fullPath.includes("/coverage/")) continue;
+    if (fullPath.includes('/node_modules/')) continue
+    if (fullPath.includes('/build/')) continue
+    if (fullPath.includes('/dist/')) continue
+    if (fullPath.includes('/coverage/')) continue
 
-    const pkgjson = path.join(fullPath, "package.json");
+    const pkgjson = path.join(fullPath, 'package.json')
     if (await isFile(pkgjson)) {
       choices.push({
         dir,
         fullPath,
-      });
+      })
     } else if (await isDirectory(fullPath)) {
-      choices.push(...(await getProjects(fullPath)));
+      choices.push(...(await getProjects(fullPath)))
     }
   }
-  return choices;
+  return choices
 }
 
 async function isDirectory(filePath: string) {
   try {
-    const stat = await fs.stat(filePath);
-    return stat.isDirectory();
+    const stat = await fs.stat(filePath)
+    return stat.isDirectory()
   } catch {
-    return false;
+    return false
   }
 }
 
 async function isFile(filePath: string) {
   try {
-    const stat = await fs.stat(filePath);
-    return stat.isFile();
+    const stat = await fs.stat(filePath)
+    return stat.isFile()
   } catch {
-    return false;
+    return false
   }
 }
 
 function isHidden(filePath: string) {
-  return !/^\..*/.test(filePath);
+  return !/^\..*/.test(filePath)
 }
