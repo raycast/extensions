@@ -44,55 +44,35 @@ enum RemindersError: Error {
   case other
 }
 
-@raycast func getData() throws -> RemindersData {
+@raycast func getData() async throws -> RemindersData {
   let eventStore = EKEventStore()
-  var remindersData: [Reminder] = []
-  var listsData: [ReminderList] = []
-  var error: Error?
 
-  let dispatchGroup = DispatchGroup()
-
-  dispatchGroup.enter()
-
-  let completion: (Bool, Error?) -> Void = { (granted, _) in
-    guard granted else {
-      error = RemindersError.accessDenied
-      dispatchGroup.leave()
-      return
-    }
-
-    let predicate = eventStore.predicateForIncompleteReminders(
-      withDueDateStarting: nil, ending: nil, calendars: nil)
-    eventStore.fetchReminders(matching: predicate) { reminders in
-      guard let reminders = reminders else {
-        error = RemindersError.noRemindersFound
-        dispatchGroup.leave()
-        return
-      }
-
-      remindersData = reminders.prefix(1000).map { $0.toStruct() }
-
-      let calendars = eventStore.calendars(for: .reminder)
-      let defaultList = eventStore.defaultCalendarForNewReminders()
-
-      listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
-
-      dispatchGroup.leave()
-    }
-  }
-
+  let granted: Bool
   if #available(macOS 14.0, *) {
-    eventStore.requestFullAccessToReminders(completion: completion)
+    granted = try await eventStore.requestFullAccessToReminders()
   } else {
-    eventStore.requestAccess(to: .reminder, completion: completion)
+    granted = try await eventStore.requestAccess(to: .reminder)
   }
-
-  dispatchGroup.wait()
-
-  if let error {
-    throw error
+  guard granted else {
+    throw RemindersError.accessDenied
   }
-
+  
+  let predicate = eventStore.predicateForIncompleteReminders(
+    withDueDateStarting: nil,
+    ending: nil,
+    calendars: nil
+  )
+  guard let reminders = await eventStore.fetchReminders(matching: predicate) else {
+    throw RemindersError.noRemindersFound
+  }
+  
+  let remindersData = reminders.prefix(1000).map { $0.toStruct() }
+  
+  let calendars = eventStore.calendars(for: .reminder)
+  let defaultList = eventStore.defaultCalendarForNewReminders()
+  
+  let listsData = calendars.map { $0.toStruct(defaultCalendarId: defaultList?.calendarIdentifier) }
+  
   return RemindersData(reminders: remindersData, lists: listsData)
 }
 
