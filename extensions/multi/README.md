@@ -52,7 +52,7 @@ Raycast extension to see rooms & teammates, join sessions, control devices and m
 
 ## Setup
 
-- Download and login to Multi (0.450.1+) from https://multi.app
+- Download and login to Multi (0.460.1+) from https://multi.app
 - Enable macOS Automation permissions for Raycast
 
 ## Showcases
