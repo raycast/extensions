@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Fix compile issue] - 2024-04-04
+
+- Fix compile issue.
+
 ## [Fix interval error validation] - 2024-03-20
 
 - `interval` error validation now checks for `0` and `negative` values.
