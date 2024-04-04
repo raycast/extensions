@@ -19,7 +19,6 @@ type Preferences = {
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>()
-  console.log(preferences)
 
   const { isLoading, data, error } = usePromise(async () => {
     const searchResults = [...(await getProjects(preferences.projectsDir))]
