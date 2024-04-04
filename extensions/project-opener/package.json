@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "license": "MIT",
+  "name": "project-opener",
+  "title": "Project Opener",
+  "description": "Search through a list of your JS/TS projects and quickly open them in your favorite IDE/editor",
+  "icon": "extension_icon.png",
+  "author": "amir-ziaei",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "project",
+    "open",
+    "IDE",
+    "editor",
+    "vscode",
+    "quick"
+  ],
+  "commands": [
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "description": "Search through a list of your JS/TS projects and quickly open them in your favorite IDE/editor",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "projectsDir",
+          "description": "Specify the path your projects are nested within.",
+          "type": "directory",
+          "required": true,
+          "title": "Projects Directory"
+        },
+        {
+          "name": "openWithApp",
+          "description": "Specify your preferred IDE/editor to use for opening projects",
+          "type": "appPicker",
+          "required": true,
+          "title": "Open Project With"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.4",
+    "@types/react": "18.2.74",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.4.4"
+  }
+}
