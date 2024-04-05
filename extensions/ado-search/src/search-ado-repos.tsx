@@ -4,7 +4,7 @@ import { personalAccessToken, organizationName } from "./preferences";
 import { AdoGitrepostitoriesResponse } from "./types";
 
 export default () => {
-  const url = "https://dev.azure.com/" + organizationName + "/_apis/git/repositories?api-version=1.0";
+  const url = `https://dev.azure.com/${organizationName}/_apis/git/repositories?api-version=1.0`;
   const { data, isLoading } = useFetch<AdoGitrepostitoriesResponse>(url, {
     headers: { Accept: "application/json", Authorization: `Basic ${personalAccessToken}` },
   });
@@ -22,8 +22,18 @@ export default () => {
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser title="Open in Browser" url={repository.webUrl} />
-                <Action.CopyToClipboard title="Copy Git SSH URL" content={repository.sshUrl} />
-                <Action.CopyToClipboard title="Copy Git Remote URL" content={repository.remoteUrl} />
+                <Action.CopyToClipboard
+                  title="Copy Git SSH URL"
+                  content={repository.sshUrl}
+                  icon={Icon.CodeBlock}
+                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Git Remote URL"
+                  content={repository.remoteUrl}
+                  icon={Icon.CopyClipboard}
+                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
               </ActionPanel>
             }
           />
