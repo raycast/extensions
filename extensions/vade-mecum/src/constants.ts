@@ -17,13 +17,19 @@ export const LAWS: Law[] = [
     name: "Código de Processo Civil Revogado",
     shortNumber: "Lei nº 5.869, de 1973",
     fullNumber: "Lei nº 5.869, de 11 de janeiro de 1973",
-    url: "https://www.planalto.gov.br/ccivil_03/leis/l5869.htm",
+    url: "https://www.planalto.gov.br/ccivil_03/leis/L5869impressao.htm",
   },
   {
     name: "Código Civil",
     shortNumber: "Lei nº 10.406, de 2002",
     fullNumber: "Lei nº 10.406, de 10 de janeiro de 2002",
     url: "https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm",
+  },
+  {
+    name: "Código Civil Revogado",
+    shortNumber: "Lei nº 3.071, de 1916",
+    fullNumber: "Lei nº 3.071, de 1º de janeiro de 1916",
+    url: "https://www.planalto.gov.br/ccivil_03/leis/L3071impressao.htm",
   },
   {
     name: "Lei de Introdução às Normas do Direito Brasileiro",

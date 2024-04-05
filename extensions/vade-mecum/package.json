@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Look up Legislation",
+      "title": "Look Up Legislation",
       "subtitle": "Vade Mecum",
       "description": "Look up relevant Brazilian legislation",
       "mode": "view"
