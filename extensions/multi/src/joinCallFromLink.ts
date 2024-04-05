@@ -1,13 +1,7 @@
-import { LaunchProps, PopToRootType, closeMainWindow } from "@raycast/api";
+import { LaunchProps } from "@raycast/api";
+import runNoViewMultiCommand from "./lib/runNoViewMultiCommand";
 import { joinCallFromLink } from "./lib/multi";
-import { showMultiScriptErrorToast } from "./lib/showMultiScriptErrorToast";
 
 export default async (props: LaunchProps) => {
-  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-
-  try {
-    await joinCallFromLink(props.arguments.url);
-  } catch (error) {
-    showMultiScriptErrorToast(error);
-  }
+  await runNoViewMultiCommand(joinCallFromLink, props.arguments.url);
 };

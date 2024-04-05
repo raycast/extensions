@@ -1,7 +1,7 @@
 import { List, Action, ActionPanel, Icon, Color, closeMainWindow, PopToRootType } from "@raycast/api";
 import { Room, copyCallLink, getRooms, joinRoom } from "./lib/multi";
 import { useCachedPromise } from "@raycast/utils";
-import { showMultiScriptErrorToast } from "./lib/showMultiScriptErrorToast";
+import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToast";
 
 export default function Command() {
   const { isLoading, data } = useCachedPromise(
@@ -12,8 +12,7 @@ export default function Command() {
     [],
     {
       onError: (error) => {
-        console.error("Error getting rooms", error);
-        showMultiScriptErrorToast(error);
+        showMultiScriptErrorToastAndLogError(error, "getRooms");
       },
     },
   );

@@ -1,7 +1,7 @@
 import { List, Icon, Color, Action, ActionPanel, closeMainWindow, PopToRootType } from "@raycast/api";
 import { User, getUsers, inviteUser } from "./lib/multi";
-import { showMultiScriptErrorToast } from "./lib/showMultiScriptErrorToast";
 import { useCachedPromise } from "@raycast/utils";
+import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToast";
 
 export default function Command() {
   const { isLoading, data } = useCachedPromise(
@@ -12,8 +12,7 @@ export default function Command() {
     [],
     {
       onError: (error) => {
-        console.error("Error getting users", error);
-        showMultiScriptErrorToast(error);
+        showMultiScriptErrorToastAndLogError(error, "getUsers");
       },
     },
   );

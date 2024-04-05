@@ -1,7 +1,21 @@
 import { Toast, showToast, open } from "@raycast/api";
 import { getAppleScriptErrorCode } from "./multi";
 
-export function showMultiScriptErrorToast(error: unknown) {
+export function showMultiScriptErrorToastAndLogError(error: unknown, functionName: string) {
+  const knownError = showMultiScriptErrorToast(error);
+  if (knownError) {
+    console.warn(`Known error while executing ${functionName}`, error);
+  } else {
+    console.error(`Unknown error while executing ${functionName}`, error);
+  }
+}
+
+/**
+ * Show a toast to the user representing the given error.
+ * @param error The error to render as a toast
+ * @returns true if it is a known error, false if it is an unknown error.
+ */
+function showMultiScriptErrorToast(error: unknown): boolean {
   switch (getAppleScriptErrorCode(error)) {
     case -1743:
       showToast({
@@ -15,7 +29,7 @@ export function showMultiScriptErrorToast(error: unknown) {
           },
         },
       });
-      return;
+      return true;
 
     case -2700:
       showToast({
@@ -29,7 +43,7 @@ export function showMultiScriptErrorToast(error: unknown) {
           },
         },
       });
-      return;
+      return true;
 
     case -1001:
       showToast({
@@ -37,7 +51,7 @@ export function showMultiScriptErrorToast(error: unknown) {
         title: "Multi is starting",
         message: "Make sure Multi is logged in and try again.",
       });
-      return;
+      return true;
 
     case -1002:
       showToast({
@@ -45,7 +59,7 @@ export function showMultiScriptErrorToast(error: unknown) {
         title: "Multi is logging in",
         message: "Wait for Multi to finish Log in and try again.",
       });
-      return;
+      return true;
 
     case -1004:
       showToast({
@@ -53,7 +67,7 @@ export function showMultiScriptErrorToast(error: unknown) {
         title: "Multi is logging out",
         message: "Log in on Multi and try again.",
       });
-      return;
+      return true;
 
     case -1005:
       showToast({
@@ -61,7 +75,7 @@ export function showMultiScriptErrorToast(error: unknown) {
         title: "Multi is logged out",
         message: "Log in on Multi and try again.",
       });
-      return;
+      return true;
 
     case -1050:
       showToast({
@@ -69,7 +83,7 @@ export function showMultiScriptErrorToast(error: unknown) {
         title: "Not in a session",
         message: "Join a session to run this command.",
       });
-      return;
+      return true;
 
     default:
       showToast({
@@ -77,5 +91,6 @@ export function showMultiScriptErrorToast(error: unknown) {
         title: "Something went wrong",
         message: "Make sure both Multi and this extension are up-to-date and try again.",
       });
+      return false;
   }
 }
