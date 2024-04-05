@@ -28,7 +28,7 @@ export type SendFormValues = {
   expirationDate: string;
   customExpirationDate: Date | null;
   maxAccessCount: string;
-  password: string;
+  accessPassword: string;
   notes: string;
   hideEmail: boolean;
   disabled: boolean;
@@ -44,7 +44,7 @@ export const sendFormInitialValues: SendFormValues = {
   expirationDate: "",
   customExpirationDate: null,
   maxAccessCount: "",
-  password: "",
+  accessPassword: "",
   notes: "",
   hideEmail: false,
   disabled: false,
@@ -217,7 +217,7 @@ export const CreateEditSendForm = ({
         info="If set, user will no longer be able to access this Send once the maximum access count is reached."
       />
       <Form.PasswordField
-        {...itemProps.password}
+        {...itemProps.accessPassword}
         title="Password"
         placeholder="Enter a password"
         info="Optionally require a password for users to access this Send."

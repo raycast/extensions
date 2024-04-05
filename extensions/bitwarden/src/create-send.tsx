@@ -44,7 +44,7 @@ const convertFormValuesToCreatePayload = (type: SendType, values: SendFormValues
   deletionDate: getStringFromDateOption(values.deletionDate as SendDateOption, values.customDeletionDate),
   expirationDate: getStringFromDateOption(values.expirationDate as SendDateOption | "", values.customExpirationDate),
   maxAccessCount: values.maxAccessCount ? parseInt(values.maxAccessCount) : null,
-  password: values.password || null,
+  password: values.accessPassword || null,
   notes: values.notes || null,
   hideEmail: values.hideEmail,
   disabled: values.disabled,
