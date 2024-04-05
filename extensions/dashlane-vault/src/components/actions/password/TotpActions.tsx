@@ -32,10 +32,11 @@ export default function TotpActions({ item }: Props) {
 async function copy(id: string) {
   const toast = await showToast(Toast.Style.Animated, "Getting TOTP code");
   try {
-    const totp = await getOtpSecret(id);
-    await Clipboard.copy(totp, { concealed: true });
+    const { otp, expireIn } = await getOtpSecret(id);
+    await Clipboard.copy(otp, { concealed: true });
 
-    toast.message = "Pasted code to clipboard";
+    toast.title = "Copied to Clipboard";
+    toast.message = `Expires in ${expireIn} seconds`;
     toast.style = Toast.Style.Success;
   } catch (error) {
     toast.message = "Failed to get TOTP";
@@ -46,8 +47,8 @@ async function copy(id: string) {
 async function paste(id: string) {
   const toast = await showToast(Toast.Style.Animated, "Getting TOTP code");
   try {
-    const totp = await getOtpSecret(id);
-    await Clipboard.paste(totp);
+    const { otp } = await getOtpSecret(id);
+    await Clipboard.paste(otp);
   } catch (error) {
     toast.message = "Failed to get TOTP";
     toast.style = Toast.Style.Failure;

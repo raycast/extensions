@@ -1,5 +1,13 @@
 # Apple Notes Changelog
 
+## [Improve AI Note command UX] - 2024-04-04
+
+The new note created by the `AI Note` command is now instantly displayed for immediate editing.
+
+## [Fix invitations] - 2024-04-03
+
+Fix a bug where notes can't be loaded at all if there is no invitations table.
+
 ## [Big Update] - 2024-03-28
 
 The Apple Notes extension has been improved in every way to make Raycast the perfect companion for your notes. Here's what's new:
@@ -11,6 +19,7 @@ There's now a new command allowing you to quickly access your most recent notes 
 ### More accessories
 
 List items has more accessories allowing to view more details of a note such as:
+
 - If the note is password-protected or not
 - If the note has a checklist in progress or if the checklist is completed
 - If the note is shared with someone else

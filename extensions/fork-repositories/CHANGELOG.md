@@ -1,5 +1,9 @@
 # Fork Repositories Changelog
 
+## [Bug Fix] - 2024-04-05
+
+- Fixed an issue where `Open in Fork` would properly open Fork, but not the the target repository.
+
 ## [Redesign] - 2023-06-19
 
 - Updated `@raycast/api` to latest version
