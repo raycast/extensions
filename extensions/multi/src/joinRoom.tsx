@@ -74,18 +74,12 @@ function getActions(room: Room) {
   );
 }
 
-async function join(room: Room) {
-  // Unfortunatelly, we can't close the view before finishing the request because the request is aborted
-  // It would be nice to have async actions that only unload the extension after the action is finished
-  await joinRoom(room.id);
-
+function join(room: Room) {
   closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  joinRoom(room.id);
 }
 
-async function copyLink(room: Room) {
-  // Unfortunatelly, we can't close the view before finishing the request because the request is aborted
-  // It would be nice to have async actions that only unload the extension after the action is finished
-  await copyCallLink(room.id);
-
+function copyLink(room: Room) {
   closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  copyCallLink(room.id);
 }

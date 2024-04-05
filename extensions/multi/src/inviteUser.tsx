@@ -73,10 +73,7 @@ function getActions(user: User) {
   );
 }
 
-async function invite(user: User) {
-  // Unfortunatelly, we can't close the view before finishing the request because the request is aborted
-  // It would be nice to have async actions that only unload the extension after the action is finished
-  await inviteUser(user.id);
-
+function invite(user: User) {
   closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
+  inviteUser(user.id);
 }
