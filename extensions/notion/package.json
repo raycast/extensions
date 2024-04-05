@@ -37,7 +37,7 @@
           "label": "Close Raycast after creating the page",
           "required": false,
           "default": true,
-          "description": "This action will be set as the primary action (⌘ + enter)."
+          "description": "This action will be set as the primary action (⌘ + ⏎)."
         }
       ]
     },
