@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { Form, ActionPanel, Action, showToast, LocalStorage, List, useNavigation, Detail } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, LocalStorage, List, useNavigation, Detail, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface Message {
@@ -31,7 +31,7 @@ function SavedConversations() {
     const conversationDetails = conversation.messages
       .map((msg) => `Q: ${msg.question}\n\nA: ${msg.answer}`)
       .join("\n\n");
-    push(<Detail markdown={conversationDetails} />);
+    push(<Detail markdown={conversationDetails} />);  // Title set in Detail if supported
   };
 
   const deleteConversation = async (index: number) => {
@@ -75,30 +75,15 @@ function truncate(text: string, length: number) {
 }
 
 export default function Command() {
-  const [apiKey, setApiKey] = useState<string>("");
   const [response, setResponse] = useState<string>("");
   const [question, setQuestion] = useState<string>("");
   const [model, setModel] = useState<string>("gpt-4");
   const [maxTokens, setMaxTokens] = useState<number>(1000);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
-  const [isSetupComplete, setIsSetupComplete] = useState<boolean>(false);
-
-  useEffect(() => {
-    LocalStorage.getItem<string>("apiKey").then((storedApiKey) => {
-      if (storedApiKey) {
-        setApiKey(storedApiKey);
-        setIsSetupComplete(true);
-      }
-    });
-  }, []);
+  const preferences = getPreferenceValues();
+  const apiKey = preferences.apiKey;
 
   const { push } = useNavigation();
-
-  const handleApiKeySubmit = async (newApiKey: string) => {
-    setApiKey(newApiKey);
-    await LocalStorage.setItem("apiKey", newApiKey);
-    setIsSetupComplete(true);
-  };
 
   const handleSaveConversation = async () => {
     if (currentConversation) {
@@ -120,7 +105,6 @@ export default function Command() {
     const openai = new OpenAI({ apiKey });
 
     try {
-      // Prepare the conversation history for the API call
       let messages: Array<{ role: "user" | "system"; content: string }> = [];
 
       if (currentConversation) {
@@ -130,7 +114,6 @@ export default function Command() {
         ]);
       }
 
-      // Append the new question to the history
       messages.push({ role: "user", content: inputQuestion });
 
       const completion = await openai.chat.completions.create({
@@ -144,7 +127,6 @@ export default function Command() {
       const answer = choiceMessage?.content ?? "No valid response text found.";
       setResponse(answer);
 
-      // Update the current conversation with the new Q&A pair
       const updatedMessages = [...(currentConversation?.messages || []), { question: inputQuestion, answer }];
       setCurrentConversation({ id: currentConversation?.id || Date.now().toString(), messages: updatedMessages });
       setQuestion("");
@@ -152,21 +134,6 @@ export default function Command() {
       console.error("Error fetching the ChatGPT response:", error);
       showToast({ title: "Error", message: "Failed to fetch response" });
     }
-  }
-
-  if (!isSetupComplete || !apiKey) {
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm title="Save API Key" onSubmit={(formValues) => handleApiKeySubmit(formValues.apiKey)} />
-          </ActionPanel>
-        }
-      >
-        <Form.Description title="Setup Required" text="Enter your OpenAI API Key to get started." />
-        <Form.TextField id="apiKey" title="API Key" placeholder="Enter your OpenAI API Key" />
-      </Form>
-    );
   }
 
   return (
@@ -191,7 +158,7 @@ export default function Command() {
         title="Message"
         placeholder="What would you like to ask?"
         value={question}
-        onChange={setQuestion} // Directly use setQuestion here
+        onChange={setQuestion}
       />
 
       <Form.Dropdown id="model" title="Model" value={model} onChange={setModel}>

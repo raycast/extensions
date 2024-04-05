@@ -5,12 +5,13 @@
   "description": "Query ChatGPT from raycast with controls for token usage and model selection.",
   "icon": "command-icon.png",
   "author": "michael_d_angelo",
+  "categories": ["Productivity", "Communication"],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Chat",
-      "description": "Ask chat something",
+      "title": "Start Chat",
+      "description": "Ask chatGPT something",
       "mode": "view"
     }
   ],
@@ -33,5 +34,16 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "apiKey",
+      "required": true,
+      "description": "Enter you API key from OpenAI",
+      "title": "OpenAI API Key",
+      "placeholder": "Enter your OpenAI API Key here"
+    }
+  ]
+  
 }
