@@ -1,7 +1,7 @@
 import { List, Action, ActionPanel, Icon, Color, closeMainWindow, PopToRootType } from "@raycast/api";
 import { Room, copyCallLink, getRooms, joinRoom } from "./lib/multi";
 import { useCachedPromise } from "@raycast/utils";
-import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToast";
+import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToastAndLogError";
 
 export default function Command() {
   const { isLoading, data } = useCachedPromise(

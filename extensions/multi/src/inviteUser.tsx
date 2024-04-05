@@ -1,7 +1,7 @@
 import { List, Icon, Color, Action, ActionPanel, closeMainWindow, PopToRootType } from "@raycast/api";
 import { User, getUsers, inviteUser } from "./lib/multi";
 import { useCachedPromise } from "@raycast/utils";
-import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToast";
+import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToastAndLogError";
 
 export default function Command() {
   const { isLoading, data } = useCachedPromise(

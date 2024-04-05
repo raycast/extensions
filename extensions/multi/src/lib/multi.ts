@@ -1,7 +1,7 @@
 import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { setTimeout } from "timers/promises";
-import { getPreferences } from "./preferences";
+import { getPreferences } from "./getPreferences";
 
 /**
  * Starts new Multi session.

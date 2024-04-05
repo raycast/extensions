@@ -1,5 +1,5 @@
 import { PopToRootType, closeMainWindow } from "@raycast/api";
-import { showMultiScriptErrorToastAndLogError } from "./showMultiScriptErrorToast";
+import { showMultiScriptErrorToastAndLogError } from "./showMultiScriptErrorToastAndLogError";
 
 export default async function runNoViewMultiCommand<T extends unknown[], R>(
   multiFunction: (...args: T) => Promise<R>,
