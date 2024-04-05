@@ -2,8 +2,7 @@ import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@r
 
 import { Items } from "./Items";
 import { Guide } from "./Guide";
-import { User } from "../types";
-import { op, ACCOUNT_CACHE_NAME, useOp, cache } from "../utils";
+import { op, ACCOUNT_CACHE_NAME, cache, useAccounts } from "../utils";
 import { useCachedState } from "@raycast/utils";
 
 export function AccountForm() {
@@ -11,7 +10,7 @@ export function AccountForm() {
     ACCOUNT_CACHE_NAME,
     cache.has(ACCOUNT_CACHE_NAME)
   );
-  const { data, error, isLoading } = useOp<User[]>(["account", "list"]);
+  const { data, error, isLoading } = useAccounts();
 
   if (error) return <Guide />;
   if (hasAccount) return <Items />;

@@ -3,13 +3,15 @@ import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 
-import { CategoryName, Item } from "./types";
-import { useCachedPromise, usePromise } from "@raycast/utils";
+import { Category, CategoryName, Item, User } from "./types";
+import { useExec } from "@raycast/utils";
 
+export type ActionID = string;
 export type ActionID = string;
 
 export const cache = new Cache();
 
+const preferences = getPreferenceValues();
 const preferences = getPreferenceValues();
 
 export const CLI_PATH =
@@ -58,35 +60,23 @@ export function op(args: string[]) {
   throw Error("1Password CLI is not found!");
 }
 
-export function useOp<T>(args: string[]) {
-  return usePromise<() => Promise<T>>(async () => {
-    const data = op([...args, "--format=json"]);
-    return JSON.parse(data);
-  });
-}
-
-export function useCachedOp<T>(args: string[], cacheKey: string) {
-  return useCachedPromise<(cacheKey: string) => Promise<T>>(
-    async () => {
-      const data = op([...args, "--format=json"]);
-      return JSON.parse(data);
+const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) =>
+  useExec<T, U>(CLI_PATH, [...args, "--format=json"], {
+    parseOutput: ({ stdout }) => {
+      if (callback) {
+        return callback(JSON.parse(stdout));
+      }
+      return JSON.parse(stdout);
     },
-    [cacheKey],
-    {
-      keepPreviousData: true,
-    }
-  );
-}
+  });
 
-export function clearCache(key?: string) {
-  if (!cache.isEmpty) {
-    if (key && cache.has(key)) {
-      cache.remove(key);
-    } else {
-      cache.clear({ notifySubscribers: false });
-    }
-  }
-}
+export const usePasswords = () =>
+  useOp<Item[]>(["item", "list", "--long"], (data) => data.sort((a, b) => a.title.localeCompare(b.title)));
+export const useCategories = () =>
+  useOp<Category[]>(["item", "template", "list"], (data) => data.sort((a, b) => a.name.localeCompare(b.name)));
+
+export const useAccount = () => useOp<User>(["whoami"]);
+export const useAccounts = () => useOp<User[]>(["account", "list"]);
 
 export function getCategoryIcon(category: CategoryName) {
   switch (category) {
