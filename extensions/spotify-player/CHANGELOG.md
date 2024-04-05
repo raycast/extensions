@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [New Album Actions] - 2024-05-27
+
+-  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+
 ## [New "Remove Playing Song from Playlist" command] - 2024-05-27
 
 - New command `Remove Playing Song from Playlist` to remove the current song from the playlist it's in.
