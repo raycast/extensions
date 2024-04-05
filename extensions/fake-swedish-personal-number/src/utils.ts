@@ -1,4 +1,5 @@
 import { randomInt } from "crypto";
+import { PersonalNumberObject } from "./types";
 
 export function generatePN(age: number, gender: "male" | "female") {
   const birthYear = new Date().getFullYear() - age;
@@ -33,10 +34,19 @@ export function generatePN(age: number, gender: "male" | "female") {
   return birthYear.toString().substr(0, 2) + bb;
 }
 
-export function generatePNItem(age: number, gender: "male" | "female") {
-  return {
+export function generatePNItem(
+  age: number,
+  gender: "male" | "female",
+  whenUsed: (pn: PersonalNumberObject) => void,
+): PersonalNumberObject & { onUse: () => void } {
+  const pnObject = {
     pn: generatePN(age, gender),
     age,
     gender,
+  };
+
+  return {
+    ...pnObject,
+    onUse: () => whenUsed(pnObject),
   };
 }
