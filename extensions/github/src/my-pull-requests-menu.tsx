@@ -36,7 +36,7 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): { source: Icon
     case "PENDING":
       return { source: Icon.Clock };
     default:
-      return { source: "pull-request.svg" };
+      return { source: "pull-request-open.svg" };
   }
 }
 
@@ -91,7 +91,7 @@ function MyPullRequestsMenu() {
   return (
     <MenuBarRoot
       title={displayTitle()}
-      icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip="GitHub My Open Pull Requests"
     >

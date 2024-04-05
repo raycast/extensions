@@ -49,7 +49,7 @@
 /extensions/apple-developer-docs                     @CaliCastle
 /extensions/apple-devices                            @madza91
 /extensions/apple-maps-search                        @djpowers @ratoru
-/extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince @thomaslombart
+/extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince @thomaslombart @xilopaint
 /extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia @jondelga
 /extensions/arc                                      @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @jayeshbhole @hinzed1127 @omar-salama
 /extensions/archiver                                 @404J
@@ -381,7 +381,7 @@
 /extensions/facetime                                 @ron-myers
 /extensions/fake-financial-data                      @andre-rd-rodrigues @farisaziz12
 /extensions/fantastical                              @devahschaefers @xilopaint
-/extensions/fantasy-premier-league-rankings          @hwb15
+/extensions/fantasy-premier-league-rankings          @hwb15 @niall-maloney
 /extensions/fastmail-masked-email                    @PhotonQuantum @klaaspieter @mike182uk
 /extensions/fathom-analytics                         @DanielFerguson
 /extensions/fathom-analytics-stats                   @yannglt
@@ -875,6 +875,7 @@
 /extensions/palette-picker                           @juliusmarminge
 /extensions/pangu-for-raycast                        @beviz
 /extensions/papago-translate                         @Rita-Mordio
+/extensions/paper                                    @luctst
 /extensions/paperless-ngx                            @Padamdam
 /extensions/papermatch                               @marlonjames71 @AndrewMonty
 /extensions/paperspace                               @yuri-becker
@@ -934,7 +935,7 @@
 /extensions/portuguese-primeira-liga                 @danielsequeira
 /extensions/posthog                                  @daibhin
 /extensions/postman                                  @tarikyildizci
-/extensions/power-management                         @sasivarnan @erics118
+/extensions/power-management                         @sasivarnan @erics118 @bbatsche
 /extensions/premier-league                           @anhthang
 /extensions/prettier                                 @aeither @jasonwaters
 /extensions/primer                                   @colebemis
@@ -1205,7 +1206,7 @@
 /extensions/svgo                                     @kaichii @kgrhartlage
 /extensions/svgr                                     @rickMcGavin
 /extensions/swift-evolution                          @BProg @dehesa @pernielsentikaer
-/extensions/swift-package-index                      @maximkrouk
+/extensions/swift-package-index                      @maximkrouk @japanese-goblinn
 /extensions/switch-game-play-history                 @kvdo2
 /extensions/switchhosts                              @tiancheng92
 /extensions/system-information                       @Visual-Studio-Coder @nagauta
@@ -1435,4 +1436,4 @@
 /extensions/znotch                                   @zkondor
 /extensions/zoom                                     @thomaslombart @Visual-Studio-Coder
 /extensions/zoom-control                             @prashantv @pernielsentikaer
-/extensions/zotero                                   @sadanand-singh @lazarjov
+/extensions/zotero                                   @sadanand-singh @lazarjov @joshuahhh
