@@ -5,7 +5,7 @@ import * as cheerio from "cheerio";
 import { decode } from "iconv-lite";
 import { useEffect, useState } from "react";
 import { Article, Law } from "../types";
-import { removeDiacritics } from "../utils";
+import { escapeRegex, removeDiacritics } from "../utils";
 
 interface ArticleListDetailsProps {
   law: Law;
@@ -119,7 +119,8 @@ export default function ArticleListDetail({ law }: ArticleListDetailsProps) {
           const normalizedSearchText = removeDiacritics(searchText);
           const searchTextWords = normalizedSearchText.trim().split(/\s+/);
           return searchTextWords.every((word) => {
-            const regex = new RegExp(`\\b${word}`, "i");
+            const escapedWord = escapeRegex(word);
+            const regex = new RegExp(`\\b${escapedWord}`, "i");
             return word === "" || regex.test(normalizedContent);
           });
         }),
