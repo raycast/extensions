@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tutero-accounts",
+  "title": "Tutero Accounts",
+  "description": "Convenience commands for creating and logging into Tutero accounts.",
+  "icon": "tutero-icon.svg",
+  "author": "zachariah-abraham",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tutero-account",
+      "title": "Tutero Accounts",
+      "description": "Manage the Tutero Accounts extension",
+      "mode": "view"
+    },
+    {
+      "name": "tutero-account-log-in-as-teacher",
+      "title": "Tutero Accounts - Log In As Teacher",
+      "description": "Autofills the Tutero Log In Popup as a Teacher",
+      "mode": "no-view",
+      "icon": "tutero-icon.svg"
+    },
+    {
+      "name": "tutero-account-sign-up-as-teacher",
+      "title": "Tutero Accounts - Sign Up As Teacher",
+      "description": "Autofills the Tutero Sign Up Popup as a Teacher",
+      "mode": "no-view",
+      "icon": "tutero-icon.svg"
+    },
+    {
+      "name": "tutero-account-sign-up-as-student",
+      "title": "Tutero Accounts - Sign Up As Student",
+      "description": "Autofills the Tutero Sign Up Popup as a Student",
+      "mode": "no-view",
+      "icon": "tutero-icon.svg"
+    },
+    {
+      "name": "tutero-account-log-in-as-student",
+      "title": "Tutero Accounts - Log In As Student",
+      "description": "Autofills the Tutero Log In Popup as a Student",
+      "mode": "no-view",
+      "icon": "tutero-icon.svg"
+    },
+    {
+      "name": "tutero-account-get-last-used-email-as-teacher",
+      "title": "Tutero Accounts - Get Last Used Email As Teacher",
+      "description": "Copies the last signed up teacher email to your clipboard",
+      "mode": "no-view",
+      "icon": "tutero-icon.svg"
+    },
+    {
+      "name": "tutero-account-get-last-used-email-as-student",
+      "title": "Tutero Accounts - Get Last Used Email As Student",
+      "description": "Copies the last signed up student email to your clipboard",
+      "mode": "no-view",
+      "icon": "tutero-icon.svg"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
