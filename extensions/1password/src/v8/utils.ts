@@ -7,11 +7,9 @@ import { Category, CategoryName, Item, User } from "./types";
 import { useExec } from "@raycast/utils";
 
 export type ActionID = string;
-export type ActionID = string;
 
 export const cache = new Cache();
 
-const preferences = getPreferenceValues();
 const preferences = getPreferenceValues();
 
 export const CLI_PATH =

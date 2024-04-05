@@ -18,14 +18,6 @@ export function Categories({ onCategoryChange }: { onCategoryChange: (newCategor
       tooltip="Select Category"
       storeValue
     >
-  return (
-    <List.Dropdown
-      defaultValue={DEFAULT_CATEGORY}
-      isLoading={isLoading}
-      onChange={onCategoryChange}
-      tooltip="Select Category"
-      storeValue
-    >
       <List.Dropdown.Item key={"000"} icon={Icon.AppWindowGrid3x3} title="All Categories" value={DEFAULT_CATEGORY} />
       {(data || []).map((category) => (
         <List.Dropdown.Item
@@ -36,6 +28,5 @@ export function Categories({ onCategoryChange }: { onCategoryChange: (newCategor
         />
       ))}
     </List.Dropdown>
-  );
   );
 }
