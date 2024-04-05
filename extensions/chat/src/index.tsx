@@ -1,5 +1,15 @@
 import OpenAI from "openai";
-import { Form, ActionPanel, Action, showToast, LocalStorage, List, useNavigation, Detail, getPreferenceValues } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  LocalStorage,
+  List,
+  useNavigation,
+  Detail,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface Message {
@@ -31,7 +41,7 @@ function SavedConversations() {
     const conversationDetails = conversation.messages
       .map((msg) => `Q: ${msg.question}\n\nA: ${msg.answer}`)
       .join("\n\n");
-    push(<Detail markdown={conversationDetails} />);  // Title set in Detail if supported
+    push(<Detail markdown={conversationDetails} />); // Title set in Detail if supported
   };
 
   const deleteConversation = async (index: number) => {
