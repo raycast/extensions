@@ -131,7 +131,7 @@ interface AppleScriptError {
 async function multiScript(name: string, parameters?: Record<string, unknown>): Promise<unknown> {
   const targetAppleScriptApplication = getPreferences().targetAppleScriptApplication;
   const effectiveParameters = { source: "raycast", ...parameters };
-  const script = `Application('${targetAppleScriptApplication}').${name}(${JSON.stringify(effectiveParameters)})`;
+  const script = `Application("${targetAppleScriptApplication}").${name}(${JSON.stringify(effectiveParameters)})`;
 
   const response = await executeScript(script);
 
