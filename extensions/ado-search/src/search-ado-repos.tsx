@@ -32,7 +32,7 @@ export default () => {
                   title="Copy Git Remote URL"
                   content={repository.remoteUrl}
                   icon={Icon.CopyClipboard}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ modifiers: ["cmd"], key: "g" }}
                 />
               </ActionPanel>
             }
