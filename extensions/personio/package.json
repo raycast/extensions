@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "personio",
+  "title": "Personio",
+  "description": "Track your time with Personio.",
+  "icon": "command-icon-1.png",
+  "author": "boosteblume",
+  "contributors": [
+    "marcjulian"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tracktime",
+      "title": "Track Time",
+      "description": "Track your time with Personio.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "employeeNumber",
+          "title": "Employee Number",
+          "description": "The employee number of the person you want to track time for.",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "getemployeenumber",
+      "title": "Find Employee Number",
+      "description": "Find the employee number of a person in Personio.",
+      "mode": "view"
+    },
+    {
+      "name": "attendances",
+      "title": "Attendances",
+      "description": "Get the attendances of a person in Personio.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "employeeNumber",
+          "title": "Employee Number",
+          "description": "The employee number of the person you want to get the attendances for.",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Client ID",
+      "description": "The client ID of your Personio company.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "clientSecret",
+      "title": "Client Secret",
+      "description": "The client secret of your Personio company.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "timezone",
+      "title": "Timezone",
+      "description": "The timezone of your Personio company.",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Berlin/Europe",
+          "value": "Europe/Berlin"
+        },
+        {
+          "title": "London/Europe",
+          "value": "Europe/London"
+        },
+        {
+          "title": "New York/America",
+          "value": "America/New_York"
+        },
+        {
+          "title": "Los Angeles/America",
+          "value": "America/Los_Angeles"
+        },
+        {
+          "title": "Tokyo/Asia",
+          "value": "Asia/Tokyo"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "axios": "^1.6.8",
+    "moment-timezone": "^0.5.45"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
