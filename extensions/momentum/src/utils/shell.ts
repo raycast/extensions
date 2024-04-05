@@ -20,7 +20,7 @@ $.quote = function quote(arg: string) {
   }
 
   return (
-    "$'" +
+    "'" +
     arg
       .replace(/\\/g, "\\\\")
       .replace(/'/g, "\\'")

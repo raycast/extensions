@@ -5,7 +5,6 @@ import { getManagerByName } from "./packageManagers";
 import { ValidationError } from "./errors";
 import { getPreferenceValues, open, showHUD } from "@raycast/api";
 import { Project } from "../typing/project";
-import { showError } from "./toasts";
 
 export interface ValidPrefsResult<T, PM> {
   manager: PM;
@@ -13,6 +12,16 @@ export interface ValidPrefsResult<T, PM> {
   openEditor: () => Promise<void>;
   data: T;
 }
+
+export const validateProjectName = async (name: string) => {
+  const validDirectoryName = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+
+  if (!validDirectoryName.test(name)) {
+    throw new ValidationError(
+      "invalid directory name, name should start with a letter, and can only contain A-Z, a-z, 0-9, underscores & hyphens.",
+    );
+  }
+};
 
 export const validateProjectRoot = async (root: string, projectDir: string) => {
   const projectRoot = path.join(root, projectDir);
@@ -47,10 +56,11 @@ export const validatePrefs = async <T extends Project, PM extends PackageManager
   const projectRoot = await validateProjectRoot(prefs.projectsLocation, args.projectName);
   const manager: PM = await validateManager(prefs.pkgManager);
 
+  await validateProjectName(args.projectName);
+
   const editor = async () => {
     if (!prefs.editor) {
-      await showError("no editor selected in preferences");
-      return;
+      throw new ValidationError("no editor selected in preferences");
     }
 
     await showHUD(`opening ${prefs.editor.name}`);

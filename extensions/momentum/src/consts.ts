@@ -1,6 +1,5 @@
 import { environment } from "@raycast/api";
 
-// will integrate those
 // const jetbraindsSpecficiDirectories = [
 //   'PycharmProjects',
 //   'WebstormProjects',
