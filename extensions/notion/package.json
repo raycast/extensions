@@ -36,7 +36,7 @@
           "type": "checkbox",
           "label": "Close Raycast after creating the page",
           "required": false,
-          "default": true,
+          "default": false,
           "description": "This action will be set as the primary action (⌘ + ⏎)."
         }
       ]
