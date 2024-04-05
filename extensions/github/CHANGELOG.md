@@ -3,7 +3,7 @@
 ## [Fix icons for Notifications and Unread Notifications commands] - 2024-04-05
 
 - Fixes icons for issues and pull requests in `Notifications` and `Unread Notifications` commands.
-- Standardize the color for all the accessories in `My Pull Requests`.
+- Standardizes the color for all the accessories in `My Pull Requests`.
 
 ## [Fix icon] - 2024-04-02
 
