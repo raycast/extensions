@@ -2,6 +2,8 @@ import { Endpoints } from "@octokit/types";
 import { Color, Icon } from "@raycast/api";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
+
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
 // from https://github.com/manosim/gitify/blob/c3683dcfd84afc74fd391b2b17ae7b36dfe779a7/src/utils/helpers.ts#L19-L27
@@ -51,18 +53,52 @@ export function getGitHubURL(notification: Notification, userId?: string) {
   return notification.url;
 }
 
-export function getNotificationIcon(notification: Notification) {
+export async function getNotificationIcon(notification: Notification) {
+  if (notification.subject.type === "PullRequest") {
+    const { octokit } = getGitHubClient();
+    const pullRequest = await octokit.rest.pulls.get({
+      owner: notification.repository.owner.login,
+      repo: notification.repository.name,
+      pull_number: parseInt(notification.subject.url.split("/").at(-1)!),
+    });
+
+    if (pullRequest.data.merged) {
+      return { value: { source: "pull-request-merged.svg", tintColor: Color.Purple }, tooltip: "Merged" };
+    } else if (pullRequest.data.state === "closed") {
+      return { value: { source: "pull-request-closed.svg", tintColor: Color.Red }, tooltip: "Closed" };
+    } else if (pullRequest.data.draft) {
+      return { value: { source: "pull-request-draft.svg", tintColor: Color.SecondaryText }, tooltip: "Draft" };
+    } else {
+      return { value: { source: "pull-request-open.svg", tintColor: Color.Green }, tooltip: "Open" };
+    }
+  }
+
+  if (notification.subject.type === "Issue") {
+    const { octokit } = getGitHubClient();
+    const issue = await octokit.rest.issues.get({
+      owner: notification.repository.owner.login,
+      repo: notification.repository.name,
+      issue_number: parseInt(notification.subject.url.split("/").at(-1)!),
+    });
+
+    if (issue.data.state === "closed") {
+      if (issue.data.state_reason === "completed") {
+        return { value: { source: "issue-closed.svg", tintColor: Color.Purple }, tooltip: "Closed as completed" };
+      } else if (issue.data.state_reason === "not_planned") {
+        return { value: { source: "skip.svg", tintColor: Color.SecondaryText }, tooltip: "Closed as not planned" };
+      } else {
+        return { value: { source: "issue-closed.svg", tintColor: Color.Purple }, tooltip: "Closed" };
+      }
+    } else {
+      return { value: { source: "issue-open.svg", tintColor: Color.Green }, tooltip: "Open" };
+    }
+  }
+
   let icon;
 
   switch (notification.subject.type) {
     case "Commit":
       icon = { value: "commit.svg", tooltip: "Commit" };
-      break;
-    case "Issue":
-      icon = { value: "issue-open.svg", tooltip: "Issue" };
-      break;
-    case "PullRequest":
-      icon = { value: "pull-request-open.svg", tooltip: "Pull Request" };
       break;
     case "Release":
       icon = { value: "tag.svg", tooltip: "Release" };

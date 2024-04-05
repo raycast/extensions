@@ -50,7 +50,7 @@ export function useMyIssues(repository: string | null) {
     .map((section) => {
       section.issues?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
 
-      const subtitle = pluralize(section.issues?.length ?? 0, "Issue", { withNumber: true });
+      const subtitle = pluralize(section.issues?.length ?? 0, "issue", { withNumber: true });
 
       return { ...section, subtitle };
     });
