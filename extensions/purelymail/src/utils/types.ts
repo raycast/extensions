@@ -42,7 +42,7 @@ export type ModifyUserRequest = {
   enableSearchIndexing?: boolean;
   enablePasswordReset?: boolean;
   requireTwoFactorAuthentication?: boolean;
-}
+};
 export type CreateRoutingRequest = {
   domainName: string;
   prefix: boolean;

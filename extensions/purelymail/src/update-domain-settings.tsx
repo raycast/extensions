@@ -5,16 +5,6 @@ import { getDomains, updateDomainSettings } from "./utils/api";
 import { Domain, Response, UpdateDomainSettingsRequest } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
 
-interface State {
-  forwardingEmail?: string;
-  domainError?: string;
-  isLoading: boolean;
-
-  allowAccountReset: boolean;
-  symbolicSubaddressing: boolean;
-  recheckDns: boolean;
-}
-
 interface DomainArgs {
   domain: string;
 }
@@ -22,25 +12,15 @@ interface DomainArgs {
 export default function UpdateDomainSettings(props: LaunchProps<{ arguments: DomainArgs }>) {
   const propDomain = props.arguments.domain;
 
-  const [state, setState] = useState<State>({
-    forwardingEmail: "",
-    domainError: "",
-    isLoading: false,
-
-    allowAccountReset: false,
-    symbolicSubaddressing: false,
-    recheckDns: false,
-  });
   const [error, setError] = useState("");
   const [domains, setDomains] = useCachedState<Domain[]>("domains");
   const [isLoading, setIsLoading] = useState(true);
-
 
   useEffect(() => {
     async function getFromApi() {
       const response: Response = await getDomains();
 
-      if (response.type==="error") {
+      if (response.type === "error") {
         setError(response.message);
       } else {
         setDomains(response.result.domains);
@@ -56,7 +36,7 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
       setIsLoading(true);
 
       const response = await updateDomainSettings({ ...values });
-      if (response.type==="success") {
+      if (response.type === "success") {
         await showToast(Toast.Style.Success, "Domain Settings Updated", "DOMAIN: " + values.name);
         popToRoot({ clearSearchBar: true });
       }
@@ -98,12 +78,12 @@ export default function UpdateDomainSettings(props: LaunchProps<{ arguments: Dom
 
       <Form.Checkbox
         label="Allow Account Reset"
-        info={`If your account allows password reset, then only domains with this option enabled can be used for password reset. In essence, owning domains with this option enabled is equivalent to owning the account.`}
+        info="If your account allows password reset, then only domains with this option enabled can be used for password reset. In essence, owning domains with this option enabled is equivalent to owning the account."
         {...itemProps.allowAccountReset}
       />
       <Form.Checkbox
         label="Symbolic Subaddressing"
-        info={`If enabled, everything after a symbol character in an email address will be ignored`}
+        info="If enabled, everything after a symbol character in an email address will be ignored"
         {...itemProps.symbolicSubaddressing}
       />
       <Form.Checkbox label="Recheck DNS" {...itemProps.recheckDns} />

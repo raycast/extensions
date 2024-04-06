@@ -5,7 +5,10 @@
 ### Enhancements
 
 - `Delete User` command moved from being a separate command to an action in `List Users`
-- You can now filter the domains by their "isShared" in `List Domains`
+- `Create Routing Rule` has been made more user friendly
+- You can now filter the domains by their "isShared" and "TLD" in `List Domains`
+- Changed `AddDomain` from `view` to `no-view`
+- Most results are now cached
 
 ### New Endpoints
 
@@ -16,6 +19,7 @@
 
 - remove redundant error toasts
 - separate useState items for better control
+- api takes an optional parameter to hide toasts (for `no-view` commands)
 
 ## [Added Billing and App Password Endpoints] - 2023-10-30
 

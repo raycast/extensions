@@ -6,7 +6,8 @@
   "icon": "purelymail.png",
   "author": "xmok",
   "categories": [
-    "Communication"
+    "Communication",
+    "Productivity"
   ],
   "license": "MIT",
   "preferences": [
@@ -31,7 +32,15 @@
       "title": "Add Domain",
       "subtitle": "Purelymail",
       "description": "Add a new domain to your Purelymail account",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "domainName",
+          "type": "text",
+          "placeholder": "example.com",
+          "required": true
+        }
+      ]
     },
     {
       "name": "get-ownership-code",
@@ -127,8 +136,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.6",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

@@ -14,9 +14,15 @@ import { API_HEADERS, API_METHOD, API_URL } from "./constants";
 import { Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-const callApi = async (endpoint: string, body: RequestBody, animatedToastMessage = "", successToastMessage = "") => {
+const callApi = async (
+  endpoint: string,
+  body: RequestBody,
+  animatedToastMessage = "",
+  successToastMessage = "",
+  hideToasts = false,
+) => {
   try {
-    await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
+    if (!hideToasts) await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
 
     const apiResponse = await fetch(API_URL + endpoint, {
       method: API_METHOD,
@@ -36,8 +42,10 @@ const callApi = async (endpoint: string, body: RequestBody, animatedToastMessage
     }
 
     const response = (await apiResponse.json()) as Response;
-    if (response.type === "success") await showToast(Toast.Style.Success, "SUCCESS", successToastMessage);
-    else await showFailureToast(response.message, { title: response.code });
+    if (!hideToasts) {
+      if (response.type === "success") await showToast(Toast.Style.Success, "SUCCESS", successToastMessage);
+      else await showFailureToast(response.message, { title: response.code });
+    }
     return response;
   } catch (error) {
     const errorResponse = {
@@ -45,7 +53,7 @@ const callApi = async (endpoint: string, body: RequestBody, animatedToastMessage
       code: "purelymailError",
       message: "Failed to execute request. Please try again later.",
     } as ErrorResponse;
-    await showFailureToast(errorResponse.message, { title: errorResponse.code });
+    if (!hideToasts) await showFailureToast(errorResponse.message, { title: errorResponse.code });
     return errorResponse;
   }
 };
@@ -101,9 +109,9 @@ export async function getRoutingRules() {
   return await callApi("listRoutingRules", body, "Fetching Routing Rules", "Fetched Routing Rules");
 }
 
-export async function getAccountCredit() {
+export async function getAccountCredit({ hideToasts = false }) {
   const body = {};
-  return await callApi("checkAccountCredit", body, "Fetching Account Credit", "Fetched Account Credit");
+  return await callApi("checkAccountCredit", body, "Fetching Account Credit", "Fetched Account Credit", hideToasts);
 }
 
 export async function createAppPassword({ ...params }: CreateAppPasswordRequest) {

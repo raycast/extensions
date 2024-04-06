@@ -1,4 +1,4 @@
-import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, Icon } from "@raycast/api";
+import { showToast, Toast, ActionPanel, Action, Form, LaunchProps, Icon, popToRoot } from "@raycast/api";
 import { useForm, FormValidation, useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { createUser, getDomains } from "./utils/api";
@@ -16,11 +16,11 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
   const [error, setError] = useState("");
   const [domains, setDomains] = useCachedState<Domain[]>("domains");
   const [isLoading, setIsLoading] = useState(true);
-  
+
   async function getFromApi() {
     const response: Response = await getDomains(true);
 
-    if (response.type==="error") {
+    if (response.type === "error") {
       setError(response.message);
     } else {
       setDomains(response.result.domains);
@@ -28,7 +28,6 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
     setIsLoading(false);
   }
   useEffect(() => {
-
     getFromApi();
   }, []);
 
@@ -48,9 +47,9 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
       };
 
       const response = await createUser(formData);
-      if (response.type==="success") {
+      if (response.type === "success") {
         await showToast(Toast.Style.Success, "User Created", `USER: ${userName}@${domainName}`);
-        await getFromApi();
+        popToRoot();
       }
       setIsLoading(false);
     },
@@ -90,6 +89,7 @@ export default function CreateUser(props: LaunchProps<{ arguments: DomainArgs }>
       </Form.Dropdown>
 
       <Form.TextField title="Username" placeholder="Enter a username" {...itemProps.userName} />
+      <Form.Description text={`${itemProps.userName.value || "<USER>"}@${itemProps.domainName.value}`} />
 
       <Form.PasswordField title="Password" placeholder="Enter password" {...itemProps.password} />
 

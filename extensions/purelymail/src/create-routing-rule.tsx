@@ -15,7 +15,7 @@ export default function CreateRoutingRule() {
     async function getFromApi() {
       const response: Response = await getDomains(true);
 
-      if (response.type==="error") {
+      if (response.type === "error") {
         setError(response.message);
       } else {
         setDomains(response.result.domains);
@@ -26,26 +26,22 @@ export default function CreateRoutingRule() {
   }, []);
 
   const description = () => {
-    let from = "FROM: ";
     const { domainName, matchUser, targetAddresses, type } = itemProps;
     const targets = targetAddresses.value && targetAddresses.value.replaceAll(" ", "").replaceAll(",", " AND ");
-    
-    if (type.value==="any") {
+
+    let from = "FROM: ";
+    if (type.value === "any") {
       from += `ANY ADDRESS i.e. '*@${domainName.value}'`;
-    } else if (type.value==="exact") {
+    } else if (type.value === "exact") {
       from += `EXACT ADDRESS '${matchUser.value || "<MATCH>"}@${domainName.value}'`;
-    } else if (type.value==="prefix") {
-      from += `ANY ADDRESS STARTING WITH '${matchUser.value || "<MATCH>"}' i.e. '${matchUser.value || "<MATCH>"}*@${domainName.value}'`;
+    } else if (type.value === "prefix") {
+      from += `ANY ADDRESS STARTING WITH '${matchUser.value || "<MATCH>"}' i.e. '${matchUser.value || "<MATCH>"}*@${
+        domainName.value
+      }'`;
     } else {
-      from += `ANY ADDRESS EXCEPT VALID ADDRESS`;
+      from += `ANY ADDRESS EXCEPT VALID ADDRESS i.e. <any>@${domainName.value}`;
     }
-    // if (!prefix.value && matchUser.value) {
-    //   from += `EXACT ADDRESS '${matchUser.value}@${domainName.value}'`;
-    // } else if (prefix && !matchUser.value) {
-    //   from += `ANY ADDRESS i.e. '*@${domainName.value}'`;
-    // } else if (prefix && matchUser.value) {
-    //   from += `ANY ADDRESS STARTING WITH '${matchUser.value}' i.e. '${matchUser.value}*@${domainName.value}'`;
-    // }
+
     const to = `
 
 TO: '${targets || "<TARGETS>"}'`;
@@ -57,35 +53,43 @@ TO: '${targets || "<TARGETS>"}'`;
     type: string;
     matchUser: string;
     targetAddresses: string;
-  }
+  };
   const { handleSubmit, itemProps } = useForm<CreateRoutingFormValues>({
     async onSubmit(values) {
       setIsLoading(true);
-      
-      let prefix = true;
-      let catchall = false;
-      let matchUser = values.matchUser;
 
-      if (values.type==="catchall") {
+      let prefix: boolean;
+      let catchall: boolean;
+      let matchUser: string;
+
+      if (values.type === "catchall") {
+        prefix = true;
         catchall = true;
         matchUser = "";
-      } else if (values.type==="any") {
+      } else if (values.type === "any") {
+        prefix = true;
+        catchall = false;
         matchUser = "";
-      } else if (values.type==="exact") {
+      } else if (values.type === "exact") {
         prefix = false;
+        catchall = false;
+        matchUser = values.matchUser;
+      } else {
+        prefix = true;
+        catchall = false;
+        matchUser = values.matchUser;
       }
-      
+
       const formData: CreateRoutingRequest = {
         domainName: values.domainName,
         prefix,
         matchUser,
         targetAddresses: values.targetAddresses.replaceAll(" ", "").split(","),
-        catchall
+        catchall,
       };
       const response = await createRoutingRule(formData);
 
-      if (response.type==="success") {
-        await showToast(Toast.Style.Success, "Rule Created");
+      if (response.type === "success") {
         await popToRoot({
           clearSearchBar: true,
         });
@@ -94,15 +98,24 @@ TO: '${targets || "<TARGETS>"}'`;
     },
     validation: {
       domainName: FormValidation.Required,
-      matchUser: FormValidation.Required,
-      targetAddresses(value) {
+      matchUser(value) {
+        if (itemProps.type.value === "prefix" || itemProps.type.value === "exact")
           if (!value) return "The item is required";
-          else if (value.replaceAll(" ", "").split(",").some(email => {
-            if (!EMAIL_REGEX.test(email)) return true;
-          })) return "The item is invalid";
       },
-    }
-  })
+      targetAddresses(value) {
+        if (!value) return "The item is required";
+        else if (
+          value
+            .replaceAll(" ", "")
+            .split(",")
+            .some((email) => {
+              if (!EMAIL_REGEX.test(email)) return true;
+            })
+        )
+          return "The item is invalid";
+      },
+    },
+  });
 
   return error ? (
     <ErrorComponent error={error} />
@@ -111,26 +124,21 @@ TO: '${targets || "<TARGETS>"}'`;
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Routing Rule"
-            icon={Icon.Check}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Create Routing Rule" icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        title="Domain"
-        {...itemProps.domainName}
-      >
-        {domains?.map((domain) => (
-          <Form.Dropdown.Item
-            key={domain.name}
-            value={domain.name}
-            title={domain.name}
-            icon={getFavicon(`https://${domain.name}`)}
-          />
-        ))}
+      <Form.Dropdown title="Domain" {...itemProps.domainName}>
+        {domains
+          ?.filter((domain) => !domain.isShared)
+          .map((domain) => (
+            <Form.Dropdown.Item
+              key={domain.name}
+              value={domain.name}
+              title={domain.name}
+              icon={getFavicon(`https://${domain.name}`)}
+            />
+          ))}
       </Form.Dropdown>
 
       <Form.Dropdown title="Type" {...itemProps.type}>
@@ -140,13 +148,17 @@ TO: '${targets || "<TARGETS>"}'`;
         <Form.Dropdown.Item title="The exact address" value="exact" />
       </Form.Dropdown>
 
-      <Form.TextField
-        title="Match User"
-        placeholder="hi"
-        info={`The local part of the user address to be matched, i.e. "user" in "user@domain.org"`}
-        {...itemProps.matchUser}
-      />
-      <Form.Description text={`${itemProps.matchUser.value || "<MATCH>"}@${itemProps.domainName.value}`} />
+      {(itemProps.type.value === "prefix" || itemProps.type.value === "exact") && (
+        <>
+          <Form.TextField
+            title="Match User"
+            placeholder="hi"
+            info={`The local part of the user address to be matched, i.e. "user" in "user@domain.org"`}
+            {...itemProps.matchUser}
+          />
+          <Form.Description text={`${itemProps.matchUser.value || "<MATCH>"}@${itemProps.domainName.value}`} />
+        </>
+      )}
 
       <Form.TextField
         title="Target Addresses"
