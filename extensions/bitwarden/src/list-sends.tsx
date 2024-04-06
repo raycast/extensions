@@ -25,9 +25,9 @@ const ListSendsCommand = () => (
 
 const getItemIcon = (send: Send): NonNullable<List.Item.Props["icon"]> => {
   if (send.type === SendType.File) {
-    return { source: Icon.Document, tintColor: Color.Orange, tooltip: "File Send" };
+    return { source: Icon.Document, tintColor: Color.Orange };
   }
-  return { source: Icon.Text, tintColor: Color.Blue, tooltip: "Text Send" };
+  return { source: Icon.Text, tintColor: Color.Blue };
 };
 
 const getItemAccessories = (send: Send): NonNullable<List.Item.Props["accessories"]> => {
