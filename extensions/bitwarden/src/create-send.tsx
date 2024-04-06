@@ -5,7 +5,7 @@ import { SessionProvider } from "~/context/session";
 import { SendDateOption, SendCreatePayload, SendType, Send } from "~/types/send";
 import { SendDateOptionsToHourOffsetMap } from "~/constants/send";
 import { CreateEditSendForm, SendFormValues, sendFormInitialValues } from "~/components/send/CreateEditSendForm";
-import ListSendsCommand from "~/list-sends";
+import SearchSendsCommand from "~/search-sends";
 
 const LoadingFallback = () => <Form isLoading />;
 
@@ -109,7 +109,7 @@ function CreateSendCommandContent({ send, onSuccess: parentOnSuccess }: CreateEd
     if (parentOnSuccess) {
       parentOnSuccess(send);
     } else {
-      push(<ListSendsCommand />);
+      push(<SearchSendsCommand />);
     }
   };
 

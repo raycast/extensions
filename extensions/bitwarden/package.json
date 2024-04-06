@@ -196,18 +196,18 @@
     },
     {
       "name": "create-send",
-      "title": "Create New Send",
+      "title": "Create Send",
       "subtitle": "Bitwarden",
       "description": "Securely share information directly with anyone.",
       "icon": "sends-create.png",
       "mode": "view"
     },
     {
-      "name": "list-sends",
-      "title": "List All Sends",
+      "name": "search-sends",
+      "title": "Search Sends",
       "subtitle": "Bitwarden",
-      "description": "List all the Sends owned by you.",
-      "icon": "sends-list.png",
+      "description": "List and search all the Sends owned by you.",
+      "icon": "sends-search.png",
       "mode": "view"
     }
   ],

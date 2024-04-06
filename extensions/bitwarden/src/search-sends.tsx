@@ -16,11 +16,11 @@ import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationNa
 const searchBarPlaceholder = "Search sends";
 const LoadingFallback = () => <List searchBarPlaceholder={searchBarPlaceholder} isLoading />;
 
-const ListSendsCommand = () => (
+const SearchSendsCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
       <SessionProvider loadingFallback={<LoadingFallback />} unlock>
-        <ListSendsCommandContent />
+        <SearchSendsCommandContent />
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
@@ -177,7 +177,7 @@ const syncSendsShortcutLabel = (() => {
   );
 })();
 
-function ListSendsCommandContent() {
+function SearchSendsCommandContent() {
   const { pop } = useNavigation();
   const bitwarden = useBitwarden();
   const queueOperation = useOperationQueue();
@@ -378,4 +378,4 @@ function ListSendsCommandContent() {
   );
 }
 
-export default ListSendsCommand;
+export default SearchSendsCommand;
