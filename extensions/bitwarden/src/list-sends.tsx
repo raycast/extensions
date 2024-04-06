@@ -308,7 +308,12 @@ function ListSendsCommandContent() {
                 shortcut={{ key: "d", modifiers: ["opt"] }}
               />
               {send.passwordSet && (
-                <Action onAction={() => onRemovePassword(send.id)} title="Remove Password" icon={Icon.LockUnlocked} />
+                <Action
+                  onAction={() => onRemovePassword(send.id)}
+                  title="Remove Password"
+                  icon={Icon.LockUnlocked}
+                  shortcut={{ key: "p", modifiers: ["opt"] }}
+                />
               )}
               {sendManagementActionSection}
             </ActionPanel>
