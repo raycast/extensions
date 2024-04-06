@@ -35,26 +35,36 @@ const getItemIcon = (send: Send): NonNullable<List.Item.Props["icon"]> => {
 const getItemAccessories = (send: Send): NonNullable<List.Item.Props["accessories"]> => {
   const accessories: NonNullable<List.Item.Props["accessories"]> = [];
   if (send.passwordSet) {
-    accessories.push({ icon: Icon.Key, tooltip: "Password protected." });
+    accessories.push({ icon: Icon.Key, tooltip: "Password protected" });
   }
   if (send.maxAccessCount) {
-    accessories.push({ icon: Icon.Person, tooltip: `Has a max Access Count of ${send.maxAccessCount}.` });
+    const wasMaxAccessCountReached = send.accessCount >= send.maxAccessCount;
+    accessories.push({
+      icon: { source: Icon.Person, tintColor: wasMaxAccessCountReached ? Color.Red : undefined },
+      tooltip: `Access Count: ${send.accessCount}/${send.maxAccessCount}`,
+    });
   }
   if (send.disabled) {
-    accessories.push({ icon: Icon.Warning, tooltip: "Deactivated and no one can access it." });
+    accessories.push({ icon: Icon.Warning, tooltip: "Deactivated" });
   }
   if (send.expirationDate) {
+    const date = new Date(send.expirationDate);
+    const isPastDate = date < new Date();
+    const color = isPastDate ? Color.Red : undefined;
     accessories.push({
-      icon: Icon.Clock,
-      date: { value: new Date(send.expirationDate) },
-      tooltip: `Will expire on ${new Date(send.expirationDate).toLocaleString()}.`,
+      icon: { source: Icon.Clock, tintColor: color },
+      date: { value: date, color },
+      tooltip: isPastDate ? `Expired on ${date.toLocaleString()}` : `Will expire on ${date.toLocaleString()}`,
     });
   }
   if (send.deletionDate) {
+    const date = new Date(send.deletionDate);
+    const isPastDate = date < new Date();
+    const color = isPastDate ? Color.Red : undefined;
     accessories.push({
-      icon: Icon.Trash,
-      date: { value: new Date(send.deletionDate) },
-      tooltip: `Will be deleted on ${new Date(send.deletionDate).toLocaleString()}.`,
+      icon: { source: Icon.Trash, tintColor: color },
+      date: { value: date, color },
+      tooltip: isPastDate ? `Deleted on ${date.toLocaleString()}` : `Will be deleted on ${date.toLocaleString()}`,
     });
   }
   return accessories;
