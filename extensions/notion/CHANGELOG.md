@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Support inline Markdown for text properties] - 2024-04-06
+
+- Add a preference that enables the use of inline Markdown on text properties when creating a new database page.
+
 ## [Change Properties order in Create Database Page] - 2024-03-22
 
 - Add ability to change order of properties when creating a new database page
