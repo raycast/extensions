@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "create-quick",
+      "name": "index",
       "title": "Quick Create Random Email Alias",
       "subtitle": "HideMail",
       "description": "Generate and copy a random private email alias to clipboard",
