@@ -83,77 +83,157 @@ const loadSends = async (bitwarden: Bitwarden, isFirstLoadRef: MutableRefObject<
   }
 };
 
+type Operation = {
+  id: string;
+  execute: () => Promise<any>;
+};
+
+const useOperationQueue = () => {
+  const operationQueueRef = useRef<Operation[]>([]);
+  const currentOperationTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const performNextOperation = () => {
+    const operation = operationQueueRef.current.shift();
+    if (!operation) return;
+
+    currentOperationTimeoutRef.current = setTimeout(async () => {
+      try {
+        await operation.execute();
+      } finally {
+        clearTimeout(currentOperationTimeoutRef.current);
+        currentOperationTimeoutRef.current = undefined;
+        if (operationQueueRef.current.length > 0) {
+          performNextOperation();
+        }
+      }
+    }, 1);
+  };
+
+  const queueOperation = (id: string, execute: () => Promise<any>) => {
+    if (!operationQueueRef.current.some((op) => op.id === id)) {
+      operationQueueRef.current.push({ id, execute });
+      if (!currentOperationTimeoutRef.current) {
+        performNextOperation();
+      }
+    }
+  };
+
+  return queueOperation;
+};
+
 function ListSendCommandContent() {
   const { pop } = useNavigation();
   const bitwarden = useBitwarden();
-  const isFirstLoadRef = useRef(true);
   const pasteActionTitle = usePasteActionTitle();
+  const queueOperation = useOperationQueue();
+
+  const isFirstLoadRef = useRef(true);
+  const selectedItemIdRef = useRef<string>();
 
   const listSends = () => loadSends(bitwarden, isFirstLoadRef);
   const { data, isLoading, revalidate: refresh, mutate } = usePromise(listSends);
 
   const { result: sends = [] } = data ?? {};
 
-  const onDeleteSend = async (id: string) => {
-    const toast = await showToast({ title: "Deleting Send....", style: Toast.Style.Animated });
-    try {
-      await bitwarden.deleteSend(id);
-      await refresh();
-      toast.style = Toast.Style.Success;
-      toast.title = "Send deleted";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to delete Send";
-      captureException("Failed to delete Send", error);
-    }
+  const onSync = () => {
+    return queueOperation("sync", async () => {
+      const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
+      try {
+        await bitwarden.sync();
+        await refresh();
+        toast.style = Toast.Style.Success;
+        toast.title = "Sends synced";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to sync Sends";
+        captureException("Failed to sync Sends", error);
+      }
+    });
   };
 
-  const onSync = async () => {
-    const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
-    try {
-      await bitwarden.sync();
-      await refresh();
-      toast.style = Toast.Style.Success;
-      toast.title = "Sends synced";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to sync Sends";
-      captureException("Failed to sync Sends", error);
-    }
+  const onDelete = (id: string) => {
+    return queueOperation(id, async () => {
+      const toast = await showToast({ title: "Deleting Send....", style: Toast.Style.Animated });
+      try {
+        await bitwarden.deleteSend(id);
+        await refresh();
+        toast.style = Toast.Style.Success;
+        toast.title = "Send deleted";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to delete Send";
+        captureException("Failed to delete Send", error);
+      }
+    });
   };
 
-  const onRemoveSendPassword = async (id: string) => {
-    const toast = await showToast({ title: "Removing Send Password....", style: Toast.Style.Animated });
-    try {
-      await bitwarden.removeSendPassword(id);
-      await refresh();
-      toast.style = Toast.Style.Success;
-      toast.title = "Send Password removed";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to remove Send Password";
-      captureException("Failed to remove Send Password", error);
-    }
+  const onRemovePassword = (id: string) => {
+    return queueOperation(id, async () => {
+      const toast = await showToast({ title: "Removing Send Password....", style: Toast.Style.Animated });
+      try {
+        await bitwarden.removeSendPassword(id);
+        await refresh();
+        toast.style = Toast.Style.Success;
+        toast.title = "Send Password removed";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to remove Send Password";
+        captureException("Failed to remove Send Password", error);
+      }
+    });
   };
 
-  const onEditSuccess = async (updatedSend: Send) => {
+  const onCreateSuccess = (newSend: Send) => {
     pop();
-    await mutate(listSends(), {
-      optimisticUpdate: (currentData) => {
-        if (!currentData?.result) return { result: [updatedSend] };
-        const index = currentData?.result.findIndex((send) => send.id === updatedSend.id);
-        const result = [...currentData.result];
-        if (index === -1) {
-          result.push(updatedSend);
-        } else {
-          result[index] = updatedSend;
-        }
+    return queueOperation(newSend.id, async () => {
+      selectedItemIdRef.current = newSend.id;
+      try {
+        await mutate(listSends(), {
+          optimisticUpdate: (currentData) => {
+            if (!currentData?.result) return { result: [newSend] };
 
-        result.sort(sortSendsByName);
-        return { result };
-      },
-      rollbackOnError: true,
-      shouldRevalidateAfter: true,
+            const result = [...currentData.result, newSend];
+            result.sort(sortSendsByName);
+            setTimeout(() => (selectedItemIdRef.current = undefined), 1);
+
+            return { result };
+          },
+          rollbackOnError: true,
+          shouldRevalidateAfter: true,
+        });
+      } catch (error) {
+        await showToast({ title: "Failed to sync Sends", style: Toast.Style.Failure });
+        captureException("Failed to sync Sends", error);
+      }
+    });
+  };
+
+  const onEditSuccess = (updatedSend: Send) => {
+    pop();
+    return queueOperation(updatedSend.id, async () => {
+      try {
+        await mutate(listSends(), {
+          optimisticUpdate: (currentData) => {
+            if (!currentData?.result) return { result: [updatedSend] };
+
+            const index = currentData?.result.findIndex((send) => send.id === updatedSend.id);
+            const result = [...currentData.result];
+            if (index === -1) {
+              result.push(updatedSend);
+            } else {
+              result[index] = updatedSend;
+            }
+            result.sort(sortSendsByName);
+
+            return { result };
+          },
+          rollbackOnError: true,
+          shouldRevalidateAfter: true,
+        });
+      } catch (error) {
+        await showToast({ title: "Failed to sync Sends", style: Toast.Style.Failure });
+        captureException("Failed to sync Sends", error);
+      }
     });
   };
 
@@ -165,27 +245,40 @@ function ListSendCommandContent() {
     );
   }
 
+  const sendManagementActionSection = (
+    <ActionPanel.Section title="Send Management">
+      <Action.Push
+        target={<CreateEditSendCommand onSuccess={onCreateSuccess} />}
+        title="Create New Send"
+        icon={Icon.NewDocument}
+        shortcut={{ key: "n", modifiers: ["opt"] }}
+      />
+      <Action
+        onAction={onSync}
+        title="Sync Sends"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ key: "r", modifiers: ["opt"] }}
+      />
+    </ActionPanel.Section>
+  );
+
   if (sends.length === 0) {
     return (
       <List>
         <List.EmptyView
           title="There are no items to list."
           icon="sends-empty-list.svg"
-          actions={
-            <ActionPanel>
-              <Action.Push target={<CreateEditSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
-              <Action onAction={refresh} title="Sync Sends" icon={Icon.ArrowClockwise} />
-            </ActionPanel>
-          }
+          actions={<ActionPanel>{sendManagementActionSection}</ActionPanel>}
         />
       </List>
     );
   }
 
   return (
-    <List searchBarPlaceholder="Search Sends">
+    <List searchBarPlaceholder="Search Sends" selectedItemId={selectedItemIdRef.current}>
       {sends.map((send) => (
         <List.Item
+          id={send.id}
           key={send.id}
           title={send.name}
           icon={getItemIcon(send)}
@@ -198,24 +291,18 @@ function ListSendCommandContent() {
                 target={<CreateEditSendCommand send={send} onSuccess={onEditSuccess} />}
                 title="Edit Send"
                 icon={Icon.Pencil}
+                shortcut={{ key: "e", modifiers: ["opt"] }}
               />
-              <Action onAction={() => onDeleteSend(send.id)} title="Delete Send" icon={Icon.Trash} />
+              <Action
+                onAction={() => onDelete(send.id)}
+                title="Delete Send"
+                icon={Icon.Trash}
+                shortcut={{ key: "d", modifiers: ["opt"] }}
+              />
               {send.passwordSet && (
-                <Action
-                  onAction={() => onRemoveSendPassword(send.id)}
-                  title="Remove Password"
-                  icon={Icon.LockUnlocked}
-                />
+                <Action onAction={() => onRemovePassword(send.id)} title="Remove Password" icon={Icon.LockUnlocked} />
               )}
-              <ActionPanel.Section title="Send Management">
-                <Action.Push target={<CreateEditSendCommand />} title="Create New Send" icon={Icon.NewDocument} />
-                <Action
-                  onAction={onSync}
-                  title="Sync Sends"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ key: "r", modifiers: ["cmd"] }}
-                />
-              </ActionPanel.Section>
+              {sendManagementActionSection}
             </ActionPanel>
           }
         />

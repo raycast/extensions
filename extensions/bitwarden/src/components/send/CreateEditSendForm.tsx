@@ -129,7 +129,11 @@ export const CreateEditSendForm = ({
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title={mode === "edit" ? "Save Send" : "Create Send"}
+            icon={{ source: "send.svg" }}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >

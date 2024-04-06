@@ -534,7 +534,6 @@ export class Bitwarden {
     try {
       const encodedPayload = await this.encode(JSON.stringify(values));
       const { stdout } = await this.exec(["send", "edit", encodedPayload], { resetVaultTimeout: true });
-      console.log({ stdout });
       return { result: JSON.parse<Send>(stdout) };
     } catch (execError) {
       captureException("Failed to delete send", execError);
@@ -558,8 +557,7 @@ export class Bitwarden {
 
   async removeSendPassword(id: string): Promise<MaybeError> {
     try {
-      const { stdout } = await this.exec(["send", "remove-password", id], { resetVaultTimeout: true });
-      console.log(stdout);
+      await this.exec(["send", "remove-password", id], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to remove send password", execError);
