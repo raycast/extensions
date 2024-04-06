@@ -1,4 +1,4 @@
-import { Form, Icon, Image } from "@raycast/api";
+import { Form, Icon, Image, getPreferenceValues } from "@raycast/api";
 import type { useForm } from "@raycast/utils";
 
 import { notionColorToTintColor, getPageIcon, Page, DatabaseProperty, User } from "../../utils/notion";
@@ -40,8 +40,17 @@ export function createConvertToFieldFunc(
       }
       case "formula":
         return null;
-      default:
-        return <Form.TextField placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)} />;
+      default: {
+        const { convertPropertyMarkdown } = getPreferenceValues<Preferences.CreateDatabasePage>();
+
+        return (
+          <Form.TextField
+            info={convertPropertyMarkdown ? "Supports a single line of inline Markdown" : undefined}
+            placeholder={placeholder}
+            {...itemPropsFor<typeof property.type>(property)}
+          />
+        );
+      }
     }
   };
 }

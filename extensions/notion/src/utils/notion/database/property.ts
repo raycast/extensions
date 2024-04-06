@@ -1,5 +1,6 @@
 import type { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
-import { Form } from "@raycast/api";
+import { Form, getPreferenceValues } from "@raycast/api";
+import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
 import { _supportedPropTypes } from "..";
@@ -12,8 +13,11 @@ type PageProperty = CreatePageParameters["properties"][string];
 export function formatDatabaseProperty(...[type, value]: FormatDatabasePropertyParams): PageProperty | undefined {
   switch (type) {
     case "title":
-    case "rich_text":
-      return formattedProperty(type, [{ text: { content: value } }]);
+    case "rich_text": {
+      const { convertPropertyMarkdown } = getPreferenceValues<Preferences.CreateDatabasePage>();
+      const richText = convertPropertyMarkdown ? markdownToRichText(value) : [{ text: { content: value } }];
+      return formattedProperty(type, richText);
+    }
     case "number":
       return formattedProperty(type, parseFloat(value));
     case "date": {
