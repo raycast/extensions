@@ -1,8 +1,8 @@
 import { SendDateOption, SendType } from "~/types/send";
 
 export const SendTypeOptions = {
-  [SendType.File]: "File (Premium)",
   [SendType.Text]: "Text",
+  [SendType.File]: "File (Premium)",
 } as const satisfies Record<SendType, string>;
 
 export const SendDateOptionsToHourOffsetMap = {

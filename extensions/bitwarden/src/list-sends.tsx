@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
 import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
+import { CACHE_KEYS } from "~/constants/general";
+import { SendTypeOptions } from "~/constants/send";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
-import CreateEditSendCommand from "~/create-send";
+import CreateSendCommand from "~/create-send";
 import { Send, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
@@ -106,6 +108,7 @@ const sortSendsByName = (send1: Send, send2: Send) => send1.name.localeCompare(s
 
 const useListSends = (bitwarden: Bitwarden) => {
   const isFirstLoadRef = useRef(true);
+  const [type, setType] = useCachedState<SendType>(CACHE_KEYS.SEND_TYPE_FILTER);
 
   const listSends = async () => {
     const toast = isFirstLoadRef.current
@@ -113,9 +116,7 @@ const useListSends = (bitwarden: Bitwarden) => {
       : undefined;
     try {
       const listSends = await bitwarden.listSends();
-      if (listSends.result) {
-        listSends.result.sort(sortSendsByName);
-      }
+      if (listSends.result) listSends.result.sort(sortSendsByName);
       return listSends;
     } finally {
       isFirstLoadRef.current = false;
@@ -131,7 +132,16 @@ const useListSends = (bitwarden: Bitwarden) => {
     return revalidate();
   };
 
-  return { sends, isLoading, isFirstLoading: isLoading && isFirstLoadRef.current, refresh, error };
+  console.log(type ? SendType[type] : type);
+
+  return {
+    isLoading,
+    refresh,
+    error,
+    filterByType: setType,
+    sends: type != null ? sends.filter((send) => send.type === type) : sends,
+    isFirstLoading: isLoading && isFirstLoadRef.current,
+  };
 };
 
 const syncSendsTitle = "Sync Sends";
@@ -148,7 +158,7 @@ function ListSendsCommandContent() {
   const { pop } = useNavigation();
   const bitwarden = useBitwarden();
   const queueOperation = useOperationQueue();
-  const { sends, isFirstLoading, refresh: refreshSends } = useListSends(bitwarden);
+  const { sends, isFirstLoading, refresh: refreshSends, filterByType } = useListSends(bitwarden);
 
   const pasteActionTitle = usePasteActionTitle();
   const selectedItemIdRef = useRef<string>();
@@ -255,9 +265,20 @@ function ListSendsCommandContent() {
     });
   };
 
+  const onSendTypeChange = (value: string) => filterByType(value !== "" ? parseInt(value) : undefined);
+
+  const searchBarAccessory = (
+    <List.Dropdown tooltip="Filter by Send type" onChange={onSendTypeChange}>
+      <List.Dropdown.Item title="All" value="" />
+      {Object.entries(SendTypeOptions).map(([value, title]) => (
+        <List.Dropdown.Item key={value} value={value} title={title} />
+      ))}
+    </List.Dropdown>
+  );
+
   if (isFirstLoading) {
     return (
-      <List searchBarPlaceholder="Search sends">
+      <List searchBarPlaceholder="Search sends" searchBarAccessory={searchBarAccessory}>
         <ListLoadingView title="Loading Sends..." description="Please wait." />
       </List>
     );
@@ -266,7 +287,7 @@ function ListSendsCommandContent() {
   const sendManagementActionSection = (
     <ActionPanel.Section title="Send Management">
       <Action.Push
-        target={<CreateEditSendCommand onSuccess={onCreateSuccess} />}
+        target={<CreateSendCommand onSuccess={onCreateSuccess} />}
         title="Create New Send"
         icon={Icon.NewDocument}
         shortcut={{ key: "n", modifiers: ["opt"] }}
@@ -277,7 +298,7 @@ function ListSendsCommandContent() {
 
   if (sends.length === 0) {
     return (
-      <List searchBarPlaceholder="Search sends">
+      <List searchBarPlaceholder="Search sends" searchBarAccessory={searchBarAccessory}>
         <List.EmptyView
           title="There are no items to list."
           icon="sends-empty-list.svg"
@@ -289,7 +310,11 @@ function ListSendsCommandContent() {
   }
 
   return (
-    <List searchBarPlaceholder="Search sends" selectedItemId={selectedItemIdRef.current}>
+    <List
+      searchBarPlaceholder="Search sends"
+      selectedItemId={selectedItemIdRef.current}
+      searchBarAccessory={searchBarAccessory}
+    >
       {sends.map((send) => (
         <List.Item
           id={send.id}
@@ -302,7 +327,7 @@ function ListSendsCommandContent() {
               <Action.CopyToClipboard title="Copy URL" content={send.accessUrl} />
               <Action.Paste title={pasteActionTitle} content={send.accessUrl} />
               <Action.Push
-                target={<CreateEditSendCommand send={send} onSuccess={onEditSuccess} />}
+                target={<CreateSendCommand send={send} onSuccess={onEditSuccess} />}
                 title="Edit Send"
                 icon={Icon.Pencil}
                 shortcut={{ key: "e", modifiers: ["opt"] }}

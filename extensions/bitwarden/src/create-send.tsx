@@ -14,11 +14,11 @@ type CreateEditSendCommandProps = {
   onSuccess?: (send: Send) => void;
 };
 
-const CreateEditSendCommand = (props: CreateEditSendCommandProps) => (
+const CreateSendCommand = (props: CreateEditSendCommandProps) => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
       <SessionProvider loadingFallback={<LoadingFallback />} unlock>
-        <CreateEditSendCommandContent {...props} />
+        <CreateSendCommandContent {...props} />
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
@@ -29,8 +29,10 @@ function getStringFromDateOption(option: SendDateOption | "", customDate: Date |
 function getStringFromDateOption(option: SendDateOption | "", customDate: Date | null) {
   if (!option) return null;
   if (option === SendDateOption.Custom) return customDate?.toISOString() ?? null;
+
   const hourOffset = SendDateOptionsToHourOffsetMap[option];
   if (!hourOffset) return null;
+
   const date = new Date();
   date.setHours(date.getHours() + hourOffset);
   return date.toISOString();
@@ -68,7 +70,6 @@ const getInitialValues = (send?: Send): SendFormValues => {
 
   const deletionDate = parseDateOptionString(send.deletionDate);
   const expirationDate = parseDateOptionString(send.expirationDate);
-
   return {
     ...sendFormInitialValues,
     name: send.name,
@@ -86,7 +87,7 @@ const getInitialValues = (send?: Send): SendFormValues => {
   };
 };
 
-function CreateEditSendCommandContent({ send, onSuccess: parentOnSuccess }: CreateEditSendCommandProps) {
+function CreateSendCommandContent({ send, onSuccess: parentOnSuccess }: CreateEditSendCommandProps) {
   const { push } = useNavigation();
   const bitwarden = useBitwarden();
 
@@ -95,13 +96,11 @@ function CreateEditSendCommandContent({ send, onSuccess: parentOnSuccess }: Crea
       const payload = convertFormValuesToCreatePayload(type, values);
       const { error, result } = await bitwarden.createSend(payload);
       if (error) throw error;
-
       return result;
     } else {
       const payload = convertFormValuesToEditPayload(send, type, values);
       const { error, result } = await bitwarden.editSend(payload);
       if (error) throw error;
-
       return result;
     }
   }
@@ -124,4 +123,4 @@ function CreateEditSendCommandContent({ send, onSuccess: parentOnSuccess }: Crea
   );
 }
 
-export default CreateEditSendCommand;
+export default CreateSendCommand;
