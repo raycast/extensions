@@ -6,11 +6,8 @@ import { fetchCorrespondents } from "./utils/fetchCorrespondents";
 import { postDocument } from "./utils/postDocument";
 import {
   Correspondent,
-  correspondentsResponse,
   Tag,
-  tagsResponse,
   Type,
-  typesResponse,
 } from "./models/paperlessResponse.model";
 import { PostDocument } from "./models/docPost.model";
 
@@ -51,12 +48,12 @@ export default function DocumentForm() {
 
   useEffect(() => {
     async function fetchOptions() {
-      const documentTags: tagsResponse = await fetchDocumentTags();
-      setTagOptions(documentTags.results);
-      const documentTypes: typesResponse = await fetchDocumentTypes();
-      setTypeOptions(documentTypes.results);
-      const correspondents: correspondentsResponse = await fetchCorrespondents();
-      setCorrespondentOptions(correspondents.results);
+      const documentTags: Tag[] = await fetchDocumentTags();
+      setTagOptions(documentTags);
+      const documentTypes: Type[] = await fetchDocumentTypes();
+      setTypeOptions(documentTypes);
+      const correspondents = await fetchCorrespondents();
+      setCorrespondentOptions(correspondents);
     }
 
     fetchOptions().then();
