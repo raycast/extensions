@@ -92,18 +92,19 @@ const useOperationQueue = () => {
   const operationQueueRef = useRef<Operation[]>([]);
   const currentOperationTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const performNextOperation = () => {
-    const operation = operationQueueRef.current.shift();
+  const processOperations = () => {
+    const [operation] = operationQueueRef.current;
     if (!operation) return;
 
     currentOperationTimeoutRef.current = setTimeout(async () => {
       try {
         await operation.execute();
       } finally {
+        operationQueueRef.current.shift();
         clearTimeout(currentOperationTimeoutRef.current);
         currentOperationTimeoutRef.current = undefined;
         if (operationQueueRef.current.length > 0) {
-          performNextOperation();
+          processOperations();
         }
       }
     }, 1);
@@ -113,7 +114,7 @@ const useOperationQueue = () => {
     if (!operationQueueRef.current.some((op) => op.id === id)) {
       operationQueueRef.current.push({ id, execute });
       if (!currentOperationTimeoutRef.current) {
-        performNextOperation();
+        processOperations();
       }
     }
   };
