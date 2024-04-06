@@ -131,39 +131,39 @@ export default function Command() {
 
   return (
     <List>
-      <List.Section title="APP列表">
+      <List.Section title="App List">
         {otherApps.map((app, index) => (
           <List.Item
             key={`other-${index}`}
             title={app.name}
             icon={app.keep ? Icon.Checkmark : Icon.Circle} // 其他应用根据keep状态选择图标
             accessories={[
-              ...(app.keep ? [{ tag: { value: "keep", color: Color.Orange } }] : []),
-              ...(app.always_keep ? [{ tag: { value: "always_keep", color: Color.Red } }] : []), // 实际上这行会始终为false并可以移除
+              ...(app.keep ? [{ tag: { value: "Keep", color: Color.Orange } }] : []),
+              ...(app.always_keep ? [{ tag: { value: "Always Keep", color: Color.Red } }] : []), // 实际上这行会始终为false并可以移除
               ...(app.keep ? [{ icon: Icon.CircleFilled }] : []),
             ]}
             actions={
               <ActionPanel>
-                <Action title="选择保留的APP" onAction={() => toggleKeepApp(app.name)} />
-                <Action title="关闭剩余的APP" onAction={() => closeApps()} />
-                <Action title="设置默认保留的APP" onAction={() => handleToggleAlwaysKeepApp(app.name)} />
+                <Action title="Set Keep" onAction={() => toggleKeepApp(app.name)} />
+                <Action title="Close Other Apps" onAction={() => closeApps()} />
+                <Action title="Set Always Keep" onAction={() => handleToggleAlwaysKeepApp(app.name)} />
               </ActionPanel>
             }
           />
         ))}
       </List.Section>
       {alwaysKeepApps.length > 0 && (
-        <List.Section title="默认保留">
+        <List.Section title="Always Keep Apps">
           {alwaysKeepApps.map((app, index) => (
             <List.Item
               key={`always-${index}`}
               title={app.name}
               icon={Icon.Checkmark} // 默认保留的应用使用Checkmark图标
-              accessories={[...(app.always_keep ? [{ tag: { value: "always_keep", color: Color.Red } }] : [])]}
+              accessories={[...(app.always_keep ? [{ tag: { value: "Always Keep", color: Color.Red } }] : [])]}
               actions={
                 <ActionPanel>
-                  <Action title="取消默认保留" onAction={() => handleToggleAlwaysKeepApp(app.name)} />
-                  <Action title="关闭APP" onAction={() => closeApps()} />
+                  <Action title="Clear Always Keep" onAction={() => handleToggleAlwaysKeepApp(app.name)} />
+                  <Action title="Close Other Apps" onAction={() => closeApps()} />
                 </ActionPanel>
               }
             />
