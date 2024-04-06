@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { MutableRefObject, useRef } from "react";
+import { useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
 import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
@@ -13,11 +13,11 @@ import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationNa
 
 const LoadingFallback = () => <List searchBarPlaceholder="Search Sends" isLoading />;
 
-const ListSendCommand = () => (
+const ListSendsCommand = () => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
       <SessionProvider loadingFallback={<LoadingFallback />} unlock>
-        <ListSendCommandContent />
+        <ListSendsCommandContent />
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
@@ -67,22 +67,6 @@ const sortSendsByName = (send1: Send, send2: Send) => {
   return send1.name.localeCompare(send2.name);
 };
 
-const loadSends = async (bitwarden: Bitwarden, isFirstLoadRef: MutableRefObject<boolean>) => {
-  const toast = isFirstLoadRef.current
-    ? await showToast({ title: "Loading Sends....", style: Toast.Style.Animated })
-    : undefined;
-  try {
-    const listSends = await bitwarden.listSends();
-    if (listSends.result) {
-      listSends.result.sort(sortSendsByName);
-    }
-    return listSends;
-  } finally {
-    isFirstLoadRef.current = false;
-    await toast?.hide();
-  }
-};
-
 type Operation = {
   id: string;
   execute: () => Promise<any>;
@@ -122,26 +106,51 @@ const useOperationQueue = () => {
   return queueOperation;
 };
 
-function ListSendCommandContent() {
+const useListSends = (bitwarden: Bitwarden) => {
+  const isFirstLoadRef = useRef(true);
+
+  const listSends = async () => {
+    const toast = isFirstLoadRef.current
+      ? await showToast({ title: "Loading Sends....", style: Toast.Style.Animated })
+      : undefined;
+    try {
+      const listSends = await bitwarden.listSends();
+      if (listSends.result) {
+        listSends.result.sort(sortSendsByName);
+      }
+      return listSends;
+    } finally {
+      isFirstLoadRef.current = false;
+      await toast?.hide();
+    }
+  };
+
+  const { data, isLoading, revalidate, mutate, error } = usePromise(listSends);
+  const { result: sends = [] } = data ?? {};
+
+  const refresh = (options?: Parameters<typeof mutate>[1]) => {
+    if (options) return mutate(listSends(), options);
+    return revalidate();
+  };
+
+  return { sends, isLoading, refresh, error };
+};
+
+function ListSendsCommandContent() {
   const { pop } = useNavigation();
   const bitwarden = useBitwarden();
-  const pasteActionTitle = usePasteActionTitle();
   const queueOperation = useOperationQueue();
+  const { sends, isLoading, refresh: refreshSends } = useListSends(bitwarden);
 
-  const isFirstLoadRef = useRef(true);
+  const pasteActionTitle = usePasteActionTitle();
   const selectedItemIdRef = useRef<string>();
-
-  const listSends = () => loadSends(bitwarden, isFirstLoadRef);
-  const { data, isLoading, revalidate: refresh, mutate } = usePromise(listSends);
-
-  const { result: sends = [] } = data ?? {};
 
   const onSync = () => {
     return queueOperation("sync", async () => {
       const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
       try {
         await bitwarden.sync();
-        await refresh();
+        await refreshSends();
         toast.style = Toast.Style.Success;
         toast.title = "Sends synced";
       } catch (error) {
@@ -157,7 +166,7 @@ function ListSendCommandContent() {
       const toast = await showToast({ title: "Deleting Send....", style: Toast.Style.Animated });
       try {
         await bitwarden.deleteSend(id);
-        await refresh();
+        await refreshSends();
         toast.style = Toast.Style.Success;
         toast.title = "Send deleted";
       } catch (error) {
@@ -173,7 +182,7 @@ function ListSendCommandContent() {
       const toast = await showToast({ title: "Removing Send Password....", style: Toast.Style.Animated });
       try {
         await bitwarden.removeSendPassword(id);
-        await refresh();
+        await refreshSends();
         toast.style = Toast.Style.Success;
         toast.title = "Send Password removed";
       } catch (error) {
@@ -189,7 +198,7 @@ function ListSendCommandContent() {
     return queueOperation(newSend.id, async () => {
       selectedItemIdRef.current = newSend.id;
       try {
-        await mutate(listSends(), {
+        await refreshSends({
           optimisticUpdate: (currentData) => {
             if (!currentData?.result) return { result: [newSend] };
 
@@ -213,7 +222,7 @@ function ListSendCommandContent() {
     pop();
     return queueOperation(updatedSend.id, async () => {
       try {
-        await mutate(listSends(), {
+        await refreshSends({
           optimisticUpdate: (currentData) => {
             if (!currentData?.result) return { result: [updatedSend] };
 
@@ -312,4 +321,4 @@ function ListSendCommandContent() {
   );
 }
 
-export default ListSendCommand;
+export default ListSendsCommand;

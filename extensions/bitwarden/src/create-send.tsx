@@ -5,7 +5,7 @@ import { SessionProvider } from "~/context/session";
 import { SendDateOption, SendCreatePayload, SendType, Send } from "~/types/send";
 import { SendDateOptionsToHourOffsetMap } from "~/constants/send";
 import { CreateEditSendForm, SendFormValues, sendFormInitialValues } from "~/components/send/CreateEditSendForm";
-import ListSendCommand from "~/list-sends";
+import ListSendsCommand from "~/list-sends";
 
 const LoadingFallback = () => <Form isLoading />;
 
@@ -110,7 +110,7 @@ function CreateEditSendCommandContent({ send, onSuccess: parentOnSuccess }: Crea
     if (parentOnSuccess) {
       parentOnSuccess(send);
     } else {
-      push(<ListSendCommand />);
+      push(<ListSendsCommand />);
     }
   };
 
