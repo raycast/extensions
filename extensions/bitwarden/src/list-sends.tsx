@@ -13,7 +13,8 @@ import { Send, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
-const LoadingFallback = () => <List searchBarPlaceholder="Search sends" isLoading />;
+const searchBarPlaceholder = "Search sends";
+const LoadingFallback = () => <List searchBarPlaceholder={searchBarPlaceholder} isLoading />;
 
 const ListSendsCommand = () => (
   <RootErrorBoundary>
@@ -25,15 +26,33 @@ const ListSendsCommand = () => (
   </RootErrorBoundary>
 );
 
+const formatDate = (date: Date) => {
+  const now = new Date();
+
+  return date.toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+    hour: "numeric",
+    minute: "numeric",
+    second: date.getSeconds() > 0 ? "numeric" : undefined,
+  });
+};
+
 const getItemIcon = (send: Send): NonNullable<List.Item.Props["icon"]> => {
-  if (send.type === SendType.File) {
-    return { source: Icon.Document, tintColor: Color.Orange };
-  }
+  if (send.type === SendType.File) return { source: Icon.Document, tintColor: Color.Orange };
   return { source: Icon.Text, tintColor: Color.Blue };
 };
 
-const getItemAccessories = (send: Send): NonNullable<List.Item.Props["accessories"]> => {
-  const accessories: NonNullable<List.Item.Props["accessories"]> = [];
+const getDateAccessoryDetails = (dateString: string) => {
+  const date = new Date(dateString);
+  const isPastDate = date < new Date();
+
+  return { date, isPastDate, color: isPastDate ? Color.Red : undefined, formattedDate: formatDate(date) };
+};
+
+const getItemAccessories = (send: Send): List.Item.Props["accessories"] => {
+  const accessories: List.Item.Props["accessories"] = [];
   if (send.passwordSet) {
     accessories.push({ icon: Icon.Key, tooltip: "Password protected" });
   }
@@ -48,25 +67,22 @@ const getItemAccessories = (send: Send): NonNullable<List.Item.Props["accessorie
     accessories.push({ icon: Icon.Warning, tooltip: "Deactivated" });
   }
   if (send.expirationDate) {
-    const date = new Date(send.expirationDate);
-    const isPastDate = date < new Date();
-    const color = isPastDate ? Color.Red : undefined;
+    const { color, formattedDate, isPastDate } = getDateAccessoryDetails(send.expirationDate);
     accessories.push({
       icon: { source: Icon.Clock, tintColor: color },
-      date: { value: date, color },
-      tooltip: isPastDate ? `Expired on ${date.toLocaleString()}` : `Will expire on ${date.toLocaleString()}`,
+      text: { value: formattedDate, color },
+      tooltip: isPastDate ? `Expired on ${formattedDate}` : `Will expire on ${formattedDate}`,
     });
   }
   if (send.deletionDate) {
-    const date = new Date(send.deletionDate);
-    const isPastDate = date < new Date();
-    const color = isPastDate ? Color.Red : undefined;
+    const { color, formattedDate, isPastDate } = getDateAccessoryDetails(send.deletionDate);
     accessories.push({
       icon: { source: Icon.Trash, tintColor: color },
-      date: { value: date, color },
-      tooltip: isPastDate ? `Deleted on ${date.toLocaleString()}` : `Will be deleted on ${date.toLocaleString()}`,
+      text: { value: formattedDate, color },
+      tooltip: isPastDate ? `Deleted on ${formattedDate}` : `Will be deleted on ${formattedDate}`,
     });
   }
+
   return accessories;
 };
 
@@ -75,10 +91,7 @@ const usePasteActionTitle = () => {
   return currentApplication ? `Paste URL into ${currentApplication}` : "Paste URL";
 };
 
-type Operation = {
-  id: string;
-  execute: () => Promise<any>;
-};
+type Operation = { id: string; execute: () => Promise<any> };
 
 const useOperationQueue = () => {
   const operationQueueRef = useRef<Operation[]>([]);
