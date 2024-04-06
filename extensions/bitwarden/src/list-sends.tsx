@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
@@ -131,14 +131,24 @@ const useListSends = (bitwarden: Bitwarden) => {
     return revalidate();
   };
 
-  return { sends, isLoading, refresh, error };
+  return { sends, isLoading, isFirstLoading: isLoading && isFirstLoadRef.current, refresh, error };
 };
+
+const syncSendsTitle = "Sync Sends";
+const syncSendsShortcut: Keyboard.Shortcut = { key: "r", modifiers: ["opt"] };
+const syncSendsShortcutLabel = (() => {
+  const modifierToLabelMap: Record<Keyboard.KeyModifier, string> = { cmd: "⌘", shift: "⇧", opt: "⌥", ctrl: "⌃" };
+  return (
+    syncSendsShortcut.modifiers.map((mod) => modifierToLabelMap[mod] ?? "").join("") +
+    syncSendsShortcut.key.toUpperCase()
+  );
+})();
 
 function ListSendsCommandContent() {
   const { pop } = useNavigation();
   const bitwarden = useBitwarden();
   const queueOperation = useOperationQueue();
-  const { sends, isLoading, refresh: refreshSends } = useListSends(bitwarden);
+  const { sends, isFirstLoading, refresh: refreshSends } = useListSends(bitwarden);
 
   const pasteActionTitle = usePasteActionTitle();
   const selectedItemIdRef = useRef<string>();
@@ -245,7 +255,7 @@ function ListSendsCommandContent() {
     });
   };
 
-  if (isLoading && sends.length === 0) {
+  if (isFirstLoading) {
     return (
       <List searchBarPlaceholder="Search sends">
         <ListLoadingView title="Loading Sends..." description="Please wait." />
@@ -261,12 +271,7 @@ function ListSendsCommandContent() {
         icon={Icon.NewDocument}
         shortcut={{ key: "n", modifiers: ["opt"] }}
       />
-      <Action
-        onAction={onSync}
-        title="Sync Sends"
-        icon={Icon.ArrowClockwise}
-        shortcut={{ key: "r", modifiers: ["opt"] }}
-      />
+      <Action onAction={onSync} title={syncSendsTitle} icon={Icon.ArrowClockwise} shortcut={syncSendsShortcut} />
     </ActionPanel.Section>
   );
 
@@ -277,6 +282,7 @@ function ListSendsCommandContent() {
           title="There are no items to list."
           icon="sends-empty-list.svg"
           actions={<ActionPanel>{sendManagementActionSection}</ActionPanel>}
+          description={`Try syncing your sends with the ${syncSendsTitle} (${syncSendsShortcutLabel}) action.`}
         />
       </List>
     );
