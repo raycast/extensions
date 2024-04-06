@@ -8,7 +8,8 @@
   "contributors": [
     "thomaslombart",
     "lukaszmtw",
-    "erics118"
+    "erics118",
+    "mlnchk"
   ],
   "license": "MIT",
   "commands": [
@@ -163,7 +164,7 @@
           "name": "filepath",
           "placeholder": "File Path",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
