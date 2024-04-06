@@ -209,6 +209,14 @@
       "description": "List and search all the Sends owned by you.",
       "icon": "sends-search.png",
       "mode": "view"
+    },
+    {
+      "name": "receive-send",
+      "title": "Receive Send",
+      "subtitle": "Bitwarden",
+      "description": "Receive a send from a URL",
+      "icon": "sends-receive.png",
+      "mode": "view"
     }
   ],
   "preferences": [

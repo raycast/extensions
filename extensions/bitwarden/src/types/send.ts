@@ -56,3 +56,25 @@ export type Send = {
   disabled: boolean;
   hideEmail: boolean;
 };
+
+export type ReceivedSendFile = {
+  id: string;
+  size: string;
+  sizeName: string;
+  fileName: string;
+};
+
+export type ReceivedSend = {
+  object: "send-access";
+  id: string;
+  name: string;
+} & (
+  | {
+      type: SendType.Text;
+      text: SendText;
+    }
+  | {
+      type: SendType.File;
+      file: ReceivedSendFile;
+    }
+);

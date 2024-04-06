@@ -14,6 +14,7 @@ import {
   ManuallyThrownError,
   NotLoggedInError,
   PremiumFeatureError,
+  SendNeedsPasswordError,
   tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
@@ -23,7 +24,7 @@ import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAva
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
-import { Send, SendCreatePayload } from "~/types/send";
+import { ReceivedSend, Send, SendCreatePayload } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
 
 type Env = {
@@ -49,6 +50,11 @@ type ExecProps = {
   resetVaultTimeout: boolean;
   abortController?: AbortController;
   input?: string;
+};
+
+type ReceiveSendOptions = {
+  savePath?: string;
+  password?: string;
 };
 
 const { supportPath } = environment;
@@ -561,6 +567,41 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to remove send password", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async receiveSendInfo(url: string, options?: ReceiveSendOptions): Promise<MaybeError<ReceivedSend>> {
+    try {
+      const { stdout, stderr } = await this.exec(["send", "receive", url, "--obj"], {
+        resetVaultTimeout: true,
+        input: options?.password,
+      });
+      if (!stdout && /Send password/i.test(stderr)) return { error: new SendNeedsPasswordError() };
+
+      return { result: JSON.parse<ReceivedSend>(stdout) };
+    } catch (execError) {
+      const errorMessage = (execError as ExecaError).stderr;
+      if (/Send password/i.test(errorMessage)) return { error: new SendNeedsPasswordError() };
+
+      captureException("Failed to receive send obj", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async receiveSend(url: string, options?: ReceiveSendOptions): Promise<MaybeError<string>> {
+    try {
+      const { savePath, password } = options ?? {};
+      const args = ["send", "receive", url];
+      if (savePath) args.push("--output", savePath);
+      const { stdout } = await this.exec(args, { resetVaultTimeout: true, input: password });
+      return { result: stdout };
+    } catch (execError) {
+      captureException("Failed to receive send", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
