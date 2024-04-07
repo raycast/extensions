@@ -29,10 +29,15 @@ class GLEnumInfo {
   }
 
   public getKeywords() {
-    // Raycast doesn't support case insensitive searching
-    // and fuzzy matching
-    return this.names // original GL_XXX
-      .concat(this.names.map((n) => n.toLowerCase().substring(3))) // easier for quick search
+    const splitStrs = this.names
+      .map((name) => name.split("_"))
+      .reduce((p, c) => p.concat(c))
+      .filter((str) => str !== "GL");
+
+    return this.names
+      .concat(this.names.map((n) => n.toLowerCase()))
+      .concat(splitStrs)
+      .concat(splitStrs.map((str) => str.toLowerCase()))
       .concat([`${this.enumInDeximal}`]); // original enum in deximal
   }
 
