@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Add Add Text to Page command] - 2024-04-07
+
+- Add command to append or prepend text to a page.
+
 ## [Change Properties order in Create Database Page] - 2024-03-22
 
 - Add ability to change order of properties when creating a new database page
