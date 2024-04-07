@@ -136,12 +136,14 @@ const tailscalePath: string =
     ? prefs.tailscalePath
     : "/Applications/Tailscale.app/Contents/MacOS/Tailscale";
 
+const execMaxBuffersBytes = 10 * 1024 * 1024; // 10 megabytes
+
 /**
  * tailscale runs a command against the Tailscale CLI.
  */
 export function tailscale(parameters: string): string {
   try {
-    return execSync(`${tailscalePath} ${parameters}`).toString().trim();
+    return execSync(`${tailscalePath} ${parameters}`, { maxBuffer: execMaxBuffersBytes }).toString().trim();
   } catch (err) {
     if (err instanceof Error) {
       if (err.message.includes("No such file or directory")) {
