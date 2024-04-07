@@ -9,7 +9,7 @@ export interface DatabaseView {
   kanban?: KanbanView;
 }
 
-export interface JournalEntry {
+export interface AppendPageLastValues {
   pageId: string;
   dateDivider: boolean;
   appendAtTop: boolean;

@@ -64,11 +64,11 @@
       "mode": "view"
     },
     {
-      "name": "add-journal-entry",
-      "title": "Add a Journal Entry",
+      "description": "Append or prepend text, along with date, to a Notion page.",
+      "mode": "view",
+      "name": "add-text-to-page",
       "subtitle": "Notion",
-      "description": "Add a journal entry to a Notion designated journal page.",
-      "mode": "view"
+      "title": "Add Text to Page"
     }
   ],
   "preferences": [

@@ -4,37 +4,40 @@ import { useForm, withAccessToken } from "@raycast/utils";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { useState } from "react";
 
-import { useJournalEntry, useSearchPages } from "./hooks";
-import { addJournalEntry, getPageIcon } from "./utils/notion";
+import { useAppendPageLastValues, useSearchPages } from "./hooks";
+import { appendPage, getPageIcon } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
 
-function AddJournalEntry() {
-  const { lastFormValues, isLastFormValuesLoading, setLastFormValues } = useJournalEntry();
+function AppendPage() {
+  const { lastFormValues, isLastFormValuesLoading, setLastFormValues } = useAppendPageLastValues();
   const [isHandlingSubmit, setIsHandlingSubmit] = useState(false);
   const [searchText, setSearchText] = useState<string>("");
   const { data: searchPages, isLoading: isSearchPageLoading } = useSearchPages(searchText);
   const { itemProps, handleSubmit } = useForm<{
     appendAtTop: boolean;
     addDateDivider: boolean;
-    journalEntry: string;
+    textToAppend: string;
     page: string;
   }>({
     async onSubmit(values) {
       try {
         if (isHandlingSubmit) return;
         setIsHandlingSubmit(true);
-        await showToast({ style: Toast.Style.Animated, title: "Adding journal entry" });
+        await showToast({ style: Toast.Style.Animated, title: "Adding content to the page..." });
 
         const selectedPage = searchPages?.find((page) => page.id === values.page);
 
         if (!selectedPage || selectedPage?.object !== "page") {
-          await showToast({ style: Toast.Style.Animated, title: "Page is not a journal page" });
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "Selected page is not a page (use create database page instead)",
+          });
           setIsHandlingSubmit(false);
           return;
         }
 
-        const content = markdownToBlocks(values.journalEntry) as BlockObjectRequest[];
-        await addJournalEntry(selectedPage.id, content, values.appendAtTop, values.addDateDivider);
+        const content = markdownToBlocks(values.textToAppend) as BlockObjectRequest[];
+        await appendPage(selectedPage.id, content, values.appendAtTop, values.addDateDivider);
 
         await setLastFormValues({
           pageId: selectedPage.id,
@@ -53,11 +56,11 @@ function AddJournalEntry() {
       addDateDivider: lastFormValues?.dateDivider ?? true,
       appendAtTop: lastFormValues?.appendAtTop ?? true,
       page: lastFormValues?.pageId ?? "",
-      journalEntry: "",
+      textToAppend: "",
     },
 
     validation: {
-      journalEntry: (input) => {
+      textToAppend: (input) => {
         if (!input) return "The content to add is required";
       },
     },
@@ -83,7 +86,7 @@ function AddJournalEntry() {
           <Form.Dropdown.Item key={page.id} title={page.title || "Untitled"} value={page.id} icon={getPageIcon(page)} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea enableMarkdown autoFocus title="Content" {...itemProps.journalEntry} info="Add something" />
+      <Form.TextArea enableMarkdown autoFocus title="Content" {...itemProps.textToAppend} info="Add something" />
       <Form.Checkbox
         label="Append at the top"
         {...itemProps.appendAtTop}
@@ -97,4 +100,4 @@ function AddJournalEntry() {
     </Form>
   );
 }
-export default withAccessToken(notionService)(AddJournalEntry);
+export default withAccessToken(notionService)(AppendPage);

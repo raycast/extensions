@@ -110,7 +110,7 @@ export async function fetchPageFirstBlockId(pageId: string) {
   }
 }
 
-export async function addJournalEntry(
+export async function appendPage(
   pageId: string,
   children: BlockObjectRequest[],
   prepend: boolean = false,

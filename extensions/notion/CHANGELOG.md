@@ -1,9 +1,5 @@
 # Notion Changelog
 
-## [Add journaling command] - 2024-03-24
-
-- Add journaling as a logseq style feature to Notion Extension
-
 ## [Change Properties order in Create Database Page] - 2024-03-22
 
 - Add ability to change order of properties when creating a new database page
