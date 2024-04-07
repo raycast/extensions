@@ -1,6 +1,6 @@
 # Power Management Changelog
 
-## [Improvements] - 2024-03-07
+## [Improvements] - 2024-04-07
 
 - Added menubar command to see the state on the icon and also a toggle button to operate alternatively
 
