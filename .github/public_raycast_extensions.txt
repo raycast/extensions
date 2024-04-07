@@ -34,3 +34,4 @@ stablecog
 apple-reminders
 whitebit
 markprompt
+apple-notes

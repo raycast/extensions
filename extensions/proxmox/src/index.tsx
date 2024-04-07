@@ -1,6 +1,8 @@
 import { ActionPanel, List, Action, Icon, Image, Color, showToast, Toast, confirmAlert } from "@raycast/api";
 import { PveVm, PveVmStatus, rebootVm, shutdownVm, startVm, stopVm, useVmList } from "./api";
 import { MutatePromise } from "@raycast/utils";
+import VmDetail from "./components/VmDetail";
+import { useState } from "react";
 
 function getStatusIcon(status: PveVmStatus): Image {
   switch (status) {
@@ -145,12 +147,35 @@ function VmActionPannel({
   );
 }
 
+function VmTypeDropdown(props: { onChange: (value: string) => void }) {
+  const TYPES = ["All", "QEMU", "LXC"];
+
+  return (
+    <List.Dropdown tooltip="VM Types" onChange={props.onChange}>
+      {TYPES.map((type) => (
+        <List.Dropdown.Item key={type} title={type} value={type.toLowerCase()} />
+      ))}
+    </List.Dropdown>
+  );
+}
+
 export default function Command() {
   const { isLoading, data, revalidate, mutate } = useVmList();
+  const [type, setType] = useState<string>("all");
+
+  const filteredData =
+    data?.filter((vm) => {
+      if (type === "all") {
+        return true;
+      }
+
+      return vm.type === type;
+    }) ?? [];
 
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       actions={
         <ActionPanel>
           <Action
@@ -161,17 +186,19 @@ export default function Command() {
           />
         </ActionPanel>
       }
+      searchBarAccessory={<VmTypeDropdown onChange={setType} />}
     >
-      {data &&
-        data.map((vm) => (
-          <List.Item
-            key={vm.id}
-            icon={getStatusIcon(vm.status)}
-            title={vm.name}
-            subtitle={`${vm.id}@${vm.node}`}
-            actions={<VmActionPannel vm={vm} mutate={mutate} revalidate={revalidate} />}
-          />
-        ))}
+      {filteredData.map((vm) => (
+        <List.Item
+          key={vm.id}
+          icon={getStatusIcon(vm.status)}
+          title={vm.name}
+          actions={<VmActionPannel vm={vm} mutate={mutate} revalidate={revalidate} />}
+          keywords={[vm.vmid.toString()]}
+          detail={<VmDetail vm={vm} />}
+          accessories={[{ text: vm.id }]}
+        />
+      ))}
     </List>
   );
 }
