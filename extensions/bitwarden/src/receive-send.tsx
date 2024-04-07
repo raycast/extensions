@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Form, Icon, Toast, closeMainWindow, showInFinder, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LaunchProps,
+  Toast,
+  closeMainWindow,
+  showInFinder,
+  showToast,
+} from "@raycast/api";
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { ExecaError } from "execa";
 import { join } from "path";
@@ -9,14 +19,15 @@ import { SessionProvider } from "~/context/session";
 import { ReceivedSend, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
 import { SendNeedsPasswordError } from "~/utils/errors";
+import useOnceEffect from "~/utils/hooks/useOnceEffect";
 
 const LoadingFallback = () => <Form isLoading />;
 
-const ReceiveSendCommand = () => (
+const ReceiveSendCommand = (props: LaunchProps<{ arguments: Arguments.ReceiveSend }>) => (
   <RootErrorBoundary>
     <BitwardenProvider loadingFallback={<LoadingFallback />}>
       <SessionProvider loadingFallback={<LoadingFallback />} unlock>
-        <ReceiveSendCommandContent />
+        <ReceiveSendCommandContent {...props} />
       </SessionProvider>
     </BitwardenProvider>
   </RootErrorBoundary>
@@ -62,54 +73,60 @@ const reducer = (state: ReducerState, action: ReducerState): ReducerState => {
   }
 };
 
-function ReceiveSendCommandContent() {
+function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments: Arguments.ReceiveSend }>) {
   const bitwarden = useBitwarden();
   const [state, dispatch] = useReducer(reducer, { status: "idle" });
   const [filePath, setFilePath] = useCachedState<string>("receiveSendFilePath", "~/Downloads");
 
   const { itemProps, handleSubmit, values } = useForm<FormValues>({
-    initialValues,
+    onSubmit,
+    initialValues: { ...initialValues, ...args },
     validation: {
       url: FormValidation.Required,
       password: state.status === "needsPassword" ? FormValidation.Required : undefined,
-    },
-    onSubmit: async ({ url, password }) => {
-      const toast = await showToast({ title: "Receiving Send...", style: Toast.Style.Animated });
-      try {
-        const { result: sendInfo, error } = await bitwarden.receiveSendInfo(url, { password });
-        if (error) {
-          if (error instanceof SendNeedsPasswordError) {
-            dispatch({ status: "needsPassword" });
-            return toast.hide();
-          }
-          throw error;
-        }
-        if (sendInfo.type === SendType.Text) {
-          const { result, error } = await bitwarden.receiveSend(url, { password });
-          if (error) throw error;
-          dispatch({ status: "textRevealed", text: result });
-        } else {
-          dispatch({ status: "pendingFile", sendInfo: { ...sendInfo, url } });
-        }
-        await toast.hide();
-      } catch (error) {
-        console.log({ error });
-        const execaError = error as ExecaError;
-        if (execaError && /Not found/i.test(execaError.message)) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Send not found";
-        } else {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Failed to receive Send";
-          captureException("Failed to receive Send", error);
-        }
-      }
     },
   });
 
   useEffect(() => {
     if (!values.url) dispatch({ status: "idle" });
   }, [values]);
+
+  useOnceEffect(() => {
+    void handleSubmit(args);
+  }, args.url);
+
+  async function onSubmit({ url, password }: FormValues) {
+    const toast = await showToast({ title: "Receiving Send...", style: Toast.Style.Animated });
+    try {
+      const { result: sendInfo, error } = await bitwarden.receiveSendInfo(url, { password });
+      if (error) {
+        if (error instanceof SendNeedsPasswordError) {
+          dispatch({ status: "needsPassword" });
+          return toast.hide();
+        }
+        throw error;
+      }
+      if (sendInfo.type === SendType.Text) {
+        const { result, error } = await bitwarden.receiveSend(url, { password });
+        if (error) throw error;
+        dispatch({ status: "textRevealed", text: result });
+      } else {
+        dispatch({ status: "pendingFile", sendInfo: { ...sendInfo, url } });
+      }
+      await toast.hide();
+    } catch (error) {
+      console.log({ error });
+      const execaError = error as ExecaError;
+      if (execaError && /Not found/i.test(execaError.message)) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Send not found";
+      } else {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to receive Send";
+        captureException("Failed to receive Send", error);
+      }
+    }
+  }
 
   const downloadFile = async () => {
     if (state.status === "pendingFile" && state.sendInfo.type === SendType.File) {
@@ -145,7 +162,7 @@ function ReceiveSendCommandContent() {
       }
     >
       <Form.TextField {...itemProps.url} title="Send URL" autoFocus />
-      {state.status === "needsPassword" && (
+      {(state.status === "needsPassword" || args.password) && (
         <Form.PasswordField {...itemProps.password} title="Password" info="This Send is password protected" />
       )}
       {state.status === "pendingFile" && (

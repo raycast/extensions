@@ -215,6 +215,18 @@
       "title": "Receive Send",
       "subtitle": "Bitwarden",
       "description": "Receive a send from a URL",
+      "arguments": [
+        { 
+          "type": "text",
+          "name": "url",
+          "placeholder": "url"
+        },
+        {
+          "name": "password",
+          "type": "password",
+          "placeholder": "password"
+        }
+      ],
       "icon": "sends-receive.png",
       "mode": "view"
     }
