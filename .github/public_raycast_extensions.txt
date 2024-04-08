@@ -34,4 +34,3 @@ stablecog
 apple-reminders
 whitebit
 markprompt
-humaans
