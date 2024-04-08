@@ -13,5 +13,5 @@ export default async function runNoViewMultiCommand<T extends unknown[], R>(
     showMultiScriptErrorToastAndLogError(error, multiFunction.name);
   }
 
-  await closeMainWindowPromise
+  await closeMainWindowPromise;
 }
