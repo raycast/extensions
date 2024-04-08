@@ -93,6 +93,8 @@ export function useActiveClients() {
 }
 
 export function useMyProjects() {
+  const cachedProjects = JSON.parse(cache.get("projects") ?? "[]") as HarvestProjectAssignment[];
+
   return useCachedPromise(
     async () => {
       let project_assignments: HarvestProjectAssignment[] = [];
@@ -107,10 +109,11 @@ export function useMyProjects() {
         if (resp.data.total_pages >= resp.data.page) break;
         page += 1;
       }
+      cache.set("projects", JSON.stringify(project_assignments));
       return project_assignments;
     },
     [],
-    { initialData: [] }
+    { initialData: cachedProjects }
   );
 }
 
