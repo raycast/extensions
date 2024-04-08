@@ -1,5 +1,10 @@
 # Notion Changelog
 
+## [Change Properties order in Create Database Page] - 2024-03-22
+
+- Add ability to change order of properties when creating a new database page
+- Fix showing/hiding properties when creating a new database page
+
 ## [Improve authentication docs] - 2024-02-27
 
 - Improve documentation on creating an internal integration

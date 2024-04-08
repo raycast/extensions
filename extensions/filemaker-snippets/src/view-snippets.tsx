@@ -25,6 +25,7 @@ import EditSnippetXML from "./components/edit-snippet-xml";
 import DynamicFieldsList from "./components/dynamic-fields-list";
 import DynamicSnippetForm from "./components/dynamic-snippet.form";
 import CreateDeeplinkForm from "./create-deeplink";
+import { fetch } from "cross-fetch";
 
 export default function Command(props: LaunchProps) {
   const [locations] = useCachedState<Location[]>("locations", []);
@@ -67,11 +68,14 @@ export default function Command(props: LaunchProps) {
   }
   async function loadContext() {
     // try to get info from launch context
+
     const parsed = zLaunchContext.safeParse(props.launchContext);
     if (!parsed.success) {
       console.error("Failed to parse launch context", parsed.error.issues);
       return;
     }
+
+    console.log("parsed launch context", parsed.data);
 
     const ctx = parsed.data;
     if (ctx.type === "my") {
@@ -125,11 +129,12 @@ export default function Command(props: LaunchProps) {
   useEffect(() => {
     if (loadedContext) return;
     if (isLoading) return;
-    if (snippets.length === 0) return;
     if (props.launchContext === undefined) return;
 
     // only run the rest of this function once
     setLoadedContext(true);
+
+    console.log("loading context");
     loadContext();
   }, [snippets, isLoading, loadedContext]);
 

@@ -16,7 +16,7 @@ import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { format } from "date-fns";
 import { createReminder } from "swift:../swift/AppleReminders";
 
-import { getPriorityIcon } from "./helpers";
+import { getIntervalValidationError, getPriorityIcon } from "./helpers";
 import { List, Reminder, useData } from "./hooks/useData";
 
 type Frequency = "daily" | "weekly" | "monthly" | "yearly";
@@ -81,8 +81,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       title: FormValidation.Required,
       interval: (value) => {
         if (!values.isRecurring) return;
-        if (!value) return "Interval is required";
-        if (isNaN(Number(value))) return "Interval must be a number";
+        return getIntervalValidationError(value);
       },
       radius: (value) => {
         if (!values.address) return;
@@ -170,7 +169,7 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   });
 
   let recurrenceDescription = "";
-  if (values.frequency && values.interval) {
+  if (values.frequency && !getIntervalValidationError(values.interval)) {
     const intervalNum = Number(values.interval);
 
     let repetitionPeriod = "";

@@ -1,4 +1,4 @@
-import { List, Color } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import {

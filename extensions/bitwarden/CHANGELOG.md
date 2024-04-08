@@ -1,5 +1,15 @@
 # Bitwarden Changelog
 
+## [Fixes and Improvements] - 2024-03-28
+
+- Fixed lock screen bypassing by increasing timeout
+- Lock and Logout commands now still succeed even if the CLI call fails
+- Improved safety and consistency of the lock screen
+
+## [Fix] - 2024-03-25
+
+- Prevent crash when CLI is not installed and display troubleshooting screen instead
+
 ## [Fix] - 2024-03-12
 
 - Use downloaded CLI on arm64 devices that have it working

@@ -25,7 +25,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       return;
     }
 
-    const data: Data = await getData(undefined);
+    const data: Data = await getData();
 
     const lists = data.lists.map((list) => {
       return `${list.title}:${list.id}`;

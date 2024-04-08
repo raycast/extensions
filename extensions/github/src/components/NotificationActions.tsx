@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, showToast, open, Toast, launchCommand, LaunchType } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
-import { getNotificationSubtitle, getNotificationTypeTitle, getGitHubURL } from "../helpers/notifications";
+import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
 import { NotificationsResponse } from "../notifications";
 
 export type Notification = NotificationsResponse["data"][0];
@@ -132,32 +132,25 @@ export default function NotificationActions({ notification, userId, mutateList }
               : open(url)
         }
       />
-      <ActionPanel.Section>
-        {notification.unread ? (
-          <>
-            <Action
-              title="Mark as Read"
-              icon={Icon.Circle}
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
-              onAction={markNotificationAsRead}
-            />
+      {notification.unread ? (
+        <>
+          <Action title="Mark as Read" icon={Icon.Circle} onAction={markNotificationAsRead} />
 
-            <Action
-              title="Mark All as Read"
-              icon={Icon.Circle}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              onAction={markAllNotificationsAsRead}
-            />
-          </>
-        ) : null}
+          <Action
+            title="Mark All as Read"
+            icon={Icon.Circle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            onAction={markAllNotificationsAsRead}
+          />
+        </>
+      ) : null}
 
-        <Action
-          title="Unsubscribe"
-          icon={Icon.BellDisabled}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
-          onAction={unsubscribe}
-        />
-      </ActionPanel.Section>
+      <Action
+        title="Unsubscribe"
+        icon={Icon.BellDisabled}
+        shortcut={{ modifiers: ["cmd"], key: "." }}
+        onAction={unsubscribe}
+      />
       <ActionPanel.Section>
         <Action.CopyToClipboard
           content={url}

@@ -1,13 +1,44 @@
+import { getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import fetch from "node-fetch";
 
 import { User } from "./users";
 
 type JiraCredentials = {
-  cloudId: string;
+  cloudId?: string;
   siteUrl: string;
   authorizationHeader: string;
   myself: User;
+};
+
+export const jiraWithApiToken = {
+  authorize: async () => {
+    const prefs = getPreferenceValues();
+    const url = prefs.siteUrl;
+    const authorizationHeader = `Basic ${btoa(`${prefs.email}:${prefs.token}`)}`;
+
+    const myselfResponse = await fetch(`https://${url}/rest/api/3/myself`, {
+      headers: {
+        Authorization: authorizationHeader,
+        Accept: "application/json",
+      },
+    });
+
+    try {
+      const myself = (await myselfResponse.json()) as User;
+
+      jiraCredentials = {
+        siteUrl: prefs.siteUrl,
+        authorizationHeader: authorizationHeader,
+        myself: myself,
+      };
+    } catch (error) {
+      throw new Error(
+        `Error authenticating with Jira. Error code: ${myselfResponse.status}. Please check your credentials in the extension preferences.`,
+      );
+    }
+    return prefs.token;
+  },
 };
 
 export const jira = OAuthService.jira({
