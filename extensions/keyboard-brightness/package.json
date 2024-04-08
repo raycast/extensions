@@ -42,14 +42,6 @@
       "mode": "no-view"
     },
     {
-      "name": "sync-keyboard-brightness",
-      "title": "Sync Keyboard Brightness",
-      "subtitle": "Sync Keyboard Brightness",
-      "description": "Sync Keyboard Brightness",
-      "mode": "no-view",
-      "interval": "4h"
-    },
-    {
       "name": "menubar-keyboard-brightness",
       "title": "Enable Keyboard Brightness Menubar",
       "subtitle": "Enable Keyboard Brightness Menubar",
