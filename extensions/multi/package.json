@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multi",
   "title": "Multi",
-  "description": "Raycast extension to see rooms & teammates, join sessions, control devices and more.",
+  "description": "Raycast extension to see rooms & teammates, join sessions, control devices and more",
   "icon": "multi-icon.png",
   "author": "fernando_barbat",
   "contributors": [
