@@ -1,4 +1,4 @@
-import { List, Icon, Color, Action, ActionPanel, closeMainWindow, PopToRootType } from "@raycast/api";
+import { List, Icon, Color, Action, ActionPanel, closeMainWindow, PopToRootType, popToRoot } from "@raycast/api";
 import { User, getUsers, inviteUser } from "./lib/multi";
 import { useCachedPromise } from "@raycast/utils";
 import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToastAndLogError";
@@ -73,7 +73,9 @@ function getActions(user: User) {
   );
 }
 
-function invite(user: User) {
-  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-  inviteUser(user.id);
+async function invite(user: User) {
+  const closeMainWindowPromise = closeMainWindow({ popToRootType: PopToRootType.Suspended });
+  await inviteUser(user.id);
+  await closeMainWindowPromise;
+  await popToRoot({ clearSearchBar: true });
 }

@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon, Color, closeMainWindow, PopToRootType } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, Color, closeMainWindow, PopToRootType, popToRoot } from "@raycast/api";
 import { Room, copyCallLink, getRooms, joinRoom } from "./lib/multi";
 import { useCachedPromise } from "@raycast/utils";
 import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToastAndLogError";
@@ -74,12 +74,16 @@ function getActions(room: Room) {
   );
 }
 
-function join(room: Room) {
-  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-  joinRoom(room.id);
+async function join(room: Room) {
+  const closeMainWindowPromise = closeMainWindow({ popToRootType: PopToRootType.Suspended });
+  await joinRoom(room.id);
+  await closeMainWindowPromise;
+  await popToRoot({ clearSearchBar: true });
 }
 
-function copyLink(room: Room) {
-  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-  copyCallLink(room.id);
+async function copyLink(room: Room) {
+  const closeMainWindowPromise = closeMainWindow({ popToRootType: PopToRootType.Suspended });
+  await copyCallLink(room.id);
+  await closeMainWindowPromise;
+  await popToRoot({ clearSearchBar: true });
 }
