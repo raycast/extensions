@@ -5,6 +5,11 @@
   "description": "Raycast extension to see rooms & teammates, join sessions, control devices and more.",
   "icon": "multi-icon.png",
   "author": "fernando_barbat",
+  "contributors": [
+    "pernielsentiker"
+  ],
+  "access": "public",
+  "owner": "multi",
   "categories": [
     "Applications",
     "Communication",
