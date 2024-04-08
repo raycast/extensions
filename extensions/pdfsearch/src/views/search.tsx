@@ -1,12 +1,13 @@
 import { environment } from "@raycast/api";
 import { Action, ActionPanel, List, LocalStorage, Toast, showHUD, showToast } from "@raycast/api";
-import { runAppleScript, showFailureToast, usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { chmod } from "fs/promises";
 import { ExecaChildProcess, execa } from "execa";
 import path from "path";
 import { Collection, Document } from "../type";
 import { getValidFiles } from "../util";
+import { openFileCallback } from "../utils";
 
 export default function SearchCollection(props: { collectionName: string }) {
   if (!props.collectionName) {
@@ -66,23 +67,10 @@ export default function SearchCollection(props: { collectionName: string }) {
         // catch process cancellation exception that is triggered when query changes
       }
 
-      return documents.sort((a, b) => b.score - a.score);
+      return documents;
     },
     [collection],
   );
-
-  const openFileCallback = async (page: number) => {
-    const script = `
-    delay 1
-    tell application "System Events"
-        keystroke "g" using {option down, command down}
-        keystroke "${page + 1}"
-        keystroke return
-    end tell
-    `;
-
-    await runAppleScript(script);
-  };
 
   // search and update results for the search query everytime the query changes
   useEffect(() => {
@@ -129,13 +117,17 @@ export default function SearchCollection(props: { collectionName: string }) {
             <List.Item
               key={result.id}
               title={result.file.match(/[^\\/]+$/)?.[0] ?? "Unknown File"}
-              subtitle={`Page ${result.page}`}
+              subtitle={`Page ${result.page + 1}`}
               quickLook={{ path: result.file, name: result.file.match(/[^\\/]+$/)?.[0] ?? "Unknown File" }}
               actions={
                 <ActionPanel>
                   <Action.Open target={result.file} onOpen={() => openFileCallback(result.page)} title="Open File" />
                   <Action.ToggleQuickLook />
-                  <Action.OpenWith path={result.file} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+                  <Action.OpenWith
+                    path={result.file}
+                    onOpen={() => openFileCallback(result.page)}
+                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                  />
                   <Action.ShowInFinder path={result.file} shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} />
                 </ActionPanel>
               }

@@ -4,6 +4,12 @@
 
 - Added 3 Send commands (Search, Create and Receive) with delete, edit and remove password actions
 
+## [Fixes and Improvements] - 2024-03-28
+
+- Fixed lock screen bypassing by increasing timeout
+- Lock and Logout commands now still succeed even if the CLI call fails
+- Improved safety and consistency of the lock screen
+
 ## [Fix] - 2024-03-25
 
 - Prevent crash when CLI is not installed and display troubleshooting screen instead

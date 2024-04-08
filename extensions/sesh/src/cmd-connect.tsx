@@ -15,17 +15,24 @@ import { getSessions, connectToSession, isTmuxRunning, Session } from "./sesh";
 import { openApp } from "./app";
 
 function getIcon(session: Session) {
-  if (session.Src === "tmux") {
-    return {
-      source: Icon.Bolt,
-      tintColor: session.Attached >= 1 ? Color.Green : Color.Blue,
-      tooltip: session.Attached >= 1 ? "Attached" : "Detached",
-    };
-  } else {
-    return {
-      source: Icon.Folder,
-      tintColor: Color.SecondaryText,
-    };
+  switch (session.Src) {
+    case "tmux":
+      return {
+        source: Icon.Bolt,
+        tintColor: session.Attached >= 1 ? Color.Green : Color.Blue,
+        tooltip: session.Attached >= 1 ? "Attached" : "Detached",
+      };
+    case "config":
+      return {
+        source: Icon.Cog,
+        tintColor: Color.SecondaryText,
+      };
+    case "zoxide":
+    default:
+      return {
+        source: Icon.Folder,
+        tintColor: Color.SecondaryText,
+      };
   }
 }
 
@@ -35,15 +42,21 @@ function formatScore(score: number) {
 }
 
 export default function ConnectCommand() {
-  const [tmuxSessions, setTmuxSessions] = useState<Array<Session>>([]);
-  const [zoxideResults, setZoxideResults] = useState<Array<Session>>([]);
+  const [sessions, setSessions] = useState<{
+    tmux: Array<Session>;
+    config: Array<Session>;
+    zoxide: Array<Session>;
+  }>({ tmux: [], config: [], zoxide: [] });
   const [isLoading, setIsLoading] = useState(true);
 
   async function getAndSetSessions() {
     try {
       const sessions = await getSessions();
-      setTmuxSessions(sessions.filter((s) => s.Src === "tmux"));
-      setZoxideResults(sessions.filter((s) => s.Src === "zoxide"));
+      setSessions({
+        tmux: sessions.filter((s) => s.Src === "tmux"),
+        config: sessions.filter((s) => s.Src === "config"),
+        zoxide: sessions.filter((s) => s.Src === "zoxide"),
+      });
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -91,7 +104,7 @@ export default function ConnectCommand() {
   return (
     <List isLoading={isLoading}>
       <List.Section title="tmux">
-        {tmuxSessions.map((session, index) => (
+        {sessions.tmux.map((session, index) => (
           <List.Item
             key={index}
             title={session.Name}
@@ -105,15 +118,15 @@ export default function ConnectCommand() {
             ]}
             actions={
               <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Path)} />
+                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
               </ActionPanel>
             }
           />
         ))}
       </List.Section>
 
-      <List.Section title="zoxide">
-        {zoxideResults.map((session, index) => (
+      <List.Section title="config">
+        {sessions.config.map((session, index) => (
           <List.Item
             key={index}
             title={session.Name}
@@ -121,7 +134,23 @@ export default function ConnectCommand() {
             accessories={[{ text: formatScore(session.Score), icon: Icon.Racket, tooltip: "Score" }]}
             actions={
               <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session.Path)} />
+                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+
+      <List.Section title="zoxide">
+        {sessions.zoxide.map((session, index) => (
+          <List.Item
+            key={index}
+            title={session.Name}
+            icon={getIcon(session)}
+            accessories={[{ text: formatScore(session.Score), icon: Icon.Racket, tooltip: "Score" }]}
+            actions={
+              <ActionPanel>
+                <Action title="Connect to Session" onAction={() => connect(session.Name)} />
               </ActionPanel>
             }
           />
