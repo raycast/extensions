@@ -79,13 +79,10 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       filePaths: state.status === "pendingFile" ? FormValidation.Required : undefined,
     },
     onSubmit: async (values) => {
-      const { url, password, filePaths } = values;
-      const [filePath] = filePaths ?? [];
-
       if (state.status === "idle" || state.status === "needsPassword") {
-        await receiveSend(url, password);
-      } else if (state.status === "pendingFile" && filePath && state.sendInfo.type === SendType.File) {
-        await downloadFile(url, state.sendInfo, filePath);
+        await receiveSend(values.url, values.password);
+      } else if (state.status === "pendingFile" && values.filePaths[0] && state.sendInfo.type === SendType.File) {
+        await downloadFile(values.url, state.sendInfo, values.filePaths[0]);
       } else {
         await showToast({ title: "Failed to receive send", style: Toast.Style.Failure });
       }
