@@ -1,6 +1,6 @@
 # Purelymail Changelog
 
-## [Added ListUser+ModifyUser Endpoints] - {PR_MERGE_DATE}
+## [Added ListUser+ModifyUser Endpoints] - 2024-04-08
 
 ### Enhancements
 
