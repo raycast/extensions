@@ -57,6 +57,12 @@ export type Send = {
   hideEmail: boolean;
 };
 
+type BaseReceivedSend = {
+  object: "send-access";
+  id: string;
+  name: string;
+};
+
 export type ReceivedSendFile = {
   id: string;
   size: string;
@@ -64,17 +70,14 @@ export type ReceivedSendFile = {
   fileName: string;
 };
 
-export type ReceivedSend = {
-  object: "send-access";
-  id: string;
-  name: string;
-} & (
-  | {
-      type: SendType.Text;
-      text: SendText;
-    }
-  | {
-      type: SendType.File;
-      file: ReceivedSendFile;
-    }
-);
+export type ReceivedFileSend = BaseReceivedSend & {
+  type: SendType.File;
+  file: ReceivedSendFile;
+};
+
+export type ReceivedTextSend = BaseReceivedSend & {
+  type: SendType.Text;
+  text: SendText;
+};
+
+export type ReceivedSend = ReceivedFileSend | ReceivedTextSend;

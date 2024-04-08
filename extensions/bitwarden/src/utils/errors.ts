@@ -70,6 +70,13 @@ export class SendNeedsPasswordError extends ManuallyThrownError {
   }
 }
 
+export class SendInvalidPasswordError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "The password you entered is invalid", stack);
+    this.name = "SendInvalidPasswordError";
+  }
+}
+
 /* -- error utils below -- */
 
 export function tryExec<T>(fn: () => T): T extends void ? T : T | undefined;

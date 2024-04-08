@@ -14,6 +14,7 @@ import {
   ManuallyThrownError,
   NotLoggedInError,
   PremiumFeatureError,
+  SendInvalidPasswordError,
   SendNeedsPasswordError,
   tryExec,
   VaultIsLockedError,
@@ -579,12 +580,15 @@ export class Bitwarden {
         resetVaultTimeout: true,
         input: options?.password,
       });
+      if (!stdout && /Invalid password/i.test(stderr)) return { error: new SendInvalidPasswordError() };
       if (!stdout && /Send password/i.test(stderr)) return { error: new SendNeedsPasswordError() };
 
       return { result: JSON.parse<ReceivedSend>(stdout) };
     } catch (execError) {
       const errorMessage = (execError as ExecaError).stderr;
-      if (/Send password/i.test(errorMessage)) return { error: new SendNeedsPasswordError() };
+      console.log({ errorMessage });
+      if (/Invalid password/gi.test(errorMessage)) return { error: new SendInvalidPasswordError() };
+      if (/Send password/gi.test(errorMessage)) return { error: new SendNeedsPasswordError() };
 
       captureException("Failed to receive send obj", execError);
       const { error } = await this.handleCommonErrors(execError);

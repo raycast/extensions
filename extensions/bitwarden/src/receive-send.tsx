@@ -16,9 +16,9 @@ import { useEffect, useReducer, useRef } from "react";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
-import { ReceivedSend, SendType } from "~/types/send";
+import { ReceivedFileSend, ReceivedSend, SendType } from "~/types/send";
 import { captureException } from "~/utils/development";
-import { SendNeedsPasswordError } from "~/utils/errors";
+import { SendInvalidPasswordError, SendNeedsPasswordError } from "~/utils/errors";
 import useOnceEffect from "~/utils/hooks/useOnceEffect";
 
 const LoadingFallback = () => <Form isLoading />;
@@ -68,7 +68,6 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
   const bitwarden = useBitwarden();
   const [state, dispatch] = useReducer(reducer, { status: "idle" });
 
-  const submittedValuesRef = useRef<FormValues>();
   const passwordFieldRef = useRef<Form.PasswordField>(null);
 
   const { itemProps, handleSubmit, values, setValue } = useForm<FormValues>({
@@ -79,8 +78,6 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       filePaths: state.status === "pendingFile" ? FormValidation.Required : undefined,
     },
     onSubmit: async (values) => {
-      submittedValuesRef.current = values;
-
       const { url, password, filePaths } = values;
       const [filePath] = filePaths ?? [];
 
@@ -108,7 +105,13 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
     const toast = await showToast({ title: "Receiving Send...", style: Toast.Style.Animated });
     try {
       const { result: sendInfo, error } = await bitwarden.receiveSendInfo(url, { password });
+      console.log({ error });
       if (error) {
+        if (error instanceof SendInvalidPasswordError) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Invalid password";
+          return;
+        }
         if (error instanceof SendNeedsPasswordError) {
           dispatch({ status: "needsPassword" });
           setTimeout(() => passwordFieldRef.current?.focus(), 1);
@@ -119,6 +122,7 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       if (sendInfo.type === SendType.Text) {
         const { result, error } = await bitwarden.receiveSend(url, { password });
         if (error) throw error;
+
         dispatch({ status: "textRevealed", sendInfo, text: result });
       } else {
         dispatch({ status: "pendingFile", sendInfo });
@@ -138,17 +142,16 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
     }
   };
 
-  const downloadFile = async (url: string, sendInfo: ReceivedSend, filePath: string) => {
-    if (sendInfo.type !== SendType.File) return;
-
+  const downloadFile = async (url: string, sendInfo: ReceivedFileSend, filePath: string) => {
     const toast = await showToast({ title: "Downloading file...", style: Toast.Style.Animated });
     try {
       const savePath = join(filePath, sendInfo.file.fileName);
       const { error } = await bitwarden.receiveSend(url, { savePath });
       if (error) throw error;
 
+      toast.title = "File downloaded";
+      toast.style = Toast.Style.Success;
       await showInFinder(savePath);
-      await toast.hide();
       await closeMainWindow();
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -215,6 +218,7 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
             canChooseFiles={false}
             allowMultipleSelection={false}
             canChooseDirectories
+            storeValue
           />
         </>
       )}
