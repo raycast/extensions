@@ -12,7 +12,7 @@ import {
 import { FormValidation, useCachedState, useForm } from "@raycast/utils";
 import { ExecaError } from "execa";
 import { join } from "path";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -43,29 +43,18 @@ const initialValues: FormValues = {
   password: "",
 };
 
-type SendInfo = ReceivedSend & { url: string };
-
-const getSendInfoDescription = (sendInfo: SendInfo) => {
-  let text = `Name: ${sendInfo.name}\n`;
-  if (sendInfo.type === SendType.File) {
-    text += `File: ${sendInfo.file.fileName}\n`;
-    text += `Size: ${sendInfo.file.sizeName}\n`;
-  }
-  return text;
-};
-
-type ReducerState =
+type State =
   | { status: "idle" }
-  | { status: "textRevealed"; text: string }
-  | { status: "pendingFile"; sendInfo: SendInfo }
+  | { status: "textRevealed"; sendInfo: ReceivedSend; text: string }
+  | { status: "pendingFile"; sendInfo: ReceivedSend }
   | { status: "needsPassword" };
 
-const reducer = (state: ReducerState, action: ReducerState): ReducerState => {
+const reducer = (state: State, action: State): State => {
   switch (action.status) {
     case "idle":
       return { status: "idle" };
     case "textRevealed":
-      return { status: "textRevealed", text: action.text };
+      return { status: "textRevealed", sendInfo: action.sendInfo, text: action.text };
     case "pendingFile":
       return { status: "pendingFile", sendInfo: action.sendInfo };
     case "needsPassword":
@@ -78,7 +67,10 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
   const [state, dispatch] = useReducer(reducer, { status: "idle" });
   const [filePath, setFilePath] = useCachedState<string>("receiveSendFilePath", "~/Downloads");
 
-  const { itemProps, handleSubmit, values } = useForm<FormValues>({
+  const submittedValuesRef = useRef<FormValues>();
+  const passwordFieldRef = useRef<Form.PasswordField>(null);
+
+  const { itemProps, handleSubmit, values, setValue } = useForm<FormValues>({
     onSubmit,
     initialValues: { ...initialValues, ...args },
     validation: {
@@ -88,20 +80,26 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
   });
 
   useEffect(() => {
-    if (!values.url) dispatch({ status: "idle" });
+    if (!values.url || values.url === "https://vault.bitwarden.com/#/send/") {
+      dispatch({ status: "idle" });
+    }
   }, [values]);
 
   useOnceEffect(() => {
     void handleSubmit(args);
   }, args.url);
 
-  async function onSubmit({ url, password }: FormValues) {
+  async function onSubmit(values: FormValues) {
+    submittedValuesRef.current = values;
+
+    const { url, password } = values;
     const toast = await showToast({ title: "Receiving Send...", style: Toast.Style.Animated });
     try {
       const { result: sendInfo, error } = await bitwarden.receiveSendInfo(url, { password });
       if (error) {
         if (error instanceof SendNeedsPasswordError) {
           dispatch({ status: "needsPassword" });
+          setTimeout(() => passwordFieldRef.current?.focus(), 1);
           return toast.hide();
         }
         throw error;
@@ -109,9 +107,9 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       if (sendInfo.type === SendType.Text) {
         const { result, error } = await bitwarden.receiveSend(url, { password });
         if (error) throw error;
-        dispatch({ status: "textRevealed", text: result });
+        dispatch({ status: "textRevealed", sendInfo, text: result });
       } else {
-        dispatch({ status: "pendingFile", sendInfo: { ...sendInfo, url } });
+        dispatch({ status: "pendingFile", sendInfo });
       }
       await toast.hide();
     } catch (error) {
@@ -129,12 +127,13 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
   }
 
   const downloadFile = async () => {
-    if (state.status === "pendingFile" && state.sendInfo.type === SendType.File) {
+    const { url } = submittedValuesRef.current ?? {};
+    if (state.status === "pendingFile" && state.sendInfo.type === SendType.File && url) {
       const { sendInfo } = state;
       const toast = await showToast({ title: "Downloading file...", style: Toast.Style.Animated });
       try {
         const savePath = join(filePath, sendInfo.file.fileName);
-        const { error } = await bitwarden.receiveSend(sendInfo.url, { savePath });
+        const { error } = await bitwarden.receiveSend(url, { savePath });
         if (error) throw error;
         await showInFinder(savePath);
         await toast.hide();
@@ -145,6 +144,12 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
         captureException("Failed to download file", error);
       }
     }
+  };
+
+  const resetFields = () => {
+    dispatch({ status: "idle" });
+    Object.keys(initialValues).forEach((key) => setValue(key, initialValues[key]));
+    passwordFieldRef.current?.focus();
   };
 
   return (
@@ -158,15 +163,32 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
           {(state.status === "idle" || state.status === "needsPassword") && (
             <Action.SubmitForm title="Receive Send" icon={{ source: Icon.Download }} onSubmit={handleSubmit} />
           )}
+          {(values.password || values.url) && (
+            <Action title="Reset Fields" icon={{ source: Icon.Trash }} onAction={resetFields} />
+          )}
         </ActionPanel>
       }
     >
       <Form.TextField {...itemProps.url} title="Send URL" autoFocus />
       {(state.status === "needsPassword" || args.password) && (
-        <Form.PasswordField {...itemProps.password} title="Password" info="This Send is password protected" />
+        <Form.PasswordField
+          {...itemProps.password}
+          ref={passwordFieldRef}
+          title="Password"
+          info="This Send is password protected"
+        />
       )}
-      {state.status === "pendingFile" && (
-        <Form.Description title="Details" text={getSendInfoDescription(state.sendInfo)} />
+      {(state.status === "pendingFile" || state.status === "textRevealed") && (
+        <>
+          <Form.Separator />
+          <Form.Description title="Name" text={state.sendInfo.name} />
+          {state.sendInfo.type === SendType.File && (
+            <>
+              <Form.Description title="File Name" text={state.sendInfo.file.fileName} />
+              <Form.Description title="File Size" text={state.sendInfo.file.sizeName} />
+            </>
+          )}
+        </>
       )}
       {state.status === "textRevealed" && (
         <Form.TextArea id="text" title="Text" value={state.text} onChange={() => null} />
@@ -174,8 +196,8 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       {state.status === "pendingFile" && (
         <Form.FilePicker
           id="filePath"
-          title="File Save Path"
-          info="This Send contains a file, this is the path where it will be saved."
+          title="Save File To"
+          info="This is the folder to where the Send's file will be saved."
           value={filePath ? [filePath] : []}
           onChange={([path]) => path && setFilePath(path)}
           canChooseFiles={false}
