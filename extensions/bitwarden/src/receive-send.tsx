@@ -68,9 +68,10 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
   const bitwarden = useBitwarden();
   const [state, dispatch] = useReducer(reducer, { status: "idle" });
 
+  const urlFieldRef = useRef<Form.TextField>(null);
   const passwordFieldRef = useRef<Form.PasswordField>(null);
 
-  const { itemProps, handleSubmit, values, setValue } = useForm<FormValues>({
+  const { itemProps, handleSubmit, values, reset } = useForm<FormValues>({
     initialValues: { ...initialValues, ...args },
     validation: {
       url: FormValidation.Required,
@@ -161,9 +162,9 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
   };
 
   const resetFields = () => {
+    reset(initialValues);
     dispatch({ status: "idle" });
-    Object.keys(initialValues).forEach((key) => setValue(key, initialValues[key]));
-    passwordFieldRef.current?.focus();
+    urlFieldRef.current?.focus();
   };
 
   return (
@@ -184,7 +185,7 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.url} title="Send URL" autoFocus />
+      <Form.TextField {...itemProps.url} ref={urlFieldRef} title="Send URL" autoFocus />
       {(state.status === "needsPassword" || args.password) && (
         <Form.PasswordField
           {...itemProps.password}
