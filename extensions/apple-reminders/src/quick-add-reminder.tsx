@@ -2,6 +2,8 @@ import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, sho
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
 import { createReminder, getData } from "swift:../swift/AppleReminders";
 
+import * as chrono from "chrono-node";
+import { toISOStringWithTimezone } from "./helpers";
 import { NewReminder } from "./create-reminder";
 import { Data } from "./hooks/useData";
 
@@ -16,11 +18,48 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      await createReminder({ title: props.arguments.text, notes: props.arguments.notes });
 
+      const text = props.arguments.text
+      let dateValue: string | undefined = undefined
+      let listId: string | undefined = undefined
+      let listName: string | undefined = undefined
+
+      const dateMatch = chrono.parse(text)
+      if (dateMatch && dateMatch.length > 0) {
+          const date = dateMatch[0].start.date()
+          dateValue = toISOStringWithTimezone(dateMatch[0].start.date())
+      }
+
+      const tagMatch = text.match(/ #(\w+)/)
+
+      if(tagMatch) {
+          const data: Data = await getData();
+          const reminderList = data.lists.find(list => list.title === tagMatch[1])
+          listId = reminderList ? reminderList.id : undefined
+          listName = reminderList ? reminderList.title : undefined
+      }
+
+      // Clean all values matching from text and previous white space as title constant
+      const title = text
+      .replace(tagMatch ? tagMatch[0] : '', '')
+      .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : '', '')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+      const reminder: NewReminder = {
+        title: title,
+        listId: listId,
+        dueDate: dateValue
+      };
+
+      await createReminder(reminder);
+
+      const toastListName = listName ? listName : "default list"
+      const humanReadableDate = dateValue ? chrono.parseDate(dateValue)?.toLocaleString() : "" 
+      const toastDueDate = humanReadableDate ? ` due ${humanReadableDate}` : ""
       await showToast({
         style: Toast.Style.Success,
-        title: `Added "${props.arguments.text}" to default list`,
+        title: `Added "${title}" to ${toastListName}${toastDueDate}`,
       });
       return;
     }

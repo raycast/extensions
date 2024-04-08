@@ -163,7 +163,8 @@
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.13.6",
     "date-fns": "^3.6.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "chrono-node": "2.4.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

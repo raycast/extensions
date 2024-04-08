@@ -98,3 +98,17 @@ export function getIntervalValidationError(interval?: string): string | undefine
   if (isNaN(Number(interval))) return "Interval must be a number";
   if ((interval as unknown as number) < 1) return "Must be greater than 0";
 }
+
+export function toISOStringWithTimezone(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = pad(date.getUTCMonth() + 1);
+  const day = pad(date.getUTCDate());
+  const hours = pad(date.getUTCHours());
+  const minutes = pad(date.getUTCMinutes());
+  const seconds = pad(date.getUTCSeconds());
+  const milliseconds = pad(date.getUTCMilliseconds());
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}Z`;
+}
+
