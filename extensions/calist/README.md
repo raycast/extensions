@@ -128,12 +128,9 @@ Customize the look and feel by using themes with colors built in Raycast, applie
 
 Choose between Avatar, Raycast Icons, Font icons
 
-- Data:
-  - Avatar
-  - Raycast Icons
-  - Font
-- Description: Change Icon Type
-- Default: Glyph
+- Avatar
+- Raycast Icons
+- Font ( Default )
 
 ## 📰 Icon Type Font Configuration
 
