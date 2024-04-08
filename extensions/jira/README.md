@@ -2,14 +2,9 @@
 
 Create, access and modify issues and sprints.
 
-# How to use
+## Logging in with an API token
 
-## Oauth
+The Jira extension supports OAuth authentication by default. But if you want, you can log in with an API token instead. To do so, you must:
 
-You will be prompted to authenticate on first use.
-
-## API Token
-
-i) Get an API token as described [here](https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/).
-ii) Select any command from the Jira extension, then press Cmd-K and scroll down to `Configure Extension`. Enter your email, API token, and Jira site url (without https) on the right. Note that all 3 must be provided to use API tokens.
-
+1. Get an API token as described here.
+2. Select any command from the Jira extension, then press Cmd+K and scroll down to `Configure Extension`. Enter your email, API token, and Jira site URL (without https://) on the right. Note that all three must be provided to use API tokens.
