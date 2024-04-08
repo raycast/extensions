@@ -12,7 +12,12 @@ import {
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
-import { getNotificationMenuBarIcon, getNotificationMenuBarTitle, getNotificationTitle } from "./helpers/notifications";
+import {
+  getNotificationMenuBarIcon,
+  getNotificationMenuBarTitle,
+  getNotificationTitle,
+  getNotificationURL,
+} from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
@@ -39,7 +44,8 @@ function UnreadNotifications() {
   async function openNotification(notification: NotificationResult) {
     const applications = await getApplications();
     const linearApp = applications.find((app) => app.bundleId === "com.linear");
-    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
+    const url = getNotificationURL(notification);
+    url ? await open(url, linearApp) : await openInbox();
     await markNotificationAsRead(notification);
   }
 

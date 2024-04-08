@@ -1,7 +1,10 @@
 import { Detail, Icon } from '@raycast/api';
-import { ItemDetailProps } from '../types';
+import { DetailedItem } from '../data/fetchDetails';
 
-const ItemDetail = ({ item }: ItemDetailProps) => {
+interface ItemDetailProps {
+  item: DetailedItem;
+}
+export const ItemDetail = ({ item }: ItemDetailProps) => {
   const {
     Actors,
     Awards,
@@ -84,7 +87,7 @@ const ItemDetail = ({ item }: ItemDetailProps) => {
             title="YouTube"
             target={`https://www.youtube.com/results?search_query=${Title.replace(
               /\s/g,
-              '+'
+              '+',
             )}+trailer`}
             text="Trailer"
           />

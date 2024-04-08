@@ -5,6 +5,9 @@
   "description": "Quickly send a message to one of your contacts.",
   "icon": "apple-messages-icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "timothy_gray"
+  ],
   "license": "MIT",
   "commands": [
     {

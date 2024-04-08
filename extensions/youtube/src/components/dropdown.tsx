@@ -1,4 +1,4 @@
-import { ListOrGridDropdown, ListOrGridDropdownSection, ListOrGridDropdownItem } from "./listgrid";
+import { ListOrGridDropdown, ListOrGridDropdownItem, ListOrGridDropdownSection } from "./listgrid";
 
 export function FilterDropdown({
   onChange,

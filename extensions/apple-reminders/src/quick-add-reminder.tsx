@@ -1,6 +1,6 @@
 import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
-import { getReminders, createReminder } from "swift:../swift/AppleReminders";
+import { createReminder, getData } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
 import { Data } from "./hooks/useData";
@@ -16,7 +16,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      await createReminder({ title: props.arguments.text, description: props.arguments.notes });
+      await createReminder({ title: props.arguments.text, notes: props.arguments.notes });
 
       await showToast({
         style: Toast.Style.Success,
@@ -25,7 +25,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       return;
     }
 
-    const data: Data = await getReminders();
+    const data: Data = await getData();
 
     const lists = data.lists.map((list) => {
       return `${list.title}:${list.id}`;

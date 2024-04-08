@@ -87,7 +87,7 @@ export type AirQualityData = {
   dominentpol: string;
   iaqi: Iaqi;
   time: Time;
-  forecast: Forecast;
+  forecast?: Forecast;
   debug: {
     sync: string;
   };

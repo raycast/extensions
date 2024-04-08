@@ -1,6 +1,6 @@
 import { List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import { getBoundedPreferenceNumber } from "./components/Menu";
@@ -44,6 +44,11 @@ function SearchRepositories() {
     [query],
     { keepPreviousData: true },
   );
+
+  // Update visited repositories (history) if any of the metadata changes, especially the repository name.
+  useEffect(() => {
+    history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r)));
+  }, [data]);
 
   const foundRepositories = useMemo(
     () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),

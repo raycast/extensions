@@ -122,11 +122,12 @@ In Raycast 1.37.0+ we made it easy for you to take beautiful pixel perfect scree
 #### How to use it?
 
 1. Set up Window Capture in Advanced Preferences (Hotkey e.g.: `⌘⇧⌥+M`)
-2. Open the command
-3. Press the hotkey, remember to tick `Save to Metadata`
+2. Ensure your extension is opened in development mode (Window Capture eliminates dev-related menus/icons).
+3. Open the command
+4. Press the hotkey, remember to tick `Save to Metadata`
 
 {% hint style="info" %}
-This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you’ve made.
+This tool will use your current background. Choose a background image with a good contrast that makes it clear and easy to see the app and extension you've made.
 
 You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make your background look pretty
 {% endhint %}
@@ -254,9 +255,8 @@ You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you
 
 ### Empty States
 
-- When you update lists with an empty array of elements, the "No results" view will be shown. Avoid introducing your own UI to achieve a similar effect (e.g. showing list item).
-  - **Known issue:** Sometimes, there is nothing you can show when the search query is empty, and an extension shows "No results" when you open it (often in search commands). We have plans to provide an API that would improve that experience. In the meantime, you might want to consider introducing some sections that could be helpful in an empty state – e.g. suggestions or recently visited items.
-- **Common mistake** – "flickering empty state view" on start
+- When you update lists with an empty array of elements, the "No results" view will be shown. You can customize this view by using the [List.EmptyView](../api-reference/user-interface/list.md#list.emptyview) or [Grid.EmptyView](../api-reference/user-interface/grid.md#grid.emptyview) components.
+- **Common mistake** - "flickering empty state view" on start
   - If you try rendering an empty list before real data arrives (e.g. from the network or disk), you might see a flickering "No results" view when opening the extension. To prevent this, make sure not to return an empty list of items before you get the data you want to display. In the meantime, you can show the loading indicator. See [this example](https://developers.raycast.com/information/best-practices#show-loading-indicator).
 
 ### Navigation Title

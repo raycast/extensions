@@ -1,5 +1,14 @@
 # Jira Changelog
 
+## [Add option to authenticate using API token] - 2023-03-27
+
+- Add option to authenticate using token for REST APIs
+- Add preferences for the same
+
+## [Improve Assignee and Sprint dropdowns] - 2024-03-14
+
+- Remove the default value in the Assignee and Sprint dropdowns when searching.
+
 ## [Add OAuth utils] - 2024-02-13
 
 - Use new OAuth utils

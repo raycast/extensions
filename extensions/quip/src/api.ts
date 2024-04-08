@@ -1,8 +1,8 @@
-export const endpoint = 'https://platform.quip.com';
+import { preferences } from './utils';
 
 // https://quip.com/dev/automation/documentation/current#operation/searchForThreads
 export const searchThreadEndpoint = (query: string, onlyMatchTitles: boolean) =>
-  `${endpoint}/1/threads/search?query=${query}&only_match_titles=${onlyMatchTitles}`;
+  `${preferences.endpoint}/1/threads/search?query=${query}&only_match_titles=${onlyMatchTitles}`;
 
 export type Thread = {
   id: string;
@@ -17,7 +17,7 @@ export type SearchThreadResponse = {
 }[];
 
 // https://quip.com/dev/automation/documentation/current#operation/getThreadHtmlV2
-export const getThreadContentEndpoint = (id: string) => `${endpoint}/2/threads/${id}/html`;
+export const getThreadContentEndpoint = (id: string) => `${preferences.endpoint}/2/threads/${id}/html`;
 
 export type GetThreadContentResponse = {
   html: string;

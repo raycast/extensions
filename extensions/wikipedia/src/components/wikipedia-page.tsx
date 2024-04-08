@@ -178,7 +178,7 @@ export default function WikipediaPage({ title }: { title: string }) {
                     <Action.OpenInBrowser
                       key={link}
                       title={link}
-                      url={`https://${language}.wikipedia.org/wiki/${link}`}
+                      url={`https://${language.split("-").at(0)}.wikipedia.org/wiki/${link}`}
                     />
                   );
                 }

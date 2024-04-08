@@ -92,7 +92,7 @@
     },
     {
       "name": "open-from-clipboard",
-      "title": "Open Issue From Clipboard",
+      "title": "Open Issue from Clipboard",
       "subtitle": "Jira",
       "description": "Open an issue by its key from the clipboard.",
       "mode": "view",
@@ -107,6 +107,31 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "title": "Jira Site URL",
+      "description": "Jira Site URL",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "foo.atlassian.com"
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Account Email",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "token",
+      "title": "API Token",
+      "description": "API Token",
+      "type": "password",
+      "required": false
+    }
+  ],
+
   "dependencies": {
     "@raycast/api": "^1.64.3",
     "@raycast/utils": "^1.12.4",

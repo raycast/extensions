@@ -1,5 +1,8 @@
 # Obsidian Changelog
 
+## [Bugfix for nested bookmarks] - 2024-02-06
+- Fixes a bug where nested bookmarks would not be displayed correctly in search
+
 ## [Support luxon formats in templates] - 2024-01-30
 - Support luxon date and time format (e.g. dd, MM, YYYY,...) in templates
 

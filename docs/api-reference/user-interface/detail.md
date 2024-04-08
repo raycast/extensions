@@ -44,6 +44,8 @@ export default function Command() {
 
 {% hint style="info" %}
 You can specify custom image dimensions by adding a `raycast-width` and `raycast-height` query string to the markdown image. For example: `![Image Title](example.png?raycast-width=250&raycast-height=250)`
+
+You can also specify a tint color to apply to an markdown image by adding a `raycast-tint-color` query string. For example: `![Image Title](example.png?raycast-tintColor=blue)`
 {% endhint %}
 
 ### Detail.Metadata

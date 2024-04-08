@@ -1,13 +1,13 @@
 export interface SnippetContent {
-  title: string;
-  description: string;
+  title: string?;
+  description: string?;
+  tags: string[];
   content: string;
   rawMetadata: string;
 }
 
 export interface Snippet {
   id: string;
-  fullPath: string;
   name: string;
   folder: string;
   content: SnippetContent;
@@ -15,10 +15,12 @@ export interface Snippet {
 
 export interface State {
   snippets?: Snippet[];
-  folders?: string[];
   filteredSnippets?: Snippet[];
-  error?: Error;
+  folders?: string[];
+  tags?: string[];
+  errors?: Error[];
   isLoading: boolean;
-  selectedFolder?: string;
+  selectedFilter?: string;
   primaryAction?: string;
+  paths?: string[];
 }
