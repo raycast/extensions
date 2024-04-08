@@ -9,7 +9,7 @@ import {
   showInFinder,
   showToast,
 } from "@raycast/api";
-import { FormValidation, useCachedState, useForm } from "@raycast/utils";
+import { FormValidation, useForm } from "@raycast/utils";
 import { ExecaError } from "execa";
 import { join } from "path";
 import { useEffect, useReducer, useRef } from "react";
@@ -36,11 +36,13 @@ const ReceiveSendCommand = (props: LaunchProps<{ arguments: Arguments.ReceiveSen
 type FormValues = {
   url: string;
   password: string;
+  filePaths: string[];
 };
 
 const initialValues: FormValues = {
   url: "",
   password: "",
+  filePaths: [],
 };
 
 type State =
@@ -65,17 +67,30 @@ const reducer = (state: State, action: State): State => {
 function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments: Arguments.ReceiveSend }>) {
   const bitwarden = useBitwarden();
   const [state, dispatch] = useReducer(reducer, { status: "idle" });
-  const [filePath, setFilePath] = useCachedState<string>("receiveSendFilePath", "~/Downloads");
 
   const submittedValuesRef = useRef<FormValues>();
   const passwordFieldRef = useRef<Form.PasswordField>(null);
 
   const { itemProps, handleSubmit, values, setValue } = useForm<FormValues>({
-    onSubmit,
     initialValues: { ...initialValues, ...args },
     validation: {
       url: FormValidation.Required,
       password: state.status === "needsPassword" ? FormValidation.Required : undefined,
+      filePaths: state.status === "pendingFile" ? FormValidation.Required : undefined,
+    },
+    onSubmit: async (values) => {
+      submittedValuesRef.current = values;
+
+      const { url, password, filePaths } = values;
+      const [filePath] = filePaths ?? [];
+
+      if (state.status === "idle" || state.status === "needsPassword") {
+        await receiveSend(url, password);
+      } else if (state.status === "pendingFile" && filePath && state.sendInfo.type === SendType.File) {
+        await downloadFile(url, state.sendInfo, filePath);
+      } else {
+        await showToast({ title: "Failed to receive send", style: Toast.Style.Failure });
+      }
     },
   });
 
@@ -86,13 +101,10 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
   }, [values]);
 
   useOnceEffect(() => {
-    void handleSubmit(args);
+    void handleSubmit({ ...initialValues, ...args });
   }, args.url);
 
-  async function onSubmit(values: FormValues) {
-    submittedValuesRef.current = values;
-
-    const { url, password } = values;
+  const receiveSend = async (url: string, password?: string) => {
     const toast = await showToast({ title: "Receiving Send...", style: Toast.Style.Animated });
     try {
       const { result: sendInfo, error } = await bitwarden.receiveSendInfo(url, { password });
@@ -124,25 +136,24 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
         captureException("Failed to receive Send", error);
       }
     }
-  }
+  };
 
-  const downloadFile = async () => {
-    const { url } = submittedValuesRef.current ?? {};
-    if (state.status === "pendingFile" && state.sendInfo.type === SendType.File && url) {
-      const { sendInfo } = state;
-      const toast = await showToast({ title: "Downloading file...", style: Toast.Style.Animated });
-      try {
-        const savePath = join(filePath, sendInfo.file.fileName);
-        const { error } = await bitwarden.receiveSend(url, { savePath });
-        if (error) throw error;
-        await showInFinder(savePath);
-        await toast.hide();
-        await closeMainWindow();
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to download file";
-        captureException("Failed to download file", error);
-      }
+  const downloadFile = async (url: string, sendInfo: ReceivedSend, filePath: string) => {
+    if (sendInfo.type !== SendType.File) return;
+
+    const toast = await showToast({ title: "Downloading file...", style: Toast.Style.Animated });
+    try {
+      const savePath = join(filePath, sendInfo.file.fileName);
+      const { error } = await bitwarden.receiveSend(url, { savePath });
+      if (error) throw error;
+
+      await showInFinder(savePath);
+      await toast.hide();
+      await closeMainWindow();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to download file";
+      captureException("Failed to download file", error);
     }
   };
 
@@ -157,11 +168,12 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
       actions={
         <ActionPanel>
           {state.status === "textRevealed" && <Action.CopyToClipboard content={state.text} title="Copy Text" />}
-          {state.status === "pendingFile" && (
-            <Action.SubmitForm title="Download File" icon={{ source: Icon.Download }} onSubmit={downloadFile} />
-          )}
-          {(state.status === "idle" || state.status === "needsPassword") && (
-            <Action.SubmitForm title="Receive Send" icon={{ source: Icon.Download }} onSubmit={handleSubmit} />
+          {state.status !== "textRevealed" && (
+            <Action.SubmitForm
+              title={state.status === "pendingFile" ? "Download File" : "Receive Send"}
+              icon={{ source: Icon.Download }}
+              onSubmit={handleSubmit}
+            />
           )}
           {(values.password || values.url) && (
             <Action title="Reset Fields" icon={{ source: Icon.Trash }} onAction={resetFields} />
@@ -194,16 +206,17 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
         <Form.TextArea id="text" title="Text" value={state.text} onChange={() => null} />
       )}
       {state.status === "pendingFile" && (
-        <Form.FilePicker
-          id="filePath"
-          title="Save File To"
-          info="This is the folder to where the Send's file will be saved."
-          value={filePath ? [filePath] : []}
-          onChange={([path]) => path && setFilePath(path)}
-          canChooseFiles={false}
-          allowMultipleSelection={false}
-          canChooseDirectories
-        />
+        <>
+          <Form.Description text="" />
+          <Form.FilePicker
+            {...itemProps.filePaths}
+            title="Save File To"
+            info="This is the folder to where the Send's file will be saved."
+            canChooseFiles={false}
+            allowMultipleSelection={false}
+            canChooseDirectories
+          />
+        </>
       )}
     </Form>
   );
