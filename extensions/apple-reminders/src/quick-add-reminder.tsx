@@ -46,11 +46,15 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       .replace(/\s+/g, ' ')
       .trim()
 
-      const reminder: NewReminder = {
+      let reminder: NewReminder = {
         title: title,
         listId: listId,
         dueDate: dateValue
       };
+
+      if (props.arguments.notes) {
+        reminder.notes = props.arguments.notes;
+      }
 
       await createReminder(reminder);
 
