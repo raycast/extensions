@@ -60,12 +60,14 @@ function getActions(room: Room) {
     <ActionPanel>
       <Action
         title={`Join ${room.name}`}
+        icon={Icon.AddPerson}
         onAction={() => {
           join(room);
         }}
       />
       <Action
         title={`Copy Link`}
+        icon={Icon.CopyClipboard}
         onAction={() => {
           copyLink(room);
         }}

@@ -65,6 +65,7 @@ function getActions(user: User) {
     <ActionPanel>
       <Action
         title={`Invite ${user.fullname} to Talk`}
+        icon={Icon.Phone}
         onAction={() => {
           invite(user);
         }}
