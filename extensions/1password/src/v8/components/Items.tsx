@@ -3,7 +3,15 @@ import { useCachedState } from "@raycast/utils";
 
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Item } from "../types";
-import { getCategoryIcon, actionsForItem, usePasswords, useAccount } from "../utils";
+import {
+  getCategoryIcon,
+  actionsForItem,
+  usePasswords,
+  useAccount,
+  CommandLineMissingError,
+  ConnectionError,
+  ExtensionError,
+} from "../utils";
 import { Guide } from "./Guide";
 import { ItemActionPanel } from "./ItemActionPanel";
 import { useMemo, useState } from "react";
@@ -25,7 +33,21 @@ export function Items() {
     category !== newCategory && setCategory(newCategory);
   };
 
-  if (itemsError || accountError) return <Guide />;
+  if (itemsError instanceof CommandLineMissingError || accountError instanceof CommandLineMissingError)
+    return <Guide />;
+
+  if (itemsError instanceof ConnectionError || accountError instanceof ConnectionError) {
+    return (
+      <List>
+        <List.EmptyView
+          title={(itemsError as ExtensionError)?.title || (accountError as ExtensionError)?.title}
+          description={itemsError?.message || accountError?.message}
+          icon={Icon.WifiDisabled}
+        />
+      </List>
+    );
+  }
+
   return (
     <List
       searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}

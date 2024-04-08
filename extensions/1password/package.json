@@ -137,7 +137,6 @@
       "description": "Close Raycast window after copying a username or password."
     },
     {
-      "default": "/usr/local/bin/op",
       "description": "Enter the CLI binary path",
       "name": "cliPath",
       "placeholder": "e.g., /usr/local/bin/op",
