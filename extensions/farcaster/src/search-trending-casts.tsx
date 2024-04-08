@@ -1,34 +1,45 @@
 import { List } from '@raycast/api';
 import { useTrendingCasts } from './hooks';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import CastListItem from './components/CastListItem';
+import { Cast } from './utils/types';
 
+const TIME_WINDOW = ['1h', '6h', '12h', '24h'];
 export default function SearchTrendingCasts() {
-  const [query, setQuery] = useState('');
-  // const [cursor, setCursor] = useState();
-  const { data, isLoading, pagination } = useTrendingCasts();
-  const [filteredList, setFilteredList] = useState(data?.casts);
+  const [timeWindow, setTimeWindow] = useState(TIME_WINDOW[3]);
+  const { data, isLoading, pagination } = useTrendingCasts(timeWindow);
 
-  useEffect(() => {
-    setFilteredList(data?.casts.filter((cast) => cast.text.toLowerCase().includes(query.toLowerCase())));
-  }, [query, data]);
+  function onTimeWindowChange(timeValue: string) {
+    setTimeWindow(timeValue);
+  }
 
   return (
     <List
-      isLoading={isLoading}
-      navigationTitle="Search casts"
-      searchBarPlaceholder="Globally search casts across hubs"
-      onSearchTextChange={setQuery}
+      isLoading={data === null || isLoading}
+      navigationTitle="Trending Casts"
+      searchBarPlaceholder="Filter cast keywords"
       pagination={pagination}
+      searchBarAccessory={<RangeDropdown value={timeWindow} onTimeWindowChange={onTimeWindowChange} />}
       throttle
     >
-      {filteredList && filteredList.length > 0 ? (
-        <List.Section title="Recent Casts" subtitle={`${filteredList.length}`}>
-          {filteredList.map((cast) => (
-            <CastListItem key={cast.hash} cast={cast} />
-          ))}
-        </List.Section>
-      ) : null}
+      <List.Section title="Recent Casts" subtitle={data ? data?.length.toString() : '0'}>
+        {(data as Cast[])?.map((cast) => <CastListItem key={cast.hash} cast={cast} />)}
+      </List.Section>
     </List>
+  );
+}
+
+interface RangeDropdownProps {
+  onTimeWindowChange: (value: string) => void;
+  value: string;
+}
+
+function RangeDropdown({ onTimeWindowChange, value }: RangeDropdownProps) {
+  return (
+    <List.Dropdown tooltip="Select Time Window" onChange={onTimeWindowChange} value={value}>
+      {TIME_WINDOW.map((timeRange) => (
+        <List.Dropdown.Item key={timeRange} title={timeRange} value={timeRange} />
+      ))}
+    </List.Dropdown>
   );
 }

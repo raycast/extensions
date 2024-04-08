@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action } from '@raycast/api';
 import { useGetProfiles } from './hooks';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   getUserIcon,
   linkify,
@@ -14,24 +14,7 @@ import { CastAuthor } from './utils/types';
 
 export default function SearchUsers() {
   const [query, setQuery] = useState('');
-  const [cursor, setCursor] = useState('');
-  const { data, isLoading } = useGetProfiles(query, cursor);
-  const [filteredList, filterList] = useState(data?.users);
-
-  useEffect(() => {
-    filterList(
-      data?.users.filter(
-        (profile) =>
-          profile?.username.toLowerCase().includes(query) || profile?.display_name.toLowerCase().includes(query),
-      ),
-    );
-  }, [query]);
-
-  const loadMore = useCallback(() => {
-    if (data?.next?.cursor) {
-      setCursor(data.next.cursor);
-    }
-  }, [data]);
+  const { data, isLoading, pagination } = useGetProfiles(query);
 
   return (
     <List
@@ -39,16 +22,16 @@ export default function SearchUsers() {
       navigationTitle="Search Profiles"
       searchBarPlaceholder="Search username, display or fid"
       onSearchTextChange={setQuery}
+      pagination={pagination}
       throttle
       isShowingDetail={!!query}
-      pagination={{ onLoadMore: loadMore, hasMore: !!data?.next?.cursor, pageSize: 25 }}
     >
-      <List.EmptyView
+      {/* <List.EmptyView
         title="Type username to search"
         description="Search for profiles by username or FID"
         icon="no-view.png"
-      />
-      {filteredList?.map((user) => <UserDetails key={user.username} user={user} />)}
+      /> */}
+      {(data as CastAuthor[])?.map((user) => <UserDetails key={user.username} user={user} />)}
     </List>
   );
 }

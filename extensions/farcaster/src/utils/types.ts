@@ -5,12 +5,11 @@ export type Cast = {
   parent_hash: string | null;
   parent_url: string;
   root_parent_url?: string;
-  // parent_author: any; // Define the structure of parent_author object if needed
   author: CastAuthor;
   text: string;
   timestamp: string;
-  // embeds: any[]; // Define the structure of embeds object if needed
-  frames: any[];
+  embeds: CastEmbed[];
+  frames: Frame[];
   reactions: {
     likes: CastReaction[];
     recasts: CastReaction[];
@@ -18,7 +17,30 @@ export type Cast = {
   replies: {
     count: number;
   };
-  // mentioned_profiles: any[]; // Define the structure of mentioned_profiles object if needed
+};
+
+export type Frame = {
+  version: 'vNext';
+  title: string;
+  image: string;
+  image_aspect_ratio: string;
+  buttons: Button[];
+  post_url: string;
+  frames_url: string;
+};
+
+type Button = {
+  index: number;
+  title: string;
+  action_type: 'post' | 'post_redirect';
+  target: string;
+};
+
+export type CastEmbed = { url: string } | { cast_id: EmbeddedCast };
+
+type EmbeddedCast = {
+  fid: string;
+  hash: string;
 };
 
 type CastReaction = {
@@ -34,9 +56,11 @@ export type FeedCastsResponse = {
 };
 
 export type FeedUsersResponse = {
-  users: CastAuthor[];
-  next: {
-    cursor: string;
+  result: {
+    users: CastAuthor[];
+    next: {
+      cursor: string;
+    };
   };
 };
 
@@ -63,6 +87,5 @@ export type CastAuthor = {
 type CastProfile = {
   bio: {
     text: string;
-    mentioned_profiles?: any[];
   };
 };

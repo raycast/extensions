@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { Cast } from '../utils/types';
-import { getUserIcon, getCastUrl } from '../utils/helpers';
+import { getUserIcon } from '../utils/helpers';
 import CastDetails from './CastDetails';
 
 export default function CastListItem({ cast }: { cast: Cast }) {
@@ -20,8 +20,7 @@ export default function CastListItem({ cast }: { cast: Cast }) {
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" icon={Icon.Sidebar} target={<CastDetails cast={cast} />} />
-          <Action.OpenInBrowser title="Open in Browser" url={getCastUrl(cast)} />
+          <Action.Push title="View Cast" icon={Icon.Sidebar} target={<CastDetails cast={cast} />} />
         </ActionPanel>
       }
     />
