@@ -4,11 +4,7 @@ import { fetchDocumentTags } from "./utils/fetchDocumentTags";
 import { fetchDocumentTypes } from "./utils/fetchDocumentTypes";
 import { fetchCorrespondents } from "./utils/fetchCorrespondents";
 import { postDocument } from "./utils/postDocument";
-import {
-  Correspondent,
-  Tag,
-  Type,
-} from "./models/paperlessResponse.model";
+import { Correspondent, Tag, Type } from "./models/paperlessResponse.model";
 import { PostDocument } from "./models/docPost.model";
 
 export default function DocumentForm() {
@@ -63,7 +59,7 @@ export default function DocumentForm() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Upload document" onSubmit={(values: PostDocument) => submit(values)} />
+          <Action.SubmitForm title="Upload Document" onSubmit={(values: PostDocument) => submit(values)} />
         </ActionPanel>
       }
     >

@@ -1,8 +1,6 @@
 import { environment, getPreferenceValues, Grid, List } from "@raycast/api";
 import { useState } from "react";
-import {
-  documentsResponse,
-} from "./models/paperlessResponse.model";
+import { documentsResponse } from "./models/paperlessResponse.model";
 import { fetchDocuments } from "./utils/fetchDocuments";
 import { DocListItem } from "./components/DocListItem";
 import { Preferences } from "./models/preferences.model";
@@ -12,7 +10,6 @@ import { useTags } from "./hooks/useTags";
 import { useDocumentTypes } from "./hooks/useDocumentTypes";
 import fs from "fs";
 import axios from "axios";
-
 
 const { apiToken }: Preferences = getPreferenceValues();
 const { paperlessURL }: Preferences = getPreferenceValues();
@@ -60,7 +57,6 @@ export default function DocumentList() {
     setResults(documentResponse);
     setLoading(false);
   };
-
 
   if (gridMode) {
     return (

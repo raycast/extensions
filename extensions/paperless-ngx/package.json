@@ -23,7 +23,7 @@
     },
     {
       "name": "documentForm",
-      "title": "Upload a Document",
+      "title": "Upload Document",
       "subtitle": "Paperless-ngx",
       "description": "Upload document to your Paperless-ngx instance",
       "mode": "view"

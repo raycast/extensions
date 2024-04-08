@@ -9,7 +9,7 @@ const { apiToken }: Preferences = getPreferenceValues();
 export const fetchCorrespondents = async (): Promise<correspondentsResponse["results"]> => {
   try {
     const response = await fetch(`${paperlessURL}/api/correspondents/?page_size=10000`, {
-      headers: { Authorization: `Token ${apiToken}` }
+      headers: { Authorization: `Token ${apiToken}` },
     });
     const json = await response.json();
     const correspondents = json as correspondentsResponse;

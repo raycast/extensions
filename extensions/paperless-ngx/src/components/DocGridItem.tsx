@@ -2,7 +2,6 @@ import { environment, Grid } from "@raycast/api";
 import { DocActions } from "./DocActions";
 import { DocItem } from "../models/docItem.model";
 
-
 export const DocGridItem = ({ document, type }: DocItem): JSX.Element => {
   return (
     <Grid.Item

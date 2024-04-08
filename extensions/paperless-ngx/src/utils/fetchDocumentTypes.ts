@@ -6,7 +6,7 @@ import { Preferences } from "../models/preferences.model";
 const { paperlessURL }: Preferences = getPreferenceValues();
 const { apiToken }: Preferences = getPreferenceValues();
 
-export const fetchDocumentTypes = async (): Promise<typesResponse['results']> => {
+export const fetchDocumentTypes = async (): Promise<typesResponse["results"]> => {
   try {
     const response = await fetch(`${paperlessURL}/api/document_types/?page_size=10000`, {
       headers: { Authorization: `Token ${apiToken}` },
