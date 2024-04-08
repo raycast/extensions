@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [New Commands] - 2024-04-09
+
+- Added 3 Send commands (Search, Create and Receive) with delete, edit and remove password actions
+
 ## [Fix] - 2024-03-25
 
 - Prevent crash when CLI is not installed and display troubleshooting screen instead
