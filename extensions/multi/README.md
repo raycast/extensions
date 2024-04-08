@@ -11,7 +11,7 @@
 Raycast extension to see rooms & teammates, join sessions, control devices and more.
 
   <p>
-    <a href="https://www.raycast.com/fernando_barbat/multi">
+    <a href="https://www.raycast.com/multi/multi">
       <img src="https://img.shields.io/badge/Raycast-store-red.svg"
         alt="Find this extension on the Raycast store"
       />
