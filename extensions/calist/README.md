@@ -48,7 +48,6 @@ Designed to be a companion for calist.io
 
 In the search field you can type in `July 1992` and it will change the date to that.
 If you type in the number of the month it will change the month to that.
-You can search for a specific date by typing the date in the search bar.
 
 ## 🧭 Navigation
 
