@@ -1,6 +1,8 @@
 import { Endpoints } from "@octokit/types";
 import { Color, Icon } from "@raycast/api";
 import { format } from "date-fns";
+import { Octokit } from "octokit";
+import { useEffect, useState } from "react";
 
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
@@ -33,7 +35,7 @@ export function generateGitHubUrl(url: string, notificationId: string, userId?: 
 
 const getCommentId = (url?: string) => (url ? /comments\/(?<id>\d+)/g.exec(url)?.groups?.id : undefined);
 
-export function getGitHubURL(notification: Notification, userId?: string) {
+export async function getGitHubURL(client: Octokit, notification: Notification, userId?: string) {
   if (notification.subject.url) {
     const latestCommentId = getCommentId(notification.subject.latest_comment_url);
     return generateGitHubUrl(
@@ -45,10 +47,46 @@ export function getGitHubURL(notification: Notification, userId?: string) {
   } else if (notification.subject.type === "CheckSuite") {
     return generateGitHubUrl(`${notification.repository.html_url}/actions`, notification.id, userId);
   } else if (notification.subject.type === "Discussion") {
-    return generateGitHubUrl(`${notification.repository.html_url}/discussions`, notification.id, userId);
+    // Determine the discussion number via GraphQL
+    // See: https://github.com/orgs/community/discussions/62728#discussioncomment-9034908
+    let discussionNumber: number | null = null;
+    try {
+      discussionNumber = await getGitHubDiscussionNumber(client, notification);
+    } catch (error) {
+      console.error("Failed to get discussion number", error);
+    }
+
+    if (!discussionNumber) {
+      return generateGitHubUrl(`${notification.repository.html_url}/discussions`, notification.id, userId);
+    }
+
+    return generateGitHubUrl(
+      `${notification.repository.html_url}/discussions/${discussionNumber}`,
+      notification.id,
+      userId,
+    );
   }
 
   return notification.url;
+}
+
+export function useGitHubUrl(client: Octokit, notification: Notification, userId?: string) {
+  const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    async function fetchUrl() {
+      try {
+        const fetchedUrl = await getGitHubURL(client, notification, userId);
+        setUrl(fetchedUrl);
+      } catch (error) {
+        console.error("Failed to fetch GitHub URL", error);
+      }
+    }
+
+    fetchUrl();
+  }, [client, notification, userId]);
+
+  return url;
 }
 
 export function getNotificationIcon(notification: Notification) {
@@ -169,4 +207,32 @@ export function getGitHubIcon(tinted = false) {
     source: "github.svg",
     tintColor: overrideTintColor ? overrideTintColor : Color.PrimaryText,
   };
+}
+
+export async function getGitHubDiscussionNumber(client: Octokit, notification: Notification) {
+  const repo = notification.repository.full_name;
+  const updated = notification.updated_at.split("T")[0];
+  const title = notification.subject.title;
+  const result = await client.graphql<{
+    search: {
+      nodes: {
+        number: number;
+        url: string;
+      }[];
+    };
+  }>(
+    `query ($filter: String!) {
+    search(query: $filter, type: DISCUSSION, first: 1) {
+      nodes {
+        ... on Discussion { number url }
+      }
+    }
+  }`,
+    { filter: `repo:${repo} updated:>=${updated} in:title ${title}` },
+  );
+
+  const data = result?.search?.nodes?.[0];
+  if (!data) return null;
+
+  return data.number;
 }

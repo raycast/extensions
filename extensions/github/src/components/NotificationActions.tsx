@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { useMemo } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
-import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
+import { getNotificationSubtitle, getNotificationTypeTitle, useGitHubUrl } from "../helpers/notifications";
 import { NotificationsResponse } from "../notifications";
 
 export type Notification = NotificationsResponse["data"][0];
@@ -18,7 +17,7 @@ type NotificationActionsProps = {
 export default function NotificationActions({ notification, userId, mutateList }: NotificationActionsProps) {
   const { octokit } = getGitHubClient();
 
-  const url = useMemo(() => getGitHubURL(notification, userId), [notification, userId]);
+  const url = useGitHubUrl(octokit, notification, userId);
 
   async function markNotificationAsRead() {
     await showToast({ style: Toast.Style.Animated, title: "Marking notification as read" });
