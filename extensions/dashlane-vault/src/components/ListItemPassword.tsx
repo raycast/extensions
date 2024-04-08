@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, environment } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 import { usePasswordContext } from "@/context/passwords";
@@ -52,6 +52,12 @@ export const ListItemPassword = ({ item }: Props) => {
             <FavoriteActions item={item} />
           </ActionPanel.Section>
           <SyncAction />
+          {environment.isDevelopment && (
+            <ActionPanel.Section title="Development">
+              <Action.CopyToClipboard title="Copy ID" content={item.id} />
+              <Action title="Print to Console" icon={Icon.Terminal} onAction={() => console.log(item)} />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />

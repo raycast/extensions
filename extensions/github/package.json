@@ -206,7 +206,7 @@
       ]
     },
     {
-      "name": "my-pull-request-menu",
+      "name": "my-pull-requests-menu",
       "title": "My Pull Requests Menu Bar",
       "description": "Display My Pull Requests in the Menu Bar",
       "mode": "menu-bar",
@@ -387,8 +387,9 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "concurrently \"ray develop\" \"yarn generate --watch\"",
-    "format": "ray lint --fix",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
   }
 }

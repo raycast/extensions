@@ -1,5 +1,7 @@
 # Wikipedia Changelog
 
+## [Add Chinese Variants] - 2024-03-26
+
 ## [Added new language] - 2024-02-24
 
 Added `Ukrainian` language

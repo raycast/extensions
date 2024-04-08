@@ -1,9 +1,10 @@
 import {
-  getPreferenceValues,
+  Color,
   Icon,
-  launchCommand,
   LaunchType,
   MenuBarExtra,
+  getPreferenceValues,
+  launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
@@ -105,7 +106,7 @@ function UnreadNotifications() {
           data.map((notification) => {
             const icon = {
               source: getNotificationIcon(notification).value,
-              tintColor: { light: "#000", dark: "#fff", adjustContrast: false },
+              tintColor: Color.PrimaryText,
             };
             const title = notification.subject.title;
             const updatedAt = new Date(notification.updated_at);
