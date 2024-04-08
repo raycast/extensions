@@ -26,7 +26,18 @@ const SearchSendsCommand = () => (
   </RootErrorBoundary>
 );
 
-const formatDate = (date: Date) => {
+const formatDateFull = (date: Date) => {
+  return date.toLocaleString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  });
+};
+
+const formatAccessoryDate = (date: Date) => {
   const now = new Date();
 
   return date.toLocaleString("en-GB", {
@@ -35,20 +46,25 @@ const formatDate = (date: Date) => {
     year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
     hour: "numeric",
     minute: "numeric",
-    second: date.getSeconds() > 0 ? "numeric" : undefined,
   });
 };
 
 const getItemIcon = (send: Send): NonNullable<List.Item.Props["icon"]> => {
-  if (send.type === SendType.File) return { source: Icon.Document, tintColor: Color.Orange };
-  return { source: Icon.Text, tintColor: Color.Blue };
+  if (send.type === SendType.File) return { source: Icon.Document, tintColor: Color.Blue };
+  return { source: Icon.Text, tintColor: Color.SecondaryText };
 };
 
 const getDateAccessoryDetails = (dateString: string) => {
   const date = new Date(dateString);
   const isPastDate = date < new Date();
 
-  return { date, isPastDate, color: isPastDate ? Color.Red : undefined, formattedDate: formatDate(date) };
+  return {
+    date,
+    isPastDate,
+    color: isPastDate ? Color.Red : undefined,
+    textDate: formatAccessoryDate(date),
+    tooltipDate: formatDateFull(date),
+  };
 };
 
 const getItemAccessories = (send: Send): List.Item.Props["accessories"] => {
@@ -56,30 +72,38 @@ const getItemAccessories = (send: Send): List.Item.Props["accessories"] => {
   if (send.passwordSet) {
     accessories.push({ icon: Icon.Key, tooltip: "Password protected" });
   }
-  if (send.maxAccessCount) {
-    const wasMaxAccessCountReached = send.accessCount >= send.maxAccessCount;
+
+  if (send.disabled) {
+    accessories.push({ icon: { source: Icon.Warning, tintColor: Color.Orange }, tooltip: "Disabled" });
+  }
+
+  const { accessCount, maxAccessCount } = send;
+  if (accessCount > 0 || maxAccessCount) {
+    const wasMaxAccessReached = maxAccessCount && accessCount >= maxAccessCount;
+
     accessories.push({
-      icon: { source: Icon.Person, tintColor: wasMaxAccessCountReached ? Color.Red : undefined },
-      tooltip: `Access Count: ${send.accessCount}/${send.maxAccessCount}`,
+      tag: { value: `${accessCount}`, color: wasMaxAccessReached ? Color.Red : undefined },
+      icon: { source: Icon.Person, tintColor: wasMaxAccessReached ? Color.Red : undefined },
+      tooltip: maxAccessCount
+        ? `Max access count reached: ${accessCount}/${maxAccessCount}`
+        : `Access Count: ${accessCount}`,
     });
   }
-  if (send.disabled) {
-    accessories.push({ icon: Icon.Warning, tooltip: "Deactivated" });
-  }
+
   if (send.expirationDate) {
-    const { color, formattedDate, isPastDate } = getDateAccessoryDetails(send.expirationDate);
+    const { color, textDate, tooltipDate, isPastDate } = getDateAccessoryDetails(send.expirationDate);
     accessories.push({
+      text: { value: textDate, color },
       icon: { source: Icon.Clock, tintColor: color },
-      text: { value: formattedDate, color },
-      tooltip: isPastDate ? `Expired on ${formattedDate}` : `Will expire on ${formattedDate}`,
+      tooltip: isPastDate ? `Expired on ${tooltipDate}` : `Will expire on ${tooltipDate}`,
     });
   }
   if (send.deletionDate) {
-    const { color, formattedDate, isPastDate } = getDateAccessoryDetails(send.deletionDate);
+    const { color, textDate: textDate, tooltipDate, isPastDate } = getDateAccessoryDetails(send.deletionDate);
     accessories.push({
+      text: { value: textDate, color },
       icon: { source: Icon.Trash, tintColor: color },
-      text: { value: formattedDate, color },
-      tooltip: isPastDate ? `Deleted on ${formattedDate}` : `Will be deleted on ${formattedDate}`,
+      tooltip: isPastDate ? `Deleted on ${tooltipDate}` : `Will be deleted on ${tooltipDate}`,
     });
   }
 
