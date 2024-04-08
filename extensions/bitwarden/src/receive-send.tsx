@@ -108,6 +108,7 @@ function ReceiveSendCommandContent({ arguments: args }: LaunchProps<{ arguments:
         if (error instanceof SendInvalidPasswordError) {
           toast.style = Toast.Style.Failure;
           toast.title = "Invalid password";
+          toast.message = "Please try again.";
           return;
         }
         if (error instanceof SendNeedsPasswordError) {
