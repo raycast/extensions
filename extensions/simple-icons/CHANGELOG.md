@@ -4,7 +4,6 @@
 
 - Add support for configuring the default action on detail view
 - Update screenshot of detail view
-- Add screenshots of dark mode
 - Bump all dependencies to latest version
 
 ## [Improvements] - 2024-03-24
