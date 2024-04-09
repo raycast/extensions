@@ -6,9 +6,9 @@
   "icon": "icon.png",
   "author": "destiner",
   "contributors": [
-    "kidonng",
     "sxn",
-    "robert"
+    "robert",
+    "kuddl"
   ],
   "categories": [
     "Design Tools",
@@ -46,12 +46,16 @@
       "default": "paste",
       "data": [
         {
-          "title": "Paste to Active App",
+          "title": "Paste <svg> to Active App",
           "value": "paste"
         },
         {
-          "title": "Copy to Clipboard",
+          "title": "Copy <svg> to Clipboard",
           "value": "copy"
+        },
+        {
+          "title": "Paste <name> to Active App",
+          "value": "pasteName"
         }
       ]
     }
