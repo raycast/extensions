@@ -1,22 +1,71 @@
 import { List, getPreferenceValues } from "@raycast/api";
-import { AttendancePeriod, getAttendances, getPersonioToken } from "./api";
+import { getPersonioToken } from "./api/api";
 import { useEffect, useState } from "react";
+import { AttendancePeriod, getAttendances } from "./api/attendances";
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "Septemnber",
+  "October",
+  "November",
+  "December",
+];
 
 export default function Attendances() {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+
   const [attendances, setAttendances] = useState<AttendancePeriod[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+
+  const paddedMonth = (selectedMonth + 1).toString().padStart(2, "0");
 
   useEffect(() => {
     async function fetchAttendances() {
       const token = await getPersonioToken();
       const employeeNumber = getPreferenceValues().employeeNumber;
-      const attendances = await getAttendances(employeeNumber, token);
-      setAttendances(attendances);
+
+      // API call
+      const attendances = await getAttendances(employeeNumber, token, currentYear.toString(), paddedMonth);
+
+      // sort from new to old attendances
+      const sortedAttendances = attendances.sort((a, b) => {
+        return Date.parse(b.date + " " + b.start_time) - Date.parse(a.date + " " + a.start_time);
+      });
+
+      setAttendances(sortedAttendances);
     }
     fetchAttendances();
-  }, []);
+  }, [selectedMonth]);
 
   return (
-    <List isShowingDetail={true} isLoading={attendances.length == 0}>
+    <List
+      isShowingDetail={true}
+      isLoading={attendances.length == 0}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Month and Year"
+          defaultValue={months[currentMonth]}
+          onChange={(month: string) => {
+            setSelectedMonth(months.indexOf(month));
+          }}
+        >
+          <List.Dropdown.Section title="Month">
+            {months.map((month) => (
+              <List.Dropdown.Item key={month} title={month} value={month} />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
+    >
       {attendances.map((attendance) => (
         <List.Item
           key={attendance.id}

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Employee, getEmployees, getPersonioToken } from "./api";
+import { getPersonioToken } from "./api/api";
+import { Employee, getEmployees } from "./api/employee";
 
 export default function GetEmployeeNumber() {
   const [employees, setEmployees] = useState<Employee[]>([]);
