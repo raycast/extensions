@@ -1,5 +1,12 @@
 # Simple Icons Changelog
 
+## [New Feature & Chore]
+
+- Add support for configuring the default action on detail view
+- Update screenshot of detail view
+- Add screenshots of dark mode
+- Bump all dependencies to latest version
+
 ## [Improvements] - 2024-3-24
 
 Now we reached 3100+ icons!
@@ -10,7 +17,7 @@ Now we reached 3100+ icons!
 
 ### Chore
 
-- Update pacakge to ESM
+- Update package to ESM
 - Use `got` instead of `node-fetch`
 - Bump all dependencies to the latest version
 
