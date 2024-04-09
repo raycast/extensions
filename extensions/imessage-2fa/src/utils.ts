@@ -36,11 +36,6 @@ export function extractCode(original: string) {
     //   "Your healow verification code is : 7579."
     //   "TRUSTED LOCATION PASSCODE: mifsuc"
     code = m[2];
-  } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits
-    // examples:
-    //   "Please enter code 548 on Zocdoc."
-    code = m[2];
   } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
     // line beginning OR "code:" OR "is:" OR word boundary, optional whitespace, 3 consecutive digits, a hyphen, then 3 consecutive digits
     // but NOT a phone number (###-###-####)
@@ -56,6 +51,11 @@ export function extractCode(original: string) {
       return `${first}${second}`;
     }
     return "";
+  } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits
+    // examples:
+    //   "Please enter code 548 on Zocdoc."
+    code = m[2];
   } else {
     // more generic, brute force patterns
 

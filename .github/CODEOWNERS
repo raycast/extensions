@@ -3,7 +3,7 @@
 /extensions/0x0                                      @pseudobun @pernielsentikaer @jatindotdev
 /extensions/1-click-confetti                         @peduarte
 /extensions/1loc                                     @kud @kgrhartlage @sxn
-/extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @Davidwalser @henrik-dmg @justspacedog @kjeldahl @superwhys
+/extensions/1password                                @khasbilegt @thomaspaulmann @dteare @pernielsentikaer @cb372 @Davidwalser @henrik-dmg @justspacedog @kjeldahl @superwhys @Luk4h
 /extensions/2fa-directory                            @andreaselia @pernielsentikaer
 /extensions/8ball                                    @Gitsack
 /extensions/Bilibili                                 @Fatpandac
@@ -50,7 +50,7 @@
 /extensions/apple-devices                            @madza91
 /extensions/apple-maps-search                        @djpowers @ratoru
 /extensions/apple-notes                              @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince @thomaslombart @xilopaint
-/extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia @jondelga
+/extensions/apple-reminders                          @thomaslombart @tmwrnr @irangarcia @jondelga @phil1995
 /extensions/arc                                      @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @danulqua @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @jayeshbhole @hinzed1127 @omar-salama
 /extensions/archiver                                 @404J
 /extensions/ars-technica                             @edwin-dd-ong
@@ -171,7 +171,8 @@
 /extensions/circle-ci                                @qeude @kudrykv @jesse-c
 /extensions/citation-generator                       @AbhinavPalacharla
 /extensions/clash                                    @ciiiii
-/extensions/cleanshotx                               @Aayush9029 @thomaslombart @lukaszmtw @erics118
+/extensions/claude                                   @florisdobber
+/extensions/cleanshotx                               @Aayush9029 @thomaslombart @lukaszmtw @erics118 @mlnchk
 /extensions/clear-clipboard                          @d3caf
 /extensions/clickup                                  @Ali-Parandeh @aesadde
 /extensions/clipboard-editor                         @pomdtr
@@ -614,7 +615,7 @@
 /extensions/karabiner-profile-switcher               @lucaschultz @erics118
 /extensions/keepassxc                                @zkytech @Sulfyderz
 /extensions/key-value                                @NirLevy98 @pernielsentikaer @gkpln3
-/extensions/keyboard-brightness                      @neo773
+/extensions/keyboard-brightness                      @neo773 @belyakov-am
 /extensions/keyboard-layout-switcher                 @lucaschultz
 /extensions/keyboard-maestro                         @eluce2 @suaw3k
 /extensions/keyboard-shortcut-sequences              @SKaplanOfficial
@@ -753,6 +754,7 @@
 /extensions/moco                                     @eviscares
 /extensions/modify-hash                              @tisfeng
 /extensions/moji                                     @Kasper4649
+/extensions/momentum                                 @LeOndaz
 /extensions/monday                                   @freak4pc
 /extensions/moneylover                               @lacherogwu
 /extensions/monitor-mate                             @MuhaddiMu
@@ -767,6 +769,7 @@
 /extensions/mozilla-firefox                          @crisboarna @grandkrav
 /extensions/mui-documentation                        @kgrhartlage
 /extensions/mullvad                                  @0x46616c6b @SebKranz
+/extensions/multi                                    @fbarbat @fbarbat @pernielsentikaer
 /extensions/multilinks                               @abhisheksatre
 /extensions/multipass                                @davibe @pernielsentikaer
 /extensions/music                                    @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford @urwrstkn8mare
@@ -1416,6 +1419,7 @@
 /extensions/year-in-progress                         @thomaspaulmann @danulqua @anothertempore
 /extensions/yopass                                   @ricoberger
 /extensions/youdao-translate                         @tiancheng92
+/extensions/yourls                                   @firhanram
 /extensions/youtrack                                 @tiulpin @skoch13 @GrimbiXcode
 /extensions/youtube                                  @tonka3000 @SKaplanOfficial @madza91 @xilopaint
 /extensions/youtube-companion                        @sasivarnan

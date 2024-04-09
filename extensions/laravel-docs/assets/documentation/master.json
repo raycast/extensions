@@ -181,6 +181,10 @@
       "url": "https://laravel.com/docs/master/rate-limiting"
     },
     {
+      "title": "Strings",
+      "url": "https://laravel.com/docs/master/strings"
+    },
+    {
       "title": "Task Scheduling",
       "url": "https://laravel.com/docs/master/scheduling"
     }
@@ -319,6 +323,10 @@
       "url": "https://laravel.com/docs/master/fortify"
     },
     {
+      "title": "Folio",
+      "url": "https://laravel.com/docs/master/folio"
+    },
+    {
       "title": "Homestead",
       "url": "https://laravel.com/docs/master/homestead"
     },
@@ -349,6 +357,22 @@
     {
       "title": "Pint",
       "url": "https://laravel.com/docs/master/pint"
+    },
+    {
+      "title": "Precognition",
+      "url": "https://laravel.com/docs/master/precognition"
+    },
+    {
+      "title": "Prompts",
+      "url": "https://laravel.com/docs/master/prompts"
+    },
+    {
+      "title": "Pulse",
+      "url": "https://laravel.com/docs/master/pulse"
+    },
+    {
+      "title": "Reverb",
+      "url": "https://laravel.com/docs/master/reverb"
     },
     {
       "title": "Sail",
