@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "farcaster",
   "title": "Farcaster",
-  "description": "Most comprehensive extension for Farecaster. Create and search your casts, frames, channels and more. Stay on top of your notifications.",
+  "description": "Most comprehensive extension for Forecaster. Search for casts, profiles and more.",
   "icon": "command-icon.png",
   "author": "artivilla",
   "categories": [
@@ -83,8 +83,8 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.12.5",
-    "@types/react": "18.2.74",
+    "@types/node": "20.12.6",
+    "@types/react": "18.2.75",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.4"

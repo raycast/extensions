@@ -1,9 +1,9 @@
 import { List } from '@raycast/api';
-import { useTrendingCasts } from './hooks';
 import { useState } from 'react';
 import CastListItem from './components/CastListItem';
 import { Cast } from './utils/types';
 import { Dropdown } from './components/Dropdown';
+import { useTrendingCasts } from './hooks/useTrendingCasts';
 
 const TIME_WINDOW = [
   { label: '1h', value: '1h' },

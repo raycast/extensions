@@ -60,3 +60,5 @@ export function linkify(text: string): string {
     return acc.replace(match.raw, `[${match.raw}](${match.url})`);
   }, text);
 }
+
+export const headers = { accept: 'application/json', api_key: preferences.apiKey };

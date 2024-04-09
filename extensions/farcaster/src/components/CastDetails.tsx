@@ -36,7 +36,6 @@ export default function CastDetails({ cast }: { cast: Cast }) {
         <ActionPanel>
           <Action title="Go Back" onAction={pop} />
           <Action.OpenInBrowser title="View Cast in Browser" url={getCastUrl(cast)} />
-          {/* link to profile view */}
         </ActionPanel>
       }
     />

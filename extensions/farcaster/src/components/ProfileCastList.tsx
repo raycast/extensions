@@ -1,7 +1,7 @@
 import { List } from '@raycast/api';
 import { Cast, CastAuthor } from '../utils/types';
 import CastListItem from './CastListItem';
-import { useGetProfileCasts } from '../hooks';
+import { useGetProfileCasts } from '../hooks/useGetProfileCasts';
 import { useMemo, useState } from 'react';
 import { Dropdown } from './Dropdown';
 
