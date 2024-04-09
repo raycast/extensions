@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "nodes",
-  "title": "Nodes",
+  "name": "solana_nodes",
+  "title": "Solana Nodes",
   "description": "Browse Solana Validator Stats from Stakewiz",
   "icon": "extension-logo.png",
   "author": "jstnw10",
