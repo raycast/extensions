@@ -87,6 +87,13 @@
       "required": false,
       "title": "Tailscale CLI Path",
       "description": "Location to the Tailscale CLI (Defaults to `/Applications/Tailscale.app/Contents/MacOS/Tailscale`)"
+    },
+    {
+      "name": "tailscaleExecMaxBuffersMB",
+      "type": "textfield",
+      "required": false,
+      "title": "Buffer size for parsing CLI output (in megabytes)",
+      "description": "Max buffer size (in megabytes, defaults to 10)"
     }
   ],
   "dependencies": {
