@@ -1,5 +1,9 @@
 # ssh-manager Changelog
 
+## [Add Alacritty Support] - 2024-04-09
+
+- Added support for alacritty as an option to open ssh connections.
+
 ## [Fix] - 2024-04-08
 
 - Fixed the issue that `User` options are still created when `User` is not specified.
