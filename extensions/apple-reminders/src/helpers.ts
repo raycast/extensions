@@ -100,7 +100,7 @@ export function getIntervalValidationError(interval?: string): string | undefine
 }
 
 export function toISOStringWithTimezone(date: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, '0');
+  const pad = (n: number) => n.toString().padStart(2, "0");
   const year = date.getUTCFullYear();
   const month = pad(date.getUTCMonth() + 1);
   const day = pad(date.getUTCDate());
@@ -111,4 +111,3 @@ export function toISOStringWithTimezone(date: Date): string {
 
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}Z`;
 }
-
