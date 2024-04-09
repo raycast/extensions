@@ -11,6 +11,7 @@ export default function Command() {
       new URLSearchParams({ sp: searchText }),
     {
       parseResponse: parseFetchResponse,
+      execute: searchText.length > 0,
     },
   );
 
