@@ -21,10 +21,15 @@ export function useModel(): ModelHook {
   const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
   const proxy = useProxy();
-  const { useAzure } = getConfiguration();
+  const { useAzure, isCustomModel } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
 
   useEffect(() => {
+    if (isCustomModel) {
+      // If choose to use custom model, we don't need to fetch models from the API
+      setFetching(false);
+      return;
+    }
     if (!useAzure) {
       gpt.models
         .list({ httpAgent: proxy })

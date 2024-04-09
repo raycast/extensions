@@ -1,5 +1,9 @@
 # Changelog
 
+## [Feat] - 2024-04-09
+
+- Feature: Support custom model name
+
 ## [Fix] - 2024-03-22
 
 - Fix: `Auto-load Text` and `Use Full Text Input` not working properly
