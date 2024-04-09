@@ -31,7 +31,24 @@ interface GetUsersResponse {
 export interface User {
   id: string;
   fullname: string;
-  availability: string;
+  availability: UserAvailability;
+  session?: UserSession
+}
+
+export enum UserAvailability {
+  Online = "online",
+  Focusing = "focusing",
+  Away = "away"
+}
+
+export type UserSession = {
+  shortdescription: string
+  room?: UserSessionRoomReference
+}
+
+export type UserSessionRoomReference = {
+  id: string
+  name: string
 }
 
 /**

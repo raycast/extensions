@@ -1,5 +1,5 @@
-import { List, Icon, Color, Action, ActionPanel, closeMainWindow, PopToRootType, popToRoot } from "@raycast/api";
-import { User, getUsers, inviteUser } from "./lib/multi";
+import { List, Image, Icon, Color, Action, ActionPanel, closeMainWindow, PopToRootType, popToRoot } from "@raycast/api";
+import { User, UserSessionRoomReference, getUsers, inviteUser, joinRoom } from "./lib/multi";
 import { useCachedPromise } from "@raycast/utils";
 import { showMultiScriptErrorToastAndLogError } from "./lib/showMultiScriptErrorToastAndLogError";
 
@@ -36,47 +36,75 @@ export default function Command() {
   );
 }
 
-function getIcon(user: User): { source: Icon; tintColor: Color } {
-  return { source: Icon.Circle, tintColor: getTintColor(user) };
-}
+function getIcon(user: User): Image {
+  if (user.session) {
+    return { source: "in-session.svg", tintColor: Color.Green };
+  }
 
-function getTintColor(user: User): Color {
   switch (user.availability) {
     case "online":
-      return Color.Green;
+      return { source: "online.svg", tintColor: Color.Green };
     case "focusing":
-      return Color.Purple;
+      return { source: "focusing.svg", tintColor: Color.Purple };
     case "away":
     default:
-      return Color.SecondaryText;
+      return { source: "away.svg", tintColor: Color.SecondaryText };
   }
 }
 
-function getAccessories(user: User) {
-  return [{ text: user.availability }];
+function getAccessories(user: User): List.Item.Accessory[]  {
+  return [{ text: user.session?.shortdescription ?? capitalizeFirstLetter(user.availability) }];
 }
 
-function getActions(user: User) {
+function capitalizeFirstLetter(text: string) {
+  return text[0].toUpperCase() + text.slice(1);
+}
+
+function getActions(user: User): React.ReactNode {
   if (user.availability === "away") {
     return undefined;
   }
 
-  return (
-    <ActionPanel>
+  const actions: ActionPanel.Children[] = [];
+
+  const roomReference = user.session?.room;
+  if (roomReference) {
+    actions.push(
       <Action
-        title={`Invite ${user.fullname} to Talk`}
-        icon={Icon.Phone}
+        key="join"
+        title={`Join ${roomReference.name}`}
+        icon={Icon.AddPerson}
         onAction={() => {
-          invite(user);
+          join(roomReference);
         }}
-      />
-    </ActionPanel>
+      />,
+    );
+  }
+
+  actions.push(
+    <Action
+      key="invite"
+      title={`Invite ${user.fullname} to Talk`}
+      icon={Icon.Phone}
+      onAction={() => {
+        invite(user);
+      }}
+    />,
   );
+
+  return <ActionPanel>{actions}</ActionPanel>;
 }
 
 async function invite(user: User) {
   const closeMainWindowPromise = closeMainWindow({ popToRootType: PopToRootType.Suspended });
   await inviteUser(user.id);
+  await closeMainWindowPromise;
+  await popToRoot({ clearSearchBar: true });
+}
+
+async function join(room: UserSessionRoomReference) {
+  const closeMainWindowPromise = closeMainWindow({ popToRootType: PopToRootType.Suspended });
+  await joinRoom(room.id);
   await closeMainWindowPromise;
   await popToRoot({ clearSearchBar: true });
 }
