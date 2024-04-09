@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues<Preferences.Mozeidon>();
+export const COMMAND_NAME = "Mozeidon";
 export const MOZEIDON = preferences.mozeidon;
 export const SEARCH_ENGINE = preferences.searchEngine;
 export const FIREFOX_OPEN_COMMAND = preferences.firefox;

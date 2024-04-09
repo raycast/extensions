@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { ReactElement, useState } from "react";
 import { TabList, TabTypeDropdown } from "./components";
-import { TAB_TYPE } from "./constants";
+import { COMMAND_NAME, TAB_TYPE } from "./constants";
 import { useMozeidonTabs } from "./hooks/useMozeidon";
 
 export default function Command(): ReactElement {
@@ -23,7 +23,7 @@ export default function Command(): ReactElement {
       throttle={true}
       onSearchTextChange={setSearchText}
       filtering={{ keepSectionOrder: true }}
-      navigationTitle={`${tabs.length} ${type}`}
+      navigationTitle={COMMAND_NAME}
       searchBarAccessory={TabTypeDropdown({
         tabTypes: [
           /*
@@ -40,7 +40,7 @@ export default function Command(): ReactElement {
         },
       })}
     >
-      <List.Section title={type}>
+      <List.Section title={`${tabs.length} ${type}`}>
         {tabs.map((tab) => (
           <TabList.TabItem
             isLoading={isLoading}
