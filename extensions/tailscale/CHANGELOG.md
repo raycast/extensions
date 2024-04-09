@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Fixes] - 2024-04-09
+
+- Increase default max buffers for `execSync` ([#10698](https://github.com/raycast/extensions/issues/10698))
+
 ## [Fixes] - 2024-04-08
 
 - Fix buffer issue on large tailnets ([#10698](https://github.com/raycast/extensions/issues/10698))
