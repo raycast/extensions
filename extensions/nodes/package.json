@@ -15,8 +15,7 @@
       "name": "menuBarStats",
       "title": "Solana Validator",
       "description": "Displays Validator Stats",
-      "mode": "menu-bar",
-      "interval": "1m"
+      "mode": "menu-bar"
     },
     {
       "name": "changeValidator",
