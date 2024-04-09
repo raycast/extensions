@@ -141,7 +141,7 @@ const tailscalePath: string =
 const execMaxBuffersBytes: number =
   prefs.tailscaleExecMaxBuffersMB && (prefs.tailscaleExecMaxBuffersMB as number)
     ? prefs.tailscaleExecMaxBuffersMB * 1024 * 1024
-    : 1 * 1024 * 1024; // 10 megabytes
+    : 10 * 1024 * 1024; // 10 megabytes
 
 /**
  * tailscale runs a command against the Tailscale CLI.
