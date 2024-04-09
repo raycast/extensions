@@ -107,14 +107,6 @@ ${joke.delivery}`;
                     <List.Item.Detail.Metadata.TagList.Item text={joke.category} />
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Label title="Type" text={joke.type} />
-                  {joke.type === "single" ? (
-                    <List.Item.Detail.Metadata.Label title="Type" text={joke.joke} />
-                  ) : (
-                    <>
-                      <List.Item.Detail.Metadata.Label title="Setup" text={joke.setup} />
-                      <List.Item.Detail.Metadata.Label title="Delivery" text={joke.delivery} />
-                    </>
-                  )}
                   <List.Item.Detail.Metadata.Label title="ID" text={joke.id.toString()} />
                   <List.Item.Detail.Metadata.Label title="Safe" icon={joke.safe ? Icon.Check : Icon.Multiply} />
                   <List.Item.Detail.Metadata.TagList title="Language">
@@ -153,19 +145,10 @@ ${joke.delivery}`;
       metadata={
         data && (
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Error" icon={Icon.Multiply} />
             <Detail.Metadata.TagList title="Category">
               <Detail.Metadata.TagList.Item text={data.category} />
             </Detail.Metadata.TagList>
             <Detail.Metadata.Label title="Type" text={data.type} />
-            {data.type === "single" ? (
-              <Detail.Metadata.Label title="Type" text={data.joke} />
-            ) : (
-              <>
-                <Detail.Metadata.Label title="Setup" text={data.setup} />
-                <Detail.Metadata.Label title="Delivery" text={data.delivery} />
-              </>
-            )}
             <Detail.Metadata.Label title="ID" text={data.id.toString()} />
             <Detail.Metadata.Label title="Safe" icon={data.safe ? Icon.Check : Icon.Multiply} />
             <Detail.Metadata.TagList title="Language">
