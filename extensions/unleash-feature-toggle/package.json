@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "projects",
-      "title": "Projects",
+      "title": "Search Projects",
       "description": "List all projects in Unleash",
       "mode": "view",
       "subtitle": "Unleash"
