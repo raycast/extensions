@@ -100,8 +100,12 @@ export default function Command() {
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
               title={`Change Validator`}
-              onAction={() => {
-                launchCommand({ name: "changeValidator", type: LaunchType.UserInitiated });
+              onAction={async () => {
+                try {
+                  launchCommand({ name: "changeValidator", type: LaunchType.UserInitiated });
+                } catch {
+                  () => {};
+                }
               }}
             />
           </MenuBarExtra.Section>
