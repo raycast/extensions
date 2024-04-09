@@ -3,7 +3,10 @@
   "name": "jokes",
   "title": "Jokes",
   "description": "Get upto 10 jokes at a time from a variety of categories",
-  "keywords": ["joke", "jokes"],
+  "keywords": [
+    "joke",
+    "jokes"
+  ],
   "icon": "jokes.png",
   "author": "xmok",
   "categories": [
@@ -183,7 +186,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
+    "@raycast/api": "^1.70.3",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
