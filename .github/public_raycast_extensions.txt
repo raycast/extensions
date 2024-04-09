@@ -36,3 +36,4 @@ whitebit
 markprompt
 multi
 apple-notes
+humaans

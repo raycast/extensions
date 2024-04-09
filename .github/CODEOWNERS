@@ -615,7 +615,7 @@
 /extensions/karabiner-profile-switcher               @lucaschultz @erics118
 /extensions/keepassxc                                @zkytech @Sulfyderz
 /extensions/key-value                                @NirLevy98 @pernielsentikaer @gkpln3
-/extensions/keyboard-brightness                      @neo773
+/extensions/keyboard-brightness                      @neo773 @belyakov-am
 /extensions/keyboard-layout-switcher                 @lucaschultz
 /extensions/keyboard-maestro                         @eluce2 @suaw3k
 /extensions/keyboard-shortcut-sequences              @SKaplanOfficial
@@ -769,7 +769,7 @@
 /extensions/mozilla-firefox                          @crisboarna @grandkrav
 /extensions/mui-documentation                        @kgrhartlage
 /extensions/mullvad                                  @0x46616c6b @SebKranz
-/extensions/multi                                    @fbarbat @pernielsentikaer
+/extensions/multi                                    @fbarbat @fbarbat @pernielsentikaer
 /extensions/multilinks                               @abhisheksatre
 /extensions/multipass                                @davibe @pernielsentikaer
 /extensions/music                                    @Rawnly @peterdev22 @danpalmer @octoxan @Shpigford @urwrstkn8mare

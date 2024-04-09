@@ -9,9 +9,14 @@ export const enum PveVmStatus {
   paused = "paused",
 }
 
+export const enum PveVmTypes {
+  qemu = "qemu",
+  lxc = "lxc",
+}
+
 export interface PveVm {
   id: string;
-  type: string;
+  type: PveVmTypes;
   name: string;
 
   cpu: number;
