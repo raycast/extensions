@@ -4,5 +4,7 @@ export function prepareSendPayload(template: SendCreatePayload, values: SendCrea
   return {
     ...template,
     ...values,
+    file: values.file ? { ...template.file, ...values.file } : template.file,
+    text: values.text ? { ...template.text, ...values.text } : template.text,
   };
 }

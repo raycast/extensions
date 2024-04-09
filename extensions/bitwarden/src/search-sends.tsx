@@ -5,13 +5,16 @@ import { Bitwarden } from "~/api/bitwarden";
 import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { CACHE_KEYS } from "~/constants/general";
+import { MODIFIER_TO_LABEL } from "~/constants/labels";
 import { SendTypeOptions } from "~/constants/send";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import CreateSendCommand from "~/create-send";
 import { Send, SendType } from "~/types/send";
+import { getFormattedDate } from "~/utils/dates";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
+import { useInterval } from "~/utils/hooks/useInterval";
 
 const searchBarPlaceholder = "Search sends";
 const LoadingFallback = () => <List searchBarPlaceholder={searchBarPlaceholder} isLoading />;
@@ -26,29 +29,6 @@ const SearchSendsCommand = () => (
   </RootErrorBoundary>
 );
 
-const formatDateFull = (date: Date) => {
-  return date.toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-  });
-};
-
-const formatAccessoryDate = (date: Date) => {
-  const now = new Date();
-
-  return date.toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-    hour: "numeric",
-    minute: "numeric",
-  });
-};
-
 const getItemIcon = (send: Send): NonNullable<List.Item.Props["icon"]> => {
   if (send.type === SendType.File) return { source: Icon.Document, tintColor: Color.Blue };
   return { source: Icon.Text, tintColor: Color.SecondaryText };
@@ -62,8 +42,8 @@ const getDateAccessoryDetails = (dateString: string) => {
     date,
     isPastDate,
     color: isPastDate ? Color.Red : undefined,
-    textDate: formatAccessoryDate(date),
-    tooltipDate: formatDateFull(date),
+    textDate: getFormattedDate(date, { abbreviate: true, second: undefined }),
+    tooltipDate: getFormattedDate(date),
   };
 };
 
@@ -151,7 +131,7 @@ const useOperationQueue = () => {
   return queueOperation;
 };
 
-const sortSendsByName = (send1: Send, send2: Send) => send1.name.localeCompare(send2.name);
+const sortSendsByName = (sendA: Send, sendB: Send) => sendA.name.localeCompare(sendB.name);
 
 const useListSends = (bitwarden: Bitwarden) => {
   const isFirstLoadRef = useRef(true);
@@ -159,7 +139,7 @@ const useListSends = (bitwarden: Bitwarden) => {
 
   const listSends = async () => {
     const toast = isFirstLoadRef.current
-      ? await showToast({ title: "Loading Sends....", style: Toast.Style.Animated })
+      ? await showToast({ title: "Loading Sends...", style: Toast.Style.Animated })
       : undefined;
     try {
       const listSends = await bitwarden.listSends();
@@ -179,56 +159,71 @@ const useListSends = (bitwarden: Bitwarden) => {
     return revalidate();
   };
 
-  console.log(type ? SendType[type] : type);
-
   return {
     isLoading,
     refresh,
     error,
+    called: !!data,
     filterByType: setType,
     sends: type != null ? sends.filter((send) => send.type === type) : sends,
     isFirstLoading: isLoading && isFirstLoadRef.current,
   };
 };
 
-const syncSendsTitle = "Sync Sends";
-const syncSendsShortcut: Keyboard.Shortcut = { key: "r", modifiers: ["opt"] };
-const syncSendsShortcutLabel = (() => {
-  const modifierToLabelMap: Record<Keyboard.KeyModifier, string> = { cmd: "⌘", shift: "⇧", opt: "⌥", ctrl: "⌃" };
-  return (
-    syncSendsShortcut.modifiers.map((mod) => modifierToLabelMap[mod] ?? "").join("") +
-    syncSendsShortcut.key.toUpperCase()
-  );
-})();
+const syncSendsAction = {
+  title: "Sync Sends",
+  get shortcut(): Keyboard.Shortcut {
+    return { key: "r", modifiers: ["opt"] };
+  },
+  get modifierToLabelMap(): Record<Keyboard.KeyModifier, string> {
+    return { cmd: "⌘", shift: "⇧", opt: "⌥", ctrl: "⌃" };
+  },
+  get shortcutLabel(): string {
+    return (
+      this.shortcut.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") + this.shortcut.key.toUpperCase()
+    );
+  },
+};
 
 function SearchSendsCommandContent() {
   const { pop } = useNavigation();
   const bitwarden = useBitwarden();
   const queueOperation = useOperationQueue();
-  const { sends, isFirstLoading, refresh: refreshSends, filterByType } = useListSends(bitwarden);
+  const { sends, isFirstLoading, called, refresh: refreshSends, filterByType } = useListSends(bitwarden);
 
   const pasteActionTitle = usePasteActionTitle();
   const selectedItemIdRef = useRef<string>();
 
-  const onSync = () => {
+  useInterval(() => onSync(true), { skip: !called });
+
+  function onSync(isPeriodic: boolean) {
     return queueOperation("sync", async () => {
-      const toast = await showToast({ title: "Syncing Sends....", style: Toast.Style.Animated });
+      const toast = await showToast({
+        title: "Syncing Sends...",
+        message: isPeriodic ? "Background Task" : undefined,
+        style: Toast.Style.Animated,
+      });
       try {
         await bitwarden.sync();
         await refreshSends();
-        toast.style = Toast.Style.Success;
-        toast.title = "Sends synced";
+
+        if (isPeriodic) {
+          await toast?.hide();
+        } else {
+          toast.style = Toast.Style.Success;
+          toast.title = "Sends synced";
+        }
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to sync Sends";
-        captureException("Failed to sync Sends", error);
+        captureException(["Failed to sync Sends", isPeriodic && "periodically"], error);
       }
     });
-  };
+  }
 
   const onDelete = (id: string) => {
     return queueOperation(id, async () => {
-      const toast = await showToast({ title: "Deleting Send....", style: Toast.Style.Animated });
+      const toast = await showToast({ title: "Deleting Send...", style: Toast.Style.Animated });
       try {
         await bitwarden.deleteSend(id);
         await refreshSends();
@@ -244,15 +239,15 @@ function SearchSendsCommandContent() {
 
   const onRemovePassword = (id: string) => {
     return queueOperation(id, async () => {
-      const toast = await showToast({ title: "Removing Send Password....", style: Toast.Style.Animated });
+      const toast = await showToast({ title: "Removing Send password...", style: Toast.Style.Animated });
       try {
         await bitwarden.removeSendPassword(id);
         await refreshSends();
         toast.style = Toast.Style.Success;
-        toast.title = "Send Password removed";
+        toast.title = "Send password removed";
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to remove Send Password";
+        toast.title = "Failed to remove Send password";
         captureException("Failed to remove Send Password", error);
       }
     });
@@ -325,7 +320,7 @@ function SearchSendsCommandContent() {
 
   if (isFirstLoading) {
     return (
-      <List searchBarPlaceholder="Search sends" searchBarAccessory={searchBarAccessory}>
+      <List searchBarPlaceholder={searchBarPlaceholder} searchBarAccessory={searchBarAccessory}>
         <ListLoadingView title="Loading Sends..." description="Please wait." />
       </List>
     );
@@ -334,23 +329,28 @@ function SearchSendsCommandContent() {
   const sendManagementActionSection = (
     <ActionPanel.Section title="Send Management">
       <Action.Push
-        target={<CreateSendCommand onSuccess={onCreateSuccess} />}
         title="Create New Send"
+        target={<CreateSendCommand onSuccess={onCreateSuccess} />}
         icon={Icon.NewDocument}
         shortcut={{ key: "n", modifiers: ["opt"] }}
       />
-      <Action onAction={onSync} title={syncSendsTitle} icon={Icon.ArrowClockwise} shortcut={syncSendsShortcut} />
+      <Action
+        title={syncSendsAction.title}
+        onAction={() => onSync(false)}
+        icon={Icon.ArrowClockwise}
+        shortcut={syncSendsAction.shortcut}
+      />
     </ActionPanel.Section>
   );
 
   if (sends.length === 0) {
     return (
-      <List searchBarPlaceholder="Search sends" searchBarAccessory={searchBarAccessory}>
+      <List searchBarPlaceholder={searchBarPlaceholder} searchBarAccessory={searchBarAccessory}>
         <List.EmptyView
           title="There are no items to list."
           icon="sends-empty-list.svg"
           actions={<ActionPanel>{sendManagementActionSection}</ActionPanel>}
-          description={`Try syncing your sends with the ${syncSendsTitle} (${syncSendsShortcutLabel}) action.`}
+          description={`Try syncing your sends with the ${syncSendsAction.title} (${syncSendsAction.shortcutLabel}) action.`}
         />
       </List>
     );
@@ -358,7 +358,7 @@ function SearchSendsCommandContent() {
 
   return (
     <List
-      searchBarPlaceholder="Search sends"
+      searchBarPlaceholder={searchBarPlaceholder}
       selectedItemId={selectedItemIdRef.current}
       searchBarAccessory={searchBarAccessory}
     >
@@ -373,26 +373,26 @@ function SearchSendsCommandContent() {
             <ActionPanel>
               <Action.CopyToClipboard title="Copy URL" content={send.accessUrl} />
               <Action.Paste title={pasteActionTitle} content={send.accessUrl} />
-              <Action.Push
-                target={<CreateSendCommand send={send} onSuccess={onEditSuccess} />}
-                title="Edit Send"
-                icon={Icon.Pencil}
-                shortcut={{ key: "e", modifiers: ["opt"] }}
-              />
-              <Action
-                onAction={() => onDelete(send.id)}
-                title="Delete Send"
-                icon={Icon.Trash}
-                shortcut={{ key: "d", modifiers: ["opt"] }}
-              />
               {send.passwordSet && (
                 <Action
-                  onAction={() => onRemovePassword(send.id)}
                   title="Remove Password"
+                  onAction={() => onRemovePassword(send.id)}
                   icon={Icon.LockUnlocked}
                   shortcut={{ key: "p", modifiers: ["opt"] }}
                 />
               )}
+              <Action.Push
+                title="Edit Send"
+                target={<CreateSendCommand send={send} onSuccess={onEditSuccess} />}
+                icon={Icon.Pencil}
+                shortcut={{ key: "e", modifiers: ["opt"] }}
+              />
+              <Action
+                title="Delete Send"
+                onAction={() => onDelete(send.id)}
+                icon={Icon.Trash}
+                shortcut={{ key: "d", modifiers: ["opt"] }}
+              />
               {sendManagementActionSection}
             </ActionPanel>
           }

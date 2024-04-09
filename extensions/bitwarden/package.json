@@ -199,7 +199,7 @@
       "title": "Create Send",
       "subtitle": "Bitwarden",
       "description": "Securely share information directly with anyone.",
-      "icon": "sends-create.png",
+      "icon": "create-send.png",
       "mode": "view"
     },
     {
@@ -207,7 +207,7 @@
       "title": "Search Sends",
       "subtitle": "Bitwarden",
       "description": "List and search all the Sends owned by you.",
-      "icon": "sends-search.png",
+      "icon": "search-sends.png",
       "mode": "view"
     },
     {
@@ -222,12 +222,12 @@
           "placeholder": "url"
         },
         {
-          "name": "password",
           "type": "password",
+          "name": "password",
           "placeholder": "password"
         }
       ],
-      "icon": "sends-receive.png",
+      "icon": "receive-send.png",
       "mode": "view"
     }
   ],

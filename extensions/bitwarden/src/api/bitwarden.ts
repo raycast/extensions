@@ -25,7 +25,7 @@ import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAva
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
-import { ReceivedSend, Send, SendCreatePayload } from "~/types/send";
+import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
 
 type Env = {
@@ -439,7 +439,9 @@ export class Bitwarden {
       if (error) throw error;
 
       folder.name = name;
-      const encodedFolder = await this.encode(JSON.stringify(folder));
+      const { result: encodedFolder, error: encodeError } = await this.encode(JSON.stringify(folder));
+      if (encodeError) throw encodeError;
+
       await this.exec(["create", "folder", encodedFolder], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
@@ -504,9 +506,16 @@ export class Bitwarden {
     }
   }
 
-  async encode(input: any): Promise<string> {
-    const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
-    return stdout;
+  async encode(input: string): Promise<MaybeError<string>> {
+    try {
+      const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
+      return { result: stdout };
+    } catch (execError) {
+      captureException("Failed to encode", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {
@@ -529,11 +538,15 @@ export class Bitwarden {
 
   async createSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
     try {
-      const { error, result: template } = await this.getTemplate("send.text");
-      if (error) throw error;
+      const { error: templateError, result: template } = await this.getTemplate(
+        values.type === SendType.Text ? "send.text" : "send.file"
+      );
+      if (templateError) throw templateError;
 
       const payload = prepareSendPayload(template, values);
-      const encodedPayload = await this.encode(JSON.stringify(payload));
+      const { result: encodedPayload, error: encodeError } = await this.encode(JSON.stringify(payload));
+      if (encodeError) throw encodeError;
+
       const { stdout } = await this.exec(["send", "create", encodedPayload], { resetVaultTimeout: true });
 
       return { result: JSON.parse<Send>(stdout) };
@@ -547,7 +560,9 @@ export class Bitwarden {
 
   async editSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
     try {
-      const encodedPayload = await this.encode(JSON.stringify(values));
+      const { result: encodedPayload, error: encodeError } = await this.encode(JSON.stringify(values));
+      if (encodeError) throw encodeError;
+
       const { stdout } = await this.exec(["send", "edit", encodedPayload], { resetVaultTimeout: true });
       return { result: JSON.parse<Send>(stdout) };
     } catch (execError) {
@@ -594,7 +609,6 @@ export class Bitwarden {
       return { result: JSON.parse<ReceivedSend>(stdout) };
     } catch (execError) {
       const errorMessage = (execError as ExecaError).stderr;
-      console.log({ errorMessage });
       if (/Invalid password/gi.test(errorMessage)) return { error: new SendInvalidPasswordError() };
       if (/Send password/gi.test(errorMessage)) return { error: new SendNeedsPasswordError() };
 

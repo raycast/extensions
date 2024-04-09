@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [New Commands] - 2024-04-09
+## [New Commands] - 2024-04-10
 
 - Added 3 Send commands (Search, Create and Receive) with delete, edit and remove password actions
 

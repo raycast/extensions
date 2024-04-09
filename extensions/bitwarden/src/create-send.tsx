@@ -1,11 +1,10 @@
-import { Form, useNavigation } from "@raycast/api";
+import { Form, LaunchType, PopToRootType, launchCommand, showHUD } from "@raycast/api";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
 import { SendDateOption, SendCreatePayload, SendType, Send } from "~/types/send";
 import { SendDateOptionsToHourOffsetMap } from "~/constants/send";
 import { CreateEditSendForm, SendFormValues, sendFormInitialValues } from "~/components/send/CreateEditSendForm";
-import SearchSendsCommand from "~/search-sends";
 
 const LoadingFallback = () => <Form isLoading />;
 
@@ -38,7 +37,7 @@ function getStringFromDateOption(option: SendDateOption | "", customDate: Date |
   return date.toISOString();
 }
 
-const convertFormValuesToCreatePayload = (type: SendType, values: SendFormValues): SendCreatePayload => ({
+const getCreatePayload = (type: SendType, values: SendFormValues): SendCreatePayload => ({
   type,
   name: values.name,
   text: values.text ? { text: values.text, hidden: values.hidden } : null,
@@ -52,16 +51,16 @@ const convertFormValuesToCreatePayload = (type: SendType, values: SendFormValues
   disabled: values.disabled,
 });
 
-const convertFormValuesToEditPayload = (send: Send, type: SendType, values: SendFormValues): Send => ({
+const getEditPayload = (send: Send, type: SendType, values: SendFormValues): Send => ({
   ...send,
-  ...convertFormValuesToCreatePayload(type, values),
+  ...getCreatePayload(type, values),
 });
 
 const parseDateOptionString = (
   dateString: string | null
 ): { option: SendDateOption | undefined; customDate: Date | null } => {
   if (!dateString) return { option: undefined, customDate: null };
-  // TODO: Figure out a reliable way of mapping dates to SendDateOption
+  // TODO: Figure out a reliable way of mapping dates to SendDateOption, right now editing selects custom date options
   return { option: SendDateOption.Custom, customDate: new Date(dateString) };
 };
 
@@ -81,35 +80,34 @@ const getInitialValues = (send?: Send): SendFormValues => {
     expirationDate: expirationDate.option || sendFormInitialValues.expirationDate,
     customExpirationDate: expirationDate.customDate || sendFormInitialValues.customExpirationDate,
     maxAccessCount: send.maxAccessCount ? String(send.maxAccessCount) : sendFormInitialValues.maxAccessCount,
+    accessPassword: "",
     notes: send.notes || sendFormInitialValues.notes,
     hideEmail: send.hideEmail || sendFormInitialValues.hideEmail,
     disabled: send.disabled || sendFormInitialValues.disabled,
   };
 };
 
-function CreateSendCommandContent({ send, onSuccess: parentOnSuccess }: CreateEditSendCommandProps) {
-  const { push } = useNavigation();
+function CreateSendCommandContent({ send, onSuccess: onParentSuccess }: CreateEditSendCommandProps) {
   const bitwarden = useBitwarden();
 
   async function onSave(type: SendType, values: SendFormValues) {
     if (!send) {
-      const payload = convertFormValuesToCreatePayload(type, values);
-      const { error, result } = await bitwarden.createSend(payload);
-      if (error) throw error;
-      return result;
-    } else {
-      const payload = convertFormValuesToEditPayload(send, type, values);
-      const { error, result } = await bitwarden.editSend(payload);
+      const { error, result } = await bitwarden.createSend(getCreatePayload(type, values));
       if (error) throw error;
       return result;
     }
+    const { error, result } = await bitwarden.editSend(getEditPayload(send, type, values));
+    if (error) throw error;
+    return result;
   }
 
-  const onSuccess = (send: Send) => {
-    if (parentOnSuccess) {
-      parentOnSuccess(send);
+  const onSuccess = async (send: Send, wasUrlCopiedToClipboard: boolean) => {
+    if (onParentSuccess) {
+      onParentSuccess(send);
+    } else if (wasUrlCopiedToClipboard) {
+      await showHUD("Send URL copied to clipboard", { popToRootType: PopToRootType.Immediate });
     } else {
-      push(<SearchSendsCommand />);
+      await launchCommand({ type: LaunchType.UserInitiated, name: "search-sends" });
     }
   };
 

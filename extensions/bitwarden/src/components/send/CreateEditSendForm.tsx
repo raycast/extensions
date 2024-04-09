@@ -52,7 +52,7 @@ export const sendFormInitialValues: SendFormValues = {
 
 type CreateEditSendFormProps = {
   initialValues?: SendFormValues;
-  onSuccess?: (send: Send) => void;
+  onSuccess?: (send: Send, wasUrlCopiedToClipboard: boolean) => void;
 } & (
   | {
       mode?: "create";
@@ -73,7 +73,7 @@ export const CreateEditSendForm = ({
   const [internalType, setInternalType] = useCachedState("sendType", SendType.Text);
   const [shouldCopyOnSave, setShouldCopyOnSave] = useCachedState("sendShouldCopyOnSave", false);
 
-  const type = (mode === "edit" && initialValues?.file ? SendType.File : SendType.Text) || internalType;
+  const type = mode === "edit" ? (initialValues?.file ? SendType.File : SendType.Text) : internalType;
 
   const { itemProps, handleSubmit } = useForm({
     initialValues,
@@ -109,10 +109,10 @@ export const CreateEditSendForm = ({
         };
       }
 
-      toast.style = Toast.Style.Success;
       toast.title = mode === "edit" ? "Send updated" : "Send created";
+      toast.style = Toast.Style.Success;
 
-      onSuccess?.(result);
+      onSuccess?.(result, shouldCopyOnSave);
     } catch (error) {
       if (error instanceof PremiumFeatureError) {
         toast.message = "This feature is only available to Premium users.";
