@@ -31,7 +31,7 @@
       "description": "Neynar account API key",
       "type": "password",
       "required": true,
-      "title": "API Key",
+      "title": "Neynar API Key",
       "placeholder": "Enter your API key",
       "link": "https://dev.neynar.com"
     },

@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action } from '@raycast/api';
+import { ActionPanel, List, Action, Clipboard } from '@raycast/api';
 import { useGetProfiles } from './hooks';
 import { useState } from 'react';
 import {
@@ -11,6 +11,7 @@ import {
   getSolanaAddressUrl,
 } from './utils/helpers';
 import { CastAuthor } from './utils/types';
+import ProfileCastList from './components/ProfileCastList';
 
 export default function SearchUsers() {
   const [query, setQuery] = useState('');
@@ -20,17 +21,13 @@ export default function SearchUsers() {
     <List
       isLoading={isLoading}
       navigationTitle="Search Profiles"
-      searchBarPlaceholder="Search username, display or fid"
+      searchBarPlaceholder="Type username or fid"
       onSearchTextChange={setQuery}
       pagination={pagination}
       throttle
       isShowingDetail={!!query}
     >
-      {/* <List.EmptyView
-        title="Type username to search"
-        description="Search for profiles by username or FID"
-        icon="no-view.png"
-      /> */}
+      <List.EmptyView title="No Profiles" description="Search by username or fid" icon="no-view.png" />
       {(data as CastAuthor[])?.map((user) => <UserDetails key={user.username} user={user} />)}
     </List>
   );
@@ -47,7 +44,8 @@ function UserDetails({ user }: { user: CastAuthor }) {
       detail={<List.Item.Detail markdown={markdown} metadata={<UserMetaData user={user} />} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="View Profile" url={getProfileUrl(user)} />
+          <Action.Push title="View Casts" target={<ProfileCastList user={user} />} />
+          <Action.OpenInBrowser title="View Profile in Browser" url={getProfileUrl(user)} />
         </ActionPanel>
       }
     />
@@ -57,19 +55,23 @@ function UserDetails({ user }: { user: CastAuthor }) {
 function UserMetaData({ user }: { user: CastAuthor }) {
   const ethAddress = user.verified_addresses.eth_addresses[0];
   const solAddress = user.verified_addresses.sol_addresses[0];
-  const isActive = user.active_status === 'active';
   const isPowerUser = user.power_badge;
   return (
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label title="Name" text={user.display_name} icon={getUserIcon(user)} />
       <List.Item.Detail.Metadata.Label title="Username" text={user.username} />
-      {(isPowerUser || isActive) && (
+      {isPowerUser && (
         <List.Item.Detail.Metadata.TagList title="Status">
-          {isPowerUser && <List.Item.Detail.Metadata.TagList.Item text="Power User" color={'#8A63D2'} />}
-          {isActive && <List.Item.Detail.Metadata.TagList.Item text="Active" color={'#34AC80'} />}
+          <List.Item.Detail.Metadata.TagList.Item text="Power User" color={'#8A63D2'} />
         </List.Item.Detail.Metadata.TagList>
       )}
-      <List.Item.Detail.Metadata.Label title="FID" text={user.fid.toString()} />
+      <List.Item.Detail.Metadata.TagList title="FID">
+        <List.Item.Detail.Metadata.TagList.Item
+          text={user.fid.toString()}
+          color={'#FFF'}
+          onAction={() => Clipboard.copy(user.fid)}
+        />
+      </List.Item.Detail.Metadata.TagList>
       <List.Item.Detail.Metadata.Label title="Followers" text={user.follower_count.toString()} />
       <List.Item.Detail.Metadata.Label title="Following" text={user.following_count.toString()} />
       <List.Item.Detail.Metadata.Separator />
@@ -92,7 +94,7 @@ function UserMetaData({ user }: { user: CastAuthor }) {
           target={getSolanaAddressUrl(solAddress)}
         />
       )}
-      {/* todo: registartion date */}
+      {/* todo: registration date */}
     </List.Item.Detail.Metadata>
   );
 }

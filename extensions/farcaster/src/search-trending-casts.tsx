@@ -3,10 +3,16 @@ import { useTrendingCasts } from './hooks';
 import { useState } from 'react';
 import CastListItem from './components/CastListItem';
 import { Cast } from './utils/types';
+import { Dropdown } from './components/Dropdown';
 
-const TIME_WINDOW = ['1h', '6h', '12h', '24h'];
+const TIME_WINDOW = [
+  { label: '1h', value: '1h' },
+  { label: '6h', value: '6h' },
+  { label: '12h', value: '12h' },
+  { label: '24h', value: '24h' },
+];
 export default function SearchTrendingCasts() {
-  const [timeWindow, setTimeWindow] = useState(TIME_WINDOW[3]);
+  const [timeWindow, setTimeWindow] = useState(TIME_WINDOW[3]?.value);
   const { data, isLoading, pagination } = useTrendingCasts(timeWindow);
 
   function onTimeWindowChange(timeValue: string) {
@@ -19,27 +25,19 @@ export default function SearchTrendingCasts() {
       navigationTitle="Trending Casts"
       searchBarPlaceholder="Filter cast keywords"
       pagination={pagination}
-      searchBarAccessory={<RangeDropdown value={timeWindow} onTimeWindowChange={onTimeWindowChange} />}
+      searchBarAccessory={
+        <Dropdown
+          options={TIME_WINDOW}
+          onDropdownChange={onTimeWindowChange}
+          value={timeWindow}
+          tooltip="Select Time Window"
+        />
+      }
       throttle
     >
-      <List.Section title="Recent Casts" subtitle={data ? data?.length.toString() : '0'}>
+      <List.Section title="Recent Casts" subtitle={data ? data?.length.toString() : undefined}>
         {(data as Cast[])?.map((cast) => <CastListItem key={cast.hash} cast={cast} />)}
       </List.Section>
     </List>
-  );
-}
-
-interface RangeDropdownProps {
-  onTimeWindowChange: (value: string) => void;
-  value: string;
-}
-
-function RangeDropdown({ onTimeWindowChange, value }: RangeDropdownProps) {
-  return (
-    <List.Dropdown tooltip="Select Time Window" onChange={onTimeWindowChange} value={value}>
-      {TIME_WINDOW.map((timeRange) => (
-        <List.Dropdown.Item key={timeRange} title={timeRange} value={timeRange} />
-      ))}
-    </List.Dropdown>
   );
 }

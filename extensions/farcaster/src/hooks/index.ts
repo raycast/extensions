@@ -26,23 +26,18 @@ export function useTrendingCasts(timeWindow: string) {
   });
 }
 
-// function fetchUser(q?: string) {
-//   let url: string;
-//   if (q) {
-//     if (/^[0-9]/.test(q)) {
-//       url = ApiUrls.getUserFids(q);
-//     } else {
-//       url = ApiUrls.getProfilesByUsername(q, VIEWER_FID);
-//     }
-//   } else {
-//     url = ApiUrls.getPowerUsers();
-//   }
-//   return url;
-// }
+function getProfileByFIDOrUsername(q: string, cursor?: string) {
+  let url: string;
+  if (/^[0-9]/.test(q)) {
+    url = ApiUrls.getUserFid(q, cursor);
+  } else {
+    url = ApiUrls.getProfilesByUsername(q, cursor);
+  }
+  return url;
+}
 
 export function useGetProfiles(query: string) {
-  // pagination isnt' working here
-  return useFetch<FeedUsersResponse>(({ cursor }) => ApiUrls.getProfilesByUsername(query, cursor), {
+  return useFetch<FeedUsersResponse>(({ cursor }) => getProfileByFIDOrUsername(query, cursor), {
     method: 'GET',
     headers: headers,
     execute: !!query,
@@ -52,11 +47,32 @@ export function useGetProfiles(query: string) {
       showToast(Toast.Style.Failure, 'Could not fetch profiles');
     },
     mapResult(result: FeedUsersResponse) {
-      console.log('🚀 ~ mapResult ~ result:', result.result?.next.cursor);
+      const rootResult = result?.result ?? result;
       return {
-        data: result.result?.users as CastAuthor[],
-        hasMore: !!result.result.next.cursor,
-        cursor: result.result?.next.cursor,
+        data: rootResult?.users as CastAuthor[],
+        hasMore: !!rootResult?.next?.cursor,
+        cursor: rootResult?.next?.cursor,
+      };
+    },
+  });
+}
+
+/** includes casts and recasts by the author */
+export function useGetProfileCasts(fids: number) {
+  return useFetch<FeedCastsResponse>(({ cursor }) => ApiUrls.getProfileCasts(fids, cursor), {
+    method: 'GET',
+    headers: headers,
+    execute: !!fids,
+    keepPreviousData: true,
+    onError: (error: Error) => {
+      console.error(error);
+      showToast(Toast.Style.Failure, `Could not fetch profile casts`);
+    },
+    mapResult(result: FeedCastsResponse) {
+      return {
+        data: result?.casts as Cast[],
+        hasMore: !!result.next.cursor,
+        cursor: result?.next.cursor,
       };
     },
   });
