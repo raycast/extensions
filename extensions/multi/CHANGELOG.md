@@ -1,6 +1,6 @@
 # Multi Changelog
 
-## [See session state for teammates] - 2024-04-08
+## [See session state for teammates] - 2024-04-09
 
 Requires Multi > 0.465.1
 
