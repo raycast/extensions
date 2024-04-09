@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-ia-writer",
-  "title": "IA Writer",
+  "title": "iA Writer",
   "description": "Create or search notes with Raycast",
   "icon": "logo.png",
   "author": "xvvhang",
@@ -42,14 +42,14 @@
     {
       "name": "quick-note",
       "title": "Quick Note",
-      "subtitle": "IA Writer",
+      "subtitle": "iA Writer",
       "description": "Create quick notes in library",
       "mode": "view"
     },
     {
       "name": "quick-search",
       "title": "Quick Search",
-      "subtitle": "IA Writer",
+      "subtitle": "iA Writer",
       "description": "Open Quick Search with queries",
       "mode": "no-view",
       "arguments": [
