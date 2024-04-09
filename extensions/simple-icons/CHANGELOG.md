@@ -1,13 +1,13 @@
 # Simple Icons Changelog
 
-## [New Feature & Chore]
+## [New Feature & Chore] - 2024-04-09
 
 - Add support for configuring the default action on detail view
 - Update screenshot of detail view
 - Add screenshots of dark mode
 - Bump all dependencies to latest version
 
-## [Improvements] - 2024-3-24
+## [Improvements] - 2024-03-24
 
 Now we reached 3100+ icons!
 
