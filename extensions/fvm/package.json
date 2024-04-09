@@ -13,18 +13,21 @@
     {
       "name": "list-command",
       "title": "List Cached Versions",
+      "subtitle": "FVM",
       "description": "Displays the local versions of Flutter installed in your machine.",
       "mode": "view"
     },
     {
       "name": "releases-command",
       "title": "List Releases",
+      "subtitle": "FVM",
       "description": "Displays the latest Flutter releases.",
       "mode": "view"
     },
     {
       "name": "open-cache-dir-command",
       "title": "Open Cache Directory",
+      "subtitle": "FVM",
       "description": "Opens the directory where FVM stores the Flutter SDK versions.",
       "mode": "no-view"
     },
