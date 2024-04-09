@@ -4,7 +4,7 @@ import statuscodes from "./statuscodes.json";
 export default function Command() {
   return (
     <List filtering={true} isShowingDetail>
-      {Object.entries(statuscodes).map(([code, item]) => (
+      {Object.entries(statuscodes).map(([, item]) => (
         <List.Item
           title={`${item.code} - ${item.message}`}
           key={item.code}
