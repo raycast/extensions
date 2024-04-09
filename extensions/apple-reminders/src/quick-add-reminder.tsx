@@ -1,10 +1,10 @@
 import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import * as chrono from "chrono-node";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
 import { createReminder, getData } from "swift:../swift/AppleReminders";
 
-import * as chrono from "chrono-node";
-import { toISOStringWithTimezone } from "./helpers";
 import { NewReminder } from "./create-reminder";
+import { toISOStringWithTimezone } from "./helpers";
 import { Data } from "./hooks/useData";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
@@ -27,7 +27,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       const dateMatch = chrono.parse(text)
       if (dateMatch && dateMatch.length > 0) {
           const date = dateMatch[0].start.date()
-          dateValue = toISOStringWithTimezone(dateMatch[0].start.date())
+          dateValue = toISOStringWithTimezone(date)
       }
 
       const tagMatch = text.match(/ #(\w+)/)
@@ -46,7 +46,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       .replace(/\s+/g, ' ')
       .trim()
 
-      let reminder: NewReminder = {
+      const reminder: NewReminder = {
         title: title,
         listId: listId,
         dueDate: dateValue
