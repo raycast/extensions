@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "OpenGLEnum",
+      "title": "Find OpenGL Enum",
       "description": "convert any decimal/hexadecimal code into actual OpenGL enum",
       "mode": "view"
     }
