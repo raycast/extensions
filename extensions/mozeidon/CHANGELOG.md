@@ -1,4 +1,4 @@
-# mozeidon Changelog
+# Mozeidon Changelog
 
 ## [Added Mozeidon] - 2024-03-23
 
