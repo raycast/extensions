@@ -52,7 +52,7 @@ function getIcon(user: User): Image {
   }
 }
 
-function getAccessories(user: User): List.Item.Accessory[]  {
+function getAccessories(user: User): List.Item.Accessory[] {
   return [{ text: user.session?.shortdescription ?? capitalizeFirstLetter(user.availability) }];
 }
 

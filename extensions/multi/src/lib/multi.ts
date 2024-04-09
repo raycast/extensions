@@ -32,24 +32,24 @@ export interface User {
   id: string;
   fullname: string;
   availability: UserAvailability;
-  session?: UserSession
+  session?: UserSession;
 }
 
 export enum UserAvailability {
   Online = "online",
   Focusing = "focusing",
-  Away = "away"
+  Away = "away",
 }
 
 export type UserSession = {
-  shortdescription: string
-  room?: UserSessionRoomReference
-}
+  shortdescription: string;
+  room?: UserSessionRoomReference;
+};
 
 export type UserSessionRoomReference = {
-  id: string
-  name: string
-}
+  id: string;
+  name: string;
+};
 
 /**
  * Search teammates and start a Multi session with them.
