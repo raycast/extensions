@@ -33,7 +33,7 @@ function MyIssuesMenu() {
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${issuesCount}` : undefined}
-      icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
       tooltip="GitHub My Issues"
     >
