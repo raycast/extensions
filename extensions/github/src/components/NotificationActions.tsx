@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, showToast, open, Toast, launchCommand, LaunchType } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { useMemo } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 import { getErrorMessage } from "../helpers/errors";
-import { getNotificationSubtitle, getNotificationTypeTitle, getGitHubURL } from "../helpers/notifications";
+import { getGitHubURL, getNotificationSubtitle, getNotificationTypeTitle } from "../helpers/notifications";
 import { NotificationsResponse } from "../notifications";
 
 export type Notification = NotificationsResponse["data"][0];

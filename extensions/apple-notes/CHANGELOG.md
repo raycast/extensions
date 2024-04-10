@@ -1,5 +1,54 @@
 # Apple Notes Changelog
 
+## [Refactoring] - 2024-04-08
+
+Improve code maintainability by migrating `DispatchGroup` to structured concurrency.
+
+## [Improve AI Note command UX] - 2024-04-04
+
+The new note created by the `AI Note` command is now instantly displayed for immediate editing.
+
+## [Fix invitations] - 2024-04-03
+
+Fix a bug where notes can't be loaded at all if there is no invitations table.
+
+## [Big Update] - 2024-03-28
+
+The Apple Notes extension has been improved in every way to make Raycast the perfect companion for your notes. Here's what's new:
+
+### Menu bar command
+
+There's now a new command allowing you to quickly access your most recent notes from the menu bar. This ensures that you stay on top of your pinned notes or notes you worked on recently.
+
+### More accessories
+
+List items has more accessories allowing to view more details of a note such as:
+
+- If the note is password-protected or not
+- If the note has a checklist in progress or if the checklist is completed
+- If the note is shared with someone else
+
+It's also possible to search for these notes thanks to special keywords such as `locked`, `password`, `checklist`, `completed`, or `shared`.
+
+### AI Note command
+
+Let the AI quickly create notes for you whenever you think of something. Whether you want to get a grocery list for a barbecue, know what you can do in Paris for a week-end, or brainstorm name ideas for a new business, this new command got you covered.
+
+### Preview notes
+
+View your entire note from Raycast. Just press ⌘ + ⏎ from the list item and you'll see the formatted note. Super useful if you quickly want to look at something.
+
+### Pinned notes
+
+There's now proper support for pinned notes, just like on the Apple Notes native app.
+
+### Other improvements
+
+- Copy invitation links for shared notes with ⌘ + ⇧ + S.
+- Copy the note title with ⌘ + ⇧ + .
+- Copy the note content as plain text, HTML, or Markdown with ⌘ + ⇧ + M. This can be useful if you want to export the note to another note app.
+- Improved empty screen view if you don't have any notes.
+
 ## [Better search] - 2024-03-22
 
 - Improve note search to include more details on folders and snippets

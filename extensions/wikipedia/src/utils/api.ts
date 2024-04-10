@@ -21,10 +21,22 @@ export interface WikiNode {
   items?: WikiNode[];
 }
 
-const getApiUrl = (language = "en") => `https://${language}.wikipedia.org/`;
+const getApiUrl = (language = "en") => {
+  return `https://${language.split("-").at(0)}.wikipedia.org/`;
+};
+
+const getApiOptions = (language = "en") => {
+  const variant = language.split("-").at(1);
+  if (variant) {
+    return { headers: { "Accept-Language": language } };
+  }
+  return {};
+};
 
 export async function getRandomPageUrl(language: string) {
-  const response = await got.get(`${getApiUrl(language)}api/rest_v1/page/random/summary`).json<PageSummary>();
+  const response = await got
+    .get(`${getApiUrl(language)}api/rest_v1/page/random/summary`, getApiOptions(language))
+    .json<PageSummary>();
   return {
     url: response.content_urls.desktop.page,
     title: response.title,
@@ -37,7 +49,7 @@ export async function getTodayFeaturedPageUrl(language: string) {
   const month = (today.getMonth() + 1).toString().padStart(2, "0");
   const day = today.getDate().toString().padStart(2, "0");
   const response = await got
-    .get(`${getApiUrl(language)}api/rest_v1/feed/featured/${year}/${month}/${day}`)
+    .get(`${getApiUrl(language)}api/rest_v1/feed/featured/${year}/${month}/${day}`, getApiOptions(language))
     .json<{ tfa: PageSummary }>();
   return {
     url: response.tfa.content_urls.desktop.page,
@@ -51,6 +63,7 @@ export async function findPagesByTitle(search: string, language: string) {
   }
   const response = await got
     .get(`${getApiUrl(language)}w/api.php`, {
+      ...getApiOptions(language),
       searchParams: {
         action: "query",
         list: "prefixsearch",
@@ -64,13 +77,16 @@ export async function findPagesByTitle(search: string, language: string) {
 }
 
 export async function getPageData(title: string, language: string) {
-  return got.get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`).json<PageSummary>();
+  return got
+    .get(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`, getApiOptions(language))
+    .json<PageSummary>();
 }
 
 export async function getPageContent(title: string, language: string): Promise<WikiNode[]> {
   return (
     wiki({
       apiUrl: `${getApiUrl(language)}w/api.php`,
+      headers: getApiOptions(language)?.headers,
     })
       .page(title)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,6 +99,7 @@ export async function getPageMetadata(title: string, language: string): Promise<
   return (
     wiki({
       apiUrl: `${getApiUrl(language)}w/api.php`,
+      headers: getApiOptions(language)?.headers,
     })
       .page(title)
       .then((page) => page.fullInfo())
@@ -96,6 +113,7 @@ export async function getPageMetadata(title: string, language: string): Promise<
 export async function getPageLinks(title: string, language: string) {
   return wiki({
     apiUrl: `${getApiUrl(language)}w/api.php`,
+    headers: getApiOptions(language)?.headers,
   })
     .page(title)
     .then((page) => page.links())
@@ -105,6 +123,7 @@ export async function getPageLinks(title: string, language: string) {
 export async function getAvailableLanguages(title: string, language: string) {
   return wiki({
     apiUrl: `${getApiUrl(language)}w/api.php`,
+    headers: getApiOptions(language)?.headers,
   })
     .page(title)
     .then((page) => page.langlinks())

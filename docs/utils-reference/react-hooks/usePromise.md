@@ -19,8 +19,8 @@ function usePromise<T>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: Result<T>) => void;
-    onWillExecute?: (args: Parameters<T>) -> void;
-  }
+    onWillExecute?: (args: Parameters<T>) => void;
+  },
 ): AsyncState<Result<T>> & {
   revalidate: () => void;
   mutate: MutatePromise<Result<T> | undefined>;
@@ -171,10 +171,10 @@ to
 ```ts
 const { isLoading, data, pagination } = usePromise(
   (searchText: string) =>
-    async ({ page, lastItem }) => {
-      const data = await getUsers(); // or any other asynchronous logic you need to perform
+    async ({ page, lastItem, cursor }) => {
+      const { data, nextCursor } = await getUsers(cursor); // or any other asynchronous logic you need to perform
       const hasMore = page < 50; //
-      return { data, hasMore };
+      return { data, hasMore, cursor: nextCursor };
     },
   [searchText],
 );
@@ -187,11 +187,13 @@ Another thing to notice is that the async function receives a [PaginationOptions
 {
   data: any[];
   hasMore: boolean;
+  cursor?: any;
 }
 ```
 
 Every time the promise resolves, the hook needs to figure out if it should paginate further, or if it should stop, and it uses `hasMore` for this.
 In addition to this, the hook also needs `data`, and needs it to be an array, because internally it appends it to a list, thus making sure the `data` that the hook _returns_ always contains the data for all of the pages that have been loaded so far.
+Additionally, you can also pass a `cursor` property, which will be included along with `page` and `lastItem` in the next pagination call.
 
 ### Full Example
 
@@ -288,10 +290,12 @@ An object passed to a `PaginatedPromise`, it has two properties:
 
 - `page`: 0-indexed, this it's incremented every time the promise resolves, and is reset whenever `revalidate()` is called.
 - `lastItem`: this is a copy of the last item in the `data` array from the last time the promise was executed. Provided for APIs that implement cursor-based pagination.
+- `cursor`: this is the `cursor` property returned after the previous execution of `PaginatedPromise`. Useful when working with APIs that provide the next cursor explicitly.
 
 ```ts
 export type PaginationOptions<T = any> = {
   page: number;
   lastItem?: T;
+  cursor?: any;
 };
 ```
