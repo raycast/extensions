@@ -52,10 +52,8 @@ export default function HistoryList() {
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Section>
+                <ActionPanel.Section title="Manage">
                   <Action title="View Details" icon={Icon.List} onAction={() => navigation.push(<HistoryView id={item.id} />)} />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
                   <Action title="Delete" icon={Icon.Trash} style={Action.Style.Destructive} onAction={() => remove(item.id)} />
                   <Action title="Clear All" icon={Icon.Trash} style={Action.Style.Destructive} onAction={() => removeAll()} />
                 </ActionPanel.Section>

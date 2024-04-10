@@ -1,5 +1,11 @@
 # Changelog
 
+## [New Additions] - April 10, 2024
+
+- Moved create action to the separate command.
+- Added export and import actions.
+- Added "Paste Result" action to the action result view.
+
 ## [Initial Version] - April 08, 2024
 
 Introducing the initial version of the Alice AI. This version includes the following features:

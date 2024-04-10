@@ -8,6 +8,7 @@ interface ActionState {
   addAction: (action: Omit<Action, "id">) => void;
   editAction: (action: Action) => void;
   removeAction: (id: string) => void;
+  replaceActions: (actions: Action[]) => void;
 }
 
 const initialState: Action[] = [
@@ -73,6 +74,11 @@ export const useActionsState = createStore<ActionState>("actions", (set, get) =>
   editAction: (action: Action) => {
     set({
       actions: get().actions.map((item) => (item.id === action.id ? action : item)),
+    });
+  },
+  replaceActions: (actions: Action[]) => {
+    set({
+      actions,
     });
   },
 }));

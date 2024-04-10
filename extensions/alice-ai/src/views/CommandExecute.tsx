@@ -163,6 +163,7 @@ export default function CommandExecute({ id }: Props) {
         <ActionPanel>
           {stream && <Action title="Stop generating..." icon={Icon.Stop} onAction={() => stream.controller.abort()} />}
           <Action.CopyToClipboard title="Copy Result" content={result} />
+          <Action.Paste title="Paste Result" content={result} />
           {!stream && (
             <Action title="Regenerate" onAction={() => generateResponse()} icon={Icon.Redo} shortcut={Keyboard.Shortcut.Common.Refresh} />
           )}

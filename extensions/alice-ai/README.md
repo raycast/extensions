@@ -4,7 +4,14 @@
 
 <h1 align="center">Alice AI - Your ChatGPT Actions Companion</h1>
 
-Before you start using Alice AI, you need to set up your OpenAI API key.
+# 📚 Introduction
+
+Alice AI is a daily productivity tool that uses your selection to execute actions using OpenAI's GPT models. It allows you to easily browse your actions, execute them, and go back to your result history. You can also add your own actions, create quicklinks to them, and back them up.
+
+# 🚀 Getting Started
+
+Before you start using Alice AI, you need to set up your OpenAI API key:
+
 ![Set up your OpenAI API key](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-7.png)
 
 # 🎉 Features
@@ -39,6 +46,12 @@ Alice AI allows you to easily customize your actions. You can add new actions, e
 Alice AI allows you to quickly access your actions from the raycast root. Just create a quicklink to your actions.
 
 ![Quicklink to your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-6.png)
+
+## Export and import your actions 📤 📥
+
+Alice AI allows you to export and import your actions. You can easily share your actions with others or back them up.
+
+![Export and import your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-8.png)
 
 # 🚀 Supported OpenAI models
 

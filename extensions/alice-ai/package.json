@@ -15,14 +15,20 @@
   "commands": [
     {
       "name": "commands",
-      "title": "List Actions",
-      "description": "Show available Alice Actions",
+      "title": "Select Action",
+      "description": "Select available action from the list",
       "mode": "view"
     },
     {
       "name": "history",
       "title": "Show History",
       "description": "Show Results History",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create New Action",
+      "description": "Create New Action",
       "mode": "view"
     }
   ],
@@ -41,6 +47,7 @@
     "@reduxjs/toolkit": "^2.2.3",
     "gpt-tokens": "^1.3.3",
     "openai": "^4.33.0",
+    "zod": "^3.22.4",
     "zustand": "^4.5.2"
   },
   "devDependencies": {

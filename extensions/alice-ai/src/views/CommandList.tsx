@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Alert, Color, Icon, Keyboard, List, confirmAlert, useNavigation } from "@raycast/api";
 import { getModelName } from "../lib/OpenAI";
+import Backup from "../services/Backup";
 import { useActionsState } from "../store/actions";
 import { createActionDeepLink } from "../utils";
 import CommandExecute from "./CommandExecute";
@@ -27,16 +28,16 @@ export default function CommandList() {
   };
 
   return (
-    <List>
-      <List.Item
-        icon="➕"
-        title="Create a New Action"
-        actions={
-          <ActionPanel>
-            <Action title="Create a New Action" onAction={() => navigation.push(<CommandForm />)} />
-          </ActionPanel>
-        }
-      />
+    <List
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Backup">
+            <Action title="Create New Action" icon={Icon.Plus} onAction={() => navigation.push(<CommandForm />)} />
+            <Action title="Import Actions" icon={Icon.Upload} onAction={() => Backup.import()} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    >
       <List.Section title="Actions">
         {actions.map((action) => (
           <List.Item
@@ -54,7 +55,7 @@ export default function CommandList() {
             ]}
             actions={
               <ActionPanel>
-                <ActionPanel.Section>
+                <ActionPanel.Section title="Manage">
                   <Action title="Run Action" icon={Icon.Play} onAction={() => navigation.push(<CommandExecute id={action.id} />)} />
                   <Action
                     title="Edit"
@@ -70,8 +71,6 @@ export default function CommandList() {
                       link: createActionDeepLink(action.id),
                     }}
                   />
-                </ActionPanel.Section>
-                <ActionPanel.Section>
                   <Action
                     title="Delete"
                     icon={Icon.Trash}
@@ -79,6 +78,10 @@ export default function CommandList() {
                     shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => remove(action.id)}
                   />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Backup">
+                  <Action title="Import Actions" icon={Icon.Upload} onAction={() => Backup.import()} />
+                  <Action title="Export Actions" icon={Icon.Download} onAction={() => Backup.export()} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

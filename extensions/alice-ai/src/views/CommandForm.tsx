@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchType, Toast, launchCommand, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { MODEL } from "../lib/OpenAI";
 import { useActionsState } from "../store/actions";
@@ -29,11 +29,26 @@ export default function CommandForm({ id }: Props) {
     onSubmit: (values) => {
       if (action && action.id) {
         editAction({ ...values, id: action.id });
+        showToast({
+          title: "Action updated",
+          message: `The action "${values.name}" was successfully updated.`,
+          style: Toast.Style.Success,
+        });
+        navigation.pop();
       } else {
         addAction(values);
+        showToast({
+          title: "Action created",
+          message: `The action "${values.name}" was successfully created.`,
+          style: Toast.Style.Success,
+        });
+        launchCommand({
+          ownerOrAuthorName: "quiknull",
+          extensionName: "alice-ai",
+          name: "commands",
+          type: LaunchType.UserInitiated,
+        });
       }
-
-      navigation.pop();
     },
     validation: {
       name: (value) => {
