@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "App Keep",
-      "subtitle": "Close Unnecessary Programs",
+      "title": "Close Unnecessary Programs",
+      "subtitle": "App Keep",
       "description": "- Select programs to keep\n- Set programs to always keep\n- Execute closing of unnecessary programs",
       "mode": "view"
     }
