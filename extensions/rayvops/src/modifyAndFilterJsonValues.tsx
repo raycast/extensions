@@ -23,7 +23,7 @@ export default function ModifyAndFilterJsonValues() {
         try {
           let json = JSON.parse(text);
           if (!Array.isArray(json)) {
-            json = [json]; 
+            json = [json];
           }
           setOriginalJson(json);
           const initialFields = Object.keys(json[0] || {});

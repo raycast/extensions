@@ -14,7 +14,7 @@ export default function ExtractJsonFieldValues() {
         try {
           let parsedJson = JSON.parse(text);
           if (!Array.isArray(parsedJson)) {
-            parsedJson = [parsedJson]; 
+            parsedJson = [parsedJson];
           }
           if (Array.isArray(parsedJson) && parsedJson.length > 0) {
             setJson(parsedJson);
