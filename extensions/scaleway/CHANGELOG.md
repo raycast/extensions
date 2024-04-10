@@ -2,7 +2,7 @@
 
 ## [Improvement] - 2024-04-09
 
-- Update Sdk Scaleway and dependencies.
+- Update SDK Scaleway and dependencies.
 - Add Ipam Product.
 - Use new secret endpoint
 - Remove Private Network entrypoint which is a duplicate of VPC
