@@ -28,9 +28,10 @@
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",
+    "husky": "^9.0.11",
     "prettier": "^2.5.1",
     "textlint": "^13.3.2",
-    "textlint-rule-aws-service-name": "^1.4.0",
+    "textlint-rule-aws-service-name": "^1.8.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

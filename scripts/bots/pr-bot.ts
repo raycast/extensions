@@ -114,8 +114,7 @@ This is especially helpful since there were no maintainers for this extension :p
       context,
       comment: `Thank you for your ${isFirstContribution ? "first " : ""} contribution! :tada:
 
-🔔 ${owners
-        .filter((x) => x !== sender)
+🔔 ${[...new Set(owners.filter((x) => x !== sender))]
         .map((x) => `@${x}`)
         .join(" ")} you might want to have a look.`,
     });

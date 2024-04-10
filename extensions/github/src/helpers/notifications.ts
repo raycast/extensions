@@ -59,16 +59,25 @@ export function getNotificationIcon(notification: Notification) {
       icon = { value: "commit.svg", tooltip: "Commit" };
       break;
     case "Issue":
-      icon = { value: "issue-opened.svg", tooltip: "Issue" };
+      icon = { value: "issue-open.svg", tooltip: "Issue" };
       break;
     case "PullRequest":
-      icon = { value: "pull-request.svg", tooltip: "Pull Request" };
+      icon = { value: "pull-request-open.svg", tooltip: "Pull Request" };
       break;
     case "Release":
       icon = { value: "tag.svg", tooltip: "Release" };
       break;
     case "CheckSuite":
-      icon = { value: Icon.CheckCircle, tooltip: "Workflow" };
+      icon = {
+        value: notification.subject.title.match(/(succeeded)/i)
+          ? Icon.CheckCircle
+          : notification.subject.title.match(/(failed)/i)
+            ? Icon.XMarkCircle
+            : notification.subject.title.match(/(skipped|cancelled)/i)
+              ? Icon.MinusCircle
+              : Icon.QuestionMarkCircle,
+        tooltip: "Workflow Run",
+      };
       break;
     case "Discussion":
       icon = { value: "comment-discussion.svg", tooltip: "Comment" };
@@ -155,9 +164,9 @@ export function getNotificationTooltip(date: Date) {
 }
 
 export function getGitHubIcon(tinted = false) {
-  const overrideTintColor = tinted ? Color.Orange : undefined;
+  const overrideTintColor = tinted ? Color.Blue : undefined;
   return {
     source: "github.svg",
-    tintColor: overrideTintColor ? overrideTintColor : { light: "#000000", dark: "#FFFFFF", adjustContrast: false },
+    tintColor: overrideTintColor ? overrideTintColor : Color.PrimaryText,
   };
 }

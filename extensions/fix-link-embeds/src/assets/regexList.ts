@@ -1,6 +1,6 @@
 export const regexList = [
   {
-    test: /https?:\/\/twitter\.com(?=\/\w+?\/status\/)/g,
+    test: /https?:\/\/(?:twitter|x)\.com(?=\/\w+?\/status\/)/g,
     replace: "https://fxtwitter.com",
     settingsKey: "replaceTwitter",
   },
