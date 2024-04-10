@@ -142,7 +142,7 @@ export default function Command() {
             icon={app.keep ? Icon.Checkmark : Icon.Circle} // 其他应用根据keep状态选择图标
             accessories={[
               ...(app.keep ? [{ tag: { value: "Keep", color: Color.Orange } }] : []),
-              ...(app.always_keep ? [{ tag: { value: "Always Keep", color: Color.Red } }] : []), // 实际上这行会始终为false并可以移除
+              ...(app.always_keep ? [{ tag: { value: "Always Keep", color: Color.Green } }] : []), // 实际上这行会始终为false并可以移除
               // ...(app.keep ? [{ icon: Icon.CircleFilled }] : []),
             ]}
             actions={
