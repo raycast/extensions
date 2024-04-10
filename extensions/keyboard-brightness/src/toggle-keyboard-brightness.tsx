@@ -11,8 +11,8 @@ export default async function command() {
 
   try {
     const brightness = await getSystemBrightness();
-    
-    let newBrightness: number
+
+    let newBrightness: number;
     if (brightness! > 0) {
       await setStoredBrightness(brightness!);
       newBrightness = 0;
