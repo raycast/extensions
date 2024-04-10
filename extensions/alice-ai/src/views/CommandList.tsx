@@ -31,8 +31,8 @@ export default function CommandList() {
     <List
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Backup">
-            <Action title="Create New Action" icon={Icon.Plus} onAction={() => navigation.push(<CommandForm />)} />
+          <ActionPanel.Section>
+            <Action title="Create Your First Action" icon={Icon.Plus} onAction={() => navigation.push(<CommandForm />)} />
             <Action title="Import Actions" icon={Icon.Upload} onAction={() => Backup.import()} />
           </ActionPanel.Section>
         </ActionPanel>
