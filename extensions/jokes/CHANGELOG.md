@@ -1,5 +1,5 @@
 # Jokes Changelog
 
-## [Only `Safe` Jokes] - {PR_MERGE_DATE}
+## [Only `Safe` Jokes] - 2024-04-10
 
 ## [Initial Version] - 2024-04-10
