@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, showToast, Toast, Color, Icon, LocalStorage, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, List, ListPlaceholder, showToast, Toast, Color, Icon, LocalStorage, closeMainWindow } from "@raycast/api";
 import { exec } from "child_process";
+
 
 type App = {
   name: string;
@@ -30,6 +31,7 @@ async function toggleAppInPresetKeepApps(appName: string) {
 
 export default function Command() {
   const [apps, setApps] = useState<App[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // 添加isLoading状态
   apps.sort((a, b) => (a.keep === b.keep ? 0 : a.keep ? -1 : 1));
 
   // 获取已打开的应用程序列表
@@ -43,10 +45,12 @@ export default function Command() {
 
     // 然后获取系统中的应用程序列表，并设置keep和always_keep属性
     const fetchApps = async () => {
+      setIsLoading(true); // 开始加载，设置isLoading为true
       const presetKeepApps = await getPresetKeepApps();
       exec(
         `osascript -e 'tell application "System Events" to get name of (processes where background only is false)'`,
         (err, stdout) => {
+          setIsLoading(false); // 加载完成，设置isLoading为false
           if (err) {
             showToast({ title: "Error fetching apps", message: err.message, style: Toast.Style.Failure });
             return;
@@ -130,7 +134,7 @@ export default function Command() {
   const otherApps = apps.filter((app) => !app.always_keep);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.Section title="App List">
         {otherApps.map((app, index) => (
           <List.Item
@@ -140,13 +144,22 @@ export default function Command() {
             accessories={[
               ...(app.keep ? [{ tag: { value: "Keep", color: Color.Orange } }] : []),
               ...(app.always_keep ? [{ tag: { value: "Always Keep", color: Color.Red } }] : []), // 实际上这行会始终为false并可以移除
-              ...(app.keep ? [{ icon: Icon.CircleFilled }] : []),
+              // ...(app.keep ? [{ icon: Icon.CircleFilled }] : []),
             ]}
             actions={
               <ActionPanel>
-                <Action title="Set Keep" onAction={() => toggleKeepApp(app.name)} />
-                <Action title="Close Other Apps" onAction={() => closeApps()} />
-                <Action title="Set Always Keep" onAction={() => handleToggleAlwaysKeepApp(app.name)} />
+                <Action 
+                  icon={{ source: Icon.Check}} 
+                  title="Set Keep" 
+                  onAction={() => toggleKeepApp(app.name)} />
+                <Action 
+                  icon={{ source: Icon.XMarkCircle, tintColor: Color.Red}}
+                  title="Close Other Apps" 
+                  onAction={() => closeApps()} />
+                <Action 
+                  icon={{ source: Icon.Lock}}
+                  title="Set Always Keep" 
+                  onAction={() => handleToggleAlwaysKeepApp(app.name)} />
               </ActionPanel>
             }
           />
@@ -162,8 +175,14 @@ export default function Command() {
               accessories={[...(app.always_keep ? [{ tag: { value: "Always Keep", color: Color.Red } }] : [])]}
               actions={
                 <ActionPanel>
-                  <Action title="Clear Always Keep" onAction={() => handleToggleAlwaysKeepApp(app.name)} />
-                  <Action title="Close Other Apps" onAction={() => closeApps()} />
+                  <Action 
+                    icon={{ source: Icon.LockDisabled }} 
+                    title="Clear Always Keep" 
+                    onAction={() => handleToggleAlwaysKeepApp(app.name)} />
+                  <Action 
+                    icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                    title="Close Other Apps" 
+                    onAction={() => closeApps()} />
                 </ActionPanel>
               }
             />
