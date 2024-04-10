@@ -3,7 +3,7 @@ import type { VPC } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 
 type PNProps = {
-  privateNetwork: VPC.v1.PrivateNetwork
+  privateNetwork: VPC.v2.PrivateNetwork
 }
 
 export const PNDetail = ({ privateNetwork }: PNProps) => (
@@ -13,9 +13,9 @@ export const PNDetail = ({ privateNetwork }: PNProps) => (
         <List.Item.Detail.Metadata.Separator />
         <List.Item.Detail.Metadata.Label title="ID" text={privateNetwork.id} />
         <List.Item.Detail.Metadata.Label
-          title="Zone"
-          text={privateNetwork.zone}
-          icon={{ source: getIconFromLocality(privateNetwork.zone) }}
+          title="Region"
+          text={privateNetwork.region}
+          icon={{ source: getIconFromLocality(privateNetwork.region) }}
         />
 
         {privateNetwork.tags.length > 0 && (
@@ -28,7 +28,10 @@ export const PNDetail = ({ privateNetwork }: PNProps) => (
 
         <List.Item.Detail.Metadata.Separator />
 
-        <List.Item.Detail.Metadata.Label title="Subnets" text={privateNetwork.subnets.toString()} />
+        <List.Item.Detail.Metadata.Label
+          title="Subnets"
+          text={privateNetwork.subnets.map(({ subnet }) => subnet).toString()}
+        />
 
         <List.Item.Detail.Metadata.Separator />
 
