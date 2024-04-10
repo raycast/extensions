@@ -1,8 +1,7 @@
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Color, Detail, Icon, LaunchProps, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps, List, Toast, showToast } from "@raycast/api";
 import { ErrorResponse, JokeResponse, SingleJoke, TwoPartJoke } from "./types";
-import { API_URL, ENABLE_SAFE_MODE, FLAGS } from "./constants";
 
 export default function GetJoke(props: LaunchProps<{ arguments: Arguments.GetJokes }>) {
   const { category, type, amount } = props.arguments;
@@ -20,24 +19,16 @@ export default function GetJoke(props: LaunchProps<{ arguments: Arguments.GetJok
         style: Toast.Style.Animated,
       });
 
-      // get unchecked flags
-      const falseFlags = Object.entries(FLAGS)
-        .filter(([, value]) => !value)
-        .map(([key]) => key)
-        .join()
-        .replaceAll("allow_", "");
-
       const baseParams = new URLSearchParams({
         format: "json",
       });
-      if (falseFlags.length) baseParams.append("blacklistFlags", falseFlags);
       if (amount) baseParams.append("amount", amount);
       if (type) baseParams.append("type", type);
 
       // we manually append safe-mode as it is without a value
-      const urlParams = ENABLE_SAFE_MODE ? `${baseParams}&safe-mode` : baseParams;
+      const urlParams = `${baseParams}&safe-mode`;
 
-      const response = await fetch(`${API_URL}joke/${category}?${urlParams}`);
+      const response = await fetch(`https://v2.jokeapi.dev/joke/${category}?${urlParams}`);
       const jsonResponse = (await response.json()) as JokeResponse | ErrorResponse;
       if (jsonResponse.error) {
         setError(jsonResponse);
@@ -108,23 +99,14 @@ ${joke.delivery}`;
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Label title="Type" text={joke.type} />
                   <List.Item.Detail.Metadata.Label title="ID" text={joke.id.toString()} />
-                  <List.Item.Detail.Metadata.Label title="Safe" icon={joke.safe ? Icon.Check : Icon.Multiply} />
                   <List.Item.Detail.Metadata.TagList title="Language">
                     <List.Item.Detail.Metadata.TagList.Item text={joke.lang} />
-                  </List.Item.Detail.Metadata.TagList>
-                  <List.Item.Detail.Metadata.TagList title="Flags">
-                    <List.Item.Detail.Metadata.TagList.Item text={`NSFW: ${joke.flags.nsfw ? "✅" : "❌"}`} />
-                    <List.Item.Detail.Metadata.TagList.Item text={`Religious: ${joke.flags.religious ? "✅" : "❌"}`} />
-                    <List.Item.Detail.Metadata.TagList.Item text={`Political: ${joke.flags.political ? "✅" : "❌"}`} />
-                    <List.Item.Detail.Metadata.TagList.Item text={`Racist: ${joke.flags.racist ? "✅" : "❌"}`} />
-                    <List.Item.Detail.Metadata.TagList.Item text={`Sexist: ${joke.flags.sexist ? "✅" : "❌"}`} />
-                    <List.Item.Detail.Metadata.TagList.Item text={`Explicit: ${joke.flags.explicit ? "✅" : "❌"}`} />
                   </List.Item.Detail.Metadata.TagList>
                 </List.Item.Detail.Metadata>
               }
             />
           }
-          accessories={[{ tag: joke.category }, { tag: { value: "safe", color: joke.safe ? Color.Green : Color.Red } }]}
+          accessories={[{ tag: joke.category }]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
@@ -150,17 +132,8 @@ ${joke.delivery}`;
             </Detail.Metadata.TagList>
             <Detail.Metadata.Label title="Type" text={data.type} />
             <Detail.Metadata.Label title="ID" text={data.id.toString()} />
-            <Detail.Metadata.Label title="Safe" icon={data.safe ? Icon.Check : Icon.Multiply} />
             <Detail.Metadata.TagList title="Language">
               <Detail.Metadata.TagList.Item text={data.lang} />
-            </Detail.Metadata.TagList>
-            <Detail.Metadata.TagList title="Flags">
-              <Detail.Metadata.TagList.Item text={`NSFW: ${data.flags.nsfw ? "✅" : "❌"}`} />
-              <Detail.Metadata.TagList.Item text={`Religious: ${data.flags.religious ? "✅" : "❌"}`} />
-              <Detail.Metadata.TagList.Item text={`Political: ${data.flags.political ? "✅" : "❌"}`} />
-              <Detail.Metadata.TagList.Item text={`Racist: ${data.flags.racist ? "✅" : "❌"}`} />
-              <Detail.Metadata.TagList.Item text={`Sexist: ${data.flags.sexist ? "✅" : "❌"}`} />
-              <Detail.Metadata.TagList.Item text={`Explicit: ${data.flags.explicit ? "✅" : "❌"}`} />
             </Detail.Metadata.TagList>
           </Detail.Metadata>
         )
@@ -174,7 +147,7 @@ ${joke.delivery}`;
               icon={Icon.Clipboard}
             />
           )}
-          <Action title="Get New Joke" icon={Icon.Redo} onAction={getJokes} />
+          <Action title="Get New Jokes" icon={Icon.Redo} onAction={getJokes} />
         </ActionPanel>
       }
     />
