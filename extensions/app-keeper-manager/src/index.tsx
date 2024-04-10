@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, List, ListPlaceholder, showToast, Toast, Color, Icon, LocalStorage, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Color, Icon, LocalStorage, closeMainWindow } from "@raycast/api";
 import { exec } from "child_process";
 
 
