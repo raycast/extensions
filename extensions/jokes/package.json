@@ -13,64 +13,6 @@
     "Fun"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "enable_safe_mode",
-      "required": false,
-      "label": "Enable Safe Mode",
-      "description": "If enabled, JokeAPI will try its best to serve only jokes that are considered safe for everyone.",
-      "type": "checkbox",
-      "default": true
-    },
-    {
-      "name": "allow_nsfw",
-      "required": false,
-      "label": "Allow NSFW Jokes",
-      "description": "Allow NSFW Jokes",
-      "type": "checkbox",
-      "default": false
-    },
-    {
-      "name": "allow_religious",
-      "required": false,
-      "label": "Allow Religious Jokes",
-      "description": "Allow Religious Jokes",
-      "type": "checkbox",
-      "default": false
-    },
-    {
-      "name": "allow_political",
-      "required": false,
-      "label": "Allow Political Jokes",
-      "description": "Allow Political Jokes",
-      "type": "checkbox",
-      "default": false
-    },
-    {
-      "name": "allow_racist",
-      "required": false,
-      "label": "Allow Racist Jokes",
-      "description": "Allow Racist Jokes",
-      "type": "checkbox",
-      "default": false
-    },
-    {
-      "name": "allow_sexist",
-      "required": false,
-      "label": "Allow Sexist Jokes",
-      "description": "Allow Sexist Jokes",
-      "type": "checkbox",
-      "default": false
-    },
-    {
-      "name": "allow_explicit",
-      "required": false,
-      "label": "Allow Explicit Jokes",
-      "description": "Allow Explicit Jokes",
-      "type": "checkbox",
-      "default": false
-    }
-  ],
   "commands": [
     {
       "name": "get-jokes",
@@ -95,10 +37,6 @@
             {
               "title": "Programming",
               "value": "Programming"
-            },
-            {
-              "title": "Dark",
-              "value": "Dark"
             },
             {
               "title": "Pun",
