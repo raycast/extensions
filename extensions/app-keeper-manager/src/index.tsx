@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { ActionPanel, Action, List, showToast, Toast, Color, Icon, LocalStorage, closeMainWindow } from "@raycast/api";
 import { exec } from "child_process";
 
-
 type App = {
   name: string;
   keep: boolean;
@@ -148,18 +147,17 @@ export default function Command() {
             ]}
             actions={
               <ActionPanel>
-                <Action 
-                  icon={{ source: Icon.Check}} 
-                  title="Set Keep" 
-                  onAction={() => toggleKeepApp(app.name)} />
-                <Action 
-                  icon={{ source: Icon.XMarkCircle, tintColor: Color.Red}}
-                  title="Close Other Apps" 
-                  onAction={() => closeApps()} />
-                <Action 
-                  icon={{ source: Icon.Lock}}
-                  title="Set Always Keep" 
-                  onAction={() => handleToggleAlwaysKeepApp(app.name)} />
+                <Action icon={{ source: Icon.Check }} title="Set Keep" onAction={() => toggleKeepApp(app.name)} />
+                <Action
+                  icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                  title="Close Other Apps"
+                  onAction={() => closeApps()}
+                />
+                <Action
+                  icon={{ source: Icon.Lock }}
+                  title="Set Always Keep"
+                  onAction={() => handleToggleAlwaysKeepApp(app.name)}
+                />
               </ActionPanel>
             }
           />
@@ -175,14 +173,16 @@ export default function Command() {
               accessories={[...(app.always_keep ? [{ tag: { value: "Always Keep", color: Color.Red } }] : [])]}
               actions={
                 <ActionPanel>
-                  <Action 
-                    icon={{ source: Icon.LockDisabled }} 
-                    title="Clear Always Keep" 
-                    onAction={() => handleToggleAlwaysKeepApp(app.name)} />
-                  <Action 
+                  <Action
+                    icon={{ source: Icon.LockDisabled }}
+                    title="Clear Always Keep"
+                    onAction={() => handleToggleAlwaysKeepApp(app.name)}
+                  />
+                  <Action
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    title="Close Other Apps" 
-                    onAction={() => closeApps()} />
+                    title="Close Other Apps"
+                    onAction={() => closeApps()}
+                  />
                 </ActionPanel>
               }
             />
