@@ -151,11 +151,29 @@ If a number is passed, it needs to be in the range 0-2. For larger values, 2 wil
 
 ### AI.Model
 
-The AI model to use to answer to the prompt. Defaults to `"gpt-3.5-turbo-instruct"`.
+The AI model to use to answer to the prompt. Defaults to `"openai-gpt-3.5-turbo-instruct"`.
 
 ```typescript
-type Model = "gpt-3.5-turbo" | "gpt-3.5-turbo-instruct" | "gpt-4";
+type Model =
+  | "anthropic-claude-haiku"
+  | "anthropic-claude-opus"
+  | "anthropic-claude-sonnet"
+  | "openai-gpt-3.5-turbo-instruct"
+  | "openai-gpt-3.5-turbo"
+  | "openai-gpt-4"
+  | "openai-gpt-4-turbo"
+  | "perplexity-sonar-medium-online"
+  | "perplexity-sonar-small-online"
+  | "llama2-70b"
+  | "codellama-70b-instruct"
+  | "mixtral-8x7b";
 ```
+
+If a model isn't available to the user, Raycast will fallback to a similar one:
+
+- `"anthropic-claude-opus"` and `"anthropic-claude-sonnet"` -> `"anthropic-claude-haiku"`
+- `"openai-gpt-4"` and `"openai-gpt-4-turbo"` -> `"openai-gpt-3.5-turbo"`
+- `"perplexity-sonar-medium-online"` -> `"perplexity-sonar-small-online"`
 
 ### AI.AskOptions
 
