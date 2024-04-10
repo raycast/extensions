@@ -21,13 +21,6 @@
       "mode": "no-view"
     },
     {
-      "name": "adjust-keyboard-brightness",
-      "title": "Adjust Keyboard Brightness",
-      "subtitle": "Adjust Keyboard Brightness",
-      "description": "Adjust Keyboard Brightness",
-      "mode": "view"
-    },
-    {
       "name": "increase-keyboard-brightness",
       "title": "Increase Keyboard Brightness",
       "subtitle": "Increase Keyboard Brightness",
