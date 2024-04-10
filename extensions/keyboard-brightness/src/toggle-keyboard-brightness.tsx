@@ -20,7 +20,7 @@ export default async function command() {
       storedBrightness = storedBrightness !== null ? storedBrightness : 1;
       await setSystemBrightness(storedBrightness!);
     }
-    await showHUD("✅ Toggled Keyboard Brightness");
+    await showHUD(`Keyboard Brightness set to ${(brightness! * 100).toFixed(0)}%`);
   } catch (e) {
     console.error(e);
     await showHUD("❌ Failed Toggling Keyboard Brightness");
