@@ -149,14 +149,14 @@ export default function Command() {
               <ActionPanel>
                 <Action icon={{ source: Icon.Check }} title="Set Keep" onAction={() => toggleKeepApp(app.name)} />
                 <Action
-                  icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                  title="Close Other Apps"
-                  onAction={() => closeApps()}
-                />
-                <Action
                   icon={{ source: Icon.Lock }}
                   title="Set Always Keep"
                   onAction={() => handleToggleAlwaysKeepApp(app.name)}
+                />
+                <Action
+                  icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                  title="Close Other Apps"
+                  onAction={() => closeApps()}
                 />
               </ActionPanel>
             }
