@@ -51,9 +51,19 @@ const adjustBrightness = async (
 ) => {
   try {
     if (brightness <= 0 && direction === "decrease") {
-      throw new Error("Brightness is already at 0%");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Brightness is already at 0%",
+      });
+
+      return;
     } else if (brightness >= 1 && direction === "increase") {
-      throw new Error("Brightness is already at 100%");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Brightness is already at 100%",
+      });
+
+      return;
     }
 
     const adjustment = direction === "increase" ? 0.1 : -0.1;
