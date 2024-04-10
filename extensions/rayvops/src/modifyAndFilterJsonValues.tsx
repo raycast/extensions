@@ -21,7 +21,10 @@ export default function ModifyAndFilterJsonValues() {
     Clipboard.readText().then((text) => {
       if (text) {
         try {
-          const json = JSON.parse(text);
+          let json = JSON.parse(text);
+          if (!Array.isArray(json)) {
+            json = [json]; 
+          }
           setOriginalJson(json);
           const initialFields = Object.keys(json[0] || {});
           setFields(initialFields);

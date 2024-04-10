@@ -12,7 +12,10 @@ export default function ExtractJsonFieldValues() {
     Clipboard.readText().then((text) => {
       if (text) {
         try {
-          const parsedJson = JSON.parse(text);
+          let parsedJson = JSON.parse(text);
+          if (!Array.isArray(parsedJson)) {
+            parsedJson = [parsedJson]; 
+          }
           if (Array.isArray(parsedJson) && parsedJson.length > 0) {
             setJson(parsedJson);
             const initialFields = Object.keys(parsedJson[0]);
