@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix various icons and colors] - 2024-04-05
+## [Fix various icons and colors] - 2024-04-11
 
 - Fixes icons for issues and pull requests in `Notifications` and `Unread Notifications` commands.
 - Standardizes the color for all the accessories in `My Pull Requests`.
