@@ -28,9 +28,9 @@
       "type": "textfield"
     },
     {
-      "description": "The personal access token for the given Azure DevOps account (PAT Base64 encoded INCLUDE THE ':')",
+      "description": "The personal access token for the given Azure DevOps account. Don't base64 encode it, just paste it as is.",
       "name": "personalAccessToken",
-      "placeholder": "OnVyY......",
+      "placeholder": "urbyvbv....",
       "required": true,
       "title": "Azure DevOps PAT",
       "type": "password"
