@@ -162,6 +162,7 @@
     "@date-fns/utc": "^1.2.0",
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.13.6",
+    "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21"
   },
