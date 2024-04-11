@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionPanel, List, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, popToRoot, clearSearchBar } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 function applicationNameFromPath(path: string): string {
@@ -152,6 +152,7 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
                     if (success) {
                       this.setState({ apps: this.state.apps.filter((a) => a.name !== app.name) });
                     }
+                    clearSearchBar();
                   }}
                 />
                 <Action
