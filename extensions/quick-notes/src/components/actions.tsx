@@ -58,7 +58,7 @@ const Actions = ({
             source: Icon.Filter,
             tintColor: colors.find((c) => c.name === "turquoise")?.tintColor,
           }}
-          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
         >
           {allTags &&
             allTags.length > 0 &&
@@ -84,7 +84,7 @@ const Actions = ({
             tintColor: colors.find((c) => c.name === "turquoise")?.tintColor,
           }}
           target={<CreateTag />}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
         />
         <Action.Push
           title="Delete Tags"

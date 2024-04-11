@@ -4,6 +4,7 @@
 
 - Categorize notes by tags on the main page by updating `Sort Notes By` in extension settings
 - Fixed a bug where tags were not deleted on the note itself when deleting a tag
+- Switch filter and view tag commands
 - Update README
 
 ## [Initial Version] - 2024-02-29
