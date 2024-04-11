@@ -1,7 +1,7 @@
-import { List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
 import { getPersonioToken } from "./api/api";
 import { useEffect, useState } from "react";
-import { AttendancePeriod, getAttendances } from "./api/attendances";
+import { AttendancePeriod, getAttendances, hoursToNiceString, uniqueDateFilter } from "./api/attendances";
 
 const months = [
   "January",
@@ -25,6 +25,7 @@ export default function Attendances() {
 
   const [attendances, setAttendances] = useState<AttendancePeriod[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [rerunFetchTrigger, setRerunFetchTrigger] = useState(true);
 
   const paddedMonth = (selectedMonth + 1).toString().padStart(2, "0");
 
@@ -44,12 +45,27 @@ export default function Attendances() {
       setAttendances(sortedAttendances);
     }
     fetchAttendances();
-  }, [selectedMonth]);
+  }, [selectedMonth, rerunFetchTrigger]);
+
+  function computeTotalHours() {
+    let totalHours = 0;
+    for (const attendance of attendances) {
+      totalHours = totalHours + attendance.duration;
+    }
+    console.log(`Total hours this month: ${hoursToNiceString(totalHours)}`);
+    return totalHours;
+  }
+
+  function computeAttendanceDays() {
+    const attendanceDays = uniqueDateFilter(attendances).length;
+    console.log(`Total working days this month: ${attendanceDays}`);
+    return attendanceDays;
+  }
 
   return (
     <List
       isShowingDetail={true}
-      isLoading={attendances.length == 0}
+      // isLoading={attendances.length == 0}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Month and Year"
@@ -78,6 +94,10 @@ export default function Attendances() {
                   <List.Item.Detail.Metadata.Label title="Date" text={attendance.date || "-"} />
                   <List.Item.Detail.Metadata.Label title="Start" text={attendance.start_time || "-"} />
                   <List.Item.Detail.Metadata.Label title="End" text={attendance.end_time || "-"} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Duration"
+                    text={hoursToNiceString(attendance.duration) || "-"}
+                  />
                   <List.Item.Detail.Metadata.Label title="Break" text={attendance.break.toString() + " minutes"} />
                   <List.Item.Detail.Metadata.Label title="Updated At" text={attendance.updated_at || "-"} />
                   <List.Item.Detail.Metadata.Label title="Acceptance Status" text={attendance.status || "-"} />
@@ -90,9 +110,23 @@ export default function Attendances() {
                     )}
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Label title="Comment" text={attendance.comment || "-"} />
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label
+                    title={`Total Hours in ${months[selectedMonth]}`}
+                    text={hoursToNiceString(computeTotalHours())}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title={`Total Attendances in ${months[selectedMonth]}`}
+                    text={computeAttendanceDays().toString()}
+                  />
                 </List.Item.Detail.Metadata>
               }
             />
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Refresh Data" onAction={() => setRerunFetchTrigger(!rerunFetchTrigger)} />
+            </ActionPanel>
           }
         />
       ))}

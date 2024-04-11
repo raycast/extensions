@@ -33,10 +33,13 @@ export class MyCache {
     // Calculate whether the entry is expired (more living minutes than it should have)
     // Return the entry only when it exists and when is is not yet expired
     if (data) {
+      console.log(`Found ${key} in cache`);
       const cacheEntry = JSON.parse(data) as CacheEntry;
       const livingMinutes = getMinutesBetweenDates(new Date(cacheEntry.createdAt), new Date());
       if (livingMinutes < cacheEntry.expiresInMinutes) {
-        console.log(`Found ${key} in cache`);
+        console.log(
+          `Cache is not yet expired, ${key} is expiring in ${cacheEntry.expiresInMinutes - livingMinutes} minutes.`,
+        );
         return cacheEntry.data;
       } else {
         console.log(`${key} is expired`);

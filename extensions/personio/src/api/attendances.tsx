@@ -27,6 +27,7 @@ export interface AttendancePeriod {
   date: string;
   start_time: string;
   end_time: string;
+  duration: number;
   break: number;
   comment: string;
   updated_at: string;
@@ -38,6 +39,43 @@ export interface AttendancePeriod {
 
 function daysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
+}
+
+function hoursBetween(time1: string, time2: string): number {
+  const date1 = Date.parse(`1970-01-01T${time1}Z`);
+  const date2 = Date.parse(`1970-01-01T${time2}Z`);
+
+  const diffInMs = Math.abs(date2 - date1);
+
+  return diffInMs / 1000 / 60 / 60;
+}
+
+export function hoursToNiceString(hours: number): string {
+  const whole_hours = Math.floor(hours);
+  const remaining_time = hours - whole_hours;
+  const minutes = Math.round(60 * remaining_time);
+  if (minutes > 0 && hours > 0) {
+    return `${whole_hours} hours and ${minutes} minutes`;
+  } else if (hours > 0 && minutes == 0) {
+    return `${whole_hours} hours`;
+  } else if (hours == 0 && minutes > 0) {
+    return `${minutes} minutes`;
+  } else {
+    return "0 minutes";
+  }
+}
+
+export function uniqueDateFilter(arr: AttendancePeriod[]) {
+  const dateSet = new Set<string>();
+
+  return arr.filter((obj) => {
+    if (dateSet.has(obj.date)) {
+      return false;
+    } else {
+      dateSet.add(obj.date);
+      return true;
+    }
+  });
 }
 
 export async function getAttendancesAPI(
@@ -67,6 +105,7 @@ export async function getAttendancesAPI(
       date: a.attributes.date,
       start_time: a.attributes.start_time,
       end_time: a.attributes.end_time,
+      duration: hoursBetween(a.attributes.end_time, a.attributes.start_time),
       break: a.attributes.break,
       comment: a.attributes.comment,
       updated_at: a.attributes.updated_at,
@@ -100,7 +139,7 @@ export async function getAttendances(
     return JSON.parse(attendances) as AttendancePeriod[];
   } else {
     const attendances = await getAttendancesAPI(employeeNumber, token, currentYear, selectedMonth);
-    cache.set(key, JSON.stringify(attendances), 23 * 60);
+    cache.set(key, JSON.stringify(attendances), 30);
     return attendances;
   }
 }
