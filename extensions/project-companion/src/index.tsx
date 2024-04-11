@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation, Color, LocalStorage } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  useNavigation,
+  Color,
+  LocalStorage,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface Project {
@@ -10,6 +21,7 @@ interface Project {
   repo?: string;
   roadmap?: string;
   design?: string;
+  other?: string;
   favorite?: string;
 }
 
@@ -29,7 +41,7 @@ const externalLink = [
   { id: "repo", placeholder: "Github, Gitlab, Bitbucket..." },
   { id: "roadmap", placeholder: "Jira, Linear, Notion, Monday..." },
   { id: "design", placeholder: "Figma, Sketch..." },
-  { id: "extra", placeholder: "Any other useful link" },
+  { id: "other", placeholder: "Any other useful link" },
 ];
 
 export default function Command() {
@@ -54,10 +66,20 @@ export default function Command() {
     setProjects(newProjects);
   }
 
-  function handleDelete(index: number) {
-    const newProjects = [...projects];
-    newProjects.splice(index, 1);
-    setProjects(newProjects);
+  async function handleDelete(index: number) {
+    const options: Alert.Options = {
+      title: "Are you sure?",
+      message: "This cannot be undone.",
+      primaryAction: {
+        title: "Delete Project",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+    if (await confirmAlert(options)) {
+      const newProjects = [...projects];
+      newProjects.splice(index, 1);
+      setProjects(newProjects);
+    }
   }
 
   function handleEdit(index: number, editedProject: Project) {
@@ -146,6 +168,13 @@ export default function Command() {
                       title="Design Files"
                       target={project.design || ""}
                       text={project.design.length > 32 ? project.design.substring(0, 32) + "..." : project.design}
+                    />
+                  ) : null}
+                  {project.other ? (
+                    <List.Item.Detail.Metadata.Link
+                      title="Other"
+                      target={project.other || ""}
+                      text={project.other.length > 32 ? project.other.substring(0, 32) + "..." : project.other}
                     />
                   ) : null}
                 </List.Item.Detail.Metadata>
@@ -264,6 +293,7 @@ function DeleteProjectAction(props: { onDelete: () => void }) {
       title="Delete Project"
       shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
       onAction={props.onDelete}
+      style={Action.Style.Destructive}
     />
   );
 }
@@ -284,6 +314,7 @@ function EditProjectForm(props: {
     repo: string;
     roadmap: string;
     design: string;
+    other: string;
     favorite: string;
   }) {
     props.onEdit(props.index, {
@@ -295,6 +326,7 @@ function EditProjectForm(props: {
       repo: values.repo,
       roadmap: values.roadmap,
       design: values.design,
+      other: values.other,
       favorite: values.favorite,
     });
     pop();
