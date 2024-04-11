@@ -193,6 +193,42 @@
         "log out",
         "account"
       ]
+    },
+    {
+      "name": "create-send",
+      "title": "Create Send",
+      "subtitle": "Bitwarden",
+      "description": "Securely share information directly with anyone.",
+      "icon": "create-send.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-sends",
+      "title": "Search Sends",
+      "subtitle": "Bitwarden",
+      "description": "List and search all the Sends owned by you.",
+      "icon": "search-sends.png",
+      "mode": "view"
+    },
+    {
+      "name": "receive-send",
+      "title": "Receive Send",
+      "subtitle": "Bitwarden",
+      "description": "Receive a send from a URL",
+      "arguments": [
+        { 
+          "type": "text",
+          "name": "url",
+          "placeholder": "url"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "placeholder": "password"
+        }
+      ],
+      "icon": "receive-send.png",
+      "mode": "view"
     }
   ],
   "preferences": [
