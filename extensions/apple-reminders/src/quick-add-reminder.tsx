@@ -4,7 +4,6 @@ import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHou
 import { createReminder, getData } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
-import { toISOStringWithTimezone } from "./helpers";
 import { Data } from "./hooks/useData";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
@@ -19,37 +18,34 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
       const text = props.arguments.text;
-      let dateValue: string | undefined = undefined;
-      let listId: string | undefined = undefined;
-      let listName: string | undefined = undefined;
+
+      let reminderList;
+      let dueDate;
+      let isDateTime;
 
       const dateMatch = chrono.parse(text);
       if (dateMatch && dateMatch.length > 0) {
-        const date = dateMatch[0].start.date();
-        dateValue = toISOStringWithTimezone(date);
+        const chronoDate = dateMatch[0].start;
+        isDateTime = chronoDate.isCertain("hour") || chronoDate.isCertain("minute") || chronoDate.isCertain("second");
+        const date = chronoDate.date();
+        dueDate = isDateTime ? date.toISOString() : format(date, "yyyy-MM-dd");
       }
 
-      const tagMatch = text.match(/ #(\w+)/);
+      const listMatch = text.match(/#(\w+)/);
 
-      if (tagMatch) {
+      if (listMatch) {
         const data: Data = await getData();
-        const reminderList = data.lists.find((list) => list.title === tagMatch[1]);
-        listId = reminderList ? reminderList.id : undefined;
-        listName = reminderList ? reminderList.title : undefined;
+        reminderList = data.lists.find((list) => list.title.toLowerCase() === listMatch[1].toLowerCase());
       }
 
       // Clean all values matching from text and previous white space as title constant
       const title = text
-        .replace(tagMatch ? tagMatch[0] : "", "")
+        .replace(listMatch ? listMatch[0] : "", "")
         .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : "", "")
         .replace(/\s+/g, " ")
         .trim();
 
-      const reminder: NewReminder = {
-        title: title,
-        listId: listId,
-        dueDate: dateValue,
-      };
+      const reminder: NewReminder = { title, listId: reminderList?.id, dueDate };
 
       if (props.arguments.notes) {
         reminder.notes = props.arguments.notes;
@@ -57,12 +53,12 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
 
       await createReminder(reminder);
 
-      const toastListName = listName ? listName : "default list";
-      const humanReadableDate = dateValue ? chrono.parseDate(dateValue)?.toLocaleString() : "";
-      const toastDueDate = humanReadableDate ? ` due ${humanReadableDate}` : "";
+      const formattedDueDate = dueDate ? ` due ${format(dueDate, `${isDateTime ? "PPPpp" : "PPP"}`)}` : "";
+      const toastMessage = `Added "${title}" to ${reminderList?.title ?? "default list"}${formattedDueDate}`;
+
       await showToast({
         style: Toast.Style.Success,
-        title: `Added "${title}" to ${toastListName}${toastDueDate}`,
+        title: toastMessage,
       });
       return;
     }
