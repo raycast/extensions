@@ -68,7 +68,16 @@
       "mode": "view",
       "name": "add-text-to-page",
       "subtitle": "Notion",
-      "title": "Add Text to Page"
+      "title": "Add Text to Page",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "title": "Text",
+          "placeholder": "Text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

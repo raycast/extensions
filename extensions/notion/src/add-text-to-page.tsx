@@ -1,103 +1,96 @@
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
-import { Action, ActionPanel, Form, Toast, closeMainWindow, popToRoot, showToast } from "@raycast/api";
-import { useForm, withAccessToken } from "@raycast/utils";
+import { Action, ActionPanel, Form, Icon, LaunchProps, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { FormValidation, useForm, withAccessToken } from "@raycast/utils";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { useState } from "react";
 
-import { useAppendPageLastValues, useSearchPages } from "./hooks";
-import { appendPage, getPageIcon } from "./utils/notion";
+import { useSearchPages } from "./hooks";
+import { appendBlockToPage, getPageIcon } from "./utils/notion";
 import { notionService } from "./utils/notion/oauth";
 
-function AppendPage() {
-  const { lastFormValues, isLastFormValuesLoading, setLastFormValues } = useAppendPageLastValues();
-  const [isHandlingSubmit, setIsHandlingSubmit] = useState(false);
+type AddTextToPageValues = {
+  prepend: boolean;
+  addDateDivider: boolean;
+  textToAppend: string;
+  page: string;
+};
+
+function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }>) {
   const [searchText, setSearchText] = useState<string>("");
-  const { data: searchPages, isLoading: isSearchPageLoading } = useSearchPages(searchText);
-  const { itemProps, handleSubmit } = useForm<{
-    appendAtTop: boolean;
-    addDateDivider: boolean;
-    textToAppend: string;
-    page: string;
-  }>({
+  const { data, isLoading } = useSearchPages(searchText);
+
+  const { itemProps, handleSubmit } = useForm<AddTextToPageValues>({
     async onSubmit(values) {
       try {
-        if (isHandlingSubmit) return;
-        setIsHandlingSubmit(true);
-        await showToast({ style: Toast.Style.Animated, title: "Adding content to the page..." });
+        await showToast({ style: Toast.Style.Animated, title: "Adding content to the page" });
 
         const selectedPage = searchPages?.find((page) => page.id === values.page);
 
-        if (!selectedPage || selectedPage?.object !== "page") {
-          await showToast({
-            style: Toast.Style.Animated,
-            title: "Selected page is not a page (use create database page instead)",
-          });
-          setIsHandlingSubmit(false);
+        if (!selectedPage) {
+          await showToast({ style: Toast.Style.Failure, title: "Could not find the selected page" });
           return;
         }
 
         const content = markdownToBlocks(values.textToAppend) as BlockObjectRequest[];
-        await appendPage(selectedPage.id, content, values.appendAtTop, values.addDateDivider);
-
-        await setLastFormValues({
+        await appendBlockToPage({
           pageId: selectedPage.id,
-          appendAtTop: values.appendAtTop,
-          dateDivider: values.addDateDivider,
+          children: content,
+          prepend: values.prepend,
+          addDateDivider: values.addDateDivider,
         });
-        await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
-        await popToRoot();
-        setIsHandlingSubmit(false);
         await closeMainWindow();
+        await showToast({ style: Toast.Style.Success, title: "Added text to page" });
       } catch (error) {
-        await showToast({ style: Toast.Style.Failure, title: "Failed capturing content to page" });
+        await showToast({ style: Toast.Style.Failure, title: "Failed adding text to page" });
       }
     },
     initialValues: {
-      addDateDivider: lastFormValues?.dateDivider ?? true,
-      appendAtTop: lastFormValues?.appendAtTop ?? true,
-      page: lastFormValues?.pageId ?? "",
-      textToAppend: "",
+      textToAppend: props.arguments.text ?? "",
     },
-
     validation: {
-      textToAppend: (input) => {
-        if (!input) return "The content to add is required";
-      },
+      page: FormValidation.Required,
+      textToAppend: FormValidation.Required,
     },
   });
 
+  const searchPages = data?.filter((page) => page.object === "page");
+
   return (
     <Form
-      isLoading={isHandlingSubmit || isLastFormValuesLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} title="Capture Entry" />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Add Text to Page" icon={Icon.Plus} />
         </ActionPanel>
       }
     >
       <Form.Dropdown
         {...itemProps.page}
         title="Notion Page"
-        isLoading={isSearchPageLoading}
+        isLoading={isLoading}
         onSearchTextChange={setSearchText}
         storeValue
       >
         {searchPages?.map((page) => (
-          <Form.Dropdown.Item key={page.id} title={page.title || "Untitled"} value={page.id} icon={getPageIcon(page)} />
+          <Form.Dropdown.Item key={page.id} title={page.title ?? ""} value={page.id} icon={getPageIcon(page)} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea enableMarkdown autoFocus title="Content" {...itemProps.textToAppend} info="Add something" />
+
+      <Form.TextArea enableMarkdown autoFocus={!props.arguments.text} title="Content" {...itemProps.textToAppend} />
+
       <Form.Checkbox
+        {...itemProps.prepend}
         label="Append at the top"
-        {...itemProps.appendAtTop}
-        info="Will try to append the content at the top of the page"
+        info="Append the content at the top of the page instead of the bottom"
+        storeValue
       />
+
       <Form.Checkbox
-        label="Append with a date divider"
         {...itemProps.addDateDivider}
-        info="Will add a divider with the current date before the content"
+        label="Append with a date divider"
+        info="Add a divider with the current date before the content"
+        storeValue
       />
     </Form>
   );
 }
-export default withAccessToken(notionService)(AppendPage);
+export default withAccessToken(notionService)(AddTextToPage);

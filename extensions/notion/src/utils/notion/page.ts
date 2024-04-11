@@ -106,16 +106,23 @@ export async function fetchPageFirstBlockId(pageId: string) {
     });
     return results[0].id;
   } catch (err) {
-    return handleError(err, "Failed to fetch page content", undefined);
+    return handleError(err, "Failed to fetch page's first block", undefined);
   }
 }
 
-export async function appendPage(
-  pageId: string,
-  children: BlockObjectRequest[],
-  prepend: boolean = false,
-  addDateDivider: boolean = false,
-) {
+type AppendBlockToPageParams = {
+  pageId: string;
+  children: BlockObjectRequest[];
+  prepend?: boolean;
+  addDateDivider?: boolean;
+};
+
+export async function appendBlockToPage({
+  pageId,
+  children,
+  prepend = false,
+  addDateDivider = false,
+}: AppendBlockToPageParams) {
   try {
     const notion = getNotionClient();
 
@@ -130,22 +137,7 @@ export async function appendPage(
 
     return results;
   } catch (err) {
-    return handleError(err, "Failed to add content to the page", undefined);
-  }
-}
-
-export async function appendBlockToPage(pageId: string, children: BlockObjectRequest[]) {
-  try {
-    const notion = getNotionClient();
-
-    const { results } = await notion.blocks.children.append({
-      block_id: pageId,
-      children,
-    });
-
-    return results;
-  } catch (err) {
-    return handleError(err, "Failed to add content to the page", undefined);
+    return handleError(err, "Failed to add block to the page", undefined);
   }
 }
 

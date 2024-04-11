@@ -12,7 +12,7 @@ import {
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
-import { DatabaseView, AppendPageLastValues } from "../utils/types";
+import { DatabaseView } from "../utils/types";
 
 export function useUsers() {
   const value = useCachedPromise(() => fetchUsers());
@@ -84,32 +84,6 @@ export function useDatabasesView(databaseId: string) {
     isLoading,
     mutate,
     setDatabaseView,
-  };
-}
-
-export function useAppendPageLastValues() {
-  const {
-    data: lastFormValues,
-    isLoading: isLastFormValuesLoading,
-    mutate,
-  } = useCachedPromise(async () => {
-    const data = await LocalStorage.getItem<string>("APPEND_PAGE_LAST_VALUES");
-
-    if (!data) return null;
-
-    return JSON.parse(data) as AppendPageLastValues | undefined;
-  });
-
-  async function setLastFormValues(data: AppendPageLastValues) {
-    if (!data) return;
-    await LocalStorage.setItem("APPEND_PAGE_LAST_VALUES", JSON.stringify(data));
-    mutate();
-  }
-
-  return {
-    lastFormValues,
-    isLastFormValuesLoading,
-    setLastFormValues,
   };
 }
 
