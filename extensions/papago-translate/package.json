@@ -5,6 +5,9 @@
   "description": "Language translation extension using Papago",
   "icon": "command-icon.png",
   "author": "rita_mordio",
+  "contributors": [
+    "jaeyeonling"
+  ],
   "categories": [
     "Applications"
   ],
