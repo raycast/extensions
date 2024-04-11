@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues, Toast, Grid, Clipboard, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  showToast,
+  getPreferenceValues,
+  Toast,
+  Grid,
+  Clipboard,
+  Icon,
+  LaunchProps,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { retrieveBrand } from "./source";
 import { RetrieveBrandResponse } from "./source.types";
@@ -10,19 +20,15 @@ import { randomUUID } from "crypto";
 
 const DOWNLOADS_DIR = `${homedir()}/Downloads`;
 
-type Values = {
-  textfield: string;
-};
-
 interface Preferences {
   bfApiKey: string;
 }
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Arguments.Index }>) {
   const { bfApiKey } = getPreferenceValues<Preferences>();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [resp, setResp] = useState<RetrieveBrandResponse | undefined>();
+  const [resp, setResp] = useState<RetrieveBrandResponse>();
 
   useEffect(() => {
     if (error) {
@@ -34,11 +40,10 @@ export default function Command() {
     }
   }, [error]);
 
-  async function handleSubmit(values: Values) {
+  async function handleSubmit(text: string) {
     setIsLoading(true);
     try {
-      const data = await retrieveBrand(bfApiKey, values.textfield);
-
+      const data = await retrieveBrand(bfApiKey, text);
       setResp(data);
     } catch (err: unknown) {
       setError((err as Error).message);
@@ -46,6 +51,10 @@ export default function Command() {
 
     setIsLoading(false);
   }
+
+  useEffect(() => {
+    handleSubmit(props.arguments.domain);
+  }, [props.arguments.domain]);
 
   async function saveToDownloads(imageUrl: string, extName: string) {
     const filePath = join(DOWNLOADS_DIR, randomUUID() + "." + extName);
@@ -64,21 +73,9 @@ export default function Command() {
     }
   }
 
-  return resp == null ? (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-      isLoading={isLoading}
-    >
-      <Form.Description text="This form accepts fields required to interact with brand fetch" />
-      <Form.TextField id="textfield" title="Brand Domain" placeholder="Enter text" defaultValue="brandfetch.com" />
-    </Form>
-  ) : (
-    <Grid columns={5}>
-      {resp.logos?.flatMap((image, idx) =>
+  return (
+    <Grid columns={5} isLoading={isLoading}>
+      {resp?.logos?.flatMap((image, idx) =>
         image.formats.map((format, index) => (
           <Grid.Item
             key={`${idx}-${index}`}
