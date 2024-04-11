@@ -34,7 +34,6 @@ export function getLinakControllerPath() {
   if (commandFolderPath) {
     return commandFolderPath.replace(/\n/gi, "") + "/linak-controller";
   }
-
   return "";
 }
 
@@ -69,8 +68,16 @@ export async function moveTo(height: number) {
 
   try {
     const { stdout } = await execAsync(
-      `${getLinakControllerPath()} --mac-address ${preferences.uuid} --move-to ${height}`,
+      `${getLinakControllerPath()} ${preferences.server ? "--forward" : ""} --mac-address ${
+        preferences.uuid
+      } --move-to ${height}`,
     );
+    if (stdout.includes("Something unexpected went wrong") && preferences.server) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Something went wrong, couldn't move desk";
+      toast.message = "Please make sure the linak-controller server is running on 127.0.0.1:9123.";
+      return null;
+    }
     toast.style = Toast.Style.Success;
     toast.title = "Desk moved successfully";
     return stdout;
