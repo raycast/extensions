@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-notes",
   "title": "Quick Notes",
-  "description": "Create simple markdown notes in Raycast locally. No integrations required!",
+  "description": "Create simple markdown notes in Raycast. No integrations required!",
   "icon": "icon.png",
   "author": "biknandy",
   "categories": [
@@ -56,6 +56,10 @@
         {
           "title": "Alphabetical",
           "value": "alphabetical"
+        },
+        {
+          "title": "Tags",
+          "value": "tags"
         }
       ],
       "defaultValue": "updated"

@@ -6,6 +6,7 @@ import {
   deleteNotesInFolder,
   exportNotes,
   getDeletedNote,
+  getDeletedTags,
   getInitialValuesFromFile,
   getOldRenamedTitles,
 } from "../utils/utils";
@@ -85,6 +86,19 @@ const tags = atom<Tag[]>(getInitialValuesFromFile(TAGS_FILE_PATH) as Tag[]);
 export const tagsAtom = atom(
   (get) => get(tags),
   (get, set, newTags: Tag[]) => {
+    // If a tag is deleted, remove it across all notes
+    const deletedTags = getDeletedTags(get(tags), newTags);
+    if (deletedTags.length > 0) {
+      const notesQ = get(notes);
+      const newNotes = notesQ.map((note) => {
+        return {
+          ...note,
+          tags: note.tags.filter((tag) => !deletedTags.some((t) => t.name === tag)),
+        };
+      });
+      set(notes, newNotes);
+    }
+
     set(tags, newTags);
 
     // Write updated notes to the file
