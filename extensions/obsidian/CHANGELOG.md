@@ -3,7 +3,7 @@
 ## [New features] - 2024-04-01
 
 - Add a new command which simply creates a new Obsidian note with the selected text as the note title.
-- Support selected text or clipboard content as the fallback input in `Append to daily note` command
+- Add a new command which append the selected text to the daily note.
 
 ## [Bugfix for nested bookmarks] - 2024-02-06
 

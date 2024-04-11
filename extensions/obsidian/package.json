@@ -266,9 +266,48 @@
           "name": "text",
           "placeholder": "Take out the trash",
           "type": "text",
-          "required": false
+          "required": true
         }
       ],
+      "preferences": [
+        {
+          "name": "appendTemplate",
+          "type": "textfield",
+          "title": "Template for Daily Note Append action",
+          "required": false,
+          "description": "Specify a template for Daily Note Append action (e.g. '- {content}')"
+        },
+        {
+          "name": "vaultName",
+          "type": "textfield",
+          "title": "Name of Obsidian vault where note is",
+          "required": false,
+          "description": "Name of Obsidian vault where note is"
+        },
+        {
+          "name": "heading",
+          "type": "textfield",
+          "title": "Name of heading in note in which to append",
+          "required": false,
+          "description": "If no heading is set, text will be appended to the end of the daily note"
+        },
+        {
+          "name": "silent",
+          "type": "checkbox",
+          "label": "Silent Mode",
+          "title": "Silent Mode",
+          "required": false,
+          "description": "Don't open daily note when appending to the daily note.",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "dailyNoteAppendFromSelectedTextCommand",
+      "title": "Append to Daily Note from Selected Text",
+      "subtitle": "Obsidian",
+      "description": "Append selected text to your daily note",
+      "mode": "view",
       "preferences": [
         {
           "name": "appendTemplate",

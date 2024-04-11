@@ -1,9 +1,20 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  getSelectedText,
+  List,
+  open,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
-import { DailyNoteAppendPreferences } from "./utils/preferences";
+import { DailyNoteAppendFromSelectedTextPreferences } from "./utils/preferences";
 import {
   applyTemplates,
   getObsidianTarget,
@@ -13,20 +24,26 @@ import {
 } from "./utils/utils";
 import { clearCache } from "./utils/data/cache";
 
-interface DailyNoteAppendArgs {
-  text: string;
-}
-
-export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs }) {
+export default function DailyNoteAppendFromSelectedText() {
   const { vaults, ready } = useObsidianVaults();
-  const { text } = props.arguments;
-  const { appendTemplate, heading, vaultName, silent } = getPreferenceValues<DailyNoteAppendPreferences>();
+  const { appendTemplate, heading, vaultName, silent } =
+    getPreferenceValues<DailyNoteAppendFromSelectedTextPreferences>();
   const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
   const [content, setContent] = useState("");
+
   useEffect(() => {
     async function getContent() {
-      const content = await applyTemplates(text, appendTemplate);
-      setContent(content);
+      try {
+        const selectedText = await getSelectedText();
+        const content = await applyTemplates(selectedText, appendTemplate);
+        setContent(content);
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No text selected",
+          message: String(error),
+        });
+      }
     }
     getContent();
   }, []);

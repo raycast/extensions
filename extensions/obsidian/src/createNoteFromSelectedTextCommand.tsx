@@ -1,4 +1,4 @@
-import { closeMainWindow, getPreferenceValues, getSelectedText, List, open, popToRoot } from "@raycast/api";
+import { getSelectedText, List, open, popToRoot, showToast, Toast } from "@raycast/api";
 
 import { CreateNoteForm } from "./components/CreateNoteForm";
 import { VaultSelection } from "./components/VaultSelection";
@@ -6,10 +6,9 @@ import { Vault } from "./utils/interfaces";
 import { getObsidianTarget, ObsidianTargetType, useObsidianVaults } from "./utils/utils";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { noVaultPathsToast } from "./components/Toasts";
-import { NoteFormPreferences } from "./utils/preferences";
 import { useEffect, useState } from "react";
 
-export default function Command() {
+export default function CreateNoteFromSelectedTextCommand() {
   const { vaults, ready } = useObsidianVaults();
   const [text, setText] = useState("");
 
@@ -19,8 +18,11 @@ export default function Command() {
         const selectedText = await getSelectedText();
         setText(selectedText);
       } catch (error) {
-        closeMainWindow();
-        console.error("Error in getting content", error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No text selected",
+          message: String(error),
+        });
       }
     }
     getContent();

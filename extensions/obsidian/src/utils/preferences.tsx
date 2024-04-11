@@ -42,6 +42,13 @@ export interface DailyNoteAppendPreferences {
   silent?: boolean;
 }
 
+export interface DailyNoteAppendFromSelectedTextPreferences {
+  appendTemplate?: string;
+  vaultName?: string;
+  heading?: string;
+  silent?: boolean;
+}
+
 export interface appendTaskPreferences {
   appendTemplate?: string;
   vaultName?: string;
