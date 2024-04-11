@@ -4,7 +4,7 @@
 
 - Fixes icons for issues and pull requests in `Notifications` and `Unread Notifications` commands.
 - Standardizes the color for all the accessories in `My Pull Requests`.
-- Fixes an issue where the pull request icon color for the `My Pull Requests Menu Bar` was not adjusted to the dark mode.
+- Fixes an issue where the pull request icon color for the `My Pull Requests Menu Bar` was not adjusted for dark mode.
 
 ## [Fix icon] - 2024-04-02
 
