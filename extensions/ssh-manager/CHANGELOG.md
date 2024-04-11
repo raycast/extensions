@@ -1,5 +1,13 @@
 # ssh-manager Changelog
 
+## [Add Alacritty Support] - 2024-04-09
+
+- Added support for alacritty as an option to open ssh connections.
+
+## [Fix] - 2024-04-08
+
+- Fixed the issue that `User` options are still created when `User` is not specified.
+
 ## [New field: Only use Host] - 2024-01-31
 
 - Added the option to let users choose whether to use Host only for ssh connections without other parameters. e.g., `ssh Host`

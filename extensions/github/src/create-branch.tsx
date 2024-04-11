@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Form, Image, Toast, open, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import { getErrorMessage } from "./helpers/errors";

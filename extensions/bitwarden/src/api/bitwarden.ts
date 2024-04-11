@@ -1,5 +1,5 @@
-import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
+import { Cache, environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue, execaSync } from "execa";
 import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
 import { dirname } from "path/posix";
 import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
@@ -9,10 +9,13 @@ import { Folder, Item } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
-  CLINotFoundError,
   EnsureCliBinError,
+  InstalledCLINotFoundError,
   ManuallyThrownError,
   NotLoggedInError,
+  PremiumFeatureError,
+  SendInvalidPasswordError,
+  SendNeedsPasswordError,
   tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
@@ -22,6 +25,8 @@ import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAva
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
+import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
+import { prepareSendPayload } from "~/api/bitwarden.helpers";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -32,12 +37,14 @@ type Env = {
   BW_SESSION?: string;
 };
 
-type ActionCallbacks = {
+type ActionListeners = {
   login?: () => MaybePromise<void>;
-  logout?: () => MaybePromise<void>;
+  logout?: (reason?: string) => MaybePromise<void>;
   lock?: (reason?: string) => MaybePromise<void>;
   unlock?: (password: string, sessionToken: string) => MaybePromise<void>;
 };
+
+type ActionListenersMap<T extends keyof ActionListeners = keyof ActionListeners> = Map<T, Set<ActionListeners[T]>>;
 
 type MaybeError<T = undefined> = { result: T; error?: undefined } | { result?: undefined; error: ManuallyThrownError };
 
@@ -46,6 +53,26 @@ type ExecProps = {
   resetVaultTimeout: boolean;
   abortController?: AbortController;
   input?: string;
+};
+
+type LockOptions = {
+  /** The reason for locking the vault */
+  reason?: string;
+  checkVaultStatus?: boolean;
+  /** The callbacks are called before the operation is finished (optimistic) */
+  immediate?: boolean;
+};
+
+type LogoutOptions = {
+  /** The reason for locking the vault */
+  reason?: string;
+  /** The callbacks are called before the operation is finished (optimistic) */
+  immediate?: boolean;
+};
+
+type ReceiveSendOptions = {
+  savePath?: string;
+  password?: string;
 };
 
 const { supportPath } = environment;
@@ -82,7 +109,20 @@ export const cliInfo = {
       // CLI bin download is off for arm64 until bitwarden releases arm binaries
       // https://github.com/bitwarden/clients/pull/2976
       // https://github.com/bitwarden/clients/pull/7338
-      if (process.arch === "arm64") return this.installedBin;
+      if (process.arch === "arm64") {
+        const cache = new Cache();
+        try {
+          if (!existsSync(this.downloadedBin)) throw new Error("No downloaded bin");
+          if (cache.get("downloadedBinWorks") === "true") return this.downloadedBin;
+
+          execaSync(this.downloadedBin, ["--version"]);
+          cache.set("downloadedBinWorks", "true");
+          return this.downloadedBin;
+        } catch {
+          cache.set("downloadedBinWorks", "false");
+          return this.installedBin;
+        }
+      }
 
       return !BinDownloadLogger.hasError() ? this.downloadedBin : this.installedBin;
     },
@@ -102,12 +142,11 @@ export class Bitwarden {
   private env: Env;
   private initPromise: Promise<void>;
   private tempSessionToken?: string;
-  private callbacks: ActionCallbacks = {};
+  private actionListeners: ActionListenersMap = new Map();
   private preferences = getPreferenceValues<Preferences>();
   private cliPath: string;
   private toastInstance: Toast | undefined;
   wasCliUpdated = false;
-  lockReason: string | undefined;
 
   constructor(toastInstance?: Toast) {
     const { cliPath: cliPathPreference, clientId, clientSecret, serverCertsPath } = this.preferences;
@@ -126,20 +165,13 @@ export class Bitwarden {
     this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
       await this.checkServerUrl(serverUrl);
-      this.lockReason = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
     })();
   }
 
   private async ensureCliBinary(): Promise<void> {
     if (this.checkCliBinIsReady(this.cliPath)) return;
-    if (this.cliPath === this.preferences.cliPath) {
-      throw new CLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
-    }
-    if (this.cliPath === cliInfo.path.installedBin) {
-      throw new CLINotFoundError(
-        `Bitwarden CLI not found at ${this.cliPath}` +
-          ", please make sure you installed it correctly. More information in the extension's description."
-      );
+    if (this.cliPath === this.preferences.cliPath || this.cliPath === cliInfo.path.installedBin) {
+      throw new InstalledCLINotFoundError(`Bitwarden CLI not found at ${this.cliPath}`);
     }
     if (BinDownloadLogger.hasError()) BinDownloadLogger.clearError();
 
@@ -200,11 +232,6 @@ export class Bitwarden {
     }
   }
 
-  setActionCallback<TAction extends keyof ActionCallbacks>(action: TAction, callback: ActionCallbacks[TAction]): this {
-    this.callbacks[action] = callback;
-    return this;
-  }
-
   setSessionToken(token: string): void {
     this.env = {
       ...this.env,
@@ -263,18 +290,6 @@ export class Bitwarden {
     }
   }
 
-  private async setLockReason(reason: string): Promise<void> {
-    this.lockReason = reason;
-    await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON, reason);
-  }
-
-  private async clearLockReason(): Promise<void> {
-    if (this.lockReason) {
-      await LocalStorage.removeItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
-      this.lockReason = undefined;
-    }
-  }
-
   private async exec(args: string[], options: ExecProps): Promise<ExecaChildProcess> {
     const { abortController, input = "", resetVaultTimeout } = options ?? {};
 
@@ -303,8 +318,8 @@ export class Bitwarden {
   async login(): Promise<MaybeError> {
     try {
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
-      await this.clearLockReason();
-      await this.callbacks.login?.();
+      await this.saveLastVaultStatus("login", "unlocked");
+      await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to login", execError);
@@ -314,11 +329,14 @@ export class Bitwarden {
     }
   }
 
-  async logout(reason?: string): Promise<MaybeError> {
+  async logout(options?: LogoutOptions): Promise<MaybeError> {
+    const { reason, immediate = false } = options ?? {};
     try {
-      if (reason) await this.setLockReason(reason);
+      if (immediate) await this.handlePostLogout(reason);
+
       await this.exec(["logout"], { resetVaultTimeout: false });
-      await this.handlePostLogout();
+      await this.saveLastVaultStatus("logout", "unauthenticated");
+      if (!immediate) await this.handlePostLogout(reason);
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to logout", execError);
@@ -328,17 +346,19 @@ export class Bitwarden {
     }
   }
 
-  async lock(reason?: string, shouldCheckVaultStatus?: boolean): Promise<MaybeError> {
+  async lock(options?: LockOptions): Promise<MaybeError> {
+    const { reason, checkVaultStatus = false, immediate = false } = options ?? {};
     try {
-      if (shouldCheckVaultStatus) {
+      if (immediate) await this.callActionListeners("lock", reason);
+      if (checkVaultStatus) {
         const { error, result } = await this.status();
         if (error) throw error;
-        if (result.status !== "unauthenticated") return { error: new NotLoggedInError("Not logged in") };
+        if (result.status === "unauthenticated") return { error: new NotLoggedInError("Not logged in") };
       }
 
-      if (reason) await this.setLockReason(reason);
       await this.exec(["lock"], { resetVaultTimeout: false });
-      await this.callbacks.lock?.(reason);
+      await this.saveLastVaultStatus("lock", "locked");
+      if (!immediate) await this.callActionListeners("lock", reason);
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to lock vault", execError);
@@ -352,8 +372,8 @@ export class Bitwarden {
     try {
       const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"], { resetVaultTimeout: true });
       this.setSessionToken(sessionToken);
-      await this.clearLockReason();
-      await this.callbacks.unlock?.(password, sessionToken);
+      await this.saveLastVaultStatus("unlock", "unlocked");
+      await this.callActionListeners("unlock", password, sessionToken);
       return { result: sessionToken };
     } catch (execError) {
       captureException("Failed to unlock vault", execError);
@@ -415,9 +435,13 @@ export class Bitwarden {
 
   async createFolder(name: string): Promise<MaybeError> {
     try {
-      const folder = await this.getTemplate("folder");
+      const { error, result: folder } = await this.getTemplate("folder");
+      if (error) throw error;
+
       folder.name = name;
-      const encodedFolder = await this.encode(JSON.stringify(folder));
+      const { result: encodedFolder, error: encodeError } = await this.encode(JSON.stringify(folder));
+      if (encodeError) throw encodeError;
+
       await this.exec(["create", "folder", encodedFolder], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
@@ -456,19 +480,24 @@ export class Bitwarden {
   async checkLockStatus(): Promise<VaultStatus> {
     try {
       await this.exec(["unlock", "--check"], { resetVaultTimeout: false });
+      await this.saveLastVaultStatus("checkLockStatus", "unlocked");
       return "unlocked";
     } catch (error) {
       captureException("Failed to check lock status", error);
       const errorMessage = (error as ExecaError).stderr;
-      if (errorMessage === "Vault is locked.") return "locked";
+      if (errorMessage === "Vault is locked.") {
+        await this.saveLastVaultStatus("checkLockStatus", "locked");
+        return "locked";
+      }
+      await this.saveLastVaultStatus("checkLockStatus", "unauthenticated");
       return "unauthenticated";
     }
   }
 
-  async getTemplate(type: string): Promise<any> {
+  async getTemplate<T = any>(type: string): Promise<MaybeError<T>> {
     try {
       const { stdout } = await this.exec(["get", "template", type], { resetVaultTimeout: true });
-      return JSON.parse(stdout);
+      return { result: JSON.parse<T>(stdout) };
     } catch (execError) {
       captureException("Failed to get template", execError);
       const { error } = await this.handleCommonErrors(execError);
@@ -477,9 +506,16 @@ export class Bitwarden {
     }
   }
 
-  async encode(input: any): Promise<string> {
-    const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
-    return stdout;
+  async encode(input: string): Promise<MaybeError<string>> {
+    try {
+      const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
+      return { result: stdout };
+    } catch (execError) {
+      captureException("Failed to encode", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {
@@ -488,13 +524,138 @@ export class Bitwarden {
     return stdout;
   }
 
+  async listSends(): Promise<MaybeError<Send[]>> {
+    try {
+      const { stdout } = await this.exec(["send", "list"], { resetVaultTimeout: true });
+      return { result: JSON.parse<Send[]>(stdout) };
+    } catch (execError) {
+      captureException("Failed to list sends", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async createSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
+    try {
+      const { error: templateError, result: template } = await this.getTemplate(
+        values.type === SendType.Text ? "send.text" : "send.file"
+      );
+      if (templateError) throw templateError;
+
+      const payload = prepareSendPayload(template, values);
+      const { result: encodedPayload, error: encodeError } = await this.encode(JSON.stringify(payload));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["send", "create", encodedPayload], { resetVaultTimeout: true });
+
+      return { result: JSON.parse<Send>(stdout) };
+    } catch (execError) {
+      captureException("Failed to create send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async editSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
+    try {
+      const { result: encodedPayload, error: encodeError } = await this.encode(JSON.stringify(values));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["send", "edit", encodedPayload], { resetVaultTimeout: true });
+      return { result: JSON.parse<Send>(stdout) };
+    } catch (execError) {
+      captureException("Failed to delete send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async deleteSend(id: string): Promise<MaybeError> {
+    try {
+      await this.exec(["send", "delete", id], { resetVaultTimeout: true });
+      return { result: undefined };
+    } catch (execError) {
+      captureException("Failed to delete send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async removeSendPassword(id: string): Promise<MaybeError> {
+    try {
+      await this.exec(["send", "remove-password", id], { resetVaultTimeout: true });
+      return { result: undefined };
+    } catch (execError) {
+      captureException("Failed to remove send password", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async receiveSendInfo(url: string, options?: ReceiveSendOptions): Promise<MaybeError<ReceivedSend>> {
+    try {
+      const { stdout, stderr } = await this.exec(["send", "receive", url, "--obj"], {
+        resetVaultTimeout: true,
+        input: options?.password,
+      });
+      if (!stdout && /Invalid password/i.test(stderr)) return { error: new SendInvalidPasswordError() };
+      if (!stdout && /Send password/i.test(stderr)) return { error: new SendNeedsPasswordError() };
+
+      return { result: JSON.parse<ReceivedSend>(stdout) };
+    } catch (execError) {
+      const errorMessage = (execError as ExecaError).stderr;
+      if (/Invalid password/gi.test(errorMessage)) return { error: new SendInvalidPasswordError() };
+      if (/Send password/gi.test(errorMessage)) return { error: new SendNeedsPasswordError() };
+
+      captureException("Failed to receive send obj", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async receiveSend(url: string, options?: ReceiveSendOptions): Promise<MaybeError<string>> {
+    try {
+      const { savePath, password } = options ?? {};
+      const args = ["send", "receive", url];
+      if (savePath) args.push("--output", savePath);
+      const { stdout } = await this.exec(args, { resetVaultTimeout: true, input: password });
+      return { result: stdout };
+    } catch (execError) {
+      captureException("Failed to receive send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  // utils below
+
+  async saveLastVaultStatus(callName: string, status: VaultStatus): Promise<void> {
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.VAULT_LAST_STATUS, status);
+  }
+
+  async getLastSavedVaultStatus(): Promise<VaultStatus | undefined> {
+    const lastSavedStatus = await LocalStorage.getItem<VaultStatus>(LOCAL_STORAGE_KEY.VAULT_LAST_STATUS);
+    if (!lastSavedStatus) {
+      const vaultStatus = await this.status();
+      return vaultStatus.result?.status;
+    }
+    return lastSavedStatus;
+  }
+
   private isPromptWaitingForMasterPassword(result: ExecaReturnValue): boolean {
     return !!(result.stderr && result.stderr.includes("Master password"));
   }
 
-  private async handlePostLogout(): Promise<void> {
+  private async handlePostLogout(reason?: string): Promise<void> {
     this.clearSessionToken();
-    await this.callbacks.logout?.();
+    await this.callActionListeners("logout", reason);
   }
 
   private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
@@ -505,7 +666,44 @@ export class Bitwarden {
       await this.handlePostLogout();
       return { error: new NotLoggedInError("Not logged in") };
     }
+    if (/Premium status/i.test(errorMessage)) {
+      return { error: new PremiumFeatureError() };
+    }
     return {};
+  }
+
+  setActionListener<A extends keyof ActionListeners>(action: A, listener: ActionListeners[A]): this {
+    const listeners = this.actionListeners.get(action);
+    if (listeners && listeners.size > 0) {
+      listeners.add(listener);
+    } else {
+      this.actionListeners.set(action, new Set([listener]));
+    }
+    return this;
+  }
+
+  removeActionListener<A extends keyof ActionListeners>(action: A, listener: ActionListeners[A]): this {
+    const listeners = this.actionListeners.get(action);
+    if (listeners && listeners.size > 0) {
+      listeners.delete(listener);
+    }
+    return this;
+  }
+
+  private async callActionListeners<A extends keyof ActionListeners>(
+    action: A,
+    ...args: Parameters<NonNullable<ActionListeners[A]>>
+  ) {
+    const listeners = this.actionListeners.get(action);
+    if (listeners && listeners.size > 0) {
+      for (const listener of listeners) {
+        try {
+          await (listener as any)?.(...args);
+        } catch (error) {
+          captureException(`Error calling bitwarden action listener for ${action}`, error);
+        }
+      }
+    }
   }
 
   private showToast = async (toastOpts: Toast.Options): Promise<Toast & { restore: () => Promise<void> }> => {

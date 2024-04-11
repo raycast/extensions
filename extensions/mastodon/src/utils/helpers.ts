@@ -2,7 +2,7 @@ import { Account, Status, VisibilityScope } from "./types";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { Icon } from "@raycast/api";
 import { showToast, Toast } from "@raycast/api";
-import { MastodonError } from "../utils/types";
+import { MastodonError, Notification } from "../utils/types";
 import { useMe } from "../hooks/useMe";
 
 const nhm = new NodeHtmlMarkdown();
@@ -85,4 +85,18 @@ export const isVisiblityPrivate = (visibility: VisibilityScope) => visibility ==
 export const isMyStatus = (account: Account) => {
   const { username } = useMe();
   return username === account.acct;
+};
+
+export const groupNotifications = (notifications: Notification[]) => {
+  const grouped: Partial<Record<Notification["type"], Notification[]>> = {};
+
+  for (const notification of notifications) {
+    if (grouped[notification.type]) {
+      grouped[notification.type]?.push(notification);
+    } else {
+      grouped[notification.type] = [notification];
+    }
+  }
+
+  return grouped;
 };

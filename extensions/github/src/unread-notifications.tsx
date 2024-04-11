@@ -1,9 +1,10 @@
 import {
-  getPreferenceValues,
+  Color,
   Icon,
-  launchCommand,
   LaunchType,
   MenuBarExtra,
+  getPreferenceValues,
+  launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
@@ -53,8 +54,12 @@ function UnreadNotifications() {
   async function openNotification(notification: Notification) {
     try {
       const openAndMarkNotificationAsRead = async () => {
-        await open(getGitHubURL(notification, viewer?.id));
-        await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        if (notification.subject.type === "RepositoryInvitation") {
+          open(`${notification.repository.html_url}/invitations`);
+        } else {
+          await open(await getGitHubURL(notification, viewer?.id));
+          await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        }
       };
 
       await mutate(openAndMarkNotificationAsRead(), {
@@ -101,7 +106,7 @@ function UnreadNotifications() {
           data.map((notification) => {
             const icon = {
               source: getNotificationIcon(notification).value,
-              tintColor: { light: "#000", dark: "#fff", adjustContrast: false },
+              tintColor: Color.PrimaryText,
             };
             const title = notification.subject.title;
             const updatedAt = new Date(notification.updated_at);

@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import { useCallback } from "react";
-import type { NoteEntity } from "crossbell.js";
+import type { NoteEntity } from "crossbell";
 import { useCharacter } from "../apis";
 import { extractCharacterInfo } from "../utils/character";
 import { extractNoteInfo } from "../utils/note";
@@ -38,7 +38,7 @@ export default function NoteDetail({ note }: { note: NoteEntity }) {
         markdown =
           `_Replied to [${note.toCharacterId}-${note.toNoteId}](${composeNoteUrl(
             note.toCharacterId,
-            note.toNoteId
+            note.toNoteId,
           )})_\n\n` + markdown;
 
         markdown += `\n\n---\n\n_Original note:_\n\n`;
@@ -51,7 +51,7 @@ export default function NoteDetail({ note }: { note: NoteEntity }) {
 
       return markdown;
     },
-    [note, toNote]
+    [note, toNote],
   );
 
   return (

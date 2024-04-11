@@ -16,6 +16,35 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.14.0
+
+- Add `useStreamJSON` hook.
+
+### v1.13.6
+
+- Updated `useFetch`'s `mapResult` type to allow returning `cursor` in addition to `data` and `hasMore`.
+
+### v1.13.5
+
+- Extended `PaginationOptions` with `cursor`.
+
+### v1.13.4
+
+- Fixed non-paginated version of `useFetch` not being re-run when `url` changes.
+
+### v1.13.3
+
+- Fixed `optimisticUpdate` not working when paginating beyond the first page when using `useCachedPromise` or other hooks that build on top of it..
+- Fixed `useFetch` type requiring `mapResult` for non-paginated overload.
+
+### v1.13.2
+
+- Added default OAuth URLs for Google, Jira, and Zoom
+
+### v1.13.1
+
+- Fixed `useFetch` type for non-paginated overload.
+
 ### v1.13.0
 
 - Added pagination support to `usePromise`, `useCachedPromise` and `useFetch`.

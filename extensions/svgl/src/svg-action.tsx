@@ -1,5 +1,8 @@
-import { Action, ActionPanel, Icon, environment } from "@raycast/api";
-import { fetchAndCopySvg } from "./util";
+import { ActionPanel } from "@raycast/api";
+import CopyReactComponentActions from "./actions/copy-react-component-actions";
+import CopySvgActions from "./actions/copy-svg-actions";
+import CopyWordmarkSvgActions from "./actions/copy-wordmark-svg-actions";
+import SvgInfoActions from "./actions/svg-info-actions";
 import { Svg } from "./type";
 
 interface SvgActionProps {
@@ -9,45 +12,19 @@ interface SvgActionProps {
 
 const SvgAction = ({ svg, category }: SvgActionProps) => {
   return (
-    <ActionPanel>
-      <Action
-        icon={Icon.Clipboard}
-        title="Copy SVG File"
-        onAction={() =>
-          fetchAndCopySvg(
-            typeof svg.route === "string"
-              ? svg.route
-              : environment.appearance === "dark"
-                ? svg.route.dark
-                : svg.route.light,
-          )
-        }
-      />
-      <Action.CopyToClipboard title="Copy SVG Title" content={svg.title} />
-      <Action.OpenInBrowser
-        title="Open SVG in Browser"
-        url={typeof svg.route === "string" ? svg.route : svg.route.light}
-        shortcut={{
-          modifiers: ["cmd"],
-          key: "o",
-        }}
-      />
-      <Action.OpenInBrowser
-        title={`Visit ${svg.title} Website`}
-        url={svg.url}
-        shortcut={{
-          modifiers: ["cmd"],
-          key: "v",
-        }}
-      />
-      <Action.OpenInBrowser
-        title="Visit This Category in Svgl"
-        url={`https://svgl.app/${category !== "All" ? `directory/${category.toLowerCase()}` : ""}`}
-        shortcut={{
-          modifiers: ["cmd"],
-          key: "s",
-        }}
-      />
+    <ActionPanel title={`${svg.title}'s Logo`}>
+      <ActionPanel.Section title="Copy SVG">
+        <CopySvgActions svg={svg} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy SVG Wordmark">
+        <CopyWordmarkSvgActions svg={svg} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Copy React Component">
+        <CopyReactComponentActions svg={svg} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="SVG Info">
+        <SvgInfoActions svg={svg} category={category} />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 };

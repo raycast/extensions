@@ -1,7 +1,8 @@
 import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import { Reminder } from "./types/reminder";
 import { sendPushNotificationWithNtfy } from "./utils/sendPushNotificationWithNtfy";
+import { sanitizeTopicForNotification } from "./utils/sanitizeTopicForNotification";
+import { runAppleScript } from "@raycast/utils";
 
 interface Preferences {
   mobileNotificationNtfy: boolean;
@@ -16,11 +17,11 @@ export default async function Command() {
   for (const key in storedRemindersObject) {
     const reminder: Reminder = JSON.parse(storedRemindersObject[key]);
     if (new Date().getTime() >= new Date(reminder.date).getTime()) {
-      await runAppleScript(
-        `display notification "${reminder.topic}" with title "Simple Reminder" sound name "default"`
-      );
+      const cleanTopic = sanitizeTopicForNotification(reminder.topic);
+
+      await runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
       if (mobileNotificationNtfy) {
-        await sendPushNotificationWithNtfy(mobileNotificationNtfyTopic, reminder.topic);
+        await sendPushNotificationWithNtfy(mobileNotificationNtfyTopic, cleanTopic);
       }
       await LocalStorage.removeItem(reminder.id);
     }

@@ -51,6 +51,7 @@ export function PlanTask({ notification, mutate }: PlanTaskProps) {
   const { handleSubmit, itemProps } = useForm<TaskPlanningFormValues>({
     initialValues: {
       dueAt: new Date(),
+      project: projects?.find((p) => p.name === "Inbox")?.source_id,
       priority: `${TaskPriority.P4 as number}`,
     },
     async onSubmit(values) {

@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.71.0 - 2024-04-10
+
+### ✨ New
+
+- **Developer Hub:** you can now programmatically send error reports using the new `captureException` function.
+- **Utils**: we’ve added a new React hook, `useStreamJSON`. The new hook simplifies the process of streaming through large JSON data sources, which normally would not fit in the extension’s memory. Take a look at the [developer docs](https://developers.raycast.com/utilities/react-hooks/usestreamjson) to learn more.
+- **AI**: All the new models are also available in the API.
+
+### 💎 Improvements
+
+- `getApplications`, `getDefaultApplication`, and `Action.OpenWith` now support remote URLs and will return the installed Applications that can open remote URLs (usually browsers)
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed a bug that could cause pagination to not work when `filtering` was set to true.
+- **CLI**: Fixed the cursor being kept hidden when interrupting a command
+
+## 1.70.0 - 2024-03-20
+
+### 💎 Improvements
+
+- **Grid & List:** The placeholders shown while waiting for the next page to load are now animated
+- **Application info:** Application object now returns the localized name if the application is running
+
+### 🐞 Fixes
+
+- **Forms:** Fixed an issue which made it impossible to select a value of a controlled Dropdown after changing its value programmatically
+- **Grid:** Fixed an issue where pagination would not work when scrolling to the bottom while `isLoading` is initially false
+- **List:** Fixed an issue where pagination would not work if there was an empty section at the end
+- Fixed a rare case where, when an extension throws an error, a different error saying “Could not communicate with command worker” would be thrown instead
+
 ## 1.69.0 - 2024-03-07
 
 ### ✨ New

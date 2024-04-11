@@ -152,3 +152,15 @@ export const silent = <T>(fn: () => T): T | null => {
     return null;
   }
 };
+
+/**
+ * 修复 Error: Cannot parse render tree JSON: Missing low code point in surrogate pair
+ */
+export function fixSurrogatePairs(str: string): string {
+  // 使用正则表达式查找孤立的高代理项（D800-DFFF之间但后面没有低代理项）
+  // 或孤立的低代理项（后面没有高代理项）
+  return str.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|([^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/g, (_, lowSurrogate) => {
+    // 如果找到孤立的低代理项，则将其移除，否则替换高代理项为�（代表无法解析的字符）
+    return lowSurrogate ? "" : "�";
+  });
+}

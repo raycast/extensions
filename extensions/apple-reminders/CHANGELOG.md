@@ -1,5 +1,14 @@
 # Apple Reminders Changelog
 
+## [Quick Add Reminder Improvements] - 2024-04-11
+
+- It's now possible to specify a due date and a list (with an `#` prefix) in `Quick Add Reminder` when not using the AI.
+- Fixed a bug where notes wouldn't be saved when adding a reminder without using the AI in `Quick Add Reminder`
+
+## [Fix interval error validation] - 2024-03-20
+
+- `interval` error validation now checks for `0` and `negative` values.
+
 ## [Quick Add Reminder Fix] - 2024-03-12
 
 - Fixed an issue where reminder notes were not being saved properly when using the Quick Add feature.

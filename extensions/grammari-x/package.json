@@ -14,7 +14,36 @@
       "name": "grammariX",
       "title": "Improve Writing",
       "description": "Experience flawless writing with GrammariX,\nyour AI-powered grammar companion.\nFrom intricate sentence structure to nuanced word choice,\nGrammariX ensures your text is polished and precise.\nLet advanced AI technology enhance your writing effortlessly,\nleaving you with confidence in every word.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "grammarType",
+          "type": "dropdown",
+          "placeholder": "Grammar Type",
+          "required": false,
+          "default": "Fix grammer",
+          "data": [
+            {
+              "title": "Fix grammer",
+              "value": "Fix grammer"
+            },
+            {
+              "title": "Paraphrase",
+              "value": "Paraphrase"
+            },
+            {
+              "title": "Change Tone",
+              "value": "Change Tone"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "history",
@@ -52,8 +81,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.1",
-    "@raycast/utils": "^1.9.1",
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.12.4",
     "dotenv": "^16.3.1",
     "openai": "^4.0.1",
     "uuid": "^9.0.0"
@@ -61,7 +90,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "18.2.27",
     "@types/uuid": "^9.0.3",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
