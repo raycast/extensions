@@ -26,7 +26,7 @@ export const fetchAndCopySvg = async (url: string, showContent: string) => {
 export const fetchAndCopyReactComponent = async (url: string, name: string, tsx: boolean) => {
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Fetching react component",
+    title: "Fetching React component",
   });
   const svg = await fetchSvg(url);
 
