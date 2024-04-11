@@ -389,6 +389,7 @@ function SearchSendsCommandContent() {
               />
               <Action
                 title="Delete Send"
+                style={Action.Style.Destructive}
                 onAction={() => onDelete(send.id)}
                 icon={Icon.Trash}
                 shortcut={{ key: "d", modifiers: ["opt"] }}
