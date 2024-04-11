@@ -10,6 +10,7 @@ export default function CommandList() {
   const navigation = useNavigation();
   const actions = useActionsState((state) => state.actions.sort((a, b) => a.name.localeCompare(b.name)));
 
+  const addAction = useActionsState((state) => state.addAction);
   const removeAction = useActionsState((state) => state.removeAction);
 
   const remove = async (id: string) => {
@@ -25,6 +26,15 @@ export default function CommandList() {
     ) {
       removeAction(id);
     }
+  };
+
+  const duplicate = async (id: string) => {
+    const action = actions.find((a) => a.id === id);
+    if (!action) {
+      return;
+    }
+
+    addAction(action);
   };
 
   return (
@@ -62,6 +72,12 @@ export default function CommandList() {
                     icon={Icon.Pencil}
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     onAction={() => navigation.push(<CommandForm id={action.id} />)}
+                  />
+                  <Action
+                    title="Duplicate"
+                    icon={Icon.Duplicate}
+                    shortcut={Keyboard.Shortcut.Common.Duplicate}
+                    onAction={() => duplicate(action.id)}
                   />
                   <Action.CreateQuicklink
                     title="Create Quicklink"

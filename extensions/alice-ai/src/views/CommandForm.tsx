@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, LaunchType, Toast, launchCommand, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { MODEL } from "../lib/OpenAI";
+import { AvailableModels } from "../lib/OpenAI";
 import { useActionsState } from "../store/actions";
 import { Action as IAction } from "../types";
 
@@ -71,7 +71,7 @@ export default function CommandForm({ id }: Props) {
           return "Model is required";
         }
 
-        if (value && !MODEL[value]) {
+        if (value && !AvailableModels[value]) {
           return "Invalid model";
         }
       },
@@ -100,8 +100,9 @@ export default function CommandForm({ id }: Props) {
       <Form.TextField title="Name" placeholder="Enter action name" {...itemProps.name} />
       <Form.TextArea title="Description" placeholder="Enter action description" {...itemProps.description} />
       <Form.TextArea title="System Prompt" placeholder="Enter system prompt" {...itemProps.systemPrompt} />
+      {/* @ts-expect-error The type of the model is Model, whereas the event dropdown is always a string. */}
       <Form.Dropdown title="Model" {...itemProps.model}>
-        {Object.entries(MODEL).map(([model, name]) => (
+        {Object.entries(AvailableModels).map(([model, name]) => (
           <Form.Dropdown.Item key={model} value={model} title={name} />
         ))}
       </Form.Dropdown>

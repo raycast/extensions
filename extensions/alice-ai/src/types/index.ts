@@ -1,9 +1,11 @@
+import { Model } from "../lib/OpenAI";
+
 export interface Action {
   id: string;
   name: string;
   description: string;
   systemPrompt: string;
-  model: string;
+  model: Model;
   temperature: string;
   maxTokens: string;
 }

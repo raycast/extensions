@@ -2,6 +2,8 @@ import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { StateCreator, create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+export const Infinity32Bit = 2147483647;
+
 export function createActionDeepLink(id: string) {
   return `raycast://extensions/quiknull/alice-ai/commands?arguments=${encodeURIComponent(`{"id":"${id}"}`)}`;
 }

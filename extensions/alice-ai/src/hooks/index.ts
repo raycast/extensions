@@ -1,7 +1,4 @@
-import { useEffect } from "react";
+import useMetadata from "./useMetadata";
+import useSelectedText from "./useSelectedText";
 
-export function useAsyncEffect(fn: () => Promise<void>, deps: React.DependencyList) {
-  return useEffect(() => {
-    fn();
-  }, deps);
-}
+export { useMetadata, useSelectedText };

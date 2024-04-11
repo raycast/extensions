@@ -60,8 +60,8 @@ export const useActionsState = createStore<ActionState>("actions", (set, get) =>
       actions: [
         ...get().actions,
         {
-          id: randomUUID(),
           ...action,
+          id: randomUUID(),
         },
       ],
     });

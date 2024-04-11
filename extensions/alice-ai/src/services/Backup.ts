@@ -3,6 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import { z } from "zod";
 import { useActionsState } from "../store/actions";
 import { Action } from "../types";
+import { Infinity32Bit } from "../utils";
 
 interface BackupDataV1 {
   name: "alice-ai-config";
@@ -38,6 +39,9 @@ export default class Backup {
         end run
       `,
         [json],
+        {
+          timeout: Infinity32Bit,
+        },
       );
 
       showToast({
@@ -55,10 +59,15 @@ export default class Backup {
   }
 
   public static async import(): Promise<void> {
-    const res = await runAppleScript(`
+    const res = await runAppleScript(
+      `
       set jsonFile to choose file with prompt "Choose the Alice AI Actions Config to import."
       set jsonContent to (read jsonFile as «class utf8»)
-    `);
+    `,
+      {
+        timeout: Infinity32Bit,
+      },
+    );
 
     try {
       const json = JSON.parse(res) as BackupData;
@@ -97,7 +106,7 @@ export default class Backup {
       name: z.string(),
       description: z.string(),
       systemPrompt: z.string(),
-      model: z.string(),
+      model: z.enum(["gpt-3.5-turbo", "gpt-4-turbo-preview"]),
       temperature: z.string(),
       maxTokens: z.string(),
     });
