@@ -1,5 +1,5 @@
 import { environment, showToast } from "@raycast/api";
-import { Note } from "../services/atoms";
+import { Note, Tag } from "../services/atoms";
 import slugify from "slugify";
 import fs from "fs";
 
@@ -75,6 +75,10 @@ export const getDeletedNote = (oldNotes: Note[], newNotes: Note[]): Note | null 
     return null;
   }
   return oldNotes.find((note) => !newNotes.includes(note)) || null;
+};
+
+export const getDeletedTags = (oldTags: Tag[], newTags: Tag[]): Tag[] => {
+  return oldTags.filter((tag) => !newTags.includes(tag));
 };
 
 export const colors = [
