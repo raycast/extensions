@@ -1,5 +1,9 @@
 # Quit Applications Changelog
 
+## [Enhancement] - 2024-04-11
+
+- Added clearSearchBar after quitting an app.
+
 ## [Enhancement] - 2024-04-05
 
 - Fixed a bug where some of the apps (e.g. Steam) were not quitting
