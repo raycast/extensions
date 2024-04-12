@@ -77,10 +77,10 @@ export function extractCode(original: string) {
       //   "Your Stripe verification code is: 719-839."
       // and make sure it isn't a phone number
       // doesn't match: <first digits>-<second digits>-<4 consecutive digits>
-  
+
       const first = m[2];
       const second = m[3];
-  
+
       code = `${first}${second}`;
     } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
       // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits

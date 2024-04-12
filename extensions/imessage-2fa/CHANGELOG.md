@@ -1,5 +1,10 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-04-12
+
+- Add unit test for regresion testing of code matching
+- Fix issue where phone numbers are matched as codes
+
 ## [Update] - 2024-04-05
 
 - Resolve issue where codes with dash were not correctly matched

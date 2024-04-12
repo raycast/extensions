@@ -1,7 +1,7 @@
-import { extractCode } from './utils';
+import { extractCode } from "./utils";
 
-describe('Testing matching logic', () => {
-  test('Alphanumeric codes', () => {
+describe("Testing matching logic", () => {
+  test("Alphanumeric codes", () => {
     expect(extractCode("2773 is your Microsoft account verification code")).toBe("2773");
     expect(extractCode("Your Airbnb verification code is: 1234.")).toBe("1234");
     expect(extractCode("Your verification code is: 1234, use it to log in")).toBe("1234");
@@ -10,8 +10,16 @@ describe('Testing matching logic', () => {
     expect(extractCode("Your healow verification code is : 7579.")).toBe("7579");
     expect(extractCode("Please enter code 548 on Zocdoc.")).toBe("548");
     expect(extractCode("TRUSTED LOCATION PASSCODE: mifsuc")).toBe("mifsuc");
-    expect(extractCode("USAA FRAUD PREVENTION ALERT: USAA will never contact you for this code, don't share it: 123456. Call 800-531-8722 if you gave it to anyone. Reply HELP for help.")).toBe("123456");
-    expect(extractCode("Call 800-531-8722 if you gave it to anyone. USAA FRAUD PREVENTION ALERT: USAA will never contact you for this code, don't share it: 123456. Reply HELP for help.")).toBe("123456");
+    expect(
+      extractCode(
+        "USAA FRAUD PREVENTION ALERT: USAA will never contact you for this code, don't share it: 123456. Call 800-531-8722 if you gave it to anyone. Reply HELP for help."
+      )
+    ).toBe("123456");
+    expect(
+      extractCode(
+        "Call 800-531-8722 if you gave it to anyone. USAA FRAUD PREVENTION ALERT: USAA will never contact you for this code, don't share it: 123456. Reply HELP for help."
+      )
+    ).toBe("123456");
     expect(extractCode("您的验证码是 199035，10分钟内有效，请勿泄露")).toBe("199035");
     expect(extractCode("登录验证码：627823，您正在尝试【登录】，10分钟内有效")).toBe("627823");
     expect(extractCode("【赛验】验证码 54538")).toBe("54538");
@@ -27,7 +35,7 @@ describe('Testing matching logic', () => {
     expect(extractCode("7645W453")).toBe("7645W453");
   });
 
-  test('Codes with dash', () => {
+  test("Codes with dash", () => {
     expect(extractCode("123-456")).toBe("123456");
     expect(extractCode("Your Stripe verification code is: 719-839.")).toBe("719839");
   });
