@@ -15,7 +15,7 @@ export function usePlaylistTracks({ playlistId = "", limit = 50, options }: UseP
     [playlistId, limit],
     {
       execute: options?.execute !== false && !!playlistId && !!limit,
-    }
+    },
   );
 
   return {

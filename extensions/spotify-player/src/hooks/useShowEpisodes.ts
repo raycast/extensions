@@ -15,7 +15,7 @@ export function useShowEpisodes({ showId = "", limit = 50, options }: UseShowEpi
     [showId, limit],
     {
       execute: options?.execute !== false && !!showId && !!limit,
-    }
+    },
   );
 
   return { showEpisodesData: data, showEpisodesError: error, showEpisodesIsLoading: isLoading };
