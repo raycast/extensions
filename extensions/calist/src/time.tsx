@@ -44,14 +44,19 @@ export default function Calist() {
       setTime({
         hours: timeStr[0].padStart(2, "0"),
         minutes: timeStr[1].padStart(2, "0"),
-        seconds: enableTimeSeconds ? timeStr[2].padStart(2, "0") : "",
-        period: enableTimeFormat !== false ? (enableTimeSeconds ? timeStr[3] : timeStr[2]) : "",
+        seconds: enableTimeSeconds && timeStr[2] ? timeStr[2].padStart(2, "0") : "",
+        period: enableTimeFormat !== false ? (enableTimeSeconds && timeStr[3] ? timeStr[3] : timeStr[2]) : "",
       });
       setSecondaryTime({
         hours: secondaryTimeStr[0].padStart(2, "0"),
         minutes: secondaryTimeStr[1].padStart(2, "0"),
-        seconds: enableTimeSeconds ? secondaryTimeStr[2].padStart(2, "0") : "",
-        period: enableTimeFormat !== false ? (enableTimeSeconds ? secondaryTimeStr[3] : secondaryTimeStr[2]) : "",
+        seconds: enableTimeSeconds && secondaryTimeStr[2] ? secondaryTimeStr[2].padStart(2, "0") : "",
+        period:
+          enableTimeFormat !== false
+            ? enableTimeSeconds && secondaryTimeStr[3]
+              ? secondaryTimeStr[3]
+              : secondaryTimeStr[2]
+            : "",
       });
     }, 1000);
 
