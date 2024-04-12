@@ -1,6 +1,10 @@
 # YouTrack Changelog
 
-## [Update] -  2024-01-21
+## [Update] -  2024-04-12
+
+* Utilize `List.Item`'s `keywords` for filtering by issue ID
+
+## [Update] -  2024-01-24
 
 * Add 'Add Work' action to add work items to the issue
 
