@@ -2,7 +2,7 @@ import { Endpoints } from "@octokit/types";
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import NotificationListItem from "./components/NotificationListItem";

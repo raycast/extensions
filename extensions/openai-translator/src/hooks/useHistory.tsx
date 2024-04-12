@@ -57,16 +57,17 @@ export function useHistory(): HistoryHook {
     async (record: Record) => {
       const data = countRef.current;
       if (data) {
-        const max = parseInt(maxHistorySize) || 30;
-        const slice = data.length > max ? data.slice(data.length - max, data.length) : data;
-        const remove = data.length > max ? data.slice(0, data.length - max) : [];
+        const max = (parseInt(maxHistorySize) || 30) - 1;
+        const slice = data.length > max ? data.slice(0, max) : data;
+        const remove = data.length > max ? data.slice(max, data.length) : [];
         for (const r of remove) {
           await unlink(r);
         }
-        setData([...slice, record]);
+
+        setData([record, ...slice]);
       }
     },
-    [setData, data]
+    [setData, data],
   );
 
   const remove = useCallback(
@@ -84,7 +85,7 @@ export function useHistory(): HistoryHook {
         toast.style = Toast.Style.Success;
       }
     },
-    [setData, data]
+    [setData, data],
   );
 
   const clear = useCallback(async () => {

@@ -17217,6 +17217,8 @@ export type PullRequest = Assignable &
     reviews?: Maybe<PullRequestReviewConnection>;
     /** Identifies the state of the pull request. */
     state: PullRequestState;
+    /** Check and Status rollup information for the PR's head ref. */
+    statusCheckRollup?: Maybe<StatusCheckRollup>;
     /** A list of reviewer suggestions based on commit history and past review comments. */
     suggestedReviewers: Array<Maybe<SuggestedReviewer>>;
     /**
@@ -20970,6 +20972,8 @@ export type Repository = Node &
     pinnedDiscussions: PinnedDiscussionConnection;
     /** A list of pinned issues for this repository. */
     pinnedIssues?: Maybe<PinnedIssueConnection>;
+    /** Returns information about the availability of certain features and limits based on the repository's billing plan. */
+    planFeatures: RepositoryPlanFeatures;
     /** The primary language of the repository's code. */
     primaryLanguage?: Maybe<Language>;
     /** Find project by number. */
@@ -22006,6 +22010,21 @@ export enum RepositoryPermission {
   /** Can read, clone, and push to this repository. Can also manage issues and pull requests */
   Write = "WRITE",
 }
+
+/** Information about the availability of features and limits for a repository based on its billing plan. */
+export type RepositoryPlanFeatures = {
+  __typename?: "RepositoryPlanFeatures";
+  /** Whether reviews can be automatically requested and enforced with a CODEOWNERS file */
+  codeowners: Scalars["Boolean"];
+  /** Whether pull requests can be created as or converted to draft */
+  draftPullRequests: Scalars["Boolean"];
+  /** Maximum number of users that can be assigned to an issue or pull request */
+  maximumAssignees: Scalars["Int"];
+  /** Maximum number of manually-requested reviews on a pull request */
+  maximumManualReviewRequests: Scalars["Int"];
+  /** Whether teams can be requested to review pull requests */
+  teamReviewRequests: Scalars["Boolean"];
+};
 
 /** The privacy of a repository */
 export enum RepositoryPrivacy {
@@ -29744,6 +29763,28 @@ export type SearchDiscussionsQuery = {
   };
 };
 
+export type GetGitHubDiscussionNumberQueryVariables = Exact<{
+  filter: Scalars["String"];
+}>;
+
+export type GetGitHubDiscussionNumberQuery = {
+  __typename?: "Query";
+  search: {
+    __typename?: "SearchResultItemConnection";
+    nodes?: Array<
+      | { __typename?: "App" }
+      | { __typename?: "Discussion"; number: number; url: any }
+      | { __typename?: "Issue" }
+      | { __typename?: "MarketplaceListing" }
+      | { __typename?: "Organization" }
+      | { __typename?: "PullRequest" }
+      | { __typename?: "Repository" }
+      | { __typename?: "User" }
+      | null
+    > | null;
+  };
+};
+
 export type IssueFieldsFragment = {
   __typename?: "Issue";
   id: string;
@@ -29805,183 +29846,6 @@ export type IssueFieldsFragment = {
       login: string;
       isViewer: boolean;
     } | null> | null;
-  };
-};
-
-export type SearchCreatedIssuesQueryVariables = Exact<{
-  createdOpenQuery: Scalars["String"];
-  createdClosedQuery: Scalars["String"];
-  numberOfOpenItems: Scalars["Int"];
-  numberOfClosedItems: Scalars["Int"];
-}>;
-
-export type SearchCreatedIssuesQuery = {
-  __typename?: "Query";
-  createdOpen: {
-    __typename?: "SearchResultItemConnection";
-    nodes?: Array<
-      | { __typename?: "App" }
-      | { __typename?: "Discussion" }
-      | {
-          __typename?: "Issue";
-          id: string;
-          url: any;
-          title: string;
-          number: number;
-          closed: boolean;
-          state: IssueState;
-          stateReason?: IssueStateReason | null;
-          updatedAt: any;
-          author?:
-            | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | {
-                __typename?: "User";
-                id: string;
-                avatarUrl: any;
-                name?: string | null;
-                login: string;
-                isViewer: boolean;
-              }
-            | null;
-          linkedBranches: {
-            __typename?: "LinkedBranchConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "LinkedBranch";
-              id: string;
-              ref?: { __typename?: "Ref"; id: string; name: string } | null;
-            } | null> | null;
-          };
-          milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
-          repository: {
-            __typename?: "Repository";
-            id: string;
-            nameWithOwner: string;
-            name: string;
-            url: any;
-            mergeCommitAllowed: boolean;
-            squashMergeAllowed: boolean;
-            rebaseMergeAllowed: boolean;
-            defaultBranchRef?: {
-              __typename?: "Ref";
-              target?:
-                | { __typename?: "Blob"; oid: any }
-                | { __typename?: "Commit"; oid: any }
-                | { __typename?: "Tag"; oid: any }
-                | { __typename?: "Tree"; oid: any }
-                | null;
-            } | null;
-            owner:
-              | { __typename?: "Organization"; login: string; avatarUrl: any }
-              | { __typename?: "User"; login: string; avatarUrl: any };
-          };
-          comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-          assignees: {
-            __typename?: "UserConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "User";
-              id: string;
-              avatarUrl: any;
-              name?: string | null;
-              login: string;
-              isViewer: boolean;
-            } | null> | null;
-          };
-        }
-      | { __typename?: "MarketplaceListing" }
-      | { __typename?: "Organization" }
-      | { __typename?: "PullRequest" }
-      | { __typename?: "Repository" }
-      | { __typename?: "User" }
-      | null
-    > | null;
-  };
-  createdClosed: {
-    __typename?: "SearchResultItemConnection";
-    nodes?: Array<
-      | { __typename?: "App" }
-      | { __typename?: "Discussion" }
-      | {
-          __typename?: "Issue";
-          id: string;
-          url: any;
-          title: string;
-          number: number;
-          closed: boolean;
-          state: IssueState;
-          stateReason?: IssueStateReason | null;
-          updatedAt: any;
-          author?:
-            | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | {
-                __typename?: "User";
-                id: string;
-                avatarUrl: any;
-                name?: string | null;
-                login: string;
-                isViewer: boolean;
-              }
-            | null;
-          linkedBranches: {
-            __typename?: "LinkedBranchConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "LinkedBranch";
-              id: string;
-              ref?: { __typename?: "Ref"; id: string; name: string } | null;
-            } | null> | null;
-          };
-          milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
-          repository: {
-            __typename?: "Repository";
-            id: string;
-            nameWithOwner: string;
-            name: string;
-            url: any;
-            mergeCommitAllowed: boolean;
-            squashMergeAllowed: boolean;
-            rebaseMergeAllowed: boolean;
-            defaultBranchRef?: {
-              __typename?: "Ref";
-              target?:
-                | { __typename?: "Blob"; oid: any }
-                | { __typename?: "Commit"; oid: any }
-                | { __typename?: "Tag"; oid: any }
-                | { __typename?: "Tree"; oid: any }
-                | null;
-            } | null;
-            owner:
-              | { __typename?: "Organization"; login: string; avatarUrl: any }
-              | { __typename?: "User"; login: string; avatarUrl: any };
-          };
-          comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-          assignees: {
-            __typename?: "UserConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "User";
-              id: string;
-              avatarUrl: any;
-              name?: string | null;
-              login: string;
-              isViewer: boolean;
-            } | null> | null;
-          };
-        }
-      | { __typename?: "MarketplaceListing" }
-      | { __typename?: "Organization" }
-      | { __typename?: "PullRequest" }
-      | { __typename?: "Repository" }
-      | { __typename?: "User" }
-      | null
-    > | null;
   };
 };
 
@@ -32850,25 +32714,17 @@ export const SearchDiscussionsDocument = gql`
   }
   ${DiscussionFieldsFragmentDoc}
 `;
-export const SearchCreatedIssuesDocument = gql`
-  query searchCreatedIssues(
-    $createdOpenQuery: String!
-    $createdClosedQuery: String!
-    $numberOfOpenItems: Int!
-    $numberOfClosedItems: Int!
-  ) {
-    createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+export const GetGitHubDiscussionNumberDocument = gql`
+  query getGitHubDiscussionNumber($filter: String!) {
+    search(query: $filter, type: DISCUSSION, first: 1) {
       nodes {
-        ...IssueFields
-      }
-    }
-    createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-      nodes {
-        ...IssueFields
+        ... on Discussion {
+          number
+          url
+        }
       }
     }
   }
-  ${IssueFieldsFragmentDoc}
 `;
 export const RepositoryCollaboratorsForIssuesDocument = gql`
   query repositoryCollaboratorsForIssues($owner: String!, $name: String!, $issueNumber: Int!) {
@@ -33436,17 +33292,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
         "query",
       );
     },
-    searchCreatedIssues(
-      variables: SearchCreatedIssuesQueryVariables,
+    getGitHubDiscussionNumber(
+      variables: GetGitHubDiscussionNumberQueryVariables,
       requestHeaders?: Dom.RequestInit["headers"],
-    ): Promise<SearchCreatedIssuesQuery> {
+    ): Promise<GetGitHubDiscussionNumberQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<SearchCreatedIssuesQuery>(SearchCreatedIssuesDocument, variables, {
+          client.request<GetGitHubDiscussionNumberQuery>(GetGitHubDiscussionNumberDocument, variables, {
             ...requestHeaders,
             ...wrappedRequestHeaders,
           }),
-        "searchCreatedIssues",
+        "getGitHubDiscussionNumber",
         "query",
       );
     },
