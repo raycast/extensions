@@ -1,4 +1,13 @@
-import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import {
+  AI,
+  closeMainWindow,
+  environment,
+  getPreferenceValues,
+  LaunchProps,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import * as chrono from "chrono-node";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
 import { createReminder, getData } from "swift:../swift/AppleReminders";
@@ -63,6 +72,11 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       return;
     }
 
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Adding reminder",
+    });
+
     const data: Data = await getData();
 
     const lists = data.lists.map((list) => {
@@ -95,6 +109,8 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     const oneHourFromNow = format(subHours(now, -1), "haa"); // won't work well 11:00pm-11:59pm
     const oneHourFromNowToday = format(addDays(subHours(now, -1), 1), "yyyy-MM-dd'T'HH:00:ss");
 
+    const locations = await LocalStorage.getItem("saved-locations");
+
     const prompt = `Act as a NLP parser for tasks. I'll give you a task text and you'll return me only a parsable and minified JSON object.\n
 
 Here's the JSON Object structure:
@@ -108,7 +124,10 @@ Here's the JSON Object structure:
     "frequency": <Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".>,
     "interval": <Recurrence interval. An integer greater than 0 that specifies how often a pattern repeats. If a recurrence frequency is "weekly" rule and the interval is 1, then the pattern repeats every week. If a recurrence frequency is "monthly" rule and the interval is 3, then the pattern repeats every 3 months.>,
     "endDate": <Recurrence end date. A full day date (YYYY-MM-DD). If no end date is specified, the recurrence will repeat forever.>
-  }
+  },
+  "address": <Task address. If the task text specifies an address, include it here.>,
+  "proximity": <Task proximity. Only pick the value from this list: "enter", "leave".>
+  "radius": <Task radius. A number that specifies the radius around the location in meters.>
 }
 
 Here are the rules you must follow:
@@ -120,10 +139,11 @@ Here are the rules you must follow:
 - Today is ${today} and the current time is ${currentTime}.
 - Pay special attention to "this" vs "next" day of the week.
 - The weekend begins on Saturday and the week begins on Monday. (e.g. tasks for "next week" would be scheduled for the upcoming Monday.)
-- Any recurring task MUST include a dueDate. If no due date is specified, use one that makes the most sense
+- Any recurring task MUST include a dueDate. If no due date is specified, use one that makes the most sense.
+- If the user seems to specify an address, search for a matching location in the following data set: ${locations}.
 
 Here are some examples to help you out:
-- Respond to email: {"title":"Respond to email","description":"'Respond to email' to default list"}
+- Respond to email: {"title":"Respond to email"}
 - Book flights today: {"title":"Book flights","description":"'Book flights' today to default list","dueDate":"${today}"}
 - Collect dry cleaning this evening: {"title":"Collect dry cleaning","description":"'Collect dry cleaning' today at 6pm to default list","dueDate":"${today}T18:00:00.000Z"}
 - Ship feature low priority: {"title":"Ship feature","description":"'Ship feature' (low priority) to default list","priority":"low"}
@@ -180,8 +200,12 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
   const maxRetries = 3;
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const result = await AI.ask(prompt, { model: "gpt-4" });
-      const json = JSON.parse(result.trim());
+      const result = await AI.ask(prompt, { model: "openai-gpt-4-turbo" });
+      const jsonMatch = result.match(/{[^{}]*}/)?.[0];
+      if (!jsonMatch) {
+        throw new Error("Invalid result returned from AI");
+      }
+      const json = JSON.parse(jsonMatch.trim());
       if (json.recurrence && !json.dueDate) {
         throw new Error("Recurrence without dueDate");
       }
