@@ -5,7 +5,7 @@
   "description": "Extension allowing you to add, update, delete and search your projects",
   "icon": "logo.png",
   "author": "maximedaraize",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "categories": [
     "Developer Tools",
     "Productivity",
@@ -22,7 +22,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0"
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.14.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

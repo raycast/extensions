@@ -11,3 +11,9 @@
 
 ### Fixes
 - Fixed a bug where the other link was not displayed in the project details
+
+## [v1.2.0] - 2024-04-12
+
+### Features
+- Replace `cmd` + `shift` hotkeys for the delete and edit command with `ctrl` instead
+- Add validation for project title to make sure no project is created without any data
