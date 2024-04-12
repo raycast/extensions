@@ -13,7 +13,7 @@ import {
 } from "u/options";
 import SVG from "u/getSvg";
 
-export default function Calist() {
+export default function CommandTime() {
   const setViewMode = getViewMode();
   const [time, setTime] = useState({
     hours: "00",

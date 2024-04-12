@@ -5,9 +5,19 @@ import { getMonthName, getDayName } from "u/getName";
 import { getAvatarIcon } from "@raycast/utils";
 
 export default function Actions({ global, day }: { global?: boolean; day?: number }) {
-  const { viewMode, setViewMode, enableWeek, setEnableWeek, enableTimer, setEnableTimer } = useContext(Context);
-
-  const { currentYear, setCurrentYear, currentDay, currentMonth, setCurrentMonth } = useContext(Context);
+  const {
+    viewMode,
+    setViewMode,
+    enableWeek,
+    setEnableWeek,
+    enableTimer,
+    setEnableTimer,
+    currentYear,
+    setCurrentYear,
+    currentDay,
+    currentMonth,
+    setCurrentMonth,
+  } = useContext(Context);
 
   const showDate = () => {
     const dateFormated = `${getDayName(currentDay)} ${currentDay}, ${getMonthName(currentMonth)} ${currentYear}`;

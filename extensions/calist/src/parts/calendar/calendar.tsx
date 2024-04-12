@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Grid } from "@raycast/api";
 import { updateCommandMetadata } from "@raycast/api";
 import { Context } from "u/context";
@@ -46,7 +46,9 @@ export default function Calendar() {
 
   const placeHolder = searchPlaceholder ? searchPlaceholder : `Search ${getMonthName(currentMonth - 1)}`;
 
-  updateCommandMetadata({ subtitle: titleCommand });
+  useEffect(() => {
+    updateCommandMetadata({ subtitle: titleCommand });
+  }, [titleCommand]);
 
   const handleSearchTextChange = (searchText: string) => {
     setIsTimerHidden(searchText.length > 0);
