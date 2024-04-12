@@ -1,8 +1,8 @@
 # Changelog
 
-## [Feat] - 2024-04-09
+## [Feature] - 2024-04-09
 
-- Feature: Support custom model name
+- Feature: Support custom model name in `Models` (Enable in preferences)
 
 ## [Fix] - 2024-03-22
 
