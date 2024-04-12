@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "huzef44",
   "contributors": [
-    "belyakov_am"
+    "belyakov_am",
+    "DannySeidel",
+    "pernielsentikaer"
   ],
   "categories": [
     "System"
@@ -19,13 +21,6 @@
       "subtitle": "Toggle Keyboard Brightness",
       "description": "Toggle Keyboard Brightness",
       "mode": "no-view"
-    },
-    {
-      "name": "adjust-keyboard-brightness",
-      "title": "Adjust Keyboard Brightness",
-      "subtitle": "Adjust Keyboard Brightness",
-      "description": "Adjust Keyboard Brightness",
-      "mode": "view"
     },
     {
       "name": "increase-keyboard-brightness",
