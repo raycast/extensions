@@ -28,11 +28,26 @@ import { Priority, Reminder, useData } from "./hooks/useData";
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
 export default function Command() {
-  const { titleType, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, view, countType } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
   const list = data?.lists.find((l) => l.id === listId);
+
+  const reminders = useMemo(() => {
+    const nonCompletedReminders: Reminder[] = [];
+
+    const reminders = listId
+      ? data?.reminders.filter((reminder: Reminder) => reminder.list?.id === listId)
+      : data?.reminders;
+
+    reminders?.forEach((reminder: Reminder) => {
+      if (reminder.isCompleted) return;
+      nonCompletedReminders.push(reminder)
+    });
+
+    return nonCompletedReminders;
+  }, [data, view, listId, countType]);
 
   const sections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -41,9 +56,6 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    const reminders = listId
-      ? data?.reminders.filter((reminder: Reminder) => reminder.list?.id === listId)
-      : data?.reminders;
     reminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
@@ -77,7 +89,7 @@ export default function Command() {
     }
 
     return sections.filter((section) => section.items.length > 0);
-  }, [data, view, listId]);
+  }, [reminders]);
 
   async function setPriority(reminderId: string, priority: Priority) {
     try {
@@ -130,7 +142,17 @@ export default function Command() {
     }
   }
 
-  const remindersCount = sections.reduce((acc, section) => acc + section.items.length, 0);
+  function getRemindersCount() {
+    if (countType === 'today') {
+      return reminders.filter((reminder) => reminder?.dueDate && (isToday(reminder?.dueDate) || isOverdue(reminder?.dueDate))).length;
+    } else if (countType === 'upcoming') {
+      return reminders.filter((reminder) => reminder.dueDate).length;
+    } else {
+      return reminders.length;
+    }
+  }
+
+  const remindersCount = getRemindersCount();
 
   const now = new Date();
 

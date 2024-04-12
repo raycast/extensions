@@ -93,6 +93,28 @@
           "required": false
         },
         {
+          "name": "countType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Count Type",
+          "description": "Choose which count you want to see in your menu bar."
+        },
+        {
           "name": "view",
           "type": "dropdown",
           "data": [
