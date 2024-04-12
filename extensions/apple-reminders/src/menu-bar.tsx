@@ -43,7 +43,7 @@ export default function Command() {
 
     reminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
-      nonCompletedReminders.push(reminder)
+      nonCompletedReminders.push(reminder);
     });
 
     return nonCompletedReminders;
@@ -143,9 +143,11 @@ export default function Command() {
   }
 
   function getRemindersCount() {
-    if (countType === 'today') {
-      return reminders.filter((reminder) => reminder?.dueDate && (isToday(reminder?.dueDate) || isOverdue(reminder?.dueDate))).length;
-    } else if (countType === 'upcoming') {
+    if (countType === "today") {
+      return reminders.filter(
+        (reminder) => reminder?.dueDate && (isToday(reminder?.dueDate) || isOverdue(reminder?.dueDate)),
+      ).length;
+    } else if (countType === "upcoming") {
       return reminders.filter((reminder) => reminder.dueDate).length;
     } else {
       return reminders.length;
