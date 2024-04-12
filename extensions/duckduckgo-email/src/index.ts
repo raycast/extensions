@@ -13,16 +13,13 @@ interface EmailResponse {
 async function getEmail() {
   const preferences = getPreferenceValues<Preferences>();
   console.log(preferences);
-  const response = await fetch(
-    "https://quack.duckduckgo.com/api/email/addresses",
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${preferences.token}`,
-      },
-      redirect: "follow",
+  const response = await fetch("https://quack.duckduckgo.com/api/email/addresses", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${preferences.token}`,
     },
-  );
+    redirect: "follow",
+  });
   const parsedResponse = (await response.json()) as EmailResponse;
   if (parsedResponse.error) {
     throw new Error(parsedResponse.error);
@@ -32,17 +29,14 @@ async function getEmail() {
 
 export default async function main() {
   try {
-
     const email = await getEmail();
     await Clipboard.copy(email);
     await showHUD("Email copied to clipboard!");
-  }
-  catch (e: unknown) {
+  } catch (e: unknown) {
     let message = "Unknown error: " + JSON.stringify(e);
     if (e instanceof Error) {
       message = "Error from DuckDuckGo: " + e.message;
     }
     await showHUD(`⚠️ ${message}`);
-
   }
 }
