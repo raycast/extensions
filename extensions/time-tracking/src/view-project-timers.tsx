@@ -1,9 +1,9 @@
-import { Action, ActionPanel, launchCommand, LaunchType, List } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Icon, launchCommand, LaunchType, List, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { deleteTimer, formatDuration, getDuration, getTimers, Timer, TimerList } from "./Timers";
 
 export default function Command() {
-  const [timers, setTimers] = useState<Timer[]>([]);
+  const [timers, setTimers] = useState<Timer[]>();
   const [filteredTimers, setFilteredTimers] = useState<Timer[]>([]);
 
   const [search, setSearch] = useState<string>("");
@@ -13,6 +13,10 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
+    if (!timers) {
+      return;
+    }
+
     setFilteredTimers(timers.filter((timer) => timer.name?.toLowerCase().includes(search.toLowerCase())));
   }, [timers, search]);
 
@@ -25,7 +29,12 @@ export default function Command() {
   }
 
   return (
-    <List searchText={search} searchBarPlaceholder={"Search timers..."} onSearchTextChange={(text) => setSearch(text)}>
+    <List
+      isLoading={timers === undefined}
+      searchText={search}
+      searchBarPlaceholder={"Search timers..."}
+      onSearchTextChange={(text) => setSearch(text)}
+    >
       {filteredTimers.map((timer) => (
         <List.Item
           key={timer.id}
@@ -44,6 +53,7 @@ export default function Command() {
             <ActionPanel>
               {!timer.end ? (
                 <Action
+                  icon={Icon.Stop}
                   title={"Stop Timer"}
                   onAction={() => {
                     launchCommand({
@@ -54,6 +64,7 @@ export default function Command() {
                 />
               ) : (
                 <Action
+                  icon={Icon.Repeat}
                   title={"Start Again"}
                   onAction={() => {
                     launchCommand({
@@ -66,10 +77,31 @@ export default function Command() {
                   }}
                 />
               )}
+              <Action.CopyToClipboard
+                icon={Icon.CopyClipboard}
+                title={"Copy Duration"}
+                content={formatDuration(getDuration(timer))}
+              />
               <Action
+                icon={Icon.Trash}
                 title={"Delete Timer"}
-                onAction={() => {
-                  deleteTimer(timer.id).then(refresh);
+                onAction={async () => {
+                  if (
+                    await confirmAlert({
+                      title: "Are you sure you want to delete this timer?",
+                      message: "This action cannot be undone.",
+                      icon: Icon.Trash,
+                      primaryAction: {
+                        title: "Delete timer",
+                      },
+                      rememberUserChoice: true,
+                    })
+                  ) {
+                    deleteTimer(timer.id).then(refresh);
+                    await showToast({
+                      title: "Timer with duration " + formatDuration(getDuration(timer)) + " deleted",
+                    });
+                  }
                 }}
                 style={Action.Style.Destructive}
               />

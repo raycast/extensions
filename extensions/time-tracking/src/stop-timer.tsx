@@ -1,21 +1,13 @@
-import { Detail } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { formatDuration, getDuration, stopTimer, Timer } from "./Timers";
+import { showHUD } from "@raycast/api";
+import { formatDuration, getDuration, stopTimer } from "./Timers";
 
-export default function Command() {
-  const [timer, setTimer] = useState<Timer | null>(null);
-
-  useEffect(() => {
-    stopTimer().then(setTimer);
-  }, []);
+export default async function Command() {
+  const timer = await stopTimer();
 
   if (timer === null) {
-    return <Detail markdown={"No timer running"} />;
+    await showHUD("No timer running");
+    return;
   }
 
-  return (
-    <Detail
-      markdown={`# Stopped ${timer.name}: ${formatDuration(getDuration(timer))}\n\n- Started: ${new Date(timer.start).toLocaleString()}\n- Ended: ${new Date(timer.end ?? 0).toLocaleString()}`}
-    />
-  );
+  await showHUD(`Stopped ${timer.name}: ${formatDuration(getDuration(timer))}`);
 }

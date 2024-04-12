@@ -1,17 +1,17 @@
-import { Detail, LaunchProps } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { startTimer, Timer } from "./Timers";
+import { LaunchProps, showHUD } from "@raycast/api";
+import { startTimer } from "./Timers";
 
-export default function Command(options: LaunchProps) {
-  const [timer, setTimer] = useState<Timer | null>(null);
-
-  useEffect(() => {
-    startTimer(options.arguments.name ?? "Unnamed timer").then(setTimer);
-  }, []);
+export default async function Command(options: LaunchProps) {
+  let name = options.arguments.name;
+  if (name?.trim().length === 0) {
+    name = "Unnamed timer";
+  }
+  const timer = await startTimer(name);
 
   if (timer === null) {
-    return <Detail markdown={"Starting timer..."} />;
+    await showHUD("Starting timer...");
+    return;
   }
 
-  return <Detail markdown={`# Started timer ${timer.name}`} />;
+  await showHUD(`Started ${timer.name}`);
 }

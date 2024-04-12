@@ -16,7 +16,7 @@
       "title": "Start Timer",
       "subtitle": "Start a project timer",
       "description": "Starts a new project timer and pauses the current timer",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "start_command.png",
       "arguments": [
         {
@@ -31,7 +31,7 @@
       "title": "Stop Timer",
       "subtitle": "Stop a project timer",
       "description": "Stops the current project timer",
-      "mode": "view",
+      "mode": "no-view",
       "icon": "stop_command.png"
     },
     {
