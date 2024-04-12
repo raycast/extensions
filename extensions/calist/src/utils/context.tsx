@@ -21,7 +21,6 @@ type ContextType = {
   setEnableWeek: (enable: boolean) => void;
   enableTimer: boolean;
   setEnableTimer: (enable: boolean) => void;
-
   selectedDay: number;
   setSelectedDay: (day: number) => void;
 };

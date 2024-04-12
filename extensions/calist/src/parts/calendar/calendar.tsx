@@ -14,7 +14,7 @@ import { getWeek } from "date-fns";
 import { getSelection } from "u/getSelection";
 import getMonthNumber from "u/getMonthNumber";
 
-export default function Calist() {
+export default function Calendar() {
   const {
     currentYear,
     currentWeek,

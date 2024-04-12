@@ -5,7 +5,6 @@ import { getTitle, getSubTitle } from "@/month/getTitle";
 import { getWeekNumber } from "u/getDate";
 import { Calendar } from "calendar";
 import { v4 as AHD } from "uuid";
-// import { weekEnable } from "u/options";
 import { Day } from "@/days/days";
 
 export default function Month() {

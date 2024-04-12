@@ -61,7 +61,7 @@ export default function Watch() {
 
   const totalWidth = enableTimeFormat !== false && enableWeek ? 94 : 80;
   const title1 = "Local time";
-  const title2 = zones[0].name;
+  const title2 = zones[0].name || "";
 
   const spacesNeeded = totalWidth - (title1.length + title2.length);
   return (
