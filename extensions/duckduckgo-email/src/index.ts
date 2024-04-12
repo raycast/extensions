@@ -7,23 +7,42 @@ interface Preferences {
 }
 
 interface EmailResponse {
-  address: string;
+  address?: string;
+  error?: string;
 }
 async function getEmail() {
   const preferences = getPreferenceValues<Preferences>();
   console.log(preferences);
-  const response = await fetch("https://quack.duckduckgo.com/api/email/addresses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${preferences.token}`,
+  const response = await fetch(
+    "https://quack.duckduckgo.com/api/email/addresses",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${preferences.token}`,
+      },
+      redirect: "follow",
     },
-    redirect: "follow",
-  });
+  );
   const parsedResponse = (await response.json()) as EmailResponse;
+  if (parsedResponse.error) {
+    throw new Error(parsedResponse.error);
+  }
   return parsedResponse.address + "@duck.com";
 }
 
 export default async function main() {
-  await Clipboard.copy(await getEmail());
-  await showHUD("Email copied to clipboard!");
+  try {
+
+    const email = await getEmail();
+    await Clipboard.copy(email);
+    await showHUD("Email copied to clipboard!");
+  }
+  catch (e: unknown) {
+    let message = "Unknown error: " + JSON.stringify(e);
+    if (e instanceof Error) {
+      message = "Error from DuckDuckGo: " + e.message;
+    }
+    await showHUD(`⚠️ ${message}`);
+
+  }
 }
