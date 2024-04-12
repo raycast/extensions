@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jokes",
+  "title": "Jokes",
+  "description": "Get up to 10 jokes at a time from a variety of categories.",
+  "keywords": [
+    "joke",
+    "jokes"
+  ],
+  "icon": "jokes.png",
+  "author": "xmok",
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-jokes",
+      "title": "Get Jokes",
+      "description": "Get Jokes by Category, Type and Amount",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "category",
+          "type": "dropdown",
+          "placeholder": "CATEGORY",
+          "required": true,
+          "data": [
+            {
+              "title": "Any",
+              "value": "Any"
+            },
+            {
+              "title": "Misc",
+              "value": "Misc"
+            },
+            {
+              "title": "Programming",
+              "value": "Programming"
+            },
+            {
+              "title": "Pun",
+              "value": "Pun"
+            },
+            {
+              "title": "Spooky",
+              "value": "Spooky"
+            },
+            {
+              "title": "Christmas",
+              "value": "Christmas"
+            }
+          ]
+        },
+        {
+          "name": "type",
+          "type": "dropdown",
+          "placeholder": "TYPE",
+          "required": false,
+          "data": [
+            {
+              "title": "Any",
+              "value": ""
+            },
+            {
+              "title": "Single",
+              "value": "single"
+            },
+            {
+              "title": "Two Part",
+              "value": "twopart"
+            }
+          ]
+        },
+        {
+          "name": "amount",
+          "type": "dropdown",
+          "placeholder": "AMOUNT",
+          "required": false,
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            },
+            {
+              "title": "7",
+              "value": "7"
+            },
+            {
+              "title": "8",
+              "value": "8"
+            },
+            {
+              "title": "9",
+              "value": "9"
+            },
+            {
+              "title": "10",
+              "value": "10"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

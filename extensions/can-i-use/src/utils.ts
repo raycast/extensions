@@ -1,6 +1,7 @@
-import { FeatureStatus } from "caniuse-lite";
-import path from "path";
 import { homedir } from "os";
+import path from "path";
+
+import { FeatureStatus } from "caniuse-lite";
 
 export const statusToName: Record<FeatureStatus, string> = {
   ls: "WHATWG living standard",

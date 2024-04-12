@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-04-05
+
+- Resolve issue where codes with dash were not correctly matched
+
 ## [Update] - 2024-03-18
 
 - Allow alphanumeric codes

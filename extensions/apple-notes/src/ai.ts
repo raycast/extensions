@@ -1,6 +1,7 @@
 import { AI, closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
-import { createNote } from "./api";
 import { showFailureToast } from "@raycast/utils";
+
+import { createNote } from "./api";
 
 export default async (props: LaunchProps<{ arguments: Arguments.Ai }>) => {
   await closeMainWindow();

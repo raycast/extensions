@@ -1,7 +1,13 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useNotes } from "./useNotes";
-import NoteListItem from "./components/NoteListItem";
+
 import { createNote } from "./api";
+import NoteListItem from "./components/NoteListItem";
+import { useNotes } from "./useNotes";
+
+export type NoteTitle = {
+  title: string;
+  uuid: string;
+};
 
 export default function Command() {
   const { data, isLoading, permissionView, mutate } = useNotes();
@@ -9,6 +15,11 @@ export default function Command() {
   if (permissionView) {
     return permissionView;
   }
+
+  const noteTitles = [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? [])].map((note) => ({
+    title: note.title,
+    uuid: note.UUID,
+  }));
 
   return (
     <List
@@ -18,13 +29,13 @@ export default function Command() {
     >
       <List.Section title="Pinned">
         {data.pinnedNotes.map((note) => (
-          <NoteListItem key={note.id} note={note} mutate={mutate} />
+          <NoteListItem noteTitles={noteTitles} key={note.id} note={note} mutate={mutate} />
         ))}
       </List.Section>
 
       <List.Section title="Notes">
         {data.unpinnedNotes.map((note) => (
-          <NoteListItem key={note.id} note={note} mutate={mutate} />
+          <NoteListItem noteTitles={noteTitles} key={note.id} note={note} mutate={mutate} />
         ))}
       </List.Section>
 

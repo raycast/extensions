@@ -1,4 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
+
 import { escapeDoubleQuotes } from "./helpers";
 
 export async function createNote(text?: string) {

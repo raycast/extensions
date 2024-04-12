@@ -6,6 +6,10 @@
 - Standardizes the color for all the accessories in `My Pull Requests`.
 - Fixes an issue where the pull request icon color for the `My Pull Requests Menu Bar` was not adjusted for dark mode.
 
+## [Opens notification discussion links] - 2024-04-08
+
+- Opens GitHub links for notifications that point to a discussion directly.
+
 ## [Fix icon] - 2024-04-02
 
 - Fixes icon for closed pull requests.
