@@ -55,14 +55,6 @@ export default function SVG({
   isToday?: boolean;
   hasEvents?: boolean;
 }) {
-  // const color = isToday
-  //   ? fontColorAccent || mapValueToColor(defCustomTheme) || Color.PrimaryText
-  //   : isWeekend
-  //     ? fontColorAccentWeekend || mapValueToColor(defCustomTheme) || Color.SecondaryText
-  //     : environment.appearance === "light"
-  //       ? "#000000"
-  //       : "#ffffff";
-
   let color;
 
   if (isToday) {
@@ -100,7 +92,7 @@ export default function SVG({
             <tspan x="50%" y="50%">${day}</tspan>
           </text>
         </g>
-        ${isToday ? `<line x1="-6" y1="6" x2="6" y2="6" />` : ""}
+        ${isToday ? `<line x1="-8" y1="6" x2="8" y2="6" />` : ""}
     </svg>
   `;
 }
