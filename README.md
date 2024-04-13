@@ -4,7 +4,7 @@ The primary function of this extension is to generate Git commit messages using 
 
 ## Features
 
-1. Identifies the latest changed git repository in the specified directory.
+1. Takes the path to the Git repository from the selected dictionary in the Finder.
 2. Calls an Raycast AI with key context details about current repository status and recent changes.
 3. Provides a facility to regenerate the commit message.
 4. Allows direct pasting of the generated commit message to the active application.
@@ -26,5 +26,4 @@ Ensure you have the following:
 
 This extension supports the following preferences:
 
-- Path to Git Repos Directory: The path to the directory where your Git repositories are stored (required).
 - AI Prompt: The prompt to be used when calling the AI for commit message generation.

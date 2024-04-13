@@ -17,20 +17,12 @@
   ],
   "preferences": [
     {
-      "name": "path-to-git-repos",
-      "description": "Path to git repositories used to search the latest edited repository",
-      "type": "directory",
-      "required": true,
-      "title": "Path to git repositories",
-      "placeholder": "~src/"
-    },
-    {
       "name": "commit-prompt",
       "description": "GPT prompt for commit message generation",
       "type": "textfield",
       "required": false,
       "title": "Commit message prompt",
-      "default": "Give me a Git commit message. I'll provide you with the git status and git diff output. The commit message should: 1. Begin with a short summary, written in the imperative tense, like 'Fix bug,' and not 'Fixed bug'. The summary should not contain any period at the end and should not exceed 60 characters. 2. Followed by a more detailed explanatory text, which should be wrapped to 72 characters per line. 3. Have a blank line separating the summary from the detailed explanatory text. 4. Use bullet points for multiple changes-use a hyphen or asterisk as bullet symbols, followed by a space. 5. Include the ticket number deduced from the branch name in the subject, if available. The formats can be: For 'dev/ABC-fix', the ticket number is [ABC]. For 'dev/ABC-1234-fix', the ticket number is [ABC-1234]. For 'dev/fix-smth', there's no ticket number. The result should be: ticket number short summary Detailed explanatory text"
+      "default": "Give me a Git commit message. I'll provide you with the git status and git diff output. The commit message should: 1. Begin with a short summary, written in the imperative tense, like 'Fix bug,' and not 'Fixed bug'. The summary should not contain any period at the end and should not exceed 60 characters. 2. Followed by a more detailed explanatory text, which should be wrapped to 72 characters per line. 3. Have a blank line separating the summary from the detailed explanatory text. 4. Use bullet points for multiple changes-use a hyphen or asterisk as bullet symbols, followed by a space. 5. Include the ticket number deduced from the branch name in the subject, if available. The formats can be: For 'dev/ABC-fix', the ticket number is [ABC]. For 'dev/ABC-1234-fix', the ticket number is [ABC-1234]. For 'dev/fix-smth', there's no ticket number. The result should be: ticket number short summary Detailed explanatory text."
     }
   ],
   "dependencies": {

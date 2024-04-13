@@ -7,30 +7,48 @@ import {
   Clipboard,
   getFrontmostApplication,
   popToRoot,
-  getPreferenceValues,
+  getPreferenceValues, environment, AI, showHUD, List
 } from "@raycast/api";
 
 import { showFailureToast } from "@raycast/utils";
 import { State, initialState, reducer } from "./reducer";
-import { generateCommitMessage, getRepositoryPath } from "./utils";
+import { generateCommitMessage, retrieveAndSavePathToRepository } from "./utils";
 
 export default function Command() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const preferences = getPreferenceValues<Preferences>();
-  const pathToRepos = preferences["path-to-git-repos"] || "~/";
   const prompt = preferences["commit-prompt"] || "";
 
-  const repositoryPath = getRepositoryPath(pathToRepos);
-  const { data: commitMessage, isLoading, error, revalidate } = generateCommitMessage(repositoryPath, prompt);
-
-  const pasteCommitMessageAndClose = () => {
+  const pasteCommitMessageAndClose = async () => {
     if (state.commitMessage) {
-      Clipboard.paste(state.commitMessage);
+      await Clipboard.paste(state.commitMessage);
     } else {
-      popToRoot();
+      await popToRoot();
     }
   };
+
+  const revalidate = () => {
+    dispatch(["revalidate"]);
+  };
+
+  useEffect(() => {
+    dispatch(["set_loading", true]);
+    retrieveAndSavePathToRepository()
+      .then((path) => dispatch(["set_repository_path", path]))
+      .catch((error) => dispatch(["set_error", error]))
+      .finally(() => dispatch(["set_loading", false]));
+  }, [state.revalidationCount]);
+
+  useEffect(() => {
+    if (state.repositoryPath) {
+      dispatch(["set_loading", true]);
+      generateCommitMessage(state.repositoryPath, prompt)
+        .then((commitMessage) => dispatch(["set_commit_message", commitMessage]))
+        .catch((error) => dispatch(["set_error", error]))
+        .finally(() => dispatch(["set_loading", false]));
+    }
+  }, [state.repositoryPath, state.revalidationCount]);
 
   useEffect(() => {
     getFrontmostApplication().then((application) => {
@@ -39,55 +57,70 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    dispatch(["set_commit_message", commitMessage]);
-  }, [commitMessage]);
-
-  useEffect(() => {
-    dispatch(["set_repository_path", repositoryPath]);
-  }, [repositoryPath]);
-
-  useEffect(() => {
-    if (error) {
-      showFailureToast(error, { title: "Failed to generate commit message" });
+    if (state.error) {
+      showFailureToast(state.error, { title: "Failed to generate commit message" }).then();
     }
-  }, [error]);
+  }, [state.error]);
 
-  return content(state, pasteCommitMessageAndClose, revalidate, isLoading);
+  return content(state, pasteCommitMessageAndClose, revalidate);
 }
 
 function content(
   state: State,
   primaryActionOnAction: () => void,
-  secondaryActionOnAction: () => void,
-  isLoading: boolean,
+  secondaryActionOnAction: () => void
 ) {
-  const markdown = `
-  ${isLoading ? "Generating Commit Message for" : "Generated Commit Message for"}
+  if (state.error) {
 
-  ${state.repositoryPath ? `\`${state.repositoryPath}\`` : ""}
-  # ${isLoading ? "Generating.." : state.commitMessage}
+    const markdown = `
+  # We encountered an error while generating the commit message 😔
+  ${state.error.message}
   `;
 
-  return (
-    <Detail
-      markdown={markdown}
-      isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <Action
-            title={isLoading ? "Cancel Generation" : `Paste Response to ${state.frontmostApplication}`}
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
-            icon={isLoading ? Icon.XMarkCircleFilled : Icon.Clipboard}
-            onAction={primaryActionOnAction}
-          />
-          <Action
-            title="Regenerate"
-            shortcut={{ modifiers: ["opt"], key: "r" }}
-            icon={Icon.ArrowClockwise}
-            onAction={secondaryActionOnAction}
-          />
-        </ActionPanel>
-      }
-    />
-  );
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Regenerate"
+              shortcut={{ modifiers: ["opt"], key: "r" }}
+              icon={Icon.ArrowClockwise}
+              onAction={secondaryActionOnAction}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  } else {
+    const markdown = `
+  ${state.isLoading ? "Generating Commit Message for" : "Generated Commit Message for"}
+
+  ${state.repositoryPath ? `\`${state.repositoryPath}\`` : ""}
+  # ${state.isLoading ? "Generating.." : state.commitMessage}
+  `;
+
+    return (
+      <Detail
+        markdown={markdown}
+        isLoading={state.isLoading}
+        actions={
+          <ActionPanel>
+            <Action
+              title={state.isLoading ? "Cancel Generation" : `Paste Response to ${state.frontmostApplication}`}
+              icon={state.isLoading ? Icon.XMarkCircleFilled : Icon.Clipboard}
+              onAction={primaryActionOnAction}
+            />
+            <Action.CopyToClipboard content={state.commitMessage || ""} />
+            <Action
+              title="Regenerate"
+              shortcut={{ modifiers: ["opt"], key: "r" }}
+              icon={Icon.ArrowClockwise}
+              onAction={secondaryActionOnAction}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 }
