@@ -79,34 +79,34 @@ export default function ManageTmuxWindows() {
     });
   }, [isTerminalSetup, isLoading]);
 
-   // Search Text Customization
+  // Search Text Customization
   useEffect(() => {
     if (searchText.length === 0) {
       setFilteredWindows(windows);
     }
 
-    const filteredWindows = windows.filter((window) =>
-      window.windowName.toLowerCase().includes(searchText.toLowerCase()) ||
+    const filteredWindows = windows.filter(
+      (window) =>
+        window.windowName.toLowerCase().includes(searchText.toLowerCase()) ||
         window.sessionName.toLowerCase().includes(searchText.toLowerCase())
     );
 
     setFilteredWindows(filteredWindows);
-  }, [searchText, windows])
+  }, [searchText, windows]);
 
   return (
     <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
       {filteredWindows.map((window, index) => (
         <List.Item
           key={index}
-          icon={Icon.Box}
+          icon={Icon.Gear}
           title={{
             value: window.windowName,
-            tooltip: `Session: ${window.sessionName} / Window No: ${window.windowIndex}`
+            tooltip: `Session: ${window.sessionName} / Window No: ${window.windowIndex}`,
           }}
           accessories={[
             {
-              text: { value: window.sessionName, color: Color.Yellow },
-              icon: Icon.Terminal
+              text: { value: window.sessionName, color: Color.Green },
             },
           ]}
           actions={
@@ -128,4 +128,3 @@ export default function ManageTmuxWindows() {
     </List>
   );
 }
-
