@@ -16,7 +16,7 @@ Content-Type: application/json
 Authorization: Basic {{authToken}}
 
 ### Get a list of repositories
-GET https://dev.azure.com/{{org}}/_apis/git/repositories/{{repositories.response.body.value[0].id}}/pullrequests?api-version=1.0
+GET https://dev.azure.com/{{org}}/_apis/git/repositories/?api-version=1.0
 Content-Type: application/json
 Authorization: Basic {{authToken}}
 
