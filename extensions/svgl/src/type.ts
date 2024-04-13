@@ -1,7 +1,7 @@
 export interface Svg {
   id: number;
   title: string;
-  category: string;
+  category: string | string[];
   route:
     | string
     | {

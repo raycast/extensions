@@ -3,7 +3,8 @@ import CopyReactComponentActions from "./actions/copy-react-component-actions";
 import CopySvgActions from "./actions/copy-svg-actions";
 import CopyWordmarkSvgActions from "./actions/copy-wordmark-svg-actions";
 import SvgInfoActions from "./actions/svg-info-actions";
-import { Svg } from "./type";
+import { Svg } from "../type";
+import PinSvgAction from "./actions/pin-svg-action";
 
 interface SvgActionProps {
   svg: Svg;
@@ -12,7 +13,7 @@ interface SvgActionProps {
 
 const SvgAction = ({ svg, category }: SvgActionProps) => {
   return (
-    <ActionPanel title={`${svg.title}'s Logo`}>
+    <ActionPanel>
       <ActionPanel.Section title="Copy SVG">
         <CopySvgActions svg={svg} />
       </ActionPanel.Section>
@@ -21,6 +22,9 @@ const SvgAction = ({ svg, category }: SvgActionProps) => {
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy React Component">
         <CopyReactComponentActions svg={svg} />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Operation">
+        <PinSvgAction svg={svg} />
       </ActionPanel.Section>
       <ActionPanel.Section title="SVG Info">
         <SvgInfoActions svg={svg} category={category} />

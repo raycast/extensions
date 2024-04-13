@@ -1,15 +1,23 @@
 import { Action } from "@raycast/api";
-import { Svg } from "../type";
-import { fetchAndCopyReactComponent } from "../util";
+import { Svg } from "../../type";
+import { fetchAndCopyReactComponent } from "../../utils/fetch";
+import { useSvglExtension } from "../app-context";
 
 const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
+  const { addRecentSvgId } = useSvglExtension();
+
+  const handleAction = (url: string, name: string, tsx: boolean) => {
+    addRecentSvgId(svg.id);
+    fetchAndCopyReactComponent(url, name, tsx);
+  };
+
   if (typeof svg.route === "string") {
     return (
       <>
         <Action
           icon="react-tsx.svg"
           title="Copy TSX Component"
-          onAction={() => fetchAndCopyReactComponent(svg.route as string, svg.title, true)}
+          onAction={() => handleAction(svg.route as string, svg.title, true)}
           shortcut={{
             modifiers: ["cmd"],
             key: "t",
@@ -19,7 +27,7 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
         <Action
           icon="react-jsx.svg"
           title="Copy JSX Component"
-          onAction={() => fetchAndCopyReactComponent(svg.route as string, svg.title, false)}
+          onAction={() => handleAction(svg.route as string, svg.title, false)}
           shortcut={{
             modifiers: ["cmd"],
             key: "j",
@@ -34,9 +42,7 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
       <Action
         icon="react-tsx.svg"
         title="Copy Light TSX Component"
-        onAction={() =>
-          fetchAndCopyReactComponent(typeof svg.route === "string" ? svg.route : svg.route.light, svg.title, true)
-        }
+        onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.light, svg.title, true)}
         shortcut={{
           modifiers: ["cmd"],
           key: "t",
@@ -46,9 +52,7 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
       <Action
         icon="react-tsx.svg"
         title="Copy Dark TSX Component"
-        onAction={() =>
-          fetchAndCopyReactComponent(typeof svg.route === "string" ? svg.route : svg.route.dark, svg.title, true)
-        }
+        onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, svg.title, true)}
         shortcut={{
           modifiers: ["cmd", "shift"],
           key: "t",
@@ -58,9 +62,7 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
       <Action
         icon="react-jsx.svg"
         title="Copy Light JSX Component"
-        onAction={() =>
-          fetchAndCopyReactComponent(typeof svg.route === "string" ? svg.route : svg.route.light, svg.title, false)
-        }
+        onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.light, svg.title, false)}
         shortcut={{
           modifiers: ["cmd"],
           key: "j",
@@ -70,9 +72,7 @@ const CopyReactComponentActions = ({ svg }: { svg: Svg }) => {
       <Action
         icon="react-jsx.svg"
         title="Copy Dark JSX Component"
-        onAction={() =>
-          fetchAndCopyReactComponent(typeof svg.route === "string" ? svg.route : svg.route.dark, svg.title, false)
-        }
+        onAction={() => handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, svg.title, false)}
         shortcut={{
           modifiers: ["cmd", "shift"],
           key: "j",

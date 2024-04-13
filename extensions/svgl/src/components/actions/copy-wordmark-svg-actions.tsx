@@ -1,14 +1,22 @@
 import { Action, Icon } from "@raycast/api";
-import { Svg } from "../type";
-import { fetchAndCopySvg } from "../util";
+import { Svg } from "../../type";
+import { APP_URL, fetchAndCopySvg } from "../../utils/fetch";
+import { useSvglExtension } from "../app-context";
 
 const CopyWordmarkSvgAction = ({ svg }: { svg: Svg }) => {
+  const { addRecentSvgId } = useSvglExtension();
+
+  const handleAction = (url: string, showContent: string) => {
+    addRecentSvgId(svg.id);
+    fetchAndCopySvg(url, showContent);
+  };
+
   if (typeof svg.wordmark === "string") {
     return (
       <Action
         icon={Icon.Clipboard}
         title="Copy SVG Wordmark File"
-        onAction={() => fetchAndCopySvg("https://svgl.app" + svg.wordmark, "Copied SVG Wordmark to clipboard")}
+        onAction={() => handleAction(APP_URL + svg.wordmark, "Copied SVG Wordmark to clipboard")}
       />
     );
   }
@@ -24,8 +32,8 @@ const CopyWordmarkSvgAction = ({ svg }: { svg: Svg }) => {
             key: "l",
           }}
           onAction={() =>
-            fetchAndCopySvg(
-              "https://svgl.app" + (typeof svg.wordmark === "string" ? svg.wordmark : svg.wordmark?.light),
+            handleAction(
+              APP_URL + (typeof svg.wordmark === "string" ? svg.wordmark : svg.wordmark?.light),
               "Copied Light SVG Wordmark to clipboard",
             )
           }
@@ -39,8 +47,8 @@ const CopyWordmarkSvgAction = ({ svg }: { svg: Svg }) => {
             key: "d",
           }}
           onAction={() =>
-            fetchAndCopySvg(
-              "https://svgl.app" + (typeof svg.wordmark === "string" ? svg.wordmark : svg.wordmark?.dark),
+            handleAction(
+              APP_URL + (typeof svg.wordmark === "string" ? svg.wordmark : svg.wordmark?.dark),
               "Copied Dark SVG Wordmark to clipboard",
             )
           }
