@@ -1,13 +1,12 @@
 import { MenuBarExtra, Icon, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { preparedPersonalAccessToken, organizationName } from "./preferences";
+import { preparedPersonalAccessToken, baseApiUrl } from "./preferences";
 import { AdoProjectResponse, AdoPrResponse, Project, PullRequest } from "./types";
 
 const activeProject = "active";
-const baseApiUrl = `https://dev.azure.com/${organizationName}`;
 
 export default () => {
-  const { data, isLoading } = useFetch<AdoProjectResponse>(`${baseApiUrl}/_apis/projects?api-version=1.0`, {
+  const { data, isLoading } = useFetch<AdoProjectResponse>(`${baseApiUrl()}/_apis/projects?api-version=1.0`, {
     headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
   });
 
@@ -20,9 +19,12 @@ export default () => {
 };
 
 function MenuBarProjectItem(props: { project: Project }) {
-  const { data } = useFetch<AdoPrResponse>(`${baseApiUrl}/${props.project.id}/_apis/git/pullrequests?api-version=1.0`, {
-    headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
-  });
+  const { data } = useFetch<AdoPrResponse>(
+    `${baseApiUrl()}/${props.project.id}/_apis/git/pullrequests?api-version=1.0`,
+    {
+      headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
+    },
+  );
 
   return (
     <MenuBarExtra.Section key={props.project.id} title={props.project.name}>

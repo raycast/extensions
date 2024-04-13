@@ -5,4 +5,8 @@ export function preparedPersonalAccessToken(): string {
   return Buffer.from(":" + personalAccessToken, "binary").toString("base64");
 }
 
+export function baseApiUrl(): string {
+  return `https://dev.azure.com/${getPreferenceValues().organizationName}`;
+}
+
 export const { organizationName } = getPreferenceValues();

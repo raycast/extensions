@@ -1,13 +1,11 @@
 import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { preparedPersonalAccessToken, organizationName } from "./preferences";
+import { preparedPersonalAccessToken, baseApiUrl } from "./preferences";
 import { AdoGitrepostitoriesResponse } from "./types";
-
-const baseApiUrl = `https://dev.azure.com/${organizationName}`;
 
 export default () => {
   const { data, isLoading } = useFetch<AdoGitrepostitoriesResponse>(
-    `${baseApiUrl}/_apis/git/repositories?api-version=1.0`,
+    `${baseApiUrl()}/_apis/git/repositories?api-version=1.0`,
     {
       headers: { Accept: "application/json", Authorization: `Basic ${preparedPersonalAccessToken()}` },
     },
