@@ -1,5 +1,11 @@
 # GIF Search Changelog
 
+## [Use AbortController] - 2024-04-13
+
+- Use `AbortController` to cancel fetch requests when the user searches
+  - This fixes issues where search ends up empty
+  - Part of Giphy search is copied to a local version with added AbortController support
+
 ## [Use native pagination] - 2024-03-12
 
 - Switched to using native pagination for better scrolling experience
