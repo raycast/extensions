@@ -1,4 +1,4 @@
-import { Icon, Image } from "@raycast/api";
+import { Color, Icon, Image } from "@raycast/api";
 import { iconStyle } from "./weather-utils";
 import ImageLike = Image.ImageLike;
 
@@ -105,17 +105,11 @@ const sfSymbolsWeatherIconMap = new Map([
   [99, "cloud-hail.png"],
 ]);
 
-function getSfSymbolWeatherIconWithTheme(folder: string, folderDark: string, weatherCode: number): ImageLike {
+function getSfSymbolWeatherIcon(weatherCode: number): ImageLike {
   return {
-    source: {
-      light: folder + sfSymbolsWeatherIconMap.get(weatherCode),
-      dark: folderDark + sfSymbolsWeatherIconMap.get(weatherCode),
-    },
+    source: "sf-weather-icons/" + sfSymbolsWeatherIconMap.get(weatherCode),
+    tintColor: Color.PrimaryText,
   };
-}
-
-function getSfSymbolWeatherIcon(weatherCode: number) {
-  return getSfSymbolWeatherIconWithTheme("sf-weather-icons/", "sf-weather-icons-dark/", weatherCode);
 }
 
 export function getWeatherIcons(weatherCode: number) {
@@ -130,10 +124,7 @@ export function getDefaultWeatherIcons() {
   return {
     description: "No weather info",
     icon: {
-      source: {
-        light: "menubar-icon.png",
-        dark: "menubar-icon@dark.png",
-      },
+      source: "menubar-icon.png",
     },
   };
 }
@@ -194,17 +185,11 @@ const sfSymbolsMenuIcons = new Map([
   ["Preferences", "prefs.png"],
 ]);
 
-function getSfSymbolMenuIconWithTheme(folder: string, folderDark: string, title: string): ImageLike {
+function getSfSymbolMenuIcon(title: string): ImageLike {
   return {
-    source: {
-      light: folder + sfSymbolsMenuIcons.get(title),
-      dark: folderDark + sfSymbolsMenuIcons.get(title),
-    },
+    source: "sf-menu-icons/" + sfSymbolsMenuIcons.get(title),
+    tintColor: Color.PrimaryText,
   };
-}
-
-function getSfSymbolMenuIcon(title: string) {
-  return getSfSymbolMenuIconWithTheme("sf-menu-icons/", "sf-menu-icons-dark/", title);
 }
 
 export function getMenuIcon(title: string) {
