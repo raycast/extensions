@@ -1,5 +1,9 @@
 # Dashlane Vault Changelog
 
+## [Improvements] - 2024-04-13
+
+- Master password for Dashlane CLI can be saved in the extensions settings to lock your vault by default
+
 ## [Update] - 2024-03-23
 
 - Update to add compatibility for Dashlane CLI version 6.2412.0

@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
+import { execa } from "execa";
 import { existsSync } from "fs";
 import { safeParse } from "valibot";
 
-import { execFilePromise } from "@/helper/exec";
 import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } from "@/types/dcli";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -15,7 +15,14 @@ async function dcli(...args: string[]) {
     throw Error("Dashlane CLI is not found!");
   }
 
-  const { stdout } = await execFilePromise(CLI_PATH, args, { maxBuffer: 4096 * 1024 });
+  const { stdout } = await execa(CLI_PATH, args, {
+    timeout: 30_000,
+    ...(preferences.masterPassword && {
+      env: {
+        DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
+      },
+    }),
+  });
 
   return stdout;
 }

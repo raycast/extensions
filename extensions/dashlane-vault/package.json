@@ -41,11 +41,18 @@
       "required": false,
       "title": "Dashlane CLI path",
       "type": "textfield"
+    },
+    {
+      "name": "masterPassword",
+      "title": "Master Password",
+      "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain.",
+      "type": "password"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.70.2",
     "@raycast/utils": "^1.13.4",
+    "execa": "^8.0.1",
     "valibot": "~0.28.1"
   },
   "devDependencies": {
