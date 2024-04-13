@@ -13,6 +13,13 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "PERSONAL_ACCESS_TOKEN",
+      "type": "password",
+      "required": false,
+      "title": "Personal Access Token",
+      "description": "You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
+    },
+    {
       "name": "TEAM_ID",
       "type": "textfield",
       "required": true,
