@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 
 import { showToast, Toast, Icon } from "@raycast/api";
 
@@ -27,9 +27,12 @@ export function GifSearch() {
 
   const [itemSize, setItemSize] = useState(getGridTrendingItemSize());
 
-  const loadMoreGifs = () => {
+  const loadMoreGifs = useCallback(() => {
+    if (isLoading) {
+      return;
+    }
     loadMore();
-  };
+  }, [loadMore, isLoading]);
 
   const onServiceChange = (service: string) => {
     setSearchService(service as ServiceName);

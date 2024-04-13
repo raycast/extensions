@@ -144,9 +144,9 @@
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^5.4.0",
-    "@raycast/api": "^1.69.1",
-    "@raycast/utils": "^1.13.1",
-    "@saekitominaga/file-size-format": "^1.0.2",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
+    "@saekitominaga/file-size-format": "^1.1.3",
     "date-fns": "^2.30.0",
     "node-fetch": "^3.3.2",
     "tempy": "^2.0.0"

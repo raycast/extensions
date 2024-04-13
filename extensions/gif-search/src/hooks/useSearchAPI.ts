@@ -8,7 +8,7 @@ import finergifs from "../models/finergifs";
 
 import dedupe from "../lib/dedupe";
 
-import type { IGif } from "../models/gif";
+import type { APIOpt, IGif } from "../models/gif";
 
 interface FetchState {
   term?: string;
@@ -65,9 +65,8 @@ export default function useSearchAPI({
           return;
         }
 
-        const newItems = searchTerm
-          ? await api.search(searchTerm, { offset, limit })
-          : await api.trending({ offset, limit });
+        const opts: APIOpt = { offset, limit, abort: cancelRef.current };
+        const newItems = searchTerm ? await api.search(searchTerm, opts) : await api.trending(opts);
 
         if (searchService === prevServiceRef.current && searchTerm === prevTermRef.current) {
           // If neither the service nor the term have changed, append the items
@@ -79,7 +78,6 @@ export default function useSearchAPI({
           prevTermRef.current = searchTerm;
         }
       } catch (e) {
-        console.error(e);
         const error = e as FetchError;
         if (e instanceof AbortError) {
           return;
@@ -87,6 +85,7 @@ export default function useSearchAPI({
           error.message = "Invalid credentials, please try again.";
           await getAPIByServiceName(searchService, true);
         }
+        console.error(e);
         setResults({ error });
       } finally {
         setIsLoading(false);
