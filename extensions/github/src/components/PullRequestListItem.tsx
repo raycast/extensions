@@ -1,4 +1,4 @@
-import { Action, Icon, List } from "@raycast/api";
+import { Action, Icon, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -67,6 +67,22 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
     keywords.push(pullRequest.author.login);
   }
 
+  const isOpenInBrowserDefault = getPreferenceValues<Preferences.SearchPullRequests>().openInBrowser;
+
+  const openInBrowserAction = <Action.OpenInBrowser url={pullRequest.permalink} />;
+
+  const showDetailsAction = (
+    <Action.Push
+      title="Show Details"
+      icon={Icon.Sidebar}
+      target={<PullRequestDetail initialPullRequest={pullRequest} viewer={viewer} mutateList={mutateList} />}
+    />
+  );
+
+  const [primaryAction, secondaryAction] = isOpenInBrowserDefault
+    ? [openInBrowserAction, showDetailsAction]
+    : [showDetailsAction, openInBrowserAction];
+
   return (
     <List.Item
       key={pullRequest.id}
@@ -77,11 +93,8 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
       accessories={accessories}
       actions={
         <PullRequestActions pullRequest={pullRequest} viewer={viewer} mutateList={mutateList}>
-          <Action.Push
-            title="Show Details"
-            icon={Icon.Sidebar}
-            target={<PullRequestDetail initialPullRequest={pullRequest} viewer={viewer} mutateList={mutateList} />}
-          />
+          {primaryAction}
+          {secondaryAction}
         </PullRequestActions>
       }
     />

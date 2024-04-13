@@ -25,7 +25,8 @@
     "xilopaint",
     "antonengelhardt",
     "johanthorell",
-    "dennis_zoma"
+    "dennis_zoma",
+    "dmitrii_mitrofanov"
   ],
   "categories": [
     "Developer Tools",
@@ -43,7 +44,17 @@
       "name": "search-pull-requests",
       "title": "Search Pull Requests",
       "description": "Search recent pull requests globally in all repositories.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "checkbox",
+          "label": "Open in Browser shortcut",
+          "name": "openInBrowser",
+          "description": "Open in browser as a default action.",
+          "default": false,
+          "required": false 
+        }
+      ]
     },
     {
       "name": "create-pull-request",

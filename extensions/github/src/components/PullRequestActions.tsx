@@ -176,8 +176,6 @@ export default function PullRequestActions({
     <ActionPanel title={`#${pullRequest.number} in ${pullRequest.repository.nameWithOwner}`}>
       {children}
 
-      <Action.OpenInBrowser url={pullRequest.permalink} />
-
       <Action.Push
         icon={Icon.Document}
         title="Add Review"
