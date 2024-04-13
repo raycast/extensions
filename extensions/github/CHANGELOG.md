@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Open in Browser as primary action setting] - 2024-04-13
+
+- You can now set Open in Browser as a primary action for Pull Request search.
+
 ## [Opens notification discussion links] - 2024-04-08
 
 - Opens GitHub links for notifications that point to a discussion directly.
