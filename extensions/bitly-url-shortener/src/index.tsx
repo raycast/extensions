@@ -16,7 +16,6 @@ export default async function () {
 
     // Try to get the selected text
     const selectedText = await getSelectedText();
-    // let urlToShorten: string;
 
     // If no text is selected, fall back to the clipboard
     const urlToShorten = selectedText ? selectedText : await Clipboard.readText();
