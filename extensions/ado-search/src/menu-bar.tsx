@@ -49,5 +49,5 @@ function generateTitle(pullRequest: PullRequest) {
 }
 
 function generatePullRequestUrl(pr: PullRequest) {
-  return `${baseApiUrl}/${pr.repository.project.name}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`;
+  return `${baseApiUrl()}/${pr.repository.project.name}/_git/${pr.repository.name}/pullrequest/${pr.pullRequestId}`;
 }
