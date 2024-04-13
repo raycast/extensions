@@ -5,7 +5,10 @@ import SvgAction from "../svg-action";
 const RecentGrid = () => {
   const { svgs, recentSvgIds, pinnedSvgIds } = useSvglExtension();
   return (
-    <Grid.Section title="Recently Used" subtitle={Math.min(recentSvgIds.length, 12).toString()}>
+    <Grid.Section
+      title="Recently Used"
+      subtitle={Math.min(recentSvgIds.filter((id) => !pinnedSvgIds.includes(id)).length, 12).toString()}
+    >
       {svgs
         .filter((svg) => recentSvgIds.includes(svg.id) && !pinnedSvgIds.includes(svg.id))
         .sort((a, b) => recentSvgIds.indexOf(a.id) - recentSvgIds.indexOf(b.id))
