@@ -144,7 +144,7 @@ const raycastMenuIcons = new Map([
   ["Direction", Icon.Windsock],
   ["1Hour", Icon.Raindrop],
   ["Sunrise", Icon.Sunrise],
-  ["Sunset", Icon.Moon],
+  ["Sunset", Icon.Moonrise],
   ["City", Icon.Building],
   ["Country", Icon.Map],
   ["Timezone", Icon.Globe],
