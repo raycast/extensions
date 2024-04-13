@@ -1,7 +1,8 @@
 # Menubar Weather Changelog
 
-## [Improve implementation of SF Symbols icon style] - 2024-04-13
+## [Update icons] - 2024-04-13
 
+- Update icons of Raycast icon style
 - Improve the implementation of SF Symbols icon style
 
 ## [Fix error] - 2024-02-05
