@@ -8,9 +8,6 @@ export default function ManageTmuxWindows() {
   const [isLoading, setIsLoading] = useState(true);
   const [isTerminalSetup, setIsTerminalSetup] = useState(false);
 
-  const [searchText, setSearchText] = useState("");
-  const [filteredWindows, setFilteredWindows] = useState<Array<TmuxWindow & { keyIndex: number }>>([]);
-
   // Init list of windows
   const setupListWindows = () => {
     getAllWindow((error, stdout) => {
@@ -79,27 +76,13 @@ export default function ManageTmuxWindows() {
     });
   }, [isTerminalSetup, isLoading]);
 
-  // Search Text Customization
-  useEffect(() => {
-    if (searchText.length === 0) {
-      setFilteredWindows(windows);
-    }
-
-    const filteredWindows = windows.filter(
-      (window) =>
-        window.windowName.toLowerCase().includes(searchText.toLowerCase()) ||
-        window.sessionName.toLowerCase().includes(searchText.toLowerCase())
-    );
-
-    setFilteredWindows(filteredWindows);
-  }, [searchText, windows]);
-
   return (
-    <List isLoading={isLoading} filtering={false} onSearchTextChange={setSearchText}>
-      {filteredWindows.map((window, index) => (
+    <List isLoading={isLoading}>
+      {windows.map((window, index) => (
         <List.Item
           key={index}
           icon={Icon.Gear}
+          keywords={[window.sessionName, window.windowName]}
           title={{
             value: window.windowName,
             tooltip: `Session: ${window.sessionName} / Window No: ${window.windowIndex}`,
