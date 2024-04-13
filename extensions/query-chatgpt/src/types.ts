@@ -5,7 +5,10 @@ export type TabOpenerArguments = {
   query: string;
 };
 
-export type ComposeAppleScriptArguments = Pick<TabOpenerArguments, "browserName" | "prompt" | "gptUrl">;
+export type ComposeAppleScriptArguments = Pick<TabOpenerArguments, "browserName" | "prompt"> & {
+  urlToOpen: TabOpenerArguments["gptUrl"];
+  urlToSearch: TabOpenerArguments["gptUrl"];
+};
 
 export type CustomCommandCreateConfigurationParams = {
   prompt: TabOpenerArguments["prompt"];
