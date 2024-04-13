@@ -75,12 +75,12 @@ export default function MenubarWeather() {
                     <MenuBarExtra.Item
                       title={"Min/Max"}
                       icon={getMenuIcon("Min/Max")}
-                      subtitle={` ${parseInt(weather?.daily.temperature_2m_min[0] + "")}/${Math.round(
+                      subtitle={` ${parseInt(weather?.daily.temperature_2m_min[0] + "")}${tempUnit} / ${Math.round(
                         weather?.daily.temperature_2m_max[0],
                       )}${tempUnit}`}
                       onAction={async () => {
                         await Clipboard.copy(
-                          `${parseInt(weather?.daily.temperature_2m_min[0] + "")}/${Math.round(
+                          `${parseInt(weather?.daily.temperature_2m_min[0] + "")}${tempUnit} / ${Math.round(
                             weather?.daily.temperature_2m_max[0],
                           )}${tempUnit}`,
                         );
