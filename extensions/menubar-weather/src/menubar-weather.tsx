@@ -63,8 +63,8 @@ export default function MenubarWeather() {
                       }}
                     />
                     <MenuBarExtra.Item
-                      title={"Feels-like"}
-                      icon={getMenuIcon("Feels-like")}
+                      title={"Feels Like"}
+                      icon={getMenuIcon("Feels Like")}
                       subtitle={` ${Math.round(weather?.hourly.apparent_temperature[timeHour()])}${tempUnit}`}
                       onAction={async () => {
                         await Clipboard.copy(

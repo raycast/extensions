@@ -134,7 +134,7 @@ export function getDefaultWeatherIcons() {
 // raycast style icons
 const raycastMenuIcons = new Map([
   ["Temperature", Icon.Temperature],
-  ["Feels-like", Icon.Temperature],
+  ["Feels Like", Icon.Temperature],
   ["Min/Max", Icon.Temperature],
   ["UVI", Icon.Sun],
   ["Pressure", Icon.CricketBall],
@@ -160,7 +160,7 @@ const raycastMenuIcons = new Map([
 // sf symbols style icons
 const sfSymbolsMenuIcons = new Map([
   ["Temperature", "temperature.png"],
-  ["Feels-like", "temperature.png"],
+  ["Feels Like", "temperature.png"],
   ["Min/Max", "temperature.png"],
   ["UVI", "uvi.png"],
   ["Pressure", "pressure.png"],
