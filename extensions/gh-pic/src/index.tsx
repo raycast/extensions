@@ -46,7 +46,7 @@ async function uploadPic() {
   };
   try {
     const text = await Clipboard.readText();
-    if (!text) {
+    if (text) {
       // Paste pic from clipboard to Temp folder.
       execaSync(preferences.pngpastePath, [TEMP_PIC_PATH]);
 
