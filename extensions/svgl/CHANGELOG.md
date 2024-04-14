@@ -29,6 +29,7 @@ You can use the `Request SVG Logo` command to request SVGs you want to add to th
 - The icon count for each category is now shown in the grid section's subtitle.
 - Each API call is now cached locally in Raycast, making it faster than before.
 - The Grid View now displays the SVGs in a 6-column layout, allowing more icons to be shown simultaneously.
+- Remove the category subtitle below the SVG name to make it cleaner.
 
 ## [Copy React Component] - 2024-04-10
 - Add copy React component feature.
