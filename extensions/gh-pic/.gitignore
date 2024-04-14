@@ -4,3 +4,5 @@
 /node_modules
 # misc
 .DS_Store
+.package-lock.json
+.idea
