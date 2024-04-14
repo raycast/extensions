@@ -10,55 +10,37 @@ import {
   confirmAlert,
   showToast,
   Toast,
-  popToRoot,
-  Detail,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getRoutingRules, deleteRoutingRule } from "./utils/api";
 import { Response, Rule } from "./utils/types";
-import { getFavicon } from "@raycast/utils";
+import { getFavicon, useCachedState } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
 
-interface State {
-  rules?: Rule[];
-  error?: string;
-  showDetails: boolean;
-  isLoading?: boolean;
-}
-
 export default function ListRoutingRules() {
-  const [state, setState] = useState<State>({
-    rules: undefined,
-    error: "",
-    showDetails: false,
-    isLoading: false,
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState("");
+  const [error, setError] = useState("");
+  const [rules, setRules] = useCachedState<Rule[]>("rules");
+  const [isShowingDetails, setIsShowingDetails] = useState(false);
+
+  async function getFromApi() {
+    setIsLoading(true);
+    const response: Response = await getRoutingRules();
+
+    if (response.type === "error") {
+      setError(response.message);
+    } else {
+      setRules(response.result.rules);
+      await showToast({
+        title: "SUCCESS",
+        message: `Fetched ${response.result.rules?.length} rules`,
+      });
+    }
+    setIsLoading(false);
+  }
 
   useEffect(() => {
-    async function getFromApi() {
-      const response: Response = await getRoutingRules();
-
-      switch (response.type) {
-        case "error":
-          setState((prevState) => {
-            return { ...prevState, error: response.message, isLoading: false };
-          });
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, error: "", rules: response.result.rules };
-          });
-          break;
-
-        default:
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          break;
-      }
-    }
-
     getFromApi();
   }, []);
 
@@ -67,47 +49,31 @@ export default function ListRoutingRules() {
       await confirmAlert({
         title: `Delete rule with id ${ruleId}?`,
         message: "You will not be able to recover it",
+        icon: Icon.DeleteDocument,
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      setState((prevState: State) => {
-        return { ...prevState, isLoading: true };
-      });
+      setIsLoading(true);
 
       const response = await deleteRoutingRule(ruleId);
-      switch (response.type) {
-        case "error":
-          setState((prevState) => {
-            return { ...prevState, error: response.message, isLoading: false };
-          });
-          await showToast(Toast.Style.Failure, "Purelymail Error", response.message);
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          await showToast(Toast.Style.Success, "Rule Deleted", "RULE ID: " + ruleId);
-          await popToRoot({
-            clearSearchBar: true,
-          });
-          break;
-
-        default:
-          break;
+      if (response.type === "success") {
+        await showToast(Toast.Style.Success, "Rule Deleted", "RULE ID: " + ruleId);
+        await getFromApi();
       }
+      setIsLoading(false);
     }
   };
 
   const toggleShowDetails = () => {
-    setState((prevState) => {
-      return { ...prevState, showDetails: !state.showDetails };
-    });
+    setIsShowingDetails((prevState) => !prevState);
   };
+
+  const filteredRules = !rules ? [] : filter === "" ? rules : rules.filter((rule) => rule.domainName === filter);
+  const rulesTitle = `${filteredRules.length} of ${rules?.length || 0} rules`;
 
   const ruleDescription = (rule: Rule) => {
     const { prefix, catchall, matchUser, domainName, targetAddresses } = rule;
-    const targets = targetAddresses.toString().replaceAll(",", "AND");
+    const targets = targetAddresses.join(" AND ");
 
     let from = "FROM: ";
     if (!prefix && !catchall && matchUser) {
@@ -126,27 +92,47 @@ export default function ListRoutingRules() {
     return from + to;
   };
 
-  return state.error ? (
-    <ErrorComponent error={state.error} />
+  const ruleSubtitle = (rule: Rule) => {
+    const { prefix, catchall, matchUser, targetAddresses } = rule;
+    let from = "";
+    if (prefix && !catchall && !matchUser) from = "*";
+    else if (prefix && catchall && !matchUser) from = "<any>";
+    else if (prefix && !catchall && matchUser) from = `${matchUser}*`;
+    else from = matchUser;
+
+    return from + ` => ${targetAddresses.toString()}`;
+  };
+
+  return error ? (
+    <ErrorComponent error={error} />
   ) : (
     <List
-      isLoading={state.rules === undefined || state.isLoading}
+      isLoading={isLoading}
       searchBarPlaceholder="Search for rule..."
-      isShowingDetail={state.showDetails == true}
+      isShowingDetail={isShowingDetails}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Select Domain" onChange={(newValue) => setFilter(newValue)}>
+          <List.Dropdown.Item title="All Domains" value="" icon={Icon.Dot} />
+          {Array.from(new Set(rules?.map((rule) => rule.domainName).flat())).map((domainName) => (
+            <List.Dropdown.Item
+              key={domainName}
+              title={domainName}
+              value={domainName}
+              icon={getFavicon(`https://${domainName}`, { fallback: Icon.List })}
+            />
+          ))}
+        </List.Dropdown>
+      }
     >
-      <List.Section title={`${state.rules?.length || 0} rules`}>
-        {(state.rules || []).map((rule) => (
+      <List.Section title={rulesTitle}>
+        {filteredRules.map((rule) => (
           <List.Item
             key={rule.id}
             icon={getFavicon(`https://${rule.domainName}`, { fallback: Icon.Forward })}
             title={`${String(rule.id)} - ${rule.domainName}`}
-            subtitle={
-              state.showDetails
-                ? undefined
-                : `${rule.matchUser || (rule.catchall && "*")} => ${rule.targetAddresses.toString()}`
-            }
+            subtitle={isShowingDetails ? undefined : ruleSubtitle(rule)}
             accessories={
-              state.showDetails
+              isShowingDetails
                 ? undefined
                 : [
                     { tag: { value: "prefix", color: rule.prefix ? Color.Green : Color.Red } },
@@ -171,6 +157,7 @@ export default function ListRoutingRules() {
                   icon={Icon.DeleteDocument}
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   onAction={() => handleDelete(rule.id)}
+                  style={Action.Style.Destructive}
                 />
               </ActionPanel>
             }
@@ -213,6 +200,8 @@ export default function ListRoutingRules() {
             }
           />
         ))}
+      </List.Section>
+      <List.Section title="Commands">
         <List.Item
           title="Create New Routing Rule"
           icon={Icon.Plus}

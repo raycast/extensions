@@ -1,5 +1,13 @@
 # Apple Notes Changelog
 
+## [Find related notes] - 2024-04-10 
+
+Add `Find Related Notes` feature to suggest relevant notes based on a selected note
+
+## [Refactoring] - 2024-04-08
+
+Improve code maintainability by migrating `DispatchGroup` to structured concurrency.
+
 ## [Improve AI Note command UX] - 2024-04-04
 
 The new note created by the `AI Note` command is now instantly displayed for immediate editing.

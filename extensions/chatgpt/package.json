@@ -135,6 +135,15 @@
     },
     {
       "default": false,
+      "description": "Enable custom model names without selecting from the model API",
+      "label": "Enable custom model name",
+      "name": "isCustomModel",
+      "required": false,
+      "title": "Custom model",
+      "type": "checkbox"
+    },
+    {
+      "default": false,
       "description": "Change the OpenAI's default API endpoint to custom endpoint",
       "label": "Change API Endpoint",
       "name": "useApiEndpoint",

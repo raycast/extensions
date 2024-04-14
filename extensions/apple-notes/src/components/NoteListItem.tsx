@@ -1,17 +1,21 @@
 import { List, Icon, getPreferenceValues, Color } from "@raycast/api";
-import { NoteItem, useNotes } from "../useNotes";
-import NoteActions from "./NoteActions";
 import { format } from "date-fns";
+
+import { NoteTitle } from "..";
+import { NoteItem, useNotes } from "../useNotes";
+
+import NoteActions from "./NoteActions";
 
 const preferences = getPreferenceValues<Preferences>();
 
 type NoteListItemProps = {
   note: NoteItem;
+  noteTitles?: NoteTitle[];
   mutate: ReturnType<typeof useNotes>["mutate"];
   isDeleted?: boolean;
 };
 
-export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemProps) {
+export default function NoteListItem({ note, noteTitles, isDeleted, mutate }: NoteListItemProps) {
   const accessories = [];
 
   if (preferences.shared && note.invitationLink) {
@@ -87,7 +91,7 @@ export default function NoteListItem({ note, isDeleted, mutate }: NoteListItemPr
       subtitle={note.snippet}
       keywords={keywords}
       accessories={accessories}
-      actions={<NoteActions note={note} isDeleted={isDeleted} mutate={mutate} />}
+      actions={<NoteActions note={note} noteTitles={noteTitles} isDeleted={isDeleted} mutate={mutate} />}
     />
   );
 }
