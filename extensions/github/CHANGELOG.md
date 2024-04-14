@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Opens notification discussion links] - 2024-04-08
+
+- Opens GitHub links for notifications that point to a discussion directly.
+
+## [Fix icon] - 2024-04-02
+
+- Fixes icon for closed pull requests.
+
 ## [Fix various icons] - 2024-03-29
 
 - Fixes icons for "Closed as not planned" and "Closed as completed" statuses in the `My Issues Menu Bar`.

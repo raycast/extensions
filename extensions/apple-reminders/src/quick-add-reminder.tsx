@@ -1,4 +1,5 @@
 import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import * as chrono from "chrono-node";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
 import { createReminder, getData } from "swift:../swift/AppleReminders";
 
@@ -16,16 +17,53 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     }
 
     if (!environment.canAccess(AI) || preferences.dontUseAI) {
-      await createReminder({ title: props.arguments.text, notes: props.arguments.notes });
+      const text = props.arguments.text;
+
+      let reminderList;
+      let dueDate;
+      let isDateTime;
+
+      const dateMatch = chrono.parse(text);
+      if (dateMatch && dateMatch.length > 0) {
+        const chronoDate = dateMatch[0].start;
+        isDateTime = chronoDate.isCertain("hour") || chronoDate.isCertain("minute") || chronoDate.isCertain("second");
+        const date = chronoDate.date();
+        dueDate = isDateTime ? date.toISOString() : format(date, "yyyy-MM-dd");
+      }
+
+      const listMatch = text.match(/#(\w+)/);
+
+      if (listMatch) {
+        const data: Data = await getData();
+        reminderList = data.lists.find((list) => list.title.toLowerCase() === listMatch[1].toLowerCase());
+      }
+
+      // Clean all values matching from text and previous white space as title constant
+      const title = text
+        .replace(listMatch ? listMatch[0] : "", "")
+        .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : "", "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const reminder: NewReminder = { title, listId: reminderList?.id, dueDate };
+
+      if (props.arguments.notes) {
+        reminder.notes = props.arguments.notes;
+      }
+
+      await createReminder(reminder);
+
+      const formattedDueDate = dueDate ? ` due ${format(dueDate, `${isDateTime ? "PPPpp" : "PPP"}`)}` : "";
+      const toastMessage = `Added "${title}" to ${reminderList?.title ?? "default list"}${formattedDueDate}`;
 
       await showToast({
         style: Toast.Style.Success,
-        title: `Added "${props.arguments.text}" to default list`,
+        title: toastMessage,
       });
       return;
     }
 
-    const data: Data = await getData(undefined);
+    const data: Data = await getData();
 
     const lists = data.lists.map((list) => {
       return `${list.title}:${list.id}`;

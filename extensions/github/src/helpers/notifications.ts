@@ -2,6 +2,9 @@ import { Endpoints } from "@octokit/types";
 import { Color, Icon } from "@raycast/api";
 import { format } from "date-fns";
 
+import { getGitHubClient } from "../api/githubClient";
+import { Discussion } from "../generated/graphql";
+
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
 // from https://github.com/manosim/gitify/blob/c3683dcfd84afc74fd391b2b17ae7b36dfe779a7/src/utils/helpers.ts#L19-L27
@@ -33,7 +36,7 @@ export function generateGitHubUrl(url: string, notificationId: string, userId?: 
 
 const getCommentId = (url?: string) => (url ? /comments\/(?<id>\d+)/g.exec(url)?.groups?.id : undefined);
 
-export function getGitHubURL(notification: Notification, userId?: string) {
+export async function getGitHubURL(notification: Notification, userId?: string) {
   if (notification.subject.url) {
     const latestCommentId = getCommentId(notification.subject.latest_comment_url);
     return generateGitHubUrl(
@@ -45,7 +48,20 @@ export function getGitHubURL(notification: Notification, userId?: string) {
   } else if (notification.subject.type === "CheckSuite") {
     return generateGitHubUrl(`${notification.repository.html_url}/actions`, notification.id, userId);
   } else if (notification.subject.type === "Discussion") {
-    return generateGitHubUrl(`${notification.repository.html_url}/discussions`, notification.id, userId);
+    // Get the discussion number via GraphQL
+    // See: https://github.com/orgs/community/discussions/62728#discussioncomment-9034908
+    let discussionNumber: number | null = null;
+    try {
+      discussionNumber = await getGitHubDiscussionNumber(notification);
+    } catch (error) {
+      console.error("Failed to get discussion number", error);
+    }
+
+    return generateGitHubUrl(
+      `${notification.repository.html_url}/discussions/${discussionNumber ?? ""}`,
+      notification.id,
+      userId,
+    );
   }
 
   return notification.url;
@@ -59,10 +75,10 @@ export function getNotificationIcon(notification: Notification) {
       icon = { value: "commit.svg", tooltip: "Commit" };
       break;
     case "Issue":
-      icon = { value: "issue-opened.svg", tooltip: "Issue" };
+      icon = { value: "issue-open.svg", tooltip: "Issue" };
       break;
     case "PullRequest":
-      icon = { value: "pull-request.svg", tooltip: "Pull Request" };
+      icon = { value: "pull-request-open.svg", tooltip: "Pull Request" };
       break;
     case "Release":
       icon = { value: "tag.svg", tooltip: "Release" };
@@ -169,4 +185,19 @@ export function getGitHubIcon(tinted = false) {
     source: "github.svg",
     tintColor: overrideTintColor ? overrideTintColor : Color.PrimaryText,
   };
+}
+
+export async function getGitHubDiscussionNumber(notification: Notification) {
+  const { github } = getGitHubClient();
+  const repo = notification.repository.full_name;
+  const updated = notification.updated_at.split("T")[0];
+  const title = notification.subject.title;
+
+  const result = await github.getGitHubDiscussionNumber({
+    filter: `repo:${repo} updated:>=${updated} in:title ${title}`,
+  });
+
+  const data = result?.search?.nodes?.[0] as Discussion | null;
+
+  return data?.number ?? null;
 }

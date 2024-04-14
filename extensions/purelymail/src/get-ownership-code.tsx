@@ -4,105 +4,83 @@ import { getOwnershipCode } from "./utils/api";
 import { Response } from "./utils/types";
 import { OPTIONAL_OWNERSHIP_DNS_RECORDS, REQUIRED_OWNERSHIP_DNS_RECORDS } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
-
-interface State {
-  code?: string;
-  error?: string;
-  isLoading?: false;
-}
+import { useCachedState } from "@raycast/utils";
 
 export default function GetOwnershipCode() {
-  const [state, setState] = useState<State>({
-    code: "",
-    error: "",
-    isLoading: false,
-  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [ownershipCode, setOwnershipCode] = useCachedState<string>("ownership-code");
 
   useEffect(() => {
     async function getFromApi() {
       const response: Response = await getOwnershipCode();
 
-      switch (response.type) {
-        case "error":
-          setState((prevState) => {
-            return { ...prevState, error: response.message, isLoading: false };
-          });
-          break;
-
-        case "success":
-          setState((prevState) => {
-            return { ...prevState, error: "", code: response.result.code };
-          });
-          break;
-
-        default:
-          setState((prevState) => {
-            return { ...prevState, isLoading: false };
-          });
-          break;
+      if (response.type === "error") {
+        setError(response.message);
+      } else {
+        setOwnershipCode(response.result.code);
       }
+      setIsLoading(false);
     }
 
     getFromApi();
   }, []);
 
-  return state.error ? (
-    <ErrorComponent error={state.error} />
+  return error ? (
+    <ErrorComponent error={error} />
   ) : (
-    <List isLoading={state.code === "" || state.isLoading}>
+    <List isLoading={isLoading}>
       <List.Section title="Required">
         {REQUIRED_OWNERSHIP_DNS_RECORDS.map((r) => (
-          <List.Item
-            key={r.value}
-            title={r.value}
-            subtitle={"HOST: " + (r.host || "(Empty)")}
-            accessories={[{ tag: r.type }]}
-            actions={
-              <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy Value" content={r.value} />
-                <Action.CopyToClipboard title="Copy Host" content={r.host} />
-                <Action.CopyToClipboard
-                  title="Copy Type"
-                  content={r.type}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
-                />
-              </ActionPanel>
-            }
-          />
+          <DNSRecordListItem key={r.value} type={r.type} host={r.host} value={r.value} ownershipCode={ownershipCode} />
         ))}
-        {state.code && (
-          <List.Item
-            key={state.code}
-            title={state.code}
-            subtitle="HOST: (Empty)"
-            accessories={[{ tag: "TXT" }]}
-            actions={
-              <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy Value" content={state.code} />
-                <Action.CopyToClipboard title="Copy Host" content="" />
-                <Action.CopyToClipboard title="Copy Type" content={state.code} />
-              </ActionPanel>
-            }
+        {ownershipCode && (
+          <DNSRecordListItem
+            key={ownershipCode}
+            type="TXT"
+            host=""
+            value={ownershipCode}
+            ownershipCode={ownershipCode}
           />
         )}
       </List.Section>
       <List.Section title="Optional">
         {OPTIONAL_OWNERSHIP_DNS_RECORDS.map((r) => (
-          <List.Item
-            key={r.value}
-            title={r.value}
-            subtitle={"HOST: " + r.host || "(Empty)"}
-            accessories={[{ tag: r.type }]}
-            actions={
-              <ActionPanel title="Copy">
-                <Action.CopyToClipboard title="Copy Value" content={r.value} />
-                <Action.CopyToClipboard title="Copy Host" content={r.host} />
-                <Action.CopyToClipboard title="Copy Type" content={r.type} />
-              </ActionPanel>
-            }
-          />
+          <DNSRecordListItem key={r.value} type={r.type} host={r.host} value={r.value} ownershipCode={ownershipCode} />
         ))}
       </List.Section>
     </List>
+  );
+}
+
+type DNSRecordListItemProps = {
+  type: string;
+  host: string;
+  value: string;
+  ownershipCode: string | undefined;
+};
+function DNSRecordListItem({ type, host, value, ownershipCode }: DNSRecordListItemProps) {
+  return (
+    <List.Item
+      key={value}
+      title={value}
+      subtitle={"HOST: " + (host || "(Empty)")}
+      accessories={[{ tag: type }]}
+      actions={
+        <ActionPanel title="Copy">
+          <Action.CopyToClipboard title="Copy Value" content={value} />
+          <Action.CopyToClipboard title="Copy Host" content={host} />
+          <Action.CopyToClipboard title="Copy Type" content={type} shortcut={{ modifiers: ["cmd"], key: "t" }} />
+          <Action.CopyToClipboard
+            title="Copy All as JSON"
+            content={JSON.stringify([
+              ...REQUIRED_OWNERSHIP_DNS_RECORDS,
+              { type: "TXT", host: "", value: ownershipCode },
+              ...OPTIONAL_OWNERSHIP_DNS_RECORDS,
+            ])}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }

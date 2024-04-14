@@ -51,7 +51,7 @@ interface Element {
   second_name: string;
   selected_by_percent: string;
   special: boolean;
-  squad_number?: any;
+  squad_number?: unknown;
   status: string;
   team: number;
   team_code: number;
@@ -144,17 +144,17 @@ interface GameSettings {
   league_points_h2h_lose: number;
   league_points_h2h_draw: number;
   league_ko_first_instead_of_random: boolean;
-  cup_start_event_id?: any;
-  cup_stop_event_id?: any;
-  cup_qualifying_method?: any;
-  cup_type?: any;
+  cup_start_event_id?: unknown;
+  cup_stop_event_id?: unknown;
+  cup_qualifying_method?: unknown;
+  cup_type?: unknown;
   squad_squadplay: number;
   squad_squadsize: number;
   squad_team_limit: number;
   squad_total_spend: number;
   ui_currency_multiplier: number;
   ui_use_special_shirts: boolean;
-  ui_special_shirt_exclusions: any[];
+  ui_special_shirt_exclusions: unknown[];
   stats_form_days: number;
   sys_vice_captain_enabled: boolean;
   transfers_cap: number;
@@ -173,7 +173,7 @@ interface Phase {
 interface Team {
   code: number;
   draw: number;
-  form?: any;
+  form?: unknown;
   id: number;
   loss: number;
   name: string;
@@ -182,7 +182,7 @@ interface Team {
   position: number;
   short_name: string;
   strength: number;
-  team_division?: any;
+  team_division?: unknown;
   unavailable: boolean;
   win: number;
   strength_overall_home: number;
@@ -219,7 +219,7 @@ interface Element {
   second_name: string;
   selected_by_percent: string;
   special: boolean;
-  squad_number?: any;
+  squad_number?: unknown;
   status: string;
   team: number;
   team_code: number;

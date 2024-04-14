@@ -19,8 +19,8 @@ function usePromise<T>(
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: Result<T>) => void;
-    onWillExecute?: (args: Parameters<T>) -> void;
-  }
+    onWillExecute?: (args: Parameters<T>) => void;
+  },
 ): AsyncState<Result<T>> & {
   revalidate: () => void;
   mutate: MutatePromise<Result<T> | undefined>;
