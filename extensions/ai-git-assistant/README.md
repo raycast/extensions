@@ -1,7 +1,7 @@
-<<<<<<< HEAD
 # AI Git Assistant
 
-The primary function of this extension is to generate Git commit messages using Raycast's AI and to feed from the diff and status outputs of your repository.
+The primary function of this extension is to generate Git commit messages using Raycast's AI and to feed from the diff
+and status outputs of your repository.
 
 ## Features
 
@@ -18,16 +18,8 @@ Ensure you have the following:
 - Raycast app
 - Raycast AI
 
-## Usage
-
-- You can use the extension by calling it via the Raycast command line.
-- Once the AI generates the commit message, you can choose to paste the response in your desired application or regenerate the message.
-
 ## Extension Preferences
 
 This extension supports the following preferences:
 
 - AI Prompt: The prompt to be used when calling the AI for commit message generation.
-=======
-# extensions
->>>>>>> 19464e5fd (Initial commit)
