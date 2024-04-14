@@ -112,10 +112,10 @@ export async function getNotificationIcon(notification: Notification) {
 
   switch (notification.subject.type) {
     case "Commit":
-      icon = { value: "commit.svg", tooltip: "Commit" };
+      icon = { value: { source: "commit.svg" }, tooltip: "Commit" };
       break;
     case "Release":
-      icon = { value: "tag.svg", tooltip: "Release" };
+      icon = { value: { source: "tag.svg" }, tooltip: "Release" };
       break;
     case "CheckSuite":
       icon = {
@@ -130,16 +130,16 @@ export async function getNotificationIcon(notification: Notification) {
       };
       break;
     case "Discussion":
-      icon = { value: "comment-discussion.svg", tooltip: "Comment" };
+      icon = { value: { source: "comment-discussion.svg" }, tooltip: "Comment" };
       break;
     case "RepositoryInvitation":
-      icon = { value: "mail.svg", tooltip: "Repository Invitation" };
+      icon = { value: { source: "mail.svg" }, tooltip: "Repository Invitation" };
       break;
     case "RepositoryVulnerabilityAlert":
-      icon = { value: "alert.svg", tooltip: "Repository} Vulnerability Alert" };
+      icon = { value: { source: "alert.svg" }, tooltip: "Repository} Vulnerability Alert" };
       break;
     default:
-      icon = { value: Icon.Circle, tooltip: "Unknown" };
+      icon = { value: { source: Icon.Circle }, tooltip: "Unknown" };
       break;
   }
 
