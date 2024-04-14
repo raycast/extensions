@@ -10,17 +10,6 @@ export default function SvglGrid() {
   const [selectCategory, setSelectCategory] = useState("All");
   const { isLoading, categories, selectedItemKey } = useSvglExtension();
 
-  const categoriesArray: string[] = [];
-  categories.forEach((category) => {
-    if (typeof category.category === "string") {
-      categoriesArray.push(category.category);
-    } else if (Array.isArray(category.category)) {
-      categoriesArray.push(...category.category);
-    }
-  });
-
-  const uniqueCategories = Array.from(new Set(categoriesArray));
-
   return (
     <Grid
       inset={Grid.Inset.Large}
@@ -41,8 +30,8 @@ export default function SvglGrid() {
             <Grid.Dropdown.Item key="Recently Used" title="Recently Used" value="Recently Used" />
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Logo Categories">
-            {uniqueCategories.map((category) => (
-              <Grid.Dropdown.Item key={category} title={category} value={category} />
+            {categories.map((category) => (
+              <Grid.Dropdown.Item key={category.category} title={category.category} value={category.category} />
             ))}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>

@@ -12,13 +12,9 @@ const AllGrid = () => {
       <PinnedGrid />
       <RecentGrid />
       {categories.map((category, index) => (
-        <Grid.Section
-          title={Array.isArray(category.category) ? category.category.join("-") : category.category}
-          subtitle={category.total.toString()}
-          key={index}
-        >
+        <Grid.Section title={category.category} subtitle={category.total.toString()} key={index}>
           {svgs
-            .filter((svg) => svg.category === category.category || svg.category?.includes(category.category as string))
+            .filter((svg) => svg.category === category.category || svg.category?.includes(category.category))
             .map((svg, index) => (
               <Grid.Item
                 key={index}

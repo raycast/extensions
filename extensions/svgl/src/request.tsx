@@ -54,17 +54,6 @@ export default function Command(props: LaunchProps<{ draftValues: RequestFormVal
     fetchCategoriesFn();
   }, []);
 
-  const categoriesArray: string[] = [];
-  categories.forEach((category) => {
-    if (typeof category.category === "string") {
-      categoriesArray.push(category.category);
-    } else if (Array.isArray(category.category)) {
-      categoriesArray.push(...category.category);
-    }
-  });
-
-  const uniqueCategories = Array.from(new Set(categoriesArray));
-
   return (
     <Form
       enableDrafts
@@ -77,8 +66,8 @@ export default function Command(props: LaunchProps<{ draftValues: RequestFormVal
     >
       <Form.TextField title="Icon Name" placeholder="Enter icon name" {...itemProps.iconName} />
       <Form.Dropdown title="Icon Category" placeholder="Select icon category" {...itemProps.category}>
-        {uniqueCategories.map((category) => (
-          <Form.Dropdown.Item key={category} value={category} title={category} />
+        {categories.map((category) => (
+          <Form.Dropdown.Item key={category.category} value={category.category} title={category.category} />
         ))}
       </Form.Dropdown>
       <Form.TextField title="Source URL (.svg)" placeholder="Enter source URL" {...itemProps.sourceUrl} />
