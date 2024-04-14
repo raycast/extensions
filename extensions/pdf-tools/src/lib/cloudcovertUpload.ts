@@ -6,7 +6,7 @@ import { createCompressTask } from "./task_compress";
 
 export class TaskUpload {
   async convertFileTaskExecuter(
-    APIKey: any,
+    APIKey: string,
     pathFileToConvert: string,
     task: string,
     extension: string,

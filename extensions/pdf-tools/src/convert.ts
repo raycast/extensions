@@ -1,5 +1,5 @@
-import Command  from "./index";
+import Command from "./index";
 
 export default function Convert() {
-    return Command('convert');
+  return Command("convert");
 }

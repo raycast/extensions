@@ -1,4 +1,4 @@
-export async function createConversionTask(cloudc: any, extension: string) {
+export async function createConversionTask(cloudc: import("cloudconvert"), extension: string) {
   let job;
   try {
     job = await cloudc.jobs.create({

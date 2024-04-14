@@ -29,19 +29,20 @@ interface AllowedFiles {
 }
 
 export default function Command(task: string) {
-  const [markdown, setMarkdown] = useState<string[] | null>(null);
+  const [markdown, setMarkdown] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filePath, setFilePath] = useState<string[] | null>(null);
+  const [filePath, setFilePath] = useState<string[]>([]);
   const [compressVal, setCompressVal] = useState("max");
 
   useEffect(() => {
     getSelectedItemFromFinder().then((filePaths) => {
       if (filePaths) {
+        console.log(`file type : ${typeof filePaths}`);
         setFilePath(filePaths);
-        let modifiedResult = filePaths
+        const modifiedResult = filePaths
           .map((item) => {
             const parts = item.split("/");
-            return parts[parts.length - 1]; // Get last part after splitting by '/' ,display to user the file name 
+            return parts[parts.length - 1]; // Get last part after splitting by '/' ,display to user the file name
           })
           .filter((fileName) => fileName);
 
@@ -77,7 +78,7 @@ export default function Command(task: string) {
                 <ActionPanel>
                   <Action.SubmitForm
                     title="Upload to CloudConvert"
-                    onSubmit={({}) => uploadFile(filePath, task, extension, compressVal)}
+                    onSubmit={() => uploadFile(filePath, task, extension, compressVal)}
                     icon={Icon.Upload}
                   />
                 </ActionPanel>
@@ -139,7 +140,7 @@ function isSupported(fileExtension: string, task: keyof AllowedFiles): boolean {
   return isSupported;
 }
 
-const uploadFile = async (filePaths: any, task: string, extension: string, compressVal: string) => {
+const uploadFile = async (filePaths: string[], task: string, extension: string, compressVal: string) => {
   if (allFilesSupported == false) {
     await showToast({
       style: Toast.Style.Failure,

@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import { List } from '@raycast/api';
-
+import { List } from "@raycast/api";
 
 interface Props {
-  setCompressVal: (value: string) => void; 
+  setCompressVal: (value: string) => void;
 }
 
-const DropdownComponent = ({ setCompressVal}: Props) => {
+const DropdownComponent = ({ setCompressVal }: Props) => {
   return (
     <List.Dropdown
       tooltip="Select Compression"
@@ -15,7 +13,7 @@ const DropdownComponent = ({ setCompressVal}: Props) => {
           console.log(`selected val : ${value}`);
           setCompressVal(value); // Ensure this line is called
         } catch (error) {
-          console.error('Error setting compression value:', error);
+          console.error("Error setting compression value:", error);
           // Handle the error appropriately
         }
       }}
