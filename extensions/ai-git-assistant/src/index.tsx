@@ -7,7 +7,7 @@ import {
   Clipboard,
   getFrontmostApplication,
   popToRoot,
-  getPreferenceValues
+  getPreferenceValues,
 } from "@raycast/api";
 
 import { showFailureToast } from "@raycast/utils";
@@ -65,13 +65,8 @@ export default function Command() {
   return content(state, pasteCommitMessageAndClose, revalidate);
 }
 
-function content(
-  state: State,
-  primaryActionOnAction: () => void,
-  secondaryActionOnAction: () => void
-) {
+function content(state: State, primaryActionOnAction: () => void, secondaryActionOnAction: () => void) {
   if (state.error) {
-
     const markdown = `
   # We encountered an error while generating the commit message 😔
   ${state.error.message}

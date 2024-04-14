@@ -37,7 +37,7 @@ export function reducer(state: State, [type, payload]: actions): typeof initialS
         error: undefined,
         commitMessage: undefined,
         repositoryPath: undefined,
-        revalidationCount: (state.revalidationCount || 0) + 1
+        revalidationCount: (state.revalidationCount || 0) + 1,
       };
     default:
       throw new Error("Unknown action: " + type);
