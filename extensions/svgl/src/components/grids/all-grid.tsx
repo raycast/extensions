@@ -28,7 +28,7 @@ const AllGrid = () => {
                   tooltip: svg.title,
                 }}
                 title={svg.title}
-                actions={<SvgAction svg={svg} category={svg.category?.[0] ?? svg.category} />}
+                actions={<SvgAction svg={svg} category={category.category} />}
               />
             ))}
         </Grid.Section>
