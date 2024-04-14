@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [S3 folders] - 2024-04-14
+
+- Added support for navigating S3 buckets using folders folders
+
 ## [Step Functions command] - 2024-02-18
 
 - Added new command to find and open Step Functions ([#10801](https://github.com/raycast/extensions/pull/10801))
