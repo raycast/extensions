@@ -9,7 +9,6 @@ import { StarFileAction } from "./StarFileAction";
 export default function FileGridItem(props: {
   revalidate: () => void;
   file: File;
-  accessTok: string;
   extraKey?: string;
   desktopApp: Application | undefined;
   starredFiles: File[];
@@ -46,12 +45,7 @@ export default function FileGridItem(props: {
 
           <ActionPanel.Section>
             {file.branches && <OpenBranchSubmenuAction file={props.file} desktopApp={desktopApp} />}
-            <OpenPageSubmenuAction
-              file={props.file}
-              desktopApp={desktopApp}
-              onVisit={onVisit}
-              accessTok={props.accessTok}
-            />
+            <OpenPageSubmenuAction file={props.file} desktopApp={desktopApp} onVisit={onVisit} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>

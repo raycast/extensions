@@ -5,13 +5,12 @@ import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { loadStarredFiles } from "./components/starFiles";
 import { figma } from "./components/oauth";
-import { withAccessToken, getAccessToken } from "@raycast/utils";
+import { withAccessToken } from "@raycast/utils";
 
 function Command() {
-  const { token } = getAccessToken();
   const { data, isLoading, error } = useCachedPromise(
     async () => {
-      const results = await resolveAllFiles(token);
+      const results = await resolveAllFiles();
       return results;
     },
     [],

@@ -8,14 +8,12 @@ import { useCachedPromise } from "@raycast/utils";
 import type { TeamFiles } from "./types";
 import { loadStarredFiles } from "./components/starFiles";
 import { figma } from "./components/oauth";
-import { withAccessToken, getAccessToken } from "@raycast/utils";
+import { withAccessToken } from "@raycast/utils";
 
 function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
-  const { token } = getAccessToken();
-  // console.log(token);
   const { data, isLoading, error } = useCachedPromise(
     async () => {
-      const results = await resolveAllFiles(token);
+      const results = await resolveAllFiles();
       return results;
     },
     [],
@@ -121,7 +119,6 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
             <FileGridItem
               key={file.key + "-starred-file"}
               file={file}
-              accessTok={token}
               desktopApp={desktopApp}
               extraKey={file.key + "-starred-file-item"}
               revalidate={revalidateStarredFiles}
@@ -139,7 +136,6 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
             <FileGridItem
               key={file.key + "-recent-file"}
               file={file}
-              accessTok={token}
               desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
               revalidate={revalidateStarredFiles}
@@ -166,7 +162,6 @@ function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { quer
               {project.files?.map((file) => (
                 <FileGridItem
                   key={file.key + "-file"}
-                  accessTok={token}
                   searchkeywords={project.name}
                   revalidate={revalidateStarredFiles}
                   file={file}

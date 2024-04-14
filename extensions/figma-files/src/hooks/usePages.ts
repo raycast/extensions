@@ -1,11 +1,11 @@
 import { getPreferenceValues, showToast, Toast, environment } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 import { useState, useRef, useEffect } from "react";
-
+import { getAccessToken } from "@raycast/utils";
 import type { File, FileDetail, Node } from "../types";
 import { loadPages, storePages } from "../cache";
 
-export function usePages(file: File, accessTok: string) {
+export function usePages(file: File) {
   const [pages, setPages] = useState<Node[]>();
   const abort = useRef<AbortController>();
 
@@ -20,7 +20,7 @@ export function usePages(file: File, accessTok: string) {
         setPages(cachedPages);
       }
 
-      const newPages = await fetchPages(file, accessTok, abort.current.signal);
+      const newPages = await fetchPages(file, abort.current.signal);
       setPages(newPages);
 
       await storePages(newPages, file);
@@ -36,7 +36,9 @@ export function usePages(file: File, accessTok: string) {
   return pages;
 }
 
-async function fetchPages(file: File, accessTok: string, signal: AbortSignal | undefined): Promise<Node[]> {
+async function fetchPages(file: File, signal: AbortSignal | undefined): Promise<Node[]> {
+  const { token } = getAccessToken();
+
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
   let isOAuth = true;
   if (PERSONAL_ACCESS_TOKEN) {
@@ -47,7 +49,7 @@ async function fetchPages(file: File, accessTok: string, signal: AbortSignal | u
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        ...(isOAuth === true ? { Authorization: `Bearer ${accessTok}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
+        ...(isOAuth === true ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
       },
       signal,
     });

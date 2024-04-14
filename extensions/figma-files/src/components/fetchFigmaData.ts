@@ -1,14 +1,15 @@
 import { getPreferenceValues, showToast, Toast, LocalStorage, environment } from "@raycast/api";
 import fetch from "node-fetch";
 import { ProjectFiles, TeamFiles, TeamProjects } from "../types";
+import { getAccessToken } from "@raycast/utils";
 
-async function fetchTeamProjects(accessTok: string): Promise<TeamProjects[]> {
+async function fetchTeamProjects(): Promise<TeamProjects[]> {
   const { PERSONAL_ACCESS_TOKEN, TEAM_ID } = getPreferenceValues();
   let isOAuth = true;
   if (PERSONAL_ACCESS_TOKEN) {
     isOAuth = false;
   }
-
+  const { token } = getAccessToken();
   const teamID: string[] = TEAM_ID.split(",").map((team: string) => team.toString().trim());
   const teams = teamID.map(async (team) => {
     try {
@@ -16,7 +17,7 @@ async function fetchTeamProjects(accessTok: string): Promise<TeamProjects[]> {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          ...(isOAuth === true ? { Authorization: `Bearer ${accessTok}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
+          ...(isOAuth === true ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
         },
       });
 
@@ -38,13 +39,14 @@ async function fetchTeamProjects(accessTok: string): Promise<TeamProjects[]> {
   return Promise.all(teams) as Promise<TeamProjects[]>;
 }
 
-async function fetchFiles(accessTok: string): Promise<ProjectFiles[][]> {
+async function fetchFiles(): Promise<ProjectFiles[][]> {
+  const { token } = getAccessToken();
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
   let isOAuth = true;
   if (PERSONAL_ACCESS_TOKEN) {
     isOAuth = false;
   }
-  const teamProjects = await fetchTeamProjects(accessTok);
+  const teamProjects = await fetchTeamProjects();
   const teamNames = teamProjects.map((team) => team.name).join(",");
   await LocalStorage.setItem("teamNames", teamNames);
   const teamFiles = teamProjects.map(async (team) => {
@@ -55,9 +57,7 @@ async function fetchFiles(accessTok: string): Promise<ProjectFiles[][]> {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...(isOAuth === true
-              ? { Authorization: `Bearer ${accessTok}` }
-              : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
+            ...(isOAuth === true ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": PERSONAL_ACCESS_TOKEN }),
           },
         });
 
@@ -76,8 +76,8 @@ async function fetchFiles(accessTok: string): Promise<ProjectFiles[][]> {
   return Promise.all(teamFiles);
 }
 
-export async function resolveAllFiles(accessTok: string): Promise<TeamFiles[]> {
-  const teamFiles = await fetchFiles(accessTok);
+export async function resolveAllFiles(): Promise<TeamFiles[]> {
+  const teamFiles = await fetchFiles();
   const teams = ((await LocalStorage.getItem<string>("teamNames")) || "").split(",");
   const fi = teamFiles.map((projectFiles, index) => {
     return { name: teams[index], files: projectFiles } as TeamFiles;
