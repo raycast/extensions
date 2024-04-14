@@ -120,12 +120,12 @@ export async function getNotificationIcon(notification: Notification) {
     case "CheckSuite":
       icon = {
         value: notification.subject.title.match(/(succeeded)/i)
-          ? Icon.CheckCircle
+          ? { source: Icon.CheckCircle, tintColor: Color.Green }
           : notification.subject.title.match(/(failed)/i)
-            ? Icon.XMarkCircle
+            ? { source: Icon.XMarkCircle, tintColor: Color.Red }
             : notification.subject.title.match(/(skipped|cancelled)/i)
-              ? Icon.MinusCircle
-              : Icon.QuestionMarkCircle,
+              ? { source: "skip.svg", tintColor: Color.SecondaryText }
+              : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText },
         tooltip: "Workflow Run",
       };
       break;
