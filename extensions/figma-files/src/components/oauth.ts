@@ -1,12 +1,13 @@
 import { OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
-
+import { getPreferenceValues } from "@raycast/api";
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Figma",
   providerIcon: "command-icon.png",
   description: "Connect your Figma account",
 });
+const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues<Preferences>();
 
 export const figma = new OAuthService({
   client,
@@ -18,4 +19,5 @@ export const figma = new OAuthService({
   refreshTokenUrl:
     "https://oauth.raycast.com/v1/refresh-token/HoH9ux_TZ_15D9D2btgNZHFDsQtYmSFRQKBCeI4XodDg6svGnR7l7hQaSAV9XY95lD9YzMTPcucjZyHCzoGOHRerqbWB1WAJjpjEDPpwkM5Jg2YCIF-fUcv7VFBepLxT5M9iv",
   scope: "files:read",
+  personalAccessToken: PERSONAL_ACCESS_TOKEN,
 });
