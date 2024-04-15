@@ -84,9 +84,9 @@ export async function resolveAllFiles(): Promise<TeamFiles[]> {
   return fi;
 }
 
-export async function fetchPages(file: File) {
+export async function fetchPages(fileKey: string) {
   try {
-    const json = await request<FileDetail>(`/files/${file.key}?depth=1`, {
+    const json = await request<FileDetail>(`/files/${fileKey}?depth=1`, {
       method: "GET",
     });
 

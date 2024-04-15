@@ -11,7 +11,7 @@ export function OpenPageSubmenuAction(props: {
   desktopApp: Application | undefined;
   onVisit: (file: File) => void;
 }) {
-  const { data: pages, isLoading } = useCachedPromise((file) => fetchPages(file), [props.file]);
+  const { data: pages, isLoading } = useCachedPromise((fileKey) => fetchPages(fileKey), [props.file.key]);
 
   return (
     <ActionPanel.Submenu
