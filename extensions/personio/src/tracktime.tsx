@@ -14,11 +14,11 @@ export default function TrackTime() {
 
   useEffect(() => {
     async function call() {
-      const token = await getPersonioToken();
+      const token_ = await getPersonioToken();
       const employeeNumber = getPreferenceValues().employeeNumber;
-      const employeeName = await getEmployeeInfo(employeeNumber, token);
+      const employeeName = await getEmployeeInfo(employeeNumber, token_);
       setEmployeeName(employeeName);
-      setToken(token);
+      setToken(token_);
 
       // when a start date or break is available in the cache, a user has previously entered
       // a start date or break. By retrieving the cache values, the user can continue with their previous values.

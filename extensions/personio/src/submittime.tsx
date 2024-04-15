@@ -13,11 +13,11 @@ export default function TrackTime() {
 
   useEffect(() => {
     async function call() {
-      const token = await getPersonioToken();
+      const token_ = await getPersonioToken();
       const employeeNumber = getPreferenceValues().employeeNumber;
-      const employeeName = await getEmployeeInfo(employeeNumber, token);
+      const employeeName = await getEmployeeInfo(employeeNumber, token_);
       setEmployeeName(employeeName);
-      setToken(token);
+      setToken(token_);
     }
     call();
   }, []);

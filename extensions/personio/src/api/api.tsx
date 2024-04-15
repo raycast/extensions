@@ -85,7 +85,7 @@ export async function addTime(
   };
 
   try {
-    axios.post(url, payload, { headers });
+    await axios.post(url, payload, { headers });
     await showHUD("Time Tracked 🎉");
     popToRoot();
   } catch (error) {
