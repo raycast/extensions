@@ -1,9 +1,14 @@
 import axios from "axios";
-import { getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { confirmAlert, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { cache } from "./cache";
+import { parseDateAndTime } from "../utils/date";
 
 export const BASE_URL = "https://api.personio.de/v1";
 
+/**
+ * This function retrieves a string token from the personio API with the
+ * client secret and client id stored in the preferences
+ */
 export async function getTokenFromAPI() {
   const url = BASE_URL + "/auth";
   const payload = {
@@ -14,15 +19,17 @@ export async function getTokenFromAPI() {
     accept: "application/json",
     "content-type": "application/json",
   };
-
   const res = await axios.post(url, payload, { headers });
   const data = res.data;
   const token = data.data.token;
-
   return token;
 }
 
-// this function uses the secrets to get a short-lived (one day) token
+/**
+ * This is a wrapper-function that implements caching for the personio token.
+ * A token from personio is valid for 24 hours, so this cache
+ * expires after 23 hours to then request a new one
+ */
 export async function getPersonioToken(caching = true) {
   if (!caching) {
     return await getTokenFromAPI();
@@ -39,6 +46,16 @@ export async function getPersonioToken(caching = true) {
   }
 }
 
+/**
+ * This function adds an attendance with the personio API.
+ *
+ * @param employeeNumber To find the right employee
+ * @param date Date of attendance
+ * @param start_time Start time of the attendance period
+ * @param end_time End time of the attendance period
+ * @param break_time Time of the break during the attendance in minutes
+ * @param token The personio token to authentiacte for the API
+ */
 export async function addTime(
   employeeNumber: number,
   date: string,
@@ -77,7 +94,6 @@ export async function addTime(
         console.log("Caught the specific error: IncomingMessage.handleStreamEnd");
         await showToast({ style: Toast.Style.Failure, title: "That didn't work!" });
       } else {
-        // Handle other errors
         console.log("Some other Axios error occurred", error);
       }
     } else {
@@ -85,3 +101,43 @@ export async function addTime(
     }
   }
 }
+
+//calls the addTime function with the given values
+export interface SubmitTimeFormValues {
+  startdate: Date | null;
+  enddate: Date | null;
+  breaktime: string;
+}
+
+export const submitTime = async (values: SubmitTimeFormValues, token: string) => {
+  const startdate = parseDateAndTime(values.startdate);
+  const enddate = parseDateAndTime(values.enddate);
+  const employeeNumber = getPreferenceValues().employeeNumber;
+  if (startdate.date == "Invalid date" || startdate.time == "Invalid date") {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: "You must add a valid start time.",
+    });
+    return;
+  }
+  if (enddate.date == "Invalid date" || enddate.time == "Invalid date") {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: "You must add a valid end time.",
+    });
+    return;
+  }
+
+  if (
+    await confirmAlert({
+      title: "Are your sure?",
+      message: `Do you want to submit the time from ${startdate.time} to ${enddate.time} with a break of ${values.breaktime} minutes?`,
+    })
+  ) {
+    addTime(employeeNumber, startdate.date, startdate.time, enddate.time, parseInt(values.breaktime), token);
+  } else {
+    await showToast({ style: Toast.Style.Failure, title: "Submit was cancelled!", message: "Unfortunate!" });
+  }
+};

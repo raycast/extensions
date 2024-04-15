@@ -2,7 +2,11 @@ import { showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { cache } from "./cache";
 import { BASE_URL } from "./api";
+import { daysInMonth, hoursBetween } from "../utils/date";
 
+/**
+ * An interface that matches the JSON output of the personio API for /company/attendances
+ */
 interface AttendancePeriodJSON {
   id: number;
   type: string;
@@ -21,6 +25,9 @@ interface AttendancePeriodJSON {
   };
 }
 
+/**
+ * A flattened version of the AttendancePeriodJSON interface
+ */
 export interface AttendancePeriod {
   id: number;
   employee: number;
@@ -37,35 +44,14 @@ export interface AttendancePeriod {
   is_on_time_off: boolean;
 }
 
-function daysInMonth(year: number, month: number) {
-  return new Date(year, month, 0).getDate();
-}
-
-function hoursBetween(time1: string, time2: string): number {
-  const date1 = Date.parse(`1970-01-01T${time1}Z`);
-  const date2 = Date.parse(`1970-01-01T${time2}Z`);
-
-  const diffInMs = Math.abs(date2 - date1);
-
-  return diffInMs / 1000 / 60 / 60;
-}
-
-export function hoursToNiceString(hours: number): string {
-  const whole_hours = Math.floor(hours);
-  const remaining_time = hours - whole_hours;
-  const minutes = Math.round(60 * remaining_time);
-  if (minutes > 0 && hours > 0) {
-    return `${whole_hours} hours and ${minutes} minutes`;
-  } else if (hours > 0 && minutes == 0) {
-    return `${whole_hours} hours`;
-  } else if (hours == 0 && minutes > 0) {
-    return `${minutes} minutes`;
-  } else {
-    return "0 minutes";
-  }
-}
-
+/**
+ * This function filters an array of AttendancePeriod objects to only
+ * the unique dates.
+ * @param arr List of AttendancePeriod objects
+ * @returns List of AttendancePeriods with unique dates
+ */
 export function uniqueDateFilter(arr: AttendancePeriod[]) {
+  // use a set to check for uniquness
   const dateSet = new Set<string>();
 
   return arr.filter((obj) => {
@@ -78,12 +64,21 @@ export function uniqueDateFilter(arr: AttendancePeriod[]) {
   });
 }
 
+/**
+ * A function that calls the personio API to retrieve a list of AttendancePeriod objects.
+ * @param employeeNumber To find the right attendances
+ * @param token Personio API token to authenticate
+ * @param currentYear Year for which to get the attendances for
+ * @param selectedMonth Month for which to get the attendances for (for currentYear)
+ * @returns A list of AttendancePeriod objects of currentYear - selectedMonth - employeeNumber
+ */
 export async function getAttendancesAPI(
   employeeNumber: number,
   token: string,
   currentYear: string,
   selectedMonth: string,
 ): Promise<AttendancePeriod[]> {
+  // use the maximum days of the month to get the last day of it for filtering to the entire month
   const maxDays = daysInMonth(parseInt(currentYear), parseInt(selectedMonth));
 
   const url =
@@ -126,6 +121,15 @@ export async function getAttendancesAPI(
   }
 }
 
+/**
+ * This is a wrapper-function that implements caching for the AttendancePeriod objects.
+ * Currently, attendances are cached for 30min
+ * @param employeeNumber To find the right attendances
+ * @param token Personio API token to authenticate
+ * @param currentYear Year for which to get the attendances for
+ * @param selectedMonth Month for which to get the attendances for (for currentYear)
+ * @returns A list of AttendancePeriod objects of currentYear - selectedMonth - employeeNumber
+ */
 export async function getAttendances(
   employeeNumber: number,
   token: string,

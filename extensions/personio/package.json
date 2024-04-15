@@ -17,7 +17,22 @@
     {
       "name": "tracktime",
       "title": "Track Time",
-      "description": "Track your time with Personio.",
+      "description": "Track your time during the day.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "employeeNumber",
+          "title": "Employee Number",
+          "description": "The employee number of the person you want to track time for.",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "submittime",
+      "title": "Add Past Times",
+      "description": "Submit your past times to personio.",
       "mode": "view",
       "preferences": [
         {

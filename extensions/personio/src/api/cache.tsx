@@ -1,9 +1,5 @@
 import { Cache } from "@raycast/api";
-
-function getMinutesBetweenDates(date1: Date, date2: Date): number {
-  const diffInMilliseconds = Math.abs(date2.getTime() - date1.getTime());
-  return diffInMilliseconds / (1000 * 60);
-}
+import { getMinutesBetweenDates } from "../utils/date";
 
 // a cache entry can  be used to store strings inside of the cache
 // which will automatically expire after some minutes

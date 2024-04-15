@@ -1,7 +1,8 @@
 import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
 import { getPersonioToken } from "./api/api";
 import { useEffect, useState } from "react";
-import { AttendancePeriod, getAttendances, hoursToNiceString, uniqueDateFilter } from "./api/attendances";
+import { AttendancePeriod, getAttendances, uniqueDateFilter } from "./api/attendances";
+import { hoursToNiceString } from "./utils/date";
 
 const months = [
   "January",

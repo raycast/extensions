@@ -1,19 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  Icon,
-  Toast,
-  confirmAlert,
-  getPreferenceValues,
-  openCommandPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, getPreferenceValues, openCommandPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { addTime, getPersonioToken } from "./api/api";
-import moment from "moment-timezone";
+import { SubmitTimeFormValues, getPersonioToken, submitTime } from "./api/api";
 import { getEmployeeInfo } from "./api/employeeinfo";
+import { cache } from "./api/cache";
 
 export default function TrackTime() {
   const [token, setToken] = useState("");
@@ -30,56 +19,37 @@ export default function TrackTime() {
       const employeeName = await getEmployeeInfo(employeeNumber, token);
       setEmployeeName(employeeName);
       setToken(token);
+
+      // when a start date or break is available in the cache, a user has previously entered
+      // a start date or break. By retrieving the cache values, the user can continue with their previous values.
+      const fetchCachedDate = async () => {
+        const cachedDate = cache.get("startDate");
+        if (cachedDate) {
+          set_startDate(new Date(cachedDate));
+        }
+      };
+      fetchCachedDate();
+
+      const fetchCachedBreak = async () => {
+        const cachedBreak = cache.get("breaktime");
+        if (cachedBreak) {
+          setBreak(cachedBreak);
+        }
+      };
+      fetchCachedBreak();
     }
     call();
   }, []);
 
-  function parseDateAndTime(dateString: Date | null, timezone: string = getPreferenceValues().timezone) {
-    const date = moment.tz(dateString, timezone);
+  //caches the start time for 14 hours
+  const cacheStartDate = async (values: SubmitTimeFormValues) => {
+    const startdate = values.startdate ? values.startdate.toISOString() : "";
+    cache.set("startDate", startdate, 14 * 60);
+  };
 
-    const formattedDate = date.format("YYYY-MM-DD");
-    const formattedTime = date.format("HH:mm");
-    return { date: formattedDate, time: formattedTime };
-  }
-
-  interface FormValues {
-    startdate: Date | null;
-    enddate: Date | null;
-    breaktime: string;
-  }
-
-  //calls the addTime function with the given values
-  const submitTime = async (values: FormValues) => {
-    const startdate = parseDateAndTime(values.startdate);
-    const enddate = parseDateAndTime(values.enddate);
-    const employeeNumber = getPreferenceValues().employeeNumber;
-    if (startdate.date == "Invalid date" || startdate.time == "Invalid date") {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "You must add a valid start time.",
-      });
-      return;
-    }
-    if (enddate.date == "Invalid date" || enddate.time == "Invalid date") {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "You must add a valid end time.",
-      });
-      return;
-    }
-
-    if (
-      await confirmAlert({
-        title: "Are your sure?",
-        message: `Do you want to submit the time from ${startdate.time} to ${enddate.time} with a break of ${values.breaktime} minutes?`,
-      })
-    ) {
-      addTime(employeeNumber, startdate.date, startdate.time, enddate.time, parseInt(values.breaktime), token);
-    } else {
-      await showToast({ style: Toast.Style.Failure, title: "Submit was cancelled!", message: "Unfortunate!" });
-    }
+  //caches the break time for 10 hours
+  const cacheBreak = async (values: SubmitTimeFormValues) => {
+    cache.set("breaktime", values.breaktime, 10 * 60);
   };
 
   if (token) {
@@ -91,7 +61,7 @@ export default function TrackTime() {
             <Action.SubmitForm
               title="Submit Time"
               icon={Icon.Checkmark}
-              onSubmit={() => submitTime({ startdate, enddate, breaktime })}
+              onSubmit={() => submitTime({ startdate, enddate, breaktime }, token)}
             />
             <Action title="Change Employee Number" icon={Icon.Person} onAction={openCommandPreferences} />
           </ActionPanel>
@@ -102,9 +72,25 @@ export default function TrackTime() {
           text={`Hi ${employeeName}\n\nTrack your time for today by specifying the start and end times of your working day and the break you took in minutes.\nPress cmd+enter to submit your time.`}
         />
         <Form.Separator />
-        <Form.DatePicker id="launchDate" title="Start time" value={startdate} onChange={set_startDate} />
+        <Form.DatePicker
+          id="launchDate"
+          title="Start time"
+          value={startdate}
+          onChange={(newDate) => {
+            set_startDate(newDate);
+            cacheStartDate({ startdate: newDate, enddate, breaktime });
+          }}
+        />
         <Form.DatePicker id="endDate" title="End time" value={enddate} onChange={set_endDate} />
-        <Form.TextField id="breaktime" title="Break (in minutes)" value={breaktime} onChange={setBreak} />
+        <Form.TextField
+          id="breaktime"
+          title="Break (in minutes)"
+          value={breaktime}
+          onChange={(newBreak) => {
+            setBreak(newBreak);
+            cacheBreak({ startdate, enddate, breaktime: newBreak });
+          }}
+        />
       </Form>
     );
   } else {
