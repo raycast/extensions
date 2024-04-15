@@ -1,5 +1,5 @@
 import { useState, useEffect, ComponentProps } from "react";
-import { Action, ActionPanel, Grid, Icon, LaunchProps, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, LaunchProps, List, LocalStorage, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useSearch } from "./hooks/useSearch";
 import { View } from "./components/View";
@@ -24,6 +24,9 @@ const filters = {
 type FilterValue = keyof typeof filters;
 
 function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
+  const preferences = getPreferenceValues<Preferences.Search>();
+  const topView = preferences["Top-View"]
+
   const {
     data: recentSearchesData,
     isLoading: recentSearchIsLoading,
@@ -113,12 +116,20 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
       >
         {searchFilter === "all" && (
           <>
-            <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />
-            <TracksSection limit={4} tracks={searchData?.tracks?.items} />
-            <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />
-            <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
-            <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />
-            <EpisodesSection limit={3} episodes={searchData?.episodes?.items} />
+            { 
+              topView === "artists" ? <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />
+              : topView === "tracks" ? <TracksSection limit={4} tracks={searchData?.tracks?.items} />
+              : topView === "albums" ? <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />
+              : topView === "playlists" ? <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
+              : topView === "shows" ? <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />
+              : <EpisodesSection limit={3} episodes={searchData?.episodes?.items} />
+            }
+            { topView !== "artists" && <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} /> }
+            { topView !== "tracks" && <TracksSection limit={4} tracks={searchData?.tracks?.items} /> }
+            { topView !== "albums" && <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} /> }
+            { topView !== "playlists" && <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} /> }
+            { topView !== "shows" && <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} /> }
+            { topView !== "episodes" && <EpisodesSection limit={3} episodes={searchData?.episodes?.items} /> }
           </>
         )}
 

@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Feature] - 2024-04-15
+
+- Added preference to allow user to choose first category for Search results
+- Added keyboard shortcut for "Add to queue"
+
 ## [Feature] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
