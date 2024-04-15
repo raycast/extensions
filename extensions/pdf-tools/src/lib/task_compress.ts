@@ -1,6 +1,3 @@
-
-
-
 export async function createCompressTask(cloudc: import("cloudconvert"), OptimizeLevel: string) {
   let job;
   try {

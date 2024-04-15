@@ -23,13 +23,11 @@ export class TaskUpload {
       jobPromise = createCompressTask(cloudc, compressVal);
     }
 
-    let job: any;
     try {
-      job = await jobPromise; // Wait for the Promise to resolve and get the job object
-      console.log("Job object:", job); // Log the job object
+      let job = await jobPromise; // Wait for the Promise to resolve and get the job object
 
       // Now you can access the tasks property on job
-      const uploadTask = job.tasks.filter((task: { name: string }) => task.name === "Upload")[0];
+      const uploadTask = (job?.tasks ?? []).filter((task: { name: string }) => task.name === "Upload")[0];
 
       const inputFile = fs.createReadStream(pathFileToConvert);
 
@@ -39,7 +37,7 @@ export class TaskUpload {
         const result = await cloudc.tasks.upload(uploadTask, inputFile, fileName);
         console.log(result);
 
-        const resJob = await cloudc.jobs.wait(job.id); // Wait for job completion
+        const resJob = await cloudc.jobs.wait(job?.id ?? ""); // Wait for job completion
 
         const file = cloudc.jobs.getExportUrls(resJob)[0];
 
