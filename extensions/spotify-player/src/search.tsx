@@ -25,7 +25,7 @@ type FilterValue = keyof typeof filters;
 
 function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
   const preferences = getPreferenceValues<Preferences.Search>();
-  const topView = preferences["Top-View"]
+  const topView = preferences["Top-View"];
 
   const {
     data: recentSearchesData,
@@ -116,20 +116,27 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
       >
         {searchFilter === "all" && (
           <>
-            { 
-              topView === "artists" ? <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />
-              : topView === "tracks" ? <TracksSection limit={4} tracks={searchData?.tracks?.items} />
-              : topView === "albums" ? <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />
-              : topView === "playlists" ? <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
-              : topView === "shows" ? <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />
-              : <EpisodesSection limit={3} episodes={searchData?.episodes?.items} />
-            }
-            { topView !== "artists" && <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} /> }
-            { topView !== "tracks" && <TracksSection limit={4} tracks={searchData?.tracks?.items} /> }
-            { topView !== "albums" && <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} /> }
-            { topView !== "playlists" && <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} /> }
-            { topView !== "shows" && <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} /> }
-            { topView !== "episodes" && <EpisodesSection limit={3} episodes={searchData?.episodes?.items} /> }
+            {topView === "artists" ? (
+              <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />
+            ) : topView === "tracks" ? (
+              <TracksSection limit={4} tracks={searchData?.tracks?.items} />
+            ) : topView === "albums" ? (
+              <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />
+            ) : topView === "playlists" ? (
+              <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
+            ) : topView === "shows" ? (
+              <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />
+            ) : (
+              <EpisodesSection limit={3} episodes={searchData?.episodes?.items} />
+            )}
+            {topView !== "artists" && <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} />}
+            {topView !== "tracks" && <TracksSection limit={4} tracks={searchData?.tracks?.items} />}
+            {topView !== "albums" && <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} />}
+            {topView !== "playlists" && (
+              <PlaylistsSection type="list" limit={6} playlists={searchData?.playlists?.items} />
+            )}
+            {topView !== "shows" && <ShowsSection type="list" limit={3} shows={searchData?.shows?.items} />}
+            {topView !== "episodes" && <EpisodesSection limit={3} episodes={searchData?.episodes?.items} />}
           </>
         )}
 
