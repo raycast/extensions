@@ -35,19 +35,9 @@ export default function Command() {
   const list = data?.lists.find((l) => l.id === listId);
 
   const reminders = useMemo(() => {
-    const nonCompletedReminders: Reminder[] = [];
-
-    const reminders = listId
-      ? data?.reminders.filter((reminder: Reminder) => reminder.list?.id === listId)
-      : data?.reminders;
-
-    reminders?.forEach((reminder: Reminder) => {
-      if (reminder.isCompleted) return;
-      nonCompletedReminders.push(reminder);
-    });
-
-    return nonCompletedReminders;
-  }, [data, view, listId, countType]);
+    if (!data) return [];
+    return listId ? data.reminders.filter((reminder: Reminder) => reminder.list?.id === listId) : data.reminders;
+  }, [data, listId]);
 
   const sections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -89,7 +79,7 @@ export default function Command() {
     }
 
     return sections.filter((section) => section.items.length > 0);
-  }, [reminders]);
+  }, [reminders, view]);
 
   async function setPriority(reminderId: string, priority: Priority) {
     try {
@@ -142,7 +132,7 @@ export default function Command() {
     }
   }
 
-  function getRemindersCount() {
+  const remindersCount = useMemo(() => {
     if (countType === "today") {
       return reminders.filter(
         (reminder) => reminder?.dueDate && (isToday(reminder?.dueDate) || isOverdue(reminder?.dueDate)),
@@ -152,9 +142,7 @@ export default function Command() {
     } else {
       return reminders.length;
     }
-  }
-
-  const remindersCount = getRemindersCount();
+  }, [reminders, countType]);
 
   const now = new Date();
 

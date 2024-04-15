@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Separate menu bar count from the view] - 2024-04-12
+## [Separate menu bar count from the view] - 2024-04-15
 
 - It's now possible to set reminders count type separately from the view type in menu bar.
 
