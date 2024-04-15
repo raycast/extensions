@@ -32,7 +32,7 @@
 /extensions/algolia                                                 @valentindotxyz
 /extensions/aliyun-oss                                              @yangxyo
 /extensions/alpinejs-doc-search                                     @aurawindsurfing
-/extensions/amazon-aws                                              @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci @frese @nagauta
+/extensions/amazon-aws                                              @victor-falcon @Hodglim @JonathanWbn @gebeto @momme-rtf @duboiss @hexpl0it @crisboarna @sidhant92 @DorukAkinci @frese @nagauta @vineus
 /extensions/amazon-search                                           @xilopaint
 /extensions/amphetamine                                             @gstvds
 /extensions/android                                                 @MohamedISoliman @3llomi
@@ -785,7 +785,7 @@
 /extensions/music-timer                                             @JulienLacr0ix
 /extensions/musicthread                                             @ChucKN0risK
 /extensions/must                                                    @eggsy
-/extensions/mute-microphone                                         @quentin23soleil @danulqua @iamyeizi
+/extensions/mute-microphone                                         @quentin23soleil @iamyeizi
 /extensions/my-daily-log                                            @frugoman
 /extensions/myanimelist-search                                      @luknl
 /extensions/myip                                                    @kkange @iwyvi @j3lte
@@ -919,7 +919,7 @@
 /extensions/pia-controls                                            @Yakitrak
 /extensions/pianoman                                                @juhamust
 /extensions/pick-random                                             @MatteoGauthier @hongqn
-/extensions/pick-your-wallpaper                                     @hugomarf @danulqua
+/extensions/pick-your-wallpaper                                     @hugomarf
 /extensions/pie-for-pihole                                          @GLaDO8
 /extensions/pika                                                    @rishimohan
 /extensions/pinata                                                  @stevedylandev
@@ -1384,7 +1384,7 @@
 /extensions/vueuse-functions                                        @noopurphalak
 /extensions/wakatime                                                @iammola
 /extensions/waktu-solat                                             @sayuthisobri @ezzylan
-/extensions/warp                                                    @joetannenbaum @danulqua @theRubberDuckiee @hakob8956
+/extensions/warp                                                    @joetannenbaum @theRubberDuckiee @hakob8956
 /extensions/wayback-machine                                         @pernielsentikaer @andreaselia
 /extensions/wcag                                                    @fgeierst
 /extensions/weather                                                 @tonka3000 @xilopaint
@@ -1413,7 +1413,7 @@
 /extensions/wistia                                                  @ddoria921
 /extensions/wol                                                     @bxb100
 /extensions/wolfram-alpha                                           @mathieudutour
-/extensions/word-count                                              @itsmingjie @koayon @danulqua
+/extensions/word-count                                              @itsmingjie @koayon
 /extensions/word-search                                             @RishabSwift @thomaspaulmann @bkeys818
 /extensions/wordle                                                  @chrisalxlng
 /extensions/wordpress-docs                                          @tillkruss @KevinBatdorf
