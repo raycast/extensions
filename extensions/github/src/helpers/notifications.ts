@@ -115,7 +115,7 @@ export async function getNotificationIcon(notification: Notification) {
       icon = { value: { source: "commit.svg" }, tooltip: "Commit" };
       break;
     case "Release":
-      icon = { value: { source: "tag.svg" }, tooltip: "Release" };
+      icon = { value: { source: "tag.svg", tintColor: Color.Blue }, tooltip: "Release" };
       break;
     case "CheckSuite":
       icon = {
