@@ -36,7 +36,7 @@ export default async function applyInlineCode() {
 
   const runKeydown = keydownAction(appName);
 
-  if (browsers.includes(appName) || customBrowser.name === appName) {
+  if (browsers.includes(appName) || customBrowser?.name === appName) {
     const url = await getActiveTabUrl(appName);
 
     return applyToWebsite(url, runKeydown);
