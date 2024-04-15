@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, Toast, LocalStorage, environment } from
 import fetch, { RequestInit } from "node-fetch";
 import { ProjectFiles, TeamFiles, TeamProjects } from "./types";
 import { getAccessToken } from "@raycast/utils";
-import type { File, FileDetail } from "./types";
+import type { FileDetail } from "./types";
 
 async function request<T>(path: string, opts?: RequestInit) {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
