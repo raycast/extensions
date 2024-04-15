@@ -1,12 +1,14 @@
 import { OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
+
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Figma",
   providerIcon: "command-icon.png",
   description: "Connect your Figma account",
 });
+
 const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues<Preferences>();
 
 export const figma = new OAuthService({

@@ -1,6 +1,6 @@
 # Figma Files Changelog
 
-## [Adds support for OAuth] - 2024-03-29
+## [Adds support for OAuth] - 2024-04-15
 
 - The extension now has OAuth support, so you don't have to create personal access tokens for giving Raycast access to Figma.
 
