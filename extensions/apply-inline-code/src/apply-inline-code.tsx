@@ -1,4 +1,9 @@
-import { showHUD, getFrontmostApplication, closeMainWindow } from '@raycast/api';
+import {
+  showHUD,
+  getFrontmostApplication,
+  closeMainWindow,
+  getPreferenceValues,
+} from '@raycast/api';
 import { keydownAction } from './utils/keydownAction';
 import resources from './data/resources.json';
 import { Key, Modifier } from './types/key';
@@ -9,7 +14,7 @@ const { browsers } = resources;
 
 async function applyToWebsite(url: URL | null, runKeydown: ReturnType<typeof keydownAction>) {
   if (!url) {
-    return showHUD('Active tab not found.');
+    return showHUD('Active tab not found. Please ensure application is a valid browser.');
   }
 
   const resources = await getResources();
@@ -27,10 +32,11 @@ async function applyToWebsite(url: URL | null, runKeydown: ReturnType<typeof key
 export default async function applyInlineCode() {
   const frontmostApplication = await getFrontmostApplication();
   const { name: appName } = frontmostApplication;
+  const { customBrowser } = getPreferenceValues();
 
   const runKeydown = keydownAction(appName);
 
-  if (browsers.includes(appName)) {
+  if (browsers.includes(appName) || customBrowser.name === appName) {
     const url = await getActiveTabUrl(appName);
 
     return applyToWebsite(url, runKeydown);

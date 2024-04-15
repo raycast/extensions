@@ -25,6 +25,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "customBrowser",
+      "title": "Custom Chromium Browser",
+      "description": "Add your custom browser based on chromium which no support by default",
+      "type": "appPicker",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.13.6",

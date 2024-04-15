@@ -1,5 +1,5 @@
 {
-  "browsers": ["Safari", "Edge", "Google Chrome"],
+  "browsers": ["Arc", "Brave", "Edge", "Google Chrome", "Opera", "Safari", "Vivaldi"],
   "applications": [
     {
       "name": "Notion",
