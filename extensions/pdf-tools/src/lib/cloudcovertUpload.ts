@@ -24,7 +24,7 @@ export class TaskUpload {
     }
 
     try {
-      let job = await jobPromise; // Wait for the Promise to resolve and get the job object
+      const job = await jobPromise; // Wait for the Promise to resolve and get the job object
 
       // Now you can access the tasks property on job
       const uploadTask = (job?.tasks ?? []).filter((task: { name: string }) => task.name === "Upload")[0];
