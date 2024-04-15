@@ -67,7 +67,7 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
     keywords.push(pullRequest.author.login);
   }
 
-  const isOpenInBrowserDefault = getPreferenceValues<Preferences.SearchPullRequests>().openInBrowser;
+  const { isOpenInBrowser } = getPreferenceValues<Preferences>();
 
   const openInBrowserAction = <Action.OpenInBrowser url={pullRequest.permalink} />;
 
@@ -79,7 +79,7 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
     />
   );
 
-  const [primaryAction, secondaryAction] = isOpenInBrowserDefault
+  const [primaryAction, secondaryAction] = isOpenInBrowser
     ? [openInBrowserAction, showDetailsAction]
     : [showDetailsAction, openInBrowserAction];
 

@@ -44,17 +44,7 @@
       "name": "search-pull-requests",
       "title": "Search Pull Requests",
       "description": "Search recent pull requests globally in all repositories.",
-      "mode": "view",
-      "preferences": [
-        {
-          "type": "checkbox",
-          "label": "Open in Browser shortcut",
-          "name": "openInBrowser",
-          "description": "Open in browser as a default action.",
-          "default": false,
-          "required": false 
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "create-pull-request",
@@ -367,6 +357,14 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "type": "checkbox",
+      "label": "Open in Browser as default for PR commands",
+      "name": "isOpenInBrowser",
+      "description": "Open in browser as a default action for pull request commands.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
