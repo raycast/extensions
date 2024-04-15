@@ -1,5 +1,9 @@
 # Pick Your Wallpaper Changelog
 
+## [Moved contributor] - 2024-04-15
+
+- No changes were made in the code.
+
 ## [1.0.4] - 2023-09-08
 
 - Added new command for setting a selected picture in Finder as a desktop wallpaper
