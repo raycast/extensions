@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "owledge-raycast",
-  "title": "Owledge - All your tools in one search",
+  "title": "Owledge - All Your Tools in One Search",
   "description": "Access Notion, Figma, Github, Miro, Jira and way more in a single crazy fast search. | Set your Owledge workspace at: https://search.owledge.app | Documentation available at: https://owledge.notion.site/Use-Raycast-s-extension-75b90b8501014bb7b8c8c901a9fcc552?pvs=74",
   "icon": "command-icon.png",
   "author": "RomainPct",
@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Owledge search",
+      "title": "Owledge Search",
       "description": "Access Notion, Figma, Github, Miro, Jira and way more in a single crazy fast search. | Set your Owledge workspace at: https://search.owledge.app | Documentation available at: https://owledge.notion.site/Use-Raycast-s-extension-75b90b8501014bb7b8c8c901a9fcc552?pvs=74",
       "mode": "view"
     }
