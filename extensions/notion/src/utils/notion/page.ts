@@ -6,6 +6,7 @@ import { NotionToMarkdown } from "notion-to-md";
 
 import { UnwrapRecord } from "../types";
 
+import { getDateMention } from "./block";
 import { handleError, pageMapper } from "./global";
 import { getNotionClient } from "./oauth";
 
@@ -97,18 +98,46 @@ export async function fetchPageContent(pageId: string) {
   }
 }
 
-export async function appendBlockToPage(pageId: string, children: BlockObjectRequest[]) {
+export async function fetchPageFirstBlockId(pageId: string) {
+  try {
+    const notion = getNotionClient();
+    const { results } = await notion.blocks.children.list({
+      block_id: pageId,
+    });
+    return results[0].id;
+  } catch (err) {
+    return handleError(err, "Failed to fetch page's first block", undefined);
+  }
+}
+
+type AppendBlockToPageParams = {
+  pageId: string;
+  children: BlockObjectRequest[];
+  prepend?: boolean;
+  addDateDivider?: boolean;
+};
+
+export async function appendBlockToPage({
+  pageId,
+  children,
+  prepend = false,
+  addDateDivider = false,
+}: AppendBlockToPageParams) {
   try {
     const notion = getNotionClient();
 
+    const childrenToInsert = addDateDivider ? [{ divider: {} }, getDateMention(), ...children] : children;
+    const insertAfter = prepend ? await fetchPageFirstBlockId(pageId) : undefined;
+
     const { results } = await notion.blocks.children.append({
       block_id: pageId,
-      children,
+      children: childrenToInsert,
+      after: insertAfter,
     });
 
     return results;
   } catch (err) {
-    return handleError(err, "Failed to add content to the page", undefined);
+    return handleError(err, "Failed to add block to the page", undefined);
   }
 }
 
