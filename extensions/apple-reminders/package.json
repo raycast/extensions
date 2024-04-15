@@ -84,37 +84,6 @@
           "description": "Choose what you want to see next to the menu bar icon."
         },
         {
-          "name": "hideMenuBarCountWhenEmpty",
-          "type": "checkbox",
-          "title": "Count",
-          "label": "Hide menu bar count when empty",
-          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
-          "default": false,
-          "required": false
-        },
-        {
-          "name": "countType",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "Today",
-              "value": "today"
-            },
-            {
-              "title": "Upcoming",
-              "value": "upcoming"
-            },
-            {
-              "title": "All",
-              "value": "all"
-            }
-          ],
-          "default": "today",
-          "required": false,
-          "title": "Count Type",
-          "description": "Choose which count you want to see in your menu bar."
-        },
-        {
           "name": "view",
           "type": "dropdown",
           "data": [
@@ -135,6 +104,36 @@
           "required": false,
           "title": "View",
           "description": "Choose which view you want to see in your menu bar."
+        },
+        {
+          "name": "countType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Count",
+          "description": "Choose which count you want to see in your menu bar."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
+          "type": "checkbox",
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
+          "required": false
         }
       ],
       "interval": "10m"
