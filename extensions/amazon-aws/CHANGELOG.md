@@ -2,7 +2,7 @@
 
 ## [S3 folders] - 2024-04-14
 
-- Added support for navigating S3 buckets using folders folders
+- Added support for navigating S3 buckets using folders
 
 ## [Step Functions command] - 2024-02-18
 
