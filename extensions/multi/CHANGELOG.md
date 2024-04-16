@@ -1,8 +1,8 @@
 # Multi Changelog
 
-## [See session state for teammates] - 2024-04-09
+## [See session state for teammates] - 2024-04-16
 
-Requires Multi > 0.465.1
+Requires Multi 0.472.1+
 
 - Call Teammate now shows if teammates are currently in a session
   - If teammates are in a room, default action is to join the room instead of sending an invite.
