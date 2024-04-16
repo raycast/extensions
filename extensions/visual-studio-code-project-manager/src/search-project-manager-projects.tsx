@@ -1,4 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Detail, environment, getPreferenceValues, List } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import { exec } from "child_process";
 import { existsSync, lstatSync, readFileSync } from "fs";
 import { homedir } from "os";
@@ -94,11 +95,6 @@ function getProjectsLocationPath(): { path: string; error?: string } {
   return { path, error: `Projects Location path is not a directory: ${path}` };
 }
 
-function getSortedProjects(projects: ProjectEntry[]): ProjectEntry[] {
-  const projectsToSort = [...projects];
-  return projectsToSort.sort((a, b) => a.name.localeCompare(b.name));
-}
-
 function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectEntry[]> {
   const groupedProjects = new Map<string, ProjectEntry[]>();
 
@@ -117,13 +113,18 @@ function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectE
   return new Map([...groupedProjects.entries()].sort());
 }
 
-function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): ReactElement[] {
+function getProjectsGroupedByTagAsElements(
+  projectEntries: ProjectEntry[],
+  visitItem: (item: ProjectEntry) => void,
+): ReactElement[] {
   const projectsGrouped = getProjectsGroupedByTag(projectEntries);
   const elements: ReactElement[] = [];
   projectsGrouped.forEach((value, key) => {
     elements.push(
       <List.Section key={key} title={key}>
-        {value?.map((project, index) => <ProjectListItem key={project.rootPath + index} {...project} />)}
+        {value?.map((project, index) => (
+          <ProjectListItem key={project.rootPath + index} item={project} visitItem={visitItem} />
+        ))}
       </List.Section>,
     );
   });
@@ -164,16 +165,19 @@ export default function Command() {
     );
   }
 
-  const sortedProjects = getSortedProjects(projectEntries);
+  const { data: sortedProjects, visitItem } = useFrecencySorting(projectEntries, {
+    key: (item: ProjectEntry) => item.rootPath,
+    sortUnvisited: (a: ProjectEntry, b: ProjectEntry) => a.name.localeCompare(b.name),
+  });
 
   const elements: ReactElement[] = [];
   if (preferences.groupProjectsByTag && !selectedTag) {
     // don't group if filtering
-    const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
+    const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects, visitItem);
     elements.push(...groupedProjects);
   } else {
     filterProjectsByTag(sortedProjects, selectedTag).forEach((project, index) => {
-      elements.push(<ProjectListItem key={project.rootPath + index} {...project} />);
+      elements.push(<ProjectListItem key={project.rootPath + index} item={project} visitItem={visitItem} />);
     });
   }
 
@@ -204,7 +208,8 @@ export default function Command() {
   );
 }
 
-function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
+function ProjectListItem({ item, visitItem }: { item: ProjectEntry; visitItem: (item: ProjectEntry) => void }) {
+  const { name, rootPath, tags } = item;
   const path = rootPath;
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
@@ -223,6 +228,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 title={`Open in ${vscodeApp.name} (Remote)`}
                 icon={{ fileIcon: vscodeApp.path }}
                 onAction={() => {
+                  visitItem(item);
                   exec(`"${vscodeAppCLI}" --remote ${parseRemoteURL(path)}`);
                   closeMainWindow();
                 }}
@@ -233,6 +239,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 icon={{ fileIcon: vscodeApp.path }}
                 target={path}
                 application={vscodeApp.path}
+                onOpen={() => visitItem(item)}
               />
             )}
             {terminalInstalled && (
@@ -243,6 +250,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
                 target={path}
                 application={terminalPath}
+                onOpen={() => visitItem(item)}
               />
             )}
             {gitClientInstalled && isGitRepo(path) && (
@@ -253,10 +261,11 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 shortcut={{ modifiers: ["cmd"], key: "g" }}
                 target={path}
                 application={gitClientPath}
+                onOpen={() => visitItem(item)}
               />
             )}
             <Action.ShowInFinder path={path} />
-            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            <Action.OpenWith path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} onOpen={() => visitItem(item)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
