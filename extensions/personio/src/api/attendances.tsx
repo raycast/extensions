@@ -116,7 +116,6 @@ export async function getAttendancesAPI(
     return attendances;
   } catch (error) {
     await showToast({ style: Toast.Style.Failure, title: "That didn't work!", message: "Unfortunate!" });
-    console.error(error);
     return [];
   }
 }

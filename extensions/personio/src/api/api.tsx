@@ -19,10 +19,16 @@ export async function getTokenFromAPI() {
     accept: "application/json",
     "content-type": "application/json",
   };
-  const res = await axios.post(url, payload, { headers });
-  const data = res.data;
-  const token = data.data.token;
-  return token;
+
+  try {
+    const res = await axios.post(url, payload, { headers });
+    const data = res.data;
+    const token = data.data.token;
+    return token;
+  }catch (error) {
+    await showToast({ style: Toast.Style.Failure, title: "Please check your Client ID, Secret and API permissions!" });
+  }
+
 }
 
 /**
@@ -34,7 +40,7 @@ export async function getPersonioToken(caching = true) {
   if (!caching) {
     return await getTokenFromAPI();
   }
-
+  
   const cacheDataToken = cache.get("personioToken");
 
   if (cacheDataToken) {
