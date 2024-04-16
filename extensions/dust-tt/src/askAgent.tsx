@@ -205,6 +205,9 @@ function AgentListItem({
   onSaveFavorite: (agent: AgentConfigurationType) => Promise<void>;
   onRemoveFavorite: (agent: AgentConfigurationType) => Promise<void>;
 }) {
+  if (!agent) {
+    return null;
+  }
   return (
     <List.Item
       key={agent.sId}

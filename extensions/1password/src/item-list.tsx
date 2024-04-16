@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { Items } from "./v7/components/Items";
-import { AccountForm } from "./v8/components/AccountForm";
+import { Items as ItemsV7 } from "./v7/components/Items";
+import { Items as ItemsV8 } from "./v8/components/Items";
 
 export default function Command() {
-  return getPreferenceValues<Preferences>().version == "v8" ? <AccountForm /> : <Items />;
+  return getPreferenceValues<Preferences>().version == "v8" ? <ItemsV8 /> : <ItemsV7 />;
 }

@@ -1,5 +1,10 @@
 # Xcode Changelog
 
+## [Clear SwiftUI Previews Cache] - 2024-04-03
+
+- Added "Clear SwiftUI Previews Cache" command to remove the ~/Library/Developer/Xcode/UserData/Previews directory
+- Improved "Clear Swift Package Manager Cache" command
+
 ## [Maintenance Update] - 2024-01-10
 
 - Removed "Search Swift Package Index" command due to the unavailability of the underlying API
