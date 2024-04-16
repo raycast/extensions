@@ -21,7 +21,7 @@ async function runWithPrivileges(command: string): Promise<void> {
   }
 }
 
-function isLowPowerModeEnabled(): boolean | undefined {
+export function isLowPowerModeEnabled(): boolean | undefined {
   try {
     const result = execSync(`pmset -g | grep powermode`);
     const lowPowerModeValue = result.toString().trim().at(-1);
