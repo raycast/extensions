@@ -1,4 +1,13 @@
-import { Action, ActionPanel, closeMainWindow, Detail, environment, getPreferenceValues, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Detail,
+  environment,
+  getPreferenceValues,
+  Icon,
+  List,
+} from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
 import { exec } from "child_process";
 import { existsSync, lstatSync, readFileSync } from "fs";
@@ -113,9 +122,12 @@ function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectE
   return new Map([...groupedProjects.entries()].sort());
 }
 
+type FrecencyResturnType<T> = ReturnType<typeof useFrecencySorting<T>>;
+type FrecencyUpdateType<T> = Pick<FrecencyResturnType<T>, "visitItem" | "resetRanking">;
+
 function getProjectsGroupedByTagAsElements(
   projectEntries: ProjectEntry[],
-  visitItem: (item: ProjectEntry) => void,
+  updateFrecency: FrecencyUpdateType<ProjectEntry>,
 ): ReactElement[] {
   const projectsGrouped = getProjectsGroupedByTag(projectEntries);
   const elements: ReactElement[] = [];
@@ -123,7 +135,7 @@ function getProjectsGroupedByTagAsElements(
     elements.push(
       <List.Section key={key} title={key}>
         {value?.map((project, index) => (
-          <ProjectListItem key={project.rootPath + index} item={project} visitItem={visitItem} />
+          <ProjectListItem key={project.rootPath + index} item={project} updateFrecency={updateFrecency} />
         ))}
       </List.Section>,
     );
@@ -160,15 +172,20 @@ export default function Command() {
   if (!projectEntries || projectEntries.length === 0) {
     return ExtensionError(
       "To use this extension, the VS Code Extension " +
-      "[Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager) " +
-      "is required and at least one project must be saved in the Project Manager.",
+        "[Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager) " +
+        "is required and at least one project must be saved in the Project Manager.",
     );
   }
 
-  const { data: sortedProjects, visitItem } = useFrecencySorting(projectEntries, {
+  const {
+    data: sortedProjects,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(projectEntries, {
     key: (item: ProjectEntry) => item.rootPath,
     sortUnvisited: (a: ProjectEntry, b: ProjectEntry) => a.name.localeCompare(b.name),
   });
+  const updateFrecency = { visitItem, resetRanking };
 
   const [searchText, setSearchText] = useState("");
   const [filteredProjects, filterProjects] = useState(sortedProjects);
@@ -201,11 +218,11 @@ export default function Command() {
   const elements: ReactElement[] = [];
   if (preferences.groupProjectsByTag && !selectedTag) {
     // don't group if filtering
-    const groupedProjects = getProjectsGroupedByTagAsElements(filteredProjects, visitItem);
+    const groupedProjects = getProjectsGroupedByTagAsElements(filteredProjects, updateFrecency);
     elements.push(...groupedProjects);
   } else {
     filterProjectsByTag(filteredProjects, selectedTag).forEach((project, index) => {
-      elements.push(<ProjectListItem key={project.rootPath + index} item={project} visitItem={visitItem} />);
+      elements.push(<ProjectListItem key={project.rootPath + index} item={project} updateFrecency={updateFrecency} />);
     });
   }
 
@@ -238,8 +255,15 @@ export default function Command() {
   );
 }
 
-function ProjectListItem({ item, visitItem }: { item: ProjectEntry; visitItem: (item: ProjectEntry) => void }) {
+function ProjectListItem({
+  item,
+  updateFrecency,
+}: {
+  item: ProjectEntry;
+  updateFrecency: FrecencyUpdateType<ProjectEntry>;
+}) {
   const { name, rootPath, tags } = item;
+  const { visitItem, resetRanking } = updateFrecency;
   const path = rootPath;
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
@@ -306,6 +330,11 @@ function ProjectListItem({ item, visitItem }: { item: ProjectEntry; visitItem: (
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <Action
+              title="Reset Project Ranking"
+              icon={Icon.ArrowCounterClockwise}
+              onAction={() => resetRanking(item)}
+            />
             <Action.Trash paths={[path]} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
