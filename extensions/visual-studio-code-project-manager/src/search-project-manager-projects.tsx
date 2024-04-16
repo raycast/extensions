@@ -5,7 +5,7 @@ import { existsSync, lstatSync, readFileSync } from "fs";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
-import { Fragment, ReactElement, useState } from "react";
+import { useState, useEffect, ReactElement, Fragment } from "react";
 import tildify from "tildify";
 import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
@@ -160,8 +160,8 @@ export default function Command() {
   if (!projectEntries || projectEntries.length === 0) {
     return ExtensionError(
       "To use this extension, the VS Code Extension " +
-        "[Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager) " +
-        "is required and at least one project must be saved in the Project Manager.",
+      "[Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager) " +
+      "is required and at least one project must be saved in the Project Manager.",
     );
   }
 
@@ -170,13 +170,41 @@ export default function Command() {
     sortUnvisited: (a: ProjectEntry, b: ProjectEntry) => a.name.localeCompare(b.name),
   });
 
+  const [searchText, setSearchText] = useState("");
+  const [filteredProjects, filterProjects] = useState(sortedProjects);
+
+  useEffect(() => {
+    // Update project list, using frecency-sorted projects
+    const searchRgx = new RegExp([...searchText].map(escapeRegex).join(".*"), "i");
+
+    const sortedProjectsSearch = sortedProjects
+      // Include all in-exact matches in search results
+      .filter((item) => searchRgx.test(item.name))
+      // Float exact matches to the top, preserving original order
+      .sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const search = searchText.toLowerCase();
+
+        if (aName === search) {
+          if (aName === bName) return 0
+          return -1;
+        }
+        if (bName === search) return 1;
+
+        return +bName.includes(search) - +aName.includes(search);
+      });
+
+    filterProjects(sortedProjectsSearch);
+  }, [searchText]);
+
   const elements: ReactElement[] = [];
   if (preferences.groupProjectsByTag && !selectedTag) {
     // don't group if filtering
-    const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects, visitItem);
+    const groupedProjects = getProjectsGroupedByTagAsElements(filteredProjects, visitItem);
     elements.push(...groupedProjects);
   } else {
-    filterProjectsByTag(sortedProjects, selectedTag).forEach((project, index) => {
+    filterProjectsByTag(filteredProjects, selectedTag).forEach((project, index) => {
       elements.push(<ProjectListItem key={project.rootPath + index} item={project} visitItem={visitItem} />);
     });
   }
@@ -187,6 +215,8 @@ export default function Command() {
 
   return (
     <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search projects ..."
       searchBarAccessory={
         projectTags.length ? (
@@ -332,4 +362,8 @@ function parseRemoteURL(path: string): string {
   path = path.slice(remotePrefix.length);
   const index = path.indexOf("/");
   return path.slice(0, index) + " " + path.slice(index) + "/";
+}
+
+function escapeRegex(x: string): string {
+  return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
