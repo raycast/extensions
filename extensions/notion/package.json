@@ -29,17 +29,7 @@
       "title": "Create Database Page",
       "subtitle": "Notion",
       "description": "Create a page in a Notion database.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "convertPropertyMarkdown",
-          "label": "Convert Property Markdown",
-          "description": "Mardown in text properties will be converted into rich text",
-          "type": "checkbox",
-          "default": false,
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "search-page",
