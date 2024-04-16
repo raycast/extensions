@@ -26,12 +26,8 @@
       "type": "textfield",
       "required": true,
       "title": "DuckDuckGo Token"
-
-
     }
-
   ],
-
   "dependencies": {
     "@raycast/api": "^1.69.0",
     "node-fetch": "^3.3.2"
