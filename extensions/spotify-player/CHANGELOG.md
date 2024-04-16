@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Feature] - 2024-04-16
+
+- New Actions added in Track Panel `Like Track` and `Dislike Track`.
+
 ## [Feature] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
