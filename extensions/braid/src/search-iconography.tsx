@@ -7,7 +7,12 @@ const getIconDataString = (svgContent: string) => `data:image/svg+xml;base64,${b
 
 export default function Command() {
   return (
-    <Grid columns={8} inset={Grid.Inset.Large} searchBarPlaceholder="Search Braid Iconography">
+    <Grid
+      columns={8}
+      inset={Grid.Inset.Large}
+      searchBarPlaceholder="Search Braid Iconography"
+      navigationTitle={`Search Iconography`}
+    >
       {localIconMap.map((item) => {
         const svgContentLight = fs.readFileSync(path.join(__dirname, item.svgPath.light), "utf-8");
         const svgContentDark = fs.readFileSync(path.join(__dirname, item.svgPath.dark), "utf-8");
