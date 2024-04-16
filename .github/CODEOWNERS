@@ -53,6 +53,7 @@
 /extensions/apple-maps-search                                       @djpowers @ratoru
 /extensions/apple-notes                                             @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince @thomaslombart @xilopaint
 /extensions/apple-reminders                                         @thomaslombart @tmwrnr @irangarcia @jondelga @phil1995
+/extensions/apply-inline-code                                       @aforian
 /extensions/arc                                                     @thomaspaulmann @zach-fuller @ankitchouhan1020 @pernielsentikaer @danpalmer @rgrunberg @tleo19 @loris @bdsqqq @xilopaint @jayeshbhole @hinzed1127 @omar-salama
 /extensions/archiver                                                @404J
 /extensions/ars-technica                                            @edwin-dd-ong
@@ -891,7 +892,7 @@
 /extensions/pangu-for-raycast                                       @beviz
 /extensions/papago-translate                                        @Rita-Mordio
 /extensions/paper                                                   @luctst
-/extensions/paperless-ngx                                           @Padamdam
+/extensions/paperless-ngx                                           @Padamdam @ibrikin
 /extensions/papermatch                                              @marlonjames71 @AndrewMonty
 /extensions/paperspace                                              @yuri-becker
 /extensions/parabol                                                 @parabol @BartoszJarocki
