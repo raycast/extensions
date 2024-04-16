@@ -38,8 +38,8 @@ export default function Watch() {
         second: enableTimeSeconds ? ("numeric" as const) : undefined,
         hour12: enableTimeFormat !== false,
       };
-      const timeStr = now.toLocaleTimeString(undefined, timeOptions).split(/[:\s]/);
-      const secondaryTimeStr = offsetNow.toLocaleTimeString(undefined, timeOptions).split(/[:\s]/);
+      const timeStr = now.toLocaleTimeString("en-US", timeOptions).split(/[:\s]/);
+      const secondaryTimeStr = offsetNow.toLocaleTimeString("en-US", timeOptions).split(/[:\s]/);
       setTime({
         hours: timeStr[0].padStart(2, "0"),
         minutes: timeStr[1].padStart(2, "0"),

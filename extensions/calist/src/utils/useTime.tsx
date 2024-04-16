@@ -14,7 +14,7 @@ export default function useTime() {
         second: enableTimeSeconds ? ("numeric" as const) : undefined,
         hour12: enableTimeFormat,
       };
-      let timeStr = now.toLocaleTimeString(undefined, timeOptions);
+      let timeStr = now.toLocaleTimeString("en-US", timeOptions);
       if (enableTimeFormat) {
         const parts = timeStr.split(" ");
         parts[1] = parts[1].toUpperCase();
