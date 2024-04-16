@@ -1,6 +1,10 @@
 # Project Companion
 
-## [Initial Version] - 2024-03-13
+## [v1.2.0] - 2024-04-12
+
+### Features
+- Replace `cmd` + `shift` hotkeys for the delete and edit command with `ctrl` instead
+- Add validation for project title to make sure no project is created without any data
 
 ## [v1.1.0] - 2024-04-11
 
@@ -12,8 +16,4 @@
 ### Fixes
 - Fixed a bug where the other link was not displayed in the project details
 
-## [v1.2.0] - 2024-04-12
-
-### Features
-- Replace `cmd` + `shift` hotkeys for the delete and edit command with `ctrl` instead
-- Add validation for project title to make sure no project is created without any data
+## [Initial Version] - 2024-03-13
