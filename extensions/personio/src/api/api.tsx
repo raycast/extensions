@@ -25,10 +25,9 @@ export async function getTokenFromAPI() {
     const data = res.data;
     const token = data.data.token;
     return token;
-  }catch (error) {
+  } catch (error) {
     await showToast({ style: Toast.Style.Failure, title: "Please check your Client ID, Secret and API permissions!" });
   }
-
 }
 
 /**
@@ -40,7 +39,7 @@ export async function getPersonioToken(caching = true) {
   if (!caching) {
     return await getTokenFromAPI();
   }
-  
+
   const cacheDataToken = cache.get("personioToken");
 
   if (cacheDataToken) {
