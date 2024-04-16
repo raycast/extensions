@@ -15,7 +15,9 @@
     "crisboarna",
     "sidhant92",
     "DorukAkinci",
-    "frese"
+    "frese",
+    "nagauta",
+    "vineus"
   ],
   "categories": [
     "Developer Tools",
@@ -121,9 +123,16 @@
           "default": "/bin/zsh -l -c \"assume -c <profile>\""
         }
       ]
+    },
+    {
+      "name": "step-functions",
+      "title": "Step Functions",
+      "description": "Find and open a Step Function",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@aws-sdk/client-sfn": "^3.216.0",
     "@aws-sdk/client-cloudformation": "^3.216.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.226.0",
     "@aws-sdk/client-codepipeline": "^3.216.0",

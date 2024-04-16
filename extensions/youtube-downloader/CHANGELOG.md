@@ -1,5 +1,9 @@
 # YouTube Downloader Changelog
 
+## [Error handling for livestreams] - 2023-10-28
+
+- Show unsupported error message for livestreams links
+
 ## [Better error handling] - 2023-10-28
 
 ## [Add trimming support] - 2023-09-03

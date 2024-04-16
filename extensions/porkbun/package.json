@@ -5,6 +5,7 @@
   "description": "Interact with Porkbun with the help of Raycast",
   "icon": "porkbun.png",
   "author": "xmok",
+  "contributors": ["djpowers"],
   "categories": [
     "Communication",
     "Web"

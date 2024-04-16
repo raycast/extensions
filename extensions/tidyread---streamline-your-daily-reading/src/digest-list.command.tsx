@@ -42,6 +42,12 @@ export default function DigestList() {
     showToast(Toast.Style.Success, "Digest deleted");
   };
 
+  const handleDeleteAll = async () => {
+    setDigests([]);
+    await saveDigests([]);
+    showToast(Toast.Style.Success, "Digests all deleted");
+  };
+
   // for debug
   // const debugActionNode = (
   //   <Action
@@ -93,7 +99,7 @@ export default function DigestList() {
                         style={Action.Style.Destructive}
                         icon={Icon.Trash}
                         shortcut={Keyboard.Shortcut.Common.Remove}
-                        title="Delete Source"
+                        title="Delete Digest"
                         onAction={async () => {
                           const flag = await confirmAlert({
                             title: "Delete Digest",
@@ -106,6 +112,26 @@ export default function DigestList() {
                           });
                           if (flag) {
                             handleDelete(digest);
+                          }
+                        }}
+                      />
+                      <Action
+                        style={Action.Style.Destructive}
+                        icon={Icon.Trash}
+                        shortcut={Keyboard.Shortcut.Common.Remove}
+                        title="Delete All Digests"
+                        onAction={async () => {
+                          const flag = await confirmAlert({
+                            title: "Delete All Digests",
+                            icon: Icon.Trash,
+                            primaryAction: {
+                              style: Alert.ActionStyle.Destructive,
+                              title: "Delete",
+                            },
+                            message: "Confirm delete all digests permanently?",
+                          });
+                          if (flag) {
+                            handleDeleteAll();
                           }
                         }}
                       />

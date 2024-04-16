@@ -1,5 +1,21 @@
 # DocSearch Changelog
 
+## [Fix Bugs] - 2024-3-19
+
+- 🐛 Fix icon of docs not found
+
+## [New feature] - 2024-2-3
+
+- 🌟 Use searchBarAccessory to switch different version of docs
+
+## [New feature and documentation] - 2024-01-16
+
+- 📄 Support [Element Plus](https://element-plus.org/en-US/)
+
+## [New feature and documentation] - 2023-10-22
+
+- 📄 Support [NvChad](https://nvchad.com/)
+
 ## [New feature and documentation] - 2023-08-12
 
 - 🌟 Support auto generate entry file and config

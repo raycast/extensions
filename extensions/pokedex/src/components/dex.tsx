@@ -31,8 +31,8 @@ export default function PokedexEntries(props: {
           props.entries,
           (e) =>
             e.pokemon_v2_version.pokemon_v2_versiongroup.pokemon_v2_generation
-              .pokemon_v2_generationnames[0].name
-        )
+              .pokemon_v2_generationnames[0].name,
+        ),
       ).map(([generation, groups]) => {
         return (
           <List.Section title={generation} key={generation}>
@@ -49,7 +49,7 @@ export default function PokedexEntries(props: {
                       text: dexNumber[entry.pokemon_v2_version.name]
                         ? `#${dexNumber[entry.pokemon_v2_version.name]
                             .toString()
-                            .padStart(3, "0")}`
+                            .padStart(4, "0")}`
                         : "--",
                     },
                   ]}

@@ -1,3 +1,5 @@
+import { LookBackUnitType } from "./types";
+
 /**
  * try to extract iMessage 2FA Code, empty result if not found any code
  *
@@ -24,35 +26,16 @@ export function extractCode(original: string) {
     // examples:
     //   "2773 is your Microsoft account verification code"
     code = m[1];
-  } else if ((m = /(code\s*:|is\s*:|码)\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // "code:" OR "is:", optional whitespace, then 4-8 consecutive digits
+  } else if ((m = /(code\s*:|is\s*:|码)\s*(\w{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    // "code:" OR "is:", optional whitespace, then 4-8 consecutive alphanumeric characters
     // examples:
     //   "Your Airbnb verification code is: 1234."
     //   "Your verification code is: 1234, use it to log in"
     //   "Here is your authorization code:9384"
     //   "【抖音】验证码9316，用于手机验证"
     //   "Your healow verification code is : 7579."
+    //   "TRUSTED LOCATION PASSCODE: mifsuc"
     code = m[2];
-  } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits
-    // examples:
-    //   "Please enter code 548 on Zocdoc."
-    code = m[2];
-  } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // line beginning OR "code:" OR "is:" OR word boundary, optional whitespace, 3 consecutive digits, a hyphen, then 3 consecutive digits
-    // but NOT a phone number (###-###-####)
-    // examples:
-    //   "123-456"
-    //   "Your Stripe verification code is: 719-839."
-    // and make sure it isn't a phone number
-    // doesn't match: <first digits>-<second digits>-<4 consecutive digits>
-
-    const first = m[2];
-    const second = m[3];
-    if (!new RegExp("/(^|code:|is:|\b)s*" + first + "-" + second + "-(d{4})($|s|R|\t|\b|.|,)/").test(message)) {
-      return `${first}${second}`;
-    }
-    return "";
   } else {
     // more generic, brute force patterns
 
@@ -85,9 +68,46 @@ export function extractCode(original: string) {
       //   "CWGUG8"
       //   "CWGUG8 is your code"
       //   "7645W453"
-      return m[0];
+      code = m[0];
+    } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+      // line beginning OR "code:" OR "is:" OR word boundary, optional whitespace, 3 consecutive digits, a hyphen, then 3 consecutive digits
+      // but NOT a phone number (###-###-####)
+      // examples:
+      //   "123-456"
+      //   "Your Stripe verification code is: 719-839."
+      // and make sure it isn't a phone number
+      // doesn't match: <first digits>-<second digits>-<4 consecutive digits>
+
+      const first = m[2];
+      const second = m[3];
+
+      code = `${first}${second}`;
+    } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+      // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits
+      // examples:
+      //   "Please enter code 548 on Zocdoc."
+      code = m[2];
     }
   }
 
   return code;
+}
+
+// This object maps each unit of time to the number of minutes it contains.
+const unitToMinutesMap: { [unit in LookBackUnitType]: number } = {
+  DAYS: 24 * 60,
+  HOURS: 60,
+  MINUTES: 1,
+};
+
+/**
+ * Calculates the total minutes based on a specified look back unit and amount.
+ *
+ * @param lookBackUnit - The time unit ('DAYS', 'HOURS', 'MINUTES') for the look back period.
+ * @param lookBackAmount - The quantity of the specified unit, defaults to 1.
+ * @returns The total minutes for the look back period. Returns 0 for unrecognized units.
+ */
+export function calculateLookBackMinutes(lookBackUnit: LookBackUnitType, lookBackAmount = 1): number {
+  const unitMinutes = unitToMinutesMap[lookBackUnit] || 0;
+  return unitMinutes * lookBackAmount;
 }

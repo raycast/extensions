@@ -1,5 +1,8 @@
 # Pokédex Changelog
 
+## [Improvements] - 2024-02-27
+- Added more Gen 9 Pokémons
+
 ## [Improvements] - 2023-02-03
 - Added Gen 9 Pokémons
 

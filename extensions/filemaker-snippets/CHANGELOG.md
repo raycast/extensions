@@ -1,5 +1,30 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2024-04-05
+
+- Fix encoding for launching favorite or recent files that contain special characters
+
+## [Fixes] - 2024-03-28
+
+- Fix deeplinks for hosted snippets. Fetch dependency was not being loaded correctly.
+
+## [Fixes] - 2024-03-20
+
+- Fix snippet creation from clipboard
+
+## [Fixes] - 2024-03-04
+
+- Improved frecency sorting for recent/favorite files
+
+## [Update AppleScripts] - 2024-02-12
+
+- Now running version 4.0.4 of FmClipTools under the hood
+
+## [Fixes] - 2024-02-05
+
+- Improved searching for recent/favorite files with additional keywords
+- Added Frecency sorting to recent/favorite files, so the most used files are shown first
+
 ## [Recents and Favorites] - 2024-01-29
 
 - Added new commands to search recent/favorite FileMaker files

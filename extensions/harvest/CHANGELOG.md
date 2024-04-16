@@ -1,5 +1,9 @@
 # Harvest Changelog
 
+## [Fixes] - 2024-04-08
+
+- Improved cache for projects and tasks
+
 ## [Toggle Timer Entry Command] - 2024-01-02
 
 - Added: New command to toggle the timer on the most recent time entry

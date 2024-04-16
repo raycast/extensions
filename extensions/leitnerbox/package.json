@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "leitnerbox",
+  "title": "Leitner Box",
+  "description": "This is a simple extension that use the concept of a learning process called leitner box",
+  "icon": "leitner-icon.png",
+  "author": "gzyannick",
+  "categories": ["Applications", "Fun"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-a-question",
+      "title": "Create A Question",
+      "subtitle": "LeitnerBox",
+      "description": "Create a question for your leitner box",
+      "mode": "view"
+    },
+    {
+      "name": "daily-question",
+      "title": "Daily Question",
+      "subtitle": "LeitnerBox",
+      "description": "Answer your daily question",
+      "mode": "view"
+    },
+    {
+      "name": "information",
+      "title": "Information",
+      "subtitle": "LeitnerBox",
+      "description": "How the leitner system work",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "@raycast/utils": "^1.12.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

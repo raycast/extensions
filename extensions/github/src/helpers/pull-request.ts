@@ -1,4 +1,4 @@
-import { List, Color, Icon } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
 import {
@@ -12,12 +12,16 @@ import { getGitHubUser } from "./users";
 
 export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
   if (pullRequest.merged) {
-    return { icon: { source: "merge.svg", tintColor: Color.Purple }, text: "Merged", color: Color.Purple };
+    return {
+      icon: { source: "pull-request-merged.svg", tintColor: Color.Purple },
+      text: "Merged",
+      color: Color.Purple,
+    };
   }
 
   if (pullRequest.closed) {
     return {
-      icon: { source: "pull-request.svg", tintColor: Color.Red },
+      icon: { source: "pull-request-closed.svg", tintColor: Color.Red },
       text: "Closed",
       color: Color.Red,
     };
@@ -32,7 +36,7 @@ export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | Pu
   }
 
   return {
-    icon: { source: "pull-request.svg", tintColor: Color.Green },
+    icon: { source: "pull-request-open.svg", tintColor: Color.Green },
     text: "Open",
     color: Color.Green,
   };
@@ -105,9 +109,9 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
       return { icon: { source: Icon.Check, tintColor: Color.Green }, tooltip: "Checks: Success" };
     case "ERROR":
     case "FAILURE":
-      return { icon: { source: Icon.XMarkCircle, tintColor: Color.Red }, tooltip: "Checks: Failure" };
+      return { icon: { source: Icon.Xmark, tintColor: Color.Red }, tooltip: "Checks: Failure" };
     case "PENDING":
-      return { icon: { source: Icon.Clock, tintColor: Color.SecondaryText }, tooltip: "Checks: Pending" };
+      return { icon: { source: Icon.Clock, tintColor: Color.Orange }, tooltip: "Checks: Pending" };
     default:
       return null;
   }

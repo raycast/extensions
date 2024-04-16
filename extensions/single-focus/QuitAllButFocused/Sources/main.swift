@@ -7,7 +7,7 @@ func quitButFront() {
         return
     }
     
-    var excludedBundleIdentifiers = ["com.apple.finder"]
+    var excludedBundleIdentifiers = ["com.apple.finder", "com.raycast.macos"]
     if let frontmostAppBundleIdentifier = frontmostApplication.bundleIdentifier {
         excludedBundleIdentifiers.append(frontmostAppBundleIdentifier)
     }

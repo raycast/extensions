@@ -1,18 +1,13 @@
-import { AI, closeMainWindow, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
+import * as chrono from "chrono-node";
 import { format, addDays, nextSunday, nextFriday, nextSaturday, addYears, subHours } from "date-fns";
-import { getReminders, createReminder } from "swift:../swift/AppleReminders";
+import { createReminder, getData } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
 import { Data } from "./hooks/useData";
 
-export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddReminder }) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
   try {
-    const data: Data = await getReminders();
-
-    const lists = data.lists.map((list) => {
-      return `${list.title}:${list.id}`;
-    });
-
     const preferences = getPreferenceValues<Preferences.QuickAddReminder>();
 
     if (preferences.shouldCloseMainWindow) {
@@ -20,6 +15,59 @@ export default async function Command(props: LaunchProps & { arguments: Argument
     } else {
       await showToast({ style: Toast.Style.Animated, title: "Adding to-do" });
     }
+
+    if (!environment.canAccess(AI) || preferences.dontUseAI) {
+      const text = props.arguments.text;
+
+      let reminderList;
+      let dueDate;
+      let isDateTime;
+
+      const dateMatch = chrono.parse(text);
+      if (dateMatch && dateMatch.length > 0) {
+        const chronoDate = dateMatch[0].start;
+        isDateTime = chronoDate.isCertain("hour") || chronoDate.isCertain("minute") || chronoDate.isCertain("second");
+        const date = chronoDate.date();
+        dueDate = isDateTime ? date.toISOString() : format(date, "yyyy-MM-dd");
+      }
+
+      const listMatch = text.match(/#(\w+)/);
+
+      if (listMatch) {
+        const data: Data = await getData();
+        reminderList = data.lists.find((list) => list.title.toLowerCase() === listMatch[1].toLowerCase());
+      }
+
+      // Clean all values matching from text and previous white space as title constant
+      const title = text
+        .replace(listMatch ? listMatch[0] : "", "")
+        .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : "", "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const reminder: NewReminder = { title, listId: reminderList?.id, dueDate };
+
+      if (props.arguments.notes) {
+        reminder.notes = props.arguments.notes;
+      }
+
+      await createReminder(reminder);
+
+      const formattedDueDate = dueDate ? ` due ${format(dueDate, `${isDateTime ? "PPPpp" : "PPP"}`)}` : "";
+      const toastMessage = `Added "${title}" to ${reminderList?.title ?? "default list"}${formattedDueDate}`;
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: toastMessage,
+      });
+      return;
+    }
+
+    const data: Data = await getData();
+
+    const lists = data.lists.map((list) => {
+      return `${list.title}:${list.id}`;
+    });
 
     const now = new Date();
     const today = format(now, "yyyy-MM-dd");
@@ -132,7 +180,7 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
   const maxRetries = 3;
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const result = await AI.ask(prompt);
+      const result = await AI.ask(prompt, { model: "gpt-4" });
       const json = JSON.parse(result.trim());
       if (json.recurrence && !json.dueDate) {
         throw new Error("Recurrence without dueDate");

@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { createList } from "../api/list";
-import { CreateListFormValues, CreateListPayload, ListIcon } from "../types/list";
-import { ListColors, ListIcons, ListTypes, ListVisualizations, getTintColorFromHue } from "../utils/list";
+
+import { createList } from "@/api/list";
+import { CreateListFormValues, CreateListPayload, ListIcon } from "@/types/list";
+import { ListColors, ListIcons, ListTypes, ListVisualizations, getTintColorFromHue } from "@/utils/list";
 
 export default function CreateList({ draftValues }: { draftValues?: CreateListFormValues }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);

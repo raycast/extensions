@@ -43,6 +43,7 @@ export interface RSSFeed {
   url: string;
   filter?: (item: RSSItem) => boolean;
   maxItems?: number;
+  tags?: string[];
 }
 
 export interface RSSItem {
@@ -62,6 +63,7 @@ export interface RawFeed {
   link: string;
   feedUrl: string;
   items: RSSItem[];
+  description?: string;
 }
 
 export interface Preferences {
@@ -81,6 +83,7 @@ export interface Preferences {
   autoGenDigest?: boolean;
   requestTimeout?: number;
   enableItemLinkProxy?: boolean;
+  splitByTags?: boolean;
   writeFreelyEndpoint?: string;
   writeFreelyAccount?: string;
   writeFreelyPassword?: string;

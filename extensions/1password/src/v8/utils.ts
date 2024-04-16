@@ -1,22 +1,17 @@
-import { Cache, getPreferenceValues, Icon } from "@raycast/api";
+import { getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
-import { useEffect, useState } from "react";
 
-import { CategoryName, Item } from "./types";
+import { Category, CategoryName, Item, User } from "./types";
+import { useExec } from "@raycast/utils";
 
-export type ActionID = Preferences["primaryAction"];
+export type ActionID = string;
 
-export const cache = new Cache();
-
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues();
 
 export const CLI_PATH =
   preferences.cliPath || ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
-export const CATEGORIES_CACHE_NAME = "@categories";
-export const ITEMS_CACHE_NAME = "@items";
-export const ACCOUNT_CACHE_NAME = "@account";
 
 export function hrefToOpenInBrowser(item: Item): string | undefined {
   if (item.category === "LOGIN") {
@@ -58,44 +53,56 @@ export function op(args: string[]) {
   throw Error("1Password CLI is not found!");
 }
 
-export function useOp<T>(args: string[], cacheKey?: string) {
-  const [data, setData] = useState<T>();
-  const [error, setError] = useState<unknown>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export const handleErrors = (stderr: string) => {
+  if (stderr.includes("no such host"))
+    throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
+  if (stderr.includes("could not get item") || stderr.includes("isn't an item"))
+    throw new NotFoundError("Item not found on 1password.", "Check it on your 1Password app.");
+  if (stderr.includes("ENOENT")) throw new CommandLineMissingError("1Password CLI not found.");
+  if (stderr.includes("does not have a field"))
+    throw new ExtensionError(`Item does not contain the field ${stderr.split("does not have a field ")[1].trim()}.`);
+};
 
-  useEffect(() => {
-    if (cacheKey && cache.has(cacheKey)) {
-      setIsLoading(false);
-      return setData(JSON.parse(cache.get(cacheKey) as string));
-    }
-
-    try {
-      const items = op([...args, "--format=json"]);
-
-      if (cacheKey) {
-        cache.set(cacheKey, items);
-        return setData(JSON.parse(cache.get(cacheKey) as string));
-      }
-      return setData(JSON.parse(items));
-    } catch (error: unknown) {
-      setError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cacheKey]);
-
-  return { data, error, isLoading };
-}
-
-export function clearCache(key?: string) {
-  if (!cache.isEmpty) {
-    if (key && cache.has(key)) {
-      cache.remove(key);
-    } else {
-      cache.clear({ notifySubscribers: false });
-    }
+export class ExtensionError extends Error {
+  public title: string;
+  constructor(title: string, message?: string) {
+    if (!message) message = title;
+    super(message);
+    this.title = title;
   }
 }
+
+export class NotFoundError extends ExtensionError {}
+export class CommandLineMissingError extends ExtensionError {}
+export class ConnectionError extends ExtensionError {}
+
+const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) =>
+  useExec<T, U>(CLI_PATH, [...args, "--format=json"], {
+    parseOutput: ({ stdout, stderr, error }) => {
+      if (error) handleErrors(error.message);
+      if (stderr) handleErrors(stderr);
+      if (callback) return callback(JSON.parse(stdout));
+      return JSON.parse(stdout);
+    },
+    onError: async (e) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: e.message,
+      });
+    },
+  });
+
+export const usePasswords = () =>
+  useOp<Item[], ExtensionError>(["item", "list", "--long"], (data) =>
+    data.sort((a, b) => a.title.localeCompare(b.title))
+  );
+export const useCategories = () =>
+  useOp<Category[], ExtensionError>(["item", "template", "list"], (data) =>
+    data.sort((a, b) => a.name.localeCompare(b.name))
+  );
+
+export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
+export const useAccounts = () => useOp<User[], ExtensionError>(["account", "list"]);
 
 export function getCategoryIcon(category: CategoryName) {
   switch (category) {

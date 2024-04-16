@@ -31,7 +31,8 @@ function Dropdown(props: { defaultValue: string; onChange: (newValue: string) =>
   );
 }
 
-export default function RSSSearch() {
+export default function RSSSearch(props: { defaultSearchText?: string }) {
+  const { defaultSearchText } = props;
   const [view, setView] = useState<"all" | "tag">("all");
 
   if (view === "tag") {
@@ -44,6 +45,7 @@ export default function RSSSearch() {
 
   return (
     <RSSPlainListView
+      defaultSearchText={defaultSearchText}
       searchBarAccessory={<Dropdown defaultValue="all" onChange={(val) => setView(val as "all" | "tag")} />}
     />
   );

@@ -182,9 +182,8 @@ class Service {
     if (this.cache.has('accounts')) {
       data = JSON.parse(this.cache.get('accounts')!) as Response<AccountItem[]>;
     } else {
-      const response = await this.client.get<Response<AccountItem[]>>(
-        'accounts',
-      );
+      const response =
+        await this.client.get<Response<AccountItem[]>>('accounts');
       data = response.data;
       this.cache.set('accounts', JSON.stringify(data));
     }

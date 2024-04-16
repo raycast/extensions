@@ -67,7 +67,10 @@ function saveSSHConfig(configFilePath: string, connections: ISSHConnection[]): v
   for (const connection of connections) {
     configData += `Host ${connection.name}\n`;
     configData += `  HostName ${connection.address}\n`;
-    configData += `  User ${connection.user}\n`;
+
+    if (connection.user) {
+      configData += `  User ${connection.user}\n`;
+    }
 
     if (connection.port) {
       configData += `  Port ${connection.port}\n`;
