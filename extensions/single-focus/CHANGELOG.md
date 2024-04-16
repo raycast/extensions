@@ -1,6 +1,6 @@
 # Single Focus Changelog
 
-## [Bug Fix] - 2024-04-07
+## [Bug Fix] - 2024-04-10
 
 - Added Raycast to the list of excluded applications when quitting
 
