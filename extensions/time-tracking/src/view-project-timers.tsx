@@ -1,4 +1,16 @@
-import { Action, ActionPanel, confirmAlert, Icon, launchCommand, LaunchType, List, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  List,
+  showToast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { deleteTimer, formatDuration, getDuration, getTimers, Timer, TimerList } from "./Timers";
 
@@ -85,13 +97,15 @@ export default function Command() {
               <Action
                 icon={Icon.Trash}
                 title={"Delete Timer"}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={async () => {
                   if (
                     await confirmAlert({
                       title: "Are you sure you want to delete this timer?",
                       message: "This action cannot be undone.",
-                      icon: Icon.Trash,
+                      icon: { source: Icon.Trash, tintColor: Color.Red },
                       primaryAction: {
+                        style: Alert.ActionStyle.Default,
                         title: "Delete timer",
                       },
                       rememberUserChoice: true,
