@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Support More Browsers] - {PR_MERGE_DATE}
+## [Support More Browsers] - 2024-04-17
 
 - Supports beta, dev, canary browsers
 
