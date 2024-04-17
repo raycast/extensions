@@ -44,6 +44,10 @@ GHPic first read the image from the clipboard and upload it to GitHub, then the 
 
 https://user-images.githubusercontent.com/19505695/186912886-ca5c45cf-fec6-4545-a162-86f025a37030.mov
 
+### Upload from file
+
+https://github.com/xiangsanliu/gh-pic/assets/19505695/64840684-a015-41fc-8954-19f88abc0a3d
+
 
 ## Thanks
 
