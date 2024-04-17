@@ -37,4 +37,4 @@ By default, only 10 results are returned for any GIF search (with no option to l
 
 ### Custom API Keys
 
-By default, this extension will download shared API keys for both services. If you wish to use your own API keys, you can sign up for a free developer account for Giphy at [https://developers.giphy.com](https://developers.giphy.com), or Tenor at [https://tenor.com/developer/keyregistration](https://tenor.com/developer/keyregistration), and provide those keys in the Command Preferences.
+By default, this extension will download shared API keys for both services. If you wish to use your own API keys, you can sign up for a free developer account for GIPHY at [https://developers.giphy.com](https://developers.giphy.com), or Tenor at [https://tenor.com/developer/keyregistration](https://tenor.com/developer/keyregistration), and provide those keys in the Command Preferences.

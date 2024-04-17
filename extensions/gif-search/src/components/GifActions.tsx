@@ -1,10 +1,8 @@
-import { useContext } from "react";
-
 import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard, showInFinder, open } from "@raycast/api";
+import path from "path";
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
-import AppContext, { AppStateAction } from "./AppContext";
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
@@ -12,38 +10,51 @@ import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
 import { removeGifFromCache } from "../lib/cachedGifs";
-import path from "path";
+import { get, remove, save } from "../lib/localGifs";
+import { useCachedPromise } from "@raycast/utils";
 
 interface GifActionsProps {
   item: IGif;
   showViewDetails: boolean;
   service?: ServiceName;
   visitGifItem?: (gif: IGif) => void;
+  mutate: () => Promise<void>;
 }
 
-export function GifActions({ item, showViewDetails, service, visitGifItem }: GifActionsProps) {
+export function GifActions({ item, showViewDetails, service, visitGifItem, mutate }: GifActionsProps) {
   const { id, url, gif_url } = item;
-  const { state, dispatch } = useContext(AppContext);
-  const { favIds, recentIds } = state;
-  const safeDispatch = (action: AppStateAction) => {
-    try {
-      dispatch(action);
-    } catch (error) {
-      console.error(error);
+
+  const { data: favIds } = useCachedPromise((s) => get(s, "favs"), [service]);
+  const { data: recentIds } = useCachedPromise((s) => get(s, "recent"), [service]);
+
+  const trackUsage = async () => {
+    if (service) {
+      await save(item, service, "recent");
+      await mutate();
+    }
+
+    visitGifItem?.(item);
+  };
+
+  const removeFromRecents = async () => {
+    if (service) {
+      await remove(item, service, "recent");
+      await mutate();
     }
   };
 
-  const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
-
-  const trackUsage = () => {
-    safeDispatch({ type: "add", save: true, recentIds: actionIds, service });
-    visitGifItem?.(item);
+  const addToFav = async () => {
+    if (service) {
+      await save(item, service, "favs");
+      await mutate();
+    }
   };
-  const removeFromRecents = () => safeDispatch({ type: "remove", save: true, recentIds: actionIds, service });
-  const addToFav = () => safeDispatch({ type: "add", save: true, favIds: actionIds, service });
 
   const removeFav = async () => {
-    safeDispatch({ type: "remove", save: true, favIds: actionIds, service });
+    if (service) {
+      await remove(item, service, "favs");
+      await mutate();
+    }
 
     // Remove the GIF from the cache if it exists
     try {
@@ -60,7 +71,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       title: "Copying...",
     })
       .then((toast) => {
-        const isInFavorites = favIds?.get(service as ServiceName)?.has(id.toString());
+        const isInFavorites = favIds?.includes(id.toString());
         return copyFileToClipboard(item.download_url, item.download_name, isInFavorites).then((file) => {
           toast.hide();
           showHUD(`Copied GIF "${file}" to clipboard`);
@@ -142,7 +153,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
   );
 
   let toggleFav: JSX.Element | undefined;
-  const isFav = favIds?.get(service as ServiceName)?.has(id.toString());
+  const isFav = favIds?.includes(id.toString());
   if (favIds) {
     toggleFav = isFav ? (
       <Action
@@ -163,7 +174,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
     );
   }
 
-  const isRecent = recentIds?.get(service as ServiceName)?.has(id.toString());
+  const isRecent = recentIds?.includes(id.toString());
   const removeRecent = isRecent ? (
     <Action
       icon={Icon.Clock}
@@ -179,7 +190,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       icon={Icon.Eye}
       key="viewDetails"
       title="View GIF Details"
-      target={<GifDetails item={item} service={service} />}
+      target={<GifDetails item={item} service={service} mutate={mutate} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       onPush={trackUsage}
     />

@@ -1,66 +1,84 @@
-import { useCallback, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { LocalType, get, getAll } from "../lib/localGifs";
+import { GRID_COLUMNS, ServiceName } from "../preferences";
+import { getAPIByServiceName } from "./useSearchAPI";
+import dedupe from "../lib/dedupe";
 
-import { ServiceName } from "../preferences";
+type ItemSize = "small" | "medium" | "large";
 
-import { clearAll, clear, getAll, get, LocalType } from "../lib/localGifs";
+async function getLocalGifs(type: LocalType, service?: ServiceName, itemSize?: ItemSize) {
+  if (!service) return [];
 
-import type { StoredGifIds } from "./useGifPopulator";
-export interface LocalIdsState {
-  ids?: StoredGifIds;
-  error?: Error;
+  const recent = await get(service, type);
+  // Display the first 2 rows only
+  const ids = Array.from(recent).slice(0, GRID_COLUMNS[itemSize ?? "medium"] * 2);
+
+  const api = await getAPIByServiceName(service);
+  if (api === null) return [];
+
+  const gifs = await api.gifs(ids);
+  return dedupe(gifs);
 }
 
-export interface LoadFavOpt {
-  offset?: number;
-}
+export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize) {
+  const isAllFavsOrRecents = service === "favorites" || service === "recents";
 
-export default function useLocalGifs(type: LocalType) {
-  const [isLoadingIds, setIsLoadingIds] = useState(true);
-  const [localIds, setLocalIds] = useState<LocalIdsState>();
+  const {
+    data: recentGifs,
+    isLoading: isLoadingRecentGifs,
+    mutate: mutateRecentGifs,
+  } = useCachedPromise((service) => getLocalGifs("recent", service, itemSize), [service], {
+    execute: !isAllFavsOrRecents,
+  });
 
-  const loadRecents = useCallback(
-    async function loadFavs(service?: ServiceName) {
-      if (!service) {
-        return;
-      }
+  const {
+    data: favoriteGifs,
+    isLoading: isLoadingFavoriteGifs,
+    mutate: mutateFavoriteGifs,
+  } = useCachedPromise((service) => getLocalGifs("favs", service, itemSize), [service], {
+    execute: !isAllFavsOrRecents,
+  });
 
-      setIsLoadingIds(true);
+  const {
+    data: allGifs,
+    isLoading: isLoadingAllGifs,
+    mutate: mutateAllGifs,
+  } = useCachedPromise(
+    async (service?: ServiceName) => {
+      let type: LocalType;
+      if (service === "favorites") type = "favs";
+      else if (service === "recents") type = "recent";
+      else return [];
 
-      try {
-        const localIds = await get(service, type);
-        setLocalIds({ ids: new Map([[service, localIds]]) });
-      } catch (e) {
-        console.error(e);
-        const error = e as Error;
+      const all = await getAll(type);
+      // Populate all gifs using the API
+      const promises = all.map(async ([service, ids]) => {
+        const api = await getAPIByServiceName(service);
+        if (api === null) return [];
+        const gifs = await api.gifs(ids);
+        return [service, dedupe(gifs)] as const;
+      });
 
-        await clear(service, type);
-        setLocalIds({ error });
-      } finally {
-        setIsLoadingIds(false);
-      }
+      const results = await Promise.all(promises);
+      return results;
     },
-    [setLocalIds, setIsLoadingIds],
+    [service],
+    { execute: isAllFavsOrRecents },
   );
 
-  const loadAllRecents = useCallback(
-    async function loadAllFavs() {
-      setIsLoadingIds(true);
+  async function mutate() {
+    if (service === "favorites" || service === "recents") {
+      return mutateAllGifs();
+    }
+    mutateRecentGifs();
+    mutateFavoriteGifs();
+  }
 
-      try {
-        const allFavs = await getAll(type);
-        setLocalIds({ ids: allFavs });
-      } catch (e) {
-        console.error(e);
-        const error = e as Error;
-
-        await clearAll(type);
-        setLocalIds({ error });
-      } finally {
-        setIsLoadingIds(false);
-      }
-    },
-    [setLocalIds],
-  );
-
-  return [localIds, isLoadingIds, loadRecents, loadAllRecents] as const;
+  return {
+    recentGifs,
+    favoriteGifs,
+    allGifs,
+    isLoading: isLoadingRecentGifs || isLoadingFavoriteGifs || isLoadingAllGifs,
+    mutate,
+  };
 }

@@ -79,7 +79,7 @@
       "name": "maxResults",
       "type": "textfield",
       "required": false,
-      "default": "10",
+      "default": "25",
       "title": "Max Results",
       "description": "Max number of results to return for a search"
     },
@@ -129,9 +129,9 @@
       "name": "giphy-apiKey",
       "type": "password",
       "required": false,
-      "title": "Giphy API Key",
-      "placeholder": "Giphy API Key (optional)",
-      "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
+      "title": "GIPHY API Key",
+      "placeholder": "GIPHY API Key (optional)",
+      "description": "API Key used to perform searches on GIPHY. You can get one for free at https://developers.giphy.com"
     },
     {
       "name": "tenor-apiKey",
@@ -144,8 +144,8 @@
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^5.4.0",
-    "@raycast/api": "^1.69.1",
-    "@raycast/utils": "^1.13.1",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
     "@saekitominaga/file-size-format": "^1.0.2",
     "date-fns": "^2.30.0",
     "node-fetch": "^3.3.2",
