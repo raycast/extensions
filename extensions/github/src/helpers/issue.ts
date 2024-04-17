@@ -22,7 +22,7 @@ export function getIssueStatus(issue: IssueFieldsFragment | IssueDetailFieldsFra
   }
 
   return {
-    icon: { source: "issue-opened.svg", tintColor: Color.Green },
+    icon: { source: "issue-open.svg", tintColor: Color.Green },
     text: "Open",
     color: Color.Green,
   };

@@ -5,6 +5,11 @@
   "description": "Easily Control Keyboard Brightness on your Apple Silicon MacBook",
   "icon": "command-icon.png",
   "author": "huzef44",
+  "contributors": [
+    "belyakov_am",
+    "DannySeidel",
+    "pernielsentikaer"
+  ],
   "categories": [
     "System"
   ],
@@ -18,19 +23,18 @@
       "mode": "no-view"
     },
     {
-      "name": "adjust-keyboard-brightness",
-      "title": "Adjust Keyboard Brightness",
-      "subtitle": "Adjust Keyboard Brightness",
-      "description": "Adjust Keyboard Brightness",
-      "mode": "view"
+      "name": "increase-keyboard-brightness",
+      "title": "Increase Keyboard Brightness",
+      "subtitle": "Increase Keyboard Brightness",
+      "description": "Increase Keyboard Brightness",
+      "mode": "no-view"
     },
     {
-      "name": "sync-keyboard-brightness",
-      "title": "Sync Keyboard Brightness",
-      "subtitle": "Sync Keyboard Brightness",
-      "description": "Sync Keyboard Brightness",
-      "mode": "no-view",
-      "interval": "4h"
+      "name": "decrease-keyboard-brightness",
+      "title": "Decrease Keyboard Brightness",
+      "subtitle": "Decrease Keyboard Brightness",
+      "description": "Decrease Keyboard Brightness",
+      "mode": "no-view"
     },
     {
       "name": "menubar-keyboard-brightness",

@@ -1,11 +1,13 @@
 import { Application, getApplications, MenuBarExtra, open, Icon } from "@raycast/api";
-import { resolveAllFiles } from "./components/fetchFigmaData";
+import { resolveAllFiles } from "./api";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { loadStarredFiles } from "./components/starFiles";
+import { loadStarredFiles } from "./starFiles";
+import { figma } from "./oauth";
+import { withAccessToken } from "@raycast/utils";
 
-export default function Command() {
+function Command() {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
@@ -109,3 +111,5 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
+export default withAccessToken(figma)(Command);

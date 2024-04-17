@@ -64,9 +64,9 @@ export function useDatabaseProperties(databaseId: string | null, filter?: (value
 
 export function useDatabasesView(databaseId: string) {
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const data = await LocalStorage.getItem("DATABASES_VIEWS");
+    const data = await LocalStorage.getItem<string>("DATABASES_VIEWS");
 
-    if (!data || typeof data !== "string") return {};
+    if (!data) return {};
 
     return JSON.parse(data) as { [databaseId: string]: DatabaseView | undefined };
   });
