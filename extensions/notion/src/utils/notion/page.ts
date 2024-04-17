@@ -63,22 +63,18 @@ export async function patchPage(pageId: string, properties: Parameters<Client["p
 }
 
 export async function search(query?: string, nextCursor?: string) {
-  try {
-    const notion = getNotionClient();
-    const database = await notion.search({
-      sort: {
-        direction: "descending",
-        timestamp: "last_edited_time",
-      },
-      page_size: 25,
-      query,
-      ...(nextCursor && { start_cursor: nextCursor }),
-    });
+  const notion = getNotionClient();
+  const database = await notion.search({
+    sort: {
+      direction: "descending",
+      timestamp: "last_edited_time",
+    },
+    page_size: 25,
+    query,
+    ...(nextCursor && { start_cursor: nextCursor }),
+  });
 
-    return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
-  } catch (err) {
-    return handleError(err, "Failed to search pages", []);
-  }
+  return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
 }
 
 export async function fetchPageContent(pageId: string) {
