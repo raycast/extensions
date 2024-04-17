@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import axios from "axios";
-import { BASE_URL } from "./api";
+import { BASE_URL, getPersonioToken } from "./api";
 import { cache } from "./cache";
 
 // the JSON structure returned by the personio API
@@ -44,12 +44,13 @@ export async function getEmployeesAPI(token: string): Promise<Employee[]> {
     return employees;
   } catch (error) {
     console.error(error);
-    await showToast({ style: Toast.Style.Failure, title: "That didn't work!", message: "Unfortunate!" });
+    await showToast({ style: Toast.Style.Failure, title: "That didn't work!", message: "Couldn't load employees!" });
     return [];
   }
 }
 
-export async function getEmployees(token: string) {
+export async function getEmployees() {
+  const token = await getPersonioToken();
   const employees = cache.get("employees");
   if (employees) {
     return JSON.parse(employees) as Employee[];

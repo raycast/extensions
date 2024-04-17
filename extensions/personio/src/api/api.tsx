@@ -5,6 +5,27 @@ import { parseDateAndTime } from "../utils/date";
 
 export const BASE_URL = "https://api.personio.de/v1";
 
+export async function isAuthenticated() {
+  const url = BASE_URL + "/auth";
+  const payload = {
+    client_secret: getPreferenceValues().clientSecret,
+    client_id: getPreferenceValues().clientId,
+  };
+  const headers = {
+    accept: "application/json",
+    "content-type": "application/json",
+  };
+
+  try {
+    await axios.post(url, payload, { headers });
+    return true;
+  } catch {
+    console.log("User provided wrong credentials or the Personio API is down or the API permissions are wrong.");
+    await showToast({ style: Toast.Style.Failure, title: "Please check your Client ID, Secret and API permissions!" });
+    return false;
+  }
+}
+
 /**
  * This function retrieves a string token from the personio API with the
  * client secret and client id stored in the preferences
@@ -20,14 +41,10 @@ export async function getTokenFromAPI() {
     "content-type": "application/json",
   };
 
-  try {
-    const res = await axios.post(url, payload, { headers });
-    const data = res.data;
-    const token = data.data.token;
-    return token;
-  } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Please check your Client ID, Secret and API permissions!" });
-  }
+  const res = await axios.post(url, payload, { headers });
+  const data = res.data;
+  const token = data.data.token;
+  return token;
 }
 
 /**
@@ -46,7 +63,9 @@ export async function getPersonioToken(caching = true) {
     return cacheDataToken;
   } else {
     const token = await getTokenFromAPI();
-    cache.set("personioToken", token, 23 * 60); // let the token expire after 23 hours
+    if (token) {
+      cache.set("personioToken", token, 23 * 60); // let the token expire after 23 hours
+    }
     return token;
   }
 }
@@ -94,29 +113,22 @@ export async function addTime(
     await showHUD("Time Tracked 🎉");
     popToRoot();
   } catch (error) {
-    if (axios.isAxiosError(error) && error.stack) {
-      if (error.stack.includes("IncomingMessage.handleStreamEnd")) {
-        console.log("Caught the specific error: IncomingMessage.handleStreamEnd");
-        await showToast({ style: Toast.Style.Failure, title: "That didn't work!" });
-      } else {
-        console.log("Some other Axios error occurred", error);
-      }
-    } else {
-      console.log("An error occurred that is not an Axios error", error);
-    }
+    console.log(error);
+    await showToast({ style: Toast.Style.Failure, title: "Error", message: "There was an error adding the time." });
   }
 }
 
 //calls the addTime function with the given values
 export interface SubmitTimeFormValues {
-  startdate: Date | null;
-  enddate: Date | null;
-  breaktime: string;
+  startDate: Date | null;
+  endDate: Date | null;
+  breakTime: string;
 }
 
-export const submitTime = async (values: SubmitTimeFormValues, token: string) => {
-  const startdate = parseDateAndTime(values.startdate);
-  const enddate = parseDateAndTime(values.enddate);
+export const submitTime = async (values: SubmitTimeFormValues) => {
+  const token = await getPersonioToken();
+  const startdate = parseDateAndTime(values.startDate);
+  const enddate = parseDateAndTime(values.endDate);
   const employeeNumber = getPreferenceValues().employeeNumber;
   if (startdate.date == "Invalid date" || startdate.time == "Invalid date") {
     await showToast({
@@ -138,10 +150,10 @@ export const submitTime = async (values: SubmitTimeFormValues, token: string) =>
   if (
     await confirmAlert({
       title: "Are your sure?",
-      message: `Do you want to submit the time from ${startdate.time} to ${enddate.time} with a break of ${values.breaktime} minutes?`,
+      message: `Do you want to submit the time from ${startdate.time} to ${enddate.time} with a break of ${values.breakTime} minutes?`,
     })
   ) {
-    addTime(employeeNumber, startdate.date, startdate.time, enddate.time, parseInt(values.breaktime), token);
+    addTime(employeeNumber, startdate.date, startdate.time, enddate.time, parseInt(values.breakTime), token);
   } else {
     await showToast({ style: Toast.Style.Failure, title: "Submit was cancelled!", message: "Unfortunate!" });
   }

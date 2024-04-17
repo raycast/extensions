@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { cache } from "./cache";
-import { BASE_URL } from "./api";
+import { BASE_URL, getPersonioToken } from "./api";
 import { daysInMonth, hoursBetween } from "../utils/date";
 
 /**
@@ -115,7 +115,12 @@ export async function getAttendancesAPI(
     });
     return attendances;
   } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "That didn't work!", message: "Unfortunate!" });
+    console.log(error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "That didn't work!",
+      message: "Attendances couldn't be fetched.",
+    });
     return [];
   }
 }
@@ -129,12 +134,8 @@ export async function getAttendancesAPI(
  * @param selectedMonth Month for which to get the attendances for (for currentYear)
  * @returns A list of AttendancePeriod objects of currentYear - selectedMonth - employeeNumber
  */
-export async function getAttendances(
-  employeeNumber: number,
-  token: string,
-  currentYear: string,
-  selectedMonth: string,
-) {
+export async function getAttendances(employeeNumber: number, currentYear: string, selectedMonth: string) {
+  const token = await getPersonioToken();
   const key = employeeNumber.toString() + currentYear + selectedMonth;
   const attendances = cache.get(key);
 

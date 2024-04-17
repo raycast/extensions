@@ -1,6 +1,6 @@
 import axios from "axios";
 import { cache } from "./cache";
-import { BASE_URL } from "./api";
+import { BASE_URL, getPersonioToken } from "./api";
 
 export async function getEmployeeInfoAPI(id: number, token: string) {
   const url = BASE_URL + "/company/employees/" + id;
@@ -14,7 +14,8 @@ export async function getEmployeeInfoAPI(id: number, token: string) {
   return data.data.attributes.preferred_name.value;
 }
 
-export async function getEmployeeInfo(id: number, token: string) {
+export async function getEmployeeInfo(id: number) {
+  const token = await getPersonioToken();
   const preferredName = cache.get("preferredName");
   if (preferredName) {
     return preferredName;

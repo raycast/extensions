@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "tracktime",
+      "name": "trackTimeCommand",
       "title": "Track Time",
       "subtitle": "Personio",
       "description": "Track your time during the day.",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "name": "submittime",
+      "name": "addPastTimesCommand",
       "title": "Add Past Times",
       "subtitle": "Personio",
       "description": "Submit your past times to personio.",
@@ -47,14 +47,14 @@
       ]
     },
     {
-      "name": "getemployeenumber",
+      "name": "findEmployeeNumberCommand",
       "title": "Find Employee Number",
       "subtitle": "Personio",
       "description": "Find the employee number of a person in Personio.",
       "mode": "view"
     },
     {
-      "name": "attendances",
+      "name": "attendancesCommand",
       "title": "Attendances",
       "subtitle": "Personio",
       "description": "Get the attendances of a person in Personio.",

@@ -50,3 +50,18 @@ export function hoursBetween(time1: string, time2: string): number {
   const diffInMs = Math.abs(date2 - date1);
   return diffInMs / 1000 / 60 / 60;
 }
+
+export const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "Septemnber",
+  "October",
+  "November",
+  "December",
+];
