@@ -166,3 +166,4 @@ compiled_raycast_swift
 
 # Root lockfile
 /package-lock.json
+/yarn.lock
