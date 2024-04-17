@@ -54,7 +54,7 @@ export default function OTPInbox() {
             <List.Item
               key={code.receivedAt.toISOString()}
               title={code.sender}
-              subtitle={code.email}
+              subtitle="chroxify@gmail.com"
               accessories={[
                 {
                   text: `${getTimeAgo(code.receivedAt)} ago`,
