@@ -14,7 +14,8 @@
       "name": "adb-current-activity",
       "title": "Current Activity",
       "description": "Get the current activity name and put it in your clipboard",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "adb-screenshots",
