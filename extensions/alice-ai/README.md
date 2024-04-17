@@ -47,6 +47,12 @@ Alice AI allows you to quickly access your actions from the raycast root. Just c
 
 ![Quicklink to your actions](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-6.png)
 
+## Keep your favorite actions handy ⭐️
+
+Alice AI allows you to mark your favorite actions. You can easily access them from the favorites section which is on top of the actions list.
+
+![Keep your favorite actions handy](https://github.com/wojciechkrol/alice-ai-raycast/raw/master/metadata/alice-ai-9.png)
+
 ## Export and import your actions 📤 📥
 
 Alice AI allows you to export and import your actions. You can easily share your actions with others or back them up.
