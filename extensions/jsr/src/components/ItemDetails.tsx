@@ -1,7 +1,7 @@
 import { SearchResultDocument } from "../lib/types";
 import { Color, Detail, Icon, List } from "@raycast/api";
 import { formatDistanceToNow } from "date-fns";
-import { pie_svg } from "../lib/progress-icon";
+import { getProgressIcon } from "@raycast/utils";
 import { compatIcons } from "../lib/compat";
 import useJSRAPI from "../hooks/useJSRAPI";
 
@@ -37,7 +37,9 @@ ${item.description}`}
           <Detail.Metadata.Label
             title="Score"
             text={item.score ? `${item.score.toString()}%` : "unknown"}
-            icon={{ source: pie_svg(progress, iconColor), tintColor: iconColor }}
+            icon={{
+              source: getProgressIcon(progress / 100, iconColor, { backgroundOpacity: 0 }),
+            }}
           />
           <Detail.Metadata.TagList title="Compatibility">
             {icons.map((ico) => (
