@@ -5,6 +5,7 @@
 - Added `Paste Article in Active App` action.
 - Added shortcuts for copy actions.
 - Added titles to the action panels.
+- Updated icon for the `View Articles` action.
 
 ## [Initial Version] - 2024-04-02
 
