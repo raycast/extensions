@@ -10,7 +10,6 @@ export default async function currentActivity() {
     await showHUD(`${e}`);
     return;
   }
-
   const cmdResult = execSync(`${adbDir} shell "dumpsys window | grep mCurrentFocus"`).toString();
   let result;
   try {
@@ -18,7 +17,6 @@ export default async function currentActivity() {
   } catch (e) {
     result = cmdResult;
   }
- 
   await Clipboard.copy({
     text: result,
   });
