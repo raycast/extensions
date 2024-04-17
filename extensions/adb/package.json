@@ -8,9 +8,6 @@
   "categories": [
     "Developer Tools"
   ],
-  "contributors": [
-    "lidary-byte"
-  ],
   "license": "MIT",
   "commands": [
     {

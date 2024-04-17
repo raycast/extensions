@@ -13,12 +13,12 @@ export default async function currentActivity() {
   const cmdResult = execSync(`${adbDir} shell "dumpsys window | grep mCurrentFocus"`).toString();
   let result;
   try {
-    result = cmdResult.split("/")[1].split("}")[0]; 
+    result = cmdResult.split("/")[1].split("}")[0];
   } catch (e) {
     result = cmdResult;
   }
   await Clipboard.copy({
     text: result,
   });
-  await showHUD("✅ Current Activity: " + result); 
+  await showHUD("✅ Current Activity: " + result);
 }
