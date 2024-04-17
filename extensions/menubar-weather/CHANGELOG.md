@@ -1,5 +1,10 @@
 # Menubar Weather Changelog
 
+## [Update icons] - 2024-04-15
+
+- Update icons
+- Improve the implementation of SF Symbols icon style
+
 ## [Fix error] - 2024-02-05
 
 - Fix json parsing errors

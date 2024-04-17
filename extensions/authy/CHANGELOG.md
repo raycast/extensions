@@ -1,5 +1,9 @@
 # Authy Extension Changelog
 
+## [UI] - 2024-04-15
+
+- Move the timer icon to right side. So the icon can be always aligned for a better visual
+
 ## [Updated extension title] - 2024-04-03
 
 ## [Updated extension name] - 2023-10-16

@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Enhancement] - 2024-04-12
+
+Add text delimiters to multiple email addresses in the mailbox caption
+
 ## [New Feature] - 2024-03-15
 
 Add `Move to Archive` Action on Mail list

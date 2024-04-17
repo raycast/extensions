@@ -24,7 +24,8 @@
     "nesl247",
     "xilopaint",
     "antonengelhardt",
-    "johanthorell"
+    "johanthorell",
+    "dennis_zoma"
   ],
   "categories": [
     "Developer Tools",
@@ -386,7 +387,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "concurrently \"ray develop\" \"yarn generate --watch\"",
+    "dev": "concurrently \"ray develop\" \"npm run generate -- --watch\"",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",

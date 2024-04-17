@@ -3,10 +3,13 @@ import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { CSVPrompt, Model, ModelHook } from "../../type";
 import { parse } from "csv-parse/sync";
+import { useCallback } from "react";
+import { getConfiguration } from "../../hooks/useChatGPT";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
   const { use, model } = props;
   const { pop } = useNavigation();
+  const { isCustomModel } = getConfiguration();
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
@@ -80,11 +83,14 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     }
   );
 
-  function replacePrompt(value: string) {
-    if (value !== "none") {
-      setValue("prompt", value);
-    }
-  }
+  const setPrompt = useCallback(
+    (value: string) => {
+      if (value !== "none") {
+        setValue("prompt", value);
+      }
+    },
+    [setValue]
+  );
 
   return (
     <Form
@@ -100,7 +106,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         title="Awesome Prompts"
         isLoading={isLoading}
         defaultValue="none"
-        onChange={replacePrompt}
+        onChange={setPrompt}
       >
         <Form.Dropdown.Item value="none" title="Choose an Awesome ChatGPT Prompts" icon={"🧠"} />
         {(data || []).map((prompt) => (
@@ -113,11 +119,16 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         placeholder="Set your sampling temperature (0 - 2)"
         {...itemProps.temperature}
       />
-      <Form.Dropdown title="Model" placeholder="Choose model option" {...itemProps.option}>
-        {MODEL_OPTIONS.map((option) => (
-          <Form.Dropdown.Item value={option} title={option} key={option} />
-        ))}
-      </Form.Dropdown>
+      {isCustomModel ? (
+        <Form.TextField title="Model" placeholder="Custom model name" {...itemProps.option} />
+      ) : (
+        <Form.Dropdown title="Model" placeholder="Choose model option" {...itemProps.option}>
+          {MODEL_OPTIONS.map((option) => (
+            <Form.Dropdown.Item value={option} title={option} key={option} />
+          ))}
+        </Form.Dropdown>
+      )}
+
       {model?.id !== "default" && <Form.Checkbox title="Pinned" label="Pin model" {...itemProps.pinned} />}
     </Form>
   );

@@ -26,10 +26,11 @@ const _exceptions = {
 
 export const capturedExceptions = Object.freeze(_exceptions);
 
-export const captureException = (description: string, error: any) => {
-  capturedExceptions.set(description, error);
+export const captureException = (description: string | Falsy | (string | Falsy)[], error: any) => {
+  const desc = Array.isArray(description) ? description.filter(Boolean).join(" ") : description || "Captured exception";
+  capturedExceptions.set(desc, error);
   if (!environment.isDevelopment) return;
-  console.error(description, error);
+  console.error(desc, error);
 };
 
 export const debugLog = (...args: any[]) => {
