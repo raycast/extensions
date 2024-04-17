@@ -1,9 +1,8 @@
-import { Action, ActionPanel, Detail, Icon, useNavigation } from '@raycast/api';
+import { Action, ActionPanel, Detail, Icon } from '@raycast/api';
 import { Cast } from '../utils/types';
 import { getUserIcon, getCastUrl } from '../utils/helpers';
 
 export default function CastDetails({ cast }: { cast: Cast }) {
-  const { pop } = useNavigation();
   const hasFrame = cast.frames && cast.frames[0]?.image;
   const imageEmbeds = cast.embeds.filter(
     (embed): embed is { url: string } => 'url' in embed && embed.url.startsWith('https://i.imgur.com/'),
@@ -34,8 +33,11 @@ export default function CastDetails({ cast }: { cast: Cast }) {
       metadata={<CastMetadata cast={cast} />}
       actions={
         <ActionPanel>
-          <Action title="Go Back" onAction={pop} />
-          <Action.OpenInBrowser title="View Cast in Browser" url={getCastUrl(cast)} />
+          <Action.OpenInBrowser
+            title="View Cast in Browser"
+            shortcut={{ modifiers: ['ctrl'], key: 'enter' }}
+            url={getCastUrl(cast)}
+          />
         </ActionPanel>
       }
     />

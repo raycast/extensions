@@ -11,7 +11,6 @@ export default function SearchUsers() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Search Profiles"
       searchBarPlaceholder="Type username or fid"
       onSearchTextChange={setQuery}
       pagination={pagination}

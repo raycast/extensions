@@ -22,7 +22,6 @@ export default function SearchTrendingCasts() {
   return (
     <List
       isLoading={data === null || isLoading}
-      navigationTitle="Trending Casts"
       searchBarPlaceholder="Filter cast keywords"
       pagination={pagination}
       searchBarAccessory={
