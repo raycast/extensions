@@ -4,7 +4,7 @@ import { Octokit } from "@octokit/core";
 import { RequestError } from "@octokit/request-error";
 import * as fs from "fs";
 import dayjs from "dayjs";
-import * as fileType from 'file-type';
+import * as fileType from "file-type";
 
 const REPO_URL = "https://github.com/xiangsanliu/gh-pic";
 
@@ -83,12 +83,12 @@ async function getPicFromClipboard() {
   const data = await Clipboard.read();
   const file = data.file;
   if (file) {
-    let filepath = decodeURIComponent(file.substring(7));
+    const filepath = decodeURIComponent(file.substring(7));
     const buffer = fs.readFileSync(filepath);
     const type = await fileType.fileTypeFromBuffer(buffer);
 
-    const {ext, mime} = type ? type : {ext: '', mime: ''};
-    if (mime.startsWith('image')) {
+    const { ext, mime } = type ? type : { ext: "", mime: "" };
+    if (mime.startsWith("image")) {
       return {
         ext: ext,
         buffer: buffer,
