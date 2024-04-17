@@ -53,9 +53,8 @@
     },
     {
       "name": "projectManagerDataPath",
-      "type": "textfield",
+      "type": "directory",
       "required": false,
-      "default": "",
       "title": "Projects Location",
       "description": "If you have changed the 'Projects Location' setting for the VSCode Project Manager extension, set this to the same directory. Otherwise, leave blank."
     },
