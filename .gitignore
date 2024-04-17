@@ -166,4 +166,5 @@ compiled_raycast_swift
 
 # Root lockfile
 /package-lock.json
+/pnpm-lock.yaml
 /yarn.lock
