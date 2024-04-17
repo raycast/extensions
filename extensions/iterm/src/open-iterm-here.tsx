@@ -22,10 +22,14 @@ export default function Command() {
       const newPaths = new Set<string>();
       items.forEach((item) => newPaths.add(getItemPath(item)));
       setPaths(newPaths);
-    } else if (finderPath.length) {
+    }
+  }, [items]);
+
+  useEffect(() => {
+    if (itemsError && finderPath.length) {
       setPaths(new Set([finderPath]));
     }
-  }, [items, finderPath]);
+  }, [itemsError, finderPath]);
 
   if (itemsError && finderError) return <ErrorToast error={finderError} />;
   if (paths.size)
