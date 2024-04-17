@@ -36,8 +36,10 @@ function isGitInstalled() {
 async function findRepositoryPath(selectedFinderItems: FileSystemItem[]) {
   const gitRepository = selectedFinderItems.find((item) => isGitRepository(item.path));
   if (gitRepository) return gitRepository.path;
-  const innerRepository = selectedFinderItems.find((item) => getInnerRepositoryPath(item.path));
-  if (innerRepository) return getInnerRepositoryPath(innerRepository.path);
+  const innerRepository = selectedFinderItems
+    .map((item) => getInnerRepositoryPath(item.path))
+    .find((path) => isGitRepository(path));
+  if (innerRepository) return getInnerRepositoryPath(innerRepository);
   throw Error("No git repository found");
 }
 
