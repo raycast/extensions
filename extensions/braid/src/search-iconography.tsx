@@ -47,7 +47,7 @@ export default function Command() {
                   dark: getIconDataString(svgContentDark),
                 },
               },
-              tooltip: item.displayName,
+              tooltip: item.name,
             }}
             keywords={item.keywords}
             actions={
