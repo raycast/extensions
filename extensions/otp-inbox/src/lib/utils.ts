@@ -1,4 +1,4 @@
-import { VerificationCode } from "./types";
+import { Email, EmailPayload, VerificationCode } from "./types";
 
 export function extractVerificationCode(text: string): string {
   const patterns: RegExp[] = [
@@ -36,7 +36,7 @@ export function extractVerificationCode(text: string): string {
   return verificationCodes[0] || "";
 }
 
-export function processEmails(emails: any[]): {
+export function processEmails(emails: Email[]): {
   recentEmails: VerificationCode[];
   verificationCodes: VerificationCode[];
 } {
@@ -62,13 +62,23 @@ export function processEmails(emails: any[]): {
       // Extract the verification code from the email
       const verificationCode = extractVerificationCode(body);
 
+      // Extract sender & sender email (format: Sender <email@domain.com>)
+      const sender = headers
+        .find((header) => header.name === "From")
+        ?.value?.replace(/<([^>]+)>/, "")
+        .trim();
+      const senderEmail = headers.find((header) => header.name === "From")?.value?.match(/<([^>]+)>/)?.[1] || "";
+
+      // Verify if code could be extracted
       if (!verificationCode) {
         // Add the email to the list of recent emails
         return recentEmails.push({
           code: null,
-          email: headers[0]["value"],
           receivedAt: new Date(parseInt(email["internalDate"], 10)),
-          sender: headers.find((header: any) => header.name === "From").value?.split(" ")[0],
+          sender: {
+            name: sender || "",
+            email: senderEmail,
+          },
           emailText: body,
         });
       }
@@ -76,9 +86,11 @@ export function processEmails(emails: any[]): {
       // Add the verification code to the list
       verificationCodes.push({
         code: verificationCode,
-        email: headers[0]["value"],
         receivedAt: new Date(parseInt(email["internalDate"], 10)),
-        sender: headers.find((header: any) => header.name === "From").value?.split(" ")[0],
+        sender: {
+          name: sender || "",
+          email: senderEmail,
+        },
         emailText: body,
       });
     } catch (error) {
@@ -103,12 +115,13 @@ export function getTimeAgo(date: Date) {
   return `${Math.floor(diff / 86400)}d`;
 }
 
-export function decodeEmailBody(body: any): string {
+export function decodeEmailBody(body: EmailPayload): string {
   if (body["mimeType"] === "multipart/alternative") {
     return decodeEmailBody(body["parts"][0]);
   } else if (body["mimeType"] === "text/plain") {
     return base64URLdecode(body["body"]["data"]).join("");
   } else if (body["mimeType"] === "text/html") {
+    // TODO: make sure hyperlinks get included too / eventually make it so that user has option to open link as action
     return base64URLdecode(body["body"]["data"])
       .join("")
       .replace(/<[^>]+>/g, " ")

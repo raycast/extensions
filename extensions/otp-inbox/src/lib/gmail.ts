@@ -1,5 +1,6 @@
 import { getAccessToken } from "@raycast/utils";
 import fetch from "cross-fetch";
+import { Email } from "./types";
 
 export async function getEmails(amount: number = 10) {
   // Gmail API call to get emails
@@ -29,7 +30,7 @@ export async function getEmails(amount: number = 10) {
     const receivedAt = new Date(parseInt(fullEmail["internalDate"], 10));
     const diffMinutes = Math.floor((new Date().getTime() - receivedAt.getTime()) / 60000);
 
-    if (diffMinutes > 10) {
+    if (diffMinutes > 230) {
       return emails;
     }
 
@@ -40,7 +41,7 @@ export async function getEmails(amount: number = 10) {
   return emails;
 }
 
-async function getEmailById(id: string) {
+async function getEmailById(id: string): Promise<Email> {
   // Gmail API call to get a specific email
   const response = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}`, {
     method: "GET",

@@ -53,8 +53,8 @@ export default function OTPInbox() {
           {verificationCodes?.map((code) => (
             <List.Item
               key={code.receivedAt.toISOString()}
-              title={code.sender}
-              subtitle={code.email}
+              title={code.sender.name}
+              subtitle={code.sender.email}
               accessories={[
                 {
                   text: `${getTimeAgo(code.receivedAt)} ago`,
@@ -71,22 +71,22 @@ export default function OTPInbox() {
                     onAction={async () => {
                       const app = await getFrontmostApplication();
                       await Clipboard.paste(code.code!);
-                      await showHUD(`Pasted code for ${code.sender} to ${app.name}`, { clearRootSearch: true });
+                      await showHUD(`Pasted code for ${code.sender.name} to ${app.name}`, { clearRootSearch: true });
                     }}
                   />
                   <Action
-                    title={`Copy code to clipboard`}
+                    title={`Copy to Clipboard`}
                     icon={{ source: Icon.Clipboard }}
                     onAction={async () => {
                       await Clipboard.copy(code.code!);
-                      await showHUD(`Copied code for ${code.sender} to clipboard`, { clearRootSearch: true });
+                      await showHUD(`Copied code for ${code.sender.name} to clipboard`, { clearRootSearch: true });
                     }}
                   />
                   <Action.Push
                     title="Show Email Content"
                     icon={{ source: Icon.Text }}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<Detail markdown={`### Email from ${code.sender}\n\n${code.emailText}`} />}
+                    target={<Detail markdown={`### Email from ${code.sender.name}\n\n${code.emailText}`} />}
                   />
                   <Action
                     title="Refresh"
@@ -110,8 +110,8 @@ export default function OTPInbox() {
           {recentEmails.map((email) => (
             <List.Item
               key={email.receivedAt.toISOString()}
-              title={email.sender}
-              subtitle={email.email}
+              title={email.sender.name}
+              subtitle={email.sender.email}
               accessories={[
                 {
                   text: `${getTimeAgo(email.receivedAt)} ago`,
@@ -123,7 +123,7 @@ export default function OTPInbox() {
                     title="Show Email Content"
                     icon={{ source: Icon.Text }}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<Detail markdown={`### Email from ${email.sender}\n\n${email.emailText}`} />}
+                    target={<Detail markdown={`### Email from ${email.sender.name}\n\n${email.emailText}`} />}
                   />
                   <Action
                     title="Open Extension Preferences"
