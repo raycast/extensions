@@ -4,10 +4,11 @@
   "title": "Open Graph",
   "description": "Preview Open Graph meta tags of a website",
   "icon": "command-icon.png",
-  "author": "davidho0403",
+  "author": "1weiho",
   "contributors": [
     "ridemountainpig",
-    "tm.wrnr"
+    "tm.wrnr",
+    "j3lte"
   ],
   "categories": [
     "Developer Tools",

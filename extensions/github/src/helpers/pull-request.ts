@@ -1,4 +1,4 @@
-import { List, Color, Icon } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
 import {
@@ -12,12 +12,16 @@ import { getGitHubUser } from "./users";
 
 export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
   if (pullRequest.merged) {
-    return { icon: { source: "merge.svg", tintColor: Color.Purple }, text: "Merged", color: Color.Purple };
+    return {
+      icon: { source: "pull-request-merged.svg", tintColor: Color.Purple },
+      text: "Merged",
+      color: Color.Purple,
+    };
   }
 
   if (pullRequest.closed) {
     return {
-      icon: { source: "pull-request.svg", tintColor: Color.Red },
+      icon: { source: "pull-request-closed.svg", tintColor: Color.Red },
       text: "Closed",
       color: Color.Red,
     };
@@ -32,7 +36,7 @@ export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | Pu
   }
 
   return {
-    icon: { source: "pull-request.svg", tintColor: Color.Green },
+    icon: { source: "pull-request-open.svg", tintColor: Color.Green },
     text: "Open",
     color: Color.Green,
   };

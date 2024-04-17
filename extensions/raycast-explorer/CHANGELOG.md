@@ -1,5 +1,9 @@
 # Prompt Explorer Extension Changelog
 
+## [Improvements] - 2024-04-16
+
+- Add browser prompts and new models
+
 ## [Fixes] - 2023-02-28
 
 - Fix custom prompt example.

@@ -1,5 +1,9 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2024-03-19
+
+- The extension now supports any variant of VS Code by using an app picker instead of a fixed dropdown list of VS Code builds.
+
 ## [Update] - 2023-11-23
 - Add support for [Cursor](http://cursor.sh)
 

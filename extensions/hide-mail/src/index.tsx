@@ -32,11 +32,13 @@ const Generate = async () => {
       await showHUD(newAliasEmail?.message);
       await open("https://hidemail.app/dashboard?source=raycast");
     }
+
+    await toast.hide();
     return;
   }
 
   if (newAliasEmail?.email) {
-    Clipboard.copy(newAliasEmail.email);
+    await Clipboard.copy(newAliasEmail.email);
     await showHUD("✅ Copied email to clipboard!");
   } else {
     let error = "Unknown error";

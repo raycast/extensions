@@ -7,7 +7,6 @@
   "author": "thomaslombart",
   "contributors": [
     "FezVrasta",
-    "igor9silva",
     "jesperorb",
     "teziovsky",
     "rifont",
@@ -15,6 +14,9 @@
     "lusit",
     "literallyjustroy",
     "mheidinger"
+  ],
+  "pastContributors": [
+    "igor9silva"
   ],
   "owner": "raycast",
   "access": "public",
@@ -107,6 +109,31 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "title": "Jira Site URL",
+      "description": "Jira Site URL",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "foo.atlassian.com"
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Account Email",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "token",
+      "title": "API Token",
+      "description": "API Token",
+      "type": "password",
+      "required": false
+    }
+  ],
+
   "dependencies": {
     "@raycast/api": "^1.64.3",
     "@raycast/utils": "^1.12.4",

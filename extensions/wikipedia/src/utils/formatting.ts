@@ -1,5 +1,6 @@
-import { openInBrowser } from "./preferences";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { WikiNode } from "./api";
+import { openInBrowser } from "./preferences";
 
 export function toTitleCase(str: string) {
   const result = str.replace(/([A-Z])/g, " $1");
@@ -25,6 +26,7 @@ export function replaceLinks(text: string, language: string, links: string[] = [
 }
 
 export function renderContent(nodes: WikiNode[], level: number, links: string[] = [], language = "en"): string {
+  if (!nodes) return "";
   return nodes
     .filter((node) => node.content || node.content.length > 0)
     .filter((node) => !excludedSections.includes(node.title))
@@ -143,3 +145,18 @@ export const excludedMetatadataLabels = [
 ];
 
 export const excludedMetatadataValues = ["true", "false", "si", "no", "altura"];
+
+export function formatMetadataValue(label: string, value?: Date | null | string) {
+  if (value instanceof Date) {
+    return value.toLocaleDateString();
+  }
+  if (!value) {
+    return "N/A";
+  }
+
+  if (label === "coordinates") {
+    return value.toString().split("|").slice(0, 2).join(", ");
+  }
+
+  return value.toString();
+}

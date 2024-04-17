@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
 import { runAppleScript, useCachedPromise, useCachedState } from "@raycast/utils";
 import { formatDate } from "date-fns";
 import pMinDelay from "p-min-delay";
+import { useState } from "react";
 
 interface CalendarEvent {
   title: string;
@@ -48,11 +49,22 @@ async function addEventsToCalendar(calendar: string, events: CalendarEvent[]) {
 }
 
 export function AddToCalendar({ event }: { event: CalendarEvent }) {
+  const [opened, setOpened] = useState(false);
   const [lastCalendar, setLastCalendar] = useCachedState<string>("latest-calendar");
-  const { data: calendars, isLoading } = useCachedPromise(getCalendars);
+  const { data: calendars, isLoading } = useCachedPromise(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async (key) => getCalendars(),
+    ["calendars"],
+    { execute: opened },
+  );
 
   return (
-    <ActionPanel.Submenu icon={Icon.Calendar} title="Add to Calendar" isLoading={isLoading}>
+    <ActionPanel.Submenu
+      icon={Icon.Calendar}
+      title="Add to Calendar"
+      isLoading={isLoading}
+      onOpen={() => setOpened(true)}
+    >
       {calendars?.map((item, index) => (
         <Action
           key={index}
