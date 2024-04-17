@@ -23,7 +23,7 @@ const transmission = createClient();
 
 export const useTorrent = ({ id }: { id: number }) => {
   return useSWR<Torrent>(
-    `/config/${id}`,
+    `/torrent/${id}`,
     async () => {
       const { torrents } = await transmission.get(id);
       const first = torrents[0] as Torrent;
