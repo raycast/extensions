@@ -1,24 +1,21 @@
 import { Toast, showToast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { z } from "zod";
 import { useActionsState } from "../store/actions";
 import { Action } from "../types";
 import { Infinity32Bit } from "../utils";
 
-interface BackupDataV1 {
+interface BackupData {
   name: "alice-ai-config";
-  version: 1;
+  version: number;
   actions: Action[];
 }
-
-type BackupData = BackupDataV1;
 
 export default class Backup {
   public static async export(): Promise<void> {
     const actions = useActionsState.getState().actions;
-    const data: BackupDataV1 = {
+    const data = {
       name: "alice-ai-config",
-      version: 1,
+      version: useActionsState.persist.getOptions().version as number,
       actions,
     };
 
@@ -70,19 +67,18 @@ export default class Backup {
     );
 
     try {
-      const json = JSON.parse(res) as BackupData;
+      const { name, actions, version } = JSON.parse(res) as BackupData;
 
-      if (json.name !== "alice-ai-config" && json.version === undefined) {
+      if (name !== "alice-ai-config" && version === undefined) {
         throw new Error("Invalid backup file.");
       }
 
-      switch (json.version) {
-        case 1:
-          await this.importVersion1(json);
-          break;
-        default:
-          throw new Error("Unsupported config version.");
-      }
+      const actionState = {
+        actions: actions,
+      };
+
+      const migratedActions = useActionsState.persist.getOptions().migrate?.(actionState, version) as typeof actionState;
+      useActionsState.setState(migratedActions);
 
       showToast({
         title: "Actions has been imported",
@@ -92,30 +88,13 @@ export default class Backup {
     } catch (error) {
       const e = error as Error;
 
+      console.error(e);
+
       showToast({
         title: "Error",
         message: e.message || "An error occurred while importing actions.",
         style: Toast.Style.Failure,
       });
     }
-  }
-
-  private static async importVersion1(data: BackupDataV1): Promise<void> {
-    const actionSchema = z.object({
-      id: z.string(),
-      name: z.string(),
-      description: z.string(),
-      systemPrompt: z.string(),
-      model: z.enum(["gpt-3.5-turbo", "gpt-4-turbo-preview"]),
-      temperature: z.string(),
-      maxTokens: z.string(),
-    });
-
-    const actions = [];
-    for (const action of data.actions) {
-      actions.push(actionSchema.parse(action));
-    }
-
-    useActionsState.getState().replaceActions(actions);
   }
 }

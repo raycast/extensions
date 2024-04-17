@@ -1,21 +1,24 @@
-import { Action, ActionPanel, Form, LaunchType, Toast, launchCommand, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { AvailableModels } from "../lib/OpenAI";
 import { useActionsState } from "../store/actions";
-import { Action as IAction } from "../types";
+import { Action as ActionModel } from "../types";
+import { Colors } from "../utils";
 
 interface Props {
   id?: string;
 }
 
-const initialValues: IAction = {
+const initialValues: ActionModel = {
   id: "",
   name: "",
+  color: Colors.Blue,
   description: "",
   systemPrompt: "",
   model: "gpt-3.5-turbo",
   temperature: "0.7",
   maxTokens: "-1",
+  favorite: false,
 };
 
 export default function CommandForm({ id }: Props) {
@@ -51,14 +54,14 @@ export default function CommandForm({ id }: Props) {
       }
     },
     validation: {
+      color: (value) => {
+        if (!value) {
+          return "Color is required";
+        }
+      },
       name: (value) => {
         if (value?.trim().length === 0) {
           return "Name is required";
-        }
-      },
-      description: (value) => {
-        if (value?.trim().length === 0) {
-          return "Description is required";
         }
       },
       systemPrompt: (value) => {
@@ -97,6 +100,19 @@ export default function CommandForm({ id }: Props) {
         </ActionPanel>
       }
     >
+      <Form.Dropdown title="Color" {...itemProps.color}>
+        {Object.entries(Colors).map(([key, value]) => (
+          <Form.Dropdown.Item
+            key={key}
+            value={`${value}`}
+            title={key}
+            icon={{
+              source: Icon.CircleFilled,
+              tintColor: value,
+            }}
+          />
+        ))}
+      </Form.Dropdown>
       <Form.TextField title="Name" placeholder="Enter action name" {...itemProps.name} />
       <Form.TextArea title="Description" placeholder="Enter action description" {...itemProps.description} />
       <Form.TextArea title="System Prompt" placeholder="Enter system prompt" {...itemProps.systemPrompt} />

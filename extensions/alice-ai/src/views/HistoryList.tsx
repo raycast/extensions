@@ -39,7 +39,7 @@ export default function HistoryList() {
         {history.map((item) => (
           <List.Item
             key={item.id}
-            icon="👋"
+            icon={{ source: Icon.Dot, tintColor: item.action.color }}
             title={item.prompt}
             subtitle={item.result}
             accessories={[
