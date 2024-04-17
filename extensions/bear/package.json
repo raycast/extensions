@@ -9,7 +9,8 @@
     "lucaschultz",
     "diokhan",
     "ron-myers",
-    "JuanBanchero"
+    "JuanBanchero",
+    "bradenschiller"
   ],
   "license": "MIT",
   "commands": [
@@ -69,6 +70,68 @@
       ]
     },
     {
+      "name": "new-note-with-ai",
+      "title": "Ai Note",
+      "subtitle": "Bear Notes",
+      "description": "Create a new Bear note with ai.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "placeholder": "Text",
+          "required": true
+        },
+        {
+          "name": "instructions",
+          "type": "text",
+          "placeholder": "Additional instructions"
+        },
+        {
+          "name": "tags",
+          "type": "text",
+          "placeholder": "Tags"
+        }
+      ],
+      "preferences": [
+        {
+          "default": "openai-gpt-4-turbo",
+          "description": "Choose ai model you want to use to generate notes",
+          "label": "Ai model used",
+          "name": "newNoteAiModel",
+          "required": true,
+          "title": "Select Ai Model",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "gpt4-turbo",
+              "value": "openai-gpt-4-turbo"
+            },
+            {
+              "title": "gpt4",
+              "value": "openai-gpt-4"
+            },
+            {
+              "title": "gpt3-turbo",
+              "value": "openai-gpt-3.5-turbo"
+            },
+            {
+              "title": "perplexity-medium",
+              "value": "perplexity-sonar-medium-online"
+            },
+            {
+              "title": "perplexity-small",
+              "value": "perplexity-sonar-small-online"
+            },
+            {
+              "title": "claud-haiku",
+              "value": "anthropic-claude-haiku"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "grab-url",
       "title": "Web Capture",
       "subtitle": "Bear",
@@ -98,6 +161,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.42.0",
+    "@raycast/utils": "^1.14.0",
     "@types/commonmark": "^0.27.5",
     "commonmark": "^0.30.0",
     "date-fns": "^2.29.3",
