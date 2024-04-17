@@ -6,7 +6,6 @@ import config from "parse-git-config";
 import { dirname } from "path";
 import { useState, ReactElement, Fragment } from "react";
 import tildify from "tildify";
-import untildify from "untildify";
 import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
@@ -75,12 +74,10 @@ const filterProjectsByTag = (projects: ProjectEntry[], selectedTag: string): Pro
 };
 
 function getProjectsLocationPath(): { path: string; error?: string } {
-  let path = preferences.projectManagerDataPath;
+  const path = preferences.projectManagerDataPath;
   if (!path) {
     return { path: STORAGE };
   }
-
-  path = untildify(path);
 
   if (!existsSync(path)) {
     return { path, error: `Projects Location path does not exist: ${path}` };
