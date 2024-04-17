@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fixes] - April 17, 2024
+
+- Fix: Handling errors during server communication.
+
 ## [Fixes and New Additions] - April 11, 2024
 
 - Feat: Add an additional check to verify if the selected text is empty, even if it contains only white spaces.

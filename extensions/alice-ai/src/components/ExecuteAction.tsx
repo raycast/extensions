@@ -15,6 +15,7 @@ interface Props {
 export default function ExecuteAction({ action, prompt }: Props) {
   const addHistoryItem = useHistoryState((state) => state.addItem);
 
+  const [error, setError] = useState<string>("");
   const [stream, setStream] = useState<Stream<ChatCompletionChunk>>();
   const [chat, setChat] = useState<ChatCompletionMessageParam[]>([]);
   const [result, setResult] = useState<string>("");
@@ -22,6 +23,7 @@ export default function ExecuteAction({ action, prompt }: Props) {
   const metadata = useMetadata(chat, action.model);
 
   const generateResponse = async () => {
+    setError("");
     setResult("");
 
     const messages: ChatCompletionMessageParam[] = [
@@ -37,23 +39,28 @@ export default function ExecuteAction({ action, prompt }: Props) {
 
     setChat(messages);
 
-    const stream = await openai.chat.completions.create({
-      model: action.model,
-      messages: messages,
-      temperature: parseFloat(action.temperature),
-      max_tokens: +action.maxTokens === -1 ? undefined : +action.maxTokens,
-      stream: true,
-    });
+    try {
+      const stream = await openai.chat.completions.create({
+        model: action.model,
+        messages: messages,
+        temperature: parseFloat(action.temperature),
+        max_tokens: +action.maxTokens === -1 ? undefined : +action.maxTokens,
+        stream: true,
+      });
 
-    setStream(stream);
+      setStream(stream);
 
-    for await (const message of stream) {
-      const content = message.choices[0].delta.content || "";
+      for await (const message of stream) {
+        const content = message.choices[0].delta.content || "";
 
-      setResult((prev) => prev + content);
+        setResult((prev) => prev + content);
+      }
+    } catch (e) {
+      const error = e as Error;
+      setError(`## ⚠️ Error Encountered\n### ${error.message}`);
+    } finally {
+      setStream(undefined);
     }
-
-    setStream(undefined);
   };
 
   useEffect(() => {
@@ -61,7 +68,7 @@ export default function ExecuteAction({ action, prompt }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!stream && result.length > 0) {
+    if (!stream && error.length === 0 && result.length > 0) {
       setChat((prev) => [
         ...prev,
         {
@@ -79,10 +86,19 @@ export default function ExecuteAction({ action, prompt }: Props) {
     }
   }, [result, stream]);
 
+  let markdown = result;
+  if (error.length > 0) {
+    if (markdown.length > 0) {
+      markdown += "\n\n---\n\n";
+    }
+
+    markdown += error;
+  }
+
   return (
     <Detail
       isLoading={stream !== undefined}
-      markdown={result}
+      markdown={markdown}
       navigationTitle={action.name}
       metadata={
         <Detail.Metadata>
