@@ -1,9 +1,11 @@
+import * as cheerio from "cheerio";
+import fetch from "node-fetch";
+import { useMemo, useRef } from "react";
+
 import { environment } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
-import * as cheerio from "cheerio";
-import { useMemo, useRef } from "react";
-import fetch from "node-fetch";
-import { SearchResult, SearchResults } from "../lib/types";
+
+import type { SearchResult, SearchResults } from "@/types";
 
 type SearchAPIData = {
   apiKey: string;

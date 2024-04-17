@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/cheerio": "^0.22.35",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",

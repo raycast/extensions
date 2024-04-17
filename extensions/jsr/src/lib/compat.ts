@@ -1,5 +1,6 @@
-import { Image } from "@raycast/api";
-import { SearchResultDocument } from "./types";
+import type { Image } from "@raycast/api";
+
+import type { SearchResultDocument } from "@/types";
 
 export const compatIcons = (item: SearchResultDocument): Array<{ icon: Image.ImageLike; text: string }> => {
   const icons: Array<{ icon: Image.ImageLike; text: string }> = [];

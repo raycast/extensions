@@ -1,4 +1,4 @@
-import { Package, SearchResultDocument } from "./types";
+import type { Package, SearchResultDocument } from "@/types";
 
 export const packageToSearchResultDocument = (pkg: Package): SearchResultDocument => {
   return {

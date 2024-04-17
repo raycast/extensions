@@ -1,9 +1,12 @@
-import { ActionPanel, List, Action, Color } from "@raycast/api";
-import { SearchResultDocument } from "../lib/types";
-import { compatIcons } from "../lib/compat";
-import CopyActions from "./CopyActions";
-import preferences from "../lib/preferences";
-import ItemDetails from "./ItemDetails";
+import { Action, ActionPanel, Color, List } from "@raycast/api";
+
+import type { SearchResultDocument } from "@/types";
+
+import { compatIcons } from "@/lib/compat";
+import preferences from "@/lib/preferences";
+
+import CopyActions from "@/components/CopyActions";
+import ItemDetails from "@/components/ItemDetails";
 
 type ListItemProps = {
   item: SearchResultDocument;

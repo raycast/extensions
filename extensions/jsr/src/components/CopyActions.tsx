@@ -1,5 +1,6 @@
 import { Action, ActionPanel } from "@raycast/api";
-import { SearchResultDocument } from "../lib/types";
+
+import type { SearchResultDocument } from "@/types";
 
 const CopyActions = ({ item }: { item: SearchResultDocument }) => {
   return (

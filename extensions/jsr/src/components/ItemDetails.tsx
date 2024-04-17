@@ -1,9 +1,14 @@
-import { SearchResultDocument } from "../lib/types";
-import { Color, Detail, Icon, List } from "@raycast/api";
 import { formatDistanceToNow } from "date-fns";
+
+import type { Color } from "@raycast/api";
+import { Detail, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { compatIcons } from "../lib/compat";
-import useJSRAPI from "../hooks/useJSRAPI";
+
+import type { SearchResultDocument } from "@/types";
+
+import { compatIcons } from "@/lib/compat";
+
+import useJSRAPI from "@/hooks/useJSRAPI";
 
 const ItemDetails = ({
   item,

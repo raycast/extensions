@@ -1,7 +1,7 @@
 // https://api.jsr.io/stats
-
 import { useFetch } from "@raycast/utils";
-import { Package } from "../lib/types";
+
+import type { Package } from "@/types";
 
 const useJSRAPIStats = () => {
   const url = `https://api.jsr.io/stats`;

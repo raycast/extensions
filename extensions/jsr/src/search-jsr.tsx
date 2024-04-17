@@ -1,9 +1,13 @@
-import { List, Toast, showToast } from "@raycast/api";
-import useJSRSearch from "./hooks/useJSRSearch";
 import { useEffect, useState } from "react";
-import ListItem from "./components/ListItem";
-import useJSRAPIStats from "./hooks/useJSRAPIStats";
-import { packageToSearchResultDocument } from "./lib/convert";
+
+import { List, Toast, showToast } from "@raycast/api";
+
+import { packageToSearchResultDocument } from "@/lib/convert";
+
+import useJSRAPIStats from "@/hooks/useJSRAPIStats";
+import useJSRSearch from "@/hooks/useJSRSearch";
+
+import ListItem from "@/components/ListItem";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
