@@ -1,5 +1,9 @@
 # Open Link in Specific Browser Changelog
 
+## [Support More Browsers] - {PR_MERGE_DATE}
+
+- Supports beta, dev, canary browsers
+
 ## [Hide All Apps] - 2023-11-03
 
 - Add setting item, you can choose to hide all apps
