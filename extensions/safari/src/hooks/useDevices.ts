@@ -60,7 +60,7 @@ const useDevices = () => {
   };
   const result = {
     devices: [localDevice],
-    permissionView: null,
+    permissionView: undefined,
     refreshDevices: localTabs.revalidate,
   };
 
