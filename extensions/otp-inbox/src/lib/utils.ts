@@ -58,7 +58,7 @@ export function processEmails(emails: Email[]): {
       const headers = email["payload"]["headers"];
 
       // Decode body
-      const body = decodeEmailBody(email["payload"]);
+      const body = decodeEmailBody(email["payload"]).replace(/[^a-zA-Z0-9\s/:?.&=+-]/g, "");
 
       // Validate if email contains keywords
       if (
@@ -113,27 +113,13 @@ export function processEmails(emails: Email[]): {
   return { recentEmails, verificationCodes };
 }
 
-export function getTimeAgo(date: Date) {
-  const diff = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-  if (diff < 60) {
-    return `${diff}s`;
-  }
-  if (diff < 3600) {
-    return `${Math.floor(diff / 60)}min`;
-  }
-  if (diff < 86400) {
-    return `${Math.floor(diff / 3600)}h`;
-  }
-  return `${Math.floor(diff / 86400)}d`;
-}
-
 export function decodeEmailBody(body: EmailPayload): string {
   if (body["mimeType"] === "multipart/alternative") {
     return decodeEmailBody(body["parts"][0]);
   } else if (body["mimeType"] === "text/plain") {
     return base64URLdecode(body["body"]["data"]).join("");
   } else if (body["mimeType"] === "text/html") {
-    // TODO: make sure hyperlinks get included too / eventually make it so that user has option to open link as action
+    // TODO: make sure hyperlinks get detected too / eventually make it so that user has option to open link as action
     return base64URLdecode(body["body"]["data"])
       .join("")
       .replace(/<[^>]+>/g, " ")

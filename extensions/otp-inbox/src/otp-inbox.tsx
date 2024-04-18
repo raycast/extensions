@@ -6,11 +6,12 @@ import {
   Icon,
   getFrontmostApplication,
   openExtensionPreferences,
+  getPreferenceValues,
   Detail,
 } from "@raycast/api";
 import { Clipboard, showHUD } from "@raycast/api";
 import { getEmails } from "./lib/gmail";
-import { getTimeAgo, processEmails } from "./lib/utils";
+import { processEmails } from "./lib/utils";
 import { VerificationCode } from "./lib/types";
 import AuthWrapper from "./components/auth-wrapper";
 import React from "react";
@@ -21,6 +22,10 @@ export default function OTPInbox() {
   const [recentEmails, setRecentEmails] = React.useState<VerificationCode[]>([]);
 
   async function getVerificationCodes() {
+    // Set states
+    setVerificationCodes(null);
+    setRecentEmails([]);
+
     // Get the emails
     const emails = await getEmails();
 
@@ -57,10 +62,12 @@ export default function OTPInbox() {
               subtitle={code.sender.email}
               accessories={[
                 {
-                  text: `${getTimeAgo(code.receivedAt)} ago`,
+                  tag: getPreferenceValues().hideVerificationCodes
+                    ? "•".repeat(code.code?.replace(/[\s-]/g, "").length || 0)
+                    : code.code,
                 },
                 {
-                  text: code.code,
+                  date: code.receivedAt,
                 },
               ]}
               actions={
@@ -92,8 +99,8 @@ export default function OTPInbox() {
                     title="Refresh"
                     icon={{ source: Icon.ArrowClockwise }}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
-                    onAction={() => {
-                      setVerificationCodes(null);
+                    onAction={async () => {
+                      await getVerificationCodes();
                     }}
                   />
                   <Action
@@ -114,7 +121,7 @@ export default function OTPInbox() {
               subtitle={email.sender.email}
               accessories={[
                 {
-                  text: `${getTimeAgo(email.receivedAt)} ago`,
+                  date: email.receivedAt,
                 },
               ]}
               actions={
@@ -144,7 +151,6 @@ export default function OTPInbox() {
                 title="Refresh"
                 icon={{ source: Icon.ArrowClockwise }}
                 onAction={async () => {
-                  setVerificationCodes(null);
                   await getVerificationCodes();
                 }}
               />

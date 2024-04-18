@@ -25,6 +25,15 @@
       "description": "Your Google client ID. Click on \"About this extension\" to learn how to get it.",
       "required": true,
       "placeholder": "*********.apps.googleusercontent.com"
+    },
+    {
+      "name": "hideVerificationCodes",
+      "title": "Hide Verification Codes",
+      "type": "checkbox",
+      "description": "Hide the verification codes in the list.",
+      "defaultValue": false,
+      "label": "Hide Codes",
+      "required": false
     }
   ],
   "dependencies": {
