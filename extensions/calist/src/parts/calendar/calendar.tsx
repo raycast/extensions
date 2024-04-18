@@ -17,7 +17,6 @@ import getMonthNumber from "u/getMonthNumber";
 export default function Calendar() {
   const {
     currentYear,
-    currentWeek,
     currentDay,
     currentMonth,
     setCurrentMonth,
@@ -26,18 +25,9 @@ export default function Calendar() {
     enableWeek,
     enableTimer,
     setSelectedDay,
-    selectedDay,
   } = useContext(Context);
   const [isTimerHidden, setIsTimerHidden] = useState(false);
   const setViewMode = getViewMode();
-
-  const titleNav = useTitle({
-    month: currentMonth,
-    year: currentYear,
-    week: currentWeek,
-    day: selectedDay,
-    weather: true,
-  });
 
   const titleCommand = useTitle({
     weather: true,
@@ -81,7 +71,6 @@ export default function Calendar() {
       inset={Grid.Inset.Small}
       aspectRatio={setViewMode}
       searchBarPlaceholder={placeHolder}
-      navigationTitle={titleNav}
       searchBarAccessory={monthDropdown ? <Dropdown /> : undefined}
       actions={<Actions />}
       onSearchTextChange={handleSearchTextChange}

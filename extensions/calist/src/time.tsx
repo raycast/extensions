@@ -2,7 +2,6 @@ import { Provider } from "u/context";
 import { Grid } from "@raycast/api";
 import getViewMode from "u/getViewMode";
 import { useState, useEffect } from "react";
-import Actions from "@/actions/actions";
 
 import {
   enableTimeSeconds,
@@ -103,7 +102,6 @@ function TimeDisplay({ time }: { time: { hours: string; minutes: string; seconds
         },
         tooltip: unit.tooltip,
       }}
-      actions={<Actions global={true} />}
     />
   ));
 }

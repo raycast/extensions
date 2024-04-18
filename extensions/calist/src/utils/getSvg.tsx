@@ -65,6 +65,8 @@ export default function SVG({
     color = environment.appearance === "light" ? "#000000" : "#ffffff";
   }
 
+  const todayDeco = isToday ? `<line x1="-8" y1="6" x2="8" y2="6" />` : "";
+
   return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  version="1.1" viewBox="0 0 24 24">
           <style>
             text {
@@ -84,6 +86,7 @@ export default function SVG({
               stroke-linecap: round;
               opacity: 1;
               position: absolute;
+              display: none;
             }
           </style>
         <g>
@@ -92,7 +95,7 @@ export default function SVG({
             <tspan x="50%" y="50%">${day}</tspan>
           </text>
         </g>
-        ${isToday ? `<line x1="-8" y1="6" x2="8" y2="6" />` : ""}
+        ${todayDeco}
     </svg>
   `;
 }

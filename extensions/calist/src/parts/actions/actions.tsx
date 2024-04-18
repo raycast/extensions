@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { ActionPanel, Action, openExtensionPreferences, showToast, Toast, Icon, Image } from "@raycast/api";
 import { Context } from "u/context";
 import { getMonthName, getDayName } from "u/getName";
@@ -15,6 +15,7 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
     currentYear,
     setCurrentYear,
     currentDay,
+    setCurrentDay,
     currentMonth,
     setCurrentMonth,
   } = useContext(Context);
@@ -68,6 +69,18 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
     setViewMode(newMode);
     showToast(Toast.Style.Success, `View Mode: ${newMode.charAt(0).toUpperCase() + newMode.slice(1).toLowerCase()}`);
   };
+
+  useEffect(() => {
+    const now = new Date();
+    const actualMonth = now.getMonth() + 1;
+    const actualYear = now.getFullYear();
+
+    if (currentMonth === actualMonth && currentYear === actualYear) {
+      setCurrentDay(now.getDate());
+    } else {
+      setCurrentDay(0);
+    }
+  }, [currentMonth, currentYear]);
 
   return (
     <ActionPanel title="Navigation">
