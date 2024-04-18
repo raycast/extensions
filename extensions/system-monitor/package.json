@@ -27,19 +27,19 @@
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.13.6",
     "os-utils": "0.0.14",
+    "plist": "^3.1.0",
     "systeminformation": "^5.22.7",
     "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.12.5",
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
     "@types/os-utils": "0.0.4",
-    "@types/react": "18.2.74",
-    "eslint": "^9.0.0",
-    "plist": "^3.1.0",
-    "prettier": "^3.2.5",
-    "react-devtools": "^4.28.4",
-    "typescript": "4.4.3"
+    "@types/plist": "^3.0.5",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
