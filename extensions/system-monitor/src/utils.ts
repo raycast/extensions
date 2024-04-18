@@ -1,4 +1,7 @@
-function formatBytes(bytes: number): string {
+import { exec } from "child_process";
+import { promisify } from "util";
+
+export const formatBytes = (bytes: number): string => {
   const decimals = 2;
 
   if (bytes === 0) {
@@ -11,14 +14,20 @@ function formatBytes(bytes: number): string {
   const i: number = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-}
+};
 
-function isObjectEmpty(obj: object): boolean {
+export const isObjectEmpty = (obj: object): boolean => {
   for (const property in obj) {
     return false;
   }
 
   return true;
-}
+};
 
-export { formatBytes, isObjectEmpty };
+export const execp = async (command: string): Promise<string> => {
+  const execp = promisify(exec);
+  const output = await execp(command);
+
+  return output.stdout.trim();
+};
+
