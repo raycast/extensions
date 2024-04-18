@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Add Pagination] - 2024-04-17
+
+- Add pagination to Search Page command
+
 ## [Add Text to Page command] - 2024-04-11
 
 - Add command to append or prepend text to a page.
