@@ -28,9 +28,9 @@
           "type": "checkbox",
           "required": true,
           "title": "Devices",
-          "description": "Include tabs across all iCloud devices",
+          "description": "Include iCloud tabs across all your devices",
           "default": true,
-          "label": "iCloud tabs"
+          "label": "iCloud"
         }
       ]
     },
