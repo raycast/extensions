@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useExec, useSQL } from "@raycast/utils";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -49,31 +50,40 @@ const useDeviceName = () =>
 const useLocalTabs = () => useCachedPromise(fetchLocalTabs, [], { keepPreviousData: true });
 
 const useDevices = () => {
+  const preferences = getPreferenceValues();
   const { data: deviceName } = useDeviceName();
-  const remoteTabs = useRemoteTabs();
   const localTabs = useLocalTabs();
-
   const localDevice = {
     uuid: "local",
     name: `${deviceName} ★`,
     tabs: localTabs.data,
   };
+  let result = {
+    refreshDevices: localTabs.revalidate,
+  };
+  let devices = [localDevice];
 
-  const removeDevices = _.chain(remoteTabs.data)
-    .groupBy("device_uuid")
-    .transform((devices: Device[], tabs: RemoteTab[], device_uuid: string) => {
-      devices.push({
-        uuid: device_uuid,
-        name: tabs[0].device_name,
-        tabs,
-      });
-    }, [])
-    .reject(["name", deviceName])
-    .value();
+  if (preferences.areRemoteTabsUsed) {
+    const remoteTabs = useRemoteTabs();
+    const remoteDevices = _.chain(remoteTabs.data)
+      .groupBy("device_uuid")
+      .transform((devices: Device[], tabs: RemoteTab[], device_uuid: string) => {
+        devices.push({
+          uuid: device_uuid,
+          name: tabs[0].device_name,
+          tabs,
+        });
+      }, [])
+      .reject(["name", deviceName])
+      .value();
 
-  const devices = [localDevice, ...removeDevices];
+    result.permissionView = remoteTabs.permissionView
+    devices.push(...remoteDevices);
+  }
 
-  return { devices, permissionView: remoteTabs.permissionView, refreshDevices: localTabs.revalidate };
+  result.devices = devices
+
+  return result;
 };
 
 export default useDevices;
