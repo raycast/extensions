@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Brand Fetch",
+      "title": "Search Brands",
+      "subtitle": "Brandfetch",
       "description": "Fetch Images using BrandFetch API",
       "mode": "view",
       "preferences": [
