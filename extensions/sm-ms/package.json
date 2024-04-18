@@ -41,7 +41,7 @@
     },
     {
       "name": "upload-image-from-clipboard",
-      "title": "Upload Image From Clipboard",
+      "title": "Upload Image from Clipboard",
       "subtitle": "SM.MS",
       "description": "Upload image from clipboard to SM.MS and get the link to the image.",
       "mode": "no-view"
