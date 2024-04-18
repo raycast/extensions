@@ -21,6 +21,7 @@ import { getProjects } from "./service/project";
 import { formatToServerDate } from "./utils/date";
 import guessProject from "./service/ai/guessProject";
 import { getDefaultDate } from "./service/preference";
+import moment from "moment-timezone";
 
 interface FormValues {
   list: string;
@@ -84,7 +85,14 @@ export default function TickTickCreate() {
         title: values.title.replace(/"/g, `\\"`),
         description: values.desc.replace(/"/g, `\\"`),
         dueDate: formatToServerDate(values.dueDate),
-        isAllDay: false,
+        isAllDay: (() => {
+          if (values.dueDate) {
+            return (
+              moment(values.dueDate).toDate().getTime() - moment(values.dueDate).startOf("day").toDate().getTime() === 1
+            );
+          }
+          return false;
+        })(),
       });
 
       switch (result) {

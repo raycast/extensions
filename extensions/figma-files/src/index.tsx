@@ -2,13 +2,15 @@ import { Application, getApplications, Grid, getPreferenceValues, LaunchProps } 
 import FileGridItem from "./components/FileGridItem";
 import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
-import { resolveAllFiles } from "./components/fetchFigmaData";
+import { resolveAllFiles } from "./api";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import type { TeamFiles } from "./types";
-import { loadStarredFiles } from "./components/starFiles";
+import { loadStarredFiles } from "./starFiles";
+import { figma } from "./oauth";
+import { withAccessToken } from "@raycast/utils";
 
-export default function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
+function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const { data, isLoading, error } = useCachedPromise(
     async () => {
       const results = await resolveAllFiles();
@@ -185,3 +187,5 @@ export default function Command({ launchContext }: Readonly<LaunchProps<{ launch
     </Grid>
   );
 }
+
+export default withAccessToken(figma)(Command);

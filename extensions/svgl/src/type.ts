@@ -1,7 +1,7 @@
 export interface Svg {
   id: number;
   title: string;
-  category: string;
+  category: string | string[];
   route:
     | string
     | {
@@ -18,6 +18,6 @@ export interface Svg {
 }
 
 export interface Category {
-  category: string | string[];
+  category: string;
   total: number;
 }

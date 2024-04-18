@@ -84,15 +84,6 @@
           "description": "Choose what you want to see next to the menu bar icon."
         },
         {
-          "name": "hideMenuBarCountWhenEmpty",
-          "type": "checkbox",
-          "title": "Count",
-          "label": "Hide menu bar count when empty",
-          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
-          "default": false,
-          "required": false
-        },
-        {
           "name": "view",
           "type": "dropdown",
           "data": [
@@ -113,6 +104,36 @@
           "required": false,
           "title": "View",
           "description": "Choose which view you want to see in your menu bar."
+        },
+        {
+          "name": "countType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Count",
+          "description": "Choose which count you want to see in your menu bar."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
+          "type": "checkbox",
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
+          "required": false
         }
       ],
       "interval": "10m"
@@ -156,12 +177,19 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Locations",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your saved locations.",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.13.6",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
     "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21"

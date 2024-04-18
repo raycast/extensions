@@ -7,6 +7,10 @@
 - Fixes an issue where the pull request icon color for the `My Pull Requests Menu Bar` was not adjusted for dark mode.
 - Updates icons for `Open My Pull Requests` and `Open My Issues` menu items in the `My Pull Requests Menu Bar` and `My Issues Menu Bar` commands.
 
+## [Fix recently closed issue] - 2024-04-18
+
+- Only one issue or one PR was previously shown in `My Pull Requests` or `My Issues`. It's not the case anymore!
+
 ## [Opens notification discussion links] - 2024-04-08
 
 - Opens GitHub links for notifications that point to a discussion directly.

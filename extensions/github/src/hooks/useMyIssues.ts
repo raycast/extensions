@@ -37,7 +37,7 @@ export function useMyIssues(repository: string | null) {
 
   const recentlyClosed = uniqBy(
     [...(createdClosed || []), ...(assignedClosed || []), ...(mentionedClosed || [])],
-    "issue.id",
+    "id",
   );
 
   const sections = [

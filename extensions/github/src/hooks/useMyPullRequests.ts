@@ -67,7 +67,7 @@ export function useMyPullRequests(repository: string | null) {
       ...(reviewRequestsClosed || []),
       ...(reviewedByClosed || []),
     ],
-    "pullRequest.id",
+    "id",
   );
 
   const prIds: string[] = [];

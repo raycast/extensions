@@ -1,5 +1,9 @@
 # TickTick Changelog
 
+## [Improve] - {PR_MERGE_DATE}
+
+- `Add Task` command support create all-day task
+
 ## [Fixed] - 2024-01-22
 
 - Resolve the issue of the 'Auto Fill with AI' executing too frequently.

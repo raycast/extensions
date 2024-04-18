@@ -7,7 +7,6 @@
   "author": "thomaslombart",
   "contributors": [
     "FezVrasta",
-    "igor9silva",
     "jesperorb",
     "teziovsky",
     "rifont",
@@ -15,6 +14,9 @@
     "lusit",
     "literallyjustroy",
     "mheidinger"
+  ],
+  "pastContributors": [
+    "igor9silva"
   ],
   "owner": "raycast",
   "access": "public",

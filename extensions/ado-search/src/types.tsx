@@ -2,6 +2,14 @@ export type AdoGitrepostitoriesResponse = {
   value: Repository[];
 };
 
+export type AdoProjectResponse = {
+  value: Project[];
+};
+
+export type AdoPrResponse = {
+  value: PullRequest[];
+};
+
 export type Repository = {
   id: string;
   name: string;
@@ -20,4 +28,19 @@ export type Project = {
   description: string;
   url: string;
   projectUrl: string;
+};
+
+export type PullRequest = {
+  repository: Repository;
+  pullRequestId: string;
+  codeReviewId: string;
+  status: string;
+  creationDate: string;
+  title: string;
+  description: string;
+  sourceRefName: string;
+  targetRefName: string;
+  mergeStatus: string;
+  url: string;
+  supportsIterations: boolean;
 };

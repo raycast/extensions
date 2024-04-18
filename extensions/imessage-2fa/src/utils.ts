@@ -36,26 +36,6 @@ export function extractCode(original: string) {
     //   "Your healow verification code is : 7579."
     //   "TRUSTED LOCATION PASSCODE: mifsuc"
     code = m[2];
-  } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // line beginning OR "code:" OR "is:" OR word boundary, optional whitespace, 3 consecutive digits, a hyphen, then 3 consecutive digits
-    // but NOT a phone number (###-###-####)
-    // examples:
-    //   "123-456"
-    //   "Your Stripe verification code is: 719-839."
-    // and make sure it isn't a phone number
-    // doesn't match: <first digits>-<second digits>-<4 consecutive digits>
-
-    const first = m[2];
-    const second = m[3];
-    if (!new RegExp("/(^|code:|is:|\b)s*" + first + "-" + second + "-(d{4})($|s|R|\t|\b|.|,)/").test(message)) {
-      return `${first}${second}`;
-    }
-    return "";
-  } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits
-    // examples:
-    //   "Please enter code 548 on Zocdoc."
-    code = m[2];
   } else {
     // more generic, brute force patterns
 
@@ -88,7 +68,25 @@ export function extractCode(original: string) {
       //   "CWGUG8"
       //   "CWGUG8 is your code"
       //   "7645W453"
-      return m[0];
+      code = m[0];
+    } else if ((m = /(^|code:|is:|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+      // line beginning OR "code:" OR "is:" OR word boundary, optional whitespace, 3 consecutive digits, a hyphen, then 3 consecutive digits
+      // but NOT a phone number (###-###-####)
+      // examples:
+      //   "123-456"
+      //   "Your Stripe verification code is: 719-839."
+      // and make sure it isn't a phone number
+      // doesn't match: <first digits>-<second digits>-<4 consecutive digits>
+
+      const first = m[2];
+      const second = m[3];
+
+      code = `${first}${second}`;
+    } else if ((m = /(code|is):?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+      // "code" OR "is" followed by an optional ":" + optional whitespace, then 3-8 consecutive digits
+      // examples:
+      //   "Please enter code 548 on Zocdoc."
+      code = m[2];
     }
   }
 
