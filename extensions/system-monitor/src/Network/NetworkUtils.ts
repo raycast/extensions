@@ -44,3 +44,26 @@ export const getNetworkData = async (): Promise<{ [key: string]: number[] }> => 
 
   return processDict;
 };
+
+const sortFunction = (a: [string, number, number], b: [string, number, number]): number => {
+  const minA = Math.min(a[1], a[2]);
+  const maxA = Math.max(a[1], a[2]);
+  const minB = Math.min(b[1], b[2]);
+  const maxB = Math.max(b[1], b[2]);
+
+  switch (true) {
+    case maxA > maxB || minA > minB:
+      return -1;
+    case maxB > maxA || minB > minA:
+      return 1;
+  }
+
+  return 0;
+};
+
+export const getTopProcess = (arr: [string, number, number][]): [string, number, number][] => {
+  arr.sort(sortFunction);
+  arr = arr.slice(0, 5);
+
+  return arr;
+};
