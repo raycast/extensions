@@ -30,7 +30,7 @@ export async function getEmails(amount: number = 10) {
     const receivedAt = new Date(parseInt(fullEmail["internalDate"], 10));
     const diffMinutes = Math.floor((new Date().getTime() - receivedAt.getTime()) / 60000);
 
-    if (diffMinutes > 230) {
+    if (diffMinutes > 10) {
       return emails;
     }
 
