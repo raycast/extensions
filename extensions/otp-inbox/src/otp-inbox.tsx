@@ -41,7 +41,7 @@ export default function OTPInbox() {
         // Get verification codes
         await getVerificationCodes();
       } catch (error) {
-        console.log("No verification codes found");
+        console.error("Failed to get verification codes", error);
       }
     })();
   }, []);

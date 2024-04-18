@@ -1,3 +1,4 @@
+import { emailFilterKeywords } from "./constants";
 import { Email, EmailPayload, VerificationCode } from "./types";
 
 export function extractVerificationCode(text: string): string {
@@ -40,7 +41,7 @@ export function processEmails(emails: Email[]): {
   recentEmails: VerificationCode[];
   verificationCodes: VerificationCode[];
 } {
-  // Valiadate if there are emails
+  // Validate if there are any emails
   if (!emails || emails.length === 0) {
     console.log("No emails found");
     return { recentEmails: [], verificationCodes: [] };
@@ -58,6 +59,17 @@ export function processEmails(emails: Email[]): {
 
       // Decode body
       const body = decodeEmailBody(email["payload"]);
+
+      // Validate if email contains keywords
+      if (
+        !emailFilterKeywords.some(
+          (keyword) =>
+            body.toLowerCase().includes(keyword) ||
+            (headers.find((header) => header.name === "Subject")?.value || "").toLowerCase().includes(keyword),
+        )
+      ) {
+        return;
+      }
 
       // Extract the verification code from the email
       const verificationCode = extractVerificationCode(body);

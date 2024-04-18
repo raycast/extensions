@@ -1,6 +1,7 @@
 import { getAccessToken } from "@raycast/utils";
 import fetch from "cross-fetch";
 import { Email } from "./types";
+import { maxEmailAge } from "./constants";
 
 export async function getEmails(amount: number = 10) {
   // Gmail API call to get emails
@@ -30,7 +31,7 @@ export async function getEmails(amount: number = 10) {
     const receivedAt = new Date(parseInt(fullEmail["internalDate"], 10));
     const diffMinutes = Math.floor((new Date().getTime() - receivedAt.getTime()) / 60000);
 
-    if (diffMinutes > 10) {
+    if (diffMinutes > maxEmailAge) {
       return emails;
     }
 
