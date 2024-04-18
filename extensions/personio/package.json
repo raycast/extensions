@@ -101,6 +101,18 @@
           "value": "Europe/London"
         },
         {
+          "title": "Rome/Europe",
+          "value": "Europe/Rome"
+        },
+        {
+          "title": "Stockholm/Europe",
+          "value": "Europe/Stockholm"
+        },
+        {
+          "title": "Tallinn/Europe",
+          "value": "Europe/Tallinn"
+        },
+        {
           "title": "New York/America",
           "value": "America/New_York"
         },
@@ -111,7 +123,124 @@
         {
           "title": "Tokyo/Asia",
           "value": "Asia/Tokyo"
+        },
+        {
+          "title": "Etc/GMT",
+          "value": "Etc/GMT"
+        },
+        {
+          "title": "Etc/GMT+0",
+          "value": "Etc/GMT+0"
+        },
+        {
+          "title": "Etc/GMT+1",
+          "value": "Etc/GMT+1"
+        },
+        {
+          "title": "Etc/GMT+10",
+          "value": "Etc/GMT+10"
+        },
+        {
+          "title": "Etc/GMT+11",
+          "value": "Etc/GMT+11"
+        },
+        {
+          "title": "Etc/GMT+12",
+          "value": "Etc/GMT+12"
+        },
+        {
+          "title": "Etc/GMT+2",
+          "value": "Etc/GMT+2"
+        },
+        {
+          "title": "Etc/GMT+3",
+          "value": "Etc/GMT+3"
+        },
+        {
+          "title": "Etc/GMT+4",
+          "value": "Etc/GMT+4"
+        },
+        {
+          "title": "Etc/GMT+5",
+          "value": "Etc/GMT+5"
+        },
+        {
+          "title": "Etc/GMT+6",
+          "value": "Etc/GMT+6"
+        },
+        {
+          "title": "Etc/GMT+7",
+          "value": "Etc/GMT+7"
+        },
+        {
+          "title": "Etc/GMT+8",
+          "value": "Etc/GMT+8"
+        },
+        {
+          "title": "Etc/GMT+9",
+          "value": "Etc/GMT+9"
+        },
+        {
+          "title": "Etc/GMT-0",
+          "value": "Etc/GMT-0"
+        },
+        {
+          "title": "Etc/GMT-1",
+          "value": "Etc/GMT-1"
+        },
+        {
+          "title": "Etc/GMT-10",
+          "value": "Etc/GMT-10"
+        },
+        {
+          "title": "Etc/GMT-11",
+          "value": "Etc/GMT-11"
+        },
+        {
+          "title": "Etc/GMT-12",
+          "value": "Etc/GMT-12"
+        },
+        {
+          "title": "Etc/GMT-13",
+          "value": "Etc/GMT-13"
+        },
+        {
+          "title": "Etc/GMT-14",
+          "value": "Etc/GMT-14"
+        },
+        {
+          "title": "Etc/GMT-2",
+          "value": "Etc/GMT-2"
+        },
+        {
+          "title": "Etc/GMT-3",
+          "value": "Etc/GMT-3"
+        },
+        {
+          "title": "Etc/GMT-4",
+          "value": "Etc/GMT-4"
+        },
+        {
+          "title": "Etc/GMT-5",
+          "value": "Etc/GMT-5"
+        },
+        {
+          "title": "Etc/GMT-6",
+          "value": "Etc/GMT-6"
+        },
+        {
+          "title": "Etc/GMT-7",
+          "value": "Etc/GMT-7"
+        },
+        {
+          "title": "Etc/GMT-8",
+          "value": "Etc/GMT-8"
+        },
+        {
+          "title": "Etc/GMT-9",
+          "value": "Etc/GMT-9"
         }
+
       ]
     }
   ],
