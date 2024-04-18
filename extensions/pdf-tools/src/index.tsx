@@ -184,7 +184,7 @@ const uploadFile = async (filePaths: string[], task: string, extension: string, 
 
   for (let i = 0; i < filePaths.length; i++) {
     const filePath = filePaths[i];
-    let res = await converter.convertFileTaskExecuter(APIKey, filePath, task, extension, compressVal);
+    const res = await converter.convertFileTaskExecuter(APIKey, filePath, task, extension, compressVal);
 
     if (MoveToTrash && res) {
       await moveFileToTrash(filePath); // Move to trash after conversion
