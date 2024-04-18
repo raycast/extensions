@@ -59,9 +59,10 @@ const useDevices = () => {
     tabs: localTabs.data,
   };
   const result = {
+    devices: [localDevice],
+    permissionView: null,
     refreshDevices: localTabs.revalidate,
   };
-  const devices = [localDevice];
 
   if (preferences.areRemoteTabsUsed) {
     const remoteTabs = useRemoteTabs();
@@ -77,11 +78,9 @@ const useDevices = () => {
       .reject(["name", deviceName])
       .value();
 
+    result.devices.push(...remoteDevices);
     result.permissionView = remoteTabs.permissionView;
-    devices.push(...remoteDevices);
   }
-
-  result.devices = devices;
 
   return result;
 };
