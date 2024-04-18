@@ -4,9 +4,8 @@ import { Octokit } from "@octokit/core";
 import { RequestError } from "@octokit/request-error";
 import * as fs from "fs";
 import dayjs from "dayjs";
-import { execaSync } from "execa";
+import * as fileType from "file-type";
 
-const TEMP_PIC_PATH = "/tmp/GHPicTemp.jpg";
 const REPO_URL = "https://github.com/xiangsanliu/gh-pic";
 
 interface Preferences {
@@ -15,7 +14,6 @@ interface Preferences {
   repo: string;
   path: string;
   email: string;
-  pngpastePath: string;
   committer: string;
 }
 
@@ -45,14 +43,10 @@ async function uploadPic() {
     helpUrl: REPO_URL,
   };
   try {
-    const text = await Clipboard.readText();
-    if (!text) {
-      // Paste pic from clipboard to Temp folder.
-      execaSync(preferences.pngpastePath, [TEMP_PIC_PATH]);
-
-      const pic = fs.readFileSync(TEMP_PIC_PATH);
-      const content = Buffer.from(pic).toString("base64");
-      const path = `${preferences.path}${dayjs().format("YYYY-MM-DDTHH:mm:ss")}.jpg`;
+    const pic = await getPicFromClipboard();
+    if (pic) {
+      const content = Buffer.from(pic.buffer).toString("base64");
+      const path = `${preferences.path}${dayjs().format("YYYY-MM-DDTHH:mm:ss")}.${pic.ext}`;
 
       // Upload pic to github.
       await octokit.request("PUT /repos/{owner}/{repo}/contents/{path}", {
@@ -81,9 +75,27 @@ async function uploadPic() {
       res.errorCode = 2;
       res.errorMsg = "Paste image from clipboard failed, press Enter for help.";
     }
-    console.log(error);
   }
   return res;
+}
+
+async function getPicFromClipboard() {
+  const data = await Clipboard.read();
+  const file = data.file;
+  if (file) {
+    const filepath = decodeURIComponent(file.substring(7));
+    const buffer = fs.readFileSync(filepath);
+    const type = await fileType.fileTypeFromBuffer(buffer);
+
+    const { ext, mime } = type ? type : { ext: "", mime: "" };
+    if (mime.startsWith("image")) {
+      return {
+        ext: ext,
+        buffer: buffer,
+      };
+    }
+  }
+  return null;
 }
 
 export default function Command() {

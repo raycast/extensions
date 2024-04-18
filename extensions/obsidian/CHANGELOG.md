@@ -1,5 +1,14 @@
 # Obsidian Changelog
 
+## [Bugfix for nested bookmarks] - 2024-02-06
+- Fixes a bug where nested bookmarks would not be displayed correctly in search
+
+## [Support luxon formats in templates] - 2024-01-30
+- Support luxon date and time format (e.g. dd, MM, YYYY,...) in templates
+
+## [Fix Search Media HotKey bug] - 2024-01-26
+- Checks for defined `searchArgument` in MediaGrid value before filtering
+
 ## [Copy Note Title action] - 2024-01-17
 - Add `Copy Note Title` action
 

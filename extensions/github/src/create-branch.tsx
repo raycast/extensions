@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Clipboard, Color, Form, Image, showToast, Toast, open } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Form, Image, Toast, open, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import View from "./components/View";
+import { getGitHubClient } from "./api/githubClient";
 import { getErrorMessage } from "./helpers/errors";
 import { getIssueStatus } from "./helpers/issue";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
 
 type BranchFormValues = {
@@ -179,10 +179,4 @@ export function BranchForm({ draftValues }: BranchFormProps) {
   );
 }
 
-export default function Command(props: { draftValues?: BranchFormValues }) {
-  return (
-    <View>
-      <BranchForm draftValues={props.draftValues} />
-    </View>
-  );
-}
+export default withGitHubClient(BranchForm);

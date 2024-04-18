@@ -22,10 +22,10 @@ import { getSignalIcon, getSignalIconColor } from "./utils/common-utils";
 import { RefreshWifi } from "./components/refresh-wifi";
 
 export default function ScanWifi() {
-  const { push } = useNavigation();
   const [refresh, setRefresh] = useState<number>(0);
   const { wifiPasswordCaches, publicWifi, wifiWithPasswordList, wifiList, curWifi, loading } = useWifiList(refresh);
   const { wifiStatus } = useWifiStatus();
+  const { push } = useNavigation();
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"Search Wi-Fi"}>

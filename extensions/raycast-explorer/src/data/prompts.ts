@@ -1,4 +1,4 @@
-import { Icon } from "@raycast/api";
+import { Icon, AI } from "@raycast/api";
 
 type Example = {
   argument?: string;
@@ -12,9 +12,9 @@ type BasePrompt = {
   prompt: string;
   icon: Icon;
   creativity: "none" | "low" | "medium" | "high" | "maximum";
-  model?: "openai_davinci_003" | "openai_gpt35_turbo" | "openai_gpt4" | "anthropic_claude";
+  model?: AI.Model;
   date: `${number}-${number}-${number}`;
-  example: Example;
+  example?: Example;
   author?: {
     name: string;
     link?: string;
@@ -35,6 +35,46 @@ export type Prompt = BasePrompt & (PromptType | CodeType);
 function generateSelection(selectionWord: string, resultWord: string) {
   return `\n\n${selectionWord}: {selection}\n\n${resultWord}:`;
 }
+
+const browser: Prompt[] = [
+  {
+    id: "inspect-website",
+    title: "Inspect Website",
+    prompt: `Describe me the tech stack used based on the following HTML document:
+
+{browser-tab format="html"}
+
+Consider every element of a tech stack, from frameworks to APIs through tools (analytics, monitoring, etc.). Include which fonts are used. Don't make any guesses on what’s used if there’s no evidence.`,
+    creativity: "low",
+    date: "2024-03-18",
+    icon: Icon.Globe,
+    model: "anthropic-claude-haiku",
+    type: "text",
+  },
+  {
+    id: "summarize-youtube-video",
+    title: "Summarize YouTube Video",
+    prompt: `Create a summary of a YouTube video using its transcript. You will use the following template:
+
+\`\`\`
+## Summary
+{Multiple sentences summarising the YouTube video}
+
+## Notes
+{Bullet points that summarize the key points or important moments from the video’s transcript with explanations}
+
+## Quotes
+{Extract the best sentences from the transcript in a list}
+\`\`\`
+
+Transcript: {browser-tab}`,
+    creativity: "low",
+    model: "anthropic-claude-haiku",
+    date: "2024-03-18",
+    icon: Icon.PlayFilled,
+    type: "text",
+  },
+];
 
 const code: Prompt[] = [
   {
@@ -1322,7 +1362,7 @@ const raycast: Prompt[] = [
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection: "Like, forver and ever, the way to go is Raycast, you know what I mean? I just love that app.",
       output: "Forever and ever, Raycast is the way to go. I absolutely love that app, you know what I mean?",
@@ -1337,10 +1377,10 @@ const raycast: Prompt[] = [
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection: "The best cuzine in da world is the brasilian!",
-      output: 'Selection: "The best cuisine in the world is the Brazilian!"',
+      output: "The best cuisine in the world is the Brazilian!",
     },
   },
   {
@@ -1359,7 +1399,7 @@ const raycast: Prompt[] = [
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection: "String",
       output:
@@ -1380,7 +1420,7 @@ Use english language` + generateSelection("Text", "Expanded text"),
     creativity: "high",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection: "Raycast is awesome.",
       output: `Raycast is an incredibly powerful and versatile productivity tool that has gained widespread acclaim and popularity. It offers a wide range of features and functionalities designed to enhance efficiency and streamline workflows. With its intuitive interface and seamless integration with various applications and services, Raycast empowers users to perform tasks and access information swiftly and effortlessly.
@@ -1409,7 +1449,7 @@ Use english language` + generateSelection("Text", "Expanded text"),
     creativity: "high",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection:
         "Raycast is an exceptionally speedy and highly customizable launcher that facilitates a wide range of functions. It empowers users to efficiently accomplish tasks, perform calculations, share frequently used links, and engage in numerous other activities.",
@@ -1434,7 +1474,7 @@ Use english language` + generateSelection("Text", "Expanded text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection:
         "Raycast is a blazingly fast, totally extendable launcher. It lets you complete tasks, calculate, share common links, and much more.",
@@ -1456,7 +1496,7 @@ Use english language` + generateSelection("Text", "Rewritten text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection:
         "Raycast is a blazingly fast, totally extendable launcher. It lets you complete tasks, calculate, share common links, and much more.",
@@ -1481,7 +1521,7 @@ Use english language` + generateSelection("Text", "Rewritten text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection:
         "Raycast is a blazingly fast, totally extendable launcher. It lets you complete tasks, calculate, share common links, and much more.",
@@ -1507,7 +1547,7 @@ Use english language` + generateSelection("Text", "Rewritten text"),
     creativity: "low",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection:
         "Raycast is a blazingly fast, totally extendable launcher. It lets you complete tasks, calculate, share common links, and much more.",
@@ -1538,7 +1578,7 @@ Tweet:
     creativity: "high",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection:
         "On top of the core Raycast Extensions already built in, you can install Extensions built by Developers from the community. Everything you’ve asked for, in one place. Search and browse Extensions for your tools, actions and more.",
@@ -1578,7 +1618,7 @@ The code is a React component that goes to the previous page.
     creativity: "medium",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection: `function bubbleSort(arr){
   for(let i = 0; i < arr.length; i++){
@@ -1651,7 +1691,7 @@ Nothing found - LGTM 👌` + generateSelection("Code", "Problems"),
     creativity: "medium",
     date: "2023-08-30",
     icon: Icon.RaycastLogoPos,
-    model: "openai_gpt35_turbo",
+    model: "openai-gpt-3.5-turbo",
     example: {
       selection: `var desert = document.querySelector('.desert');
 
@@ -1682,6 +1722,12 @@ export const categories: Category[] = [
     id: "code",
     prompts: [...code],
     icon: Icon.Code,
+  },
+  {
+    name: "Browser",
+    id: "browser",
+    prompts: [...browser],
+    icon: Icon.Globe,
   },
   {
     name: "Communication",

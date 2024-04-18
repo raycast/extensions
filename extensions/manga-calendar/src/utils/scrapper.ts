@@ -1,14 +1,14 @@
+import { Collection, GraphicPublication, GraphicPublicationList } from "@types";
+import { generateKey } from "@utils/generateKey";
 import * as cheerio from "cheerio";
-import { Collection, Manga, MangaList } from "../types";
-import { generateKey } from "./generateKey";
 
-// This work for both Calendario /calendario/manga and Colección /manga/:nombre
-export async function scrapeManga(body: string): Promise<Manga[]> {
+// This work for both Calendario /calendario/publication and Colección /publication/:nombre
+export async function scrapeManga(body: string): Promise<GraphicPublication[]> {
   try {
     const $ = cheerio.load(body);
-    const Shelf: Manga[] = [];
+    const Shelf: GraphicPublication[] = [];
     $("div.g-coleccion div.comic").map((_idx, el) => {
-      const manga: Manga = {
+      const Publication: GraphicPublication = {
         id: generateKey(),
         name: $(el).attr("data-c")?.split(" ").slice(0, -1).join(" ") || "",
         volume: $(el).attr("data-no") || "",
@@ -18,7 +18,7 @@ export async function scrapeManga(body: string): Promise<Manga[]> {
         url: $(el).attr("data-u") || "",
         frontImageUrl: $(el).find("img.nl").attr("src") || "",
       };
-      Shelf.push(manga);
+      Shelf.push(Publication);
     });
     return Shelf;
   } catch (error) {
@@ -27,20 +27,20 @@ export async function scrapeManga(body: string): Promise<Manga[]> {
   }
 }
 
-export async function getMangaCalendar(url: string): Promise<MangaList> {
+export async function getMangaCalendar(url: string): Promise<GraphicPublicationList> {
   const response = await scrapeManga(url);
-  const dataGroupedByDate: MangaList =
+  const dataGroupedByDate: GraphicPublicationList =
     response?.reduce(
-      (grouper: MangaList, manga: Manga) => ({
+      (grouper: GraphicPublicationList, publication: GraphicPublication) => ({
         ...grouper,
-        [manga.publicationDate]: [...(grouper[manga.publicationDate] || []), manga],
+        [publication.publicationDate]: [...(grouper[publication.publicationDate] || []), publication],
       }),
       {}
     ) || {};
   return dataGroupedByDate;
 }
 
-export async function getMangaCollection(url: string): Promise<Manga[]> {
+export async function getMangaCollection(url: string): Promise<GraphicPublication[]> {
   const response = await scrapeManga(url);
   return response;
 }
@@ -59,7 +59,7 @@ export async function scrapeCollections(body: string) {
       };
       Shelf.push(collection);
     });
-    return Shelf.filter((item) => item.url.includes("manga"));
+    return Shelf;
   } catch (error) {
     console.log(error);
     return [];

@@ -2,6 +2,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Model, ModelHook } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
+import { useProxy } from "./useProxy";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -17,14 +18,21 @@ export const DEFAULT_MODEL: Model = {
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
-  const { useAzure } = getConfiguration();
+  const proxy = useProxy();
+  const { useAzure, isCustomModel } = getConfiguration();
   const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
 
   useEffect(() => {
+    if (isCustomModel) {
+      // If choose to use custom model, we don't need to fetch models from the API
+      setFetching(false);
+      return;
+    }
     if (!useAzure) {
       gpt.models
-        .list()
+        .list({ httpAgent: proxy })
         .then((res) => {
           const models = res.data;
           setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
@@ -47,7 +55,12 @@ export function useModel(): ModelHook {
                   style: Toast.Style.Failure,
                 }
           );
+        })
+        .finally(() => {
+          setFetching(false);
         });
+    } else {
+      setFetching(false);
     }
   }, [gpt]);
 
@@ -122,7 +135,7 @@ export function useModel(): ModelHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear }),
-    [data, isLoading, option, add, update, remove, clear]
+    () => ({ data, isLoading, option, add, update, remove, clear, isFetching }),
+    [data, isLoading, option, add, update, remove, clear, isFetching]
   );
 }

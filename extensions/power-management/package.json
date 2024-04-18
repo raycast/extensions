@@ -1,0 +1,61 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "power-management",
+    "title": "Power Management",
+    "description": "Change Power Management Settings of the system",
+    "icon": "command-icon.png",
+    "author": "sasivarnan",
+    "contributors": [
+        "erics118",
+        "bbatsche",
+        "iamyeizi"
+    ],
+    "categories": [
+        "System"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "title": "Toggle Low Power Mode",
+            "name": "toggle-low-power-mode",
+            "description": "Toggle Low Power Mode of the System",
+            "mode": "no-view"
+        },
+        {
+            "name": "lowpower-menubar",
+            "title": "Menu Bar Low Power Mode",
+            "description": "See status of Low Power Mode toggle on the menubar",
+            "mode": "menu-bar",
+            "interval": "5m",
+            "preferences": [
+              {
+                "name": "hideIconWhenDisabled",
+                "description": "Hide the icon in the Menu Bar when Low Power Mode is disabled",
+                "type": "checkbox",
+                "label": "Hide icon when disabled",
+                "default": false,
+                "required": false
+              }
+            ]
+          }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.67.1",
+        "@raycast/utils": "^1.12.4"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.8",
+        "@types/node": "20.11.17",
+        "@types/react": "18.2.55",
+        "eslint": "^8.56.0",
+        "prettier": "^3.2.5",
+        "typescript": "^5.3.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}

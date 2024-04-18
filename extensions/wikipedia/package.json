@@ -12,7 +12,9 @@
     "menahishayan",
     "pernielsentikaer",
     "igor9silva",
-    "Ek217"
+    "Ek217",
+    "sergiivelykodnyi",
+    "j3lte"
   ],
   "license": "MIT",
   "preferences": [
@@ -106,25 +108,26 @@
     "News"
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3",
-    "@raycast/utils": "^1.4.18",
-    "got": "^12.5.3",
+    "@raycast/api": "^1.71.1",
+    "@raycast/utils": "^1.14.0",
+    "node-fetch": "^3.3.2",
     "wikijs": "^6.4.1"
   },
   "devDependencies": {
-    "@types/node": "^18.13.0",
-    "@types/react": "^18.0.28",
-    "@types/jsdom": "^21.1.0",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/debug": "^4.1.12",
+    "@types/node": "20.11.17",
+    "@types/react": "18.2.55",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

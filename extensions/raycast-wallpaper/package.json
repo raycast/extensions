@@ -5,6 +5,9 @@
   "description": "Get and set Raycast official wallpapers.",
   "icon": "command-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "samuelkraft"
+  ],
   "categories": [
     "Media",
     "Productivity",
@@ -141,6 +144,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -18,11 +18,7 @@ export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useCachedState("showDetail", false);
 
   return (
-    <List
-      isShowingDetail={isShowingDetail}
-      isLoading={isLoadingProcesses}
-      searchBarPlaceholder="Search Open Ports"
-    >
+    <List isShowingDetail={isShowingDetail} isLoading={isLoadingProcesses} searchBarPlaceholder="Search Open Ports">
       {processes?.map((p) => (
         <List.Item
           key={p.pid}

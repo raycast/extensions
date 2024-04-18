@@ -1,6 +1,6 @@
 import fetch, { RequestInit } from "node-fetch";
 
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
+import { getJiraCredentials } from "../api/jiraCredentials";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
@@ -13,9 +13,12 @@ type RequestOptions = Partial<{
 }>;
 
 export const getBaseUrl = () => {
-  const { cloudId } = getJiraCredentials();
+  const { cloudId, siteUrl } = getJiraCredentials();
 
-  return `https://api.atlassian.com/ex/jira/${cloudId}`;
+  if (cloudId) {
+    return `https://api.atlassian.com/ex/jira/${cloudId}`;
+  }
+  return `https://${siteUrl}`;
 };
 
 export async function request<T>(path: string, options: RequestOptions = { method: "GET" }) {

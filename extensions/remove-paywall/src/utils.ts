@@ -6,15 +6,20 @@ function isUrl(text: string): boolean {
   return urlRegex.test(text);
 }
 
-export async function getUrl(): Promise<string | Error> {
+export async function getUrl(urlArgument: string | undefined): Promise<string | Error> {
   let url: string | undefined;
 
-  try {
-    // If the user has selected text, use that as the URL
-    url = await getSelectedText();
-  } catch {
-    // Otherwise, use the clipboard
-    url = await Clipboard.readText();
+  if (urlArgument) {
+    // If the user has provided a URL, use that
+    url = urlArgument;
+  } else {
+    try {
+      // If the user has selected text, use that as the URL
+      url = await getSelectedText();
+    } catch {
+      // Otherwise, use the clipboard
+      url = await Clipboard.readText();
+    }
   }
 
   if (!url) {

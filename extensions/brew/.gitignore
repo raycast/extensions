@@ -1,2 +1,9 @@
 
 raycast-env.d.ts
+node_modules
+.vscode
+.editorconfig
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

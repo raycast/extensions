@@ -1,22 +1,9 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  LocalStorage,
-  showToast,
-  Alert,
-  Icon,
-  Color,
-  confirmAlert,
-  environment,
-} from "@raycast/api";
+import { ActionPanel, Action, List, LocalStorage, showToast, Alert, Icon, Color, confirmAlert } from "@raycast/api";
 import { useState } from "react";
 import Search from "./views/search";
 import { usePromise } from "@raycast/utils";
 import { Collection } from "./type";
-import path from "path";
 import { CreateCollectionForm } from "./views/form";
-import { unlinkSync } from "fs";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
@@ -36,13 +23,9 @@ export default function Command() {
       primaryAction: {
         style: Alert.ActionStyle.Destructive,
         title: "Delete Collection",
-        onAction: () => {
-          // delete sqlite database file
-          const databasePath = path.join(environment.supportPath, `${name}.sqlite`);
-          unlinkSync(databasePath);
-
+        onAction: async () => {
           // remove record of collection
-          LocalStorage.removeItem(name);
+          await LocalStorage.removeItem(name);
           revalidate();
           showToast({ title: "Success", message: `Successfully deleted collection ${name}!` });
         },

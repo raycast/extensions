@@ -5,6 +5,9 @@
   "description": "Create Fantastical events and reminders using Fantasticals natural language processing.",
   "icon": "fantastical.png",
   "author": "devahschaefers",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -19,8 +22,8 @@
   "commands": [
     {
       "name": "fan-add-event-editable",
-      "title": "Add Fantastical Calendar Event",
-      "description": "add a new fantastical event",
+      "title": "Add Fantastical Event",
+      "description": "Add a new Fantastical event",
       "mode": "no-view",
       "arguments": [
         {
@@ -96,8 +99,8 @@
         {
           "type": "text",
           "name": "add",
-          "title": "Add Reminder",
-          "placeholder": "reminder",
+          "title": "Add Event",
+          "placeholder": "event",
           "required": true
         }
       ],
@@ -105,9 +108,9 @@
         "fantastical",
         "fan",
         "add",
-        "reminder",
-        "fan add reminder",
-        "fan reminder",
+        "event",
+        "fan add event",
+        "fan event",
         "quick"
       ]
     }

@@ -1,18 +1,17 @@
-import { ActionPanel, confirmAlert, Action, Toast, showToast, Color, Icon, Clipboard, Alert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import {
   IssueClosedStateReason,
   IssueDetailFieldsFragment,
   IssueFieldsFragment,
-  SearchCreatedIssuesQuery,
-  SearchOpenIssuesQuery,
   UserFieldsFragment,
 } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
 import { getGitHubUser } from "../helpers/users";
-import { getGitHubClient } from "../helpers/withGithubClient";
+import { useMyIssues } from "../hooks/useMyIssues";
 import { useViewer } from "../hooks/useViewer";
 
 type Issue = IssueFieldsFragment | IssueDetailFieldsFragment;
@@ -20,10 +19,7 @@ type Issue = IssueFieldsFragment | IssueDetailFieldsFragment;
 type IssueActionsProps = {
   issue: Issue;
   viewer?: UserFieldsFragment;
-  mutateList?:
-    | MutatePromise<SearchCreatedIssuesQuery | undefined>
-    | MutatePromise<SearchOpenIssuesQuery | undefined>
-    | MutatePromise<IssueFieldsFragment[] | undefined>;
+  mutateList?: MutatePromise<IssueFieldsFragment[] | undefined> | ReturnType<typeof useMyIssues>["mutate"];
   mutateDetail?: MutatePromise<Issue>;
   children?: React.ReactNode;
 };

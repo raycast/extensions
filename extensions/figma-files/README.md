@@ -14,7 +14,7 @@ Note - Currently, this extension only works with team accounts. Draft files are 
 
 ## Setting up the Extension
 
-1. Locate your team ID. Do this by visiting Figma.com and click the team name you wish to use. In the URL, copy the ID that comes BETWEEN the word `/team/` and BEFORE your actual team name. You can also right-click on the team name in the Figma Desktop app sidebar and copy the link.
+1. Locate your team IDs. Do this by visiting Figma.com and click the team name you wish to use. In the URL, copy the ID that comes BETWEEN the word `/team/` and BEFORE your actual team name. You can also right-click on the team name in the Figma Desktop app sidebar and copy the link.
 
 > Example - https://www.figma.com/files/team/12345678987654321/NameOfTeam...
 
@@ -22,6 +22,6 @@ The extension supports multiple teams. If you have more than one team, separate 
 
 > Example - 12345678987654321,98765432123456789
 
-2. Create a Personal Access Token. Do this by clicking on your avatar on Figma.com (or desktop app) and go to settings. Scroll down to Personal Access Token and create a new one to use with Raycast.
+2. Paste your team IDs into the Raycast preferences field for this extension, it will be the first screen you'll see when you launch any command.
 
-Paste both of these into the Raycast preferences for this extension.
+3. On the second screen, Raycast will ask you to sign in with Figma. Clicking on the button will redirect you to your web browser, where you can sign in and give access to your Figma files to Raycast.

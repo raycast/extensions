@@ -252,13 +252,17 @@ export async function autoDownloadPictures(downSize: string, bingImages: BingIma
 }
 
 export function getDownloadedBingWallpapers() {
-  const imageFolderPath = getPicturesDirectory();
-  const files = fse.readdirSync(imageFolderPath);
   const downloadedWallpapers: DownloadedBingImage[] = [];
-  files.forEach((value) => {
-    if (wallpaperImageExtension.includes(parse(value).ext) && !value.startsWith(".")) {
-      downloadedWallpapers.push({ name: parse(value).name, path: imageFolderPath + "/" + value });
-    }
-  });
-  return downloadedWallpapers;
+  try {
+    const imageFolderPath = getPicturesDirectory();
+    const files = fse.readdirSync(imageFolderPath);
+    files.forEach((value) => {
+      if (wallpaperImageExtension.includes(parse(value).ext) && !value.startsWith(".")) {
+        downloadedWallpapers.push({ name: parse(value).name, path: imageFolderPath + "/" + value });
+      }
+    });
+    return downloadedWallpapers;
+  } catch (e) {
+    return downloadedWallpapers;
+  }
 }

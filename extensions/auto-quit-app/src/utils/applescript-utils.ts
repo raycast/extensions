@@ -3,46 +3,50 @@ import { Application, getFrontmostApplication } from "@raycast/api";
 
 export async function scriptQuitAppsWithoutWindow(apps: Application[]) {
   for (let i = 0; i < apps.length; i++) {
-    const appName = apps[i].path.split("/").pop()?.replace(".app", "");
-    const hasWindow = await scriptGetAppWindow(appName);
-    const isRunning = await scriptIsRunning(appName);
-    const isFrontmost = await IsFrontmostApp(appName);
-    if (!hasWindow && isRunning && !isFrontmost) {
-      const script = `tell application "${appName}"
+    try {
+      const appName = apps[i].path.split("/").pop()?.replace(".app", "");
+      const hasWindow = await scriptGetAppWindow(appName);
+      const isRunning = await scriptIsRunning(appName);
+      const isFrontmost = await IsFrontmostApp(appName);
+      if (!hasWindow && isRunning && !isFrontmost) {
+        const script = `tell application "${appName}"
    quit
 end tell`;
-
-      try {
         await runAppleScript(script);
-      } catch (e) {
-        console.error(e);
       }
+    } catch (e) {
+      console.error(e);
     }
   }
 }
 
 export async function scriptQuitApps(apps: Application[]) {
   for (let i = 0; i < apps.length; i++) {
-    const appName = apps[i].path.split("/").pop()?.replace(".app", "");
+    try {
+      const appName = apps[i].path.split("/").pop()?.replace(".app", "");
 
-    const isRunning = await scriptIsRunning(appName);
-    if (isRunning) {
-      const script = `tell application "${appName}"
+      const isRunning = await scriptIsRunning(appName);
+      if (isRunning) {
+        const script = `tell application "${appName}"
    quit
 end tell`;
 
-      try {
         await runAppleScript(script);
-      } catch (e) {
-        console.error(e);
       }
+    } catch (e) {
+      console.error(e);
     }
   }
 }
 
 async function IsFrontmostApp(applicationName: string | undefined) {
-  const app = await getFrontmostApplication();
-  return app?.name == applicationName;
+  try {
+    const app = await getFrontmostApplication();
+    return app?.name == applicationName;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
 }
 
 async function scriptIsRunning(appName: string | undefined) {

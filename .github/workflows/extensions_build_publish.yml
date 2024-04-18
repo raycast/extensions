@@ -34,7 +34,7 @@ jobs:
     runs-on: macos-13
     steps:
       - name: Setup Xcode
-        uses: raycast/github-actions/setup-xcode@xcode-15.0.x
+        uses: raycast/github-actions/setup-xcode@xcode-15.2.x
       - uses: actions/checkout@v4
         with:
           path: github_utils
@@ -59,7 +59,7 @@ jobs:
           rm -rf ${{ github.workspace }}/github_utils
       - name: Run Ray CLI
         id: ray_cli
-        uses: raycast/github-actions/ray@v1.15.0
+        uses: raycast/github-actions/ray@v1.16.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
           command: "${{ github.event.inputs.command }}"
@@ -67,12 +67,12 @@ jobs:
           cli_version: "${{ github.event.inputs.cli_version }}"
           allow_owners_only_for_extensions: "${{ steps.allow_owners_only_for_extensions.outputs.value }}"
       - name: Post Store URLs
-        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.15.0
+        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.16.0
         with:
           store_urls: ${{ steps.ray_cli.outputs.store_urls }}
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Reward Contributor
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         if: github.event_name == 'push'
         env:
           PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}

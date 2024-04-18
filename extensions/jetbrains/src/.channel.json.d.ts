@@ -5,6 +5,7 @@ export interface Extension {
     ["idea.config.path"]: string;
   };
   baseName: string;
+  name: string;
 }
 export interface Tool {
   toolId: string;

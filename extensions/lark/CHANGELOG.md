@@ -1,5 +1,13 @@
 # Lark Changelog
 
+## [Update] - 2024-02-15
+
+- Support search Lark Minutes
+
+## [Update] - 2024-02-06
+
+- Remove user fields due to security reasons
+
 ## [Update] - 2023-11-06
 
 - Fix "read properties of undefined"

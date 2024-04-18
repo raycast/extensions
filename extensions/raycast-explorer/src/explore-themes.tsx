@@ -71,7 +71,7 @@ export default function ExploreThemes() {
 
     const encode = (value: string) => encodeURIComponent(value);
     const urlWithoutColors = `${protocol}theme?version=${theme.version}&name=${encode(theme.name)}&appearance=${encode(
-      theme.appearance
+      theme.appearance,
     )}`;
 
     const colors = [
@@ -95,7 +95,7 @@ export default function ExploreThemes() {
   function getMarkdownImage(theme: Theme): string {
     return `![Screenshot of "${theme.name}" theme](${baseUrl}/ogs/${theme.slug.replace(
       "/",
-      "_"
+      "_",
     )}.png?raycast-height=200)`;
   }
 

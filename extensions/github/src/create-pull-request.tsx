@@ -1,12 +1,12 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import PullRequestDetail from "./components/PullRequestDetail";
-import View from "./components/View";
 import { getErrorMessage } from "./helpers/errors";
 import { getGitHubUser } from "./helpers/users";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
 
 type PullRequestFormValues = {
@@ -168,7 +168,6 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   useEffect(() => {
     setValue("from", "");
     setValue("into", "");
-    setValue("title", "");
     setValue("description", "");
     setValue("reviewers", []);
     setValue("assignees", []);
@@ -305,10 +304,4 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   );
 }
 
-export default function Command(props: { draftValues?: PullRequestFormValues }) {
-  return (
-    <View>
-      <PullRequestForm draftValues={props.draftValues} />
-    </View>
-  );
-}
+export default withGitHubClient(PullRequestForm);

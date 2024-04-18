@@ -1,11 +1,11 @@
-import { List, Image, Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { compareDesc, format } from "date-fns";
 import { useMemo } from "react";
 
+import { getGitHubClient } from "../api/githubClient";
 import { PullRequestCommitFieldsFragment } from "../generated/graphql";
 import { getCheckStateAccessory } from "../helpers/pull-request";
-import { getGitHubClient } from "../helpers/withGithubClient";
 
 import { PullRequest } from "./PullRequestActions";
 

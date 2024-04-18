@@ -13,35 +13,31 @@ import {
   openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import {
-  addWeeks,
-  endOfWeek,
-  isBefore,
-  isToday,
-  isTomorrow,
-  parseISO,
-  startOfDay,
-  startOfToday,
-  startOfTomorrow,
-  startOfWeek,
-} from "date-fns";
+import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
 import { useMemo } from "react";
-
 import {
   deleteReminder as apiDeleteReminder,
+  setPriorityStatus,
   toggleCompletionStatus,
-  setReminderPriority,
-  setReminderDueDate,
-} from "./api";
-import { getPriorityIcon, truncate } from "./helpers";
+  setDueDate as setReminderDueDate,
+} from "swift:../swift/AppleReminders";
+
+import { getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 
+const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
+
 export default function Command() {
-  const { titleType, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, view, countType } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
   const list = data?.lists.find((l) => l.id === listId);
+
+  const reminders = useMemo(() => {
+    if (!data) return [];
+    return listId ? data.reminders.filter((reminder: Reminder) => reminder.list?.id === listId) : data.reminders;
+  }, [data, listId]);
 
   const sections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -50,16 +46,14 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    const reminders = listId ? data?.reminders.filter((reminder) => reminder.list?.id === listId) : data?.reminders;
-    reminders?.forEach((reminder) => {
+    reminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
       if (!reminder.dueDate) {
         other.push(reminder);
       } else {
-        const dueDate = parseISO(reminder.dueDate);
-
-        if (isBefore(dueDate, startOfDay(new Date()))) {
+        const { dueDate } = reminder;
+        if (isOverdue(dueDate)) {
           overdue.push(reminder);
         } else if (isToday(dueDate)) {
           today.push(reminder);
@@ -85,11 +79,11 @@ export default function Command() {
     }
 
     return sections.filter((section) => section.items.length > 0);
-  }, [data, view, listId]);
+  }, [reminders, view]);
 
   async function setPriority(reminderId: string, priority: Priority) {
     try {
-      await setReminderPriority(reminderId, priority);
+      await setPriorityStatus({ reminderId, priority });
       await mutate();
       await showToast({
         style: Toast.Style.Success,
@@ -106,7 +100,7 @@ export default function Command() {
 
   async function setDueDate(reminderId: string, date: Date | null) {
     try {
-      await setReminderDueDate(reminderId, date ? date.toISOString() : null);
+      await setReminderDueDate({ reminderId, dueDate: date ? format(date, "yyyy-MM-dd") : null });
       await mutate();
       await showToast({
         style: Toast.Style.Success,
@@ -138,7 +132,17 @@ export default function Command() {
     }
   }
 
-  const remindersCount = sections.reduce((acc, section) => acc + section.items.length, 0);
+  const remindersCount = useMemo(() => {
+    if (countType === "today") {
+      return reminders.filter(
+        (reminder) => reminder?.dueDate && (isToday(reminder?.dueDate) || isOverdue(reminder?.dueDate)),
+      ).length;
+    } else if (countType === "upcoming") {
+      return reminders.filter((reminder) => reminder.dueDate).length;
+    } else {
+      return reminders.length;
+    }
+  }, [reminders, countType]);
 
   const now = new Date();
 
@@ -209,7 +213,7 @@ export default function Command() {
                 <MenuBarExtra.Item
                   title="Open Reminder"
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
-                  icon={{ fileIcon: "/System/Applications/Reminders.app" }}
+                  icon={{ fileIcon: REMINDERS_FILE_ICON }}
                 />
 
                 <MenuBarExtra.Item
@@ -342,6 +346,14 @@ export default function Command() {
           alternate={
             <MenuBarExtra.Item title="Configure Extension" icon={Icon.Gear} onAction={openExtensionPreferences} />
           }
+        />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Reminders"
+          icon={{ fileIcon: REMINDERS_FILE_ICON }}
+          onAction={() => open("home", "com.apple.reminders")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

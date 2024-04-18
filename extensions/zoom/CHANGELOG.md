@@ -1,5 +1,9 @@
 # Zoom Changelog
 
+## [Use OAuth Utils] - 2024-02-01
+
+Use new OAuth utils
+
 ## [New Icon] - 2024-09-27
 
 Updated Icon to the newer zoom icon with a slightly different gradient to differentiate between the app and the raycast extension.

@@ -1,9 +1,10 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { File, getStarredFilesURL } from "./api/getFiles";
-import { withGoogleAuth, getOAuthToken } from "./components/withGoogleAuth";
+import { withGoogleAuth } from "./components/withGoogleAuth";
 import { getFileIconLink } from "./helpers/files";
 import { createDocFromUrl } from "./helpers/docs";
+import { getOAuthToken } from "./api/googleAuth";
 
 function StarredFiles() {
   const { data, isLoading } = useFetch<{ files: File[] }>(getStarredFilesURL(), {
@@ -90,6 +91,4 @@ function StarredFiles() {
   );
 }
 
-export default function Command() {
-  return withGoogleAuth(<StarredFiles />);
-}
+export default withGoogleAuth(StarredFiles);

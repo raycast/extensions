@@ -8,6 +8,7 @@ import {
   readCustomTimers,
   startTimer,
   stopTimer,
+  toggleCustomTimerMenubarVisibility,
 } from "../timerUtils";
 import { CustomTimer, Timer } from "../types";
 import { Alert, Icon, confirmAlert } from "@raycast/api";
@@ -50,6 +51,7 @@ export default function useTimers() {
       name: timer.name,
       timeInSeconds: timer.secondsSet,
       selectedSound: "default",
+      showInMenuBar: true,
     };
     createCustomTimer(customTimer);
     refreshTimers();
@@ -69,6 +71,11 @@ export default function useTimers() {
     }
   };
 
+  const handleToggleCTVisibility = async (ctID: string) => {
+    toggleCustomTimerMenubarVisibility(ctID);
+    refreshTimers();
+  };
+
   return {
     timers,
     customTimers,
@@ -79,5 +86,6 @@ export default function useTimers() {
     handleStartCT,
     handleCreateCT,
     handleDeleteCT,
+    handleToggleCTVisibility,
   };
 }
