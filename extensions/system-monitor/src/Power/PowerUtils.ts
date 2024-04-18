@@ -1,8 +1,3 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execp = promisify(exec);
-
 export const getCycleCount = async (): Promise<string> => {
   const output = await execp("/usr/sbin/system_profiler SPPowerDataType | grep 'Cycle Count' | awk '{print $3}'");
 
@@ -41,8 +36,9 @@ export const getBatteryTime = async (): Promise<string> => {
 };
 
 export const getTimeOnBattery = async (): Promise<string> => {
-  const output = await execp('/usr/bin/pmset -g log | grep "Using AC" | tail -n 1 | awk \'{print $1 " " $2 " " $3}\'');
-  const lastChargeDate = output.stdout.trim();
+  const lastChargeDate = await execp(
+    '/usr/bin/pmset -g log | grep "Using AC" | tail -n 1 | awk \'{print $1 " " $2 " " $3}\'',
+  );
   const startTime = new Date(Date.parse(lastChargeDate));
   const endTime = new Date();
 

@@ -1,13 +1,27 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execp = promisify(exec);
+import { execp } from "../utils";
 
 export const getNetworkData = async (): Promise<{ [key: string]: number[] }> => {
-  const output = await execp(
-    "/usr/bin/nettop -P -L 1 -k time,interface,state,rx_dupe,rx_ooo,re-tx,rtt_avg,rcvsize,tx_win,tc_class,tc_mgt,cc_algo,P,C,R,W,arch"
-  );
-  const processList: string[] = output.stdout.trim().split("\n").slice(1);
+  const nettopOptions = [
+    "time",
+    "interface",
+    "state",
+    "rx_dupe",
+    "rx_ooo",
+    "re-tx",
+    "rtt_avg",
+    "rcvsize",
+    "tx_win",
+    "tc_class",
+    "tc_mgt",
+    "cc_algo",
+    "P",
+    "C",
+    "R",
+    "W",
+    "arch",
+  ];
+  const output = await execp(`/usr/bin/nettop -P -L 1 -k ${nettopOptions.join()}`);
+  const processList: string[] = output.split("\n").slice(1);
   const modProcessList: string[][] = [];
   const processDict: { [key: string]: number[] } = {};
 
