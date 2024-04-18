@@ -177,12 +177,19 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Locations",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your saved locations.",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@date-fns/utc": "^1.2.0",
-    "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.13.6",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
     "chrono-node": "^2.7.5",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21"

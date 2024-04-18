@@ -35,8 +35,8 @@ export default function LawListItem({
       accessories={[{ text: law.shortNumber }]}
       icon={Icon.Book}
       actions={
-        <ActionPanel>
-          <Action.Push title="View Articles" icon={Icon.Paragraph} target={<ArticleListDetail law={law} />} />
+        <ActionPanel title={law.name}>
+          <Action.Push title="View Articles" icon={Icon.Eye} target={<ArticleListDetail law={law} />} />
           <Action.OpenInBrowser url={law.url} />
           <ActionPanel.Section>
             <Action
@@ -66,8 +66,16 @@ export default function LawListItem({
               </>
             )}
           </ActionPanel.Section>
-          <Action.CopyToClipboard title="Copy Law Number" content={law.fullNumber} />
-          <Action.CopyToClipboard title="Copy Law Name" content={law.name} />
+          <Action.CopyToClipboard
+            title="Copy Law Number"
+            content={law.fullNumber}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Law Name"
+            content={law.name}
+            shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
+          />
         </ActionPanel>
       }
     />

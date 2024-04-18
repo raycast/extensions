@@ -81,7 +81,7 @@ export default function ExplorePrompts(props: Props) {
         const { title, prompt, creativity, icon, model } = selectedPrompt;
 
         return `prompts=${encodeURIComponent(
-          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) })
+          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) }),
         )}`;
       })
       .join("&");
@@ -317,10 +317,10 @@ function getPromptMarkdown(prompt: Prompt) {
         prompt.example.argument ? `### Argument\n\n${prompt.example.argument}\n\n` : ""
       }### Selection\n\n${wrapInCodeBlock(
         prompt.example.selection,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh"
+        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
       )}\n\n### Output\n\n${wrapInCodeBlock(
         prompt.example.output,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh"
+        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
       )}`
     : "";
 

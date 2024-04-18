@@ -28,6 +28,12 @@ export const statusIcons: Record<'open' | 'completed' | 'canceled', Image.ImageL
   canceled: { source: Icon.XMarkCircle, tintColor: Color.SecondaryText },
 };
 
+export const menuBarStatusIcons: Record<'open' | 'completed' | 'canceled', Image.ImageLike> = {
+  open: Icon.Circle,
+  completed: Icon.CheckCircle,
+  canceled: Icon.XMarkCircle,
+};
+
 export function getChecklistItemsWithAI(name: string, notes: string) {
   return AI.ask(
     `Break down a task into sub-tasks. The sub-tasks should be actionable. Each item should be separated by a new line. Return the sub-tasks in the same language than the task's title (e.g if the task title is written in French, the sub-tasks should be written in French as well).
