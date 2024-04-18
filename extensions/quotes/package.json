@@ -3,7 +3,7 @@
   "name": "quotes",
   "title": "Quotes",
   "description": "Get live stock quotes right from Raycast",
-  "icon": "📈",
+  "icon": "extension_icon.png",
   "author": "shaneikennedy",
   "categories": ["Finance"],
   "license": "MIT",
