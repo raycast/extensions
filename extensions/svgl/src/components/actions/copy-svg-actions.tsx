@@ -1,14 +1,22 @@
 import { Action, Icon } from "@raycast/api";
-import { Svg } from "../type";
-import { fetchAndCopySvg } from "../util";
+import { Svg } from "../../type";
+import { fetchAndCopySvg } from "../../utils/fetch";
+import { useSvglExtension } from "../app-context";
 
 const CopySvgActions = ({ svg }: { svg: Svg }) => {
+  const { addRecentSvgId } = useSvglExtension();
+
+  const handleAction = (url: string, showContent: string) => {
+    addRecentSvgId(svg.id);
+    fetchAndCopySvg(url, showContent);
+  };
+
   if (typeof svg.route === "string") {
     return (
       <Action
         icon={Icon.Clipboard}
         title="Copy SVG File"
-        onAction={() => fetchAndCopySvg(svg.route as string, "Copied SVG to clipboard")}
+        onAction={() => handleAction(svg.route as string, "Copied SVG to clipboard")}
       />
     );
   }
@@ -23,7 +31,7 @@ const CopySvgActions = ({ svg }: { svg: Svg }) => {
           key: "l",
         }}
         onAction={() =>
-          fetchAndCopySvg(typeof svg.route === "string" ? svg.route : svg.route.light, "Copied Light SVG to clipboard")
+          handleAction(typeof svg.route === "string" ? svg.route : svg.route.light, "Copied Light SVG to clipboard")
         }
       />
 
@@ -35,7 +43,7 @@ const CopySvgActions = ({ svg }: { svg: Svg }) => {
           key: "d",
         }}
         onAction={() =>
-          fetchAndCopySvg(typeof svg.route === "string" ? svg.route : svg.route.dark, "Copied Dark SVG to clipboard")
+          handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, "Copied Dark SVG to clipboard")
         }
       />
     </>

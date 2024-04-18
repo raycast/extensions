@@ -1,5 +1,6 @@
 import { Action } from "@raycast/api";
-import { Svg } from "../type";
+import { Svg } from "../../type";
+import { APP_URL } from "../../utils/fetch";
 
 const SvgInfoAction = ({ svg, category }: { svg: Svg; category: string }) => {
   return (
@@ -26,7 +27,7 @@ const SvgInfoAction = ({ svg, category }: { svg: Svg; category: string }) => {
 
       <Action.OpenInBrowser
         title="Visit This Category in Svgl"
-        url={`https://svgl.app/${category !== "All" ? `directory/${category.toLowerCase()}` : ""}`}
+        url={`${APP_URL}/${category !== "All" ? `directory/${category.toLowerCase()}` : ""}`}
         shortcut={{
           modifiers: ["cmd"],
           key: "s",
