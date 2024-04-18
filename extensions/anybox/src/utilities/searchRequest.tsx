@@ -55,7 +55,9 @@ export interface Link {
 export interface Preferences {
   api_key: string;
   searchTags: boolean;
+  showTags: boolean;
   searchFolders: boolean;
+  showFolders: boolean;
   asIcons: boolean;
   preferLinkIcons: boolean;
 }

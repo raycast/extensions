@@ -39,7 +39,7 @@ function relativeDate(dateString: string): string {
     sameDay: "[Today at] HH:mm",
     lastDay: "[Yesterday at] HH:mm",
     lastWeek: "[Last] dddd",
-    sameElse: "MMM D, YYYY",
+    sameElse: "D MMM YYYY",
   });
   return result;
 }
@@ -241,7 +241,33 @@ export default function LinkItem(props: Props) {
     );
   } else {
     const accessories: List.Item.Accessory[] = [];
-    accessories.push({ text: isSearchEngine ? "" : relativeDate(item.dateLastOpened) });
+    if (item.folder && preferences.showFolders) {
+      accessories.push({
+        tag: {
+          value: item.folder.originalName,
+          color: item.folder.color,
+        },
+      });
+    }
+    if (preferences.showTags) {
+      for (const tag of item.tags) {
+        accessories.push({
+          tag: {
+            value: tag.originalName,
+            color: tag.color,
+          },
+        });
+      }
+    }
+    if (!isSearchEngine) {
+      let dateText = "";
+      if (preferences.showFolders || preferences.showTags) {
+        accessories.push({ date: new Date(item.dateLastOpened) });
+      } else {
+        dateText = relativeDate(item.dateLastOpened);
+        accessories.push({ text: dateText });
+      }
+    }
     return (
       <List.Item
         title={item.title}
