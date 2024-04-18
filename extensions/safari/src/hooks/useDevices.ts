@@ -58,7 +58,7 @@ const useDevices = () => {
     name: `${deviceName} ★`,
     tabs: localTabs.data,
   };
-  const devices = [localDevice]
+  const devices = [localDevice];
   let permissionView;
 
   if (preferences.areRemoteTabsUsed) {
