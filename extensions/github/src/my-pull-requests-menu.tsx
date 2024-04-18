@@ -93,7 +93,6 @@ function MyPullRequestsMenu() {
       title={displayTitle()}
       icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
-      tooltip="GitHub My Open Pull Requests"
     >
       {filteredSections().map((section) => {
         return (
@@ -127,7 +126,7 @@ function MyPullRequestsMenu() {
       <MenuBarSection>
         <MenuBarItem
           title="Open My Pull Requests"
-          icon={Icon.Terminal}
+          icon={Icon.AppWindowList}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => launchMyPullRequestsCommand()}
         />
