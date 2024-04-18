@@ -77,11 +77,11 @@ const useDevices = () => {
       .reject(["name", deviceName])
       .value();
 
-    result.permissionView = remoteTabs.permissionView
+    result.permissionView = remoteTabs.permissionView;
     devices.push(...remoteDevices);
   }
 
-  result.devices = devices
+  result.devices = devices;
 
   return result;
 };
