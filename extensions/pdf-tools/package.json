@@ -5,6 +5,7 @@
   "description": "Varied tools to handle PDF files.",
   "icon": "pdfLogo.png",
   "author": "eyal_levy",
+  "categories": ["Productivity", "Documentation"],
   "license": "MIT",
   "commands": [
     {
@@ -12,22 +13,22 @@
       "title": "Office to PDF Converter",
       "description": "Convert office such as Microsoft Word, PowerPoint and Excel file to PDF",
       "mode": "view"
-    }, 
+    },
     {
-      "name" : "compress", 
+      "name": "compress",
       "title": "Compress PDF",
-      "description": "Compress PDF with different compression optimization", 
+      "description": "Compress PDF with different compression optimization",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "APIKey", 
-      "title": "API Key", 
-      "description": "for now this is just a test", 
+      "name": "APIKey",
+      "title": "API Key",
+      "description": "Put your API key here, this is required for this extension to work.",
       "type": "password",
       "required": true
-    }, 
+    },
     {
       "name": "CloseWindow",
       "title": "Close Raycast Window when task finished",
@@ -36,11 +37,21 @@
       "default": true,
       "required": false,
       "label": "Close window"
+    },
+    {
+      "name": "MoveToTrash",
+      "title": "Move original file to trash",
+      "description": "The original file will move to trash automatically.",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Move to trash."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.70.3",
-    "cloudconvert": "^2.3.6"
+    "cloudconvert": "^2.3.6",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

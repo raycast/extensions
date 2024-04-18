@@ -13,19 +13,40 @@ import {
 import { useState, useEffect } from "react";
 import { TaskUpload } from "./lib/cloudcovertUpload";
 import DropdownComponent from "./component/DropdownComponent";
+import { runAppleScript } from "run-applescript";
 
 let allFilesSupported = true; // Global flag set to true by default
 
 interface Preferences {
   APIKey: string;
   CloseWindow: boolean;
+  MoveToTrash: boolean;
 }
 
-const { APIKey, CloseWindow } = getPreferenceValues<Preferences>();
+const { APIKey, CloseWindow, MoveToTrash } = getPreferenceValues<Preferences>();
 
 interface AllowedFiles {
   convert: string[];
   compress: string[];
+}
+
+function generateTrashAppleScript(filePath: string) {
+  return `set posixFile to POSIX file "${filePath}"
+    tell application "Finder"
+      move posixFile to trash
+    end tell`;
+}
+
+function moveFileToTrash(filePath: string) {
+  const appleScriptCode = generateTrashAppleScript(filePath);
+
+  return runAppleScript(appleScriptCode)
+    .then((result) => {
+      console.log("File moved to Trash successfully:", result);
+    })
+    .catch((error) => {
+      console.error("Error moving file to Trash:", error);
+    });
 }
 
 export default function Command(task: string) {
@@ -163,7 +184,12 @@ const uploadFile = async (filePaths: string[], task: string, extension: string, 
 
   for (let i = 0; i < filePaths.length; i++) {
     const filePath = filePaths[i];
-    await converter.convertFileTaskExecuter(APIKey, filePath, task, extension, compressVal);
+    let res = await converter.convertFileTaskExecuter(APIKey, filePath, task, extension, compressVal);
+
+    if (MoveToTrash && res) {
+      await moveFileToTrash(filePath); // Move to trash after conversion
+    }
+
     await showToast({
       style: Toast.Style.Animated,
       title: `${taskType}...`,
@@ -171,15 +197,14 @@ const uploadFile = async (filePaths: string[], task: string, extension: string, 
     });
   }
 
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Finished all",
-    message: "Have a nice day!",
-  });
-
   if (CloseWindow) {
     await closeMainWindow(); // Close Raycast window
+    await showHUD("Finished all, Have a nice day!");
+  } else {
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Finished all",
+      message: "Have a nice day!",
+    });
   }
-
-  await showHUD("Finished all");
 };

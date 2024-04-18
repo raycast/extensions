@@ -1,3 +1,5 @@
+import { showToast, Toast } from "@raycast/api";
+
 export async function createConversionTask(cloudc: import("cloudconvert"), extension: string) {
   let job;
   try {
@@ -29,7 +31,12 @@ export async function createConversionTask(cloudc: import("cloudconvert"), exten
       tag: "convert",
     });
   } catch (error) {
-    console.log(`this is an custom error : ${error}`);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Files limit has been reached`,
+      message: `error : ${error}`,
+    });
+    throw error;
   }
   return job;
 }

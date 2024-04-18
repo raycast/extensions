@@ -1,3 +1,5 @@
+import { showToast, Toast } from "@raycast/api";
+
 export async function createCompressTask(cloudc: import("cloudconvert"), OptimizeLevel: string) {
   let job;
   try {
@@ -25,7 +27,12 @@ export async function createCompressTask(cloudc: import("cloudconvert"), Optimiz
       tag: "compress",
     });
   } catch (error) {
-    console.log(`this is an custom error : ${error}`);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Files limit has been reached`,
+      message: `error : ${error}`,
+    });
+    throw error;
   }
   return job;
 }
