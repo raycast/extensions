@@ -58,10 +58,10 @@ const useDevices = () => {
     name: `${deviceName} ★`,
     tabs: localTabs.data,
   };
-  let result = {
+  const result = {
     refreshDevices: localTabs.revalidate,
   };
-  let devices = [localDevice];
+  const devices = [localDevice];
 
   if (preferences.areRemoteTabsUsed) {
     const remoteTabs = useRemoteTabs();
