@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard, showInFinder, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, showToast, Toast, showInFinder, open, closeMainWindow } from "@raycast/api";
 import path from "path";
 
 import { getDefaultAction, ServiceName } from "../preferences";
@@ -31,9 +31,8 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
     if (service) {
       await save(item, service, "recent");
       await mutate();
+      await visitGifItem?.(item);
     }
-
-    visitGifItem?.(item);
   };
 
   const removeFromRecents = async () => {
@@ -80,30 +79,18 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
     }
   };
 
-  const copyFileAction = () =>
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Copying...",
-    })
-      .then((toast) => {
-        const isInFavorites = favIds?.includes(id.toString());
-        return copyFileToClipboard(item.download_url, item.download_name, isInFavorites).then((file) => {
-          toast.hide();
-          showHUD(`Copied GIF "${file}" to clipboard`);
-        });
-      })
-      .catch((e: Error) =>
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error, please try again",
-          message: e?.message,
-          primaryAction: {
-            title: "Copy Error Message",
-            onAction: (toast) => Clipboard.copy(toast.message ?? ""),
-            shortcut: { modifiers: ["cmd"], key: "c" },
-          },
-        }),
-      );
+  async function copyGif() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Copying GIF" });
+      const isInFavorites = favIds?.includes(id.toString());
+      const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
+      await trackUsage();
+      await closeMainWindow();
+      await showToast({ style: Toast.Style.Success, title: `Copied GIF "${file}" to clipboard` });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not copy GIF" });
+    }
+  }
 
   const downloadGIFAction = async () => {
     try {
@@ -145,7 +132,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
       icon={Icon.Clipboard}
       key="copyFile"
       title="Copy GIF"
-      onAction={() => copyFileAction().then(trackUsage)}
+      onAction={copyGif}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );
