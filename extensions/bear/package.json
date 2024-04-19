@@ -70,64 +70,50 @@
       ]
     },
     {
-      "name": "new-note-with-ai",
-      "title": "Ai Note",
-      "subtitle": "Bear Notes",
-      "description": "Create a new Bear note with ai.",
+      "name": "ai-note",
+      "title": "Create Ai Note",
+      "subtitle": "Bear",
+      "description": "Create a new bear note using Ai",
       "mode": "view",
-      "arguments": [
-        {
-          "name": "text",
-          "type": "text",
-          "placeholder": "Text",
-          "required": true
-        },
-        {
-          "name": "instructions",
-          "type": "text",
-          "placeholder": "Additional instructions"
-        },
-        {
-          "name": "tags",
-          "type": "text",
-          "placeholder": "Tags"
-        }
-      ],
       "preferences": [
         {
-          "default": "openai-gpt-4-turbo",
-          "description": "Choose ai model you want to use to generate notes",
-          "label": "Ai model used",
-          "name": "newNoteAiModel",
-          "required": true,
-          "title": "Select Ai Model",
+          "default": "main",
+          "description": "Choose default opening mode when creating a new note",
+          "label": "Open new notes in",
+          "name": "newNoteOpenMode",
+          "required": false,
+          "title": "Opening Notes",
           "type": "dropdown",
           "data": [
             {
-              "title": "gpt4-turbo",
-              "value": "openai-gpt-4-turbo"
+              "title": "Don't Open Note",
+              "value": "no"
             },
             {
-              "title": "gpt4",
-              "value": "openai-gpt-4"
+              "title": "In Main Window",
+              "value": "main"
             },
             {
-              "title": "gpt3-turbo",
-              "value": "openai-gpt-3.5-turbo"
-            },
-            {
-              "title": "perplexity-medium",
-              "value": "perplexity-sonar-medium-online"
-            },
-            {
-              "title": "perplexity-small",
-              "value": "perplexity-sonar-small-online"
-            },
-            {
-              "title": "claud-haiku",
-              "value": "anthropic-claude-haiku"
+              "title": "In New Window",
+              "value": "new"
             }
           ]
+        },
+        {
+          "default": false,
+          "description": "When creating a new note, prepend time and date",
+          "label": "Prepend time and date",
+          "name": "prependTimeAndDate",
+          "required": false,
+          "type": "checkbox"
+        },
+        {
+          "default": false,
+          "description": "When creating a new note, prepend time and date",
+          "label": "Pin note in notes list",
+          "name": "pinNote",
+          "required": false,
+          "type": "checkbox"
         }
       ]
     },
