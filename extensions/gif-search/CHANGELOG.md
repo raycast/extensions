@@ -1,5 +1,10 @@
 # GIF Search Changelog
 
+## [Better Results] - 2024-04-19
+
+- The extension now uses GIPHY Pro and Tenor v2 to have better GIF results
+- The codebase has largely been revamped to make it easier to maintain
+
 ## [Use native pagination] - 2024-03-12
 
 - Switched to using native pagination for better scrolling experience

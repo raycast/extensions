@@ -124,22 +124,6 @@
           "value": "downloadFile"
         }
       ]
-    },
-    {
-      "name": "giphy-apiKey",
-      "type": "password",
-      "required": false,
-      "title": "GIPHY API Key",
-      "placeholder": "GIPHY API Key (optional)",
-      "description": "API Key used to perform searches on GIPHY. You can get one for free at https://developers.giphy.com"
-    },
-    {
-      "name": "tenor-apiKey",
-      "type": "password",
-      "required": false,
-      "title": "Tenor API Key",
-      "placeholder": "Tenor API Key (optional)",
-      "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
     }
   ],
   "dependencies": {
