@@ -15,10 +15,10 @@ export default function Command() {
 
   const filteredAliases = useMemo(() => {
     const predicate = (alias: AliasResponse) =>
-      alias.name?.toLowerCase().includes(searchText.toLowerCase())
-      || alias.email.toLowerCase().includes(searchText.toLowerCase())
-      || alias.note?.toLowerCase().includes(searchText.toLowerCase());
-  
+      alias.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      alias.email.toLowerCase().includes(searchText.toLowerCase()) ||
+      alias.note?.toLowerCase().includes(searchText.toLowerCase());
+
     switch (filter) {
       case "all":
         return aliases.filter(predicate);
