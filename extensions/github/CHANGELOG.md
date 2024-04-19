@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Updated metadata images] - 2024-04-19
+
+- Updated outdated metadata images.
+
 ## [Fix recently closed issue] - 2024-04-18
 
 - Only one issue or one PR was previously shown in `My Pull Requests` or `My Issues`. It's not the case anymore!
