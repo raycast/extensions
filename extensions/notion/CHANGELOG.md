@@ -1,5 +1,13 @@
 # Notion Changelog
 
+## [Support inline Markdown for text properties] - 2024-04-18
+
+- Add a preference that enables the use of inline Markdown on text properties when creating a new database page.
+
+## [Add Pagination] - 2024-04-17
+
+- Add pagination to Search Page command
+
 ## [Add Text to Page command] - 2024-04-11
 
 - Add command to append or prepend text to a page.

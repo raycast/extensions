@@ -1,5 +1,7 @@
 # YouTube Downloader Changelog
 
+## [Update FFmpeg installation docs] - 2024-04-17
+
 ## [Error handling for livestreams] - 2023-10-28
 
 - Show unsupported error message for livestreams links

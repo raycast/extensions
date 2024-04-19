@@ -12,7 +12,7 @@ The easiest way to install this is using [Homebrew](https://brew.sh/). After you
 following command in your terminal:
 
 ```bash
-brew install ffmpeg
+brew install ffmpeg@6
 ```
 
 Depending on your macOS version, the package might be located in a different path than the one set by the extension. To

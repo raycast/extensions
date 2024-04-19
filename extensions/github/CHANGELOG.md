@@ -1,8 +1,12 @@
 # GitHub Changelog
 
-## [Open in Browser as primary action setting] - 2024-04-13
+## [Open in Browser as primary action setting] - 2024-04-19
 
-- You can now set Open in Browser as a primary action for Pull Request search.
+- You can now set Open in Browser as a primary action for Pull Request searches.
+
+## [Fix recently closed issue] - 2024-04-18
+
+- Only one issue or one PR was previously shown in `My Pull Requests` or `My Issues`. It's not the case anymore!
 
 ## [Opens notification discussion links] - 2024-04-08
 

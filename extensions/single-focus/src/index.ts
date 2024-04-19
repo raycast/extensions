@@ -10,7 +10,7 @@ export default async function main() {
     message: "You will not be able to undo this action.",
     rememberUserChoice: true,
     primaryAction: {
-      title: "Confirm",
+      title: "Do It",
       style: Alert.ActionStyle.Destructive,
     },
   };
