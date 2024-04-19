@@ -47,7 +47,7 @@ export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇮🇷", title: "Persian", value: "fa" },
   { icon: "🇦🇪", title: "Arabic", value: "ar" },
   { icon: "🇵🇱", title: "Polish", value: "pl" },
-  { icon: "🇸🇽", title: "Dutch", value: "nl" },
+  { icon: "🇳🇱", title: "Dutch", value: "nl" },
   { icon: "🇹🇷", title: "Turkish", value: "tr" },
   { icon: "🇬🇷", title: "Greek", value: "el" },
   { icon: "🇺🇦", title: "Ukraine", value: "uk" },
