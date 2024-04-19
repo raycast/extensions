@@ -1,5 +1,8 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Get the current activity] - 2024-04-17
+- Get the current activity name and put it in your clipboard
+
 ## [Add preference for Android Sdk] - 2024-02-23
 - Add preference to set Android Sdk path
 

@@ -66,11 +66,11 @@ export const Supports = () => (
   <>
     <Action.OpenInBrowser
       title="Request a New Icon"
-      url="https://github.com/simple-icons/simple-icons/issues/new?assignees=&labels=new+icon&template=icon_request.yml"
+      url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
     />
     <Action.OpenInBrowser
       title="Report an Oudated Icon"
-      url="https://github.com/simple-icons/simple-icons/issues/new?assignees=&labels=icon+outdated&template=icon_update.yml"
+      url="https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml"
     />
   </>
 );
