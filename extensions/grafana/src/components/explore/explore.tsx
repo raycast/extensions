@@ -1,6 +1,5 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useFetch, useFrecencySorting } from "@raycast/utils";
-import { useEffect, useState } from "react";
 import { preferences } from "../../helpers/preferences";
 import { z } from "zod";
 
@@ -72,7 +71,7 @@ export function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Open datasource"
+                title="Open Datasource"
                 url={createExploreLink(datasource.uid)}
                 onOpen={() => visitItem(datasource)}
               />

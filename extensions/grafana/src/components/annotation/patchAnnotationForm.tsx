@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: remove any types and be fully-type safe
 import { ActionPanel, showToast, Toast, Form, SubmitFormAction, popToRoot } from "@raycast/api";
 import { getErrorMessage } from "../../utils";
 
@@ -26,7 +28,7 @@ async function handleSubmit(values: Values, annotationId: number) {
       {
         text: values.text,
       },
-      annotationId
+      annotationId,
     );
     await showToast(Toast.Style.Success, "Annotation updated", "Annotation update successful");
 
