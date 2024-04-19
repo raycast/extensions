@@ -9,14 +9,14 @@ interface RecentDoc {
 }
 
 interface QueryResult {
-  data: RecentDoc[]
+  data: RecentDoc[];
 }
 
 async function getRecentDocs(apiKey: string) {
   const res = await fetch(`${SERVER}/v1/docs/recent?api_key=${apiKey}`, {
     headers: {},
   });
-  return (await res.json() as QueryResult).data;
+  return ((await res.json()) as QueryResult).data;
 }
 
 export default function SearchDocs() {
