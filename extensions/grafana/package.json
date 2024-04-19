@@ -32,7 +32,7 @@
       "name": "explore",
       "title": "Explore",
       "subtitle": "Grafana",
-      "description": "Open the explore section",
+      "description": "Open the explore section with the selected datasource",
       "mode": "view"
     }
   ],
