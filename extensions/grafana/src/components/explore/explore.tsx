@@ -60,7 +60,7 @@ export function Command() {
   };
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Use a datasource..." throttle>
+    <List isLoading={isLoading} searchBarPlaceholder="Explore with a datasource..." throttle>
       {sortedData.map((datasource) => (
         <List.Item
           key={datasource.id}
@@ -71,7 +71,7 @@ export function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Open Datasource"
+                title="Explore with this datasource"
                 url={createExploreLink(datasource.uid)}
                 onOpen={() => visitItem(datasource)}
               />
