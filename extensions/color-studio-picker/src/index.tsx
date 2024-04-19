@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSelectedText, List } from "@raycast/api";
-import { findColor, useColorSections } from "./hooks";
+import { useColorSections } from "./hooks";
 import colors from "./colors";
 import { LaunchProps, DropdownProps } from "./types";
 
@@ -36,7 +36,7 @@ export default function Command(props: LaunchProps) {
   }, [color]);
 
   return (
-    <List 
+    <List
       searchText={searchText}
       searchBarPlaceholder="Filter colors by name or HEX code"
       onSearchTextChange={setSearchText}
