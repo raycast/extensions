@@ -5,21 +5,19 @@ import { URLSearchParams } from "node:url";
 import { useDebounce } from "@uidotdev/usehooks";
 
 const Command = () => {
-  const API = "https://itunes.apple.com/search?media=software&entity=software"
-  const [searchText, setSearchText] = useState("")
+  const API = "https://itunes.apple.com/search?media=software&entity=software";
+  const [searchText, setSearchText] = useState("");
   const debouncedSearchTerm = useDebounce(searchText, 1000);
-  
-  const queryUrl = debouncedSearchTerm.length === 0 ? "" : API + "&" + new URLSearchParams({ term: debouncedSearchTerm })
-  
-  const { data, isLoading } = useFetch(
-    queryUrl,
-    {
-      execute: queryUrl !== "",
-      parseResponse: parseFetchResponse,
-    },
-  )
 
-  console.log(searchText, queryUrl)
+  const queryUrl =
+    debouncedSearchTerm.length === 0 ? "" : API + "&" + new URLSearchParams({ term: debouncedSearchTerm });
+
+  const { data, isLoading } = useFetch(queryUrl, {
+    execute: queryUrl !== "",
+    parseResponse: parseFetchResponse,
+  });
+
+  console.log(searchText, queryUrl);
 
   return (
     <List
@@ -29,13 +27,11 @@ const Command = () => {
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((searchResult) => (
-          <SearchListItem key={searchResult.name} searchResult={searchResult} />
-        ))}
+        {data?.map((searchResult) => <SearchListItem key={searchResult.name} searchResult={searchResult} />)}
       </List.Section>
     </List>
   );
-}
+};
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
@@ -63,15 +59,14 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 
 /** Parse the response from the fetch query into something we can display */
 async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as
-    | {
-        results: {
-          trackName: string;
-          description?: string;
-          sellerName?: string;
-          trackViewUrl: string;
-        }[];
-      };
+  const json = (await response.json()) as {
+    results: {
+      trackName: string;
+      description?: string;
+      sellerName?: string;
+      trackViewUrl: string;
+    }[];
+  };
 
   if (!response.ok) {
     throw new Error(response.statusText);
@@ -94,4 +89,4 @@ interface SearchResult {
   url: string;
 }
 
-export default Command
+export default Command;
