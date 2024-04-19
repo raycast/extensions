@@ -11,7 +11,7 @@ import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
 import { removeGifFromCache } from "../lib/cachedGifs";
 import { get, remove, save } from "../lib/localGifs";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 
 interface GifActionsProps {
   item: IGif;
@@ -37,23 +37,38 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
   };
 
   const removeFromRecents = async () => {
-    if (service) {
-      await remove(item, service, "recent");
-      await mutate();
+    try {
+      if (service) {
+        await remove(item, service, "recent");
+        await mutate();
+        await showToast({ style: Toast.Style.Success, title: "Removed GIF from recents" });
+      }
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not remove GIF from recents" });
     }
   };
 
   const addToFav = async () => {
-    if (service) {
-      await save(item, service, "favs");
-      await mutate();
+    try {
+      if (service) {
+        await save(item, service, "favs");
+        await mutate();
+        await showToast({ style: Toast.Style.Success, title: "Added GIF to favorites" });
+      }
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not add GIF to favorites" });
     }
   };
 
   const removeFav = async () => {
-    if (service) {
-      await remove(item, service, "favs");
-      await mutate();
+    try {
+      if (service) {
+        await remove(item, service, "favs");
+        await mutate();
+        await showToast({ style: Toast.Style.Success, title: "Removed GIF from favorites" });
+      }
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not remove GIF from favorites" });
     }
 
     // Remove the GIF from the cache if it exists
@@ -119,7 +134,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem, mutat
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to download GIF",
+        title: "Could not download GIF",
         message: item.download_name,
       });
     }

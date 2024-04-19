@@ -1,4 +1,4 @@
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 
 import { ServiceName, GIF_SERVICE } from "../preferences";
 import giphy from "../models/giphy";
@@ -32,7 +32,7 @@ type UseSearchAPIParams = {
 };
 
 export default function useSearchAPI({ term, service, limit = 10 }: UseSearchAPIParams) {
-  return usePromise(
+  return useCachedPromise(
     (term: string, service?: ServiceName) =>
       async ({ cursor, page }) => {
         if (!service) {

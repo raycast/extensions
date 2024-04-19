@@ -6,38 +6,33 @@ import dedupe from "../lib/dedupe";
 
 type ItemSize = "small" | "medium" | "large";
 
-async function getLocalGifs(type: LocalType, service?: ServiceName, itemSize?: ItemSize) {
-  if (!service) return [];
-
-  const recent = await get(service, type);
-  // Display the first 2 rows only
-  const ids = Array.from(recent).slice(0, GRID_COLUMNS[itemSize ?? "medium"] * 2);
-
-  const api = await getAPIByServiceName(service);
-  if (api === null) return [];
-
-  const gifs = await api.gifs(ids);
-  return dedupe(gifs);
-}
-
 export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize) {
   const isAllFavsOrRecents = service === "favorites" || service === "recents";
 
   const {
-    data: recentGifs,
-    isLoading: isLoadingRecentGifs,
-    mutate: mutateRecentGifs,
-  } = useCachedPromise((service) => getLocalGifs("recent", service, itemSize), [service], {
-    execute: !isAllFavsOrRecents,
-  });
+    data: localGifs,
+    isLoading: isLoadingLocalGifs,
+    mutate: mutateLocalGifs,
+  } = useCachedPromise(
+    async (service) => {
+      if (!service) return [];
 
-  const {
-    data: favoriteGifs,
-    isLoading: isLoadingFavoriteGifs,
-    mutate: mutateFavoriteGifs,
-  } = useCachedPromise((service) => getLocalGifs("favs", service, itemSize), [service], {
-    execute: !isAllFavsOrRecents,
-  });
+      const favs = await get(service, "favs");
+      const recent = (await get(service, "recent")).filter((id) => !favs.includes(id));
+
+      // Display the first 2 rows only
+      const favIds = Array.from(favs).slice(0, GRID_COLUMNS[itemSize ?? "medium"] * 2);
+      const recentIds = Array.from(recent).slice(0, GRID_COLUMNS[itemSize ?? "medium"] * 2);
+
+      const api = await getAPIByServiceName(service);
+      if (api === null) return [];
+
+      const [favoriteGifs, recentGifs] = await Promise.all([api.gifs(favIds), api.gifs(recentIds)]);
+      return { recentGifs: dedupe(recentGifs), favoriteGifs: dedupe(favoriteGifs) };
+    },
+    [service],
+    { execute: !isAllFavsOrRecents },
+  );
 
   const {
     data: allGifs,
@@ -67,18 +62,14 @@ export default function useLocalGifs(service?: ServiceName, itemSize?: ItemSize)
   );
 
   async function mutate() {
-    if (service === "favorites" || service === "recents") {
-      return mutateAllGifs();
-    }
-    mutateRecentGifs();
-    mutateFavoriteGifs();
+    isAllFavsOrRecents ? mutateAllGifs() : mutateLocalGifs();
   }
 
   return {
-    recentGifs,
-    favoriteGifs,
+    favoriteGifs: localGifs && "favoriteGifs" in localGifs ? localGifs.favoriteGifs : [],
+    recentGifs: localGifs && "recentGifs" in localGifs ? localGifs.recentGifs : [],
     allGifs,
-    isLoading: isLoadingRecentGifs || isLoadingFavoriteGifs || isLoadingAllGifs,
+    isLoading: isLoadingLocalGifs || isLoadingAllGifs,
     mutate,
   };
 }

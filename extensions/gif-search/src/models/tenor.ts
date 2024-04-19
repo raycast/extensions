@@ -67,7 +67,6 @@ export default async function tenor() {
         reqUrl.searchParams.set("pos", opt.next);
       }
 
-      console.log(reqUrl.toString());
       const response = await fetch(reqUrl.toString());
       if (!response.ok) {
         throw new Error("Could not get trending gifs from Tenor");
