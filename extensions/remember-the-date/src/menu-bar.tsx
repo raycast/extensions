@@ -1,7 +1,6 @@
 import { MenuBarExtra, launchCommand, LaunchType, Icon } from "@raycast/api";
 import moment from "moment";
 import { useCachedPromise } from "@raycast/utils";
-import { getShortcut } from "./utils";
 import { getFormattedList } from "./list";
 
 export default function Command() {
