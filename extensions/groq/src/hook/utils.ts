@@ -2,8 +2,9 @@ import { encode } from "@nem035/gpt-3-encoder";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Mixtral 8x7b 32k", id: "mixtral-8x7b-32768" },
-  { name: "Llama2 70B 4k", id: "llama2-70b-4096" },
+  { name: "Llama3 8B 8k", id: "llama3-8b-8192" },
+  { name: "Llama3 70B 8k", id: "llama3-70b-8192" },
+  { name: "Mixtral 8x7B 32k", id: "mixtral-8x7b-32768" },
   { name: "Gemma 7B 8k", id: "gemma-7b-it" },
 ];
 
@@ -29,10 +30,11 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
     case "mixtral-8x7b-32768":
       price = ((prompt_token * 0.27) / 1_000_000 + (output_token * 0.27) / 1_000_000) * 100;
       break;
-    case "llama2-70b-4096":
+    case "llama3-70b-8192":
       price = ((prompt_token * 0.7) / 1_000_000 + (output_token * 0.8) / 1_000_000) * 100;
       break;
     case "gemma-7b-it":
+    case "llama3-8b-8192":
       price = ((prompt_token * 0.1) / 1_000_000 + (output_token * 0.1) / 1_000_000) * 100;
       break;
   }
