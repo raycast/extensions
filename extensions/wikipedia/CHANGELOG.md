@@ -1,5 +1,9 @@
 # Wikipedia Changelog
 
+## [Tiny update] - 2024-04-19
+
+- Updated the flag for the `Dutch` language
+
 ## [Updates] - 2024-04-10
 
 - Update dependencies
