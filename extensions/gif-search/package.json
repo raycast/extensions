@@ -79,7 +79,7 @@
       "name": "maxResults",
       "type": "textfield",
       "required": false,
-      "default": "25",
+      "default": "20",
       "title": "Max Results",
       "description": "Max number of results to return for a search"
     },

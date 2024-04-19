@@ -39,7 +39,7 @@ export function getDefaultAction(): string {
 }
 
 export function getMaxResults(): number {
-  return parseInt(preferences.maxResults, 10) ?? 50;
+  return parseInt(preferences.maxResults, 10) ?? 20;
 }
 
 export const GRID_COLUMNS: { [key: string]: number } = {

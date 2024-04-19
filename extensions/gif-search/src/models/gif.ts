@@ -33,8 +33,8 @@ export interface IGif {
 export type APIOpt = { offset?: number; limit?: number; next?: string };
 
 export interface IGifAPI {
-  search: (term: string, opt?: APIOpt) => Promise<{ results: IGif[]; next: string }>;
-  trending: (opt?: APIOpt) => Promise<{ results: IGif[]; next: string }>;
+  search: (term: string, opt?: APIOpt) => Promise<{ results: IGif[]; next?: string }>;
+  trending: (opt?: APIOpt) => Promise<{ results: IGif[]; next?: string }>;
   gifs: (id: string[]) => Promise<IGif[]>;
 }
 

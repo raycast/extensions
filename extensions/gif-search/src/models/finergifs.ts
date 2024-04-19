@@ -26,11 +26,11 @@ export default function finergifs() {
     async search(term: string, opt?: APIOpt) {
       const { offset = 0, limit } = opt || {};
       const results = await api.search(term, { offset, limit });
-      return { results: results.results.map(mapFinerGifsResponse), next: "" };
+      return { results: results.results.map(mapFinerGifsResponse) };
     },
 
     async trending() {
-      return { results: [], next: "" };
+      return { results: [] };
     },
 
     async gifs(ids: string[]) {
@@ -39,7 +39,7 @@ export default function finergifs() {
       }
 
       const results = await api.gifs(ids);
-      return { results: results.results.map(mapFinerGifsResponse) };
+      return results.results.map(mapFinerGifsResponse);
     },
   };
 }
