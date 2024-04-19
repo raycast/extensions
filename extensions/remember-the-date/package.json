@@ -9,6 +9,12 @@
     "samuelkraft"
   ],
   "license": "MIT",
+  "keywords": [
+    "date",
+    "remember",
+    "countdown",
+    "important"
+  ],
   "commands": [
     {
       "name": "index",
