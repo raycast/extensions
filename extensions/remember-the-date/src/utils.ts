@@ -1,4 +1,4 @@
-import { Keyboard, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
+import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { Item } from "./types";
 
 export function pluralize(length: number): string {

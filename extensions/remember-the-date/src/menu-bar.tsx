@@ -4,13 +4,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { getFormattedList } from "./list";
 
 export default function Command() {
-  const { data: connectionsList, isLoading } = useCachedPromise(getFormattedList, []);
+  const { data: datesList, isLoading } = useCachedPromise(getFormattedList, []);
 
-  if (!connectionsList) {
+  if (!datesList) {
     return <MenuBarExtra isLoading={isLoading} />;
   }
 
-  const upcomingDates = connectionsList[0].items;
+  const upcomingDates = datesList[0].items;
   const nextDate = upcomingDates[0];
 
   if (!nextDate) {
@@ -24,7 +24,7 @@ export default function Command() {
   return (
     <MenuBarExtra icon={nextDate.icon} title={untilNextDate}>
       <MenuBarExtra.Section>
-        {upcomingDates.map((item, index) => {
+        {upcomingDates.map((item) => {
           const until = moment(item.date).fromNow();
           return (
             <MenuBarExtra.Item
@@ -32,7 +32,13 @@ export default function Command() {
               icon={{ source: item.icon, tintColor: item.color }}
               title={item.name}
               subtitle={until}
-              onAction={() => launchCommand({ name: "list", type: LaunchType.UserInitiated })}
+              onAction={async () => {
+                try {
+                  await launchCommand({ name: "list", type: LaunchType.UserInitiated });
+                } catch (error) {
+                  console.error("Failed to launch command:", error);
+                }
+              }}
             />
           );
         })}
@@ -41,7 +47,13 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Create Date"
           icon={Icon.PlusCircle}
-          onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "index", type: LaunchType.UserInitiated });
+            } catch (error) {
+              console.error("Failed to launch command:", error);
+            }
+          }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

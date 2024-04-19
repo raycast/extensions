@@ -7,7 +7,7 @@ import { getItems, saveItems } from "./storage";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const { data: connectionsList, isLoading, mutate } = useCachedPromise(getFormattedList, []);
+  const { data: datesList, isLoading, mutate } = useCachedPromise(getFormattedList, []);
 
   async function handleCreate(item: Item) {
     let items: Item[] = await getItems();
@@ -31,7 +31,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       <List.EmptyView title="No dates added" description="Add a date to get started" />
-      {connectionsList?.map((section) => {
+      {datesList?.map((section) => {
         return (
           <List.Section
             title={section.title}
