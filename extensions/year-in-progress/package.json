@@ -19,7 +19,7 @@
   "commands": [
     {
       "name": "year-in-progress",
-      "title": "Year in Progress",
+      "title": "Progress",
       "description": "Displays the year in progress inline.",
       "mode": "no-view",
       "interval": "4h"

@@ -19,6 +19,7 @@ function getLatestAllProgress(allProgress: Progress[]) {
         shown: updatedProgress?.menubar.shown,
         title: progress.menubar.title,
       },
+      showAsCommand: updatedProgress?.showAsCommand,
     };
   });
   const userProgress = allProgress
@@ -29,6 +30,26 @@ function getLatestAllProgress(allProgress: Progress[]) {
     }));
   return [...latestDefaultProgress, ...userProgress];
 }
+
+export const getLatestXProgress = async () => {
+  const storedAllProgress = await LocalStorage.getItem<string>(STORAGE_KEY);
+  if (!storedAllProgress) {
+    return { allProgress: defaultProgress, currMenubarProgressTitle: defaultProgress[0].title };
+  }
+
+  try {
+    const xProgress: Omit<State, "isLoading"> = JSON.parse(storedAllProgress);
+    return {
+      ...xProgress,
+      allProgress: getLatestAllProgress(xProgress.allProgress),
+    };
+  } catch (err) {
+    return {
+      allProgress: defaultProgress,
+      currMenubarProgressTitle: defaultProgress[0].title,
+    };
+  }
+};
 
 export function useLocalStorageProgress(): [
   State,
@@ -79,26 +100,6 @@ export function useLocalStorageProgress(): [
       JSON.stringify({ allProgress: state.allProgress, currMenubarProgressTitle: state.currMenubarProgressTitle })
     );
   }, [state.allProgress, state.currMenubarProgressTitle]);
-
-  const getLatestXProgress = async () => {
-    const storedAllProgress = await LocalStorage.getItem<string>(STORAGE_KEY);
-    if (!storedAllProgress) {
-      return { allProgress: defaultProgress, currMenubarProgressTitle: defaultProgress[0].title };
-    }
-
-    try {
-      const xProgress: Omit<State, "isLoading"> = JSON.parse(storedAllProgress);
-      return {
-        ...xProgress,
-        allProgress: getLatestAllProgress(xProgress.allProgress),
-      };
-    } catch (err) {
-      return {
-        allProgress: defaultProgress,
-        currMenubarProgressTitle: defaultProgress[0].title,
-      };
-    }
-  };
 
   return [state, setState, getLatestXProgress];
 }

@@ -76,6 +76,16 @@ export default function XInProgress() {
     await launchCommand({ name: "index", type: LaunchType.UserInitiated });
   };
 
+  const setShowAsCommand = async (targetProgress: Progress) => {
+    setState((prev) => ({
+      ...prev,
+      allProgress: prev.allProgress.map((progress) => {
+          return { ...progress, showAsCommand: progress.title === targetProgress.title };
+      }),
+    }));
+    await launchCommand({ name: "year-in-progress", type: LaunchType.Background });
+  }
+
   const onEditProgress = (targetProgress: Progress) => {
     navigation.push(
       <AddOrEditProgress
@@ -203,7 +213,7 @@ export default function XInProgress() {
               key={progress.title}
               title={progress.title}
               subtitle={getSubtitle(progress.progressNum)}
-              icon={getIcon(progress.progressNum)}
+              icon={getIcon(progress.progressNum, progress.showAsCommand)}
               detail={<ProgressDetail progress={progress} />}
               actions={
                 <Actions
@@ -211,6 +221,7 @@ export default function XInProgress() {
                   onShowingDetails={onShowingDetails}
                   togglePinProgress={togglePinProgress}
                   toggleShowInMenubar={toggleShowInMenubar}
+                  setShowAsCommand={setShowAsCommand}
                   onEditProgress={onEditProgress}
                   onAddProgress={onAddProgress}
                   onDeleteProgress={onDeleteProgress}
@@ -231,7 +242,7 @@ export default function XInProgress() {
                 key={progress.title}
                 title={progress.title}
                 subtitle={getSubtitle(progress.progressNum)}
-                icon={getIcon(progress.progressNum)}
+                icon={getIcon(progress.progressNum, progress.showAsCommand)}
                 detail={<ProgressDetail progress={progress} />}
                 actions={
                   <Actions
@@ -239,6 +250,7 @@ export default function XInProgress() {
                     onShowingDetails={onShowingDetails}
                     togglePinProgress={togglePinProgress}
                     toggleShowInMenubar={toggleShowInMenubar}
+                    setShowAsCommand={setShowAsCommand}
                     onEditProgress={onEditProgress}
                     onAddProgress={onAddProgress}
                     onDeleteProgress={onDeleteProgress}
@@ -257,6 +269,7 @@ function Actions(props: {
   onShowingDetails: () => void;
   togglePinProgress: (targetProgress: Progress) => Promise<void>;
   toggleShowInMenubar: (targetProgress: Progress) => Promise<void>;
+  setShowAsCommand: (targetProgress: Progress) => void;
   onEditProgress: (targetProgress: Progress) => void;
   onAddProgress: () => void;
   onDeleteProgress: (targetTitle: string) => Promise<void>;
@@ -266,6 +279,7 @@ function Actions(props: {
     onShowingDetails,
     togglePinProgress,
     toggleShowInMenubar,
+    setShowAsCommand,
     onEditProgress,
     onAddProgress,
     onDeleteProgress,
@@ -287,6 +301,13 @@ function Actions(props: {
           icon={progress.menubar.shown ? Icon.EyeDisabled : Icon.Eye}
           onAction={async () => {
             await toggleShowInMenubar(progress);
+          }}
+        />
+        <Action
+          title={`${progress.showAsCommand ? "Hide as Command" : "Show as Command"}`}
+          icon={progress.showAsCommand ? Icon.EyeDisabled : Icon.Eye}
+          onAction={async () => {
+            await setShowAsCommand(progress);
           }}
         />
         {progress.type === "user" && (
