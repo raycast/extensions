@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Nif Fresquinho",
+	 "title": "Copy Portuguese Tax Number",
+      "subtitle": "Nif Fresquinho",
       "description": "Template for running a script without any view",
       "mode": "no-view"
     }
