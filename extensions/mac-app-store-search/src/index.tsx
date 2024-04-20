@@ -23,7 +23,7 @@ const Command = () => {
     <List
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search mac app store..."
+      searchBarPlaceholder="Search Mac App Store..."
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
