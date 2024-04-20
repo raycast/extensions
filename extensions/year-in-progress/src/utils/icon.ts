@@ -1,15 +1,14 @@
 import { getProgressIcon } from "@raycast/utils";
 
 export function getIcon(progressNum: number, highlight = false) {
-  if(highlight) {
+  if (highlight) {
     return {
       source: getProgressIcon(progressNum / 100),
     };
-  }else {
+  } else {
     return {
       source: getProgressIcon(progressNum / 100),
       tintColor: { dark: "#E6E6E6", light: "#262626", adjustContrast: false },
     };
   }
-  
 }

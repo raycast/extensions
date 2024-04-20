@@ -6,11 +6,11 @@ import { getLatestXProgress } from "./hooks/use-local-storage-progress";
 export default async function Command() {
   const storedAllProgress = await getLatestXProgress();
   let progress = storedAllProgress.allProgress.find((p) => p.showAsCommand) as Progress;
-  if(!progress) {
+  if (!progress) {
     progress = storedAllProgress.allProgress.find((p) => p.title === "Year In Progress") as Progress;
   }
   const progressBar = getSubtitle(progress.progressNum);
-  
+
   updateCommandMetadata({ subtitle: `${progress.menubar.title} ${progressBar}` });
 
   if (environment.launchType === LaunchType.UserInitiated) {

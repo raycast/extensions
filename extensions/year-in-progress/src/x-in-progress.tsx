@@ -80,11 +80,11 @@ export default function XInProgress() {
     setState((prev) => ({
       ...prev,
       allProgress: prev.allProgress.map((progress) => {
-          return { ...progress, showAsCommand: progress.title === targetProgress.title };
+        return { ...progress, showAsCommand: progress.title === targetProgress.title };
       }),
     }));
     await launchCommand({ name: "year-in-progress", type: LaunchType.Background });
-  }
+  };
 
   const onEditProgress = (targetProgress: Progress) => {
     navigation.push(
