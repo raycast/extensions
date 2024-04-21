@@ -192,7 +192,7 @@ export function useRecentPages() {
 }
 
 export function useSearchPages(query: string) {
-  return useCachedPromise((query) => search(query), [query], {
+  return useCachedPromise(search, [query], {
     keepPreviousData: true,
   });
 }

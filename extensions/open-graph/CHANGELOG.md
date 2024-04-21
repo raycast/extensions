@@ -1,5 +1,9 @@
 # Open Graph Changelog
 
+## [Fix image urls]
+
+- Fix the link to the images in OpenGraph
+
 ## [Fix meta tag name and property issue] - 2023-12-19
 
 - Fix meta tag name and property issue

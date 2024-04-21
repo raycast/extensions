@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix recently closed issue] - 2024-04-18
+
+- Only one issue or one PR was previously shown in `My Pull Requests` or `My Issues`. It's not the case anymore!
+
 ## [Opens notification discussion links] - 2024-04-08
 
 - Opens GitHub links for notifications that point to a discussion directly.
