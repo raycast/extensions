@@ -24,7 +24,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search in Owledge..." throttle>
-      {data?.length == 0 ? (
+      {(data?.length == 0 && !isLoading) ? (
         <List.EmptyView
           icon={{ source: "http://search.owledge.app/images/logo.svg" }}
           title={`No result found for "${searchText}"`}
