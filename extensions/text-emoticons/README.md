@@ -27,7 +27,7 @@
   </p>
 
   <p>
-    <img src="./metadata/text-emoticons-2.png" />
+    <img src="./media/screenshot.png" />
   </p>
 
 </div>
