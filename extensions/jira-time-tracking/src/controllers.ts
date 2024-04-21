@@ -4,12 +4,9 @@ import { issuesValidator, paginationValidator, projectsValidator } from "./valid
 import { getPreferenceValues } from "@raycast/api";
 import { Project } from "./types";
 
-// Define the structure for user preferences
+// Helper to define the structure for isJiraCloud
 type UserPreferences = {
   isJiraCloud: boolean;
-  domain: string;
-  username: string;
-  token: string;
 };
 
 const userPrefs = getPreferenceValues<UserPreferences>();
@@ -92,7 +89,7 @@ export const postTimeLog = async (timeSpentSeconds: number, issueId: string, des
   const basePath = `/rest/api/3/issue/${issueId}/worklog?notifyUsers=false`;
   const apiPath = getApiPath(basePath);
 
-  // Determine the comment format based on whether Jira is cloud-based
+  // Determine the comment format based on whether Jira instance is cloud-based
   const comment = userPrefs.isJiraCloud
     ? {
         type: "doc",
