@@ -5,7 +5,7 @@ import { dateSortPredicate } from "../utils/dateSortPredicate";
 
 export function useFetchStoredReminders(
   setReminders: (reminders: Reminder[]) => void,
-  setIsLoading: (isLoading: boolean) => void
+  setIsLoading: (isLoading: boolean) => void,
 ) {
   useEffect(() => {
     setIsLoading(true);

@@ -249,3 +249,13 @@ extension EKCalendar {
       isDefault: defaultCalendarId != nil ? isDefault : false)
   }
 }
+
+extension EKEventStore {
+  func fetchReminders(matching predicate: NSPredicate) async -> [EKReminder]? {
+    await withCheckedContinuation { continuation in
+      fetchReminders(matching: predicate) { reminders in
+        continuation.resume(returning: reminders)
+      }
+    }
+  }
+}

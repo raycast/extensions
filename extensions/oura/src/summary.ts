@@ -3,21 +3,22 @@ import { updateCommandMetadata, getPreferenceValues } from "@raycast/api";
 import { today, tomorrow } from "./utils/datetime";
 import { ReadinessResponse, SleepResponse, ActivityResponse } from "./types";
 import { convertMeters, numberWithCommas } from "./utils/measurement";
+import { Preference } from "./types";
 
-const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues<Preference>();
 const config = {
   headers: {
     Authorization: `Bearer ${preferences.oura_token}`,
   },
 };
 
-const ouraUrl = `https://api.ouraring.com/v2/usercollection/`;
-
 interface AllStatus {
   readiness: ReadinessResponse;
   sleep: SleepResponse;
   activity: ActivityResponse;
 }
+
+const ouraUrl = `https://api.ouraring.com/v2/usercollection/`;
 
 const fetchData = async (): Promise<AllStatus | undefined> => {
   try {
@@ -42,13 +43,6 @@ const fetchData = async (): Promise<AllStatus | undefined> => {
 
 export default async function Command() {
   const data = await fetchData();
-  const subtitleData = {
-    readiness: data?.readiness.data.data[0].score as number,
-    sleep: data?.sleep.data.data[0].score as number,
-    activity: data?.activity.data.data[0].score as number,
-    steps: data?.activity.data.data[0].steps as number,
-    distance: data?.activity.data.data[0].equivalent_walking_distance as number,
-  };
 
   if (!data) {
     await updateCommandMetadata({
@@ -57,7 +51,13 @@ export default async function Command() {
     return;
   }
 
+  const readinessScore = data.readiness?.data?.data[0]?.score as number,
+    sleepScore = data.sleep?.data?.data[0]?.score as number,
+    activityScore = data.activity?.data?.data[0]?.score as number,
+    steps = data.activity?.data?.data[0]?.steps as number,
+    distance = data.activity?.data?.data[0]?.equivalent_walking_distance as number;
+
   await updateCommandMetadata({
-    subtitle: `Readiness: ${subtitleData.readiness} | Sleep: ${subtitleData.sleep} | Activity: ${subtitleData.activity} · Steps: ${numberWithCommas(subtitleData.steps)} · Distance: ${convertMeters(subtitleData.distance)}`,
+    subtitle: `Readiness: ${readinessScore ?? "N/A"} | Sleep: ${sleepScore ?? "N/A"} | Activity: ${activityScore ?? "N/A"} · Steps: ${numberWithCommas(steps ?? 0)} · Distance: ${convertMeters(distance ?? 0)}`,
   });
 }

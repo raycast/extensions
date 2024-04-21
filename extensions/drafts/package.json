@@ -27,9 +27,16 @@
     },
     {
       "name": "create-draft-from-clipboard",
-      "title": "Create Draft From Clipboard",
+      "title": "Create Draft from Clipboard",
       "subtitle": "Drafts",
       "description": "creates a new draft with the clipboard as content",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-draft-from-selection",
+      "title": "Create Draft from Selection",
+      "subtitle": "Drafts",
+      "description": "creates a new draft with the selected text as content",
       "mode": "no-view"
     },
     {
@@ -66,17 +73,40 @@
       "subtitle": "Drafts",
       "description": "easily create Raycast Quicklinks for Drafts",
       "mode": "view"
+    },
+    {
+      "name": "quicklink-open-draft-creator",
+      "title": "Create Open Draft Quicklink",
+      "subtitle": "Drafts",
+      "description": "create a Raycast Quicklinks to open a Draft",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Open Draft Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "uuid",
+          "placeholder": "UUID",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.68.0",
     "open": "^8.4.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
-    "@types/node": "^18.8.3",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

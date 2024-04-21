@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, Color } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, open } from "@raycast/api";
 import { dirname } from "node:path";
 import tildify from "./vendor/tildify";
 import { useRepos, useHasApplication } from "./hooks";
@@ -57,7 +57,17 @@ const Command = () => {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.Open title="Open in Fork" icon="icon.png" target={path} application={FORK_BUNDLE_ID} />
+                      <Action
+                        title="Open in Fork"
+                        icon="icon.png"
+                        onAction={async () => {
+                          // For some reason, if this action is used when Fork isn't running, it'll result in
+                          // the app being started, but not the repo actually being opened.
+                          // So to work around that, we call `open` twice 🤷
+                          await open(path, FORK_BUNDLE_ID);
+                          await open(path, FORK_BUNDLE_ID);
+                        }}
+                      />
                       <Action.OpenWith path={path} />
                       <Action.ShowInFinder path={path} />
                     </ActionPanel.Section>

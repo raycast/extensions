@@ -350,7 +350,7 @@ export function brewUpgradeCommand(upgradable: Cask | Formula | Nameable): strin
 
 export function brewName(item: Cask | Nameable): string {
   if (isCask(item)) {
-    return item.name ? item.name[0] : "Unknown";
+    return item.name && item.name[0] ? item.name[0] : "Unknown";
   } else {
     return item.name;
   }

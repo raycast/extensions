@@ -4,6 +4,8 @@ import { format } from "date-fns";
 import { useCachedPromise } from "@raycast/utils";
 import { moviedb } from "../api";
 import { formatMovieDuration } from "../helpers";
+import Posters from "./Posters";
+import Backdrops from "./Backdrops";
 
 export default function MovieDetail({ movie }: { movie: MovieResponse }) {
   const { data: details, isLoading: isLoadingDetails } = useCachedPromise(
@@ -28,6 +30,7 @@ export default function MovieDetail({ movie }: { movie: MovieResponse }) {
   const title = movie.title ?? movie.original_title ?? "Unknown Movie";
   const releaseDate = movie.release_date ? format(new Date(movie.release_date ?? ""), "PP") : "Unknown";
   const rating = movie.vote_average ? movie.vote_average.toFixed(1) : "No Ratings";
+  // const posterUrl = `https://image.tmdb.org/t/p/original/${movie.poster_path}`;
 
   const markdown = `# ${title}\n![Movie Banner](https://image.tmdb.org/t/p/w500/${movie.backdrop_path})\n\n${
     movie.overview ?? ""
@@ -77,7 +80,7 @@ export default function MovieDetail({ movie }: { movie: MovieResponse }) {
                 return (
                   <Detail.Metadata.TagList.Item
                     key={provider.provider_id}
-                    text={provider.logo_path}
+                    text={provider.provider_name}
                     icon={`https://image.tmdb.org/t/p/w500/${provider.logo_path}`}
                   />
                 );
@@ -102,6 +105,25 @@ export default function MovieDetail({ movie }: { movie: MovieResponse }) {
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
           ) : null}
+          {details?.homepage && (
+            <Action.OpenInBrowser
+              title="Open Homepage"
+              url={details.homepage}
+              shortcut={{ modifiers: ["cmd"], key: "h" }}
+            />
+          )}
+          <Action.Push
+            title="Show Posters"
+            icon={Icon.Image}
+            target={movie.id !== undefined && <Posters id={movie.id} type="movie" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+          />
+          <Action.Push
+            title="Show Backdrops"
+            icon={Icon.Image}
+            target={movie.id !== undefined && <Backdrops id={movie.id} type="movie" />}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          />
         </ActionPanel>
       }
     />

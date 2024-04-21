@@ -1,5 +1,22 @@
 # Changelog
 
+## [Feature] - 2024-04-09
+
+- Feature: Support custom model name in `Models` (Enable in preferences)
+
+## [Fix] - 2024-03-22
+
+- Fix: `Auto-load Text` and `Use Full Text Input` not working properly
+- Fix: `Ask` `onSelectionChange` race condition
+
+## [Chore] - 2024-03-09
+
+- Chore: Retrieve `Preferences` dynamically directly from the generated type definition
+
+## [Feature] - 2024-02-21
+
+- Feature: Integrate awesome-chatgpt-prompts project
+
 ## [Fix] - 2024-02-20
 
 - Fix: Inability to answer according to prompt rules or even refusal to answer

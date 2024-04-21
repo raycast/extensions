@@ -1,9 +1,15 @@
-import { LaunchType } from "@raycast/api";
+import { LaunchType, getPreferenceValues } from "@raycast/api";
 import { SonosDevice } from "@svrooij/sonos/lib";
 import { getActiveCoordinator } from "./core/sonos";
 import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
+interface Preferences {
+  volumeStep: string;
+}
+
 export default async function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+
   let coordinator: SonosDevice | undefined;
 
   try {
@@ -20,6 +26,6 @@ export default async function Command() {
       failureMessage: `Failed to launch "Set Active Group" automatically`,
     });
   } else {
-    await coordinator.SetRelativeGroupVolume(-2);
+    await coordinator.SetRelativeGroupVolume(-Number(preferences.volumeStep));
   }
 }

@@ -11,6 +11,7 @@ Remove the paywall from the selected or clipboard URL. It can be taken from the 
 - [12ft](https://12ft.io)
 - [Archive](https://archive.is)
 - [RemovePaywall](https://www.removepaywall.com)
+- [Freedium](https://freedium.cfd)
 
 ## Author
 

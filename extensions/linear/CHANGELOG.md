@@ -1,5 +1,14 @@
 # Linear Changelog
 
+## [Enhanced Notifications] - 2024-03-12
+
+- Notifications now include links to comments, project updates, and projects, making it easier to navigate directly to the relevant content in Linear.
+- You can now copy the URL of a notification's related item directly from the notification panel.
+
+## [Improve Notifications search] - 2024-03-01
+
+- It's possible to search your notifications by issue identifiers, issue titles, or usernames.
+
 ## [Fix images in issues] - 2024-02-02
 
 - Images are now properly loaded when looking at the details of an issue.

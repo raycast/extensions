@@ -1,5 +1,13 @@
 # Google Workspace Changelog
 
+## [Adds support to choose which browser to open a file with from Action Panel] - 2024-04-11
+
+- Adds the ability to select which browser to open a file in from the Action Panel.
+
+## [Added Copy Markdown Link and Copy HTML Link actions] - 2024-02-19
+
+- Add the ability to copy a link to a file list item to the clipboard as Markdown or HTML. This is useful for quickly sharing links in various applications.
+
 ## [Use OAuth utils] - 2024-02-12
 
 - Use new OAuth utils

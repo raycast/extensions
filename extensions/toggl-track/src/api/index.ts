@@ -20,4 +20,11 @@ export {
 } from "./clients";
 export { getMyTags, createTag, updateTag, deleteTag, type Tag } from "./tags";
 export { getMyTasks, type Task } from "./tasks";
-export { getMyTimeEntries, createTimeEntry, stopTimeEntry, getRunningTimeEntry, type TimeEntry } from "./timeEntries";
+export {
+  getMyTimeEntries,
+  createTimeEntry,
+  stopTimeEntry,
+  getRunningTimeEntry,
+  type TimeEntry,
+  type TimeEntryMetaData,
+} from "./timeEntries";

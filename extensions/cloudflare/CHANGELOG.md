@@ -1,5 +1,14 @@
 # Changelog
 
+## [Add copy actions] - 2024-02-28
+
+- Added copy actions in View Pages and View Sites commands. Fixed shortcuts of some actions.
+
+## [Update reserved shortcuts] - 2024-02-23
+
+- Updated `View Sites > Purge Files from Cache by URL` shortcut
+- Updated `View Pages > Open Page` shortcut
+
 ## [Add token generation link] - 2024-02-15
 
 - Added link in README to streamline onboarding

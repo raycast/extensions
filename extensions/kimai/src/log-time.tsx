@@ -14,6 +14,7 @@ import { useProjects } from "./hooks/useProjects";
 import { useActivities } from "./hooks/useActivities";
 import { saveTimesheet } from "./libs/api";
 import dayjs from "dayjs";
+import getPreferences from "./libs/preferences";
 
 interface FormValues {
   project: string;
@@ -26,6 +27,8 @@ interface FormValues {
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const LogTimeCommand = () => {
+  const { duration } = getPreferences();
+  const initialDuration = parseInt(duration);
   const { isLoading: isLoadingProjects, projects, visitItem: visitProject } = useProjects();
   const { isLoading: isLoadingActivities, activities, visitItem: visitActivity } = useActivities();
 
@@ -83,6 +86,7 @@ const LogTimeCommand = () => {
     },
     initialValues: {
       activityDate: new Date(),
+      duration: isNaN(initialDuration) ? "0" : String(initialDuration),
     },
   });
 
@@ -97,10 +101,18 @@ const LogTimeCommand = () => {
     >
       <Form.DatePicker title="Activity Date" type={Form.DatePicker.Type.Date} {...itemProps.activityDate} />
       <Form.TextField title="Duration (in minutes)" autoFocus {...itemProps.duration} />
-      <Form.Dropdown title="Project" {...itemProps.project}>
+      <Form.Dropdown
+        title="Project"
+        {...itemProps.project}
+        error={!projects.length ? "Please add projects first!" : itemProps.project.error}
+      >
         {projects?.map((p) => <Form.Dropdown.Item key={p.id} value={p.id} title={p.name} />)}
       </Form.Dropdown>
-      <Form.Dropdown title="Activity" {...itemProps.activity}>
+      <Form.Dropdown
+        title="Activity"
+        {...itemProps.activity}
+        error={!activities.length ? "Please add activities first!" : itemProps.activity.error}
+      >
         {activities
           ?.filter((a) => !a.project || String(a.project) === values.project)
           .map((a) => <Form.Dropdown.Item key={a.id} value={a.id} title={a.name} />)}

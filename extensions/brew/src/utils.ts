@@ -137,7 +137,9 @@ async function _fetchRemote<T>(remote: Remote<T>, attempt: number): Promise<T[]>
         streamArray(),
       ]);
       pipeline.on("data", (data) => {
-        value?.push(data.value);
+        if (data && typeof data === "object" && "value" in data) {
+          value.push(data.value);
+        }
       });
       pipeline.on("end", () => {
         resolve(value);

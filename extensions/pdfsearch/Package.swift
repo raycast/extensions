@@ -6,10 +6,11 @@ import PackageDescription
 let package = Package(
     name: "DocumentSearcher",
     platforms: [
-        .macOS(.v10_15)
+        .macOS(.v11)
     ],
     targets: [
         .executableTarget(name: "SearchDocument"),
-        .executableTarget(name: "DrawImage")
+        .executableTarget(name: "DrawImage"),
+        .executableTarget(name: "GetOutline")
     ]
 )

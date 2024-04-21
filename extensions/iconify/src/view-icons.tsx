@@ -12,8 +12,9 @@ import { createGlobalState } from 'react-hooks-global-state';
 import Service, { Icon, Set } from './service';
 import { toDataURI, toSvg, toURL } from './utils';
 
-const { primaryAction } =
-  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
+const { primaryAction } = getPreferenceValues<{
+  primaryAction: 'paste' | 'copy' | 'pasteName';
+}>();
 
 const service = new Service();
 const cache = new Cache({
@@ -157,6 +158,12 @@ function Command() {
             const copy = (
               <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
             );
+            const pasteName = activeSetId && (
+              <Action.Paste
+                title="Paste Name"
+                content={`${activeSetId}:${id}`}
+              />
+            );
             return (
               <Grid.Item
                 content={{
@@ -169,15 +176,24 @@ function Command() {
                 title={id}
                 actions={
                   <ActionPanel>
-                    {primaryAction === 'paste' ? (
+                    {primaryAction === 'paste' && (
                       <>
                         {paste}
                         {copy}
+                        {pasteName}
                       </>
-                    ) : (
+                    )}
+                    {primaryAction === 'copy' && (
                       <>
                         {copy}
                         {paste}
+                      </>
+                    )}
+                    {primaryAction === 'pasteName' && (
+                      <>
+                        {pasteName}
+                        {paste}
+                        {copy}
                       </>
                     )}
                     {activeSetId && (

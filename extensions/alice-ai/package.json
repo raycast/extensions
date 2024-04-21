@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alice-ai",
+  "title": "Alice AI - Your ChatGPT Actions Companion",
+  "description": "Alice helps with your daily tasks by providing quick access to OpenAI's ChatGPT API. Use Alice to generate text, code, and more with just a few keystrokes.",
+  "icon": "icon.png",
+  "author": "quiknull",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "commands",
+      "title": "Select Action",
+      "description": "Select available action from the list",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Show History",
+      "description": "Show Results History",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create New Action",
+      "description": "Create New Action",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API Key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.14.0",
+    "@reduxjs/toolkit": "^2.2.3",
+    "gpt-tokens": "^1.3.3",
+    "openai": "^4.33.0",
+    "zod": "^3.22.4",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

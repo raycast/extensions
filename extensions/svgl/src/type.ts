@@ -1,8 +1,14 @@
 export interface Svg {
   id: number;
   title: string;
-  category: string;
+  category: string | string[];
   route:
+    | string
+    | {
+        dark: string;
+        light: string;
+      };
+  wordmark:
     | string
     | {
         dark: string;

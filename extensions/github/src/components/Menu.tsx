@@ -9,8 +9,7 @@ import {
   launchCommand,
   openCommandPreferences,
 } from "@raycast/api";
-import React from "react";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 function clipText(text: string) {
   const maxLength = 100;
