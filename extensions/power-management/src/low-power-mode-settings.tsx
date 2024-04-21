@@ -5,11 +5,9 @@ import { useEffect, useState } from "react";
 async function togglePowerMode(currentSetting: boolean, target: PowerModeTarget): Promise<void> {
   await setPowerMode(currentSetting ? PowerMode.Normal : PowerMode.Low, target);
 
-  try {
-    launchCommand({ name: "lowpower-menubar", type: LaunchType.Background });
-  } catch {
+  launchCommand({ name: "lowpower-menubar", type: LaunchType.Background }).catch(() => {
     console.debug("low-power-menubar is disabled");
-  }
+  });
 }
 
 export default function Command() {
@@ -45,7 +43,7 @@ export default function Command() {
                 } catch {
                   setIsLoading(false);
 
-                  await showToast({
+                  showToast({
                     title: "Failed to toggle low power mode on AC power.",
                     style: Toast.Style.Failure,
                   });
@@ -56,7 +54,7 @@ export default function Command() {
                 setACPower(!acPower);
                 setIsLoading(false);
 
-                await showToast({
+                showToast({
                   title: `Low power mode on AC power is turned ${acPower ? "off" : "on"}`,
                   style: Toast.Style.Success,
                 });
@@ -84,7 +82,7 @@ export default function Command() {
                 } catch {
                   setIsLoading(false);
 
-                  await showToast({
+                  showToast({
                     title: "Failed to toggle low power mode on battery power.",
                     style: Toast.Style.Failure,
                   });
@@ -95,7 +93,7 @@ export default function Command() {
                 setBatteryPower(!batteryPower);
                 setIsLoading(false);
 
-                await showToast({
+                showToast({
                   title: `Low power mode on battery power is turned ${batteryPower ? "off" : "on"}`,
                   style: Toast.Style.Success,
                 });

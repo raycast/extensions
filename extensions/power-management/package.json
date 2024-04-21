@@ -16,8 +16,8 @@
     "license": "MIT",
     "commands": [
         {
-            "title": "Get Power Mode Details",
-            "name": "get-low-power-detail",
+            "title": "Low Power Mode Settings",
+            "name": "low-power-mode-settings",
             "description": "Get detailed low power mode settings",
             "mode": "view"
         },

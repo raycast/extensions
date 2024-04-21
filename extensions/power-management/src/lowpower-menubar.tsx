@@ -37,13 +37,13 @@ export default function lowPowerMenuBar({ launchContext }: { launchContext?: { i
               toggleResult = await toggleLowPowerMode();
             } catch (error) {
               setIsLoading(false);
-              await showFailureToast(error, { title: "Could not toggle low power mode" });
+              showFailureToast(error, { title: "Could not toggle low power mode" });
               return;
             }
 
             setEnabled(toggleResult);
             setIsLoading(false);
-            await showHUD(`✅ Low power mode is turned ${toggleResult ? "on" : "off"}`);
+            showHUD(`✅ Low power mode is turned ${toggleResult ? "on" : "off"}`);
           }}
         />
       </MenuBarExtra.Section>

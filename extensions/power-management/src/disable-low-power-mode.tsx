@@ -6,19 +6,17 @@ export default async function main(): Promise<void> {
   try {
     await setPowerMode(PowerMode.Normal, PowerModeTarget.All);
   } catch (error) {
-    await showFailureToast(error, { title: "Could not disable low power mode" });
+    showFailureToast(error, { title: "Could not disable low power mode" });
     return;
   }
 
-  await showHUD("✅ Low power mode is disabled");
+  showHUD("✅ Low power mode is disabled");
 
-  try {
-    launchCommand({
-      name: "lowpower-menubar",
-      type: LaunchType.Background,
-      context: { isEnabled: false },
-    });
-  } catch {
+  launchCommand({
+    name: "lowpower-menubar",
+    type: LaunchType.Background,
+    context: { isEnabled: false },
+  }).catch(() => {
     console.debug("low-power-menubar is disabled");
-  }
+  });
 }
