@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { Form, Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { getIssues, getProjects, postTimeLog } from "./controllers";
 import { toSeconds, createTimeLogSuccessMessage } from "./utils";
 import { Project, Issue } from "./types";
 
+type UserPreferences = {
+  isJiraCloud: boolean;
+};
+
 export default function Command() {
+  const userPrefs = getPreferenceValues<UserPreferences>();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Issue>();
@@ -16,6 +21,7 @@ export default function Command() {
   const [startedAt, setStartedAt] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [issueCache, setIssueCache] = useState(new Map());
+  const [isJiraCloud] = useState<boolean>(userPrefs.isJiraCloud); // Use user preferences to determine Jira Cloud or Server
 
   const pageGot = useRef(0);
   const pageTotal = useRef(1);
@@ -40,8 +46,7 @@ export default function Command() {
       showToast(Toast.Style.Success, successMessage);
       cleanUp();
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Error Logging Time";
-      showToast(Toast.Style.Failure, message);
+      showToast(Toast.Style.Failure, e instanceof Error ? e.message : "Error Logging Time");
     } finally {
       setLoading(false);
     }
@@ -49,57 +54,75 @@ export default function Command() {
 
   // fetch projects on mount
   useEffect(() => {
-    if (!selectedProject) {
-      if (pageGot.current < pageTotal.current) {
-        const fetchProjects = async () => {
-          console.debug("fetch project");
-          try {
-            const result = await getProjects(pageGot.current);
+    const fetchProjects = async () => {
+      setLoading(true);
+      try {
+        const result = await getProjects(pageGot.current);
+        if (result.data.length > 0) {
+          setProjects((prevProjects) => [...prevProjects, ...result.data]);
+
+          // If Jira Cloud (v3), we expect pagination, so we set pageTotal.current
+          // If not (v2), we assume all projects are loaded in one go, hence no pagination
+          if (userPrefs.isJiraCloud) {
+            pageGot.current += result.data.length;
             pageTotal.current = result.total;
-            pageGot.current = pageGot.current + result.data.length;
-            if (result.data.length > 0) {
-              setProjects([...projects, ...result.data]);
-            }
-            showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
-          } catch (e) {
-            const message = e instanceof Error ? e.message : "Error Logging Time";
-            showToast(Toast.Style.Failure, message);
-          } finally {
-            setLoading(false);
+          } else {
+            pageGot.current = result.data.length; // All projects are loaded
+            pageTotal.current = result.data.length; // Set total to the number of projects loaded
           }
-        };
-        fetchProjects();
-      } else {
-        showToast(Toast.Style.Success, `Project loaded ${pageGot.current}/${pageTotal.current}`);
+
+          // Show toast message accordingly
+          if (userPrefs.isJiraCloud) {
+            showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
+          } else {
+            showToast(Toast.Style.Success, "All projects loaded");
+          }
+        }
+      } catch (e) {
+        showToast(Toast.Style.Failure, "Failed to load projects", e instanceof Error ? e.message : String(e));
+      } finally {
+        setLoading(false);
       }
+    };
+
+    if (projects.length === 0 && (userPrefs.isJiraCloud || pageGot.current < pageTotal.current)) {
+      fetchProjects();
     }
-  }, [projects]);
+  }, [isJiraCloud]); // Re-run the effect if isJiraCloud changes
 
   // fetch issues after project is selected
   useEffect(() => {
     if (selectedProject) {
-      if (pageGot.current < pageTotal.current) {
-        const fetchIssues = async (project: string) => {
-          const result = await getIssues(pageGot.current, project);
-          const oldIssues = issueCache.get(project) ?? [];
-          setIssueCache((prev) => new Map(prev).set(project, [...oldIssues, ...result.data]));
-          pageTotal.current = result.total;
-          showToast(Toast.Style.Animated, `Loading issues ${pageGot.current}/${pageTotal.current}`);
-        };
-        fetchIssues(selectedProject);
-      } else {
-        showToast(Toast.Style.Success, `Issue loaded ${pageGot.current}/${pageTotal.current}`);
-      }
+      const fetchIssues = async () => {
+        setLoading(true);
+        try {
+          const result = await getIssues(pageGot.current, selectedProject);
+          if (result.data.length > 0) {
+            setIssueCache((prev) =>
+              new Map(prev).set(selectedProject, [...(prev.get(selectedProject) ?? []), ...result.data]),
+            );
+            setIssues(result.data);
+            pageTotal.current = result.total;
+            pageGot.current += result.data.length;
+            showToast(Toast.Style.Success, "Issues loaded");
+          }
+        } catch (e) {
+          showToast(Toast.Style.Failure, "Failed to load issues", e instanceof Error ? e.message : String(e));
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchIssues();
     }
-  }, [issues]);
+  }, [selectedProject]); // Re-run the effect if selectedProject changes
 
   const resetIssue = (resetLength: boolean) => {
     const list = issueCache.get(selectedProject) ?? [];
-    setIssues([...list]);
-    setSelectedIssue(list[0]);
+    setIssues(list);
+    setSelectedIssue(list.length > 0 ? list[0] : null);
     pageGot.current = list.length;
     if (resetLength) {
-      pageTotal.current = list.length + 1;
+      pageTotal.current = Math.max(pageTotal.current, list.length + 1);
     }
   };
 
@@ -111,11 +134,9 @@ export default function Command() {
     resetIssue(false);
   }, [issueCache]);
 
-  const handleSelectIssue = (key: string) => {
-    const issue = issues.find((issue) => issue.key === key);
-    if (issue) {
-      setSelectedIssue(issue);
-    }
+  const handleSelectIssue = (issueKey: string) => {
+    const issue = issues.find((issue) => issue.key === issueKey);
+    setSelectedIssue(issue);
   };
 
   const cleanUp = () => {
@@ -132,15 +153,16 @@ No Jira projects were found using your credentials.
 
 This could happen because:
 
-- The provided jira domain has no associated projects.
+- The provided Jira domain has no associated projects.
+- The provided Jira instance is a Jira Server instance, not a Jira Cloud instance.
 - The email credential provided is not authorized to access any projects on the provided jira domain.
 - The email credential provided is incorrect.
 - The API token credential provided is incorrect.
 
-Please check your permissions, jira account or credentials and try again.
+Please check your permissions, jira account, or credentials and try again.
   `;
 
-  if (!projects && !loading) {
+  if (!projects.length && !loading) {
     return <Detail markdown={emptyMessage} />;
   }
 
