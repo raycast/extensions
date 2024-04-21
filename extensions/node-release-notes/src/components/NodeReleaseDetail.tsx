@@ -1,17 +1,14 @@
 import { Action, ActionPanel, Detail } from '@raycast/api';
-import { useFetch } from '@raycast/utils';
-import { NODE_RELEASES_GITHUB_BASE_URL } from '../config';
 import { createNodeDocsUrl } from '../helpers';
+import { useReleaseNotes } from '../hooks/useReleaseNotes';
 
 type NodeVersionDetailProps = {
   version: string;
   tagListItems?: React.ComponentProps<typeof Detail.Metadata.TagList.Item>[];
 };
 
-export function NodeReleaseDetail({ version, tagListItems: tagListItems }: NodeVersionDetailProps) {
-  const { data, isLoading, error } = useFetch<{ body: string; html_url: string; published_at: string; name: string }>(
-    `${NODE_RELEASES_GITHUB_BASE_URL}/tags/${version}`,
-  );
+export function NodeReleaseDetail({ version, tagListItems }: NodeVersionDetailProps) {
+  const { data, isLoading, error } = useReleaseNotes(version);
   const markdown = `# ${version}\n## Release Name: \n${data?.name ?? ''}\n\n${data?.body || error?.message || ''}`;
   const docsUrl = createNodeDocsUrl(version);
   const publishedDate = data && new Date(data.published_at).toLocaleString();
@@ -20,23 +17,17 @@ export function NodeReleaseDetail({ version, tagListItems: tagListItems }: NodeV
     <Detail
       isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={version}
+      navigationTitle={`Details for Node ${version}`}
       metadata={
         data && (
           <Detail.Metadata>
             <Detail.Metadata.Label title="Published" text={publishedDate} />
             <Detail.Metadata.Link title="Release Notes URL" text={data.html_url} target={data.html_url} />
             <Detail.Metadata.Link title="Docs" text={docsUrl} target={docsUrl} />
-            {tagListItems?.length && (
-              <>
-                <Detail.Metadata.Separator />
-                <Detail.Metadata.TagList title="Tags">
-                  {tagListItems.map((props) => (
-                    <Detail.Metadata.TagList.Item key={props.text} {...props} />
-                  ))}
-                </Detail.Metadata.TagList>
-              </>
-            )}
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.TagList title="Tags">
+              {tagListItems?.map((props) => <Detail.Metadata.TagList.Item key={props.text} {...props} />)}
+            </Detail.Metadata.TagList>
           </Detail.Metadata>
         )
       }
