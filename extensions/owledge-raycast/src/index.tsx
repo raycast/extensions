@@ -24,7 +24,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search in Owledge..." throttle>
-      {(data?.length == 0 && !isLoading) ? (
+      {data?.length == 0 && !isLoading ? (
         <List.EmptyView
           icon={{ source: "http://search.owledge.app/images/logo.svg" }}
           title={`No result found for "${searchText}"`}
@@ -56,18 +56,18 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
             <Action.OpenInBrowser title={`Open parent "${searchResult.parent_path}"`} url={searchResult.parent_url} />
             <Action.OpenInBrowser
               shortcut={{ modifiers: ["opt"], key: "enter" }}
-              title="Search in Owledge app"
+              title="Search in Owledge App"
               url={searchResult.owledge_search_url}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy url"
+              title="Copy Url"
               content={searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.CopyToClipboard
-              title="Copy parent url"
+              title="Copy Parent Url"
               content={searchResult.parent_url}
               shortcut={{ modifiers: ["cmd"], key: ";" }}
             />
