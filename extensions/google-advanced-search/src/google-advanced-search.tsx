@@ -17,10 +17,10 @@ type SearchParams = {
 };
 
 function buildSearchUrl(values: SearchParams): string {
-  let searchParams = new URLSearchParams();
+  const searchParams = new URLSearchParams();
 
   Object.keys(values).forEach((key) => {
-    let value = values[key as keyof SearchParams];
+    const value = values[key as keyof SearchParams];
     searchParams.append(key, value);
   });
 
