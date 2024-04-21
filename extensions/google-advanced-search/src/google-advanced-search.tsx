@@ -5,8 +5,15 @@ interface QueryParams {
   as_epq: string;
   as_oq: string;
   as_eq: string;
-  as_sitesearch: string;
+  as_nlo: string;
+  as_nhi: string;
+  lr: string;
+  cr: string;
   as_qdr: string;
+  as_sitesearch: string;
+  as_occt_input: string;
+  as_filetype: string;
+  sur: string;
 }
 
 function formatParameter(parameterText: string): string {
@@ -20,10 +27,6 @@ function buildUrl(values: QueryParams): string {
 
   for (const key in values) {
     const value = key as keyof QueryParams;
-
-    if (!values.hasOwnProperty(key)) {
-      continue;
-    }
 
     if (firstParamenter) {
       searchUrl += "?";
