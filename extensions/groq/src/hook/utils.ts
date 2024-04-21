@@ -31,10 +31,12 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       price = ((prompt_token * 0.27) / 1_000_000 + (output_token * 0.27) / 1_000_000) * 100;
       break;
     case "llama3-70b-8192":
-      price = ((prompt_token * 0.7) / 1_000_000 + (output_token * 0.8) / 1_000_000) * 100;
+      price = ((prompt_token * 0.59) / 1_000_000 + (output_token * 0.79) / 1_000_000) * 100;
+      break;
+    case "llama3-8b-8192":
+      price = ((prompt_token * 0.05) / 1_000_000 + (output_token * 0.1) / 1_000_000) * 100;
       break;
     case "gemma-7b-it":
-    case "llama3-8b-8192":
       price = ((prompt_token * 0.1) / 1_000_000 + (output_token * 0.1) / 1_000_000) * 100;
       break;
   }
