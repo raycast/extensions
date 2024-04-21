@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-emoticons",
+  "title": "Text Emoticons Search",
+  "description": "Finds text emoticons and inserts or copies them",
+  "icon": "icon.png",
+  "author": "konfuze",
+  "license": "MIT",
+  "categories": [
+    "Fun",
+    "Communication"
+  ],
+  "commands": [
+    {
+      "name": "search-emoticons",
+      "title": "Search Text Emoticons",
+      "description": "Finds text emoticons and pastes or copies them",
+      "mode": "view"
+    },
+    {
+      "name": "random-emoticon",
+      "title": "Paste Random Text Emoticon",
+      "description": "Finds random text emoticon and pastes it",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "recent-items-number",
+      "type": "textfield",
+      "description": "Number of recent emoticons to store and display",
+      "title": "Number of recent emoticons to store and display",
+      "default": "3"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.14.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.1.1",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^7.7.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
