@@ -41,7 +41,7 @@
         },
         {
             "name": "lowpower-menubar",
-            "title": "Low Power Mode Menu",
+            "title": "Low Power Mode Menu Bar",
             "description": "See status of low power mode in the menubar",
             "mode": "menu-bar",
             "interval": "10m",
