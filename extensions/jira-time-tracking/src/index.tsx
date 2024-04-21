@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Form, Detail, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { getIssues, getProjects, postTimeLog } from "./controllers";
-import { toSeconds, createTimeLogSuccessMessage } from "./utils";
+import { parseTimeToSeconds, createTimeLogSuccessMessage } from "./utils";
 import { Project, Issue } from "./types";
 
 type UserPreferences = {
@@ -13,38 +13,59 @@ export default function Command() {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Issue>();
-  const [hours, setHours] = useState("0");
-  const [minutes, setMinutes] = useState("0");
-  const [seconds, setSeconds] = useState("0");
   const [description, setDescription] = useState("");
   const [selectedProject, setSelectedProject] = useState<string>();
   const [startedAt, setStartedAt] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [issueCache, setIssueCache] = useState(new Map());
+  const [totalTimeWorked, setTotalTimeWorked] = useState<number>(0);  // Total time in seconds
   const [isJiraCloud] = useState<boolean>(userPrefs.isJiraCloud); // Use user preferences to determine Jira Cloud or Server
+  const [timeInput, setTimeInput] = useState<string>("");
 
   const pageGot = useRef(0);
   const pageTotal = useRef(1);
 
+  const parseTimeInput = (input) => {
+    const totalSeconds = parseTimeToSeconds(input);
+    
+    if (totalSeconds < 900) {
+      showToast(Toast.Style.Failure, "Please enter a minimum of 15 minutes.");
+      return false;
+    }
+  
+    setTotalTimeWorked(totalSeconds);
+    if (totalSeconds > 0) {
+      return true;
+    } else {
+      showToast(Toast.Style.Failure, "Please enter a valid time.");
+    }
+    return false;
+  };
+  
   async function handleSubmit() {
-    const totalTimeWorked = toSeconds(Number(seconds), Number(minutes), Number(hours));
+    if (totalTimeWorked < 900) {  // 900 seconds = 15 minutes
+      showToast(Toast.Style.Failure, "Error logging time: Minimum log time is 15 minutes.");
+      return;
+    }
+    
+    if (totalTimeWorked <= 0) {
+      showToast(Toast.Style.Failure, "Error logging time: no time entered.");
+      return;
+    }
 
     if (!selectedIssue) {
       showToast(Toast.Style.Failure, "Error logging time: issue not found");
       return;
     }
-    if (!totalTimeWorked) {
-      showToast(Toast.Style.Failure, "Error logging time: no time entered.");
-      return;
-    }
 
     setLoading(true);
-
     try {
       await postTimeLog(totalTimeWorked, selectedIssue.key, description, startedAt);
-      const successMessage = createTimeLogSuccessMessage(selectedIssue.key, hours, minutes, seconds);
+      const successMessage = createTimeLogSuccessMessage(selectedIssue.key, totalTimeWorked);
       showToast(Toast.Style.Success, successMessage);
-      cleanUp();
+      // Clearing the time and description fields on successful submission
+      setTimeInput("");  // Reset the time input field
+      setDescription(""); // Reset the description text area
     } catch (e) {
       showToast(Toast.Style.Failure, e instanceof Error ? e.message : "Error Logging Time");
     } finally {
@@ -184,36 +205,26 @@ Please check your permissions, jira account, or credentials and try again.
           <Form.Dropdown.Item key={item.key} value={item.key} title={`${item.key}: ${item.fields.summary}`} />
         ))}
       </Form.Dropdown>
+      <Form.Separator />
       <Form.DatePicker
         id="startedAt"
-        title="Start Date"
+        title="Date"
         value={startedAt}
         onChange={(date) => {
           date && setStartedAt(date);
         }}
       />
-      <Form.Separator />
-      <Form.Dropdown id="hours" title="Hours" value={hours} onChange={setHours}>
-        {Array(25)
-          .fill(null)
-          .map((_, i) => (
-            <Form.Dropdown.Item title={`${i}`} key={"hours-" + i} value={String(i)} />
-          ))}
-      </Form.Dropdown>
-      <Form.Dropdown id="minutes" title="Minutes" value={minutes} onChange={setMinutes}>
-        {Array(60)
-          .fill(null)
-          .map((_, i) => (
-            <Form.Dropdown.Item title={`${i}`} key={"minutes-" + i} value={String(i)} />
-          ))}
-      </Form.Dropdown>
-      <Form.Dropdown id="seconds" title="Seconds" value={seconds} onChange={setSeconds}>
-        {Array(60)
-          .fill(null)
-          .map((_, i) => (
-            <Form.Dropdown.Item title={`${i}`} key={"seconds-" + i} value={String(i)} />
-          ))}
-      </Form.Dropdown>
+      <Form.TextField
+        id="timeInput"
+        title="Time (e.g., 2h 15m 30s)"
+        placeholder="Enter time as 'Xh Ym Zs'"
+        value={timeInput}
+        onChange={(newTime) => {
+          setTimeInput(newTime);
+          parseTimeInput(newTime);
+        }}
+        onBlur={() => parseTimeInput(timeInput)}
+      />
       <Form.TextArea
         id="description"
         title="Description"
@@ -222,5 +233,5 @@ Please check your permissions, jira account, or credentials and try again.
         onChange={setDescription}
       />
     </Form>
-  );
+    );
 }
