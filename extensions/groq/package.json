@@ -5,6 +5,9 @@
   "description": "Use the powerful models via Groq from the comfort of Raycast.",
   "icon": "groq.png",
   "author": "ilian",
+  "contributors": [
+    "allanx"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools",
@@ -47,8 +50,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -89,8 +92,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -131,8 +134,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -173,8 +176,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -215,8 +218,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -273,8 +276,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -332,8 +335,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -375,8 +378,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -418,8 +421,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -461,8 +464,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -504,8 +507,8 @@
               "title": "Gemma 7B 8k 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -547,8 +550,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -590,8 +593,8 @@
               "title": "Gemma 7B 8k"
             },
             {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
             }
           ]
         }
@@ -613,7 +616,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "mixtral-8x7b-32768",
+      "default": "llama3-70b-8192",
       "data": [
         {
           "value": "mixtral-8x7b-32768",
@@ -624,8 +627,8 @@
           "title": "Gemma 7B 8k"
         },
         {
-          "value": "llama2-70b-4096",
-          "title": "Llama2 70B 4k"
+          "value": "llama3-70b-8192",
+          "title": "Llama3 70B 8k"
         }
       ]
     },
