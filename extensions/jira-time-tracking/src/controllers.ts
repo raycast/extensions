@@ -6,17 +6,18 @@ import { Project } from "./types";
 
 // Helper to define the structure for isJiraCloud
 type UserPreferences = {
-  isJiraCloud: boolean;
+  isJiraCloud: string; // Changed from boolean to string
 };
 
 const userPrefs = getPreferenceValues<UserPreferences>();
 
 // Helper function to determine the correct API path based on Jira type
 function getApiPath(path: string): string {
-  const version = userPrefs.isJiraCloud ? "3" : "2";
+  const isJiraCloud = userPrefs.isJiraCloud === "cloud"; //
+  const version = isJiraCloud ? "3" : "2";
 
   // Customize endpoint paths for version compatibility
-  if (!userPrefs.isJiraCloud) {
+  if (!isJiraCloud) {
     if (path.includes("/project/search")) {
       path = path.replace("/rest/api/3/project/search", "/rest/api/2/project");
     } else if (path.includes("/search")) {
@@ -89,8 +90,9 @@ export const postTimeLog = async (timeSpentSeconds: number, issueId: string, des
   const basePath = `/rest/api/3/issue/${issueId}/worklog?notifyUsers=false`;
   const apiPath = getApiPath(basePath);
 
-  // Determine the comment format based on whether Jira instance is cloud-based
-  const comment = userPrefs.isJiraCloud
+  const isJiraCloud = userPrefs.isJiraCloud === "cloud";
+
+  const comment = isJiraCloud
     ? {
         type: "doc",
         version: 1,

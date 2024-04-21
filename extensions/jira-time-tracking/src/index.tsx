@@ -5,7 +5,7 @@ import { parseTimeToSeconds, createTimeLogSuccessMessage } from "./utils";
 import { Project, Issue } from "./types";
 
 type UserPreferences = {
-  isJiraCloud: boolean;
+  isJiraCloud: string; // "cloud" or "server"
 };
 
 export default function Command() {
@@ -19,7 +19,7 @@ export default function Command() {
   const [loading, setLoading] = useState(true);
   const [issueCache, setIssueCache] = useState(new Map());
   const [totalTimeWorked, setTotalTimeWorked] = useState<number>(0); // Total time in seconds
-  const [isJiraCloud] = useState<boolean>(userPrefs.isJiraCloud); // Use user preferences to determine Jira Cloud or Server
+  const [isJiraCloud, setIsJiraCloud] = useState(userPrefs.isJiraCloud === "cloud"); // Use user preferences to determine Jira Cloud or Server
   const [timeInput, setTimeInput] = useState<string>("");
 
   const pageGot = useRef(0);
@@ -72,6 +72,10 @@ export default function Command() {
     }
   }
 
+  useEffect(() => {
+    setIsJiraCloud(userPrefs.isJiraCloud === "cloud");
+  }, [userPrefs.isJiraCloud]);
+
   // fetch projects on mount
   useEffect(() => {
     const fetchProjects = async () => {
@@ -81,22 +85,19 @@ export default function Command() {
         if (result.data.length > 0) {
           setProjects((prevProjects) => [...prevProjects, ...result.data]);
 
-          // If Jira Cloud (v3), we expect pagination, so we set pageTotal.current
-          // If not (v2), we assume all projects are loaded in one go, hence no pagination
-          if (userPrefs.isJiraCloud) {
+          if (isJiraCloud) {
+            // Use state to check if it is Jira Cloud
             pageGot.current += result.data.length;
             pageTotal.current = result.total;
           } else {
-            pageGot.current = result.data.length; // All projects are loaded
-            pageTotal.current = result.data.length; // Set total to the number of projects loaded
+            pageGot.current = result.data.length; // Assume all projects loaded
+            pageTotal.current = result.data.length;
           }
 
-          // Show toast message accordingly
-          if (userPrefs.isJiraCloud) {
-            showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
-          } else {
-            showToast(Toast.Style.Success, "All projects loaded");
-          }
+          showToast(
+            isJiraCloud ? Toast.Style.Animated : Toast.Style.Success,
+            `Loading projects ${pageGot.current}/${pageTotal.current}`,
+          );
         }
       } catch (e) {
         showToast(Toast.Style.Failure, "Failed to load projects", e instanceof Error ? e.message : String(e));
@@ -105,10 +106,10 @@ export default function Command() {
       }
     };
 
-    if (projects.length === 0 && (userPrefs.isJiraCloud || pageGot.current < pageTotal.current)) {
+    if (projects.length === 0 || pageGot.current < pageTotal.current) {
       fetchProjects();
     }
-  }, [isJiraCloud]); // Re-run the effect if isJiraCloud changes
+  }, [isJiraCloud]);
 
   // fetch issues after project is selected
   useEffect(() => {

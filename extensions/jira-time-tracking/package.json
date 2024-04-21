@@ -22,12 +22,21 @@
   "preferences": [
     {
       "name": "isJiraCloud",
-      "type": "checkbox",
+      "type": "dropdown",
       "required": true,
-      "title": "Jira Cloud Instance?",
-      "description": "Leave checked if you are using Jira Cloud, uncheck if you are using Jira Server.",
-      "default": true,
-      "label": "Note: Uncheck if you are using Jira Server."
+      "title": "Select your Jira instance type",
+      "description": "Choose whether you are using a Jira Cloud or a Jira Server instance.",
+      "data": [
+        {
+          "title": "Jira Cloud",
+          "value": "cloud"
+        },
+        {
+          "title": "Jira Server",
+          "value": "server"
+        }
+      ],
+      "default": "cloud"
     },
     {
       "name": "domain",
