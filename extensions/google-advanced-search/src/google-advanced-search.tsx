@@ -1,57 +1,42 @@
 import { Action, ActionPanel, Form, Icon, open } from "@raycast/api";
 
-interface QueryParams {
-  as_q: string;
+type SearchParams = {
   as_epq: string;
-  as_oq: string;
   as_eq: string;
-  as_nlo: string;
+  as_filetype: string;
   as_nhi: string;
-  lr: string;
-  cr: string;
+  as_nlo: string;
+  as_occt_input: string;
+  as_oq: string;
+  as_q: string;
   as_qdr: string;
   as_sitesearch: string;
-  as_occt_input: string;
-  as_filetype: string;
+  cr: string;
+  lr: string;
   sur: string;
+};
+
+function buildSearchUrl(values: SearchParams): string {
+  let searchParams = new URLSearchParams();
+
+  Object.keys(values).forEach((key) => {
+    let value = values[key as keyof SearchParams];
+    searchParams.append(key, value);
+  });
+
+  return `https://www.google.com/search?${searchParams.toString()}`;
 }
 
-function formatParameter(parameterText: string): string {
-  return parameterText.replaceAll(" ", "+");
-}
-
-function buildUrl(values: QueryParams): string {
-  let searchUrl = "https://www.google.com/search";
-
-  let firstParamenter: boolean = true;
-
-  for (const key in values) {
-    const value = key as keyof QueryParams;
-
-    if (firstParamenter) {
-      searchUrl += "?";
-    } else {
-      searchUrl += "&";
-    }
-
-    searchUrl += `${key}=${formatParameter(values[value])}`;
-
-    firstParamenter = false;
+function OpenSearchInBrowserAction() {
+  async function handleSubmit(values: SearchParams) {
+    const url = buildSearchUrl(values);
+    open(url);
   }
 
-  return searchUrl;
+  return <Action.SubmitForm icon={Icon.Globe} title="Search" onSubmit={handleSubmit} />;
 }
 
 export default function Command() {
-  function OpenSearchInBrowserAction() {
-    async function handleSubmit(values: QueryParams) {
-      const searchUrl = buildUrl(values);
-      open(searchUrl);
-    }
-
-    return <Action.SubmitForm icon={Icon.Globe} title="Search" onSubmit={handleSubmit} />;
-  }
-
   return (
     <Form
       navigationTitle="Google Advanced Search"
