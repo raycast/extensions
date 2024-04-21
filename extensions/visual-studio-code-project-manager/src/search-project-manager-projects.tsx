@@ -4,7 +4,7 @@ import { existsSync, lstatSync, readFileSync } from "fs";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
-import { useState, ReactElement, Fragment } from "react";
+import { Fragment, ReactElement, useState } from "react";
 import tildify from "tildify";
 import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
@@ -18,7 +18,7 @@ const terminalInstalled = existsSync(terminalPath);
 
 const { vscodeApp } = preferences;
 const vscodeAppNameShort = vscodeApp?.name.replace(/^Visual Studio /, "") || "";
-const vscodeAppCLI: string = vscodeAppNameShort.replace(/[ -]+/g, "-").toLowerCase();
+const vscodeAppCLI = `${vscodeApp?.path}/Contents/Resources/app/bin/code`;
 
 const STORAGE = `${homedir()}/Library/Application Support/${vscodeAppNameShort}/User/globalStorage/alefragnani.project-manager`;
 
@@ -204,7 +204,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
                 title={`Open in ${vscodeApp.name} (Remote)`}
                 icon={{ fileIcon: vscodeApp.path }}
                 onAction={() => {
-                  exec(`${vscodeAppCLI} --remote ${parseRemoteURL(path)}`);
+                  exec(`"${vscodeAppCLI}" --remote ${parseRemoteURL(path)}`);
                   closeMainWindow();
                 }}
               />
