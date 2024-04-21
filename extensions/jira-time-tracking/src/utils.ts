@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences } from "./types";
 
-export const parseTimeToSeconds = (input) => {
+export const parseTimeToSeconds = (input: string) => {
   const regex = /(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?/;
   const matches = input.match(regex);
   if (matches) {
@@ -26,9 +26,9 @@ export const createTimeLogSuccessMessage = (issueKey: string, seconds: number) =
   const remainingSeconds = seconds % 60;
 
   let message = `You logged `;
-  if (hours > 0) message += `${hours} hours `;
-  if (minutes > 0) message += `${minutes} minutes `;
-  if (remainingSeconds > 0) message += `${remainingSeconds} seconds `;
+  if (hours > 0) message += `${hours} hour(s) `;
+  if (minutes > 0) message += `${minutes} minute(s) `;
+  if (remainingSeconds > 0) message += `${remainingSeconds} second(s) `;
   message += `against ${issueKey}.`;
 
   return message;

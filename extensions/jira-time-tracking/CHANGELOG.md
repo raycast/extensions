@@ -1,8 +1,9 @@
 # Changelog
 
-## [Jira Server support] - 2024-04-20
+## [Jira Server support] - 2024-04-21
 
 - Now supports both Jira Server and Jira Cloud instances.
+- Updated time logging UI/UX for faster/more Raycast-like user experience.
 
 ## [Pagination support] - 2024-01-26
 

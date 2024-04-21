@@ -18,21 +18,21 @@ export default function Command() {
   const [startedAt, setStartedAt] = useState<Date>(new Date());
   const [loading, setLoading] = useState(true);
   const [issueCache, setIssueCache] = useState(new Map());
-  const [totalTimeWorked, setTotalTimeWorked] = useState<number>(0);  // Total time in seconds
+  const [totalTimeWorked, setTotalTimeWorked] = useState<number>(0); // Total time in seconds
   const [isJiraCloud] = useState<boolean>(userPrefs.isJiraCloud); // Use user preferences to determine Jira Cloud or Server
   const [timeInput, setTimeInput] = useState<string>("");
 
   const pageGot = useRef(0);
   const pageTotal = useRef(1);
 
-  const parseTimeInput = (input) => {
+  const parseTimeInput = (input: string) => {
     const totalSeconds = parseTimeToSeconds(input);
-    
+
     if (totalSeconds < 900) {
       showToast(Toast.Style.Failure, "Please enter a minimum of 15 minutes.");
       return false;
     }
-  
+
     setTotalTimeWorked(totalSeconds);
     if (totalSeconds > 0) {
       return true;
@@ -41,13 +41,14 @@ export default function Command() {
     }
     return false;
   };
-  
+
   async function handleSubmit() {
-    if (totalTimeWorked < 900) {  // 900 seconds = 15 minutes
+    if (totalTimeWorked < 900) {
+      // 900 seconds = 15 minutes
       showToast(Toast.Style.Failure, "Error logging time: Minimum log time is 15 minutes.");
       return;
     }
-    
+
     if (totalTimeWorked <= 0) {
       showToast(Toast.Style.Failure, "Error logging time: no time entered.");
       return;
@@ -63,9 +64,7 @@ export default function Command() {
       await postTimeLog(totalTimeWorked, selectedIssue.key, description, startedAt);
       const successMessage = createTimeLogSuccessMessage(selectedIssue.key, totalTimeWorked);
       showToast(Toast.Style.Success, successMessage);
-      // Clearing the time and description fields on successful submission
-      setTimeInput("");  // Reset the time input field
-      setDescription(""); // Reset the description text area
+      cleanUp();
     } catch (e) {
       showToast(Toast.Style.Failure, e instanceof Error ? e.message : "Error Logging Time");
     } finally {
@@ -162,9 +161,7 @@ export default function Command() {
 
   const cleanUp = () => {
     setDescription("");
-    setHours("0");
-    setMinutes("0");
-    setSeconds("0");
+    setTimeInput(""); // Reset the time input field
   };
 
   const emptyMessage = `
@@ -233,5 +230,5 @@ Please check your permissions, jira account, or credentials and try again.
         onChange={setDescription}
       />
     </Form>
-    );
+  );
 }
