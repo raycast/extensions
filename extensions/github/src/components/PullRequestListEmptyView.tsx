@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 
 import { PullRequestForm } from "../create-pull-request";
 

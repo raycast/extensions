@@ -197,7 +197,7 @@ export default function PullRequestActions({
           {pullRequest.repository.mergeCommitAllowed ? (
             <Action
               title="Create Merge Commit"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
             />
@@ -206,7 +206,7 @@ export default function PullRequestActions({
           {pullRequest.repository.squashMergeAllowed ? (
             <Action
               title="Squash and Merge"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
             />
@@ -215,7 +215,7 @@ export default function PullRequestActions({
           {pullRequest.repository.rebaseMergeAllowed ? (
             <Action
               title="Rebase and Merge"
-              icon={{ source: "merge.svg", tintColor: Color.PrimaryText }}
+              icon={{ source: "pull-request-merged.svg", tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["opt", "shift"], key: "enter" }}
               onAction={() => mergePullRequest(PullRequestMergeMethod.Rebase)}
             />
@@ -248,7 +248,7 @@ export default function PullRequestActions({
         {pullRequest.closed && !pullRequest.merged ? (
           <Action
             title="Reopen Pull Request"
-            icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+            icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
             onAction={() => reopenPullRequest()}
           />
         ) : null}

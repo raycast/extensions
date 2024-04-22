@@ -88,7 +88,7 @@ export async function getPrompts() {
             Accept: "application/json",
           },
         }
-      : undefined
+      : undefined,
   );
 
   if (!response.ok) {

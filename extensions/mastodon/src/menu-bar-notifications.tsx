@@ -1,6 +1,6 @@
 import { setTimeout } from "node:timers/promises";
 import { useEffect, useState } from "react";
-import { Color, MenuBarExtra, Icon, getPreferenceValues, open } from "@raycast/api";
+import { Color, MenuBarExtra, Icon, getPreferenceValues, open, openCommandPreferences } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import apiServer from "./utils/api";
 import { client, getAccessToken } from "./utils/oauth";
@@ -50,7 +50,8 @@ export default function MenuBarNotifications() {
   }, []);
 
   const groupedNotifications = groupNotifications(notifications);
-  const { instance } = getPreferenceValues();
+  const { instance, openNotificationWith } = getPreferenceValues<Preferences.MenuBarNotifications>();
+  const openWithApp = openNotificationWith?.bundleId ?? openNotificationWith?.name;
 
   return (
     <MenuBarExtra
@@ -60,8 +61,8 @@ export default function MenuBarNotifications() {
         tintColor: Color.PrimaryText,
       }}
     >
-      <MenuBarExtra.Section>
-        {needReauthorize && (
+      {needReauthorize && (
+        <MenuBarExtra.Section>
           <MenuBarExtra.Item
             title="This feature requires re-authorize to use"
             onAction={async () => {
@@ -69,7 +70,26 @@ export default function MenuBarNotifications() {
               await open("raycast://extensions/SevicheCC/mastodon/menu-bar-notifications");
             }}
           />
-        )}
+        </MenuBarExtra.Section>
+      )}
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={`Open ${openNotificationWith?.name ?? "Mastodon"}`}
+          icon={
+            openWithApp && openNotificationWith?.path
+              ? { fileIcon: openNotificationWith?.path }
+              : {
+                  source: iconClear,
+                  tintColor: Color.PrimaryText,
+                }
+          }
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={() => {
+            open(`https://${instance}`, openWithApp);
+          }}
+        />
+      </MenuBarExtra.Section>
+      <MenuBarExtra.Section>
         {Object.entries(groupedNotifications).map(([type, items = []]) => {
           const menu = menus[type];
           return (
@@ -78,24 +98,35 @@ export default function MenuBarNotifications() {
               icon={{ source: menu.icon ?? "" }}
               title={`${menu.title}: ${items.length}`}
               onAction={() => {
-                open(`https://${instance}/notifications`);
+                open(`https://${instance}/notifications`, openWithApp);
               }}
             />
           );
         })}
+        {notifications.length === 0 && <MenuBarExtra.Item title="No unread notifications" />}
       </MenuBarExtra.Section>
-      {notifications.length > 0 && (
-        <MenuBarExtra.Section>
+      <MenuBarExtra.Section>
+        {notifications.length > 0 && (
           <MenuBarExtra.Item
             title="Dismiss all"
+            icon={Icon.Check}
+            shortcut={{ modifiers: ["shift"], key: "escape" }}
             onAction={async () => {
               await apiServer.dismissAllNotifications();
               setMenuBarIcon(iconClear);
               await setTimeout(100);
             }}
           />
-        </MenuBarExtra.Section>
-      )}
+        )}
+        <MenuBarExtra.Item
+          title="Configure Command"
+          icon={Icon.Gear}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={() => {
+            openCommandPreferences();
+          }}
+        />
+      </MenuBarExtra.Section>
     </MenuBarExtra>
   );
 }
