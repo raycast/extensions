@@ -52,7 +52,7 @@ export default function SearchResult() {
     isSearchEngines: false,
   });
   const [searchText, setSearchText] = useState("");
-  const preferences  = getPreferenceValues();
+  const preferences = getPreferenceValues();
 
   useEffect(() => {
     const searchLinks = async () => {
