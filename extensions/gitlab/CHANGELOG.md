@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Fix] - 2024-04-23
+
+- Fix limit of 50 users for user selection during Create Merge Request / Create Issue
+
 ## [Standardize Project Actions and List Items] - 2024-02-22
 
 - Standardize project actions between Search Projects and Groups > Show Group views
