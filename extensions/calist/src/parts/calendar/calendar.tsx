@@ -65,6 +65,9 @@ export default function Calendar() {
     }
   };
 
+  const now = new Date();
+  const todayId = `SID:${now.getDate()}`;
+
   return (
     <Grid
       columns={enableWeek ? 8 : 7}
@@ -73,6 +76,7 @@ export default function Calendar() {
       searchBarPlaceholder={placeHolder}
       searchBarAccessory={monthDropdown ? <Dropdown /> : undefined}
       actions={<Actions />}
+      selectedItemId={todayId}
       onSearchTextChange={handleSearchTextChange}
       onSelectionChange={(id) => {
         getSelection(id, setCurrentWeek, setSelectedDay, getWeek, currentYear, currentMonth);

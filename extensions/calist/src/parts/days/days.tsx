@@ -24,9 +24,12 @@ export function Day({ type, day, hasEvents }: DayProps) {
 
   const AHID = `SIT:${type}, SID:${day}, SIM:${currentMonth}, SIY:${currentYear} + SIU:${AHD()}`;
 
+  const now = new Date();
+  const todayId = `SID:${now.getDate()}`;
+
   return (
     <Grid.Item
-      id={AHID}
+      id={type === "today" ? todayId : AHID}
       content={{
         value: {
           source: type === "empty" ? " " : source,
