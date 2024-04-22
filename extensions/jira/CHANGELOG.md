@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Persist Project query when Creating Issue] - 2024-04-22
+
+- Persists the project query in cache in the Create Issue command
+
 ## [API token bug fixes] - 2024-04-22
 
 - Improved handling of invalid URLs in the jiraWithApiToken function
