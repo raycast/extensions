@@ -21,9 +21,17 @@ export default function Command() {
   const [totalTimeWorked, setTotalTimeWorked] = useState<number>(0); // Total time in seconds
   const [isJiraCloud, setIsJiraCloud] = useState(userPrefs.isJiraCloud === "cloud"); // Use user preferences to determine Jira Cloud or Server
   const [timeInput, setTimeInput] = useState<string>("");
+  const isValidTimeInput = (newTime: string) => /^[0-9hms ]*$/.test(newTime);
 
   const pageGot = useRef(0);
   const pageTotal = useRef(1);
+
+  const handleTimeInput = (newTime: string) => {
+    if (isValidTimeInput(newTime)) {
+      setTimeInput(newTime);
+      parseTimeInput(newTime);
+    }
+  };
 
   const parseTimeInput = (input: string) => {
     const totalSeconds = parseTimeToSeconds(input);
@@ -217,10 +225,7 @@ Please check your permissions, jira account, or credentials and try again.
         title="Time (e.g., 2h 15m 30s)"
         placeholder="Enter time as 'Xh Ym Zs'"
         value={timeInput}
-        onChange={(newTime) => {
-          setTimeInput(newTime);
-          parseTimeInput(newTime);
-        }}
+        onChange={handleTimeInput}
         onBlur={() => parseTimeInput(timeInput)}
       />
       <Form.TextArea
