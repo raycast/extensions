@@ -1,8 +1,7 @@
 import AppKit
-import RaycastExtensionMacro
+import RaycastSwiftMacros
 
-#exportFunction(quitButFront)
-func quitButFront() {
+@raycast func quitButFront() async {
     guard let frontmostApplication = NSWorkspace.shared.frontmostApplication else {
         return
     }
@@ -20,6 +19,3 @@ func quitButFront() {
         }
         .forEach { $0.terminate() }
 }
-
-
-#handleFunctionCall()

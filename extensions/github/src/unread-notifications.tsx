@@ -107,7 +107,7 @@ function UnreadNotifications() {
   return (
     <MenuBarExtra
       icon={getGitHubIcon(hasUnread)}
-      title={hasUnread ? String(data.length) : undefined}
+      title={preferences.showUnreadCount && hasUnread ? String(data.length) : undefined}
       isLoading={isLoading}
     >
       <MenuBarExtra.Item
