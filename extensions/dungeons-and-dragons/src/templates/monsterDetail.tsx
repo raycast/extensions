@@ -67,14 +67,13 @@ export default function MonsterDetail(monster: index) {
   }
 
   // Actions
-  if(foe?.actions.length > 0) {
+  if (foe?.actions.length > 0) {
     foeMarkdown += `## Actions\n`;
     for (const action of foe.actions) {
       foeMarkdown += `### ${action.name}\n`;
       foeMarkdown += `${action.desc}\n`;
     }
   }
-
 
   // roll die for HP and damage
   // set up supporting data
@@ -100,11 +99,7 @@ export default function MonsterDetail(monster: index) {
           <Detail.Metadata.Label title="Alignment" text={foe.alignment} />
           {/* replace this with a loop? */}
           {foe.armor_class.map((armor) => (
-            <Detail.Metadata.Label
-              key={armor.type}
-              title={`Armor (AC): ${armor.type}`}
-              text={(armor.value).toString()}
-            />
+            <Detail.Metadata.Label key={armor.type} title={`Armor (AC): ${armor.type}`} text={armor.value.toString()} />
           ))}
           <Detail.Metadata.Label title="Challenge Rating (CR)" text={foe.challenge_rating.toString()} />
           <Detail.Metadata.Label title="Proficiency Bonus" text={foe.proficiency_bonus.toString()} />

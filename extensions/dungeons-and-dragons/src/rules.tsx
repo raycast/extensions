@@ -12,13 +12,13 @@ interface rulesTypes {
 export default function Command() {
   const rules = getDnd("/api/rule-sections") as rulesTypes;
 
-  if(!rules?.data && rules.isLoading) {
-		return <List isLoading={true} />;
-	}
+  if (!rules?.data && rules.isLoading) {
+    return <List isLoading={true} />;
+  }
 
-	if(!rules?.data) {
-		return <Unresponsive />;
-	}
+  if (!rules?.data) {
+    return <Unresponsive />;
+  }
 
   return (
     <List

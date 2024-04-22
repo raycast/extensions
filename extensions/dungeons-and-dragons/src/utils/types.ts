@@ -50,7 +50,7 @@ export interface spell {
     url: string;
   }[];
   url: string;
-};
+}
 
 export interface rule {
   index: string;
