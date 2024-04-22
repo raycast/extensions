@@ -74,7 +74,7 @@
       "mode": "view"
     },
     {
-      "name": "my-issues",
+      "name": "assigned-issues",
       "title": "My Issues",
       "description": "View and modify issues that are assigned to you.",
       "mode": "view",
