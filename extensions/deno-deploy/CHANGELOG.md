@@ -1,5 +1,9 @@
 # Deno Deploy Changelog
 
+## [Icon update] - 2024-04-18
+
+- Icon updated for better visibility
+
 ## [Tiny typo fix] - 2024-02-13
 
 - Fixed a tiny typo in the description of the extension

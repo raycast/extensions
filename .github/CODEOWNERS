@@ -180,7 +180,7 @@
 /extensions/claude                                                  @florisdobber
 /extensions/cleanshotx                                              @Aayush9029 @thomaslombart @lukaszmtw @erics118 @mlnchk
 /extensions/clear-clipboard                                         @d3caf
-/extensions/clickup                                                 @Ali-Parandeh @aesadde
+/extensions/clickup                                                 @Ali-Parandeh @aesadde @JoltCode
 /extensions/clipboard-editor                                        @pomdtr
 /extensions/clipboard-formatter                                     @joshtemple
 /extensions/clipmenu                                                @Envl
@@ -461,7 +461,7 @@
 /extensions/git-repos                                               @moored @nitishpdmn @go-dima @cameronsstone
 /extensions/gitee                                                   @koinzhang
 /extensions/gitfox                                                  @azlekov
-/extensions/github                                                  @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt @bangerang @wottpal
+/extensions/github                                                  @thomaslombart @unnamedd @tonka3000 @khasbilegt @pernielsentikaer @loxygenK @oilbeater @LunaticMuch @aeorge @daquinoaldo @peppy @aeither @marcotf @qeude @nesl247 @xilopaint @antonengelhardt @bangerang @wottpal @LitoMore @d-mitrofanov-v
 /extensions/github-cli-manual                                       @demartini
 /extensions/github-codespaces                                       @mkwng
 /extensions/github-for-enterprise                                   @Kinbaum @emanguy @LunaticMuch @pernielsentikaer
@@ -818,6 +818,7 @@
 /extensions/nfl-information                                         @kciarnie
 /extensions/nft-search                                              @glazec
 /extensions/ngrok                                                   @ubinatus
+/extensions/nif-fresquinho                                          @poor666
 /extensions/night-light                                             @devmoath @kgrhartlage @erics118
 /extensions/nippon-colors                                           @nagauta
 /extensions/nixpkgs-search                                          @aiotter
@@ -889,6 +890,7 @@
 /extensions/otter                                                   @mrmartineau
 /extensions/oura                                                    @RobErskine
 /extensions/outline-page                                            @praveenjuge
+/extensions/owledge-raycast                                         @RomainPct
 /extensions/package-tracker                                         @cojmeister
 /extensions/pagerduty                                               @horimislime
 /extensions/palette-colors                                          @douglas-pires
@@ -1062,7 +1064,7 @@
 /extensions/refresh-wifi                                            @natterstefan
 /extensions/regex-repl                                              @hongkiulam
 /extensions/regex-tester                                            @allenan
-/extensions/remember-the-date                                       @pernielsentikaer
+/extensions/remember-the-date                                       @pernielsentikaer @samuelkraft
 /extensions/remember-this                                           @Ek2100
 /extensions/remove-background                                       @maantje @FezVrasta
 /extensions/remove-background-powered-by-mac                        @remorses
@@ -1161,7 +1163,7 @@
 /extensions/simpletexocr                                            @zhuozhiyongde
 /extensions/simpread                                                @Kenshin
 /extensions/single-disk-eject                                       @johndturn
-/extensions/single-focus                                            @Mmehdi06
+/extensions/single-focus                                            @Mmehdi06 @LitoMore
 /extensions/sip                                                     @jamesjlyons
 /extensions/sips                                                    @SKaplanOfficial @arronhunt @nakaakist
 /extensions/sitespeakai                                             @hermanschutte
@@ -1312,7 +1314,7 @@
 /extensions/tradingview-controls                                    @jacksonsalopek
 /extensions/transfer-sh_upload                                      @0PandaDEV
 /extensions/transform                                               @Idered @robertrosman @Lp-Francois
-/extensions/transmission                                            @FezVrasta @danpalmer
+/extensions/transmission                                            @FezVrasta @danpalmer @j3lte
 /extensions/transmit                                                @kennonb
 /extensions/trello                                                  @ChrisChinchilla @Jimmy-b36 @ChrisChinchilla @ajaypremshankar
 /extensions/truth-or-dare                                           @tandpfun

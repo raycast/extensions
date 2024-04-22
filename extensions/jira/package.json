@@ -113,7 +113,7 @@
     {
       "name": "siteUrl",
       "title": "Jira Site URL",
-      "description": "Jira Site URL",
+      "description": "Your Jira site URL (e.g foo.atlassian.net)",
       "type": "textfield",
       "required": false,
       "placeholder": "foo.atlassian.com"
@@ -133,7 +133,6 @@
       "required": false
     }
   ],
-
   "dependencies": {
     "@raycast/api": "^1.64.3",
     "@raycast/utils": "^1.12.4",
