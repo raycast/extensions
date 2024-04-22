@@ -1,9 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nif-fresquinho",
-  "title": "Copy Portuguese Tax Number",
-  "subtitle": "Nif Fresquinho",
-  "description": "Get a new Portuguese Tax Number",
+  "title": "Portuguese Tax Number",
+  "description": "Copy a new Portuguese Tax Number to the clipboard",
   "icon": "nif-icon.png",
   "author": "poor666",
   "categories": [
@@ -15,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-	    "title": "Copy Portuguese Tax Number",
+      "title": "Copy Portuguese Tax Number",
       "subtitle": "Nif Fresquinho",
       "description": "Get a new Portuguese Tax Number",
       "mode": "no-view"
