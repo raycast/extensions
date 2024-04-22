@@ -1,8 +1,17 @@
 # GitHub Changelog
 
-## [Open in Browser as primary action setting] - 2024-04-19
+## [Open in Browser as primary action setting] - 2024-04-22
 
 - You can now set Open in Browser as a primary action for Pull Request searches.
+
+## [Updated metadata images] - 2024-04-22
+
+- Updated outdated metadata images.
+
+## [Polish menu bar icon] - 2024-04-22
+
+- Use a new icon with indicator for unread state.
+- Add a new preference item `Show unread count` to allow user to hide the unread count.
 
 ## [Fix recently closed issue] - 2024-04-18
 

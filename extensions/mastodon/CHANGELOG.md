@@ -1,5 +1,10 @@
 # Mastodon Changelog
 
+## [New feature] - 2024-04-22
+
+- Add support for opening notifications with a specific app
+- Add shortcuts for menu actions
+
 ## [New feature] - 2024-03-13
 
 - Add menu bar icon for showing Masotodon notifications

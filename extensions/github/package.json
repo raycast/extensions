@@ -26,6 +26,7 @@
     "antonengelhardt",
     "johanthorell",
     "dennis_zoma",
+    "litomore",
     "dmitrii_mitrofanov"
   ],
   "categories": [
@@ -161,6 +162,14 @@
           "label": "Always Show",
           "name": "alwaysShow",
           "description": "Show the menu bar extra even when you don't have any unread notifications.",
+          "default": true,
+          "required": false
+        },
+        {
+          "type": "checkbox",
+          "label": "Show unread count",
+          "name": "showUnreadCount",
+          "description": "Show the unread count in the menu bar.",
           "default": true,
           "required": false
         }
