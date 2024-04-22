@@ -133,7 +133,7 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 export default function Command() {
   if (!vscodeApp) {
     return ExtensionError(
-      "Please configure the **Search Project Manager** Raycast extension" +
+      "Please configure the **Search Project Manager** Raycast extension " +
         "to choose which version of Visual Studio Code to use.",
     );
   }
@@ -284,7 +284,7 @@ function ExtensionError(detail: string) {
       markdown={detail}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="VS Code App" text={vscodeApp.name} />
+          <Detail.Metadata.Label title="VS Code App" text={vscodeApp?.name || "(unset)"} />
           <Detail.Metadata.Label
             title={`Projects Location${path ? "" : " (Default)"}`}
             text={tildify(path || STORAGE)}
