@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, List, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
 import type { SearchResultDocument } from "@/types";
 
@@ -47,11 +47,7 @@ const ListItem = ({ item, toggleDetails, isShowingDetails }: ListItemProps) => {
             </>
           ) : (
             <>
-              <Action
-                title="Toggle Details"
-                onAction={() => toggleDetails()}
-                icon={Icon.AppWindowSidebarLeft}
-              />
+              <Action title="Toggle Details" onAction={() => toggleDetails()} icon={Icon.AppWindowSidebarLeft} />
               <Action.OpenInBrowser
                 title="Open in JSR"
                 icon={{ source: "jsr.svg" }}
