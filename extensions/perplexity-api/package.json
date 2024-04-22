@@ -58,6 +58,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -106,6 +118,18 @@
             {
               "value": "mixtral-8x7b-instruct",
               "title": "Mixtral 8×7B 16k"
+            },
+            {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -158,6 +182,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -208,6 +244,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -256,6 +304,18 @@
             {
               "value": "mixtral-8x7b-instruct",
               "title": "Mixtral 8×7B 16k"
+            },
+            {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -318,6 +378,18 @@
             {
               "value": "mixtral-8x7b-instruct",
               "title": "Mixtral 8×7B 16k"
+            },
+            {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
             },
             {
               "value": "mistral-7b-instruct",
@@ -399,6 +471,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -448,6 +532,18 @@
             {
               "value": "mixtral-8x7b-instruct",
               "title": "Mixtral 8×7B 16k"
+            },
+            {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -501,6 +597,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -550,6 +658,18 @@
             {
               "value": "mixtral-8x7b-instruct",
               "title": "Mixtral 8×7B 16k"
+            },
+            {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -603,6 +723,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -652,6 +784,18 @@
             {
               "value": "mixtral-8x7b-instruct",
               "title": "Mixtral 8×7B 16k"
+            },
+            {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
             },
             {
               "value": "codellama-70b-instruct",
@@ -705,6 +849,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -756,6 +912,18 @@
               "title": "Mixtral 8×7B 16k"
             },
             {
+              "value": "mixtral-8x22b-instruct",
+              "title": "Mixtral 8×22B 16k"
+            },
+            {
+              "value": "llama-3-8b-instruct",
+              "title": "Llama3 8B 8k"
+            },
+            {
+              "value": "llama-3-70b-instruct",
+              "title": "Llama3 70B 8k"
+            },
+            {
               "value": "codellama-70b-instruct",
               "title": "CodeLlama 70B 16k"
             }
@@ -792,6 +960,18 @@
         {
           "value": "mixtral-8x7b-instruct",
           "title": "Mixtral 8×7B 16k"
+        },
+        {
+          "value": "mixtral-8x22b-instruct",
+          "title": "Mixtral 8×22B 16k"
+        },
+        {
+          "value": "llama-3-8b-instruct",
+          "title": "Llama3 8B 8k"
+        },
+        {
+          "value": "llama-3-70b-instruct",
+          "title": "Llama3 70B 8k"
         },
         {
           "value": "mistral-7b-instruct",
