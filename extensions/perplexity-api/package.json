@@ -369,11 +369,11 @@
             },
             {
               "value": "sonar-small-online",
-              "title": "Sonar small 7B Online"
+              "title": "Sonar Small 7B Online"
             },
             {
               "value": "sonar-medium-online",
-              "title": "Sonar medium 8x7B Online"
+              "title": "Sonar Medium 8x7B Online"
             },
             {
               "value": "mixtral-8x7b-instruct",
