@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "chroxify",
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Security",
+    "Other"
   ],
   "license": "MIT",
   "commands": [
@@ -33,6 +35,14 @@
       "description": "Hide the verification codes in the list.",
       "defaultValue": false,
       "label": "Hide Codes",
+      "required": false
+    },
+    {
+      "name": "emailFilterKeywords",
+      "title": "Custom Email Filter Keywords",
+      "type": "textfield",
+      "description": "Separate multiple keywords with a comma. (This will override the default filter keywords!)",
+      "placeholder": "login,verification,sign up,otp,...",
       "required": false
     }
   ],

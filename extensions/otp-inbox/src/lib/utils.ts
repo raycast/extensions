@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { emailFilterKeywords } from "./constants";
 import { Email, EmailPayload, VerificationCode } from "./types";
 
@@ -61,9 +62,11 @@ export function processEmails(emails: Email[]): {
       const body = decodeEmailBody(email["payload"]).replace(/[^a-zA-Z0-9\s/:?.&=+-]/g, "");
 
       // Validate if email contains keywords
+      const customKeywords = getPreferenceValues().emailFilterKeywords;
+      const filterKeywords = customKeywords ? customKeywords.split(",") : emailFilterKeywords;
       if (
-        !emailFilterKeywords.some(
-          (keyword) =>
+        !filterKeywords.some(
+          (keyword: string) =>
             body.toLowerCase().includes(keyword) ||
             (headers.find((header) => header.name === "Subject")?.value || "").toLowerCase().includes(keyword),
         )
