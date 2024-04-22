@@ -1,15 +1,70 @@
-import { Detail } from "@raycast/api";
+import { Detail, LocalStorage, Toast, getPreferenceValues, openExtensionPreferences, showToast } from "@raycast/api";
 import { useEffect, useContext, useState } from "react";
-import Login from "./login";
 import { AuthContext, getToken, logout } from "./authContext";
 import BookList from "./components/book-list";
-import { ApolloProvider } from "@apollo/client";
+import { ApolloProvider, useMutation } from "@apollo/client";
 import client from "./utils/client";
+import { LOG_IN } from "./mutations/login";
+
+interface Preferences {
+  email: string;
+  password: string;
+}
 
 function Literal() {
-  const { token } = useContext(AuthContext);
+  const { setToken, token } = useContext(AuthContext);
 
-  return token ? <BookList /> : <Login />;
+  const { email, password } = getPreferenceValues<Preferences>();
+
+  const [login, { loading }] = useMutation(LOG_IN, {
+    variables: {
+      email,
+      password,
+    },
+    onCompleted: (data) => {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Logged in successfully",
+      });
+      const { login } = data;
+      LocalStorage.setItem("x-literal-token", login.token);
+      setToken(login.token);
+    },
+    onError: () => {
+      const options: Toast.Options = {
+        style: Toast.Style.Failure,
+        title: "Failed to login",
+        message: "Check credentials and try again",
+        primaryAction: {
+          title: "Go to https://literal.club",
+          onAction: (toast) => {
+            open("https://literal.club");
+            toast.hide();
+          },
+        },
+      };
+      openExtensionPreferences();
+      showToast(options);
+    },
+  });
+
+  useEffect(() => {
+    const attemptLogin = async () => {
+      if (email && password && token) {
+        return;
+      } else {
+        await login();
+      }
+    };
+
+    attemptLogin();
+  }, [email, password, login, token]);
+
+  if (loading) {
+    return <Detail isLoading />;
+  }
+
+  return <BookList />;
 }
 
 export default function Command() {

@@ -14,8 +14,27 @@
     {
       "name": "literal",
       "title": "Search Books",
+      "subtitle": "Literal",
       "description": "Search your literal books by status",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Enter your email for literal",
+      "placeholder": "Enter your email for literal",
+      "name": "email",
+      "required": true,
+      "title": "Email",
+      "type": "textfield"
+    },
+    {
+      "description": "Enter your password for literal",
+      "placeholder": "Enter your password for literal",
+      "name": "password",
+      "required": true,
+      "title": "Password",
+      "type": "password"
     }
   ],
   "dependencies": {
