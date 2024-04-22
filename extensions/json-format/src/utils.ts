@@ -103,7 +103,6 @@ export function formatToJSONLines(input: string) {
   return jsonVal.data.map(JSON.stringify).join('\n');
 }
 
-
 function isJson(str: string) {
   try {
     JSON.parse(str);
