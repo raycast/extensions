@@ -369,9 +369,10 @@
     },
     {
       "type": "checkbox",
-      "label": "Open in Browser as default for PR commands",
+      "title": "Actions"
+      "label": "Open PRs in browser by default",
       "name": "isOpenInBrowser",
-      "description": "Open in browser as a default action for pull request commands.",
+      "description": "If checked, pull requests will be opened in the browser by default instead of viewing them within Raycast.",
       "default": false,
       "required": false
     }
