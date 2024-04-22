@@ -22,7 +22,7 @@ export default function SearchTag(props: Props) {
   });
   const tag = props.tag;
   const [searchText, setSearchText] = useState("");
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Search>();
 
   useEffect(() => {
     const searchLinks = async () => {

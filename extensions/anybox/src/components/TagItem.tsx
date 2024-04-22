@@ -8,7 +8,7 @@ interface Props {
 
 export default function TagItem(props: Props) {
   const tag = props.item;
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Search>();
   if (preferences.asIcons) {
     return (
       <Grid.Item

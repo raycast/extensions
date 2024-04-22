@@ -18,7 +18,7 @@ import calendar from "dayjs/plugin/calendar";
 import "dayjs/locale/en";
 import { Link } from "../utilities/searchRequest";
 
-const preferences = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences.Search>();
 
 dayjs.locale("en");
 dayjs.extend(calendar);

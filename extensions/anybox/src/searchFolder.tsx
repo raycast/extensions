@@ -22,7 +22,7 @@ export default function SearchFolder(props: Props) {
   });
   const folder = props.folder;
   const [searchText, setSearchText] = useState("");
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Search>();
 
   useEffect(() => {
     const searchLinks = async () => {
