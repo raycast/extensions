@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Polish menu bar icon] - 2024-04-20
+
+- Use a new icon with indicator for unread state.
+- Add a new preference item `Show unread count` to allow user to hide the unread count.
+
 ## [Fix recently closed issue] - 2024-04-18
 
 - Only one issue or one PR was previously shown in `My Pull Requests` or `My Issues`. It's not the case anymore!

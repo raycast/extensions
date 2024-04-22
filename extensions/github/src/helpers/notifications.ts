@@ -179,11 +179,10 @@ export function getNotificationTooltip(date: Date) {
   return `Updated: ${format(date, "EEEE d MMMM yyyy 'at' HH:mm")}`;
 }
 
-export function getGitHubIcon(tinted = false) {
-  const overrideTintColor = tinted ? Color.Blue : undefined;
+export function getGitHubIcon(isUnread = false) {
   return {
-    source: "github.svg",
-    tintColor: overrideTintColor ? overrideTintColor : Color.PrimaryText,
+    source: isUnread ? "github-unread.svg" : "github.svg",
+    tintColor: Color.PrimaryText,
   };
 }
 
