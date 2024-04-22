@@ -13,11 +13,18 @@ type JiraCredentials = {
 
 export const jiraWithApiToken = {
   authorize: async () => {
-    const prefs = getPreferenceValues();
-    const url = prefs.siteUrl;
-    const authorizationHeader = `Basic ${btoa(`${prefs.email}:${prefs.token}`)}`;
+    const { siteUrl, token, email } = getPreferenceValues();
 
-    const myselfResponse = await fetch(`https://${url}/rest/api/3/myself`, {
+    let hostname;
+    try {
+      hostname = new URL(siteUrl).hostname;
+    } catch (error) {
+      // If the URL isn't valid, assume a hostname was entered directly
+      hostname = siteUrl;
+    }
+
+    const authorizationHeader = `Basic ${btoa(`${email}:${token}`)}`;
+    const myselfResponse = await fetch(`https://${hostname}/rest/api/3/myself`, {
       headers: {
         Authorization: authorizationHeader,
         Accept: "application/json",
@@ -26,9 +33,8 @@ export const jiraWithApiToken = {
 
     try {
       const myself = (await myselfResponse.json()) as User;
-
       jiraCredentials = {
-        siteUrl: prefs.siteUrl,
+        siteUrl: hostname,
         authorizationHeader: authorizationHeader,
         myself: myself,
       };
@@ -37,7 +43,7 @@ export const jiraWithApiToken = {
         `Error authenticating with Jira. Error code: ${myselfResponse.status}. Please check your credentials in the extension preferences.`,
       );
     }
-    return prefs.token;
+    return token;
   },
 };
 
