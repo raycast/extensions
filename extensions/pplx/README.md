@@ -1,0 +1,1 @@
+this extension forks https://github.com/abielzulio/chatgpt-raycast and points it to the pplx-api

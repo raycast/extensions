@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pplx",
+  "title": "PPLX-API",
+  "description": "Interact with Perplexity",
+  "icon": "icon.png",
+  "author": "idk",
+  "contributors": [],
+  "pastContributors": [],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Web",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Question",
+      "subtitle": "Perplexity",
+      "description": "Ask Perplexity via Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "saved",
+      "title": "Saved Answers",
+      "subtitle": "Perplexity",
+      "description": "Your saved answers",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "Perplexity",
+      "description": "Your recent answers",
+      "mode": "view"
+    },
+    {
+      "name": "conversation",
+      "title": "Conversations",
+      "subtitle": "Perplexity",
+      "description": "Your recent conversations",
+      "mode": "view"
+    },
+    {
+      "name": "model",
+      "title": "Models",
+      "subtitle": "Perplexity",
+      "description": "Your custom and default model",
+      "mode": "view"
+    }
+  ],
+  "keywords": [
+    "ai",
+    "perplexity",
+    "llm",
+    "pplx"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "label": "PPLX-API Key",
+      "description": "Enter your PPLX-API Key",
+      "type": "password",
+      "title": "API Key",
+      "required": true
+    },
+    {
+      "name": "useStream",
+      "label": "Enable streaming completions",
+      "description": "Stream the completions of the generated answer",
+      "type": "checkbox",
+      "title": "Stream Completion",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "isAutoSaveConversation",
+      "label": "Enable auto-save conversation",
+      "description": "Auto-save every conversation that you had with the model",
+      "type": "checkbox",
+      "title": "Auto-save Conversation",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "isHistoryPaused",
+      "label": "Enable pause history",
+      "description": "Pause the history of the conversation",
+      "type": "checkbox",
+      "title": "Pause History",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoLoadText",
+      "label": "Enable auto-load selected text",
+      "description": "Load selected text from your frontmost application to the question bar automatically",
+      "type": "checkbox",
+      "title": "Auto-load Text",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoFullInput",
+      "label": "Enable full text input initially",
+      "description": "Use full text input form when asking question for the first time",
+      "type": "checkbox",
+      "title": "Use Full Text Input",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "@raycast/utils": "^1.5.2",
+    "@types/uuid": "^9.0.0",
+    "csv-parse": "^5.5.3",
+    "openai": "^4.24.3",
+    "proxy-agent": "^6.3.1",
+    "say": "^0.16.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
