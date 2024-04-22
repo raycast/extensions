@@ -11,6 +11,8 @@ import {
   duration,
   preferences,
   progress,
+  saveIntervalHistory,
+  endOfInterval,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 import { Interval, IntervalType } from "../lib/types";
@@ -25,15 +27,7 @@ export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
 
   if (currentInterval && progress(currentInterval) >= 100) {
-    try {
-      launchCommand({
-        name: "pomodoro-control-timer",
-        type: LaunchType.UserInitiated,
-        context: { currentInterval },
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    endOfInterval(currentInterval);
   }
 
   function onStart(type: IntervalType) {
