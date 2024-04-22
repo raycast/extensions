@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Close Raycast after create new database page] - 2024-03-22
+## [Close Raycast after create new database page] - 2024-04-22
 
 - Add settings to close Raycast after create a new database
 
