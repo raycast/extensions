@@ -3,8 +3,8 @@ import { encode } from "@nem035/gpt-3-encoder";
 export const allModels = [
   { name: "Follow global model", id: "global" },
   { name: "Mistral 7B 16k", id: "mistral-7b-instruct" },
-  { name: "Mixtral 8x7b 16k", id: "mixtral-8x7b-instruct" },
-  { name: "Mixtral 8x22b 16k", id: "mixtral-8x22b-instruct" },
+  { name: "Mixtral 8x7B 16k", id: "mixtral-8x7b-instruct" },
+  { name: "Mixtral 8x22B 16k", id: "mixtral-8x22b-instruct" },
   { name: "Sonar Small 7B 16k", id: "sonar-small-chat" },
   { name: "Sonar Medium 8x7B 16k", id: "sonar-medium-chat" },
   { name: "Llama3 8B 8k", id: "llama-3-8b-instruct" },
