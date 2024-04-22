@@ -46,7 +46,7 @@ type CreateIssueFormProps = {
 export default function CreateIssueForm({ draftValues, enableDrafts = true }: CreateIssueFormProps) {
   const { push } = useNavigation();
 
-  const [projectQuery, setProjectQuery] = useState("");
+  const [projectQuery, setProjectQuery] = useCachedState<string>("create-issue-project");
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
