@@ -21,6 +21,15 @@ pip3 install linak-controller
 4. Run the extension and add the UUID and your preferred standing and sitting heights to the extension settings.
 5. (Optional) Set up keyboard shortcuts to toggle between your preferred heights 🥳
 
+## Server Mode
+
+You can run the extension in server mode in order to keep a persistent connection making the response time a lot quicker.
+
+1. Enable server mode in the extension settings
+2. Start the server in your terminal by running `linak-controller --server`
+
+See the [Using the Server](https://github.com/rhyst/linak-controller?tab=readme-ov-file#using-the-server) for more information on server mode.
+
 ## Troubleshooting
 
 Make sure that `linak-controller` is installed and available in your path. If linak-controller is installed and works in your terminal but not in Raycast run `which linak-controller` in your terminal and add the python bin path to the extension settings .i.e.

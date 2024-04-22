@@ -1,5 +1,9 @@
 # Mute microphone Changelog
 
+## [Moved contributor] - 2024-04-15
+
+- No changes were made in the code.
+
 ## [Improvements] - 2023-12-17
 
 - Added checkbox to choose menu bar icon display modes

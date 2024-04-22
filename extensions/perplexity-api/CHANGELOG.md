@@ -1,5 +1,9 @@
 # Perplexity API Changelog
 
+## [Update] - 2024-03-17
+
+- Fixed names of Mistral AI instruct models.
+
 ## [Update] - 2024-03-13
 
 - Removed deprecated models.
