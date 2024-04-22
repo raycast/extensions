@@ -53,7 +53,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open" url={searchResult.url} />
-            <Action.OpenInBrowser title={`Open parent "${searchResult.parent_path}"`} url={searchResult.parent_url} />
+            <Action.OpenInBrowser title={`Open Parent "${searchResult.parent_path}"`} url={searchResult.parent_url} />
             <Action.OpenInBrowser
               shortcut={{ modifiers: ["opt"], key: "enter" }}
               title="Search in Owledge App"
@@ -62,12 +62,12 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Url"
+              title="Copy URL"
               content={searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.CopyToClipboard
-              title="Copy Parent Url"
+              title="Copy Parent URL"
               content={searchResult.parent_url}
               shortcut={{ modifiers: ["cmd"], key: ";" }}
             />
