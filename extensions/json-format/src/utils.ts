@@ -99,7 +99,7 @@ export function formatToJSONLines(input: string) {
     return;
   }
 
-  let jsonVal = JSON.parse(`{"data":${input}}`);
+  const jsonVal = JSON.parse(`{"data":${input}}`);
   return jsonVal.data.map(JSON.stringify).join('\n');
 }
 

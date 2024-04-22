@@ -19,7 +19,7 @@ export default function Command() {
                     <Action.SubmitForm
                         title="Format"
                         onSubmit={async (values: FormInput) => {
-                            let input: string = values.input;
+                            const input: string = values.input;
                             const output = formatToJSONLines(input);
                             if (output) {
                                 setResult(output);
@@ -29,7 +29,7 @@ export default function Command() {
                     <Action.SubmitForm
                         title="View Result"
                         onSubmit={async (values: FormInput) => {
-                            let input: string = values.input;
+                            const input: string = values.input;
                             const output = formatToJSONLines(input);
                             if (output) {
                                 setResult(output);
