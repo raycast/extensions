@@ -12,17 +12,18 @@ import {
 
 import { showFailureToast } from "@raycast/utils";
 import { State, initialState, reducer } from "./reducer";
-import { generateCommitMessage, retrieveAndSavePathToRepository } from "./utils";
+import { generatePrDescription } from "../../utils/ai";
+import { getCurrentBranchName } from "../../utils/git";
 
-export default function Command() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+export function GeneratePrDescriptionComponent(props: { repositoryPath: string; branchName: string }) {
+  const [state, dispatch] = useReducer(reducer, initialState(props.repositoryPath, props.branchName));
 
   const preferences = getPreferenceValues<Preferences>();
-  const prompt = preferences["commit-prompt"] || "";
+  const prompt = preferences["pr-description-prompt"];
 
-  const pasteCommitMessageAndClose = async () => {
-    if (state.commitMessage) {
-      await Clipboard.paste(state.commitMessage);
+  const pastePrDescriptionAndClose = async () => {
+    if (state.prDescription) {
+      await Clipboard.paste(state.prDescription);
     } else {
       await popToRoot();
     }
@@ -33,42 +34,43 @@ export default function Command() {
   };
 
   useEffect(() => {
-    dispatch(["set_loading", true]);
-    retrieveAndSavePathToRepository()
-      .then((path) => dispatch(["set_repository_path", path]))
-      .catch((error) => dispatch(["set_error", error]))
-      .finally(() => dispatch(["set_loading", false]));
-  }, [state.revalidationCount]);
-
-  useEffect(() => {
-    if (state.repositoryPath) {
+    if (state.repositoryPath && state.currentBranchName) {
       dispatch(["set_loading", true]);
-      generateCommitMessage(state.repositoryPath, prompt)
-        .then((commitMessage) => dispatch(["set_commit_message", commitMessage]))
+      generatePrDescription(state.repositoryPath, state.currentBranchName, state.baseBranchName, prompt)
+        .then((prDescription) => dispatch(["set_pr_description", prDescription]))
         .catch((error) => dispatch(["set_error", error]))
         .finally(() => dispatch(["set_loading", false]));
     }
-  }, [state.repositoryPath, state.revalidationCount]);
+  }, [state.repositoryPath, state.currentBranchName, state.revalidationCount]);
 
   useEffect(() => {
     getFrontmostApplication().then((application) => {
       dispatch(["set_frontmost_application", application]);
     });
-  }, []);
+  });
+
+  useEffect(() => {
+    if (state.repositoryPath) {
+      dispatch(["set_loading", true]);
+      const currentBranch = getCurrentBranchName(state.repositoryPath);
+      dispatch(["set_current_branch", currentBranch]);
+      dispatch(["set_loading", false]);
+    }
+  }, [state.repositoryPath]);
 
   useEffect(() => {
     if (state.error) {
-      showFailureToast(state.error, { title: "Failed to generate commit message" }).then();
+      showFailureToast(state.error, { title: "Failed to generate PR description" }).then();
     }
   }, [state.error]);
 
-  return content(state, pasteCommitMessageAndClose, revalidate);
+  return content(state, pastePrDescriptionAndClose, revalidate);
 }
 
 function content(state: State, primaryActionOnAction: () => void, secondaryActionOnAction: () => void) {
   if (state.error) {
     const markdown = `
-  # We encountered an error while generating the commit message 😔
+  # We encountered an error while generating the PR description 😔
   ${state.error.message}
   `;
 
@@ -89,10 +91,11 @@ function content(state: State, primaryActionOnAction: () => void, secondaryActio
     );
   } else {
     const markdown = `
-  ${state.isLoading ? "Generating Commit Message for" : "Generated Commit Message for"}
+  ${state.isLoading ? "Generating PR Description for" : "Generated PR Description for"}
 
-  ${state.repositoryPath ? `\`${state.repositoryPath}\`` : ""}
-  # ${state.isLoading ? "Generating.." : state.commitMessage}
+  \`${state.currentBranchName} -> ${state.baseBranchName}\`
+  
+  ${state.isLoading ? "# Generating.." : state.prDescription}
   `;
 
     return (
@@ -106,7 +109,7 @@ function content(state: State, primaryActionOnAction: () => void, secondaryActio
               icon={state.isLoading ? Icon.XMarkCircleFilled : Icon.Clipboard}
               onAction={primaryActionOnAction}
             />
-            <Action.CopyToClipboard content={state.commitMessage || ""} />
+            <Action.CopyToClipboard content={state.prDescription || ""} />
             <Action
               title="Regenerate"
               shortcut={{ modifiers: ["opt"], key: "r" }}
