@@ -113,7 +113,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
+    "@raycast/api": "^1.71.0",
     "@raycast/utils": "^1.5.2",
     "@types/uuid": "^9.0.0",
     "csv-parse": "^5.5.3",
