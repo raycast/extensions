@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Open in Browser as primary action setting] - 2024-04-22
+
+- You can now set Open in Browser as a primary action for Pull Request searches.
+
 ## [Fix various icons and colors] - 2024-04-22
 
 - Fixes icons for issues and pull requests in `Notifications` and `Unread Notifications` commands.

@@ -26,7 +26,8 @@
     "antonengelhardt",
     "johanthorell",
     "dennis_zoma",
-    "litomore"
+    "litomore",
+    "dmitrii_mitrofanov"
   ],
   "categories": [
     "Developer Tools",
@@ -365,6 +366,15 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "type": "checkbox",
+      "title": "Actions",
+      "label": "Open PRs in browser by default",
+      "name": "isOpenInBrowser",
+      "description": "If checked, pull requests will be opened in the browser by default instead of viewing them within Raycast.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
