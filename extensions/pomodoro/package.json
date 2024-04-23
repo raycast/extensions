@@ -40,7 +40,7 @@
     },
     {
       "name": "stats-pomodoro-timer",
-      "title": "View pomodoro Stats",
+      "title": "View Pomodoro Stats",
       "mode": "view",
       "description": "Shows the stats of the Pomodoro timer"
     },
