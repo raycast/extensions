@@ -35,8 +35,8 @@ export default function Command() {
 
               open(
                 `https://copilot-workspace.githubnext.com/${repo}?task=${encodeURIComponent(
-                  values.task
-                )}`
+                  values.task,
+                )}`,
               );
             }}
           />
@@ -70,7 +70,7 @@ export default function Command() {
         onBlur={(event) => {
           if (event.target.value && !validateRepo(event.target.value)) {
             setRepoError(
-              "Invalid repository. Please provide a valid repository name in the format owner/repo"
+              "Invalid repository. Please provide a valid repository name in the format owner/repo",
             );
           } else {
             dropRepoErrorIfNeeded();
