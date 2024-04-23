@@ -1,6 +1,6 @@
 # Copilot Workspace Raycast Extension
 
-Quick access to Copilot Workspace, the Copilot-native dev environment.
+Quick access to Copilot Workspace, GitHub's first AI-native developer tool for completing everyday tasks.
 
 ## Local development
 

@@ -35,12 +35,15 @@
     "@raycast/utils": "^1.14.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.1.1",
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.1",
     "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "typescript-eslint": "^7.7.1"
   },
   "scripts": {
     "build": "ray build -e dist",
