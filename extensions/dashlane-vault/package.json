@@ -46,7 +46,8 @@
       "name": "masterPassword",
       "title": "Master Password",
       "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain.",
-      "type": "password"
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
