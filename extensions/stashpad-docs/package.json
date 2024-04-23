@@ -24,18 +24,21 @@
       "subtitle": "Stashpad Docs",
       "description": "Look for an existing Stashpad doc.",
       "mode": "view",
-      "preferences": [ {
-        "name": "apiKey",
-        "type": "password",
-        "required": true,
-        "title": "API Key",
-        "description": "Your API Key",
-        "placeholder": "Enter your API Key"
-      }]
+      "preferences": [
+        {
+          "name": "apiKey",
+          "type": "password",
+          "required": true,
+          "title": "API Key",
+          "description": "Your API Key",
+          "placeholder": "Enter your API Key"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.69.2",
+    "@raycast/utils": "^1.14.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

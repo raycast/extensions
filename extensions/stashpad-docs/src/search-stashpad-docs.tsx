@@ -1,5 +1,6 @@
-import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, List, getPreferenceValues, openCommandPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 import { HOST, SERVER } from "./constants";
 
@@ -13,28 +14,38 @@ interface QueryResult {
 }
 
 async function getRecentDocs(apiKey: string) {
-  const res = await fetch(`${SERVER}/v1/docs/recent?api_key=${apiKey}`, {
+  const response = await fetch(`${SERVER}/v1/docs/recent?api_key=${apiKey}`, {
     headers: {},
   });
-  return ((await res.json()) as QueryResult).data;
+  if (response.status !== 200) {
+    throw new Error("Please make sure your API key is valid.");
+  }
+  return ((await response.json()) as QueryResult).data;
 }
 
 export default function SearchDocs() {
-  const [recentDocs, setRecentDocs] = useState<RecentDoc[]>([]);
+  const [recentDocs, setRecentDocs] = useState<RecentDoc[]>();
   const preferences = getPreferenceValues();
 
   useEffect(() => {
     async function load() {
-      const result = await getRecentDocs(preferences.apiKey);
-      setRecentDocs(result);
+      try {
+        const result = await getRecentDocs(preferences.apiKey);
+        setRecentDocs(result);
+      } catch (e) {
+        await showFailureToast(e, {
+          title: "Could not load recent docs.",
+          primaryAction: { title: "Configure Command", onAction: () => openCommandPreferences() },
+        });
+      }
     }
 
     load();
   }, []);
 
   return (
-    <List filtering key={"key"}>
-      {recentDocs.map((d) => (
+    <List filtering key={"key"} isLoading={recentDocs === undefined}>
+      {recentDocs?.map((d) => (
         <List.Item
           key={d.id}
           title={d.title}
