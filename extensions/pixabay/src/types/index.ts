@@ -68,11 +68,3 @@ export interface VideoSearchResult {
 
 export type SearchImageType = "all" | "photo" | "illustration" | "vector";
 export type SearchVideoType = "all" | "film" | "animation";
-
-export type Preferences = {
-  apiKey: string;
-  showinfinder?: boolean;
-  downloadFolder?: string;
-  safeSearch?: boolean;
-  resultsPerPage?: string;
-};
