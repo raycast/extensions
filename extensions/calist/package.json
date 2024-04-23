@@ -29,7 +29,7 @@
       "name": "weekFormat",
       "type": "dropdown",
       "required": true,
-      "title": "First Day of Week",
+      "title": "First day of week",
       "data": [
         {
           "title": "Monday",
@@ -40,14 +40,14 @@
           "value": "0"
         }
       ],
-      "description": "First Day of Week",
+      "description": "First day of week",
       "default": "1"
     },
     {
       "name": "weekEnable",
       "type": "checkbox",
       "required": true,
-      "label": "Show Week Column",
+      "label": "Show week column",
       "title": "Settings",
       "description": "Indicated if it is necessary to show week numbers",
       "default": true
@@ -56,7 +56,7 @@
       "name": "weekDays",
       "type": "checkbox",
       "required": true,
-      "label": "Show Weekday Names",
+      "label": "Show weekday names",
       "description": "This option shows week days on top",
       "default": true
     },
@@ -64,7 +64,7 @@
       "name": "monthDetails",
       "type": "checkbox",
       "required": true,
-      "label": "Show Event Count",
+      "label": "Show event count",
       "description": "This option enabled details under each day",
       "default": true
     },
@@ -72,7 +72,7 @@
       "name": "monthName",
       "type": "checkbox",
       "required": true,
-      "label": "Show Month Name",
+      "label": "Show month name",
       "description": "This option shows months title or hides it to save space",
       "default": true
     },
@@ -80,7 +80,7 @@
       "name": "monthSignal",
       "type": "checkbox",
       "required": true,
-      "label": "Event Indicator",
+      "label": "Event indicator",
       "description": "This option shows a dot in top right corner when day has events",
       "default": true
     },
@@ -88,7 +88,7 @@
       "name": "monthDropdown",
       "type": "checkbox",
       "required": true,
-      "label": "Enable Month Dropdown",
+      "label": "Enable month dropdown",
       "description": "This option shows or hides the dropdown",
       "default": true
     },
@@ -111,7 +111,7 @@
           "value": "compact"
         }
       ],
-      "description": "Card Density",
+      "description": "Card density",
       "default": "compact"
     },
     {
@@ -119,7 +119,7 @@
       "type": "checkbox",
       "required": true,
       "label": "Time",
-      "title": "Time Settings",
+      "title": "Time settings",
       "description": "Show the time before calendar",
       "default": true
     },
@@ -128,7 +128,7 @@
       "type": "checkbox",
       "required": false,
       "label": "Seconds",
-      "description": "Hide Seconds in time",
+      "description": "Hide seconds in time",
       "default": true
     },
     {
@@ -143,23 +143,23 @@
       "name": "enableTimeFormat",
       "type": "checkbox",
       "required": false,
-      "label": "AM/PM",
-      "description": "Show AM/PM in time",
+      "label": "Time format",
+      "description": "Display time in AM/PM format",
       "default": true
     },
     {
       "name": "enableTimeSecondary",
       "type": "textfield",
       "required": false,
-      "label": "Second Timezone Title",
-      "title": "Secondary Timezone",
+      "label": "Second timezone title",
+      "title": "Secondary timezone",
       "description": "Second timezone that displays when time is enabled"
     },
     {
       "name": "enableTimeSecondaryOffset",
       "type": "textfield",
       "required": false,
-      "label": "Second Timezone Offset",
+      "label": "Second timezone offset",
       "title": "Offset",
       "description": "Second timezone offset in hours"
     },
@@ -167,24 +167,24 @@
       "name": "searchPlaceholder",
       "type": "textfield",
       "required": false,
-      "label": "Search Custom Placeholder",
-      "title": "Search Placeholder",
+      "label": "Search custom placeholder",
+      "title": "Search placeholder",
       "description": "Show or hide time on search placeholder"
     },
     {
       "name": "navTitle",
       "type": "textfield",
       "required": false,
-      "label": "Custom Window title text",
+      "label": "Custom window title text",
       "placeholder": "Custom title",
-      "title": "Navigation Title",
+      "title": "Navigation title",
       "description": "Show or hide time on search placeholder"
     },
     {
       "name": "navDate",
       "type": "checkbox",
       "required": true,
-      "label": "Show Date",
+      "label": "Show date",
       "description": "This option shows date on navigation title",
       "default": true
     },
@@ -192,7 +192,7 @@
       "name": "navWeather",
       "type": "checkbox",
       "required": true,
-      "label": "Show Weather",
+      "label": "Show weather",
       "description": "This option shows a dot in top right corner when day has events",
       "default": true
     },
@@ -200,7 +200,7 @@
       "name": "navWeek",
       "type": "checkbox",
       "required": true,
-      "label": "Show Week Number",
+      "label": "Show week number",
       "description": "This option shows the week number on the navigation title",
       "default": true
     },
@@ -257,7 +257,7 @@
           "value": "avatar"
         },
         {
-          "title": "Raycast Icons",
+          "title": "Raycast icons",
           "value": "raycast"
         },
         {
@@ -265,14 +265,14 @@
           "value": "glyph"
         }
       ],
-      "description": "Change Icon Type",
+      "description": "Change icon type",
       "default": "glyph"
     },
     {
       "name": "fontWeight",
       "type": "dropdown",
       "required": false,
-      "title": "Font Weight",
+      "title": "Font weight",
       "data": [
         {
           "title": "Normal",
@@ -283,14 +283,14 @@
           "value": "bold"
         }
       ],
-      "description": "Font Weight",
+      "description": "Font weight",
       "default": "normal"
     },
     {
       "name": "fontFamily",
       "type": "dropdown",
       "required": false,
-      "title": "Font Family",
+      "title": "Font family",
       "data": [
         {
           "title": "Sans Serif",
@@ -313,7 +313,7 @@
       "type": "textfield",
       "required": false,
       "placeholder": "#5d18dc",
-      "title": "Current Day Color",
+      "title": "Current day color",
       "description": "Change current day color, overrides theme color"
     },
     {
@@ -321,7 +321,7 @@
       "type": "textfield",
       "required": false,
       "placeholder": "#ff8282",
-      "title": "Custom Color for Weekends",
+      "title": "Custom color for weekends",
       "description": "Change Weekend color, overrides theme color"
     }
   ],
