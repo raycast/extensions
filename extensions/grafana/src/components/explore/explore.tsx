@@ -71,7 +71,7 @@ export function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Explore with this datasource"
+                title="Explore With This Datasource"
                 url={createExploreLink(datasource.uid)}
                 onOpen={() => visitItem(datasource)}
               />
