@@ -40,9 +40,9 @@
     },
     {
       "name": "stats-pomodoro-timer",
+      "title": "View pomodoro Stats",
       "mode": "view",
-      "description": "Shows the stats of the Pomodoro timer",
-      "title": "View pomodoro Stats"
+      "description": "Shows the stats of the Pomodoro timer"
     },
     {
       "name": "slack-pomodoro-menu-bar",

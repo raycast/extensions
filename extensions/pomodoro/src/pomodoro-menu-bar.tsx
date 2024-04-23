@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
+import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import { FocusText, LongBreakText, ShortBreakText } from "../lib/constants";
 import {
@@ -11,7 +11,6 @@ import {
   duration,
   preferences,
   progress,
-  saveIntervalHistory,
   endOfInterval,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
