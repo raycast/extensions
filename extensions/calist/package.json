@@ -151,7 +151,7 @@
       "name": "enableTimeSecondary",
       "type": "textfield",
       "required": false,
-      "label": "Second timezone title",
+      "label": "Second Timezone Title",
       "title": "Secondary Timezone",
       "description": "Second timezone that displays when time is enabled"
     },
@@ -159,7 +159,7 @@
       "name": "enableTimeSecondaryOffset",
       "type": "textfield",
       "required": false,
-      "label": "Second timezone offset",
+      "label": "Second Timezone Offset",
       "title": "Offset",
       "description": "Second timezone offset in hours"
     },
@@ -184,7 +184,7 @@
       "name": "navDate",
       "type": "checkbox",
       "required": true,
-      "label": "Show date",
+      "label": "Show Date",
       "description": "This option shows date on navigation title",
       "default": true
     },
@@ -192,7 +192,7 @@
       "name": "navWeather",
       "type": "checkbox",
       "required": true,
-      "label": "Show weather",
+      "label": "Show Weather",
       "description": "This option shows a dot in top right corner when day has events",
       "default": true
     },
@@ -200,7 +200,7 @@
       "name": "navWeek",
       "type": "checkbox",
       "required": true,
-      "label": "Show week number",
+      "label": "Show Week Number",
       "description": "This option shows the week number on the navigation title",
       "default": true
     },
