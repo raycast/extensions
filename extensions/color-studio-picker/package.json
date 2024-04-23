@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Pick a color",
+      "title": "Pick a Color",
       "description": "Select a color from Color Studio",
       "mode": "view",
       "arguments": [

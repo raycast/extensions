@@ -15,28 +15,33 @@ const DropdownCategories = ({ categories, setSection }: DropdownProps) => (
 
 export default function Command(props: LaunchProps) {
   const { color } = props.arguments;
-  const [searchText, setSearchText] = useState("");
+  const initialText = color || "";
+  const [searchText, setSearchText] = useState(initialText);
   const [section, setSection] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const { filteredSections, categories } = useColorSections(colors, searchText, section);
 
   useEffect(() => {
+    setIsLoading(true);
+
     async function fetchAndSetSearchText() {
-      let selectedText = "";
-      try {
-        selectedText = await getSelectedText();
-      } catch (error) {
-        /* no-op */
-      }
+      const selectedText = await getSelectedText().catch(() => "");
 
       const searchTextToUse = color || selectedText || "";
       setSearchText(searchTextToUse);
+      setIsLoading(false);
     }
 
-    fetchAndSetSearchText();
+    if (!color) {
+      fetchAndSetSearchText();
+    } else {
+      setIsLoading(false);
+    }
   }, [color]);
 
   return (
     <List
+      isLoading={isLoading}
       searchText={searchText}
       searchBarPlaceholder="Filter colors by name or HEX code"
       onSearchTextChange={setSearchText}
