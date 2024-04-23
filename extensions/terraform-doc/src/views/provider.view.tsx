@@ -58,10 +58,10 @@ export default function ProviderView() {
                 title={`Navigate to ${p.attributes["full-name"]}`}
                 target={<ProviderVersionsView provider={p} />}
               />
-              <Action 
+              <Action
                 icon={Icon.Download}
-                title="Refresh cache" 
-                onAction={() => setState(undefined)} 
+                title="Refresh Cache"
+                onAction={() => setState(undefined)}
               />
             </ActionPanel>
           }
