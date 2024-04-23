@@ -46,7 +46,9 @@ export default function Command() {
     return null;
   }
 
-  if (now.getHours() < startHour) {
+  const [startHours, startMinutes] = startHour.split(":").map(Number);
+  const startTime = startHours + (startMinutes || 0) / 60;
+  if (now.getHours() < startTime) {
     return null;
   }
 
