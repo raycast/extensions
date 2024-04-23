@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "color-studio-picker",
   "title": "Color Studio Picker",
-  "description": "It helps you identify and pick colors from Automattic's Color Studio",
+  "description": "Helps you identify and pick colors from Automattic's Color Studio",
   "icon": "command-icon.png",
   "author": "Automattic_Inc",
   "license": "MIT",
