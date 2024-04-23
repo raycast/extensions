@@ -1,41 +1,6 @@
-import { Color, getPreferenceValues, Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
-import { differenceInMinutes, isWeekend } from "date-fns";
-
-function getRemainingTime(now: Date) {
-  const getEndHour = () => {
-    const { endHour } = getPreferenceValues();
-    return endHour.split(":").map((i: string) => Number(i));
-  };
-  const endOfWorkday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...getEndHour());
-
-  const difference = differenceInMinutes(endOfWorkday, now, { roundingMethod: "floor" });
-  const hours = Math.floor(difference / 60);
-  const minutes = difference - hours * 60;
-
-  return { hours, minutes };
-}
-
-function getIcon(hours: number) {
-  if (hours < 1) {
-    return { source: Icon.Clock, tintColor: Color.Red };
-  } else if (hours < 2) {
-    return { source: Icon.Clock, tintColor: Color.Orange };
-  } else if (hours < 3) {
-    return { source: Icon.Clock, tintColor: Color.Yellow };
-  } else {
-    return { source: Icon.Clock };
-  }
-}
-
-function getTitle(hours: number, minutes: number) {
-  if (!minutes) {
-    return `${hours}h`;
-  } else if (!hours) {
-    return `${minutes}m`;
-  } else {
-    return `${hours}h ${minutes}m`;
-  }
-}
+import { getPreferenceValues, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import { isWeekend } from "date-fns";
+import { getRemainingTime, getIcon, getTitle } from "./utils/time";
 
 export default function Command() {
   const now = new Date();
