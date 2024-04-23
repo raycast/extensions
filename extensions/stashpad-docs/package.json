@@ -14,12 +14,14 @@
     {
       "name": "create-stashpad-doc",
       "title": "Create Doc",
+      "subtitle": "Stashpad Docs",
       "description": "Create a new Stashpad doc.",
       "mode": "no-view"
     },
     {
       "name": "search-stashpad-docs",
       "title": "Search Docs",
+      "subtitle": "Stashpad Docs",
       "description": "Look for an existing Stashpad doc.",
       "mode": "view",
       "preferences": [ {
