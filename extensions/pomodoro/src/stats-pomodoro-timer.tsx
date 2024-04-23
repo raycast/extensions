@@ -57,5 +57,5 @@ export default function StatsPomodoro() {
    - Top Number of back to back pomodoro cicle${topBackToBackCycle > 1 ? "s" : ""}: **${topBackToBackCycle}**. 👑\n
     `;
 
-  return <Detail isLoading={isLoading} navigationTitle="Stats of pomodoro timer" markdown={markdown} />;
+  return <Detail isLoading={isLoading} markdown={markdown} />;
 }
