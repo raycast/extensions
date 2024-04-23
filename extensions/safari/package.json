@@ -11,7 +11,8 @@
   "author": "loris",
   "contributors": [
     "thomas",
-    "HelloImSteven"
+    "HelloImSteven",
+    "axsuul"
   ],
   "license": "MIT",
   "commands": [
@@ -19,8 +20,19 @@
       "name": "cloud-tabs",
       "title": "Search Tabs",
       "subtitle": "Safari",
-      "description": "Browse your open tabs (Local and iCloud)",
-      "mode": "view"
+      "description": "Browse your open tabs",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "areRemoteTabsUsed",
+          "type": "checkbox",
+          "required": false,
+          "title": "Devices",
+          "description": "Include iCloud tabs across all your devices",
+          "default": true,
+          "label": "iCloud"
+        }
+      ]
     },
     {
       "name": "reading-list",
