@@ -1,5 +1,9 @@
 # Visual Studio Code - Project Manager Changelog
 
+## [Update] - 2024-04-23
+
+- Improved error messages when the Projects Location file is invalid or when the extension isn't found in the selected VS Code build.
+
 ## [Update] - 2024-03-19
 
 - The extension now supports any variant of VS Code by using an app picker instead of a fixed dropdown list of VS Code builds.
