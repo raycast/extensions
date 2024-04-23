@@ -1,5 +1,5 @@
-import { Action, Image, Keyboard } from "@raycast/api";
 import { ha } from "@lib/common";
+import { Action, Image, Keyboard } from "@raycast/api";
 
 export function HAOpenUrlInAction(props: {
   url: string;
