@@ -1,7 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import type { Preferences } from "@/types";
-
 import { resolveFilepath } from "@/lib/utils";
 
 const prefs = getPreferenceValues<Preferences>();
