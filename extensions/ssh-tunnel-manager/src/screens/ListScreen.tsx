@@ -43,7 +43,7 @@ export function ListScreen(props: {
       cache.set(Storage.AlivePidList, JSON.stringify(Array.from(alivePidSet)));
       tunnelItem.pid = null;
       setListData([...listData]);
-      showToast({ title: "Tunnel Closed" });
+      showToast({ title: "Tunnel closed" });
     }
   };
 

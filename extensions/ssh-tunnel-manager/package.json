@@ -4,7 +4,7 @@
   "title": "SSH Tunnel Manager",
   "description": "Manage ssh tunnels",
   "icon": "extension_icon.png",
-  "author": "MinatoHikari",
+  "author": "Graffino",
   "categories": [
     "System",
     "Developer Tools"
@@ -20,18 +20,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.1",
-    "@raycast/utils": "^1.4.14"
+    "@raycast/api": "^1.71.4",
+    "@raycast/utils": "^1.14.0"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/parser": "^7.7.1",
+    "eslint": "^9.1.1",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

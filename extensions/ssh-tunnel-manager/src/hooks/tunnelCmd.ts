@@ -1,3 +1,4 @@
+import { showToast } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useEffect, SetStateAction, Dispatch, MutableRefObject } from "react";
 import { Values, Storage, ListData, TunnelType } from "../types";
@@ -8,11 +9,19 @@ export const useTunelCmd = (
   setListData: Dispatch<SetStateAction<ListData[]>>,
   alivePidSet: Set<string>,
   defaultTunnelParams: Partial<Values>,
-  shouldEstablish: MutableRefObject<boolean>
+  shouldEstablish: MutableRefObject<boolean>,
 ) => {
   const [tunnelParams, setTunnelParams] = useState<Partial<Values>>({ ...defaultTunnelParams });
 
   const { name, sshHost, user, remoteHost, localPort, remotePort, sshPort, type, identityFile } = tunnelParams;
+
+  if (listData.find((i) => i.localPort === localPort)) {
+    showToast({
+      title: "Tunnel port in use",
+      message: "The tunnel port is already in use please kill the corresponding tunnerl first.",
+    });
+    return;
+  }
 
   const {
     isLoading,
@@ -32,7 +41,7 @@ export const useTunelCmd = (
       `-${type === TunnelType.Local ? "L" : "R"}`,
       `${localPort?.trim()}:${remoteHost?.trim() || "localhost"}:${remotePort?.trim()}`,
       ">",
-      `/tmp/${name?.trim()}.log`,
+      `/tmp/${name?.replace(/[\W_]+/g, "-").trim()}.log`,
       "2>&1",
       "&",
       "echo",
@@ -42,7 +51,7 @@ export const useTunelCmd = (
       shell: true,
       execute: false,
       initialData: null,
-    }
+    },
   );
 
   useEffect(() => {

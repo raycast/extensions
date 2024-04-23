@@ -45,20 +45,20 @@ export function FromScreen(props: { onSubmit: (values: Values) => void; shouldEs
       }
     >
       <Form.Description text="SSH tunnel config" />
-      <Form.TextField title="Name" placeholder="Alias name of tunnel" {...itemProps.name} />
-      <Form.TextField title="Local Port" placeholder="Enter a port" {...itemProps.localPort} />
-      <Form.TextField title="Username" placeholder="Enter username" {...itemProps.user} />
-      <Form.TextField title="SSH Host" placeholder="Enter ssh host" {...itemProps.sshHost} />
-      <Form.TextField title="SSH Port" placeholder="Enter ssh port (default: 22)" {...itemProps.sshPort} />
+      <Form.TextField title="Name" placeholder="connect.example.com (MariaDB|MongoDB|PosgreSQL)" {...itemProps.name} />
+      <Form.TextField title="Local Port" placeholder="Local forwarding port (e.g. 2000)" {...itemProps.localPort} />
+      <Form.TextField title="SSH Username" placeholder="Target SSH username (e.g. graffino)" {...itemProps.user} />
+      <Form.TextField title="SSH Host" placeholder="Target SSH host (e.g. connect.example.com)" {...itemProps.sshHost} />
+      <Form.TextField title="SSH Port" placeholder="Target SSH port (default: 22)" {...itemProps.sshPort} />
       <Form.TextField
         title="Target Host"
-        placeholder="Enter target host (default: localhost)"
+        placeholder="Target forwarding host (default: 127.0.0.1)"
         {...itemProps.remoteHost}
       />
-      <Form.TextField title="Target Port" placeholder="Enter target port" {...itemProps.remotePort} />
+      <Form.TextField title="Target forwarding port" placeholder="Enter target port (e.g. 3306|27017|5432" {...itemProps.remotePort} />
       <Form.Separator />
       <Form.Dropdown id="type" title="Tunnel Type">
-        <Form.Dropdown.Item value={TunnelType.Local} title="Local" />
+        <Form.Dropdown.Item value={TunnelType.Local} title="Local (default)" />
         <Form.Dropdown.Item value={TunnelType.Remote} title="Remote" />
       </Form.Dropdown>
       <Form.FilePicker
