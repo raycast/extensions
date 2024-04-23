@@ -103,7 +103,7 @@ async function getFrontmostApplication(): Promise<Application>;
 import { getFrontmostApplication } from "@raycast/api";
 
 export default async function Command() => {
-  const defaultApplication = await getFrontmostApplication();
+  const frontmostApplication = await getFrontmostApplication();
   console.log(`The frontmost application is: ${frontmostApplication.name}`);
 };
 ```
