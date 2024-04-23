@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 
 import type { Profile, WithDetails } from "@/types";
@@ -13,16 +13,21 @@ export type ProfileItemProps = WithDetails & {
 
 export default function ProfileItem({ profile, toggleDetails, detailsShown }: ProfileItemProps) {
   const accessories = useMemo(() => {
-    if (!profile.subscriberCount || profile.subscriberCount.length === 0 || detailsShown) {
+    if (detailsShown) {
       return [];
     }
     return [
-      {
-        tag: profile.subscriberCount,
-        icon: Icon.Person,
-        tooltip: "Estimated amount of subscribers",
-      },
-    ];
+      !profile.subscriberCount || profile.subscriberCount.length === 0
+        ? null
+        : {
+            tag: profile.subscriberCount,
+            icon: Icon.Person,
+            tooltip: "Estimated amount of subscribers",
+          },
+      !profile.hasPosts
+        ? { tag: "No posts", icon: { source: "empty.svg", tintColor: Color.Red }, tooltip: "No posts found" }
+        : null,
+    ].filter((a) => a !== null) as Array<{ tag: string; icon: Icon; tooltip: string }>;
   }, [profile, detailsShown]);
 
   return (

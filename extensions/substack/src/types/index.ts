@@ -233,3 +233,30 @@ export type WithDetails = {
   detailsShown: boolean;
   toggleDetails: () => void;
 };
+
+export type CachedPostResultItem = {
+  audience: string;
+  cover_image: string;
+  post_date: string;
+  publication_id: number;
+  slug: string;
+  subtitle: string;
+  title: string;
+  truncated_body: string;
+  url: string;
+};
+
+export type CachedPost = WithID & CachedPostResultItem;
+
+export type CachedPostResult = {
+  authors: Array<{
+    bio: string;
+    handle: string;
+    name: string;
+    photo_url: string;
+    role: string;
+    user_id: number;
+  }>;
+  posts: CachedPostResultItem[];
+  recentPosts: CachedPostResultItem[];
+};
