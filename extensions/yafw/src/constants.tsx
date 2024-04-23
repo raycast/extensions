@@ -6,6 +6,6 @@ export const COMPRESSION_OPTIONS: Record<CompressionOptionKey, CompressionOption
   small_file: { crf: 35, bitrate: "1000k", bufsize: "2000k" },
   very_small_file: { crf: 42, bitrate: "500k", bufsize: "1000k" },
 };
-
 export const DEFAULT_COMPRESSION: CompressionOptionKey = "balanced";
 export const VIDEO_FORMATS = ["mp4", "mov", "avi", "mkv", "webm"];
+export const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin:/opt/homebrew/sbin/:~/.bin";

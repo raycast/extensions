@@ -46,9 +46,10 @@
     {
       "name": "ffmpeg_path",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "ffmpeg path",
       "description": "You need to install it manually (`brew install ffmpeg`).",
+      "default": "/opt/homebrew/bin/ffmpeg",
       "placeholder": "/opt/homebrew/bin/ffmpeg"
     }
   ]

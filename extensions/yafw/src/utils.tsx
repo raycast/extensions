@@ -1,10 +1,22 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
-import { COMPRESSION_OPTIONS, CompressionOptionKey } from "./constants";
+import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH } from "./constants";
 
-const ffmpegPath = getPreferenceValues().ffmpegPath || "/opt/homebrew/bin/ffmpeg";
+const ffmpegPath = getPreferenceValues().ffmpeg_path || "/opt/homebrew/bin/ffmpeg";
+
+export const isFFmpegInstalled = (): boolean => {
+  try {
+    const result = execSync(`zsh -l -c 'PATH=${PATH} ffmpeg -version'`).toString();
+    if (result.includes("ffmpeg version")) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    return false;
+  }
+};
 
 export function normalizeFilePath(filePath: string): string {
   return filePath.replace(/^file:\/\//, "").replace(/%20/g, " ");
@@ -23,6 +35,15 @@ export function fileExists(file: string) {
 }
 
 export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {
+  if (!isFFmpegInstalled()) {
+    showToast({
+      title: "Error",
+      message: "FFmpeg is not installed. Please install FFmpeg or specify its path in the extension settings.",
+      style: Toast.Style.Failure,
+    });
+    return [];
+  }
+
   const one = files.length === 1;
   await showToast(Toast.Style.Animated, one ? "Compressing video..." : "Compressing videos...");
 

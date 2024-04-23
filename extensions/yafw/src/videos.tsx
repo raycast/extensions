@@ -6,12 +6,15 @@ import { getHistoryFromStorage, saveHistoryToStorage } from "./storage";
 export function Videos(props: { files: string[] }) {
   const [history, setHistory] = useState<string[] | null>(null);
   const [allFiles, setAllFiles] = useState<string[]>(props.files);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getHistoryFromStorage().then((fromStorage) => {
-      if (fromStorage) setHistory(fromStorage);
-      else setHistory([]);
-    });
+    getHistoryFromStorage()
+      .then((fromStorage) => {
+        if (fromStorage) setHistory(fromStorage);
+        else setHistory([]);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   useEffect(() => {
@@ -33,7 +36,7 @@ export function Videos(props: { files: string[] }) {
   };
 
   return (
-    <Grid selectedItemId={"0"}>
+    <Grid isLoading={isLoading}>
       {unique(allFiles).map((file, index) => (
         <Grid.Item
           id={index.toString()}
@@ -53,15 +56,20 @@ export function Videos(props: { files: string[] }) {
               <Action title="Open in Finder" onAction={() => showInFinder(file)} icon={{ source: Icon.Finder }} />
               <Action
                 title="Remove From History"
+                style={Action.Style.Destructive}
                 onAction={() => removeFromHistory(file)}
                 icon={{ source: Icon.Trash }}
               />
-              <Action title="Clear All History" onAction={clearAllHistory} icon={{ source: Icon.Trash }} />
+              <Action
+                title="Clear All History"
+                style={Action.Style.Destructive}
+                onAction={clearAllHistory}
+                icon={{ source: Icon.Trash }}
+              />
             </ActionPanel>
           }
         />
       ))}
-      {history == null && <Grid.Item key="loading" title="Loading history..." content="" />}
     </Grid>
   );
 }
