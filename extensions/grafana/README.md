@@ -8,7 +8,7 @@
     Grafana
   </h1>
 
-Raycast extension to search dashboards, create, search and modify annotations, and more to come.
+Raycast extension to search dashboards, go to the explore view, create, search and modify annotations, and more to come.
 
   <p>
     <a href="https://www.raycast.com/francois/grafana">
@@ -28,12 +28,6 @@ Raycast extension to search dashboards, create, search and modify annotations, a
       src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
       alt="PRs welcome!"  
     />
-    <a href="https://open.vscode.dev/organization/repository">
-      <img
-        src="https://open.vscode.dev/badges/open-in-vscode.svg"
-        alt="Open in Visual Studio Code"
-      />
-    </a>
   </p>
 </div>
 
@@ -67,11 +61,6 @@ Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
 ### Create Annotation
 
 ![search-dashboards](./assets/showcase_create_annotation.png)
-
-## Roadmap
-
-- Improve annotation creation with a custom time, and choosing a time range
-- Let the user choose tags from a dropdown for the annotation
 
 ---
 
