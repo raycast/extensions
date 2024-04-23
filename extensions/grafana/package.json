@@ -34,6 +34,20 @@
       "subtitle": "Grafana",
       "description": "Open the explore section with the selected datasource",
       "mode": "view"
+    },
+    {
+      "name": "createSavedQuery",
+      "title": "Create Saved Query",
+      "subtitle": "Grafana",
+      "description": "Create saved PromQL or LogQL queries",
+      "mode": "view"
+    },
+    {
+      "name": "listSavedQueries",
+      "title": "List Saved Queries",
+      "subtitle": "Grafana",
+      "description": "List QL queries",
+      "mode": "view"
     }
   ],
   "preferences": [
