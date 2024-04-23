@@ -5,7 +5,7 @@ import { getAvatarIcon } from "@raycast/utils";
 
 import type { Profile, WithDetails } from "@/types";
 
-import ProfilePosts from "@/components/ProfilePosts";
+import UserProfilePosts from "./UserProfilePosts";
 
 export type ProfileItemProps = WithDetails & {
   profile: Profile;
@@ -48,7 +48,7 @@ export default function ProfileItem({ profile, toggleDetails, detailsShown }: Pr
           )}
           <Action.Push
             title="Show Posts"
-            target={<ProfilePosts userId={profile.id} />}
+            target={<UserProfilePosts profile={profile} />}
             icon={{ source: Icon.List }}
             shortcut={{ key: "o", modifiers: ["cmd"] }}
           />
