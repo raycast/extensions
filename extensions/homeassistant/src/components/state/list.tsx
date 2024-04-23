@@ -51,7 +51,11 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+      {states
+        ?.sort((a, b) =>
+          (a.attributes.friendly_name || a.entity_id).localeCompare(b.attributes.friendly_name || b.entity_id),
+        )
+        .map((state) => <StateListItem key={state.entity_id} state={state} />)}
     </List>
   );
 }

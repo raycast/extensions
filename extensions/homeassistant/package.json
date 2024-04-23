@@ -7,7 +7,8 @@
   "contributors": [
     "altrdev",
     "rspeicher",
-    "amuelli"
+    "amuelli",
+    "xilopaint"
   ],
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
@@ -565,6 +566,7 @@
     "dev": "ray develop",
     "build": "ray build -e dist",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
