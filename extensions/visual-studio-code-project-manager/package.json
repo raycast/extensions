@@ -29,7 +29,7 @@
       "name": "groupProjectsByTag",
       "type": "checkbox",
       "required": false,
-      "title": "Group projects...",
+      "title": "Group Projects...",
       "default": true,
       "label": "by tag",
       "description": "Groups projects by tag instead of just showing"
@@ -38,7 +38,7 @@
       "name": "hideProjectsWithoutTag",
       "type": "checkbox",
       "required": false,
-      "title": "Hide projects...",
+      "title": "Hide Projects...",
       "default": false,
       "label": "without tag",
       "description": "Hide projects without tag"
@@ -63,7 +63,7 @@
       "type": "appPicker",
       "required": false,
       "default": "/Applications/iTerm.app",
-      "title": "Terminal app path",
+      "title": "Terminal App Path",
       "description": "Path to the terminal app"
     },
     {
@@ -71,7 +71,7 @@
       "type": "appPicker",
       "required": false,
       "default": "/Applications/Fork.app",
-      "title": "Git client app path",
+      "title": "Git Client App Path",
       "description": "Path to the Git client app"
     }
   ],
