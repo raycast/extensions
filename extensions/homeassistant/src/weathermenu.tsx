@@ -58,8 +58,8 @@ export default function WeatherMenuBarCommand(): JSX.Element {
   const error = stateError
     ? getErrorMessage(stateError)
     : weather === undefined
-    ? `Entity '${entity}' not found`
-    : undefined;
+      ? `Entity '${entity}' not found`
+      : undefined;
   return (
     <WeatherMenuBarExtra
       title={temp ? temp.toString() : undefined}
