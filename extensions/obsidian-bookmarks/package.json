@@ -5,6 +5,9 @@
   "description": "Manage your bookmarked links with Obsidian. Save, search, and access your bookmarks. Supports Chrome, Safari and Arc.",
   "icon": "obsidian-bookmarks.png",
   "author": "dru89",
+  "contributors": [
+    "moeyua"
+  ],
   "categories": [
     "Productivity",
     "Applications",
@@ -145,6 +148,15 @@
       "type": "textfield",
       "placeholder": "home, work, fun",
       "required": false
+    },
+    {
+      "name": "datePrefix",
+      "label": "Date Prefix",
+      "title": "Date Prefix",
+      "description": "The prefix to use for the date in the filename of your bookmarks.",
+      "type": "checkbox",
+      "default": true,
+      "required": true
     }
   ]
 }
