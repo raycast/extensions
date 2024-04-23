@@ -156,7 +156,7 @@
       "description": "The prefix to use for the date in the filename of your bookmarks.",
       "type": "checkbox",
       "default": true,
-      "required": true
+      "required": false
     }
   ]
 }
