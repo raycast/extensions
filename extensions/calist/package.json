@@ -250,7 +250,7 @@
       "name": "iconsType",
       "type": "dropdown",
       "required": false,
-      "title": "Icon Type",
+      "title": "Icon type",
       "data": [
         {
           "title": "Avatar",
