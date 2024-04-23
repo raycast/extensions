@@ -4,28 +4,31 @@ import { getActiveCoordinator } from "./core/sonos";
 import { handleCommandError, tryLaunchCommand } from "./core/utils";
 
 interface Preferences {
-  volumeStep: string;
+	volumeStep: string;
 }
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+	const preferences = getPreferenceValues<Preferences>();
 
-  let coordinator: SonosDevice | undefined;
+	let coordinator: SonosDevice | undefined;
 
-  try {
-    coordinator = await getActiveCoordinator();
-  } catch (error) {
-    await handleCommandError(error);
-    return;
-  }
+	try {
+		coordinator = await getActiveCoordinator();
+	} catch (error) {
+		const caught = await handleCommandError(error);
 
-  if (coordinator === undefined) {
-    await tryLaunchCommand({
-      name: "set-group",
-      type: LaunchType.UserInitiated,
-      failureMessage: `Failed to launch "Set Active Group" automatically`,
-    });
-  } else {
-    await coordinator.SetRelativeGroupVolume(-Number(preferences.volumeStep));
-  }
+		if (caught) {
+			return;
+		}
+	}
+
+	if (coordinator === undefined) {
+		await tryLaunchCommand({
+			name: "set-group",
+			type: LaunchType.UserInitiated,
+			failureMessage: `Failed to launch "Set Active Group" automatically`,
+		});
+	} else {
+		await coordinator.SetRelativeGroupVolume(-Number(preferences.volumeStep));
+	}
 }
