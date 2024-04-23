@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Fix Creating issue with milestone] - 2024-04-23
+
+Fix defining milestoneId in payload.
+
 ## [Enhanced Notifications] - 2024-03-12
 
 - Notifications now include links to comments, project updates, and projects, making it easier to navigate directly to the relevant content in Linear.
