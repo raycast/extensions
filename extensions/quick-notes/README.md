@@ -25,7 +25,14 @@ View Notes
 - Create a new tag `⇧ + ⌘ + T`
 - Delete tags `^ + ⇧ + T`
 
-Export Notes
+Export Notes (1-way sync)
 
 - Set a directory to export your notes once
-- This can be automated in extension preferences
+- Setting a folder in extension settings automates this
+
+Sync with Folder (2-way automatic sync)
+
+- Disabled by default
+- Set up automatic 2-way sync with the folder set in settings
+  - Adding `.md` markdown files to your folder will sync back to Quick Notes
+- Auto-runs every 10min (background sync can be turned off)
