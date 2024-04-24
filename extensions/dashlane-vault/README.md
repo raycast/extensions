@@ -49,7 +49,7 @@ Set the path to the Dashlane CLI in the extension preferences of Raycast. Open R
 
 ### Master Password
 
-The Dashlane CLI supports an [option](https://dashlane.github.io/dashlane-cli/personal/authentication#options) `save-master-password` to request the user's master password. If set to false, every time someone wants to acces your vault, the master password needs to be inserted. If you are using this, you can set you master password in the preferences of this extensions, which are stored in a [encrypted database](https://developers.raycast.com/information/security#data-storage).
+The Dashlane CLI supports an [option](https://dashlane.github.io/dashlane-cli/personal/authentication#options) `save-master-password` to request the user's master password. If set to false, every time someone wants to access your vault, the master password needs to be inserted. If you are using this, you can set you master password in the preferences of this extension, which are stored in an [encrypted database](https://developers.raycast.com/information/security#data-storage).
 
 ```sh
 dcli configure save-master-password false
