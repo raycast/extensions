@@ -463,7 +463,7 @@
     },
     {
       "name": "professional",
-      "title": "Change Tone to Professional.",
+      "title": "Change Tone to Professional",
       "description": "Change tone of selected text to professional.",
       "mode": "view",
       "disabledByDefault": true,
