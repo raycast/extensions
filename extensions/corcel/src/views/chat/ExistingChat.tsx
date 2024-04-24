@@ -3,7 +3,6 @@ import ChatComponent from "./Chat";
 import { Chat, getChatFromStorage } from "../../lib/chat";
 
 const ExistingChat: React.FC<{ chatId: string }> = ({ chatId }) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [chat, setChat] = useState<Chat>();
 
   useEffect(() => {
@@ -11,11 +10,10 @@ const ExistingChat: React.FC<{ chatId: string }> = ({ chatId }) => {
       if (chatFromStorage) {
         setChat(chatFromStorage);
       }
-      setIsLoading(false);
     });
   }, []);
 
-  return <ChatComponent isLoading={isLoading} chat={chat} />;
+  return <ChatComponent isLoading={!chat} chat={chat} />;
 };
 
 export default ExistingChat;

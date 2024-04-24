@@ -4,7 +4,6 @@ import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/a
 import {
   type Chat,
   Exchange,
-  addOrUpdateExchange,
   deleteExchangeFromChatStorage,
   generateChatFromQuestion,
   generateExchangeFromQuestion,
@@ -30,24 +29,24 @@ const ListItem: React.FC<{
   setIsLoading: (isLoading: boolean) => void;
   chat: Chat;
   model: Model;
-}> = ({ exchange, handleSendMessage, setIsLoading, exchanges, chat, model }) => {
+  updateExchange: (exchange: Exchange) => void;
+}> = ({ exchange, handleSendMessage, setIsLoading, exchanges, chat, model, updateExchange }) => {
   const [internalExchange, setInternalExchange] = useState(exchange);
   const internalExchangeRef = useRef(internalExchange);
 
   const { streamMessage, systemResponse, errorMessage, isStreaming, cancelStream } = useSendLastMessage(exchanges);
 
   const updateChatExchange = useCallback(() => {
-    addOrUpdateExchange(internalExchangeRef.current, chat.id);
+    updateExchange(internalExchangeRef.current);
   }, []);
 
   useEffect(() => {
-    internalExchangeRef.current = internalExchange;
     if (!internalExchange.answer) {
       setIsLoading(true);
       streamMessage(model)
         .then(() => {
           setIsLoading(false);
-          updateChatExchange(); // Save to store
+          updateChatExchange();
         })
         .catch(() => {
           setIsLoading(false);
@@ -63,10 +62,14 @@ const ListItem: React.FC<{
 
   useEffect(() => {
     if (systemResponse) {
-      setInternalExchange((internalExchange) => ({
-        ...internalExchange,
-        answer: { content: systemResponse, updated_on: new Date().toUTCString() },
-      }));
+      setInternalExchange((internalExchange) => {
+        const newExchange = {
+          ...internalExchange,
+          answer: { content: systemResponse, updated_on: new Date().toUTCString() },
+        };
+        internalExchangeRef.current = { ...newExchange };
+        return newExchange;
+      });
     }
   }, [systemResponse]);
 
@@ -139,6 +142,19 @@ const Chat: React.FC<{ chat?: Chat; isLoading?: boolean }> = ({ chat, isLoading 
     }
   }, [internalChat, chatText, setInternalChat, internalIsLoading]);
 
+  const updateExchange = useCallback(
+    (exchange: Exchange) => {
+      if (internalChat) {
+        const withoutExchangeToRemove = internalChat.exchanges.filter((exchng) => exchange.id !== exchng.id);
+        setInternalChat({
+          ...internalChat,
+          exchanges: [exchange, ...withoutExchangeToRemove],
+        });
+      }
+    },
+    [internalChat, setInternalChat],
+  );
+
   const onSearchTextChange = useCallback(
     (value: string) => {
       if (!internalIsLoading) {
@@ -209,6 +225,7 @@ const Chat: React.FC<{ chat?: Chat; isLoading?: boolean }> = ({ chat, isLoading 
               exchange={exchange}
               handleSendMessage={addNewExchange}
               setIsLoading={setInternalIsLoading}
+              updateExchange={updateExchange}
             />
           ))}
         </List.Section>

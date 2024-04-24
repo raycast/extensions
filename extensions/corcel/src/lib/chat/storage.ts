@@ -37,37 +37,13 @@ export const getChatFromStorage = async (chatId: Chat["id"]) => {
 };
 
 export const addOrUpdateChatInStorage = async (chat: Chat) => {
-  const chatsMap = await parseChatsFromStorage();
+  const chatsMap = (await parseChatsFromStorage()) || {};
 
-  if (chatsMap) {
-    chatsMap[chat.id] = chat;
+  chatsMap[chat.id] = chat;
 
-    await LocalStorage.setItem(CHATS_KEY, JSON.stringify(chatsMap));
+  await LocalStorage.setItem(CHATS_KEY, JSON.stringify(chatsMap));
 
-    return chat;
-  } else {
-    await LocalStorage.setItem(CHATS_KEY, JSON.stringify({ [chat.id]: chat }));
-
-    return chat;
-  }
-};
-
-export const addOrUpdateExchange = async (exchange: Exchange, chatId: ChatId) => {
-  // TODO add error handling
-  const chatsMap = await parseChatsFromStorage();
-
-  if (chatsMap) {
-    const chat = chatsMap[chatId];
-    if (chat) {
-      const newExchanges = chat.exchanges.filter((exchng) => exchng.id !== exchange.id);
-      newExchanges.unshift(exchange);
-      chat.exchanges = newExchanges;
-      chatsMap[chatId] = chat;
-      chatsMap[chatId].updated_on = new Date().toISOString();
-
-      await LocalStorage.setItem(CHATS_KEY, JSON.stringify(chatsMap));
-    }
-  }
+  return chat;
 };
 
 export const deleteChatFromStorage = async (chatId: ChatId) => {
