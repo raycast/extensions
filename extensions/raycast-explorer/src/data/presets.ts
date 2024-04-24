@@ -24,7 +24,7 @@ export type PresetCategory = {
   presets: Preset[];
 };
 
-// TODO: Force AI.Model name when @
+// TODO: Force AI.Model name when api is updated
 export const modelNames: { [key in string]: string } = {
   "openai-gpt-3.5-turbo": "Open AI GPT-3.5 Turbo",
   "openai-gpt-3.5-turbo-instruct": "Open AI GPT-3.5 Turbo Instruct",
