@@ -46,7 +46,7 @@ export default function PackageList({ accountName }: Props) {
         return;
       }
       const json = (await data.json()) as TPackageList;
-      await action.func(`npm install ${packageName}@${json.version}`);
+      await action.func(`npm install @${accountName}/${packageName}@${json.version}`);
       toast.style = Toast.Style.Success;
       toast.title = "Install Command Copied";
     } catch (error) {
