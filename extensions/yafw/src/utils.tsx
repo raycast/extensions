@@ -1,12 +1,20 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import fs from "fs";
+import fs, { existsSync } from "fs";
 import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH } from "./constants";
 
 const ffmpegPath = getPreferenceValues().ffmpeg_path || "/opt/homebrew/bin/ffmpeg";
 
-export const isFFmpegInstalled = (): boolean => {
+const ffmpegPathExists = (): boolean => {
+  try {
+    return existsSync(ffmpegPath);
+  } catch (error) {
+    return false;
+  }
+};
+
+const isFFmpegInstalledOnPath = (): boolean => {
   try {
     const result = execSync(`zsh -l -c 'PATH=${PATH} ffmpeg -version'`).toString();
     if (result.includes("ffmpeg version")) {
@@ -16,6 +24,10 @@ export const isFFmpegInstalled = (): boolean => {
   } catch (error) {
     return false;
   }
+};
+
+const isFFmpegInstalled = (): boolean => {
+  return ffmpegPathExists() || isFFmpegInstalledOnPath();
 };
 
 export function normalizeFilePath(filePath: string): string {
