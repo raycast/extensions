@@ -27,7 +27,7 @@ export default function ControlGoveeLights() {
   }, [devices, getName]);
 
   useEffect(() => {
-    if (error) {
+    if (error && error.name !== "SyntaxError") {
       console.error("Error with Govee controller", error);
     }
   }, [error]);

@@ -110,8 +110,12 @@ const useGoveeController = (): GoveeControllerReturn => {
 
       controller.on(GoveeEventTypes.Error, (err) => {
         const error = err instanceof Error ? err : new Error("Unknown error");
-        console.error("Error with Govee controller", error);
+        // console.error("Error with Govee controller", error);
         setError(error);
+      });
+
+      controller.on(GoveeEventTypes.UnknownMessage, (msg) => {
+        console.warn("Unknown message", msg);
       });
 
       controller.on(GoveeEventTypes.UnknownMessage, (msg) => {
