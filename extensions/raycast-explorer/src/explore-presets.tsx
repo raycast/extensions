@@ -106,7 +106,7 @@ export default function ExplorePresets() {
                         title="Contribute"
                         icon={Icon.PlusSquare}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        url={`${CONTRIBUTE_URL}/src/data/presets.ts`}
+                        url={CONTRIBUTE_URL}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>
