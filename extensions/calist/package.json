@@ -29,7 +29,7 @@
       "name": "weekFormat",
       "type": "dropdown",
       "required": true,
-      "title": "First day of week",
+      "title": "First Day of Week",
       "data": [
         {
           "title": "Monday",
@@ -119,7 +119,7 @@
       "type": "checkbox",
       "required": true,
       "label": "Time",
-      "title": "Time settings",
+      "title": "Time Settings",
       "description": "Show the time before calendar",
       "default": true
     },
@@ -152,7 +152,7 @@
       "type": "textfield",
       "required": false,
       "label": "Second timezone title",
-      "title": "Secondary timezone",
+      "title": "Secondary Timezone",
       "description": "Second timezone that displays when time is enabled"
     },
     {
@@ -168,7 +168,7 @@
       "type": "textfield",
       "required": false,
       "label": "Search custom placeholder",
-      "title": "Search placeholder",
+      "title": "Search Placeholder",
       "description": "Show or hide time on search placeholder"
     },
     {
@@ -177,7 +177,7 @@
       "required": false,
       "label": "Custom window title text",
       "placeholder": "Custom title",
-      "title": "Navigation title",
+      "title": "Navigation Title",
       "description": "Show or hide time on search placeholder"
     },
     {
@@ -250,7 +250,7 @@
       "name": "iconsType",
       "type": "dropdown",
       "required": false,
-      "title": "Icon type",
+      "title": "Icon Type",
       "data": [
         {
           "title": "Avatar",
@@ -272,7 +272,7 @@
       "name": "fontWeight",
       "type": "dropdown",
       "required": false,
-      "title": "Font weight",
+      "title": "Font Weight",
       "data": [
         {
           "title": "Normal",
@@ -290,7 +290,7 @@
       "name": "fontFamily",
       "type": "dropdown",
       "required": false,
-      "title": "Font family",
+      "title": "Font Family",
       "data": [
         {
           "title": "Sans Serif",
@@ -313,7 +313,7 @@
       "type": "textfield",
       "required": false,
       "placeholder": "#5d18dc",
-      "title": "Current day color",
+      "title": "Current Day Color",
       "description": "Change current day color, overrides theme color"
     },
     {
@@ -321,7 +321,7 @@
       "type": "textfield",
       "required": false,
       "placeholder": "#ff8282",
-      "title": "Custom color for weekends",
+      "title": "Custom Color for Weekends",
       "description": "Change Weekend color, overrides theme color"
     }
   ],
