@@ -30,7 +30,7 @@ If you’d like, you can export or auto-sync your notes as markdown to a directo
 - Set a directory to export your notes once
 - Setting a folder in extension settings automates this
 
-**Sync With Folder (2-way automatic sync)**
+**Sync with Folder (2-way automatic sync)**
 
 - Disabled by default
 - Set up automatic 2-way sync by adding a folder in settings
