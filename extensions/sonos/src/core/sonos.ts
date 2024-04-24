@@ -47,24 +47,24 @@ export async function getManager() {
 export async function getLatestState(): Promise<SonosState | null> {
   const storedState = await storage.getState();
 
-  if (storedState === null) {
-    const coordinator = await getActiveCoordinator();
-
-    if (coordinator === undefined) {
-      await showToast({
-        title: "No explicit group set",
-        style: Toast.Style.Failure,
-      });
-
-      return null;
-    }
-
-    const state = await storage.setState(coordinator);
-
-    return state.sonosState;
+  if (storedState !== null) {
+    return storedState.sonosState;
   }
 
-  return storedState.sonosState;
+  const coordinator = await getActiveCoordinator();
+
+  if (coordinator === undefined) {
+    await showToast({
+      title: "No explicit group set",
+      style: Toast.Style.Failure,
+    });
+
+    return null;
+  }
+
+  const state = await storage.setState(coordinator);
+
+  return state.sonosState;
 }
 
 export async function isPlaying() {
