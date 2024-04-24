@@ -25,6 +25,7 @@ async function getRecentDocs(apiKey: string) {
 
 export default function SearchDocs() {
   const [recentDocs, setRecentDocs] = useState<RecentDoc[]>();
+  const [errorOccurred, setErrorOccurred] = useState(false);
   const preferences = getPreferenceValues();
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function SearchDocs() {
         const result = await getRecentDocs(preferences.apiKey);
         setRecentDocs(result);
       } catch (e) {
+        setErrorOccurred(true);
         await showFailureToast(e, {
           title: "Could not load recent docs.",
           primaryAction: { title: "Configure Command", onAction: () => openCommandPreferences() },
@@ -44,7 +46,7 @@ export default function SearchDocs() {
   }, []);
 
   return (
-    <List filtering key={"key"} isLoading={recentDocs === undefined}>
+    <List filtering key={"key"} isLoading={recentDocs === undefined && !errorOccurred}>
       {recentDocs?.map((d) => (
         <List.Item
           key={d.id}
