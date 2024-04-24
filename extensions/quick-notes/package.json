@@ -25,7 +25,7 @@
     },
     {
       "name": "sync",
-      "title": "Sync with Folder",
+      "title": "Sync With Folder",
       "description": "2-way sync existing markdown files from the auto save directory.",
       "mode": "no-view",
       "disabledByDefault": true,

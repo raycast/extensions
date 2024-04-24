@@ -2,7 +2,7 @@
 
 ## [2-Way Folder Sync] - 2024-04-25
 
-- New `Sync with Folder` command (disabled by default) to allow for syncing existing `.md` files into quick notes
+- New `Sync With Folder` command (disabled by default) to allow for syncing existing `.md` files into quick notes
 - Remove tag and title from body in synced folder as it's not that useful
 - Use Mac trash instead of permanent delete of files in synced folder
 

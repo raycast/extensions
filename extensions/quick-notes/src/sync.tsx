@@ -1,8 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import { TODO_FILE_PATH, preferences } from "./services/config";
-import { getInitialValuesFromFile, getSyncWithDirectory } from "./utils/utils";
+import { getSyncWithDirectory } from "./utils/utils";
 import fs from "fs";
-import { Note } from "./services/atoms";
 
 export default async function Command() {
   const filePath = preferences.fileLocation;
