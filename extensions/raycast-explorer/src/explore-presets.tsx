@@ -62,19 +62,16 @@ export default function ExplorePresets() {
                     markdown={preset.instructions}
                     metadata={
                       <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="Name" text={preset.name} />
                         <List.Item.Detail.Metadata.Label title="Model" text={modelNames[preset.model]} />
                         <List.Item.Detail.Metadata.Label
                           title="Creativity"
                           text={preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)}
                           icon={getCreativityIcon(preset.creativity)}
                         />
-                        <List.Item.Detail.Metadata.Label
-                          title="Web search"
-                          text={preset.web_search ? "Enabled" : "Disabled"}
-                          icon={preset.web_search ? Icon.Globe : Icon.XMarkCircle}
-                        />
+                        <List.Item.Detail.Metadata.Label title="Web Search" text={preset.web_search ? "On" : "Off"} />
                         {preset.image_generation ? (
-                          <List.Item.Detail.Metadata.Label title="Image generation" text="Enabled" icon={Icon.Image} />
+                          <List.Item.Detail.Metadata.Label title="Image Generation" text="On" />
                         ) : null}
                         {preset.author ? (
                           <List.Item.Detail.Metadata.Label
