@@ -4,6 +4,7 @@ import { preferences } from "./helpers/preferences";
 import { Form } from "@raycast/api";
 import { LocalStorage } from "@raycast/api";
 import { datasourcesSchema } from "./datasource/datasource.schema";
+import { useState } from "react";
 
 type FormValues = {
   query: string;
@@ -44,7 +45,10 @@ async function handleSubmit(values: FormValues) {
 export default function Command() {
   // https://grafana.com/docs/grafana-cloud/developer-resources/api-reference/http-api/data_source/
   // This API currently doesn’t handle pagination. The default maximum number of data sources returned is 5000. You can change this value in the default.ini file.
-  const { data: datasources } = useFetch(`${preferences.rootApiUrl}/api/datasources`, {
+  const [queryFieldError, setQueryFieldError] = useState<string | undefined>();
+  const [datasourcesFieldError, setDatasourcesFieldError] = useState<string | undefined>();
+
+  const { data: datasources } = useFetch(`${preferences.rootApiUrl}/api/datasources2`, {
     parseResponse,
     // to make sure the screen isn't flickering when the searchText changes
     keepPreviousData: true,
@@ -54,7 +58,27 @@ export default function Command() {
       accept: "application/json",
       Authorization: `Bearer ${preferences.apikey}`,
     },
+    onError: async (error) => {
+      console.error(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch datasources",
+      });
+      setDatasourcesFieldError("Failed to fetch datasources");
+    },
   });
+
+  const dropQueryFieldErrorIfNeeded = () => {
+    if (queryFieldError && queryFieldError.length > 0) {
+      setQueryFieldError(undefined);
+    }
+  };
+
+  const dropDatasourcesFieldErrorIfNeeded = () => {
+    if (datasourcesFieldError && datasourcesFieldError.length > 0) {
+      setDatasourcesFieldError(undefined);
+    }
+  };
 
   return (
     <Form
@@ -64,9 +88,35 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="query" title="Query" placeholder="Your QL query" />
+      <Form.TextArea
+        id="query"
+        title="Query"
+        placeholder="Your QL query"
+        error={queryFieldError}
+        onChange={dropQueryFieldErrorIfNeeded}
+        onBlur={(event) => {
+          if (event.target.value?.length == 0) {
+            setQueryFieldError("The field should't be empty!");
+          } else {
+            dropQueryFieldErrorIfNeeded();
+          }
+        }}
+      />
       <Form.TextField id="name" title="Name (Optional)" placeholder="Optional name" />
-      <Form.Dropdown id="datasource" title="Datasource">
+      <Form.Dropdown
+        id="datasource"
+        title="Datasource"
+        error={datasourcesFieldError}
+        onChange={dropDatasourcesFieldErrorIfNeeded}
+        onBlur={(event) => {
+          console.log(event.target.value);
+          if (!event.target.value) {
+            setDatasourcesFieldError("The field should't be empty!");
+          } else {
+            dropDatasourcesFieldErrorIfNeeded();
+          }
+        }}
+      >
         {(datasources || [])
           .sort((a, b) => (a.type < b.type ? 1 : -1))
           .map((datasource) => (
