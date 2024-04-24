@@ -1,5 +1,10 @@
 # Prompt Explorer Extension Changelog
 
+## [Add Explore Presets] - 2024-04-16
+
+- Add command for exploring Presets
+- Update icons for creativity
+
 ## [Improvements] - 2024-04-16
 
 - Add browser prompts and new models
