@@ -3,11 +3,21 @@ import { Govee, GoveeEventTypes } from "@j3lte/govee-lan-controller";
 import PQueue from "p-queue";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { getPreferenceValues } from "@raycast/api";
+
 import type { GoveeControllerReturn, Scenario } from "@/types";
 
 import { wait } from "@/utils";
 
 const WAIT = 100;
+
+const { deviceDiscoveryTimeout } = getPreferenceValues<Preferences>();
+const DISCOVERY_TIMEOUT_VALUE = deviceDiscoveryTimeout ? parseInt(deviceDiscoveryTimeout) : 5000;
+const DISCOVERY_TIMEOUT = Number.isNaN(DISCOVERY_TIMEOUT_VALUE)
+  ? 5000
+  : DISCOVERY_TIMEOUT_VALUE < 1000
+    ? 1000
+    : DISCOVERY_TIMEOUT_VALUE;
 
 const useGoveeController = (): GoveeControllerReturn => {
   const govee = useRef<Govee | null>(null);
@@ -99,8 +109,6 @@ const useGoveeController = (): GoveeControllerReturn => {
         discoverInterval: 10000,
         deviceUpdateInterval: 2000,
       });
-      await controller.waitForReady();
-      setIsLoading(false);
 
       controller.on(GoveeEventTypes.NewDevice, (device) => {
         // console.log("New device found", device.id);
@@ -120,6 +128,21 @@ const useGoveeController = (): GoveeControllerReturn => {
       controller.on(GoveeEventTypes.UnknownMessage, (msg) => {
         console.warn("Unknown message", msg);
       });
+
+      // race who's first (device discovery or timeout)
+      let canError = true;
+      await Promise.race([
+        wait(DISCOVERY_TIMEOUT).then(() => {
+          if (canError) {
+            setError(new Error("Error initializing Govee Controller: timeout"));
+          }
+        }),
+        controller.waitForReady().then(() => {
+          canError = false;
+        }),
+      ]);
+      canError = false;
+      setIsLoading(false);
 
       govee.current = controller;
     };

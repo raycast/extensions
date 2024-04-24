@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import { List } from "@raycast/api";
+import { List, Toast, showToast } from "@raycast/api";
 
 import useGoveeController from "@/hooks/useGoveeController";
 import useNameMapping from "@/hooks/useNameMapping";
@@ -29,6 +29,11 @@ export default function ControlGoveeLights() {
   useEffect(() => {
     if (error && error.name !== "SyntaxError") {
       console.error("Error with Govee controller", error);
+      showToast({
+        title: "Error",
+        message: error.message,
+        style: Toast.Style.Failure,
+      });
     }
   }, [error]);
 
