@@ -1,6 +1,6 @@
 # Zoom Meeting Control Changelog
 
-## [Extension Improvement] - 2024-04-24
+## [New Commands] - 2024-04-24
 
 Added the following commands:
 
