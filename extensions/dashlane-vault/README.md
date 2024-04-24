@@ -55,6 +55,10 @@ The Dashlane CLI supports an [option](https://dashlane.github.io/dashlane-cli/pe
 dcli configure save-master-password false
 ```
 
+### Biometrics
+
+The Dashlane CLI supports an [option](https://dashlane.github.io/dashlane-cli/personal/authentication#unlock-with-biometrics) `user-presence` to use biometrics to access your vault. If set to `biometric`, every time someone wants to access your vault, you will be ask to unlock your vault with your biometrics. If you are using this, you must enable the checkbox in the preferenecs of this extension. Otherwise the extension is not working as expected.
+
 ## Troubleshooting
 
 To troubleshoot issues with syncing your vault or if passwords and notes are not appearing, please follow these steps:
@@ -82,6 +86,10 @@ which dcli
 ### Unsupported Versions
 
 Currently there is a version (v6.2415.0) of the Dashlane CLI with a bug, that can only be fixed by upgrading the CLI.
+
+### Wrong configuration
+
+Currently the extensions does not support using both configurations `save-master-password` set to false and `user-presence` set to biometrics. Please use only one of the configuration.
 
 ## Security
 

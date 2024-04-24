@@ -48,6 +48,14 @@
       "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain.",
       "type": "password",
       "required": false
+    },
+    {
+      "name": "biometrics",
+      "title": "Biometrics",
+      "description": "Should be enabled, if you configured the Dashlane CLI to use biometrics.",
+      "type": "checkbox",
+      "label": "Use biometrics to unlock the vault",
+      "required": false
     }
   ],
   "dependencies": {

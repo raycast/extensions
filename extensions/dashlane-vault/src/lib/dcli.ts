@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execa } from "execa";
+import { execa, execaCommand } from "execa";
 import { existsSync } from "fs";
 import { safeParse } from "valibot";
 
@@ -36,6 +36,10 @@ async function dcli(...args: string[]) {
       },
     }),
   });
+
+  if (preferences.biometrics) {
+    execaCommand("open -a Raycast.app");
+  }
 
   return stdout;
 }
