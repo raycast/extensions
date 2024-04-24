@@ -1,6 +1,5 @@
-import type { Device } from "@j3lte/govee-lan-controller";
+import type { ColorInput, Device } from "@j3lte/govee-lan-controller";
 import { Govee, GoveeEventTypes } from "@j3lte/govee-lan-controller";
-import type { ColorInput } from "@j3lte/govee-lan-controller/build/types/lib/color";
 import PQueue from "p-queue";
 import { useCallback, useEffect, useRef, useState } from "react";
 
