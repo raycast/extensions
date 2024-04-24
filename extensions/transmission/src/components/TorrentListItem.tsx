@@ -106,7 +106,7 @@ export default function TorrentListItem({
                   # ${downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")}
 
                   ${cellImage.value ? `<img src="data:image/svg+xml,${encodeURIComponent(cellImage.value)}"/>` : ""}
-                  ${torrent.errorString && `**Error**: ${torrent.errorString}`}
+                  ${torrent.errorString ? `**Error**: ${torrent.errorString}` : ""}
                 `)}
             metadata={
               <Detail.Metadata>
