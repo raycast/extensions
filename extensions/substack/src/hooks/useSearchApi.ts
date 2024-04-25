@@ -42,7 +42,7 @@ export default function useSearchApi<T extends Post | Profile>(
           hasMore: false,
         };
       },
-      keepPreviousData: true,
+      keepPreviousData: false,
       initialData: [],
       execute: query !== "",
     },

@@ -36,7 +36,11 @@ export default function SearchSubstackPosts() {
           detailsShown={showDetails}
         />
       ))}
-      <List.EmptyView title={query === "" ? "Search Posts" : "No posts found"} icon={{ source: "substack.svg" }} />
+      {!isLoading ? (
+        <List.EmptyView title={query === "" ? "Search Posts" : "No posts found"} icon={{ source: "substack.svg" }} />
+      ) : (
+        <List.EmptyView title="Searching..." icon={{ source: "substack.svg" }} />
+      )}
     </List>
   );
 }

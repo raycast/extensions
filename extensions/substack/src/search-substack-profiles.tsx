@@ -12,7 +12,6 @@ import ProfileItem from "@/components/ProfileItem";
 export default function SearchSubstackProfiles() {
   const [query, setQuery, unEqual] = useThrottledQuery();
   const { showDetails, setShowDetails } = useShowDetails(query);
-
   const { data, isLoading, pagination } = useSearchApi<Profile>(SearchType.Profiles, query);
 
   return (
@@ -31,7 +30,14 @@ export default function SearchSubstackProfiles() {
           detailsShown={showDetails}
         />
       ))}
-      <List.EmptyView title={query === "" ? "Search Profile" : "No profiles found"} icon={{ source: "substack.svg" }} />
+      {!isLoading ? (
+        <List.EmptyView
+          title={query === "" ? "Search Profile" : "No profiles found"}
+          icon={{ source: "substack.svg" }}
+        />
+      ) : (
+        <List.EmptyView title="Searching..." icon={{ source: "substack.svg" }} />
+      )}
     </List>
   );
 }

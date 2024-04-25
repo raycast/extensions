@@ -38,7 +38,7 @@ export default function ProfileItem({ profile, toggleDetails, detailsShown }: Pr
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action title={detailsShown ? "Hide Details" : "Show Details"} onAction={toggleDetails} />
+          <Action title={detailsShown ? "Hide Details" : "Show Details"} onAction={toggleDetails} icon={Icon.List} />
           {profile.handle && (
             <Action.OpenInBrowser
               title="Open on Substack"
