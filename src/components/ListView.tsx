@@ -20,7 +20,7 @@ const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, results 
   const [showingDetail, setShowingDetail] = useState(false);
   return (
     <List
-      searchBarPlaceholder="repetitions * weight"
+      searchBarPlaceholder="weight * repetitions"
       onSearchTextChange={setSearchText}
       searchText={searchText}
       isShowingDetail={showingDetail}
@@ -35,8 +35,8 @@ const ListView: React.FC<ListViewProps> = ({ searchText, setSearchText, results 
             title={`${result.label}`}
             accessories={[
               {
-                tag: { value: `${result.percentage ? result.percentage : ""}%`, color: Color.SecondaryText },
-                tooltip: `${result.percentage ? result.percentage : ""}% of your one rep max`,
+                tag: { value: `${result.percentage ? result.percentage * 100 : ""}%`, color: Color.SecondaryText },
+                tooltip: `${result.percentage ? result.percentage * 100 : ""}% of your one rep max`,
               },
             ]}
             detail={
