@@ -34,6 +34,7 @@ export const AddOrRemoveImageFromFavoutitesAction: React.FC<{
       ) : (
         <Action
           title="Remove from Favourites"
+          style={Action.Style.Destructive}
           icon={Icon.HeartDisabled}
           onAction={() => {
             showToast({ title: "Removing from favourites", style: Toast.Style.Animated });
