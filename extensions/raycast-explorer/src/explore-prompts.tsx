@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchProps, List, Toast, environment, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
@@ -334,7 +334,7 @@ function getPromptMarkdown(prompt: Prompt) {
 
 function getCreativityIcon(creativity: Prompt["creativity"]) {
   if (creativity === "none") {
-    return Icon.XMarkCircle;
+    return Icon.CircleDisabled;
   }
 
   if (creativity === "low") {
