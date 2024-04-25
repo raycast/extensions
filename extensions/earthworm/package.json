@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "earthworm",
+  "title": "Earthworm",
+  "description": "Quick play with Earthworm.",
+  "icon": "extension_icon.png",
+  "author": "baboon-king",
+  "categories": [
+    "Web",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Earthworm",
+      "description": "Go to Earthworm Home Page.",
+      "mode": "no-view"
+    },
+    {
+      "name": "home",
+      "title": "Home",
+      "subtitle": "Earthworm",
+      "description": "Go to Earthworm Home Page.",
+      "mode": "no-view"
+    },
+    {
+      "name": "code",
+      "title": "Code",
+      "subtitle": "Earthworm",
+      "description": "Go to Earthworm Source Code Page.",
+      "mode": "no-view"
+    },
+    {
+      "name": "issues",
+      "title": "Issues",
+      "subtitle": "Earthworm",
+      "description": "Go to Earthworm Issues Page.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pulls",
+      "title": "Pulls",
+      "subtitle": "Earthworm",
+      "description": "Go to Earthworm Pull Requests Page.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
