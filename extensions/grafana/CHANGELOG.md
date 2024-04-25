@@ -1,6 +1,6 @@
 # Grafana Changelog
 
-## [New commands] - {PR_MERGE_DATE}
+## [New commands] - 2024-04-25
 
 - New command "Create saved query"
 - New command "List saved queries"
