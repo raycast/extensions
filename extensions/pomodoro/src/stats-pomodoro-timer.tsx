@@ -46,9 +46,10 @@ function topBackToBackCycles(intervals: Interval[]) {
 
 export default function StatsPomodoro() {
   const { data, isLoading } = usePromise(getIntervalHistory);
-  const numberOfCompletedCycle = countNumberOfCompletedCycle(data || []);
-  const countTotalFocus = countTotalFocusTime(data || []);
-  const topBackToBackCycle = topBackToBackCycles(data || []);
+  const focusIntervales = data?.filter((interval) => interval.type === "focus");
+  const numberOfCompletedCycle = countNumberOfCompletedCycle(focusIntervales || []);
+  const countTotalFocus = countTotalFocusTime(focusIntervales || []);
+  const topBackToBackCycle = topBackToBackCycles(focusIntervales || []);
 
   const markdown = `# 🍅 Pomodoro Recap 🍅\n
   > 📊 Statistics of your pomodoro timer - all from the begin\n
