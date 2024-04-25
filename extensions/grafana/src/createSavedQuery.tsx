@@ -48,7 +48,7 @@ export default function Command() {
   const [queryFieldError, setQueryFieldError] = useState<string | undefined>();
   const [datasourcesFieldError, setDatasourcesFieldError] = useState<string | undefined>();
 
-  const { data: datasources } = useFetch(`${preferences.rootApiUrl}/api/datasources2`, {
+  const { data: datasources } = useFetch(`${preferences.rootApiUrl}/api/datasources`, {
     parseResponse,
     // to make sure the screen isn't flickering when the searchText changes
     keepPreviousData: true,
