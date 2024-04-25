@@ -107,7 +107,7 @@ export default function XInProgress() {
                     shown: values.showInMenubar,
                     title: values.menubarTitle,
                   },
-                  showAsCommand: values.showAsCommand
+                  showAsCommand: values.showAsCommand,
                 };
               }
               return progress;
@@ -130,7 +130,7 @@ export default function XInProgress() {
             setState((prev) => ({ ...prev, allProgress, currMenubarProgressTitle }));
 
             // 4. If it is shown as command, update it
-            if(targetProgress.showAsCommand) {
+            if (targetProgress.showAsCommand) {
               setShowAsCommand(targetProgress);
             }
 
@@ -168,11 +168,11 @@ export default function XInProgress() {
                 shown: values.showInMenubar,
                 title: values.menubarTitle,
               },
-              showAsCommand: values.showAsCommand
+              showAsCommand: values.showAsCommand,
             };
             setState((prev) => ({ ...prev, allProgress: [...prev.allProgress, newProgress] }));
             // If added process is shown as command, update it
-            if(newProgress.showAsCommand) {
+            if (newProgress.showAsCommand) {
               setShowAsCommand(newProgress);
             }
             navigation.pop();
@@ -206,7 +206,7 @@ export default function XInProgress() {
       setState((prev) => ({ ...prev, allProgress, currMenubarProgressTitle }));
 
       // 3. If it is shown as command, update it
-      if(allProgress.filter((p) => p.showAsCommand).length == 0) {
+      if (allProgress.filter((p) => p.showAsCommand).length == 0) {
         const yearInProgress = allProgress.find((p) => p.title === "Year In Progress") as Progress;
         setShowAsCommand(yearInProgress);
       }
