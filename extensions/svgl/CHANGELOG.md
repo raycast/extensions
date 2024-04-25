@@ -1,5 +1,9 @@
 # svgl Changelog
 
+## [Fix copy wordmark] - 2024-04-25
+
+- Fix the incorrect URL for the copy wordmark SVG.
+
 ## [Big Update] - 2024-04-13
 
 ### Pin SVGs
