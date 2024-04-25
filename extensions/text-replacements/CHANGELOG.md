@@ -1,3 +1,3 @@
-# Text Replacement to Snippets Changelog
+# Text Replacement Changelog
 
 ## [Initial Version] - 2024-04-22
