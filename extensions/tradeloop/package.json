@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tradeloop",
+  "title": "TradeLoop",
+  "description": "Powerful tools, built for traders.",
+  "icon": "command-icon.png",
+  "author": "ajayvignesh01",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "position-size",
+      "title": "Position Size",
+      "subtitle": "Calculation",
+      "description": "Calculate position size from stop loss % and risk $",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "stop_loss",
+          "placeholder": "Stop Loss %",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "risk",
+          "placeholder": "Risk $",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "order_type",
+          "placeholder": "Order Type",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+            "title": "Limit",
+            "value": "limit"
+            },
+            {
+            "title": "Market",
+            "value": "market"
+            }
+          ]
+        }
+      ],
+      "preferences": [
+        {
+          "name": "subtract_fees",
+          "description": "adjust position size according to fees",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Subtract Fees"
+        },
+        {
+          "name": "limit_fees",
+          "description": "enter number without %",
+          "type": "textfield",
+          "title": "Limit Fee (%)",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "market_fees",
+          "description": "enter number without %",
+          "type": "textfield",
+          "title": "Market Fee (%)",
+          "required": false,
+          "default": "0"
+        },
+        {
+          "name": "default_order_type",
+          "description": "default order type to calculate fees for",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "None",
+              "value": "none"
+            },
+            {
+              "title": "Limit",
+              "value": "limit"
+            },
+            {
+              "title": "Market",
+              "value": "market"
+            }
+          ],
+          "title": "Default Order Type",
+          "required": false,
+          "default": "none"
+        }
+      ]
+    },
+    {
+      "name": "trade-calculator",
+      "title": "Trade Calculator",
+      "subtitle": "Tool",
+      "description": "Calculate various aspects of your trade",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
