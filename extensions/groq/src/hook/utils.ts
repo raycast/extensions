@@ -11,7 +11,7 @@ export const allModels = [
 // format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
 export const currentDate = new Date().toLocaleString("en-US", {
   timeStyle: "long",
-  dateStyle: "full"
+  dateStyle: "full",
 });
 
 function naiveRound(num: number, decimalPlaces = 0) {
