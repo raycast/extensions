@@ -1,5 +1,10 @@
 # Grafana Changelog
 
+## [New commands] - 2024-04-25
+
+- New command "Create saved query"
+- New command "List saved queries"
+
 ## [New command] - 2024-04-19
 
 - New command Explore

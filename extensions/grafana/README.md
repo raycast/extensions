@@ -8,7 +8,7 @@
     Grafana
   </h1>
 
-Raycast extension to search dashboards, go to the explore view, create, search and modify annotations, and more to come.
+Raycast extension to search dashboards, go to the explore view, create saved queries and list them, create, search and modify annotations, and more to come.
 
   <p>
     <a href="https://www.raycast.com/francois/grafana">
@@ -35,6 +35,8 @@ Raycast extension to search dashboards, go to the explore view, create, search a
 
 - Quick access & search to your dashboards
 - Search, create, update & delete an annotation
+- Go to the Explore grafana page
+- List, create & open saved queries
 
 ## Getting started
 
@@ -60,8 +62,20 @@ Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
 
 ### Create Annotation
 
-![search-dashboards](./assets/showcase_create_annotation.png)
+![create-annotation](./assets/showcase_create_annotation.png)
+
+### Create saved query
+
+Create a query you often need on Grafana explore via this Raycast extension, to send use it with the "List saved queries" command
+
+![create-saved-query](./assets/showcase_create_saved_query.png)
+
+### List saved queries
+
+Open saved queries directly in your grafana Explore page
+
+![list-saved-queries](./assets/showcase_list_saved_queries.png)
 
 ---
 
-_Extension built & tested for Grafana Cloud v8_
+_Extension built & tested for Grafana Cloud v10_
