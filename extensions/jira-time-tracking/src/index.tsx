@@ -171,6 +171,7 @@ export default function Command() {
   const cleanUp = () => {
     setDescription("");
     setTimeInput(""); // Reset the time input field
+    setTotalTimeWorked(0);
   };
 
   const emptyMessage = `
