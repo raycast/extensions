@@ -6,6 +6,7 @@
 - Updated default sytem prompt of `Fix Grammar and Spelling` command
 - Current time added to system prompt
 - Fixed typo in command title
+- Updated screenshots
 
 ## [New Model] - 2024-04-19
 
