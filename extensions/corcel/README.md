@@ -9,7 +9,7 @@
     Use more AI powered applications on <a href="https://corcel.io">Corcel.io</a>
 </h3>
 
-![](metadata/1.png)
+![Corcel's Commands List](metadata/1.png)
 
 ## Getting Started
 
@@ -32,8 +32,8 @@
 
 Chat with a variety of models hosted on the bittensor network. AI chat featues: Getting responses from different models while preserving context, a locally stored chat history, copy/paste question and answer, chat deletion etc.
 
-![Chat example](metadata/2.png)
-![Chat history](metadata/3.png)
+![Chat Example](metadata/2.png)
+![Chat History](metadata/3.png)
 
 ### Generate AI Image
 
@@ -41,7 +41,7 @@ Generate, save and download images with a variety of models
 
 ![Generated Image](metadata/4.png)
 ![Generated Images](metadata/5.png)
-![Single image](metadata/6.png)
+![Generated Image information](metadata/6.png)
 
 ## Preferences
 
