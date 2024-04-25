@@ -213,8 +213,9 @@ export default function XInProgress() {
               key={progress.title}
               title={progress.title}
               subtitle={getSubtitle(progress.progressNum)}
-              icon={getIcon(progress.progressNum, progress.showAsCommand)}
+              icon={getIcon(progress.progressNum)}
               detail={<ProgressDetail progress={progress} />}
+              accessories={progress.showAsCommand ? [{ tag: "Selected" }] : []}
               actions={
                 <Actions
                   progress={progress}
@@ -242,8 +243,9 @@ export default function XInProgress() {
                 key={progress.title}
                 title={progress.title}
                 subtitle={getSubtitle(progress.progressNum)}
-                icon={getIcon(progress.progressNum, progress.showAsCommand)}
+                icon={getIcon(progress.progressNum)}
                 detail={<ProgressDetail progress={progress} />}
+                accessories={progress.showAsCommand ? [{ tag: "Selected" }] : []}
                 actions={
                   <Actions
                     progress={progress}
