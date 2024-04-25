@@ -237,7 +237,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Remove Pinned Case"
                     icon={Icon.PinDisabled}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={{ key: "q", modifiers: ["cmd"] }}
                     onAction={() => {
                       setPinned(pinned.filter((c) => c !== props.case));
                     }}
@@ -245,7 +245,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Clear Pinned Cases"
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    shortcut={{ key: "q", modifiers: ["cmd", "shift"] }}
                     onAction={() => {
                       setPinned([]);
                     }}
@@ -257,7 +257,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Remove Recent Case"
                     icon={Icon.XMarkCircle}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={{ key: "q", modifiers: ["cmd"] }}
                     onAction={() => {
                       setRecent(recent.filter((c) => c !== props.case));
                     }}
@@ -265,7 +265,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Clear Recent Cases"
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    shortcut={{ key: "q", modifiers: ["cmd", "shift"] }}
                     onAction={() => {
                       setRecent([]);
                     }}
