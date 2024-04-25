@@ -13,7 +13,7 @@ const parseImagesFromStorage = async () =>
 export const getImagesFromStore = async () => {
   const imagesMap = await parseImagesFromStorage();
 
-  return Object.values(imagesMap);
+  return Object.values(imagesMap).sort((a, b) => new Date(b.created_on).getTime() - new Date(a.created_on).getTime());
 };
 
 export const saveImageToStore = async (image: GeneratedImage) => {

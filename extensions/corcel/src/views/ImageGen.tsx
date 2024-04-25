@@ -94,17 +94,7 @@ const ImageGen: React.FC = () => {
       {isLoading || (!displayedImages && data) ? (
         <Grid.Section title="Generating your images...">
           {new Array(Number(preferences.numberOfImages)).fill(" ").map((_, index) => (
-            <Grid.Item
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Section title="Navigation">
-                    <OpenSavedImagesAction />
-                  </ActionPanel.Section>
-                </ActionPanel>
-              }
-              key={index}
-              content=""
-            ></Grid.Item>
+            <Grid.Item key={index} content=""></Grid.Item>
           ))}
         </Grid.Section>
       ) : displayedImages ? (
