@@ -54,14 +54,7 @@ export default function Command() {
         .catch(() => setSelectedFinderItems([]));
     };
     lookForVideoSources();
-    /* Poll for new files every 3 seconds
-     * In case the view is left in the background (i.e Raycast loses focus)
-     * the following warning will be shown at some point:
-     * > Looks like the command is rendering a lot without any changes. This might indicate an rendering loop caused by a `setState` not being wrapped in a `useEffect`.
-     * > This will degrade the performances of Raycast and Raycast might arbitrarily decide to terminate the extension if it happens too many times.
-     */
-    setInterval(lookForVideoSources, 3000);
-  }, []);
+  }, [setClipboard, setSelectedFinderItems]);
 
   useEffect(() => {
     if (clipboard && "file" in clipboard && !files.includes(clipboard.file!)) {
@@ -120,6 +113,11 @@ export default function Command() {
         </ActionPanel>
       }
     >
+      {autoLoaded && files.length > 0 ? (
+        <Form.Description text="✔︎ Loaded files from your clipboard or Finder" />
+      ) : (
+        <Form.Description text="You can also copy some videos or select them in the Finder and launch this command again" />
+      )}
       <Form.FilePicker
         id="files"
         value={files}
@@ -128,7 +126,6 @@ export default function Command() {
         title="Choose Video Files"
         info="Any files you copy or select in the Finder will show up here"
       />
-      {autoLoaded && files.length > 0 && <Form.Description text="↑ Loaded files from your clipboard or Finder" />}
       <Form.Dropdown
         id="compression"
         title="Compression"
