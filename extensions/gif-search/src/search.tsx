@@ -74,7 +74,9 @@ export default function GifSearch() {
     { title: "Trending", results },
   ];
 
-  if (showAllFavs || showAllRecents) {
+  const showLocalGifsView = showAllFavs || showAllRecents;
+
+  if (showLocalGifsView) {
     sections =
       allGifs?.map(([service, gifs]) => {
         return { title: getServiceTitle(service), results: gifs, isLocalGifSection: true };
@@ -86,7 +88,7 @@ export default function GifSearch() {
   return (
     <Grid
       columns={columns}
-      pagination={pagination}
+      pagination={showLocalGifsView ? undefined : pagination}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Change GIF Provider" onChange={onServiceChange} value={searchService}>
           <Grid.Dropdown.Section>
