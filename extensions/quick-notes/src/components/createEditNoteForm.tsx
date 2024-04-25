@@ -80,6 +80,8 @@ const CreateEditNoteForm = ({
           return "Title is required";
         } else if (value.length > 100) {
           return "Title < 100 chars";
+        } else if (notes.find((n) => n.title === value && n.createdAt !== createdAt)) {
+          return "Title must be unique";
         }
       },
     },

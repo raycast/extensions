@@ -112,7 +112,7 @@ export default function CreateIssueForm(props: CreateIssueFormProps) {
           ...(values.assigneeId ? { assigneeId: values.assigneeId } : {}),
           ...(values.cycleId ? { cycleId: values.cycleId } : {}),
           ...(values.projectId ? { projectId: values.projectId } : {}),
-          ...(values.milestoneId ? { projectId: values.milestoneId } : {}),
+          ...(values.milestoneId ? { milestoneId: values.milestoneId } : {}),
           ...(values.parentId ? { parentId: values.parentId } : {}),
           priority: parseInt(values.priority),
         };

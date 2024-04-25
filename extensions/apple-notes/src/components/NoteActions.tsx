@@ -126,20 +126,12 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
         <Action.CopyToClipboard
           title="Copy Note URL"
           content={{
-            html: `<a href="notes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
-            text: `notes://showNote?identifier=${note.UUID}`,
+            html: `<a href="applenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
+            text: `applenotes://showNote?identifier=${note.UUID}`,
           }}
           shortcut={Keyboard.Shortcut.Common.Copy}
         />
 
-        <Action.CopyToClipboard
-          title="Copy Mobile Note URL"
-          content={{
-            html: `<a href="mobilenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
-            text: `mobilenotes://showNote?identifier=${note.UUID}`,
-          }}
-          shortcut={Keyboard.Shortcut.Common.CopyPath}
-        />
         {note.invitationLink ? (
           <Action.CopyToClipboard
             title="Copy Invitation Link"
@@ -233,7 +225,7 @@ function OpenNoteAction({ note, separately, shortcut }: OpenNoteActionProps) {
     return (
       <Action.Open
         title="Open in Notes"
-        target={`notes://showNote?identifier=${note.UUID}`}
+        target={`applenotes://showNote?identifier=${note.UUID}`}
         icon={{ fileIcon }}
         application="com.apple.notes"
         shortcut={shortcut}
@@ -303,7 +295,7 @@ Only return a minified JSON array that is parsable, nothing else. Try to find be
             <Action.Open
               key={note.uuid}
               title={note.title}
-              target={`notes://showNote?identifier=${note.uuid}`}
+              target={`applenotes://showNote?identifier=${note.uuid}`}
               icon={{ fileIcon }}
               application="com.apple.notes"
             />

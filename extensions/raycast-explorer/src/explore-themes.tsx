@@ -1,6 +1,6 @@
-import { ActionPanel, Action, List, Icon, closeMainWindow, environment } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, environment } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const baseUrl = "https://themes.ray.so";
 

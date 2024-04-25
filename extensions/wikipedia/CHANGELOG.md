@@ -1,5 +1,9 @@
 # Wikipedia Changelog
 
+## [Flag update] - 2024-04-19
+
+- Update flag emoji for the `Dutch` language
+
 ## [Updates] - 2024-04-10
 
 - Update dependencies
