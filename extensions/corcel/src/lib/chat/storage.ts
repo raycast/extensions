@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { Chat, ChatId, Exchange } from "./types";
+import { Chat, ChatId } from "./types";
 
 type ChatsMap = Record<Chat["id"], Chat>;
 
@@ -51,21 +51,5 @@ export const deleteChatFromStorage = async (chatId: ChatId) => {
   if (chatsMap) {
     const { [chatId]: _, ...remainingChats } = chatsMap;
     await LocalStorage.setItem(CHATS_KEY, JSON.stringify(remainingChats));
-  }
-};
-
-export const deleteExchangeFromChatStorage = async (exchangeId: Exchange["id"], chatId: ChatId) => {
-  const chatsMap = await parseChatsFromStorage();
-
-  if (chatsMap) {
-    const chat = chatsMap[chatId];
-    if (chat) {
-      const newExchanges = chat.exchanges.filter((exchng) => exchng.id !== exchangeId);
-      chat.exchanges = newExchanges;
-      chatsMap[chatId] = chat;
-      chatsMap[chatId].updated_on = new Date().toISOString();
-
-      await LocalStorage.setItem(CHATS_KEY, JSON.stringify(chatsMap));
-    }
   }
 };

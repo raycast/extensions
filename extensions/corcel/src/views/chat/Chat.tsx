@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues, environment } from "@raycast/api";
 
 import {
   type Chat,
   Exchange,
-  deleteExchangeFromChatStorage,
   generateChatFromQuestion,
   generateExchangeFromQuestion,
   addOrUpdateChatInStorage,
@@ -27,10 +26,10 @@ const ListItem: React.FC<{
   exchange: Exchange;
   handleSendMessage: () => void;
   setIsLoading: (isLoading: boolean) => void;
-  chat: Chat;
   model: Model;
   updateExchange: (exchange: Exchange) => void;
-}> = ({ exchange, handleSendMessage, setIsLoading, exchanges, chat, model, updateExchange }) => {
+  deleteExchange: (exchange: Exchange) => void;
+}> = ({ exchange, handleSendMessage, setIsLoading, exchanges, model, updateExchange, deleteExchange }) => {
   const [internalExchange, setInternalExchange] = useState(exchange);
   const internalExchangeRef = useRef(internalExchange);
 
@@ -97,9 +96,12 @@ const ListItem: React.FC<{
               />
             )}
           </ActionPanel.Section>
-          <ActionPanel.Section title="Navigation">
-            <OpenChatHistoryCommandAction />
-          </ActionPanel.Section>
+          {environment.commandName !== "chats" && (
+            <ActionPanel.Section title="Navigation">
+              <OpenChatHistoryCommandAction />
+            </ActionPanel.Section>
+          )}
+
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Question" content={internalExchange.question.content} />
             {internalExchange.answer && (
@@ -111,7 +113,7 @@ const ListItem: React.FC<{
               title="Delete Message"
               icon={Icon.Trash}
               onAction={() => {
-                deleteExchangeFromChatStorage(internalExchange.id, chat.id);
+                deleteExchange(internalExchange);
               }}
             />
           </ActionPanel.Section>
@@ -131,8 +133,8 @@ const Chat: React.FC<{ chat?: Chat; isLoading?: boolean }> = ({ chat, isLoading 
   const addNewExchange = useCallback(() => {
     if (!internalIsLoading) {
       if (internalChat) {
-        const exchange = generateExchangeFromQuestion(chatText, model);
-        setInternalChat({ ...internalChat, exchanges: [exchange, ...internalChat.exchanges] });
+        const exchanges = [generateExchangeFromQuestion(chatText, model), ...internalChat.exchanges];
+        setInternalChat({ ...internalChat, title: exchanges[exchanges.length - 1].question.content, exchanges });
       } else {
         const newChat = generateChatFromQuestion(chatText, model);
         setInternalChat(newChat);
@@ -149,6 +151,19 @@ const Chat: React.FC<{ chat?: Chat; isLoading?: boolean }> = ({ chat, isLoading 
         setInternalChat({
           ...internalChat,
           exchanges: [exchange, ...withoutExchangeToRemove],
+        });
+      }
+    },
+    [internalChat, setInternalChat],
+  );
+
+  const deleteExchange = useCallback(
+    (exchange: Exchange) => {
+      if (internalChat) {
+        const withoutExchangeToRemove = internalChat.exchanges.filter((exchng) => exchange.id !== exchng.id);
+        setInternalChat({
+          ...internalChat,
+          exchanges: withoutExchangeToRemove,
         });
       }
     },
@@ -184,7 +199,7 @@ const Chat: React.FC<{ chat?: Chat; isLoading?: boolean }> = ({ chat, isLoading 
       searchText={chatText}
       filtering={false}
       isLoading={internalIsLoading}
-      isShowingDetail={!!internalChat}
+      isShowingDetail={!!internalChat && internalChat.exchanges.length > 0}
       onSearchTextChange={onSearchTextChange}
       searchBarAccessory={
         <List.Dropdown
@@ -206,9 +221,11 @@ const Chat: React.FC<{ chat?: Chat; isLoading?: boolean }> = ({ chat, isLoading 
           <ActionPanel.Section title="Input">
             <SendMessageAction handleSendMessageAction={addNewExchange} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Navigation">
-            <OpenChatHistoryCommandAction />
-          </ActionPanel.Section>
+          {environment.commandName !== "chats" && (
+            <ActionPanel.Section title="Navigation">
+              <OpenChatHistoryCommandAction />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     >
@@ -219,13 +236,13 @@ const Chat: React.FC<{ chat?: Chat; isLoading?: boolean }> = ({ chat, isLoading 
           {internalChat.exchanges.map((exchange) => (
             <ListItem
               model={model}
-              chat={internalChat}
               key={exchange.id}
               exchanges={internalChat.exchanges}
               exchange={exchange}
               handleSendMessage={addNewExchange}
               setIsLoading={setInternalIsLoading}
               updateExchange={updateExchange}
+              deleteExchange={deleteExchange}
             />
           ))}
         </List.Section>

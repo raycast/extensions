@@ -11,7 +11,7 @@ export const SendMessageAction: React.FC<{ handleSendMessageAction: () => void }
 
 export const OpenChatHistoryCommandAction: React.FC = () => (
   <Action
-    title="Open Chats History"
+    title="Open Chat History"
     shortcut={{ modifiers: ["cmd"], key: "h" }}
     icon={Icon.List}
     onAction={() => {
