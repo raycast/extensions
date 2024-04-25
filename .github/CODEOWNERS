@@ -140,6 +140,7 @@
 /extensions/cal-com-share-meeting-links                             @eluce2 @peduarte @pernielsentikaer @AlexIsMaking
 /extensions/calendar                                                @fuksman @pernielsentikaer
 /extensions/calendly                                                @eluce2
+/extensions/calist                                                  @astrit
 /extensions/can-i-php                                               @mechelon
 /extensions/can-i-use                                               @thomaslombart @j3lte
 /extensions/canvascast                                              @YodaLightsabr @yug2005
@@ -476,7 +477,7 @@
 /extensions/github-trending                                         @mikqi
 /extensions/github-users                                            @luisFilipePT
 /extensions/gitignore                                               @daniel-stoneuk @pernielsentikaer
-/extensions/gitlab                                                  @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew @shaoye @charl3j @emlez @HBunnick
+/extensions/gitlab                                                  @tonka3000 @Loskir @immint023 @duboiss @metakirby5 @macbookandrew @shaoye @charl3j @emlez @HBunnick @RomanSchmid
 /extensions/gitlab-docs                                             @saschaeggi
 /extensions/gitmoji                                                 @ricoberger @DannySeidel
 /extensions/gitpod                                                  @henit-chobisa @Palanikannan1437 @henit-chobisa @pernielsentikaer @henit-chobisa
@@ -500,6 +501,7 @@
 /extensions/google-trends                                           @kkange
 /extensions/google-workspace                                        @thomaslombart @mathieudutour @marcmagn1 @mepearso
 /extensions/gopass                                                  @bake @buchanan
+/extensions/govee                                                   @j3lte
 /extensions/gradle-plugins                                          @alex-w0
 /extensions/grafana                                                 @Lp-Francois
 /extensions/grafbase                                                @mlafeldt @notrab
@@ -685,7 +687,7 @@
 /extensions/lightshot-gallery                                       @feyli
 /extensions/ligue-1                                                 @anhthang @loris
 /extensions/linak-desk-controller                                   @samuelkraft
-/extensions/linear                                                  @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer @mil3na
+/extensions/linear                                                  @thomaslombart @mathieudutour @thomaspaulmann @peduarte @pernielsentikaer @mil3na @clemb8
 /extensions/linguee                                                 @geekdada
 /extensions/link-cleaner                                            @MisakiCoca
 /extensions/linkding                                                @InteractiveNinja
@@ -845,7 +847,7 @@
 /extensions/obs-clippings                                           @trevware
 /extensions/obs-control                                             @Yukaii
 /extensions/obsidian                                                @KevinBatdorf @marcjulianschwarz @iancanderson @pernielsentikaer @ofalvai @adamadamsmusic @FServais
-/extensions/obsidian-bookmarks                                      @Dru89
+/extensions/obsidian-bookmarks                                      @Dru89 @moeyua
 /extensions/obsidian-smart-capture                                  @trillhause
 /extensions/octopus-energy                                          @mike182uk
 /extensions/odesli                                                  @anned20
@@ -1027,7 +1029,7 @@
 /extensions/raycast-bard-ai                                         @EvanZhouDev @Visual-Studio-Coder
 /extensions/raycast-create-remix                                    @nuno
 /extensions/raycast-diki                                            @blazejkustra
-/extensions/raycast-explorer                                        @thomaslombart @EvanZhouDev @mil3na @xilopaint
+/extensions/raycast-explorer                                        @thomaslombart @EvanZhouDev @mil3na @xilopaint @samuelkraft
 /extensions/raycast-fly                                             @devuo
 /extensions/raycast-gemini                                          @EvanZhouDev
 /extensions/raycast-google-palm                                     @EvanZhouDev
@@ -1211,6 +1213,7 @@
 /extensions/stablecog                                               @yekta
 /extensions/stackoverflow                                           @sadanand-singh
 /extensions/stardew-valley-wiki                                     @mistah-robot @mistah-robot
+/extensions/stashpad-docs                                           @tsmarin
 /extensions/statamic-docs                                           @andrebreia
 /extensions/static-marks-bookmarks                                  @aerobless @rudeayelo
 /extensions/steam                                                   @KevinBatdorf
@@ -1436,7 +1439,7 @@
 /extensions/wordpress-docs                                          @tillkruss @KevinBatdorf
 /extensions/wordpress-plugins                                       @edmundcwm
 /extensions/wordreference                                           @Nass30
-/extensions/work-time-countdown                                     @thomaspaulmann @pernielsentikaer @aalhaif
+/extensions/work-time-countdown                                     @thomaspaulmann @pernielsentikaer @aalhaif @krsntn
 /extensions/workflowy-inbox                                         @cameronapak
 /extensions/worktrees                                               @canac
 /extensions/world-clock                                             @koinzhang

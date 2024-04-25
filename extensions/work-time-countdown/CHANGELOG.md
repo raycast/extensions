@@ -1,5 +1,10 @@
 # Work Time Countdown Changelog
 
+## [Enhancement] - 2024-04-23
+
+- Addressed the issue where references to time were specifically set at intervals such as 6:30, 7:30, 8:30, etc.
+- Added a new subtitle, that shows the remaining percentage until the end of workday.
+
 ## [Enhancement] - 2023-11-29
 
 - Added more work intervals (6:30, 7:30, 8:30 etc.)
