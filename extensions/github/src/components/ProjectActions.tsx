@@ -4,6 +4,7 @@ import { MutatePromise } from "@raycast/utils";
 import { getGitHubClient } from "../api/githubClient";
 import { ProjectFieldsFragment } from "../generated/graphql";
 import { getErrorMessage } from "../helpers/errors";
+import { hasRequiredScopes } from "../helpers/scopes";
 import { useMyProjects } from "../hooks/useMyProjects";
 
 type ProjectActionsProps = {
@@ -14,7 +15,7 @@ type ProjectActionsProps = {
 };
 
 export default function ProjectActions({ project, children, mutateList, mutateDetail }: ProjectActionsProps) {
-  const { github } = getGitHubClient();
+  const { github, octokit } = getGitHubClient();
 
   const canClientActions = project.viewerCanClose || project.viewerCanReopen || project.viewerCanUpdate;
 
@@ -31,6 +32,16 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
   async function setProjectClosed(state: boolean) {
     try {
       await showToast({ style: Toast.Style.Animated, title: state ? `Closing project` : `Reopening project` });
+      const hasProjectScopes = await hasRequiredScopes(["project", "project:write"], octokit);
+
+      if (!hasProjectScopes) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Missing Scopes`,
+          message: `You need the "project" or "project:write" scopes to close or reopen a project. Please re-authenticate.`,
+        });
+        return;
+      }
 
       await github.changeProjectStatus({
         projectId: project.id,
