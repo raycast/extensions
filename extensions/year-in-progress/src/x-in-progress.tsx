@@ -129,8 +129,9 @@ export default function XInProgress() {
 
             setState((prev) => ({ ...prev, allProgress, currMenubarProgressTitle }));
 
-            // 4. If it is shown as command, update it
-            if (targetProgress.showAsCommand) {
+            // 4. If it is shown as command subtitle, update it
+            const editedProcess = allProgress.find((p) => p.title === targetProgress.title) as Progress;
+            if (editedProcess.showAsCommand) {
               setShowAsCommand(targetProgress);
             }
 
@@ -322,13 +323,16 @@ function Actions(props: {
             await toggleShowInMenubar(progress);
           }}
         />
-        <Action
-          title={`${progress.showAsCommand ? "Hide as Command" : "Show as Command"}`}
-          icon={progress.showAsCommand ? Icon.EyeDisabled : Icon.Eye}
-          onAction={async () => {
-            await setShowAsCommand(progress);
-          }}
-        />
+        {!progress.showAsCommand && (
+          <Action
+            title="Show in Command Subtitle"
+            icon={Icon.Eye}
+            onAction={async () => {
+              await setShowAsCommand(progress);
+            }}
+          />
+        )}
+
         {progress.type === "user" && (
           <Action
             title="Edit Progress"

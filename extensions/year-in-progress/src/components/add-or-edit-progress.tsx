@@ -167,7 +167,7 @@ export default function AddOrEditProgress(props: AddOrEditProgressProps) {
       />
       <Form.Checkbox
         id="showAsCommand"
-        title="Show as Command"
+        title="Show in Command Subtitle"
         label="Yes"
         value={formValue.showAsCommand}
         onChange={(value) => {
