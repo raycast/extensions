@@ -24,7 +24,7 @@ export default function GifSearch() {
   const limit = getMaxResults();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [searchService, setSearchService] = useCachedState<ServiceName>("service");
+  const [searchService, setSearchService] = useCachedState<ServiceName>("service", GIF_SERVICE.GIPHY);
 
   const itemSize = searchTerm.length > 0 ? getGridItemSize() : getGridTrendingItemSize();
 
@@ -47,10 +47,10 @@ export default function GifSearch() {
 
   let placeholder = `Search for GIFs${searchService ? ` on ${getServiceTitle(searchService)}` : ""}`;
   if (showAllFavs) {
-    placeholder = "Search recents";
+    placeholder = "Search favorites";
   }
   if (showAllRecents) {
-    placeholder = "Search favorites";
+    placeholder = "Search recents";
   }
 
   let emptyState = { text: "Enter a search above to get started…", icon: Icon.MagnifyingGlass };
@@ -59,6 +59,9 @@ export default function GifSearch() {
   }
   if (showAllRecents) {
     emptyState = { text: "Work with some GIFs first…", icon: Icon.Clock };
+  }
+  if (searchTerm.length > 0 && results?.length === 0) {
+    emptyState = { text: "No GIFs were found.", icon: Icon.Image };
   }
 
   let sections = [
