@@ -1,5 +1,5 @@
 <p align="center">
-<img width=100 src="https://raw.githubusercontent.com/raycast/extensions/main/extensions/groq/assets/groq.png">
+<img width=100 src="assets/groq.png">
 </p>
 
 <h1 align="center">Groq</h1>
@@ -10,6 +10,11 @@ Interact with Groq's API right from your command bar
 
 Groq's API offers a wide range of AI models, such as Mistral, Google and Meta's Llama models, with insanely fast speed (Llama3 70B with over 250 t/s).
 With this powerful extension, you can boost your productivity using advanced AI models without having to leave your Raycast interface.
+
+![Overview](metadata/1overview.png)
+
+### Get Instant Answers
+![Overview](metadata/2askAI.png)
 
 ## Getting an API Key
 
