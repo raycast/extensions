@@ -1,1 +1,1 @@
-export { default as parsedRepo } from './parseRepo'
+export { default as parsedRepo } from "./parseRepo";
