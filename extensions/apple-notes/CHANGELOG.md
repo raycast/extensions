@@ -1,8 +1,12 @@
 # Apple Notes Changelog
 
+## [Use new URI scheme] - 2024-04-25
+
+Merge `Copy Mobile Note URL` into `Copy Note URL` by using the `applenotes://` scheme that works on all platforms.
+
 ## [Find related notes] - 2024-04-10 
 
-Add `Find Related Notes` feature to suggest relevant notes based on a selected note
+Add `Find Related Notes` feature to suggest relevant notes based on a selected note.
 
 ## [Refactoring] - 2024-04-08
 
