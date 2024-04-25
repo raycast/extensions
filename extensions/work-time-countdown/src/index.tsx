@@ -1,23 +1,18 @@
-import { getPreferenceValues, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import { getPreferenceValues, MenuBarExtra, openCommandPreferences, updateCommandMetadata } from "@raycast/api";
 import { isWeekend } from "date-fns";
-import { getRemainingTime, getIcon, getTitle } from "./utils/time";
+import { getRemainingTime, getIcon, getTitle, getRemainingPercentage, getProgressBar } from "./utils/time";
 
 export default function Command() {
   const now = new Date();
   const { hours, minutes } = getRemainingTime(now);
-  const { includeWeekends, startHour } = getPreferenceValues();
+  const { includeWeekends } = getPreferenceValues();
+  const progress = getRemainingPercentage(now);
 
-  if (hours < 0 || minutes < 0) {
-    return null;
-  }
+  updateCommandMetadata({
+    subtitle: getProgressBar((!includeWeekends && isWeekend(now)) || progress < 0 || progress > 100 ? null : progress),
+  });
 
-  const [startHours, startMinutes] = startHour.split(":").map(Number);
-  const startTime = startHours + (startMinutes || 0) / 60;
-  if (now.getHours() < startTime) {
-    return null;
-  }
-
-  if (!includeWeekends && isWeekend(now)) {
+  if ((!includeWeekends && isWeekend(now)) || progress < 0 || progress > 100) {
     return null;
   }
 

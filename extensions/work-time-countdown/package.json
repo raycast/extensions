@@ -16,144 +16,137 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "progress",
-      "title": "Work Time Progress",
-      "description": "View the remaining duration for work time.",
-      "mode": "no-view",
-      "interval": "1m"
-    },
-    {
       "name": "index",
       "title": "Work Time Countdown",
       "description": "A simple timer to help you keep productive during work time.",
       "mode": "menu-bar",
-      "interval": "1m"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "startHour",
-      "description": "The time you want to start working every day.",
-      "type": "dropdown",
-      "required": false,
-      "title": "Start of Workday",
-      "data": [
+      "interval": "1m",
+      "preferences": [
         {
-          "title": "6:00",
-          "value": "6"
+          "name": "startHour",
+          "description": "The time you want to start working every day.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Start of Workday",
+          "data": [
+            {
+              "title": "6:00",
+              "value": "6"
+            },
+            {
+              "title": "6:30",
+              "value": "6:30"
+            },
+            {
+              "title": "7:00",
+              "value": "7"
+            },
+            {
+              "title": "7:30",
+              "value": "7:30"
+            },
+            {
+              "title": "8:00",
+              "value": "8"
+            },
+            {
+              "title": "8:30",
+              "value": "8:30"
+            },
+            {
+              "title": "9:00",
+              "value": "9"
+            },
+            {
+              "title": "9:30",
+              "value": "9:30"
+            },
+            {
+              "title": "10:00",
+              "value": "10"
+            },
+            {
+              "title": "10:30",
+              "value": "10:30"
+            },
+            {
+              "title": "11:00",
+              "value": "11"
+            }
+          ],
+          "default": "9"
         },
         {
-          "title": "6:30",
-          "value": "6:30"
+          "name": "endHour",
+          "description": "The time until you want to work every day.",
+          "type": "dropdown",
+          "required": false,
+          "title": "End of Workday",
+          "data": [
+            {
+              "title": "15:00",
+              "value": "15"
+            },
+            {
+              "title": "15:30",
+              "value": "15:30"
+            },
+            {
+              "title": "16:00",
+              "value": "16"
+            },
+            {
+              "title": "16:30",
+              "value": "16:30"
+            },
+            {
+              "title": "17:00",
+              "value": "17"
+            },
+            {
+              "title": "17:30",
+              "value": "17:30"
+            },
+            {
+              "title": "18:00",
+              "value": "18"
+            },
+            {
+              "title": "18:30",
+              "value": "18:30"
+            },
+            {
+              "title": "19:00",
+              "value": "19"
+            },
+            {
+              "title": "19:30",
+              "value": "19:30"
+            },
+            {
+              "title": "20:00",
+              "value": "20"
+            },
+            {
+              "title": "20:30",
+              "value": "20:30"
+            },
+            {
+              "title": "21:00",
+              "value": "21"
+            }
+          ],
+          "default": "19"
         },
         {
-          "title": "7:00",
-          "value": "7"
-        },
-        {
-          "title": "7:30",
-          "value": "7:30"
-        },
-        {
-          "title": "8:00",
-          "value": "8"
-        },
-        {
-          "title": "8:30",
-          "value": "8:30"
-        },
-        {
-          "title": "9:00",
-          "value": "9"
-        },
-        {
-          "title": "9:30",
-          "value": "9:30"
-        },
-        {
-          "title": "10:00",
-          "value": "10"
-        },
-        {
-          "title": "10:30",
-          "value": "10:30"
-        },
-        {
-          "title": "11:00",
-          "value": "11"
+          "name": "includeWeekends",
+          "description": "Show countdown on weekends",
+          "type": "checkbox",
+          "label": "Include Weekends",
+          "required": false,
+          "default": false
         }
-      ],
-      "default": "9"
-    },
-    {
-      "name": "endHour",
-      "description": "The time until you want to work every day.",
-      "type": "dropdown",
-      "required": false,
-      "title": "End of Workday",
-      "data": [
-        {
-          "title": "15:00",
-          "value": "15"
-        },
-        {
-          "title": "15:30",
-          "value": "15:30"
-        },
-        {
-          "title": "16:00",
-          "value": "16"
-        },
-        {
-          "title": "16:30",
-          "value": "16:30"
-        },
-        {
-          "title": "17:00",
-          "value": "17"
-        },
-        {
-          "title": "17:30",
-          "value": "17:30"
-        },
-        {
-          "title": "18:00",
-          "value": "18"
-        },
-        {
-          "title": "18:30",
-          "value": "18:30"
-        },
-        {
-          "title": "19:00",
-          "value": "19"
-        },
-        {
-          "title": "19:30",
-          "value": "19:30"
-        },
-        {
-          "title": "20:00",
-          "value": "20"
-        },
-        {
-          "title": "20:30",
-          "value": "20:30"
-        },
-        {
-          "title": "21:00",
-          "value": "21"
-        }
-      ],
-      "default": "19"
-    },
-    {
-      "name": "includeWeekends",
-      "description": "Show countdown on weekends",
-      "type": "checkbox",
-      "label": "Include Weekends",
-      "required": false,
-      "default": false
+      ]
     }
   ],
   "dependencies": {

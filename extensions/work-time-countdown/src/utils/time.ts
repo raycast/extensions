@@ -46,8 +46,8 @@ export function getTitle(hours: number, minutes: number) {
   }
 }
 
-export function getProgressBar(percentage: number, options: { limit?: number } = {}) {
-  if (percentage < 0) {
+export function getProgressBar(percentage: number | null, options: { limit?: number } = {}) {
+  if (percentage === null) {
     return "Currently not within working hours. 🥂";
   }
 
