@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Fixed overlapping keyboard shortcuts] - 2024-04-25
+- Fixed the issue where some key combinations were mapped to multiple commands at the same time.
+
 ## [Fix to View of Detail] - 2024-03-20
 - Fixed so that line breaks are displayed as new lines
 
