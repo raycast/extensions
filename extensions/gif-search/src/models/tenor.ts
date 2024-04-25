@@ -1,5 +1,4 @@
-import formatRelative from "date-fns/formatRelative";
-import fromUnixTime from "date-fns/fromUnixTime";
+import { formatRelative, fromUnixTime } from "date-fns";
 import fetch from "node-fetch";
 
 import { APIOpt, IGif, IGifAPI, slugify } from "../models/gif";

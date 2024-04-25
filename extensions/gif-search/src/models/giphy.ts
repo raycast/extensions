@@ -1,4 +1,4 @@
-import formatRelative from "date-fns/formatRelative";
+import { formatRelative } from "date-fns";
 
 import type { IGif as GiphyGif } from "@giphy/js-types";
 
