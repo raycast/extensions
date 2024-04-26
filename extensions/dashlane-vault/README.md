@@ -89,7 +89,7 @@ Currently there is a version (v6.2415.0) of the Dashlane CLI with a bug, that ca
 
 ### Wrong configuration
 
-Currently the extensions does not support using both configurations `save-master-password` set to false and `user-presence` set to biometrics. Please use only one of the configuration.
+Currently the extension does not support using both configurations `save-master-password` set to false and `user-presence` set to biometrics. Please use only one of the configuration.
 
 ## Security
 
