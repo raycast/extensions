@@ -21,6 +21,7 @@ export default function SearchSubstackProfiles() {
       searchBarPlaceholder="Search Profiles on Substack"
       onSearchTextChange={setQuery}
       isShowingDetail={showDetails}
+      throttle
     >
       {data?.map((profile) => (
         <ProfileItem
