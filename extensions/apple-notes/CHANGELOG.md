@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Add text to note] - 2024-04-26
+
+Add a new command called `Add Text to Note` allowing you to quickly append text to your notes for faster note-taking. You can also add text to a note from the `Search Notes command`.
+
 ## [Use new URI scheme] - 2024-04-25
 
 Merge `Copy Mobile Note URL` into `Copy Note URL` by using the `applenotes://` scheme that works on all platforms.

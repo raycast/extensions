@@ -23,6 +23,7 @@ import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, 
 import { fileIcon } from "../helpers";
 import { NoteItem, useNotes } from "../useNotes";
 
+import AddTextForm from "./AddTextForm";
 import NoteDetail from "./NoteDetail";
 
 const preferences = getPreferenceValues<Preferences>();
@@ -103,24 +104,33 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
       />
       {secondaryOpen}
 
-      {noteTitles ? <RelatedNotes noteTitles={noteTitles} note={note} /> : null}
+      <ActionPanel.Section>
+        <Action.Push
+          title="Add Text to Note"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          target={<AddTextForm noteId={note.id} />}
+        />
 
-      {isDeleted ? (
-        <Action
-          title="Restore to Notes Folder"
-          icon={Icon.ArrowCounterClockwise}
-          onAction={restoreNote}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-        />
-      ) : (
-        <Action
-          title="Delete Note"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={deleteNote}
-          shortcut={Keyboard.Shortcut.Common.Remove}
-        />
-      )}
+        {noteTitles ? <RelatedNotes noteTitles={noteTitles} note={note} /> : null}
+
+        {isDeleted ? (
+          <Action
+            title="Restore to Notes Folder"
+            icon={Icon.ArrowCounterClockwise}
+            onAction={restoreNote}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          />
+        ) : (
+          <Action
+            title="Delete Note"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={deleteNote}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+          />
+        )}
+      </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action.CopyToClipboard
