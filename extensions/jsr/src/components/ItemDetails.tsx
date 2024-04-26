@@ -32,10 +32,10 @@ ${item.description}`}
             <>
               <Detail.Metadata.Label
                 title="Last Updated"
-                text={formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true })}
+                text={data.updatedAt ? formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true }) : "unknown"}
                 icon={Icon.Clock}
               />
-              <Detail.Metadata.Label title="Version" text={data.latestVersion} icon={Icon.ComputerChip} />
+              <Detail.Metadata.Label title="Version" text={data.latestVersion ?? "unknown"} icon={Icon.ComputerChip} />
               <Detail.Metadata.Separator />
             </>
           ) : null}
