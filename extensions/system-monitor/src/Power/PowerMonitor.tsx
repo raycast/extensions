@@ -33,11 +33,7 @@ export default function PowerMonitor() {
 }
 
 function PowerMonitorDetail({ batteryData, isOnAC }: { batteryData?: BatteryDataInterface; isOnAC?: boolean }) {
-  const {
-    revalidate,
-    data: timeOnBattery,
-    isLoading: isLoadingTimeOnBattery,
-  } = usePromise(getTimeOnBattery);
+  const { revalidate, data: timeOnBattery, isLoading: isLoadingTimeOnBattery } = usePromise(getTimeOnBattery);
 
   useInterval(revalidate, 1000 * 60);
 
@@ -61,10 +57,7 @@ function PowerMonitorDetail({ batteryData, isOnAC }: { batteryData?: BatteryData
                 title={batteryData?.isCharging ? "Time to charge" : "Time to discharge"}
                 text={batteryData ? convertMinutesToHours(batteryData?.timeRemaining) : "Loading…"}
               />
-              <List.Item.Detail.Metadata.Label
-                title="Time on battery"
-                text={timeOnBattery || "Loading…"}
-              />
+              <List.Item.Detail.Metadata.Label title="Time on battery" text={timeOnBattery || "Loading…"} />
             </>
           ) : null}
         </List.Item.Detail.Metadata>
