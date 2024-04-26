@@ -24,12 +24,16 @@ export default async function command() {
     await setSystemBrightness(newBrightness!);
     await showHUD(`Keyboard Brightness set to ${(newBrightness! * 100).toFixed(0)}%`);
 
-    await launchCommand({
-      name: "menubar-keyboard-brightness",
-      type: LaunchType.Background,
-    });
+    try {
+      await launchCommand({
+        name: "menubar-keyboard-brightness",
+        type: LaunchType.Background,
+      });
+    } catch (e) {
+      () => {};
+    }
   } catch (e) {
     console.error(e);
-    await showHUD("❌ Failed Toggling Keyboard Brightness");
+    await showHUD("❌ Failed Toggling Keyboard Brightness!!!");
   }
 }
