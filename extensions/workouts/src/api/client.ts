@@ -13,7 +13,7 @@ const client = new OAuth.PKCEClient({
 
 let atheleteId: number | null;
 
-async function getAthleteId() {
+export async function getAthleteId() {
   if (!atheleteId) {
     const { id } = await getAthlete();
     return id;

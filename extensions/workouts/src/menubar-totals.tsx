@@ -1,11 +1,12 @@
 import { Color, Icon, MenuBarExtra, getPreferenceValues, open, openCommandPreferences } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { getStats, provider } from "./api/client";
+import { getAthleteId, getStats, provider } from "./api/client";
 import { sportIcons } from "./constants";
 import { formatDistance } from "./utils";
 
 function MenuBarTotals() {
   const { data: stats, isLoading } = useCachedPromise(getStats, []);
+  const { data: athleteId } = useCachedPromise(getAthleteId, []);
 
   if (!stats) {
     return <MenuBarExtra isLoading={isLoading} />;
@@ -13,7 +14,7 @@ function MenuBarTotals() {
 
   const preferences = getPreferenceValues();
 
-  const stravaProfileUrl = `https://www.strava.com/athletes/${getPreferenceValues().strava_user_id}`;
+  const stravaProfileUrl = athleteId ? `https://www.strava.com/athletes/${athleteId}` : "https://www.strava.com";
 
   const ytdRunTotal = formatDistance(stats.ytd_run_totals.distance);
   const ytdRideTotal = formatDistance(stats.ytd_ride_totals.distance);
@@ -46,21 +47,21 @@ function MenuBarTotals() {
       tooltip={`${primarySport} ${primaryStat}`}
     >
       <MenuBarExtra.Section title="Last 4 weeks">
-        {stats.recent_run_totals.distance ? (
+        {stats.recent_run_totals.distance || primarySport === "Run" ? (
           <MenuBarExtra.Item
             title={recentRunTotal}
             icon={{ source: "run.svg", tintColor: Color.PrimaryText }}
             onAction={() => open(stravaProfileUrl)}
           />
         ) : null}
-        {stats.recent_ride_totals.distance ? (
+        {stats.recent_ride_totals.distance || primarySport === "Ride" ? (
           <MenuBarExtra.Item
             title={recentRideTotal}
             icon={{ source: "ride.svg", tintColor: Color.PrimaryText }}
             onAction={() => open(stravaProfileUrl)}
           />
         ) : null}
-        {stats.recent_swim_totals.distance > 0 ? (
+        {stats.recent_swim_totals.distance || primarySport === "Swim" ? (
           <MenuBarExtra.Item
             title={recentSwimTotal}
             icon={{ source: "swim.svg", tintColor: Color.PrimaryText }}
@@ -69,21 +70,21 @@ function MenuBarTotals() {
         ) : null}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="This Year">
-        {stats.ytd_run_totals.distance ? (
+        {stats.ytd_run_totals.distance || primarySport === "Run" ? (
           <MenuBarExtra.Item
             title={ytdRunTotal}
             icon={{ source: "run.svg", tintColor: Color.PrimaryText }}
             onAction={() => open(stravaProfileUrl)}
           />
         ) : null}
-        {stats.ytd_ride_totals.distance ? (
+        {stats.ytd_ride_totals.distance || primarySport === "Ride" ? (
           <MenuBarExtra.Item
             title={ytdRideTotal}
             icon={{ source: "ride.svg", tintColor: Color.PrimaryText }}
             onAction={() => open(stravaProfileUrl)}
           />
         ) : null}
-        {stats.ytd_swim_totals.distance > 0 ? (
+        {stats.ytd_swim_totals.distance || primarySport === "Swim" ? (
           <MenuBarExtra.Item
             title={ytdSwimTotal}
             icon={{ source: "swim.svg", tintColor: Color.PrimaryText }}
@@ -92,21 +93,21 @@ function MenuBarTotals() {
         ) : null}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="All Time">
-        {stats.all_run_totals.distance ? (
+        {stats.all_run_totals.distance || primarySport === "Run" ? (
           <MenuBarExtra.Item
             title={allRunTotal}
             icon={{ source: "run.svg", tintColor: Color.PrimaryText }}
             onAction={() => open(stravaProfileUrl)}
           />
         ) : null}
-        {stats.all_ride_totals.distance ? (
+        {stats.all_ride_totals.distance || primarySport === "Ride" ? (
           <MenuBarExtra.Item
             title={allRideTotal}
             icon={{ source: "ride.svg", tintColor: Color.PrimaryText }}
             onAction={() => open(stravaProfileUrl)}
           />
         ) : null}
-        {stats.all_swim_totals.distance > 0 ? (
+        {stats.all_swim_totals.distance || primarySport === "Swim" ? (
           <MenuBarExtra.Item
             title={allSwimTotal}
             icon={{ source: "swim.svg", tintColor: Color.PrimaryText }}

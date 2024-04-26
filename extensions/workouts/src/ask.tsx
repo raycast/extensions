@@ -17,10 +17,15 @@ function Ask(props: { arguments: Arguments.Ask }) {
     }
   }, [error]);
 
-  const cleanedActivities = activities?.map((activity) => {
-    const { map, ...rest } = activity; // eslint-disable-line @typescript-eslint/no-unused-vars
-    return rest;
-  });
+  if (!activities) {
+    return <Detail isLoading={true} markdown="Loading your activities..." />;
+  }
+
+  const cleanedActivities =
+    activities?.map((activity) => {
+      const { map, ...rest } = activity; // eslint-disable-line @typescript-eslint/no-unused-vars
+      return rest;
+    }) || [];
 
   const preferences = getPreferenceValues();
   const { data, isLoading } = useAI(
