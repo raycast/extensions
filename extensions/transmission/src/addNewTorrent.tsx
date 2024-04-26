@@ -10,8 +10,6 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useCallback, useMemo } from "react";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import expandTidle from "expand-tilde";
 import { createClient } from "./modules/client";
 import { useAsync } from "react-use";

@@ -8,7 +8,7 @@
   - [getAvatarIcon](utils-reference/icons/getAvatarIcon.md)
   - [getFavicon](utils-reference/icons/getFavicon.md)
   - [getProgressIcon](utils-reference/icons/getProgressIcon.md)
-- [OAuth](utils-reference/oauth/README.md)
+- [OAuth Utils](utils-reference/oauth/README.md)
   - [OAuthService](utils-reference/oauth/OAuthService.md)
   - [withAccessToken](utils-reference/oauth/withAccessToken.md)
   - [getAccessToken](utils-reference/oauth/getAccessToken.md)

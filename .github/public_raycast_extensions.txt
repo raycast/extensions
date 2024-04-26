@@ -37,3 +37,4 @@ markprompt
 multi
 apple-notes
 humaans
+text-replacements
