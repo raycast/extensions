@@ -13,7 +13,7 @@
     {
       "name": "search-anki-decks",
       "title": "Search Anki Decks",
-      "description": "",
+      "description": "Allows to search and open Anki decks.",
       "mode": "view"
     }
   ],
