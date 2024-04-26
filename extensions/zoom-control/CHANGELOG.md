@@ -1,10 +1,12 @@
 # Zoom Meeting Control Changelog
 
-## [New Commands] - 2024-04-24
+## [New Commands] - 2024-04-26
 
-Added the following commands:
+Added `Toggle Chat`
 
-- Toggle Chat
+## [Extension Improvement] - 2024-04-26
+
+- Fix compatibility with latest Zoom 6.0 update.
 
 ## [Extension Improvement] - 2024-01-14
 
@@ -21,7 +23,7 @@ Added the following commands:
 
 ## [New Commands] - 2023-12-12
 
-Added `toggle mute` and `toggle video`
+Added `Toggle Mute` and `Toggle Video`
 
 ## [Initial Version] - 2023-10-15
 

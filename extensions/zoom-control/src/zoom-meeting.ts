@@ -53,7 +53,15 @@ on run argv
 
   tell application "System Events" to tell application process "zoom.us"
     if not exists (menu bar item menu1 of menu bar 1) then
-      return "zoom-no-menu1"
+      if menu1 is "zoom.us" then
+        if exists (menu bar item "Zoom Workplace" of menu bar 1) then
+        	set menu1 to "Zoom Workplace"
+        else
+          return "zoom-no-menu1"
+        end if
+      else
+        return "zoom-no-menu1"
+      end if
     end if
 
     tell (menu bar item menu1 of menu bar 1)
