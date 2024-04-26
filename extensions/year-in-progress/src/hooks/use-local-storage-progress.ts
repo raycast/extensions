@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LaunchType, LocalStorage, launchCommand } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Progress } from "../types";
 import { defaultProgress, getProgressNumByDate } from "../utils/progress";
@@ -66,12 +66,15 @@ export function useLocalStorageProgress(): [
     (async () => {
       const storedAllProgress = await LocalStorage.getItem<string>(STORAGE_KEY);
       if (!storedAllProgress) {
+        // setting first progress as default command subtitle
+        defaultProgress[0].showAsCommand = true;
         setState((prev) => ({
           ...prev,
           isLoading: false,
           allProgress: defaultProgress,
           currMenubarProgressTitle: defaultProgress[0].title,
         }));
+        await launchCommand({ name: "year-in-progress", type: LaunchType.Background });
         return;
       }
 
