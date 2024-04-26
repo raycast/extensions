@@ -22,6 +22,14 @@
       "title": "Export Notes",
       "description": "Export all notes to a directory.",
       "mode": "view"
+    },
+    {
+      "name": "sync",
+      "title": "Sync with Folder",
+      "description": "2-way sync existing markdown files from the auto save directory.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "interval": "10m"
     }
   ],
   "keywords": [

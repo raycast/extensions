@@ -71,16 +71,16 @@ export const fetchItemInput = () => {
         : itemInput
             .setContent(String(await clipboard()))
             .setSource(ItemSource.CLIPBOARD)
-            .setType()
+            .setType(),
     )
     .catch(async () =>
       itemInput
         .setContent(String(await clipboard()))
         .setSource(ItemSource.CLIPBOARD)
-        .setType()
+        .setType(),
     )
     .then((item) =>
-      !isEmpty(item.content) ? itemInput : itemInput.setContent("").setSource(ItemSource.NULL).setType()
+      !isEmpty(item.content) ? itemInput : itemInput.setContent("").setSource(ItemSource.NULL).setType(),
     )
     .catch(() => itemInput.setContent("").setSource(ItemSource.NULL).setType());
 };

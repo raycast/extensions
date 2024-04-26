@@ -1,5 +1,14 @@
 # Apple Reminders Changelog
 
+## [Add Saved Locations] - 2024-04-16
+
+- Save your frequently used locations with the new "Add Saved Location" action when creating a reminder. This makes it easy to quickly add new location-based reminders later.
+- In "Quick Add Reminder," you can add reminders for locations or any of your saved locations - simply specify the one you want to use.
+
+## [Separate menu bar count from the view] - 2024-04-15
+
+- It's now possible to set reminders count type separately from the view type in menu bar.
+
 ## [Quick Add Reminder Improvements] - 2024-04-11
 
 - It's now possible to specify a due date and a list (with an `#` prefix) in `Quick Add Reminder` when not using the AI.

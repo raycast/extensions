@@ -1,10 +1,10 @@
-import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchProps, List, Toast, environment, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
 import { getPrompts, removeUpvote, upvote } from "./api";
 import { Prompt, categories as rawCategories } from "./data/prompts";
-import { CONTRIBUTE_URL, wrapInCodeBlock } from "./helpers";
+import { CONTRIBUTE_URL, raycastProtocol, wrapInCodeBlock } from "./helpers";
 
 type Props = LaunchProps<{ launchContext: string[] }>;
 
@@ -74,19 +74,17 @@ export default function ExplorePrompts(props: Props) {
       .flatMap((category) => category.prompts)
       .filter((prompt) => selectedIds.includes(prompt.id));
 
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
-
     const queryString = prompts
       .map((selectedPrompt) => {
         const { title, prompt, creativity, icon, model } = selectedPrompt;
 
         return `prompts=${encodeURIComponent(
-          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) })
+          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) }),
         )}`;
       })
       .join("&");
 
-    return `${protocol}prompts/import?${queryString}`;
+    return `${raycastProtocol}prompts/import?${queryString}`;
   }, [selectedIds, categories]);
 
   const sharingLink = useMemo(() => {
@@ -317,10 +315,10 @@ function getPromptMarkdown(prompt: Prompt) {
         prompt.example.argument ? `### Argument\n\n${prompt.example.argument}\n\n` : ""
       }### Selection\n\n${wrapInCodeBlock(
         prompt.example.selection,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh"
+        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
       )}\n\n### Output\n\n${wrapInCodeBlock(
         prompt.example.output,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh"
+        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
       )}`
     : "";
 
@@ -336,23 +334,23 @@ function getPromptMarkdown(prompt: Prompt) {
 
 function getCreativityIcon(creativity: Prompt["creativity"]) {
   if (creativity === "none") {
-    return Icon.Circle;
+    return Icon.CircleDisabled;
   }
 
   if (creativity === "low") {
-    return Icon.CircleProgress25;
+    return Icon.StackedBars1;
   }
 
   if (creativity === "medium") {
-    return Icon.CircleProgress50;
+    return Icon.StackedBars2;
   }
 
   if (creativity === "high") {
-    return Icon.CircleProgress75;
+    return Icon.StackedBars3;
   }
 
   if (creativity === "maximum") {
-    return Icon.CircleProgress100;
+    return Icon.StackedBars4;
   }
 }
 

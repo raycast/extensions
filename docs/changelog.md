@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.72.0 - 2024-04-24
+
+### ✨ New
+
+- **Browser Extension**: You can now access the context of the focused browser via the Raycast Browser Extension. You can get the list of open tabs as well as the content of a tab.
+
+### 🐞 Fixes
+
+- **Grid**: Fixed a bug that caused the selected Grid item to be brought into focus when paginating.
+
 ## 1.71.0 - 2024-04-10
 
 ### ✨ New

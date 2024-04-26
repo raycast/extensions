@@ -1,4 +1,9 @@
-# Simple Icons Changelog
+# Brand Icons Changelog
+
+## [Updates] - 2024-04-15
+
+- Rename extension name to Brand Icons
+- Update feedback links
 
 ## [New Feature & Chore] - 2024-04-09
 

@@ -1,5 +1,9 @@
 # Perplexity API Changelog
 
+## [Update] - 2024-04-22
+
+- Added new Llama3 models and `Mixtral 8x22B` model.
+
 ## [Update] - 2024-03-17
 
 - Fixed names of Mistral AI instruct models.

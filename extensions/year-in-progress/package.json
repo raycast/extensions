@@ -6,8 +6,10 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "danulqua",
     "anothertempore"
+  ],
+  "pastContributors": [
+    "danulqua"
   ],
   "categories": [
     "Productivity",
