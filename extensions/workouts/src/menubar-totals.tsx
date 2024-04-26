@@ -12,7 +12,7 @@ function MenuBarTotals() {
     return <MenuBarExtra isLoading={isLoading} />;
   }
 
-  const preferences = getPreferenceValues();
+  const preferences: Preferences.MenubarTotals = getPreferenceValues();
 
   const stravaProfileUrl = athleteId ? `https://www.strava.com/athletes/${athleteId}` : "https://www.strava.com";
 
