@@ -43,8 +43,10 @@ function Ask(props: { arguments: Arguments.Ask }) {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={data}
-      navigationTitle={`Ask AI: ${props.arguments.question}`}
+      markdown={`
+## ${props.arguments.question}
+
+${data}`}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Answer" content={data} />
