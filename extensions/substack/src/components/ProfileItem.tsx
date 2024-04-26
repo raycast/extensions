@@ -38,7 +38,11 @@ export default function ProfileItem({ profile, toggleDetails, detailsShown }: Pr
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action title={detailsShown ? "Hide Details" : "Show Details"} onAction={toggleDetails} icon={Icon.List} />
+          <Action
+            title={detailsShown ? "Hide Details" : "Show Details"}
+            onAction={toggleDetails}
+            icon={{ source: Icon.AppWindowSidebarLeft, tintColor: "#FF6719" }}
+          />
           {profile.handle && (
             <Action.OpenInBrowser
               title="Open on Substack"
@@ -46,12 +50,14 @@ export default function ProfileItem({ profile, toggleDetails, detailsShown }: Pr
               icon={{ source: "substack.svg" }}
             />
           )}
-          <Action.Push
-            title="Show Posts"
-            target={<UserProfilePosts profile={profile} />}
-            icon={{ source: Icon.List }}
-            shortcut={{ key: "o", modifiers: ["cmd"] }}
-          />
+          {profile.hasPosts && (
+            <Action.Push
+              title="Show Posts"
+              target={<UserProfilePosts profile={profile} />}
+              icon={{ source: Icon.List, tintColor: "#FF6719" }}
+              shortcut={{ key: "o", modifiers: ["cmd"] }}
+            />
+          )}
         </ActionPanel>
       }
       detail={
