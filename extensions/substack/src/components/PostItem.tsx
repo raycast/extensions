@@ -70,7 +70,11 @@ ${post.truncated_body_text}`}
       }
       actions={
         <ActionPanel>
-          <Action title={detailsShown ? "Hide Details" : "Show Details"} onAction={toggleDetails} icon={Icon.List} />
+          <Action
+            title={detailsShown ? "Hide Details" : "Show Details"}
+            onAction={toggleDetails}
+            icon={{ source: Icon.AppWindowSidebarLeft, tintColor: "#FF6719" }}
+          />
           {post.canonical_url && (
             <Action.OpenInBrowser title="Open on Substack" url={post.canonical_url} icon={{ source: "substack.svg" }} />
           )}
