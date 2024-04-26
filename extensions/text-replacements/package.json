@@ -5,6 +5,9 @@
   "description": "Import macOS's text replacements to Raycast snippets.",
   "icon": "extension-icon.png",
   "author": "thomaslombart",
+  "contributors": [
+    "igor9silva"
+  ],
   "owner": "raycast",
   "access": "public",
   "categories": [
@@ -18,11 +21,19 @@
       "subtitle": "Text Replacements",
       "description": "Import macOS's text replacements to Raycast snippets.",
       "mode": "no-view"
+    },
+    {
+      "name": "import-snippets-to-text-replacements",
+      "title": "Import Snippets to Text Replacements",
+      "subtitle": "Text Replacements",
+      "description": "Import Raycast snippets to macOS's text replacements.",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.14.0"
+    "@raycast/utils": "^1.14.0",
+    "untildify": "^5.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

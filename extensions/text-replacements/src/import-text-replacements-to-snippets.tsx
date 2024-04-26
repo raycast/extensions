@@ -17,7 +17,7 @@ const execAsync = promisify(exec);
 
 async function getTextReplacements() {
   const dbPath = path.resolve(homedir(), "Library/KeyboardServices/TextReplacements.db");
-  const query = "SELECT * FROM ZTEXTREPLACEMENTENTRY";
+  const query = `select ZUNIQUENAME, ZSHORTCUT, ZPHRASE from ZTEXTREPLACEMENTENTRY where ZWASDELETED = 0;` 
 
   try {
     const { stdout } = await execAsync(`sqlite3 --json --readonly "${dbPath}" "${query}"`);
@@ -28,10 +28,10 @@ async function getTextReplacements() {
 }
 
 export default async function Command() {
-  const data = await getTextReplacements();
 
-  if (data) {
-    const replacements = data?.filter((row) => row.ZWASDELETED !== "1");
+  const replacements = await getTextReplacements();
+
+  if (replacements) {
 
     const raycastFlavor = environment.raycastVersion.includes("alpha") ? "raycastinternal" : "raycast";
 
@@ -40,6 +40,7 @@ export default async function Command() {
       text: replacement.ZPHRASE,
       keyword: replacement.ZSHORTCUT,
     }));
+
     const params = snippets?.map((snippet) => `snippet=${encodeURIComponent(JSON.stringify(snippet))}`).join("&");
     const importURL = `${raycastFlavor}://snippets/import?${params}`;
     open(importURL);
