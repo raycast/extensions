@@ -162,9 +162,9 @@ export default function Command(props: LaunchProps) {
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
           if (preferences.popToRoot) {
-            closeMainWindow();
-          } else {
             popToRoot();
+          } else {
+            closeMainWindow();
           }
         }}
       />
@@ -188,9 +188,9 @@ export default function Command(props: LaunchProps) {
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
           if (preferences.popToRoot) {
-            closeMainWindow();
-          } else {
             popToRoot();
+          } else {
+            closeMainWindow();
           }
         }}
       />

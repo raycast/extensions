@@ -36,8 +36,8 @@
       "type":"checkbox",
       "default": false,
       "title": "Behavior",
-      "description": "Allow pasting multiple different texts without re-entering extension. Usually, you only need to change the case once, so leaving this unchecked will make the extension pop to root after Action.",
-      "label": "Stay in the extension after Action",
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
+      "label": "Pop to Root after Action",
       "required": true
     },
     {
