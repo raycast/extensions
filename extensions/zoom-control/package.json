@@ -100,6 +100,7 @@
       "title": "Toggle Chat",
       "subtitle": "Zoom",
       "description": "Toggles chat in current Zoom meeting",
+      "disabledByDefault": true,
       "mode": "no-view"
     }
   ],
