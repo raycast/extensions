@@ -12,12 +12,7 @@ import {
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
-import {
-  getNotificationMenuBarIcon,
-  getNotificationMenuBarTitle,
-  getNotificationTitle,
-  getNotificationURL,
-} from "./helpers/notifications";
+import { getNotificationMenuBarTitle, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
