@@ -1276,6 +1276,7 @@
 /extensions/text-decorator                                          @koinzhang
 /extensions/text-differ                                             @fishfisher
 /extensions/text-format-improver                                    @mrgeneralgoo
+/extensions/text-replacements                                       @thomaslombart
 /extensions/text-shortcuts                                          @koinzhang
 /extensions/textlint-rule-aws-service-name                          @bun913
 /extensions/texts                                                   @zavbala
