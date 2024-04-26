@@ -1,5 +1,4 @@
 // src/utils/fetchCurrentIP.ts
-import { showToast, Toast } from '@raycast/api';
 import https from 'https'; // Import remains for the first request to ipify.org
 import http from 'http'; // Import for http requests to ip-api.com
 
@@ -13,7 +12,7 @@ interface GeolocationResponse {
 
 export async function fetchCurrentIP(): Promise<string> {
   // First, get the external IP address using HTTPS
-  let ip = await new Promise<string>((resolve, reject) => {
+  const ip = await new Promise<string>((resolve, reject) => {
     https
       .get('https://api.ipify.org?format=json', (res) => {
         let data = '';
