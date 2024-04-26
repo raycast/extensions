@@ -3,7 +3,7 @@
   "name": "cron",
   "title": "Cron",
   "description": "A companion for cron.re",
-  "icon": "icon.png",
+  "icon": "cron.png",
   "author": "astrit",
   "categories": [
     "Productivity"
