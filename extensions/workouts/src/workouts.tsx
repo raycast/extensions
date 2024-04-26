@@ -142,7 +142,12 @@ function Activity({ activity, isLoading }: { activity: StravaActivitySummary; is
           <Action.OpenInBrowser title="View on Strava" url={stravaLink} />
           <Action.CopyToClipboard title="Copy Strava Link" content={stravaLink} />
           {activity.distance ? (
-            <Action.Push icon={Icon.BarChart} title="View Splits" target={<Splits activityId={activity.id} />} />
+            <Action.Push
+              icon={Icon.BarChart}
+              title="View Splits"
+              target={<Splits activityId={activity.id} />}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+            />
           ) : null}
         </ActionPanel>
       }
