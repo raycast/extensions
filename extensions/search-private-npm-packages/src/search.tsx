@@ -101,7 +101,7 @@ export default function Command() {
       ))}
       <List.EmptyView
         title="No Tracking Accounts Found"
-        description="Press ⌘ to add a tracking account!"
+        description="Press ↵ key to add a tracking account!"
         actions={
           <ActionPanel>
             <Action.Push icon={Icon.PlusSquare} title="Add Tracking Account" target={<AddTracking />} />
