@@ -6,7 +6,7 @@ import { StravaActivitySummary } from "./api/types";
 import { sportIcons, sportNames } from "./constants";
 import { formatDistance, formatSpeedForSportType, generateMapboxImage } from "./utils";
 
-export function ActivityDetail({ activityId }: { activityId: StravaActivitySummary["id"] }) {
+export function Splits({ activityId }: { activityId: StravaActivitySummary["id"] }) {
   const { data: activity, isLoading } = usePromise(() => getActivity(activityId), []);
 
   if (isLoading || !activity) {
@@ -66,6 +66,8 @@ function Activity({ activity, isLoading }: { activity: StravaActivitySummary; is
   if (preferences.distance_unit === "mi") {
     elevationGain = `${(activity.total_elevation_gain * 3.28084).toFixed(0)}ft`;
   }
+
+  const stravaLink = `https://www.strava.com/activities/${activity.id}/`;
 
   return (
     <List.Item
@@ -137,14 +139,11 @@ function Activity({ activity, isLoading }: { activity: StravaActivitySummary; is
       }
       actions={
         <ActionPanel>
+          <Action.OpenInBrowser title="View on Strava" url={stravaLink} />
+          <Action.CopyToClipboard title="Copy Strava Link" content={stravaLink} />
           {activity.distance ? (
-            <Action.Push
-              icon={Icon.BarChart}
-              title="Show Splits"
-              target={<ActivityDetail activityId={activity.id} />}
-            />
+            <Action.Push icon={Icon.BarChart} title="View Splits" target={<Splits activityId={activity.id} />} />
           ) : null}
-          <Action.OpenInBrowser title="View on Strava" url={`https://www.strava.com/activities/${activity.id}/`} />
         </ActionPanel>
       }
       keywords={[activity.name]}

@@ -46,7 +46,7 @@ function Ask(props: { arguments: Arguments.Ask }) {
       markdown={`
 ## ${props.arguments.question}
 
-${data}`}
+${isLoading ? `Analyzing data…` : data}`}
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Answer" content={data} />
