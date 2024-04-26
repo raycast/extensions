@@ -87,10 +87,6 @@ which dcli
 
 Currently there is a version (v6.2415.0) of the Dashlane CLI with a bug, that can only be fixed by upgrading the CLI.
 
-### Wrong configuration
-
-Currently the extension does not support using both configurations `save-master-password` set to false and `user-presence` set to biometrics. Please use only one of the configuration.
-
 ## Security
 
 The extension relies on the Dashlane CLI, so every security consideration that applies to the CLI applies to the extension as well. See <https://dashlane.github.io/dashlane-cli> for more information.
