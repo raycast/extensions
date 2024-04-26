@@ -1,7 +1,8 @@
 # Change Case Changelog
 
-## [Fixed overlapping keyboard shortcuts] - 2024-04-25
+## [Fixed overlapping keyboard shortcuts and a wrong setting] - 2024-04-26
 - Fixed the issue where some key combinations were mapped to multiple commands at the same time.
+- Fixed the inverted `popToRoot` setting.
 
 ## [Fix to View of Detail] - 2024-03-20
 - Fixed so that line breaks are displayed as new lines
@@ -52,6 +53,7 @@
 - Added so it's possible to select copy or paste as default action
 
 ## [Update] - 2022-12-23
+
 
 - Make use of the `getFrontmostApplication` API.
 

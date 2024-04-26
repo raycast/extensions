@@ -12,7 +12,8 @@
   ],
   "contributors": [
     "pernielsentikaer",
-    "nagauta"
+    "nagauta",
+    "PWrzesinski"
   ],
   "keywords": [
     "text",
@@ -35,8 +36,8 @@
       "type":"checkbox",
       "default": false,
       "title": "Behavior",
-      "description": "Allow pasting multiple different case without re-selecting text. Usually, you only need to change the case once, so you can pop to root",
-      "label": "Pop to Root after Action",
+      "description": "Allow pasting multiple different texts without re-entering extension. Usually, you only need to change the case once, so leaving this unchecked will make the extension pop to root after Action.",
+      "label": "Stay in the extension after Action",
       "required": true
     },
     {
