@@ -1,4 +1,4 @@
-import { open, confirmAlert, showToast, Toast } from "@raycast/api";
+import { confirmAlert, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
 export enum ZoomMenuResult {
@@ -8,6 +8,8 @@ export enum ZoomMenuResult {
   NoMenu2 = "zoom-no-menu2",
   Menu2Disabled = "zoom-menu-disabled",
 }
+
+type ZoomMenuItem = { menu: string; menuItem: string };
 
 export async function runAS(script: string, args: string[] = []): Promise<string> {
   try {
@@ -88,8 +90,8 @@ end run
   return res as ZoomMenuResult;
 }
 
-export async function zoomExecuteMenu(menuItem: string): Promise<boolean | null> {
-  const res = await zoomMenu("Meeting", menuItem);
+export async function zoomExecuteMenu({ menu, menuItem }: ZoomMenuItem): Promise<boolean | null> {
+  const res = await zoomMenu(menu, menuItem);
   switch (res) {
     case ZoomMenuResult.Executed:
       return true;
