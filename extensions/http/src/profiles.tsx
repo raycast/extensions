@@ -48,11 +48,11 @@ export default function Command() {
   }, [stateProfiles.items]);
 
   const handleCreateProfile = useCallback(
-    (profile: Profile, index: number) => {
+    (profile: Profile) => {
       const newProfiles = [...stateProfiles.items, profile];
       setStateProfiles((previous) => ({ ...previous, items: newProfiles }));
     },
-    [stateProfiles.items, setStateProfiles]
+    [stateProfiles.items, setStateProfiles],
   );
 
   const handleUpdateProfile = useCallback(
@@ -62,7 +62,7 @@ export default function Command() {
       newProfiles[index] = profile;
       setStateProfiles((previous) => ({ ...previous, items: newProfiles }));
     },
-    [stateProfiles.items, setStateProfiles]
+    [stateProfiles.items, setStateProfiles],
   );
 
   const handleDeleteProfile = useCallback(
@@ -82,13 +82,13 @@ export default function Command() {
         },
       });
     },
-    [stateProfiles.items, setStateProfiles]
+    [stateProfiles.items, setStateProfiles],
   );
 
   const getNewProfile = useCallback((): Profile => {
     const p = NewProfile();
     if (stateProfiles.items.length > 0) {
-      for (const [key, value] of Object.entries(stateProfiles.items[0].fields)) {
+      for (const [key] of Object.entries(stateProfiles.items[0].fields)) {
         p.fields[key] = "";
       }
     }
@@ -98,12 +98,12 @@ export default function Command() {
   const handleCreateField = useCallback(
     (name: string) => {
       // console.log('handleCreateField', name);
-      stateProfiles.items.map((profile, index) => {
+      stateProfiles.items.map((profile) => {
         profile.fields[name] = "";
       });
       setStateProfiles((previous) => ({ ...previous, items: stateProfiles.items }));
     },
-    [stateProfiles.items, setStateProfiles]
+    [stateProfiles.items, setStateProfiles],
   );
 
   const handleDeleteField = useCallback(
@@ -117,7 +117,7 @@ export default function Command() {
           style: ActionStyle.Destructive,
           onAction: () => {
             const newProfiles = [...stateProfiles.items];
-            newProfiles.map((profile, index) => {
+            newProfiles.map((profile) => {
               delete profile.fields[key];
             });
             setStateProfiles((previous) => ({ ...previous, items: newProfiles }));
@@ -125,7 +125,7 @@ export default function Command() {
         },
       });
     },
-    [stateProfiles.items, setStateProfiles]
+    [stateProfiles.items, setStateProfiles],
   );
 
   return (
@@ -218,7 +218,7 @@ export default function Command() {
                   }
                 />
                 <ActionPanel.Submenu icon={Icon.Trash} title={"Delete Field"}>
-                  {Object.entries(profile.fields).map(([key, value], index) => {
+                  {Object.entries(profile.fields).map(([key]) => {
                     return <Action key={key} title={key} onAction={() => handleDeleteField(key)} />;
                   })}
                 </ActionPanel.Submenu>

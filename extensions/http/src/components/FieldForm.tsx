@@ -1,6 +1,6 @@
-import {useCallback, useState} from "react";
+import { useCallback, useState } from "react";
 import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
-import {validateNotEmptyString} from "../validation";
+import { validateNotEmptyString } from "../validation";
 
 function FieldForm(props: { name: string; index: number; onCreate: (name: string) => void }) {
   const { name, index, onCreate } = props;
@@ -12,11 +12,11 @@ function FieldForm(props: { name: string; index: number; onCreate: (name: string
       onCreate(values.name);
       pop();
     },
-    [onCreate, pop]
+    [onCreate, pop],
   );
 
-    const [nameError, setNameError] = useState<string | undefined>();
-    const validateNameErrorFunc = validateNotEmptyString( setNameError);
+  const [nameError, setNameError] = useState<string | undefined>();
+  const validateNameErrorFunc = validateNotEmptyString(setNameError);
 
   return (
     <Form
@@ -27,11 +27,11 @@ function FieldForm(props: { name: string; index: number; onCreate: (name: string
       }
     >
       <Form.TextField
-          id={"name"}
-          title={"Name"}
-          defaultValue={name}
-          error={nameError}
-          onChange={validateNameErrorFunc}
+        id={"name"}
+        title={"Name"}
+        defaultValue={name}
+        error={nameError}
+        onChange={validateNameErrorFunc}
       />
     </Form>
   );

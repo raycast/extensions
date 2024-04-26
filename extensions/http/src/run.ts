@@ -44,13 +44,13 @@ function buildRequestConfig(item: Request, currentProfile: Profile | undefined):
   const cfg: AxiosRequestConfig = {
     method: item.Method,
     url: u,
-    validateStatus: function(status) {
+    validateStatus: function (status) {
       return status >= 100 && status <= 999;
     },
     // prevent parse response data
-    transformResponse: function(data) {
+    transformResponse: function (data) {
       return data;
-    }
+    },
   };
 
   if (item.RequestBody.length > 0) {

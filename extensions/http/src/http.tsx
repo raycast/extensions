@@ -9,7 +9,7 @@ import {
   showToast,
   Toast,
   Clipboard,
-  showHUD
+  showHUD,
 } from "@raycast/api";
 import { NewResponse, Profile, Request, ShowDetails, StateProfiles, StateRequests } from "./types";
 import { useCallback, useEffect } from "react";
@@ -24,12 +24,12 @@ export default function Command() {
     isLoading: true,
     isRequesting: false,
     items: [],
-    ShowDetails: ShowDetails.Full
+    ShowDetails: ShowDetails.Full,
   });
 
   const [stateProfiles, setStateProfiles] = useCachedState<StateProfiles>("profiles", {
     isLoading: true,
-    items: []
+    items: [],
   });
 
   // let currentProfile: Profile | undefined;
@@ -83,7 +83,7 @@ export default function Command() {
       const newItems = [...stateItems.items, item];
       setStateItems((previous) => ({ ...previous, items: newItems }));
     },
-    [stateItems.items, setStateItems]
+    [stateItems.items, setStateItems],
   );
 
   const handleUpdate = useCallback(
@@ -92,7 +92,7 @@ export default function Command() {
       newItems[index] = item;
       setStateItems((previous) => ({ ...previous, items: newItems }));
     },
-    [stateItems.items, setStateItems]
+    [stateItems.items, setStateItems],
   );
 
   const handleToggleDetails = useCallback(() => {
@@ -122,7 +122,7 @@ export default function Command() {
       newItems[index - 1] = item;
       setStateItems((previous) => ({ ...previous, items: newItems }));
     },
-    [stateItems.items, setStateItems]
+    [stateItems.items, setStateItems],
   );
 
   const handleMoveDown = useCallback(
@@ -136,7 +136,7 @@ export default function Command() {
       newItems[index + 1] = item;
       setStateItems((previous) => ({ ...previous, items: newItems }));
     },
-    [stateItems.items, setStateItems]
+    [stateItems.items, setStateItems],
   );
 
   const copyURL = useCallback(async () => {
@@ -153,7 +153,7 @@ export default function Command() {
         title: "Are you sure?",
         message: `Delete request "${name}"`,
         dismissAction: {
-          title: "Cancel"
+          title: "Cancel",
         },
         primaryAction: {
           title: "Delete",
@@ -162,11 +162,11 @@ export default function Command() {
             const newItems = [...stateItems.items];
             newItems.splice(index, 1);
             setStateItems((previous) => ({ ...previous, items: newItems }));
-          }
-        }
+          },
+        },
       });
     },
-    [stateItems.items, setStateItems]
+    [stateItems.items, setStateItems],
   );
 
   const handleRun = useCallback(
@@ -181,7 +181,7 @@ export default function Command() {
       newItems[index] = item;
       setStateItems((previous) => ({ ...previous, items: newItems, isLoading: false }));
     },
-    [stateItems.items, setStateItems]
+    [stateItems.items, setStateItems],
   );
 
   return (
@@ -213,7 +213,9 @@ export default function Command() {
       <List.EmptyView
         title={"No stored requests"}
         icon={Icon.BlankDocument}
-        description={"Create a new request using the Cmd+N shortcut\nUse Cmd+K to explore more actions\nUse command HTTP Profiles to create a new profile"}
+        description={
+          "Create a new request using the Cmd+N shortcut\nUse Cmd+K to explore more actions\nUse command HTTP Profiles to create a new profile"
+        }
       ></List.EmptyView>
       {stateItems.items.map((item, index) => (
         <List.Item
@@ -224,11 +226,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section title="Request">
-                <Action
-                  title="Run"
-                  icon={Icon.Play}
-                  onAction={() => handleRun(item, index)}
-                />
+                <Action title="Run" icon={Icon.Play} onAction={() => handleRun(item, index)} />
                 <Action.Push
                   icon={Icon.Pencil}
                   title="Edit"

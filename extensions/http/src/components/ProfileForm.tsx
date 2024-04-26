@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { Form, Action, ActionPanel, useNavigation, Icon } from "@raycast/api";
-import {  Profile } from "../types";
+import { Profile } from "../types";
 import { FieldForm } from "./index";
-import {validateNotEmptyString} from "../validation";
+import { validateNotEmptyString } from "../validation";
 
 function ProfileForm(props: {
   profile: Profile;
@@ -15,8 +15,8 @@ function ProfileForm(props: {
 
   const [stateProfile, setStateProfile] = useState<Profile>(profile);
 
-    const [nameError, setNameError] = useState<string | undefined>();
-    const validateNameErrorFunc = validateNotEmptyString( setNameError);
+  const [nameError, setNameError] = useState<string | undefined>();
+  const validateNameErrorFunc = validateNotEmptyString(setNameError);
 
   const handleSubmit = useCallback(
     (values: { [key: string]: string }) => {
@@ -31,10 +31,8 @@ function ProfileForm(props: {
       onCreate(profile, index);
       pop();
     },
-    [onCreate, pop]
+    [onCreate, pop],
   );
-
-
 
   return (
     <Form
@@ -62,14 +60,14 @@ function ProfileForm(props: {
         </ActionPanel>
       }
     >
-        {profile.name === '' ? <Form.Description text="New Profile" /> : <Form.Description text="Edit Profile" />}
+      {profile.name === "" ? <Form.Description text="New Profile" /> : <Form.Description text="Edit Profile" />}
 
       <Form.TextField
-          id="_name_"
-          title="Name"
-          defaultValue={stateProfile.name}
-          error={nameError}
-          onChange={validateNameErrorFunc}
+        id="_name_"
+        title="Name"
+        defaultValue={stateProfile.name}
+        error={nameError}
+        onChange={validateNameErrorFunc}
       />
 
       <Form.Separator />

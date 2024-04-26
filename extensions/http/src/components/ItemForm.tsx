@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
 import { Request } from "../types";
-import {validateNotEmptyString} from "../validation";
+import { validateNotEmptyString } from "../validation";
 
 function ItemForm(props: { item: Request; index: number; onCreate: (item: Request, index: number) => void }) {
   const { item, index, onCreate } = props;
@@ -17,14 +17,14 @@ function ItemForm(props: { item: Request; index: number; onCreate: (item: Reques
       onCreate(item, index);
       pop();
     },
-    [onCreate, pop]
+    [onCreate, pop],
   );
 
   const [nameError, setNameError] = useState<string | undefined>();
-  const validateNameErrorFunc = validateNotEmptyString( setNameError);
+  const validateNameErrorFunc = validateNotEmptyString(setNameError);
 
   const [urlError, setURLError] = useState<string | undefined>();
-  const validateURLErrorFunc = validateNotEmptyString( setURLError);
+  const validateURLErrorFunc = validateNotEmptyString(setURLError);
 
   return (
     <Form
