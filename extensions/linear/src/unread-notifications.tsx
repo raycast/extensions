@@ -67,13 +67,13 @@ function UnreadNotifications() {
   return (
     <MenuBarExtra
       title={getNotificationMenuBarTitle(unreadNotifications)}
-      icon={getNotificationMenuBarIcon(unreadNotifications)}
+      icon={{ source: { dark: "dark/linear.svg", light: "light/linear.svg" } }}
       isLoading={isLoadingNotifications}
     >
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Open Inbox"
-          icon="linear.png"
+          icon="linear-app-icon.png"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={openInbox}
         />
