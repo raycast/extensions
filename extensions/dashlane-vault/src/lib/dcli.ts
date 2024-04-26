@@ -45,13 +45,7 @@ async function dcli(...args: string[]) {
 }
 
 export async function syncVault() {
-  try {
-    await dcli("sync");
-  } catch (error) {
-    await showFailureToast(error, {
-      primaryAction: getErrorAction(error),
-    });
-  }
+  await dcli("sync");
 }
 
 export async function getVaultCredentials() {
