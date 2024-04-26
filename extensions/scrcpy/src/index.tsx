@@ -24,8 +24,8 @@ export default function Command() {
       `${getScrcpyDir()}/scrcpy \
         ${values["turnScreenOff"] ? "--turn-screen-off" : ""} \
         ${values["stayAwake"] ? "--stay-awake" : ""} \
-        ${values["hidKeyboard"] ? "--hid-keyboard" : ""} \
-        ${values["hidMouse"] ? "--hid-mouse" : ""} \
+        ${values["hidKeyboard"] ? "--keyboard=uhid" : ""} \
+        ${values["hidMouse"] ? "--mouse=uhid" : ""} \
         ${values["disableAudio"] ? "--no-audio" : ""} \
         ${values["alwaysOnTop"] ? "--always-on-top" : ""} \
         -m ${values["size"]} \
