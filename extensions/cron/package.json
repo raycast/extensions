@@ -19,7 +19,7 @@
     {
       "name": "time",
       "title": "Time",
-      "description": "Cron · Time",
+      "description": "Cron · Time with two zones",
       "subtitle": "Show time",
       "mode": "view"
     }
