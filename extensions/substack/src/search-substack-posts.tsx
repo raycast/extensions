@@ -27,6 +27,7 @@ export default function SearchSubstackPosts() {
       searchBarAccessory={<LanguageDropdown onLanguageChange={setLanguage} />}
       onSearchTextChange={setQuery}
       isShowingDetail={showDetails}
+      throttle
     >
       {data?.map((post) => (
         <PostItem
