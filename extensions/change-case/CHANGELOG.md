@@ -54,7 +54,6 @@
 
 ## [Update] - 2022-12-23
 
-
 - Make use of the `getFrontmostApplication` API.
 
 ## [Update] - 2022-10-05
