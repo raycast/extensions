@@ -31,8 +31,8 @@ export function Videos(props: { files: string[] }) {
   };
 
   const clearAllHistory = () => {
-    saveHistoryToStorage(props.files);
-    setAllFiles(props.files);
+    saveHistoryToStorage([]);
+    setAllFiles([]);
   };
 
   return (
