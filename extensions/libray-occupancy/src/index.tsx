@@ -47,7 +47,7 @@ export default function Command() {
 
   return (
     <List navigationTitle="Main Library 📖">
-      <List.Section title="People in the main library now">
+      <List.Section title="People in the main library now 👥">
         <List.Item
           title={"🧑🏻‍🎓  Student"}
           accessories={[
