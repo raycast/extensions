@@ -34,6 +34,6 @@ export default async function command() {
     }
   } catch (e) {
     console.error(e);
-    await showHUD("❌ Failed Toggling Keyboard Brightness!!!");
+    await showHUD("❌ Failed Toggling Keyboard Brightness");
   }
 }
