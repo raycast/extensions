@@ -17,7 +17,7 @@ import {
   showHUD,
   showToast,
   Toast,
-  Keyboard
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { CaseFunction, CaseType, functions } from "./types.js";
