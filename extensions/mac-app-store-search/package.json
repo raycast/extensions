@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "Search App Store",
-      "subtitle": "Search for Applications on the Mac App Store",
       "description": "Search for Apps on the Mac App Store",
       "mode": "view"
     }

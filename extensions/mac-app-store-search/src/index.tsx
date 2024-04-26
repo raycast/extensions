@@ -1,11 +1,11 @@
 import { ActionPanel, Action, List } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
 import { useDebounce } from "@uidotdev/usehooks";
 
 const Command = () => {
-  const API = "https://itunes.apple.com/search?media=software&entity=software";
+  const API = "https://itunes.apple.com/search?media=software&entity=macSoftware";
   const [searchText, setSearchText] = useState("");
   const debouncedSearchTerm = useDebounce(searchText, 1000);
 
@@ -16,8 +16,6 @@ const Command = () => {
     execute: queryUrl !== "",
     parseResponse: parseFetchResponse,
   });
-
-  console.log(searchText, queryUrl);
 
   return (
     <List
@@ -43,8 +41,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in App Store" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy to Clipboard"
               content={searchResult.url}
