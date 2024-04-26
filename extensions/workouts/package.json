@@ -54,7 +54,7 @@
           "description": "The sport you want to see totals for in the menu bar",
           "type": "dropdown",
           "default": "Run",
-          "required": false,
+          "required": true,
           "data": [
             {
               "value": "Run",
@@ -76,7 +76,7 @@
           "description": "The stat you want to see in the menu bar",
           "type": "dropdown",
           "default": "recent",
-          "required": false,
+          "required": true,
           "data": [
             {
               "value": "recent",
