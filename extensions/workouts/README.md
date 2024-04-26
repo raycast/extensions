@@ -10,4 +10,4 @@ To display maps of you workouts you need a Mapbox account (generous free limits)
 
 Powered by Strava
 
-![Powered by Strava](./metadata/powered-by-strava.png)
+![Powered by Strava](./powered-by-strava.png)
