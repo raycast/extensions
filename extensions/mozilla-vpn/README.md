@@ -1,6 +1,6 @@
 # Mozilla VPN Connect
 
-*Interact with the Mozilla VPN client from Raycast without even opening the Mozilla client.*
+_Interact with the Mozilla VPN client from Raycast without even opening the Mozilla client._
 
 ### What does it do?
 
