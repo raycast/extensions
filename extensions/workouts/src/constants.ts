@@ -33,6 +33,8 @@ export const sportNames: { [key: string]: string } = {
 export const sportIcons: { [key: string]: string } = {
   Run: "run.svg",
   Ride: "ride.svg",
+  VirtualRide: "ride.svg",
+  EBikeRide: "ride-Ebike.svg",
   Swim: "swim.svg",
   Hike: "hike.svg",
   Walk: "walk.svg",
