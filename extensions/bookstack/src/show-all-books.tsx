@@ -1,6 +1,6 @@
 // src/show-all-books.tsx
 import React, { useState, useEffect } from 'react';
-import { List, ActionPanel, Action, showToast } from '@raycast/api';
+import { List, ActionPanel, Action, showToast, Toast } from '@raycast/api';
 import { getAllBooks, SearchResultItem, baseUrl } from './bookstack-api';
 import { stripHtmlTags } from './utils';
 
@@ -16,7 +16,7 @@ export default function ShowAllBooks() {
                 setIsLoading(false);
             })
             .catch((error) => {
-                showToast(Toast.Style.Failure, "Failed to fetch data", error instanceof Error ? Error.message : "An unknown error occurred").then(r => console.log(r));
+                showToast(Toast.Style.Failure, "Failed to fetch data", error instanceof Error ? error.message : "An unknown error occurred").then(r => console.log(r));
                 setIsLoading(false);
             });
     }, []);

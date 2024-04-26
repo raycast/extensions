@@ -14,11 +14,29 @@ interface SearchResult {
     data: SearchResultItem[];
 }
 
+interface Book {
+    id: number;
+    name: string;
+    slug: string;
+    title: string;
+    description: string;
+}
+
+interface Shelf {
+    id: number;
+    name: string;
+    slug: string;
+    title: string;
+    description: string;
+}
+
 export interface SearchResultItem {
     id: number;
     name: string;
+    description: string;
     url: string;
     type: string;
+    preview_html?: { content: string };
 }
 
 const preferences: Preferences = getPreferenceValues<Preferences>();
@@ -42,7 +60,7 @@ export async function searchBookStack(query: string): Promise<SearchResultItem[]
 export async function getAllBooks(): Promise<SearchResultItem[]> {
     const response = await apiClient.get('/api/books');
     if (response.data && Array.isArray(response.data.data)) {
-        return response.data.data.map((book) => ({
+        return response.data.data.map((book: Book) => ({
             id: book.id,
             name: book.name,
             description: book.description,
@@ -55,7 +73,7 @@ export async function getAllBooks(): Promise<SearchResultItem[]> {
 export async function getAllShelves(): Promise<SearchResultItem[]> {
     const response = await apiClient.get('/api/shelves');
     if (response.data && Array.isArray(response.data.data)) {
-        return response.data.data.map((shelf) => ({
+        return response.data.data.map((shelf: Shelf) => ({
             id: shelf.id,
             name: shelf.name,
             description: shelf.description,
