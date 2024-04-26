@@ -1,5 +1,9 @@
 # Zoom Meeting Control Changelog
 
+## [Extension Improvement] - 2024-04-26
+
+- Fix compatibility with latest Zoom 6.0 update.
+
 ## [Extension Improvement] - 2024-01-14
 
 - Improve handling of accessibility permissions errors.
