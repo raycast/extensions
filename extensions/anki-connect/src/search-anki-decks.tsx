@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, List, closeMainWindow } from "@raycast/api";
-import fetch from "node-fetch";
+import fetch, { FetchError } from "node-fetch";
 import { runAppleScript } from "run-applescript";
 import { useCallback, useEffect, useState } from "react";
 
@@ -13,8 +13,8 @@ export default function Command() {
         setDecks(await invokeAnkiConnectAction("deckNames", 6));
       } catch (error) {
         console.error(error);
-        // @ts-ignore
-        if (error.code === "ECONNREFUSED") {
+
+        if (error instanceof Error && isFetchError(error) && error.code === "ECONNREFUSED") {
           setShowAnkiUnavailableMessage(true);
         }
       }
@@ -128,4 +128,12 @@ async function openAnki() {
       end repeat
     end tell
   `);
+}
+
+function isFetchError(error: Error): error is FetchError {
+  if (error.name === "FetchError") {
+    return true;
+  }
+
+  return false;
 }
