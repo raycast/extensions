@@ -4,7 +4,6 @@
 
 - Updated dependencies
 - Changed url to v3 of the api
-  - Fixes reported issue #12030
 
 ## [1.1] - 2023-01-10
 
