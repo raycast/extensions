@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { captureException, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execa, execaCommand } from "execa";
 import { existsSync } from "fs";
@@ -45,7 +45,12 @@ async function dcli(...args: string[]) {
 }
 
 export async function syncVault() {
-  await dcli("sync");
+  try {
+    await dcli("sync");
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
 }
 
 export async function getVaultCredentials() {
@@ -53,6 +58,7 @@ export async function getVaultCredentials() {
     const stdout = await dcli("password", "--output", "json");
     return parseVaultCredentials(stdout);
   } catch (error) {
+    captureException(error);
     await showFailureToast(error, {
       primaryAction: getErrorAction(error),
     });
@@ -64,6 +70,7 @@ export async function getNotes() {
     const stdout = await dcli("note", "--output", "json");
     return parseNotes(stdout);
   } catch (error) {
+    captureException(error);
     await showFailureToast(error, {
       primaryAction: getErrorAction(error),
     });
@@ -71,17 +78,27 @@ export async function getNotes() {
 }
 
 export async function getPassword(id: string) {
-  const stdout = await dcli("read", `dl://${extractId(id)}/password`);
-  return stdout.trim();
+  try {
+    const stdout = await dcli("read", `dl://${extractId(id)}/password`);
+    return stdout.trim();
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
 }
 
 export async function getOtpSecret(id: string) {
-  const result = await dcli("read", `dl://${extractId(id)}/otpSecret?otp+expiry`);
-  const [otp, expireIn] = result.split(" ").map((item) => item.trim());
-  return {
-    otp,
-    expireIn,
-  };
+  try {
+    const result = await dcli("read", `dl://${extractId(id)}/otpSecret?otp+expiry`);
+    const [otp, expireIn] = result.split(" ").map((item) => item.trim());
+    return {
+      otp,
+      expireIn,
+    };
+  } catch (error) {
+    captureException(error);
+    throw error;
+  }
 }
 
 function parseVaultCredentials(jsonString: string): VaultCredential[] {

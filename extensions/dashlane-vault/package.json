@@ -5,9 +5,7 @@
   "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
   "icon": "dashlane-512.png",
   "author": "tm.wrnr",
-  "categories": [
-    "Security"
-  ],
+  "categories": ["Security"],
   "license": "MIT",
   "commands": [
     {
@@ -59,8 +57,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.2",
-    "@raycast/utils": "^1.13.4",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.0",
     "execa": "^8.0.1",
     "valibot": "~0.28.1"
   },
