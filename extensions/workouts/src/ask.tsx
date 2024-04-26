@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { getPreferenceValues } from "@raycast/api";
 
 function Ask(props: { arguments: Arguments.Ask }) {
-  const { data: activities, error } = useCachedPromise(() => getActivities(1, 100));
+  const { data: activities, error } = useCachedPromise(async () => await getActivities(1, 100));
 
   useEffect(() => {
     if (error) {
@@ -16,10 +16,6 @@ function Ask(props: { arguments: Arguments.Ask }) {
       });
     }
   }, [error]);
-
-  if (!activities) {
-    return <Detail isLoading={true} markdown="Loading your activities..." />;
-  }
 
   const cleanedActivities =
     activities?.map((activity) => {
@@ -39,8 +35,8 @@ function Ask(props: { arguments: Arguments.Ask }) {
     - When talking about running speed respond with pace in ${preferences.distance_unit === "km" ? "min/km" : "min/mile"}
     `,
     {
-      execute: activities && activities.length > 0,
-      model: "anthropic-claude-sonnet",
+      execute: cleanedActivities && cleanedActivities.length > 0,
+      model: "anthropic-claude-haiku",
     },
   );
 
