@@ -36,26 +36,16 @@ export default function Command() {
   const parseTimeInput = (input: string) => {
     const totalSeconds = parseTimeToSeconds(input);
 
-    if (totalSeconds < 900) {
-      showToast(Toast.Style.Failure, "Please enter a minimum of 15 minutes.");
-      return false;
-    }
-
     setTotalTimeWorked(totalSeconds);
     if (totalSeconds > 0) {
       return true;
     } else {
-      showToast(Toast.Style.Failure, "Please enter a valid time.");
+      showToast(Toast.Style.Failure, "Please enter a valid time (Greater than 0.)");
     }
     return false;
   };
 
   async function handleSubmit() {
-    if (totalTimeWorked < 900) {
-      // 900 seconds = 15 minutes
-      showToast(Toast.Style.Failure, "Error logging time: Minimum log time is 15 minutes.");
-      return;
-    }
 
     if (totalTimeWorked <= 0) {
       showToast(Toast.Style.Failure, "Error logging time: no time entered.");
@@ -134,6 +124,8 @@ export default function Command() {
             pageTotal.current = result.total;
             pageGot.current += result.data.length;
             showToast(Toast.Style.Success, "Issues loaded");
+          } else {
+            showToast(Toast.Style.Failure, "No issues found for selected project.");
           }
         } catch (e) {
           showToast(Toast.Style.Failure, "Failed to load issues", e instanceof Error ? e.message : String(e));
