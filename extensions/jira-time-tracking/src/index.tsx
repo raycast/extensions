@@ -46,7 +46,6 @@ export default function Command() {
   };
 
   async function handleSubmit() {
-
     if (totalTimeWorked <= 0) {
       showToast(Toast.Style.Failure, "Error logging time: no time entered.");
       return;
@@ -76,30 +75,30 @@ export default function Command() {
 
   useEffect(() => {
     let isMounted = true; // Flag to manage async operations on unmounted component
-    
+
     const fetchProjects = async () => {
       if (pageGot.current >= pageTotal.current) {
         setLoading(false);
         showToast(Toast.Style.Success, "All projects loaded");
         return; // Stop if no more data is there to fetch
       }
-  
+
       setLoading(true);
       try {
         const result = await getProjects(pageGot.current);
         if (result.data.length > 0 && isMounted) {
-          setProjects(prevProjects => [...prevProjects, ...result.data]);
-  
+          setProjects((prevProjects) => [...prevProjects, ...result.data]);
+
           pageGot.current += result.data.length;
           if (isJiraCloud) {
             pageTotal.current = result.total;
           } else {
             pageTotal.current = Math.max(pageTotal.current, pageGot.current + 100);
           }
-  
+
           showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
         }
-  
+
         if (pageGot.current < pageTotal.current) {
           setTimeout(fetchProjects, 100);
         } else {
@@ -112,36 +111,38 @@ export default function Command() {
         }
       }
     };
-  
+
     fetchProjects();
-  
+
     return () => {
       isMounted = false;
     };
   }, [projects.length, pageGot.current]);
-  
+
   useEffect(() => {
     let isMounted = true; // Ensure operation only proceeds if the component is still mounted
-    
+
     const fetchIssues = async () => {
       if (!selectedProject || pageGot.current >= pageTotal.current) {
         setLoading(false);
         return; // Stop if no selected project or all data fetched
       }
-  
+
       setLoading(true);
       try {
         const result = await getIssues(pageGot.current, selectedProject);
         if (result.data.length > 0 && isMounted) {
-          setIssueCache(prev => new Map(prev).set(selectedProject, [...(prev.get(selectedProject) ?? []), ...result.data]));
-          setIssues(prevIssues => [...prevIssues, ...result.data]);
-  
+          setIssueCache((prev) =>
+            new Map(prev).set(selectedProject, [...(prev.get(selectedProject) ?? []), ...result.data]),
+          );
+          setIssues((prevIssues) => [...prevIssues, ...result.data]);
+
           pageTotal.current = result.total;
           pageGot.current += result.data.length;
-  
+
           showToast(Toast.Style.Success, "Issues loaded");
         }
-  
+
         if (pageGot.current < pageTotal.current) {
           setTimeout(fetchIssues, 100); // Manage calls with timeout
         } else {
@@ -154,14 +155,13 @@ export default function Command() {
         }
       }
     };
-  
+
     fetchIssues();
-  
+
     return () => {
       isMounted = false;
     };
-  }, [selectedProject, issues.length, pageGot.current]);  
-
+  }, [selectedProject, issues.length, pageGot.current]);
 
   const resetIssue = (resetLength: boolean) => {
     const list = issueCache.get(selectedProject) ?? [];
