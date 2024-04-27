@@ -1,4 +1,4 @@
-import { Detail, Icon, Image, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
+import { Detail, LaunchProps, popToRoot, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import names from "./names.json";
 import Fuse from "fuse.js";
