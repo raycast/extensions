@@ -74,68 +74,94 @@ export default function Command() {
     setIsJiraCloud(userPrefs.isJiraCloud === "cloud");
   }, [userPrefs.isJiraCloud]);
 
-  // fetch projects on mount
   useEffect(() => {
+    let isMounted = true; // Flag to manage async operations on unmounted component
+    
     const fetchProjects = async () => {
+      if (pageGot.current >= pageTotal.current) {
+        setLoading(false);
+        showToast(Toast.Style.Success, "All projects loaded");
+        return; // Stop if no more data is there to fetch
+      }
+  
       setLoading(true);
       try {
         const result = await getProjects(pageGot.current);
-        if (result.data.length > 0) {
-          setProjects((prevProjects) => [...prevProjects, ...result.data]);
-
+        if (result.data.length > 0 && isMounted) {
+          setProjects(prevProjects => [...prevProjects, ...result.data]);
+  
+          pageGot.current += result.data.length;
           if (isJiraCloud) {
-            // Use state to check if it is Jira Cloud
-            pageGot.current += result.data.length;
             pageTotal.current = result.total;
           } else {
-            pageGot.current = result.data.length; // Assume all projects loaded
-            pageTotal.current = result.data.length;
+            pageTotal.current = Math.max(pageTotal.current, pageGot.current + 100);
           }
-
-          showToast(
-            isJiraCloud ? Toast.Style.Animated : Toast.Style.Success,
-            `Loading projects ${pageGot.current}/${pageTotal.current}`,
-          );
+  
+          showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
         }
-      } catch (e) {
-        showToast(Toast.Style.Failure, "Failed to load projects", e instanceof Error ? e.message : String(e));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (projects.length === 0 || pageGot.current < pageTotal.current) {
-      fetchProjects();
-    }
-  }, [isJiraCloud]);
-
-  // fetch issues after project is selected
-  useEffect(() => {
-    if (selectedProject) {
-      const fetchIssues = async () => {
-        setLoading(true);
-        try {
-          const result = await getIssues(pageGot.current, selectedProject);
-          if (result.data.length > 0) {
-            setIssueCache((prev) =>
-              new Map(prev).set(selectedProject, [...(prev.get(selectedProject) ?? []), ...result.data]),
-            );
-            setIssues(result.data);
-            pageTotal.current = result.total;
-            pageGot.current += result.data.length;
-            showToast(Toast.Style.Success, "Issues loaded");
-          } else {
-            showToast(Toast.Style.Failure, "No issues found for selected project.");
-          }
-        } catch (e) {
-          showToast(Toast.Style.Failure, "Failed to load issues", e instanceof Error ? e.message : String(e));
-        } finally {
+  
+        if (pageGot.current < pageTotal.current) {
+          setTimeout(fetchProjects, 100);
+        } else {
           setLoading(false);
         }
-      };
-      fetchIssues();
-    }
-  }, [selectedProject]); // Re-run the effect if selectedProject changes
+      } catch (e) {
+        if (isMounted) {
+          showToast(Toast.Style.Failure, "Failed to load projects", e instanceof Error ? e.message : String(e));
+          setLoading(false);
+        }
+      }
+    };
+  
+    fetchProjects();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [projects.length, pageGot.current]);
+  
+  useEffect(() => {
+    let isMounted = true; // Ensure operation only proceeds if the component is still mounted
+    
+    const fetchIssues = async () => {
+      if (!selectedProject || pageGot.current >= pageTotal.current) {
+        setLoading(false);
+        return; // Stop if no selected project or all data fetched
+      }
+  
+      setLoading(true);
+      try {
+        const result = await getIssues(pageGot.current, selectedProject);
+        if (result.data.length > 0 && isMounted) {
+          setIssueCache(prev => new Map(prev).set(selectedProject, [...(prev.get(selectedProject) ?? []), ...result.data]));
+          setIssues(prevIssues => [...prevIssues, ...result.data]);
+  
+          pageTotal.current = result.total;
+          pageGot.current += result.data.length;
+  
+          showToast(Toast.Style.Success, "Issues loaded");
+        }
+  
+        if (pageGot.current < pageTotal.current) {
+          setTimeout(fetchIssues, 100); // Manage calls with timeout
+        } else {
+          setLoading(false);
+        }
+      } catch (e) {
+        if (isMounted) {
+          showToast(Toast.Style.Failure, "Failed to load issues", e instanceof Error ? e.message : String(e));
+          setLoading(false);
+        }
+      }
+    };
+  
+    fetchIssues();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedProject, issues.length, pageGot.current]);  
+
 
   const resetIssue = (resetLength: boolean) => {
     const list = issueCache.get(selectedProject) ?? [];
