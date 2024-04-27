@@ -169,7 +169,7 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
 
 function ClubActivities({ activities }: { activities: StravaClubActivity[] }) {
   return (
-    <List searchBarPlaceholder={SEARCHBAR_PLACEHOLDER}>
+    <List searchBarPlaceholder="Search activities">
       {activities.map((activity) => (
         <List.Item
           key={activity.name}
