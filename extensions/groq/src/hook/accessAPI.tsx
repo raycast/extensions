@@ -17,7 +17,7 @@ export default function ResultView(props: ResultViewProps) {
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
   async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
-    sysPrompt = `Current date: ${currentDate}.\n\n${sysPrompt}`;
+    sysPrompt = `Current date: ${currentDate}.\n\n ${sysPrompt}`;
     const userPrompt = `${user_extra_msg ? `${user_extra_msg}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText}"` : ""}`;
     try {
       const streamOrCompletion = await openai.chat.completions.create({
@@ -107,7 +107,8 @@ export default function ResultView(props: ResultViewProps) {
 
   return (
     <Detail
-      markdown={(user_extra_msg ? `\`\`\`\n${user_extra_msg}\n\`\`\`\n\n` : "") + response}
+      // markdown={(user_extra_msg ? `\`\`\`\n${user_extra_msg}\n\`\`\`\n\n` : "") + response}
+      markdown={(user_extra_msg ? `>${user_extra_msg}\n\n` : "") + response}
       isLoading={loading}
       actions={
         !loading && (
