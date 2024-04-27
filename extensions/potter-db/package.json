@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "potter-db",
+  "title": "Potter DB",
+  "description": "Dive into the magical world of Harry Potter via Potter DB.",
+  "icon": "command-icon.png",
+  "author": "xmok",
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "books",
+      "title": "Books",
+      "description": "Retrieve a list of books",
+      "mode": "view"
+    },
+    {
+      "name": "characters",
+      "title": "Characters",
+      "description": "Retrieve a list of characters",
+      "mode": "view"
+    },
+    {
+      "name": "movies",
+      "title": "Movies",
+      "description": "Retrieve a list of movies",
+      "mode": "view"
+    },
+    {
+      "name": "potions",
+      "title": "Potions",
+      "description": "Retrieve a list of potions",
+      "mode": "view"
+    },
+    {
+      "name": "spells",
+      "title": "Spells",
+      "description": "Retrieve a list of spells",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
