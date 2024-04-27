@@ -1,39 +1,49 @@
+import { showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export default async function () {
-  await runAppleScript(
-    `on run
-      try
-        main()
-      on error msg number errno
-        if errno is not -128 then
-          activate
-          display alert msg message "Error Number : " & errno
-        end if
-      end try
-    end run
+  const res = await runAppleScript(
+    `tell application "System Events"
+      set appName to name of the first process whose frontmost is true
+      set visible of process appName to false
 
-    on main()
-      tell application "Finder"
-        activate
+      set appName to name of the first process whose frontmost is true
+    end tell
+
+    tell application "Finder"
+      activate
+
+      -- if no active Finder window open one
+
+      if (count windows) is 0 then make new Finder window
         tell window 1
+          -- if view is icon view set as variable and change the current view to list view
+
           set oldView to current view
           if oldView is icon view then set current view to list view
         end tell
-      end tell
+    end tell
 
-      tell application "System Events" to tell application process "Finder"
-        set theSelection to value of attribute "AXFocusedUIElement"
-        tell theSelection to perform action "AXShowMenu"
-      end tell
+    tell application "System Events" to tell application process "Finder"
+      set theSelection to value of attribute "AXFocusedUIElement"
+      -- open menu
 
-      tell application "Finder"
-        activate
-        tell window 1
-          if oldView is icon view then set current view to icon view
-        end tell
+      tell theSelection to perform action "AXShowMenu"
+    end tell
+
+    tell application "Finder"
+      activate
+      tell window 1
+        -- if view was previously icon view change the current view back to it
+
+        if oldView is icon view then set current view to icon view
       end tell
-    end main`,
+    end tell`,
     ["world"],
+    {
+      humanReadableOutput: true,
+      language: "AppleScript",
+    },
   );
+  await showHUD(res);
 }
