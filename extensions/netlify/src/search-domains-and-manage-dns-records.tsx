@@ -18,6 +18,7 @@ import api from './utils/api';
 import { formatDate, getDomainUrl, handleNetworkError } from './utils/helpers';
 import { useTeams } from './utils/hooks';
 import { DomainSearch } from './utils/interfaces';
+import ManageDNSRecords from './components/manage-dns-records';
 
 export default function Command() {
   const [query, setQuery] = useState<string>('');
@@ -132,6 +133,11 @@ export default function Command() {
                 <OpenOnNetlify
                   url={getDomainUrl(domain.account_slug, domain.name)}
                 />
+                <Action.Push
+                  title="Manage DNS Records"
+                  icon={Icon.Text}
+                  target={<ManageDNSRecords domain={domain} />}
+                />
               </ActionPanel>
             }
           />
@@ -148,8 +154,8 @@ export default function Command() {
                 domain.available
                   ? 'Available'
                   : domain.owned_by_account
-                  ? 'Registered by Team'
-                  : 'Not Available'
+                    ? 'Registered by Team'
+                    : 'Not Available'
               }
               accessories={
                 [
