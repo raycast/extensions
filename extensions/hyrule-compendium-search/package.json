@@ -13,7 +13,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "getEntry",
       "title": "Get Entry",
       "subtitle": "Hyrule Compendium Search",
       "icon": "command-icon.png",
