@@ -63,7 +63,11 @@ export default function Command() {
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Link title="Website" target={item.url} text={item.url} />
+                    <List.Item.Detail.Metadata.Link
+                      title="Website"
+                      target={item.url}
+                      text={item.url.replace(/^(https?:\/\/)?(www\.)?/, "")}
+                    />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Affiliates" text={item.affiliates.toString()} />
                     <List.Item.Detail.Metadata.Label title="Visitors" text={item.visitors.toString()} />

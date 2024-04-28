@@ -76,6 +76,7 @@ export type Affiliate = {
   first_name: string;
   last_name: string;
   email: string;
+  state: string;
   paypal_email: string;
   confirmed_at: string;
   paypal_email_confirmed_at: string;

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
 import { useFetch, useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 
@@ -12,10 +12,14 @@ import {
   PaginationResult,
   Preferences,
 } from "./types";
+import { useState } from "react";
+import { formatShortDate } from "./scripts";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const encodedApiKey = btoa(`${preferences.apiKey}:`);
+
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const { isLoading, data, pagination, revalidate } = useFetch(
     (options) => `${baseUrl}/affiliates?expand=campaign&` + new URLSearchParams({ page: String(options.page + 1) }),
@@ -38,7 +42,7 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={isLoading} pagination={pagination}>
+    <List isLoading={isLoading} pagination={pagination} isShowingDetail={isShowingDetail}>
       {data && data.length > 0 ? (
         <>
           {Object.entries(
@@ -51,30 +55,75 @@ export default function Command() {
                 <List.Item
                   key={item.id}
                   title={`${item.first_name} ${item.last_name}`}
-                  subtitle={`Visitors: ${item.visitors.toLocaleString(currentLocale)}, Leads: ${item.leads.toLocaleString(currentLocale)}, Conversions: ${item.conversions.toLocaleString(currentLocale)}`}
+                  icon={
+                    item.state === "active"
+                      ? { source: Icon.Checkmark, tintColor: Color.Green }
+                      : { source: Icon.Xmark }
+                  }
+                  subtitle={
+                    !isShowingDetail
+                      ? `Visitors: ${item.visitors.toLocaleString(currentLocale)}, Leads: ${item.leads.toLocaleString(currentLocale)}, Conversions: ${item.conversions.toLocaleString(currentLocale)}`
+                      : ""
+                  }
                   actions={
                     <ActionPanel>
-                      <Action.OpenInBrowser
-                        title="View In Rewardful"
-                        shortcut={{ modifiers: ["cmd"], key: "o" }}
-                        url={`${siteUrl}/affiliates/${item.id}`}
-                      />
-                      <Action.Push
-                        title="Create Affiliate"
-                        icon={{ source: Icon.Plus }}
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
-                        target={
-                          <CreateAffiliate affiliate={item} encodedApiKey={encodedApiKey} revalidate={revalidate} />
-                        }
-                      />
-                      <Action.Push
-                        title="Update Affiliate"
-                        icon={{ source: Icon.Pencil }}
-                        shortcut={{ modifiers: ["cmd"], key: "u" }}
-                        target={
-                          <UpdateAffiliate affiliate={item} encodedApiKey={encodedApiKey} revalidate={revalidate} />
-                        }
-                      />
+                      <ActionPanel.Section title="View">
+                        {!isShowingDetail && (
+                          <Action
+                            title="Show Detail"
+                            icon={{ source: Icon.Info }}
+                            onAction={() => setIsShowingDetail(true)}
+                          />
+                        )}
+                        {isShowingDetail && (
+                          <Action
+                            title="Hide Detail"
+                            icon={{ source: Icon.Info }}
+                            onAction={() => setIsShowingDetail(false)}
+                          />
+                        )}
+                        <Action.OpenInBrowser
+                          title="View In Rewardful"
+                          shortcut={{ modifiers: ["cmd"], key: "o" }}
+                          url={`${siteUrl}/affiliates/${item.id}`}
+                        />
+                      </ActionPanel.Section>
+                      {item.paypal_email || item.wise_email ? (
+                        <ActionPanel.Section title="Payout">
+                          {item.paypal_email && (
+                            <Action.CopyToClipboard
+                              title="Copy PayPal Email"
+                              shortcut={{ modifiers: ["cmd"], key: "c" }}
+                              content={item.paypal_email}
+                            />
+                          )}
+                          {item.wise_email && (
+                            <Action.CopyToClipboard
+                              title="Copy Wise Email"
+                              shortcut={{ modifiers: ["cmd"], key: "w" }}
+                              content={item.wise_email}
+                            />
+                          )}
+                        </ActionPanel.Section>
+                      ) : null}
+                      <ActionPanel.Section title="Actions">
+                        <Action.Push
+                          title="Create Affiliate"
+                          icon={{ source: Icon.Plus }}
+                          shortcut={{ modifiers: ["cmd"], key: "n" }}
+                          target={
+                            <CreateAffiliate affiliate={item} encodedApiKey={encodedApiKey} revalidate={revalidate} />
+                          }
+                        />
+                        <Action.Push
+                          title="Update Affiliate"
+                          icon={{ source: Icon.Pencil }}
+                          shortcut={{ modifiers: ["cmd"], key: "u" }}
+                          target={
+                            <UpdateAffiliate affiliate={item} encodedApiKey={encodedApiKey} revalidate={revalidate} />
+                          }
+                        />
+                      </ActionPanel.Section>
                       <Action
                         title="Refresh"
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -82,6 +131,26 @@ export default function Command() {
                       />
                     </ActionPanel>
                   }
+                  {...(isShowingDetail && {
+                    detail: (
+                      <List.Item.Detail
+                        metadata={
+                          <List.Item.Detail.Metadata>
+                            <List.Item.Detail.Metadata.Label title="Visitors" text={item.visitors.toString()} />
+                            <List.Item.Detail.Metadata.Label title="Leads" text={item.leads.toString()} />
+                            <List.Item.Detail.Metadata.Label title="Conversions" text={item.conversions.toString()} />
+                            <List.Item.Detail.Metadata.Separator />
+                            <List.Item.Detail.Metadata.Label title="Email" text={item.email} />
+                            <List.Item.Detail.Metadata.Label title="PayPal Email" text={item.paypal_email || ""} />
+                            <List.Item.Detail.Metadata.Label title="Wise Email" text={item.wise_email || ""} />
+                            <List.Item.Detail.Metadata.Separator />
+                            <List.Item.Detail.Metadata.Label title="Created" text={formatShortDate(item.created_at)} />
+                            <List.Item.Detail.Metadata.Label title="Updated" text={formatShortDate(item.updated_at)} />
+                          </List.Item.Detail.Metadata>
+                        }
+                      />
+                    ),
+                  })}
                 />,
               );
               return sections;

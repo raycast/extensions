@@ -40,7 +40,7 @@ export default function Command() {
                 ? { source: Icon.Person, tintColor: Color.Blue }
                 : item.conversion_state === "lead"
                   ? { source: Icon.Clock, tintColor: Color.Yellow }
-                  : { source: Icon.Check, tintColor: Color.Green }
+                  : { source: Icon.Checkmark, tintColor: Color.Green }
             }
             title={`${item.affiliate.campaign.name} - ${item.affiliate.first_name} ${item.affiliate.last_name}`}
             subtitle={`Visits: ${item.visits}, Created: ${formatRelativeDate(item.created_at)}, Updated: ${formatRelativeDate(item.updated_at)}${item.deactivated_at ? `, Converted at: ${formatRelativeDate(item.became_conversion_at)}` : ""}`}
