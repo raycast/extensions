@@ -70,14 +70,14 @@ export default function Command() {
                       <ActionPanel.Section title="View">
                         {!isShowingDetail && (
                           <Action
-                            title="Show Detail"
+                            title="Show Details"
                             icon={{ source: Icon.Info }}
                             onAction={() => setIsShowingDetail(true)}
                           />
                         )}
                         {isShowingDetail && (
                           <Action
-                            title="Hide Detail"
+                            title="Hide Details"
                             icon={{ source: Icon.Info }}
                             onAction={() => setIsShowingDetail(false)}
                           />
