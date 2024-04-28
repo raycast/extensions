@@ -10,15 +10,25 @@ export default function Command() {
   const shared_secret = preferences.bttSharedSecret;
   const sharedSecretString = shared_secret ? `{ shared_secret: "${shared_secret}"}` : "";
   const namedTriggerId = 643;
+  const applicationName = "BetterTouchTool";
   const getTriggersJXA = `function run(argv) {
-    let BetterTouchTool = Application('BetterTouchTool');
-    return BetterTouchTool.get_triggers(${
-      namedTriggerId
-        ? `{trigger_id: ${namedTriggerId}${shared_secret ? ", ..." + sharedSecretString : ""} }`
-        : sharedSecretString
-    });
+    let btt = Application('${applicationName}');
+    if (!Application('${applicationName}').running()) {
+      return "error: ${applicationName} is not running. Please launch BTT to use this extension!";
+    }
+    try {
+      return btt.get_triggers(${
+        namedTriggerId
+          ? `{trigger_id: ${namedTriggerId}${shared_secret ? ", ..." + sharedSecretString : ""} }`
+          : sharedSecretString
+      });
+    } catch (e) {
+      return "error: Could not run JXA script. Is BTT running?";
+    }
+
   } run();`;
-  const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA]);
+
+  const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA], { onError: console.error }  );
 
   const checkError = (data: string) => {
     if (!data || data === "null" || data.includes("error:")) {
@@ -26,9 +36,10 @@ export default function Command() {
         data === "null"
           ? "No data returned from BTT. Have you configured a shared secret?"
           : data.replace("error:", "").trim() || "Unknown error";
+      const [part1, part2] = errorMessage.split(". ");
       showToast({
-        title: "Error:",
-        message: errorMessage,
+        title: part1 || "Error",
+        message: (part1 && part2) || "",
         style: Toast.Style.Failure,
       });
       return true;
@@ -37,17 +48,22 @@ export default function Command() {
   };
 
   useEffect(() => {
-    if (data && !checkError(data || "")) {
-      const jsonData = JSON.parse(data);
+    if (!isLoading && data && !checkError(data || "")) {
+      try {
+        const jsonData = JSON.parse(data);
 
-      const filteredTriggers = jsonData.filter(
-        (trigger: BTTTrigger) =>
-          !!trigger.BTTTriggerName && (showDisabledTriggers || (trigger.BTTEnabled === 1 && trigger.BTTEnabled2 === 1))
-      );
+        const filteredTriggers = jsonData.filter(
+          (trigger: BTTTrigger) =>
+            !!trigger.BTTTriggerName &&
+            (showDisabledTriggers || (trigger.BTTEnabled === 1 && trigger.BTTEnabled2 === 1))
+        );
 
-      setCommands(filteredTriggers);
+        setCommands(filteredTriggers);
+      } catch (error) {
+        checkError("error: Failed to parse triggers. Have you created a named trigger?");
+      }
     }
-  }, [data, showDisabledTriggers]);
+  }, [isLoading, data, showDisabledTriggers]);
 
   const TriggerDropdown = ({ onTriggerTypeChange }: { onTriggerTypeChange: (value: string) => void }) => {
     return (
@@ -86,7 +102,7 @@ export default function Command() {
 }
 
 function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
-  const { BTTTriggerName: triggerName } = triggerResult;
+  const triggerName = triggerResult.BTTTriggerName || triggerResult.BTTPredefinedActionName;
   const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}`;
   const handleTrigger = async () => {
     await open(url);
@@ -106,13 +122,18 @@ function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
     });
   };
 
+  const accessories = []
+  if (triggerResult.BTTGestureNotes && triggerResult.BTTGestureNotes !== "Named Trigger: " + triggerName) {
+
+  }
   return (
     <List.Item
-      title={triggerName || triggerResult.BTTPredefinedActionName}
+      title={triggerName}
       accessories={[
-        ...(triggerResult.BTTGestureNotes
+        ...(
           ? [{ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes }]
           : []),
+
         {
           text: triggerResult.BTTPredefinedActionName,
           icon: Icon.ArrowRight,
