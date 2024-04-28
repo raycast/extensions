@@ -114,13 +114,15 @@ export const useSettings = (): Partial<Settings> => {
   const [settings, setSettings] = useState(getSettings());
 
   useEffect(() => {
-    const watcher = fs.watch(settingsJson, () => {
-      setSettings(getSettings());
-    });
+    if (fs.existsSync(settingsJson)) {
+      const watcher = fs.watch(settingsJson, () => {
+        setSettings(getSettings());
+      });
 
-    return () => {
-      watcher.close();
-    };
+      return () => {
+        watcher.close();
+      };
+    }
   }, []);
 
   return settings;
