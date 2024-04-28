@@ -1,7 +1,17 @@
-import { ActionPanel, Action, List, open, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  open,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  Keyboard,
+  closeMainWindow,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
-import { useExec } from "@raycast/utils";
-import { exec } from "child_process";
+import { runAppleScript, useExec } from "@raycast/utils";
 
 export default function Command() {
   const [commands, setCommands] = useState<BTTTrigger[]>([]);
@@ -28,7 +38,9 @@ export default function Command() {
 
   } run();`;
 
-  const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA], { onError: console.error }  );
+  const { isLoading, data, revalidate } = useExec("osascript", ["-l", "JavaScript", "-e", getTriggersJXA], {
+    onError: console.error,
+  });
 
   const checkError = (data: string) => {
     if (!data || data === "null" || data.includes("error:")) {
@@ -101,46 +113,45 @@ export default function Command() {
   );
 }
 
-function runShellCommand(osaCommand: string) {
-  return new Promise((resolve, reject) => {
-    exec(osaCommand, (error) => {
-      if (error) {
-        reject(error);
-      }
-      resolve("success");
-    });
-  })
-}
 function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
+  const preferences: Preferences.Trigger = getPreferenceValues();
+  const shared_secret = preferences.bttSharedSecret;
+  const sharedSecretString = shared_secret ? `shared_secret "${shared_secret}"` : "";
+
   const triggerName = triggerResult.BTTTriggerName || triggerResult.BTTPredefinedActionName;
-  const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}`;
+  const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}${
+    shared_secret ? "&shared_secret=" + shared_secret : ""
+  }`;
   const handleTrigger = async () => {
     await open(url);
   };
 
-  const handleRun = async () => {
-    const osaCommand = `tell application "BetterTouchTool" to trigger_named "${triggerName}"`;
+  const handleRun = async (closeWindow = false) => {
+    if (closeWindow) {
+      await closeMainWindow();
+    }
+    const osaCommand = `tell application "BetterTouchTool" to trigger_named "${triggerName}" ${sharedSecretString}`;
     try {
-      await runShellCommand(`osascript -e '${osaCommand}'`);
+      await runAppleScript(osaCommand);
     } catch (error) {
       showToast({
         title: "Failed to run trigger",
-        message: error && String(error) !== 'null' ? String(error) : "",
+        message: error && String(error) !== "null" ? String(error) : "",
         style: Toast.Style.Failure,
       });
     }
   };
 
-  const accessories = []
+  const accessories = [];
   if (triggerResult.BTTGestureNotes && triggerResult.BTTGestureNotes !== "Named Trigger: " + triggerName) {
-    accessories.push({ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes })
+    accessories.push({ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes });
   }
   if (triggerResult.BTTPredefinedActionName) {
     accessories.push({
       text: triggerResult.BTTPredefinedActionName,
       icon: Icon.ArrowRight,
       tooltip: triggerResult.BTTGenericActionConfig || triggerResult.BTTPredefinedActionName,
-    })
+    });
   }
 
   return (
@@ -150,12 +161,20 @@ function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.Play} />
-            <Action title="Run Trigger with BTT via URL" onAction={handleTrigger} icon={Icon.Link} />
+            <Action title="Run Trigger with BTT" onAction={handleRun} icon={Icon.PlayFilled} />
+            <Action title="Run Trigger in Background" onAction={() => handleRun(true)} icon={Icon.Play} />
+            <Action
+              title="Run Trigger with BTT via URL"
+              onAction={handleTrigger}
+              icon={Icon.Link}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Trigger URL"
               content={url}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               onCopy={() => console.log(triggerResult)}
             />
           </ActionPanel.Section>
