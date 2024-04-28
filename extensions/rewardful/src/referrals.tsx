@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@ra
 import { useFetch } from "@raycast/utils";
 
 import { baseUrl } from "./utils";
-import { formatDate } from "./scripts";
+import { formatRelativeDate } from "./scripts";
 import { ReferralApiResponse, Referral, PaginationResult, Preferences } from "./types";
 
 export default function Command() {
@@ -43,7 +43,7 @@ export default function Command() {
                   : { source: Icon.Check, tintColor: Color.Green }
             }
             title={`${item.affiliate.campaign.name} - ${item.affiliate.first_name} ${item.affiliate.last_name}`}
-            subtitle={`Visits: ${item.visits}, Created: ${formatDate(item.created_at)}, Updated: ${formatDate(item.updated_at)}${item.deactivated_at ? `, Converted at: ${formatDate(item.became_conversion_at)}` : ""}`}
+            subtitle={`Visits: ${item.visits}, Created: ${formatRelativeDate(item.created_at)}, Updated: ${formatRelativeDate(item.updated_at)}${item.deactivated_at ? `, Converted at: ${formatRelativeDate(item.became_conversion_at)}` : ""}`}
             actions={
               <ActionPanel>
                 <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => revalidate()} />

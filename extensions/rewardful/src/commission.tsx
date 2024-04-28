@@ -3,7 +3,7 @@ import { showFailureToast, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 
 import { baseUrl } from "./utils";
-import { formatCurrency, formatDate } from "./scripts";
+import { formatCurrency, formatRelativeDate } from "./scripts";
 import { CommissionApiResponse, Commission, PaginationResult, Preferences, ErrorResponse } from "./types";
 
 export default function Command() {
@@ -63,7 +63,7 @@ export default function Command() {
                   : { source: Icon.Clock, tintColor: Color.Yellow }
             }
             title={`${item.sale.affiliate.first_name} ${item.sale.affiliate.last_name} ${formatCurrency(item.amount, item.currency)}`}
-            subtitle={`Created: ${formatDate(item.created_at)}, Due: ${formatDate(item.due_at)}${item.paid_at ? `, Paid: ${formatDate(item.paid_at)}` : ""}`}
+            subtitle={`Created: ${formatRelativeDate(item.created_at)}, Due: ${formatRelativeDate(item.due_at)}${item.paid_at ? `, Paid: ${formatRelativeDate(item.paid_at)}` : ""}`}
             actions={
               <ActionPanel>
                 <Action.PickDate title="Set Payment Date" onChange={(date) => updatePaymentDate(item.id, date)} />
