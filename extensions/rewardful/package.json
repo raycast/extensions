@@ -1,0 +1,626 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rewardful",
+  "title": "Rewardful",
+  "description": "Unofficial Rewardful extension",
+  "icon": "rewardful-icon.png",
+  "author": "alexs",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "campaigns",
+      "title": "Campaigns",
+      "description": "View campaigns",
+      "mode": "view"
+    },
+    {
+      "name": "affiliates",
+      "title": "Affiliates",
+      "description": "View and update affiliates",
+      "mode": "view"
+    },
+    {
+      "name": "commission",
+      "title": "Commission",
+      "description": "View and update commission",
+      "mode": "view"
+    },
+    {
+      "name": "referrals",
+      "title": "Referrals",
+      "description": "View referrals",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Key for the API",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "locale",
+      "title": "Locale",
+      "description": "Locale for date / time formatting",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "value": "af",
+          "title": "Afrikaans"
+        },
+        {
+          "value": "ar-dz",
+          "title": "Arabic (Algeria)"
+        },
+        {
+          "value": "ar-kw",
+          "title": "Arabic (Kuwait)"
+        },
+        {
+          "value": "ar-ly",
+          "title": "Arabic (Libya)"
+        },
+        {
+          "value": "ar-ma",
+          "title": "Arabic (Morocco)"
+        },
+        {
+          "value": "ar-ps",
+          "title": "Arabic (Palestine)"
+        },
+        {
+          "value": "ar-sa",
+          "title": "Arabic (Saudi Arabia)"
+        },
+        {
+          "value": "ar-tn",
+          "title": "Arabic (Tunisia)"
+        },
+        {
+          "value": "ar",
+          "title": "Arabic"
+        },
+        {
+          "value": "az",
+          "title": "Azerbaijani"
+        },
+        {
+          "value": "be",
+          "title": "Belarusian"
+        },
+        {
+          "value": "bg",
+          "title": "Bulgarian"
+        },
+        {
+          "value": "bm",
+          "title": "Bambara"
+        },
+        {
+          "value": "bn-bd",
+          "title": "Bengali (Bangladesh)"
+        },
+        {
+          "value": "bn",
+          "title": "Bengali"
+        },
+        {
+          "value": "bo",
+          "title": "Tibetan"
+        },
+        {
+          "value": "br",
+          "title": "Breton"
+        },
+        {
+          "value": "bs",
+          "title": "Bosnian"
+        },
+        {
+          "value": "ca",
+          "title": "Catalan"
+        },
+        {
+          "value": "cs",
+          "title": "Czech"
+        },
+        {
+          "value": "cv",
+          "title": "Chuvash"
+        },
+        {
+          "value": "cy",
+          "title": "Welsh"
+        },
+        {
+          "value": "da",
+          "title": "Danish"
+        },
+        {
+          "value": "de-at",
+          "title": "German (Austria)"
+        },
+        {
+          "value": "de-ch",
+          "title": "German (Switzerland)"
+        },
+        {
+          "value": "de",
+          "title": "German"
+        },
+        {
+          "value": "dv",
+          "title": "Divehi"
+        },
+        {
+          "value": "el",
+          "title": "Greek"
+        },
+        {
+          "value": "en-au",
+          "title": "English (Australia)"
+        },
+        {
+          "value": "en-ca",
+          "title": "English (Canada)"
+        },
+        {
+          "value": "en-gb",
+          "title": "English (United Kingdom)"
+        },
+        {
+          "value": "en-ie",
+          "title": "English (Ireland)"
+        },
+        {
+          "value": "en-il",
+          "title": "English (Israel)"
+        },
+        {
+          "value": "en-in",
+          "title": "English (India)"
+        },
+        {
+          "value": "en-nz",
+          "title": "English (New Zealand)"
+        },
+        {
+          "value": "en-sg",
+          "title": "English (Singapore)"
+        },
+        {
+          "value": "en-us",
+          "title": "English (United States)"
+        },
+        {
+          "value": "eo",
+          "title": "Esperanto"
+        },
+        {
+          "value": "es-do",
+          "title": "Spanish (Dominican Republic)"
+        },
+        {
+          "value": "es-mx",
+          "title": "Spanish (Mexico)"
+        },
+        {
+          "value": "es-us",
+          "title": "Spanish (United States)"
+        },
+        {
+          "value": "es",
+          "title": "Spanish"
+        },
+        {
+          "value": "et",
+          "title": "Estonian"
+        },
+        {
+          "value": "eu",
+          "title": "Basque"
+        },
+        {
+          "value": "fa",
+          "title": "Persian"
+        },
+        {
+          "value": "fi",
+          "title": "Finnish"
+        },
+        {
+          "value": "fil",
+          "title": "Filipino"
+        },
+        {
+          "value": "fo",
+          "title": "Faroese"
+        },
+        {
+          "value": "fr-ca",
+          "title": "French (Canada)"
+        },
+        {
+          "value": "fr-ch",
+          "title": "French (Switzerland)"
+        },
+        {
+          "value": "fr",
+          "title": "French"
+        },
+        {
+          "value": "fy",
+          "title": "Frisian"
+        },
+        {
+          "value": "ga",
+          "title": "Irish"
+        },
+        {
+          "value": "gd",
+          "title": "Scottish Gaelic"
+        },
+        {
+          "value": "gl",
+          "title": "Galician"
+        },
+        {
+          "value": "gom-deva",
+          "title": "Konkani (Devanagari script)"
+        },
+        {
+          "value": "gom-latn",
+          "title": "Konkani (Latin script)"
+        },
+        {
+          "value": "gu",
+          "title": "Gujarati"
+        },
+        {
+          "value": "he",
+          "title": "Hebrew"
+        },
+        {
+          "value": "hi",
+          "title": "Hindi"
+        },
+        {
+          "value": "hr",
+          "title": "Croatian"
+        },
+        {
+          "value": "hu",
+          "title": "Hungarian"
+        },
+        {
+          "value": "hy-am",
+          "title": "Armenian"
+        },
+        {
+          "value": "id",
+          "title": "Indonesian"
+        },
+        {
+          "value": "is",
+          "title": "Icelandic"
+        },
+        {
+          "value": "it-ch",
+          "title": "Italian (Switzerland)"
+        },
+        {
+          "value": "it",
+          "title": "Italian"
+        },
+        {
+          "value": "ja",
+          "title": "Japanese"
+        },
+        {
+          "value": "jv",
+          "title": "Javanese"
+        },
+        {
+          "value": "ka",
+          "title": "Georgian"
+        },
+        {
+          "value": "kk",
+          "title": "Kazakh"
+        },
+        {
+          "value": "km",
+          "title": "Khmer"
+        },
+        {
+          "value": "kn",
+          "title": "Kannada"
+        },
+        {
+          "value": "ko",
+          "title": "Korean"
+        },
+        {
+          "value": "ku-kmr",
+          "title": "Kurdish (Northern Kurdish)"
+        },
+        {
+          "value": "ku",
+          "title": "Kurdish"
+        },
+        {
+          "value": "ky",
+          "title": "Kyrgyz"
+        },
+        {
+          "value": "lb",
+          "title": "Luxembourgish"
+        },
+        {
+          "value": "lo",
+          "title": "Lao"
+        },
+        {
+          "value": "lt",
+          "title": "Lithuanian"
+        },
+        {
+          "value": "lv",
+          "title": "Latvian"
+        },
+        {
+          "value": "me",
+          "title": "Montenegrin"
+        },
+        {
+          "value": "mi",
+          "title": "Māori"
+        },
+        {
+          "value": "mk",
+          "title": "Macedonian"
+        },
+        {
+          "value": "ml",
+          "title": "Malayalam"
+        },
+        {
+          "value": "mn",
+          "title": "Mongolian"
+        },
+        {
+          "value": "mr",
+          "title": "Marathi"
+        },
+        {
+          "value": "ms-my",
+          "title": "Malay (Malaysia)"
+        },
+        {
+          "value": "ms",
+          "title": "Malay"
+        },
+        {
+          "value": "mt",
+          "title": "Maltese"
+        },
+        {
+          "value": "my",
+          "title": "Burmese"
+        },
+        {
+          "value": "nb",
+          "title": "Norwegian Bokmål"
+        },
+        {
+          "value": "ne",
+          "title": "Nepali"
+        },
+        {
+          "value": "nl-be",
+          "title": "Dutch (Belgium)"
+        },
+        {
+          "value": "nl",
+          "title": "Dutch"
+        },
+        {
+          "value": "nn",
+          "title": "Norwegian Nynorsk"
+        },
+        {
+          "value": "oc-lnc",
+          "title": "Occitan (Languedocien)"
+        },
+        {
+          "value": "pa-in",
+          "title": "Punjabi (India)"
+        },
+        {
+          "value": "pl",
+          "title": "Polish"
+        },
+        {
+          "value": "pt-br",
+          "title": "Portuguese (Brazil)"
+        },
+        {
+          "value": "pt",
+          "title": "Portuguese"
+        },
+        {
+          "value": "ro",
+          "title": "Romanian"
+        },
+        {
+          "value": "ru",
+          "title": "Russian"
+        },
+        {
+          "value": "sd",
+          "title": "Sindhi"
+        },
+        {
+          "value": "se",
+          "title": "Northern Sami"
+        },
+        {
+          "value": "si",
+          "title": "Sinhala"
+        },
+        {
+          "value": "sk",
+          "title": "Slovak"
+        },
+        {
+          "value": "sl",
+          "title": "Slovenian"
+        },
+        {
+          "value": "sq",
+          "title": "Albanian"
+        },
+        {
+          "value": "sr-cyrl",
+          "title": "Serbian (Cyrillic)"
+        },
+        {
+          "value": "sr",
+          "title": "Serbian"
+        },
+        {
+          "value": "ss",
+          "title": "Swati"
+        },
+        {
+          "value": "sv",
+          "title": "Swedish"
+        },
+        {
+          "value": "sw",
+          "title": "Swahili"
+        },
+        {
+          "value": "ta",
+          "title": "Tamil"
+        },
+        {
+          "value": "te",
+          "title": "Telugu"
+        },
+        {
+          "value": "tet",
+          "title": "Tetum"
+        },
+        {
+          "value": "tg",
+          "title": "Tajik"
+        },
+        {
+          "value": "th",
+          "title": "Thai"
+        },
+        {
+          "value": "tk",
+          "title": "Turkmen"
+        },
+        {
+          "value": "tl-ph",
+          "title": "Tagalog (Philippines)"
+        },
+        {
+          "value": "tlh",
+          "title": "Klingon"
+        },
+        {
+          "value": "tr",
+          "title": "Turkish"
+        },
+        {
+          "value": "tzl",
+          "title": "Talossan"
+        },
+        {
+          "value": "tzm-latn",
+          "title": "Central Atlas Tamazight (Latin)"
+        },
+        {
+          "value": "tzm",
+          "title": "Central Atlas Tamazight"
+        },
+        {
+          "value": "ug-cn",
+          "title": "Uyghur (China)"
+        },
+        {
+          "value": "uk",
+          "title": "Ukrainian"
+        },
+        {
+          "value": "ur",
+          "title": "Urdu"
+        },
+        {
+          "value": "uz-latn",
+          "title": "Uzbek (Latin)"
+        },
+        {
+          "value": "uz",
+          "title": "Uzbek"
+        },
+        {
+          "value": "vi",
+          "title": "Vietnamese"
+        },
+        {
+          "value": "x-pseudo",
+          "title": "Pseudo"
+        },
+        {
+          "value": "yo",
+          "title": "Yoruba"
+        },
+        {
+          "value": "zh-cn",
+          "title": "Chinese (China)"
+        },
+        {
+          "value": "zh-hk",
+          "title": "Chinese (Hong Kong)"
+        },
+        {
+          "value": "zh-mo",
+          "title": "Chinese (Macau)"
+        },
+        {
+          "value": "zh-tw",
+          "title": "Chinese (Taiwan)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.1",
+    "moment": "^2.30.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

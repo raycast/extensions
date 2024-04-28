@@ -1,0 +1,60 @@
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+
+import { baseUrl } from "./utils";
+import { formatDate } from "./scripts";
+import { ReferralApiResponse, Referral, PaginationResult, Preferences } from "./types";
+
+export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+  const encodedApiKey = btoa(`${preferences.apiKey}:`);
+
+  const { isLoading, data, pagination, revalidate } = useFetch(
+    (options) => `${baseUrl}/referrals?expand[]=affiliate&` + new URLSearchParams({ page: String(options.page + 1) }),
+    {
+      headers: { Authorization: `Basic ${encodedApiKey}` },
+      initialData: {
+        data: [],
+        hasMore: false,
+        pageSize: 0,
+      } as PaginationResult<Referral>,
+      keepPreviousData: true,
+      mapResult(result: ReferralApiResponse): PaginationResult<Referral> {
+        // console.log("result:", JSON.stringify(result));
+        return {
+          data: result.data,
+          hasMore: !!result.pagination.next_page,
+          pageSize: result.pagination.limit,
+        };
+      },
+    },
+  );
+
+  return (
+    <List isLoading={isLoading} pagination={pagination}>
+      {data && data.length > 0 ? (
+        data.map((item) => (
+          <List.Item
+            key={item.id}
+            icon={
+              item.conversion_state === "visitor"
+                ? { source: Icon.Person, tintColor: Color.Blue }
+                : item.conversion_state === "lead"
+                  ? { source: Icon.Clock, tintColor: Color.Yellow }
+                  : { source: Icon.Check, tintColor: Color.Green }
+            }
+            title={`${item.affiliate.campaign.name} - ${item.affiliate.first_name} ${item.affiliate.last_name}`}
+            subtitle={`Visits: ${item.visits}, Created: ${formatDate(item.created_at)}, Updated: ${formatDate(item.updated_at)}${item.deactivated_at ? `, Converted at: ${formatDate(item.became_conversion_at)}` : ""}`}
+            actions={
+              <ActionPanel>
+                <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => revalidate()} />
+              </ActionPanel>
+            }
+          />
+        ))
+      ) : (
+        <List.EmptyView title="No data available" description="Failed to fetch data from the API." />
+      )}
+    </List>
+  );
+}
