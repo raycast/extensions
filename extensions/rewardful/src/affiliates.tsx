@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, getPreferenceValues, Icon, List, useNavigati
 import { useFetch, useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import fetch from "node-fetch";
 
-import { baseUrl, siteUrl } from "./utils";
+import { baseUrl, currentLocale, siteUrl } from "./utils";
 import {
   Affiliate,
   AffiliateApiResponse,
@@ -12,9 +12,6 @@ import {
   PaginationResult,
   Preferences,
 } from "./types";
-
-const preferences = getPreferenceValues();
-const localePref = preferences.locale || "en-us";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -54,7 +51,7 @@ export default function Command() {
                 <List.Item
                   key={item.id}
                   title={`${item.first_name} ${item.last_name}`}
-                  subtitle={`Visitors: ${item.visitors.toLocaleString(localePref)}, Leads: ${item.leads.toLocaleString(localePref)}, Conversions: ${item.conversions.toLocaleString(localePref)}`}
+                  subtitle={`Visitors: ${item.visitors.toLocaleString(currentLocale)}, Leads: ${item.leads.toLocaleString(currentLocale)}, Conversions: ${item.conversions.toLocaleString(currentLocale)}`}
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser

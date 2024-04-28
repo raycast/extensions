@@ -2,11 +2,8 @@ import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@ra
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 
-import { baseUrl, siteUrl } from "./utils";
+import { baseUrl, currentLocale, siteUrl } from "./utils";
 import { CampaignApiResponse, Campaign, PaginationResult, Preferences } from "./types";
-
-const preferences = getPreferenceValues();
-const localePref = preferences.locale || "en-us";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -51,7 +48,7 @@ export default function Command() {
                 ? { source: Icon.Lock, tintColor: Color.Blue }
                 : { source: Icon.BullsEye, tintColor: Color.Green }
             }
-            subtitle={`Affiliates: ${item.affiliates.toLocaleString(localePref)}, Visitors: ${item.visitors.toLocaleString(localePref)}, Leads: ${item.leads.toLocaleString(localePref)}, Conversions: ${item.conversions.toLocaleString(localePref)}`}
+            subtitle={`Affiliates: ${item.affiliates.toLocaleString(currentLocale)}, Visitors: ${item.visitors.toLocaleString(currentLocale)}, Leads: ${item.leads.toLocaleString(currentLocale)}, Conversions: ${item.conversions.toLocaleString(currentLocale)}`}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
