@@ -21,7 +21,6 @@ export default function Command() {
       } as PaginationResult<Commission>,
       keepPreviousData: true,
       mapResult(result: CommissionApiResponse): PaginationResult<Commission> {
-        // console.log("result:", JSON.stringify(result));
         return {
           data: result.data,
           hasMore: !!result.pagination.next_page,

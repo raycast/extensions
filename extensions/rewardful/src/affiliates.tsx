@@ -31,7 +31,6 @@ export default function Command() {
       } as PaginationResult<Affiliate>,
       keepPreviousData: true,
       mapResult(result: AffiliateApiResponse): PaginationResult<Affiliate> {
-        // console.log("result:", JSON.stringify(result));
         return {
           data: result.data,
           hasMore: !!result.pagination.next_page,

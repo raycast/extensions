@@ -23,7 +23,6 @@ export default function Command() {
       } as PaginationResult<Campaign>,
       keepPreviousData: true,
       mapResult(result: CampaignApiResponse): PaginationResult<Campaign> {
-        // console.log("result:", JSON.stringify(result));
         return {
           data: result.data,
           hasMore: !!result.pagination.next_page,

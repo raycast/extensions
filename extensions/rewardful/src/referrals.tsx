@@ -20,7 +20,6 @@ export default function Command() {
       } as PaginationResult<Referral>,
       keepPreviousData: true,
       mapResult(result: ReferralApiResponse): PaginationResult<Referral> {
-        // console.log("result:", JSON.stringify(result));
         return {
           data: result.data,
           hasMore: !!result.pagination.next_page,

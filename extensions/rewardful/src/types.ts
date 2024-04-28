@@ -171,7 +171,6 @@ export type Commission = {
   sale: Sale;
 };
 
-// Define the type for the API response
 export type CommissionApiResponse = {
   pagination: Pagination;
   data: Commission[];
