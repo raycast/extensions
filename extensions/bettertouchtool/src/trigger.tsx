@@ -101,6 +101,16 @@ export default function Command() {
   );
 }
 
+function runShellCommand(osaCommand: string) {
+  return new Promise((resolve, reject) => {
+    exec(osaCommand, (error) => {
+      if (error) {
+        reject(error);
+      }
+      resolve("success");
+    });
+  })
+}
 function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
   const triggerName = triggerResult.BTTTriggerName || triggerResult.BTTPredefinedActionName;
   const url = `btt://trigger_named/?trigger_name=${encodeURIComponent(triggerName)}`;
@@ -110,36 +120,33 @@ function TriggerItem({ triggerResult }: { triggerResult: BTTTrigger }) {
 
   const handleRun = async () => {
     const osaCommand = `tell application "BetterTouchTool" to trigger_named "${triggerName}"`;
-    await exec(`osascript -e '${osaCommand}'`, (error, stdout, stderr) => {
-      if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-      }
-    });
+    try {
+      await runShellCommand(`osascript -e '${osaCommand}'`);
+    } catch (error) {
+      showToast({
+        title: "Failed to run trigger",
+        message: error && String(error) !== 'null' ? String(error) : "",
+        style: Toast.Style.Failure,
+      });
+    }
   };
 
   const accessories = []
   if (triggerResult.BTTGestureNotes && triggerResult.BTTGestureNotes !== "Named Trigger: " + triggerName) {
-
+    accessories.push({ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes })
   }
+  if (triggerResult.BTTPredefinedActionName) {
+    accessories.push({
+      text: triggerResult.BTTPredefinedActionName,
+      icon: Icon.ArrowRight,
+      tooltip: triggerResult.BTTGenericActionConfig || triggerResult.BTTPredefinedActionName,
+    })
+  }
+
   return (
     <List.Item
       title={triggerName}
-      accessories={[
-        ...(
-          ? [{ text: triggerResult.BTTGestureNotes, icon: Icon.Info, tooltip: triggerResult.BTTGestureNotes }]
-          : []),
-
-        {
-          text: triggerResult.BTTPredefinedActionName,
-          icon: Icon.ArrowRight,
-          tooltip: triggerResult.BTTGenericActionConfig || triggerResult.BTTPredefinedActionName,
-        },
-      ]}
+      accessories={accessories}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
