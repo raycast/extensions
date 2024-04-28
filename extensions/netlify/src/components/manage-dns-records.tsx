@@ -13,7 +13,7 @@ import {
 } from '@raycast/api';
 import { FormValidation, useForm, usePromise } from '@raycast/utils';
 import api from '../utils/api';
-import { DNS_RECORD_TYPES } from '../utils/constants';
+import { ALLOWED_CAA_RECORD_TAGS, DNS_RECORD_TYPES } from '../utils/constants';
 import { CreateDNSRecord, DNSRecord, Domain } from '../utils/interfaces';
 import { useState } from 'react';
 import { handleNetworkError } from '../utils/helpers';
@@ -22,6 +22,8 @@ interface Props {
   domain: Domain;
 }
 export default function ManageDNSRecords({ domain }: Props) {
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [filter, setFilter] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function confirmAndDeleteRecord(record: DNSRecord) {
@@ -75,13 +77,28 @@ export default function ManageDNSRecords({ domain }: Props) {
 
   const isLoading = isFetching || isDeleting;
 
+  const filteredRecords = !filter
+    ? records
+    : records?.filter((record) => record.type === filter);
+
   return (
     <List
       navigationTitle={`Domains / ${domain.name} / Manage DNS Records`}
       isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter" onChange={setFilter}>
+          <List.Dropdown.Item title="All" value="" />
+          <List.Dropdown.Section title="Records">
+            {[...new Set(records?.map((record) => record.type))].map((type) => (
+              <List.Dropdown.Item key={type} title={type} value={type} />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
     >
       <List.Section title={domain.name}>
-        {records?.map((record) => (
+        {filteredRecords?.map((record) => (
           <List.Item
             key={record.id}
             title={record.hostname}
@@ -90,8 +107,77 @@ export default function ManageDNSRecords({ domain }: Props) {
               { text: record.ttl.toString() },
               { tag: record.type },
             ]}
+            detail={
+              <List.Item.Detail
+                markdown={`${record.hostname} = ${record.value}`}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label
+                      title="Name"
+                      text={record.hostname}
+                    />
+                    <List.Item.Detail.Metadata.TagList title="Type">
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={record.type}
+                      />
+                    </List.Item.Detail.Metadata.TagList>
+                    <List.Item.Detail.Metadata.Label
+                      title="TTL"
+                      text={`${record.ttl} seconds`}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Priority"
+                      text={record.priority?.toString() || ''}
+                      icon={!record.priority ? Icon.Minus : undefined}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Weight"
+                      text={record.weight?.toString() || ''}
+                      icon={!record.weight ? Icon.Minus : undefined}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Port"
+                      text={record.port?.toString() || ''}
+                      icon={!record.port ? Icon.Minus : undefined}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Flag"
+                      text={record.flag?.toString() || ''}
+                      icon={!record.flag ? Icon.Minus : undefined}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Tag"
+                      text={record.tag || ''}
+                      icon={!record.tag ? Icon.Minus : undefined}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Site ID"
+                      text={record.site_id || ''}
+                      icon={!record.site_id ? Icon.Minus : undefined}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="DNS Zone ID"
+                      text={record.dns_zone_id}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Managed"
+                      icon={record.managed ? Icon.Check : Icon.Multiply}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Value"
+                      text={record.value}
+                    />
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
+                <Action
+                  title="Toggle Details"
+                  icon={Icon.Sidebar}
+                  onAction={() => setIsShowingDetail((prev) => !prev)}
+                />
                 <Action
                   title={`Delete ${record.type} Record`}
                   style={Action.Style.Destructive}
@@ -187,9 +273,13 @@ function CreateDNSRecordComponent({
         tag: values.flag || null,
       };
       try {
+        await showToast({
+          title: `Creating ${values.type} record`,
+          style: Toast.Style.Animated,
+        });
         await api.createDNSRecord(domain.id, body);
         await showToast({
-          title: `${type} Record Created`,
+          title: `${type} record created`,
         });
         onDNSRecordCreated();
         pop();
@@ -213,11 +303,15 @@ function CreateDNSRecordComponent({
         if (values.type === 'CAA') {
           if (!value) return 'The item is required';
           else if (!Number(value)) return 'The item must be a number';
+          else if (Number(value) < 0 || Number(value) > 255)
+            return 'The item must be between 0 and 255';
         }
       },
       tag(value) {
         if (values.type === 'CAA') {
           if (!value) return 'The item is required';
+          else if (!ALLOWED_CAA_RECORD_TAGS.includes(value))
+            return 'The item is invalid';
         }
       },
       value: FormValidation.Required,
@@ -277,8 +371,8 @@ function CreateDNSRecordComponent({
       </Form.Dropdown>
       <Form.TextField
         title="Name"
-        {...itemProps.hostname}
         info={`@ will automatically set ${domain.name} as the host name`}
+        {...itemProps.hostname}
       />
       {values.type !== 'SRV' ? (
         <>
@@ -292,32 +386,37 @@ function CreateDNSRecordComponent({
           {values.type === 'MX' && (
             <Form.TextField
               title="Priority"
-              {...itemProps.priority}
               placeholder="Priority"
               info="The priority of the target host, lower value means more preferred"
+              {...itemProps.priority}
             />
           )}
           {values.type === 'CAA' && (
             <>
-              <Form.TextField title="Flag" {...itemProps.flag} />
+              <Form.TextField
+                title="Flag"
+                placeholder="0 to 255"
+                {...itemProps.flag}
+              />
               <Form.TextField
                 title="Tag"
-                {...itemProps.tag}
+                placeholder={ALLOWED_CAA_RECORD_TAGS.join(', ')}
                 info="The identifier of the property represented by the record. Options: issue, issuewild or iodef"
+                {...itemProps.tag}
               />
             </>
           )}
           {['CAA', 'SPF', 'TXT'].includes(values.type) ? (
             <Form.TextArea
               title="Value"
-              {...itemProps.value}
               placeholder="Value"
+              {...itemProps.value}
             />
           ) : (
             <Form.TextField
               title="Value"
-              {...itemProps.value}
               placeholder="Value"
+              {...itemProps.value}
             />
           )}
           {values.type && (
@@ -332,42 +431,44 @@ function CreateDNSRecordComponent({
         <>
           <Form.TextField
             title="Service"
-            {...itemProps.service}
             info="The symbolic name of the desired service; this is usually sip"
+            placeholder="sip"
+            {...itemProps.service}
           />
           <Form.TextField
             title="Protocol"
-            {...itemProps.protocol}
             info="The transport protocol of the desired service; this is usually either TCP or UDP"
+            placeholder="tcp, udp"
+            {...itemProps.protocol}
           />
           <Form.TextField
             title="Priority"
-            {...itemProps.priority}
             placeholder="Priority"
             info="The priority of the target host, lower value means more preferred"
+            {...itemProps.priority}
           />
           <Form.TextField
             title="Weight"
-            {...itemProps.weight}
             info="A relative weight for records with the same priority, higher value means more preferred"
+            {...itemProps.weight}
           />
           <Form.TextField
             title="Port"
-            {...itemProps.port}
             info="The TCP or UDP port on which the service is found"
+            {...itemProps.port}
           />
           <Form.TextField
             title="Target"
-            {...itemProps.value}
             info="The TCP or UDP port on which the service is found"
+            {...itemProps.value}
           />
         </>
       )}
       <Form.TextField
         title="TTL"
-        {...itemProps.ttl}
         placeholder="TTL in seconds (optional)"
         info="The amount of time the record is allowed to be cached by a resolver"
+        {...itemProps.ttl}
       />
     </Form>
   );

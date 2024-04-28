@@ -9,7 +9,7 @@ import {
   confirmAlert,
   showToast,
 } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
+import { getFavicon, usePromise } from '@raycast/utils';
 import { useState } from 'react';
 
 import { OpenOnNetlify } from './components/actions';
@@ -88,7 +88,9 @@ export default function Command() {
         {registeredDomains.map((domain) => (
           <List.Item
             key={domain.name}
-            icon={Icon.Globe}
+            icon={getFavicon(`https://${domain.name}`, {
+              fallback: Icon.Globe,
+            })}
             title={domain.name}
             subtitle={domain.account_name}
             keywords={domain.account_slug.split('-')}

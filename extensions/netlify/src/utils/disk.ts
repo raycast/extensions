@@ -239,7 +239,7 @@ export function useDiskCache(query: string | undefined): {
       setError(undefined);
 
       try {
-        const preferences = getPreferenceValues<Preferences.FindLocalSites>()
+        const preferences = getPreferenceValues<Preferences.FindLocalSites>();
         if (!preferences.scanPath) {
           setError('Path to scan has not been defined in settings');
           return;

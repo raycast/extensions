@@ -114,7 +114,7 @@ export interface DNSRecord {
   flag: number | null;
   tag: string | null;
   id: string;
-  site_id: string;
+  site_id: string | null;
   dns_zone_id: string;
   // errors: [],
   managed: boolean;
