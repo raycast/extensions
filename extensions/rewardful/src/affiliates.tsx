@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Color, Form, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
 import { useFetch, useForm, FormValidation, showFailureToast } from "@raycast/utils";
+import { useState } from "react";
 import fetch from "node-fetch";
 
 import { baseUrl, currentLocale, siteUrl } from "./utils";
+import { formatShortDate } from "./scripts";
 import {
   Affiliate,
   AffiliateApiResponse,
@@ -12,8 +14,6 @@ import {
   PaginationResult,
   Preferences,
 } from "./types";
-import { useState } from "react";
-import { formatShortDate } from "./scripts";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -141,8 +141,12 @@ export default function Command() {
                             <List.Item.Detail.Metadata.Label title="Conversions" text={item.conversions.toString()} />
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Label title="Email" text={item.email} />
-                            <List.Item.Detail.Metadata.Label title="PayPal Email" text={item.paypal_email || ""} />
-                            <List.Item.Detail.Metadata.Label title="Wise Email" text={item.wise_email || ""} />
+                            {item.paypal_email && (
+                              <List.Item.Detail.Metadata.Label title="PayPal Email" text={item.paypal_email} />
+                            )}
+                            {item.wise_email && (
+                              <List.Item.Detail.Metadata.Label title="Wise Email" text={item.wise_email} />
+                            )}
                             <List.Item.Detail.Metadata.Separator />
                             <List.Item.Detail.Metadata.Label title="Created" text={formatShortDate(item.created_at)} />
                             <List.Item.Detail.Metadata.Label title="Updated" text={formatShortDate(item.updated_at)} />
