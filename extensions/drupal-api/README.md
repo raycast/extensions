@@ -30,5 +30,5 @@ Pull requests are also welcome ;-).
 
 If anyone has pity on me, they're more than welcome to design a new logo for the extension. Here's what I've considered so far:
 
-![Thinking Drupal Icon](/assets/custom-drupal-icon.png)
-![Debugging Drupal Icon](/assets/debugging-drupal.png)
+[<img src="/assets/custom-drupal-icon.png" width="200" height="200"/>](/assets/custom-drupal-icon.png)
+[<img src="/assets/debugging-drupal.png" width="200" height="200"/>](/assets/debugging-drupal.png)
