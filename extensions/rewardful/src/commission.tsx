@@ -63,14 +63,44 @@ export default function Command() {
             subtitle={`Created: ${formatRelativeDate(item.created_at)}, Due: ${formatRelativeDate(item.due_at)}${item.paid_at ? `, Paid: ${formatRelativeDate(item.paid_at)}` : ""}`}
             actions={
               <ActionPanel>
-                <Action.PickDate title="Set Payment Date" onChange={(date) => updatePaymentDate(item.id, date)} />
-                {item.sale.referral.stripe_customer_id && (
-                  <Action.OpenInBrowser
-                    title="View Customer In Stripe"
-                    shortcut={{ modifiers: ["cmd"], key: "s" }}
-                    url={`https://dashboard.stripe.com/customers/${item.sale.referral.stripe_customer_id}`}
-                  />
-                )}
+                <ActionPanel.Section title="Payout">
+                  <Action.PickDate title="Set Payment Date" onChange={(date) => updatePaymentDate(item.id, date)} />
+                  {item.sale.affiliate.paypal_email && (
+                    <>
+                      <Action.OpenInBrowser
+                        title="Open PayPal Payment Page"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                        url="https://www.paypal.com/myaccount/transfer/homepage/pay"
+                      />
+                      <Action.Paste
+                        title="Paste PayPal Email"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                        content={item.sale.affiliate.paypal_email}
+                      />
+                    </>
+                  )}
+                  {item.sale.affiliate.wise_email && (
+                    <>
+                      <Action.OpenInBrowser
+                        title="Open Wise Payment Page"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                        url="https://wise.com/send"
+                      />
+                      <Action.Paste
+                        title="Paste Wise Email"
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                        content={item.sale.affiliate.wise_email}
+                      />
+                    </>
+                  )}
+                  {item.sale.referral.stripe_customer_id && (
+                    <Action.OpenInBrowser
+                      title="View Customer In Stripe"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                      url={`https://dashboard.stripe.com/customers/${item.sale.referral.stripe_customer_id}`}
+                    />
+                  )}
+                </ActionPanel.Section>
                 <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => revalidate()} />
               </ActionPanel>
             }
