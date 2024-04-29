@@ -5,6 +5,7 @@ import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hook
 import { LanguageCode, supportedLanguagesByCode, languages, getLanguageFlag } from "./languages";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
+import { getActions } from "./actions";
 
 export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -55,37 +56,38 @@ export default function TranslateForm() {
   return (
     <Form
       isLoading={isLoading}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section title="Generals">
-            <Action.CopyToClipboard title="Copy Translated" content={translated?.translatedText ?? ""} />
-            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />
-            <Action.CopyToClipboard
-              title="Copy Pronunciation"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              content={translated?.pronunciationText ?? ""}
-            />
-            <Action.OpenInBrowser
-              title="Open in Google Translate"
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-              url={
-                "https://translate.google.com/?sl=" +
-                langFrom +
-                "&tl=" +
-                langTo +
-                "&text=" +
-                encodeURIComponent(text) +
-                "&op=translate"
-              }
-            />
-            <Action.Push
-              icon={Icon.Pencil}
-              title="Manage language sets..."
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
-              target={<LanguagesManagerList />}
-            />
-          </ActionPanel.Section>
-
+      actions={getActions({
+        value: translated?.translatedText ?? "",
+        defaultActionsPrefix: "Translated",
+        firstSectionTitle: "Generals",
+        otherActions: [
+          <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />,
+          <Action.CopyToClipboard
+            title="Copy Pronunciation"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            content={translated?.pronunciationText ?? ""}
+          />,
+          <Action.OpenInBrowser
+            title="Open in Google Translate"
+            shortcut={{ modifiers: ["opt"], key: "enter" }}
+            url={
+              "https://translate.google.com/?sl=" +
+              langFrom +
+              "&tl=" +
+              langTo +
+              "&text=" +
+              encodeURIComponent(text) +
+              "&op=translate"
+            }
+          />,
+          <Action.Push
+            icon={Icon.Pencil}
+            title="Manage language sets..."
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            target={<LanguagesManagerList />}
+          />,
+        ],
+        otherSections: [
           <ActionPanel.Section title="Settings">
             <Action
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
@@ -131,9 +133,9 @@ export default function TranslateForm() {
                 ))}
               </ActionPanel.Submenu>
             </ActionPanel.Submenu>
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
+          </ActionPanel.Section>,
+        ],
+      })}
     >
       <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} />
       <Form.Dropdown
