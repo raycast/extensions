@@ -137,7 +137,7 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
         </List.Dropdown>
       }
     >
-      {!activities.length && !isLoading && <List.EmptyView title={`No ${getActivitiesName()} this week`} />}
+      {!activities?.length && !isLoading && <List.EmptyView title={`No ${getActivitiesName()} this week`} />}
       <List.Section title={weekString}>
         {activities
           ? Object.entries(activitiesPerAthlete)
