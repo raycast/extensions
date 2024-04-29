@@ -1,4 +1,4 @@
-import { Detail, LocalStorage, Toast, getPreferenceValues, openExtensionPreferences, showToast } from "@raycast/api";
+import { Detail, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useContext, useState } from "react";
 import { AuthContext, getToken, logout } from "./authContext";
 import BookList from "./components/book-list";
