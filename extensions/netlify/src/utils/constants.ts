@@ -17,10 +17,3 @@ export const DNS_RECORD_TYPES = {
   SRV: '',
   TXT: 'Free form text data',
 };
-
-export const ALLOWED_CAA_RECORD_TAGS = [
-  'issue',
-  'issuewild',
-  'issuemail',
-  'iodef',
-];

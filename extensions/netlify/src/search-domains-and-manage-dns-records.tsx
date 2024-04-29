@@ -18,7 +18,7 @@ import api from './utils/api';
 import { formatDate, getDomainUrl, handleNetworkError } from './utils/helpers';
 import { useTeams } from './utils/hooks';
 import { DomainSearch } from './utils/interfaces';
-import ManageDNSRecords from './components/manage-dns-records';
+import ManageDNSRecords from './components/dns/manage-dns-records';
 
 export default function Command() {
   const [query, setQuery] = useState<string>('');
