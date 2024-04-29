@@ -38,3 +38,4 @@ multi
 apple-notes
 humaans
 text-replacements
+copilot-workspace
