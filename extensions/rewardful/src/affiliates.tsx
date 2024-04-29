@@ -87,18 +87,32 @@ export default function Command() {
                       {item.paypal_email || item.wise_email ? (
                         <ActionPanel.Section title="Payout">
                           {item.paypal_email && (
-                            <Action.CopyToClipboard
-                              title="Copy PayPal Email"
-                              shortcut={{ modifiers: ["cmd"], key: "c" }}
-                              content={item.paypal_email}
-                            />
+                            <>
+                              <Action.OpenInBrowser
+                                title="Open PayPal Payment Page"
+                                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                                url="https://www.paypal.com/myaccount/transfer/homepage/pay"
+                              />
+                              <Action.Paste
+                                title="Paste PayPal Email"
+                                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                                content={item.paypal_email}
+                              />
+                            </>
                           )}
                           {item.wise_email && (
-                            <Action.CopyToClipboard
-                              title="Copy Wise Email"
-                              shortcut={{ modifiers: ["cmd"], key: "w" }}
-                              content={item.wise_email}
-                            />
+                            <>
+                              <Action.OpenInBrowser
+                                title="Open Wise Payment Page"
+                                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                                url="https://wise.com/send"
+                              />
+                              <Action.Paste
+                                title="Paste Wise Email"
+                                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                                content={item.wise_email}
+                              />
+                            </>
                           )}
                         </ActionPanel.Section>
                       ) : null}
