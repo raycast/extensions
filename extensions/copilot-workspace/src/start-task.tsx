@@ -16,11 +16,11 @@ export default function Command() {
 
       open(
         `https://copilot-workspace.githubnext.com/${repo}?task=${encodeURIComponent(
-          values.task,
-        )}`,
+          values.task
+        )}`
       );
 
-      setRepo(repo);
+      setRepo(values.repo);
       popToRoot();
     },
     validation: {
