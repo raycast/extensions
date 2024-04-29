@@ -1,6 +1,17 @@
+// General types used throughout the app
 export type Preferences = {
   apiKey: string;
 };
+
+export type ApiResponse<T> = {
+  pagination: Pagination;
+  data: T[];
+};
+
+export type CampaignApiResponse = ApiResponse<Campaign>;
+export type AffiliateApiResponse = ApiResponse<Affiliate>;
+export type ReferralApiResponse = ApiResponse<Referral>;
+export type CommissionApiResponse = ApiResponse<Commission>;
 
 export type ErrorResponse = {
   error: string;
@@ -21,6 +32,47 @@ export type Pagination = {
   limit: number;
   total_pages: number;
   total_count: number;
+};
+
+// Types for main objects
+export type Affiliate = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  state: string;
+  paypal_email: string;
+  confirmed_at: string;
+  paypal_email_confirmed_at: string;
+  wise_email: string;
+  receive_new_commission_notifications: boolean;
+  sign_in_count: number;
+  unconfirmed_email: string | null;
+  stripe_customer_id: string | null;
+  stripe_account_id: string | null;
+  visitors: number;
+  leads: number;
+  conversions: number;
+  campaign: Campaign;
+  links: Link[];
+};
+
+export type AffiliateFormProps = {
+  affiliate: Affiliate;
+  encodedApiKey: string;
+  revalidate: () => void;
+};
+
+export type CreateAffiliateFormValues = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  campaign_id: string;
+  token: string;
+  paypal_email: string;
+  wise_email: string;
 };
 
 export type Campaign = {
@@ -55,63 +107,16 @@ export type Campaign = {
   affiliates: number;
 };
 
-export type CampaignApiResponse = {
-  pagination: Pagination;
-  data: Campaign[];
-};
-
-type Link = {
-  id: string;
-  url: string;
-  token: string;
-  visitors: number;
-  leads: number;
-  conversions: number;
-};
-
-export type Affiliate = {
+export type Commission = {
   id: string;
   created_at: string;
   updated_at: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  state: string;
-  paypal_email: string;
-  confirmed_at: string;
-  paypal_email_confirmed_at: string;
-  wise_email: string;
-  receive_new_commission_notifications: boolean;
-  sign_in_count: number;
-  unconfirmed_email: string | null;
-  stripe_customer_id: string | null;
-  stripe_account_id: string | null;
-  visitors: number;
-  leads: number;
-  conversions: number;
+  amount: number;
+  currency: string;
+  due_at: string;
+  paid_at: string | null;
   campaign: Campaign;
-  links: Link[];
-};
-
-export type AffiliateApiResponse = {
-  pagination: Pagination;
-  data: Affiliate[];
-};
-
-export type AffiliateFormProps = {
-  affiliate: Affiliate;
-  encodedApiKey: string;
-  revalidate: () => void;
-};
-
-export type CreateAffiliateFormValues = {
-  first_name: string;
-  last_name: string;
-  email: string;
-  campaign_id: string;
-  token: string;
-  paypal_email: string;
-  wise_email: string;
+  sale: Sale;
 };
 
 export type Referral = {
@@ -131,16 +136,21 @@ export type Referral = {
   stripe_customer_id: string;
 };
 
-export type ReferralApiResponse = {
-  pagination: Pagination;
-  data: Referral[];
-};
-
+// Types related to the main objects
 type Customer = {
   platform: string;
   id: string;
   name: string;
   email: string;
+};
+
+type Link = {
+  id: string;
+  url: string;
+  token: string;
+  visitors: number;
+  leads: number;
+  conversions: number;
 };
 
 type Sale = {
@@ -158,21 +168,4 @@ type Sale = {
   sale_amount_cents: number;
   referral: Referral;
   affiliate: Affiliate;
-};
-
-export type Commission = {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  amount: number;
-  currency: string;
-  due_at: string;
-  paid_at: string | null;
-  campaign: Campaign;
-  sale: Sale;
-};
-
-export type CommissionApiResponse = {
-  pagination: Pagination;
-  data: Commission[];
 };
