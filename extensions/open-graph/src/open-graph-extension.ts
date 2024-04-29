@@ -2,7 +2,7 @@ import { environment, launchCommand, BrowserExtension, showHUD, LaunchType } fro
 
 export default async function OpenGraphWithExtension() {
   if (!environment.canAccess(BrowserExtension)) {
-    showHUD("This script requires the Browser Extension to be installed.");
+    showHUD("This command requires the Raycast Browser Extension to be installed.");
     return;
   }
   try {
