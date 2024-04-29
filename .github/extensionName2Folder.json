@@ -233,6 +233,7 @@
   "bengry/convert-typescript-to-javascript": "convert-typescript-to-javascript",
   "koinzhang/converter": "converter",
   "NicolasMontone/cookie-string-parser": "cookie-string-parser",
+  "cole/copilot-workspace": "copilot-workspace",
   "pomdtr/copy-gcp-icons": "copy-gcp-icons",
   "koinzhang/copy-path": "copy-path",
   "justinw/copy-skeet-link": "copy-skeet-link",
