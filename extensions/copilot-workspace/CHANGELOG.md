@@ -1,5 +1,9 @@
 # Copilot Workspace Changelog
 
+## [Update extension author] - 2023-04-29
+
+- Updates the extension author to GitHub Next.
+
 ## [Update README] - 2023-04-29
 
 - Updates the README to include a link to the Copilot Workspace website.
