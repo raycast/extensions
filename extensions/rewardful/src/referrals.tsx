@@ -1,14 +1,11 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import { baseUrl } from "./utils";
+import { baseUrl, encodedApiKey } from "./utils";
 import { formatRelativeDate } from "./scripts";
-import { ReferralApiResponse, Referral, PaginationResult, Preferences } from "./types";
+import { ReferralApiResponse, Referral, PaginationResult } from "./types";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const encodedApiKey = btoa(`${preferences.apiKey}:`);
-
   const { isLoading, data, pagination, revalidate } = useFetch(
     (options) => `${baseUrl}/referrals?expand[]=affiliate&` + new URLSearchParams({ page: String(options.page + 1) }),
     {

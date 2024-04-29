@@ -1,15 +1,12 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 
-import { baseUrl, siteUrl } from "./utils";
-import { CampaignApiResponse, Campaign, PaginationResult, Preferences } from "./types";
+import { baseUrl, encodedApiKey, siteUrl } from "./utils";
+import { CampaignApiResponse, Campaign, PaginationResult } from "./types";
 import { formatCurrency, formatShortDate } from "./scripts";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const encodedApiKey = btoa(`${preferences.apiKey}:`);
-
   const { isLoading, data, pagination, revalidate } = useFetch(
     (options) => `${baseUrl}/campaigns?` + new URLSearchParams({ page: String(options.page + 1) }),
     {

@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Color, Form, getPreferenceValues, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useFetch, useForm, FormValidation, showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import fetch from "node-fetch";
 
-import { baseUrl, currentLocale, siteUrl } from "./utils";
+import { baseUrl, currentLocale, encodedApiKey, siteUrl } from "./utils";
 import { formatShortDate } from "./scripts";
 import {
   Affiliate,
@@ -12,13 +12,9 @@ import {
   AffiliateFormProps,
   ErrorResponse,
   PaginationResult,
-  Preferences,
 } from "./types";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const encodedApiKey = btoa(`${preferences.apiKey}:`);
-
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const { isLoading, data, pagination, revalidate } = useFetch(

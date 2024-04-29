@@ -1,15 +1,12 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { showFailureToast, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 
-import { baseUrl } from "./utils";
+import { baseUrl, encodedApiKey } from "./utils";
 import { formatCurrency, formatRelativeDate } from "./scripts";
-import { CommissionApiResponse, Commission, PaginationResult, Preferences, ErrorResponse } from "./types";
+import { CommissionApiResponse, Commission, PaginationResult, ErrorResponse } from "./types";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const encodedApiKey = btoa(`${preferences.apiKey}:`);
-
   const { isLoading, data, pagination, revalidate } = useFetch(
     (options) => `${baseUrl}/commissions?expand[]=sale&` + new URLSearchParams({ page: String(options.page + 1) }),
     {
