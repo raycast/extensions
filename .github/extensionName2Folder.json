@@ -1133,6 +1133,7 @@
   "krzysztofzuraw/search-mdn": "search-mdn",
   "reckoning-dev/search-notion": "search-notion",
   "mrmartineau/search-npm": "search-npm",
+  "HCJackyLee/search-private-npm-packages": "search-private-npm-packages",
   "musienkoyuriy/search-regexp": "search-regexp",
   "aleks/search-rubygems": "search-rubygems",
   "maximedaraize/search-shopify-liquid-documentation": "search-shopify-liquid-documentation",

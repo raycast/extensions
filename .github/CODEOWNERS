@@ -153,7 +153,7 @@
 /extensions/ccf-what                                                @CrackedPoly
 /extensions/center                                                  @enesozturk
 /extensions/chakra-ui-docs                                          @pgvr @Ansub
-/extensions/change-case                                             @erics118 @pernielsentikaer @nagauta
+/extensions/change-case                                             @erics118 @pernielsentikaer @nagauta @PWrzesinski
 /extensions/change-scroll-direction                                 @gregoralbrecht @emilshr
 /extensions/charged                                                 @apoorvsadana
 /extensions/charming-chatgpt                                        @KittenYang
@@ -1134,6 +1134,7 @@
 /extensions/search-mdn                                              @krzysztofzuraw @OBQun @k8scat @j3lte
 /extensions/search-notion                                           @sadanand-singh @erikjs14
 /extensions/search-npm                                              @mrmartineau @reloadedhead @TimonVS @luisFilipePT @LunaticMuch @jomifepe @j3lte
+/extensions/search-private-npm-packages                             @HsiuCL
 /extensions/search-regexp                                           @musienkoyuriy @pernielsentikaer
 /extensions/search-rubygems                                         @aleks
 /extensions/search-shopify-liquid-documentation                     @maximedaraize
@@ -1463,7 +1464,7 @@
 /extensions/yabai                                                   @krzysztoff1
 /extensions/yafw                                                    @pablopunk
 /extensions/yandex-music                                            @AlexStrNik
-/extensions/year-in-progress                                        @thomaspaulmann @anothertempore
+/extensions/year-in-progress                                        @thomaspaulmann @anothertempore @akshykhade
 /extensions/yopass                                                  @ricoberger
 /extensions/you-com-search                                          @smian1
 /extensions/youdao-translate                                        @tiancheng92
