@@ -13,6 +13,7 @@
     {
       "name": "start-task-with-selected-text",
       "title": "Start Task with Selected Text",
+      "subtitle": "Copilot Workspace",
       "description": "Open selected text as a task in Copilot Workspace",
       "mode": "no-view",
       "arguments": [
@@ -26,6 +27,7 @@
     {
       "name": "start-task",
       "title": "Start Task",
+      "subtitle": "Copilot Workspace",
       "description": "Start a new task in Copilot Workspace",
       "mode": "view"
     }
