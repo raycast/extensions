@@ -1,8 +1,12 @@
 # Linear Changelog
 
+## [New icons] - 2024-04-26
+
+- Use new Linear icons
+
 ## [Fix Creating issue with milestone] - 2024-04-23
 
-Fix defining milestoneId in payload.
+- Fix defining `milestoneId` in payload.
 
 ## [Enhanced Notifications] - 2024-03-12
 
