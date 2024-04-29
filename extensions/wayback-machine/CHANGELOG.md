@@ -1,5 +1,9 @@
 # Wayback Machine Changelog
 
+## [Add Browser Extension launch] - 2024-04-29
+
+- Add command that will get the url from the current open tab in your browser and open the `Open in Wayback Machine` command with this url
+
 ## [Update] - 2023-10-08
 
 Add multi URL support with a new view command
