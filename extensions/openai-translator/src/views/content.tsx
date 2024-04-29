@@ -17,15 +17,21 @@ import { getModeActionSection } from "../actions/mode";
 import { HistoryHook, Record } from "../hooks/useHistory";
 import { useProxy } from "../hooks/useProxy";
 import { QueryHook } from "../hooks/useQuery";
-import { getProvider } from "../providers";
 import { detectLang } from "../providers/lang";
 import { TranslateMode, TranslateQuery } from "../providers/types";
 import { DetailView } from "./detail";
 import { EmptyView } from "./empty";
+import { getErrorText } from "../providers/utils";
+import { Provider } from "../providers/base";
+import { getProviderActionSection } from "../actions/provider";
+import { ProvidersHook } from "../hooks/useProvider";
+import { createProvider } from "../providers";
 
 export interface ContentViewProps {
   query: QueryHook;
   history: HistoryHook;
+  provider: Provider;
+  providerHook: ProvidersHook | null;
   mode: TranslateMode;
   setMode: (value: TranslateMode) => void;
   setSelectedId: (value: string) => void;
@@ -52,15 +58,6 @@ type FinishReason = {
   img: string | undefined;
 };
 
-const { provider: providerName } = getPreferenceValues<{
-  entrypoint: string;
-  apikey: string;
-  apiModel: string;
-  provider: string;
-}>();
-
-const provider = getProvider(providerName);
-
 const { alwayShowMetadata } = getPreferenceValues<{
   alwayShowMetadata: boolean;
 }>();
@@ -70,18 +67,19 @@ const { isAutoCopy2Clipboard } = getPreferenceValues<{
 }>();
 
 export const ContentView = (props: ContentViewProps) => {
-  const { query, history, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
+  const { query, history, provider, providerHook, mode, setMode, setSelectedId, setIsInit, setIsEmpty } = props;
   const agent = useProxy();
   const [data, setData] = useState<ViewItem[]>();
   const [querying, setQuerying] = useState<Querying | null>();
   const [finishReason, setFinishReason] = useState<FinishReason | null>();
   const [translatedText, setTranslatedText] = useState("");
   const [showMetadata, setShowMetadata] = useState(alwayShowMetadata);
-
+  const [activeRecord, setActiveRecord] = useState({ provider, id: providerHook?.selected?.id });
+  const activeProvider = activeRecord.provider;
   function updateData() {
     if (history.data) {
       const sortedResults = history.data.sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       );
       if (querying == null) {
         setData(sortedResults);
@@ -115,7 +113,7 @@ export const ContentView = (props: ContentViewProps) => {
         error: message,
       },
       ocrImg: img,
-      provider: providerName,
+      provider: activeProvider.name,
     };
     history.add(record);
     setFinishReason(null);
@@ -152,7 +150,7 @@ export const ContentView = (props: ContentViewProps) => {
         text: newText,
       },
       ocrImg: img,
-      provider: providerName,
+      provider: activeProvider.name,
     };
     history.add(record);
     setFinishReason(null);
@@ -199,10 +197,32 @@ export const ContentView = (props: ContentViewProps) => {
         text,
         detectFrom,
         detectTo,
-        onMessage: (message) => {
-          if (message.role) {
-            return;
-          }
+      },
+      id: "querying",
+    };
+    setTranslatedText("");
+    setQuerying(_querying);
+    query.updateText("");
+    try {
+      const translationStream = activeProvider.translate(_querying.query);
+      for await (const message of translationStream) {
+        // console.debug("=====ui====");
+        // console.debug(message);
+        if (typeof message === "string") {
+          setFinishReason({
+            reason: message,
+            error: `failed: ${message}`,
+            toast,
+            detectFrom,
+            detectTo,
+            text,
+            img,
+          });
+          return;
+        } else {
+          // if (message.role) {
+          //   continue;
+          // }
           // setIsWordMode(message.isWordMode)
           setTranslatedText((txt) => {
             if (message.isFullText) {
@@ -210,36 +230,20 @@ export const ContentView = (props: ContentViewProps) => {
             }
             return txt + message.content;
           });
-        },
-        onFinish: (reason) => {
-          setFinishReason({
-            reason,
-            error: `failed: ${reason}`,
-            toast,
-            detectFrom,
-            detectTo,
-            text,
-            img,
-          });
-        },
-        onError: (error) => {
-          setFinishReason({
-            reason: "error",
-            error,
-            toast,
-            detectFrom,
-            detectTo,
-            text,
-            img,
-          });
-        },
-      },
-      id: "querying",
-    };
-    setTranslatedText("");
-    setQuerying(_querying);
-    query.updateText("");
-    provider.translate(_querying.query);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      setFinishReason({
+        reason: "error",
+        error: getErrorText(error),
+        toast,
+        detectFrom,
+        detectTo,
+        text,
+        img,
+      });
+    }
   }
 
   useEffect(() => {
@@ -305,6 +309,13 @@ export const ContentView = (props: ContentViewProps) => {
       {getModeActionSection((mode) => {
         setMode(mode);
       })}
+      {providerHook &&
+        getProviderActionSection(providerHook, activeRecord.id, (record) => {
+          setActiveRecord({
+            provider: createProvider(record.type, record.props),
+            id: record.id,
+          });
+        })}
       <ActionPanel.Section title="Options">
         <Action
           title={showMetadata ? "Hide Metadata" : "Show Metadata"}
@@ -318,7 +329,7 @@ export const ContentView = (props: ContentViewProps) => {
       <ActionPanel.Section title="History">
         <Action
           title="Delete Item"
-          icon={Icon.Trash}
+          icon={{ source: Icon.Trash, tintColor: "red" }}
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
@@ -363,7 +374,7 @@ export const ContentView = (props: ContentViewProps) => {
             id={item.id}
             key={item.id}
             title={item.query.text}
-            accessories={[{ text: `#${i + 1}` }]}
+            accessories={[{ text: `#${i}` }]}
             actions={getQueryingActionPanel()}
             detail={
               <DetailView
@@ -374,7 +385,7 @@ export const ContentView = (props: ContentViewProps) => {
                 mode={querying ? querying.query.mode : "translate"}
                 ocrImg={query.ocrImage}
                 to={query.to}
-                provider={providerName}
+                provider={activeProvider.name}
               />
             }
           />

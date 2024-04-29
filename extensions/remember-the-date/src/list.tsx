@@ -1,21 +1,13 @@
 import { List, ActionPanel, Action, Icon, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
-import { useEffect, useState } from "react";
 import moment from "moment";
-import { pluralize } from "./utils";
+import { refreshMenuBar, pluralize } from "./utils";
 import { Item, ListItems, Preferences } from "./types";
 import { EditForm } from "./editForm";
 import { getItems, saveItems } from "./storage";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const [connectionsList, setConnectionsList] = useState<ListItems[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      setConnectionsList(await getFormattedList());
-      setLoading(false);
-    })();
-  }, []);
+  const { data: datesList, isLoading, mutate } = useCachedPromise(getFormattedList, []);
 
   async function handleCreate(item: Item) {
     let items: Item[] = await getItems();
@@ -23,7 +15,8 @@ export default function Command() {
     items.push(item);
 
     await saveItems(items);
-    setConnectionsList(await getFormattedList());
+    await mutate(getFormattedList());
+    await refreshMenuBar();
   }
 
   async function removeItem(item: Item) {
@@ -31,13 +24,14 @@ export default function Command() {
     items = items.filter((i) => i.id !== item.id);
 
     await saveItems(items);
-    setConnectionsList(await getFormattedList());
+    await mutate(getFormattedList());
+    await refreshMenuBar();
   }
 
   return (
-    <List isLoading={loading}>
+    <List isLoading={isLoading}>
       <List.EmptyView title="No dates added" description="Add a date to get started" />
-      {connectionsList.map((section) => {
+      {datesList?.map((section) => {
         return (
           <List.Section
             title={section.title}
@@ -47,7 +41,7 @@ export default function Command() {
             {section.items.map((item: Item) => (
               <List.Item
                 id={item.id}
-                key={item.name}
+                key={item.id}
                 icon={{ source: item.icon, tintColor: item.color }}
                 title={item.name}
                 subtitle={item.subtitle}
@@ -112,7 +106,7 @@ function Actions({
   );
 }
 
-async function getFormattedList() {
+export async function getFormattedList() {
   const items: Item[] = await getItems();
   const now = new Date().getTime();
   const dates = [];

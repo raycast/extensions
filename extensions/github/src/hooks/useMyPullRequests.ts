@@ -67,7 +67,7 @@ export function useMyPullRequests(repository: string | null) {
       ...(reviewRequestsClosed || []),
       ...(reviewedByClosed || []),
     ],
-    "pullRequest.id",
+    "id",
   );
 
   const prIds: string[] = [];
@@ -90,7 +90,7 @@ export function useMyPullRequests(repository: string | null) {
       const pullRequests = getPullRequestsWithoutDuplicates(section.pullRequests);
       pullRequests?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
 
-      const subtitle = pluralize(pullRequests?.length ?? 0, "Pull Request", { withNumber: true });
+      const subtitle = pluralize(pullRequests?.length ?? 0, "pull request", { withNumber: true });
 
       return { ...section, subtitle, pullRequests };
     });

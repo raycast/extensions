@@ -1,5 +1,7 @@
 # Google Translate Changelog
 
+## [Re-added previously removed contributor] - 2024-04-26
+
 ## [Fix] - 2024-03-08
 
  - Return back `CMD+Enter` shortcut for `Toggle Full Text` action

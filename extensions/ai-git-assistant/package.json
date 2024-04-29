@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-git-assistant",
+  "title": "AI Git Assistant",
+  "description": "Your personal AI assistant for Git commit operations such as generating commit messages and PR descriptions",
+  "icon": "extension-icon.png",
+  "author": "popalay",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-commit-message",
+      "title": "Generate Commit Message",
+      "description": "Transform your git diff and status output into a commit message using AI",
+      "mode": "view"
+    },
+    {
+      "name": "generate-pr-description",
+      "title": "Generate PR Description",
+      "description": "Transform your git diff into a PR description using AI",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "commit-message-prompt",
+      "description": "AI prompt for commit message generation",
+      "type": "textfield",
+      "required": false,
+      "title": "Commit message prompt",
+      "default": "Give me a Git commit message. I'll provide you with the git status and git diff output. The commit message should: 1. Begin with a short summary, written in the imperative tense, like 'Fix bug,' and not 'Fixed bug'. The summary should not contain any period at the end and should not exceed 60 characters. 2. Followed by a more detailed explanatory text, which should be wrapped to 72 characters per line. 3. Have a blank line separating the summary from the detailed explanatory text. 4. Use bullet points for multiple changes-use a hyphen or asterisk as bullet symbols, followed by a space. 5. Include the ticket number deduced from the branch name in the subject, if available. The formats can be: For 'dev/ABC-fix', the ticket number is [ABC]. For 'dev/ABC-1234-fix', the ticket number is [ABC-1234]. For 'dev/fix-smth', there's no ticket number. The result should be: ticket number short summary Detailed explanatory text."
+    },
+    {
+      "name": "pr-description-prompt",
+      "description": "AI prompt for PR description generation",
+      "type": "textfield",
+      "required": false,
+      "title": "PR description prompt",
+      "default": "Write a pull request description focusing on the motivation behind the change and why it improves the project. Go straight to the point. The format of the description should be # Description Short pr description, ## Changes Bullet list with changes, ## Issues Issues related to the PR (use jira tickets from the commits, do not add this secrion if no issues)."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.13.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

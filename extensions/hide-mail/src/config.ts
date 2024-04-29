@@ -6,5 +6,6 @@ export const getHeaders = (token: string) => {
     "Content-Type": "application/json",
     Accept: "application/json",
     "X-Custom-Agent": "Raycast",
+    "X-Custom-Agent-Version": "1.0.1",
   };
 };

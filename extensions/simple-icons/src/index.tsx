@@ -1,7 +1,19 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Cache, Clipboard, Detail, Grid, Icon, Toast, showHUD, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Cache,
+  Clipboard,
+  Detail,
+  Grid,
+  Icon,
+  Toast,
+  getPreferenceValues,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { titleToSlug } from "simple-icons/sdk";
-import { Supports, CopySvg, OpenWith } from "./actions.js";
+import { Supports, actions, defaultActionsOrder } from "./actions.js";
 import { loadLatestVersion, loadJson, cleanSavedPaths, initSavePath, getAliases } from "./utils.js";
 import { IconJson, IconData } from "./types.js";
 
@@ -55,6 +67,15 @@ export default function Command() {
     })();
   }, []);
 
+  const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
+  const DefaultAction = actions[defaultDetailAction];
+
+  const restActions = defaultActionsOrder
+    .filter((id) => id !== defaultDetailAction)
+    .map((actionId) => {
+      return actions[actionId];
+    });
+
   return (
     <Grid
       columns={itemDisplayColumns[itemSize]}
@@ -78,9 +99,7 @@ export default function Command() {
         icons.map((icon) => {
           const slug = icon.slug || titleToSlug(icon.title);
 
-          const simpleIconsCdnLink = `https://cdn.simpleicons.org/${slug}`;
           const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg`;
-          const unpkgCdnLink = `https://unpkg.com/simple-icons@${version}/icons/${slug}.svg`;
           const aliases = getAliases(icon);
 
           return (
@@ -161,27 +180,12 @@ export default function Command() {
                           actions={
                             <ActionPanel>
                               <ActionPanel.Section>
-                                <CopySvg slug={slug} version={version} />
-                                <Action.CopyToClipboard title="Copy Color" content={icon.hex} />
-                                <Action.CopyToClipboard
-                                  title="Copy Slug"
-                                  content={slug}
-                                  shortcut={{ modifiers: ["opt"], key: "enter" }}
-                                />
-                                <Action.CopyToClipboard
-                                  title="Copy CDN Link"
-                                  content={simpleIconsCdnLink}
-                                  shortcut={{ modifiers: ["shift"], key: "enter" }}
-                                />
-                                <Action.CopyToClipboard title="Copy jsDelivr CDN Link" content={jsdelivrCdnLink} />
-                                <Action.CopyToClipboard
-                                  // eslint-disable-next-line @raycast/prefer-title-case
-                                  title="Copy unpkg CDN Link"
-                                  content={unpkgCdnLink}
-                                />
+                                <DefaultAction icon={icon} version={version} />
                               </ActionPanel.Section>
                               <ActionPanel.Section>
-                                <OpenWith slug={slug} version={version} />
+                                {restActions.map((A, index) => (
+                                  <A key={`action-String(${index})`} icon={icon} version={version} />
+                                ))}
                               </ActionPanel.Section>
                               <ActionPanel.Section>
                                 <Supports />

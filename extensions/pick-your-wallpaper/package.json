@@ -5,7 +5,7 @@
   "description": "Lets you pick a wallpaper from a folder of finder.",
   "icon": "command-icon.png",
   "author": "hugomarfani",
-  "contributors": [
+  "pastContributors": [
     "danulqua"
   ],
   "categories": [

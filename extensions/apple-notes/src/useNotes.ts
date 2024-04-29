@@ -1,5 +1,6 @@
-import { resolve } from "path";
 import { homedir } from "os";
+import { resolve } from "path";
+
 import { showFailureToast, useSQL } from "@raycast/utils";
 import { partition } from "lodash";
 

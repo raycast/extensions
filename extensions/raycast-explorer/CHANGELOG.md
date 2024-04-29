@@ -1,5 +1,18 @@
 # Prompt Explorer Extension Changelog
 
+## [Fixes] - 2024-04-25
+
+- Fix icon for the `None` creativity level in the `Explore Prompts` command.
+
+## [Add Explore Presets] - 2024-04-16
+
+- Add command for exploring Presets
+- Update icons for creativity
+
+## [Improvements] - 2024-04-16
+
+- Add browser prompts and new models
+
 ## [Fixes] - 2023-02-28
 
 - Fix custom prompt example.

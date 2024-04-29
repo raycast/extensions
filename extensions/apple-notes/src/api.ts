@@ -1,4 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
+
 import { escapeDoubleQuotes } from "./helpers";
 
 export async function createNote(text?: string) {
@@ -12,6 +13,7 @@ export async function createNote(text?: string) {
         set body of newNote to "${escapedText}"
       end if
       set selection to newNote
+      show newNote
     end tell
     `);
 }
@@ -60,6 +62,14 @@ export async function getNotePlainText(id: string) {
     tell application "Notes"
       set theNote to note id "${escapeDoubleQuotes(id)}"
       return plaintext of theNote
+    end tell
+    `);
+}
+export async function setNoteBody(id: string, body: string) {
+  return runAppleScript(`
+    tell application "Notes"
+      set theNote to note id "${escapeDoubleQuotes(id)}"
+      set body of theNote to "${escapeDoubleQuotes(body)}"
     end tell
     `);
 }

@@ -7,7 +7,8 @@
     "author": "sasivarnan",
     "contributors": [
         "erics118",
-        "bbatsche"
+        "bbatsche",
+        "iamyeizi"
     ],
     "categories": [
         "System"
@@ -19,7 +20,24 @@
             "name": "toggle-low-power-mode",
             "description": "Toggle Low Power Mode of the System",
             "mode": "no-view"
-        }
+        },
+        {
+            "name": "lowpower-menubar",
+            "title": "Menu Bar Low Power Mode",
+            "description": "See status of Low Power Mode toggle on the menubar",
+            "mode": "menu-bar",
+            "interval": "5m",
+            "preferences": [
+              {
+                "name": "hideIconWhenDisabled",
+                "description": "Hide the icon in the Menu Bar when Low Power Mode is disabled",
+                "type": "checkbox",
+                "label": "Hide icon when disabled",
+                "default": false,
+                "required": false
+              }
+            ]
+          }
     ],
     "dependencies": {
         "@raycast/api": "^1.67.1",

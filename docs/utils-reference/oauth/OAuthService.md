@@ -18,7 +18,7 @@ const client = new OAuth.PKCEClient({
 const github = new OAuthService({
   client,
   clientId: "7235fe8d42157f1f38c0",
-  scopes: "notifications repo read:org read:user read:project",
+  scope: "notifications repo read:org read:user read:project",
   authorizeUrl: "https://github.oauth.raycast.com/authorize",
   tokenUrl: "https://github.oauth.raycast.com/token",
 });

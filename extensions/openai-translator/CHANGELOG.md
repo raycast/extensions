@@ -1,9 +1,31 @@
 # OpenAI Translator Changelog
 
-## [Toggle Auto copy to clipboard after translation]
+## [Toggle Auto copy to clipboard after translation] - {PR_MERGE_DATE}
 
 - Add preference to auto on/off copy to clipboard after translation @joyg
 
+## [Rewrite Multiple LLM Provider] - 2024-03-29
+
+- More LLM Provider Support:
+  - Gemini
+  - Claude AI
+  - Groq
+  - Moonshot
+  - Ollama
+- More OCR Language Support for macOS 14
+  - 粤语（简体）
+  - 粵語（正體）
+  - 한국어
+  - 日本語
+  - Русский
+  - Українська
+  - ภาษาไทย
+  - Tiếng Việt
+- Custom model support for OpenAI by @Sped0n
+- Added ability to switch providers within the content view
+- Fixed History issue
+- Fixed content refresh issue
+- Remove PaLM2 support
 
 ## [Toggle metadata visiability] - 2023-09-14
 

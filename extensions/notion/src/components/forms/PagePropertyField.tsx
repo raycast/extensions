@@ -41,7 +41,13 @@ export function createConvertToFieldFunc(
       case "formula":
         return null;
       default:
-        return <Form.TextField placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)} />;
+        return (
+          <Form.TextField
+            info="Supports a single line of inline Markdown"
+            placeholder={placeholder}
+            {...itemPropsFor<typeof property.type>(property)}
+          />
+        );
     }
   };
 }

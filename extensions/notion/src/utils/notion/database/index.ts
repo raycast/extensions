@@ -179,7 +179,7 @@ export async function createDatabasePage(values: Form.Values) {
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to create page", undefined);
+    throw new Error("Failed to create page", { cause: err });
   }
 }
 
@@ -205,6 +205,7 @@ export async function deleteDatabase(databaseId: string) {
     return handleError(err, "Failed to delete database", undefined);
   }
 }
+
 export interface Database {
   id: string;
   last_edited_time: number;

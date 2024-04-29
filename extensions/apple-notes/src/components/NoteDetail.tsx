@@ -1,8 +1,10 @@
 import { Detail } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { NodeHtmlMarkdown } from "node-html-markdown";
-import { NoteItem, useNotes } from "../useNotes";
+
 import { getNoteBody } from "../api";
+import { NoteItem, useNotes } from "../useNotes";
+
 import NoteActions from "./NoteActions";
 
 type NoteDetailProps = {

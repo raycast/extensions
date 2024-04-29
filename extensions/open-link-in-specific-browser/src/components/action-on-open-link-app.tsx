@@ -76,7 +76,7 @@ export function ActionOnOpenLinkApp(props: {
                     await clearRank(openLinkApplication, openLinkApplications);
                     setRefresh(Date.now());
                     await showToast(Toast.Style.Success, `Rank of ${openLinkApplication.name} Reset!`);
-                  }
+                  },
                 );
               }}
             />
@@ -94,7 +94,7 @@ export function ActionOnOpenLinkApp(props: {
                     await clearAllRank(openLinkApplications);
                     setRefresh(Date.now());
                     await showToast(Toast.Style.Success, "Rank of All Reset!");
-                  }
+                  },
                 );
               }}
             />

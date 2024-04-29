@@ -13,22 +13,23 @@
     "StevenRCE0",
     "HelloImSteven",
     "tylerwince",
-    "thomaslombart"
+    "thomaslombart",
+    "xilopaint"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Search Notes",
-      "subtitle": "Notes",
-      "description": "Search notes in the Apple Notes app.",
+      "subtitle": "Apple Notes",
+      "description": "Search through your Apple notes.",
       "mode": "view"
     },
     {
       "name": "new",
       "title": "New Note",
-      "subtitle": "Notes",
-      "description": "Create a new note in the Apple Notes app.",
+      "subtitle": "Apple Notes",
+      "description": "Create a new note in your Apple Notes.",
       "mode": "no-view",
       "keywords": [
         "write note",
@@ -47,8 +48,8 @@
     {
       "name": "ai",
       "title": "AI Note",
-      "subtitle": "Notes",
-      "description": "Create a new note filled with AI in the Apple Notes app.",
+      "subtitle": "Apple Notes",
+      "description": "Create a new note filled with AI in your Apple notes.",
       "mode": "no-view",
       "arguments": [
         {
@@ -67,8 +68,8 @@
     {
       "name": "menu-bar",
       "title": "Menu Bar Notes",
-      "subtitle": "Notes",
-      "description": "View your recent and pinned notes in the menu bar.",
+      "subtitle": "Apple Notes",
+      "description": "View your recent and pinned Apple notes in the menu bar.",
       "mode": "menu-bar",
       "preferences": [
         {
@@ -80,6 +81,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "add-text",
+      "title": "Add Text to Note",
+      "subtitle": "Apple Notes",
+      "description": "Add some text to an Apple note.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -143,8 +151,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.2",
-    "@raycast/utils": "^1.13.4",
+    "@raycast/api": "^1.71.0",
+    "@raycast/utils": "^1.14.0",
     "date-fns": "^3.6.0",
     "lodash": "^4.17.21",
     "node-html-markdown": "^1.3.0"
@@ -155,6 +163,7 @@
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.67",
     "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
     "prettier": "3.2.5",
     "react": "^18.2.0",
     "typescript": "^5.4.3"
@@ -163,6 +172,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fix-lint": "ray lint --fix"
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

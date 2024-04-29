@@ -5,9 +5,8 @@ import { getMyTimeEntries } from "../api";
 
 export function useTimeEntries() {
   const startDateRef = useRef(dayjs().subtract(1, "week").toDate());
-  const endDateRef = useRef(dayjs().toDate());
   const { data, error, isLoading, revalidate } = useSafeCachedPromise(
-    () => getMyTimeEntries({ startDate: startDateRef.current, endDate: endDateRef.current, includeMetadata: true }),
+    () => getMyTimeEntries({ startDate: startDateRef.current, endDate: dayjs().toDate(), includeMetadata: true }),
     [],
     { initialData: [] },
   );

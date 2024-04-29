@@ -12,34 +12,32 @@ import {
   closeMainWindow,
   useNavigation,
   showHUD,
+  AI,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { NoteItem, useNotes } from "../useNotes";
-import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api";
-import NoteDetail from "./NoteDetail";
-import { fileIcon } from "../helpers";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { NodeHtmlMarkdown } from "node-html-markdown";
+import { useState } from "react";
+
+import { NoteTitle } from "..";
+import { deleteNoteById, restoreNoteById, openNoteSeparately, getNotePlainText, getNoteBody } from "../api";
+import { fileIcon } from "../helpers";
+import { NoteItem, useNotes } from "../useNotes";
+
+import AddTextForm from "./AddTextForm";
+import NoteDetail from "./NoteDetail";
 
 const preferences = getPreferenceValues<Preferences>();
 
 type NoteActionsProps = {
   note: NoteItem;
+  noteTitles?: NoteTitle[];
   mutate: ReturnType<typeof useNotes>["mutate"];
   isDeleted?: boolean;
   isDetail?: boolean;
 };
 
-export default function NoteActions({ note, isDeleted, isDetail, mutate }: NoteActionsProps) {
+export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mutate }: NoteActionsProps) {
   const { pop } = useNavigation();
-
-  async function openNoteInSeparateWindow() {
-    try {
-      await openNoteSeparately(note.id);
-      await closeMainWindow();
-    } catch (error) {
-      await showFailureToast(error, { title: "Could not open note" });
-    }
-  }
 
   async function deleteNote() {
     try {
@@ -86,28 +84,15 @@ export default function NoteActions({ note, isDeleted, isDetail, mutate }: NoteA
     }
   }
 
-  const getOpenNotesAction = (separately?: boolean, shortcut?: Keyboard.Shortcut) =>
-    separately ? (
-      <Action
-        title="Open in a Separate Window"
-        icon={Icon.NewDocument}
-        onAction={openNoteInSeparateWindow}
-        shortcut={shortcut}
-      />
-    ) : (
-      <Action.Open
-        title="Open in Notes"
-        target={`notes://showNote?identifier=${note.UUID}`}
-        icon={{ fileIcon }}
-        application="com.apple.notes"
-        shortcut={shortcut}
-      />
-    );
+  const primaryOpen = isDeleted ? (
+    <OpenNoteAction note={note} />
+  ) : (
+    <OpenNoteAction note={note} separately={preferences.openSeparately} />
+  );
 
-  const primaryOpen = isDeleted ? getOpenNotesAction() : getOpenNotesAction(preferences.openSeparately);
-  const secondaryOpen = isDeleted
-    ? null
-    : getOpenNotesAction(!preferences.openSeparately, Keyboard.Shortcut.Common.Open);
+  const secondaryOpen = isDeleted ? null : (
+    <OpenNoteAction note={note} separately={!preferences.openSeparately} shortcut={Keyboard.Shortcut.Common.Open} />
+  );
 
   return (
     <ActionPanel>
@@ -119,41 +104,44 @@ export default function NoteActions({ note, isDeleted, isDetail, mutate }: NoteA
       />
       {secondaryOpen}
 
-      {isDeleted ? (
-        <Action
-          title="Restore to Notes Folder"
-          icon={Icon.ArrowCounterClockwise}
-          onAction={restoreNote}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      <ActionPanel.Section>
+        <Action.Push
+          title="Add Text to Note"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          target={<AddTextForm noteId={note.id} />}
         />
-      ) : (
-        <Action
-          title="Delete Note"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={deleteNote}
-          shortcut={Keyboard.Shortcut.Common.Remove}
-        />
-      )}
+
+        {noteTitles ? <RelatedNotes noteTitles={noteTitles} note={note} /> : null}
+
+        {isDeleted ? (
+          <Action
+            title="Restore to Notes Folder"
+            icon={Icon.ArrowCounterClockwise}
+            onAction={restoreNote}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          />
+        ) : (
+          <Action
+            title="Delete Note"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={deleteNote}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+          />
+        )}
+      </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action.CopyToClipboard
           title="Copy Note URL"
           content={{
-            html: `<a href="notes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
-            text: `notes://showNote?identifier=${note.UUID}`,
+            html: `<a href="applenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
+            text: `applenotes://showNote?identifier=${note.UUID}`,
           }}
           shortcut={Keyboard.Shortcut.Common.Copy}
         />
 
-        <Action.CopyToClipboard
-          title="Copy Mobile Note URL"
-          content={{
-            html: `<a href="mobilenotes://showNote?identifier=${note.UUID}" title="${note.title}">${note.title}</a>`,
-            text: `mobilenotes://showNote?identifier=${note.UUID}`,
-          }}
-          shortcut={Keyboard.Shortcut.Common.CopyPath}
-        />
         {note.invitationLink ? (
           <Action.CopyToClipboard
             title="Copy Invitation Link"
@@ -215,5 +203,115 @@ export default function NoteActions({ note, isDeleted, isDetail, mutate }: NoteA
         </ActionPanel.Section>
       ) : null}
     </ActionPanel>
+  );
+}
+
+type OpenNoteActionProps = {
+  note: NoteItem;
+  separately?: boolean;
+  shortcut?: Keyboard.Shortcut;
+};
+
+function OpenNoteAction({ note, separately, shortcut }: OpenNoteActionProps) {
+  async function openNoteInSeparateWindow() {
+    try {
+      await openNoteSeparately(note.id);
+      await closeMainWindow();
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not open note" });
+    }
+  }
+
+  if (separately) {
+    return (
+      <Action
+        title="Open in a Separate Window"
+        icon={Icon.NewDocument}
+        onAction={openNoteInSeparateWindow}
+        shortcut={shortcut}
+      />
+    );
+  } else {
+    return (
+      <Action.Open
+        title="Open in Notes"
+        target={`applenotes://showNote?identifier=${note.UUID}`}
+        icon={{ fileIcon }}
+        application="com.apple.notes"
+        shortcut={shortcut}
+      />
+    );
+  }
+}
+
+type RelatedNotesProps = {
+  noteTitles?: NoteTitle[];
+  note: NoteItem;
+};
+
+function RelatedNotes({ noteTitles, note }: RelatedNotesProps) {
+  const [load, setLoad] = useState(false);
+
+  const { data, isLoading } = usePromise(
+    async () => {
+      const prompt = `Find relevant notes to the following note:
+
+"""
+${note.title}
+"""
+
+Here are all of the notes titles with their UUIDs:
+${JSON.stringify(noteTitles, null, 2)}
+
+Return the output as a JSON array containing only the UUIDs of the related notes. The UUIDs should be in the following format:
+["8743E9E4-CDB6-4026-8D62-0D2FD0B410F6","D75A980D-C5C4-4354-9216-4BA3B7C0F35F","11533A9C-9633-4424-A2C1-3E5FF6CE2A81"]
+
+Only return a minified JSON array that is parsable, nothing else. Try to find between 3 to 10 related notes, even if they are not perfect matches.`;
+      const result = await AI.ask(prompt, { model: "anthropic-claude-haiku" });
+      // Because the AI can be dumb sometimes, let's use a regex to extract a JSON array from the response
+      const jsonRegex = /\[.*\]/;
+      const match = result.match(jsonRegex)?.[0];
+      if (!match) throw new Error("Invalid response from AI model");
+      const noteIds = JSON.parse(match);
+      // The AI model might return the UUID of the original note, so we need to filter it out
+      const noteIdsWithoutOriginalNote = noteIds.filter((id: string) => id !== note.UUID);
+      const relatedNotes = noteTitles?.filter((n) => noteIdsWithoutOriginalNote.includes(n.uuid));
+      return relatedNotes;
+    },
+    [],
+    {
+      execute: load,
+      onError(error) {
+        showFailureToast(error, { title: "Could not find related notes" });
+      },
+    },
+  );
+
+  return (
+    <ActionPanel.Submenu
+      title="Find Related Notes"
+      isLoading={isLoading}
+      icon={Icon.Stars}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+      onOpen={() => setLoad(true)}
+    >
+      {isLoading ? (
+        <Action title="Finding Related Notes…" icon={Icon.MagnifyingGlass} />
+      ) : (
+        data?.map((note) => {
+          if (!note) return null;
+
+          return (
+            <Action.Open
+              key={note.uuid}
+              title={note.title}
+              target={`applenotes://showNote?identifier=${note.uuid}`}
+              icon={{ fileIcon }}
+              application="com.apple.notes"
+            />
+          );
+        })
+      )}
+    </ActionPanel.Submenu>
   );
 }

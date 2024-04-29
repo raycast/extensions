@@ -5,9 +5,7 @@
   "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
   "icon": "dashlane-512.png",
   "author": "tm.wrnr",
-  "categories": [
-    "Security"
-  ],
+  "categories": ["Security"],
   "license": "MIT",
   "commands": [
     {
@@ -41,22 +39,38 @@
       "required": false,
       "title": "Dashlane CLI path",
       "type": "textfield"
+    },
+    {
+      "name": "masterPassword",
+      "title": "Master Password",
+      "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "biometrics",
+      "title": "Biometrics",
+      "description": "Should be enabled, if you configured the Dashlane CLI to use biometrics.",
+      "type": "checkbox",
+      "label": "Use biometrics to unlock the vault",
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.0",
+    "execa": "^8.0.1",
     "valibot": "~0.28.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",
     "@total-typescript/ts-reset": "^0.5.1",
-    "@types/node": "^20.8.10",
+    "@types/node": "^20.11.30",
     "@types/react": "18.2.31",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "prettier-plugin-organize-imports": "^3.2.3",
-    "typescript": "^5.2.2"
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
