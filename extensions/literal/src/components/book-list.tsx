@@ -17,13 +17,22 @@ interface ReadingStates {
 
 const BookList: React.FC = () => {
   const { loading, data } = useQuery<ReadingStates>(GET_BOOKS, {
-    onError: () => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load your books",
-      });
+    onError: (error) => {
+      if (error.graphQLErrors) {
+        const graphqlError = error.graphQLErrors[0];
+        showToast({
+          style: Toast.Style.Failure,
+          title: graphqlError.message,
+        });
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "An error occurred",
+        });
+      }
     },
   });
+
   const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
 
   const books = data?.myReadingStates || [];

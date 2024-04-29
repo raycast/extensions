@@ -30,21 +30,8 @@ function Literal() {
       LocalStorage.setItem("x-literal-token", login.token);
       setToken(login.token);
     },
-    onError: () => {
-      const options: Toast.Options = {
-        style: Toast.Style.Failure,
-        title: "Failed to login",
-        message: "Check credentials and try again",
-        primaryAction: {
-          title: "Go to https://literal.club",
-          onAction: (toast) => {
-            open("https://literal.club");
-            toast.hide();
-          },
-        },
-      };
-      openExtensionPreferences();
-      showToast(options);
+    onError: (error) => {
+      console.error(error);
     },
   });
 
