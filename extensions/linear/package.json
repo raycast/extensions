@@ -76,9 +76,12 @@
     },
     {
       "name": "assigned-issues",
-      "title": "Assigned Issues",
+      "title": "My Issues",
       "description": "View and modify issues that are assigned to you.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "assigned"
+      ]
     },
     {
       "name": "created-issues",
@@ -223,7 +226,7 @@
   ],
   "dependencies": {
     "@linear/sdk": "^13.0.0",
-    "@raycast/api": "^1.64.5",
+    "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.14.1",
     "date-fns": "^3.1.0",
     "file-type": "^18.7.0",
