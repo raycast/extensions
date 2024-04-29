@@ -45,12 +45,18 @@ const fuse = new Fuse(names, options);
 async function checkForResults() {
 	popToRoot();
 	await showToast({
-		title: "No entry found 🚫",
+		title: "No entry found.",
 		style: Toast.Style.Failure,
 		// clearRootSearch: true,
 		// popToRootType: PopToRootType.Immediate,
 	});
 }
+
+const capitalize = (str: string) =>
+	str
+		.split(" ")
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(" ");
 
 export default function Command(props: LaunchProps<{ arguments: EntryArgument }>) {
 	const { entryName } = props.arguments;
@@ -64,7 +70,6 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 	}
 
 	const searchResult = fuse.search(entryName)[0].item.replace(/\s/g, "_");
-	console.log(searchResult);
 
 	const { isLoading, data } = useFetch<CreatureResponse>(
 		`https://botw-compendium.herokuapp.com/api/v3/compendium/entry/${searchResult}`,
@@ -75,7 +80,7 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 
 	const markdown = `# ${entry?.name.replace(/(^|\s)\S/g, (match: string) => match.toUpperCase())}
 
-	${entry?.description}
+${entry?.description}
 
 ![Entry Image](${entry?.image})
 `;
@@ -91,12 +96,20 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 			} else {
 				return (
 					<Detail.Metadata.TagList title="Drops">
-						{entry?.drops.map((index: string) => <Detail.Metadata.TagList.Item text={index} key={index} />)}
+						{entry?.drops.map((index: string) => (
+							<Detail.Metadata.TagList.Item
+								text={capitalize(index)}
+								key={index}
+								icon={{ source: `materialIcons/${index}.png` }}
+							/>
+						))}
 					</Detail.Metadata.TagList>
 				);
 			}
 		} else if (category?.category == "equipment") {
-			if (entry?.properties.attack > 0) {
+			if (entry?.properties.attack > 100000) {
+				return <Detail.Metadata.Label title="Attack" text={"∞"} />;
+			} else if (entry?.properties.attack > 0) {
 				return <Detail.Metadata.Label title="Attack" text={entry?.properties.attack.toString()} />;
 			} else if (entry?.properties.defense > 0) {
 				return <Detail.Metadata.Label title="Defense" text={entry?.properties.defense.toString()} />;
@@ -132,7 +145,7 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 				} else if (entry?.name == "ancient arrow") {
 					return (
 						<>
-							<Detail.Metadata.Label title="Elemental Effect" text={"Death."} />
+							<Detail.Metadata.Label title="Elemental Effect" text={"💀 Death."} />
 							<Detail.Metadata.Label title="Bonus Attack" text={"1.5x (only on bosses)"} />
 						</>
 					);
@@ -215,7 +228,18 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 					}
 				}
 			} else {
-				if (entry?.drops.length == 0) {
+				if (entry?.name == "blupee") {
+					return (
+						<>
+							<Detail.Metadata.TagList title="Drops">
+								<Detail.Metadata.TagList.Item
+									text={"Rupees"}
+									icon={{ source: "materialIcons/green rupee.png" }}
+								/>
+							</Detail.Metadata.TagList>
+						</>
+					);
+				} else if (!entry?.drops || entry?.drops.length == 0) {
 					return (
 						<>
 							<Detail.Metadata.TagList title="Drops">
@@ -228,7 +252,11 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 						<>
 							<Detail.Metadata.TagList title="Drops">
 								{entry?.drops.map((index: string) => (
-									<Detail.Metadata.TagList.Item text={index} key={index} />
+									<Detail.Metadata.TagList.Item
+										text={capitalize(index)}
+										key={index}
+										icon={{ source: `materialIcons/${index}.png` }}
+									/>
 								))}
 							</Detail.Metadata.TagList>
 						</>
@@ -238,6 +266,7 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 		}
 	}
 
+	console.log(searchResult);
 	if (isLoading) {
 		return (
 			<Detail
@@ -280,8 +309,10 @@ export default function Command(props: LaunchProps<{ arguments: EntryArgument }>
 						</Detail.Metadata.TagList>
 
 						<Detail.Metadata.Label
+							// icon={{source: "materialIcons/treasures.png"}}
 							title="Category"
-							text={entry?.category.replace(/(^|\s)\S/g, (match: string) => match.toUpperCase())}
+							icon={{ source: `materialIcons/${entry?.category}.png` }}
+							text={capitalize(entry?.category)}
 						/>
 					</Detail.Metadata>
 				}
