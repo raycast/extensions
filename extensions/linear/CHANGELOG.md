@@ -1,9 +1,13 @@
 # Linear Changelog
 
-## [Improvements] - 2024-04-17
+## [Improvements] - 2024-04-29
 
 - Add pagination when searching issues
 - Rename "Assigned Issues" to "My Issues"
+
+## [Fix Creating issue with milestone] - 2024-04-23
+
+Fix defining milestoneId in payload.
 
 ## [Enhanced Notifications] - 2024-03-12
 

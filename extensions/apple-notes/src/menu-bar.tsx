@@ -61,7 +61,9 @@ function NoteMenuBarItem({ note, openSeparately }: NoteMenuBarItemProps) {
       key={note.id}
       title={title}
       icon="note"
-      onAction={() => (openSeparately ? openNoteSeparately(note.id) : open(`notes://showNote?identifier=${note.UUID}`))}
+      onAction={() =>
+        openSeparately ? openNoteSeparately(note.id) : open(`applenotes://showNote?identifier=${note.UUID}`)
+      }
     />
   );
 }

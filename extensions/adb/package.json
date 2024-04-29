@@ -11,6 +11,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "adb-current-activity",
+      "title": "Current Activity",
+      "description": "Get the current activity name and put it in your clipboard",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "adb-screenshots",
       "title": "Take Screenshot",
       "description": "Takes a screenshot, saves it, and put it in your clipboard for easy-sharing",

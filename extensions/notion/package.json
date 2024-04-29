@@ -29,7 +29,17 @@
       "title": "Create Database Page",
       "subtitle": "Notion",
       "description": "Create a page in a Notion database.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "closeAfterCreate",
+          "type": "checkbox",
+          "label": "Close Raycast after creating the page",
+          "required": false,
+          "default": false,
+          "description": "This action will be set as the primary action (⌘ + ⏎)."
+        }
+      ]
     },
     {
       "name": "search-page",
@@ -101,8 +111,8 @@
   "dependencies": {
     "@mozilla/readability": "^0.5.0",
     "@notionhq/client": "^2.2.14",
-    "@raycast/api": "^1.68.1",
-    "@raycast/utils": "^1.12.5",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^3.3.1",
     "linkedom": "^0.16.8",

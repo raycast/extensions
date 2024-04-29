@@ -1,6 +1,6 @@
-# simple-icons-raycast
+# Brand Icons - simpleicons.org
 
-Browse, search, and copy 3100+ free SVG icons for popular brands.
+Browse, search, and copy 3100+ free SVG icons for popular brands from [Simple Icons](https://simpleicons.org).
 
 ## Disclaimer
 
@@ -18,8 +18,8 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 
 ## Links
 
-- [Request a new icon](https://github.com/simple-icons/simple-icons/issues/new?assignees=&labels=new+icon&template=icon_request.yml)
-- [Report an outdated icon](https://github.com/simple-icons/simple-icons/issues/new?assignees=&labels=icon+outdated&template=icon_update.yml)
+- [Request a new icon](https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml)
+- [Report an outdated icon](https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml)
 
 ## Related
 

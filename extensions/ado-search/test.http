@@ -10,6 +10,17 @@ Content-Type: application/json
 Authorization: Basic {{authToken}}
 
 ### Get a list of repositories
+# @name repositories
 GET https://dev.azure.com/{{org}}/_apis/git/repositories?api-version=1.0
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get a list of repositories
+GET https://dev.azure.com/{{org}}/_apis/git/repositories/?api-version=1.0
+Content-Type: application/json
+Authorization: Basic {{authToken}}
+
+### Get a list of PRs
+GET https://dev.azure.com/{{org}}/{{project.response.body.value[0].id}}/_apis/git/pullrequests?api-version=1.0&searchCriteria.status=active
 Content-Type: application/json
 Authorization: Basic {{authToken}}

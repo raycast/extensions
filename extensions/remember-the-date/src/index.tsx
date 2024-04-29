@@ -2,16 +2,22 @@ import { Form, ActionPanel, Action, showToast, Icon, Color, popToRoot } from "@r
 import { Item } from "./types";
 import { getItems, saveItems } from "./storage";
 import { nanoid } from "nanoid";
-import { validateItem } from "./utils";
+import { refreshMenuBar, validateItem } from "./utils";
+import { useCachedPromise } from "@raycast/utils";
+import { getFormattedList } from "./list";
 
 export default function Command() {
+  const { mutate } = useCachedPromise(getFormattedList, []);
+
   async function handleSubmit(item: Item) {
     if (validateItem(item)) {
       const existingItems = await getItems();
       existingItems.push({ ...item, id: nanoid() });
 
       popToRoot();
-      saveItems(existingItems);
+      await saveItems(existingItems);
+      await mutate(getFormattedList());
+      await refreshMenuBar();
       showToast({ title: "Success", message: "Successfully added item" });
     }
   }
