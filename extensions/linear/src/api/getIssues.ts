@@ -138,7 +138,7 @@ export async function getLastUpdatedIssues(after?: string) {
   >(
     `
       query($after: String) {
-        issues(first: 20, orderBy: updatedAt, after: $after) {
+        issues(first: 25, orderBy: updatedAt, after: $after) {
           nodes {
             ${IssueFragment}
           }
@@ -163,7 +163,7 @@ export async function searchIssues(query: string, after?: string) {
   >(
     `
       query($query: String!, $after: String) {
-        issueSearch(first: 20, query: $query, after: $after) {
+        issueSearch(first: 25, query: $query, after: $after) {
           nodes {
             ${IssueFragment}
           }

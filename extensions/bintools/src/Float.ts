@@ -174,7 +174,7 @@ export class DoublePrecision extends BinaryFloat {
  * @param fixedPoint the number to normalize in the form of a fixed point binary number
  * @returns {{delta: number, mantissa: string}}
  */
-function normalizeNumber(fixedPoint: string) {
+function normalizeNumber(fixedPoint: string): { delta: number; mantissa: string } {
   //if the number is negative, remove the minus sign
   fixedPoint = fixedPoint.replace("-", "");
   //if the number is positive, remove the plus sign

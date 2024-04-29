@@ -3,7 +3,7 @@
   "name": "linear",
   "title": "Linear",
   "description": "Bring Linear to every corner of your Mac. Create, search, and modify your issues. Stay on top of your notifications in the menu bar.",
-  "icon": "linear.png",
+  "icon": "linear-app-icon.png",
   "owner": "linear",
   "access": "public",
   "author": "thomaslombart",
@@ -119,7 +119,6 @@
       "description": "Show unread notifications in the Menu Bar.",
       "mode": "menu-bar",
       "subtitle": "Linear",
-      "icon": "linear.png",
       "interval": "15m",
       "preferences": [
         {
@@ -227,8 +226,8 @@
   ],
   "dependencies": {
     "@linear/sdk": "^13.0.0",
-    "@raycast/api": "^1.70.2",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.1",
     "date-fns": "^3.1.0",
     "file-type": "^18.7.0",
     "lodash": "^4.17.21",
