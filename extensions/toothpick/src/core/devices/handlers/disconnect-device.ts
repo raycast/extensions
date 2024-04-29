@@ -3,7 +3,7 @@ import { Device } from "src/core/devices/devices.model";
 import { getDevicesService } from "src/core/devices/devices.service";
 
 export async function disconnectDevice(device: Device) {
-  const { bluetoothBackend } = getPreferenceValues();
+  const { bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
   const devicesService = getDevicesService(bluetoothBackend);
 
   await showToast({ style: Toast.Style.Animated, title: "Disconnecting..." });

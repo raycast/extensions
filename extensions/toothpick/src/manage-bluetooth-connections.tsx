@@ -7,7 +7,7 @@ export default function ManageBluetoothConnectionsView() {
   const [loading, setLoading] = useState(true);
   const [devices, setDevices] = useState<Device[]>([]);
 
-  const { bluetoothBackend } = getPreferenceValues();
+  const { bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
   const devicesService = getDevicesService(bluetoothBackend);
 
   if (!devicesService) {
