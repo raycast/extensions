@@ -1,6 +1,6 @@
 # OpenAI Translator Changelog
 
-## [Toggle Auto copy to clipboard after translation] - {PR_MERGE_DATE}
+## [Toggle Auto copy to clipboard after translation] - 2024-04-29
 
 - Add preference to auto on/off copy to clipboard after translation @joyg
 
