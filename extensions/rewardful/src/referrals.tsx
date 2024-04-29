@@ -43,7 +43,12 @@ export default function Command() {
             subtitle={`Visits: ${item.visits}, Created: ${formatRelativeDate(item.created_at)}, Updated: ${formatRelativeDate(item.updated_at)}${item.deactivated_at ? `, Converted at: ${formatRelativeDate(item.became_conversion_at)}` : ""}`}
             actions={
               <ActionPanel>
-                <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => revalidate()} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.Repeat}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => revalidate()}
+                />
               </ActionPanel>
             }
           />

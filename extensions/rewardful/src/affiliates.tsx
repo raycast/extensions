@@ -122,6 +122,7 @@ export default function Command() {
                       </ActionPanel.Section>
                       <Action
                         title="Refresh"
+                        icon={Icon.Repeat}
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
                         onAction={() => revalidate()}
                       />
