@@ -5,6 +5,8 @@
   "description": "Take an idea from anywhere and turn it into code with Copilot Workspace",
   "icon": "icon.png",
   "author": "cole",
+  "owner": "github-next",
+  "access": "public",
   "contributors": [
     "pernielsentikaer"
   ],
