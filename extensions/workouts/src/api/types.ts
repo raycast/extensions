@@ -31,6 +31,7 @@ export type StravaSummaryClub = {
   url: string;
   profile_medium: string;
   activity_types: ActivityType[];
+  sport_type: "cycling" | "running" | "triathlon" | "other";
 };
 
 export enum ActivityType {
@@ -73,6 +74,7 @@ export enum SportType {
   EMountainBikeRide = "EMountainBikeRide",
   Elliptical = "Elliptical",
   GravelRide = "GravelRide",
+  Handcycle = "Handcycle",
   Hike = "Hike",
   IceSkate = "IceSkate",
   InlineSkate = "InlineSkate",
@@ -94,10 +96,12 @@ export enum SportType {
   TrailRun = "TrailRun",
   VirtualRide = "VirtualRide",
   VirtualRun = "VirtualRun",
+  Velomobile = "Velomobile",
   Walk = "Walk",
   WeightTraining = "WeightTraining",
   Windsurf = "Windsurf",
   Workout = "Workout",
+  Wheelchair = "Wheelchair",
   Yoga = "Yoga",
 }
 

@@ -113,6 +113,16 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
         }, {})
     : {};
 
+  function getActivitiesName(plural = true) {
+    if (club?.sport_type === "running") {
+      return plural ? "runs" : "run";
+    } else if (club?.sport_type === "cycling") {
+      return plural ? "rides" : "ride";
+    } else {
+      return plural ? "activities" : "activity";
+    }
+  }
+
   return (
     <List
       searchBarPlaceholder={SEARCHBAR_PLACEHOLDER}
@@ -127,7 +137,7 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
         </List.Dropdown>
       }
     >
-      {!activities.length && !isLoading && <List.EmptyView title="No activities this week" />}
+      {!activities.length && !isLoading && <List.EmptyView title={`No ${getActivitiesName()} this week`} />}
       <List.Section title={weekString}>
         {activities
           ? Object.entries(activitiesPerAthlete)
@@ -147,8 +157,8 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
                     }
                     accessories={[
                       {
-                        text: `${data.activities.length} ${data.activities.length === 1 ? "Activity" : "Activities"}`,
-                        tooltip: "Number of Activities",
+                        text: `${data.activities.length} ${getActivitiesName(data.activities.length > 1)}`,
+                        tooltip: `Number of ${getActivitiesName(data.activities.length > 1)}`,
                       },
                       { text: formatDuration(data.moving_time), icon: Icon.Clock, tooltip: "Moving Time" },
                       { text: formatDistance(data.distance), icon: Icon.ArrowRight, tooltip: "Distance" },

@@ -7,6 +7,7 @@ export const sportNames: { [key: string]: string } = {
   EMountainBikeRide: "E-Mountain Bike Ride",
   Elliptical: "Elliptical",
   GravelRide: "Gravel Ride",
+  Handcycle: "Handcycle",
   Hike: "Hike",
   IceSkate: "Ice Skate",
   InlineSkate: "Inline Skate",
@@ -28,10 +29,12 @@ export const sportNames: { [key: string]: string } = {
   TrailRun: "Trail Run",
   VirtualRide: "Virtual Ride",
   VirtualRun: "Virtual Run",
+  Velomobile: "Velomobile",
   Walk: "Walk",
   WeightTraining: "Weight Training",
   Windsurf: "Windsurf",
   Workout: "Workout",
+  Wheelchair: "Wheelchair",
   Yoga: "Yoga",
 };
 
