@@ -5,6 +5,9 @@
   "description": "Quick access to Copilot Workspace, GitHub's first AI-native developer tool for completing everyday tasks.",
   "icon": "icon.png",
   "author": "cole",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools"
   ],
