@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
@@ -36,13 +36,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessories={[{ text: searchResult.sellerName }]}
+      accessories={[{ icon: Icon.Person, text: searchResult.sellerName, tooltip: searchResult.sellerName }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in App Store" url={searchResult.url} />
             <Action.CopyToClipboard
-              title="Copy to Clipboard"
+              title="Copy URL to Clipboard"
               content={searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
