@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "video-gif-modification",
-  "title": "Video/Gif Modification",
+  "title": "Video/GIF Modification",
   "description": "Allows to optimize/convert and resize videos and gifs using ffmpeg. At the moment, the extension only works with the finder selection. At the first launch extension would download the ffmpeg binary.",
   "icon": "command-icon.png",
   "author": "tonypinkevych",
