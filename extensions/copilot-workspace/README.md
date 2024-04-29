@@ -1,13 +1,3 @@
 # Copilot Workspace Raycast Extension
 
-Quick access to Copilot Workspace, GitHub's first AI-native developer tool for completing everyday tasks.
-
-## Local development
-
-Prerequisite: You must be running macOS with [Raycast](https://www.raycast.com/) installed.
-
-```shell
-cd raycast
-npm install
-npm run dev
-```
+Take an idea from anywhere and turn it into code with Copilot Workspace, a Copilot-native dev environment designed for everyday tasks. To learn more, go to https://gh.io/copilot-workspace.

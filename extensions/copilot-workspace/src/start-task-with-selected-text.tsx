@@ -3,13 +3,13 @@ import { showFailureToast } from "@raycast/utils";
 import { validateRepo } from "./validate-repo";
 
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments.StartTaskWithSelectedText }>,
+  props: LaunchProps<{ arguments: Arguments.StartTaskWithSelectedText }>
 ) {
   const repo = props.arguments.repo || "githubnext/workspace-blank";
 
   if (!validateRepo(repo)) {
     await showFailureToast(
-      "Please provide a valid repository name in the format owner/repo",
+      "Please provide a valid repository name in the format owner/repo"
     );
     return;
   }
@@ -23,8 +23,8 @@ export default async function Command(
 
     open(
       `https://copilot-workspace.githubnext.com/${repo}?task=${encodeURIComponent(
-        selectedText,
-      )}`,
+        selectedText
+      )}`
     );
   } catch (error) {
     open(`https://copilot-workspace.githubnext.com/${repo}`);

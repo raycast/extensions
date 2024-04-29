@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "copilot-workspace",
   "title": "Copilot Workspace",
-  "description": "Quick access to Copilot Workspace, GitHub's first AI-native developer tool for completing everyday tasks.",
+  "description": "Take an idea from anywhere and turn it into code with Copilot Workspace",
   "icon": "icon.png",
   "author": "cole",
   "contributors": [
