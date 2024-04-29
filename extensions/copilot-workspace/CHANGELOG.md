@@ -1,6 +1,8 @@
 # Copilot Workspace Changelog
 
+## [Bug fixes] - 2024-04-29
 
+- Allow valid repository names
 
 ## [Update README] - 2023-04-29
 
