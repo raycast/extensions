@@ -69,8 +69,7 @@
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.14.1",
     "axios": "^1.6.8",
-    "decompress": "^4.2.1",
-    "unzipper": "^0.11.4"
+    "decompress": "^4.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
