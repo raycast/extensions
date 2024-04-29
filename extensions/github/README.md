@@ -18,7 +18,7 @@ Otherwise, you can manually create it:
 - `repo`
 - `read:org`
 - `read:user`
-- `read:project`
+- `project`
 - `notifications`
 
 5. Click "Generate token".
