@@ -64,6 +64,13 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.PickDate title="Set Payment Date" onChange={(date) => updatePaymentDate(item.id, date)} />
+                {item.sale.referral.stripe_customer_id && (
+                  <Action.OpenInBrowser
+                    title="View Customer In Stripe"
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                    url={`https://dashboard.stripe.com/customers/${item.sale.referral.stripe_customer_id}`}
+                  />
+                )}
                 <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => revalidate()} />
               </ActionPanel>
             }
