@@ -67,7 +67,7 @@ export class Ffmpeg {
     return new Promise<void>((resolve, reject) => {
       this.callbacks?.onStatusChange?.(`Encoding ${path.basename(input)}`);
 
-      // @NOTE: ffmpeg uses milliseconds as nanoseconds for some reason
+      // @NOTE: ffmpeg uses nanoseconds as milliseconds for some reason
       const durationInMilliseconds = parseFloat(durationInSeconds) * 1000 * 1000;
 
       const command = [`"${binary}"`, "-y", `-i "${input}"`, ...(params ?? []), "-progress pipe:1", `"${output}"`]

@@ -4,7 +4,7 @@ import path from "path";
 import { Binary } from "./binary";
 
 /**
- * Ffmpeg wrapper
+ * Ffprobe wrapper
  */
 export class Ffprobe {
   /**

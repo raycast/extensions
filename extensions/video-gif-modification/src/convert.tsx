@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
-import { SelectedFinderFiles } from "./objects/selected-finder.videos";
+import { SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Video } from "./objects/video";
 
 export default function Command() {

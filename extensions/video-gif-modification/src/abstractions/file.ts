@@ -12,7 +12,7 @@ export type File = {
   stream: () => Promise<ReadStream>;
 
   /**
-   * Return next name. For example in system we have `video.mp4` then this method should return `video 2.mp4`
+   * Return next name. For example in system we have `video.mp4` then this method should return `video 1.mp4`
    */
   nextName: (options?: {
     /**
