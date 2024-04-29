@@ -4,8 +4,9 @@
   "title": "Copilot Workspace",
   "description": "Take an idea from anywhere and turn it into code with Copilot Workspace",
   "icon": "icon.png",
-  "author": "cole",
+  "author": "github-next",
   "contributors": [
+    "cole",
     "pernielsentikaer"
   ],
   "categories": [
