@@ -28,7 +28,11 @@ function withClubs(Component: React.FC<{ clubs: StravaSummaryClub[] }>) {
     }
 
     if (clubs === undefined) {
-      return <List.EmptyView title="No clubs found" />;
+      return (
+        <List>
+          <List.EmptyView title="No clubs found" />
+        </List>
+      );
     }
 
     return <Component clubs={clubs} />;
@@ -79,7 +83,11 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
 
   const club = clubs.find((club) => club.id.toString() === clubId);
   if (!club) {
-    return <List.EmptyView title="No clubs found" />;
+    return (
+      <List>
+        <List.EmptyView title="No clubs found" />
+      </List>
+    );
   }
   const clubSportTypes = getSportTypesFromActivityTypes(club.activity_types);
 
@@ -119,6 +127,7 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
         </List.Dropdown>
       }
     >
+      {!activities.length && !isLoading && <List.EmptyView title="No activities this week" />}
       <List.Section title={weekString}>
         {activities
           ? Object.entries(activitiesPerAthlete)
