@@ -51,7 +51,7 @@ function SearchIssues() {
       {data ? (
         <List.Section
           title={searchText ? "Search Results" : "Created Recently"}
-          subtitle={pluralize(data.length, "Issue", { withNumber: true })}
+          subtitle={pluralize(data.length, "issue", { withNumber: true })}
         >
           {data.map((issue) => {
             return <IssueListItem key={issue.id} issue={issue} viewer={viewer} mutateList={mutateList} />;
