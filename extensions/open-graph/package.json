@@ -29,10 +29,16 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "open-graph-extension",
+      "title": "Preview Open Graph (Browser Extension)",
+      "description": "Preview Open Graph meta tags of a website using the browser extension",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.1",
+    "@raycast/api": "^1.72.1",
     "node-fetch": "^3.3.2",
     "node-html-parser": "^6.1.11"
   },
