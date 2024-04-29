@@ -3,7 +3,7 @@
   "name": "drupal-api",
   "title": "Drupal API",
   "description": "Search Drupal API documentation directly from Raycast",
-  "icon": "custom-drupal-icon.png",
+  "icon": "512x512.png",
   "author": "BossElijah",
   "categories": [
     "Developer Tools",
@@ -29,7 +29,7 @@
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.2.5",
     "typescript": "^5.2.2"
   },
   "scripts": {

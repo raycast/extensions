@@ -1,9 +1,9 @@
 export interface RecordItem {
-  title: string,
-  type: string,
-  location: string,
-  description: string,
-  url: string,
+  title: string;
+  type: string;
+  location: string;
+  description: string;
+  url: string;
 }
 
 export interface SearchState {
