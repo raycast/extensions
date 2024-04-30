@@ -1,5 +1,5 @@
 import React from "react";
-import { Action, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { Action, getPreferenceValues } from "@raycast/api";
 
 enum DefaultActionPreference {
   CopyToClipboard = "copy",
@@ -18,39 +18,29 @@ interface ActionsOpts {
   otherSections?: React.ReactElement[];
 }
 
-export function getActions({
-  value,
-  defaultActionsPrefix,
-  firstSectionTitle,
-  otherActions,
-  otherSections,
-}: ActionsOpts) {
+export const ConfigurableCopyPasteActions = ({ defaultActionsPrefix, value }: ActionsOpts) => {
   const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
-  const action = [
-    <Action.CopyToClipboard
-      title={defaultActionsPrefix ? `Copy ${defaultActionsPrefix}` : `Copy`}
-      key={DefaultActionPreference.CopyToClipboard}
-      content={value}
-    />,
-    <Action.Paste
-      title={defaultActionsPrefix ? `Paste ${defaultActionsPrefix}` : `Paste`}
-      key={DefaultActionPreference.PasteToApp}
-      content={value}
-    />,
-  ];
-  const defaultAction = action.find((action) => action.key === defaultPreference);
-  const secondaryAction = action.filter((action) => action.key !== defaultPreference);
+
+  const pasteAction = (
+    <Action.Paste title={defaultActionsPrefix ? `Paste ${defaultActionsPrefix}` : `Paste`} content={value} />
+  );
+  const copyAction = (
+    <Action.CopyToClipboard title={defaultActionsPrefix ? `Copy ${defaultActionsPrefix}` : `Copy`} content={value} />
+  );
+
+  if (defaultPreference === DefaultActionPreference.PasteToApp) {
+    return (
+      <>
+        {pasteAction}
+        {copyAction}
+      </>
+    );
+  }
 
   return (
-    <ActionPanel>
-      <ActionPanel.Section title={firstSectionTitle}>
-        <>
-          {defaultAction}
-          {secondaryAction}
-          {otherActions}
-        </>
-      </ActionPanel.Section>
-      <>{otherSections}</>
-    </ActionPanel>
+    <>
+      {copyAction}
+      {pasteAction}
+    </>
   );
-}
+};
