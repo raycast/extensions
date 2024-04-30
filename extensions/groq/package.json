@@ -69,7 +69,7 @@
           "title": "Prompt",
           "description": "The prompt for the grammar command.",
           "type": "textfield",
-          "default": "Fix spelling, grammar and punctuation. ONLY write the corrected version without explanations.",
+          "default": "Fix spelling, grammar, and punctuation. It is important that you only correct the text and do not write any explanations. Remember, I want you to strictly correct my grammar mistakes and typos.",
           "required": false
         },
         {
@@ -463,7 +463,7 @@
     },
     {
       "name": "professional",
-      "title": "Change Tone to Professional.",
+      "title": "Change Tone to Professional",
       "description": "Change tone of selected text to professional.",
       "mode": "view",
       "disabledByDefault": true,

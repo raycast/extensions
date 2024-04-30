@@ -17,6 +17,7 @@ import {
   showHUD,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { CaseFunction, CaseType, functions } from "./types.js";
@@ -161,9 +162,9 @@ export default function Command(props: LaunchProps) {
           showHUD("Copied to Clipboard");
           Clipboard.copy(props.modified);
           if (preferences.popToRoot) {
-            closeMainWindow();
-          } else {
             popToRoot();
+          } else {
+            closeMainWindow();
           }
         }}
       />
@@ -187,9 +188,9 @@ export default function Command(props: LaunchProps) {
           showHUD(`Pasted in ${frontmostApp.name}`);
           Clipboard.paste(props.modified);
           if (preferences.popToRoot) {
-            closeMainWindow();
-          } else {
             popToRoot();
+          } else {
+            closeMainWindow();
           }
         }}
       />
@@ -224,7 +225,7 @@ export default function Command(props: LaunchProps) {
                 <Action
                   title="Pin Case"
                   icon={Icon.Pin}
-                  shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
+                  shortcut={Keyboard.Shortcut.Common.Pin}
                   onAction={() => {
                     setPinned([props.case, ...pinned]);
                     if (props.recent) {
@@ -237,7 +238,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Remove Pinned Case"
                     icon={Icon.PinDisabled}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
                       setPinned(pinned.filter((c) => c !== props.case));
                     }}
@@ -245,7 +246,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Clear Pinned Cases"
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={() => {
                       setPinned([]);
                     }}
@@ -257,7 +258,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Remove Recent Case"
                     icon={Icon.XMarkCircle}
-                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={() => {
                       setRecent(recent.filter((c) => c !== props.case));
                     }}
@@ -265,7 +266,7 @@ export default function Command(props: LaunchProps) {
                   <Action
                     title="Clear Recent Cases"
                     icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                    shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={() => {
                       setRecent([]);
                     }}
@@ -281,7 +282,7 @@ export default function Command(props: LaunchProps) {
               <Action
                 title="Refresh Content"
                 icon={Icon.RotateAntiClockwise}
-                shortcut={{ key: "r", modifiers: ["cmd"] }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={refreshContent}
               />
             </ActionPanel.Section>

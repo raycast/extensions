@@ -3,7 +3,7 @@ import { Device } from "../devices.model";
 import { getDevicesService } from "../devices.service";
 
 export async function connectDevice(device: Device) {
-  const { closeOnSuccessfulConnection, bluetoothBackend } = getPreferenceValues();
+  const { closeOnSuccessfulConnection, bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
   const devicesService = getDevicesService(bluetoothBackend);
 
   await showToast({ style: Toast.Style.Animated, title: "Connecting..." });

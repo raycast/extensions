@@ -1,5 +1,9 @@
 # OpenAI Translator Changelog
 
+## [Toggle Auto copy to clipboard after translation] - 2024-04-29
+
+- Add preference to auto on/off copy to clipboard after translation @joyg
+
 ## [Rewrite Multiple LLM Provider] - 2024-03-29
 
 - More LLM Provider Support:

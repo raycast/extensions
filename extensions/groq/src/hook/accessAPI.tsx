@@ -16,19 +16,20 @@ export default function ResultView(props: ResultViewProps) {
   const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
-  async function getChatResponse(prompt: string, selectedText: string, model: string, temp: number) {
-    prompt = `Current date: ${currentDate}. ${prompt}`;
+  async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
+    sysPrompt = `Current date: ${currentDate}.\n\n ${sysPrompt}`;
+    const userPrompt = `${user_extra_msg ? `${user_extra_msg}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText}"` : ""}`;
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
         messages: [
-          { role: "system", content: prompt },
-          { role: "user", content: selectedText + (user_extra_msg ? `\n\n${user_extra_msg}` : "") },
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userPrompt },
         ],
         temperature: temp,
         stream: enable_streaming,
       });
-      setPromptTokenCount(countToken(prompt + selectedText));
+      setPromptTokenCount(countToken(sysPrompt + selectedText));
       return streamOrCompletion;
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Error" });
@@ -106,7 +107,8 @@ export default function ResultView(props: ResultViewProps) {
 
   return (
     <Detail
-      markdown={response}
+      // markdown={(user_extra_msg ? `\`\`\`\n${user_extra_msg}\n\`\`\`\n\n` : "") + response}
+      markdown={(user_extra_msg ? `>${user_extra_msg}\n\n` : "") + response}
       isLoading={loading}
       actions={
         !loading && (

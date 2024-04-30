@@ -1,5 +1,8 @@
 # SnapJot Changelog
 
+## [Bug Fixes] - 2024-01-24
+- Error: EISDIR: illegal operation on a directory, read
+
 ## [New Commands] - 2024-01-24
 
 - Add "Daily Note" command

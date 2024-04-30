@@ -1,5 +1,9 @@
 # Keyboard Brightness Changelog
 
+## [Fix] - 2024-04-26
+
+- Resolved an issue where an error message would appear if the menu bar command was disabled.
+
 ## [Improve user feedback and error handling] - 2024-04-10
 
 - Remove adjust-brightness command as it is replaced by increase-brightness and decrease-brightness commands.

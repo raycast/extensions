@@ -1,5 +1,11 @@
 # BetterTouchTool Changelog
 
+## Error handling - 2024-04-28
+
+- Update dependencies and use `runAppleScript` function from utils
+- Check for BTT to be active before accessing scripting interface
+- Option to run triggers after closing Raycast window
+
 ## [Shared Secrets] - 2023-05-10
 
 - Add support for shared secrets in BTT

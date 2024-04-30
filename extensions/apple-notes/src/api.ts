@@ -65,3 +65,11 @@ export async function getNotePlainText(id: string) {
     end tell
     `);
 }
+export async function setNoteBody(id: string, body: string) {
+  return runAppleScript(`
+    tell application "Notes"
+      set theNote to note id "${escapeDoubleQuotes(id)}"
+      set body of theNote to "${escapeDoubleQuotes(body)}"
+    end tell
+    `);
+}

@@ -1,10 +1,7 @@
-import { useContext } from "react";
-
-import { List, Icon, Color, Grid } from "@raycast/api";
+import { Grid } from "@raycast/api";
 
 import { GifActions } from "./GifActions";
 
-import AppContext from "./AppContext";
 import { IGif } from "../models/gif";
 import { ServiceName, getGridItemSize } from "../preferences";
 
@@ -14,17 +11,11 @@ interface GifGridItemProps {
   visitGifItem: (gif: IGif) => void;
   service?: ServiceName;
   section: string;
+  mutate: () => Promise<void>;
 }
 
 export function GifGridItem(props: GifGridItemProps) {
-  const { preview_gif_url, title, id, gif_url } = props.item;
-  const { state } = useContext(AppContext);
-  const is_fav = state.favIds?.get(props.service as ServiceName)?.has(id.toString());
-
-  const accessories: List.Item.Accessory[] = [];
-  if (is_fav) {
-    accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow } });
-  }
+  const { preview_gif_url, title, gif_url } = props.item;
 
   const isLargeGridSize = getGridItemSize() === "large";
 
@@ -38,6 +29,7 @@ export function GifGridItem(props: GifGridItemProps) {
           showViewDetails={true}
           service={props.service}
           visitGifItem={props.visitGifItem}
+          mutate={props.mutate}
         />
       }
     />
