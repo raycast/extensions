@@ -8,7 +8,7 @@ Before you get started, you need to add an API to the Raycast extension.
 
 _ℹ️ The Capacities API is currently a feature of Capacities Pro._
 
-![Add API](/metadata/capacities-6.png)
+![Add API](./metadata/capacities-6.png)
 
 
 After install, select a command. You need to paste an access token into the Raycast window when prompted. To get an access token, follow these steps:
@@ -65,7 +65,7 @@ _For full functionality, you will need to have the correct Raycast permissions l
 
 You will see it in the 'Created today' section in your calendar and with your other weblinks. 
 
-![Save weblink](/metadata/capacities-3.png)
+![Save weblink](./metadata/capacities-3.png)
 
 ### Save to Daily Note
 
@@ -77,7 +77,7 @@ Similar to Weblinks, you can save any text to your daily note.
 
 It will arrive in your daily note with an icon to show it's from Raycast. 
 
-![Save to daily note](/metadata/capacities-5.png)
+![Save to daily note](./metadata/capacities-5.png)
 
 **Note**
 
