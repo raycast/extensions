@@ -15,18 +15,17 @@ export default function main() {
   React.useEffect(() => {
     Clipboard.readText().then((text) => {
       setClipboardText(text?.toString() || "");
-    })
-  })
-  
+    });
+  });
+
   React.useEffect(() => {
     const _input = input || clipboardText;
-    console.log('input: ' + _input)
+    console.log("input: " + _input);
     setInput(_input);
     if (_input) {
-      timeConverter(_input)
-    } 
-  },[clipboardText])
-
+      timeConverter(_input);
+    }
+  }, [clipboardText]);
 
   function timeConverter(time: string) {
     setInput(time);
@@ -35,7 +34,7 @@ export default function main() {
     } else {
       const dTime = dayjs(time);
       if (dTime.isValid()) {
-        setResultList((formatTime(time)));
+        setResultList(formatTime(time));
       } else {
         showError();
       }
@@ -106,17 +105,14 @@ export default function main() {
   }
 
   return (
-    <List 
+    <List
       onSearchTextChange={(text) => timeConverter(text)}
       searchText={input}
       searchBarPlaceholder="Enter a time or date"
-      
     >
-
-    {resultList.map((time, index) => (
-          <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
-        ))}
-
+      {resultList.map((time, index) => (
+        <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
+      ))}
     </List>
   );
 }
