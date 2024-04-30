@@ -7,6 +7,8 @@ export class LocalFile implements File {
 
   path: File["path"] = () => this._path;
 
+  extension: File["extension"] = () => path.extname(this._path);
+
   stream: File["stream"] = async () => fs.createReadStream(this._path);
 
   nextName: File["nextName"] = (options = {}) => {

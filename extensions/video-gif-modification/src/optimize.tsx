@@ -1,8 +1,7 @@
-import { Toast as RaycastToast, showToast } from "@raycast/api";
-import * as path from "path";
+import { Toast as RaycastToast } from "@raycast/api";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
-import { SelectedFinderFiles } from "./objects/selected-finder.files";
+import { FinderIsNotFrontmostApp, SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
 
@@ -29,21 +28,24 @@ export default async function Command(props: { arguments: { preset: "smallest-si
     const files = await new SelectedFinderFiles().list();
 
     if (files.length === 0) {
-      await toast.show({ title: "Please select any Video in Finder", style: RaycastToast.Style.Failure });
-      return;
+      throw new Error("Please select any Video in Finder");
+    }
+
+    if (files.some((file) => file.extension() === ".gif")) {
+      throw new Error("Does not applicable to GIFs yet");
     }
 
     for (const file of files) {
-      const extension = path.extname(file.path());
-      if (extension === ".gif") {
-        throw new Error("Does not applicable to GIFs yet");
-      }
-
       await new Video(file, ffmpeg).encode({ preset });
     }
 
-    await showToast({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
+    await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
   } catch (err) {
+    if (err instanceof FinderIsNotFrontmostApp) {
+      await toast.show({ title: "Please put Finder in focus and try again", style: RaycastToast.Style.Failure });
+      return;
+    }
+
     if (err instanceof Error) {
       console.error(err);
       await toast.show({ title: err.message, style: RaycastToast.Style.Failure });

@@ -7,6 +7,14 @@ export type File = {
   path: () => string;
 
   /**
+   * Return extension of the file.
+   * @example
+   * - my-gif.gif -> .gif
+   * - clip.mp4 -> .mp4
+   */
+  extension: () => string;
+
+  /**
    * Return content of the file
    */
   stream: () => Promise<ReadStream>;

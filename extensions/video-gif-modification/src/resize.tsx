@@ -1,17 +1,15 @@
 import { Toast as RaycastToast } from "@raycast/api";
-import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
-import { SelectedFinderFiles } from "./objects/selected-finder.files";
+import { SafeNumber } from "./objects/safe.number";
+import { FinderIsNotFrontmostApp, SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
 
-const stringToNumber = (stringifiedNumber: string): number | undefined =>
-  stringifiedNumber !== "" ? parseInt(stringifiedNumber, 10) : undefined;
-
 export default async function Command(props: { arguments: { width: string; height: string } }) {
-  const { width: providedWidth, height: providedHeight } = props.arguments;
+  const width = new SafeNumber(props.arguments.width);
+  const height = new SafeNumber(props.arguments.height);
   const toast = new Toast();
   const ffmpeg = new Ffmpeg(
     new Ffprobe({
@@ -29,37 +27,42 @@ export default async function Command(props: { arguments: { width: string; heigh
     },
   );
 
-  if (!providedWidth && !providedHeight) {
-    await toast.show({ title: "Width or Height should be provided", style: RaycastToast.Style.Failure });
-    return;
-  }
-
   try {
+    if (width.toInt() == null && height.toInt() == null) {
+      throw new Error("Please specify Width or Height and they must both be numbers");
+    }
+
     const files = await new SelectedFinderFiles().list();
 
     if (files.length === 0) {
-      await toast.show({ title: "Please select any Video in Finder", style: RaycastToast.Style.Failure });
-      return;
+      throw new Error("Please select any Video in Finder");
     }
 
     for (const file of files) {
-      const width = stringToNumber(providedWidth);
-      const height = stringToNumber(providedHeight);
-      const extension = path.extname(file.path());
-
-      if (extension === ".gif") {
-        await new Gif(file, ffmpeg).encode({ width, height });
+      if (file.extension() === ".gif") {
+        await new Gif(file, ffmpeg).encode({
+          width: width.toInt(),
+          height: height.toInt(),
+        });
         continue;
       }
 
-      await new Video(file, ffmpeg).encode({ width, height });
+      await new Video(file, ffmpeg).encode({
+        width: width.toInt(),
+        height: height.toInt(),
+      });
     }
 
     await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
   } catch (err) {
+    if (err instanceof FinderIsNotFrontmostApp) {
+      await toast.show({ title: "Please put Finder in focus and try again", style: RaycastToast.Style.Failure });
+      return;
+    }
+
     if (err instanceof Error) {
       console.error(err);
-      await toast.show({ title: err.message, style: RaycastToast.Style.Success });
+      await toast.show({ title: err.message, style: RaycastToast.Style.Failure });
     }
   }
 }

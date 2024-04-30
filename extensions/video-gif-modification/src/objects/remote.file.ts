@@ -9,6 +9,8 @@ export class RemoteFile implements File {
 
   path: File["path"] = () => this._url;
 
+  extension: File["extension"] = () => this.localFile.extension();
+
   stream: File["stream"] = async () => {
     const response = await axios({
       method: "GET",
