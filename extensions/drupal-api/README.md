@@ -7,6 +7,7 @@ Here is a link to my [original repository](https://github.com/BossElijah/raycast
 ## Features
 
 - Search [Drupal's API](https://api.drupal.org) directly from Raycast (only returns the first 50 items).
+- Select which version of Drupal you want to search in (your choice will be stored so the same value will be chosen by default next time you use the extension).
 - Press `Enter` to open the link directly.
 
 ![How it works](/assets/image.png)
@@ -15,7 +16,7 @@ Here is a link to my [original repository](https://github.com/BossElijah/raycast
 
 ## Future Development
 
-My plan is to let the user choose which version of Drupal to search in. It currently only searches in Drupal 10's API.
+No further development except for bug fixes. Extension is considered feature-done.
 
 ## Issues / Support
 

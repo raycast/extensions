@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, List } from "@raycast/api";
 import { getDrupalApiResults } from "./util";
-import { SearchState } from "./types";
+import { DrupalVersionMachineCode, SearchState } from "./types";
+import Dropdown from "./dropdown";
 
 const Command = () => {
   const [state, setState] = useState<SearchState>({});
   const [searchText, setSearchText] = useState<string>("");
+  const [drupalVersion, setDrupalVersion] = useState<DrupalVersionMachineCode>(DrupalVersionMachineCode.Drupal10);
 
   useEffect(() => {
     async function fetchRecords() {
       try {
         setState({ records: state.records, loading: true });
-        const feed = await getDrupalApiResults(searchText || "");
+        const feed = await getDrupalApiResults(drupalVersion, searchText || "");
         setState({ records: feed, loading: false });
       } catch (error) {
         console.error(error);
@@ -22,7 +24,7 @@ const Command = () => {
     }
 
     fetchRecords();
-  }, [searchText]);
+  }, [searchText, drupalVersion]);
 
   let noResultsText = "";
   if (state.error) {
@@ -42,8 +44,9 @@ const Command = () => {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
-      searchBarPlaceholder={"Search the Drupal API..."}
+      searchBarPlaceholder="Search the Drupal API..."
       isShowingDetail
+      searchBarAccessory={<Dropdown onVersionChange={setDrupalVersion} />}
     >
       <List.EmptyView title={noResultsText}></List.EmptyView>
       {state.records?.map((item, index) => {
