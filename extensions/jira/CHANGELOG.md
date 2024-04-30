@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Show target status on Change Status submenu] - 2024-04-30
+
+- Show target status next to the action name on Change Status submenu
+
 ## [API token bug fixes] - 2024-04-22
 
 - Improved handling of invalid URLs in the jiraWithApiToken function
