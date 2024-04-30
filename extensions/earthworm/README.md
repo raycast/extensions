@@ -5,5 +5,5 @@
 <h1 align="center">Earthworm</h1>
 
 <h3 align="center">
-Quick play with Earthworm.
+Quickly open everything about Earthworm with Raycast. Earthworm is a website for learning English.
 </h3>
