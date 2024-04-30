@@ -69,13 +69,11 @@ export function QuickTranslateListItem(props: {
           <ActionPanel.Section>
             <ConfigurableAction defaultActionsPrefix="Translation" value={result.translatedText} />
             <Action
-              key="toggle-full-text"
               title="Toggle Full Text"
               icon={Icon.Text}
               onAction={() => props.setIsShowingDetail(!props.isShowingDetail)}
             />
             <Action.OpenInBrowser
-              key="open-in-google-translate"
               title="Open in Google Translate"
               shortcut={{ modifiers: ["opt"], key: "enter" }}
               url={
