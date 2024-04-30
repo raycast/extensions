@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "azure-devops",
+  "title": "Azure DevOps",
+  "description": "Add azure devops services",
+  "icon": "azure-devops-icon.png",
+  "author": "yemilgr",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "work-items",
+      "title": "Recent Work Items",
+      "description": "Show a list of the team recent working items",
+      "mode": "view"
+    },
+    {
+      "name": "personal-work-items",
+      "title": "My Recent Work Items",
+      "description": "Show a list of my recent working items",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "orgUrl",
+      "title": "Organization",
+      "description": "Azure DevOps organization. Ex: https://dev.azure.com/Acme",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://dev.azure.com/Acme"
+    },
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "Azure DevOps personal access token. Generate one at https://dev.azure.com/{Acme}/_usersSettings/tokens",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "azure-devops-node-api": "^13.0.0",
+    "html-to-md": "^0.8.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
