@@ -1,33 +1,36 @@
-import { Toast, showToast, updateCommandMetadata } from "@raycast/api";
+import { Toast as RaycastToast, showToast } from "@raycast/api";
 import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { SelectedFinderFiles } from "./objects/selected-finder.files";
+import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
 
 export default async function Command(props: { arguments: { preset: "smallest-size" | "optimal" | "best-quality" } }) {
+  const toast = new Toast();
+
   try {
     const { preset } = props.arguments;
 
     const files = await new SelectedFinderFiles().list();
 
     if (files.length === 0) {
-      await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
+      await toast.show({ title: "Please select any video in Finder", style: RaycastToast.Style.Failure });
       return;
     }
 
     const ffmpeg = new Ffmpeg(
       new Ffprobe({
         onStatusChange: async (status) => {
-          await showToast({ title: status, style: Toast.Style.Animated });
+          await toast.show({ title: status, style: RaycastToast.Style.Animated });
         },
       }),
       {
         onStatusChange: async (status) => {
-          await showToast({ title: status, style: Toast.Style.Animated });
+          await toast.show({ title: status, style: RaycastToast.Style.Animated });
         },
-        onProgressChange: (progress) => {
-          updateCommandMetadata({ subtitle: `${Math.round(progress * 100)}%` });
+        onProgressChange: async (progress) => {
+          await toast.updateProgress(Math.round(progress * 100));
         },
       },
     );
@@ -42,21 +45,17 @@ export default async function Command(props: { arguments: { preset: "smallest-si
         }
       } catch (err) {
         if (err instanceof Error) {
-          await showToast({ title: err.message, style: Toast.Style.Failure });
+          await showToast({ title: err.message, style: RaycastToast.Style.Failure });
         }
         return;
       }
     }
 
-    await showToast({ title: "All videos processed", style: Toast.Style.Success });
-    updateCommandMetadata({ subtitle: "Finished Sucessfully" });
+    await showToast({ title: "All videos processed", style: RaycastToast.Style.Success });
   } catch (err) {
     if (err instanceof Error) {
-      updateCommandMetadata({ subtitle: "Finished with Error" });
+      console.error(err);
+      await toast.show({ title: err.message, style: RaycastToast.Style.Failure });
     }
-  } finally {
-    setTimeout(() => {
-      updateCommandMetadata({ subtitle: null });
-    }, 1000);
   }
 }

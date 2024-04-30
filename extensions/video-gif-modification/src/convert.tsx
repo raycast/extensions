@@ -1,10 +1,11 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast as RaycastToast, useNavigation } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { useState } from "react";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
 import { SelectedFinderFiles } from "./objects/selected-finder.files";
+import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
 
 export default function Command() {
@@ -13,19 +14,21 @@ export default function Command() {
   const [type, setType] = useState<"mp4" | "webm" | "gif" | undefined>();
   const { pop } = useNavigation();
 
+  const toast = new Toast();
   const files = new SelectedFinderFiles();
   const ffmpeg = new Ffmpeg(
     new Ffprobe({
       onStatusChange: async (status) => {
-        await showToast({ title: status, style: Toast.Style.Animated });
+        await toast.show({ title: status, style: RaycastToast.Style.Animated });
       },
     }),
     {
       onStatusChange: async (status) => {
-        await showToast({ title: status, style: Toast.Style.Animated });
+        await toast.show({ title: status, style: RaycastToast.Style.Animated });
       },
-      onProgressChange: (progress) => {
+      onProgressChange: async (progress) => {
         setProgress(progress);
+        await toast.updateProgress(Math.round(progress * 100));
       },
     },
   );
@@ -36,7 +39,7 @@ export default function Command() {
     const selectedFiles = await files.list();
 
     if (selectedFiles.length === 0) {
-      await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
+      await toast.show({ title: "Please select any video in Finder", style: RaycastToast.Style.Failure });
       return;
     }
 
@@ -45,16 +48,16 @@ export default function Command() {
         await new Video(file, ffmpeg).encode({ format: "mp4" });
       } catch (err) {
         if (err instanceof Error) {
-          await showToast({
+          await toast.show({
             title: err.message,
-            style: Toast.Style.Failure,
+            style: RaycastToast.Style.Failure,
           });
         }
         return;
       }
     }
 
-    await showToast({ title: "All videos processed", style: Toast.Style.Success });
+    await toast.show({ title: "All videos processed", style: RaycastToast.Style.Success });
     setIsLoading(false);
     setProgress(undefined);
     setType(undefined);
@@ -67,7 +70,7 @@ export default function Command() {
     const selectedFiles = await files.list();
 
     if (selectedFiles.length === 0) {
-      await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
+      await toast.show({ title: "Please select any video in Finder", style: RaycastToast.Style.Failure });
       return;
     }
 
@@ -76,16 +79,16 @@ export default function Command() {
         await new Video(file, ffmpeg).encode({ format: "webm" });
       } catch (err) {
         if (err instanceof Error) {
-          await showToast({
+          await toast.show({
             title: err.message,
-            style: Toast.Style.Failure,
+            style: RaycastToast.Style.Failure,
           });
         }
         return;
       }
     }
 
-    await showToast({ title: "All videos processed", style: Toast.Style.Success });
+    await toast.show({ title: "All videos processed", style: RaycastToast.Style.Success });
     setIsLoading(false);
     setProgress(undefined);
     setType(undefined);
@@ -98,7 +101,7 @@ export default function Command() {
     const selectedFiles = await files.list();
 
     if (selectedFiles.length === 0) {
-      await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
+      await toast.show({ title: "Please select any video in Finder", style: RaycastToast.Style.Failure });
       return;
     }
 
@@ -107,16 +110,16 @@ export default function Command() {
         await new Gif(file, ffmpeg).encode();
       } catch (err) {
         if (err instanceof Error) {
-          await showToast({
+          await toast.show({
             title: err.message,
-            style: Toast.Style.Failure,
+            style: RaycastToast.Style.Failure,
           });
         }
         return;
       }
     }
 
-    await showToast({ title: "All videos processed", style: Toast.Style.Success });
+    await toast.show({ title: "All videos processed", style: RaycastToast.Style.Success });
     setIsLoading(false);
     setProgress(undefined);
     setType(undefined);
