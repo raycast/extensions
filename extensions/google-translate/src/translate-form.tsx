@@ -60,13 +60,12 @@ export default function TranslateForm() {
         <ActionPanel>
           <ActionPanel.Section title="Generals">
             <ConfigurableCopyPasteActions defaultActionsPrefix="Translated" value={translated?.translatedText ?? ""} />
-            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />,
+            <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />
             <Action.CopyToClipboard
               title="Copy Pronunciation"
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               content={translated?.pronunciationText ?? ""}
             />
-            ,
             <Action.OpenInBrowser
               title="Open in Google Translate"
               shortcut={{ modifiers: ["opt"], key: "enter" }}
@@ -80,7 +79,6 @@ export default function TranslateForm() {
                 "&op=translate"
               }
             />
-            ,
             <Action.Push
               icon={Icon.Pencil}
               title="Manage language sets..."

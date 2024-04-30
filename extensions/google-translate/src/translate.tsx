@@ -50,31 +50,33 @@ export default function Translate(): ReactElement {
               detail={<List.Item.Detail markdown={r.translatedText} />}
               actions={
                 <ActionPanel>
-                  <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={r.translatedText} />
-                  <Action
-                    title="Toggle Full Text"
-                    icon={Icon.Text}
-                    onAction={() => setIsShowingDetail(!isShowingDetail)}
-                  />
-                  <Action
-                    title="Play Text-To-Speech"
-                    icon={Icon.Play}
-                    shortcut={{ modifiers: ["cmd"], key: "t" }}
-                    onAction={() => playTTS(r.translatedText, r.langTo)}
-                  />
-                  <Action.OpenInBrowser
-                    title="Open in Google Translate"
-                    shortcut={{ modifiers: ["opt"], key: "enter" }}
-                    url={
-                      "https://translate.google.com/?sl=" +
-                      r.langFrom +
-                      "&tl=" +
-                      r.langTo +
-                      "&text=" +
-                      encodeURIComponent(debouncedValue) +
-                      "&op=translate"
-                    }
-                  />
+                  <ActionPanel.Section>
+                    <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={r.translatedText} />
+                    <Action
+                      title="Toggle Full Text"
+                      icon={Icon.Text}
+                      onAction={() => setIsShowingDetail(!isShowingDetail)}
+                    />
+                    <Action
+                      title="Play Text-To-Speech"
+                      icon={Icon.Play}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      onAction={() => playTTS(r.translatedText, r.langTo)}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open in Google Translate"
+                      shortcut={{ modifiers: ["opt"], key: "enter" }}
+                      url={
+                        "https://translate.google.com/?sl=" +
+                        r.langFrom +
+                        "&tl=" +
+                        r.langTo +
+                        "&text=" +
+                        encodeURIComponent(debouncedValue) +
+                        "&op=translate"
+                      }
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
@@ -86,7 +88,7 @@ export default function Translate(): ReactElement {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <ConfigurableCopyPasteActions value={r.translatedText} />
+                      <ConfigurableCopyPasteActions value={r.pronunciationText} />
                       <Action
                         title="Toggle Full Text"
                         icon={Icon.Text}
