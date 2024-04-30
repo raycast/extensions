@@ -24,7 +24,7 @@ export const fetchPackages = async (
 ): Promise<RpkgFetchResponse> => {
   try {
     const response = await fetch(
-      `http://search.r-pkg.org/_search?q=${searchTerm}&size=25`,
+      `https://search.r-pkg.org/package/_search?q=${searchTerm}&size=25`,
     )
     const json: any = await response.json()
     const pkgs = json.hits.hits

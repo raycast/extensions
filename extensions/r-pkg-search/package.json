@@ -6,6 +6,9 @@
   "subtitle": "r-pkg.org",
   "icon": "r-pkg.png",
   "author": "grrrck",
+  "contributors": [
+    "baslat"
+  ],
   "categories": ["Developer Tools"],
   "license": "MIT",
   "commands": [
