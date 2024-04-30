@@ -1,5 +1,13 @@
 # Groq Changelog
 
+## [Update] - 2024-04-25
+
+- Question of command `Ask AI` now displayed at the top of the response
+- Updated default sytem prompt of `Fix Grammar and Spelling` command
+- Current time added to system prompt
+- Fixed typo in command title
+- Updated screenshots
+
 ## [New Model] - 2024-04-19
 
 - Removed `Llama2 70B`
