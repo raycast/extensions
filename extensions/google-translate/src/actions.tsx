@@ -21,22 +21,35 @@ interface ActionsOpts {
 export const ConfigurableAction = ({ defaultActionsPrefix, value }: ActionsOpts) => {
   const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
 
-  if (defaultPreference === DefaultActionPreference.PasteToApp) {
-    return (
-      <Action.Paste
-        title={defaultActionsPrefix ? `Paste ${defaultActionsPrefix}` : `Paste`}
-        key={DefaultActionPreference.PasteToApp}
-        content={value}
-      />
-    );
-  }
-
-  // DefaultActionPreference.CopyToClipboard is default action
-  return (
+  const pasteAction = (
+    <Action.Paste
+      title={defaultActionsPrefix ? `Paste ${defaultActionsPrefix}` : `Paste`}
+      key={DefaultActionPreference.PasteToApp}
+      content={value}
+    />
+  );
+  const copyAction = (
     <Action.CopyToClipboard
       title={defaultActionsPrefix ? `Copy ${defaultActionsPrefix}` : `Copy`}
       key={DefaultActionPreference.CopyToClipboard}
       content={value}
     />
+  );
+
+  if (defaultPreference === DefaultActionPreference.PasteToApp) {
+    return (
+      <>
+        {pasteAction}
+        {copyAction}
+      </>
+    );
+  }
+
+  // DefaultActionPreference.CopyToClipboard is default action
+  return (
+    <>
+      {copyAction}
+      {pasteAction}
+    </>
   );
 };
