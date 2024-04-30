@@ -7,5 +7,3 @@
 <h3 align="center">
 Quick play with Earthworm.
 </h3>
-
-![Conversation View](metadata/1.png)
