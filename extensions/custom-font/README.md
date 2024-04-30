@@ -2,11 +2,11 @@
 
 Transform text to custom utf-8 based fonts
 
-
 Supported fonts:
+
 - Upside down
-- Gothic 
-- Bold 
+- Gothic
+- Bold
 - Italic
 - Strikethrough
 - Bubble Text
