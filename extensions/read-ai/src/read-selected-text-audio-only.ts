@@ -5,8 +5,6 @@ import { Preferences } from "./preferences";
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
 
-  const processor = new TextToSpeechProcessor(
-    preferences,
-  );
+  const processor = new TextToSpeechProcessor(preferences);
   await processor.processSelectedText();
 }

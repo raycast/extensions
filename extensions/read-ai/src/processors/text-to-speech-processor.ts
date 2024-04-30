@@ -30,10 +30,7 @@ export class TextToSpeechProcessor {
   private readingStyle: string;
   public onScriptGenerated?: (script: string) => void;
 
-  constructor(
-    preferences: Preferences,
-    onScriptGenerated?: (script: string) => void,
-  ) {
+  constructor(preferences: Preferences, onScriptGenerated?: (script: string) => void) {
     this.openai = new OpenAI({ apiKey: preferences.apiKey });
     this.voice = preferences.defaultVoice;
     this.temperature = preferences.temperature;
@@ -42,7 +39,6 @@ export class TextToSpeechProcessor {
     this.outputLanguage = preferences.outputLanguage;
     this.readingStyle = preferences.readingStyle;
     try {
-
       this.speed = parseSpeed(preferences.speed);
     } catch (error) {
       showToast({

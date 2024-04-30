@@ -9,10 +9,7 @@ const Command = () => {
   const [isLoading, setIsLoading] = useState(false);
   const preferences = getPreferenceValues<Preferences>();
 
-  const processor = new TextToSpeechProcessor(
-    preferences,
-    (generatedScript: string) => fetchScript(generatedScript),
-  );
+  const processor = new TextToSpeechProcessor(preferences, (generatedScript: string) => fetchScript(generatedScript));
 
   const fetchScript = async (generatedScript: string) => {
     setScript(generatedScript);

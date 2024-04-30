@@ -6,9 +6,7 @@ import { Preferences } from "./preferences";
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const processor = new ImageToTextProcessor(preferences.apiKey);
-  const textToSpeechProcessor = new TextToSpeechProcessor(
-    preferences,
-  );
+  const textToSpeechProcessor = new TextToSpeechProcessor(preferences);
 
   const imageUrl = await Clipboard.readText();
   const maxTokens = 600; // Max tokens for GPT-4 Vision Default is 300
