@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Show target status on Change Status submenu] - 2024-04-24
+## [Show target status on Change Status submenu] - 2024-04-30
 
 - Show target status next to the action name on Change Status submenu
 
