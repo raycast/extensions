@@ -5,6 +5,10 @@
   "description": "Convert timestamps and datetime strings into various formats.",
   "icon": "command-icon.png",
   "author": "yangxy",
+  "contributors": [
+    "yangxy",
+    "zhouyu"
+  ],
   "license": "MIT",
   "commands": [
     {

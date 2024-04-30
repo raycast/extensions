@@ -1,4 +1,5 @@
-import { Form, List, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
+import { Form, List, ActionPanel, Action, Clipboard, showToast, Toast, useNavigation } from "@raycast/api";
+import React, { useState } from "react";
 import dayjs from "dayjs";
 
 import localizedFormat from "dayjs/plugin/localizedFormat";
@@ -7,15 +8,37 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
 export default function main() {
-  const { push } = useNavigation();
+  const [clipboardText, setClipboardText] = useState("");
+  const [input, setInput] = useState<string>(clipboardText);
+  const [resultList, setResultList] = useState([] as string[]);
+
+  React.useEffect(() => {
+    Clipboard.readText().then((text) => {
+      setClipboardText(text?.toString() || "");
+    })
+  })
+  
+  React.useEffect(() => {
+    const _input = input || clipboardText;
+    console.log('input: ' + _input)
+    setInput(_input);
+    if (_input) {
+      timeConverter(_input)
+    } else {
+
+    }
+
+  },[clipboardText])
+
 
   function timeConverter(time: string) {
+    setInput(time);
     if (!time || time === "now") {
-      push(ResultList(formatTime(new Date().toString())));
+      setResultList(formatTime(new Date().toString()));
     } else {
       const dTime = dayjs(time);
       if (dTime.isValid()) {
-        push(ResultList(formatTime(time)));
+        setResultList((formatTime(time)));
       } else {
         showError();
       }
@@ -70,16 +93,6 @@ export default function main() {
     ];
   }
 
-  function ResultList(times: string[]) {
-    return (
-      <List>
-        {times.map((time, index) => (
-          <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
-        ))}
-      </List>
-    );
-  }
-
   type ActionItem = {
     item: {
       content: string;
@@ -96,14 +109,17 @@ export default function main() {
   }
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Submit Form" onSubmit={(values) => timeConverter(values.time)} />
-        </ActionPanel>
-      }
+    <List 
+      onSearchTextChange={(text) => timeConverter(text)}
+      searchText={input}
+      searchBarPlaceholder="Enter a time or date"
+      
     >
-      <Form.TextField id="time" defaultValue="now" placeholder="Enter timestamp, datetime string, or 'now'." />
-    </Form>
+
+    {resultList.map((time, index) => (
+          <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
+        ))}
+
+    </List>
   );
 }
