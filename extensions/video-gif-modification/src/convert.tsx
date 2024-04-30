@@ -8,10 +8,13 @@ import { SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
 
+type Format = "mp4" | "webm" | "gif";
+const supportedFormats: Format[] = ["mp4", "webm", "gif"];
+
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number | undefined>(undefined);
-  const [type, setType] = useState<"mp4" | "webm" | "gif" | undefined>();
+  const [type, setType] = useState<Format>();
   const { pop } = useNavigation();
 
   const toast = new Toast();
@@ -33,93 +36,33 @@ export default function Command() {
     },
   );
 
-  const encodeMp4 = async () => {
-    setType("mp4");
+  const convertTo = async (format: Format) => {
+    setType(format);
     setIsLoading(true);
     const selectedFiles = await files.list();
 
     if (selectedFiles.length === 0) {
-      await toast.show({ title: "Please select any video in Finder", style: RaycastToast.Style.Failure });
+      await toast.show({ title: "Please select any Video in Finder", style: RaycastToast.Style.Failure });
       return;
     }
 
-    for (const file of selectedFiles) {
-      try {
-        await new Video(file, ffmpeg).encode({ format: "mp4" });
-      } catch (err) {
-        if (err instanceof Error) {
-          await toast.show({
-            title: err.message,
-            style: RaycastToast.Style.Failure,
-          });
+    try {
+      for (const file of selectedFiles) {
+        if (format === "gif") {
+          await new Gif(file, ffmpeg).encode();
+          continue;
         }
-        return;
+
+        await new Video(file, ffmpeg).encode({ format });
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err);
+        await toast.show({ title: err.message, style: RaycastToast.Style.Failure });
       }
     }
 
-    await toast.show({ title: "All videos processed", style: RaycastToast.Style.Success });
-    setIsLoading(false);
-    setProgress(undefined);
-    setType(undefined);
-    pop();
-  };
-
-  const encodeWebm = async () => {
-    setType("webm");
-    setIsLoading(true);
-    const selectedFiles = await files.list();
-
-    if (selectedFiles.length === 0) {
-      await toast.show({ title: "Please select any video in Finder", style: RaycastToast.Style.Failure });
-      return;
-    }
-
-    for (const file of selectedFiles) {
-      try {
-        await new Video(file, ffmpeg).encode({ format: "webm" });
-      } catch (err) {
-        if (err instanceof Error) {
-          await toast.show({
-            title: err.message,
-            style: RaycastToast.Style.Failure,
-          });
-        }
-        return;
-      }
-    }
-
-    await toast.show({ title: "All videos processed", style: RaycastToast.Style.Success });
-    setIsLoading(false);
-    setProgress(undefined);
-    setType(undefined);
-    pop();
-  };
-
-  const encodeGif = async () => {
-    setType("gif");
-    setIsLoading(true);
-    const selectedFiles = await files.list();
-
-    if (selectedFiles.length === 0) {
-      await toast.show({ title: "Please select any video in Finder", style: RaycastToast.Style.Failure });
-      return;
-    }
-
-    for (const file of selectedFiles) {
-      try {
-        await new Gif(file, ffmpeg).encode();
-      } catch (err) {
-        if (err instanceof Error) {
-          await toast.show({
-            title: err.message,
-            style: RaycastToast.Style.Failure,
-          });
-        }
-        return;
-      }
-    }
-
-    await toast.show({ title: "All videos processed", style: RaycastToast.Style.Success });
+    await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
     setIsLoading(false);
     setProgress(undefined);
     setType(undefined);
@@ -128,35 +71,18 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      <List.Item
-        icon={progress != null && type === "mp4" ? getProgressIcon(progress, "#374FD5") : Icon.ChevronRightSmall}
-        title=".mp4"
-        actions={
-          <ActionPanel>
-            <Action title="Convert Video" onAction={encodeMp4} />
-          </ActionPanel>
-        }
-      />
-
-      <List.Item
-        icon={progress != null && type === "webm" ? getProgressIcon(progress, "#374FD5") : Icon.ChevronRightSmall}
-        title=".webm"
-        actions={
-          <ActionPanel>
-            <Action title="Convert Video" onAction={encodeWebm} />
-          </ActionPanel>
-        }
-      />
-
-      <List.Item
-        icon={progress != null && type === "gif" ? getProgressIcon(progress, "#374FD5") : Icon.ChevronRightSmall}
-        title=".gif"
-        actions={
-          <ActionPanel>
-            <Action title="Convert GIF" onAction={encodeGif} />
-          </ActionPanel>
-        }
-      />
+      {supportedFormats.map((format) => (
+        <List.Item
+          key={format}
+          icon={progress != null && type === format ? getProgressIcon(progress, "#374FD5") : Icon.ChevronRightSmall}
+          title={`.${format.toUpperCase()}`}
+          actions={
+            <ActionPanel>
+              <Action title={`Convert to ${format.toUpperCase()}`} onAction={() => convertTo(format)} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }

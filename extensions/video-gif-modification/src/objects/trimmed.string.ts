@@ -9,6 +9,10 @@ export class TrimmedString {
   ) {}
 
   toString() {
+    if (this.origin.length < this.length) {
+      return this.origin;
+    }
+
     return this.origin.substring(0, this.length) + "...";
   }
 }
