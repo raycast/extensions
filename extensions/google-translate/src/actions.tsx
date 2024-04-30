@@ -45,7 +45,6 @@ export const ConfigurableAction = ({ defaultActionsPrefix, value }: ActionsOpts)
     );
   }
 
-  // DefaultActionPreference.CopyToClipboard is default action
   return (
     <>
       {copyAction}
