@@ -3,7 +3,7 @@
   "name": "drupal-api",
   "title": "Drupal API",
   "description": "Search Drupal API documentation directly from Raycast",
-  "icon": "512x512.png",
+  "icon": "logo-2_512x512.png",
   "author": "BossElijah",
   "categories": [
     "Developer Tools",

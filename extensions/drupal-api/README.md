@@ -30,5 +30,14 @@ Pull requests are also welcome ;-).
 
 If anyone has pity on me, they're more than welcome to design a new logo for the extension. Here's what I've considered so far:
 
-[<img src="/assets/custom-drupal-icon.png" width="200" height="200"/>](/assets/custom-drupal-icon.png)
-[<img src="/assets/debugging-drupal.png" width="200" height="200"/>](/assets/debugging-drupal.png)
+[<img src="/assets/logo-1.png" width="200" height="200"/>](/assets/logo-1.png)
+[<img src="/assets/logo-2.png" width="200" height="200"/>](/assets/logo-2.png)
+[<img src="/assets/logo-3.png" width="200" height="200"/>](/assets/logo-3.png)
+[<img src="/assets/logo-4.png" width="200" height="200"/>](/assets/logo-4.png)
+
+Below are all the logos in the right dimensions listed. They're shown here to avoid breaking Raycast's guidelines 😄🤣
+
+[<img src="/assets/logo-1_512x512.png" width="200" height="200"/>](/assets/logo-1_512x512.png)
+[<img src="/assets/logo-2_512x512.png" width="200" height="200"/>](/assets/logo-2_512x512.png)
+[<img src="/assets/logo-3_512x512.png" width="200" height="200"/>](/assets/logo-3_512x512.png)
+[<img src="/assets/logo-4_512x512.png" width="200" height="200"/>](/assets/logo-4_512x512.png)
