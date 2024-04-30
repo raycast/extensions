@@ -57,7 +57,6 @@ export function Videos(props: { files: string[] }) {
               <Action
                 title="Remove from History"
                 style={Action.Style.Destructive}
-                style={Action.Style.Destructive}
                 onAction={() => removeFromHistory(file)}
                 icon={{ source: Icon.Trash }}
               />
