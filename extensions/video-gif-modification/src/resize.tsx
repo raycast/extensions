@@ -14,7 +14,7 @@ export default async function Command(props: { arguments: { width: string; heigh
     const { width: providedWidth, height: providedHeight } = props.arguments;
 
     if (!providedWidth && !providedHeight) {
-      await toast.show({ title: "Width or Height should be proivded", style: RaycastToast.Style.Failure });
+      await toast.show({ title: "Width or Height should be provided", style: RaycastToast.Style.Failure });
       return;
     }
 
