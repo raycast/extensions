@@ -1,23 +1,21 @@
 import { LaunchType, launchCommand, showHUD } from "@raycast/api";
-import { toggleLowPowerMode } from "./utils/powerManagement";
+import { PowerMode, PowerModeTarget, setPowerMode } from "./utils/powerManagement";
 import { showFailureToast } from "@raycast/utils";
 
 export default async function main(): Promise<void> {
-  let lowPowerMode;
-
   try {
-    lowPowerMode = await toggleLowPowerMode();
+    await setPowerMode(PowerMode.Low, PowerModeTarget.All);
   } catch (error) {
-    showFailureToast(error, { title: "Could not toggle low power mode" });
+    showFailureToast(error, { title: "Could not enable low power mode" });
     return;
   }
 
-  showHUD(`✅ Low power mode is turned ${lowPowerMode ? "on" : "off"}`);
+  showHUD("✅ Low power mode is enabled");
 
   launchCommand({
     name: "lowpower-menubar",
     type: LaunchType.Background,
-    context: { isEnabled: lowPowerMode },
+    context: { isEnabled: true },
   }).catch(() => {
     console.debug("low-power-menubar is disabled");
   });
