@@ -66,7 +66,7 @@ export function QuickTranslateListItem(props: {
       detail={<List.Item.Detail markdown={result.translatedText} />}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Generals">
+          <ActionPanel.Section>
             <ConfigurableAction defaultActionsPrefix="Translation" value={result.translatedText} />
             <Action
               key="toggle-full-text"

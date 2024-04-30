@@ -85,25 +85,27 @@ export default function Translate(): ReactElement {
                 detail={<List.Item.Detail markdown={r.pronunciationText} />}
                 actions={
                   <ActionPanel>
-                    <ConfigurableAction defaultActionsPrefix="Pronunciation" value={r.translatedText} />
-                    <Action
-                      title="Toggle Full Text"
-                      icon={Icon.Text}
-                      onAction={() => setIsShowingDetail(!isShowingDetail)}
-                    />
-                    <Action.OpenInBrowser
-                      title="Open in Google Translate"
-                      shortcut={{ modifiers: ["opt"], key: "enter" }}
-                      url={
-                        "https://translate.google.com/?sl=" +
-                        r.langFrom +
-                        "&tl=" +
-                        r.langTo +
-                        "&text=" +
-                        encodeURIComponent(debouncedValue) +
-                        "&op=translate"
-                      }
-                    />
+                    <ActionPanel.Section>
+                      <ConfigurableAction value={r.translatedText} />
+                      <Action
+                        title="Toggle Full Text"
+                        icon={Icon.Text}
+                        onAction={() => setIsShowingDetail(!isShowingDetail)}
+                      />
+                      <Action.OpenInBrowser
+                        title="Open in Google Translate"
+                        shortcut={{ modifiers: ["opt"], key: "enter" }}
+                        url={
+                          "https://translate.google.com/?sl=" +
+                          r.langFrom +
+                          "&tl=" +
+                          r.langTo +
+                          "&text=" +
+                          encodeURIComponent(debouncedValue) +
+                          "&op=translate"
+                        }
+                      />
+                    </ActionPanel.Section>
                   </ActionPanel>
                 }
               />
