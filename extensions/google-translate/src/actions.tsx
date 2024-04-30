@@ -22,18 +22,10 @@ export const ConfigurableAction = ({ defaultActionsPrefix, value }: ActionsOpts)
   const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
 
   const pasteAction = (
-    <Action.Paste
-      title={defaultActionsPrefix ? `Paste ${defaultActionsPrefix}` : `Paste`}
-      key={DefaultActionPreference.PasteToApp}
-      content={value}
-    />
+    <Action.Paste title={defaultActionsPrefix ? `Paste ${defaultActionsPrefix}` : `Paste`} content={value} />
   );
   const copyAction = (
-    <Action.CopyToClipboard
-      title={defaultActionsPrefix ? `Copy ${defaultActionsPrefix}` : `Copy`}
-      key={DefaultActionPreference.CopyToClipboard}
-      content={value}
-    />
+    <Action.CopyToClipboard title={defaultActionsPrefix ? `Copy ${defaultActionsPrefix}` : `Copy`} content={value} />
   );
 
   if (defaultPreference === DefaultActionPreference.PasteToApp) {
