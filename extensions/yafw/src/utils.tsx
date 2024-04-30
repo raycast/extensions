@@ -65,16 +65,11 @@ export async function compressVideoFiles(files: string[], compression: Compressi
       const { crf, bitrate, bufsize } = COMPRESSION_OPTIONS[compression];
       const command = `${ffmpegPath} -y -i "${file}" -vcodec libx264 -crf ${crf} -b:v ${bitrate} -bufsize ${bufsize} "${output}"`;
 
-      return promisify(exec)(command)
-        .then(({ stdout, stderr }) => {
-          console.log(stdout);
-          console.log(stderr);
-          return output;
-        })
-        .catch((err) => {
-          console.error(err);
-          return null;
-        });
+      return promisify(exec)(command).then(({ stdout, stderr }) => {
+        console.log(stdout);
+        console.log(stderr);
+        return output;
+      });
     }),
   );
 
