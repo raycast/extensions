@@ -23,31 +23,31 @@
   "commands": [
     {
       "name": "open-spaces",
-      "title": "Open space",
+      "title": "Open Space",
       "description": "Open a space in the Capacities app",
       "mode": "view"
     },
     {
       "name": "search-content",
-      "title": "Search content",
+      "title": "Search Content",
       "description": "Search content in Capacities",
       "mode": "view"
     },
     {
       "name": "create-weblink",
-      "title": "Save weblink",
+      "title": "Save Weblink",
       "description": "Create a weblink in Capacities",
       "mode": "view"
     },
     {
       "name": "save-to-daily-note",
-      "title": "Save to daily note",
+      "title": "Save to Daily Note",
       "description": "Saves a text to today's daily note in Capacities. The text can be formatted in markdown.",
       "mode": "view"
     },
     {
       "name": "load-space-info",
-      "title": "Reload space info",
+      "title": "Synchronize Data",
       "description": "If your spaces or object types are outdated, you can reload them with this command.",
       "mode": "view"
     }

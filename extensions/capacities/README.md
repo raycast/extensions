@@ -8,7 +8,7 @@ Before you get started, you need to add an API to the Raycast extension.
 
 _ℹ️ The Capacities API is currently a feature of Capacities Pro._
 
-![Add API](/media/capacities-6.png)
+![Add API](/metadata/capacities-6.png)
 
 
 After install, select a command. You need to paste an access token into the Raycast window when prompted. To get an access token, follow these steps:
@@ -36,7 +36,7 @@ Your results will be labeled with their type, and the space they are found in.
 
 Navigate to the result you wish to load, press `enter`, and it'll be opened in Capacities.
 
-![Search Results](./media/capacities-1.png)
+![Search Results](./metadata/capacities-1.png)
 
 If you wish to filter the search from Raycast, you can do so with the drop down menu in the top right.
 
@@ -48,7 +48,7 @@ If you use several spaces, you can open any of them via the "Open Space" command
 * Type "Open Space" and press `Enter` 
 * Type the name of the space you want and press `Enter` to load it
 
-![Open Space](./media/capacities-2.png)
+![Open Space](./metadata/capacities-2.png)
 
 ### Save Weblink
 
@@ -65,7 +65,7 @@ _For full functionality, you will need to have the correct Raycast permissions l
 
 You will see it in the 'Created today' section in your calendar and with your other weblinks. 
 
-![Save weblink](/media/capacities-3.png)
+![Save weblink](/metadata/capacities-3.png)
 
 ### Save to Daily Note
 
@@ -77,7 +77,7 @@ Similar to Weblinks, you can save any text to your daily note.
 
 It will arrive in your daily note with an icon to show it's from Raycast. 
 
-![Save to daily note](/media/capacities-5.png)
+![Save to daily note](/metadata/capacities-5.png)
 
 **Note**
 
