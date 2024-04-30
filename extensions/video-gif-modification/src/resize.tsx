@@ -1,4 +1,4 @@
-import { Toast as RaycastToast } from "@raycast/api";
+import { Toast as RaycastToast, showHUD } from "@raycast/api";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
@@ -53,7 +53,7 @@ export default async function Command(props: { arguments: { width: string; heigh
       });
     }
 
-    await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
+    await showHUD("All Videos are Processed");
   } catch (err) {
     if (err instanceof FinderIsNotFrontmostApp) {
       await toast.show({ title: "Please put Finder in focus and try again", style: RaycastToast.Style.Failure });

@@ -14,7 +14,29 @@
       "name": "convert",
       "title": "Convert",
       "description": "The command takes no arguments and encodes the file in the selected folder.",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "format",
+          "placeholder": "Format",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "MP4",
+              "value": "mp4"
+            },
+            {
+              "title": "WEBM",
+              "value": "webm"
+            },
+            {
+              "title": "GIF",
+              "value": "gif"
+            }
+          ],
+          "required": true
+        }
+      ]
     },
     {
       "name": "optimize",
