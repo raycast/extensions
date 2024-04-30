@@ -1,9 +1,8 @@
 # YAFW Changelog
 
-## [Adding backend error logging] - 2024-04-30
+## [Fix custom paths and add error logging] - 2024-04-30
 
-Thowing errors so the backend can catch them and make them easily accessible
-through Raycast's "Extension issues" tool.
+Now custom paths should work properly. Also, added error logging to debug production issues.
 
 ## [Initial Version] - 2024-04-18
 
