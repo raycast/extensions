@@ -1,5 +1,10 @@
 # Bear Changelog
 
+## [Add ability to create a new note utilizing Ai] - 2024-04-30
+
+- Add support to generate a new note in bear app utilzing Ai.
+  - Create Ai Note
+
 ## [Create new note configurations and new search feature] - 2023-07-09
 
 - When creating a new note, you can choose default options that you don't have to pick in the form. Options are: opening the note in the main window, in a new window, or don't open it at all.
