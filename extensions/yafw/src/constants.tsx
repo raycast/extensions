@@ -8,4 +8,14 @@ export const COMPRESSION_OPTIONS: Record<CompressionOptionKey, CompressionOption
 };
 export const DEFAULT_COMPRESSION: CompressionOptionKey = "balanced";
 export const VIDEO_FORMATS = ["mp4", "mov", "avi", "mkv", "webm"];
-export const PATH = "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin:/opt/homebrew/sbin/:~/.bin";
+export const PATH = [
+  ".",
+  "/bin",
+  "~/.bin",
+  "/usr/bin",
+  "/usr/gnu/bin",
+  "/usr/local/bin",
+  "/opt/homebrew/bin",
+  "/opt/homebrew/sbin",
+  "/usr/local/Cellar/ffmpeg",
+].join(":");
