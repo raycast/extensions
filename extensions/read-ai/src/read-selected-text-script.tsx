@@ -2,6 +2,7 @@ import React from "react";
 import { Action, ActionPanel, Detail, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TextToSpeechProcessor } from "./processors/text-to-speech-processor";
+import { Preferences } from "./preferences";
 
 const Command = () => {
   const [script, setScript] = useState("");
@@ -9,13 +10,7 @@ const Command = () => {
   const preferences = getPreferenceValues<Preferences>();
 
   const processor = new TextToSpeechProcessor(
-    preferences.apiKey,
-    preferences.defaultVoice,
-    preferences.temperature,
-    preferences.gptModel,
-    preferences.subtitlesToggle,
-    preferences.outputLanguage,
-    preferences.readingStyle,
+    preferences,
     (generatedScript: string) => fetchScript(generatedScript),
   );
 

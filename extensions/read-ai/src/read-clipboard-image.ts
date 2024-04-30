@@ -1,18 +1,13 @@
 import { getPreferenceValues, showToast, Toast, Clipboard } from "@raycast/api";
 import { ImageToTextProcessor } from "./processors/image-to-text-processor";
 import { TextToSpeechProcessor } from "./processors/text-to-speech-processor";
+import { Preferences } from "./preferences";
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const processor = new ImageToTextProcessor(preferences.apiKey);
   const textToSpeechProcessor = new TextToSpeechProcessor(
-    preferences.apiKey,
-    preferences.defaultVoice,
-    preferences.temperature,
-    preferences.gptModel,
-    preferences.subtitlesToggle,
-    preferences.outputLanguage,
-    preferences.readingStyle,
+    preferences,
   );
 
   const imageUrl = await Clipboard.readText();

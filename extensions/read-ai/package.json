@@ -8,6 +8,10 @@
     "Productivity"
   ],
   "author": "JungHoonGhae",
+  "contributors":[
+    "JungHoonGhae",
+    "zezhehh"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -40,6 +44,15 @@
       "description": "Provide your OpenAI API Key here",
       "required": true,
       "label": "API Key"
+    },
+    {
+      "name": "directRead",
+      "type": "checkbox",
+      "title": "Direct Read",
+      "description": "Read the selected text directly without translation and script generation",
+      "required": true,
+      "default": false,
+      "label": "Direct Read"
     },
     {
       "name": "subtitlesToggle",
@@ -201,6 +214,15 @@
           "title": "gpt-4-32k-0613"
         }
       ]
+    },
+    {
+      "name": "speed",
+      "type": "textfield",
+      "title": "Speed",
+      "description": "Input the speed of the voice, varying from 0.25 to 4.0",
+      "required": true,
+      "default": "1.0",
+      "label": "Speed"
     },
     {
       "name": "temperature",
