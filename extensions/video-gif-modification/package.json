@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "convert",
-      "title": "Convert",
+      "title": "Convert to",
       "description": "The command takes no arguments and encodes the file in the selected folder.",
       "mode": "no-view",
       "arguments": [
