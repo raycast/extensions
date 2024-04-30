@@ -5,7 +5,7 @@ import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hook
 import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, playTTS } from "./simple-translate";
-import { ConfigurableAction } from "./actions";
+import { ConfigurableCopyPasteActions } from "./actions";
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
@@ -50,7 +50,7 @@ export default function Translate(): ReactElement {
               detail={<List.Item.Detail markdown={r.translatedText} />}
               actions={
                 <ActionPanel>
-                  <ConfigurableAction defaultActionsPrefix="Translation" value={r.translatedText} />
+                  <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={r.translatedText} />
                   <Action
                     title="Toggle Full Text"
                     icon={Icon.Text}
@@ -86,7 +86,7 @@ export default function Translate(): ReactElement {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <ConfigurableAction value={r.translatedText} />
+                      <ConfigurableCopyPasteActions value={r.translatedText} />
                       <Action
                         title="Toggle Full Text"
                         icon={Icon.Text}

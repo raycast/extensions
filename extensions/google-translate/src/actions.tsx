@@ -18,7 +18,7 @@ interface ActionsOpts {
   otherSections?: React.ReactElement[];
 }
 
-export const ConfigurableAction = ({ defaultActionsPrefix, value }: ActionsOpts) => {
+export const ConfigurableCopyPasteActions = ({ defaultActionsPrefix, value }: ActionsOpts) => {
   const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
 
   const pasteAction = (

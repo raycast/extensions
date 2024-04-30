@@ -3,7 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
-import { ConfigurableAction } from "../actions";
+import { ConfigurableCopyPasteActions } from "../actions";
 
 export function QuickTranslateListItem(props: {
   debouncedText: string;
@@ -67,7 +67,7 @@ export function QuickTranslateListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ConfigurableAction defaultActionsPrefix="Translation" value={result.translatedText} />
+            <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={result.translatedText} />
             <Action
               title="Toggle Full Text"
               icon={Icon.Text}
