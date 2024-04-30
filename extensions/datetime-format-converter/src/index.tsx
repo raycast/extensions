@@ -1,4 +1,4 @@
-import { Form, List, ActionPanel, Action, Clipboard, showToast, Toast, useNavigation } from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import dayjs from "dayjs";
 
@@ -24,10 +24,7 @@ export default function main() {
     setInput(_input);
     if (_input) {
       timeConverter(_input)
-    } else {
-
-    }
-
+    } 
   },[clipboardText])
 
 
