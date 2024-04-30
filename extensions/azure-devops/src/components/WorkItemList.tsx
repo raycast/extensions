@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { RecentWorkItems } from "../utils/enums";
 import { Project, WorkItem, WorkItemType } from "../utils/types";
@@ -93,10 +93,7 @@ export default function WorkItemList(props: { recentItems: RecentWorkItems }) {
           title={item.title}
           subtitle={item.workItemType}
           keywords={[item.id.toString()]}
-          accessories={[
-            { text: item.state, icon: { source: Icon.CheckCircle, tintColor: Color.Green } },
-            { text: item.teamProject },
-          ]}
+          accessories={[{ text: item.state }, { text: item.teamProject }]}
           actions={
             <ActionPanel title="Quick actions">
               <ActionPanel.Section>

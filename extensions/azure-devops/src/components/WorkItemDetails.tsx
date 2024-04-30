@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import html2md from "html-to-md";
 import AzureDevOpsApiClient from "../api/client";
-import { WorkItemExtended } from "../utils/types";
+import { Identity, WorkItemExtended } from "../utils/types";
 import { toSnakeCase } from "../utils/helpers";
 
 interface State {
@@ -23,7 +23,7 @@ export default function WorkItemDetails(props: { itemId: number }) {
       try {
         const item = await apiClient.getWorkItem(props.itemId);
         setState({ item });
-        setBranchName(`${item.id.toString()}_${toSnakeCase(item.fields?.["System.Title"])}`);
+        setBranchName(`${item.id.toString()}_${toSnakeCase(item.fields?.["System.Title"] as string)}`);
       } catch (error) {
         setState({
           error: error instanceof Error ? error : new Error("An error occurred while fetching work item."),
@@ -37,7 +37,7 @@ export default function WorkItemDetails(props: { itemId: number }) {
   }, []);
 
   function getNavigationTitle(): string {
-    return isLoading ? "Loading..." : state.item?.fields?.["System.Title"] ?? "Work Item";
+    return isLoading ? "Loading..." : (state.item?.fields?.["System.Title"] as string) ?? "Work Item";
   }
 
   function getMarkdown(): string {
@@ -55,10 +55,13 @@ export default function WorkItemDetails(props: { itemId: number }) {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Id" text={state.item?.id.toString()} />
-          <Detail.Metadata.Label title="Type" text={state.item?.fields?.["System.WorkItemType"]} />
-          <Detail.Metadata.Label title="State" text={state.item?.fields?.["System.State"]} />
-          <Detail.Metadata.Label title="Assigned To" text={state.item?.fields?.["System.AssignedTo"]?.displayName} />
-          <Detail.Metadata.Label title="Created On" text={state.item?.fields?.["System.CreatedDate"]} />
+          <Detail.Metadata.Label title="Type" text={state.item?.fields?.["System.WorkItemType"] as string} />
+          <Detail.Metadata.Label title="State" text={state.item?.fields?.["System.State"] as string} />
+          <Detail.Metadata.Label
+            title="Assigned To"
+            text={(state.item?.fields?.["System.AssignedTo"] as Identity)?.displayName || "Unassigned"}
+          />
+          <Detail.Metadata.Label title="Created On" text={state.item?.fields?.["System.CreatedDate"] as string} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="Edit"

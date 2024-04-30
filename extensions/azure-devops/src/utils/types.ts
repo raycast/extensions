@@ -17,21 +17,9 @@ export type WorkItem = {
 
 export type WorkItemExtended = {
   id: number;
-  fields?: { [key: string]: any };
+  fields?: { [key: string]: string | number | Date | Identity };
   _links?: { [key: string]: { href: string } };
   url?: string;
-};
-
-export type WorkItemDetailsField = {
-  "System.Title": string;
-  "System.TeamProject": string;
-  "System.WorkItemType": string;
-  "System.State": string;
-  "System.Description": string;
-  "System.CreatedDate": Date;
-  "System.ChangedDate": Date;
-  "System.CommentCount": number;
-  "System.AssignedTo": Identity;
 };
 
 export type WorkItemType = {
