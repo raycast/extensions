@@ -1,9 +1,9 @@
-import { Action, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
-import { getActions } from "../actions";
+import { ConfigurableAction } from "../actions";
 
 export function QuickTranslateListItem(props: {
   debouncedText: string;
@@ -64,31 +64,33 @@ export function QuickTranslateListItem(props: {
         },
       ]}
       detail={<List.Item.Detail markdown={result.translatedText} />}
-      actions={getActions({
-        value: result.translatedText,
-        otherActions: [
-          <Action
-            key="toggle-full-text"
-            title="Toggle Full Text"
-            icon={Icon.Text}
-            onAction={() => props.setIsShowingDetail(!props.isShowingDetail)}
-          />,
-          <Action.OpenInBrowser
-            key="open-in-google-translate"
-            title="Open in Google Translate"
-            shortcut={{ modifiers: ["opt"], key: "enter" }}
-            url={
-              "https://translate.google.com/?sl=" +
-              result.langFrom +
-              "&tl=" +
-              result.langTo +
-              "&text=" +
-              encodeURIComponent(props.debouncedText) +
-              "&op=translate"
-            }
-          />,
-        ],
-      })}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Generals">
+            <ConfigurableAction defaultActionsPrefix="Translation" value={result.translatedText} />
+            <Action
+              key="toggle-full-text"
+              title="Toggle Full Text"
+              icon={Icon.Text}
+              onAction={() => props.setIsShowingDetail(!props.isShowingDetail)}
+            />
+            <Action.OpenInBrowser
+              key="open-in-google-translate"
+              title="Open in Google Translate"
+              shortcut={{ modifiers: ["opt"], key: "enter" }}
+              url={
+                "https://translate.google.com/?sl=" +
+                result.langFrom +
+                "&tl=" +
+                result.langTo +
+                "&text=" +
+                encodeURIComponent(props.debouncedText) +
+                "&op=translate"
+              }
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
     />
   );
 }

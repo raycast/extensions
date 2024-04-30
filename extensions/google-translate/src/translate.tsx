@@ -1,11 +1,11 @@
 import React, { ReactElement, useState } from "react";
-import { List, showToast, Toast, Action, Icon } from "@raycast/api";
+import { List, showToast, Toast, Action, Icon, ActionPanel } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
 import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, playTTS } from "./simple-translate";
-import { getActions } from "./actions";
+import { ConfigurableAction } from "./actions";
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
@@ -43,26 +43,25 @@ export default function Translate(): ReactElement {
         const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
 
         return (
-          <>
+          <React.Fragment key={index}>
             <List.Item
-              key={index}
               title={r.translatedText}
               accessories={[{ text: languages, tooltip: tooltip }]}
               detail={<List.Item.Detail markdown={r.translatedText} />}
-              actions={getActions({
-                value: r.translatedText,
-                otherActions: [
+              actions={
+                <ActionPanel>
+                  <ConfigurableAction defaultActionsPrefix="Translation" value={r.translatedText} />
                   <Action
                     title="Toggle Full Text"
                     icon={Icon.Text}
                     onAction={() => setIsShowingDetail(!isShowingDetail)}
-                  />,
+                  />
                   <Action
                     title="Play Text-To-Speech"
                     icon={Icon.Play}
                     shortcut={{ modifiers: ["cmd"], key: "t" }}
                     onAction={() => playTTS(r.translatedText, r.langTo)}
-                  />,
+                  />
                   <Action.OpenInBrowser
                     title="Open in Google Translate"
                     shortcut={{ modifiers: ["opt"], key: "enter" }}
@@ -75,24 +74,23 @@ export default function Translate(): ReactElement {
                       encodeURIComponent(debouncedValue) +
                       "&op=translate"
                     }
-                  />,
-                ],
-              })}
+                  />
+                </ActionPanel>
+              }
             />
             {r.pronunciationText && (
               <List.Item
-                key={index}
                 title={r.pronunciationText}
                 accessories={[{ text: languages, tooltip: tooltip }]}
                 detail={<List.Item.Detail markdown={r.pronunciationText} />}
-                actions={getActions({
-                  value: r.translatedText,
-                  otherActions: [
+                actions={
+                  <ActionPanel>
+                    <ConfigurableAction defaultActionsPrefix="Pronunciation" value={r.translatedText} />
                     <Action
                       title="Toggle Full Text"
                       icon={Icon.Text}
                       onAction={() => setIsShowingDetail(!isShowingDetail)}
-                    />,
+                    />
                     <Action.OpenInBrowser
                       title="Open in Google Translate"
                       shortcut={{ modifiers: ["opt"], key: "enter" }}
@@ -105,12 +103,12 @@ export default function Translate(): ReactElement {
                         encodeURIComponent(debouncedValue) +
                         "&op=translate"
                       }
-                    />,
-                  ],
-                })}
+                    />
+                  </ActionPanel>
+                }
               />
             )}
-          </>
+          </React.Fragment>
         );
       })}
     </List>
