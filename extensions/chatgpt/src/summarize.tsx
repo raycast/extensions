@@ -47,7 +47,7 @@ export default function Summarize() {
   const { data, isLoading: modelLoading } = useModel();
 
   const [defaultModel, setDefaultModel] = useState<Model | null>(null);
-  const [separateDefaultModel, setSeparateDefaultModel] = useState<Model[]>([]);
+  const [separateDefaultModel, setSeparateDefaultModel] = useState<Model[] | null>(null);
 
   useEffect(() => {
     if (!modelLoading) {
@@ -126,20 +126,28 @@ export default function Summarize() {
           }
         }}
       />
-      <Form.Dropdown
-        id="model"
-        title="Model"
-        placeholder="Choose model"
-        defaultValue={selectedModelId}
-        onChange={setSelectedModelId}
-      >
-        {defaultModel && <Form.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
-        <Form.Dropdown.Section title="Custom Models">
-          {separateDefaultModel.map((model) => (
-            <Form.Dropdown.Item value={model.id} title={model.name} key={model.id} />
-          ))}
-        </Form.Dropdown.Section>
-      </Form.Dropdown>
+      {
+        // the default value not match any values warning so annoying
+        (defaultModel || separateDefaultModel) && (
+          <Form.Dropdown
+            id="model"
+            title="Model"
+            placeholder="Choose model"
+            defaultValue={selectedModelId}
+            onChange={setSelectedModelId}
+          >
+            {defaultModel && (
+              <Form.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />
+            )}
+            <Form.Dropdown.Section title="Custom Models">
+              {separateDefaultModel &&
+                separateDefaultModel.map((model) => (
+                  <Form.Dropdown.Item value={model.id} title={model.name} key={model.id} />
+                ))}
+            </Form.Dropdown.Section>
+          </Form.Dropdown>
+        )
+      }
     </Form>
   );
 }

@@ -69,23 +69,21 @@
       "name": "summarize",
       "title": "Summarize Website",
       "subtitle": "ChatGPT",
-      "description": "Summarize website and youtube video transcript",
+      "description": "Summarize Website and YouTube video",
       "mode": "view",
       "preferences": [
         {
-          "name": "prompt",
-          "description": "Tag {{content}} will replace with the content",
-          "type": "textfield",
-          "title": "Prompt for the website content",
-          "default": "Summarize this {{content}}",
+          "name": "promptTemplate",
+          "description": "Template support {{content}} tag, and it will replace with the content",
+          "type": "file",
+          "title": "Prompt template for the website",
           "required": false
         },
         {
-          "name": "prompt2",
-          "description": "Tag {{content}} will replace with the content",
-          "type": "textfield",
-          "title": "Prompt for the Youtubes video transcript",
-          "default": "Summarize this {{content}}",
+          "name": "promptTemplate2",
+          "description": "Template support {{content}} tag, and it will replace with the video transcript",
+          "type": "file",
+          "title": "Prompt template for the YouTube",
           "required": false
         }
       ]

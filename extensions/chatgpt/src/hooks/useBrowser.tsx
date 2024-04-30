@@ -28,7 +28,7 @@ export function useBrowserContent() {
       const content = await getBrowserContent();
       setContent(content);
     } catch (error) {
-      console.debug(error);
+      // console.debug(error);
       setError(error);
     }
     setLoading(false);
