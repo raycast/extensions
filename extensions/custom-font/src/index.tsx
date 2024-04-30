@@ -15,32 +15,32 @@ const fonts = [
 ];
 
 export default function Command() {
-  const [searchText, setSearchText] = useState("");
+    const [searchText, setSearchText] = useState("");
 
-  return (
-    <List
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Type your text to change..."
-      throttle
-    >
-      <List.Section title="Custom UTF-8 Fonts" subtitle={"Press enter to copy to clipboard"}>
-        {fonts.map((font, index) => (
-            <CustomFontItem key={ index } inputText={ searchText } fontType= { font } /> 
-        ))}
-      </List.Section>
-    </List>
-  );
+    return (
+        <List
+            onSearchTextChange={setSearchText}
+            searchBarPlaceholder="Type your text to change..."
+            throttle
+        >
+            <List.Section title="Custom UTF-8 Fonts" subtitle={"Press enter to copy to clipboard"}>
+                {fonts.map((font, index) => (
+                    <CustomFontItem key={index} inputText={searchText} fontType={font} />
+                ))}
+            </List.Section>
+        </List>
+    );
 }
 
-function CustomFontItem({ inputText, fontType }: { inputText: string, fontType: string}) {
+function CustomFontItem({ inputText, fontType }: { inputText: string, fontType: string }) {
     return (
         <List.Item
-            title= { fontToCustomFont(inputText, fontType) }
-            subtitle={ fontType }
+            title={fontToCustomFont(inputText, fontType)}
+            subtitle={fontType}
             actions={
                 <ActionPanel>
                     <ActionPanel.Section>
-                        <Action.CopyToClipboard title="Copy Font Name" content={`${fontToCustomFont(inputText, fontType)}`} shortcut={{ modifiers: ["cmd"], key: "."}} />
+                        <Action.CopyToClipboard title="Copy Font Name" content={`${fontToCustomFont(inputText, fontType)}`} shortcut={{ modifiers: ["cmd"], key: "." }} />
                     </ActionPanel.Section>
                 </ActionPanel>
             }
@@ -48,7 +48,7 @@ function CustomFontItem({ inputText, fontType }: { inputText: string, fontType: 
     );
 }
 
-function fontToCustomFont( input: string, fontType: string) {
+function fontToCustomFont(input: string, fontType: string) {
     switch (fontType) {
         case "upside-down":
             return fontMap(input, upsideDownMap).split("").reverse().join("");
@@ -71,7 +71,7 @@ function fontToCustomFont( input: string, fontType: string) {
         default:
             return input;
     }
-} 
+}
 
 function fontMap(input: string, map: Record<string, string>) {
     return input.split("").map((char) => {
