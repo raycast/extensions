@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
-import { ColorMap } from "utils/mapping";
+import { determineCardColor } from "utils/mapping";
 import { ICard } from "utils/types";
 
 import CardDetail from "components/CardDetail";
@@ -15,10 +15,12 @@ const CardListItem = ({ card, removeFromList }: CardListItemProps) => {
   return (
     <List.Item
       title={card.data.name}
+      subtitle={card.data.name === "" ? "Untitled" : undefined}
       icon={{
-        source: Icon.BlankDocument,
-        tintColor: card.membership.color ? ColorMap[card.membership.color] : Color.SecondaryText,
+        source: Icon.Circle,
+        tintColor: determineCardColor(card),
       }}
+      detail={<List.Item.Detail markdown={card.data.markup} />}
       actions={
         <ActionPanel>
           <Action.Push title="View Card" icon={Icon.BlankDocument} target={<CardDetail card={card} />} />
