@@ -1,4 +1,12 @@
-import { closeMainWindow, confirmAlert, getPreferenceValues, LaunchProps, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import {
+  closeMainWindow,
+  confirmAlert,
+  getPreferenceValues,
+  LaunchProps,
+  openExtensionPreferences,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { appendToDailyNote, ReflectApiError } from "./helpers/api";
 import { prependNote } from "./helpers/dates";
 import { authorize } from "./helpers/oauth";
