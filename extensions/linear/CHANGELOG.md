@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Fix missing icons] - 2024-05-01
+
+- Update missing Linear icons
+
 ## [Improvements] - 2024-04-29
 
 - Add pagination when searching issues
