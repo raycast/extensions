@@ -1,5 +1,5 @@
 import { canAccessBrowserExtension } from "./utils/browser";
-import { Action, ActionPanel, Form, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
@@ -9,6 +9,7 @@ import Ask from "./ask";
 import { open } from "@raycast/api";
 import { PrimaryAction } from "./actions";
 import { useBrowserContent } from "./hooks/useBrowser";
+import { CacheAdapter } from "./utils/cache";
 
 export default function Summarize() {
   if (!canAccessBrowserExtension()) {
@@ -57,19 +58,15 @@ export default function Summarize() {
   }, [modelLoading]);
 
   const [selectedModelId, setSelectedModelId] = useState<string>("default");
+  const cache = new CacheAdapter("select_model");
 
-  // TODO: duplicate code
   useEffect(() => {
-    (async () => {
-      const selectModel = await LocalStorage.getItem<string>("select_model");
-      setSelectedModelId(selectModel || "default");
-    })();
+    const selectModel = cache.get();
+    setSelectedModelId(selectModel || "default");
   }, []);
 
   useEffect(() => {
-    (async () => {
-      await LocalStorage.setItem("select_model", selectedModelId);
-    })();
+    cache.set(selectedModelId);
   }, [selectedModelId]);
 
   const RetryAction = () => {
@@ -127,13 +124,13 @@ export default function Summarize() {
         }}
       />
       {
-        // the default value not match any values warning so annoying
+        // the value not match any values warning so annoying
         (defaultModel || separateDefaultModel) && (
           <Form.Dropdown
             id="model"
             title="Model"
             placeholder="Choose model"
-            defaultValue={selectedModelId}
+            value={selectedModelId}
             onChange={setSelectedModelId}
           >
             {defaultModel && (
