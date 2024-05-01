@@ -194,6 +194,7 @@
     {
       "name": "adb-restart",
       "title": "Restart ADB",
+      "disabledByDefault": true,
       "description": "Restart ADB by killing the ADB server and starting again",
       "mode": "no-view"
     }
