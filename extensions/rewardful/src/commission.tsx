@@ -64,7 +64,10 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Payout">
-                  <Action.PickDate title="Set Payment Date" onChange={(date) => updatePaymentDate(item.id, date)} />
+                  {/* Docs show that you can update the paid_at date after setting it but this is no longer supported */}
+                  {!item.paid_at && (
+                    <Action.PickDate title="Set Payment Date" onChange={(date) => updatePaymentDate(item.id, date)} />
+                  )}
                   {item.sale.affiliate.paypal_email && (
                     <>
                       <Action.OpenInBrowser

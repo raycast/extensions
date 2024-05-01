@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 
-import { baseUrl, encodedApiKey, siteUrl } from "./utils";
+import { baseUrl, currentLocale, encodedApiKey, siteUrl } from "./utils";
 import { CampaignApiResponse, Campaign, PaginationResult } from "./types";
 import { formatCurrency, formatShortDate } from "./scripts";
 
@@ -71,10 +71,22 @@ export default function Command() {
                       text={item.url.replace(/^(https?:\/\/)?(www\.)?/, "")}
                     />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Affiliates" text={item.affiliates.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Visitors" text={item.visitors.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Leads" text={item.leads.toString()} />
-                    <List.Item.Detail.Metadata.Label title="Conversions" text={item.conversions.toString()} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Affiliates"
+                      text={item.affiliates.toLocaleString(currentLocale).toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Visitors"
+                      text={item.visitors.toLocaleString(currentLocale).toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Leads"
+                      text={item.leads.toLocaleString(currentLocale).toString()}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Conversions"
+                      text={item.conversions.toLocaleString(currentLocale).toString()}
+                    />
                     <List.Item.Detail.Metadata.Separator />
                     {item.commission_percent && (
                       <List.Item.Detail.Metadata.Label
