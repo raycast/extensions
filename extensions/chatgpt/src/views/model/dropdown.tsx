@@ -26,11 +26,7 @@ export const ModelDropdown = (props: ChangeModelProp) => {
    * we can't use `DropDown.storeValue`, because it will reset `selectedModel` to default when the component rerender.
    */
   return (
-    <List.Dropdown
-      tooltip="Select Model"
-      value={selectedModel}
-      onChange={onModelChange}
-    >
+    <List.Dropdown tooltip="Select Model" value={selectedModel} onChange={onModelChange}>
       {defaultModel && <List.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
       <List.Dropdown.Section title="Pinned">
         {separateDefaultModel

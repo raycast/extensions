@@ -7,7 +7,7 @@ export class CacheAdapter {
   constructor(key: string) {
     this.key = key;
     this.cache = new Cache({
-      namespace: "abielzulio.chatgpt"
+      namespace: "abielzulio.chatgpt",
     });
   }
 

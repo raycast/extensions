@@ -19,7 +19,7 @@ const ASCII_TABLES = Object.entries({
   "&amp;": "&",
   "&#32;": " ",
   "&#33;": "!",
-  "&#34;": "\"",
+  "&#34;": '"',
   "&#35;": "#",
   "&#36;": "$",
   "&#37;": "%",
@@ -67,12 +67,12 @@ export async function getBrowserContent() {
   if (activeTab && activeTab.url.startsWith("https://www.youtube.com/watch?v=")) {
     // not official API, so it may break in the future
     const content = await YoutubeTranscript.fetchTranscript(activeTab.url, {
-      lang: "en"
+      lang: "en",
     }).then((transcript) => {
       return transcript.map((item) => item.text).join("\n");
     });
     prompt = promptTemplate2 || DEFAULT_PROMPT;
-    prompt = prompt.replaceAll(/\{\{\s?content.*?}}/g, content)
+    prompt = prompt.replaceAll(/\{\{\s?content.*?}}/g, content);
   } else {
     prompt = await dynamicExecution(promptTemplate || DEFAULT_PROMPT);
   }
@@ -82,7 +82,8 @@ export async function getBrowserContent() {
   return replace(prompt, entries);
 }
 
-const regex = /\{\{\s*content\s*(format="(?<format>markdown|text|html)")?\s*(cssSelector="(?<cssSelector>.+)")?\s*(tabId=(?<tabId>\d+))?\s*}}/gm;
+const regex =
+  /\{\{\s*content\s*(format="(?<format>markdown|text|html)")?\s*(cssSelector="(?<cssSelector>.+)")?\s*(tabId=(?<tabId>\d+))?\s*}}/gm;
 
 /**
  * dynamic execution by the tag
@@ -105,13 +106,13 @@ async function dynamicExecution(prompt: string) {
         const { format, cssSelector, tabId } = groups;
         try {
           const content = await BrowserExtension.getContent({
-            format: format ? format as "markdown" | "text" | "html" : "markdown",
+            format: format ? (format as "markdown" | "text" | "html") : "markdown",
             cssSelector: cssSelector ? cssSelector : undefined,
-            tabId: tabId ? parseInt(tabId) : undefined
+            tabId: tabId ? parseInt(tabId) : undefined,
           });
           result = result.replace(m[0], content);
         } catch (error) {
-          errors.push(`Tag "${ m[0] }" execution failed: ${ error }`);
+          errors.push(`Tag "${m[0]}" execution failed: ${error}`);
         }
       }
     }
@@ -126,7 +127,7 @@ function replace(prompt: string, entries: [string, string][]): string {
   prompt = prompt.replace("\\n", "\n");
 
   let result = entries.reduce((acc, [key, value]) => {
-    const r = new RegExp(`{{\\s*${ key }}}\\s*`, "g");
+    const r = new RegExp(`{{\\s*${key}}}\\s*`, "g");
     return acc.replaceAll(r, value);
   }, prompt);
 
