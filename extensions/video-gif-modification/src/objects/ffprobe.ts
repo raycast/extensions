@@ -45,11 +45,11 @@ export class Ffprobe {
   exec: (payload: { input: string; params?: (string | undefined)[] }) => Promise<string> = async (payload) => {
     const { input, params } = payload;
 
-    const binary = await this.ffprobeBinary.path();
-
     if (input.includes("ffprobe")) {
       throw new Error("Path to ffprobe command included automatically. Start your command directly from arguments");
     }
+
+    const binary = await this.ffprobeBinary.path();
 
     this.callbacks?.onStatusChange?.(`Processing ${path.basename(input)}`);
     // ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 input.mp4

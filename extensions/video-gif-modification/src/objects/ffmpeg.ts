@@ -54,11 +54,11 @@ export class Ffmpeg {
       throw new Error("Cannot override source");
     }
 
-    const binary = await this.ffmpegBinary.path();
-
     if (input.includes("ffmpeg")) {
       throw new Error("Path to ffmpeg command included automatically. Start your command directly from arguments");
     }
+
+    const binary = await this.ffmpegBinary.path();
 
     const durationInSeconds = await this.ffprobe.exec({
       input,
