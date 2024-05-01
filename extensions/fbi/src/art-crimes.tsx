@@ -1,0 +1,57 @@
+import { Icon, List } from "@raycast/api";
+import { useCachedState, useFetch } from "@raycast/utils";
+import { ArtCrime, SuccessResponse } from "./types";
+import { API_HEADERS, PAGE_SIZE } from "./constants";
+import { Fragment } from "react";
+import { ItemWithTextOrIcon, generateMarkdown } from "./utils";
+
+export default function ArtCrimes() {
+    const [total, setTotal] = useCachedState<number>("total-artcrimes");
+    const { isLoading, data: artcrimes, pagination } = useFetch(
+        (options) =>
+        "https://api.fbi.gov/artcrimes?" +
+          new URLSearchParams({ page: String(options.page + 1), pageSize: PAGE_SIZE.toString() }).toString(),
+        {
+        headers: API_HEADERS,
+          mapResult(result: SuccessResponse<ArtCrime>) {
+            if (!total) setTotal(result.total);
+            const lastPage = Number((result.total / PAGE_SIZE).toFixed());
+            return {
+              data: result.items,
+              hasMore: lastPage!==result.page,
+            };
+          },
+          keepPreviousData: true,
+          initialData: [],
+        },
+    );
+
+    return <List isLoading={isLoading} pagination={pagination} isShowingDetail>
+        <List.Section title={`${artcrimes.length} of ${total} Art Crimes`}>
+        {artcrimes.map(artcrime => <List.Item key={artcrime.uid} title={artcrime.title} detail={<List.Item.Detail markdown={generateMarkdown(artcrime)} metadata={<List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label title="Crime Category" text={artcrime.crimeCategory} />
+        {artcrime.additionalData ? <List.Item.Detail.Metadata.TagList title="Additional Data">
+            {artcrime.additionalData.split(";").map((item, itemIndex) => <List.Item.Detail.Metadata.TagList.Item key={item + itemIndex} text={item} />)}
+        </List.Item.Detail.Metadata.TagList> : <List.Item.Detail.Metadata.Label title="Additional Data" icon={Icon.Minus} />}
+        <ItemWithTextOrIcon title="Period" text={artcrime.period} />
+        <List.Item.Detail.Metadata.Label title="Is Stealth" icon={artcrime.isStealth ? Icon.Check : Icon.Multiply} />
+        <List.Item.Detail.Metadata.Label title="ID In Agency" text={artcrime.idInAgency} />
+        <ItemWithTextOrIcon title="Maker" text={artcrime.maker} />
+        <List.Item.Detail.Metadata.Label title="Title" text={artcrime.title} />
+        <ItemWithTextOrIcon title="Materials" text={artcrime.materials} />
+        <List.Item.Detail.Metadata.Link title="URL" text={artcrime.url} target={artcrime.url} />
+        <ItemWithTextOrIcon title="Modified" text={artcrime.modified} />
+        <ItemWithTextOrIcon title="Reference Number" text={artcrime.referenceNumber} />
+        <ItemWithTextOrIcon title="Crime Category" text={artcrime.crimeCategory} />
+        <List.Item.Detail.Metadata.Label title="Descriptions" text={artcrime.description} />
+        <List.Item.Detail.Metadata.Separator />
+        {artcrime.images.map((image, imageIndex) => <Fragment key={imageIndex}>
+            <List.Item.Detail.Metadata.Link title="Original" text={image.original} target={image.original} />
+            <List.Item.Detail.Metadata.Link title="Thumb" text={image.thumb} target={image.original} />
+            <List.Item.Detail.Metadata.Label title="Caption" text={image.caption} />
+            <List.Item.Detail.Metadata.Link title="Large" text={image.large} target={image.original} />
+        </Fragment>)}
+        </List.Item.Detail.Metadata>} />} />)}
+        </List.Section>
+    </List>
+}
