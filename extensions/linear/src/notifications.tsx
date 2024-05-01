@@ -193,7 +193,7 @@ function Notifications() {
                   title={`${getNotificationTitle(notification)} by ${displayName}`}
                   key={notification.id}
                   keywords={keywords}
-                  icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
+                  icon={notification.actor ? getUserIcon(notification.actor) : "linear-app-icon.png"}
                   {...(notification.issue
                     ? { subtitle: `${notification.issue?.identifier} ${notification.issue?.title}` }
                     : {})}
