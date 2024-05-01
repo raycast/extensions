@@ -1,13 +1,10 @@
 import { ActionPanel, Action, List, Grid, getPreferenceValues } from "@raycast/api";
 import { readdirSync } from "fs";
 
-interface Preferences {
-  homedir: string;
-  layout: string;
-}
+const preferences = getPreferenceValues<Preferences.ListFolders>();
 
-const dir = getPreferenceValues<Preferences>().homedir;
-const layout = getPreferenceValues<Preferences>().layout;
+const dir = preferences.homedir;
+const layout = preferences.layout;
 
 export default function Command() {
   if (layout == "List") {

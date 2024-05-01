@@ -1,10 +1,7 @@
 import { open, getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  downloadsdir: string;
-}
+const dir = getPreferenceValues<Preferences.Downloads>().downloadsdir;
 
 export default function Command() {
-  const dir = getPreferenceValues<Preferences>().downloadsdir;
   return open(`${dir}`);
 }

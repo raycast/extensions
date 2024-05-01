@@ -1,31 +1,22 @@
 import { open, getPreferenceValues, Grid, ActionPanel, Action } from "@raycast/api";
 
-interface Preferences {
-  fileOne: string;
-  fileTwo: string;
-  fileThree: string;
-  fileFour: string;
-  fileFive: string;
-  fileSix: string;
-  fileSeven: string;
-  fileEight: string;
-}
+const preferences = getPreferenceValues<Preferences.FileSpeedDial>();
 
-const preferences = [
-  getPreferenceValues<Preferences>().fileOne,
-  getPreferenceValues<Preferences>().fileTwo,
-  getPreferenceValues<Preferences>().fileThree,
-  getPreferenceValues<Preferences>().fileFour,
-  getPreferenceValues<Preferences>().fileFive,
-  getPreferenceValues<Preferences>().fileSix,
-  getPreferenceValues<Preferences>().fileSeven,
-  getPreferenceValues<Preferences>().fileEight,
+const fileLocations = [
+  preferences.fileOne,
+  preferences.fileTwo,
+  preferences.fileThree,
+  preferences.fileFour,
+  preferences.fileFive,
+  preferences.fileSix,
+  preferences.fileSeven,
+  preferences.fileEight,
 ];
 
 export default function Command() {
   const files: Map<number, string> = new Map<number, string>();
 
-  preferences.forEach((element) => {
+  fileLocations.forEach((element) => {
     if (element != null && element != "") {
       files.set(files.size, element);
     }

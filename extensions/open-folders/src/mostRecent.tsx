@@ -1,11 +1,7 @@
 import { open, getPreferenceValues } from "@raycast/api";
 import { readdirSync, statSync } from "fs";
 
-interface Preferences {
-  downloadsdir: string;
-}
-
-const downloadsdir = getPreferenceValues<Preferences>().downloadsdir;
+const downloadsdir = getPreferenceValues<Preferences.MostRecent>().downloadsdir;
 
 export default function Command() {
   const dirContents = readdirSync(downloadsdir, { withFileTypes: true }).sort((a, b) => {

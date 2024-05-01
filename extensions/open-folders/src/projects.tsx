@@ -1,10 +1,7 @@
 import { open, getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  projectsdir: string;
-}
+const dir = getPreferenceValues<Preferences.Projects>().projectsdir;
 
 export default function Command() {
-  const dir = getPreferenceValues<Preferences>().projectsdir;
   return open(`${dir}`);
 }

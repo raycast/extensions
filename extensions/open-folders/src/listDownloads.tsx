@@ -1,13 +1,9 @@
 import { ActionPanel, Action, List, Grid, getPreferenceValues } from "@raycast/api";
 import { readdirSync, Dirent, statSync } from "fs";
 
-interface Preferences {
-  downloadedFilesdir: string;
-  layout: string;
-}
-
-const dir = getPreferenceValues<Preferences>().downloadedFilesdir;
-const layout = getPreferenceValues<Preferences>().layout;
+const preferences = getPreferenceValues<Preferences.ListDownloads>();
+const dir = preferences.downloadedFilesdir;
+const layout = preferences.layout;
 
 export default function Command() {
   const dirContents = readdirSync(dir, { withFileTypes: true }).sort((a, b) => {
