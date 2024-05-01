@@ -1,4 +1,4 @@
-import { Cache, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
+import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import checkAdbExists, { getAppIdFromParamsOrCache, saveAppIdInCache } from "./utils";
 import Style = Toast.Style;
