@@ -1,8 +1,8 @@
 import { environment } from "@raycast/api";
-import fs from "fs";
 import path from "path";
 import { File, Gif } from "../abstractions";
 import { Ffmpeg } from "./ffmpeg";
+import { FsFile } from "./fs.file";
 
 export class FfmpegGif implements Gif {
   constructor(
@@ -15,8 +15,8 @@ export class FfmpegGif implements Gif {
 
     const filePath = this.file.path();
     const sourceDirPath = path.dirname(filePath);
-    const targetFilePath = path.join(sourceDirPath, this.file.nextName({ extension: ".gif" }));
-    const baseFolderPath = environment.supportPath;
+    const targetGifPath = path.join(sourceDirPath, this.file.nextName({ extension: ".gif" }));
+    const paletteFile = new FsFile(path.join(environment.supportPath, "palette.png"));
     // @TODO: provide through properties or arguments
     const frameRate = 30;
 
@@ -24,7 +24,7 @@ export class FfmpegGif implements Gif {
       await this.ffmpeg.exec({
         input: filePath,
         params: [`-vf "fps=${frameRate},palettegen=stats_mode=diff"`],
-        output: `${baseFolderPath}/palette.png`,
+        output: paletteFile.path(),
       });
       await this.ffmpeg.exec({
         input: filePath,
@@ -33,10 +33,10 @@ export class FfmpegGif implements Gif {
           !width && !!height ? `-vf scale=-2:${height}` : undefined,
           !!width && !!height ? `-vf scale=${width}:${height}` : undefined,
         ],
-        output: targetFilePath,
+        output: targetGifPath,
       });
     } finally {
-      fs.rmSync(`${baseFolderPath}/palette.png`);
+      await paletteFile.remove();
     }
   };
 }

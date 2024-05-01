@@ -95,7 +95,7 @@ export class FsBinary implements Binary {
       this.onStatusChange?.("Updating binary");
       await this.makeExecutable();
     } catch (error) {
-      await afs.rm(this.binaryFile.path());
+      await this.binaryFile.remove();
       throw new ModeChangingFailedException();
     }
 
