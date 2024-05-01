@@ -190,6 +190,12 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "adb-restart",
+      "title": "Restart ADB",
+      "description": "Restart ADB by killing the ADB server and starting again",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -209,6 +215,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/expand-tilde": "^2.0.2",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

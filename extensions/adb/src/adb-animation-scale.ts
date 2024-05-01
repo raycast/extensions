@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists from "./utils";
+import { checkAdbDeviceExists } from "./utils";
 
 interface AdbAnimationScaleArguments {
   factor: string;
@@ -9,7 +9,7 @@ interface AdbAnimationScaleArguments {
 export default async function animationScale(props: LaunchProps<{ arguments: AdbAnimationScaleArguments }>) {
   let adbDir: string;
   try {
-    adbDir = await checkAdbExists();
+    adbDir = await checkAdbDeviceExists();
   } catch (e) {
     await showHUD(`${e}`);
     return;
