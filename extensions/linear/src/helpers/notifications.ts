@@ -23,6 +23,14 @@ enum IssueNotificationType {
 enum ProjectNotificationType {
   projectUpdatePrompt = "projectUpdatePrompt",
   projectUpdateMentionPrompt = "projectUpdateMentionPrompt",
+  projectUpdateCreated = "projectUpdateCreated",
+  projectAddedAsMember = "projectAddedAsMember",
+  projectUpdateReaction = "projectUpdateReaction",
+  projectUpdateNewComment = "projectUpdateNewComment"
+}
+
+enum DocumentNotificationType {
+  documentMention = "documentMention"
 }
 
 const notificationIcons: Record<string, Image.ImageLike> = {
@@ -41,6 +49,11 @@ const notificationIcons: Record<string, Image.ImageLike> = {
   [IssueNotificationType.issueReminder]: Icon.Clock,
   [ProjectNotificationType.projectUpdatePrompt]: Icon.Heartbeat,
   [ProjectNotificationType.projectUpdateMentionPrompt]: Icon.Bubble,
+  [ProjectNotificationType.projectUpdateCreated]: Icon.Megaphone,
+  [ProjectNotificationType.projectAddedAsMember]: Icon.AddPerson,
+  [ProjectNotificationType.projectUpdateReaction]: Icon.Emoji,
+  [ProjectNotificationType.projectUpdateNewComment]: Icon.Bubble,
+  [DocumentNotificationType.documentMention]: Icon.AtSymbol
 };
 
 export function getNotificationIcon(notification: NotificationResult) {
@@ -73,6 +86,11 @@ const notificationTitles: Record<string, string> = {
   [IssueNotificationType.issueReminder]: "Reminded about the issue",
   [ProjectNotificationType.projectUpdatePrompt]: "Reminded to provide a project update",
   [ProjectNotificationType.projectUpdateMentionPrompt]: "Mentioned in a project update",
+  [ProjectNotificationType.projectUpdateCreated]: "New project update",
+  [ProjectNotificationType.projectAddedAsMember]: "Added as a project member",
+  [ProjectNotificationType.projectUpdateReaction]: "New reaction to a project update",
+  [ProjectNotificationType.projectUpdateNewComment]: "New reply",
+  [DocumentNotificationType.documentMention]: "Mentioned"
 };
 
 export function getNotificationTitle(notification: NotificationResult) {
