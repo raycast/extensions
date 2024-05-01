@@ -175,6 +175,21 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "adb-animation-scale",
+      "title": "Change the Animation Scale",
+      "description": "Increase or decrease the animation scale",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "factor",
+          "placeholder": "0 - 10.0",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
