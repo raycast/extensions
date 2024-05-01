@@ -1,4 +1,5 @@
-import nodeFetch from 'node-fetch';
+import nodeFetch from "node-fetch";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis.fetch as typeof globalThis.fetch) = nodeFetch as any;
 
 import type { LaunchProps } from "@raycast/api";
