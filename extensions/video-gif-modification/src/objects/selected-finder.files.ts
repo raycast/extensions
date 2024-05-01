@@ -1,9 +1,9 @@
 import { getFrontmostApplication, getSelectedFinderItems } from "@raycast/api";
 import path from "path";
 import { Files } from "../abstractions";
-import { LocalFile } from "./local.file";
+import { FsFile } from "./fs.file";
 
-export class FinderIsNotFrontmostApp extends Error {}
+export class FinderIsNotFrontmostAppException extends Error {}
 
 export class SelectedFinderFiles implements Files {
   /**
@@ -13,7 +13,7 @@ export class SelectedFinderFiles implements Files {
     const frontmostApp = await getFrontmostApplication();
 
     if (frontmostApp.name !== "Finder") {
-      throw new FinderIsNotFrontmostApp();
+      throw new FinderIsNotFrontmostAppException();
     }
 
     const paths = await getSelectedFinderItems();
@@ -22,6 +22,6 @@ export class SelectedFinderFiles implements Files {
         const extension = path.extname(filePath.path);
         return extensions.includes(extension);
       })
-      .map((filePath) => new LocalFile(filePath.path));
+      .map((filePath) => new FsFile(filePath.path));
   };
 }

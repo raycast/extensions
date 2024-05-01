@@ -7,7 +7,8 @@ export type File = {
   path: () => string;
 
   /**
-   * Return extension of the file.
+   * Return extension of the file
+   *
    * @example
    * - my-gif.gif -> .gif
    * - clip.mp4 -> .mp4
@@ -15,9 +16,19 @@ export type File = {
   extension: () => string;
 
   /**
+   * Returns sha256 hash of the file
+   */
+  hash: () => Promise<string>;
+
+  /**
    * Return content of the file
    */
   stream: () => Promise<ReadStream>;
+
+  /**
+   * Returns true if the file exists at the specified path
+   */
+  exists: () => Promise<boolean>;
 
   /**
    * Return next name. For example in system we have `video.mp4` then this method should return `video 1.mp4`
@@ -36,7 +47,17 @@ export type File = {
   }) => string;
 
   /**
+   * Downloads content from the specified url and writes it to the current path
+   */
+  download: (fromUrl: string) => Promise<void>;
+
+  /**
    * Change content of the file
    */
   write: (content: ReadStream) => Promise<void>;
+
+  /**
+   * Remove file
+   */
+  remove: () => Promise<void>;
 };

@@ -1,21 +1,16 @@
 import { environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { File } from "../abstractions";
+import { File, Gif } from "../abstractions";
 import { Ffmpeg } from "./ffmpeg";
 
-export class Gif {
+export class FfmpegGif implements Gif {
   constructor(
-    private readonly file: File,
     private readonly ffmpeg: Ffmpeg,
+    private readonly file: File,
   ) {}
 
-  encode = async (
-    options: {
-      width?: number;
-      height?: number;
-    } = {},
-  ) => {
+  encode: Gif["encode"] = async (options = {}) => {
     const { width, height } = options;
 
     const filePath = this.file.path();

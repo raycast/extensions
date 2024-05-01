@@ -1,8 +1,9 @@
 import { exec } from "child_process";
 import os from "os";
 import path from "path";
-import { Binary } from "./binary";
+import { Binary } from "../abstractions";
 import { Ffprobe } from "./ffprobe";
+import { FsBinary } from "./fs.binary";
 
 /**
  * Ffmpeg wrapper
@@ -23,7 +24,7 @@ export class Ffmpeg {
   ) {
     this.ffmpegBinary =
       os.arch() === "arm64"
-        ? new Binary(
+        ? new FsBinary(
             {
               name: "ffmpeg",
               sha256: "326895b16940f238d76e902fc71150f10c388c281985756f9850ff800a2f1499",
@@ -31,7 +32,7 @@ export class Ffmpeg {
             },
             callbacks?.onStatusChange,
           )
-        : new Binary(
+        : new FsBinary(
             {
               name: "ffmpeg",
               sha256: "6a658787de8de14741acaedd14d5b81f7b44aef60711cbf7784208a2751933ec",

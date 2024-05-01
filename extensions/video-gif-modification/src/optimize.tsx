@@ -1,9 +1,9 @@
 import { Toast as RaycastToast, showHUD } from "@raycast/api";
 import { Ffmpeg } from "./objects/ffmpeg";
+import { FfmpegVideo } from "./objects/ffmpeg.video";
 import { Ffprobe } from "./objects/ffprobe";
-import { FinderIsNotFrontmostApp, SelectedFinderFiles } from "./objects/selected-finder.files";
+import { FinderIsNotFrontmostAppException, SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
-import { Video } from "./objects/video";
 
 export default async function Command(props: { arguments: { preset: "smallest-size" | "optimal" | "best-quality" } }) {
   const { preset } = props.arguments;
@@ -36,12 +36,12 @@ export default async function Command(props: { arguments: { preset: "smallest-si
     }
 
     for (const file of files) {
-      await new Video(file, ffmpeg).encode({ preset });
+      await new FfmpegVideo(ffmpeg, file).encode({ preset });
     }
 
     await showHUD("All Videos are Processed");
   } catch (err) {
-    if (err instanceof FinderIsNotFrontmostApp) {
+    if (err instanceof FinderIsNotFrontmostAppException) {
       await toast.show({ title: "Please put Finder in focus and try again", style: RaycastToast.Style.Failure });
       return;
     }

@@ -1,13 +1,43 @@
+import axios from "axios";
+import crypto from "crypto";
 import fs from "fs";
+import afs from "fs/promises";
 import path from "path";
 import { File } from "../abstractions";
 
-export class LocalFile implements File {
+export class FsFile implements File {
   constructor(private readonly _path: string) {}
 
   path: File["path"] = () => this._path;
 
   extension: File["extension"] = () => path.extname(this._path);
+
+  hash: File["hash"] = async () => {
+    return new Promise((resolve, reject) => {
+      const hash = crypto.createHash("sha256");
+      const fileStream = fs.createReadStream(this.path());
+
+      fileStream.on("error", (err) => {
+        reject(err);
+      });
+
+      hash.once("readable", () => {
+        const data = hash.digest("hex");
+        resolve(data);
+      });
+
+      fileStream.pipe(hash);
+    });
+  };
+
+  exists: File["exists"] = async () => {
+    try {
+      await afs.stat(this.path());
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   stream: File["stream"] = async () => fs.createReadStream(this._path);
 
@@ -44,6 +74,15 @@ export class LocalFile implements File {
     return `${nextName}${extension ?? currentExtension}`;
   };
 
+  download: File["download"] = async (fromUrl) => {
+    const response = await axios({
+      method: "GET",
+      url: fromUrl,
+      responseType: "stream",
+    });
+    await this.write(response.data);
+  };
+
   write: File["write"] = (content) =>
     new Promise((resolve, reject) => {
       const dirName = path.dirname(this._path);
@@ -61,4 +100,8 @@ export class LocalFile implements File {
         reject(err);
       });
     });
+
+  remove: File["remove"] = async () => {
+    await afs.rm(this.path());
+  };
 }

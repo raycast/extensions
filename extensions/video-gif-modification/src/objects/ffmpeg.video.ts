@@ -1,21 +1,14 @@
 import path from "path";
-import { File } from "../abstractions";
+import { File, Video } from "../abstractions";
 import { Ffmpeg } from "./ffmpeg";
 
-export class Video {
+export class FfmpegVideo implements Video {
   constructor(
-    private readonly file: File,
     private readonly ffmpeg: Ffmpeg,
+    private readonly file: File,
   ) {}
 
-  encode = async (
-    options: {
-      preset?: "smallest-size" | "optimal" | "best-quality";
-      width?: number;
-      height?: number;
-      format?: "mp4" | "webm" | "mov";
-    } = {},
-  ) => {
+  encode: Video["encode"] = async (options = {}) => {
     const { preset, width, height, format } = options;
 
     const videoPath = this.file.path();

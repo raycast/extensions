@@ -1,10 +1,10 @@
 import { Toast as RaycastToast, showHUD } from "@raycast/api";
 import { Ffmpeg } from "./objects/ffmpeg";
+import { FfmpegGif } from "./objects/ffmpeg.gif";
+import { FfmpegVideo } from "./objects/ffmpeg.video";
 import { Ffprobe } from "./objects/ffprobe";
-import { Gif } from "./objects/gif";
-import { FinderIsNotFrontmostApp, SelectedFinderFiles } from "./objects/selected-finder.files";
+import { FinderIsNotFrontmostAppException, SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
-import { Video } from "./objects/video";
 
 export default async function Command(props: { arguments: { format: "mp4" | "webm" | "gif" } }) {
   const { format } = props.arguments;
@@ -35,16 +35,16 @@ export default async function Command(props: { arguments: { format: "mp4" | "web
 
     for (const file of selectedFiles) {
       if (format === "gif") {
-        await new Gif(file, ffmpeg).encode();
+        await new FfmpegGif(ffmpeg, file).encode();
         continue;
       }
 
-      await new Video(file, ffmpeg).encode({ format });
+      await new FfmpegVideo(ffmpeg, file).encode({ format });
     }
 
     await showHUD("All Videos are Processed");
   } catch (err) {
-    if (err instanceof FinderIsNotFrontmostApp) {
+    if (err instanceof FinderIsNotFrontmostAppException) {
       await toast.show({ title: "Please put Finder in focus and try again", style: RaycastToast.Style.Failure });
       return;
     }
