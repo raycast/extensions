@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import moment from "moment";
-import { Preferences } from "./types";
 
 const preferences = getPreferenceValues<Preferences>();
 export const encodedApiKey = btoa(`${preferences.apiKey}:`);
