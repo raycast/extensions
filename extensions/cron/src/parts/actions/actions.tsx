@@ -181,7 +181,7 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
         <Action.OpenInBrowser
           title="Cron"
           icon={{ source: getAvatarIcon("C", { background: "#0e0f10", gradient: true }), mask: Image.Mask.Circle }}
-          url="https://cron.io"
+          url="https://cron.re"
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
