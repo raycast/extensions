@@ -1,7 +1,4 @@
 // General types used throughout the app
-export type Preferences = {
-  apiKey: string;
-};
 
 export type ApiResponse<T> = {
   pagination: Pagination;
