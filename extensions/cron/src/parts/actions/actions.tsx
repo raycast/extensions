@@ -179,9 +179,9 @@ export default function Actions({ global, day }: { global?: boolean; day?: numbe
           url="https://github.com/astrit"
         />
         <Action.OpenInBrowser
-          title="Cron"
+          title="Calist"
           icon={{ source: getAvatarIcon("C", { background: "#0e0f10", gradient: true }), mask: Image.Mask.Circle }}
-          url="https://cron.io"
+          url="https://calist.io"
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
