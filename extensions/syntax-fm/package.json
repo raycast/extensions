@@ -18,6 +18,7 @@
     {
       "name": "search",
       "title": "Search Episodes",
+      "subtitle": "Syntax.fm",
       "description": "List all episodes",
       "mode": "view"
     }
