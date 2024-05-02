@@ -834,6 +834,7 @@
 /extensions/nixpkgs-search                                          @aiotter
 /extensions/nmbs-planner                                            @SamuelVanhaecke
 /extensions/node-js-evaluate                                        @selfish
+/extensions/node-release-notes                                      @filipszczepanski
 /extensions/node-version-manager                                    @AndresMorelos @pernielsentikaer @LeOndaz
 /extensions/nodes                                                   @jstnw10
 /extensions/nos-news                                                @Joran-Dob

@@ -833,6 +833,7 @@
   "aiotter/nixpkgs-search": "nixpkgs-search",
   "Samuel3865/nmbs-planner": "nmbs-planner",
   "Selfish/node-js-evaluate": "node-js-evaluate",
+  "fil/node-release-notes": "node-release-notes",
   "andresmorelos/node-version-manager": "node-version-manager",
   "jstnw10/solana_nodes": "nodes",
   "jorandob/nos-nieuws": "nos-news",
