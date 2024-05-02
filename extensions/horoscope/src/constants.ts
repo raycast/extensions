@@ -1,0 +1,1 @@
+export const API_URL = "https://horoscope-app-api.vercel.app/api/v1/get-horoscope/";
