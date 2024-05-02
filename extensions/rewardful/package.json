@@ -9,25 +9,29 @@
   "commands": [
     {
       "name": "campaigns",
-      "title": "Campaigns",
+      "title": "View Campaigns",
+      "subtitle": "Rewardful",
       "description": "View campaigns",
       "mode": "view"
     },
     {
       "name": "affiliates",
-      "title": "Affiliates",
+      "title": "View Affiliates",
+      "subtitle": "Rewardful",
       "description": "View and update affiliates",
       "mode": "view"
     },
     {
       "name": "commission",
-      "title": "Commission",
+      "title": "View Commission",
+      "subtitle": "Rewardful",
       "description": "View and update commission",
       "mode": "view"
     },
     {
       "name": "referrals",
-      "title": "Referrals",
+      "title": "View Referrals",
+      "subtitle": "Rewardful",
       "description": "View referrals",
       "mode": "view"
     }
