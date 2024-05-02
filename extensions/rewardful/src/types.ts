@@ -1,5 +1,4 @@
 // General types used throughout the app
-
 export type ApiResponse<T> = {
   pagination: Pagination;
   data: T[];
