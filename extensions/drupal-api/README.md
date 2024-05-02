@@ -10,9 +10,13 @@ Here is a link to my [original repository](https://github.com/BossElijah/raycast
 - Select which version of Drupal you want to search in (your choice will be stored so the same value will be chosen by default next time you use the extension).
 - Press `Enter` to open the link directly.
 
-![How it works](/assets/image.png)
+## Screenshots
 
-![How it works 2](/assets/image-2.png)
+![How it works](/media/drupal-api-1.png)
+
+![How it works 2](/media/drupal-api-3.png)
+
+![How it works 2](/media/drupal-api-5.png)
 
 ## Future Development
 
@@ -31,14 +35,14 @@ Pull requests are also welcome ;-).
 
 If anyone has pity on me, they're more than welcome to design a new logo for the extension. Here's what I've considered so far:
 
-[<img src="/assets/logo-1.png" width="200" height="200"/>](/assets/logo-1.png)
-[<img src="/assets/logo-2.png" width="200" height="200"/>](/assets/logo-2.png)
-[<img src="/assets/logo-3.png" width="200" height="200"/>](/assets/logo-3.png)
-[<img src="/assets/logo-4.png" width="200" height="200"/>](/assets/logo-4.png)
+[<img src="/media/logo-1.png" width="200" height="200"/>](/media/logo-1.png)
+[<img src="/media/logo-2.png" width="200" height="200"/>](/media/logo-2.png)
+[<img src="/media/logo-3.png" width="200" height="200"/>](/media/logo-3.png)
+[<img src="/media/logo-4.png" width="200" height="200"/>](/media/logo-4.png)
 
-Below are all the logos in the right dimensions listed. They're shown here to avoid breaking Raycast's guidelines 😄🤣
+Below are all the logos in the correct dimensions (512x512) listed. They're shown here to avoid breaking Raycast's guidelines 😄🤣
 
-[<img src="/assets/logo-1_512x512.png" width="200" height="200"/>](/assets/logo-1_512x512.png)
-[<img src="/assets/logo-2_512x512.png" width="200" height="200"/>](/assets/logo-2_512x512.png)
-[<img src="/assets/logo-3_512x512.png" width="200" height="200"/>](/assets/logo-3_512x512.png)
-[<img src="/assets/logo-4_512x512.png" width="200" height="200"/>](/assets/logo-4_512x512.png)
+[<img src="/media/logo-1_512x512.png" width="200" height="200"/>](/media/logo-1_512x512.png)
+[<img src="/media/logo-2_512x512.png" width="200" height="200"/>](/media/logo-2_512x512.png)
+[<img src="/media/logo-3_512x512.png" width="200" height="200"/>](/media/logo-3_512x512.png)
+[<img src="/media/logo-4_512x512.png" width="200" height="200"/>](/media/logo-4_512x512.png)
