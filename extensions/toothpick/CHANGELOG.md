@@ -1,5 +1,9 @@
 # Toothpick Changelog
 
+## [Update] - 2024-05-02
+
+- Fixed an error when using deeplink in background
+
 ## [Update] - 2024-04-22
 
 - Updated dependencies
