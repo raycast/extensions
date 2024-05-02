@@ -17,7 +17,7 @@ export default function Summarize() {
       <List
         actions={
           <ActionPanel>
-            <PrimaryAction title={"install"} onAction={() => open("https://www.raycast.com/browser-extension")} />
+            <PrimaryAction title="Install" onAction={() => open("https://www.raycast.com/browser-extension")} />
           </ActionPanel>
         }
       >
