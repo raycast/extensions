@@ -79,7 +79,7 @@ export default function Command() {
                           />
                         )}
                         <Action.OpenInBrowser
-                          title="View In Rewardful"
+                          title="View in Rewardful"
                           shortcut={{ modifiers: ["cmd"], key: "o" }}
                           url={`${siteUrl}/affiliates/${item.id}`}
                         />
