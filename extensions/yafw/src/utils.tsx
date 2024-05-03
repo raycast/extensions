@@ -1,7 +1,7 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { exec, execSync } from "child_process";
-import { promisify } from "util";
 import fs, { existsSync } from "fs";
+import { promisify } from "util";
 import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH } from "./constants";
 
 const ffmpegPath = getPreferenceValues().ffmpeg_path || "/opt/homebrew/bin/ffmpeg";
