@@ -93,6 +93,16 @@ ${entry?.description}
 						<Detail.Metadata.TagList.Item text={"None"} />
 					</Detail.Metadata.TagList>
 				);
+			} else if (entry?.drops[0] == "treasures") {
+				return (
+					<Detail.Metadata.TagList title="Drops">
+						<Detail.Metadata.TagList.Item
+							text={"Treasures"}
+							key={"treasures"}
+							icon={{ source: `materialIcons/treasureIcon.png` }}
+						/>
+					</Detail.Metadata.TagList>
+				);
 			} else {
 				return (
 					<Detail.Metadata.TagList title="Drops">
@@ -108,11 +118,25 @@ ${entry?.description}
 			}
 		} else if (category?.category == "equipment") {
 			if (entry?.properties.attack > 100000) {
-				return <Detail.Metadata.Label title="Attack" text={"∞"} />;
+				return (
+					<Detail.Metadata.Label title="Attack" icon={{ source: "materialIcons/attack.png" }} text={"∞"} />
+				);
 			} else if (entry?.properties.attack > 0) {
-				return <Detail.Metadata.Label title="Attack" text={entry?.properties.attack.toString()} />;
+				return (
+					<Detail.Metadata.Label
+						title="Attack"
+						icon={{ source: "materialIcons/attack.png" }}
+						text={entry?.properties.attack.toString()}
+					/>
+				);
 			} else if (entry?.properties.defense > 0) {
-				return <Detail.Metadata.Label title="Defense" text={entry?.properties.defense.toString()} />;
+				return (
+					<Detail.Metadata.Label
+						title="Defense"
+						icon={{ source: "materialIcons/guard.png" }}
+						text={entry?.properties.defense.toString()}
+					/>
+				);
 			} else {
 				if (entry?.name == "shock arrow") {
 					return (
@@ -163,7 +187,11 @@ ${entry?.description}
 				return (
 					<>
 						<Detail.Metadata.Label title="Cooking Effect" text={"None"} />
-						<Detail.Metadata.Label title="Hearts Recovered" text={entry?.hearts_recovered.toString()} />
+						<Detail.Metadata.Label
+							title="Hearts Recovered"
+							icon={{ source: `materialIcons/${entry?.hearts_recovered.toString()}.png` }}
+							// text={entry?.hearts_recovered.toString()}
+						/>
 					</>
 				);
 			} else {
@@ -172,10 +200,16 @@ ${entry?.description}
 						<>
 							<Detail.Metadata.Label
 								title="Cooking Effect"
+								icon={{ source: `materialIcons/${entry?.cooking_effect}.png` }}
 								text={entry?.cooking_effect.replace(/(^|\s)\S/g, (match: string) =>
 									match.toUpperCase(),
 								)}
 							/>
+							{/* <Detail.Metadata.Label
+								title="Hearts Recovered"
+								icon={{ source: `materialIcons/${entry?.hearts_recovered.toString()}.png` }}
+								text={entry?.hearts_recovered.toString()}
+							/> */}
 						</>
 					);
 				} else {
@@ -183,11 +217,16 @@ ${entry?.description}
 						<>
 							<Detail.Metadata.Label
 								title="Cooking Effect"
+								icon={{ source: `materialIcons/${entry?.cooking_effect}.png` }}
 								text={entry?.cooking_effect.replace(/(^|\s)\S/g, (match: string) =>
 									match.toUpperCase(),
 								)}
 							/>
-							<Detail.Metadata.Label title="Hearts Recovered" text={entry?.hearts_recovered.toString()} />
+							<Detail.Metadata.Label
+								title="Hearts Recovered"
+								icon={{ source: `materialIcons/${entry?.hearts_recovered.toString()}.png` }}
+								// text={entry?.hearts_recovered.toString()}
+							/>
 						</>
 					);
 				}
@@ -199,6 +238,7 @@ ${entry?.description}
 						<>
 							<Detail.Metadata.Label
 								title="Cooking Effect"
+								icon={{ source: `materialIcons/${entry?.cooking_effect}.png` }}
 								text={entry?.cooking_effect.replace(/(^|\s)\S/g, (match: string) =>
 									match.toUpperCase(),
 								)}
@@ -208,20 +248,26 @@ ${entry?.description}
 				} else {
 					if (entry?.cooking_effect == "") {
 						return (
-							<Detail.Metadata.Label title="Hearts Recovered" text={entry?.hearts_recovered.toString()} />
+							<Detail.Metadata.Label
+								title="Hearts Recovered"
+								icon={{ source: `materialIcons/${entry?.hearts_recovered.toString()}.png` }}
+								// text={entry?.hearts_recovered.toString()}
+							/>
 						);
 					} else {
 						return (
 							<>
 								<Detail.Metadata.Label
 									title="Cooking Effect"
+									icon={{ source: `materialIcons/${entry?.cooking_effect}.png` }}
 									text={entry?.cooking_effect.replace(/(^|\s)\S/g, (match: string) =>
 										match.toUpperCase(),
 									)}
 								/>
 								<Detail.Metadata.Label
 									title="Hearts Recovered"
-									text={entry?.hearts_recovered.toString()}
+									icon={{ source: `materialIcons/${entry?.hearts_recovered.toString()}.png` }}
+									// text={entry?.hearts_recovered.toString()}
 								/>
 							</>
 						);
@@ -234,7 +280,7 @@ ${entry?.description}
 							<Detail.Metadata.TagList title="Drops">
 								<Detail.Metadata.TagList.Item
 									text={"Rupees"}
-									icon={{ source: "materialIcons/green rupee.png" }}
+									icon={{ source: "materialIcons/Treasures.png" }}
 								/>
 							</Detail.Metadata.TagList>
 						</>

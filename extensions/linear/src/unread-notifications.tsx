@@ -84,7 +84,7 @@ function UnreadNotifications() {
             notification.actor ? notification.actor.displayName : "Linear"
           }`;
 
-          const icon = notification.actor ? getUserIcon(notification.actor) : "linear.png";
+          const icon = notification.actor ? getUserIcon(notification.actor) : "linear-app-icon.png";
           const subtitle = notification.issue?.title ? truncate(notification.issue.title, 20) : "";
           const tooltip = `${notification.issue?.identifier}: ${notification.issue?.title}`;
 

@@ -91,7 +91,7 @@ export interface Series {
   titleSlug: string;
   certification?: string;
   genres: string[];
-  tags: any[];
+  tags: unknown[];
   added: string;
   ratings: Ratings;
   qualityProfileId: number;

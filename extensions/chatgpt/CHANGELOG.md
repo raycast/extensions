@@ -1,5 +1,10 @@
 # Changelog
 
+## [Feature] - 2024-04-30
+
+- Feature: add `Summarize` command to summarize website and YouTube video
+- Refactor: model dropdown save model switch `localstorage` to `cache`
+
 ## [Feature] - 2024-04-09
 
 - Feature: Support custom model name in `Models` (Enable in preferences)
