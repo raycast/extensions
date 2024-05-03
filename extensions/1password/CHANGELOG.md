@@ -1,5 +1,7 @@
 # 1Password Changelog
 
+## [Moved contributor] - 2024-05-03
+
 ## [Enhancements] - 2024-04-08
 
 - Adds Optimistic Updates for items and account.
