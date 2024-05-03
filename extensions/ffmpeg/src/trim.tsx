@@ -1,37 +1,53 @@
-import { Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, confirmAlert, showToast } from "@raycast/api";
 import { executeFFmpegCommandAsync, isFFmpegInstalled } from "./utils/ffmpeg";
 import { TipForInstallFFmpeg } from "./components/tipForInstallFFmpeg";
 import { getSelectedVideos } from "./utils/fs";
 import { formatTime, getTimeInSeconds } from "./utils/time";
+import fs from "fs";
 
 const ffmpegInstalled = isFFmpegInstalled();
 
-export default async function Trim() {
+export default function Trim() {
   if (!ffmpegInstalled) {
     return <TipForInstallFFmpeg />;
   }
 
-  const paths = getSelectedVideos();
-
   const handleSubmit = async (values: { startTime: string; endTime: string; format: string }) => {
+    const paths = getSelectedVideos();
+
+    if (paths.length === 0) {
+      await showToast({ title: "Please select a video file.", style: Toast.Style.Failure });
+      return;
+    }
+
     try {
       const { startTime, endTime, format } = values;
 
       const inputFile = paths[0];
       const outputFile = `${inputFile.substring(0, inputFile.lastIndexOf("."))}_trimmed.${format}`;
 
-      const command = `-i "${inputFile}" -ss ${startTime} -to ${endTime} -c:v libx264 -c:a aac "${outputFile}"`;
+      const alreadyExists = fs.existsSync(outputFile);
 
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Trimming video...",
-      });
+      if (alreadyExists) {
+        const deleteExisting = await confirmAlert({
+          title: "File already exists",
+          message: "The file already exists. Do you want to replace it?",
+        });
+
+        if (deleteExisting) {
+          fs.unlinkSync(outputFile);
+        } else {
+          return;
+        }
+      }
+
+      const command = `-i "${inputFile}" -ss ${startTime} -to ${endTime} -c:v libx264 -c:a aac "${outputFile}"`;
 
       let totalDuration = 0;
 
       const convertingToast = await showToast({
         style: Toast.Style.Animated,
-        title: "Extracting...",
+        title: "Trimming...",
       });
 
       await executeFFmpegCommandAsync({

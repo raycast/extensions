@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, confirmAlert, showToast } from "@raycast/api";
 import { TipForInstallFFmpeg } from "./components/tipForInstallFFmpeg";
 import { executeFFmpegCommandAsync, isFFmpegInstalled } from "./utils/ffmpeg";
 import { getSelectedVideos } from "./utils/fs";
 import { formatTime, getTimeInSeconds } from "./utils/time";
+import fs from "fs";
 
 const ffmpegInstalled = isFFmpegInstalled();
 
@@ -21,7 +22,22 @@ export default function ExtractAudio() {
 
     const videoPath = paths[0];
     const { audioFormat } = values;
-    const outputPath = `${videoPath.substring(0, videoPath.lastIndexOf("."))}.${audioFormat}`;
+    const outputPath = `${videoPath.substring(0, videoPath.lastIndexOf("."))}_trim.${audioFormat}`;
+
+    const alreadyExists = fs.existsSync(outputPath);
+
+    if (alreadyExists) {
+      const deleteExisting = await confirmAlert({
+        title: "File already exists",
+        message: "The file already exists. Do you want to replace it?",
+      });
+
+      if (deleteExisting) {
+        fs.unlinkSync(outputPath);
+      } else {
+        return;
+      }
+    }
 
     await showToast({ title: "Extracting audio...", style: Toast.Style.Animated });
 
