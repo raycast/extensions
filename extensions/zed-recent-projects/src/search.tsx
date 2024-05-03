@@ -56,7 +56,7 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
 export function Command() {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const zed = useContext(ZedContext).zed!;
-  const { entries } = useZedRecentWorkspaces();
+  const { entries, isLoading } = useZedRecentWorkspaces();
   const { pinnedEntries, pinEntry, unpinEntry, moveUp, moveDown } = usePinnedEntries();
 
   const pinned = Object.values(pinnedEntries)
@@ -64,7 +64,7 @@ export function Command() {
     .sort((a, b) => a.order - b.order);
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       <List.Section title="Pinned Projects">
         {pinned.map((e) => {
           const entry = getEntry(e.uri);
