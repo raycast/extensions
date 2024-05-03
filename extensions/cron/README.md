@@ -1,20 +1,20 @@
 <div align="center">
   <img
-    src="https://calist.io/calist.png"
+    src="https://cron.re/cron.png"
     width="120"
   />
 
   <h1>
-    Calist
+    Cron
   </h1>
 
 This extension consists of two commands, Calendar and Time. The Calendar command displays a calendar with the current date highlighted and very flexible navigation shortcuts. The Time command displays the current time and optional extra timezone. Both commands have a variety of settings that can be customized to your liking.
 <br><br>
-Designed to be a companion for calist.io
+Designed to be a companion for cron.re
 <br><br>
 
   <p>
-    <a href="https://www.raycast.com/astrit/calist">
+    <a href="https://www.raycast.com/astrit/cron">
       <img src="https://img.shields.io/badge/Raycast-store-red.svg"
         alt="Find this extension on the Raycast store"
       />
