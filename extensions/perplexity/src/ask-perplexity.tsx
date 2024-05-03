@@ -29,9 +29,13 @@ export default function Command(props: LaunchProps<{ draftValues: Values; argume
   });
 
   if (props.arguments.query) {
+    let copilot = getPreferenceValues<Preferences.AskPerplexity>().useProMode;
+    if (props.arguments.copilot !== undefined && props.arguments.copilot !== "") {
+      copilot = ["n", "no", "false"].includes(props.arguments.copilot.toLowerCase()) ? false : true
+    }
     handleSubmit({
       query: props.arguments.query,
-      copilot: ["y", "yes", "true"].includes(props.arguments.copilot?.toLowerCase() ?? ""),
+      copilot: copilot,
       focus: "all",
     });
     return null;

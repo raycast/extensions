@@ -5,6 +5,9 @@
   "description": "Query Perplexity from within Raycast",
   "icon": "perplexity-logo.png",
   "author": "third774",
+  "contributors": [
+    "trefsoftware"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -36,6 +39,14 @@
           "default": false,
           "type": "checkbox",
           "name": "fallbackCopilot",
+          "required": false
+        },
+        {
+          "label": "Use Pro Mode by Default",
+          "description": "This will enable Perplexity's Pro Mode by default when using the command",
+          "default": false,
+          "type": "checkbox",
+          "name": "useProMode",
           "required": false
         }
       ]
