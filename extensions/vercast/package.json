@@ -10,7 +10,8 @@
   "access": "public",
   "contributors": [
     "matt",
-    "dgrcode"
+    "dgrcode",
+    "samuelkraft"
   ],
   "commands": [
     {
@@ -61,6 +62,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "lint:fix": "ray lint --fix"
+    "lint:fix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

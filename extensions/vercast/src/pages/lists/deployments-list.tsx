@@ -64,8 +64,15 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                       deployment.id || deployment.uid
                     )}
                     icon={Icon.Link}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
                   />
                 )}
+                <Action.CopyToClipboard
+                  title={`Copy URL`}
+                  content={`https://${deployment.url}`}
+                  icon={Icon.CopyClipboard}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                />
               </ActionPanel>
             }
             accessories={[
