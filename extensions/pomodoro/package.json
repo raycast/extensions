@@ -11,7 +11,8 @@
     "susan_thapa",
     "mikikiv",
     "MartinGonzalez",
-    "nathanjms"
+    "nathanjms",
+    "cchalop1"
   ],
   "keywords": [
     "pomodoro",
@@ -36,6 +37,12 @@
       "subtitle": "Start / Stop Pomodoro Timer",
       "description": "Start, pause, stop or continue pomodoro intervals",
       "mode": "view"
+    },
+    {
+      "name": "stats-pomodoro-timer",
+      "title": "View Pomodoro Stats",
+      "mode": "view",
+      "description": "Shows the stats of the Pomodoro timer"
     },
     {
       "name": "slack-pomodoro-menu-bar",
