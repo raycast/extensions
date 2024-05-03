@@ -30,7 +30,7 @@ enum ProjectNotificationType {
 }
 
 enum DocumentNotificationType {
-  documentMention = "documentMention"
+  documentMention = "documentMention",
 }
 
 const notificationIcons: Record<string, Image.ImageLike> = {
@@ -53,7 +53,7 @@ const notificationIcons: Record<string, Image.ImageLike> = {
   [ProjectNotificationType.projectAddedAsMember]: Icon.AddPerson,
   [ProjectNotificationType.projectUpdateReaction]: Icon.Emoji,
   [ProjectNotificationType.projectUpdateNewComment]: Icon.Bubble,
-  [DocumentNotificationType.documentMention]: Icon.AtSymbol
+  [DocumentNotificationType.documentMention]: Icon.AtSymbol,
 };
 
 export function getNotificationIcon(notification: NotificationResult) {
@@ -90,7 +90,7 @@ const notificationTitles: Record<string, string> = {
   [ProjectNotificationType.projectAddedAsMember]: "Added as a project member",
   [ProjectNotificationType.projectUpdateReaction]: "New reaction to a project update",
   [ProjectNotificationType.projectUpdateNewComment]: "New reply",
-  [DocumentNotificationType.documentMention]: "Mentioned"
+  [DocumentNotificationType.documentMention]: "Mentioned",
 };
 
 export function getNotificationTitle(notification: NotificationResult) {
