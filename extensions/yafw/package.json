@@ -29,7 +29,7 @@
     {
       "name": "convert",
       "title": "Convert To",
-      "description": "The command takes no arguments and encodes the file in the selected folder.",
+      "description": "This command encodes the file in the selected folder.",
       "mode": "no-view",
       "arguments": [
         {
