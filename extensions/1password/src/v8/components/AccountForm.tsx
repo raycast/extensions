@@ -5,12 +5,12 @@ import { Guide } from "./Guide";
 import { op, useAccounts } from "../utils";
 import { useCachedState } from "@raycast/utils";
 
-export function AccountForm() {
+export function AccountForm({ reset = false }: { reset?: boolean }) {
   const [hasAccount, setHasAccount] = useCachedState<boolean | undefined>("@account", false);
   const { data, error, isLoading } = useAccounts();
 
   if (error) return <Guide />;
-  if (hasAccount) return <Items />;
+  if (!reset && hasAccount) return <Items />;
   return (
     <Form
       isLoading={isLoading}

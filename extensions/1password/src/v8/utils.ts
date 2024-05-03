@@ -3,7 +3,7 @@ import { getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 
-import { Category, CategoryName, Item, User } from "./types";
+import { Category, CategoryName, Item, User, Vault } from "./types";
 import { useExec } from "@raycast/utils";
 
 export type ActionID = string;
@@ -29,6 +29,7 @@ export function actionsForItem(item: Item): ActionID[] {
     "copy-username",
     "copy-password",
     "copy-one-time-password",
+    "switch-account",
   ];
   // prioritize primary and secondary actions, then append the rest and remove duplicates
   const deduplicatedActions = [
@@ -78,7 +79,7 @@ export class ConnectionError extends ExtensionError {}
 
 const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) =>
   useExec<T, U>(CLI_PATH, [...args, "--format=json"], {
-    parseOutput: ({ stdout, stderr, error }) => {
+    parseOutput: ({ stdout, stderr, error, ...rest }) => {
       if (error) handleErrors(error.message);
       if (stderr) handleErrors(stderr);
       if (callback) return callback(JSON.parse(stdout));
@@ -92,16 +93,21 @@ const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) =
     },
   });
 
-export const usePasswords = () =>
-  useOp<Item[], ExtensionError>(["item", "list", "--long"], (data) =>
+export const usePasswords = (flags: string[] = []) =>
+  useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
     data.sort((a, b) => a.title.localeCompare(b.title))
   );
+
+export const useVaults = () =>
+  useOp<Vault[], ExtensionError>(["vault", "list"], (data) => data.sort((a, b) => a.name.localeCompare(b.name)));
+
 export const useCategories = () =>
   useOp<Category[], ExtensionError>(["item", "template", "list"], (data) =>
     data.sort((a, b) => a.name.localeCompare(b.name))
   );
 
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
+
 export const useAccounts = () => useOp<User[], ExtensionError>(["account", "list"]);
 
 export function getCategoryIcon(category: CategoryName) {

@@ -3,6 +3,7 @@ import { CopyToClipboard } from "./ActionCopyToClipboard";
 import { Item, User } from "../types";
 import { ActionID, hrefToOpenInBrowser } from "../utils";
 import resetCache from "../../reset-cache";
+import { SwitchAccount } from "./ActionSwitchAccount";
 
 export function ItemActionPanel({
   account,
@@ -27,6 +28,8 @@ export function ItemActionPanel({
             return CopyPassword(item);
           case "copy-one-time-password":
             return CopyOneTimePassword(item);
+          case "switch-account":
+            return SwitchAccount();
         }
       })}
       <ActionPanel.Section>
