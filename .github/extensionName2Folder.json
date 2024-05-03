@@ -219,6 +219,7 @@
   "lardissone/commitlint": "commitlint",
   "koinzhang/common-directory": "common-directory",
   "jns/comodoro": "comodoro",
+  "j3lte/composerize": "composerize",
   "felixhaeberle/compress-pdf": "compress-pdf",
   "hieudinh/compressx": "compressx",
   "tbrown/confluence": "confluence-search",
