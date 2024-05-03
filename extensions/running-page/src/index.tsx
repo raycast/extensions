@@ -3,12 +3,24 @@ import { withAccessToken } from "@raycast/utils";
 import { github } from "./util/auth";
 import Stat from "./components/Stat";
 import { useRunningPage } from "./hook/useRunningPage";
-import { getOwnerAndRepository } from "./util/utils";
+import { filterActivities, getOwnerAndRepository } from "./util/utils";
+import { useMemo, useState } from "react";
+import { Activity } from "./type";
 
 function AuthorizedComponent() {
   const preferences = getPreferenceValues<Preferences>();
   const repository = getOwnerAndRepository(preferences.repository);
   const { data, isLoading, revalidate } = useRunningPage({ ...repository, path: preferences.path });
+
+  const [searchData, setSearchData] = useState<Activity[] | null>(null);
+
+  const sections = useMemo(() => {
+    if (!data) return null;
+    const recent = filterActivities(data, null, 28);
+    const ytd = filterActivities(data, null, 365);
+    const others = data.slice(recent.length + ytd.length - 1);
+    return { recent, ytd, others };
+  }, [data]);
 
   return (
     <List
@@ -19,9 +31,48 @@ function AuthorizedComponent() {
           <Action onAction={revalidate} title="Refresh" icon={Icon.ArrowClockwise} />
         </ActionPanel>
       }
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select Activities Rage"
+          defaultValue={"all"}
+          onChange={(value) => {
+            if (value === "all") {
+              setSearchData(null);
+            } else {
+              setSearchData(filterActivities(data!, null, value === "recent" ? 28 : 365));
+            }
+          }}
+        >
+          <List.Dropdown.Item title="All" value="all" />
+          <List.Dropdown.Item title="Past Year" value="ytd" />
+          <List.Dropdown.Item title="Last 4 Weeks" value="recent" />
+        </List.Dropdown>
+      }
     >
-      {data ? data.map((item) => <Stat activity={item} key={item.run_id} />) : <List.EmptyView title="No data now" />}
+      {searchData || sections ? (
+        searchData ? (
+          searchData.map((activity) => <Stat activity={activity} key={activity.run_id} />)
+        ) : (
+          <>
+            <ListSection activities={sections!.recent} title="Last 4 Weeks" />
+            <ListSection activities={sections!.ytd} title="Past Year" />
+            <ListSection activities={sections!.others} title="Others" />
+          </>
+        )
+      ) : (
+        <List.EmptyView title="No data now" />
+      )}
     </List>
+  );
+}
+
+function ListSection({ activities, title }: { activities: Activity[]; title: string }) {
+  return (
+    <List.Section title={title}>
+      {activities.map((activity) => (
+        <Stat activity={activity} key={activity.run_id} />
+      ))}
+    </List.Section>
   );
 }
 

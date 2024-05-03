@@ -13,9 +13,9 @@ function MenuBarTotals() {
   if (!data) {
     return <MenuBarExtra isLoading={isLoading} />;
   }
-  const recentRunTotal = getAllDistance(data, "Run", 14);
-  const recentRideTotal = getAllDistance(data, "Ride", 14);
-  const recentSwimTotal = getAllDistance(data, "Swim", 14);
+  const recentRunTotal = getAllDistance(data, "Run", 28);
+  const recentRideTotal = getAllDistance(data, "Ride", 28);
+  const recentSwimTotal = getAllDistance(data, "Swim", 28);
 
   const ytdRunTotal = getAllDistance(data, "Run", 365);
   const ytdRideTotal = getAllDistance(data, "Ride", 365);

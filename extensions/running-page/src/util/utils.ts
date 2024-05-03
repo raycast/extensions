@@ -39,6 +39,9 @@ export const formatRunTime = (moving_time: string): string => {
 export const titleForRun = (run: Activity): string => {
   const runDistance = run.distance / 1000;
   const runHour = +run.start_date_local.slice(11, 13);
+  if (run.type === "VirtualRide") {
+    return run.name;
+  }
   if (run.type === "Run") {
     if (runDistance > 20 && runDistance < 40) {
       return RUN_TITLES.HALF_MARATHON_RUN_TITLE;
@@ -47,6 +50,7 @@ export const titleForRun = (run: Activity): string => {
       return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
     }
   }
+  // other workouts
   let msg = "";
   if (runHour >= 0 && runHour <= 10) {
     msg = RUN_TITLES.MORNING_RUN_TITLE;
@@ -99,7 +103,13 @@ export const sortDateFunc = (a: Activity, b: Activity) => {
 };
 
 export const getAllDistance = (activities: Activity[], type: string, interval: number): string => {
-  let filtered = activities.filter((activity) => activity.type === type);
+  const filtered = filterActivities(activities, type, interval);
+  const distance = filtered.reduce((acc, cur) => acc + cur.distance, 0);
+  return (distance / 1000.0).toFixed(0) + " km";
+};
+
+export const filterActivities = (activities: Activity[], type: string | null, interval: number): Activity[] => {
+  let filtered = activities.filter((activity) => (type ? activity.type === type : true));
   if (interval != -1) {
     const now = new Date();
     const start = new Date(now.getTime() - interval * 24 * 60 * 60 * 1000);
@@ -108,6 +118,5 @@ export const getAllDistance = (activities: Activity[], type: string, interval: n
       return date >= start && date <= now;
     });
   }
-  const distance = filtered.reduce((acc, cur) => acc + cur.distance, 0);
-  return (distance / 1000.0).toFixed(0) + " km";
+  return filtered;
 };
