@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Improvements] - 2024-05-03
+
+- Notifications now support Projects (Updates, comments, reactions, added as member), Document Mentions and Bots (GitHub and GitLab)
+- Updated Project Icons
+
 ## [Fix missing icons] - 2024-05-01
 
 - Update missing Linear icons
