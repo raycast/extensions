@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "calist",
-  "title": "Calist",
-  "description": "Calist a calendar extension, companion for calist.io",
-  "icon": "calist.png",
+  "name": "cron",
+  "title": "Cron",
+  "description": "A companion for cron.re",
+  "icon": "cron.png",
   "author": "astrit",
   "categories": [
     "Productivity"
@@ -13,13 +13,13 @@
     {
       "name": "index",
       "title": "Calendar",
-      "description": "Calist · Calendar",
+      "description": "Cron · Calendar",
       "mode": "view"
     },
     {
       "name": "time",
       "title": "Time",
-      "description": "Calist · Time",
+      "description": "Cron · Time with two zones",
       "subtitle": "Show time",
       "mode": "view"
     }
