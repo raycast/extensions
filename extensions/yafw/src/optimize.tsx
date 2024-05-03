@@ -19,6 +19,9 @@ export default async function Command(props: { arguments: { preset: "smallest-si
 
   await new SafeOperation(
     new EncodeOperation(files, async (selectedFiles) => {
+      // @NOTE: this is disabled because of a problem with ffmpeg when it makes the GIF size larger than it was before.
+      // This might be due to internal palette building algorithms of ffmpeg itself.
+      // @TODO: we should look for a way to enable this optimization for gifs as well.
       if (selectedFiles.some((file) => file.extension() === ".gif")) {
         throw new Error("Does not applicable to GIFs yet");
       }

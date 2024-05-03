@@ -18,6 +18,9 @@ export default async function Command() {
 
   await new SafeOperation(
     new EncodeOperation(files, async (selectedFiles) => {
+      // @NOTE: I don't think this is a valuable command for GIFs at all.
+      // But it could easily be included if we decide to do so.
+      // Beware that this feature has not been tested on GIFs, so please test it if you enable it.
       if (selectedFiles.some((file) => file.extension() === ".gif")) {
         throw new Error("Does not applicable to GIFs yet");
       }
