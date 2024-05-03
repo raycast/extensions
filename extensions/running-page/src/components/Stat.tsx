@@ -1,19 +1,21 @@
 import { Activity } from "../type";
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCallback } from "react";
 import { StatMetadata } from "./StatMetadata";
 import { sportsIcons } from "../util/const";
 
 export default function Stat({ activity }: { activity: Activity }) {
   const preferences = getPreferenceValues<Preferences>();
+  const indexPreference = getPreferenceValues<Preferences.Index>();
 
   const mapboxImg = useCallback(
     (summary_polyline: string) => {
-      const mode = "dark-v10";
+      // https://docs.mapbox.com/api/maps/styles/
+      const mode = environment.appearance === "light" ? indexPreference["light-style"] : indexPreference["dark-style"];
       // rgb(224,237,94)';
-      const mainColor = "e0ed5e";
+      const strokeColor = indexPreference["stroke-color"] || "e0ed5e";
       // https://docs.mapbox.com/api/maps/static-images/#path
-      const path = `path-5+${mainColor}-0.5(${encodeURIComponent(summary_polyline)})`;
+      const path = `path-5+${strokeColor}-0.5(${encodeURIComponent(summary_polyline)})`;
       const width = encodeURIComponent(860);
       const height = encodeURIComponent(360);
       const padding = encodeURIComponent("40,40,80");

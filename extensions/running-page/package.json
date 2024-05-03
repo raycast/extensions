@@ -15,7 +15,85 @@
       "name": "index",
       "title": "Activities",
       "description": "Show activities powered by running_page ❤\uFE0F",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "light-style",
+          "title": "Light Style",
+          "description": "Use light style for the map",
+          "type": "dropdown",
+          "default": "dark-v11",
+          "required": false,
+          "data": [
+            {
+              "title": "streets-v12",
+              "value": "streets-v12"
+            },
+            {
+              "title": "outdoors-v12",
+              "value": "outdoors-v12"
+            },
+            {
+              "title": "light-v11",
+              "value": "light-v11"
+            },
+            {
+              "title": "dark-v11",
+              "value": "dark-v11"
+            },
+            {
+              "title": "satellite-v9",
+              "value": "satellite-v9"
+            },
+            {
+              "title": "satellite-streets-v12",
+              "value": "satellite-streets-v12"
+            }
+          ]
+        },
+        {
+          "name": "dark-style",
+          "title": "Dark Style",
+          "description": "Use dark style for the map",
+          "type": "dropdown",
+          "default": "dark-v11",
+          "required": false,
+          "data": [
+            {
+              "title": "streets-v12",
+              "value": "streets-v12"
+            },
+            {
+              "title": "outdoors-v12",
+              "value": "outdoors-v12"
+            },
+            {
+              "title": "light-v11",
+              "value": "light-v11"
+            },
+            {
+              "title": "dark-v11",
+              "value": "dark-v11"
+            },
+            {
+              "title": "satellite-v9",
+              "value": "satellite-v9"
+            },
+            {
+              "title": "satellite-streets-v12",
+              "value": "satellite-streets-v12"
+            }
+          ]
+        },
+        {
+          "name": "stroke-color",
+          "title": "Stroke Color",
+          "description": "A 3- or 6-digit hexadecimal color code for the map line stroke",
+          "type": "textfield",
+          "default": "f44",
+          "required": false
+        }
+      ]
     },
     {
       "name": "menubar-totals",
