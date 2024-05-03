@@ -26,6 +26,7 @@ interface Workspace {
 interface ZedRecentWorkspaces {
   entries: ZedEntries;
   isLoading?: boolean;
+  error?: Error;
 }
 
 export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
@@ -37,7 +38,7 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
     };
   }
 
-  const { data, isLoading } = useSQL<Workspace>(path, "SELECT local_paths, timestamp FROM workspaces");
+  const { data, isLoading, error } = useSQL<Workspace>(path, "SELECT local_paths, timestamp FROM workspaces");
 
   return {
     entries: data
@@ -61,5 +62,6 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
           }, {})
       : {},
     isLoading,
+    error,
   };
 }
