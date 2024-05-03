@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export default function Command() {
   const [decks, setDecks] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAnkiUnavailableMessage, setShowAnkiUnavailableMessage] = useState<boolean>(false);
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export default function Command() {
           setShowAnkiUnavailableMessage(true);
         }
       }
+      setIsLoading(false);
     };
 
     fetchDecks();
@@ -55,7 +57,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={!decks}>
+    <List isLoading={isLoading}>
       {decks?.map((name) => (
         <List.Item
           key={name}
