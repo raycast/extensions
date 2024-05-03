@@ -1,4 +1,5 @@
 # scrcpy Changelog
+
 ## [New Additions] - 2024-04-26
 
 - Removed deprecated command --hid-keyboard and changed to --keyboard=uhid
