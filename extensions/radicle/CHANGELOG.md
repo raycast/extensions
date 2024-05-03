@@ -1,5 +1,10 @@
 # Radicle Changelog
 
+## [Fix delegate schema, add project threshold] - 2024-05-03
+
+- With the latest rc.8 the delegates are being served with their aliases, so we don't need to fetch additionally the remotes.
+- We also get the project threshold, so we can show more information related to the delegates.
+
 ## [Fix URL nodes param] - 2024-03-01
 
 - Instead of passing only the hostname, we need to make sure to pass in hostname and port into the URL, when opening the repo in the browser.
