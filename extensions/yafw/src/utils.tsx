@@ -1,14 +1,12 @@
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import fs, { existsSync } from "fs";
 import { promisify } from "util";
-import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH } from "./constants";
-
-const ffmpegPath = getPreferenceValues().ffmpeg_path || "/opt/homebrew/bin/ffmpeg";
+import { COMPRESSION_OPTIONS, CompressionOptionKey, FFMPEG_BINARY_CUSTOM_PATH, PATH } from "./constants";
 
 const ffmpegPathExists = (): boolean => {
   try {
-    return existsSync(ffmpegPath);
+    return existsSync(FFMPEG_BINARY_CUSTOM_PATH);
   } catch (error) {
     return false;
   }
@@ -49,7 +47,7 @@ const getFFmpegCommand = (args: string) => {
   if (isInPath) {
     return `zsh -l -c 'PATH=${PATH} ffmpeg ${args}'`;
   } else if (customPathExists) {
-    return `${ffmpegPath} ${args}`;
+    return `${FFMPEG_BINARY_CUSTOM_PATH} ${args}`;
   } else {
     showToast({
       title: "Error",

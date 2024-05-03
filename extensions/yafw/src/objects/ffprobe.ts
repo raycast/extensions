@@ -1,26 +1,27 @@
 import { execSync } from "child_process";
+import path from "path";
 import { Binary } from "../abstractions";
-import { CUSTOM_PATH, PATH } from "../constants";
+import { FFMPEG_BINARY_CUSTOM_PATH, PATH } from "../constants";
 import { FsBinary } from "./fs.binary";
 import { FsFolder } from "./fs.folder";
 
-export class FfprobeBinaryNotFoundException extends Error {
-  constructor() {
-    super("ffprobe binary not found");
-  }
-}
+export class FfprobeBinaryNotFoundException extends Error {}
 
 /**
  * Ffprobe wrapper
  */
 export class Ffprobe {
-  constructor(
-    private readonly ffprobeBinary: Binary = new FsBinary(
-      // @TODO: refactor to remove path from strict dependencies here
-      [...PATH.split(":"), CUSTOM_PATH].filter((p) => !!p).map((p) => new FsFolder(p)),
-      "ffprobe",
-    ),
-  ) {}
+  private readonly ffprobeBinary: Binary;
+
+  constructor(ffprobeBinary?: Binary) {
+    this.ffprobeBinary =
+      ffprobeBinary ??
+      new FsBinary(
+        // @TODO: refactor to remove path from strict dependencies here
+        [...PATH.split(":"), path.dirname(FFMPEG_BINARY_CUSTOM_PATH)].filter((p) => !!p).map((p) => new FsFolder(p)),
+        "ffprobe",
+      );
+  }
 
   /**
    * @todo add validations for params?

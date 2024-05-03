@@ -1,15 +1,18 @@
-import { Toast as RaycastToast, showHUD } from "@raycast/api";
-import { Ffmpeg, FfmpegBinaryNotFoundException } from "./objects/ffmpeg";
+import { Toast as RaycastToast } from "@raycast/api";
+import { EncodeOperation } from "./objects/encode.operation";
+import { Ffmpeg } from "./objects/ffmpeg";
 import { FfmpegGif } from "./objects/ffmpeg.gif";
 import { FfmpegVideo } from "./objects/ffmpeg.video";
-import { Ffprobe, FfprobeBinaryNotFoundException } from "./objects/ffprobe";
+import { Ffprobe } from "./objects/ffprobe";
 import { SafeNumber } from "./objects/safe.number";
-import { FinderIsNotFrontmostAppException, SelectedFinderFiles } from "./objects/selected-finder.files";
+import { SafeOperation } from "./objects/safe.operation";
+import { SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
   const width = new SafeNumber(props.arguments.width);
   const height = new SafeNumber(props.arguments.height);
+  const files = new SelectedFinderFiles();
   const toast = new Toast();
   const ffmpeg = new Ffmpeg(new Ffprobe(), {
     onProgressChange: async (progress) => {
@@ -17,52 +20,33 @@ export default async function Command(props: { arguments: { width: string; heigh
     },
   });
 
-  try {
-    if (width.toInt() == null && height.toInt() == null) {
-      throw new Error("Please specify Width or Height and they must both be numbers");
-    }
+  if (width.toInt() == null && height.toInt() == null) {
+    await toast.show({
+      title: "Please specify Width or Height and they must both be numbers",
+      style: RaycastToast.Style.Failure,
+    });
+    return;
+  }
 
-    const files = await new SelectedFinderFiles().list();
+  await new SafeOperation(
+    new EncodeOperation(files, async (selectedFiles) => {
+      for (const file of selectedFiles) {
+        await toast.show({ title: `Resizing "${file.name()}${file.extension()}"`, style: RaycastToast.Style.Animated });
 
-    if (files.length === 0) {
-      throw new Error("Please select any Video in Finder");
-    }
+        if (file.extension() === ".gif") {
+          await new FfmpegGif(ffmpeg, file).encode({
+            width: width.toInt(),
+            height: height.toInt(),
+          });
+          continue;
+        }
 
-    for (const file of files) {
-      await toast.show({ title: `Resizing "${file.name()}${file.extension()}"`, style: RaycastToast.Style.Animated });
-
-      if (file.extension() === ".gif") {
-        await new FfmpegGif(ffmpeg, file).encode({
+        await new FfmpegVideo(ffmpeg, file).encode({
           width: width.toInt(),
           height: height.toInt(),
         });
-        continue;
       }
-
-      await new FfmpegVideo(ffmpeg, file).encode({
-        width: width.toInt(),
-        height: height.toInt(),
-      });
-    }
-
-    await showHUD("All Videos are Processed");
-  } catch (err) {
-    if (err instanceof FfmpegBinaryNotFoundException || err instanceof FfprobeBinaryNotFoundException) {
-      await toast.show({
-        title: "FFmpeg is not installed. Please install FFmpeg or specify its path in the extension settings.",
-        style: RaycastToast.Style.Failure,
-      });
-      return;
-    }
-
-    if (err instanceof FinderIsNotFrontmostAppException) {
-      await toast.show({ title: "Please put Finder in focus and try again", style: RaycastToast.Style.Failure });
-      return;
-    }
-
-    if (err instanceof Error) {
-      console.error(err);
-      await toast.show({ title: err.message, style: RaycastToast.Style.Failure });
-    }
-  }
+    }),
+    toast,
+  ).run();
 }

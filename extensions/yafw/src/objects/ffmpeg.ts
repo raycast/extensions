@@ -1,31 +1,34 @@
 import { exec } from "child_process";
+import path from "path";
 import { Binary } from "../abstractions";
-import { CUSTOM_PATH, PATH } from "../constants";
+import { FFMPEG_BINARY_CUSTOM_PATH, PATH } from "../constants";
 import { Ffprobe } from "./ffprobe";
 import { FsBinary } from "./fs.binary";
 import { FsFolder } from "./fs.folder";
 
-export class FfmpegBinaryNotFoundException extends Error {
-  constructor() {
-    super("ffmpeg binary not found");
-  }
-}
+export class FfmpegBinaryNotFoundException extends Error {}
 
 /**
  * Ffmpeg wrapper
  */
 export class Ffmpeg {
+  private readonly ffmpegBinary: Binary;
+
   constructor(
     private readonly ffprobe: Ffprobe,
     private readonly callbacks?: {
       onProgressChange?: (progress: number) => void;
     },
-    private readonly ffmpegBinary: Binary = new FsBinary(
-      // @TODO: refactor to remove path from strict dependencies here
-      [...PATH.split(":"), CUSTOM_PATH].filter((p) => !!p).map((p) => new FsFolder(p)),
-      "ffmpeg",
-    ),
-  ) {}
+    ffmpegBinary?: Binary,
+  ) {
+    this.ffmpegBinary =
+      ffmpegBinary ??
+      new FsBinary(
+        // @TODO: refactor to remove path from strict dependencies here
+        [...PATH.split(":"), path.dirname(FFMPEG_BINARY_CUSTOM_PATH)].filter((p) => !!p).map((p) => new FsFolder(p)),
+        "ffmpeg",
+      );
+  }
 
   /**
    * @todo add validations for params?

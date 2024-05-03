@@ -21,4 +21,4 @@ export const PATH = [
   "/opt/homebrew/sbin",
   "/usr/local/Cellar/ffmpeg",
 ].join(":");
-export const CUSTOM_PATH = getPreferenceValues().ffmpeg_path;
+export const FFMPEG_BINARY_CUSTOM_PATH = getPreferenceValues().ffmpeg_path ?? "/opt/homebrew/bin/ffmpeg";
