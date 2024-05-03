@@ -3,12 +3,15 @@ import { Action, ActionPanel, List, Icon, open, getPreferenceValues, Color, show
 import { useRepositories, setSetting, useSettings } from "./settings";
 import { editors, bundleIds } from "./shared";
 import { git, gitPath } from "./git";
+import { checkRelaInstallation } from "./app";
 
 export default () => {
   const preferences = getPreferenceValues();
 
   const repositories = useRepositories();
   const settings = useSettings();
+
+  checkRelaInstallation();
 
   if (!gitPath) {
     showToast({

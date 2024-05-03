@@ -2,6 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, Icon, List, open } from "@ray
 
 import { useSettings, useWorkflows, type Workflow, type Settings } from "./settings";
 import { editors, bundleIds } from "./shared";
+import { checkRelaInstallation } from "./app";
 
 const Item = ({
   workflow,
@@ -71,6 +72,8 @@ export default () => {
   const preferences = getPreferenceValues();
   const settings = useSettings();
   const workflows = useWorkflows();
+
+  checkRelaInstallation();
 
   return (
     <List isShowingDetail isLoading={workflows === null}>
