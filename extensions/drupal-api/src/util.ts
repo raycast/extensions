@@ -4,6 +4,10 @@ import { DrupalVersionMachineCode, DrupalVersions, RecordItem } from "./types";
 
 export const drupalVersions: { name: DrupalVersions; code: DrupalVersionMachineCode }[] = [
   {
+    name: DrupalVersions.Drupal11,
+    code: DrupalVersionMachineCode.Drupal11,
+  },
+  {
     name: DrupalVersions.Drupal10,
     code: DrupalVersionMachineCode.Drupal10,
   },
@@ -19,22 +23,6 @@ export const drupalVersions: { name: DrupalVersions; code: DrupalVersionMachineC
     name: DrupalVersions.Drupal7,
     code: DrupalVersionMachineCode.Drupal7,
   },
-  {
-    name: DrupalVersions.Drupal6,
-    code: DrupalVersionMachineCode.Drupal6,
-  },
-  {
-    name: DrupalVersions.Drupal5,
-    code: DrupalVersionMachineCode.Drupal5,
-  },
-  {
-    name: DrupalVersions.Drupal4_7,
-    code: DrupalVersionMachineCode.Drupal4_7,
-  },
-  {
-    name: DrupalVersions.Drupal4_6,
-    code: DrupalVersionMachineCode.Drupal4_6,
-  },
 ];
 
 export const getDrupalApiResults = async (drupalVersion: DrupalVersionMachineCode, searchQuery: string) => {
@@ -43,7 +31,7 @@ export const getDrupalApiResults = async (drupalVersion: DrupalVersionMachineCod
     headers: { "user-agent": "Raycast Drupal API Extension" },
   });
   const $ = cheerioLoad(body);
-  const tableRows = $(".view-api-search tbody tr");
+  const tableRows = $(".views-element-container tbody tr");
 
   const records: RecordItem[] = tableRows.toArray().map((item) => {
     const recordLink = $("td.views-field-title", item);

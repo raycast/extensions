@@ -16,7 +16,7 @@ Here is a link to my [original repository](https://github.com/BossElijah/raycast
 
 ![How it works 2](/media/drupal-api-3.png)
 
-![How it works 2](/media/drupal-api-5.png)
+![How it works 3](/media/drupal-api-5.png)
 
 ## Future Development
 

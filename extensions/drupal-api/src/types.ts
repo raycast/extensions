@@ -13,23 +13,17 @@ export interface SearchState {
 }
 
 export enum DrupalVersions {
+  Drupal11 = "11",
   Drupal10 = "10",
-  Drupal9 = "9.5",
-  Drupal8 = "8.9",
+  Drupal9 = "9",
+  Drupal8 = "8",
   Drupal7 = "7",
-  Drupal6 = "6",
-  Drupal5 = "5",
-  Drupal4_7 = "4.7",
-  Drupal4_6 = "4.6",
 }
 
 export enum DrupalVersionMachineCode {
+  Drupal11 = "11.x",
   Drupal10 = "10",
   Drupal9 = "9",
   Drupal8 = "8.9.x",
   Drupal7 = "7.x",
-  Drupal6 = "6.x",
-  Drupal5 = "5.x",
-  Drupal4_7 = "4.7.x",
-  Drupal4_6 = "4.6.x",
 }
