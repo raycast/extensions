@@ -21,13 +21,13 @@
   "commands": [
     {
       "name": "index",
-      "title": "File information & manipulation",
+      "title": "File Information & Manipulation",
       "description": "Use FFmpeg for view media file info",
       "mode": "view"
     },
     {
       "name": "convert-to",
-      "title": "Convert to",
+      "title": "Convert To",
       "description": "Converts the video to any chosen format.",
       "mode": "view"
     },

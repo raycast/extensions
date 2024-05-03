@@ -243,7 +243,7 @@ class FileManager {
         let additionalIndex = 0;
         let targetFilePath = path.join(basePath, `${baseNameNoExt}${suffix}${extName}`);
 
-        const scaleFilter = `"scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=w='if(lte(iw,ih),1080,-2)':h='if(lte(iw,ih),-2,1080)'"`;
+        // const scaleFilter = `"scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=w='if(lte(iw,ih),1080,-2)':h='if(lte(iw,ih),-2,1080)'"`;
 
         const ffmpegArguments = `-vcodec libx264 -preset veryslow -b:v 4000k -profile:v main -level:v 4.0 -pix_fmt yuv420p -vf "scale='trunc(ih*dar/2)*2:trunc(ih/2)*2',setsar=1/1,scale=w='if(lte(iw,ih),1080,-2)':h='if(lte(iw,ih),-2,1080)'" -bsf:v 'filter_units=remove_types=6' -fflags +bitexact -write_tmcd 0 -an -color_trc bt709 -movflags +faststart`;
         console.log("FFMPEG arguments are: ", ffmpegArguments);
