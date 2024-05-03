@@ -10,21 +10,21 @@
       {
         "name": "search-command",
         "title": "Search Documentation",
-        "subtitle": "Find pages, chapters, or books in BookStack",
+        "subtitle": "BookStack",
         "description": "Quickly search through your BookStack contents and open the results directly from Raycast.",
         "mode": "view"
       },
       {
         "name": "show-all-books",
         "title": "Show All Books",
-        "subtitle": "Show all books in BookStack",
+        "subtitle": "BookStack",
         "description": "Quickly list all your BookStack books and open the results directly from Raycast.",
         "mode": "view"
       },
       {
         "name": "show-all-shelves",
         "title": "Show All Shelves",
-        "subtitle": "Show all shelves in BookStack",
+        "subtitle": "BookStack",
         "description": "Quickly list all your BookStack shelves and open the results directly from Raycast.",
         "mode": "view"
       }
