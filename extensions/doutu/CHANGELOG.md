@@ -1,5 +1,8 @@
 # DouTu Changelog
 
+## [Fix Debug] - 2024-04-26
+- Fix the issue of ineffective copying of GIFs
+
 ## [Fix Debug] - 2024-02-07
 
 - Fix copying GIF images to output static images
