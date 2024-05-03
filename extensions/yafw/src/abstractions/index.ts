@@ -1,4 +1,3 @@
-export type { Archive } from "./archive";
 export type { Binary } from "./binary";
 export type { File } from "./file";
 export type { Files } from "./files";
