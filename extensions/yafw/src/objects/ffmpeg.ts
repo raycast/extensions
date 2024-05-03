@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { Binary } from "../abstractions";
-import { PATH } from "../constants";
+import { CUSTOM_PATH, PATH } from "../constants";
 import { Ffprobe } from "./ffprobe";
 import { FsBinary } from "./fs.binary";
 import { FsFolder } from "./fs.folder";
@@ -22,7 +22,7 @@ export class Ffmpeg {
     },
     private readonly ffmpegBinary: Binary = new FsBinary(
       // @TODO: refactor to remove path from strict dependencies here
-      PATH.split(":").map((p) => new FsFolder(p)),
+      [...PATH.split(":"), CUSTOM_PATH].filter((p) => !!p).map((p) => new FsFolder(p)),
       "ffmpeg",
     ),
   ) {}
