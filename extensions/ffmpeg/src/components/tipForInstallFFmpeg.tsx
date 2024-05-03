@@ -1,5 +1,4 @@
-import { Detail } from "@raycast/api";
-import { Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 
 export function TipForInstallFFmpeg() {
   const content = `

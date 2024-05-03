@@ -7,9 +7,10 @@
   "author": "RenderCoder",
   "contributors": [
     "blekmus",
-    "truls_aagedal"
+    "truls_aagedal",
+    "ilcors-dev"
   ],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "categories": [
     "Media",
     "Developer Tools",
@@ -20,27 +21,46 @@
   "commands": [
     {
       "name": "index",
-      "title": "FFmpeg",
+      "title": "File information & manipulation",
       "description": "Use FFmpeg for view media file info",
+      "mode": "view"
+    },
+    {
+      "name": "convert-to",
+      "title": "Convert to",
+      "description": "Converts the video to any chosen format.",
+      "mode": "view"
+    },
+    {
+      "name": "extract-audio",
+      "title": "Extract Audio",
+      "description": "Extracts the audio from the video in the chosen format.",
+      "mode": "view"
+    },
+    {
+      "name": "trim",
+      "title": "Trim Video",
+      "description": "Trim the video to the chosen duration.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.1",
-    "@raycast/utils": "^1.9.1",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.0",
     "cachedir": "^2.4.0",
     "filesize": "^10.0.12",
     "mp4box": "^0.5.2",
     "rct-state": "^0.2.2",
+    "run-applescript": "^7.0.0",
     "strip-ansi": "^7.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "2.8.8",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

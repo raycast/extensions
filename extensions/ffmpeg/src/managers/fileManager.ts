@@ -1,4 +1,4 @@
-import { Clipboard, showHUD, Cache } from "@raycast/api";
+import { Cache, Clipboard, showHUD } from "@raycast/api";
 import { filesize as fileSizeFormat } from "filesize";
 import * as fs from "fs";
 import * as path from "path";
@@ -14,6 +14,7 @@ import {
   getFileInfoData,
 } from "../utils/ffmpeg";
 import { getFileType } from "../utils/ffmpeg/fileType";
+import { getTimeInSeconds } from "../utils/time";
 
 const cache = new Cache();
 
@@ -61,11 +62,6 @@ const defaultState: State = {
   loading: false,
   loadingDesc: "",
 };
-
-function getTimeInSeconds(timeStr: string) {
-  const [hours, minutes, seconds] = timeStr.split(":");
-  return parseFloat(hours) * 3600 + parseFloat(minutes) * 60 + parseFloat(seconds);
-}
 
 class FileManager {
   state$: Observable<State> = observable(defaultState);

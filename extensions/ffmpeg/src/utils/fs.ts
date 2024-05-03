@@ -5,6 +5,7 @@ import * as path from "path";
 import { fileState$ } from "../managers/fileManager";
 import { getFileType } from "./ffmpeg/fileType";
 import { FileType } from "../type/file";
+import { runAppleScriptSync } from "run-applescript";
 
 function autoCreateDir(dirPath: string) {
   // create cache dir if not exits
@@ -24,7 +25,7 @@ export async function refreshSelectedFiles(options?: { filterFileType: boolean }
   if (filterFileType) {
     fileState$.batch(() => {
       fileState$.loadingDesc.set(
-        `Filtering file type...starting\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`
+        `Filtering file type...starting\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`,
       );
       fileState$.loading.set(true);
     });
@@ -67,10 +68,10 @@ export async function refreshSelectedFiles(options?: { filterFileType: boolean }
           fileState$.loadingDesc.set(
             `Filtering file type... (${
               processIndex + 1
-            }/${fileCount})\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`
+            }/${fileCount})\n\nFile filtering is being conducted in strict mode, please allow some time for this process to complete.`,
           );
           resolve(1);
-        })
+        }),
       );
 
       processIndex += 1;
@@ -85,4 +86,45 @@ export async function refreshSelectedFiles(options?: { filterFileType: boolean }
       fileState$.loading.set(false);
     });
   }
+}
+
+/**
+ * Get the selected video file paths from Finder by running an AppleScript
+ *
+ * @returns {string[]} - The selected video file paths
+ */
+export function getSelectedVideos(): string[] {
+  const output = runAppleScriptSync(
+    `tell application "Finder"
+      set theSelection to selection
+      set thePaths to {}
+      repeat with i from 1 to (theSelection count)
+        set theItem to item i of theSelection
+        set thePath to theItem as text
+        copy thePath to end of thePaths
+      end repeat
+      return thePaths
+    end tell`,
+  );
+
+  const paths = output
+    .trim()
+    .split(",")
+    .map((path: string) => path.trim())
+    .filter((path: string) => path !== "");
+
+  // make sure to remove duplicates, extract the file name, and return the file path
+  return paths.map((path: string) => {
+    const parts = path.split(":");
+
+    parts.shift();
+    path = parts.join("/");
+
+    // ensure the first character is a slash
+    if (path.charAt(0) !== "/") {
+      path = `/${path}`;
+    }
+
+    return path;
+  });
 }

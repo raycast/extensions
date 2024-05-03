@@ -1,5 +1,11 @@
 # FFmpeg Changelog
 
+## [Added commands] - 2024-05-03
+- Added new command to convert video files with more configurable options
+- Added new command to extract audio from video files
+- Added new command to trim video files.
+- Updated raycast dependencies to latest version.
+
 ## [Added conversion option and percentage progress] - 2023-10-17
 
 - I added a new video file conversion option, called VideoLoop Converter. This uses FFMPEG to create a h.264 .mp4 file without sound, at a bitrate of 4000kbps. This is intended to be used as a replacement for GIFs on certain websites.

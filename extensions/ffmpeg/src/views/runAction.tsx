@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, useNavigation, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { ReactNode } from "react";
 import { fileManager, fileState$ } from "../managers/fileManager";
 import { ActionType } from "../type/action";
@@ -161,11 +161,13 @@ export function RunAction() {
           <List.Section title={section.title} key={sectionIndex}>
             {section.list.map((item) => {
               let $detail: ReactNode | undefined;
+
               if (item.detail) {
                 $detail = item.detail();
               } else if (item.descriptionMarkdown) {
                 $detail = <List.Item.Detail markdown={item.descriptionMarkdown()} />;
               }
+
               return (
                 <List.Item
                   icon={item.icon}
@@ -175,6 +177,7 @@ export function RunAction() {
                   detail={$detail}
                   actions={
                     <ActionPanel title="FFmpeg Action">
+                      <Action title="Cancel" onAction={pop} />
                       <Action
                         title="Run"
                         onAction={() => {

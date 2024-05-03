@@ -1,7 +1,12 @@
 import { execSync, spawn } from "child_process";
 import stripAnsi from "strip-ansi";
 
-export function getFFmpegPath() {
+/**
+ * Get the path of the FFmpeg command by executing a shell script that checks common locations
+ *
+ * @returns {string}
+ */
+export function getFFmpegPath(): string {
   const commandFolderPath = execSync(`
   locations=(
       /usr/local/bin
@@ -38,7 +43,12 @@ export function isFFmpegInstalled() {
   return !!getFFmpegPath();
 }
 
-export function getFFprobePath() {
+/**
+ * Get the path of the FFprobe command by executing a shell script that checks common locations
+ *
+ * @returns {string}
+ */
+export function getFFprobePath(): string {
   return (
     execSync(`
     locations=(
@@ -77,6 +87,14 @@ export function executeFFprobeCommand(command: string) {
   return execSync(`${getFFprobePath()} ${command}`).toString();
 }
 
+/**
+ * Execute an FFmpeg command asynchronously.
+ *
+ * The `onContent` callback is called whenever there is new content from the command.
+ *
+ * @param param0 the configuration object
+ * @returns
+ */
 export function executeFFmpegCommandAsync({
   command,
   onContent,
@@ -103,6 +121,14 @@ export function executeFFmpegCommandAsync({
   });
 }
 
+/**
+ * Execute an FFprobe command asynchronously.
+ *
+ * The `onContent` callback is called whenever there is new content from the command.
+ *
+ * @param param0 the configuration object
+ * @returns
+ */
 export function executeFFprobeCommandAsync({
   command,
   onContent,
