@@ -4,7 +4,6 @@ import { Binary } from "../abstractions";
 import { FFMPEG_BINARY_CUSTOM_PATH, PATH } from "../constants";
 import { Ffprobe } from "./ffprobe";
 import { FsBinary } from "./fs.binary";
-import { FsFolder } from "./fs.folder";
 
 export class FfmpegBinaryNotFoundException extends Error {}
 
@@ -25,7 +24,7 @@ export class Ffmpeg {
       ffmpegBinary ??
       new FsBinary(
         // @TODO: refactor to remove path from strict dependencies here
-        [...PATH.split(":"), path.dirname(FFMPEG_BINARY_CUSTOM_PATH)].filter((p) => !!p).map((p) => new FsFolder(p)),
+        [...PATH.split(":"), path.dirname(FFMPEG_BINARY_CUSTOM_PATH)].filter((p) => !!p).join(":"),
         "ffmpeg",
       );
   }

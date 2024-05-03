@@ -1,5 +1,3 @@
-import { ReadStream } from "fs";
-
 export type File = {
   /**
    * Return path of the file
@@ -25,21 +23,6 @@ export type File = {
   extension: () => string;
 
   /**
-   * Returns sha256 hash of the file
-   */
-  hash: () => Promise<string>;
-
-  /**
-   * Return content of the file
-   */
-  stream: () => Promise<ReadStream>;
-
-  /**
-   * Returns true if the file exists at the specified path
-   */
-  exists: () => Promise<boolean>;
-
-  /**
    * Return next name. For example in system we have `video.mp4` then this method should return `video 1.mp4`
    */
   nextName: (options?: {
@@ -54,11 +37,6 @@ export type File = {
      */
     counter?: number;
   }) => string;
-
-  /**
-   * Change content of the file
-   */
-  write: (content: ReadStream) => Promise<void>;
 
   /**
    * Remove file

@@ -1,14 +1,18 @@
 import { execSync } from "child_process";
-import { Binary, Folder } from "../abstractions";
+import { Binary } from "../abstractions";
 
 export class FsBinary implements Binary {
   constructor(
-    private readonly folders: Folder[],
+    /**
+     * column separated path to folders.
+     * @example '/bin:/homebrew/bin'
+     */
+    private readonly foldersPath: string,
     private readonly fileName: string,
   ) {}
 
   path: Binary["path"] = () => {
-    return this.folders.map((folder) => folder.path()).join(":");
+    return this.foldersPath;
   };
 
   exists: Binary["exists"] = () => {
