@@ -1,5 +1,12 @@
 # 1Password Changelog
 
+## [Enhancements] - 2024-05-03
+
+-- Adds "My Vaults" command.
+-- Adds "Switch Account" action.
+-- Improves error handling.
+-- Modifies Auto Renewal to be disabled by default.
+
 ## [Moved contributor] - 2024-05-03
 
 ## [Enhancements] - 2024-04-08
