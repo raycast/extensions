@@ -46,10 +46,11 @@ export default function Command() {
   const numberEmojis = ["1️⃣", "2️⃣", "2️⃣", "3️⃣", "4️⃣"];
 
   return (
-    <List navigationTitle="Main Library 📖">
+    <List isLoading={loadingPeople || loadingTime}>
       <List.Section title="People in the main library now 👥">
         <List.Item
-          title={"🧑🏻‍🎓  Student"}
+          icon="🧑🏻‍🎓"
+          title={"Student"}
           accessories={[
             {
               tag: {
@@ -61,7 +62,8 @@ export default function Command() {
           ]}
         />
         <List.Item
-          title={"🧑🏻‍💻  Staff"}
+          icon="🧑🏻‍💻"
+          title={"Staff"}
           accessories={[
             {
               tag: { value: loadingPeople ? "Loading..." : `Total Staff: ${dataPeople?.staff}`, color: Color.Magenta },
@@ -70,7 +72,8 @@ export default function Command() {
           ]}
         />
         <List.Item
-          title={"🚶🏻  Visitor"}
+          icon="🚶🏻"
+          title={"Visitor"}
           accessories={[
             {
               tag: {
@@ -82,7 +85,8 @@ export default function Command() {
           ]}
         />
         <List.Item
-          title={"👥  Current Total"}
+          icon="👥"
+          title={"Current Total"}
           accessories={[
             {
               tag: { value: loadingPeople ? "Loading..." : `Capacity: ${dataPeople?.capacity}`, color: Color.Blue },
@@ -98,7 +102,8 @@ export default function Command() {
           ]}
         />
         <List.Item
-          title={"🕒  Average visit length in last 7 days"}
+          icon="🕒"
+          title={"Average visit length in last 7 days"}
           accessories={[
             {
               tag: {
@@ -114,7 +119,8 @@ export default function Command() {
         {dataPC?.rooms.map((room, index) => (
           <List.Item
             key={index}
-            title={`${numberEmojis[index % numberEmojis.length]} ${room.name}`}
+            icon={numberEmojis[index % numberEmojis.length]}
+            title={room.name}
             accessories={[
               { tag: { value: `Total: ${room.total}`, color: Color.Blue }, tooltip: `Total PCs: ${room.total}` },
               {
