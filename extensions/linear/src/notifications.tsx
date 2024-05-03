@@ -184,7 +184,7 @@ function Notifications() {
                   ? notification.botActor.name
                   : "Linear";
 
-              const keywords = [displayName];
+              const keywords = [displayName || "Linear"];
 
               if (notification.issue) {
                 keywords.push(...notification.issue.identifier.split("-"));
