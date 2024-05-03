@@ -176,7 +176,7 @@
       "name": "PascalSnakeCase",
       "type": "checkbox",
       "description": "Enable the \"Pascal_Snake_Case\" Transformation",
-      "label": "Pascal Case",
+      "label": "Pascal Snake Case",
       "default": true,
       "required": false
     },

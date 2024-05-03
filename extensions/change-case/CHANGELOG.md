@@ -1,5 +1,9 @@
 # Change Case Changelog
 
+## [Fixes] - 2024-5-02
+- Fixed using action style as destructive
+- Fixed `Pascal Snake Case` being incorrectly named as `Pascal Case` in preferences
+
 ## [Add Pop to Root Preference] - 2024-03-07
 - Added pop to root as a default preference
 
