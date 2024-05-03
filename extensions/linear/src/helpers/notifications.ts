@@ -26,7 +26,7 @@ enum ProjectNotificationType {
   projectUpdateCreated = "projectUpdateCreated",
   projectAddedAsMember = "projectAddedAsMember",
   projectUpdateReaction = "projectUpdateReaction",
-  projectUpdateNewComment = "projectUpdateNewComment"
+  projectUpdateNewComment = "projectUpdateNewComment",
 }
 
 enum DocumentNotificationType {
@@ -42,14 +42,14 @@ const notificationIcons: Record<string, Image.ImageLike> = {
   [IssueNotificationType.issueBlocking]: Icon.ExclamationMark,
   [IssueNotificationType.issueUnblocked]: Icon.ExclamationMark,
   [IssueNotificationType.issueNewComment]: Icon.Bubble,
-  [IssueNotificationType.issueCommentMention]: Icon.Bubble,
-  [IssueNotificationType.issueMention]: Icon.Bubble,
+  [IssueNotificationType.issueCommentMention]: Icon.AtSymbol,
+  [IssueNotificationType.issueMention]: Icon.AtSymbol,
   [IssueNotificationType.issueDue]: Icon.Calendar,
   [IssueNotificationType.issueSubscribed]: Icon.Bell,
   [IssueNotificationType.issueReminder]: Icon.Clock,
   [ProjectNotificationType.projectUpdatePrompt]: Icon.Heartbeat,
   [ProjectNotificationType.projectUpdateMentionPrompt]: Icon.Bubble,
-  [ProjectNotificationType.projectUpdateCreated]: Icon.Megaphone,
+  [ProjectNotificationType.projectUpdateCreated]: Icon.Heartbeat,
   [ProjectNotificationType.projectAddedAsMember]: Icon.AddPerson,
   [ProjectNotificationType.projectUpdateReaction]: Icon.Emoji,
   [ProjectNotificationType.projectUpdateNewComment]: Icon.Bubble,

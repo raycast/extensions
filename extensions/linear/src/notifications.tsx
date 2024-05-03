@@ -13,6 +13,7 @@ import useUsers from "./hooks/useUsers";
 import { getErrorMessage } from "./helpers/errors";
 import { getNotificationIcon, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
+import { getBotIcon } from "./helpers/bots";
 
 import View from "./components/View";
 import IssueDetail from "./components/IssueDetail";
@@ -177,7 +178,7 @@ function Notifications() {
             {notifications.map((notification) => {
               const createdAt = new Date(notification.createdAt);
 
-              const displayName = notification.actor ? notification.actor.displayName : "Linear";
+              const displayName = notification.actor ? notification.actor.displayName : notification.botActor ? notification.botActor.name : "Linear";
 
               const keywords = [displayName];
 
@@ -189,13 +190,17 @@ function Notifications() {
               const url = getNotificationURL(notification);
 
               return (
+                console.log(notification),
                 <List.Item
                   title={`${getNotificationTitle(notification)} by ${displayName}`}
                   key={notification.id}
                   keywords={keywords}
-                  icon={notification.actor ? getUserIcon(notification.actor) : "linear.png"}
+                  icon={notification.actor ? getUserIcon(notification.actor) : notification.botActor ? getBotIcon(notification.botActor) : "linear-app-icon.png"}
                   {...(notification.issue
                     ? { subtitle: `${notification.issue?.identifier} ${notification.issue?.title}` }
+                    : {})}
+                  {...(notification.project
+                    ? { subtitle: `${notification.project.name}` }
                     : {})}
                   accessories={[
                     {
