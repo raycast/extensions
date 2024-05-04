@@ -150,7 +150,6 @@ export default function Command(props: LaunchProps) {
     <List
       searchText={query}
       onSearchTextChange={(query) => {
-        console.log(fallbackText, query);
         // When called as a fallback, Raycast calls this function with the fallback text, which should…
         // …add the query to the history.
         // …invoke the search .
