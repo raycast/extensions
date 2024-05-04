@@ -25,7 +25,7 @@ export default function ProjectList() {
       return [];
     }
 
-    if (roadmap === "") {
+    if (!roadmap || !roadmaps || roadmaps.length < 1) {
       return projects;
     }
 

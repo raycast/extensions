@@ -1,7 +1,7 @@
 import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
 import { Pin, sortPins } from "../../Pins";
 import { SORT_FN, StorageKey } from "../../constants";
-import { getStorage } from "../../utils";
+import { getStorage } from "../../storage";
 
 /**
  * Placeholder for the newline-separated list of pin targets. The list is sorted by most recently opened pin first.

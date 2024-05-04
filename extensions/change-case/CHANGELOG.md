@@ -1,6 +1,19 @@
 # Change Case Changelog
 
-## [Fix Quicklink]
+## [Fixed overlapping keyboard shortcuts and a wrong setting] - 2024-04-26
+- Fixed the issue where some key combinations were mapped to multiple commands at the same time.
+- Fixed the inverted `popToRoot` setting.
+
+## [Fix to View of Detail] - 2024-03-20
+- Fixed so that line breaks are displayed as new lines
+
+## [Add Pop to Root Preference] - 2024-03-07
+- Added pop to root as a default preference
+
+## [Better Sentence Case] - 2024-01-28
+- Sentence case now handles punctuation better
+
+## [Fix Quicklink] - 2023-12-27
 - Fixed quicklinks not respecting the `Primary Action` preference.
 
 ## [Manual Refresh] - 2023-11-27

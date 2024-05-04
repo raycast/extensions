@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { getStorage, setStorage } from "./utils";
+import { getStorage, setStorage } from "./storage";
 import { useCachedState } from "@raycast/utils";
 import { SORT_FN, SORT_STRATEGY, StorageKey } from "./constants";
 import { showToast } from "@raycast/api";
@@ -65,7 +65,7 @@ export const GroupKeys = ["name", "icon", "id", "parent", "sortStrategy", "iconC
  * @param obj The item to check.
  * @returns Whether or not the item is a group.
  */
-export const isGroup = (obj: object): boolean => {
+export const isGroup = (obj: object): obj is Group => {
   return (obj as Pin).url == undefined;
 };
 
@@ -78,8 +78,16 @@ export const useGroups = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const revalidateGroups = async () => {
+    setLoading(true);
     const storedGroups: Group[] = await getStorage(StorageKey.LOCAL_GROUPS);
-    setGroups(storedGroups || []);
+    const checkedGroups: Group[] = [];
+    for (const group of storedGroups) {
+      checkedGroups.push({
+        ...group,
+        id: group.id == undefined ? await getNextGroupID() : group.id,
+      });
+    }
+    setGroups(checkedGroups);
     setLoading(false);
   };
 

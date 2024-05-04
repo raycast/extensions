@@ -40,12 +40,18 @@ export function getOpenedUrlForArc() {
       delay 1
 
       tell application "System Events"
-        keystroke "c" using {command down, shift down}
+        keystroke "l" using {command down}
         delay 1
-        set copiedURL to the clipboard as text
+        keystroke "c" using {command down}
+        delay 1
+        key code 53
       end tell
 
     end tell
+
+    delay 0.5
+
+    set copiedURL to do shell script "pbpaste"
 
     return copiedURL
   `;

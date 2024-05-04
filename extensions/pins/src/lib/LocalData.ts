@@ -5,16 +5,41 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-09-04 17:36:31
- * Last modified  : 2023-11-01 00:43:57
+ * Last modified  : 2024-01-13 01:07:53
  */
 
 import { Application, getFrontmostApplication, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript, useCachedState } from "@raycast/utils";
-import { getStorage, setStorage } from "./utils";
+import { getStorage, setStorage } from "./storage";
 import { ExtensionPreferences } from "./preferences";
 import { StorageKey } from "./constants";
 import { utils } from "placeholders-toolkit";
+
+/**
+ * A reference to a tab in a browser.
+ */
+export type TabRef = { name: string; url: string };
+
+/**
+ * A reference to a file.
+ */
+export type FileRef = { name: string; path: string };
+
+/**
+ * A reference to a note in Notes.
+ */
+export type NoteRef = { name: string; id: string };
+
+/**
+ * A reference to a track in Music, Spotify, or TV.
+ */
+export type TrackRef = { name: string; artist: string; album: string; uri: string };
+
+/**
+ * A reference to a playlist in Music.
+ */
+export type PlaylistRef = { name: string };
 
 /**
  * Local data object that stores various contextual information for use in placeholders, recent apps list, etc.
@@ -33,32 +58,37 @@ export interface LocalDataObject {
   /**
    * The list of currently open tabs in the frontmost browser. The browser must be a member of {@link SupportedBrowsers}. Tabs are represented as objects with a name and URL.
    */
-  tabs: { name: string; url: string }[];
+  tabs: TabRef[];
 
   /**
    * The name and URL of the currently active tab in the frontmost browser. The browser must be a member of {@link SupportedBrowsers}.
    */
-  currentTab: { name: string; url: string };
+  currentTab: TabRef;
 
   /**
    * The name and path of the current Finder directory.
    */
-  currentDirectory: { name: string; path: string };
+  currentDirectory: FileRef;
 
   /**
    * The list of currently selected files in Finder. Files are represented as objects with a name and path.
    */
-  selectedFiles: { name: string; path: string }[];
+  selectedFiles: FileRef[];
 
   /**
    * The list of currently selected notes in Notes. Notes are represented as objects with a name and ID. The ID is the AppleScript ID of the note (not the ID used by the notes:// URL scheme).
    */
-  selectedNotes: { name: string; id: string }[];
+  selectedNotes: NoteRef[];
 
   /**
    * The name and path of the current document in the frontmost application. The application must be a document-based application such as iWork apps, Office apps, etc.
    */
-  currentDocument: { name: string; path: string };
+  currentDocument: FileRef;
+
+  /**
+   * The name, artist, album, and URI of the currently playing track in Music, Spotify, or TV.
+   */
+  currentTrack: TrackRef;
 }
 
 /**
@@ -75,6 +105,7 @@ const dummyData = (): LocalDataObject => {
     selectedFiles: [] as { name: string; path: string }[],
     selectedNotes: [] as { name: string; id: string }[],
     currentDocument: { name: "", path: "" },
+    currentTrack: { name: "", artist: "", album: "", uri: "" },
   };
 };
 
@@ -87,6 +118,7 @@ export const requestLocalData = async (): Promise<{
   finderSelection: { name: string; path: string }[];
   selectedNotes: { name: string; id: string }[];
   activeDocument: { name: string; path: string } | null;
+  currentTrack: { name: string; artist: string; album: string; uri: string } | null;
 }> => {
   const data = await runAppleScript(
     `function run() {
@@ -95,50 +127,106 @@ export const requestLocalData = async (): Promise<{
       finderSelection: [],
       selectedNotes: [],
       activeDocument: null,
+      currentTrack: null,
     };
     
     const se = Application("System Events");
-    const frontApp = se.applicationProcesses.whose({ frontmost: true }).name();
-        
-    if (frontApp == "Finder") {
-      const finder = Application("Finder");
-      const currentDirectory = finder.insertionLocation();
-      data.currentDirectory = { name: currentDirectory.name(), path: $.NSURL.alloc.initWithString(currentDirectory.url()).path.js };
-  
-      let theSelection = finder.selection();
-      data.finderSelection = theSelection.map((item) => {
-        const itemPath = $.NSURL.alloc.initWithString(item.url()).path.js
-        return { name: item.name(), path: itemPath }
-      });
-    } else if (frontApp == "Notes") {
-      data.selectedNotes = Application("Notes").selection().map((note) => ({ name: note.name(), id: note.id() }));
-    } else if (frontApp == "TextEdit") {
-      const textedit = Application("TextEdit");
-      const doc = textedit.documents[0];
-      data.activeDocument = { name: doc.name(), path: doc.path() };
-    } else if (frontApp == "Pages" || frontApp == "Numbers" || frontApp == "Keynote") {
-      const iworkApp = Application(frontApp.toString());
-      const doc = iworkApp.documents[0];
-      data.activeDocument = { name: doc.name(), path: doc.file().toString() };
-    } else if (frontApp == "Microsoft Word") {
-      const word = Application("Microsoft Word");
-      const doc = word.activeDocument;
-      data.activeDocument = { name: doc.name(), path: \`\${se.aliases[doc.path()].posixPath()}/\${doc.name()}\` };
-    } else if (frontApp == "Microsoft PowerPoint") {
-      const powerpoint = Application("Microsoft PowerPoint");
-      const doc = powerpoint.activePresentation;
-      data.activeDocument = { name: doc.name(), path: \`\${se.aliases[doc.path()].posixPath()}/\${doc.name()}\` };
-    } else if (frontApp == "Microsoft Excel") {
-      const excel = Application("Microsoft Excel");
-      const doc = excel.activeWorkbook;
-      data.activeDocument = { name: doc.name(), path: \`\${se.aliases[doc.path()].posixPath()}/\${doc.name()}\` };
-    } else {
-      // Try to get active document from any generic document-based app
-      const app = Application(frontApp.toString());
-      const doc = app.documents[0];
-      if (doc) {
-        data.activeDocument = { name: doc.name(), path: doc.path().toString() };
+    se.includeStandardAdditions = true;
+    let errorType = "generic";
+    try {
+      errorType = "frontApp";
+      const frontApp = se.applicationProcesses.whose({ frontmost: true }).name();
+          
+      if (frontApp == "Finder") {
+        errorType = "Finder";
+        const finder = Application("Finder");
+        const currentDirectory = finder.insertionLocation();
+        data.currentDirectory = { name: currentDirectory.name(), path: $.NSURL.alloc.initWithString(currentDirectory.url()).path.js };
+    
+        let theSelection = finder.selection();
+        data.finderSelection = theSelection.map((item) => {
+          const itemPath = $.NSURL.alloc.initWithString(item.url()).path.js
+          return { name: item.name(), path: itemPath }
+        });
+      } else if (frontApp == "Notes") {
+        errorType = "Notes";
+        data.selectedNotes = Application("Notes").selection().map((note) => ({ name: note.name(), id: note.id() }));
+      } else if (frontApp == "TextEdit") {
+        errorType = "TextEdit";
+        const textedit = Application("TextEdit");
+        const doc = textedit.documents[0];
+        data.activeDocument = { name: doc.name(), path: doc.path() };
+      } else if (frontApp == "Pages" || frontApp == "Numbers" || frontApp == "Keynote") {
+        errorType = "iWork";
+        const iworkApp = Application(frontApp.toString());
+        const doc = iworkApp.documents[0];
+        data.activeDocument = { name: doc.name(), path: doc.file().toString() };
+      } else if (frontApp == "Microsoft Word") {
+        errorType = "Word";
+        const word = Application("Microsoft Word");
+        const doc = word.activeDocument;
+        data.activeDocument = { name: doc.name(), path: \`\${se.aliases[doc.path()].posixPath()}/\${doc.name()}\` };
+      } else if (frontApp == "Microsoft PowerPoint") {
+        errorType = "PowerPoint";
+        const powerpoint = Application("Microsoft PowerPoint");
+        const doc = powerpoint.activePresentation;
+        data.activeDocument = { name: doc.name(), path: \`\${se.aliases[doc.path()].posixPath()}/\${doc.name()}\` };
+      } else if (frontApp == "Microsoft Excel") {
+        errorType = "Excel";
+        const excel = Application("Microsoft Excel");
+        const doc = excel.activeWorkbook;
+        data.activeDocument = { name: doc.name(), path: \`\${se.aliases[doc.path()].posixPath()}/\${doc.name()}\` };
+      } else if (frontApp == "Music") {
+        errorType = "Music";
+        const music = Application("Music");
+        try {
+          const track = music.currentTrack;
+          data.currentTrack = { name: track.name(), artist: track.artist() || "", album: track.album() || "", uri: "" };
+        } catch {
+          errorType = "Music.currentTrack";
+        }
+      } else if (frontApp == "Spotify") {
+        errorType = "Spotify";
+        const spotify = Application("Spotify");
+        try {
+          const track = spotify.currentTrack;
+          data.currentTrack = { name: track.name(), artist: track.artist() || "", album: track.album() || "", uri: track.spotifyUrl() || "" };
+        } catch {
+          errorType = "Spotify.currentTrack";
+        }
+      } else if (frontApp == "TV") {
+        errorType = "TV";
+        const tv = Application("TV");
+        try {
+          const track = tv.currentTrack;
+          data.currentTrack = { name: track.name(), artist: track.director() || "", album: track.album() || "", uri: "" };
+        } catch {
+          errorType = "TV.currentTrack";
+        }
+      } else {
+        errorType = "document";
+        // Try to get active document from any generic document-based app
+        const app = Application(frontApp.toString());
+        const docs = app.documents;
+        const doc = docs.length > 0 ? docs[0] : null;
+        if (doc) {
+          try {
+            debug = "document.path";
+            const path = doc.path();
+            if (path) {
+              data.activeDocument = { name: doc.name(), path: doc.path.toString() };
+            }
+          } catch {
+            debug = "document.file";
+            const file = doc.file();
+            if (file) {
+              data.activeDocument = { name: doc.name(), path: file.toString() };
+            }
+          }
+        }
       }
+    } catch (error) {
+      console.log(\`\${error.toString()}\n\nError Type: LocalData.\${errorType}\`);
     }
     
     return data;
@@ -155,15 +243,15 @@ export const requestLocalData = async (): Promise<{
 export const getFinderSelection = async (): Promise<{ name: string; path: string }[]> => {
   const data = await runAppleScript(
     `try
-    tell application "Finder"
-      set theSelection to selection
-      set thePath to {}
-      repeat with i in theSelection
-        set end of thePath to {name, POSIX path} of (i as alias)
-      end repeat
-      return thePath
-    end tell
-  end try`,
+      tell application "Finder"
+        set theSelection to selection
+        set thePath to {}
+        repeat with i in theSelection
+          set end of thePath to {name, POSIX path} of (i as alias)
+        end repeat
+        return thePath
+      end tell
+    end try`,
     { humanReadableOutput: true },
   );
 
@@ -258,6 +346,7 @@ export const useLocalData = () => {
       newData.selectedFiles = request.finderSelection;
       newData.selectedNotes = request.selectedNotes;
       newData.currentDocument = request.activeDocument || { name: "", path: "" };
+      newData.currentTrack = request.currentTrack || { name: "", artist: "", album: "", uri: "" };
 
       const browser = utils.SupportedBrowsers.find((b) => b.name == app.name);
       if (browser) {

@@ -1,5 +1,15 @@
 [
   {
+    "name": "IconAI",
+    "displayName": "AI",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconAI",
+    "keywords": ["ai", "gpt", "transformer", "artificial", "smart"],
+    "svgPath": {
+      "light": "./assets/icons/AI-light.svg",
+      "dark": "./assets/icons/AI-dark.svg"
+    }
+  },
+  {
     "name": "IconAdd",
     "displayName": "Add",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconAdd",
@@ -27,6 +37,26 @@
     "svgPath": {
       "light": "./assets/icons/bookmark-light.svg",
       "dark": "./assets/icons/bookmark-dark.svg"
+    }
+  },
+  {
+    "name": "IconCareer",
+    "displayName": "Career",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconCareer",
+    "keywords": ["career", "job", "work", "compass", "safari"],
+    "svgPath": {
+      "light": "./assets/icons/career-light.svg",
+      "dark": "./assets/icons/career-dark.svg"
+    }
+  },
+  {
+    "name": "IconCategory",
+    "displayName": "Category",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconCategory",
+    "keywords": ["category", "shapes"],
+    "svgPath": {
+      "light": "./assets/icons/category-light.svg",
+      "dark": "./assets/icons/category-dark.svg"
     }
   },
   {
@@ -93,7 +123,7 @@
     "name": "IconCreditCard",
     "displayName": "CreditCard",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconCreditCard",
-    "keywords": ["creditcard", "credit", "card", "debit", "payment", "bank", "money"],
+    "keywords": ["creditcard", "credit", "card", "debit", "payment", "bank"],
     "svgPath": {
       "light": "./assets/icons/creditCard-light.svg",
       "dark": "./assets/icons/creditCard-dark.svg"
@@ -200,6 +230,16 @@
     }
   },
   {
+    "name": "IconExperience",
+    "displayName": "Experience",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconExperience",
+    "keywords": ["experience", "diamond", "gem", "special"],
+    "svgPath": {
+      "light": "./assets/icons/experience-light.svg",
+      "dark": "./assets/icons/experience-dark.svg"
+    }
+  },
+  {
     "name": "IconFilter",
     "displayName": "Filter",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconFilter",
@@ -217,6 +257,26 @@
     "svgPath": {
       "light": "./assets/icons/flag-light.svg",
       "dark": "./assets/icons/flag-dark.svg"
+    }
+  },
+  {
+    "name": "IconGift",
+    "displayName": "Gift",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconGift",
+    "keywords": ["gift", "present", "box", "surprise"],
+    "svgPath": {
+      "light": "./assets/icons/gift-light.svg",
+      "dark": "./assets/icons/gift-dark.svg"
+    }
+  },
+  {
+    "name": "IconGlobe",
+    "displayName": "Globe",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconGlobe",
+    "keywords": ["globe", "world", "map", "earth", "planet"],
+    "svgPath": {
+      "light": "./assets/icons/globe-light.svg",
+      "dark": "./assets/icons/globe-dark.svg"
     }
   },
   {
@@ -293,7 +353,7 @@
     "name": "IconInvoice",
     "displayName": "Invoice",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconInvoice",
-    "keywords": ["invoice", "bill", "payment", "money", "receipt"],
+    "keywords": ["invoice", "bill", "payment", "receipt"],
     "svgPath": {
       "light": "./assets/icons/invoice-light.svg",
       "dark": "./assets/icons/invoice-dark.svg"
@@ -303,7 +363,7 @@
     "name": "IconLanguage",
     "displayName": "Language",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconLanguage",
-    "keywords": ["language", "globe", "world", "translate"],
+    "keywords": ["language", "translate", "letters"],
     "svgPath": {
       "light": "./assets/icons/language-light.svg",
       "dark": "./assets/icons/language-dark.svg"
@@ -393,7 +453,7 @@
     "name": "IconMoney",
     "displayName": "Money",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconMoney",
-    "keywords": ["money", "cash", "dollar", "bill", "payment", "bank", "$"],
+    "keywords": ["money", "cash", "dollar", "bill", "payment", "bank", "$", "note", "currency"],
     "svgPath": {
       "light": "./assets/icons/money-light.svg",
       "dark": "./assets/icons/money-dark.svg"
@@ -563,10 +623,20 @@
     "name": "IconResume",
     "displayName": "Resume",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconResume",
-    "keywords": ["resume", "cv", "cirriculum vitae", "paper", "document"],
+    "keywords": ["resume", "cv", "curriculum vitae", "paper", "document"],
     "svgPath": {
       "light": "./assets/icons/resume-light.svg",
       "dark": "./assets/icons/resume-dark.svg"
+    }
+  },
+  {
+    "name": "IconRocket",
+    "displayName": "Rocket",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconRocket",
+    "keywords": ["rocket", "launch", "blast", "space", "ship"],
+    "svgPath": {
+      "light": "./assets/icons/rocket-light.svg",
+      "dark": "./assets/icons/rocket-dark.svg"
     }
   },
   {
@@ -630,6 +700,16 @@
     }
   },
   {
+    "name": "IconSkills",
+    "displayName": "Skills",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconSkills",
+    "keywords": ["skills", "lightning", "bolt", "flash"],
+    "svgPath": {
+      "light": "./assets/icons/skills-light.svg",
+      "dark": "./assets/icons/skills-dark.svg"
+    }
+  },
+  {
     "name": "IconSocialFacebook",
     "displayName": "SocialFacebook",
     "url": "https://seek-oss.github.io/braid-design-system/components/IconSocialFacebook",
@@ -680,13 +760,13 @@
     }
   },
   {
-    "name": "IconSocialTwitter",
-    "displayName": "SocialTwitter",
-    "url": "https://seek-oss.github.io/braid-design-system/components/IconSocialTwitter",
-    "keywords": ["socialtwitter", "social", "twitter", "network", "x"],
+    "name": "IconSocialX",
+    "displayName": "SocialX",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconSocialX",
+    "keywords": ["socialx", "social", "twitter", "network", "x"],
     "svgPath": {
-      "light": "./assets/icons/socialTwitter-light.svg",
-      "dark": "./assets/icons/socialTwitter-dark.svg"
+      "light": "./assets/icons/socialx-light.svg",
+      "dark": "./assets/icons/socialx-dark.svg"
     }
   },
   {
@@ -697,6 +777,16 @@
     "svgPath": {
       "light": "./assets/icons/socialYouTube-light.svg",
       "dark": "./assets/icons/socialYouTube-dark.svg"
+    }
+  },
+  {
+    "name": "IconSort",
+    "displayName": "Sort",
+    "url": "https://seek-oss.github.io/braid-design-system/components/IconSort",
+    "keywords": ["sort", "order", "filter", "funnel", "sliders", "adjust", "arrow", "up", "down", "arrange"],
+    "svgPath": {
+      "light": "./assets/icons/sort-light.svg",
+      "dark": "./assets/icons/sort-dark.svg"
     }
   },
   {

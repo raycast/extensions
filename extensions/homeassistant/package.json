@@ -6,7 +6,8 @@
   "author": "tonka3000",
   "contributors": [
     "altrdev",
-    "rspeicher"
+    "rspeicher",
+    "amuelli"
   ],
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
@@ -385,6 +386,59 @@
           "placeholder": "cover.mycover1,cover.bath*"
         }
       ]
+    },
+    {
+      "name": "entitymenu01",
+      "title": "Entity Menu 1",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu02",
+      "title": "Entity Menu 2",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
+    },
+    {
+      "name": "entitymenu03",
+      "title": "Entity Menu 3",
+      "description": "Show a Single Entity directly in the Menubar",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "entity",
+          "description": "Entity ID which will be shown",
+          "type": "textfield",
+          "required": true,
+          "title": "Weather Entity",
+          "placeholder": "weather.home"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -478,7 +532,7 @@
     "Other"
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.66.0",
     "@raycast/utils": "^1.5.2",
     "home-assistant-js-websocket": "^8.1.0",
     "javascript-time-ago": "^2.5.9",

@@ -1,70 +1,96 @@
-import { useContext } from "react";
-
-import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard, showInFinder, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, showToast, Toast, showInFinder, open, closeMainWindow } from "@raycast/api";
+import path from "path";
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
-import AppContext, { AppStateAction } from "./AppContext";
 import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
+import { removeGifFromCache } from "../lib/cachedGifs";
+import { get, remove, save } from "../lib/localGifs";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 
 interface GifActionsProps {
   item: IGif;
   showViewDetails: boolean;
   service?: ServiceName;
   visitGifItem?: (gif: IGif) => void;
+  mutate: () => Promise<void>;
 }
 
-export function GifActions({ item, showViewDetails, service, visitGifItem }: GifActionsProps) {
+export function GifActions({ item, showViewDetails, service, visitGifItem, mutate }: GifActionsProps) {
   const { id, url, gif_url } = item;
-  const { state, dispatch } = useContext(AppContext);
-  const { favIds, recentIds } = state;
-  const safeDispatch = (action: AppStateAction) => {
-    try {
-      dispatch(action);
-    } catch (error) {
-      console.error(error);
+
+  const { data: favIds } = useCachedPromise((s) => get(s, "favs"), [service]);
+  const { data: recentIds } = useCachedPromise((s) => get(s, "recent"), [service]);
+
+  const trackUsage = async () => {
+    if (service) {
+      await save(item, service, "recent");
+      await mutate();
+      await visitGifItem?.(item);
     }
   };
 
-  const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
-
-  const trackUsage = () => {
-    safeDispatch({ type: "add", save: true, recentIds: actionIds, service });
-    visitGifItem?.(item);
+  const removeFromRecents = async () => {
+    try {
+      if (service) {
+        await remove(item, service, "recent");
+        await mutate();
+        await showToast({ style: Toast.Style.Success, title: "Removed GIF from recents" });
+      }
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not remove GIF from recents" });
+    }
   };
-  const removeFromRecents = () => safeDispatch({ type: "remove", save: true, recentIds: actionIds, service });
-  const addToFav = () => safeDispatch({ type: "add", save: true, favIds: actionIds, service });
 
-  const removeFav = () => safeDispatch({ type: "remove", save: true, favIds: actionIds, service });
+  const addToFav = async () => {
+    try {
+      if (service) {
+        await save(item, service, "favs");
+        await mutate();
+        await showToast({ style: Toast.Style.Success, title: "Added GIF to favorites" });
+      }
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not add GIF to favorites" });
+    }
+  };
 
-  const copyFileAction = () =>
-    showToast({
-      style: Toast.Style.Animated,
-      title: "Copying...",
-    })
-      .then((toast) => {
-        return copyFileToClipboard(item.download_url, item.download_name).then((file) => {
-          toast.hide();
-          showHUD(`Copied GIF "${file}" to clipboard`);
-        });
-      })
-      .catch((e: Error) =>
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error, please try again",
-          message: e?.message,
-          primaryAction: {
-            title: "Copy Error Message",
-            onAction: (toast) => Clipboard.copy(toast.message ?? ""),
-            shortcut: { modifiers: ["cmd"], key: "c" },
-          },
-        })
-      );
+  const removeFav = async () => {
+    try {
+      if (service) {
+        await remove(item, service, "favs");
+        await mutate();
+        await showToast({ style: Toast.Style.Success, title: "Removed GIF from favorites" });
+      }
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not remove GIF from favorites" });
+    }
+
+    // Remove the GIF from the cache if it exists
+    try {
+      const fileName = item.download_name || path.basename(item.download_url);
+      await removeGifFromCache(fileName);
+    } catch (error) {
+      console.error("Failed to remove GIF from cache:", error);
+    }
+  };
+
+  async function copyGif() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Copying GIF" });
+      const isInFavorites = favIds?.includes(id.toString());
+      const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
+      await trackUsage();
+      await closeMainWindow();
+      await showToast({ style: Toast.Style.Success, title: `Copied GIF "${file}" to clipboard` });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not copy GIF" });
+    }
+  }
 
   const downloadGIFAction = async () => {
     try {
@@ -95,7 +121,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to download GIF",
+        title: "Could not download GIF",
         message: item.download_name,
       });
     }
@@ -106,7 +132,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       icon={Icon.Clipboard}
       key="copyFile"
       title="Copy GIF"
-      onAction={() => copyFileAction().then(trackUsage)}
+      onAction={copyGif}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );
@@ -129,7 +155,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
   );
 
   let toggleFav: JSX.Element | undefined;
-  const isFav = favIds?.get(service as ServiceName)?.has(id.toString());
+  const isFav = favIds?.includes(id.toString());
   if (favIds) {
     toggleFav = isFav ? (
       <Action
@@ -150,7 +176,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
     );
   }
 
-  const isRecent = recentIds?.get(service as ServiceName)?.has(id.toString());
+  const isRecent = recentIds?.includes(id.toString());
   const removeRecent = isRecent ? (
     <Action
       icon={Icon.Clock}
@@ -166,7 +192,7 @@ export function GifActions({ item, showViewDetails, service, visitGifItem }: Gif
       icon={Icon.Eye}
       key="viewDetails"
       title="View GIF Details"
-      target={<GifDetails item={item} service={service} />}
+      target={<GifDetails item={item} service={service} mutate={mutate} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       onPush={trackUsage}
     />

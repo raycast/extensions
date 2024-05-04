@@ -1,5 +1,17 @@
 # Quit Applications Changelog
 
+## [Enhancement] - 2024-04-11
+
+- Added clearSearchBar after quitting an app.
+
+## [Enhancement] - 2024-04-05
+
+- Fixed a bug where some of the apps (e.g. Steam) were not quitting
+
+## [Performance Improvements] - 2024-01-19
+
+- Improve icon fetching performance by using the API provided by Raycast
+
 ## [Deeplinks Support] - 2023-10-21
 
 - Added Deeplink Support

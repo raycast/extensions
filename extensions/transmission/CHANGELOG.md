@@ -1,5 +1,23 @@
 # Transmission Changelog
 
+## [ETA] - 2024-04-24
+
+- Add an ETA to the torrent details
+- Fix a small isse where the cell images are undefined, should show no string
+
+## [Code improvements] - 2024-04-16
+
+- Refactor the code, splitting the `listTorrents` file into separate components
+- Update command because <kbd>Cmd</kbd> + <kbd>,</kbd> is reserved by Raycast
+- Fix a bug where the extension tries to read files that are not in `localhost`
+- Fix a memory leak in `TorrentConfiiguration` component
+- Fix a bug where too many files are loaded in a big torrent (added a configurable limit (max 100))
+- Update dependencies, cleaning up unnecessary ones
+
+## [Fix remove torrent and delete local data] - 2024-01-15
+
+- "Delete local data" option when removing torrent fixed.
+
 ## [Usability improvements] - 2023-04-30
 
 - Use the password type for a field storing a password.

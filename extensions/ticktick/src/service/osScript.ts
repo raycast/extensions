@@ -15,6 +15,11 @@ const taskObject2Task = (object: Record<string, unknown>): Task => {
     items: object.items as Task["items"],
     kind: object.kind as Task["kind"],
     tags: (object.tags || []) as Task["tags"],
+    startDate: object.startDate as Task["startDate"],
+    dueDate: object.dueDate as Task["dueDate"],
+    isAllDay: object.isAllDay as Task["isAllDay"],
+    isFloating: object.isFloating as Task["isFloating"],
+    timeZone: object.timeZone as Task["timeZone"],
   };
 };
 
@@ -185,10 +190,9 @@ export const addTask = async (data: {
     set result to ""
     tell application "TickTick"
       set result to add task to list "${projectId}" title "${title}" description "${description}"${
-      dueDate ? ` due date "${dueDate}"` : ""
-    } from "raycast" ${isAllDay ? "with" : "without"} allday
+      dueDate ? ` due date "${dueDate}" is allday ${isAllDay}` : ""
+    } from "raycast"
     end tell
-
   `)) as string;
     if (result === "missing value") {
       return false;

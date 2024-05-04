@@ -11,6 +11,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "adb-current-activity",
+      "title": "Current Activity",
+      "description": "Get the current activity name and put it in your clipboard",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "adb-screenshots",
       "title": "Take Screenshot",
       "description": "Takes a screenshot, saves it, and put it in your clipboard for easy-sharing",
@@ -23,44 +30,78 @@
       "mode": "no-view"
     },
     {
+      "name": "adb-open-developer-settings",
+      "title": "Open Developer Settings",
+      "description": "Open the developer settings on your device",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-toggle-layout-bounds",
+      "title": "Toggle Layout Bounds",
+      "description": "Show or Hide the layout bounds",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "adb-wifi",
       "title": "Enable or Disable Wifi",
       "description": "enable/disable wifi",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "toggle",
-          "placeholder": "enable|disable",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "adb-airplane",
       "title": "Enable or Disable Airplane Mode",
       "description": "enable/disable airplane mode (all connectivity on/off)",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "toggle",
-          "placeholder": "enable|disable",
-          "type": "text",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "adb-dark-mode",
       "title": "Enable or Disable Dark Mode",
       "description": "enable/disable/auto dark mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "adb-clear-app-data",
+      "title": "Clear App Data",
+      "description": "Remove all files and cache for an app",
       "mode": "no-view",
+      "disabledByDefault": true,
       "arguments": [
         {
-          "name": "toggle",
-          "placeholder": "enable|disable|auto",
+          "name": "appId",
+          "placeholder": "com.vendor.app",
           "type": "text",
-          "required": true
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "adb-force-stop",
+      "title": "Force Stop App",
+      "description": "Force stop an app via its package name",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "appId",
+          "placeholder": "com.vendor.app",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "adb-soft-kill",
+      "title": "Softly Kill App",
+      "description": "Kill an app process to test state save/restoration",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "appId",
+          "placeholder": "com.vendor.app",
+          "type": "text",
+          "required": false
         }
       ]
     },
@@ -82,6 +123,7 @@
       "name": "adb-display-size",
       "title": "Change the Display Density",
       "description": "Increase or decrease the display density",
+      "disabledByDefault": true,
       "mode": "no-view",
       "arguments": [
         {
@@ -135,12 +177,24 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "title": "Android SDK",
+      "name": "androidSDK",
+      "description": "Locate Android SDK path",
+      "type": "textfield",
+      "required": true,
+      "default": "~/Library/Android/sdk"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.52.1",
+    "expand-tilde": "^2.0.2",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
+    "@types/expand-tilde": "^2.0.2",
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
     "eslint": "^7.32.0",

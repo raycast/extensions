@@ -25,7 +25,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
     return filterTasks;
   };
 
-  const { isLoading, data, revalidate } = useCachedPromise(getFilterTasksCached, [query]);
+  const { isLoading, data } = useCachedPromise(getFilterTasksCached, [query]);
 
   useEffect(() => {
     if (data) {
@@ -33,7 +33,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
     }
   }, [data]);
 
-  const { sections, viewProps, sortedTasks } = useViewTasks(`todoist.filter${name}`, { tasks });
+  const { sections, viewProps } = useViewTasks(`todoist.filter${name}`, { tasks });
 
   if (tasks.length === 0) {
     return (

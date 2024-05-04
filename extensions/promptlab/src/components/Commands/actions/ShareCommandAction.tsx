@@ -1,9 +1,9 @@
 import { Action, Icon, Toast, showToast } from "@raycast/api";
-import { Command, StoreCommand } from "../../../utils/types";
-import { STORE_ENDPOINT, STORE_KEY } from "../../../utils/constants";
+import { Command, StoreCommand } from "../../../lib/commands/types";
+import { STORE_ENDPOINT, STORE_KEY } from "../../../lib/common/constants";
 import fetch from "node-fetch";
-import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { getActionShortcut, isActionEnabled } from "../../../lib/actions";
+import { AdvancedSettings } from "../../../data/default-advanced-settings";
 
 /**
  * Action to share a command to the PromptLab store.
@@ -12,7 +12,7 @@ import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils"
  */
 export default function ShareCommandAction(props: {
   command: Command;
-  settings: typeof defaultAdvancedSettings;
+  settings: AdvancedSettings;
 }): JSX.Element | null {
   const { command, settings } = props;
 
@@ -82,6 +82,7 @@ export default function ShareCommandAction(props: {
                 setupConfig: command.setupConfig ? JSON.stringify(command.setupConfig) : "None",
                 useSpeech: command.useSpeech ? "TRUE" : "FALSE",
                 speakResponse: command.speakResponse ? "TRUE" : "FALSE",
+                recordRuns: command.recordRuns ? "TRUE" : "FALSE",
               },
             }),
           }).then((res) => {

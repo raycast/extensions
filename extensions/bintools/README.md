@@ -17,5 +17,5 @@ Currently only decimal and binary fixed point numbers are supported as input.
 ### Examples
 
 - `0b101 + 0x1` will result in `0b110` or `6` in decimal
-- `0b0101+0o5-0xf`  will result in `-0b101?` or `-5` in decimal
+- `0b0101+0o5-0xf` will result in `-0b101?` or `-5` in decimal
 - `0b0.1` will result in `0.5` in decimal

@@ -15,11 +15,15 @@ export async function listDirectories(folder: string) {
   return fs.promises.readdir(folder, { withFileTypes: true });
 }
 
-export const emulatorPath = `${androidSDK()}/emulator/emulator`;
+export const emulatorPath = `ANDROID_AVD_HOME="${androidAVD()}" ${androidSDK()}/emulator/emulator`;
 
 export function androidSDK() {
   const sdk = getPreferenceValues().androidSDK;
   return sdk.replace("~", expandTilde("~"));
+}
+export function androidAVD() {
+  const avd = getPreferenceValues().androidAVD;
+  return avd.replace("~", expandTilde("~"));
 }
 
 export const adbPath = path.join(androidSDK(), "platform-tools", "adb");

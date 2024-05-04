@@ -7,7 +7,8 @@
   "author": "koinzhang",
   "contributors": [
     "r22",
-    "fuksman"
+    "fuksman",
+    "xilopaint"
   ],
   "license": "MIT",
   "commands": [
@@ -129,7 +130,7 @@
     {
       "name": "tempType",
       "type": "dropdown",
-      "title": "Show in menubar",
+      "title": "Show in Menubar",
       "description": "Temperature type",
       "required": false,
       "default": "temperature",
@@ -139,7 +140,7 @@
           "value": "temperature"
         },
         {
-          "title": "Feels-like",
+          "title": "Feels Like",
           "value": "apparent_temperature"
         }
       ]
@@ -179,8 +180,8 @@
     {
       "name": "showSun",
       "type": "checkbox",
-      "label": "Sunrise and sunset",
-      "title": "Show in details",
+      "label": "Sunrise and Sunset",
+      "title": "Show in Details",
       "description": "Show sunrise and sunset in details",
       "required": false,
       "default": true
@@ -204,31 +205,31 @@
     {
       "name": "showForecast",
       "type": "checkbox",
-      "label": "7-day weather forecast",
+      "label": "7-day Weather Forecast",
       "description": "Show 7-day weather forecast in details",
       "required": false,
       "default": true
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.1",
-    "axios": "^1.4.0"
+    "@raycast/api": "^1.71.3",
+    "axios": "^1.6.8"
   },
   "devDependencies": {
-    "@types/node": "20.4.4",
-    "@types/react": "18.2.15",
-    "@typescript-eslint/eslint-plugin": "^6.1.0",
-    "@typescript-eslint/parser": "^6.1.0",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^8.8.0",
-    "prettier": "^2.8.8",
-    "typescript": "^5.1.6"
+    "@types/node": "20.11.16",
+    "@types/react": "18.2.52",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

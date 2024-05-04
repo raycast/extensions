@@ -156,3 +156,15 @@ extensions/**/*.zip
 
 # Raycast
 raycast-env.d.ts
+.build
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+
+# VSCode
+.vscode
+
+# Root lockfiles
+/package-lock.json
+/pnpm-lock.yaml
+/yarn.lock

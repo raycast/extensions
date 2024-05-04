@@ -11,7 +11,7 @@ import { XcodeSimulatorSendPushNotificationForm } from "./xcode-simulator-send-p
 /**
  * Xcode Simulator List Item
  */
-export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; revalidate: () => void }): JSX.Element {
+export function XcodeSimulatorListItem(props: { simulator: XcodeSimulator; revalidate: () => void }) {
   return (
     <List.Item
       icon={{ source: "xcode-simulator.png" }}

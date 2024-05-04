@@ -1,6 +1,6 @@
 import { Toast, open } from "@raycast/api";
 import { FetchPopiconsError } from "../errors/fetch-popicons-error";
-import { getApiErrorIssueUrl } from "../helpers/get-api-error-issue-url";
+import { getNewIssueUrl } from "../helpers/get-new-issue-url";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DynamicToastOptions = (...args: Array<any>) => Toast.Options;
@@ -21,8 +21,7 @@ const Toasts = {
     SuccessNewIcons: (count: number) => {
       return {
         style: Toast.Style.Success,
-        title: "🎉 New Icons Added",
-        message: `${count} new Popicons were added to the extension.`,
+        title: `🎉 ${count} new Popicons added`,
       };
     },
     FetchError: (err: FetchPopiconsError, retry: () => void) => {
@@ -40,7 +39,7 @@ const Toasts = {
         secondaryAction: {
           title: "Report Issue",
           onAction: (toast) => {
-            open(getApiErrorIssueUrl(err.reason).toString());
+            open(getNewIssueUrl().toString());
             toast.hide();
           },
         },
@@ -49,8 +48,8 @@ const Toasts = {
     OfflineError: (retry: () => void) => {
       return {
         style: Toast.Style.Failure,
-        title: "Update Failed",
-        message: "No internet connection available. The icons will be updated the next time the extension is openend.",
+        title: "You Are Offline",
+        message: "The icons will be updated the next time the extension is openend.",
         primaryAction: {
           title: "Retry Loading Popicons",
           onAction: (toast) => {

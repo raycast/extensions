@@ -10,7 +10,8 @@ import {
   Keyboard,
   showToast,
 } from "@raycast/api";
-import { setStorage, getStorage, cutoff, pluralize } from "./lib/utils";
+import { cutoff, pluralize } from "./lib/utils";
+import { setStorage, getStorage } from "./lib/storage";
 import { ExtensionPreferences } from "./lib/preferences";
 import { PinForm } from "./components/PinForm";
 import { Direction, StorageKey } from "./lib/constants";

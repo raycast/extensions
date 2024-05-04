@@ -1,10 +1,10 @@
 import { Toast, environment, getPreferenceValues, showToast } from "@raycast/api";
+import { ExtensionPreferences } from "../preferences/types";
 import { defaultAdvancedSettings } from "../../data/default-advanced-settings";
 import path from "path";
 import { Placeholder, PLLoader } from "placeholders-toolkit";
+import { CUSTOM_PLACEHOLDERS_FILENAME } from "../common/constants";
 import * as fs from "fs";
-import { ExtensionPreferences } from "../../utils/types";
-import { CUSTOM_PLACEHOLDERS_FILENAME } from "../../utils/constants";
 
 /**
  * Loads custom placeholders from the custom-placeholders.json file in the support directory.

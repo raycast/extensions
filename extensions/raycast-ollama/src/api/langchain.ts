@@ -55,8 +55,7 @@ async function GetFilesFromLocalStorage(): Promise<DocumentLoaderFiles[]> {
 
 /**
  * Verify if cache can be used for DocumentLoader().
- * @param {DocumentLoaderFiles[]}
- * @returns
+ * @returns {Promise<Boolean>} Return 'true' value if cache can be used otherwise return 'false' value.
  */
 async function UseCacheDocumentLoader(): Promise<boolean> {
   let files = await GetFilesFromLocalStorage();
@@ -111,7 +110,7 @@ export async function UseCache(tags: PromptTags[]): Promise<boolean> {
  * Load documents contents from file.
  * @param {number} chunckSize - Number of character for each chunk.
  * @param {number} chunckOverlap - Number of character overlapping between nearby chunk.
- * @returns {Document<Record<string, any>>[]} Array of documents.
+ * @returns {Promise<Document<Record<string, any>>[]>} Array of documents.
  */
 async function DocumentLoader(chunckSize = 1000, chunckOverlap = 200): Promise<Document<Record<string, any>>[]> {
   const path = await GetFilesPathFromLocalStorage();
@@ -149,7 +148,7 @@ async function DocumentLoader(chunckSize = 1000, chunckOverlap = 200): Promise<D
  * @param {Document<Record<string,any>>[]} docs.
  * @param {number} chunckSize - Number of character for each chunk.
  * @param {number} chunckOverlap - Number of character overlapping between nearby chunk.
- * @returns {Document<Record<string,any>>[]} splitted documents.
+ * @returns {Promise<Document<Record<string,any>>[]>} splitted documents.
  */
 async function DocumentSplitter(
   docs: Document<Record<string, any>>[],
@@ -164,7 +163,7 @@ async function DocumentSplitter(
 }
 
 /**
- * Return Document based on chose tags.
+ * Return Document based on chosed tags.
  * Memory Vector Store is used only for large amount of data.
  * @param {string} prompt.
  * @param {string} model - Model used for embedding.

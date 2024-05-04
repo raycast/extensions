@@ -1,5 +1,47 @@
 # Linear Changelog
 
+## [Fix missing icons] - 2024-05-01
+
+- Update missing Linear icons
+
+## [Improvements] - 2024-04-29
+
+- Add pagination when searching issues
+- Rename "Assigned Issues" to "My Issues"
+
+## [New icons] - 2024-04-26
+
+- Use new Linear icons
+
+## [Fix Creating issue with milestone] - 2024-04-23
+
+- Fix defining `milestoneId` in payload.
+
+## [Enhanced Notifications] - 2024-03-12
+
+- Notifications now include links to comments, project updates, and projects, making it easier to navigate directly to the relevant content in Linear.
+- You can now copy the URL of a notification's related item directly from the notification panel.
+
+## [Improve Notifications search] - 2024-03-01
+
+- It's possible to search your notifications by issue identifiers, issue titles, or usernames.
+
+## [Fix images in issues] - 2024-02-02
+
+- Images are now properly loaded when looking at the details of an issue.
+
+## [Use OAuth utils] - 2024-02-01
+
+- Use new OAuth utils
+
+## [Fix projects search not working] - 2024-01-30
+
+- The projects search was not working in case there were no roadmaps available. This is now fixed.
+
+## [Add Favorites command] - 2024-01-05
+
+- Add `Favorites` command to browse your Linear favorites right from Raycast.
+
 ## [Add issue links] - 2023-12-29
 
 - Add support for issue links. It is now possible to see the number of links an issue has from the detail view. You can also browse them in a dedicated view.

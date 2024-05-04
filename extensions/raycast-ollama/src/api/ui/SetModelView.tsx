@@ -69,7 +69,7 @@ export function SetModelView(props: props): JSX.Element {
 
   /**
    *  Save chosen model on LocalStorage.
-   * @param {string} model - Model.}
+   * @param {FormData} data - Data recieved from form.
    */
   function setLocalStorageModels(data: FormData): void {
     if (data.ModelGenerate) LocalStorage.setItem(`${props.Command}_model_generate`, data.ModelGenerate);

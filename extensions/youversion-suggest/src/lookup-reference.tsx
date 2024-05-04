@@ -61,7 +61,7 @@ function useSearch() {
         showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
       }
     },
-    [setState]
+    [setState],
   );
 
   useEffect(() => {

@@ -1,5 +1,44 @@
 # Toggl Track Changelog
 
+## [Bug Fixes] - 2024-03-25
+
+- Fix time entries refresh
+
+## [Enhancements] - 2024-03-06
+
+- Add workspace and project fields to time entry form.
+
+## [Enhancements] - 2024-02-27
+
+- Show tags, project, and client on time entries.
+
+## [Bug Fixes] - 2024-02-21
+
+- Update the `project` from in `CreateTimeEntryFrom` when projects are changed.
+- Fix list item accessory for time entries' projects.
+
+## [New Feature] - 2024-01-16
+
+- Adds a new `Manage Tags` command.
+- Adds a new `Manage Projects` command.
+- Adds a new `Manage Clients` command.
+- Adds a new `View Projects` command.
+
+## [Enhancements] - 2024-01-16
+
+- Rename main command to "Start/Stop Time Entry".
+- Remove projects from list view.
+
+## [Bug Fixes] - 2024-01-15
+
+- Remove `refresh` action.
+- Fix project dropdown in time entry form.
+- Fix today's duration timer.
+
+## [Refactor] - 2024-01-04
+
+- Refactor extension to use updated Raycast utilities.
+
 ## [New Feature] - 2023-02-28
 
 - Add ability to choose a [project task](https://support.toggl.com/en/articles/2220738-tasks) when creating a new time entry.

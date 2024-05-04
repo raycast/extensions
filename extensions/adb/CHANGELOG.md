@@ -1,5 +1,37 @@
 # Android Debug Bridge (Adb) Changelog
 
+## [Get the current activity] - 2024-04-17
+- Get the current activity name and put it in your clipboard
+
+## [Add preference for Android Sdk] - 2024-02-23
+- Add preference to set Android Sdk path
+
+## [App id commands] - 2024-02-20
+- Add `clear-app-data` command to clear cache and files for an appId
+- Add `force-stop` command to force-stop an app (doesn't save state)
+- Add `soft-kill` command to soft-kill an app (saves state)
+
+## [Crash fixes] - 2024-02-20
+- Fix missing device.
+- Fix multiple devices connected (it'll use the first device for now).
+- Fix `open-url` command due to url with params.
+- Add regex testing for `open-url` command to reject non-valid format.
+- Add max/min density. If user input a greater/lower value, it'll be maxed/mined out.
+
+## [Fix wifi/airplane commands] - 2024-02-14
+- Fix `wifi`, `airplane` commands. There was a problem fixing merge conflicts disregarding the usage of new toggle value.
+
+## [Fix wifi/airplane commands] - 2024-02-13
+- Fix `wifi`, `airplane` commands. ADB requires these commands to receive specific enable/disable arguments to be fully compatible.
+
+## [Add toggle layout bounds command] - 2024-02-13
+- Add `toggle layout bounds` command, disabled by default
+- Change `wifi`, `airplane`, `dark mode` commands to toggle instead of taking arguments to enable/disable.
+
+## [Add open device developer settings] - 2024-02-13
+- Add `open developer settings` to open the locale developer settings
+- Disable `adb-display-size` by default, since it's less used
+
 ## [Add font/display sizes commands] - 2023-06-13
 - Add `display density` to control display density (values from 0.5 to 3.0)
 - Add `font size` to control font sizes (vales from 0.5 to 3.0)

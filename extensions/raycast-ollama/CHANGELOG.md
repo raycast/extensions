@@ -1,12 +1,34 @@
 # raycast-ollama Changelog
 
-## [BugFix] 2024-01-02
+## [BugFix] - 2024-03-12
+
+- [@almoce] Fixed missing first word in answer on `Chat with Ollama`.
+
+## [Improvement and BugFix] - 2024-03-02
+
+- [Improvement] [@AlexMcDermott] Screenshot on Clipboard can now be used on `Chat with Ollama` and `Describe Content of Image`.
+- [BugFix] Fixed error causing ModelView not showing if model was not configured.
+
+## [BugFix] - 2024-01-24
+
+- Fixed `Cannot read properties of undefined (reading 'split')` caused by API route '/api/show' responding with empty 'parameters' value for some models.
+
+## [BugFix] - 2024-01-12
+
+- **Command 'Improve Writing'**: fixed error 'Preferred model is not configured in LocalStorage'.
+- Fixed typo on error code 'Prefered model is not configured in LocalStorage'.
+
+## [Improvement] - 2024-01-11
+
+- **Command 'Translate'**: now is required to specify the destination language.
+
+## [BugFix] - 2024-01-02
 
 - **Command 'Manage Models'**: fixed bug that cause error `ollama-models | TypeError: Cannot read properties of undefined (reading 'split')` when model show information was undefined.
 - **Command 'Chat With Ollama'**: fixed bug that cause error `ollama-chat | SyntaxError: Expected ',' or '}' after property value in JSON at position 97` when Ollama chat api response with an unformatted JSON response.
 - **Command 'Manage Models'**: fixed bug that cause error `ollama-models | SyntaxError: Unexpected non-whitespace character after JSON at position 30` when Ollama pull api response with an unformatted JSON response.
 
-## [Improvement and BugFix] 2023-12-20
+## [Improvement and BugFix] - 2023-12-20
 
 - [Improvement] **Command 'Chat With Ollama'**: implemented the new Ollama chat feature, for use this command is now required at least Ollama v0.1.14.
 - [Improvement] **Command 'Chat With Ollama'**: new tag `/image` permit to add an image from clipboard or more than one from Finder selection on the prompt. At least Ollama v0.1.15 and one multimodal model installed are required. Only PNG or JPG image are supported.

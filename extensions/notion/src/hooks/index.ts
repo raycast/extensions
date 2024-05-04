@@ -46,17 +46,27 @@ export function useDatabases() {
   return { ...value, data: value.data ?? [] };
 }
 
-export function useDatabaseProperties(databaseId: string | null) {
-  const value = useCachedPromise((id) => fetchDatabaseProperties(id), [databaseId], { execute: !!databaseId });
+export function useDatabaseProperties(databaseId: string | null, filter?: (value: DatabaseProperty) => boolean) {
+  const value = useCachedPromise(
+    (id): Promise<DatabaseProperty[]> =>
+      fetchDatabaseProperties(id).then((databaseProperties) => {
+        if (databaseProperties && filter) {
+          return databaseProperties.filter(filter);
+        }
+        return databaseProperties;
+      }),
+    [databaseId],
+    { execute: !!databaseId },
+  );
 
   return { ...value, data: value.data ?? [] };
 }
 
 export function useDatabasesView(databaseId: string) {
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const data = await LocalStorage.getItem("DATABASES_VIEWS");
+    const data = await LocalStorage.getItem<string>("DATABASES_VIEWS");
 
-    if (!data || typeof data !== "string") return {};
+    if (!data) return {};
 
     return JSON.parse(data) as { [databaseId: string]: DatabaseView | undefined };
   });
@@ -70,7 +80,7 @@ export function useDatabasesView(databaseId: string) {
   }
 
   return {
-    data: data?.[databaseId],
+    data: data?.[databaseId] || {},
     isLoading,
     mutate,
     setDatabaseView,
@@ -121,10 +131,11 @@ export function useRecentPages() {
       await Promise.all(
         recentPages.map((p) => {
           // convert each RecentPage object into a Page object
+          // don't error if the page is not found
           if (p.type === "page") {
-            return fetchPage(p.id);
+            return fetchPage(p.id, true);
           } else {
-            return fetchDatabase(p.id);
+            return fetchDatabase(p.id, true);
           }
         }),
       )
@@ -181,7 +192,7 @@ export function useRecentPages() {
 }
 
 export function useSearchPages(query: string) {
-  return useCachedPromise((query) => search(query), [query], {
+  return useCachedPromise(search, [query], {
     keepPreviousData: true,
   });
 }

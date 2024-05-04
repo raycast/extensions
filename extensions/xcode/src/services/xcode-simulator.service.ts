@@ -12,7 +12,6 @@ import {
   XcodeSimulatorOpenUrlErrorReason,
 } from "../models/xcode-simulator/xcode-simulator-open-url-error.model";
 import { XcodeSimulatorStateFilter } from "../models/xcode-simulator/xcode-simulator-state-filter.model";
-import { XcodeSimulatorApplication } from "../models/xcode-simulator/xcode-simulator-application.model";
 
 /**
  * XcodeSimulatorService

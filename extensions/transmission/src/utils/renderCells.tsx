@@ -5,7 +5,7 @@ import { environment } from "@raycast/api";
 import { darken, mix } from "polished";
 
 const colors =
-  environment.theme === "light"
+  environment.appearance === "light"
     ? {
         gray: "#C8CAC9",
         accent: "#007DD7",
@@ -115,13 +115,13 @@ export async function renderPieces({
           colIndex={colIndex}
           rowIndex={rowIndex}
         />
-      ))
+      )),
     )
     .flat();
 
   return renderToString(
     <svg viewBox={`0 0 ${width} ${width}`} xmlns="http://www.w3.org/2000/svg">
       {cellsMarkup}
-    </svg>
+    </svg>,
   );
 }

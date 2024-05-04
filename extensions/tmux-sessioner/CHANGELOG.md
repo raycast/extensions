@@ -1,4 +1,13 @@
 # Tmux Sessioner Changelog
+## [v0.0.5] - 2024-04-14
+### Updated
+- In manage tmux windows, support filter by both window name and session name.
+- Better UI in manage tmux windows. Use accessories to show session name on the right side of list item.
+- Audit fix some package vulnerabilities.
+
+## [v0.0.4] - 2024-01-19
+### Fixed
+- `Change Default Terminal` will be launched automatically when there isn't one selected.
 
 ## [v0.0.3] - 2023-09-05
 ### Fixed

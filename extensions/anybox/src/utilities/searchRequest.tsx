@@ -52,16 +52,8 @@ export interface Link {
   hasLinkImage: boolean;
 }
 
-export interface Preferences {
-  api_key: string;
-  searchTags: boolean;
-  searchFolders: boolean;
-  asIcons: boolean;
-  preferLinkIcons: boolean;
-}
-
 export default async function searchRequest(query: SearchQuery): Promise<[Link]> {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Search>();
   // @ts-expect-error: Don’t know how to satify URLSearchParams’s type.
   const searchParams = new URLSearchParams(query);
   return fetch("http://127.0.0.1:6391/search?" + searchParams, {

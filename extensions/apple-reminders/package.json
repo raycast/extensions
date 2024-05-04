@@ -7,7 +7,9 @@
   "author": "thomaslombart",
   "contributors": [
     "tm.wrnr",
-    "ir4n"
+    "ir4n",
+    "jondelgado",
+    "phil_s"
   ],
   "owner": "raycast",
   "access": "public",
@@ -60,22 +62,26 @@
       "mode": "menu-bar",
       "preferences": [
         {
-          "name": "displayMenuBarCount",
-          "type": "checkbox",
-          "title": "Display count",
-          "label": "Display menu bar count",
-          "description": "When enabled, the number of reminders in the menu bar will be displayed",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "hideMenuBarCountWhenEmpty",
-          "type": "checkbox",
-          "title": "Hide count when empty",
-          "label": "Hide menu bar count when empty",
-          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
-          "default": false,
-          "required": false
+          "name": "titleType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Nothing",
+              "value": "nothing"
+            },
+            {
+              "title": "Count",
+              "value": "count"
+            },
+            {
+              "title": "First Reminder",
+              "value": "firstReminder"
+            }
+          ],
+          "default": "count",
+          "required": false,
+          "title": "Title",
+          "description": "Choose what you want to see next to the menu bar icon."
         },
         {
           "name": "view",
@@ -97,7 +103,37 @@
           "default": "today",
           "required": false,
           "title": "View",
-          "description": "Indicates which view you want to see in your menu bar."
+          "description": "Choose which view you want to see in your menu bar."
+        },
+        {
+          "name": "countType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Count",
+          "description": "Choose which count you want to see in your menu bar."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
+          "type": "checkbox",
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
+          "required": false
         }
       ],
       "interval": "10m"
@@ -109,6 +145,14 @@
       "description": "Quickly add a reminder in Reminders.",
       "mode": "no-view",
       "preferences": [
+        {
+          "name": "dontUseAI",
+          "type": "checkbox",
+          "label": "Don't use the AI",
+          "description": "When enabled, the reminder is simply added to your default list with the input as the title.",
+          "default": false,
+          "required": false
+        },
         {
           "name": "shouldCloseMainWindow",
           "type": "checkbox",
@@ -133,25 +177,34 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Locations",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your saved locations.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1",
-    "date-fns": "^2.30.0",
+    "@date-fns/utc": "^1.2.0",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
+    "chrono-node": "^2.7.5",
+    "date-fns": "^3.6.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.201",
-    "@types/node": "^20.9.0",
-    "@types/react": "^18.2.37",
-    "eslint": "^8.53.0",
-    "eslint-plugin-import": "^2.29.0",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "^20.12.4",
+    "@types/react": "^18.2.74",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.1.0",
+    "prettier": "^3.2.5",
     "react": "^18.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",

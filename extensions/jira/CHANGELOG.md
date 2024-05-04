@@ -1,5 +1,31 @@
 # Jira Changelog
 
+## [Show target status on Change Status submenu] - 2024-04-30
+
+- Show target status next to the action name on Change Status submenu
+
+## [API token bug fixes] - 2024-04-22
+
+- Improved handling of invalid URLs in the jiraWithApiToken function
+- Changed to using hostname instead of full URL in jiraCredentials to avoid potential errors
+
+## [Add option to authenticate using API token] - 2023-03-27
+
+- Add option to authenticate using token for REST APIs
+- Add preferences for the same
+
+## [Improve Assignee and Sprint dropdowns] - 2024-03-14
+
+- Remove the default value in the Assignee and Sprint dropdowns when searching.
+
+## [Add OAuth utils] - 2024-02-13
+
+- Use new OAuth utils
+
+## [Add command to open issue from clipboard] - 2024-01-19
+
+- Add a new command to open issue by key from the clipboard.
+
 ## [Fix issue with JQL reserved keywords in project names] - 2023-12-18
 
 - Fix a bug causing queries to fail when project names included JQL reserved keywords.

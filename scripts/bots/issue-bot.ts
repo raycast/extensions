@@ -24,6 +24,8 @@ const oldMatchGithub =
 const closeIssueMatch = /@raycastbot close this issue/;
 const reopenIssueMatch = /@raycastbot reopen this issue/;
 const renameIssueMatch = /@raycastbot rename this issue to "(.+)"/;
+const assignMeMatch = /@raycastbot assign me/;
+const goodFirstIssueMatch = /@raycastbot good first issue/;
 
 export default async ({ github, context }: API) => {
   const sender = context.payload.sender.login;
@@ -130,6 +132,22 @@ export default async ({ github, context }: API) => {
           repo: context.repo.repo,
           title,
         });
+      } else if (assignMeMatch.test(context.payload.comment.body)) {
+        console.log(`assigning #${context.payload.issue.number} to ${context.payload.comment.user.login}`);
+        await github.rest.issues.addAssignees({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          assignees: [context.payload.comment.user.login],
+        });
+      } else if (goodFirstIssueMatch.test(context.payload.comment.body)) {
+        console.log(`Adding the "Good first issue" label to #${context.payload.issue.number}`);
+        await github.rest.issues.addLabels({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          labels: ["Good first issue"],
+        });
       } else {
         console.log(`didn't find the right comment`);
       }
@@ -157,6 +175,17 @@ export default async ({ github, context }: API) => {
     // ignore, it might not be there
   }
 
+  if (!owners.length) {
+    console.log("no maintainer for this extension");
+    await comment({
+      github,
+      context,
+      comment: `Thank you for opening this issue!
+
+Unfortunately it seems like nobody is maintaining this extension anymore. If you want to help, feel free to contribute to the extension :pray:`,
+    });
+  }
+
   const toNotify = owners.filter((x) => x !== sender);
 
   if (!toNotify.length) {
@@ -180,7 +209,9 @@ The author and contributors of \`${extension}\` can trigger bot actions by comme
 
 - \`@raycastbot close this issue\` Closes the issue.
 - \`@raycastbot rename this issue to "Awesome new title"\` Renames the issue.
-- \`@raycastbot reopen this issue\` Reopen the issue.
+- \`@raycastbot reopen this issue\` Reopens the issue.
+- \`@raycastbot assign me\` Assigns yourself to the issue.
+- \`@raycastbot good first issue\` Adds the "Good first issue" label to the issue.
 
 </details>`,
   });
@@ -189,11 +220,14 @@ The author and contributors of \`${extension}\` can trigger bot actions by comme
 async function getCodeOwners({ github, context }: Pick<API, "github" | "context">) {
   const codeowners = await getGitHubFile(".github/CODEOWNERS", { github, context });
 
-  const regex = /(\/extensions\/[\w-]+) +(.+)/g;
+  const regex = /(\/extensions\/[\w-]+) +(.*)/g;
   const matches = codeowners.matchAll(regex);
 
   return Array.from(matches).reduce<{ [key: string]: string[] }>((prev, match) => {
-    prev[match[1]] = match[2].split(" ").map((x) => x.replace(/^@/, ""));
+    prev[match[1]] = match[2]
+      .split(" ")
+      .map((x) => x.replace(/^@/, ""))
+      .filter((x) => !!x);
     return prev;
   }, {});
 }

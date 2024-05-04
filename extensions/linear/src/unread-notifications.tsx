@@ -12,7 +12,7 @@ import {
 import { NotificationResult } from "./api/getNotifications";
 import { updateNotification } from "./api/updateNotification";
 import View from "./components/View";
-import { getNotificationMenuBarIcon, getNotificationMenuBarTitle, getNotificationTitle } from "./helpers/notifications";
+import { getNotificationMenuBarTitle, getNotificationTitle, getNotificationURL } from "./helpers/notifications";
 import { getUserIcon } from "./helpers/users";
 import useNotifications from "./hooks/useNotifications";
 
@@ -39,7 +39,8 @@ function UnreadNotifications() {
   async function openNotification(notification: NotificationResult) {
     const applications = await getApplications();
     const linearApp = applications.find((app) => app.bundleId === "com.linear");
-    notification.issue ? await open(notification.issue.url, linearApp) : await openInbox();
+    const url = getNotificationURL(notification);
+    url ? await open(url, linearApp) : await openInbox();
     await markNotificationAsRead(notification);
   }
 
@@ -61,13 +62,13 @@ function UnreadNotifications() {
   return (
     <MenuBarExtra
       title={getNotificationMenuBarTitle(unreadNotifications)}
-      icon={getNotificationMenuBarIcon(unreadNotifications)}
+      icon={{ source: { dark: "dark/linear.svg", light: "light/linear.svg" } }}
       isLoading={isLoadingNotifications}
     >
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Open Inbox"
-          icon="linear.png"
+          icon="linear-app-icon.png"
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={openInbox}
         />
@@ -83,7 +84,7 @@ function UnreadNotifications() {
             notification.actor ? notification.actor.displayName : "Linear"
           }`;
 
-          const icon = notification.actor ? getUserIcon(notification.actor) : "linear.png";
+          const icon = notification.actor ? getUserIcon(notification.actor) : "linear-app-icon.png";
           const subtitle = notification.issue?.title ? truncate(notification.issue.title, 20) : "";
           const tooltip = `${notification.issue?.identifier}: ${notification.issue?.title}`;
 

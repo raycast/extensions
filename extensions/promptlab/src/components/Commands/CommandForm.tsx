@@ -11,14 +11,14 @@ import {
 } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useModels } from "../../hooks/useModels";
+import { ExtensionPreferences } from "../../lib/preferences/types";
+import { Command } from "../../lib/commands/types";
 import {
   BooleanConfigField,
-  Command,
   CommandConfig,
-  ExtensionPreferences,
   NumberConfigField,
   StringConfigField,
-} from "../../utils/types";
+} from "../../lib/commands/config/types";
 import { Fragment, useEffect, useState } from "react";
 import * as crypto from "crypto";
 import { useRef } from "react";
@@ -27,14 +27,15 @@ import {
   OpenAdvancedSettingsAction,
   OpenPlaceholdersGuideAction,
 } from "../actions/OpenFileActions";
-import { updateCommand } from "../../utils/command-utils";
+import { updateCommand } from "../../lib/commands";
 import * as fs from "fs";
 import path from "path";
-import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../utils/constants";
+import { ADVANCED_SETTINGS_FILENAME, COMMAND_CATEGORIES } from "../../lib/common/constants";
 import { useAdvancedSettings } from "../../hooks/useAdvancedSettings";
-import { isActionEnabled } from "../../utils/action-utils";
+import { isActionEnabled } from "../../lib/actions";
+import { loadCustomPlaceholders } from "../../lib/placeholders/utils";
+import { PromptLabPlaceholders } from "../../lib/placeholders";
 import { PLChecker } from "placeholders-toolkit";
-import { PromptLabPlaceholders, loadCustomPlaceholders } from "../../lib/placeholders";
 
 interface CommandFormValues {
   name: string;
@@ -68,6 +69,7 @@ interface CommandFormValues {
   useSpeech?: boolean;
   speakResponse?: boolean;
   showInMenuBar?: boolean;
+  recordRuns?: boolean;
 }
 
 const defaultPromptInfo =
@@ -75,7 +77,7 @@ const defaultPromptInfo =
 
 export default function CommandForm(props: {
   oldData?: Command;
-  setCommands?: React.Dispatch<React.SetStateAction<Command[]>>;
+  setCommands?: (commands: Command[]) => void;
   duplicate?: boolean;
 }) {
   const { oldData, setCommands, duplicate } = props;
@@ -161,6 +163,7 @@ export default function CommandForm(props: {
       useSpeech: false,
       speakResponse: false,
       showInMenuBar: true,
+      recordRuns: true,
     };
   };
 
@@ -185,7 +188,10 @@ export default function CommandForm(props: {
           });
           setPromptInfo(newPromptInfo);
 
-          PLChecker.checkForPlaceholders(oldData.actionScript || "").then((includedPlaceholders) => {
+          PLChecker.checkForPlaceholders(oldData.actionScript || "", {
+            customPlaceholders,
+            defaultPlaceholders: PromptLabPlaceholders,
+          }).then((includedPlaceholders) => {
             let newScriptInfo = includedPlaceholders.length > 0 ? "Detected Placeholders:" : "";
             includedPlaceholders.forEach((placeholder) => {
               newScriptInfo =
@@ -343,11 +349,11 @@ export default function CommandForm(props: {
         outputKind: values.outputKind,
         actionScript: values.actionScript,
         showResponse: values.showResponse,
-        description: values.description,
+        description: values.description || "",
         useSaliencyAnalysis: values.useSaliencyAnalysis,
         author: values.author,
         website: values.website,
-        version: values.version,
+        version: values.version || "1.0.0",
         requirements: values.requirements,
         scriptKind: values.scriptKind,
         categories: values.categories,
@@ -359,6 +365,9 @@ export default function CommandForm(props: {
         showInMenuBar: values.showInMenuBar,
         favorited: values.favorited,
         model: values.model,
+        timesExecuted: oldData ? oldData.timesExecuted : 0,
+        recordRuns: values.recordRuns,
+        runs: oldData ? oldData.runs : [],
       };
 
       if (setupFields.length > 0) {
@@ -473,6 +482,7 @@ export default function CommandForm(props: {
 
   return (
     <Form
+      navigationTitle={oldData && !duplicate ? `Edit Command '${oldData.name}'` : "New PromptLab Command"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -802,6 +812,13 @@ export default function CommandForm(props: {
         label="Favorite"
         {...itemProps.favorited}
         info="Mark this command as a favorite. Favorited commands will appear at the top of the command list."
+        onFocus={() => setShowAddPlaceholderAction(false)}
+      />
+
+      <Form.Checkbox
+        label="Record Runs"
+        {...itemProps.recordRuns}
+        info="If checked, the command will record each time it is run, including the fully substituted prompt and the response. You can then use this information using the {{lastRun}} placeholder."
         onFocus={() => setShowAddPlaceholderAction(false)}
       />
 

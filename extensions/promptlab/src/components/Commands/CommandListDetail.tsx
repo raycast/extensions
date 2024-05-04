@@ -1,14 +1,7 @@
 import { List } from "@raycast/api";
-import {
-  Command,
-  StoreCommand,
-  isCommand,
-  NumberConfigField,
-  BooleanConfigField,
-  StringConfigField,
-  isStoreCommand,
-  isTrueStr,
-} from "../../utils/types";
+import { isTrueStr } from "../../lib/common/types";
+import { Command, StoreCommand, isCommand, isStoreCommand } from "../../lib/commands/types";
+import { NumberConfigField, BooleanConfigField, StringConfigField } from "../../lib/commands/config/types";
 
 export default function CommandListDetail(props: { command: Command | StoreCommand }) {
   const { command } = props;
@@ -94,10 +87,11 @@ ${
         command.minNumFiles == "0"
           ? "N/A"
           : command.acceptedFileExtensions?.length && command.acceptedFileExtensions !== "None"
-            ? command.acceptedFileExtensions
-            : "Any"
+          ? command.acceptedFileExtensions
+          : "Any"
       } |
 | Creativity | ${command.temperature == undefined || command.temperature == "" ? "1.0" : command.temperature} |
+| Record Runs? | ${isTrueStr(command.recordRuns) ? "Yes" : "No"} |
 | Use File Metadata? | ${isTrueStr(command.useMetadata) ? "Yes" : "No"} |
 | Use Sound Classification? | ${isTrueStr(command.useSoundClassification) ? "Yes" : "No"} |
 | Use Subject Classification? | ${isTrueStr(command.useSubjectClassification) ? "Yes" : "No"} |

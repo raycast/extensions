@@ -1,5 +1,8 @@
 # shell Changelog
 
+## [Fix] 2024-04-26
+Fix an issue where iTerm opens two windows instead of one when iTerm was not already running.
+
 ## [Fixes] 2023-01-02
 Fix an issue when the use Terminal/iTerm option is turned-on and command run with argument by moving execution logic to useEffect.
 

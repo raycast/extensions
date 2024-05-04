@@ -16,11 +16,11 @@ import {
   updateIssue,
   updateIssueAssignee,
 } from "../api/issues";
+import { getJiraCredentials } from "../api/jiraCredentials";
 import { autocompleteUsers, User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { slugify } from "../helpers/string";
-import { getJiraCredentials } from "../helpers/withJiraCredentials";
 
 import CreateIssueForm from "./CreateIssueForm";
 import IssueAttachments from "./IssueAttachments";
@@ -455,6 +455,16 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
     }
   }
 
+  function formattedTitle(transition: Transition): string {
+    if (!transition.name) {
+      return "Unknown status name";
+    }
+    if (!transition.to.name) {
+      return transition.name;
+    }
+    return `${transition.name} -> ${transition.to.name}`;
+  }
+
   return (
     <ActionPanel.Submenu
       title="Change Status"
@@ -473,7 +483,7 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
           return (
             <Action
               key={transition.id}
-              title={transition.name ?? "Unknown status name"}
+              title={formattedTitle(transition)}
               onAction={() => changeTransition(transition)}
             />
           );

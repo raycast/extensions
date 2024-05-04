@@ -30,21 +30,23 @@
         "search",
         "icons",
         "icon",
-        "ui"
+        "ui",
+        "myna",
+        "mynaui"
       ]
     }
   ],
   "dependencies": {
-    "@mynaui/icons": "0.0.38",
-    "@raycast/api": "^1.60.1"
+    "@mynaui/icons": "0.2.2",
+    "@raycast/api": "^1.70.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.33",
-    "eslint": "^8.52.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "20.11.30",
+    "@types/react": "18.2.67",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",

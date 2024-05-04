@@ -1,5 +1,5 @@
 import { Action } from "@raycast/api";
-import { getNormalizedParameter } from "../utils/normalize";
+import { normalizeURL } from "@utils/normalizeUrl";
 
 interface Props {
   publisher: string;
@@ -8,7 +8,5 @@ interface Props {
 }
 
 export function OpenPublisherStore({ publisher, title, storeUrl }: Props) {
-  return (
-    <Action.OpenInBrowser title={publisher} url={storeUrl.replace("{param}", getNormalizedParameter(title, "+"))} />
-  );
+  return <Action.OpenInBrowser title={publisher} url={storeUrl.replace("{param}", normalizeURL(title, "+"))} />;
 }

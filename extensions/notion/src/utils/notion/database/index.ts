@@ -1,32 +1,33 @@
+import { Client } from "@notionhq/client";
 import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
 import { supportedPropTypes } from "..";
-import { authorize, notion } from "../authorize";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
+import { getNotionClient } from "../oauth";
 
 import { formatDatabaseProperty } from "./property";
 import { DatabaseProperty, DatabasePropertyOption } from "./property";
 
 export type { DatabaseProperty, DatabasePropertyOption };
 
-export async function fetchDatabase(pageId: string) {
+export async function fetchDatabase(pageId: string, silent: boolean = true) {
   try {
-    await authorize();
+    const notion = getNotionClient();
     const page = await notion.databases.retrieve({
       database_id: pageId,
     });
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to fetch database", undefined);
+    if (!silent) return handleError(err, "Failed to fetch database", undefined);
   }
 }
 
 export async function fetchDatabases() {
   try {
-    await authorize();
+    const notion = getNotionClient();
     const databases = await notion.search({
       sort: {
         direction: "descending",
@@ -55,7 +56,7 @@ export async function fetchDatabases() {
 
 export async function fetchDatabaseProperties(databaseId: string) {
   try {
-    await authorize();
+    const notion = getNotionClient();
     const database = await notion.databases.retrieve({ database_id: databaseId });
     const propertyNames = Object.keys(database.properties).reverse();
 
@@ -114,7 +115,7 @@ export async function queryDatabase(
   sort: "last_edited_time" | "created_time" = "last_edited_time",
 ) {
   try {
-    await authorize();
+    const notion = getNotionClient();
     const database = await notion.databases.query({
       database_id: databaseId,
       page_size: 20,
@@ -144,12 +145,12 @@ export async function queryDatabase(
   }
 }
 
-type CreateRequest = Parameters<typeof notion.pages.create>[0];
+type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
 // Create database page
 export async function createDatabasePage(values: Form.Values) {
   try {
-    await authorize();
+    const notion = getNotionClient();
     const { database, content, ...props } = values;
 
     const arg: CreateRequest = {
@@ -178,13 +179,13 @@ export async function createDatabasePage(values: Form.Values) {
 
     return pageMapper(page);
   } catch (err) {
-    return handleError(err, "Failed to create page", undefined);
+    throw new Error("Failed to create page", { cause: err });
   }
 }
 
 export async function deleteDatabase(databaseId: string) {
   try {
-    await authorize();
+    const notion = getNotionClient();
 
     await showToast({
       style: Toast.Style.Animated,
@@ -204,6 +205,7 @@ export async function deleteDatabase(databaseId: string) {
     return handleError(err, "Failed to delete database", undefined);
   }
 }
+
 export interface Database {
   id: string;
   last_edited_time: number;

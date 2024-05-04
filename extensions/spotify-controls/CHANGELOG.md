@@ -1,5 +1,9 @@
 # Spotify Controls Changelog
 
+## [Enhancement] - 2024-04-19
+
+Show current track in HUD instead of alert.
+
 ## [Fix] - 2023-08-02
 
 - Added better error handling by making sure that Spotify is installed for the majority of the Spotify Controls commands. If not installed, a HUD is shown.

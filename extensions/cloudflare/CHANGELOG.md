@@ -1,5 +1,22 @@
 # Changelog
 
+## [Add copy actions] - 2024-02-28
+
+- Added copy actions in View Pages and View Sites commands. Fixed shortcuts of some actions.
+
+## [Update reserved shortcuts] - 2024-02-23
+
+- Updated `View Sites > Purge Files from Cache by URL` shortcut
+- Updated `View Pages > Open Page` shortcut
+
+## [Add token generation link] - 2024-02-15
+
+- Added link in README to streamline onboarding
+
+## [Bug Fix] - 2023-12-21
+
+- Fixed an issue where Pages without a source would break the View Pages command.
+
 ## [Change auth to API tokens] - 2022-08-22
 
 - Change the authentication method to use API tokens instead of legacy API keys. This will require you to create and use a new token for this extension.

@@ -5,9 +5,8 @@
   "description": "Quick Tmux Session Switcher",
   "icon": "command-icon.png",
   "author": "louishuyng",
-  "categories": [
-    "Developer Tools"
-  ],
+  "contributors": ["sxn"],
+  "categories": ["Developer Tools"],
   "license": "MIT",
   "commands": [
     {
@@ -36,15 +35,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.2",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "prettier": "^2.8.8",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

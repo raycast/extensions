@@ -41,7 +41,13 @@ export function createConvertToFieldFunc(
       case "formula":
         return null;
       default:
-        return <Form.TextField placeholder={placeholder} {...itemPropsFor<typeof property.type>(property)} />;
+        return (
+          <Form.TextField
+            info="Supports a single line of inline Markdown"
+            placeholder={placeholder}
+            {...itemPropsFor<typeof property.type>(property)}
+          />
+        );
     }
   };
 }
@@ -72,11 +78,11 @@ export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
     [k: string]: T extends "date"
       ? Date | null
       : T extends "checkbox"
-      ? boolean
-      : T extends "multi_select" | "relation" | "people"
-      ? string[]
-      : T extends "formula"
-      ? null
-      : string;
+        ? boolean
+        : T extends "multi_select" | "relation" | "people"
+          ? string[]
+          : T extends "formula"
+            ? null
+            : string;
   }>
 >["itemProps"][string];

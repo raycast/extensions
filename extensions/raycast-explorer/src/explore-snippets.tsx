@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchProps, List, environment, getPreferenceValues } from "@raycast/api";
 import { useMemo, useState } from "react";
 import removeMarkdown from "remove-markdown";
 

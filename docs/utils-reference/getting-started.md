@@ -16,6 +16,73 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.14.0
+
+- Add `useStreamJSON` hook.
+
+### v1.13.6
+
+- Updated `useFetch`'s `mapResult` type to allow returning `cursor` in addition to `data` and `hasMore`.
+
+### v1.13.5
+
+- Extended `PaginationOptions` with `cursor`.
+
+### v1.13.4
+
+- Fixed non-paginated version of `useFetch` not being re-run when `url` changes.
+
+### v1.13.3
+
+- Fixed `optimisticUpdate` not working when paginating beyond the first page when using `useCachedPromise` or other hooks that build on top of it..
+- Fixed `useFetch` type requiring `mapResult` for non-paginated overload.
+
+### v1.13.2
+
+- Added default OAuth URLs for Google, Jira, and Zoom
+
+### v1.13.1
+
+- Fixed `useFetch` type for non-paginated overload.
+
+### v1.13.0
+
+- Added pagination support to `usePromise`, `useCachedPromise` and `useFetch`.
+
+### v1.12.5
+
+- Add string array support for OAuth scope (Thanks @tonka3000!).
+
+### v1.12.4
+
+- Add `tokenResponseParser` and `tokenRefreshResponseParser` in the options of `OAuthService`.
+- Fix built-in Slack OAuthServices.
+
+### v1.12.3
+
+- Fixed bodyEncoding for some built-in OAuthServices.
+
+### v1.12.2
+
+- Fixed types for `OAuthService.slack`.
+
+### v1.12.1
+
+- Fixed the refresh flow of `OAuthService` that would return outdated tokens.
+
+### v1.12.0
+
+- Removed some default OAuth clientIDs that could not work with generic scopes.
+- Fixed `withAccessToken` when used in no-view commands.
+
+### v1.11.1
+
+- Fixed Google OAuth configuration.
+
+### v1.11.0
+
+- Added the [OAuth utils](./oauth/README.md).
+
 ### v1.10.1
 
 - Fix an issue where the values passed to the `reset` function of the `useForm` hook wouldn't be respected.

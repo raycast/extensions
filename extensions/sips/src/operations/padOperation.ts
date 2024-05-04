@@ -44,8 +44,7 @@ export default async function pad(sourcePaths: string[], padding: number, color:
           imagePath
         )
       );
-    }
-    if (imagePath.toLowerCase().endsWith(".svg")) {
+    } else if (imagePath.toLowerCase().endsWith(".svg")) {
       // Convert to PNG, apply padding, then restore to SVG
       resultPaths.push(
         await execSIPSCommandOnSVG(

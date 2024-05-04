@@ -1,5 +1,10 @@
 # Bing Wallpaper Changelog
 
+## [Fix error] - 2024-02-05
+
+- Fix network request errors
+- Optimize wallpaper information display
+
 ## [Update grid layout] - 2022-10-15
 
 - Update grid layout

@@ -72,10 +72,17 @@
       "mode": "view"
     },
     {
-      "name": "project_search",
-      "title": "Search Project",
+      "name": "group_search",
+      "title": "Search Groups",
       "subtitle": "GitLab",
-      "description": "Search GitLab Project",
+      "description": "Search GitLab Groups",
+      "mode": "view"
+    },
+    {
+      "name": "project_search",
+      "title": "Search Projects",
+      "subtitle": "GitLab",
+      "description": "Search GitLab Projects",
       "mode": "view"
     },
     {
@@ -355,7 +362,8 @@
     "shaoye",
     "charlej",
     "emlez",
-    "hendrikbunnick"
+    "hendrikbunnick",
+    "romanschmid"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

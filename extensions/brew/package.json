@@ -7,7 +7,9 @@
   "contributors": [
     "Aayush9029",
     "mathieudutour",
-    "urwrstkn8mare"
+    "urwrstkn8mare",
+    "ashokbaruaakas",
+    "millerapps"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -39,6 +41,24 @@
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
       "mode": "no-view"
+    },
+    {
+      "name": "clean-up",
+      "title": "Clean Up",
+      "subtitle": "Brew",
+      "description": "Clean files and packages from the cache that are older than 120 days",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "withoutThreshold",
+          "title": "Clean Up",
+          "type": "checkbox",
+          "default": false,
+          "required": false,
+          "label": "Include --prune=all when cleaning",
+          "description": "Include --prune=all when cleaning files & packages from cache.\nThis option bypasses the 120 days threshold."
+        }
+      ]
     }
   ],
   "preferences": [
@@ -62,6 +82,10 @@
         {
           "title": "iTerm",
           "value": "iterm"
+        },
+        {
+          "title": "Warp",
+          "value": "warp"
         }
       ],
       "description": "The terminal application/emulator to use when using any Run in Terminal action."
@@ -82,11 +106,20 @@
       "title": "Uninstall",
       "label": "Remove all files associated with a cask.",
       "description": "Run cask uninstall with the --zap option for a more complete uninstallation of files associated with cask.\nWARNING: This may remove files shared with other applications."
+    },
+    {
+      "name": "quarantine",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Quarantine",
+      "label": "Enable quarantine of downloads",
+      "description": "Enable or disable quarantine of files downloaded by brew"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.3",
-    "@raycast/utils": "^1.4.11",
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.13.4",
     "@types/stream-json": "^1.7.2",
     "node-fetch": "^2.6.7",
     "run-applescript": "^6.0.0",
@@ -95,10 +128,11 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^16.11.26",
+    "@types/node": "^20.8.10",
     "@types/node-fetch": "^2.6.1",
-    "@types/react": "^17.0.40",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
+    "react": "^18.2.0",
     "typescript": "^4.6.2"
   },
   "scripts": {

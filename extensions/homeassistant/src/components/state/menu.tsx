@@ -1,10 +1,10 @@
 import { State } from "@lib/haapi";
-import { ensureShort, getFriendlyName } from "@lib/utils";
+import { ensureShort, getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MediaPlayerMenubarItem } from "@components/mediaplayer/menu";
 import { CoverMenubarItem } from "@components/cover/menu";
 import { PersonMenubarItem } from "@components/person/menu";
 import { SwitchMenubarItem } from "@components/switch/menu";
-import { CopyToClipboardMenubarItem, MenuBarSubmenu } from "@components/menu";
+import { CopyToClipboardMenubarItem, MenuBarItemConfigureCommand, MenuBarSubmenu } from "@components/menu";
 import { LightMenubarItem } from "@components/light/menu";
 import { WeatherMenubarItem } from "@components/weather/menu";
 import { CameraMenubarItem } from "@components/camera/menu";
@@ -18,6 +18,8 @@ import { VacuumMenubarItem } from "@components/vacuum/menu";
 import { getStateValue, getIcon } from "./utils";
 import { InputButtonMenubarItem } from "@components/input_button/menu";
 import { AutomationMenubarItem } from "@components/automation/menu";
+import { Icon, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { useHAStates } from "@components/hooks";
 
 export function CopyEntityIDToClipboard(props: { state: State }) {
   const s = props.state;
@@ -94,4 +96,44 @@ export function StateMenubarItem(props: { state: State }): JSX.Element | null {
       <CopyEntityStateToClipboardMenubarItem state={s} />
     </MenuBarSubmenu>
   );
+}
+
+export function MenuBarExtraEntity(props: { state: State | undefined; isLoading?: boolean | undefined }) {
+  const s = props.state;
+  const stateValue = (state: State | undefined) => {
+    if (!state) {
+      return undefined;
+    }
+    const e = state.entity_id;
+    if (e.startsWith("sensor.")) {
+      return getStateValue(state);
+    }
+    return undefined;
+  };
+  return (
+    <MenuBarExtra
+      title={stateValue(s)}
+      icon={s ? getIcon(s) : "entity.png"}
+      tooltip={s ? getFriendlyName(s) : undefined}
+      isLoading={props.isLoading}
+    >
+      <MenuBarItemConfigureCommand />
+    </MenuBarExtra>
+  );
+}
+
+function getEntityIDfromPreferences() {
+  const prefs = getPreferenceValues();
+  const result = prefs.entity as string | undefined;
+  return result ?? "";
+}
+
+export default function SingleEntityMenuBarExtra() {
+  const { states, error, isLoading } = useHAStates();
+  if (error) {
+    return <MenuBarExtra title="?" icon={Icon.Warning} tooltip={getErrorMessage(error)} />;
+  }
+  const entityID = getEntityIDfromPreferences();
+  const entity = states?.find((state) => state.entity_id === entityID);
+  return <MenuBarExtraEntity state={entity} isLoading={isLoading} />;
 }

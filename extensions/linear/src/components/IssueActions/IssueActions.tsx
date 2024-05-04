@@ -6,8 +6,7 @@ import { format } from "date-fns";
 
 import { IssueResult, IssueDetailResult, Attachment } from "../../api/getIssues";
 
-import { getLinearClient } from "../../helpers/withLinearClient";
-import { isLinearInstalled } from "../../helpers/isLinearInstalled";
+import { getLinearClient } from "../../api/linearClient";
 
 import { getEstimateScale } from "../../helpers/estimates";
 import { getErrorMessage } from "../../helpers/errors";
@@ -27,6 +26,7 @@ import IssueCommentForm from "../IssueCommentForm";
 import IssueAttachments from "../IssueAttachments";
 import CreateSubIssues from "../CreateSubIssues";
 import MilestoneSubmenu from "./MilestoneSubmenu";
+import OpenInLinear from "../OpenInLinear";
 
 type IssueActionsProps = {
   issue: IssueResult;
@@ -362,11 +362,7 @@ export default function IssueActions({
 
   return (
     <>
-      {isLinearInstalled ? (
-        <Action.Open title="Open Issue in Linear" icon="linear.png" target={issue.url} application="Linear" />
-      ) : (
-        <Action.OpenInBrowser url={issue.url} title="Open Issue in Browser" />
-      )}
+      <OpenInLinear title="Open Issue" url={issue.url} />
 
       <ActionPanel.Section>
         <Action.Push

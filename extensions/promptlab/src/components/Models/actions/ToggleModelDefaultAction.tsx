@@ -1,7 +1,8 @@
 import { Action, Icon } from "@raycast/api";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { Model, ModelManager } from "../../../utils/types";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { Model, ModelManager } from "../../../lib/models/types";
+import { getActionShortcut, isActionEnabled } from "../../../lib/actions";
+import { updateModel } from "../../../lib/models";
 
 /**
  * Action to toggle a model's default status.
@@ -27,10 +28,10 @@ export default function ToggleModelDefaultAction(props: {
       icon={model.isDefault ? Icon.XMarkCircle : Icon.CheckCircle}
       shortcut={getActionShortcut("ToggleModelDefaultAction", settings)}
       onAction={async () => {
-        await models.updateModel(model, { ...model, isDefault: !model.isDefault });
+        await updateModel(model, { ...model, isDefault: !model.isDefault });
         for (const otherModel of models.models) {
           if (otherModel.id != model.id) {
-            await models.updateModel(otherModel, { ...otherModel, isDefault: false });
+            await updateModel(otherModel, { ...otherModel, isDefault: false });
           }
         }
         await models.revalidate();

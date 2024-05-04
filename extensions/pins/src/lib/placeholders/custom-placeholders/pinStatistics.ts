@@ -1,7 +1,7 @@
 import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
 import { Pin, getPinStatistics, sortPins } from "../../Pins";
 import { SORT_STRATEGY, StorageKey } from "../../constants";
-import { getStorage } from "../../utils";
+import { getStorage } from "../../storage";
 import { Group } from "../../Groups";
 
 /**

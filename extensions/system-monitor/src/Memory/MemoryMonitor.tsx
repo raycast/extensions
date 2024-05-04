@@ -1,5 +1,5 @@
-import { List } from "@raycast/api";
-import { getFreeDiskSpace, getTopRamProcess, getTotalDiskSpace, getMemoryUsage } from "./MemoryUtils";
+import { Icon, List } from "@raycast/api";
+import { getTopRamProcess, getMemoryUsage } from "./MemoryUtils";
 import { useInterval } from "usehooks-ts";
 import { Actions } from "../components/Actions";
 import { usePromise } from "@raycast/utils";
@@ -24,8 +24,9 @@ export default function MemoryMonitor() {
     <>
       <List.Item
         id="memory"
-        title="📝  Memory"
-        accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage}% (~ ${data.freeMem} GB)` }]}
+        title="Memory"
+        icon={Icon.MemoryChip}
+        accessories={[{ text: !data ? "Loading…" : `${data.freeMemPercentage} % (~ ${data.freeMem} GB)` }]}
         detail={
           <MemoryMonitorDetail
             freeMem={data?.freeMem || ""}
@@ -48,25 +49,19 @@ function MemoryMonitorDetail({
   freeMem: string;
   totalMem: string;
 }) {
-  const { data: totalDisk, isLoading: isLoadingTotalDisk } = usePromise(getTotalDiskSpace);
   const {
     data: topProcess,
     isLoading: isLoadingTopProcess,
     revalidate: revalidateTopProcess,
   } = usePromise(getTopRamProcess);
-  useInterval(revalidateTopProcess, 5000);
 
-  const { data: freeDisk, isLoading: isLoadingFreeDisk, revalidate: revalidateFreeDisk } = usePromise(getFreeDiskSpace);
-  useInterval(revalidateFreeDisk, 1000 * 60);
+  useInterval(revalidateTopProcess, 5000);
 
   return (
     <List.Item.Detail
-      isLoading={isLoadingTotalDisk || isLoadingTopProcess || isLoadingFreeDisk}
+      isLoading={isLoadingTopProcess}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Total Disk Space" text={totalDisk} />
-          <List.Item.Detail.Metadata.Label title="Free Disk Space" text={freeDisk} />
-          <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Total RAM" text={`${totalMem} GB`} />
           <List.Item.Detail.Metadata.Label title="Free RAM" text={`${freeMem} GB`} />
           <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${freeMemPercentage} %`} />
@@ -78,7 +73,7 @@ function MemoryMonitorDetail({
               return (
                 <List.Item.Detail.Metadata.Label
                   key={index}
-                  title={index + 1 + ".    " + element[0]}
+                  title={`${index + 1} -> ${element[0]}`}
                   text={element[1]}
                 />
               );

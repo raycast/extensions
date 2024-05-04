@@ -7,12 +7,16 @@
   "author": "jomifepe",
   "contributors": [
     "daniel-stoneuk",
-    "pomdtr",
     "andreaselia",
     "pernielsentikaer",
     "eth-p",
     "Yamen",
-    "undefinedzack"
+    "undefinedzack",
+    "anirudhganwal06",
+    "samuel_ivarsson"
+  ],
+  "pastContributors": [
+    "pomdtr"
   ],
   "license": "MIT",
   "keywords": [
@@ -163,6 +167,14 @@
       ]
     },
     {
+      "name": "create-folder",
+      "title": "Create Folder",
+      "subtitle": "Bitwarden",
+      "description": "Create a folder in the authenticated Bitwarden vault.",
+      "icon": "create-folder.png",
+      "mode": "view"
+    },
+    {
       "name": "lock-vault",
       "title": "Lock Vault",
       "subtitle": "Bitwarden",
@@ -181,6 +193,42 @@
         "log out",
         "account"
       ]
+    },
+    {
+      "name": "create-send",
+      "title": "Create Send",
+      "subtitle": "Bitwarden",
+      "description": "Securely share information directly with anyone.",
+      "icon": "create-send.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-sends",
+      "title": "Search Sends",
+      "subtitle": "Bitwarden",
+      "description": "List and search all the Sends owned by you.",
+      "icon": "search-sends.png",
+      "mode": "view"
+    },
+    {
+      "name": "receive-send",
+      "title": "Receive Send",
+      "subtitle": "Bitwarden",
+      "description": "Receive a send from a URL",
+      "arguments": [
+        { 
+          "type": "text",
+          "name": "url",
+          "placeholder": "url"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "placeholder": "password"
+        }
+      ],
+      "icon": "receive-send.png",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -245,6 +293,14 @@
           "value": "86400000"
         },
         {
+          "title": "On system lock (experimental)",
+          "value": "-2"
+        },
+        {
+          "title": "On system sleep (experimental)",
+          "value": "-3"
+        },
+        {
           "title": "Never",
           "value": "-1"
         }
@@ -263,9 +319,9 @@
       "name": "cliPath",
       "type": "textfield",
       "required": false,
-      "title": "Bitwarden CLI Installation Path",
-      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1.",
-      "placeholder": "CLI Installation Path"
+      "title": "Bitwarden CLI Path",
+      "description": "If you wish to use your own CLI, type here the location of your local installation. The typical location of it is '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1/Apple Silicon macs.",
+      "placeholder": "CLI Path"
     },
     {
       "name": "serverUrl",
@@ -308,17 +364,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.2",
-    "@raycast/utils": "^1.7.1",
-    "execa": "^7.0.0"
+    "@raycast/api": "^1.70.2",
+    "@raycast/utils": "^1.13.4",
+    "execa": "^7.0.0",
+    "node-fetch": "^3.3.2",
+    "node-stream-zip": "^1.15.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@types/jest": "^29.5.0",
     "@types/node": "~18.14.2",
     "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.59.8",
-    "@typescript-eslint/parser": "^5.59.8",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.16.0",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -329,7 +387,7 @@
     "react-devtools": "^4.27.2",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.1.3"
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,5 +1,13 @@
 # Amazon AWS Changelog
 
+## [S3 folders] - 2024-04-14
+
+- Added support for navigating S3 buckets using folders
+
+## [Step Functions command] - 2024-02-18
+
+- Added new command to find and open Step Functions ([#10801](https://github.com/raycast/extensions/pull/10801))
+
 ## [Make Vault Optional] - 2023-11-16
 
 - Make vault optional for people who have it installed but do not want to use it.

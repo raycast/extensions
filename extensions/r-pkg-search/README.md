@@ -31,7 +31,7 @@ View the package description, dependencies, and key stats within Raycast when yo
 | :-----------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 |       <kbd>↵</kbd>        | Opens the default link, configurable in the extension settings. All options are available in the actions menu: <ul><li>Homepage</li><li>CRAN</li><li>Source repository</li><li>Bug Reports</li><li>CRAN check results</li></ul> |
 | <kbd>⌘</kbd> <kbd>↵</kbd> | Opens the package page on [r-pkg.org](https://r-pkg.org)                                                                                                                                                                        |
-| <kbd>⌘</kbd> <kbd>→</kbd> | Opens the package description inside Raycast                                                                                                                                                                                    |
+| <kbd>←</kbd>/<kbd>→</kbd> | Move between package description and search results                                                                                                                                                                             |
 
 ### Copy package links
 

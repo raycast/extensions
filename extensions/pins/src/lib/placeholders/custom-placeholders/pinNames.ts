@@ -1,5 +1,5 @@
 import { Placeholder, PlaceholderCategory, PlaceholderType } from "placeholders-toolkit";
-import { getStorage } from "../../utils";
+import { getStorage } from "../../storage";
 import { Pin } from "../../Pins";
 import { StorageKey } from "../../constants";
 

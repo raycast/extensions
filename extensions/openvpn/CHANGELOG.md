@@ -1,8 +1,12 @@
 # OpenVPN Changelog
 
+## [Bug Fixes] - 2024-01-27
+
+Fixed a bug where OpenVPN would not start because of minimize flag. UI now shows up and a short delay was added to wait for the UI to be ready for AppleScript.
+
 ## [Bug Fixes] - 2023-12-27
 
-Fixed a bug where the extension would not work if Apple Script
+Improved error handling
 
 ## [Initial Version] - 2023-12-10
 

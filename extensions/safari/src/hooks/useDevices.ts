@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useExec, useSQL } from "@raycast/utils";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -36,7 +37,7 @@ const useRemoteTabs = () => {
     DATABASE_PATH,
     `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
          FROM cloud_tabs t
-         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`
+         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`,
   );
 };
 
@@ -49,31 +50,36 @@ const useDeviceName = () =>
 const useLocalTabs = () => useCachedPromise(fetchLocalTabs, [], { keepPreviousData: true });
 
 const useDevices = () => {
+  const preferences = getPreferenceValues();
   const { data: deviceName } = useDeviceName();
-  const remoteTabs = useRemoteTabs();
   const localTabs = useLocalTabs();
-
   const localDevice = {
     uuid: "local",
     name: `${deviceName} ★`,
     tabs: localTabs.data,
   };
+  const devices = [localDevice];
+  let permissionView;
 
-  const removeDevices = _.chain(remoteTabs.data)
-    .groupBy("device_uuid")
-    .transform((devices: Device[], tabs: RemoteTab[], device_uuid: string) => {
-      devices.push({
-        uuid: device_uuid,
-        name: tabs[0].device_name,
-        tabs,
-      });
-    }, [])
-    .reject(["name", deviceName])
-    .value();
+  if (preferences.areRemoteTabsUsed) {
+    const remoteTabs = useRemoteTabs();
+    const remoteDevices = _.chain(remoteTabs.data)
+      .groupBy("device_uuid")
+      .transform((devices: Device[], tabs: RemoteTab[], device_uuid: string) => {
+        devices.push({
+          uuid: device_uuid,
+          name: tabs[0].device_name,
+          tabs,
+        });
+      }, [])
+      .reject(["name", deviceName])
+      .value();
 
-  const devices = [localDevice, ...removeDevices];
+    devices.push(...remoteDevices);
+    permissionView = remoteTabs.permissionView;
+  }
 
-  return { devices, permissionView: remoteTabs.permissionView, refreshDevices: localTabs.revalidate };
+  return { devices, permissionView, refreshDevices: localTabs.revalidate };
 };
 
 export default useDevices;

@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, List, useNavigation } from "@raycast/api";
+import { ActionPanel, clearSearchBar, getPreferenceValues, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { PrimaryAction } from "./actions";
@@ -15,13 +15,20 @@ import { ChatView } from "./views/chat";
 import { ModelDropdown } from "./views/model/dropdown";
 import { QuestionForm } from "./views/question/form";
 
-export default function Ask(props: { conversation?: Conversation }) {
+export default function Ask(props: { conversation?: Conversation; initialQuestion?: string }) {
   const conversations = useConversations();
   const models = useModel();
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
   const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
-  const question = useQuestion({ initialQuestion: "", disableAutoLoad: props.conversation ? true : false });
+  const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
+
+  useEffect(() => {
+    // only work on `Summarize -> Ask` flow
+    if (props.initialQuestion) {
+      chats.ask(props.initialQuestion, props.conversation!.model);
+    }
+  }, []);
 
   const [conversation, setConversation] = useState<Conversation>(
     props.conversation ?? {
@@ -40,24 +47,36 @@ export default function Ask(props: { conversation?: Conversation }) {
     props.conversation ? props.conversation.model.id : "default"
   );
 
-  const [isAutoFullInput] = useState(() => {
+  const [{ isAutoFullInput, isAutoLoadText }] = useState(() => {
     return getPreferenceValues<{
       isAutoFullInput: boolean;
-    }>().isAutoFullInput;
+      isAutoLoadText: boolean;
+    }>();
   });
 
   const { push, pop } = useNavigation();
 
   useEffect(() => {
-    if (
-      isAutoFullInput &&
-      (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0))
-    ) {
+    if (props.initialQuestion || !isAutoFullInput) {
+      // `initialQuestion` only set from Summarize.tsx page
+      // `isAutoFullInput` is set from preferences
+      setLoading(false);
+      return;
+    }
+    // fix https://github.com/raycast/extensions/issues/11420
+    if (isAutoLoadText && question.data.length === 0) {
+      setLoading(false);
+      return;
+    }
+    if (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0)) {
+      const questionText = question.data;
+      clearSearchBar();
       push(
         <QuestionForm
-          initialQuestion={question.data}
+          initialQuestion={questionText}
           onSubmit={(question) => {
-            chats.ask(question, conversation.model), pop();
+            chats.ask(question, conversation.model);
+            pop();
           }}
           models={models.data}
           selectedModel={selectedModelId}
@@ -93,12 +112,13 @@ export default function Ask(props: { conversation?: Conversation }) {
 
   useEffect(() => {
     const selectedModel = models.data.find((x) => x.id === selectedModelId);
+    //console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
       ...conversation,
       model: selectedModel ?? { ...conversation.model },
       updated_at: new Date().toISOString(),
     });
-  }, [selectedModelId]);
+  }, [selectedModelId, models.data]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>
@@ -117,9 +137,9 @@ export default function Ask(props: { conversation?: Conversation }) {
   return (
     <List
       searchText={question.data}
-      isShowingDetail={chats.data.length > 0 ? true : false}
+      isShowingDetail={chats.data.length > 0}
       filtering={false}
-      isLoading={isLoading ? isLoading : question.isLoading ? question.isLoading : chats.isLoading}
+      isLoading={isLoading || question.isLoading || chats.isLoading || models.isLoading}
       onSearchTextChange={question.update}
       throttle={false}
       navigationTitle={"Ask"}
@@ -143,11 +163,8 @@ export default function Ask(props: { conversation?: Conversation }) {
       searchBarAccessory={
         <ModelDropdown models={models.data} onModelChange={setSelectedModelId} selectedModel={selectedModelId} />
       }
-      onSelectionChange={(id) => {
-        if (id !== chats.selectedChatId) {
-          chats.setSelectedChatId(id);
-        }
-      }}
+      // https://github.com/raycast/extensions/issues/10844
+      // `onSelectionChange` may cause race condition
       searchBarPlaceholder={chats.data.length > 0 ? "Ask another question..." : "Ask a question..."}
     >
       <ChatView

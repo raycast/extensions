@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Icon, LocalStorage, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { getCommandJSON } from "../../../utils/command-utils";
-import { Command, ExtensionPreferences, StoreCommand, isCommand } from "../../../utils/types";
+import { ExtensionPreferences } from "../../../lib/preferences/types";
+import { Command, StoreCommand, isCommand } from "../../../lib/commands/types";
 import path from "path";
 import * as fs from "fs";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { anyActionsEnabled, getActionShortcut, isActionEnabled } from "../../../lib/actions";
+import CopyJSONAction from "../../actions/CopyJSONAction";
+import CopyIDAction from "../../actions/CopyIDAction";
 
 /**
  * Action panel section for actions related to copying command data to the clipboard.
@@ -19,10 +21,10 @@ export const CopyCommandActionsSection = (props: {
   const { command, showTitle, settings } = props;
 
   if (
-    !isActionEnabled("CopyCommandPromptAction", settings) &&
-    !isActionEnabled("CopyCommandJSONAction", settings) &&
-    !isActionEnabled("CopyCommandIDAction", settings) &&
-    !isActionEnabled("ExportAllCommandsAction", settings)
+    !anyActionsEnabled(
+      ["CopyCommandPromptAction", "CopyJSONAction", "CopyIDAction", "ExportAllCommandsAction"],
+      settings,
+    )
   ) {
     return null;
   }
@@ -36,20 +38,8 @@ export const CopyCommandActionsSection = (props: {
           shortcut={getActionShortcut("CopyCommandPromptAction", settings)}
         />
       ) : null}
-      {isActionEnabled("CopyCommandJSONAction", settings) ? (
-        <Action.CopyToClipboard
-          title="Copy Command JSON"
-          content={getCommandJSON(command)}
-          shortcut={getActionShortcut("CopyCommandJSONAction", settings)}
-        />
-      ) : null}
-      {isCommand(command) && isActionEnabled("CopyCommandIDAction", settings) ? (
-        <Action.CopyToClipboard
-          title="Copy Command ID"
-          content={command.id}
-          shortcut={getActionShortcut("CopyCommandIDAction", settings)}
-        />
-      ) : null}
+      {isCommand(command) ? <CopyIDAction object={command} settings={settings} /> : null}
+      <CopyJSONAction object={command} settings={settings} />
       {isCommand(command) && isActionEnabled("ExportAllCommandsAction", settings) ? <ExportAllCommandsAction /> : null}
     </ActionPanel.Section>
   );

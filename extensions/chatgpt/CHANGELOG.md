@@ -1,5 +1,54 @@
 # Changelog
 
+## [Feature] - 2024-04-30
+
+- Feature: add `Summarize` command to summarize website and YouTube video
+- Refactor: model dropdown save model switch `localstorage` to `cache`
+
+## [Feature] - 2024-04-09
+
+- Feature: Support custom model name in `Models` (Enable in preferences)
+
+## [Fix] - 2024-03-22
+
+- Fix: `Auto-load Text` and `Use Full Text Input` not working properly
+- Fix: `Ask` `onSelectionChange` race condition
+
+## [Chore] - 2024-03-09
+
+- Chore: Retrieve `Preferences` dynamically directly from the generated type definition
+
+## [Feature] - 2024-02-21
+
+- Feature: Integrate awesome-chatgpt-prompts project
+
+## [Fix] - 2024-02-20
+
+- Fix: Inability to answer according to prompt rules or even refusal to answer
+
+## [Added keywords] - 2024-12-02
+
+- Added a few keywords to make the extension easier to find in the store.
+
+## [Feat] - 2024-01-31
+
+- Feature: Make responses display above the question
+
+## [Fix] - 2024-01-28
+
+- Fix: Proxy not working
+- Fix: Fetching model data lag entered the form view
+- Fix: Switching from "Ask Question" to "Full Text Input", the model change didn't work
+- Chore: Add react hook lint
+
+## [Fix] - 2024-01-19
+
+- Fix: Azure API 401 error
+
+## [Chore] - 2024-01-11
+
+- Migrate openai v3 to v4
+
 ## [Fix] - 2024-01-01
 
 - Fix: Markdown output being truncated when streaming enabled with json parse error

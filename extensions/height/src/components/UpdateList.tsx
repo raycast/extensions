@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
-import { getList, updateList } from "../api/list";
-import { ListObject, UpdateListFormValues, UpdateListPayload } from "../types/list";
-import { CachedPromiseMutateType } from "../types/utils";
-import { ListColors, ListTypes, ListVisualizations } from "../utils/list";
+
+import { getList, updateList } from "@/api/list";
+import { ListObject, UpdateListFormValues, UpdateListPayload } from "@/types/list";
+import { CachedPromiseMutateType } from "@/types/utils";
+import { ListColors, ListTypes, ListVisualizations } from "@/utils/list";
 
 type Props = {
   list: ListObject;

@@ -1,10 +1,10 @@
-import { ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
 import { Group, GroupedLight, Id, Light, Palette, PngUri, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import useGradientUris from "./hooks/useGradientUris";
 import "./helpers/arrayExtensions";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
@@ -44,7 +44,7 @@ export default function ControlGroups() {
     setPalettes(palettes);
   }, [rooms, zones, lights]);
 
-  const manageHueBridgeElement: JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
+  const manageHueBridgeElement: React.JSX.Element | null = ManageHueBridge(hueBridgeState, sendHueMessage);
   if (manageHueBridgeElement !== null) return manageHueBridgeElement;
 
   return (
@@ -192,7 +192,7 @@ function Group(props: {
 
 function ToggleGroupAction(props: { group: Group; groupedLight: GroupedLight; onToggle: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       title={`Turn ${props.group.metadata.name} ${props.groupedLight.on?.on ? "Off" : "On"}`}
       icon={props.groupedLight.on?.on ? Icon.LightBulbOff : Icon.LightBulb}
       onAction={props.onToggle}
@@ -204,7 +204,7 @@ function SetSceneAction(props: { group: Group; useHue: ReturnType<typeof useHue>
   const { push } = useNavigation();
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Set Scene"
       icon={Icon.Image}
       onAction={() => push(<SetScene group={props.group} useHue={props.useHue} />)}
@@ -221,11 +221,7 @@ function SetBrightnessAction(props: { group: Group; groupedLight: GroupedLight; 
       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
     >
       {BRIGHTNESSES.map((brightness) => (
-        <ActionPanel.Item
-          key={brightness}
-          title={`${brightness}% Brightness`}
-          onAction={() => props.onSet(brightness)}
-        />
+        <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
       ))}
     </ActionPanel.Submenu>
   );
@@ -240,7 +236,7 @@ function IncreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Increase Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
       icon={Icon.Plus}
@@ -258,7 +254,7 @@ function DecreaseBrightnessAction(props: { group: Group; groupedLight: GroupedLi
   }
 
   return (
-    <ActionPanel.Item
+    <Action
       title="Decrease Brightness"
       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
       icon={Icon.Minus}

@@ -6,7 +6,7 @@ import { XcodeProjectType } from "../../models/xcode-project/xcode-project-type.
 /**
  * Xcode View Swift Package Resolved
  */
-export function XcodeViewSwiftPackageResolved(): JSX.Element {
+export function XcodeViewSwiftPackageResolved() {
   return (
     <XcodeProjectList
       key="select-xcode-project"
