@@ -147,6 +147,12 @@
           ]
         }
       ]
+    },
+    {
+      "name": "statistics",
+      "title": "Statistics",
+      "description": "Display the statistics of your activities",
+      "mode": "view"
     }
   ],
   "preferences": [

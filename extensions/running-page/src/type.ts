@@ -42,3 +42,9 @@ export type LocationCountry = {
   district: string | "None";
   districtCode: string | "None";
 };
+
+export type GitHubResource = {
+  name: string;
+  html_url: string;
+  download_url: string;
+};
