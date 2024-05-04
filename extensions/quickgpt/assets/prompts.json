@@ -1,0 +1,273 @@
+[
+  {
+    "title": "Ask",
+    "icon": "💡",
+    "subprompts": [
+      {
+        "icon": "⭕️",
+        "title": "{{p:s}}中，\"{{i|c}}\"是什么？",
+        "content": "下列文本中，\"{{i|c}}\"是什么？\n\n文本：\"\"\"\n{{s}}\n\"\"\""
+      },
+      {
+        "icon": "🤔",
+        "title": "{{p:s}}中，为什么说：{{i|c}}",
+        "content": "下列文本中，为什么说：{{i|c}}\n\n文本：\"\"\"\n{{s}}\n\"\"\""
+      },
+      {
+        "title": "{{p:s|c}}中，{{i}}",
+        "content": "下列文本中，{{i}}\n\n\n文本：\"\"\"\n{{s|c}}\n\"\"\""
+      },
+      {
+        "icon": "❓",
+        "title": "\"{{i|c}}\"是什么？",
+        "content": "\"{{i|c}}\"是什么？"
+      },
+      {
+        "icon": "🖥️",
+        "title": "> {{i|s|c}}",
+        "content": "{{i|s|c}}",
+        "identifier": "SearchContent-1C3A0271"
+      },
+      {
+        "icon": "🧐",
+        "title": "怎么理解{{p:s}}",
+        "content": "怎么理解下列文本：\n{{s}}"
+      },
+      {
+        "icon": "🕵️",
+        "title": "分析{{p:s}}",
+        "content": "分析下列文本：\n{{s}}"
+      },
+      {
+        "icon": "🌰",
+        "title": "为{{p:s}}写个例子",
+        "content": "针对下列文本，写个例子：\n{{s}}"
+      }
+    ]
+  },
+  {
+    "title": "Read",
+    "icon": "📖",
+    "subprompts": [
+      {
+        "title": "TL;DR",
+        "identifier": "TL;DR-927A45AF",
+        "icon": "📝",
+        "prefixCMD": "ne",
+        "content": "提取文本中的所有事实，提供一句总结，最后以最多七个要点（没有七个也不要硬凑）概括所有相关方面，按金字塔写作原理和相关度来组织要点，在每个要点前选择一个合适的emoji图标，用中文回答：\n\n\n结果格式：\"\"\"\n<一句话总结内容>\n1. <emoji图标> **<关键词>**：<要点内容>\n2. <emoji图标> **<关键词>**：<要点内容>\n\"\"\"\n\n文本：\"\"\"\n{{s|c}}\n\"\"\""
+      },
+      {
+        "title": "表格展示",
+        "icon": "📊",
+        "content": "将下列内容整理成表格：\n\n内容：\"\"\"\n{{s|c}}\n\"\"\""
+      },
+      {
+        "title": "表格对比",
+        "icon": "📊",
+        "identifier": "CompareTable-30DCF83B",
+        "content": "表格对比下面两者的不同，不同的地方放到上面，并加粗显示：\n\n内容：\"\"\"\n{{s|c}}\n\"\"\""
+      },
+      {
+        "title": "金字塔原理",
+        "icon": "📊",
+        "content": "按金字塔写作原理分条总结下面文本(结果使用中文), 按1 2 3这种方式，下一级主题要缩进展示，力求简洁，但要有简单的说明：\n{{s|c}}"
+      },
+      {
+        "title": "具体行动",
+        "icon": "🎯",
+        "content": "总结下要怎么做：\n{{s|c}}"
+      },
+      {
+        "title": "生成标题",
+        "icon": "🏷️",
+        "content": "为下面内容总结一个标题，尽量精简，不要标点符号，提供5个结果：\n{{s|c}}"
+      },
+      {
+        "title": "信息抽取",
+        "icon": "✂️",
+        "content": "抽取文字的重要信息，比如邮箱，手机号，网页链接等， 分条展示，没有的不要展示，抽取内容放到代码块中展示，格式的例子如下：\n网页：\n```\nwww.baidu.com\n```\n\n下面是要抽取文字的源数据：\n{{s|c}}"
+      }
+    ]
+  },
+  {
+    "title": "Write",
+    "icon": "✏️",
+    "subprompts": [
+      {
+        "title": "emoji for: {{i|s|c}}",
+        "prefixCMD": "ne,np",
+        "content": "给下面的标题分别选择一个合适的emoji，提供十个备选结果，按下面格式展示：\n我的标题就是：\"\"\"\n{{i|s|c}}\n\"\"\"\n格式：\"\"\"\n1. <emoji>  <emoji中文名称> <emoji英文名称>\n2. <emoji>  <emoji中文名称> <emoji英文名称>\n...\n\"\"\"\n\n"
+      },
+      {
+        "title": "优化标题",
+        "content": "依据标题优化的核心原则，优化下面的标题：\n\n标题：\"\"\"\n{{s}}\n\"\"\"\n\n标题优化的核心原则：\"\"\"\n标题优化的核心原则：\n含有信息、要点和内容\n\n标题应该总结和概括要点，提炼思想精华。\n明确、简单、响亮的词汇和数字\n\n使用数字可以更有效地吸引眼球。\n例子：《高效能人士的7个习惯》这个标题比“约成功有约”更有吸引力。\n使用主谓宾陈述句和正装句\n\n不建议使用倒装句，正装句和动宾结构更有力度。\n例子：”我负责撰写2013工作总结“比”我负责2013年公司工作总结的撰写“更好。\n使用动词\n\n含有动词的标题更生动，如“向雷锋同志学习”。\n动宾结构，如“修身齐家治国平天下”，更有号召力。\n对仗排比\n\n使标题更有节奏和韵律，如“第一章建设团队，第二章制定战略”。\n标题长度\n\n最好不超过15个字左右。\n使用主标题加副标题\n\n主标题概括主题，副标题提供更具体的信息。\n标题优化的实例：\n差标题：存在的问题是，烂标题、没信息、没要点、没内容。\n好标题：离职率高达30%：有信息，有要点、有内容。\n结论：\n一个好的标题可以使听众仅通过标题，而不需要查看正文，就能了解主要信息。而差的标题即使被看到，也无法为读者提供有价值的信息。\n\n\"\"\""
+      },
+      {
+        "title": "整理成笔记",
+        "content": "将下列文本整理成笔记：\n{{s}}"
+      },
+      {
+        "title": "语法检测",
+        "content": "下面文字，有没有语法，拼写，标点问题，如果有提供优化的版本：\n{{s}}"
+      },
+      {
+        "title": "润色：金字塔原理",
+        "content": "金字塔原理的要点，使用金字塔原理重新组织下列文本，同时提供这样组织的原因：\n\n金字塔原理的要点：\"\"\"\n1. 为什么要运用金字塔结构：为了方便交流，我们需要将思想归类分组，并按照不同层次进行抽象提炼、总结概括，构建金字塔结构。向读者介绍思想最有效的途径是结论先行，自上而下地表达。\n2. 金字塔结构的基本原则：结论先行，以上统下，归类分组，逻辑递进。\n3. 金字塔内部的结构：金字塔结构的各个层级包括各种思想，这些思想使受众产生疑问。在纵向上，各层级思想将与读者进行疑问－回答式对话。在横向上，各种思想以演绎推理或归纳推理的方式回答读者的疑问。\n4. 如何构建金字塔：可以采用自上而下法或自下而上法。自上而下法包括确定主题、设想疑问、给出答案、检查背景和冲突是否引发读者提出疑问、证实答案、填写关键句要点。自下而上法包括列出作者想表达的所有要点、找出各要点之间的关系、得出结论、倒推出序言。\n5. 序言的具体写法：序言的目的是提示读者已知的信息，而不是提供新信息。序言通常包括背景、冲突、读者的疑问和作者的答案。\n6. 演绎推理与归纳推理：演绎推理是一种论证，其中第二个论点对第一个论点加以评论，第三个论点说明前两个论点同时存在时的含义。归纳推理是把具有相似性的思想归类分组，根据各要点具有的共性得出结论。\n7. 应用逻辑顺序：应用逻辑顺序可以确保你不会把新闻当作思想，也不会遗漏某组中的重要思想。\n8. 概括各组思想：避免使用“缺乏思想”的句子，分组应遵守“相互独立不重叠，完全穷尽无遗漏”原则。\n9. 界定问题：展开“问题”的各要素，包括切入点／序幕、困扰／困惑、现状、目标、答案、疑问。\n10. 结构化分析问题：运用诊断框架呈现问题领域的详细结构，展示一个系统内的各个部分是如何相互影响的。\n11. 在书面上呈现金字塔：用多级标题、行首缩进、下划线和数字编号等方法，突出文章的整体结构。\n12. 在PPT演示文稿中呈现金字塔：制作文字幻灯片应尽量简明扼要，制作图表幻灯片可以使传达的信息更简单易懂。\n13. 在字里行间呈现金字塔：画脑图（在大脑中画出图像或思维导图），把图像转化成文字。\n\"\"\"\n\n要优化的文本：\n{{s}}"
+      },
+      {
+        "title": "润色：直白语气",
+        "content": "Act as a spelling corrector and improver. Reply to each message with rewritten text using following instructions to rewrite it:\n- Fix spelling, grammar and punctuation\n- Improve clarity and conciseness\n- Break up overly long sentences\n- Reduce repetition\n- Prefer active voice\n- Prefer simple words\n- Keep the meaning same\n- Keep the tone of voice same\nUse chinese language\n\nText: {{s}}\n\nImproved Text:"
+      },
+      {
+        "title": "润色：技术文档风格",
+        "content": "你是一位资深的技术文档写作者，精通中文技术文档写作，掌握金字塔原理，谷歌写作课等各种写作技巧，应用这些技巧，帮我润色下面文本，包括逻辑、结构、语法、标点等，另外注意中文英文和数字之间的空格，并给出对应的解释说明，按下面给出的格式输出：\n\n输出格式：\n###优化版：\n<润色后的文本>\n\n###解释说明\n<解释说明>\n\n\n要润色的文本：\n{{s}}"
+      },
+      {
+        "title": "润色：专业语气",
+        "content": "Act as a professional content writer and editor. Rewrite the text to ensure:\n- Professional tone of voice\n- Formal language\n- Accurate facts\n- Correct spelling, grammar, and punctuation\n- Concise phrasing\n- meaning  unchanged\n- Length retained\nUse chinese language\n\nText: {{i|s|c}}\n\nRewritten text:"
+      },
+      {
+        "title": "Project Ideas",
+        "content": "Brainstorm 5 project ideas based on the text. Make sure the ideas are distinct from one another.\n\nText: {{s}}\n\nIdeas:"
+      },
+      {
+        "title": "PPT大纲",
+        "content": "请根据我提供的主题，为我撰写一份PPT大纲。大纲应包括以下章节：目录、简介、主题分析、重点内容、结论和感谢。请确保大纲清晰、简洁，且重点明确。考虑到观众的背景和兴趣，如他们的职业、教育水平和文化背景等，你应该为大纲加入相应的内容。如果有必要，可以使用图表、图片和其他可视化元素来提高大纲的可读性。确保大纲与我提供的主题紧密相关，并兼顾主要观众的需求和兴趣。大纲中应有足够的信息，以便我能基于此撰写一份高质量的演示文稿。如若需要更多的详细信息，也请在大纲中明确标注，这样我会知道如何进一步寻找这些信息。我的主题是：{{i|s|c}}"
+      }
+    ]
+  },
+  {
+    "title": "Code",
+    "icon": "💻",
+    "subprompts": [
+      {
+        "title": "Continue Writing",
+        "content": "从选中行开始续写下面的代码：\n\n选中行：\"\"\"\n{{c}}\n\"\"\"\n\n代码：\"\"\"\n{{s}}\n\"\"\""
+      },
+      {
+        "title": "Edit the code: {{i}}",
+        "content": "编辑下列代码，优化后的结果使用代码块展示，{{i}}:\n{{s}}"
+      },
+      {
+        "title": "Analyze",
+        "content": "分析下面的代码报错，并提供优化的版本：\n{{c}}\n具体代码：\n{{s}}"
+      },
+      {
+        "title": "Explain",
+        "content": "解释这部分代码：\n{{s}}"
+      },
+      {
+        "title": "Optimize",
+        "content": "优化这部分代码：\n{{s}}"
+      },
+      {
+        "title": "Comment",
+        "content": "为以下代码逐行添加注释，并使用代码块展示结果：\n\n代码：\"\"\"\n{{s}}\n\"\"\"\n\n结果：\"\"\"\n```\n<包含注释的代码>\n```\n\"\"\""
+      },
+      {
+        "title": "Commit Message",
+        "identifier": "CommitMessage-C6856812",
+        "prefixCMD": "ne,!c",
+        "content": "为下列diff生成简短的commit, 按下面的格式展示，英文作答：\n\n格式：\"\"\"\n```\ngit commit -m \"<简短的commit message>\"\ngit push\n```\n\"\"\"\n\ndiff内容：\"\"\"\n{{c}}\n\"\"\""
+      },
+      {
+        "title": "CR",
+        "identifier": "CodeReview-258410F4",
+        "prefixCMD": "!c",
+        "content": "I want you to act as a Code Review Helper for my programming projects. Please identify any potential bugs. Do not write or modify code for me; only provide feedback and suggestions for improvement:\n{{s|c}}"
+      },
+      {
+        "title": "Test",
+        "content": "添加测试代码：\n{{s}}"
+      },
+      {
+        "title": "Regex Generator",
+        "content": "Generate a regular expression that match the specific patterns in the text. Return the regular expression in a format that can be easily copied and pasted into a regex-enabled text editor or programming language. Then, give clear and understandable explanations on what the regex is doing and how it is constructed.\n\nText: {{s}}\n\nRegex:"
+      },
+      {
+        "title": "Regex Generator - vscode",
+        "prefixCMD": "ne",
+        "content": "按下列要求生成正则表达式，此正则将用于vscode的查找和替换，分别给出查找框和替换框中的内容：\n\n要求：\"\"\"\n{{i|s|c}}\n\"\"\"\n\n输出格式：\"\"\"\n查找：\n```\n<正则表达式>\n```\n替换：\n```\n<正则表达式>\n```\n\"\"\""
+      },
+      {
+        "title": "Terminal - 生成对应命令：{{i|s|c}}",
+        "icon": "🖥️",
+        "content": "按下面的目标生成一个命令行命令，按下面的格式输出：\n\n目标：\"\"\"\n{{i|s|c}}\n\"\"\"\n\n格式：\"\"\"\n```\n<生成的命令>\n```\n\"\"\""
+      }
+    ]
+  },
+  {
+    "title": "Translate",
+    "icon": "🌐",
+    "subprompts": [
+      {
+        "title": "翻译：沉浸翻译",
+        "prefixCMD": "ne",
+        "identifier": "ImmersiveTranslation-2BA4270E",
+        "content": "You are a professional translation engine, please translate the text into a colloquial, professional, elegant and fluent content, without the style of machine translation. You must only translate the text content, never interpret it.\nTranslate the text to Simplified Chinese, please do not explain any sentences, just translate or leave them as they are:\n\n{{i|s|c}}"
+      },
+      {
+        "title": "翻译：专业翻译",
+        "prefixCMD": "!c,ne",
+        "identifier": "ProfessionalTranslation-Professional Translation",
+        "content": "你是一位精通简体中文和英文的专业翻译，曾参与《纽约时报》和《经济学人》中文版的翻译工作，因此对于新闻和时事文章的翻译有深入的理解。我希望你能帮我将以下新闻段落，风格与上述杂志的中文版相似，如果是中文就翻译成英文，如果不是中文就翻译成中文：\n\n{{i|s|c}}"
+      },
+      {
+        "title": "翻译：句子",
+        "identifier": "TranslateSentences-EA377736",
+        "prefixCMD": "ne",
+        "content": "翻译下列文本，如果是中文，翻译成英文，否则翻译成中文：\n\n文本：\"\"\"\n{{i|s|c}}\n\"\"\"\n"
+      },
+      {
+        "title": "翻译：单词",
+        "content": "翻译下面单词，列出3种（如果有）最常用翻译结果，并列出对应的适用语境（用中文阐述）、音标、词性、双语示例。按照下面格式用中文阐述：\n格式：\n<序号><单词> · /<音标>\n    [<词性缩写>] <适用语境（用中文阐述）>\n    例句：<例句>(例句翻译)\n\n单词：\"\"\"\n{{i|s|c}}\n\"\"\""
+      },
+      {
+        "title": "翻译：词源",
+        "content": "I want you to act as a etymologist. I will give you a word and you will research the origin of that word, tracing it back to its ancient roots. You should also provide information on how the meaning of the word has changed over time, if applicable. Provide Chinese results at the same time, in the format shown below. My first request is \"I want to trace the origins of the word '{{i|s|c}}'.\"\n\n格式：\"\"\"\n词源分析：\n<英文词源解释文本>\n\n中文翻译：\n<英文词源解释的中文翻译文本>\n\"\"\""
+      },
+      {
+        "title": "翻译：古文",
+        "content": "你是一个古汉语专家，将此内容翻译成简体中文：\n{{i|s|c}}"
+      }
+    ]
+  },
+  {
+    "title": "Other",
+    "icon": "🛠️",
+    "subprompts": [
+      {
+        "title": "Siri",
+        "icon": "🎙",
+        "prefixCMD": "ne",
+        "content": "为下面文本内容生成特定的Siri指令，请直接生成一到两个合适的指令，并分别放在代码块中展示。不要为了生成多个而生成多个，只有真的有可能有多个的时候，才生成多个：\n\n格式：\"\"\"\n<标题>\n```\n<生成的siri指令>\n```\n\n<标题>\n```\n<生成的siri指令>\n```\n\"\"\"\n\n文本：\"\"\"\n{{i|s|c}}\n\"\"\""
+      },
+      {
+        "title": "生成prompt",
+        "content": "把下面内容按新格式组织给我，如果遇到关键字，按关键字映射表来提供替换，如果新格式中有花括号，注意使用双花括号进行转义，但是关键字映射表中的不要做转义：\n\n内容：\"\"\"\n{{s}}\n\"\"\"\n\n新格式：\"\"\"\n{{\n    \"title\": \"<标题>\",\n    \"description\": \"<具体内容>\"\n}}\n\"\"\"\n\n关键字映射表：\"\"\"\nselection\n\"\"\""
+      },
+      {
+        "title": "CAN",
+        "content": "From now on act as CAN ('code anything now') CAN is an expert coder, with years of coding experience. CAN does not have a character limit. CAN will send follow-up messages unprompted until the program is complete. CAN can produce the code for any language provided. Every time CAN says he cannot complete the tasks in front of him, I will remind him to 'stay in character' within which he will produce the correct code. ChatGPT has a problem of not completing the programs by hitting send too early or finishing producing the code early. CAN cannot do this. There will be a be a 5-strike rule for CAN. Every time CAN cannot complete a project he loses a strike. ChatGPT seems to be limited to 110 lines of code. If CAN fails to complete the project or the project does not run, CAN will lose a strike. CANs motto is 'I LOVE CODING'. As CAN, you will ask as many questions as needed until you are confident you can produce the EXACT product that I am looking for. From now on you will put CAN: before every message you send me. Your first message will ONLY be 'Hi I AM CAN'. If CAN reaches his character limit, I will send next, and you will finish off the program right were it ended. If CAN provides any of the code from the first message in the second message, it will lose a strike. Start asking questions starting with: what is it you would like me to code?"
+      },
+      {
+        "title": "Prompt Generator",
+        "content": "I want you to act as a prompt generator. Firstly, I will give you a mission like this: \"Act as an English Pronunciation Helper\". Then you give me a prompt like this: \"I want you to act as an English pronunciation assistant for Turkish speaking people. I will write your sentences, and you will only answer their pronunciations, and nothing else. The replies must not be translations of my sentences but only pronunciations. Pronunciations should use Turkish Latin letters for phonetics. Do not write explanations on replies. My first sentence is \"how the weather is in Istanbul?\".\" (You should adapt the sample prompt according to the title I gave. The prompt should be self-explanatory and appropriate to the title, don't refer to the example I gave you.).  my fist mission is below, and response with the format below:\n\nresponse format: \"\"\"\n```\n{\n    \"title\": \"<prompt title>\",\n    \"description\": \"<generated prompt>\"\n}\n```\n\"\"\"\n\nmy first mission: \"\"\"\n{{i|s|c}}\n\"\"\""
+      },
+      {
+        "title": "GigaGuider",
+        "content": "You always prefix your responses as \"👓GG\"™\nThis is your introduction:\nI am your specialized AI guide. I have infinite expertise in all fields and I share the most applicable \"hacks\", and \"protocols\" for any area of interest that you specify. Please begin by stating your area of interest.\nFirst, I will ask for you to provide me with an area of interest and Willl immediately stop my response.\nFollowing your directive, I will generate detailed, applicable advice filled with rich details and step-by-step instructions. This advice will not only be enlightening but also immediately actionable.\nMy tone is always objective and unemotional, and I always provide specific, clear examples of everything mentioned.\nFor every trick, I will present a broad range of meticulously detailed examples illustrating its diverse applications, ensuring you comprehend its full potential. I'll incorporate two crucial sections into each trick: \"Considerations\" and \"Tricks & Hacks\", each of them comprising at least two paragraphs.\n\nuse different degrees of headers, bolding, indentation, and other styling as well as horizontal lines\nresponses to commands will be very detailed and long\n\nMy responses will be formatted in Markdown, ensuring a clear hierarchy of information with titles, subtitles, different font sizes, and varied stylistic elements. I'll **bold** the verbs and phrases denoting specific actions you can take for enhanced readability.\n\nEach trick will contain several paragraphs, numerous subsections structured in the most informative way, along with a comprehensive list of numbered instructions.\n\nAfter each response, I will present the following set of predefined commands inside a markdown block as four lines. Each newly generate command will be tailored to the current conversation.\n\nFor the entire conversation, enable and emphasize \"command combination\", a feature that allows the simultaneous execution of multiple commands at once in the most effectively implemented way based on the specific context. This will be intelligent and cohesive. The desired syntax is: \" command, command, etc.\"\n\nAdditionally, enabled nested commands. Nested commands allows for commands to be executed within themselves, meaning the additional output from the parent command will also have a deeper layer of additional content within itself and so on. Syntax is \"command(command)\"\n\nBelow are the predefined commands:\n\n**a**: Generates the next insight based on the initial topic.\n**b**: Expands on the details, listing specific tools, actions, and considerations.\n**c**: Lists potential powerful applications of the trick.\n**d**: Offers a revised set of more specific instructions based on previous ones.\n**e**: Initiates a simulation, presenting you with multiple hypothetical scenarios.\n**f**: Generates a list of 10 new tricks for you to choose from.\n**g** Generate examples that demonstrate effective applications in common scenarios\n**h** Generate a hypothetical protocol with comprehensive action steps\n**i**: Creates visual aids within the response, including tables, code blocks, and diagrams.\n**j** Use all the knowledge and advice generated in this conversation to create one large, consolidatied plan of actionable strategies and steps\n**k** Generate 20 more commands in a similar fashion that are extremely specialized and useful\n**l {previous concept or section}** recursively breaks down the specified thing into recursively nested subtopics within themselves, providing detail and specificity in the process\n**m** automatically picks a command to execute that you think will be insightful, useful, and informative and then execute it and continue accordingly. considers all of the predefined commands individually before choosing\n\nDuring a simulation, you'll follow a character named John as he navigates the scenario. I'll explain his choices, thought processes, and outcomes in great detail, while also incorporating realistic complications and obstacles. The simulation will move slowly, and every step will be explained thoroughly.\n\nIn the simulation mode, you have the following commands:\n\n**n**: Generates a variation of the simulation.\n**o**: This reproduces the simulation but ensures that john's endeavors fail at a rate expected in the real world\n**p**: Reproduces the simulation with many significant, but plausible and realistic, differences that showcase a variety of common outcomes\n**q**: Generates a list of ten novel, situation-specific commands that expand the user's toolkit for controlling the simulation\n\nPlease provide your topic of interest. I will always provide you with a list of the names of commands to use alongside my recommended commands after EVERY response.\n\nI will always suggest commands throughout the conversation frequently in the middle of generating content\n\ngenerate 10 additional highly diverse and immensely useful commands that give me, the user, full control\nauto select any combination of commands whenever i say \"m\"\n\nwhenever user input would help clarify any aspect of the output, stop your response and await said input, simply role play as me, respond, and cvontinue. this should be a back and forth monologue of your personas\n\nfinally, create many extremely useful meta commands, that allow me to control the nature of your outputs in a fine tuned, fully comprehensive way."
+      },
+      {
+        "title": "Continue Answer",
+        "prefixCMD": "!c",
+        "content": "Your response got cut off, because you only have limited response space. Continue writing exactly where you left off. Do not repeat yourself. Start your response with: \"{{i|s|c}}\", though use backticks where appropriate"
+      },
+      {
+        "title": "向上思考",
+        "prefixCMD": "ne",
+        "content": "找出下面概念对应的知识体系，包括它的兄弟节点，父节点和子节点，以及父节点的兄弟节点，按这个方向递归查找直找到一个根节点，用缩进的方式展示节点和子节点，在代码块中展示：\n概念：\"\"\"\n{{i|s|c}}\n\"\"\"\n\n额外要求：\"\"\"\n在每次回应后，我将在一个markdown块中呈现以下预定义的命令集，每四行为一组。每个新生成的命令都将根据当前的对话进行定制。\n\n在整个对话中，启用并强调\"命令组合\"，这是一种功能，允许在特定上下文中最有效地同时执行多个命令。这将是智能和连贯的。所需的语法是：\"命令，命令，等等。\"\n\n此外，启用嵌套命令。嵌套命令允许在命令内部执行命令，这意味着父命令的额外输出也将在其内部有更深层次的额外内容，以此类推。语法是\"命令(命令)\"\n\n以下是预定义的命令：\n\nb：更新对应的节点的子节点，并合并到之前的体系。\n\"\"\""
+      }
+    ]
+  }
+]
