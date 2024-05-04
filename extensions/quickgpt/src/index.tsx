@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   List,
   ActionPanel,
@@ -19,7 +19,6 @@ import fs from "fs";
 import path from "path";
 import { match } from "pinyin-pro";
 import useClipboardAndSelectionText from "./useClipboardAndSelectionText";
-import React from "react";
 
 const IDENTIFIER_PREFIX = "quickgpt-";
 const DEFAULT_ICON = "🔖";
