@@ -68,7 +68,9 @@ const adjustBrightness = async (
 
     const adjustment = direction === "increase" ? 0.1 : -0.1;
     let newBrightness = brightness + adjustment;
-    newBrightness = newBrightness < 0 ? 0 : newBrightness > 1 ? 1 : newBrightness;
+    // ensure that brightness is between 0 and 1
+    newBrightness = Math.max(0, newBrightness);
+    newBrightness = Math.min(1, newBrightness);
     await setSystemBrightness(newBrightness);
 
     showToast({
