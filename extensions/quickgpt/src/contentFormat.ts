@@ -31,14 +31,19 @@ const generateCombinations = (arr: string[]): string[] => {
 
 const allCombinations = generateCombinations(Object.keys(inputPlaceholder));
 
-export function contentFormat(text: string, specificReplacements: SpecificReplacements): [string, string[]] {
+export function contentFormat(
+  text: string,
+  specificReplacements: SpecificReplacements
+): [string, string[]] {
   const compositeReplacements: { [key: string]: string | undefined } = {};
   for (const combination of allCombinations) {
     const keysInCombination = combination.split("|");
     for (const key of keysInCombination) {
       if (specificReplacements[inputPlaceholder[key]]) {
-        compositeReplacements[`{{${combination}}}`] = specificReplacements[inputPlaceholder[key]];
-        compositeReplacements[`{{p:${combination}}}`] = literalPlaceholder[inputPlaceholder[key]];
+        compositeReplacements[`{{${combination}}}`] =
+          specificReplacements[inputPlaceholder[key]];
+        compositeReplacements[`{{p:${combination}}}`] =
+          literalPlaceholder[inputPlaceholder[key]];
         break;
       }
     }

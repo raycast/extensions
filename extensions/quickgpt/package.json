@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quickgpt",
-  "title": "quickgpt",
+  "title": "QuickGPT",
   "description": "quickgpt is a tool to provide prompt for chatgpt.",
   "icon": "command-icon.png",
   "author": "ddhjy2012",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "index",
+      "title": "Index",
       "description": "运行quickgpt工具，该工具用于为 chatgpt 提供提示词。需要一个视图，并接受三个可选参数：剪贴板文本、选择文本和动作。",
       "mode": "view",
       "arguments": [

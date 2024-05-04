@@ -33,12 +33,17 @@ const supportedPrefixCMD: { [key: string]: string } = {
 
 const defaultPrefixCMD = ["c", "cot"];
 
-function processActionPrefixCMD(content: string, actionPrefixCMD: string | undefined) {
+function processActionPrefixCMD(
+  content: string,
+  actionPrefixCMD: string | undefined
+) {
   let currentPrefixCMD = defaultPrefixCMD.slice();
   const actionPrefixes = actionPrefixCMD?.split(",");
   actionPrefixes?.forEach((cmd) => {
     cmd.startsWith("!")
-      ? (currentPrefixCMD = currentPrefixCMD.filter((c) => c !== cmd.substring(1)))
+      ? (currentPrefixCMD = currentPrefixCMD.filter(
+          (c) => c !== cmd.substring(1)
+        ))
       : currentPrefixCMD.push(cmd);
   });
   currentPrefixCMD = [...new Set(currentPrefixCMD)];
@@ -50,15 +55,23 @@ function processActionPrefixCMD(content: string, actionPrefixCMD: string | undef
   return content;
 }
 
-function findQuickPrompt(selectionText: string, identifier?: string): [PromptProps | undefined, string] {
+function findQuickPrompt(
+  selectionText: string,
+  identifier?: string
+): [PromptProps | undefined, string] {
   let foundAction;
   let cleanedText = selectionText;
 
   if (identifier) {
-    foundAction = promptManager.findPrompt((action) => `${IDENTIFIER_PREFIX}${action.identifier}` === identifier);
+    foundAction = promptManager.findPrompt(
+      (action) => `${IDENTIFIER_PREFIX}${action.identifier}` === identifier
+    );
   } else {
     foundAction = promptManager.findPrompt(
-      (action) => (action.identifier && selectionText.includes(IDENTIFIER_PREFIX + action.identifier)) || false
+      (action) =>
+        (action.identifier &&
+          selectionText.includes(IDENTIFIER_PREFIX + action.identifier)) ||
+        false
     );
     if (foundAction?.identifier) {
       cleanedText = selectionText
@@ -78,13 +91,23 @@ function getPromptActions(formattedDescription: string) {
     title: string | undefined,
     url: string,
     formattedDescription: string | number | Clipboard.Content
-  ) => <RaycastAction.OpenInBrowser title={title} url={url} onOpen={() => Clipboard.copy(formattedDescription)} />;
+  ) => (
+    <RaycastAction.OpenInBrowser
+      title={title}
+      url={url}
+      onOpen={() => Clipboard.copy(formattedDescription)}
+    />
+  );
 
   const action = [
     {
       name: "openURL",
       condition: preferences.openURL,
-      action: createRaycastOpenInBrowser("Open URL", preferences.openURL ?? "", formattedDescription),
+      action: createRaycastOpenInBrowser(
+        "Open URL",
+        preferences.openURL ?? "",
+        formattedDescription
+      ),
     },
     ...[
       path.join(__dirname, "assets/ChatGPT.applescript"),
@@ -103,7 +126,10 @@ function getPromptActions(formattedDescription: string) {
         condition: script,
         action: (
           <Action
-            title={`Run ${path.basename(script ?? "", path.extname(script ?? ""))}`}
+            title={`Run ${path.basename(
+              script ?? "",
+              path.extname(script ?? "")
+            )}`}
             key={`runScript${index + 1}`}
             icon={Icon.Terminal}
             onAction={() => {
@@ -134,11 +160,16 @@ function getPromptActions(formattedDescription: string) {
       {action
         .sort((a, b) =>
           a.name == preferences.primaryAction ||
-          (a.name == preferences.secondaryAction && b.name != preferences.primaryAction)
+          (a.name == preferences.secondaryAction &&
+            b.name != preferences.primaryAction)
             ? -1
             : 0
         )
-        .map((option, index) => option.condition && React.cloneElement(option.action, { key: index }))}
+        .map(
+          (option, index) =>
+            option.condition &&
+            React.cloneElement(option.action, { key: index })
+        )}
     </>
   );
 }
@@ -167,25 +198,42 @@ function PromptList({
 
   const [, forceUpdate] = useState(0);
   const activeSearchText = searchMode ? "" : searchText;
-  const replacements = { query: activeSearchText, clipboard: clipboardText, selection: selectionText };
+  const replacements = {
+    query: activeSearchText,
+    clipboard: clipboardText,
+    selection: selectionText,
+  };
   const promptItems = prompts
     .sort((a, b) => Number(b.pinned) - Number(a.pinned))
     .map((prompt) => {
-      const content = prompt.content ? processActionPrefixCMD(prompt.content, prompt.prefixCMD) : undefined;
-      const [formattedTitle, missingTitleTags] = contentFormat(prompt.title || "", replacements);
-      const [formattedDescription, missingDescriptionTags] = contentFormat(content || "", replacements);
+      const content = prompt.content
+        ? processActionPrefixCMD(prompt.content, prompt.prefixCMD)
+        : undefined;
+      const [formattedTitle, missingTitleTags] = contentFormat(
+        prompt.title || "",
+        replacements
+      );
+      const [formattedDescription, missingDescriptionTags] = contentFormat(
+        content || "",
+        replacements
+      );
 
-      const missingPlaceholders = [...new Set([...missingTitleTags, ...missingDescriptionTags])].join(", ");
+      const missingPlaceholders = [
+        ...new Set([...missingTitleTags, ...missingDescriptionTags]),
+      ].join(", ");
 
       const isSubtitleMissingTags = missingPlaceholders.length > 0;
-      const subtitle = isSubtitleMissingTags ? `missing Placeholders: ${missingPlaceholders}` : undefined;
+      const subtitle = isSubtitleMissingTags
+        ? `missing Placeholders: ${missingPlaceholders}`
+        : undefined;
 
       const promptTitle = isSubtitleMissingTags ? prompt.title : formattedTitle;
 
       if (
         activeSearchText &&
         formattedTitle == prompt.title &&
-        prompt.title.toLowerCase().indexOf(activeSearchText.toLowerCase()) == -1 &&
+        prompt.title.toLowerCase().indexOf(activeSearchText.toLowerCase()) ==
+          -1 &&
         !match(prompt.title, activeSearchText, { continuous: true })
       ) {
         return null;
@@ -198,12 +246,18 @@ function PromptList({
           icon={prompt.icon ?? DEFAULT_ICON}
           subtitle={subtitle}
           accessories={[
-            prompt.pinned ? { tag: { value: "PIN", color: Color.SecondaryText } } : {},
+            prompt.pinned
+              ? { tag: { value: "PIN", color: Color.SecondaryText } }
+              : {},
             {
               icon: prompt.subprompts ? Icon.Folder : Icon.Paragraph,
               tooltip:
                 prompt.content ??
-                prompt.subprompts?.map((subaction, index) => `${index + 1}. ${subaction.title} `).join("\n"),
+                prompt.subprompts
+                  ?.map(
+                    (subaction, index) => `${index + 1}. ${subaction.title} `
+                  )
+                  .join("\n"),
             },
           ]}
           actions={
@@ -229,7 +283,9 @@ function PromptList({
                   icon={Icon.Pin}
                   onAction={() => {
                     prompt.pinned = !prompt.pinned;
-                    prompt.pinned ? pinsManager.pin(prompt.identifier) : pinsManager.unpin(prompt.identifier);
+                    prompt.pinned
+                      ? pinsManager.pin(prompt.identifier)
+                      : pinsManager.unpin(prompt.identifier);
                     forceUpdate((n) => n + 1);
                   }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
@@ -245,7 +301,9 @@ function PromptList({
                   <RaycastAction.CopyToClipboard
                     title="Copy Deeplink"
                     content={`raycast://extensions/ddhjy2012/quickgpt/index?arguments=${encodeURIComponent(
-                      JSON.stringify({ target: IDENTIFIER_PREFIX + prompt.identifier })
+                      JSON.stringify({
+                        target: IDENTIFIER_PREFIX + prompt.identifier,
+                      })
                     )}`}
                     icon={Icon.Link}
                   />
@@ -264,13 +322,18 @@ function PromptList({
   );
 }
 
-export default function MainCommand(props: LaunchProps<{ arguments: Arguments.Index }>) {
+export default function MainCommand(
+  props: LaunchProps<{ arguments: Arguments.Index }>
+) {
   const {
     selectionText: argumentSelectionText,
     clipboardText: argumentClipboardText,
     target: target,
   } = props.arguments;
-  const { clipboardText: currentClipboardText, selectionText: currentSelectionText } = useClipboardAndSelectionText();
+  const {
+    clipboardText: currentClipboardText,
+    selectionText: currentSelectionText,
+  } = useClipboardAndSelectionText();
   const clipboardText = argumentClipboardText ?? currentClipboardText;
   const selectionText = argumentSelectionText ?? currentSelectionText;
 
@@ -280,12 +343,23 @@ export default function MainCommand(props: LaunchProps<{ arguments: Arguments.In
     return action.pinned;
   });
 
-  const [quickAction, cleanSelectionText] = findQuickPrompt(selectionText, target);
-  const actionsForUse = quickAction ? [quickAction] : [...pinnedActions, ...promptManager.getRootPrompts()];
+  const [quickAction, cleanSelectionText] = findQuickPrompt(
+    selectionText,
+    target
+  );
+  const actionsForUse = quickAction
+    ? [quickAction]
+    : [...pinnedActions, ...promptManager.getRootPrompts()];
   const selectionTextForUse = quickAction ? cleanSelectionText : selectionText;
 
-  const uniqueFilteredActions = Array.from(new Set(actionsForUse.map((action) => action.identifier || action.title)))
-    .map((unique) => actionsForUse.find((action) => action.identifier === unique || action.title === unique))
+  const uniqueFilteredActions = Array.from(
+    new Set(actionsForUse.map((action) => action.identifier || action.title))
+  )
+    .map((unique) =>
+      actionsForUse.find(
+        (action) => action.identifier === unique || action.title === unique
+      )
+    )
     .filter(Boolean) as PromptProps[];
 
   return (

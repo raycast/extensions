@@ -23,7 +23,9 @@ class PromptManager {
   constructor() {
     const preferences = getPreferenceValues<Preferences>();
     this.promptsPaths = [
-      ...(preferences.disableDefaultPrompts ? [] : [path.join(__dirname, "assets/prompts.json")]),
+      ...(preferences.disableDefaultPrompts
+        ? []
+        : [path.join(__dirname, "assets/prompts.json")]),
       ...(preferences.customPrompts ? [preferences.customPrompts] : []),
     ];
     this.rootPrompts = this.loadPrompts();
@@ -65,7 +67,9 @@ class PromptManager {
     traverse(this.rootPrompts);
   }
 
-  public getFilteredPrompts(filter: (prompt: PromptProps) => boolean): PromptProps[] {
+  public getFilteredPrompts(
+    filter: (prompt: PromptProps) => boolean
+  ): PromptProps[] {
     const result: PromptProps[] = [];
     this.traversePrompts((prompt) => {
       if (filter(prompt)) {
@@ -75,7 +79,9 @@ class PromptManager {
     return result;
   }
 
-  public findPrompt(filter: (prompt: PromptProps) => boolean): PromptProps | undefined {
+  public findPrompt(
+    filter: (prompt: PromptProps) => boolean
+  ): PromptProps | undefined {
     let result: PromptProps | undefined;
     this.traversePrompts((prompt) => {
       if (filter(prompt)) {

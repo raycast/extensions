@@ -7,7 +7,10 @@ function useClipboardAndSelectionText() {
   const [selectionText, setSelectionText] = useState("");
 
   useEffect(() => {
-    Promise.all([Clipboard.readText().catch(() => ""), getSelectedText().catch(() => "")])
+    Promise.all([
+      Clipboard.readText().catch(() => ""),
+      getSelectedText().catch(() => ""),
+    ])
       .then(([clipboard, selection]) => {
         setClipboardText(clipboard ?? "");
         setSelectionText(selection);
