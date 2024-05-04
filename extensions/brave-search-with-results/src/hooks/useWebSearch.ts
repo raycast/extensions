@@ -1,0 +1,69 @@
+import { useMemo } from "react";
+import { getPreferenceValues } from "@raycast/api";
+
+import useFetch from "./useFetch";
+
+const ENDPOINT = new URL("https://api.search.brave.com/res/v1/web/search");
+
+interface ApiWebSearchData {
+  web: {
+    results: ApiWebSearchResult[];
+  };
+}
+
+interface ApiWebSearchResult {
+  type: string;
+  title: string;
+  url: string;
+  meta_url: {
+    favicon: string;
+  };
+}
+
+interface WebSearchResult {
+  id: string;
+  icon: string;
+  title: string;
+  url: URL;
+}
+
+const toResult = (result: ApiWebSearchResult): WebSearchResult => {
+  return {
+    id: "result" + result.type + result.url,
+    icon: result.meta_url.favicon,
+    title: result.title,
+    url: new URL(result.url),
+  };
+};
+
+export default function useWebSearch(query: string, execute: boolean) {
+  const { data_for_search_api_key } = getPreferenceValues();
+
+  const url = useMemo(() => {
+    const url = new URL(ENDPOINT.toString());
+    url.searchParams.append("q", query);
+    return url;
+  }, [query]);
+
+  const headers = useMemo(() => {
+    return {
+      "X-Subscription-Token": data_for_search_api_key,
+      Accept: "application/json",
+      "Accept-Encoding": "gzip",
+    };
+  }, [data_for_search_api_key]);
+
+  const { isLoading, data } = useFetch<ApiWebSearchData>(
+    url,
+    {
+      headers,
+    },
+    execute,
+  );
+
+  const results = useMemo(() => {
+    return data?.web.results.map(toResult) ?? [];
+  }, [data, execute]);
+
+  return { isLoading, results };
+}
