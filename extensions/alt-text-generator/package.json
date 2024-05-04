@@ -34,7 +34,7 @@
     {
       "name": "generateFromSelectionCMD",
       "icon": "from-finder-selection-icon.png",
-      "title": "From Finder selection",
+      "title": "From Finder Selection",
       "description": "This command will generate alt-text from a single file selection in Finder. Supported image types and file sizes are set by the OpenAI API. For more information, refer to the OpenAI API Vision documentation: https://platform.openai.com/docs/guides/vision",
       "mode": "no-view"
     },
@@ -57,7 +57,7 @@
     {
       "name": "generateFromClipboardCMD",
       "icon": "from-clipboard-icon.png",
-      "title": "From clipboard",
+      "title": "From Clipboard",
       "description": "This command will generate alt-text from an image copied to the clipboard",
       "mode": "no-view"
     }
