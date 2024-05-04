@@ -61,7 +61,7 @@
       "type": "dropdown",
       "data": [
         {
-          "value": "0",
+          "value": "runScript0",
           "title": "Default"
         },
         {
@@ -83,6 +83,30 @@
         {
           "value": "runScript3",
           "title": "Run Script 3"
+        },
+        {
+          "value": "runScript4",
+          "title": "Run Script 4"
+        },
+        {
+          "value": "runScript5",
+          "title": "Run Script 5"
+        },
+        {
+          "value": "runScript6",
+          "title": "Run Script 6"
+        },
+        {
+          "value": "runScript7",
+          "title": "Run Script 7"
+        },
+        {
+          "value": "runScript8",
+          "title": "Run Script 8"
+        },
+        {
+          "value": "runScript9",
+          "title": "Run Script 9"
         }
       ]
     },
@@ -94,7 +118,7 @@
       "type": "dropdown",
       "data": [
         {
-          "value": "0",
+          "value": "runScript0",
           "title": "Default"
         },
         {
@@ -116,6 +140,30 @@
         {
           "value": "runScript3",
           "title": "Run Script 3"
+        },
+        {
+          "value": "runScript4",
+          "title": "Run Script 4"
+        },
+        {
+          "value": "runScript5",
+          "title": "Run Script 5"
+        },
+        {
+          "value": "runScript6",
+          "title": "Run Script 6"
+        },
+        {
+          "value": "runScript7",
+          "title": "Run Script 7"
+        },
+        {
+          "value": "runScript8",
+          "title": "Run Script 8"
+        },
+        {
+          "value": "runScript9",
+          "title": "Run Script 9"
         }
       ]
     },
@@ -145,6 +193,48 @@
       "title": "Action: Run Apple Script 3",
       "required": false,
       "description": "Run Apple Script 3",
+      "type": "file"
+    },
+    {
+      "name": "runScript4",
+      "title": "Action: Run Apple Script 4",
+      "required": false,
+      "description": "Run Apple Script 4",
+      "type": "file"
+    },
+    {
+      "name": "runScript5",
+      "title": "Action: Run Apple Script 5",
+      "required": false,
+      "description": "Run Apple Script 5",
+      "type": "file"
+    },
+    {
+      "name": "runScript6",
+      "title": "Action: Run Apple Script 6",
+      "required": false,
+      "description": "Run Apple Script 6",
+      "type": "file"
+    },
+    {
+      "name": "runScript7",
+      "title": "Action: Run Apple Script 7",
+      "required": false,
+      "description": "Run Apple Script 7",
+      "type": "file"
+    },
+    {
+      "name": "runScript8",
+      "title": "Action: Run Apple Script 8",
+      "required": false,
+      "description": "Run Apple Script 8",
+      "type": "file"
+    },
+    {
+      "name": "runScript9",
+      "title": "Action: Run Apple Script 9",
+      "required": false,
+      "description": "Run Apple Script 9",
       "type": "file"
     }
   ],

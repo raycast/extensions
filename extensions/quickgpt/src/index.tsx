@@ -25,7 +25,7 @@ const IDENTIFIER_PREFIX = "quickgpt-";
 const DEFAULT_ICON = "🔖";
 
 const supportedPrefixCMD: { [key: string]: string } = {
-  c: "中文作答",
+  c: "简体中文作答",
   ne: "NO EXPLANATION",
   np: "Do not use plugins and data analysis",
   cot: "Take a deep breath and work on this problem step-by-step",
@@ -91,9 +91,15 @@ function getPromptActions(formattedDescription: string) {
       preferences.runScript1,
       preferences.runScript2,
       preferences.runScript3,
+      preferences.runScript4,
+      preferences.runScript5,
+      preferences.runScript6,
+      preferences.runScript7,
+      preferences.runScript8,
+      preferences.runScript9,
     ].map((script, index) => {
       return {
-        name: `runScript${index + 1}`,
+        name: `runScript${index}`,
         condition: script,
         action: (
           <Action
