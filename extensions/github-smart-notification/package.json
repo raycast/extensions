@@ -7,7 +7,9 @@
   "author": "shopping-jaws",
   "owner": "shopping-jaws",
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Developer Tools",
+    "Communication"
   ],
   "version": "0.1.6",
   "license": "MIT",
