@@ -39,10 +39,10 @@ async function fetchRepositoryImages(
   registryId: string,
   repositoryName: string,
   token?: string,
-  accImages?: ImageIdentifier[]
+  accImages?: ImageIdentifier[],
 ): Promise<ImageIdentifier[]> {
   const { imageIds, nextToken } = await ecrClient.send(
-    new ListImagesCommand({ registryId, repositoryName, nextToken: token })
+    new ListImagesCommand({ registryId, repositoryName, nextToken: token }),
   );
 
   const combinedImages = [...(accImages || []), ...(imageIds || [])];

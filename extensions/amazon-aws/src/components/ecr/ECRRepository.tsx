@@ -10,7 +10,7 @@ function ECRRepository({ repository }: { repository: Repository }) {
     [repository.registryId ?? "", repository.repositoryName ?? ""],
     {
       keepPreviousData: true,
-    }
+    },
   );
   return (
     <List.Item
