@@ -32,7 +32,7 @@ export function actionsForItem(item: Item): ActionID[] {
     "share-item",
     "switch-account",
   ];
-  // pr ioritize primary and secondary actions, then append the rest and remove duplicates
+  // prioritize primary and secondary actions, then append the rest and remove duplicates
   const deduplicatedActions = [
     ...new Set<ActionID>([preferences.primaryAction, preferences.secondaryAction, ...defaultActions]),
   ];
@@ -164,5 +164,5 @@ export function getCategoryIcon(category: CategoryName) {
 
 export function titleCaseWord(word: string) {
   if (!word) return word;
-  return word[0].toUpperCase() + word.substr(1).toLowerCase();
+  return word[0].toUpperCase() + word.slice(1).toLowerCase();
 }
