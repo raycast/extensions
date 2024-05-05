@@ -147,9 +147,9 @@ export default (
   useEffect(() => {
     (async () => {
       if (useSelected) {
-        // handle the case where we don't need to get selected text: if we already have a query.
-        if (argQuery) {
-          await getResponse(`${context}\n${argQuery}`);
+        // handle the case where we don't need to get selected text: if we already have a context and a query.
+        if (context && argQuery) {
+          await getResponse(`${context}\n\n${argQuery}`);
           return;
         }
 
@@ -174,22 +174,28 @@ export default (
                 title: "Could not get selected text",
               });
             }
-          } else await getResponse(`${context}\n${selected}`);
-        }
+          } else await getResponse(`${context}\n\n${selected}`);
+        } else {
+          // !useSelectedAsQuery
+          // if a query is provided, then we use it as "context", and selected text as "query"
+          if (!context && argQuery) {
+            await getResponse(`${argQuery}\n\n${selected}`);
+          }
 
-        // otherwise, we will need to obtain a separate query by showing a form
-        else if (showFormText) {
-          setSelected(selected);
-          setPage(Pages.Form);
-        }
+          // if no query is provided, we will need to obtain a separate query by showing a form
+          else if (showFormText) {
+            setSelected(selected);
+            setPage(Pages.Form);
+          }
 
-        // if no query is provided and showing a form is not allowed, we will show an error
-        else {
-          await popToRoot();
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "No query provided",
-          });
+          // if no query is provided and showing a form is not allowed, we will show an error
+          else {
+            await popToRoot();
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "No Query Provided",
+            });
+          }
         }
       } else {
         // !useSelected
@@ -203,7 +209,7 @@ export default (
             await popToRoot();
             await showToast({
               style: Toast.Style.Failure,
-              title: "No query provided",
+              title: "No Query Provided",
             });
           }
         }
@@ -247,7 +253,7 @@ export default (
               setMarkdown("");
 
               if (useSelected && selectedState) {
-                getResponse(`${values.query}\n${selectedState}`);
+                getResponse(`${values.query}\n\n${selectedState}`);
                 return;
               }
               getResponse(`${context ? `${context}\n\n` : ""}${values.query}`);
