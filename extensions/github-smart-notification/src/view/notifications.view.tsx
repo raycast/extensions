@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { hashColorizer } from "../util";
 import { Configuration } from "../lib/configurations";
 import { useCachedState } from "@raycast/utils";
+import { execAsync } from "../lib/util";
+import { toHtmlUrl } from "../lib/github";
 export default function NotificationsView() {
   const [state, setState] = useState<Notification[] | undefined>([]);
   const [configState] = useCachedState<Configuration[]>("config", [], {
@@ -47,7 +49,7 @@ export default function NotificationsView() {
           ]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url="https://github.com/notifications?query=is%3Aunread" />
+              <Action title="Open" onAction={() => toHtmlUrl(s).then((url) => execAsync(`open ${url}`))} />
             </ActionPanel>
           }
         ></List.Item>

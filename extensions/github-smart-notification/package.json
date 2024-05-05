@@ -5,24 +5,32 @@
   "description": "Ley you know the necessary notifactions only",
   "icon": "command-icon.png",
   "author": "shopping-jaws",
+  "owner": "shoppingjaws",
   "categories": [
     "Productivity"
   ],
+  "version": "0.1.0",
   "license": "MIT",
   "commands": [
     {
+      "icon": "command-icon.png",
+      "subtitle": "List smart notifications",
       "name": "notifications",
       "title": "Github Notifications",
       "description": "List Notifications",
       "mode": "view"
     },
     {
+      "icon": "command-icon.png",
+      "subtitle": "List configured rule",
       "name": "configurations",
       "title": "List Configuration",
       "description": "Configure mute settings",
       "mode": "view"
     },
     {
+      "icon": "command-icon.png",
+      "subtitle": "Configure the auto read rule",
       "name": "configurationForm",
       "title": "Create Configuration",
       "description": "Configure mute settings",

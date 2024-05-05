@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { autoReadMergedPr, ghCommandPath } from "./preference";
-import { exec } from "child_process";
-import { promisify } from "util";
 import { Configuration } from "./configurations";
 import { minimatch } from "minimatch";
-const execAsync = promisify(exec);
+import { execAsync } from "./util";
+
 const NotificationSchema = z.object({
   id: z.preprocess((item) => `${item}`, z.string()),
   updated_at: z.preprocess((item) => new Date(`${item}`), z.date()),
@@ -41,7 +40,6 @@ export const filter = async (n: Notification[], c: Configuration[]): Promise<Not
     })
     .filter((f): f is Notification => f !== undefined);
 
-  // readListFromConfig.map(l => markAsRead(l.notifcation))
   // extract read target from AutoClose
   const mergedPrAutoReadList = await extractMergedPrAutoReadList(n);
   console.log(`[autoReadMergedPr]${mergedPrAutoReadList.length}`);
@@ -50,7 +48,8 @@ export const filter = async (n: Notification[], c: Configuration[]): Promise<Not
   const tasks = target.map((t) => markAsRead(t));
   await Promise.all(tasks);
   // // remove mark target notification
-  const filteredNotification = autoReadMergedPr === true ?  n.filter((f) => !target.map((r) => r.id).includes(f.id)) : [];
+  const filteredNotification =
+    autoReadMergedPr === true ? n.filter((f) => !target.map((r) => r.id).includes(f.id)) : [];
   return filteredNotification;
 };
 
