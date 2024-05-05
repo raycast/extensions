@@ -5,7 +5,7 @@ import { ContentFormat, ResultViewProps } from "./ResultView.types";
 import { enable_streaming, global_model, openai } from "./api";
 import { allModels as changeModels, countToken, estimatePrice } from "./utils";
 
-const getTranscript = async ({ format = "markdown" }: { format?: ContentFormat }) => {
+const getBrowserContent = async ({ format = "markdown" }: { format?: ContentFormat }) => {
   return await BrowserExtension.getContent({ format: format });
 };
 
@@ -14,6 +14,7 @@ export default function ResultView(props: ResultViewProps) {
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
   const [response, setResponse] = useState("");
+  const [browserContent, setBrowserContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [cumulative_tokens, setCumulativeTokens] = useState(0);
   const [cumulative_cost, setCumulativeCost] = useState(0);
@@ -22,7 +23,8 @@ export default function ResultView(props: ResultViewProps) {
 
   async function getChatResponse(prompt: string, model: string, temp: number, format?: ContentFormat) {
     try {
-      const md = await getTranscript({ format });
+      const _browserContent = await getBrowserContent({ format });
+      setBrowserContent(_browserContent);
 
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
@@ -31,12 +33,12 @@ export default function ResultView(props: ResultViewProps) {
             role: "system",
             content: `${prompt}`,
           },
-          { role: "user", content: "\nTranscript:  " + md },
+          { role: "user", content: "\nTranscript:  " + _browserContent },
         ],
         temperature: temp,
         stream: enable_streaming,
       });
-      setPromptTokenCount(countToken(prompt + md));
+      setPromptTokenCount(countToken(prompt + _browserContent));
       return streamOrCompletion;
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Error" });
@@ -106,6 +108,7 @@ export default function ResultView(props: ResultViewProps) {
           <ActionPanel title="Actions">
             <Action.CopyToClipboard title="Copy Results" content={response} />
             <Action.Paste title="Paste Results" content={response} />
+            <Action.CopyToClipboard title="Copy Browser Content" content={browserContent} />
             <Action
               title="Retry"
               onAction={() => retry({})}
