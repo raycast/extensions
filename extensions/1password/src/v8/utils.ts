@@ -29,9 +29,10 @@ export function actionsForItem(item: Item): ActionID[] {
     "copy-username",
     "copy-password",
     "copy-one-time-password",
+    "share-item",
     "switch-account",
   ];
-  // prioritize primary and secondary actions, then append the rest and remove duplicates
+  // pr ioritize primary and secondary actions, then append the rest and remove duplicates
   const deduplicatedActions = [
     ...new Set<ActionID>([preferences.primaryAction, preferences.secondaryAction, ...defaultActions]),
   ];
