@@ -7,7 +7,7 @@ import ChromeProfileDropDown from "./components/ChromeProfileDropdown";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "./constants";
 
-const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
+export const groupEntries = (allEntries?: HistoryEntry[]): GroupedEntries =>
   allEntries
     ? allEntries.reduce((acc, cur) => {
         const title = new Date(cur.lastVisited).toLocaleDateString(undefined, {
