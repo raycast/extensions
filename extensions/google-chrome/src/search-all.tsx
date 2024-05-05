@@ -40,10 +40,10 @@ export default function Command() {
   const groupedEntries = groupEntries(historyData);
   const groups = Array.from(groupedEntries.keys());
 
-  const revalidate = (profile: string) =>{
+  const revalidate = (profile: string) => {
     revalidateHistory?.(profile);
     revalidateBookmark?.(profile);
-  }
+  };
 
   return (
     errorViewTab ?? (
