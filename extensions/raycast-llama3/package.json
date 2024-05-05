@@ -1,0 +1,182 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-llama3",
+  "title": "Llama 3",
+  "description": "Use Llama-3 for FREE, on Raycast - no API Key required.",
+  "icon": "llama-icon.png",
+  "author": "muzhen_gaming",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "askAI",
+      "title": "Ask AI",
+      "description": "Ask Llama-3 a question",
+      "mode": "view",
+      "icon": "llama-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "description": "Chat with Llama-3",
+      "icon": "chat-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "askAboutSelectedText",
+      "title": "Ask About Selected Text",
+      "description": "Ask Llama-3 about selected text",
+      "mode": "view",
+      "icon": "clipboard-icon.png",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "continue",
+      "title": "Continue Text",
+      "description": "Generate completion of text",
+      "icon": "text-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize text",
+      "icon": "summarize-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain",
+      "description": "Explain text",
+      "icon": "explain-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "fixCode",
+      "title": "Fix Code",
+      "description": "Fix errors and bugs in code",
+      "icon": "code-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to friendly",
+      "mode": "view"
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "icon": "text-icon.png",
+      "description": "Change tone of selected text to professional",
+      "mode": "view"
+    },
+    {
+      "name": "paraphrase",
+      "title": "Paraphrase",
+      "icon": "text-icon.png",
+      "description": "Paraphrase selected text",
+      "mode": "view"
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "icon": "synonym-icon.png",
+      "description": "Find synonyms of word/phrase",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "word/phrase",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "icon": "grammar-icon.png",
+      "description": "Fix spelling and grammar of selected text",
+      "mode": "view"
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "icon": "longer-icon.png",
+      "description": "Make selected text longer",
+      "mode": "view"
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "icon": "shorten-icon.png",
+      "description": "Make selected text shorter",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "Default Llama-3 Provider",
+      "description": "The default provider and model used in this extension.",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "DeepInfra (meta-llama-3-8b)",
+          "value": "DeepInfraLlama3_8B"
+        },
+        {
+          "title": "DeepInfra (meta-llama-3-70b)",
+          "value": "DeepInfraLlama3_70B"
+        },
+        {
+          "title": "Replicate (meta-llama-3-70b)",
+          "value": "ReplicateLlama3"
+        }
+      ],
+      "default": "DeepInfraLlama3_8B"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.62.0",
+    "@raycast/utils": "^1.9.0",
+    "node-fetch-polyfill": "^2.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
