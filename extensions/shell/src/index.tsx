@@ -162,7 +162,7 @@ const runInIterm = (command: string) => {
     call_forward()
   `;
 
-  runAppleScript(script;
+  runAppleScript(script);
 };
 
 const runInKitty = (command: string) => {
