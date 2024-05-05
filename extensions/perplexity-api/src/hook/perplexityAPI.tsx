@@ -24,7 +24,7 @@ export default function ResultView(props: ResultViewProps) {
         model: model,
         messages: [
           { role: "system", content: sysPrompt },
-           { role: "user", content: userPrompt },
+          { role: "user", content: userPrompt },
         ],
         temperature: temp,
         stream: enable_streaming,
@@ -107,7 +107,14 @@ export default function ResultView(props: ResultViewProps) {
 
   return (
     <Detail
-      markdown={(user_extra_msg ? user_extra_msg.split('\n').map(line => `>${line}`).join('\n') + '\n\n' : "") + response}
+      markdown={
+        (user_extra_msg
+          ? user_extra_msg
+              .split("\n")
+              .map((line) => `>${line}`)
+              .join("\n") + "\n\n"
+          : "") + response
+      }
       isLoading={loading}
       actions={
         !loading && (
