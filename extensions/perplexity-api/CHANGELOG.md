@@ -1,5 +1,11 @@
 # Perplexity API Changelog
 
+## [Update] - 2024-05-05
+
+ - Question of command `Ask AI` is now displayed at the top of the response
+ - Updated default sytem prompt of `Fix Grammar and Spelling` command
+ - Current time added to system prompt
+
 ## [Update] - 2024-04-22
 
 - Added new Llama3 models and `Mixtral 8x22B` model.
