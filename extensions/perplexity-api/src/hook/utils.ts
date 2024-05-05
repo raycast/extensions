@@ -4,12 +4,12 @@ export const allModels = [
   { name: "Follow global model", id: "global" },
   { name: "Sonar Small 7B 32k", id: "llama-3-sonar-small-32k-chat" },
   { name: "Sonar Large 8x7B 32k", id: "llama-3-sonar-large-32k-chat" },
-  { name: "Llama3 8B 8k", id: "llama-3-8b-instruct" },
-  { name: "Llama3 70B 8k", id: "llama-3-70b-instruct" },
   { name: "Sonar Small 7B Online", id: "llama-3-sonar-small-32k-online" },
   { name: "Sonar Large 8x7B Online", id: "llama-3-sonar-large-32k-online" },
-  { name: "Mixtral 8x7B 16k", id: "mixtral-8x7b-instruct" },
+  { name: "Llama3 70B 8k", id: "llama-3-70b-instruct" },
+  { name: "Llama3 8B 8k", id: "llama-3-8b-instruct" },
   { name: "Mixtral 8x22B 16k", id: "mixtral-8x22b-instruct" },
+  { name: "Mixtral 8x7B 16k", id: "mixtral-8x7b-instruct" },
 ];
 
 // format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
