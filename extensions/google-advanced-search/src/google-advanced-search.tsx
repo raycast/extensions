@@ -46,26 +46,66 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="as_q" title="All these words:" />
-
-      <Form.TextField id="as_epq" title="This exact word or phrase:" />
-
-      <Form.TextField id="as_oq" title="Any of these words:" />
-
-      <Form.TextField id="as_eq" title="None of these words:" />
-
-      <Form.Separator />
-
-      <Form.TextField id="as_nlo" title="Numbers ranging from:" />
-
-      <Form.TextField id="as_nhi" title="Numbers ranging to:" info="" />
+      {/* WORD SEARCH */}
 
       <Form.Description
-        title="Numbers ranging"
-        text="Put two full stops between the numbers and add a unit of measurement: 10..35 kg, £300..£500, 2010..2011"
+        title="Word Search"
+        text="Specify keywords to include, exact phrases, optional words, and exclusions to streamline your search."
+      />
+
+      <Form.TextField
+        id="as_q"
+        title="All these words:"
+        info="Enter all the words that must appear in the search results. E.g.: electric car reviews"
+      />
+
+      <Form.TextField
+        id="as_epq"
+        title="This exact phrase:"
+        info="Enter an exact phrase that must be found in the results. E.g.: climate change legislation"
+      />
+
+      <Form.TextField
+        id="as_oq"
+        title="Any of these words:"
+        info="Enter words, any of which you're interested in finding within the results. E.g.: iPhone Samsung smartphone"
+      />
+
+      <Form.TextField
+        id="as_eq"
+        title="None of these words:"
+        info="List words you want to exclude from your search, helping to eliminate unwanted terms. E.g.: nuts dairy shellfish"
       />
 
       <Form.Separator />
+
+      {/* NUMERIC RANGE */}
+
+      <Form.Description
+        title="Numeric Range"
+        text="Set minimum and maximum numeric limits, such as price or date, to narrow down search results."
+      />
+
+      <Form.TextField
+        id="as_nlo"
+        title="Numbers ranging from:"
+        info="Set the start of a numerical range for your search. You can add a unit of measurement: 2022, $100, 10 kg"
+      />
+
+      <Form.TextField
+        id="as_nhi"
+        title="Numbers ranging to:"
+        info="Set the end of a numerical range for your search. You can add a unit of measurement: 2024, $300, 35 kg"
+      />
+
+      <Form.Separator />
+
+      {/* SEARCH FILTERS */}
+
+      <Form.Description
+        title="Search Filters"
+        text="Filter results by language, region, site, last update or format to customize search outcomes."
+      />
 
       <Form.Dropdown id="lr" title="Language:" defaultValue="" info="Find pages in the language that you select.">
         <Form.Dropdown.Item value="" title="any language" />
