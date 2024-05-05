@@ -162,6 +162,16 @@ const runInIterm = (command: string) => {
     call_forward()
   `;
 
+  runAppleScript(script;
+};
+
+const runInKitty = (command: string) => {
+  const escaped_command = command.replaceAll('"', '\\"');
+  const script = `
+    tell application "System Events"
+      do shell script "/Applications/kitty.app/Contents/MacOS/kitty --single-instance kitten @ launch --hold ${escaped_command}"
+    end tell
+  `;
   runAppleScript(script);
 };
 
@@ -266,6 +276,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
   const [history, setHistory] = useState<string[]>();
   const [recentlyUsed, setRecentlyUsed] = usePersistentState<string[]>("recently-used", []);
   const iTermInstalled = fs.existsSync("/Applications/iTerm.app");
+  const kittyInstalled = fs.existsSync("/Applications/kitty.app");
   const WarpInstalled = fs.existsSync("/Applications/Warp.app");
 
   const addToRecentlyUsed = (command: string) => {
@@ -285,12 +296,20 @@ export default function Command(props: { arguments?: ShellArguments }) {
       showHUD("Ran command in " + terminalType);
       popToRoot();
       closeMainWindow();
-      if (terminalType == "iTerm") {
-        runInIterm(props.arguments.command);
-      } else if (terminalType == "Warp") {
-        runInWarp(props.arguments.command);
-      } else {
-        runInTerminal(props.arguments.command);
+
+      switch (terminalType) {
+        case "iTerm":
+          runInIterm(props.arguments.command);
+          break;
+        case "kitty":
+          runInKitty(props.arguments.command);
+          break;
+        case "Warp":
+          runInWarp(props.arguments.command);
+          break;
+        case default:
+          runInTerminal(props.arguments.command);
+          break;
       }
     }
   }, [props.arguments]);
@@ -357,6 +376,18 @@ export default function Command(props: { arguments?: ShellArguments }) {
                         popToRoot();
                         addToRecentlyUsed(command);
                         runInIterm(command);
+                      }}
+                    />
+                  ) : null}
+                  {kittyInstalled ? (
+                    <Action
+                      title="Execute in kitty.app"
+                      icon={Icon.Window}
+                      onAction={() => {
+                        closeMainWindow();
+                        popToRoot();
+                        addToRecentlyUsed(command);
+                        runInKitty(command);
                       }}
                     />
                   ) : null}

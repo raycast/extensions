@@ -6,7 +6,8 @@
   "icon": "bash-icon.png",
   "author": "asubbotin",
   "contributors": [
-    "emiara"
+    "emiara",
+    "kevin_manca"
   ],
   "categories": ["Developer Tools"],
   "license": "MIT",
@@ -46,7 +47,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Decide which Terminal Application you want to use",
-      "description": "If iTerm or Warp is available, you can use them instead of Terminal.",
+      "description": "If iTerm, Warp or kitty is available, you can use them instead of Terminal.",
       "data": [{
         "title": "Terminal",
         "value": "Terminal"
@@ -54,6 +55,10 @@
         {
           "title": "iTerm",
           "value": "iTerm"
+        },
+        {
+          "title": "kitty",
+          "value": "kitty"
         },
         {
           "title": "Warp",
