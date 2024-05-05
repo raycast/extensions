@@ -5,11 +5,11 @@
   "description": "Ley you know the necessary notifactions only",
   "icon": "command-icon.png",
   "author": "shopping-jaws",
-  "owner": "shoppingjaws",
+  "owner": "shopping-jaws",
   "categories": [
     "Productivity"
   ],
-  "version": "0.1.5",
+  "version": "0.1.6",
   "license": "MIT",
   "commands": [
     {
