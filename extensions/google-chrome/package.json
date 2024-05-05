@@ -51,7 +51,7 @@
       "name": "search-all",
       "title": "Search All",
       "subtitle": "Google Chrome",
-      "description": "Search browser all tabs and history、bookmarks.",
+      "description": "Search browser all tabs and history,bookmarks.",
       "mode": "view"
     },
     {
