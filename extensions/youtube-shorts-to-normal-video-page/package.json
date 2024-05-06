@@ -13,7 +13,6 @@
     {
       "name": "index",
       "title": "YouTube Shorts to Normal Video Page",
-      "subtitle": "Redirect browser's YouTube shorts to a normal video page",
       "description": "Change the URL of the YouTube shorts page in browser to a normal video URL and load it.",
       "mode": "no-view"
     }
