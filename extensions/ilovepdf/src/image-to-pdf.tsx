@@ -20,12 +20,6 @@ type Values = {
   files: string[];
 };
 
-interface Preferences {
-  APIPublicKey: string;
-  APISecretKey: string;
-  OpenNow: boolean;
-}
-
 type Status = "init" | "success" | "failure";
 
 const { APIPublicKey: publicKey, APISecretKey: secretKey, OpenNow: openNow } = getPreferenceValues<Preferences>();
