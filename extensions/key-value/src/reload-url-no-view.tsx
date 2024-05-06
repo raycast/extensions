@@ -4,12 +4,6 @@ import fetch from "node-fetch";
 import { homedir } from "os";
 import path from "path";
 
-interface ExtensionPreferences {
-  jsonURLPath: string;
-  jsonKeyForKey: string;
-  jsonKeyForValue: string;
-}
-
 interface JsonItem {
   [key: string]: string;
 }
