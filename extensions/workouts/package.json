@@ -24,6 +24,13 @@
       "mode": "view"
     },
     {
+      "name": "leaderboard",
+      "title": "Weekly Leaderboard",
+      "description": "See your club's weekly leaderboard",
+      "mode": "view",
+      "icon": "leaderboard-icon.png"
+    },
+    {
       "name": "ask",
       "title": "Ask Workout AI",
       "description": "Ask AI about your 100 most recent workouts",

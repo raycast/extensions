@@ -1,3 +1,34 @@
+interface Country {
+  alpha2: string;
+  alpha3: string;
+  name: string;
+}
+
+interface Team {
+  name: string;
+  slug: string;
+  shortName: string;
+  gender: string;
+  sport: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+  userCount: number;
+  nameCode: string;
+  ranking: number;
+  disabled: boolean;
+  national: boolean;
+  type: number;
+  id: number;
+  country: Country;
+  teamColors: {
+    primary: string | null;
+    secondary: string | null;
+    text: string | null;
+  };
+}
+
 interface PlayerDetails {
   rowName: string;
   ranking: number;
@@ -6,10 +37,7 @@ interface PlayerDetails {
   bestRanking?: number | null;
   bestRankingDateTimestamp?: string | null;
   category: string;
-  country: {
-    alpha2: string;
-    name: string;
-  };
+  country: Country;
   disabled: string | null;
   displayInverseHomeAwayTeams: string | null;
   firstName: string | null;
@@ -26,7 +54,7 @@ interface PlayerDetails {
     name: string;
     slug: string;
   };
-  team: string | null;
+  team: Team | null;
   teamColors: {
     primary: string | null;
     secondary: string | null;

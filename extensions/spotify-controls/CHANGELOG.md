@@ -1,5 +1,9 @@
 # Spotify Controls Changelog
 
+## [Enhancement] - 2024-05-06
+
+Add Mute Volume command.
+
 ## [Enhancement] - 2024-04-19
 
 Show current track in HUD instead of alert.

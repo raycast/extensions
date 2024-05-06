@@ -72,6 +72,7 @@
 /extensions/avatar                                                  @koinzhang @madza91
 /extensions/axios-docs                                              @denizyoldas
 /extensions/background-sounds                                       @sebdanielsson
+/extensions/badges                                                  @LitoMore
 /extensions/baidu-ocr                                               @Chivier
 /extensions/bamboo-search-self-hosted                               @axp-dev
 /extensions/bamboohr                                                @RobErskine
@@ -115,6 +116,7 @@
 /extensions/bmw                                                     @aesign
 /extensions/bob                                                     @ViGeng @natsustan
 /extensions/bonk-price                                              @AnishDe12020
+/extensions/bookstack                                               @vipii
 /extensions/braid                                                   @felixhabib
 /extensions/brand-fetch                                             @dilutedev
 /extensions/brasileirao-serie-a                                     @willianhf
@@ -125,6 +127,7 @@
 /extensions/brew-services                                           @erics118
 /extensions/brightness-control                                      @CaliCastle
 /extensions/bring                                                   @amuelli @maximilianzuern @xilopaint
+/extensions/browser-ai                                              @aeither
 /extensions/browser-bookmarks                                       @thomaslombart @sasivarnan @ahpatel @chupi33 @tleo19 @jum8ys
 /extensions/browser-history                                         @crisboarna
 /extensions/browsers-profiles                                       @skydiver @kytta
@@ -220,6 +223,7 @@
 /extensions/commitlint                                              @lardissone
 /extensions/common-directory                                        @koinzhang
 /extensions/comodoro                                                @jesse-c
+/extensions/composerize                                             @j3lte
 /extensions/compress-pdf                                            @felixhaeberle
 /extensions/compressx                                               @dqhieu
 /extensions/confluence-search                                       @daviddkkim
@@ -275,6 +279,7 @@
 /extensions/dashlane                                                @dpnick
 /extensions/dashlane-vault                                          @tmwrnr
 /extensions/datadog                                                 @kudrykv @rcruzper @aexvir @albertoxamin @cussiol
+/extensions/datawrapper                                             @benkates
 /extensions/date-converter                                          @asportnoy
 /extensions/datetime-format-converter                               @yangxyo
 /extensions/dawa                                                    @SimonJ @pernielsentikaer
@@ -572,6 +577,7 @@
 /extensions/idonthavespotify                                        @sjdonado
 /extensions/ifanr                                                   @madcodelife
 /extensions/ihosts                                                  @404J
+/extensions/ilovepdf                                                @MohamedK1
 /extensions/image-host                                              @SuleymanEfe
 /extensions/image-wallet                                            @ibll
 /extensions/imagekit-uploader                                       @ludafa
@@ -1277,7 +1283,7 @@
 /extensions/teleport                                                @lamberttraccard
 /extensions/tempmail                                                @Joshlucpoll
 /extensions/temporary-email                                         @natterstefan @JoelKlint
-/extensions/tennis-standings                                        @faisal3389
+/extensions/tennis-standings                                        @faisal3389 @xilopaint
 /extensions/terminal                                                @ron-myers
 /extensions/terminalfinder                                          @yedongze @Bibabidu
 /extensions/terraform-doc                                           @shoppingjaws @b-per
@@ -1327,7 +1333,7 @@
 /extensions/toggle-scroll-bars-visibility                           @danulqua
 /extensions/tomito-controls                                         @elyyyse
 /extensions/toolbox                                                 @kkange @Saafo @pernielsentikaer @Yakitrak @podlesny-j
-/extensions/toothpick                                               @VladCuciureanu @briankosw @VladCuciureanu @sxn @pernielsentikaer
+/extensions/toothpick                                               @VladCuciureanu @briankosw @VladCuciureanu @sxn @pernielsentikaer @rspeicher
 /extensions/tower                                                   @tdwesten @sebduggan
 /extensions/trackflight                                             @cojmeister
 /extensions/tradingview-controls                                    @jacksonsalopek
@@ -1480,11 +1486,12 @@
 /extensions/youtube-companion                                       @sasivarnan
 /extensions/youtube-downloader                                      @vimtor @pernielsentikaer @darmiel
 /extensions/youtube-music                                           @danieldbird @AlexStrNik @zach-fuller @gnosticdev
+/extensions/youtube-shorts-to-normal-video-page                     @b6pzeusbc54tvhw5jgpyw8pwz2x6gs
 /extensions/youtube-subscriber-count                                @imaNNeo
 /extensions/youversion-suggest                                      @caleb531
 /extensions/yubikey-code                                            @yoyoyeti
 /extensions/zalgo-text                                              @petermiles
-/extensions/zed-recent-projects                                     @ewgenius @tleo19 @jylamont
+/extensions/zed-recent-projects                                     @ewgenius @tleo19 @jylamont @pernielsentikaer
 /extensions/zeitraum                                                @KennethWussmann
 /extensions/zen-mode                                                @pradeepb28
 /extensions/zendesk                                                 @cpenned

@@ -58,6 +58,10 @@ const getFFmpegCommand = (args: string) => {
   }
 };
 
+function sanitizeFileName(file: string): string {
+  return file.replace(/ /g, "\\ ").replace(/'/g, `\\'\\''`).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
 export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {
   const one = files.length === 1;
   await showToast(Toast.Style.Animated, one ? "Compressing video..." : "Compressing videos...");
@@ -67,7 +71,7 @@ export async function compressVideoFiles(files: string[], compression: Compressi
       const output = file.replace(/\.\w+$/, ` (yafw ${compression}).mp4`);
       const { crf, bitrate, bufsize } = COMPRESSION_OPTIONS[compression];
       const command = getFFmpegCommand(
-        `-y -i "${file}" -vcodec libx264 -crf ${crf} -b:v ${bitrate} -bufsize ${bufsize} "${output}"`,
+        `-y -i ${sanitizeFileName(file)} -vcodec libx264 -crf ${crf} -b:v ${bitrate} -bufsize ${bufsize} ${sanitizeFileName(output)}`,
       );
 
       if (!command) {
