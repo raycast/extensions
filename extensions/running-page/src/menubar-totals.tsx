@@ -1,4 +1,12 @@
-import { Color, getPreferenceValues, Icon, MenuBarExtra, openCommandPreferences } from "@raycast/api";
+import {
+  Color,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchType,
+  MenuBarExtra,
+  openCommandPreferences,
+} from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useRunningPage } from "./hook/useRunningPage";
 import { github } from "./util/auth";
@@ -36,6 +44,17 @@ function MenuBarTotals() {
     primarySportTotal = primaryStat === "year" ? ytdSwimTotal : primaryStat === "all" ? allSwimTotal : recentSwimTotal;
   }
 
+  const toIndex = async (days: string, type: string) => {
+    await launchCommand({
+      name: "index",
+      type: LaunchType.UserInitiated,
+      context: {
+        days,
+        type,
+      },
+    });
+  };
+
   return (
     <MenuBarExtra
       icon={{
@@ -49,36 +68,57 @@ function MenuBarTotals() {
         <MenuBarExtra.Item
           title={`${recentRunTotal}`}
           icon={{ source: sportsIcons.Run, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("recent", "Run")}
         />
         <MenuBarExtra.Item
           title={`${recentRideTotal}`}
           icon={{ source: sportsIcons.Ride, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("recent", "Ride")}
         />
         <MenuBarExtra.Item
           title={`${recentSwimTotal}`}
           icon={{ source: sportsIcons.Swim, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("recent", "Swim")}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="This Year">
-        <MenuBarExtra.Item title={`${ytdRunTotal}`} icon={{ source: sportsIcons.Run, tintColor: Color.PrimaryText }} />
+        <MenuBarExtra.Item
+          title={`${ytdRunTotal}`}
+          tooltip={"Year Run"}
+          icon={{ source: sportsIcons.Run, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("year", "Run")}
+        />
         <MenuBarExtra.Item
           title={`${ytdRideTotal}`}
+          tooltip={"Year Ride"}
           icon={{ source: sportsIcons.Ride, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("year", "Ride")}
         />
         <MenuBarExtra.Item
           title={`${ytdSwimTotal}`}
+          tooltip={"Year Swim"}
           icon={{ source: sportsIcons.Swim, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("year", "Swim")}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section title="All Time">
-        <MenuBarExtra.Item title={`${allRunTotal}`} icon={{ source: sportsIcons.Run, tintColor: Color.PrimaryText }} />
+        <MenuBarExtra.Item
+          title={`${allRunTotal}`}
+          tooltip={"Run"}
+          icon={{ source: sportsIcons.Run, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("all", "Run")}
+        />
         <MenuBarExtra.Item
           title={`${allRideTotal}`}
+          tooltip={"All Ride"}
           icon={{ source: sportsIcons.Ride, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("all", "Ride")}
         />
         <MenuBarExtra.Item
           title={`${allSwimTotal}`}
+          tooltip={"All Swim"}
           icon={{ source: sportsIcons.Swim, tintColor: Color.PrimaryText }}
+          onAction={() => toIndex("all", "Swim")}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>

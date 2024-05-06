@@ -1,17 +1,18 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { github } from "./util/auth";
 import Stat from "./components/Stat";
 import { useRunningPage } from "./hook/useRunningPage";
 import { filterActivities, getOwnerAndRepository } from "./util/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Activity } from "./type";
 
-function AuthorizedComponent() {
+function AuthorizedComponent(launchProps: LaunchProps) {
   const preferences = getPreferenceValues<Preferences>();
   const repository = getOwnerAndRepository(preferences.repository);
   const { data, isLoading, revalidate } = useRunningPage({ ...repository, path: preferences.path });
 
+  const [searchDays, setSearchDays] = useState(launchProps.launchContext?.days || "all");
   const [searchData, setSearchData] = useState<Activity[] | null>(null);
 
   const sections = useMemo(() => {
@@ -22,29 +23,30 @@ function AuthorizedComponent() {
     return { recent, ytd, others };
   }, [data]);
 
+  useEffect(() => {
+    if (searchDays === "all") {
+      setSearchData(null);
+    } else if (searchDays === "recent") {
+      setSearchData(sections?.recent || []);
+    } else {
+      setSearchData(sections?.ytd || []);
+    }
+  }, [searchDays, sections]);
+
   return (
     <List
       isShowingDetail={true}
       isLoading={isLoading}
+      searchText={launchProps.launchContext?.type}
       actions={
         <ActionPanel>
           <Action onAction={revalidate} title="Refresh" icon={Icon.ArrowClockwise} />
         </ActionPanel>
       }
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Activities Rage"
-          defaultValue={"all"}
-          onChange={(value) => {
-            if (value === "all") {
-              setSearchData(null);
-            } else {
-              setSearchData(filterActivities(data!, null, value === "recent" ? 28 : 365));
-            }
-          }}
-        >
+        <List.Dropdown tooltip="Select Activities Rage" defaultValue={searchDays} onChange={setSearchDays}>
           <List.Dropdown.Item title="All" value="all" />
-          <List.Dropdown.Item title="Past Year" value="ytd" />
+          <List.Dropdown.Item title="Past Year" value="year" />
           <List.Dropdown.Item title="Last 4 Weeks" value="recent" />
         </List.Dropdown>
       }
