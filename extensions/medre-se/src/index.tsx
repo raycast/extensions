@@ -114,7 +114,7 @@ Bu cüz \`${book.numberOfVerses}\` âyet içerir.`}
         />
       );
     }
-    case ResponseType.Page:
+    case ResponseType.Page: {
       const page = entry.data as Page;
       return (
         <List.Item
@@ -140,6 +140,7 @@ This page includes ${page.content
           }
         />
       );
+    }
     case ResponseType.Chapter: {
       const chapter = entry.data as Chapter;
       return (
