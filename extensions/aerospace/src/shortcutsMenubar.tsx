@@ -1,10 +1,14 @@
 import { Keyboard, MenuBarExtra } from "@raycast/api";
-import { AppConfig, getConfig } from "./utils/config";
+import { getConfig, handleConfigError } from "./utils/config";
 import { executeShortcut, extractKeyboardShortcuts, groupShortcutsByMode } from "./utils/shortcuts";
 import { normalizeKey } from "./utils/keys";
 
 export default function Command() {
-  const { config } = getConfig() as { config: AppConfig };
+  const { config, error } = getConfig();
+  if (error) {
+    handleConfigError(error);
+  }
+  if (config) {
   const keyboardShortcuts = extractKeyboardShortcuts(config);
   const groupedShortcuts = groupShortcutsByMode(keyboardShortcuts);
   //   console.log(groupedShortcuts);
@@ -45,4 +49,5 @@ export default function Command() {
       })}
     </MenuBarExtra>
   );
+}
 }

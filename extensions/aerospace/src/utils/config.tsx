@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Toast, showToast, open } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -51,7 +51,7 @@ function readConfigFile(configPath: string): { content?: string; error?: string 
   }
 }
 
-function parseTOML(content: string): { config?: object; error?: string } {
+function parseTOML(content: string): { config?: AppConfig; error?: string } {
   try {
     const config = TOML.parse(content);
     return { config };
@@ -69,7 +69,7 @@ function parseTOML(content: string): { config?: object; error?: string } {
   }
 }
 
-export function getConfig() {
+export function getConfig(): { config?: AppConfig; error?: string } {
   const { configPath } = getPreferenceValues();
   console.log("Config file path as is:", configPath);
 
@@ -87,4 +87,21 @@ export function getConfig() {
 
   console.log("Config:", config);
   return { config };
+}
+
+export async function handleConfigError(error: string) {
+ const options: Toast.Options = {
+   style: Toast.Style.Failure,
+   title: "Config Error",
+   message: error,
+   primaryAction: {
+     title: "Install Aerospace and try again",
+     onAction: (toast) => {
+       open("https://nikitabobko.github.io/AeroSpace/guide#installation");
+       toast.hide();
+     },
+   },
+ };
+
+ await showToast(options);
 }
