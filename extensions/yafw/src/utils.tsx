@@ -2,7 +2,7 @@ import { Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
 import fs, { existsSync } from "fs";
-import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH } from "./constants";
+import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH, VIDEO_FORMATS } from "./constants";
 
 const ffmpegPath = getPreferenceValues().ffmpeg_path || "/opt/homebrew/bin/ffmpeg";
 
@@ -108,4 +108,8 @@ export function capitalizeSnakeCase(text: string): string {
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export function isFileFormatSupported(filename: string): boolean {
+  return VIDEO_FORMATS.some((format) => filename.toLowerCase().endsWith(format));
 }

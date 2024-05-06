@@ -5,6 +5,9 @@
   "description": "Yet Another FFMPEG Wrapper. Compress videos easily from Raycast. Zero config. From your clipboard, or the Finder.",
   "icon": "command-icon.png",
   "author": "pablopunk",
+  "contributors": [
+    "mlz11"
+  ],
   "categories": [
     "Productivity",
     "Applications"

@@ -11,7 +11,14 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Videos } from "./videos";
-import { capitalizeSnakeCase, compressVideoFiles, fileName, normalizeFilePath, unique } from "./utils";
+import {
+  capitalizeSnakeCase,
+  compressVideoFiles,
+  fileName,
+  isFileFormatSupported,
+  normalizeFilePath,
+  unique,
+} from "./utils";
 import { fileExists } from "./utils";
 import { COMPRESSION_OPTIONS, CompressionOptionKey, DEFAULT_COMPRESSION, VIDEO_FORMATS } from "./constants";
 
@@ -58,7 +65,7 @@ export default function Command() {
 
   useEffect(() => {
     if (clipboard && "file" in clipboard && !files.includes(clipboard.file!)) {
-      if (VIDEO_FORMATS.some((format) => clipboard.file?.endsWith(format))) {
+      if (clipboard.file && isFileFormatSupported(clipboard.file)) {
         setFiles([...files, clipboard.file!], true);
       }
     }
@@ -67,7 +74,7 @@ export default function Command() {
   useEffect(() => {
     if (selectedFinderItems) {
       for (const item of selectedFinderItems) {
-        if (item.path && VIDEO_FORMATS.some((format) => item.path.endsWith(format))) {
+        if (item.path && isFileFormatSupported(item.path)) {
           setFiles([...files, item.path], true);
         }
       }
@@ -76,7 +83,7 @@ export default function Command() {
 
   useEffect(() => {
     for (const file of files) {
-      if (!VIDEO_FORMATS.some((format) => file.endsWith(format))) {
+      if (!isFileFormatSupported(file)) {
         showToast({
           title: "Invalid file",
           message: `The file "${fileName(file)}" is not a valid video file. Supported formats are: ${VIDEO_FORMATS.join(", ")}`,
