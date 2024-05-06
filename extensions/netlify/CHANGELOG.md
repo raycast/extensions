@@ -4,8 +4,8 @@
 
 ### Enhancements
 
-- Renamed `Search Domains` -> `Search Domains and Manage DNS Records`.
-    - `Manage DNS Records` subcommand to `View`, `Create`, `Delete` DNS Records
+- Renamed `Search Domains` (title) -> `Search Domains and Manage DNS Records`.
+    - Added `Manage DNS Records` subcommand to `View`, `Create`, `Delete` DNS Records
 
 ### Chore
 

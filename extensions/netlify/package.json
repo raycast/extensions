@@ -44,7 +44,7 @@
       "mode": "view"
     },
     {
-      "name": "search-domains-and-manage-dns-records",
+      "name": "search-domains",
       "title": "Search Domains and Manage DNS Records",
       "subtitle": "Netlify",
       "description": "Search your team's domain names, register new domains and manage DNS records.",
