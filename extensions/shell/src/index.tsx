@@ -168,10 +168,11 @@ const runInIterm = (command: string) => {
 const runInKitty = (command: string) => {
   const escaped_command = command.replaceAll('"', '\\"');
   const script = `
-    tell application "System Events"
-      do shell script "/Applications/kitty.app/Contents/MacOS/kitty --single-instance kitten @ launch --hold ${escaped_command}"
-    end tell
+      tell application "System Events"
+          do shell script "/Applications/kitty.app/Contents/MacOS/kitty --single-instance kitten @ launch --hold ${escaped_command}"
+      end tell
   `;
+
   runAppleScript(script);
 };
 
@@ -301,12 +302,15 @@ export default function Command(props: { arguments?: ShellArguments }) {
         case "iTerm":
           runInIterm(props.arguments.command);
           break;
+          
         case "kitty":
           runInKitty(props.arguments.command);
           break;
+
         case "Warp":
           runInWarp(props.arguments.command);
           break;
+
         case default:
           runInTerminal(props.arguments.command);
           break;
