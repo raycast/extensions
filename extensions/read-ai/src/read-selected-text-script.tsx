@@ -2,7 +2,6 @@ import React from "react";
 import { Action, ActionPanel, Detail, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { TextToSpeechProcessor } from "./processors/text-to-speech-processor";
-import { Preferences } from "./preferences";
 
 const Command = () => {
   const [script, setScript] = useState("");

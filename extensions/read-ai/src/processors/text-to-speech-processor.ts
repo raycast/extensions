@@ -12,7 +12,8 @@ import {
   splitSentences,
   parseSpeed,
 } from "../utills";
-import { Preferences, VoiceChoice } from "../preferences";
+
+type VoiceChoice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
 
 export class TextToSpeechProcessor {
   private textToSpeechQueue: string[] = [];

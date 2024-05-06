@@ -1,7 +1,6 @@
 import { getPreferenceValues, showToast, Toast, Clipboard } from "@raycast/api";
 import { ImageToTextProcessor } from "./processors/image-to-text-processor";
 import { TextToSpeechProcessor } from "./processors/text-to-speech-processor";
-import { Preferences } from "./preferences";
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences>();
