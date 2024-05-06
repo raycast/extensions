@@ -14,7 +14,7 @@ export default function Command() {
 
 async function downloadAndSaveJson() {
   try {
-    const prefs = getPreferenceValues<ExtensionPreferences>();
+    const prefs = getPreferenceValues<Preferences.ReloadUrlNoView>();
     // Check if the URL is defined
     if (!prefs.jsonURLPath) {
       showToast({
