@@ -1,5 +1,10 @@
 # Prompt Explorer Extension Changelog
 
+## [Refactor data fetching] - 2024-05-06
+
+- Fetch prompts & snippets from their respective APIs.
+- Fetch Preset AI Model names from Raycast backend.
+
 ## [Adding prompts] - 2024-05-04
 
 - Add task list prompt.
