@@ -64,28 +64,22 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
     })();
   }, [deviceId, data, type]);
 
-  const DeviceActions = ({ device }: { device: AudioDevice }) => <>
-    <SetAudioDeviceAction device={device} type={type} />
-    <Action.CreateQuicklink
-      quicklink={{
-        name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
-        link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
-          deviceId: device.id,
-        }),
-      }}
-    />
-    <Action.CopyToClipboard
-      title="Copy Device Name"
-      content={device.name}
-      shortcut={Keyboard.Shortcut.Common.Copy}
-    />
-    <ToggleDeviceVisibilityAction deviceId={device.uid} onAction={refetchHiddenDevices} />
-    <Action
-      title="Show Hidden Devices"
-      icon={Icon.Eye}
-      onAction={() => setShowHidden(true)}
-    />
-  </>
+  const DeviceActions = ({ device }: { device: AudioDevice }) => (
+    <>
+      <SetAudioDeviceAction device={device} type={type} />
+      <Action.CreateQuicklink
+        quicklink={{
+          name: `Set ${device.isOutput ? "Output" : "Input"} Device to ${device.name}`,
+          link: createDeepLink(device.isOutput ? "set-output-device" : "set-input-device", {
+            deviceId: device.id,
+          }),
+        }}
+      />
+      <Action.CopyToClipboard title="Copy Device Name" content={device.name} shortcut={Keyboard.Shortcut.Common.Copy} />
+      <ToggleDeviceVisibilityAction deviceId={device.uid} onAction={refetchHiddenDevices} />
+      <Action title="Show Hidden Devices" icon={Icon.Eye} onAction={() => setShowHidden(true)} />
+    </>
+  );
 
   return (
     <List isLoading={isLoading}>
@@ -201,7 +195,7 @@ function ToggleDeviceVisibilityAction({ deviceId, onAction }: { deviceId: string
 }
 
 async function toggleDeviceVisibility(deviceId: string) {
-  const hiddenDevices = JSON.parse(await LocalStorage.getItem("hiddenDevices") || "[]");
+  const hiddenDevices = JSON.parse((await LocalStorage.getItem("hiddenDevices")) || "[]");
   const index = hiddenDevices.indexOf(deviceId);
   if (index === -1) {
     hiddenDevices.push(deviceId);
@@ -212,7 +206,7 @@ async function toggleDeviceVisibility(deviceId: string) {
 }
 
 async function getHiddenDevices() {
-  return JSON.parse(await LocalStorage.getItem("hiddenDevices") || "[]");
+  return JSON.parse((await LocalStorage.getItem("hiddenDevices")) || "[]");
 }
 
 function getIcon(device: AudioDevice, isCurrent: boolean) {
