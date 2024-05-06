@@ -2,13 +2,13 @@ export const ReplicateProvider = "ReplicateProvider";
 import fetch from "node-fetch-polyfill";
 import { formatChatToPrompt } from "../helper";
 
-const url = "https://replicate.com/api/models/meta/meta-llama-3-70b-instruct/predictions";
+const url = (model) => `https://replicate.com/api/models/${model}/predictions`;
 const headers = {
   accept: "application/json",
   "Content-Type": "application/json",
 };
 
-export const getReplicateResponse = async function* (chat, max_retries = 10) {
+export const getReplicateResponse = async function* (chat, model, max_retries = 10) {
   let data = {
     stream: true,
     input: {
@@ -18,7 +18,7 @@ export const getReplicateResponse = async function* (chat, max_retries = 10) {
 
   try {
     // POST
-    const response = await fetch(url, {
+    const response = await fetch(url(model), {
       method: "POST",
       headers: headers,
       body: JSON.stringify(data),
@@ -48,6 +48,7 @@ export const getReplicateResponse = async function* (chat, max_retries = 10) {
       let str = new TextDecoder().decode(value);
 
       // iterate through each line
+      // implementation ported from gpt4free.
       let lines = str.split("\n");
       let is_only_line = true;
       for (let i = 0; i < lines.length; i++) {
@@ -70,7 +71,7 @@ export const getReplicateResponse = async function* (chat, max_retries = 10) {
   } catch (e) {
     if (max_retries > 0) {
       console.log(e, "Retrying...");
-      yield* getReplicateResponse(chat, max_retries - 1);
+      yield* getReplicateResponse(chat, model, max_retries - 1);
     } else {
       throw e;
     }

@@ -23,9 +23,8 @@ import { ReplicateProvider, getReplicateResponse } from "./Providers/replicate";
 // Providers
 // [Provider, Model, Stream]
 export const providers = {
-  DeepInfraLlama3_8B: [DeepInfraProvider, "meta-llama/Meta-Llama-3-8B-Instruct", true],
-  DeepInfraLlama3_70B: [DeepInfraProvider, "meta-llama/Meta-Llama-3-70B-Instruct", true],
-  ReplicateLlama3: [ReplicateProvider, "", true],
+  ReplicateLlama3_70B: [ReplicateProvider, "meta/meta-llama-3-70b-instruct", true],
+  ReplicateLlama3_8B: [ReplicateProvider, "meta/meta-llama-3-8b-instruct", true],
 };
 
 export const defaultProvider = () => {
@@ -277,7 +276,7 @@ export const chatCompletion = async (chat, options) => {
     response = await getDeepInfraResponse(chat, options.model);
   } else if (provider === ReplicateProvider) {
     // Replicate
-    response = await getReplicateResponse(chat);
+    response = await getReplicateResponse(chat, options.model);
   }
 
   return response;
