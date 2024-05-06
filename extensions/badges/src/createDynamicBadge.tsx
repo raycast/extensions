@@ -1,25 +1,39 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Cache, Detail, Form, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Cache, Detail, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { omitBy } from "lodash";
 import { Documentation } from "./components/actions.js";
+import { Input } from "./components/input.js";
 import { FieldType, fields } from "./components/parameters.js";
 import { Badge, LaunchFromSimpleIconsContext } from "./types.js";
-import { codeBlock, encodeBadgeContentParameters } from "./utils.js";
+import { codeBlock } from "./utils.js";
 
 const cache = new Cache();
-cache.set("launchCommandName", JSON.stringify("createStaticBadge"));
+cache.set("launchCommandName", JSON.stringify("createDynamicBadge"));
 
 const defaultBadge: Badge = {
-  label: "label",
-  message: "message",
-  color: "blue",
+  $type: "json",
+  url: "https://github.com/raycast/extensions/raw/main/extensions/badges/package.json",
+  query: "$.title",
+  label: "Dynamic Badge",
 };
 
-const parameterIds: FieldType[] = ["Label", "Message", "Color", "LabelColor", "Logo", "Style"];
+const parameterIds: FieldType[] = [
+  "Type",
+  "Url",
+  "Query",
+  "Prefix",
+  "Suffix",
+  "Label",
+  "Color",
+  "LabelColor",
+  "Logo",
+  "Style",
+];
+const validationFields = ["url", "query"];
 
 export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchFromSimpleIconsContext }>) {
-  const [badge, setBadge] = useCachedState<Badge>("static-badge", defaultBadge);
+  const [badge, setBadge] = useCachedState<Badge>("dynamic-badge", defaultBadge);
   const [input, setInput] = useState<{ title: string; value?: string }>({ title: "", value: undefined });
   const [inputValid, setInputValid] = useState(true);
 
@@ -30,7 +44,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   };
 
   const validateInput = (value: string) => {
-    if (["label", "color", "labelColor", "logoColor"].includes(input.title)) {
+    if (validationFields.includes(input.title)) {
       setInputValid(Boolean(value));
     }
   };
@@ -47,45 +61,28 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
     }
   }, [input]);
 
-  const badgeContent = encodeBadgeContentParameters(
-    [badge.label ?? "", badge.message ?? "", badge.color ?? ""].filter(Boolean),
-  ).join("-");
-
-  const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$") || ["label", "message", "color"].includes(k));
+  const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$"));
   const query = new URLSearchParams(urlParameters as Record<string, string>).toString();
 
   if (input.title) {
     return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title={`Submit ${input.title}`}
-              onSubmit={(values) => {
-                setBadge({ ...badge, [input.title]: values[input.title] });
-                setInput({ title: "", value: undefined });
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id={input.title}
-          title={input.title}
-          defaultValue={input.value}
-          placeholder={`Enter your ${input.title}`}
-          error={inputValid ? undefined : "This field is required"}
-          onChange={(value) => {
-            if (["label", "color", "labelColor", "logoColor"].includes(input.title)) {
-              setInputValid(Boolean(value));
-            }
-          }}
-        />
-      </Form>
+      <Input
+        input={input}
+        inputValid={inputValid}
+        onChange={(value) => {
+          if (validationFields.includes(input.title)) {
+            setInputValid(Boolean(value));
+          }
+        }}
+        onSubmit={(values) => {
+          setBadge({ ...badge, [input.title]: values[input.title] });
+          setInput({ title: "", value: undefined });
+        }}
+      />
     );
   }
 
-  const badgeUrl = new URL(`https://img.shields.io/badge/${badgeContent}`);
+  const badgeUrl = new URL(`https://img.shields.io/badge/dynamic/${badge.$type}`);
   badgeUrl.search = query;
 
   const parameterFields = parameterIds.map((id) => fields[id]);
@@ -110,7 +107,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
               onAction={() => reset()}
             />
           </ActionPanel.Section>
-          <Documentation title="API Documentation" url="https://shields.io/badges" />
+          <Documentation title="API Documentation" url={`https://shields.io/badges/dynamic-${badge.$type}-badge`} />
         </ActionPanel>
       }
       markdown={`${"# \n\n".repeat(5)}![](${badgeUrl})\n\n${codeBlock("markdown", badgeUrl.toString())}`}

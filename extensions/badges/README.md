@@ -4,7 +4,10 @@ Concise, consistent, and legible badges with [shields.io](https://github.com/bad
 
 ## Features
 
+- Create social badges
 - Create static badges
+- Create dynamic badges
+- Create endpoint badges
 
 ## Note
 
