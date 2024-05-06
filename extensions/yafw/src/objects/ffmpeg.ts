@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import path from "path";
 import { Binary } from "../abstractions";
 import { FFMPEG_BINARY_CUSTOM_PATH, PATH } from "../constants";
+import { sanitizeFileName } from "../utils";
 import { Ffprobe } from "./ffprobe";
 import { FsBinary } from "./fs.binary";
 
@@ -61,10 +62,10 @@ export class Ffmpeg {
       const command = this.ffmpegBinary.command(
         [
           "-y",
-          `-i "${input}"`,
+          `-i "${sanitizeFileName(input)}"`,
           ...(params ?? []),
           output ? "-progress pipe:1" : undefined,
-          output ? `"${output}"` : undefined,
+          output ? `"${sanitizeFileName(output)}"` : undefined,
         ]
           .filter((param) => param != null)
           .join(" "),

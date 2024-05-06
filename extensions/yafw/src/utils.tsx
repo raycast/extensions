@@ -58,7 +58,7 @@ const getFFmpegCommand = (args: string) => {
   }
 };
 
-function sanitizeFileName(file: string): string {
+export function sanitizeFileName(file: string): string {
   return file.replace(/ /g, "\\ ").replace(/'/g, `\\'\\''`).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
 

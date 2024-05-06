@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import path from "path";
 import { Binary } from "../abstractions";
 import { FFMPEG_BINARY_CUSTOM_PATH, PATH } from "../constants";
+import { sanitizeFileName } from "../utils";
 import { FsBinary } from "./fs.binary";
 
 export class FfprobeBinaryNotFoundException extends Error {}
@@ -38,7 +39,7 @@ export class Ffprobe {
 
     // ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 input.mp4
     const command = this.ffprobeBinary.command(
-      [...(params ?? []), `"${input}"`].filter((param) => param != null).join(" "),
+      [...(params ?? []), `"${sanitizeFileName(input)}"`].filter((param) => param != null).join(" "),
     );
     const result = execSync(command);
     return result.toString();
