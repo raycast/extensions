@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tennis-standings",
   "title": "Tennis Standings",
-  "description": "Get the ATP rankings",
+  "description": "Get the ATP and WTA rankings",
   "icon": "command-icon.png",
   "author": "Zalgo_123",
   "contributors": [
