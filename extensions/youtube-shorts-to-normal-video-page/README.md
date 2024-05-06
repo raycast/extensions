@@ -2,5 +2,3 @@
 
 This raycast extension just redirect current browser's YouTube shorts page
 to a normal video page.
-
-![demo](./media/demo.gif)
