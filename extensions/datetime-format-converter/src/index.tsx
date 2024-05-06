@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Clipboard, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Clipboard, Icon, Color } from "@raycast/api";
 import React, { useState } from "react";
 import dayjs from "dayjs";
 
@@ -36,17 +36,9 @@ export default function main() {
       if (dTime.isValid()) {
         setResultList(formatTime(time));
       } else {
-        showError();
+        setResultList([]);
       }
     }
-  }
-
-  function showError() {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "An error occurred",
-      message: "This is not a time format.",
-    });
   }
 
   function formatTime(time: string) {
@@ -59,7 +51,6 @@ export default function main() {
         // is unix timestamp milliseconds
         dTime = dayjs(Number(time));
       } else {
-        showError();
         return [];
       }
     } else {
@@ -110,9 +101,17 @@ export default function main() {
       searchText={input}
       searchBarPlaceholder="Enter a time or date"
     >
-      {resultList.map((time, index) => (
-        <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
-      ))}
+      {resultList && resultList.length > 0 ? (
+        resultList.map((time, index) => (
+          <List.Item key={index} title={time.toString()} actions={<Actions item={{ content: time }} />}></List.Item>
+        ))
+      ) : (
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+          title="An error occurred"
+          description="This is not a time format."
+        />
+      )}
     </List>
   );
 }
