@@ -60,8 +60,8 @@ type Repository = {
   remote?: string;
 };
 
-export const useRepositories = (): Repository[] | null => {
-  const [repos, setRepos] = useState<Repository[] | null>(null);
+export const useRepositories = (): Repository[] | undefined => {
+  const [repos, setRepos] = useState<Repository[]>();
 
   useEffect(() => {
     const run = async () => {
@@ -227,14 +227,16 @@ const getWorkflows = async (): Promise<{
   };
 };
 
-export const useWorkflows = (): {
-  relagit: Workflow[];
-  external: Workflow[];
-} | null => {
+export const useWorkflows = ():
+  | {
+      relagit: Workflow[];
+      external: Workflow[];
+    }
+  | undefined => {
   const [workflows, setWorkflows] = useState<{
     relagit: Workflow[];
     external: Workflow[];
-  } | null>(null);
+  }>();
 
   useEffect(() => {
     getWorkflows().then(setWorkflows);

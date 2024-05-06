@@ -22,7 +22,7 @@ export default () => {
   }
 
   return (
-    <List isLoading={repositories === null}>
+    <List isLoading={repositories === undefined}>
       {repositories?.map((repository) => (
         <List.Item
           key={repository.path}

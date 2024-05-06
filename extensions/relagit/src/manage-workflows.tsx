@@ -76,7 +76,7 @@ export default () => {
   checkRelaInstallation();
 
   return (
-    <List isShowingDetail isLoading={workflows === null}>
+    <List isShowingDetail isLoading={workflows === undefined}>
       <List.Section title=".relagit/workflows">
         {workflows?.relagit.map((workflow) => (
           <Item key={workflow.path} preferences={preferences} settings={settings} workflow={workflow} />
