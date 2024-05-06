@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists from "./utils";
+import { checkAdbDeviceExists } from "./utils";
 
 interface AdbDisplayDensityArguments {
   factor: string;
@@ -9,7 +9,7 @@ interface AdbDisplayDensityArguments {
 export default async function displayDensity(props: LaunchProps<{ arguments: AdbDisplayDensityArguments }>) {
   let adbDir: string;
   try {
-    adbDir = await checkAdbExists();
+    adbDir = await checkAdbDeviceExists();
   } catch (e) {
     await showHUD(`${e}`);
     return;

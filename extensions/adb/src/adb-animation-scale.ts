@@ -2,11 +2,11 @@ import { LaunchProps, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
 import { checkAdbDeviceExists } from "./utils";
 
-interface AdbFontSizeArguments {
+interface AdbAnimationScaleArguments {
   factor: string;
 }
 
-export default async function fontSize(props: LaunchProps<{ arguments: AdbFontSizeArguments }>) {
+export default async function animationScale(props: LaunchProps<{ arguments: AdbAnimationScaleArguments }>) {
   let adbDir: string;
   try {
     adbDir = await checkAdbDeviceExists();
@@ -15,6 +15,6 @@ export default async function fontSize(props: LaunchProps<{ arguments: AdbFontSi
     return;
   }
   const factor = props.arguments.factor;
-  await showHUD(`🔎 Setting font size to ${factor}`);
-  execSync(`${adbDir} shell settings put system font_scale ${factor}`);
+  await showHUD(`🎥 Setting animation scale to ${factor}`);
+  execSync(`${adbDir} shell settings put global window_animation_scale ${factor}`);
 }
