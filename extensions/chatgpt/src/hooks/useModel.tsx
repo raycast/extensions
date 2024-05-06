@@ -34,7 +34,17 @@ export function useModel(): ModelHook {
       gpt.models
         .list({ httpAgent: proxy })
         .then((res) => {
-          const models = res.data;
+          let models = res.data;
+          // some provider return text/plain content type
+          // and the sdk `defaultParseResponse` simply return `text`
+          if (models.length === 0) {
+            try {
+              const body = JSON.parse((res as unknown as { body: string }).body);
+              models = body.data;
+            } catch (e) {
+              // ignore try to parse it
+            }
+          }
           setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
         })
         .catch(async (err) => {

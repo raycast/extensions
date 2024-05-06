@@ -25,7 +25,7 @@ const Command = () => {
       throttle
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((searchResult) => <SearchListItem key={searchResult.name} searchResult={searchResult} />)}
+        {data?.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
       </List.Section>
     </List>
   );
@@ -37,6 +37,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       title={searchResult.name}
       subtitle={searchResult.description}
       accessories={[{ icon: Icon.Person, text: searchResult.sellerName, tooltip: searchResult.sellerName }]}
+      icon={searchResult.icon ? { source: searchResult.icon } : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -46,6 +47,14 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               content={searchResult.url}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
+            {searchResult.artist ? (
+              <Action.OpenInBrowser
+                title="Open Author Page in App Store"
+                url={searchResult.artist}
+                icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+              />
+            ) : null}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -57,10 +66,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 async function parseFetchResponse(response: Response) {
   const json = (await response.json()) as {
     results: {
+      bundleId: string;
       trackName: string;
       description?: string;
       sellerName?: string;
       trackViewUrl: string;
+      artistViewUrl?: string;
+      artworkUrl60?: string;
     }[];
   };
 
@@ -70,19 +82,25 @@ async function parseFetchResponse(response: Response) {
 
   return json.results.map((result) => {
     return {
+      id: result.bundleId,
       name: result.trackName,
       description: result.description,
       sellerName: result.sellerName,
       url: result.trackViewUrl,
+      artist: result.artistViewUrl,
+      icon: result.artworkUrl60,
     } as SearchResult;
   });
 }
 
 interface SearchResult {
+  id: string;
   name: string;
   description?: string;
   sellerName?: string;
   url: string;
+  artist?: string;
+  icon?: string;
 }
 
 export default Command;

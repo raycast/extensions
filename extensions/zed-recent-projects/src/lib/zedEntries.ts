@@ -19,13 +19,14 @@ function getPath() {
 }
 
 interface Workspace {
-  workspace_location: string;
+  local_paths: string;
   timestamp: number;
 }
 
 interface ZedRecentWorkspaces {
   entries: ZedEntries;
   isLoading?: boolean;
+  error?: Error;
 }
 
 export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
@@ -37,16 +38,16 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
     };
   }
 
-  const { data, isLoading } = useSQL<Workspace>(path, "SELECT workspace_location, timestamp FROM workspaces");
+  const { data, isLoading, error } = useSQL<Workspace>(path, "SELECT local_paths, timestamp FROM workspaces");
 
   return {
     entries: data
       ? data
-          .filter((d) => !!d.workspace_location)
+          .filter((d) => !!d.local_paths)
           .map<ZedEntry>((d) => {
-            const pathStart = d.workspace_location.indexOf("/");
+            const pathStart = d.local_paths.indexOf("/");
             return {
-              uri: "file://" + d.workspace_location.substring(pathStart),
+              uri: "file://" + d.local_paths.substring(pathStart),
               lastOpened: new Date(d.timestamp).getTime(),
             };
           })
@@ -61,5 +62,6 @@ export function useZedRecentWorkspaces(): ZedRecentWorkspaces {
           }, {})
       : {},
     isLoading,
+    error,
   };
 }
