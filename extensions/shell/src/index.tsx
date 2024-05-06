@@ -138,14 +138,11 @@ const runInIterm = (command: string) => {
 
     -- Main
     if has_windows() then
-    	-- Open the command in the current session unless it has a running command, e.g., ssh or top
-    	if is_processing() then
-    		if open_in_new_window then
-    			new_window()
-    		else
-    			new_tab()
-    		end if
-    	end if
+      if open_in_new_window then
+        new_window()
+      else
+        new_tab()
+      end if
     else
     	-- If iTerm is not running and we tell it to create a new window, we get two
     	-- One from opening the application, and the other from the command
@@ -156,14 +153,10 @@ const runInIterm = (command: string) => {
     	end if
     end if
 
-    if is_running() then
-      new_tab()
-    else
-      -- Make sure a window exists before we continue, or the write may fail
-      repeat until has_windows()
-        delay 0.01
-      end repeat
-    end
+    -- Make sure a window exists before we continue, or the write may fail
+    repeat until has_windows()
+    	delay 0.01
+    end repeat
 
     send_text("${command.replaceAll('"', '\\"')}")
     call_forward()

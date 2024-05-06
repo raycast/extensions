@@ -49,10 +49,10 @@ export type Package = {
     workerd?: boolean;
     bun?: boolean;
   };
-  updatedAt: string;
-  createdAt: string;
-  versionCount: number;
-  score: number;
-  latestVersion: string;
+  updatedAt: string | null;
+  createdAt: string | null;
+  versionCount: number | null;
+  score: number | null;
+  latestVersion: string | null;
   whenFeatured: string | null;
 };

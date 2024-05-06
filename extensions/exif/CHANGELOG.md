@@ -1,5 +1,9 @@
 # Exif Changelog
 
+## [Add Browser Extension launch] - 2024-04-30
+
+- Add command that will get the url from the current open tab in your browser and open the `Show Metadata for Image` command with this url
+
 ## [Minor Bugfix] - 2024-01-01
 
 - Fix issue where `url` is undefined, see [this issue](https://www.raycast.com/extension-issues/j3lte/exif/4716045440)

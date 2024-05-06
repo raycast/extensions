@@ -15,13 +15,20 @@ import { ChatView } from "./views/chat";
 import { ModelDropdown } from "./views/model/dropdown";
 import { QuestionForm } from "./views/question/form";
 
-export default function Ask(props: { conversation?: Conversation }) {
+export default function Ask(props: { conversation?: Conversation; initialQuestion?: string }) {
   const conversations = useConversations();
   const models = useModel();
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
   const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
-  const question = useQuestion({ initialQuestion: "", disableAutoLoad: props.conversation ? true : false });
+  const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
+
+  useEffect(() => {
+    // only work on `Summarize -> Ask` flow
+    if (props.initialQuestion) {
+      chats.ask(props.initialQuestion, props.conversation!.model);
+    }
+  }, []);
 
   const [conversation, setConversation] = useState<Conversation>(
     props.conversation ?? {
@@ -50,7 +57,9 @@ export default function Ask(props: { conversation?: Conversation }) {
   const { push, pop } = useNavigation();
 
   useEffect(() => {
-    if (!isAutoFullInput) {
+    if (props.initialQuestion || !isAutoFullInput) {
+      // `initialQuestion` only set from Summarize.tsx page
+      // `isAutoFullInput` is set from preferences
       setLoading(false);
       return;
     }

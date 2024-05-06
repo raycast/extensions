@@ -1,5 +1,9 @@
 # Omnivore Changelog
 
+## Tags/Labels support - 2024-29-04
+
+- From now you can quickly capture URL with labels
+
 ## [Searching improvements] - 2023-12-07
 
 - No results shows correct message
