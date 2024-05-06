@@ -3,12 +3,23 @@
   "name": "google-calendar",
   "title": "Google Calendar",
   "description": "Show Google calendar events in raycast",
-  "icon": "command-icon.png",
-  "author": "d4vz",
+  "icon": "google-calendar-512px-512px.png",
+  "author": "davi_orlandi",
   "categories": [
-    "Applications"
+    "Applications",
+    "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "required": true,
+      "name": "clientId",
+      "title": "OAuth Client ID",
+      "description": "OAuth Client ID for Google Calendar API",
+      "type": "textfield",
+      "defaultValue": ""
+    }
+  ],
   "commands": [
     {
       "name": "daily",
@@ -21,13 +32,6 @@
       "name": "index",
       "title": "Calendar Events",
       "description": "Show calendar events in Google Calendar",
-      "mode": "view",
-      "icon": "google-calendar.png"
-    },
-    {
-      "name": "logout",
-      "title": "Logout",
-      "description": "Logout in Google Calendar",
       "mode": "view",
       "icon": "google-calendar.png"
     }

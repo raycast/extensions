@@ -1,15 +1,18 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getDailyCalendarEvents } from "../services/events";
-import { useAuth } from "./useAuth";
 
 export const useGetDailyCalendarEvents = (calendarId: string) => {
-  const { authorize } = useAuth();
-
   return useCachedPromise(
     async (calendarId: string) => {
-      await authorize();
-      const calendarEvents = await getDailyCalendarEvents(calendarId);
-      return calendarEvents;
+      try {
+        const calendarEvents = await getDailyCalendarEvents(calendarId);
+        return calendarEvents;
+      } catch (error) {
+        showFailureToast(error, {
+          title: "Failed to fetch daily calendar events",
+        });
+        return [];
+      }
     },
     [calendarId],
     { initialData: [] },

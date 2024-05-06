@@ -1,19 +1,15 @@
-import fetch from "node-fetch";
-import { client } from "../client";
+import { client } from "../lib/client";
+import { fetch } from "../lib/fetch";
 import { Event } from "../types/event";
 
 const getDayInterval = () => {
   const now = new Date();
-  const offset = now.getTimezoneOffset();
 
   const start = new Date(now);
   start.setHours(0, 0, 0, 0);
-  start.setMinutes(start.getMinutes() - offset);
 
   const end = new Date(now);
   end.setHours(23, 59, 59, 999);
-  end.setMinutes(end.getMinutes() - offset);
-
   return { start, end };
 };
 
