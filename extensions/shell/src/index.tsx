@@ -101,6 +101,17 @@ const Result = ({ cmd }: { cmd: string }) => {
   );
 };
 
+const runInKitty = (command: string) => {
+  const escaped_command = command.replaceAll('"', '\\"');
+  const script = `
+    tell application "System Events"
+      do shell script "/Applications/kitty.app/Contents/MacOS/kitty -1 kitten @ launch --hold ${escaped_command}"
+    end tell
+  `;
+
+  runAppleScript(script);
+};
+
 const runInIterm = (command: string) => {
   const script = `
     -- Set this property to true to open in a new window instead of a new tab
@@ -153,24 +164,14 @@ const runInIterm = (command: string) => {
     	end if
     end if
 
-    -- Make sure a window exists before we continue, or the write may fail
-    repeat until has_windows()
-    	delay 0.01
-    end repeat
+    on send_text(custom_text)
+        tell application "System Events"
+            keystroke custom_text
+        end tell
+    end send_text
 
     send_text("${command.replaceAll('"', '\\"')}")
     call_forward()
-  `;
-
-  runAppleScript(script);
-};
-
-const runInKitty = (command: string) => {
-  const escaped_command = command.replaceAll('"', '\\"');
-  const script = `
-      tell application "System Events"
-          do shell script "/Applications/kitty.app/Contents/MacOS/kitty --single-instance kitten @ launch --hold ${escaped_command}"
-      end tell
   `;
 
   runAppleScript(script);
@@ -276,8 +277,8 @@ export default function Command(props: { arguments?: ShellArguments }) {
   const [cmd, setCmd] = useState<string>("");
   const [history, setHistory] = useState<string[]>();
   const [recentlyUsed, setRecentlyUsed] = usePersistentState<string[]>("recently-used", []);
-  const iTermInstalled = fs.existsSync("/Applications/iTerm.app");
   const kittyInstalled = fs.existsSync("/Applications/kitty.app");
+  const iTermInstalled = fs.existsSync("/Applications/iTerm.app");
   const WarpInstalled = fs.existsSync("/Applications/Warp.app");
 
   const addToRecentlyUsed = (command: string) => {
@@ -297,21 +298,20 @@ export default function Command(props: { arguments?: ShellArguments }) {
       showHUD("Ran command in " + terminalType);
       popToRoot();
       closeMainWindow();
-
       switch (terminalType) {
-        case "iTerm":
-          runInIterm(props.arguments.command);
-          break;
-          
         case "kitty":
           runInKitty(props.arguments.command);
+          break;
+
+        case "iTerm":
+          runInWarp(props.arguments.command);
           break;
 
         case "Warp":
           runInWarp(props.arguments.command);
           break;
 
-        case default:
+        default:
           runInTerminal(props.arguments.command);
           break;
       }
@@ -371,18 +371,6 @@ export default function Command(props: { arguments?: ShellArguments }) {
                     onPush={() => addToRecentlyUsed(command)}
                     target={<Result cmd={command} />}
                   />
-                  {iTermInstalled ? (
-                    <Action
-                      title="Execute in iTerm.app"
-                      icon={Icon.Window}
-                      onAction={() => {
-                        closeMainWindow();
-                        popToRoot();
-                        addToRecentlyUsed(command);
-                        runInIterm(command);
-                      }}
-                    />
-                  ) : null}
                   {kittyInstalled ? (
                     <Action
                       title="Execute in kitty.app"
@@ -392,6 +380,18 @@ export default function Command(props: { arguments?: ShellArguments }) {
                         popToRoot();
                         addToRecentlyUsed(command);
                         runInKitty(command);
+                      }}
+                    />
+                  ) : null}
+                  {iTermInstalled ? (
+                    <Action
+                      title="Execute in iTerm.app"
+                      icon={Icon.Window}
+                      onAction={() => {
+                        closeMainWindow();
+                        popToRoot();
+                        addToRecentlyUsed(command);
+                        runInIterm(command);
                       }}
                     />
                   ) : null}
