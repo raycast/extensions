@@ -132,6 +132,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard
+              title="Copy URL to Clipboard" 
               content={badgeUrl.toString()}
               onCopy={() => {
                 if (resetOnCopy) reset();
