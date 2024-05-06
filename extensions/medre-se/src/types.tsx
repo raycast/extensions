@@ -15,7 +15,6 @@ export interface Definition {
     reference: string;
 }
 
-
 export interface Chapter {
     name: string;
     info: string;
