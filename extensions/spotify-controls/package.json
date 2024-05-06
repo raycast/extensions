@@ -158,6 +158,13 @@
       ]
     },
     {
+      "name": "muteVolume",
+      "title": "Mute Volume",
+      "subtitle": "Spotify",
+      "description": "Mute volume in Spotify.",
+      "mode": "no-view"
+    },
+    {
       "name": "quarterVolume",
       "title": "Set Volume to 25%",
       "subtitle": "Spotify",
