@@ -1,7 +1,6 @@
 # Changelog
 
-## [Release to public store] - 2024-04-27
-
+## [Release to public store] - 2024-05-06
 - Add HUD when successfully worked
 - Improve extension metadata in package.json
 - Update README.md
