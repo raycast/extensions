@@ -110,6 +110,7 @@ export function capitalizeSnakeCase(text: string): string {
     .join(" ");
 }
 
-export function isFileFormatSupported(filename: string): boolean {
-  return VIDEO_FORMATS.some((format) => filename.toLowerCase().endsWith(format));
+export function isFileFormatSupported(_filename: string): boolean {
+  const filename = _filename.toLowerCase();
+  return VIDEO_FORMATS.some((format) => filename.endsWith(format));
 }
