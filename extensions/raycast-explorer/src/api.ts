@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OAuth, AI } from "@raycast/api";
-
 import fetch from "node-fetch";
 
 import { Prompt } from "./data/prompts";
