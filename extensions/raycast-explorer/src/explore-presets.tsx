@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { getAvailableAiModels } from "./api";
 import { Preset, PresetCategory } from "./data/presets";
-import { raycastProtocol } from "./helpers";
+import { getIcon, raycastProtocol } from "./helpers";
 
 const CONTRIBUTE_URL = "https://github.com/raycast/preset-explorer/blob/main/data/presets.ts";
 const baseUrl = "https://presets.ray.so";
@@ -31,9 +31,7 @@ export default function ExplorePresets() {
         <List.Dropdown tooltip="Select Category" onChange={setSelectedCategory} value={selectedCategory}>
           <List.Dropdown.Item icon={Icon.BulletPoints} title="All Categories" value="" />
           {categories?.map((category) => {
-            const icon = category.icon
-              .replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-              .replace(/^./, (str) => str.toUpperCase()) as keyof typeof Icon;
+            const icon = getIcon(category.icon || "");
             return (
               <List.Dropdown.Item
                 key={category.slug}
@@ -50,9 +48,7 @@ export default function ExplorePresets() {
         <List.Section key={category.name} title={category.name}>
           {category.presets.map((preset) => {
             const addToRaycastUrl = `${raycastProtocol}presets/import?${makeQueryString(preset)}`;
-            const icon = preset.icon
-              .replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-              .replace(/^./, (str) => str.toUpperCase()) as keyof typeof Icon;
+            const icon = getIcon(preset.icon || "");
 
             const aiModel = aiModels?.find((model) => model.id === preset.model);
             const modelName =
