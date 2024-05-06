@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { getPreferenceValues } from "@raycast/api";
-
-import useFetch from "./useFetch";
+import { useFetch } from "@raycast/utils";
 
 const ENDPOINT = new URL("https://api.search.brave.com/res/v1/suggest/search");
 
@@ -25,6 +24,8 @@ const toResult = (result: ApiSuggestionsResult): SuggestionsResult => {
   };
 };
 
+const fallback: SuggestionsResult[] = [];
+
 export default function useSuggestions(query: string, execute: boolean) {
   const { suggest_api_key } = getPreferenceValues();
   const trimmedQuery = query.trim();
@@ -44,19 +45,19 @@ export default function useSuggestions(query: string, execute: boolean) {
     };
   }, [suggest_api_key]);
 
-  const { isLoading, data } = useFetch<ApiSuggestionsData>(
-    url,
-    {
-      headers,
-    },
+  const { isLoading, data } = useFetch<ApiSuggestionsData>(url.toString(), {
+    headers,
     execute,
-  );
+    keepPreviousData: true,
+  });
 
   const filteredResults = useMemo(() => {
-    return [...(data?.results.filter((result) => result.query !== trimmedQuery).map(toResult) ?? [])];
+    return data?.results.filter((result) => result.query !== trimmedQuery).map(toResult) ?? [];
   }, [data]);
 
-  const finalResults = useMemo(() => {
+  const results = useMemo(() => {
+    if (execute === false) return fallback;
+
     return [
       {
         id: "input",
@@ -64,7 +65,7 @@ export default function useSuggestions(query: string, execute: boolean) {
       },
       ...filteredResults,
     ];
-  }, [trimmedQuery, filteredResults]);
+  }, [trimmedQuery, filteredResults, execute]);
 
-  return { isLoading, results: finalResults };
+  return { isLoading, results };
 }

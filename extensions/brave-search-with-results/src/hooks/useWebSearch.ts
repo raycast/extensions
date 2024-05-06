@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { getPreferenceValues } from "@raycast/api";
-
-import useFetch from "./useFetch";
+import { useFetch } from "@raycast/utils";
 
 const ENDPOINT = new URL("https://api.search.brave.com/res/v1/web/search");
 
@@ -36,6 +35,8 @@ const toResult = (result: ApiWebSearchResult): WebSearchResult => {
   };
 };
 
+const fallback: WebSearchResult[] = [];
+
 export default function useWebSearch(query: string, execute: boolean) {
   const { data_for_search_api_key } = getPreferenceValues();
 
@@ -53,16 +54,16 @@ export default function useWebSearch(query: string, execute: boolean) {
     };
   }, [data_for_search_api_key]);
 
-  const { isLoading, data } = useFetch<ApiWebSearchData>(
-    url,
-    {
-      headers,
-    },
+  const { isLoading, data } = useFetch<ApiWebSearchData>(url.toString(), {
+    headers,
     execute,
-  );
+    keepPreviousData: false,
+  });
 
   const results = useMemo(() => {
-    return data?.web.results.map(toResult) ?? [];
+    if (execute === false) return fallback;
+
+    return data?.web.results.map(toResult) ?? fallback;
   }, [data, execute]);
 
   return { isLoading, results };
