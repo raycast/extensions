@@ -162,8 +162,10 @@ export default function Chat({ launchContext }) {
         <Form.TextArea id="systemPrompt" defaultValue="" />
         <Form.Description title="Llama-3 Provider" text="The provider and model used for this chat." />
         <Form.Dropdown id="provider" defaultValue={defaultProviderString}>
-          <Form.Dropdown.Item title="Replicate (meta-llama-3-70b)" value="ReplicateLlama3_70B" />
           <Form.Dropdown.Item title="Replicate (meta-llama-3-8b)" value="ReplicateLlama3_8B" />
+          <Form.Dropdown.Item title="Replicate (meta-llama-3-70b)" value="ReplicateLlama3_70B" />
+          <Form.Dropdown.Item title="DeepInfra (meta-llama-3-8b)" value="DeepInfraLlama3_8B" />
+          <Form.Dropdown.Item title="DeepInfra (meta-llama-3-70b)" value="DeepInfraLlama3_70B" />
         </Form.Dropdown>
       </Form>
     );
