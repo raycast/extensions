@@ -164,11 +164,10 @@ const runInIterm = (command: string) => {
     	end if
     end if
 
-    on send_text(custom_text)
-        tell application "System Events"
-            keystroke custom_text
-        end tell
-    end send_text
+    -- Make sure a window exists before we continue, or the write may fail
+    repeat until has_windows()
+    	delay 0.01
+    end repeat
 
     send_text("${command.replaceAll('"', '\\"')}")
     call_forward()
@@ -270,15 +269,15 @@ const runInTerminal = (command: string) => {
   end tell
   `;
 
-  runAppleScript(script);
+  runAppleScript(script)
 };
 
 export default function Command(props: { arguments?: ShellArguments }) {
   const [cmd, setCmd] = useState<string>("");
   const [history, setHistory] = useState<string[]>();
   const [recentlyUsed, setRecentlyUsed] = usePersistentState<string[]>("recently-used", []);
-  const kittyInstalled = fs.existsSync("/Applications/kitty.app");
   const iTermInstalled = fs.existsSync("/Applications/iTerm.app");
+  const kittyInstalled = fs.existsSync("/Applications/kitty.app");
   const WarpInstalled = fs.existsSync("/Applications/Warp.app");
 
   const addToRecentlyUsed = (command: string) => {
