@@ -9,7 +9,7 @@ interface Arguments {
 }
 
 export default async function copyFavicon(props: { arguments: Arguments }) {
-  var url = props.arguments.url;
+  let url = props.arguments.url;
   if (!url.includes("https://")) {
     url = "https://" + url;
   }
