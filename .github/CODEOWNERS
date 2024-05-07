@@ -459,7 +459,7 @@
 /extensions/geohash-encode-decode                                   @alrico88
 /extensions/gerrit-code-review                                      @vkhitrin
 /extensions/get-direct-link                                         @trungnghiatn
-/extensions/get-favicon                                             @vimtor
+/extensions/get-favicon                                             @vimtor @robotdestroy
 /extensions/get-ssh-key                                             @tc9011 @pernielsentikaer
 /extensions/getsound                                                @asgu @asgu @asgu
 /extensions/gg-deals                                                @whitespacecode
