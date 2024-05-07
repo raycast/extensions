@@ -6,7 +6,8 @@
   "icon": "bash-icon.png",
   "author": "asubbotin",
   "contributors": [
-    "emiara"
+    "emiara",
+    "mohamedk1"
   ],
   "categories": ["Developer Tools"],
   "license": "MIT",
