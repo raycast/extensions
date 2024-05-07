@@ -164,6 +164,7 @@ const runInIterm = (command: string) => {
     	end if
     end if
 
+
     -- Make sure a window exists before we continue, or the write may fail
     repeat until has_windows()
     	delay 0.01
@@ -269,7 +270,7 @@ const runInTerminal = (command: string) => {
   end tell
   `;
 
-  runAppleScript(script)
+  runAppleScript(script);
 };
 
 export default function Command(props: { arguments?: ShellArguments }) {
