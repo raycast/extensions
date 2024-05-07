@@ -80,7 +80,10 @@ export function getStartOfWeekUnix() {
   return Math.floor(weekStart.getTime() / 1000);
 }
 
-export function getSportTypesFromActivityTypes(activityTypes: ActivityType[]): SportType[] {
+export function getSportTypesFromActivityTypes(
+  activityTypes: ActivityType[],
+  localized_sport_type: string,
+): SportType[] {
   const sportTypes: SportType[] = [];
   if (activityTypes.includes(ActivityType.Ride)) {
     sportTypes.push(SportType.Ride);
@@ -97,5 +100,11 @@ export function getSportTypesFromActivityTypes(activityTypes: ActivityType[]): S
   activityTypes.forEach((activityType) => {
     sportTypes.push(activityType as unknown as SportType);
   });
+  sportTypes.push("localized_sport_type" as unknown as SportType);
+  if (localized_sport_type == "Multisport") {
+    Object.values(SportType).forEach((sportType) => {
+      sportTypes.push(sportType);
+    });
+  }
   return sportTypes;
 }
