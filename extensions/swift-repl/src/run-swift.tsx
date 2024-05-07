@@ -2,20 +2,19 @@ import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
-type Result = {
+type CommandResult = {
   command: string;
   stdout: string | undefined;
   stderr: string | undefined;
 };
 
 export default function Command() {
-  const [results, setResults] = useState<Result[]>([]);
+  const [results, setResults] = useState<CommandResult[]>([]);
   const [code, setCode] = useState<string | undefined>();
   const [runningCode, setRunningCode] = useState<string | undefined>();
   const [pendingCode, setPendingCode] = useState<string | undefined>();
 
-  // @ts-expect-error This works
-  const { isLoading, data } = useExec<Result, undefined>("swift", {
+  const { isLoading, data } = useExec<CommandResult, undefined>("swift", ["repl"], {
     execute: !!runningCode?.trim(),
     input: runningCode,
     parseOutput: ({ stdout, stderr }) => {
@@ -23,7 +22,7 @@ export default function Command() {
         command: code,
         stdout,
         stderr,
-      };
+      } as CommandResult;
     },
   });
 
