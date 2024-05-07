@@ -15,10 +15,8 @@ import {
 import { Guide } from "./Guide";
 import { ItemActionPanel } from "./ItemActionPanel";
 import { useMemo, useState } from "react";
-import { useAuth } from "./AuthContext";
 
 export function Items({ flags }: { flags?: string[] }) {
-  const { isAuthenticated } = useAuth();
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
   const [passwords, setPasswords] = useState<Item[]>([]);
 
@@ -29,7 +27,7 @@ export function Items({ flags }: { flags?: string[] }) {
     if (!items) return;
     if (category === DEFAULT_CATEGORY) return setPasswords(items);
     setPasswords(items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase()));
-  }, [items, category, isAuthenticated]);
+  }, [items, category]);
 
   const onCategoryChange = (newCategory: string) => {
     category !== newCategory && setCategory(newCategory);
