@@ -8,10 +8,10 @@ export default function Command() {
   const [utcDateTime, setUtcDateTime] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const getClipboardText = async () => {  
+    const getClipboardText = async () => {
       const clipboardContents = await Clipboard.readText();
       setClipboardText(clipboardContents);
-    }
+    };
 
     getClipboardText();
   }, []);
@@ -33,14 +33,14 @@ export default function Command() {
       } catch (e) {
         await showToast({ title: "Error", message: "Something went wrong." });
       }
-    }
+    };
 
     handleInputChange();
   }, [input, clipboardText]);
 
   const handleSearchChange = async (args: string) => {
     setInput(args);
-  }
+  };
 
   return (
     <>
@@ -50,28 +50,28 @@ export default function Command() {
         searchBarPlaceholder="Submit an Epoch Date to Convert"
         onSearchTextChange={handleSearchChange}
       >
-        {localDateTime && utcDateTime &&
+        {localDateTime && utcDateTime && (
           <List.Section title={`Input: ${input || clipboardText}`}>
             <List.Item
               title={localDateTime}
-              subtitle='Your Timezone'
+              subtitle="Your Timezone"
               actions={
                 <ActionPanel title="#1 Your Timezone">
-                  <Action.CopyToClipboard title="Copy Your Timezone" content={localDateTime || ''} />
+                  <Action.CopyToClipboard title="Copy Your Timezone" content={localDateTime || ""} />
                 </ActionPanel>
               }
             />
             <List.Item
               title={utcDateTime}
-              subtitle='GMT/UTC Timezone'
+              subtitle="GMT/UTC Timezone"
               actions={
                 <ActionPanel title="#2 GMT/UTC Timezone">
-                  <Action.CopyToClipboard title="Copy GMT/UTC Timezone" content={utcDateTime || ''} />
+                  <Action.CopyToClipboard title="Copy GMT/UTC Timezone" content={utcDateTime || ""} />
                 </ActionPanel>
               }
             />
           </List.Section>
-        }
+        )}
       </List>
     </>
   );

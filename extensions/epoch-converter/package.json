@@ -3,7 +3,7 @@
   "name": "epoch-converter",
   "title": "Epoch Converter",
   "description": "Convert an epoch to a human-readable date.",
-  "icon": "command-icon.png",
+  "icon": "command_icon.png",
   "author": "nick_lansing",
   "categories": [
     "Productivity",
