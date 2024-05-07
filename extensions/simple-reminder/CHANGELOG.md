@@ -1,5 +1,14 @@
 # Simple Reminder Changelog
 
+## [Recurrent reminders] - 2024-05-06
+
+- Add action to set reminders as recurrent (daily, weekly, bi-weekly, monthly)
+- Visual improvements and reordering of the reminder actions to be more user-friendly
+- Copy reminder and delete reminder actions now have intuitive shortcuts
+
+Notes:
+- This feature addition makes some visual changes (2 sections to separate recurrent from normal reminders), but shouldn't cause any breaking change
+
 ## [Fix] - 2024-03-18
 
 - Fix issue with topics having quoted words not triggering notifications
