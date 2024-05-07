@@ -1,5 +1,10 @@
 # Simple Reminder Changelog
 
+## [Reminder Menu Bar] - 2024-05-07
+
+- Add a menu bar command to check the reminder list in the macOS menu bar
+- The menu bar list is the same as presented in the list command
+
 ## [Recurrent reminders] - 2024-05-06
 
 - Add action to set reminders as recurrent (daily, weekly, bi-weekly, monthly)
