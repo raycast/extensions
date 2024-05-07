@@ -123,10 +123,6 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
     }
   }
 
-  // if (!activities) {
-  //   return null;
-  // }
-
   return (
     <List
       searchBarPlaceholder={SEARCHBAR_PLACEHOLDER}
