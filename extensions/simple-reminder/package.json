@@ -30,6 +30,14 @@
       "description": "Background service to notify the user through a system notification when a reminder date is right up",
       "mode": "no-view",
       "interval": "1m"
+    },
+    {
+      "name": "reminderMenuBar",
+      "title": "Reminder Menu Bar",
+      "subtitle": "Simple Reminder",
+      "description": "See your simple reminders in your macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [

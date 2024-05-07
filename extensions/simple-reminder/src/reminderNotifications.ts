@@ -8,7 +8,6 @@ import { sendPushNotificationWithNtfy } from "./utils/sendPushNotificationWithNt
 import { sanitizeTopicForNotification } from "./utils/sanitizeTopicForNotification";
 import { SimpleReminderPreferences } from "./types/preferences";
 import { Frequency } from "./types/frequency";
-import { addMinutes } from "date-fns/addMinutes";
 
 export default async function Command() {
   const { mobileNotificationNtfy, mobileNotificationNtfyTopic } = getPreferenceValues<SimpleReminderPreferences>();

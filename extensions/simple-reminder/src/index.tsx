@@ -118,7 +118,7 @@ export default function Command() {
               <List.Item
                 key={reminder.id}
                 title={reminder.topic}
-                subtitle={`set to ${reminder.date.toLocaleString()} ${reminder.frequency ? `(happening ${reminder.frequency})` : ""}`}
+                subtitle={`set to ${reminder.date.toLocaleString()}`}
                 icon="bell.png"
                 actions={
                   <ListActionPanel
