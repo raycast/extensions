@@ -1,4 +1,5 @@
 import { getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
+import { execSync } from "node:child_process";
 
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
@@ -56,13 +57,18 @@ export function op(args: string[]) {
 }
 
 export const handleErrors = (stderr: string) => {
-  if (stderr.includes("no such host"))
+  console.error(stderr);
+  if (stderr.includes("no such host")) {
     throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
-  if (stderr.includes("could not get item") || stderr.includes("isn't an item"))
+  } else if (stderr.includes("could not get item") || stderr.includes("isn't an item")) {
     throw new NotFoundError("Item not found on 1password.", "Check it on your 1Password app.");
-  if (stderr.includes("ENOENT")) throw new CommandLineMissingError("1Password CLI not found.");
-  if (stderr.includes("does not have a field"))
+  } else if (stderr.includes("ENOENT") || stderr.includes("file") || stderr.includes("enoent")) {
+    throw new CommandLineMissingError("1Password CLI not found.");
+  } else if (stderr.includes("does not have a field")) {
     throw new ExtensionError(`Item does not contain the field ${stderr.split("does not have a field ")[1].trim()}.`);
+  } else {
+    throw new ExtensionError(stderr);
+  }
 };
 
 export class ExtensionError extends Error {
@@ -78,11 +84,21 @@ export class NotFoundError extends ExtensionError {}
 export class CommandLineMissingError extends ExtensionError {}
 export class ConnectionError extends ExtensionError {}
 
-const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) =>
-  useExec<T, U>(CLI_PATH, [...args, "--format=json"], {
-    parseOutput: ({ stdout, stderr, error, ...rest }) => {
+export const getSignInStatus = () => {
+  try {
+    execSync(`${CLI_PATH} whoami`);
+    return true;
+  } catch (stderr) {
+    return false;
+  }
+};
+
+export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) => {
+  return useExec<T, U>(CLI_PATH, [...args, "--format=json"], {
+    parseOutput: ({ stdout, stderr, error, exitCode }) => {
       if (error) handleErrors(error.message);
       if (stderr) handleErrors(stderr);
+      if (exitCode != 0) handleErrors(stdout);
       if (callback) return callback(JSON.parse(stdout));
       return JSON.parse(stdout);
     },
@@ -93,6 +109,7 @@ const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) =
       });
     },
   });
+};
 
 export const usePasswords = (flags: string[] = []) =>
   useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>

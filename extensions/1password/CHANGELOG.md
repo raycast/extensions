@@ -1,7 +1,8 @@
 # 1Password Changelog
 
-## [Enhancements] - 2024-05-03
+## [Enhancements] - 2024-05-07
 
+-- Fixes double auth prompts.
 -- Adds "My Vaults" command.
 -- Adds "Switch Account" action.
 -- Improves error handling.
