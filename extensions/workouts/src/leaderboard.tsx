@@ -89,7 +89,7 @@ function Leaderboard({ clubs }: { clubs: StravaSummaryClub[] }) {
       </List>
     );
   }
-  const clubSportTypes = getSportTypesFromActivityTypes(club.activity_types);
+  const clubSportTypes = getSportTypesFromActivityTypes(club.activity_types, club.localized_sport_type);
 
   const activitiesPerAthlete = activities
     ? activities

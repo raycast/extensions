@@ -32,6 +32,7 @@ export type StravaSummaryClub = {
   profile_medium: string;
   activity_types: ActivityType[];
   sport_type: "cycling" | "running" | "triathlon" | "other";
+  localized_sport_type: string;
 };
 
 export enum ActivityType {
