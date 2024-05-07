@@ -5,6 +5,7 @@ import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hook
 import { LanguageCode, supportedLanguagesByCode, languages, getLanguageFlag } from "./languages";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
+import { ConfigurableCopyPasteActions } from "./actions";
 
 export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -58,7 +59,7 @@ export default function TranslateForm() {
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Generals">
-            <Action.CopyToClipboard title="Copy Translated" content={translated?.translatedText ?? ""} />
+            <ConfigurableCopyPasteActions defaultActionsPrefix="Translated" value={translated?.translatedText ?? ""} />
             <Action.CopyToClipboard title="Copy Text" content={text ?? ""} />
             <Action.CopyToClipboard
               title="Copy Pronunciation"
@@ -85,7 +86,6 @@ export default function TranslateForm() {
               target={<LanguagesManagerList />}
             />
           </ActionPanel.Section>
-
           <ActionPanel.Section title="Settings">
             <Action
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}

@@ -1,5 +1,8 @@
 # Google Translate Changelog
 
+## [Default Action preference for translations] - 2024-04-29
+- Add a preference to set the default action for the translations
+
 ## [Re-added previously removed contributor] - 2024-04-26
 
 ## [Fix] - 2024-03-08

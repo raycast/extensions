@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists from "./utils";
+import { checkAdbDeviceExists } from "./utils";
 
 interface AdbWriteArguments {
   text: string;
@@ -9,7 +9,7 @@ interface AdbWriteArguments {
 export default async function writeText(props: LaunchProps<{ arguments: AdbWriteArguments }>) {
   let adbDir: string;
   try {
-    adbDir = await checkAdbExists();
+    adbDir = await checkAdbDeviceExists();
   } catch (e) {
     await showHUD(`${e}`);
     return;

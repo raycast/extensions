@@ -1,14 +1,12 @@
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { exec, execSync } from "child_process";
-import { promisify } from "util";
 import fs, { existsSync } from "fs";
-import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH } from "./constants";
-
-const ffmpegPath = getPreferenceValues().ffmpeg_path || "/opt/homebrew/bin/ffmpeg";
+import { promisify } from "util";
+import { COMPRESSION_OPTIONS, CompressionOptionKey, FFMPEG_BINARY_CUSTOM_PATH, PATH } from "./constants";
 
 const ffmpegPathExists = (): boolean => {
   try {
-    return existsSync(ffmpegPath);
+    return existsSync(FFMPEG_BINARY_CUSTOM_PATH);
   } catch (error) {
     return false;
   }
@@ -24,10 +22,6 @@ const isFFmpegInstalledOnPath = (): boolean => {
   } catch (error) {
     return false;
   }
-};
-
-const isFFmpegInstalled = (): boolean => {
-  return ffmpegPathExists() || isFFmpegInstalledOnPath();
 };
 
 export function normalizeFilePath(filePath: string): string {
@@ -46,16 +40,29 @@ export function fileExists(file: string) {
   return fs.existsSync(file);
 }
 
-export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {
-  if (!isFFmpegInstalled()) {
+const getFFmpegCommand = (args: string) => {
+  const isInPath = isFFmpegInstalledOnPath();
+  const customPathExists = ffmpegPathExists();
+
+  if (isInPath) {
+    return `zsh -l -c 'PATH=${PATH} ffmpeg ${args}'`;
+  } else if (customPathExists) {
+    return `${FFMPEG_BINARY_CUSTOM_PATH} ${args}`;
+  } else {
     showToast({
       title: "Error",
       message: "FFmpeg is not installed. Please install FFmpeg or specify its path in the extension settings.",
       style: Toast.Style.Failure,
     });
-    return [];
+    return null;
   }
+};
 
+export function sanitizeFileName(file: string): string {
+  return file.replace(/ /g, "\\ ").replace(/'/g, `\\'\\''`).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
+export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {
   const one = files.length === 1;
   await showToast(Toast.Style.Animated, one ? "Compressing video..." : "Compressing videos...");
 
@@ -63,18 +70,19 @@ export async function compressVideoFiles(files: string[], compression: Compressi
     files.map(async (file) => {
       const output = file.replace(/\.\w+$/, ` (yafw ${compression}).mp4`);
       const { crf, bitrate, bufsize } = COMPRESSION_OPTIONS[compression];
-      const command = `${ffmpegPath} -y -i "${file}" -vcodec libx264 -crf ${crf} -b:v ${bitrate} -bufsize ${bufsize} "${output}"`;
+      const command = getFFmpegCommand(
+        `-y -i ${sanitizeFileName(file)} -vcodec libx264 -crf ${crf} -b:v ${bitrate} -bufsize ${bufsize} ${sanitizeFileName(output)}`,
+      );
 
-      return promisify(exec)(command)
-        .then(({ stdout, stderr }) => {
-          console.log(stdout);
-          console.log(stderr);
-          return output;
-        })
-        .catch((err) => {
-          console.error(err);
-          return null;
-        });
+      if (!command) {
+        return [];
+      }
+
+      return promisify(exec)(command).then(({ stdout, stderr }) => {
+        console.log(stdout);
+        console.log(stderr);
+        return output;
+      });
     }),
   );
 

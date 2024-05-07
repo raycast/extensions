@@ -5,6 +5,9 @@
   "description": "Search for apps in the Mac App Store from Raycast!",
   "icon": "icon.png",
   "author": "say4n",
+  "contributors": [
+    "j3lte"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"

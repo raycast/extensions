@@ -2,7 +2,8 @@ export interface Project {
   name: string;
   description: string;
   defaultBranch: string;
-  delegates: string[];
+  delegates: { id: string; alias?: string }[];
+  threshold: number;
   visibility: { type: "private" | "public" };
   head: string;
   patches: { open: number; draft: number; archived: number; merged: number };
@@ -31,11 +32,4 @@ export interface Blob {
       time: number;
     };
   };
-}
-
-export interface Remote {
-  id: string;
-  alias: string;
-  heads: Record<string, string>;
-  delegate: boolean;
 }

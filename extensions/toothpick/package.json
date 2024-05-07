@@ -8,7 +8,8 @@
     "briankosw",
     "oranja",
     "sxn",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "rspeicher"
   ],
   "repository": {
     "type": "git",
@@ -80,6 +81,22 @@
       "disabledByDefault": true
     },
     {
+      "name": "toggle-device",
+      "title": "Toggle Device",
+      "subtitle": "Toothpick",
+      "description": "Shortcut for toggling a connection to a specific device.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "nameOrMacAddress",
+          "placeholder": "Name or Mac Address",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "disabledByDefault": true
+    },
+    {
       "name": "connect-favorite-device-1",
       "title": "Connect Favorite Device #1",
       "description": "Shortcut for connecting to favorite device #1.",
@@ -118,6 +135,27 @@
       "name": "disconnect-favorite-device-3",
       "title": "Disconnect Favorite Device #3",
       "description": "Shortcut for disconnecting from favorite device #3.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-favorite-device-1",
+      "title": "Toggle Favorite Device #1",
+      "description": "Shortcut for toggling a connection to favorite device #1.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-favorite-device-2",
+      "title": "Toggle Favorite Device #2",
+      "description": "Shortcut for toggling a connection to favorite device #2.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "toggle-favorite-device-3",
+      "title": "Toggle Favorite Device #3",
+      "description": "Shortcut for toggling a connection to favorite device #3.",
       "mode": "no-view",
       "disabledByDefault": true
     },

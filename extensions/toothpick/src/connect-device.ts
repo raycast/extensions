@@ -1,19 +1,19 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { ratio } from "fuzzball";
 import { connectDevice } from "./core/devices/handlers/connect-device";
 import { getDevicesService } from "./core/devices/devices.service";
-import { showError } from "./utils";
+import { showErrorMessage } from "./utils";
 
 export default async (props: { arguments: { nameOrMacAddress: string | undefined } }) => {
   const { fuzzyRatio, bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
 
   if (props.arguments.nameOrMacAddress === undefined) {
-    await showError("Undefined value. Check extension preferences.");
+    await showErrorMessage("Undefined value. Check extension preferences.");
     return;
   }
 
   if (isNaN(parseFloat(fuzzyRatio))) {
-    await showError("Invalid fuzzy ratio. Check extension preferences.");
+    await showErrorMessage("Invalid fuzzy ratio. Check extension preferences.");
     return;
   }
 
@@ -26,7 +26,7 @@ export default async (props: { arguments: { nameOrMacAddress: string | undefined
   );
 
   if (!device) {
-    await showToast({ style: Toast.Style.Failure, title: "Device not found." });
+    await showErrorMessage("Device not found");
   } else {
     await connectDevice(device);
   }

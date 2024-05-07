@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { Action, ActionPanel, Grid, Icon, showInFinder } from "@raycast/api";
-import { fileName, unique } from "./utils";
+import { useEffect, useState } from "react";
 import { getHistoryFromStorage, saveHistoryToStorage } from "./storage";
+import { fileName, unique } from "./utils";
 
 export function Videos(props: { files: string[] }) {
   const [history, setHistory] = useState<string[] | null>(null);
