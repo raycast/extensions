@@ -15,7 +15,6 @@
     {
       "name": "listFolders",
       "title": "List User Folders",
-      "subtitle": "Finder",
       "icon": "extension-icon-grid.png",
       "description": "List of folders in the user home directory, excluding dot folders.",
       "mode": "view",
@@ -71,7 +70,6 @@
     {
       "name": "listDownloads",
       "title": "List Downloads",
-      "subtitle": "Recently downloaded files",
       "icon": "extension-icon-grid.png",
       "description": "List files in downloads folder by creation date.",
       "mode": "view",
@@ -126,8 +124,7 @@
     },
     {
       "name": "fileSpeedDial",
-      "title": "File Speed Dial",
-      "subtitle": "Favourited Files",
+      "title": "Open File Speed Dial",
       "icon": "extension-icon-grid.png",
       "description": "Speed Dial of user selected files to open.",
       "mode": "view",
@@ -192,8 +189,7 @@
     },
     {
       "name": "folderSpeedDial",
-      "title": "Folder Speed Dial",
-      "subtitle": "Favourited Folders in Finder",
+      "title": "Open Folder Speed Dial",
       "icon": "extension-icon-grid.png",
       "description": "Speed Dial of user selected folders to open.",
       "mode": "view",
@@ -275,8 +271,7 @@
     },
     {
       "name": "downloads",
-      "title": "Downloads",
-      "subtitle": "Finder",
+      "title": "Open Downloads Folder",
       "description": "Open Downloads folder.",
       "mode": "no-view",
       "preferences": [
@@ -292,8 +287,7 @@
     },
     {
       "name": "documents",
-      "title": "Documents",
-      "subtitle": "Finder",
+      "title": "Open Documents Folder",
       "description": "Open Documents folder.",
       "mode": "no-view",
       "preferences": [
@@ -309,8 +303,7 @@
     },
     {
       "name": "desktop",
-      "title": "Desktop",
-      "subtitle": "Finder",
+      "title": "Open Desktop Folder",
       "description": "Open Desktop folder.",
       "mode": "no-view",
       "preferences": [
@@ -326,8 +319,7 @@
     },
     {
       "name": "projects",
-      "title": "Projects",
-      "subtitle": "Finder",
+      "title": "Open Projects Folder",
       "description": "Open Projects folder.",
       "mode": "no-view",
       "preferences": [
