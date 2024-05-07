@@ -64,17 +64,7 @@ function Statistics() {
                   icon={Icon.Bird}
                   title="Detail"
                   onAction={() => {
-                    push(
-                      <Detail
-                        actions={
-                          <ActionPanel>
-                            <Action.OpenInBrowser url={item.html_url} />
-                            <Action onAction={revalidate} title="Refresh" icon={Icon.ArrowClockwise} />
-                          </ActionPanel>
-                        }
-                        markdown={`![](${item.download_url}${item.download_url.includes("?") ? "&" : "?"}raycast-width=720)`}
-                      />,
-                    );
+                    push(<ImageDetails item={item} revalidate={revalidate} />);
                   }}
                 />
               </ActionPanel>
@@ -85,5 +75,41 @@ function Statistics() {
     </Grid>
   );
 }
+
+const ImageDetails = ({ item, revalidate }: { item: GitHubResource; revalidate: () => void }) => {
+  const [width, setWidth] = useState(250);
+
+  return (
+    <Detail
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={item.html_url} />
+          <Action onAction={revalidate} title="Refresh" icon={Icon.ArrowClockwise} />
+        </ActionPanel>
+      }
+      markdown={`![](${item.download_url}${item.download_url.includes("?") ? "&" : "?"}raycast-width=${width})`}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Zoom">
+            <Detail.Metadata.TagList.Item
+              color={"#eed535"}
+              icon={Icon.Plus}
+              onAction={() => {
+                setWidth((p) => Math.min(470, p + 10));
+              }}
+            ></Detail.Metadata.TagList.Item>
+            <Detail.Metadata.TagList.Item
+              color={"#eed535"}
+              icon={Icon.Minus}
+              onAction={() => {
+                setWidth((p) => Math.max(200, p - 10));
+              }}
+            ></Detail.Metadata.TagList.Item>
+          </Detail.Metadata.TagList>
+        </Detail.Metadata>
+      }
+    />
+  );
+};
 
 export default withAccessToken(github)(Statistics);
