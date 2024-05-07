@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "find-and-replace-filenames",
+  "title": "Find and Replace Filenames",
+  "description": "Allows you to perform find and replace actions on the selected Finder files to rename them in bulk.",
+  "icon": "icon.png",
+  "author": "renegade_fox",
+  "categories": [
+    "Data",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rename-files",
+      "title": "Rename Selected Files",
+      "subtitle": "Rename selected files in Finder",
+      "description": "Perform a find and replace action on the selected files to rename them.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
