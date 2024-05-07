@@ -1,5 +1,7 @@
 # Syntax Changelog
 
+## [Changed logo] - 2024-05-07
+
 ## [Initial Version] - 2024-04-24
 
 - Add support for searching episodes
