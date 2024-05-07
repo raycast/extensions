@@ -90,18 +90,18 @@ export function getConfig(): { config?: AppConfig; error?: string } {
 }
 
 export async function handleConfigError(error: string) {
- const options: Toast.Options = {
-   style: Toast.Style.Failure,
-   title: "Config Error",
-   message: error,
-   primaryAction: {
-     title: "Install Aerospace and try again",
-     onAction: (toast) => {
-       open("https://nikitabobko.github.io/AeroSpace/guide#installation");
-       toast.hide();
-     },
-   },
- };
+  const options: Toast.Options = {
+    style: Toast.Style.Failure,
+    title: "Config Error",
+    message: error,
+    primaryAction: {
+      title: "Install Aerospace and try again",
+      onAction: (toast) => {
+        open("https://nikitabobko.github.io/AeroSpace/guide#installation");
+        toast.hide();
+      },
+    },
+  };
 
- await showToast(options);
+  await showToast(options);
 }
