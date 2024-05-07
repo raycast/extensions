@@ -1,6 +1,6 @@
 # Changelog
 
-## [Manage DNS Commands] - {PR_MERGE_DATE}
+## [Manage DNS Commands] - 2024-05-07
 
 ### Enhancements
 
