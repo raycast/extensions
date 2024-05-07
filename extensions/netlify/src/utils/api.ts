@@ -1,10 +1,11 @@
 import axios, { AxiosInstance } from 'axios';
 
-import { getPreferences } from './helpers';
 import {
   AlgoliaHit,
   AuditLog,
   Committer,
+  CreateDNSRecord,
+  DNSRecord,
   Deploy,
   Domain,
   DomainSearch,
@@ -15,10 +16,12 @@ import {
   Team,
   User,
 } from './interfaces';
-
-const ALGOLIA_APP_ID = '4RTNPM1QF9';
-const ALGOLIA_PUBLIC_API_KEY = '260466eb2466a36278b2fdbcc56ad7ba';
-const ALGOLIA_INDEX_NAME = 'docs-manual';
+import {
+  ALGOLIA_APP_ID,
+  ALGOLIA_INDEX_NAME,
+  ALGOLIA_PUBLIC_API_KEY,
+  API_TOKEN,
+} from './constants';
 
 class Api {
   algolia: AxiosInstance;
@@ -61,6 +64,31 @@ class Api {
   async getDomains(team?: string): Promise<Domain[]> {
     const params = team ? `?account_slug=${team}` : '';
     const { data } = await this.netlify.get<Domain[]>(`/dns_zones${params}`);
+    return data;
+  }
+
+  async getDNSRecords(zoneId: string): Promise<DNSRecord[]> {
+    const { data } = await this.netlify.get<DNSRecord[]>(
+      `/dns_zones/${zoneId}/dns_records`,
+    );
+    return data;
+  }
+
+  async createDNSRecord(
+    zoneId: string,
+    body: CreateDNSRecord,
+  ): Promise<DNSRecord> {
+    const { data } = await this.netlify.post(
+      `/dns_zones/${zoneId}/dns_records`,
+      body,
+    );
+    return data;
+  }
+
+  async deleteDNSRecord(zoneId: string, recordId: string) {
+    const { data } = await this.netlify.delete(
+      `/dns_zones/${zoneId}/dns_records/${recordId}`,
+    );
     return data;
   }
 
@@ -160,7 +188,6 @@ class Api {
   }
 }
 
-const { token } = getPreferences();
-const api = new Api(token);
+const api = new Api(API_TOKEN);
 
 export default api;
