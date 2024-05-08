@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LocalStorage, Toast, showHUD, showToast } from "@raycast/api";
+import { LocalStorage, showHUD } from "@raycast/api";
 import axios from "axios";
 
 const API_VERSION = "/api/v4";
