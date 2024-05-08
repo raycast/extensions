@@ -110,7 +110,11 @@ const BookItem: React.FC<BookItemProps> = ({ item }) => {
             }
           />
           <Action.OpenInBrowser url={`https://literal.club/book/${slug}`} />
-          <ActionPanel.Submenu icon={Icon.Book} title="Update Reading Status">
+          <ActionPanel.Submenu
+            icon={Icon.Book}
+            title="Update Reading Status"
+            shortcut={{ modifiers: ["cmd"], key: "u" }}
+          >
             <Action
               icon={{ source: Icon.Circle, tintColor: Color.Green }}
               title="Finished"
@@ -163,13 +167,19 @@ const BookItem: React.FC<BookItemProps> = ({ item }) => {
           <Action.Push
             icon={Icon.SpeechBubble}
             title="Create Review"
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
             target={
               <ApolloProvider client={client}>
                 <CreateReview title={title} bookId={id} />
               </ApolloProvider>
             }
           />
-          <Action title="Logout" icon={{ source: Icon.Logout }} onAction={() => logout()} />
+          <Action
+            title="Logout"
+            icon={{ source: Icon.Logout }}
+            onAction={() => logout()}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+          />
         </ActionPanel>
       }
     />

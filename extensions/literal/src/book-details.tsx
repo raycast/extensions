@@ -49,7 +49,11 @@ export default function BookDetails(props: BookDetailsProps) {
         data ? (
           <ActionPanel>
             {data.book.slug && <Action.OpenInBrowser url={`https://literal.club/book/${data.book.slug}`} />}
-            <ActionPanel.Submenu icon={Icon.Book} title="Update Reading Status">
+            <ActionPanel.Submenu
+              icon={Icon.Book}
+              title="Update Reading Status"
+              shortcut={{ modifiers: ["cmd"], key: "u" }}
+            >
               <Action
                 icon={{ source: Icon.Circle, tintColor: Color.Green }}
                 title="Finished"
@@ -102,6 +106,7 @@ export default function BookDetails(props: BookDetailsProps) {
             <Action.Push
               icon={Icon.SpeechBubble}
               title="Create Review"
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
               target={
                 <ApolloProvider client={client}>
                   <CreateReview title={data.book.title || "Book"} bookId={data.book.id} />
