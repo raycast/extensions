@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Chat, findChats } from "./api/chat";
-import { usePromise } from "@raycast/utils";
 import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { currentUserId } from "./api/user";
 import { OpenUrlAction } from "./api/util";
+import { CallType, callUser } from "./actions/callAction";
+import { usePromise } from "@raycast/utils";
 
 const chatIcon = {
   oneOnOne: Icon.Person,
@@ -40,6 +41,20 @@ function ChatItem({ chat }: { chat: Chat }) {
       actions={
         <ActionPanel>
           <OpenUrlAction url={chat.webUrl} />
+          <OpenUrlAction
+            title={"Call Audio"}
+            url={chat.webUrl}
+            callback={() => callUser(CallType.Audio)}
+            icon={Icon.Phone}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          />
+          <OpenUrlAction
+            title={"Call Video"}
+            url={chat.webUrl}
+            callback={() => callUser(CallType.Video)}
+            icon={Icon.Camera}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+          />
         </ActionPanel>
       }
     />
