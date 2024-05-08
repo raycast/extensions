@@ -1,5 +1,10 @@
 # Avatar Changelog
 
+## [Update DiceBear api] - {PR_MERGE_DATE}
+
+- Update DiceBear avatar api to fix DiceBear avatar unavailability issue
+- Fix the problem that Advanced Options nearly saves the value of the latest modification
+
 ## [Minor typo fix] - 2023-06-16
 
 - Fixes typo in command preferences
