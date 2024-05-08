@@ -22,11 +22,6 @@ This plugin provides two commands:
 2. Download and install this plugin.
 3. Use the specified commands to view live WTA rankings directly in your Raycast window.
 
-## Screenshots
-
-![Raycast WTA Tennis Rankings Plugin](https://github.com/drillprop/wta-ranking/blob/main/assets/screenshot-1.png?raw=true)
-![Raycast WTA Tennis Rankings Details](https://github.com/drillprop/wta-ranking/blob/main/assets/screenshot-2.png?raw=true)
-
 ## Credits
 
 This plugin was created by [drillprop](https://github.com/drillprop).
