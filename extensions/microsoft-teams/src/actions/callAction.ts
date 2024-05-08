@@ -1,5 +1,5 @@
-import { runAppleScript } from "run-applescript";
 import { prefs } from "../api/preferences";
+import { runAppleScript } from "@raycast/utils";
 
 export enum CallType {
   Video = "video",
