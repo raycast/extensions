@@ -18,7 +18,7 @@ This is useful for referencing emails in other applications. For example, you ca
 
 ## 📄 License
 
-This software is licensed under the [Apache License 2.0](LICENSE).
+This software is licensed under the [MIT](LICENSE).
 
 ## Stargazers over time
 
