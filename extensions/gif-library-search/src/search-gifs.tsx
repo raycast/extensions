@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ActionPanel, Action, Grid, showToast, Toast, getPreferenceValues, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, Grid, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 interface Preferences {
@@ -22,12 +22,6 @@ const getGifs = async (path: string): Promise<string[]> => {
     .split(", ")
     .filter((g: string) => g.includes(".gif"))
     .map((gif: string) => `${path}/${gif}`);
-};
-
-const copyGifToClipboard = async (file: string) => {
-  await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
-  await closeMainWindow({ clearRootSearch: true });
-  await showToast({ style: Toast.Style.Success, title: `Copied GIF to clipboard` });
 };
 
 export default function Command() {
@@ -72,7 +66,7 @@ export default function Command() {
           title={gif.replace(`${path}/`, "").replace(".gif", "")}
           actions={
             <ActionPanel>
-              <Action title="Copy to Clipboard" onAction={() => copyGifToClipboard(gif)} />
+              <Action.CopyToClipboard title="Copy to Clipboard" content={{ file: gif }} />
               <Action.ShowInFinder title="Show in Finder" path={gif} />
             </ActionPanel>
           }
