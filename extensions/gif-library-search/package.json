@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gif-library-search",
+  "title": "Gif Library Search",
+  "description": "Search for gifs in a directory and copy them to the clipboard",
+  "icon": "gif-icon.png",
+  "author": "rknightuk",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-gifs",
+      "title": "Search Gif Library",
+      "description": "Search your gif library",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gif-library-path",
+      "title": "Library Directory",
+      "description": "The directory of your gif library",
+      "type": "directory",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
