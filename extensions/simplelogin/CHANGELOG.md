@@ -1,5 +1,9 @@
 # SimpleLogin Changelog
 
+## [Updates to List Aliases & Create Random Alias commands] - 2024-05-08
+- Add new search bar filters to support filtering by aliases with and without a description
+- Update Create Random Alias command to support taking in a description for the alias
+
 ## [Updates to List Aliases command] - 2024-04-19
 - Updated search functionality to also search by email and description
 - Updated UI naming to match SimpleLogin UI (Note -> Description, Name -> Display Name)

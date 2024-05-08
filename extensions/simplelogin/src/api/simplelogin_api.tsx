@@ -95,15 +95,17 @@ export async function createAlias(values: ParamNewAlias): Promise<AliasResponse 
     });
 }
 
-export async function createRandomAlias(): Promise<AliasResponse | null> {
+export async function createRandomAlias(note?: string): Promise<AliasResponse> {
   const api_token = preferences.api_token;
   const app_url = preferences.app_url;
   const mode = preferences.mode;
 
+  const endpoint_url = `${app_url}/api/alias/random/new?mode=${mode}`;
+
   return axios
     .post(
-      app_url + "/api/alias/random/new?mode=" + mode,
-      {},
+      endpoint_url,
+      { note },
       {
         headers: {
           Authentication: api_token,
@@ -112,14 +114,6 @@ export async function createRandomAlias(): Promise<AliasResponse | null> {
     )
     .then((response) => {
       return response.data as AliasResponse;
-    })
-    .catch((error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: error.response.data.error,
-      });
-      console.log(error.response.data.error);
-      return null;
     });
 }
 

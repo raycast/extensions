@@ -4,7 +4,7 @@ import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert 
 import { AliasResponse } from "./models/alias";
 import moment from "moment";
 
-type Filter = "all" | "" | "pinned" | "others";
+type Filter = "all" | "" | "pinned" | "others" | "with-description" | "without-description";
 
 export default function Command() {
   const [aliases, setAliases] = useState<AliasResponse[]>([]);
@@ -26,6 +26,10 @@ export default function Command() {
         return aliases.filter((alias) => alias.pinned).filter(predicate);
       case "others":
         return aliases.filter((alias) => !alias.pinned).filter(predicate);
+      case "with-description":
+        return aliases.filter((alias) => alias.note != null && alias.note.length > 0).filter(predicate);
+      case "without-description":
+        return aliases.filter((alias) => alias.note == null || alias.note.length == 0).filter(predicate);
       default:
         return [];
     }
@@ -183,6 +187,8 @@ export default function Command() {
           <List.Dropdown.Item title="Show All" value="all" key="all" icon={Icon.Globe} />
           <List.Dropdown.Item title="Show Pinned" value="pinned" key="pinned" icon={Icon.Pin} />
           <List.Dropdown.Item title="Show Not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
+          <List.Dropdown.Item title="Show with description" value="with-description" icon={Icon.Text} />
+          <List.Dropdown.Item title="Show without description" value="without-description" icon={Icon.StrikeThrough} />
         </List.Dropdown>
       }
     >

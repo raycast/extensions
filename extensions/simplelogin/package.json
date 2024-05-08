@@ -62,7 +62,7 @@
       "title": "Create Random Alias",
       "subtitle": "SimpleLogin",
       "description": "Shield your inbox with a new email alias.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "list_alias",
