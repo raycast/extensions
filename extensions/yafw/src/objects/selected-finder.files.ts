@@ -1,7 +1,7 @@
 import { getFrontmostApplication, getSelectedFinderItems } from "@raycast/api";
 import { Files } from "../abstractions";
-import { FsFile } from "./fs.file";
 import { isFileFormatSupported } from "../utils";
+import { FsFile } from "./fs.file";
 
 export class FinderIsNotFrontmostAppException extends Error {}
 
@@ -18,9 +18,7 @@ export class SelectedFinderFiles implements Files {
 
     const paths = await getSelectedFinderItems();
     return paths
-      .filter((filePath) => 
-        isFileFormatSupported(filePath.path)
-      )
+      .filter((filePath) => isFileFormatSupported(filePath.path))
       .map((filePath) => new FsFile(filePath.path));
   };
 }

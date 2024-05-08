@@ -10,17 +10,17 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Videos } from "./videos";
+import { COMPRESSION_OPTIONS, CompressionOptionKey, DEFAULT_COMPRESSION, VIDEO_FORMATS } from "./constants";
 import {
   capitalizeSnakeCase,
   compressVideoFiles,
+  fileExists,
   fileName,
   isFileFormatSupported,
   normalizeFilePath,
   unique,
 } from "./utils";
-import { fileExists } from "./utils";
-import { COMPRESSION_OPTIONS, CompressionOptionKey, DEFAULT_COMPRESSION, VIDEO_FORMATS } from "./constants";
+import { Videos } from "./videos";
 
 export default function Command() {
   const [files, _setFiles] = useState<string[]>([]);
