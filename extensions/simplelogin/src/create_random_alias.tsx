@@ -20,7 +20,6 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create alias";
       toast.message = "Houston, we've got a problem...";
-      return;
     }
   };
 
