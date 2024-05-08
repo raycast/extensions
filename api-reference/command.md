@@ -31,7 +31,7 @@ export default async function Command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options<mark style="color:red;">*</mark> | A parameter object with the properties: `name`: command name as defined in the extension's manifest `type`: [LaunchType.UserInitiated](environment.md#launchtype) or [LaunchType.Background](environment.md#launchtype) `arguments`: optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` `context`: arbitrary object for custom data that should be passed to the command and accessible as `environment.launchContext`; the object must be JSON serializable (Dates and Buffers supported) | <code>[LaunchOptions](command.md#launchoptions)</code> |
+| options<mark style="color:red;">*</mark> | Options to launch a command within the same extension or in another extension. | <code>[LaunchOptions](command.md#launchoptions)</code> |
 
 #### Return
 
@@ -86,11 +86,11 @@ The options that can be used when launching a command from the same extension.
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| name<mark style="color:red;">*</mark> | command name as defined in the extension's manifest | <code>string</code> |
+| name<mark style="color:red;">*</mark> | Command name as defined in the extension's manifest | <code>string</code> |
 | type<mark style="color:red;">*</mark> | [LaunchType.UserInitiated](environment.md#launchtype) or [LaunchType.Background](environment.md#launchtype) | <code>[LaunchType](environment.md#launchtype)</code> |
-| arguments | optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` | <code>[Arguments](../information/lifecycle/arguments.md#arguments)</code> or <code>null</code> |
-| context | arbitrary object for custom data that should be passed to the command and accessible as `environment.launchContext`; the object must be JSON serializable (Dates and Buffers supported) | <code>[LaunchContext](command.md#launchcontext)</code> or <code>null</code> |
-| fallbackText | optional string to send as fallback text to the command | <code>string</code> or <code>null</code> |
+| arguments | Optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` | <code>[Arguments](../information/lifecycle/arguments.md#arguments)</code> or <code>null</code> |
+| context | Arbitrary object for custom data that should be passed to the command and accessible as `environment.launchContext`; the object must be JSON serializable (Dates and Buffers supported) | <code>[LaunchContext](command.md#launchcontext)</code> or <code>null</code> |
+| fallbackText | Optional string to send as fallback text to the command | <code>string</code> or <code>null</code> |
 
 #### InterExtensionLaunchOptions
 
@@ -98,5 +98,10 @@ The options that can be used when launching a command from a different extension
 
 | Property | Description | Type |
 | :--- | :--- | :--- |
-| extensionName<mark style="color:red;">*</mark> | when launching command from a different extension, the extension name (as defined in the extension's manifest) is necessary | <code>string</code> |
-| ownerOrAuthorName<mark style="color:red;">*</mark> | when launching command from a different extension, the owner or author (as defined in the extension's manifest) is necessary | <code>string</code> |
+| extensionName<mark style="color:red;">*</mark> | When launching command from a different extension, the extension name (as defined in the extension's manifest) is necessary | <code>string</code> |
+| name<mark style="color:red;">*</mark> | Command name as defined in the extension's manifest | <code>string</code> |
+| ownerOrAuthorName<mark style="color:red;">*</mark> | When launching command from a different extension, the owner or author (as defined in the extension's manifest) is necessary | <code>string</code> |
+| type<mark style="color:red;">*</mark> | [LaunchType.UserInitiated](environment.md#launchtype) or [LaunchType.Background](environment.md#launchtype) | <code>[LaunchType](environment.md#launchtype)</code> |
+| arguments | Optional object for the argument properties and values as defined in the extension's manifest, for example: `{ "argument1": "value1" }` | <code>[Arguments](../information/lifecycle/arguments.md#arguments)</code> or <code>null</code> |
+| context | Arbitrary object for custom data that should be passed to the command and accessible as `environment.launchContext`; the object must be JSON serializable (Dates and Buffers supported) | <code>[LaunchContext](command.md#launchcontext)</code> or <code>null</code> |
+| fallbackText | Optional string to send as fallback text to the command | <code>string</code> or <code>null</code> |

@@ -14,12 +14,16 @@ You can check if a user has the Browser Extension installed using [`environment.
 
 ### BrowserExtension.getContent
 
-Get the content of the active browser tab.
+Get the content of an opened browser tab.
 
 #### Signature
 
 ```typescript
-async function getContent(options?: GetContentOptions): Promise<string>;
+async function getContent(options?: {
+  cssSelector?: string;
+  tabId?: number;
+  format?: "html" | "text" | "markdown";
+}): Promise<string>;
 ```
 
 #### Example
@@ -57,7 +61,10 @@ export default async function command() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| options |  | <code>[BrowserExtension.GetContentOptions](browser-extension.md#browserextension.getcontentoptions)</code> |
+| options | Options to control which content to get. | <code>Object</code> |
+| options.cssSelector | Only returns the content of the element that matches the [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_selectors). | <code>string</code> |
+| options.format | The format of the content. | <code>"html"</code> or <code>"text"</code> or <code>"markdown"</code> |
+| options.tabId | The ID of the tab to get the content from. If not specified, the content of the active tab of the focused window is returned. | <code>number</code> |
 
 #### Return
 
@@ -86,19 +93,9 @@ export default async function command() {
 
 #### Return
 
-A Promise that resolves with the list of tabs.
+A Promise that resolves with the list of [tabs](#browserextension.tab).
 
 ## Types
-
-### BrowserExtension.GetContentOptions
-
-#### Properties
-
-| Property | Description | Type |
-| :--- | :--- | :--- |
-| cssSelector | Only returns the content of the element that matches the [CSS selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_selectors). | <code>string</code> |
-| format | The format of the content. | <code>"html"</code> or <code>"text"</code> or <code>"markdown"</code> |
-| tabId | The ID of the tab to get the content from. If not specified, the content of the active tab of the focused window is returned. | <code>number</code> |
 
 ### BrowserExtension.Tab
 

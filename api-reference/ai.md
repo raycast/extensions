@@ -130,8 +130,8 @@ export default async function main() {
 
 | Name | Description | Type |
 | :--- | :--- | :--- |
-| prompt<mark style="color:red;">*</mark> |  | <code>string</code> |
-| options |  | <code>[AI.AskOptions](ai.md#ai.askoptions)</code> |
+| prompt<mark style="color:red;">*</mark> | The prompt to ask the AI. | <code>string</code> |
+| options | Options to control which and how the AI model should behave.  | <code>[AI.AskOptions](ai.md#ai.askoptions)</code> |
 
 #### Return
 
