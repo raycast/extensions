@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { SearchChangeRecordsState } from "./utils/search-change-records.ts/types";
-import { getDrupalChangeRecords } from "./utils/search-change-records.ts/do-change-record-api";
+import { SearchChangeRecordsState } from "./utils/search-change-records/types";
+import { getDrupalChangeRecords } from "./utils/search-change-records/do-change-record-api";
 
 export default function Command() {
   const [state, setState] = useState<SearchChangeRecordsState>({});
