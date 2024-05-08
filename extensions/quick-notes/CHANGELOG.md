@@ -1,5 +1,10 @@
 # Quick Notes Changelog
 
+## [Copy Action] - 2024-05-08
+
+- New `Copy to Clipboard` action on note body using `⌘ + ⇧ + C`
+- Update README and metadata images accordingly
+
 ## [2-Way Folder Sync] - 2024-04-25
 
 - New `Sync with Folder` command (disabled by default) to allow for syncing existing `.md` files into quick notes

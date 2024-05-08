@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard, showToast, Toast } from "@raycast/api";
 import CreateEditNoteForm from "./createEditNoteForm";
 import CreateTag from "./createTag";
 import DeleteNoteAction from "./deleteNoteAction";
@@ -29,21 +29,33 @@ const Actions = ({
     <ActionPanel>
       <ActionPanel.Section>
         {!noNotes && (
-          <Action.Push
-            title="Edit Note"
-            icon={{
-              source: Icon.Pencil,
-              tintColor: colors.find((c) => c.name === "sky")?.tintColor,
-            }}
-            target={
-              <CreateEditNoteForm isDraft={isDraft} title={title} note={note} tags={tags} createdAt={createdAt} />
-            }
-          />
+          <>
+            <Action.Push
+              title="Edit Note"
+              icon={{
+                source: Icon.Pencil,
+                tintColor: colors.find((c) => c.name === "sky")?.tintColor,
+              }}
+              target={
+                <CreateEditNoteForm isDraft={isDraft} title={title} note={note} tags={tags} createdAt={createdAt} />
+              }
+            />
+            <Action
+              title="Copy Note"
+              icon={{ source: Icon.CopyClipboard, tintColor: colors.find((c) => c.name === "turquoise")?.tintColor }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              onAction={() => {
+                Clipboard.copy(note ?? "").then(() => {
+                  showToast({ style: Toast.Style.Success, title: "Note Copied" });
+                });
+              }}
+            />
+          </>
         )}
         <Action.Push
           title="New Note"
           icon={{
-            source: Icon.BlankDocument,
+            source: Icon.PlusSquare,
             tintColor: colors.find((c) => c.name === "green")?.tintColor,
           }}
           target={<CreateEditNoteForm isDraft={true} />}

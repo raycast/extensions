@@ -34,7 +34,7 @@ export default function HistoryDetails({ history }: Props) {
   return (
     <Detail
       markdown={displayPrompt ? `# Prompt\n\n---\n${history.prompt}` : `# Result\n\n---\n${history.result}`}
-      navigationTitle={history.prompt}
+      navigationTitle={history.prompt.trim()}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Action" text={history.action.name} />

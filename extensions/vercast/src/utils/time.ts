@@ -17,7 +17,7 @@ const ordinalizeNumber = (n: number) => {
 const getTimeSince = (
   _fromDate: number | Date,
   _toDate: number | Date,
-  dateStringCap: number | undefined = undefined
+  dateStringCap: number | undefined = undefined,
 ) => {
   const throwError = () => {
     throw new Error("getTimeSince requires 1-2 arguments, of type date or date-string");
