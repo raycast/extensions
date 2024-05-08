@@ -28,7 +28,11 @@ export default function Command() {
       navigationTitle="Create Random Alias"
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} shortcut={{ modifiers: ["cmd"], key: "return" }} />
+          <Action.SubmitForm
+            title="Create Alias"
+            onSubmit={handleSubmit}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+          />
         </ActionPanel>
       }
     >
