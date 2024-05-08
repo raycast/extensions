@@ -42,6 +42,10 @@ export default function Command() {
   }, [data, runningCode]);
 
   function run() {
+    if (!code) {
+      return;
+    }
+
     const command = `
     import Foundation
 
