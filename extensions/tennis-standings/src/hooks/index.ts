@@ -1,3 +1,3 @@
-import useATPRankings from "./useATPRankings";
+import useRankings from "./useRankings";
 
-export { useATPRankings };
+export { useRankings };

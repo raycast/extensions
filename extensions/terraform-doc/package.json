@@ -5,6 +5,9 @@
   "description": "Quickly access Terraform resources",
   "icon": "extension_icon.png",
   "author": "shopping-jaws",
+  "contributors": [
+    "b-per"
+  ],
   "categories": [
     "Web",
     "Developer Tools",

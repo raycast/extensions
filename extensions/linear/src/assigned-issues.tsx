@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 
-import { getAssignedIssues } from "./api/getIssues";
+import { getMyIssues } from "./api/getIssues";
 
 import useIssues from "./hooks/useIssues";
 import usePriorities from "./hooks/usePriorities";
@@ -11,8 +11,8 @@ import StateIssueList from "./components/StateIssueList";
 import CreateIssueForm from "./components/CreateIssueForm";
 import View from "./components/View";
 
-function AssignedIssues() {
-  const { issues, isLoadingIssues, mutateList } = useIssues(getAssignedIssues);
+function MyIssues() {
+  const { issues, isLoadingIssues, mutateList } = useIssues(getMyIssues);
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
   const { users, isLoadingUsers } = useUsers();
@@ -44,7 +44,7 @@ function AssignedIssues() {
 export default function Command() {
   return (
     <View>
-      <AssignedIssues />
+      <MyIssues />
     </View>
   );
 }

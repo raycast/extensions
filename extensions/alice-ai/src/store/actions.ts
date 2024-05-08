@@ -102,7 +102,15 @@ export const useActionsState = createStore<ActionState>({
       });
     },
   }),
-  migrate: (persistedState: any) => {
+  migrate: (persistedState: any, version: number) => {
+    switch (version) {
+      case 1: // Migrate from v1 to v2, update model names from gpt-4-turbo-preview to gpt-4-turbo
+        persistedState.actions = persistedState.actions.map((action: Action) => ({
+          ...action,
+          model: action.model.replace("gpt-4-turbo-preview", "gpt-4-turbo"),
+        }));
+    }
+
     return persistedState;
   },
 });

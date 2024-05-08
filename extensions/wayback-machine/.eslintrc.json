@@ -1,4 +1,9 @@
 {
   "root": true,
-  "extends": ["@raycast"]
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "@typescript-eslint/consistent-type-imports": "error"
+  }
 }

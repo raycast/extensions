@@ -1,11 +1,11 @@
 import { Clipboard, showHUD } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists from "./utils";
+import { checkAdbDeviceExists } from "./utils";
 
 export default async function currentActivity() {
   let adbDir: string;
   try {
-    adbDir = await checkAdbExists();
+    adbDir = await checkAdbDeviceExists();
   } catch (e) {
     await showHUD(`${e}`);
     return;

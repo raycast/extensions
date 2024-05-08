@@ -1,27 +1,33 @@
 import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { addDays } from "date-fns/addDays";
+import { addWeeks } from "date-fns/addWeeks";
+import { addMonths } from "date-fns/addMonths";
 import { Reminder } from "./types/reminder";
 import { sendPushNotificationWithNtfy } from "./utils/sendPushNotificationWithNtfy";
 import { sanitizeTopicForNotification } from "./utils/sanitizeTopicForNotification";
-import { runAppleScript } from "@raycast/utils";
-
-interface Preferences {
-  mobileNotificationNtfy: boolean;
-  mobileNotificationNtfyTopic: string;
-}
+import { SimpleReminderPreferences } from "./types/preferences";
+import { Frequency } from "./types/frequency";
 
 export default async function Command() {
-  const { mobileNotificationNtfy, mobileNotificationNtfyTopic } = getPreferenceValues<Preferences>();
+  const { mobileNotificationNtfy, mobileNotificationNtfyTopic } = getPreferenceValues<SimpleReminderPreferences>();
   const storedRemindersObject = await LocalStorage.allItems<Record<string, string>>();
   if (!Object.keys(storedRemindersObject).length) return;
 
   for (const key in storedRemindersObject) {
     const reminder: Reminder = JSON.parse(storedRemindersObject[key]);
-    if (new Date().getTime() >= new Date(reminder.date).getTime()) {
+    if (isReminderInThePast(reminder)) {
       const cleanTopic = sanitizeTopicForNotification(reminder.topic);
 
-      await runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
+      await sendPushNotificationToMacOS(cleanTopic);
       if (mobileNotificationNtfy) {
         await sendPushNotificationWithNtfy(mobileNotificationNtfyTopic, cleanTopic);
+      }
+
+      if (reminder.frequency) {
+        const newDate = updateReminderDateForRecurrence(reminder);
+        reminder.date = newDate!;
+        return await LocalStorage.setItem(reminder.id, JSON.stringify(reminder));
       }
       await LocalStorage.removeItem(reminder.id);
     }
@@ -30,4 +36,25 @@ export default async function Command() {
   await updateCommandMetadata({
     subtitle: `Last checked for reminders: ${new Date().toLocaleString()}`,
   });
+}
+
+function isReminderInThePast(reminder: Reminder) {
+  return new Date().getTime() >= new Date(reminder.date).getTime();
+}
+
+function sendPushNotificationToMacOS(cleanTopic: string) {
+  return runAppleScript(`display notification "${cleanTopic}" with title "Simple Reminder" sound name "default"`);
+}
+
+function updateReminderDateForRecurrence(reminder: Reminder) {
+  switch (reminder.frequency) {
+    case Frequency.DAILY:
+      return addDays(reminder.date, 1);
+    case Frequency.WEEKLY:
+      return addWeeks(reminder.date, 1);
+    case Frequency.BI_WEEKLY:
+      return addWeeks(reminder.date, 2);
+    case Frequency.MONTHLY:
+      return addMonths(reminder.date, 1);
+  }
 }

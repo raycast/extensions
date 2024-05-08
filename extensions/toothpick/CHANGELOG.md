@@ -1,5 +1,18 @@
 # Toothpick Changelog
 
+## [QoL Improvements] - 2024-05-06
+
+- Added so it's possible to toggle devices
+
+## [Update] - 2024-05-02
+
+- Fixed an error when using deeplink in background
+
+## [Update] - 2024-04-22
+
+- Updated dependencies
+- Fixed an error when using deeplink in background
+
 ## [QoL Improvements] - 2023-11-30
 
 - Extended favorite devices functionality to disconnecting from specific devices
