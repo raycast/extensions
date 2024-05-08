@@ -39,3 +39,11 @@ If you have any suggestions or issues, feel free to open a PR or an issue on the
 ## Roadmap
 
 - [ ] Add support for more image types like svg.
+
+## Images
+
+![](./media/screenshot-1.png)
+
+![](./media/screenshot-2.jpeg)
+
+![](./media/screenshot-3.png)
