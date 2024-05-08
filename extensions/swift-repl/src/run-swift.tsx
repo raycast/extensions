@@ -42,7 +42,7 @@ export default function Command() {
   }, [data, runningCode]);
 
   function run() {
-    if (!code) {
+    if (!code?.trim()) {
       return;
     }
 
