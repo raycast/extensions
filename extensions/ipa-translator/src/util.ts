@@ -1,31 +1,19 @@
-import { Dictionary, Languages } from "./types";
+import { readFileSync } from "fs-extra";
+import { Dictionary } from "./types";
 
-export const getTranslation = (text: string, language: Languages, includeAccents: boolean) => {
-  let dictionary: Dictionary;
+export const readDictionaryData = (path: string) => {
+  return readFileSync(__dirname + "/assets/data/" + path, "utf8");
+};
 
-  switch (language) {
-    case Languages.English:
-      if (includeAccents) {
-        dictionary = require("../assets/data/EN_dictionary.json");
-      } else {
-        dictionary = require("../assets/data/EN_dictionary-no-accents.json");
-      }
-      break;
-    case Languages.Danish:
-      dictionary = require("../assets/data/DA_dictionary.json");
-      break;
-    case Languages.German:
-      dictionary = require("../assets/data/DE_dictionary.json");
-      break;
-    case Languages.Swedish:
-      dictionary = require("../assets/data/SV_dictionary.json");
-      break;
-    case Languages.Czech:
-      dictionary = require("../assets/data/CZ_dictionary.json");
-      break;
-    default:
-      return "This language is not supported yet!";
+export const getTranslation = (text: string, dictionaryPlaceholder: string) => {
+  if (!text) {
+    return "";
   }
+  if (!dictionaryPlaceholder) {
+    return "This language is not supported yet!";
+  }
+
+  const dictionary: Dictionary = JSON.parse(dictionaryPlaceholder);
 
   const result: string[] = [];
   // Remove all punctuation.

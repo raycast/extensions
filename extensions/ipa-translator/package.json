@@ -42,10 +42,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1"
+    "@raycast/api": "^1.72.1",
+    "fs-extra": "^11.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
