@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitlab-assistant",
+  "title": "Gitlab Assistant",
+  "description": "manage gitlab with raycast",
+  "icon": "command-icon.png",
+  "author": "ShamProfessor",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "configure",
+      "title": "Configure",
+      "description": "configure gitlab assistant",
+      "mode": "view"
+    },
+    {
+      "name": "create-mr",
+      "title": "Create MR",
+      "description": "create a gitlab mr",
+      "mode": "view"
+    },
+    {
+      "name": "quickly-mr",
+      "title": "Quickly MR",
+      "description": "quickly create a gitlab mr to dev",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "axios": "^1.6.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
