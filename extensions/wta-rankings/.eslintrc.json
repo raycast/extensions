@@ -1,0 +1,17 @@
+{
+	"root": true,
+	"extends": ["@raycast", "plugin:react/recommended", "plugin:react-hooks/recommended", "plugin:react/jsx-runtime"],
+	"plugins": ["react-hooks"],
+	"rules": {
+		"react-hooks/rules-of-hooks": "error",
+		"react-hooks/exhaustive-deps": "warn",
+		"react/jsx-curly-brace-presence": ["warn", { "props": "never", "children": "never" }],
+		"react/self-closing-comp": [
+			"warn",
+			{
+				"component": true,
+				"html": true
+			}
+		]
+	}
+}
