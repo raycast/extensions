@@ -3,6 +3,7 @@ import { useExec } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
 type CommandResult = {
+  id: number;
   command: string;
   stdout: string | undefined;
   stderr: string | undefined;
@@ -13,12 +14,14 @@ export default function Command() {
   const [code, setCode] = useState<string | undefined>();
   const [runningCode, setRunningCode] = useState<string | undefined>();
   const [pendingCode, setPendingCode] = useState<string | undefined>();
+  const [selectedID, setSelectedID] = useState<string | undefined>();
 
   const { isLoading, data } = useExec<CommandResult, undefined>("swift", ["repl"], {
     execute: !!runningCode?.trim(),
     input: runningCode,
     parseOutput: ({ stdout, stderr }) => {
       return {
+        id: results.length,
         command: code,
         stdout,
         stderr,
@@ -28,12 +31,15 @@ export default function Command() {
 
   useEffect(() => {
     if (pendingCode && data && (data.stdout || data.stderr)) {
+      console.log("got here", { runningCode, pendingCode, data });
+      data.id = results.length;
       data.command = pendingCode;
       setResults([data, ...results]);
-      setCode(undefined);
+      setRunningCode(undefined);
       setPendingCode(undefined);
+      setSelectedID(String(data.id));
     }
-  }, [data]);
+  }, [data, runningCode]);
 
   function run() {
     const command = `
@@ -47,10 +53,34 @@ export default function Command() {
     setRunningCode(command);
   }
 
+  useEffect(() => {
+    setSelectedID("run");
+  }, [code]);
+
+  function markdownFor(result: CommandResult): string {
+    const label = result.stderr ? "Error:" : "Output:";
+
+    const string =
+      "Input:\n```swift\n" +
+      result.command +
+      "\n```\n" +
+      label +
+      "\n```swift\n" +
+      (result.stderr || result.stdout || "No output.") +
+      "\n```";
+
+    console.log(result);
+    console.log(string);
+
+    return string;
+  }
+
   return (
     <List
       onSearchTextChange={setCode}
       searchBarPlaceholder="Enter some Swift…"
+      isShowingDetail
+      selectedItemId={selectedID}
       actions={
         <ActionPanel title="Run">
           <Action title="Run" onAction={run} />
@@ -66,6 +96,7 @@ export default function Command() {
           if (result === "Run") {
             return (
               <List.Item
+                id="run"
                 key="run"
                 title="Run"
                 actions={
@@ -79,17 +110,16 @@ export default function Command() {
             return (
               <List.Section key="Past Results" title="Past Results">
                 {results.map((result) => {
-                  if (result.stderr) {
-                    return <List.Item key={Math.random()} title={result.command || ""} subtitle={result.stderr} />;
-                  } else {
-                    return (
-                      <List.Item
-                        key={Math.random()}
-                        title={result.command || ""}
-                        subtitle={result.stdout || "(No Output)"}
-                      />
-                    );
-                  }
+                  console.log("result id", result.id);
+                  return (
+                    <List.Item
+                      id={String(result.id)}
+                      key={String(result.id)}
+                      title={result.command || ""}
+                      subtitle={result.stdout || "(No Output)"}
+                      detail={<List.Item.Detail markdown={markdownFor(result)} />}
+                    />
+                  );
                 })}
               </List.Section>
             );
