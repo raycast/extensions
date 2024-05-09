@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "move-desktop-screenshots-to-trash",
+  "title": "Move Screenshots to Trash",
+  "description": "Quickly move all Screenshots on your desktop to the Trash. Works with CleanShot X as well.",
+  "icon": "command-icon.png",
+  "author": "charlie_deets",
+  "categories": [
+    "Productivity",
+    "Media",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Move Screenshots to Trash",
+      "subtitle": "Move all Screenshots from your Desktop to the Trash",
+      "description": "Quickly move all Screenshots on your desktop to the Trash. Works with CleanShot X as well.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "trash": "^8.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
