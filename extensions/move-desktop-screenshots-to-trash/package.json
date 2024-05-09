@@ -3,7 +3,7 @@
   "name": "move-desktop-screenshots-to-trash",
   "title": "Move Screenshots to Trash",
   "description": "Quickly move all Screenshots on your desktop to the Trash. Works with CleanShot X as well.",
-  "icon": "command-icon.png",
+  "icon": "trash-icon.png",
   "author": "charlie_deets",
   "categories": [
     "Productivity",
