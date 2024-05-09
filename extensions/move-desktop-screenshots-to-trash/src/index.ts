@@ -26,13 +26,13 @@ fs.readdir(desktopDir, (err, files) => {
     return;
   }
 
-  let movedFilesCount = 0;  // Counter to track moved files
+  let movedFilesCount = 0;
 
   files.forEach((filename) => {
     if ((filename.startsWith('CleanShot ') || filename.startsWith('Screenshot ')) && filename.endsWith('.png')) {
       const fullPath = path.join(desktopDir, filename);
       moveFileToTrash(fullPath);
-      movedFilesCount++;  // Increment counter for each moved file
+      movedFilesCount++;
     }
   });
 
