@@ -56,6 +56,7 @@ export default function Translate(): ReactElement {
                       title="Toggle Full Text"
                       icon={Icon.Text}
                       onAction={() => setIsShowingDetail(!isShowingDetail)}
+                      shortcut={{ modifiers: ["cmd"], key: "f" }}
                     />
                     <Action
                       title="Play Text-To-Speech"
@@ -93,6 +94,7 @@ export default function Translate(): ReactElement {
                         title="Toggle Full Text"
                         icon={Icon.Text}
                         onAction={() => setIsShowingDetail(!isShowingDetail)}
+                        shortcut={{ modifiers: ["cmd"], key: "f" }}
                       />
                       <Action.OpenInBrowser
                         title="Open in Google Translate"

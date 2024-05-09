@@ -72,6 +72,7 @@ export function QuickTranslateListItem(props: {
               title="Toggle Full Text"
               icon={Icon.Text}
               onAction={() => props.setIsShowingDetail(!props.isShowingDetail)}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
             />
             <Action.OpenInBrowser
               title="Open in Google Translate"
