@@ -4,6 +4,7 @@ import { exec } from 'child_process';
 interface VpnStatus {
   isActive: boolean;
   serverCity: string;
+  isAuthenticated: boolean;
 }
 
 // Execute a shell command and return the promise with the output
@@ -21,9 +22,7 @@ const executeCommand = (command: string): Promise<string> => {
 };
 
 // Run specific VPN commands e.g., activate, deactivate
-export const runCommand = (
-  action: 'activate' | 'deactivate'
-): Promise<void> => {
+export const runCommand = (action: 'activate' | 'deactivate'): Promise<void> => {
   const command = `/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN ${action}`;
   return executeCommand(command)
     .then(() => {
@@ -43,10 +42,9 @@ export const checkVpnStatus = (): Promise<VpnStatus> => {
     .then((stdout) => {
       const isActive = stdout.includes('VPN state: on');
       const serverCityMatch = stdout.match(/Server city: (.+)/);
-      const serverCity = serverCityMatch
-        ? serverCityMatch[1].trim()
-        : 'Unknown';
-      return { isActive, serverCity };
+      const serverCity = serverCityMatch ? serverCityMatch[1].trim() : 'Unknown';
+      const isAuthenticated = !stdout.includes('User status: not authenticated');
+      return { isActive, serverCity, isAuthenticated };
     })
     .catch((err) => {
       console.error('Error checking VPN status:', err);
