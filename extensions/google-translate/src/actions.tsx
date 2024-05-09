@@ -42,7 +42,7 @@ export const ToggleFullTextAction: React.VFC<{
   );
 };
 
-export const OpenInBrowserAction: React.VFC<{
+export const OpenOnGoogleTranslateWebsiteAction: React.VFC<{
   translation: Pick<SimpleTranslateResult, "langFrom" | "langTo">;
   translationText: string;
 }> = ({ translationText, translation }) => {

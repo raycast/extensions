@@ -5,7 +5,7 @@ import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hook
 import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, playTTS } from "./simple-translate";
-import { ConfigurableCopyPasteActions, OpenInBrowserAction, ToggleFullTextAction } from "./actions";
+import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "./actions";
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
@@ -59,7 +59,7 @@ export default function Translate(): ReactElement {
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => playTTS(r.translatedText, r.langTo)}
                     />
-                    <OpenInBrowserAction translationText={debouncedValue} translation={r} />
+                    <OpenOnGoogleTranslateWebsiteAction translationText={debouncedValue} translation={r} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -74,7 +74,7 @@ export default function Translate(): ReactElement {
                     <ActionPanel.Section>
                       <ConfigurableCopyPasteActions value={r.pronunciationText} />
                       <ToggleFullTextAction onAction={() => setIsShowingDetail(!isShowingDetail)} />
-                      <OpenInBrowserAction translationText={debouncedValue} translation={r} />
+                      <OpenOnGoogleTranslateWebsiteAction translationText={debouncedValue} translation={r} />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }

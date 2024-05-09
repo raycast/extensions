@@ -3,7 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
 import { simpleTranslate } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
-import { ConfigurableCopyPasteActions, OpenInBrowserAction, ToggleFullTextAction } from "../actions";
+import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "../actions";
 
 export function QuickTranslateListItem(props: {
   debouncedText: string;
@@ -69,7 +69,7 @@ export function QuickTranslateListItem(props: {
           <ActionPanel.Section>
             <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={result.translatedText} />
             <ToggleFullTextAction onAction={() => props.setIsShowingDetail(!props.isShowingDetail)} />
-            <OpenInBrowserAction translationText={props.debouncedText} translation={result} />
+            <OpenOnGoogleTranslateWebsiteAction translationText={props.debouncedText} translation={result} />
           </ActionPanel.Section>
         </ActionPanel>
       }
