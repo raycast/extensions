@@ -6,7 +6,7 @@ import { showHUD } from "@raycast/api";
 
 const desktopDir = path.join(os.homedir(), "Desktop");
 
-const moveFileToTrash = (filePath) => {
+const moveFileToTrash = (filePath: string) => {
   exec(`osascript -e 'tell application "Finder" to delete POSIX file "${filePath}"'`, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error: ${error.message}`);
@@ -38,6 +38,8 @@ fs.readdir(desktopDir, (err, files) => {
 
   if (movedFilesCount === 0) {
     showHUD("No screenshots were found to move to trash.");
+  } else if (movedFilesCount === 1) {
+    showHUD(`One screenshot moved to trash.`);
   } else {
     showHUD(`${movedFilesCount} screenshots moved to trash.`);
   }
