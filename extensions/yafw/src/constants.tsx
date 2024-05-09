@@ -9,7 +9,7 @@ export const COMPRESSION_OPTIONS: Record<CompressionOptionKey, CompressionOption
   very_small_file: { crf: 42, bitrate: "500k", bufsize: "1000k" },
 };
 export const DEFAULT_COMPRESSION: CompressionOptionKey = "balanced";
-export const VIDEO_FORMATS = ["mp4", "mov", "avi", "mkv", "webm"];
+export const VIDEO_FORMATS = ["mp4", "mov", "avi", "mkv", "webm", "gif"];
 export const PATH = [
   ".",
   "/bin",
