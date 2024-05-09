@@ -1,4 +1,4 @@
-import { Form, ActionPanel, SubmitFormAction, closeMainWindow, showToast, ToastStyle } from "@raycast/api";
+import { Form, ActionPanel, closeMainWindow, showToast, Action, Toast } from "@raycast/api";
 import { colors, languages } from "./constants";
 import { useState } from "react";
 import open from "open";
@@ -31,7 +31,11 @@ export default function CreateSnippet() {
 
   const handleSubmit = async () => {
     if (!code.snippet) {
-      await showToast(ToastStyle.Failure, "Missing Code", "Code cannot be empty");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Missing Code",
+        message: "Code cannot be empty",
+      });
       return;
     }
     open(url);
@@ -42,7 +46,7 @@ export default function CreateSnippet() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Snippet" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Snippet" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -61,12 +65,7 @@ export default function CreateSnippet() {
       <Form.Separator />
       <Form.Dropdown id="color" title="Color" storeValue onChange={(color) => setCode({ ...code, color })}>
         {colors.map((el, idx) => (
-          <Form.Dropdown.Item
-            key={idx}
-            icon={{ source: `${el.value}.png` }}
-            value={el.value}
-            title={el.title}
-          />
+          <Form.Dropdown.Item key={idx} icon={{ source: `${el.value}.png` }} value={el.value} title={el.title} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="language" title="Language" storeValue onChange={(language) => setCode({ ...code, language })}>
