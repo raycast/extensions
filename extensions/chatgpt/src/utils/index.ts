@@ -3,8 +3,7 @@ import { Chat, Message } from "../type";
 function countOpenAITokens(text: string): number {
   // 100 tokens ~= 75 words
   const words = text.split(" ").length;
-  const openAITokens = Math.ceil(words / 75) * 100;
-  return openAITokens;
+  return Math.ceil(words / 75) * 100;
 }
 
 function limitConversationLength(chats: Chat[]) {
@@ -29,7 +28,7 @@ function limitConversationLength(chats: Chat[]) {
   return newChats;
 }
 
-export function chatTransfomer(chat: Chat[], prompt: string): Message[] {
+export function chatTransformer(chat: Chat[], prompt: string): Message[] {
   const messages: Message[] = [{ role: "system", content: prompt }];
   const limitedChat = limitConversationLength(chat);
   limitedChat.forEach(({ question, answer }) => {

@@ -1,4 +1,4 @@
-import { List, Color, Icon } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
 import {
@@ -12,12 +12,16 @@ import { getGitHubUser } from "./users";
 
 export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
   if (pullRequest.merged) {
-    return { icon: { source: "merge.svg", tintColor: Color.Purple }, text: "Merged", color: Color.Purple };
+    return {
+      icon: { source: "pull-request-merged.svg", tintColor: Color.Purple },
+      text: "Merged",
+      color: Color.Purple,
+    };
   }
 
   if (pullRequest.closed) {
     return {
-      icon: { source: "pull-request.svg", tintColor: Color.Red },
+      icon: { source: "pull-request-closed.svg", tintColor: Color.Red },
       text: "Closed",
       color: Color.Red,
     };
@@ -32,7 +36,7 @@ export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | Pu
   }
 
   return {
-    icon: { source: "pull-request.svg", tintColor: Color.Green },
+    icon: { source: "pull-request-open.svg", tintColor: Color.Green },
     text: "Open",
     color: Color.Green,
   };
@@ -102,12 +106,12 @@ export function getNumberOfComments(pullRequest: PullRequestFieldsFragment) {
 export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState): List.Item.Accessory | null {
   switch (commitStatusCheckRollupState) {
     case "SUCCESS":
-      return { icon: { source: Icon.Check, tintColor: Color.Green }, tooltip: "Checks: Success" };
+      return { icon: Icon.Check, tooltip: "Checks: Success" };
     case "ERROR":
     case "FAILURE":
-      return { icon: { source: Icon.Xmark, tintColor: Color.Red }, tooltip: "Checks: Failure" };
+      return { icon: Icon.Xmark, tooltip: "Checks: Failure" };
     case "PENDING":
-      return { icon: { source: Icon.Clock, tintColor: Color.Orange }, tooltip: "Checks: Pending" };
+      return { icon: Icon.Clock, tooltip: "Checks: Pending" };
     default:
       return null;
   }
@@ -116,12 +120,12 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
 export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {
   switch (reviewDecision) {
     case "REVIEW_REQUIRED":
-      return { tag: { value: "Review required", color: Color.Orange } };
+      return { tag: { value: "Review required" } };
     case "CHANGES_REQUESTED":
-      return { tag: { value: "Changes requested", color: Color.Red } };
+      return { tag: { value: "Changes requested" } };
     case "APPROVED":
       return {
-        tag: { value: "Approved", color: Color.Green },
+        tag: { value: "Approved" },
       };
     default:
       return null;

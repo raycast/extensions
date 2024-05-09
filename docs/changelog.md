@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.72.0 - 2024-04-24
+
+### ✨ New
+
+- **Browser Extension**: You can now access the context of the focused browser via the Raycast Browser Extension. You can get the list of open tabs as well as the content of a tab.
+
+### 🐞 Fixes
+
+- **Grid**: Fixed a bug that caused the selected Grid item to be brought into focus when paginating.
+
+## 1.71.0 - 2024-04-10
+
+### ✨ New
+
+- **Developer Hub:** you can now programmatically send error reports using the new `captureException` function.
+- **Utils**: we’ve added a new React hook, `useStreamJSON`. The new hook simplifies the process of streaming through large JSON data sources, which normally would not fit in the extension’s memory. Take a look at the [developer docs](https://developers.raycast.com/utilities/react-hooks/usestreamjson) to learn more.
+- **AI**: All the new models are also available in the API.
+
+### 💎 Improvements
+
+- `getApplications`, `getDefaultApplication`, and `Action.OpenWith` now support remote URLs and will return the installed Applications that can open remote URLs (usually browsers)
+
+### 🐞 Fixes
+
+- **Pagination**: Fixed a bug that could cause pagination to not work when `filtering` was set to true.
+- **CLI**: Fixed the cursor being kept hidden when interrupting a command
+
 ## 1.70.0 - 2024-03-20
 
 ### 💎 Improvements

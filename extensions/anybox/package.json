@@ -35,7 +35,7 @@
           "type": "checkbox",
           "required": false,
           "default": true,
-          "label": "Show Tags in Search Results",
+          "label": "Search Tags",
           "description": "Search tags and limit search scope to one specific tag."
         },
         {
@@ -43,8 +43,24 @@
           "type": "checkbox",
           "required": false,
           "default": false,
-          "label": "Show Folders in Search Results",
+          "label": "Search Folders",
           "description": "Search folders and limit search scope to one specific folder."
+        },
+        {
+          "name": "showTags",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show Tags",
+          "description": "Show tags next to URL."
+        },
+        {
+          "name": "showFolders",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show Folders",
+          "description": "Show folder next to URL."
         },
         {
           "name": "asIcons",
@@ -80,14 +96,14 @@
     },
     {
       "name": "saveCurrentTabWithTags",
-      "title": "Save Current Tab With Tags",
+      "title": "Save Current Tab with Tags",
       "subtitle": "Anybox",
       "description": "Save URL of current tab to Anybox with optional tags.",
       "mode": "view"
     },
     {
       "name": "saveCurrentTabWithFolder",
-      "title": "Save Current Tab With Folder",
+      "title": "Save Current Tab with Folder",
       "subtitle": "Anybox",
       "description": "Save URL of current tab to Anybox with optional folder.",
       "mode": "view"
@@ -101,14 +117,14 @@
     },
     {
       "name": "pasteWithTags",
-      "title": "Save Clipboard With Tags",
+      "title": "Save Clipboard with Tags",
       "subtitle": "Anybox",
       "description": "Save clipboard to Anybox with optional tags.",
       "mode": "view"
     },
     {
       "name": "pasteWithFolder",
-      "title": "Save Clipboard With Folder",
+      "title": "Save Clipboard with Folder",
       "subtitle": "Anybox",
       "description": "Save clipboard to Anybox with optional Folder.",
       "mode": "view"
@@ -174,17 +190,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.2",
+    "@raycast/api": "^1.71.4",
     "dayjs": "^1.11.10",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "18.18.4",
-    "@types/react": "18.2.27",
-    "eslint": "^8.54.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.3.2"
+    "@types/react": "18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

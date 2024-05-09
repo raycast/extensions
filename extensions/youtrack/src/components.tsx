@@ -32,6 +32,7 @@ export function IssueListItem(props: {
     <List.Item
       icon={state.icon}
       title={props.item.summary}
+      keywords={[props.item.id]}
       subtitle={props.item.date}
       accessories={state.accessories}
       actions={

@@ -1,5 +1,7 @@
 # Raindrop.io Extension Changelog
 
+## [Fixed a typo] - 2024-05-02
+
 ## [Enhancements] - 2024-01-25
 
 - Adds a preference to display additional item and select display date in list.

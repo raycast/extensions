@@ -14,8 +14,9 @@
     "Productivity"
   ],
   "contributors": [
+    "tobias",
     "peduarte"
-],
+  ],
   "commands": [
     {
       "name": "create",

@@ -1,5 +1,19 @@
 # Changelog
 
+## [Feature] - 2024-04-30
+
+- Feature: add `Summarize` command to summarize website and YouTube video
+- Refactor: model dropdown save model switch `localstorage` to `cache`
+
+## [Feature] - 2024-04-09
+
+- Feature: Support custom model name in `Models` (Enable in preferences)
+
+## [Fix] - 2024-03-22
+
+- Fix: `Auto-load Text` and `Use Full Text Input` not working properly
+- Fix: `Ask` `onSelectionChange` race condition
+
 ## [Chore] - 2024-03-09
 
 - Chore: Retrieve `Preferences` dynamically directly from the generated type definition

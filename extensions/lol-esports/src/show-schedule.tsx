@@ -1,9 +1,18 @@
-import { Color, Icon, List } from "@raycast/api";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { chain } from "lodash";
-import { format as formatDate, isThisYear, isToday, isTomorrow, isYesterday } from "date-fns";
+import {
+  addMinutes,
+  differenceInMinutes,
+  format as formatDate,
+  isThisYear,
+  isToday,
+  isTomorrow,
+  isYesterday,
+} from "date-fns";
 import { useSchedule } from "./lib/hooks/use-schedule";
 import { LeagueDropdown } from "./lib/components/league-dropdown";
+import { AddToCalendar } from "./lib/components/add-to-calendar";
 
 export default function ShowSchedule() {
   const [leagueId, setLeagueId] = useCachedState("leagueId", "98767991302996019");
@@ -17,11 +26,31 @@ export default function ShowSchedule() {
     .orderBy(([time]) => time, ["desc"])
     .value();
 
+  const commonEventDistance = chain(schedule?.events)
+    .filter((event) => event.type === "match")
+    .takeRight(10)
+    .map((event, index, events) => {
+      const nextEvent = events[index + 1];
+      if (!nextEvent) {
+        return 0;
+      }
+      const matches = event.match.strategy.count || 1;
+      const minutes = differenceInMinutes(nextEvent.startTime, event.startTime);
+      return minutes / matches;
+    })
+    .filter((distance) => distance > 0 && distance <= 300)
+    .groupBy()
+    .entries()
+    .orderBy(([, values]) => values.length, "desc")
+    .map(([distance]) => distance)
+    .first()
+    .defaultTo(60)
+    .value();
+
   return (
     <List
       isLoading={isLoading}
-      // TODO: Uncomment when the scroll position can be controlled to center today.
-      // selectedItemId={schedule?.events.toReversed().find((event) => isToday(event.startTime))?.match.id}
+      selectedItemId={schedule?.events.find((event) => event.state !== "completed")?.match?.id}
       searchBarPlaceholder="Search teams and days"
       searchBarAccessory={<LeagueDropdown value={leagueId} onChange={setLeagueId} />}
     >
@@ -92,6 +121,17 @@ export default function ShowSchedule() {
                   subtitle={subtitle}
                   accessories={[strategy]}
                   keywords={[...event.match.teams[0].name.split(" "), ...event.match.teams[1].name.split(" "), title]}
+                  actions={
+                    <ActionPanel>
+                      <AddToCalendar
+                        event={{
+                          title: `${teamA.name} vs ${teamsB.name}`,
+                          startDate: event.startTime,
+                          endDate: addMinutes(event.startTime, commonEventDistance as number),
+                        }}
+                      />
+                    </ActionPanel>
+                  }
                 />
               );
             })}

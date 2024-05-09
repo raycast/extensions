@@ -1,4 +1,17 @@
-import { ActionPanel, Clipboard, Icon, Form, showToast, useNavigation, Action, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Clipboard,
+  Icon,
+  Form,
+  showToast,
+  useNavigation,
+  Action,
+  Toast,
+  getPreferenceValues,
+  closeMainWindow,
+  PopToRootType,
+  Keyboard,
+} from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useState } from "react";
 
@@ -13,35 +26,53 @@ import {
 import { createDatabasePage, DatabaseProperty } from "../../utils/notion";
 import { handleOnOpenPage } from "../../utils/openPage";
 import { ActionSetVisibleProperties } from "../actions";
+import { ActionSetOrderProperties } from "../actions";
 
 import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 
 export type CreatePageFormValues = {
   database: string | undefined;
   [K: string]: Form.Value | undefined;
+  closeAfterSave?: boolean;
+  content: string;
 };
 
 type CreatePageFormProps = {
   mutate?: () => Promise<void>;
   launchContext?: CreatePageFormValues;
-  defaults?: CreatePageFormValues;
+  defaults?: Partial<CreatePageFormValues>;
 };
 
+type CreatePageFormPreferences = {
+  closeAfterCreate: boolean;
+};
+
+type Quicklink = Action.CreateQuicklink.Props["quicklink"];
+
+const createPropertyId = (property: DatabaseProperty) => "property::" + property.type + "::" + property.id;
+
+const NON_EDITABLE_PROPETY_TYPES = ["formula"];
+const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
+
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
+  const preferences = getPreferenceValues<CreatePageFormPreferences>();
   const defaultValues = launchContext ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
   const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
-  const { data: databaseProperties } = useDatabaseProperties(databaseId);
+  const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
   const { setRecentPage } = useRecentPages();
 
+  const databasePropertyIds = databaseProperties.map((dp) => dp.id) || [];
+
   const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
   const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
+    if (NON_EDITABLE_PROPETY_TYPES.includes(type)) continue;
     const key = "property::" + type + "::" + id;
     if (type == "title") validation[key] = FormValidation.Required;
     let value = defaultValues?.[key];
@@ -49,45 +80,52 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     initialValues[key] = value;
   }
 
-  const { itemProps, values, handleSubmit } = useForm<CreatePageFormValues>({
+  const { itemProps, values, handleSubmit, reset, focus } = useForm<CreatePageFormValues>({
     initialValues,
     validation,
     async onSubmit(values) {
+      const { closeAfterSave, ...pageValues } = values;
       try {
+        if (closeAfterSave) {
+          await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+        }
+
         await showToast({ style: Toast.Style.Animated, title: "Creating page" });
 
-        if (initialDatabaseId) {
-          values.database = initialDatabaseId;
+        const page = await createDatabasePage({
+          ...initialValues,
+          ...pageValues,
+        });
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Page created",
+          primaryAction: {
+            title: "Open Page",
+            shortcut: { modifiers: ["cmd"], key: "o" },
+            onAction: () => handleOnOpenPage(page, setRecentPage),
+          },
+          secondaryAction: page.url
+            ? {
+                title: "Copy URL",
+                shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+                onAction: () => {
+                  Clipboard.copy(page.url as string);
+                },
+              }
+            : undefined,
+        });
+
+        if (mutate) {
+          await mutate();
+          useNavigation().pop();
+        } else {
+          reset(initialValues);
+          const titleProperty = databaseProperties?.find((dp) => dp.type == "title");
+          titleProperty && focus(createPropertyId(titleProperty));
         }
-
-        const page = await createDatabasePage(values);
-
-        if (page) {
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Created page",
-            primaryAction: {
-              title: "Open Page",
-              shortcut: { modifiers: ["cmd"], key: "o" },
-              onAction: () => handleOnOpenPage(page, setRecentPage),
-            },
-            secondaryAction: page.url
-              ? {
-                  title: "Copy URL",
-                  shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-                  onAction: () => {
-                    Clipboard.copy(page.url as string);
-                  },
-                }
-              : undefined,
-          });
-
-          if (mutate) {
-            mutate();
-            useNavigation().pop();
-          }
-        }
-      } catch {
+      } catch (error) {
+        console.error(error);
         await showToast({ style: Toast.Style.Failure, title: "Failed to create page" });
       }
     },
@@ -96,10 +134,14 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   function filterProperties(dp: DatabaseProperty) {
     return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
   }
+
   function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
-    if (a.type == "title") return -1;
-    if (b.type == "title") return 1;
-    if (!databaseView?.create_properties) return 0;
+    if (!databaseView?.create_properties) {
+      if (a.type == "title") return -1;
+      if (b.type == "title") return 1;
+      return 0;
+    }
+
     const valueA = databaseView.create_properties.indexOf(a.id);
     const valueB = databaseView.create_properties.indexOf(b.id);
     if (valueA > valueB) return 1;
@@ -107,7 +149,6 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     return 0;
   }
 
-  type Quicklink = Action.CreateQuicklink.Props["quicklink"];
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
     const launchContext = encodeURIComponent(JSON.stringify(values));
@@ -126,7 +167,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   }
 
   function itemPropsFor<T extends DatabaseProperty["type"]>(property: DatabaseProperty) {
-    const id = "property::" + property.type + "::" + property.id;
+    const id = createPropertyId(property);
     return {
       ...(itemProps[id] as FieldProps<T>),
       title: property.name,
@@ -137,6 +178,26 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   const convertToField = createConvertToFieldFunc(itemPropsFor, relationPages, users);
 
+  const renderSubmitAction = (type: "main" | "second") => {
+    const shortcut: Keyboard.Shortcut | undefined =
+      type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
+
+    if ((!preferences.closeAfterCreate && type === "main") || (preferences.closeAfterCreate && type === "second")) {
+      return <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;
+    } else {
+      return (
+        <Action.SubmitForm
+          title="Create Page and Close"
+          icon={Icon.Plus}
+          onSubmit={async (values: CreatePageFormValues) => {
+            handleSubmit({ ...values, closeAfterSave: true });
+          }}
+          shortcut={shortcut}
+        />
+      );
+    }
+  };
+
   return (
     <Form
       isLoading={isLoadingDatabases || isLoadingRelationPages}
@@ -144,22 +205,23 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} />
+            {renderSubmitAction("main")}
+            {renderSubmitAction("second")}
             <Action.CreateQuicklink
               title="Create Deeplink to Command as Configured"
               quicklink={getQuicklink()}
               icon={Icon.Link}
             />
           </ActionPanel.Section>
-          {databaseView && setDatabaseView ? (
+          {databaseView && databaseProperties ? (
             <ActionPanel.Section title="View options">
               <ActionSetVisibleProperties
-                databaseProperties={databaseProperties?.filter((dp) => dp.id !== "title") || []}
-                selectedPropertiesIds={databaseView?.create_properties || databaseProperties.map((x) => x.id)}
+                databaseProperties={databaseProperties.filter((dp) => dp.id !== "title")}
+                selectedPropertiesIds={databaseView?.create_properties || databasePropertyIds}
                 onSelect={(propertyId) => {
                   setDatabaseView({
                     ...databaseView,
-                    create_properties: databaseView.create_properties
+                    create_properties: databaseView?.create_properties
                       ? [...databaseView.create_properties, propertyId]
                       : [propertyId],
                   });
@@ -167,7 +229,19 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
                 onUnselect={(propertyId) => {
                   setDatabaseView({
                     ...databaseView,
-                    create_properties: databaseView.create_properties?.filter((pid) => pid !== propertyId),
+                    create_properties: (databaseView?.create_properties || databasePropertyIds).filter(
+                      (pid) => pid !== propertyId,
+                    ),
+                  });
+                }}
+              />
+              <ActionSetOrderProperties
+                databaseProperties={databaseProperties}
+                propertiesOrder={databaseView?.create_properties || databasePropertyIds}
+                onChangeOrder={(propertyIds) => {
+                  setDatabaseView({
+                    ...databaseView,
+                    create_properties: propertyIds,
                   });
                 }}
               />
@@ -212,11 +286,12 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
       {databaseProperties?.filter(filterProperties).sort(sortProperties).map(convertToField)}
       <Form.Separator />
       <Form.TextArea
+        {...itemProps["content"]}
         id="content"
         title="Page Content"
         enableMarkdown
-        info="Parses Markdown to Notion Blocks. 
-        
+        info="Parses Markdown to Notion Blocks.
+
 It supports:
 - Headings (levels 4 to 6 are treated as 3 on Notion)
 - Numbered, bulleted, and to-do lists

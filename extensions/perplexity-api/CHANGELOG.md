@@ -1,5 +1,21 @@
 # Perplexity API Changelog
 
+## [Update] - 2024-05-05
+
+ - Added new Llama3 based Sonar models `llama-3-sonar-small-32k`, `llama-3-sonar-large-32k`
+ - Removed deprecated models `codellama-70b-instruct`, `mistral-7b-instruct`, `sonar-small`, `sonar-medium`
+ - Question of command `Ask AI` is now displayed at the top of the response
+ - Updated default sytem prompt of `Fix Grammar and Spelling` command
+ - Current time added to system prompt
+
+## [Update] - 2024-04-22
+
+- Added new Llama3 models and `Mixtral 8x22B` model.
+
+## [Update] - 2024-03-17
+
+- Fixed names of Mistral AI instruct models.
+
 ## [Update] - 2024-03-13
 
 - Removed deprecated models.

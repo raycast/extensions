@@ -1,4 +1,5 @@
 import { useCachedState } from "@raycast/utils";
+
 import { Locale, useLanguage } from "./language";
 
 export function useRecentArticles() {

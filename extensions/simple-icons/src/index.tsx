@@ -1,9 +1,22 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Cache, Clipboard, Detail, Grid, Icon, Toast, showHUD, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Cache,
+  Clipboard,
+  Detail,
+  Grid,
+  Icon,
+  LaunchProps,
+  Toast,
+  getPreferenceValues,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { titleToSlug } from "simple-icons/sdk";
-import { Supports, CopySvg, OpenWith } from "./actions";
-import { loadLatestVersion, loadJson, cleanSavedPaths, initSavePath } from "./utils";
-import { IconJson, IconData } from "./types";
+import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
+import { loadLatestVersion, loadJson, cleanSavedPaths, initSavePath, getAliases } from "./utils.js";
+import { IconJson, IconData, LaunchContext } from "./types.js";
 
 const itemDisplayColumns = {
   small: 8,
@@ -11,7 +24,7 @@ const itemDisplayColumns = {
   large: 3,
 } as const;
 
-export default function Command() {
+export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchContext }>) {
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
   const [version, setVersion] = useState("latest");
@@ -55,8 +68,20 @@ export default function Command() {
     })();
   }, []);
 
+  const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
+  const DefaultAction = actions[defaultDetailAction];
+
+  const restActions = defaultActionsOrder
+    .filter((id) => id !== defaultDetailAction)
+    .map((actionId) => {
+      return actions[actionId];
+    });
+
   return (
     <Grid
+      navigationTitle={
+        launchContext?.launchFromExtensionTitle ? `Pick icon for ${launchContext.launchFromExtensionTitle}` : undefined
+      }
       columns={itemDisplayColumns[itemSize]}
       inset={Grid.Inset.Small}
       isLoading={isLoading}
@@ -78,9 +103,8 @@ export default function Command() {
         icons.map((icon) => {
           const slug = icon.slug || titleToSlug(icon.title);
 
-          const simpleIconsCdnLink = `https://cdn.simpleicons.org/${slug}`;
           const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg`;
-          const unpkgCdnLink = `https://unpkg.com/simple-icons@${version}/icons/${slug}.svg`;
+          const aliases = getAliases(icon);
 
           return (
             <Grid.Item
@@ -106,6 +130,20 @@ export default function Command() {
                           metadata={
                             <Detail.Metadata>
                               <Detail.Metadata.Label title="Title" text={icon.title} />
+                              {aliases.length > 0 && (
+                                <Detail.Metadata.TagList title="Aliases">
+                                  {aliases.map((alias) => (
+                                    <Detail.Metadata.TagList.Item
+                                      key={alias}
+                                      text={alias}
+                                      onAction={async () => {
+                                        Clipboard.copy(alias);
+                                        await showHUD("Copied to Clipboard");
+                                      }}
+                                    />
+                                  ))}
+                                </Detail.Metadata.TagList>
+                              )}
                               <Detail.Metadata.TagList title="Slug">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.slug}
@@ -145,29 +183,27 @@ export default function Command() {
                           }
                           actions={
                             <ActionPanel>
-                              <ActionPanel.Section>
-                                <CopySvg slug={slug} version={version} />
-                                <Action.CopyToClipboard title="Copy Color" content={icon.hex} />
-                                <Action.CopyToClipboard
-                                  title="Copy Slug"
-                                  content={slug}
-                                  shortcut={{ modifiers: ["opt"], key: "enter" }}
-                                />
-                                <Action.CopyToClipboard
-                                  title="Copy CDN Link"
-                                  content={simpleIconsCdnLink}
-                                  shortcut={{ modifiers: ["shift"], key: "enter" }}
-                                />
-                                <Action.CopyToClipboard title="Copy jsDelivr CDN Link" content={jsdelivrCdnLink} />
-                                <Action.CopyToClipboard
-                                  // eslint-disable-next-line @raycast/prefer-title-case
-                                  title="Copy unpkg CDN Link"
-                                  content={unpkgCdnLink}
-                                />
-                              </ActionPanel.Section>
-                              <ActionPanel.Section>
-                                <OpenWith slug={slug} version={version} />
-                              </ActionPanel.Section>
+                              {launchContext && (
+                                <ActionPanel.Section>
+                                  <LaunchCommand
+                                    callbackLaunchOptions={launchContext.callbackLaunchOptions}
+                                    icon={{ ...icon, slug: icon.slug || titleToSlug(icon.title) }}
+                                    version={version}
+                                  />
+                                </ActionPanel.Section>
+                              )}
+                              {(!launchContext || launchContext?.showCopyActions) && (
+                                <>
+                                  <ActionPanel.Section>
+                                    <DefaultAction icon={icon} version={version} />
+                                  </ActionPanel.Section>
+                                  <ActionPanel.Section>
+                                    {restActions.map((A, index) => (
+                                      <A key={`action-String(${index})`} icon={icon} version={version} />
+                                    ))}
+                                  </ActionPanel.Section>
+                                </>
+                              )}
                               <ActionPanel.Section>
                                 <Supports />
                               </ActionPanel.Section>

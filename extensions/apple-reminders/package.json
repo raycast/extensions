@@ -7,7 +7,9 @@
   "author": "thomaslombart",
   "contributors": [
     "tm.wrnr",
-    "ir4n"
+    "ir4n",
+    "jondelgado",
+    "phil_s"
   ],
   "owner": "raycast",
   "access": "public",
@@ -82,15 +84,6 @@
           "description": "Choose what you want to see next to the menu bar icon."
         },
         {
-          "name": "hideMenuBarCountWhenEmpty",
-          "type": "checkbox",
-          "title": "Count",
-          "label": "Hide menu bar count when empty",
-          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
-          "default": false,
-          "required": false
-        },
-        {
           "name": "view",
           "type": "dropdown",
           "data": [
@@ -111,6 +104,36 @@
           "required": false,
           "title": "View",
           "description": "Choose which view you want to see in your menu bar."
+        },
+        {
+          "name": "countType",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Today",
+              "value": "today"
+            },
+            {
+              "title": "Upcoming",
+              "value": "upcoming"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ],
+          "default": "today",
+          "required": false,
+          "title": "Count",
+          "description": "Choose which count you want to see in your menu bar."
+        },
+        {
+          "name": "hideMenuBarCountWhenEmpty",
+          "type": "checkbox",
+          "label": "Hide menu bar count when empty",
+          "description": "When enabled, the number of reminders will be hidden if there are no reminders left (\"Display menu bar count\" needs to be enabled)",
+          "default": false,
+          "required": false
         }
       ],
       "interval": "10m"
@@ -154,26 +177,34 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "manage-locations",
+      "title": "Manage Locations",
+      "subtitle": "Apple Reminders",
+      "description": "Manage your saved locations.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@date-fns/utc": "^1.1.1",
-    "@raycast/api": "^1.66.0",
-    "@raycast/utils": "^1.11.1",
-    "date-fns": "^3.3.1",
+    "@date-fns/utc": "^1.2.0",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
+    "chrono-node": "^2.7.5",
+    "date-fns": "^3.6.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.14.202",
-    "@types/node": "^20.11.7",
-    "@types/react": "^18.2.48",
-    "eslint": "^8.56.0",
+    "@types/lodash": "^4.17.0",
+    "@types/node": "^20.12.4",
+    "@types/react": "^18.2.74",
+    "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "react": "^18.2.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",

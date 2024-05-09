@@ -9,21 +9,27 @@ type Filter = "all" | "" | "pinned" | "others";
 export default function Command() {
   const [aliases, setAliases] = useState<AliasResponse[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
+  const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filteredAliases = useMemo(() => {
+    const predicate = (alias: AliasResponse) =>
+      alias.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      alias.email.toLowerCase().includes(searchText.toLowerCase()) ||
+      alias.note?.toLowerCase().includes(searchText.toLowerCase());
+
     switch (filter) {
       case "all":
-        return aliases;
+        return aliases.filter(predicate);
       case "pinned":
-        return aliases.filter((alias) => alias.pinned);
+        return aliases.filter((alias) => alias.pinned).filter(predicate);
       case "others":
-        return aliases.filter((alias) => !alias.pinned);
+        return aliases.filter((alias) => !alias.pinned).filter(predicate);
       default:
         return [];
     }
-  }, [aliases, filter]);
+  }, [aliases, filter, searchText]);
 
   useEffect(() => {
     loadAllAliases()
@@ -93,9 +99,9 @@ export default function Command() {
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Name" text={alias.name ?? "n/a"} />
+                <List.Item.Detail.Metadata.Label title="Display Name" text={alias.name ?? "n/a"} />
                 <List.Item.Detail.Metadata.Label
-                  title="Note"
+                  title="Description"
                   text={alias.note != null && alias.note?.length > 0 ? alias.note : "---"}
                 />
                 <List.Item.Detail.Metadata.Separator />
@@ -166,7 +172,8 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter aliases by name..."
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Filter aliases by name, email or description..."
       isShowingDetail={filteredAliases.length >= 0 && selectedId !== null}
       onSelectionChange={(selected) => {
         setSelectedId(selected);

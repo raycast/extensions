@@ -39,16 +39,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -56,7 +60,7 @@
     },
     {
       "name": "grammar",
-      "title": "Fix Grammar",
+      "title": "Fix Grammar and Spelling",
       "description": "Fix spelling and grammar of selected text.",
       "mode": "view",
       "preferences": [
@@ -65,7 +69,7 @@
           "title": "Prompt",
           "description": "The prompt for the grammar command.",
           "type": "textfield",
-          "default": "Fix spelling, grammar and punctuation. ONLY write the corrected version without explanations.",
+          "default": "Fix spelling, grammar, and punctuation. It is important that you only correct the text and do not write any explanations. Remember, I want you to strictly correct my grammar mistakes and typos.",
           "required": false
         },
         {
@@ -81,16 +85,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -123,16 +131,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -165,16 +177,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -207,16 +223,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -265,16 +285,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -324,16 +348,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -367,16 +395,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -410,16 +442,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -427,7 +463,7 @@
     },
     {
       "name": "professional",
-      "title": "Change Tone to Professional.",
+      "title": "Change Tone to Professional",
       "description": "Change tone of selected text to professional.",
       "mode": "view",
       "disabledByDefault": true,
@@ -453,16 +489,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -496,16 +536,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
-              "title": "Gemma 7B 8k 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
+              "title": "Gemma 7B 8k"
             }
           ]
         }
@@ -539,16 +583,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -582,16 +630,20 @@
               "value": "global"
             },
             {
+              "value": "llama3-70b-8192",
+              "title": "Llama3 70B 8k"
+            },
+            {
+              "value": "llama3-8b-8192",
+              "title": "Llama3 8B 8k"
+            },
+            {
               "value": "mixtral-8x7b-32768",
-              "title": "Mixtral 8x7b 32k"
+              "title": "Mixtral 8x7B 32k"
             },
             {
               "value": "gemma-7b-it",
               "title": "Gemma 7B 8k"
-            },
-            {
-              "value": "llama2-70b-4096",
-              "title": "Llama2 70B 4k"
             }
           ]
         }
@@ -613,19 +665,23 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "mixtral-8x7b-32768",
+      "default": "llama3-70b-8192",
       "data": [
         {
+          "value": "llama3-70b-8192",
+          "title": "Llama3 70B 8k"
+        },
+        {
+          "value": "llama3-8b-8192",
+          "title": "Llama3 8B 8k"
+        },
+        {
           "value": "mixtral-8x7b-32768",
-          "title": "Mixtral 8x7b 32k"
+          "title": "Mixtral 8x7B 32k"
         },
         {
           "value": "gemma-7b-it",
           "title": "Gemma 7B 8k"
-        },
-        {
-          "value": "llama2-70b-4096",
-          "title": "Llama2 70B 4k"
         }
       ]
     },

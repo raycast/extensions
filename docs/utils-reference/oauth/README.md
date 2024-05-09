@@ -16,7 +16,7 @@ import { Detail, LaunchProps } from "@raycast/api";
 import { withAccessToken, getAccessToken, OAuthService } from "@raycast/utils";
 
 const github = OAuthService.github({
-  scopes: "notifications repo read:org read:user read:project",
+  scope: "notifications repo read:org read:user read:project",
 });
 
 function AuthorizedComponent(props: LaunchProps) {
@@ -46,7 +46,7 @@ const client = new OAuth.PKCEClient({
 const provider = new OAuthService({
   client,
   clientId: "YOUR_CLIENT_ID",
-  scopes: "YOUR_SCOPES",
+  scope: "YOUR_SCOPES",
   authorizeUrl: "YOUR_AUTHORIZE_URL",
   tokenUrl: "YOUR_TOKEN_URL",
 });

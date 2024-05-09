@@ -1,6 +1,6 @@
 import type { Project } from "../types";
 
-import { Action, ActionPanel, Icon, List, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
 import { Project as ProjectComponent } from "../project";
 
 export function ProjectListItem({ project: p }: { project: Project }) {
@@ -12,7 +12,7 @@ export function ProjectListItem({ project: p }: { project: Project }) {
       accessories={[
         { text: p.patches.open.toString(), icon: "patch.svg" },
         { text: p.issues.open.toString(), icon: "issue.svg" },
-        { text: p.delegates.length.toString(), icon: Icon.Person },
+        { text: `${p.threshold}/${p.delegates.length}`, icon: "quorum.svg" },
         { text: p.seeding.toString(), icon: "seeding.svg" },
       ]}
       actions={<Actions project={p} />}

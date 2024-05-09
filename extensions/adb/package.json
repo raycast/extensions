@@ -11,6 +11,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "adb-current-activity",
+      "title": "Current Activity",
+      "description": "Get the current activity name and put it in your clipboard",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "adb-screenshots",
       "title": "Take Screenshot",
       "description": "Takes a screenshot, saves it, and put it in your clipboard for easy-sharing",
@@ -168,6 +175,28 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "adb-animation-scale",
+      "title": "Change the Animation Scale",
+      "description": "Increase or decrease the animation scale",
+      "disabledByDefault": true,
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "factor",
+          "placeholder": "0 - 10.0",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "adb-restart",
+      "title": "Restart ADB",
+      "disabledByDefault": true,
+      "description": "Restart ADB by killing the ADB server and starting again",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -181,19 +210,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.52.1",
+    "@raycast/api": "^1.72.1",
     "expand-tilde": "^2.0.2",
-    "node-fetch": "^3.3.1"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
+    "@raycast/eslint-config": "^1.0.6",
     "@types/expand-tilde": "^2.0.2",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
     "moment": "^2.29.4",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

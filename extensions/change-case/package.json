@@ -12,7 +12,8 @@
   ],
   "contributors": [
     "pernielsentikaer",
-    "nagauta"
+    "nagauta",
+    "PWrzesinski"
   ],
   "keywords": [
     "text",
@@ -35,7 +36,7 @@
       "type":"checkbox",
       "default": false,
       "title": "Behavior",
-      "description": "Allow pasting multiple different case without re-selecting text. Usually, you only need to change the case once, so you can pop to root",
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
       "label": "Pop to Root after Action",
       "required": true
     },
