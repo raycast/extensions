@@ -80,7 +80,7 @@ const BookItem: React.FC<BookItemProps> = ({ item }) => {
     onCompleted: () => {
       showToast({
         style: Toast.Style.Success,
-        title: "Successful",
+        title: "Successfully updated",
       });
     },
     onError: () => {

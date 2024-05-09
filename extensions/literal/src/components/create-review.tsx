@@ -32,7 +32,7 @@ export default function CreateReview(props: CreateReviewProps) {
     onCompleted: () => {
       showToast({
         style: Toast.Style.Success,
-        title: "Successfuly send",
+        title: "Successfully send",
       });
       pop();
     },

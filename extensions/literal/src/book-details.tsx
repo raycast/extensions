@@ -27,7 +27,7 @@ export default function BookDetails(props: BookDetailsProps) {
     onCompleted: () => {
       showToast({
         style: Toast.Style.Success,
-        title: "Successful",
+        title: "Successfully updated",
       });
     },
     onError: () => {
