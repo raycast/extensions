@@ -48,6 +48,10 @@
               "value": "crimson"
             },
             {
+              "title": "Evil Rabbit",
+              "value": "rabbit"
+            },
+            {
               "title": "Falcon",
               "value": "falcon"
             },
@@ -70,6 +74,10 @@
             {
               "title": "Sunset",
               "value": "sunset"
+            },
+            {
+              "title": "Vercel",
+              "value": "vercel"
             }
           ]
         },

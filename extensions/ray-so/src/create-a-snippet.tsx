@@ -63,9 +63,9 @@ export default function CreateSnippet() {
         {colors.map((el, idx) => (
           <Form.Dropdown.Item
             key={idx}
-            icon={{ source: `${el}.png` }}
-            value={el}
-            title={el.charAt(0).toUpperCase() + el.substring(1).toLowerCase()}
+            icon={{ source: `${el.value}.png` }}
+            value={el.value}
+            title={el.title}
           />
         ))}
       </Form.Dropdown>

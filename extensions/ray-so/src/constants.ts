@@ -1,4 +1,16 @@
-export const colors = ["candy", "breeze", "crimson", "falcon", "meadow", "midnight", "mono", "raindrop", "sunset"];
+export const colors = [
+  { title: "Candy", value: "candy" },
+  { title: "Breeze", value: "breeze" },
+  { title: "Crimson", value: "crimson" },
+  { title: "Falcon", value: "falcon" },
+  { title: "Meadow", value: "meadow" },
+  { title: "Midnight", value: "midnight" },
+  { title: "Mono", value: "mono" },
+  { title: "Evil Rabbit", value: "rabbit" },
+  { title: "Raindrop", value: "raindrop" },
+  { title: "Sunset", value: "sunset" },
+  { title: "Vercel", value: "vercel" },
+];
 
 export const languages = [
   { label: "Auto-Detect", value: "auto" },
