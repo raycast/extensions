@@ -1,3 +1,3 @@
-# Delete Desktop Screenshots
+# Move Desktop Screenshots to Trash
 
-Quickly delete any screenshots on your desktop.
+Quickly move any Screenshots on your Desktop to the Trash. Also works with CleanShot X.
