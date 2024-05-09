@@ -1,5 +1,11 @@
 import React from 'react';
-import { List, ActionPanel, Action, popToRoot, closeMainWindow } from '@raycast/api';
+import {
+  List,
+  ActionPanel,
+  Action,
+  popToRoot,
+  closeMainWindow,
+} from '@raycast/api';
 import { exec } from 'child_process';
 
 const openMozillaVpnApp = () => {

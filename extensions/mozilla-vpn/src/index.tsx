@@ -18,7 +18,9 @@ const isMozillaVpnInstalled = () => {
 };
 
 const Command: React.FC = () => {
-  const [currentIP, setCurrentIP] = useState<string>('Fetching IP and location...');
+  const [currentIP, setCurrentIP] = useState<string>(
+    'Fetching IP and location...'
+  );
   const [vpnStatus, setVpnStatus] = useState<boolean | null>(null);
   const [serverCity, setServerCity] = useState<string>('Loading...');
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +59,8 @@ const Command: React.FC = () => {
       console.error(`Failed to ${action} VPN:`, error);
       loadingToast.style = Toast.Style.Failure;
       loadingToast.title = `VPN ${action} failed`;
-      loadingToast.message = error instanceof Error ? error.message : String(error);
+      loadingToast.message =
+        error instanceof Error ? error.message : String(error);
     }
   };
 
@@ -131,7 +134,11 @@ const Command: React.FC = () => {
 
   return (
     <List isLoading={isLoading} isShowingDetail={false}>
-      <VpnStatus vpnStatus={vpnStatus} serverCity={serverCity} onToggleVpn={toggleVpn} />
+      <VpnStatus
+        vpnStatus={vpnStatus}
+        serverCity={serverCity}
+        onToggleVpn={toggleVpn}
+      />
       <List.Item title="Current IP Address and Location" subtitle={currentIP} />
     </List>
   );

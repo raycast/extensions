@@ -21,9 +21,13 @@ const executeCommand = (command: string): Promise<string> => {
 
 // Check if the user is authenticated
 export const checkLoginStatus = (): Promise<LoginStatus> => {
-  return executeCommand('/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN status')
+  return executeCommand(
+    '/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN status'
+  )
     .then((stdout) => {
-      const isAuthenticated = !stdout.includes('User status: not authenticated');
+      const isAuthenticated = !stdout.includes(
+        'User status: not authenticated'
+      );
       return { isAuthenticated };
     })
     .catch((err) => {

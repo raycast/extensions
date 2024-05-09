@@ -7,11 +7,18 @@ interface VpnStatusProps {
   onToggleVpn: () => void;
 }
 
-const VpnStatus: React.FC<VpnStatusProps> = ({ vpnStatus, serverCity, onToggleVpn }) => {
+const VpnStatus: React.FC<VpnStatusProps> = ({
+  vpnStatus,
+  serverCity,
+  onToggleVpn,
+}) => {
   return (
     <List.Item
       title={vpnStatus ? 'Deactivate Mozilla VPN' : 'Activate Mozilla VPN'}
-      accessories={[{ text: `Server City: ${serverCity}` }, { text: `Status: ${vpnStatus ? 'Connected' : 'Disconnected'}` }]}
+      accessories={[
+        { text: `Server City: ${serverCity}` },
+        { text: `Status: ${vpnStatus ? 'Connected' : 'Disconnected'}` },
+      ]}
       actions={
         <ActionPanel>
           <Action

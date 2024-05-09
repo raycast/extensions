@@ -22,7 +22,9 @@ const executeCommand = (command: string): Promise<string> => {
 };
 
 // Run specific VPN commands e.g., activate, deactivate
-export const runCommand = (action: 'activate' | 'deactivate'): Promise<void> => {
+export const runCommand = (
+  action: 'activate' | 'deactivate'
+): Promise<void> => {
   const command = `/Applications/Mozilla\\ VPN.app/Contents/MacOS/Mozilla\\ VPN ${action}`;
   return executeCommand(command)
     .then(() => {
@@ -42,8 +44,12 @@ export const checkVpnStatus = (): Promise<VpnStatus> => {
     .then((stdout) => {
       const isActive = stdout.includes('VPN state: on');
       const serverCityMatch = stdout.match(/Server city: (.+)/);
-      const serverCity = serverCityMatch ? serverCityMatch[1].trim() : 'Unknown';
-      const isAuthenticated = !stdout.includes('User status: not authenticated');
+      const serverCity = serverCityMatch
+        ? serverCityMatch[1].trim()
+        : 'Unknown';
+      const isAuthenticated = !stdout.includes(
+        'User status: not authenticated'
+      );
       return { isActive, serverCity, isAuthenticated };
     })
     .catch((err) => {
