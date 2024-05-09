@@ -1,0 +1,25 @@
+{
+  "root": true,
+  "extends": [
+    "finn",
+    "finn/node",
+    "finn-prettier"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "rules": {
+    "new-cap": ["error", { "capIsNewExceptions": ["Router"] }]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "test/**/*"],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
+}

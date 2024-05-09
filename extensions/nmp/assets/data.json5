@@ -1,0 +1,82 @@
+{
+  environments: [
+    {
+      brand: "Finn",
+      lifecycle: "prod",
+      domain: "svc.prod.finn.no",
+      overrides: {
+        log: "https://kibana.obs.prod.finn.no/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))&_a=(columns:!(finn_app,level,message,throwable),filters:!(),index:'30907c50-abe4-11ea-a90d-b37452ff2398',interval:auto,query:(language:kuery,query:'kubernetes.labels.app:(%22classified-innfinn%22%20OR%20%22ad-content-daemon%22%20OR%20%22ad-input-server%22%20OR%20%22ad-content-server%22%20OR%20%22item-management-server%22%20OR%20%22ad-input-docs%22%20OR%20%22classified-migration-runner%22%20OR%20%22ad-messaging-forwarder%22)%20AND%20(NOT%20level:(%22INFO%22%20OR%20%22DEBUG%22))%0A'),sort:!(!('@timestamp',desc)))",
+        metrics: "https://grafana.finntech.no/",
+        kafka: "https://akhq.svc.prod.finn.no/ui/prod/topic",
+      }
+    },
+    {
+      brand: "Tori",
+      lifecycle: "prod",
+      domain: "svc.prod.tori.fi",
+      overrides: {
+        log: "https://logs.gke02.obs.i01.rc.nmp.tech/app/discover#/view/3b2a50f0-a497-11ee-b9d8-1125049955e8?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(message),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'30907c50-abe4-11ea-a90d-b37452ff2398',key:level,negate:!f,params:!(ERROR,FATAL,WARN,error),type:phrases,value:!(ERROR,FATAL,WARN,error)),query:(bool:(minimum_should_match:1,should:!((match_phrase:(level:ERROR)),(match_phrase:(level:FATAL)),(match_phrase:(level:WARN)),(match_phrase:(level:error)))))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'30907c50-abe4-11ea-a90d-b37452ff2398',key:kubernetes.labels.app,negate:!f,params:!(apps-adinput,ad-content-daemon,ad-content-server,ad-input-server,item-management-server,classified-migration-runner,ad-messaging-forwarder),type:phrases,value:!(apps-adinput,ad-content-daemon,ad-content-server,ad-input-server,item-management-server,classified-migration-runner,ad-messaging-forwarder)),query:(bool:(minimum_should_match:1,should:!((match_phrase:(kubernetes.labels.app:apps-adinput)),(match_phrase:(kubernetes.labels.app:ad-content-daemon)),(match_phrase:(kubernetes.labels.app:ad-content-server)),(match_phrase:(kubernetes.labels.app:ad-input-server)),(match_phrase:(kubernetes.labels.app:item-management-server)),(match_phrase:(kubernetes.labels.app:classified-migration-runner)),(match_phrase:(kubernetes.labels.app:ad-messaging-forwarder))))))),grid:(),hideChart:!f,index:'30907c50-abe4-11ea-a90d-b37452ff2398',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))",
+        metrics: "https://metrics.gke02.obs.i01.rc.nmp.tech/d/spring_boot_21/spring-boot-3-x-statistics?orgId=1",
+        kafka: "https://confluent.cloud/environments/env-7nr69o/clusters/lkc-19xox3/topics/public.classified.broadcast/overview"
+      }
+    },
+    {
+      brand: "Finn",
+      lifecycle: "dev",
+      domain: "svc.dev.finn.no",
+      overrides: {
+        log: "https://kibana.obs.dev.finn.no/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))&_a=(columns:!(finn_app,level,message,throwable),filters:!(),index:c2023fe0-a17e-11ea-b351-29ac48bd5d1f,interval:auto,query:(language:kuery,query:'kubernetes.labels.app:(%22classified-innfinn%22%20OR%20%22ad-content-daemon%22%20OR%20%22ad-input-server%22%20OR%20%22ad-content-server%22%20OR%20%22item-management-server%22%20OR%20%22ad-input-docs%22%20OR%20%22classified-migration-runner%22%20OR%20%22ad-messaging-forwarder%22)%20AND%20(NOT%20level:(%22INFO%22%20OR%20%22DEBUG%22))%0A'),sort:!(!('@timestamp',desc)))",
+        metrics: "https://kibana.obs.dev.finn.no/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))&_a=(columns:!(finn_app,level,message,throwable),filters:!(),index:c2023fe0-a17e-11ea-b351-29ac48bd5d1f,interval:auto,query:(language:kuery,query:'kubernetes.labels.app:(%22classified-innfinn%22%20OR%20%22ad-content-daemon%22%20OR%20%22ad-input-server%22%20OR%20%22ad-content-server%22%20OR%20%22item-management-server%22%20OR%20%22ad-input-docs%22%20OR%20%22classified-migration-runner%22%20OR%20%22ad-messaging-forwarder%22)%20AND%20(NOT%20level:(%22INFO%22%20OR%20%22DEBUG%22))%0A'),sort:!(!('@timestamp',desc)))",
+        kafka: "https://akhq.svc.dev.finn.no/ui/dev/topic"
+      }
+    },
+    {
+      brand: "Tori",
+      lifecycle: "dev",
+      domain: "svc.dev.tori.fi",
+      overrides: {
+        log: "https://console.cloud.google.com/logs/query;query=labels.%22k8s-pod%2Fowner%22%3D%22af-adcontent%22%0Aseverity!%3DINFO%0Aseverity!%3DDEBUG;storageScope=storage,projects%2Fnmp-rc-toripg-apps%2Flocations%2Fglobal%2Fbuckets%2F_Default%2Fviews%2Fnmp-toripg-workloads,projects%2Fnmp-rc-toripg-apps%2Flocations%2Fglobal%2Fbuckets%2F_Default%2Fviews%2F_Default,projects%2Fnmp-rc-toripg-apps%2Flocations%2Fglobal%2Fbuckets%2F_Required%2Fviews%2F_AllLogs;cursorTimestamp=2024-04-29T07:39:08.884470256Z;duration=PT1H?referrer=search&hl=en&project=nmp-rc-toripg-apps",
+        metrics: null,
+        kafka: null
+      }
+    }
+  ],
+  tools: [
+    {
+      shortName: "acs",
+      displayName: "Ad Content Server",
+      serviceName: "ad-content-server",
+      path: "/items/1"
+    },
+    {
+      shortName: "vault",
+      "displayName": "Vault - Secret storage",
+      serviceName: "vault",
+      path: "ui/vault/secrets"
+    },
+    {
+      shortName: "log",
+      displayName: "Kibana Logs",
+      serviceName: "kibana",
+      path: "app/kibana#/discover"
+    },
+    {
+      shortName: "metrics",
+      displayName: "Grafana Metrics",
+      serviceName: "grafana",
+      path: "/"
+    },
+    {
+      shortName: "kafka",
+      displayName: "AKHQ - Kafka UI",
+      serviceName: "akhq",
+      path: "/ui/prod/topic"
+    },
+    {
+      shortName: "unleash",
+      displayName: "Unleash - Feature Flags and Toggles",
+      serviceName: "unleash",
+      path: "/#/features"
+    }
+  ]
+}
