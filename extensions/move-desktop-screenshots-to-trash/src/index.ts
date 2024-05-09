@@ -1,7 +1,7 @@
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const { exec } = require('child_process');
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { exec } from "child_process";
 import { showHUD } from "@raycast/api";
 
 const desktopDir = path.join(os.homedir(), 'Desktop');
