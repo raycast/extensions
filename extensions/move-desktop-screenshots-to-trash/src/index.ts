@@ -4,7 +4,7 @@ import path from "path";
 import { exec } from "child_process";
 import { showHUD } from "@raycast/api";
 
-const desktopDir = path.join(os.homedir(), 'Desktop');
+const desktopDir = path.join(os.homedir(), "Desktop");
 
 const moveFileToTrash = (filePath) => {
   exec(`osascript -e 'tell application "Finder" to delete POSIX file "${filePath}"'`, (error, stdout, stderr) => {
@@ -22,14 +22,14 @@ const moveFileToTrash = (filePath) => {
 
 fs.readdir(desktopDir, (err, files) => {
   if (err) {
-    console.log('Error finding files: ' + err);
+    console.log("Error finding files: " + err);
     return;
   }
 
   let movedFilesCount = 0;
 
   files.forEach((filename) => {
-    if ((filename.startsWith('CleanShot ') || filename.startsWith('Screenshot ')) && filename.endsWith('.png')) {
+    if ((filename.startsWith("CleanShot ") || filename.startsWith("Screenshot ")) && filename.endsWith(".png")) {
       const fullPath = path.join(desktopDir, filename);
       moveFileToTrash(fullPath);
       movedFilesCount++;
