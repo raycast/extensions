@@ -7,6 +7,7 @@ export const CustomForm = ({ language, accentSwitch }: { language: Languages; ac
   const [text, setText] = useState("");
   const [includeAccents, setIncludeAccents] = useState(true);
   const [translated, setTranslated] = useState("");
+  const [wordsNotFound, setWordsNotFound] = useState<string[]>([]);
 
   let dictionaryPlaceholder: string;
   let dictionaryPlaceholderNoAccents: string;
@@ -34,7 +35,14 @@ export const CustomForm = ({ language, accentSwitch }: { language: Languages; ac
   }
 
   const handleSubmit = (textToTranslate: string, accents: boolean) => {
-    setTranslated(getTranslation(textToTranslate, accents ? dictionaryPlaceholder : dictionaryPlaceholderNoAccents));
+    setWordsNotFound([]);
+    setTranslated(
+      getTranslation(
+        textToTranslate,
+        accents ? dictionaryPlaceholder : dictionaryPlaceholderNoAccents,
+        setWordsNotFound,
+      ),
+    );
   };
 
   const onTextChange = (newValue: string) => {
@@ -68,6 +76,19 @@ export const CustomForm = ({ language, accentSwitch }: { language: Languages; ac
       )}
       <Form.Separator />
       <Form.Description title="Translated IPA" text={translated} />
+      <Form.Separator />
+      {wordsNotFound.length ? (
+        <Form.Description
+          title="Not found in dictionary"
+          text={
+            wordsNotFound.length === 1
+              ? `The word "${wordsNotFound[0]}" was not found in the dictionary.`
+              : `The words "${wordsNotFound.join(", ")}" were not found in the dictionary.`
+          }
+        />
+      ) : (
+        <></>
+      )}
     </Form>
   );
 };
