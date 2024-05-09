@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ethereum-eips",
+  "title": "ethereum-eips",
+  "description": "Look up Ethereum Proposals and read them",
+  "icon": "icon.png",
+  "author": "banteg",
+  "categories": [
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Ethereum Proposals",
+      "description": "Look up Ethereum Proposals and read them",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repos_path",
+      "description": "A path to a folder containing EIPs and ERCs repositories",
+      "type": "directory",
+      "required": true,
+      "title": "Folder with EIPs and ERCs repos",
+      "placeholder": "/home/banteg/dev/ethereum"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "@raycast/utils": "^1.4.8",
+    "fuse.js": "^7.0.0",
+    "glob": "^10.3.12",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
