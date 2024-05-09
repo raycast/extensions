@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Improvement] - 2024-05-09
+
+- The issue of the Raycast window closing after executing the volume up and down commands has been addressed, enhancing usability.
+
 ## [Feature] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.

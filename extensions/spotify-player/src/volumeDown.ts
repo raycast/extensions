@@ -1,4 +1,4 @@
-import { showHUD } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { changeVolume } from "./api/changeVolume";
 import { getPlaybackState } from "./api/getPlaybackState";
@@ -11,9 +11,19 @@ export default async function Command() {
   const newVolume = Math.max(volume - 10, 0);
 
   try {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: `Setting volume to ${newVolume}%`,
+    });
     await changeVolume(newVolume);
-    await showHUD(`Volume set to ${newVolume}%`);
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Volume set to ${newVolume}%`,
+    });
   } catch (error) {
-    await showHUD("No active device");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No active device",
+    });
   }
 }
