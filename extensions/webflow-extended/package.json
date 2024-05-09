@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "webflow-extended",
+  "title": "Webflow Extended",
+  "description": "Have quick access to your Webflow projects and CMS collections",
+  "icon": "command-icon.png",
+  "author": "lucas_ramalho",
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "showSites",
+      "title": "Navigate Webflow",
+      "description": "Navigate through your Webflow projects and CMS collections",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.3",
+    "node-fetch": "^3.3.2",
+    "webflow-api": "^2.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
