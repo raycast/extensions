@@ -22,7 +22,7 @@
         },
         {
             "name": "setSwitchSet",
-            "title": "Set Switch",
+            "title": "Set Switch Set",
             "subtitle": "Klack",
             "description": "Sets Switch Set",
             "mode": "view"
