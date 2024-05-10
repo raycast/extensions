@@ -1,13 +1,22 @@
 import { bodyOf, failIfNotOk, get, post } from "./api";
 import { showHUD } from "@raycast/api";
 
-export type Availability = "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "Offline";
-type Activity = "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "OffWork";
+export type Availability =
+  | "Available"
+  | "Busy"
+  | "DoNotDisturb"
+  | "BeRightBack"
+  | "Away"
+  | "Offline"
+  | "PresenceUnknown";
+type Activity = "Available" | "Busy" | "DoNotDisturb" | "BeRightBack" | "Away" | "OffWork" | "Unknown";
 
 function activityFor(availability: Availability): Activity {
   switch (availability) {
     case "Offline":
       return "OffWork";
+    case "PresenceUnknown":
+      return "Unknown";
     default:
       return availability;
   }
@@ -26,9 +35,9 @@ interface Presence {
   activity: string;
 }
 
-async function getPresence() {
+export async function getPresence(entityId?: string) {
   const response = await get({
-    path: "/me/presence",
+    path: entityId === undefined ? "/me/presence" : `/users/${entityId.split(":")[1].split(":")[0]}/presence`,
   });
   await failIfNotOk(response, "Getting presence");
   return bodyOf<Presence>(response);

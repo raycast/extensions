@@ -1,15 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Chat, findChats } from "./api/chat";
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { currentUserId } from "./api/user";
 import { OpenUrlAction } from "./api/util";
 import { CallType, callUser } from "./actions/callAction";
 import { usePromise } from "@raycast/utils";
+import { getPresence } from "./api/presence";
 
 const chatIcon = {
   oneOnOne: Icon.Person,
   group: Icon.TwoPeople,
   meeting: Icon.Calendar,
+};
+
+const presenceIcon: Record<string, string> = {
+  Available: "presence_available.png",
+  Away: "presence_away.png",
+  BeRightBack: "presence_away.png",
+  Busy: "presence_busy.png",
+  DoNotDisturb: "presence_dnd.png",
+  InACall: "presence_dnd.png",
+  InAConferenceCall: "presence_dnd.png",
+  Inactive: "presence_offline.png",
+  InAMeeting: "presence_dnd.png",
+  Offline: "presence_offline.png",
+  OffWork: "presence_offline.png",
+  OutOfOffice: "presence_oof.png",
+  PresenceUnknown: "presence/presence_offline.png",
+  Presenting: "presence_dnd.png",
+  UrgentInterruptionsOnly: "presence_dnd.png",
 };
 
 function chatMemberNames(chat: Chat) {
@@ -33,9 +52,24 @@ function chatTitle(chat: Chat) {
 }
 
 function ChatItem({ chat }: { chat: Chat }) {
+  const [availability, setAvailability] = useState<string | undefined>(undefined);
+  const { isLoading, data: currentAvailability } = usePromise(getPresence, [chat.id]);
+
+  useEffect(() => {
+    setAvailability(currentAvailability?.activity);
+  }, [currentAvailability]);
+
   return (
     <List.Item
-      icon={{ source: chatIcon[chat.chatType], tintColor: Color.Purple }}
+      icon={{
+        source: isLoading
+          ? Icon.CircleProgress
+          : chat.chatType !== "oneOnOne"
+          ? chatIcon[chat.chatType]
+          : availability !== undefined
+          ? presenceIcon[availability]
+          : Icon.Person,
+      }}
       title={chatTitle(chat)}
       accessories={[{ tag: new Date(chat.lastMessagePreview?.createdDateTime ?? chat.createdDateTime) }]}
       actions={
