@@ -55,25 +55,25 @@ export default function Command() {
 
       <Form.TextField
         id="as_q"
-        title="All these words:"
+        title="All These Words"
         info="Enter all the words that must appear in the search results. E.g.: electric car reviews"
       />
 
       <Form.TextField
         id="as_epq"
-        title="This exact phrase:"
+        title="This Exact Phrase"
         info="Enter an exact phrase that must be found in the results. E.g.: climate change legislation"
       />
 
       <Form.TextField
         id="as_oq"
-        title="Any of these words:"
+        title="Any of These Words"
         info="Enter words, any of which you're interested in finding within the results. E.g.: iPhone Samsung smartphone"
       />
 
       <Form.TextField
         id="as_eq"
-        title="None of these words:"
+        title="None of These Words"
         info="List words you want to exclude from your search, helping to eliminate unwanted terms. E.g.: nuts dairy shellfish"
       />
 
@@ -88,13 +88,13 @@ export default function Command() {
 
       <Form.TextField
         id="as_nlo"
-        title="Numbers ranging from:"
+        title="Numbers Ranging from"
         info="Set the start of a numerical range for your search. You can add a unit of measurement: 2022, $100, 10 kg"
       />
 
       <Form.TextField
         id="as_nhi"
-        title="Numbers ranging to:"
+        title="Numbers Ranging to"
         info="Set the end of a numerical range for your search. You can add a unit of measurement: 2024, $300, 35 kg"
       />
 
@@ -107,7 +107,7 @@ export default function Command() {
         text="Filter results by language, region, site, last update or format to customize search outcomes."
       />
 
-      <Form.Dropdown id="lr" title="Language:" defaultValue="" info="Find pages in the language that you select.">
+      <Form.Dropdown id="lr" title="Language" defaultValue="" info="Find pages in the language that you select.">
         <Form.Dropdown.Item value="" title="any language" />
         <Form.Dropdown.Item value="lang_af" title="Afrikaans" />
         <Form.Dropdown.Item value="lang_ar" title="Arabic" />
@@ -157,7 +157,7 @@ export default function Command() {
         <Form.Dropdown.Item value="lang_vi" title="Vietnamese" />
       </Form.Dropdown>
 
-      <Form.Dropdown id="cr" title="Region:" defaultValue="" info="Find pages published in a particular region.">
+      <Form.Dropdown id="cr" title="Region" defaultValue="" info="Find pages published in a particular region.">
         <Form.Dropdown.Item value="" title="any region" />
         <Form.Dropdown.Item value="countryAF" title="Afghanistan" />
         <Form.Dropdown.Item value="countryAL" title="Albania" />
@@ -400,7 +400,7 @@ export default function Command() {
 
       <Form.Dropdown
         id="as_qdr"
-        title="Last update:"
+        title="Last Update"
         defaultValue="all"
         info="Find pages updated within the time that you specify."
       >
@@ -413,13 +413,13 @@ export default function Command() {
 
       <Form.TextField
         id="as_sitesearch"
-        title="Site or domain:"
+        title="Site or Domain"
         info="Search one site (like wikipedia.org ) or limit your results to a domain like .edu, .org or .gov"
       />
 
       <Form.Dropdown
         id="as_occt_input"
-        title="Terms appearing:"
+        title="Terms Appearing"
         defaultValue="any"
         info="Search for terms in the whole page, page title or web address, or links to the page you're looking for."
       >
@@ -432,7 +432,7 @@ export default function Command() {
 
       <Form.Dropdown
         id="as_filetype"
-        title="File type:"
+        title="File Type"
         defaultValue=""
         info="Find pages in the format that you prefer."
       >
@@ -451,7 +451,7 @@ export default function Command() {
 
       <Form.Dropdown
         id="sur"
-        title="Usage rights:"
+        title="Usage Rights"
         defaultValue=""
         info="Find pages that you are free to use yourself."
       >
