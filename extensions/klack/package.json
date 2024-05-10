@@ -5,6 +5,7 @@
     "description": "Control Klack for macOS with Raycast",
     "icon": "klack.png",
     "author": "henrikruscon",
+    "contributors": [],
     "categories": [
         "Applications",
         "Media",
@@ -23,28 +24,28 @@
             "name": "setSwitchSet",
             "title": "Set Switch",
             "subtitle": "Klack",
-            "description": "Sets Switch",
+            "description": "Sets Switch Set",
             "mode": "view"
         },
         {
             "name": "setSoftVolume",
             "title": "Set Volume to Soft",
             "subtitle": "Klack",
-            "description": "Sets Volume to Soft",
+            "description": "Sets Volume to Soft (30%)",
             "mode": "no-view"
         },
         {
             "name": "setBalancedVolume",
             "title": "Set Volume to Balanced",
             "subtitle": "Klack",
-            "description": "Sets Volume to Balanced",
+            "description": "Sets Volume to Balanced (60%)",
             "mode": "no-view"
         },
         {
             "name": "setLoudVolume",
             "title": "Set Volume to Loud",
             "subtitle": "Klack",
-            "description": "Sets Volume to Loud",
+            "description": "Sets Volume to Loud (90%)",
             "mode": "no-view"
         }
     ],
