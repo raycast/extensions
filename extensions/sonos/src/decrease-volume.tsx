@@ -1,4 +1,4 @@
-import { LaunchType, getPreferenceValues } from "@raycast/api";
+import { LaunchType, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { SonosDevice } from "@svrooij/sonos/lib";
 import { getActiveCoordinator } from "./core/sonos";
 import { handleCommandError, tryLaunchCommand } from "./core/utils";
@@ -30,5 +30,11 @@ export default async function Command() {
     });
   } else {
     await coordinator.SetRelativeGroupVolume(-Number(preferences.volumeStep));
+    await coordinator.GetState().then((state) =>
+      showToast({
+        style: Toast.Style.Success,
+        title: `Decreased volume to ${state.volume}%.`,
+      }),
+    );
   }
 }
