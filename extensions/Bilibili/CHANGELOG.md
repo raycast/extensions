@@ -1,6 +1,15 @@
 # Bilibili Changelog
 
-## [New Feature] - 2023-12-11
+## New Feature - 2024-5-10
+
+- Rmove Popular Videos and Weekly Popular Series.
+
+## [New Feature] - 2023-12-30
+
+- Support add watch later reminder into the reminder.app
+- Show all images on the first screen
+
+## [New Feature] - 2023-11-13
 
 - Support AI summary video
 
