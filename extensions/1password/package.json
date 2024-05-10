@@ -16,12 +16,8 @@
     "superwhys",
     "lukah"
   ],
-  "past_contributors": [
-    "Davidwalser"
-  ],
-  "categories": [
-    "Security"
-  ],
+  "past_contributors": ["Davidwalser"],
+  "categories": ["Security"],
   "license": "MIT",
   "commands": [
     {
@@ -144,6 +140,15 @@
       "required": false,
       "title": "1Password CLI path",
       "type": "textfield"
+    },
+    {
+      "description": "Enter your ZSH binary path",
+      "name": "zshPath",
+      "placeholder": "e.g., /bin/zsh",
+      "required": false,
+      "title": "1Password SHELL path",
+      "type": "textfield",
+      "default": "/bin/zsh"
     }
   ],
   "dependencies": {

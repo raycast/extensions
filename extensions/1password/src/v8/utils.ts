@@ -11,8 +11,31 @@ export type ActionID = string;
 
 const preferences = getPreferenceValues();
 
-export const CLI_PATH =
-  preferences.cliPath || ["/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) => existsSync(path));
+export class ExtensionError extends Error {
+  public title: string;
+  constructor(title: string, message?: string) {
+    if (!message) message = title;
+    super(message);
+    this.title = title;
+  }
+}
+
+export class NotFoundError extends ExtensionError {}
+export class CommandLineMissingError extends ExtensionError {}
+export class ZshMissingError extends ExtensionError {}
+export class ConnectionError extends ExtensionError {}
+
+export const CLI_PATH = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"].find((path) =>
+  existsSync(path)
+);
+
+export const ZSH_PATH = [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
+
+export const errorRegex = new RegExp(/\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+(.*)$/m);
+
+export function capitalizeWords(str: string): string {
+  return str.replace(/\b\w/g, (char: string) => char.toUpperCase());
+}
 
 export function hrefToOpenInBrowser(item: Item): string | undefined {
   if (item.category === "LOGIN") {
@@ -71,18 +94,12 @@ export const handleErrors = (stderr: string) => {
   }
 };
 
-export class ExtensionError extends Error {
-  public title: string;
-  constructor(title: string, message?: string) {
-    if (!message) message = title;
-    super(message);
-    this.title = title;
+export const checkZsh = () => {
+  if (!ZSH_PATH) {
+    return false;
   }
-}
-
-export class NotFoundError extends ExtensionError {}
-export class CommandLineMissingError extends ExtensionError {}
-export class ConnectionError extends ExtensionError {}
+  return true;
+};
 
 export const getSignInStatus = () => {
   try {
