@@ -4,31 +4,31 @@ import { getSignedNumberNotationInString } from "./getSignedNumberNotation";
 import { getRankingColor } from "./getRankingColor";
 
 type CreateAccessoriesOpts = {
-	player: Player;
-	show: boolean;
-	additionalAccessories?: List.Item.Accessory[] | null;
+  player: Player;
+  show: boolean;
+  additionalAccessories?: List.Item.Accessory[] | null;
 };
 
 export const createAccessories = ({
-	show,
-	player,
-	additionalAccessories,
+  show,
+  player,
+  additionalAccessories,
 }: CreateAccessoriesOpts): List.Item.Accessory[] | null => {
-	if (!show) {
-		return null;
-	}
-	return [
-		...(additionalAccessories ? additionalAccessories : []),
-		...(player.pointsChange
-			? [
-					{
-						tag: {
-							value: getSignedNumberNotationInString(player.pointsChange),
-							color: getRankingColor(player.pointsChange),
-						},
-					},
-			  ]
-			: []),
-		{ text: `Points: ${player.points.toString()}` },
-	];
+  if (!show) {
+    return null;
+  }
+  return [
+    ...(additionalAccessories ? additionalAccessories : []),
+    ...(player.pointsChange
+      ? [
+          {
+            tag: {
+              value: getSignedNumberNotationInString(player.pointsChange),
+              color: getRankingColor(player.pointsChange),
+            },
+          },
+        ]
+      : []),
+    { text: `Points: ${player.points.toString()}` },
+  ];
 };
