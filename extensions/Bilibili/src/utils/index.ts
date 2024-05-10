@@ -11,6 +11,3 @@ export * from "./getVideoInfo";
 export * from "./postHeartbeat";
 export * from "./getDynamicFeed";
 export * from "./gennerateQRCode";
-export * from "./getPopularVideos";
-export * from "./getPopularSeriesList";
-export * from "./getPopularSeriesVideos";

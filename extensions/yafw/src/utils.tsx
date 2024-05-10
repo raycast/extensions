@@ -1,14 +1,12 @@
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { exec, execSync } from "child_process";
-import { promisify } from "util";
 import fs, { existsSync } from "fs";
-import { COMPRESSION_OPTIONS, CompressionOptionKey, PATH } from "./constants";
-
-const ffmpegPath = getPreferenceValues().ffmpeg_path || "/opt/homebrew/bin/ffmpeg";
+import { promisify } from "util";
+import { COMPRESSION_OPTIONS, CompressionOptionKey, FFMPEG_BINARY_CUSTOM_PATH, PATH } from "./constants";
 
 const ffmpegPathExists = (): boolean => {
   try {
-    return existsSync(ffmpegPath);
+    return existsSync(FFMPEG_BINARY_CUSTOM_PATH);
   } catch (error) {
     return false;
   }
@@ -49,7 +47,7 @@ const getFFmpegCommand = (args: string) => {
   if (isInPath) {
     return `zsh -l -c 'PATH=${PATH} ffmpeg ${args}'`;
   } else if (customPathExists) {
-    return `${ffmpegPath} ${args}`;
+    return `${FFMPEG_BINARY_CUSTOM_PATH} ${args}`;
   } else {
     showToast({
       title: "Error",
@@ -60,6 +58,10 @@ const getFFmpegCommand = (args: string) => {
   }
 };
 
+export function sanitizeFileName(file: string): string {
+  return file.replace(/ /g, "\\ ").replace(/'/g, `\\'\\''`).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
 export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {
   const one = files.length === 1;
   await showToast(Toast.Style.Animated, one ? "Compressing video..." : "Compressing videos...");
@@ -69,7 +71,7 @@ export async function compressVideoFiles(files: string[], compression: Compressi
       const output = file.replace(/\.\w+$/, ` (yafw ${compression}).mp4`);
       const { crf, bitrate, bufsize } = COMPRESSION_OPTIONS[compression];
       const command = getFFmpegCommand(
-        `-y -i "${file}" -vcodec libx264 -crf ${crf} -b:v ${bitrate} -bufsize ${bufsize} "${output}"`,
+        `-y -i ${sanitizeFileName(file)} -vcodec libx264 -crf ${crf} -b:v ${bitrate} -bufsize ${bufsize} ${sanitizeFileName(output)}`,
       );
 
       if (!command) {

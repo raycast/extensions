@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [ECR] - 2024-04-14
+
+- Added support for navigating AWS ECR repositories
+
 ## [S3 folders] - 2024-04-14
 
 - Added support for navigating S3 buckets using folders

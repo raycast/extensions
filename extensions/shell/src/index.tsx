@@ -58,7 +58,7 @@ const Result = ({ cmd }: { cmd: string }) => {
 
     const runCommand = async () => {
       const execEnv = await getCachedEnv();
-      child = exec(cmd, execEnv);
+      child = exec(`$SHELL -i -c "${cmd}"`, execEnv);
       child.stderr?.on("data", (data: string) => {
         if (killed) {
           return;

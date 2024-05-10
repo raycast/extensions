@@ -1109,6 +1109,46 @@ prompts:
     },
   },
   {
+    id: "create-task-list",
+    title: "Create Task List",
+    prompt:
+      "List detailed action steps in markdown format based on the provided text. Ensure the tasks can be efficiently completed." +
+      generateSelection("Text", "Tasks"),
+    creativity: "medium",
+    date: "2024-05-04",
+    type: "text",
+    icon: Icon.Flag,
+    author: {
+      name: "Abner Shang",
+      link: "https://www.linkedin.com/in/abnershang/",
+    },
+    example: {
+      selection: `SEO is necessary after the website's launch.
+Phase 1: Optimize title, description, and keywords (TDK).
+Phase 2: Include the keyword list in the sitemap.`,
+      output: `1. **Phase 1: Optimize title, description, and keywords (TDK)**
+  - [ ] Conduct keyword research to identify relevant and high-traffic keywords
+  - [ ] Analyze competitor websites to understand their TDK strategies
+  - [ ] Create unique and compelling titles for each page, incorporating primary keywords
+  - [ ] Write concise and engaging meta descriptions for each page, including relevant keywords
+  - [ ] Ensure the keyword density in page content is appropriate and natural
+
+2. **Phase 2: Include the keyword list in the sitemap**
+  - [ ] Create a comprehensive list of all optimized pages and their corresponding keywords
+  - [ ] Generate an XML sitemap that includes all the optimized pages
+  - [ ] Ensure the XML sitemap follows proper formatting and structure
+  - [ ] Submit the updated XML sitemap to search engines (e.g., Google Search Console, Bing Webmaster Tools)
+  - [ ] Regularly update the sitemap as new pages are added or existing pages are modified
+
+3. **Additional SEO tasks**
+  - [ ] Set up and configure Google Analytics and Google Search Console for tracking and monitoring
+  - [ ] Ensure the website has a clean, search engine-friendly URL structure
+  - [ ] Implement structured data (e.g., Schema.org) to provide additional context to search engines
+  - [ ] Build high-quality backlinks from reputable websites to improve domain authority
+  - [ ] Monitor search engine rankings and traffic to measure the success of SEO efforts`,
+    },
+  },
+  {
     id: "extract-email-addresses",
     title: "Extract Email Addresses",
     prompt:

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { AvailableModels } from "../lib/OpenAI";
 import { useActionsState } from "../store/actions";
@@ -7,6 +7,7 @@ import { Colors } from "../utils";
 
 interface Props {
   id?: string;
+  afterSubmit?: () => void;
 }
 
 const initialValues: ActionModel = {
@@ -21,8 +22,7 @@ const initialValues: ActionModel = {
   favorite: false,
 };
 
-export default function CommandForm({ id }: Props) {
-  const navigation = useNavigation();
+export default function CommandForm({ id, afterSubmit }: Props) {
   const action = useActionsState((state) => state.actions.find((a) => a.id === id));
   const editAction = useActionsState((state) => state.editAction);
   const addAction = useActionsState((state) => state.addAction);
@@ -37,7 +37,6 @@ export default function CommandForm({ id }: Props) {
           message: `The action "${values.name}" was successfully updated.`,
           style: Toast.Style.Success,
         });
-        navigation.pop();
       } else {
         addAction(values);
         showToast({
@@ -45,13 +44,9 @@ export default function CommandForm({ id }: Props) {
           message: `The action "${values.name}" was successfully created.`,
           style: Toast.Style.Success,
         });
-        launchCommand({
-          ownerOrAuthorName: "quiknull",
-          extensionName: "alice-ai",
-          name: "commands",
-          type: LaunchType.UserInitiated,
-        });
       }
+
+      afterSubmit?.();
     },
     validation: {
       color: (value) => {

@@ -1,5 +1,10 @@
 # Brand Icons Changelog
 
+## [Updates] - 2024-04-30
+
+- Expose search function through `launchCommand`
+- Remove unused cache header
+
 ## [Updates] - 2024-04-15
 
 - Rename extension name to Brand Icons

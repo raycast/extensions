@@ -1,5 +1,9 @@
 # Prompt Explorer Extension Changelog
 
+## [Adding prompts] - 2024-05-04
+
+- Add task list prompt.
+
 ## [Fixes] - 2024-04-25
 
 - Fix icon for the `None` creativity level in the `Explore Prompts` command.

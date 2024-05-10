@@ -7,6 +7,32 @@ export type StravaAthlete = {
   city: string;
   state: string;
   country: string;
+  clubs: {
+    id: number;
+    name: string;
+    profile_medium: string;
+    cover_photo: string;
+    cover_photo_small: string;
+    activity_types: ActivityType[];
+    city: string;
+    state: string;
+    country: string;
+    private: boolean;
+    member_count: number;
+    featured: boolean;
+    verified: boolean;
+    url: string;
+  }[];
+};
+
+export type StravaSummaryClub = {
+  id: number;
+  name: string;
+  url: string;
+  profile_medium: string;
+  activity_types: ActivityType[];
+  sport_type: "cycling" | "running" | "triathlon" | "other";
+  localized_sport_type: string;
 };
 
 export enum ActivityType {
@@ -14,7 +40,6 @@ export enum ActivityType {
   BackcountrySki = "BackcountrySki",
   Canoeing = "Canoeing",
   Crossfit = "Crossfit",
-  EBikeRide = "EBikeRide",
   Elliptical = "Elliptical",
   Hike = "Hike",
   IceSkate = "IceSkate",
@@ -33,11 +58,51 @@ export enum ActivityType {
   StandUpPaddling = "StandUpPaddling",
   Surfing = "Surfing",
   Swim = "Swim",
-  VirtualRide = "VirtualRide",
+  TrailRun = "TrailRun",
   Walk = "Walk",
   WeightTraining = "WeightTraining",
   Windsurf = "Windsurf",
   Workout = "Workout",
+  Yoga = "Yoga",
+}
+
+export enum SportType {
+  AlpineSki = "AlpineSki",
+  BackcountrySki = "BackcountrySki",
+  Canoeing = "Canoeing",
+  Crossfit = "Crossfit",
+  EBikeRide = "EBikeRide",
+  EMountainBikeRide = "EMountainBikeRide",
+  Elliptical = "Elliptical",
+  GravelRide = "GravelRide",
+  Handcycle = "Handcycle",
+  Hike = "Hike",
+  IceSkate = "IceSkate",
+  InlineSkate = "InlineSkate",
+  Kayaking = "Kayaking",
+  Kitesurf = "Kitesurf",
+  NordicSki = "NordicSki",
+  MountainBikeRide = "MountainBikeRide",
+  Ride = "Ride",
+  RockClimbing = "RockClimbing",
+  RollerSki = "RollerSki",
+  Rowing = "Rowing",
+  Run = "Run",
+  Snowboard = "Snowboard",
+  Snowshoe = "Snowshoe",
+  StairStepper = "StairStepper",
+  StandUpPaddling = "StandUpPaddling",
+  Surfing = "Surfing",
+  Swim = "Swim",
+  TrailRun = "TrailRun",
+  VirtualRide = "VirtualRide",
+  VirtualRun = "VirtualRun",
+  Velomobile = "Velomobile",
+  Walk = "Walk",
+  WeightTraining = "WeightTraining",
+  Windsurf = "Windsurf",
+  Workout = "Workout",
+  Wheelchair = "Wheelchair",
   Yoga = "Yoga",
 }
 
@@ -49,6 +114,7 @@ export type StravaActivitySummary = {
   elapsed_time: number;
   total_elevation_gain: number;
   type: ActivityType;
+  sport_type: SportType;
   id: number;
   start_date: string;
   start_date_local: string;
@@ -144,4 +210,18 @@ export type StravaStats = {
   ytd_ride_totals: Totals;
   all_ride_totals: Totals;
   ytd_run_totals: Totals;
+};
+
+export type StravaClubActivity = {
+  athlete: {
+    firstname: number;
+    lastname: number;
+  };
+  name: string;
+  distance: number;
+  moving_time: number;
+  elapsed_time: number;
+  total_elevation_gain: number;
+  sport_type: SportType;
+  workout_type: number;
 };
