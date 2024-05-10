@@ -1,6 +1,6 @@
 # Bilibili Changelog
 
-## New Feature - 2024-5-10
+## [New Feature] - 2024-05-10
 
 - Rmove Popular Videos and Weekly Popular Series.
 
