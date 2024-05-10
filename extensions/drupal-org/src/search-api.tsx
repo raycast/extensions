@@ -60,7 +60,7 @@ const SearchApi = () => {
 
   return (
     <List
-      isLoading={state.loading}
+      isLoading={state.loading || !state.records}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
