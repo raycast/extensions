@@ -1,6 +1,6 @@
 # Avatar Changelog
 
-## [Update DiceBear api] - {PR_MERGE_DATE}
+## [Update DiceBear api] - 2024-05-10
 
 - Update DiceBear avatar api to fix DiceBear avatar unavailability issue
 - Fix the problem that Advanced Options nearly saves the value of the latest modification
