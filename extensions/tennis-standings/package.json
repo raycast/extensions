@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "Zalgo_123",
   "contributors": [
-    "xilopaint"
+    "xilopaint",
+    "drillprop"
   ],
   "categories": [
     "Fun"
@@ -14,8 +15,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "atp-rankings",
-      "title": "ATP Rankings",
+      "name": "atp-live-ranking",
+      "title": "ATP Live Ranking",
       "description": "Get the ATP rankings",
       "mode": "view",
       "keywords": [
@@ -23,9 +24,27 @@
       ]
     },
     {
-      "name": "wta-rankings",
-      "title": "WTA Rankings",
+      "name": "wta-live-ranking",
+      "title": "WTA Live Ranking",
       "description": "Get the WTA rankings",
+      "mode": "view",
+      "keywords": [
+        "tennis"
+      ]
+    },
+    {
+      "name": "atp-race",
+      "title": "ATP Race Ranking",
+      "description": "Get the ATP race rankings",
+      "mode": "view",
+      "keywords": [
+        "tennis"
+      ]
+    },
+    {
+      "name": "wta-race",
+      "title": "WTA Race Ranking",
+      "description": "Get the WTA race rankings",
       "mode": "view",
       "keywords": [
         "tennis"
