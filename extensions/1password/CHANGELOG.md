@@ -1,12 +1,13 @@
 # 1Password Changelog
 
-## [Enhancements] - 2024-05-07
+## [Enhancements] - 2024-05-10
 
 -- Fixes double auth prompts.
 -- Adds "My Vaults" command.
 -- Adds "Switch Account" action.
 -- Improves error handling.
 -- Modifies Auto Renewal to be disabled by default.
+-- Improves Auto Renewal to start renewing only after a manual sign-in.
 
 ## [Moved contributor] - 2024-05-03
 
