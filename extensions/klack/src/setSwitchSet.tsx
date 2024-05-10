@@ -1,0 +1,111 @@
+import { useEffect, useState } from 'react'
+import { closeMainWindow, showHUD, Action, ActionPanel, Icon, List } from '@raycast/api'
+import { runAppleScript } from 'run-applescript'
+
+const brands = [
+    {
+        name: 'CherryMX',
+        switchSets: [
+            {
+                name: 'Japanese Black',
+                color: '#57534e'
+            }
+        ]
+    },
+    {
+        name: 'Everglide',
+        switchSets: [
+            {
+                name: 'Crystal Purple',
+                color: '#f0abfc'
+            },
+            {
+                name: 'Oreo',
+                color: '#9e9894'
+            }
+        ]
+    },
+    {
+        name: 'NovelKeys',
+        switchSets: [
+            {
+                name: 'Cream',
+                color: '#ffedd5'
+            }
+        ]
+    }
+]
+
+export async function setSwitchSet(name: string) {
+    await closeMainWindow()
+    await runAppleScript(`tell application "Klack" to switch ${name}`)
+}
+
+export default function Command() {
+    const [searchText, setSearchText] = useState('')
+    const [filteredList, filterList] = useState(brands)
+    const [currentSwitchSet, setCurrentSwitchSet] = useState('')
+
+    useEffect(() => {
+        filterList(
+            brands.map((brand) => {
+                return {
+                    ...brand,
+                    switchSets: brand.switchSets.filter((switchSet) =>
+                        switchSet.name.toLowerCase().includes(searchText)
+                    )
+                }
+            })
+        )
+    }, [searchText])
+
+    useEffect(() => {
+        const getCurrentSwitchSet = async () => {
+            const switchSet = await runAppleScript('tell application "Klack" to current switch')
+
+            setCurrentSwitchSet(switchSet)
+        }
+
+        getCurrentSwitchSet()
+    }, [setCurrentSwitchSet])
+
+    async function handleAction(switchSet: string) {
+        await showHUD(`Selected ${switchSet}`)
+
+        setSwitchSet(switchSet)
+        setCurrentSwitchSet(switchSet.toLowerCase())
+    }
+
+    return (
+        <List
+            filtering={false}
+            onSearchTextChange={setSearchText}
+            navigationTitle="Select Switch Sets"
+            searchBarPlaceholder="Select Switch Set">
+            {filteredList.map((brand) => (
+                <List.Section key={brand.name} title={`${brand.name}™`}>
+                    {brand.switchSets.map((switchSet) => (
+                        <List.Item
+                            key={switchSet.name}
+                            title={switchSet.name}
+                            subtitle={
+                                switchSet.name.toLowerCase() === currentSwitchSet ? 'Current' : ''
+                            }
+                            icon={{ source: Icon.PlusSquare, tintColor: switchSet.color }}
+                            actions={
+                                <ActionPanel>
+                                    <Action
+                                        title="Select"
+                                        onAction={() => {
+                                            handleAction(switchSet.name)
+                                        }}
+                                    />
+                                </ActionPanel>
+                            }
+                        />
+                    ))}
+                </List.Section>
+            ))}
+        </List>
+    )
+}
