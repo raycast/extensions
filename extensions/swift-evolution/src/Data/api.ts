@@ -47,4 +47,13 @@ export async function fetchProposals(): Promise<ProposalJson[]> {
   return evolution.proposals;
 }
 
+export async function fetchMarkdown(url: string): Promise<string> {
+  try {
+    const response = await fetch(url);
+    return await response.text();
+  } catch (error) {
+    throw Promise.resolve(error);
+  }
+}
+
 export {};

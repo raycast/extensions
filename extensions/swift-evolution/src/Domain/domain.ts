@@ -1,22 +1,7 @@
-import fetch from "node-fetch";
-import { ProposalJson, fetchProposals as fetchRemoteProposals } from "./api";
-import { ProposalViewModel } from "./ProposalsList";
+import { ProposalJson, fetchProposals as fetchRemoteProposals } from "../Data/api";
+import { ProposalDataModel, Status } from "./ProposalDataModel";
 
-enum Status {
-  awaitingReview = ".awaitingReview",
-  scheduledForReview = ".scheduledForReview",
-  activeReview = ".activeReview",
-  accepted = ".accepted",
-  acceptedWithRevisions = ".acceptedWithRevisions",
-  previewing = ".previewing",
-  implemented = ".implemented",
-  returnedForRevision = ".returnedForRevision",
-  deferred = ".deferred",
-  rejected = ".rejected",
-  withdrawn = ".withdrawn",
-}
-
-export async function fetchProposals(): Promise<ProposalViewModel[]> {
+export async function fetchProposals(): Promise<ProposalDataModel[]> {
   try {
     const json = await fetchRemoteProposals();
     return convertToViewModel(json);
@@ -26,33 +11,10 @@ export async function fetchProposals(): Promise<ProposalViewModel[]> {
   }
 }
 
-export async function fetchMarkdown(url: string): Promise<string> {
-  try {
-    const response = await fetch(url);
-    return await response.text();
-  } catch (error) {
-    throw Promise.resolve(error);
-  }
-}
-
-const statusToViewModelMap = new Map<string, Pick<ProposalViewModel, "status" | "statusColor">>([
-  [Status.awaitingReview, { status: "Awaiting Review", statusColor: "orange" }],
-  [Status.scheduledForReview, { status: "Scheduled For Review", statusColor: "orange" }],
-  [Status.activeReview, { status: "In Review", statusColor: "orange" }],
-  [Status.accepted, { status: "Accepted", statusColor: "green" }],
-  [Status.acceptedWithRevisions, { status: "Accepted", statusColor: "green" }],
-  [Status.previewing, { status: "Previewing", statusColor: "green" }],
-  [Status.implemented, { status: "Implemented", statusColor: "blue" }],
-  [Status.returnedForRevision, { status: "Returned", statusColor: "purple" }],
-  [Status.deferred, { status: "Deferred", statusColor: "red" }],
-  [Status.rejected, { status: "Rejected", statusColor: "red" }],
-  [Status.withdrawn, { status: "Withdrawn", statusColor: "red" }],
-]);
-
-function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
-  const proposalsViewModel: ProposalViewModel[] = proposals
+function convertToViewModel(proposals: ProposalJson[]): ProposalDataModel[] {
+  const proposalsViewModel: ProposalDataModel[] = proposals
     .map((json) => {
-      const viewModel: ProposalViewModel = {
+      const viewModel: ProposalDataModel = {
         id: json.id,
         authors: json.authors.map((x) => ({ ...x, name: x.name.trim() })),
         implementations: getImplementations(json),
@@ -61,8 +23,7 @@ function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
         link: "https://github.com/apple/swift-evolution/blob/main/proposals/" + json.link,
         markdownLink: "https://raw.githubusercontent.com/apple/swift-evolution/main/proposals/" + json.link,
         keywords: getKeywords(json),
-        status: statusToViewModelMap.get(json.status.state)?.status ?? json.status.state,
-        statusColor: statusToViewModelMap.get(json.status.state)?.statusColor ?? "blue",
+        status: json.status.state as Status,
         title: json.title.trim(),
         swiftVersion: json.status.version,
         scheduled:
@@ -78,7 +39,7 @@ function convertToViewModel(proposals: ProposalJson[]): ProposalViewModel[] {
 }
 
 function getKeywords(proposal: ProposalJson) {
-  const statusKeywords = statusToViewModelMap.get(proposal.status.state)?.status;
+  const statusKeywords = proposal.status.state.trim().split(" ");
   const summaryKeywords = proposal.summary.trim().split(" ");
   const titleKeywords = proposal.title.trim().split(" ");
   const repoKeywords = getRepos(proposal);

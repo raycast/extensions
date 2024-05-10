@@ -1,6 +1,6 @@
 import { Detail, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchMarkdown } from "./domain";
+import { fetchMarkdown } from "../Data/api";
 
 export default function ProposalGithubPage(props: { markdownUrl: string; prUrl: string }) {
   const [state, setState] = useState<{ markdown: string }>({ markdown: "" });
