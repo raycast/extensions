@@ -1,6 +1,6 @@
 # Sonos Changelog
 
-## [ Improvement] - 2024-05-10
+## [Improvement] - 2024-05-10
 
 - Display the volume change after executing increase and decrease volume commands
 
