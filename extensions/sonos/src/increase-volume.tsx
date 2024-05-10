@@ -29,11 +29,10 @@ export default async function Command() {
       failureMessage: `Failed to launch "Set Active Group" automatically`,
     });
   } else {
-    await coordinator.SetRelativeGroupVolume(Number(preferences.volumeStep)).then((volume) =>
-      showToast({
-        style: Toast.Style.Success,
-        title: `Increased volume to ${volume}%.`,
-      }),
-    );
+    const volume = await coordinator.SetRelativeGroupVolume(Number(preferences.volumeStep));
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Increased volume to ${volume}%.`,
+    });
   }
 }
