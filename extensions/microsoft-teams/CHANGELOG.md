@@ -5,6 +5,7 @@
 # Features
 
 - Added ability to directly call with audio or video a user from a chat. 
+- Added to `OneToOne` chats status icons based on the Microsoft Graph Presence API.
 
 ## [Update] - 2023-05-16
 
