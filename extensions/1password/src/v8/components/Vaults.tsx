@@ -2,7 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { Vault } from "../types";
 import { useVaults, useAccount, CommandLineMissingError, ConnectionError, ExtensionError } from "../utils";
-import { Guide } from "./Guide";
+import { Error as ErrorGuide } from "./Error";
 import { VaultActionPanel } from "./VaultActionPanel";
 
 export function Items() {
@@ -16,7 +16,7 @@ export function Items() {
   }, [items]);
 
   if (itemsError instanceof CommandLineMissingError || accountError instanceof CommandLineMissingError)
-    return <Guide />;
+    return <ErrorGuide />;
 
   if (itemsError instanceof ConnectionError || accountError instanceof ConnectionError) {
     return (

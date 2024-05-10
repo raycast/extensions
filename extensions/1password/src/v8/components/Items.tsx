@@ -12,7 +12,7 @@ import {
   ConnectionError,
   ExtensionError,
 } from "../utils";
-import { Guide } from "./Guide";
+import { Error as ErrorGuide } from "./Error";
 import { ItemActionPanel } from "./ItemActionPanel";
 import { useMemo, useState } from "react";
 
@@ -34,7 +34,7 @@ export function Items({ flags }: { flags?: string[] }) {
   };
 
   if (itemsError instanceof CommandLineMissingError || accountError instanceof CommandLineMissingError)
-    return <Guide />;
+    return <ErrorGuide />;
 
   if (itemsError instanceof ConnectionError || accountError instanceof ConnectionError) {
     return (
