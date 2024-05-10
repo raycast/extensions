@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "solana-simds",
+  "title": "Solana SIMDs",
+  "description": "Look up Solana Proposals and read them",
+  "icon": "icon.svg",
+  "author": "pkxro",
+  "categories": [
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Solana Proposals",
+      "description": "Look up Solana Proposals and read them",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repos_path",
+      "description": "A path to a folder containing the SIMD repository",
+      "type": "directory",
+      "required": true,
+      "title": "Folder with the SIMD repository",
+      "placeholder": "/home/user/solana/simds"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "@raycast/utils": "^1.4.8",
+    "fuse.js": "^7.0.0",
+    "glob": "^10.3.12",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
