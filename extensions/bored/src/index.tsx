@@ -12,7 +12,7 @@ interface Activity {
 }
 
 export default () => {
-  const { isLoading, data, revalidate } = useFetch<Activity>("https://www.boredapi.com/api/activity");
+  const { isLoading, data, revalidate } = useFetch<Activity>("https://www.boredapi.com/api/activity", { keepPreviousData: false });
 
   let markdown = "Loading...";
   if (data) {
