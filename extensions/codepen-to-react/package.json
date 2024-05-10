@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codepen-to-react",
+  "title": "Codepen to React",
+  "description": "Convert CodePen code to React components",
+  "icon": "command-icon.png",
+  "author": "alexcory",
+  "categories": [
+    "Developer Tools"
+  ],
+  "permissions": [
+    "browser-api",
+    "execute"
+  ],
+  "preferences": [
+    {
+      "name": "gptModel",
+      "description": "Select the GPT model to use for code conversion",
+      "type": "dropdown",
+      "required": true,
+      "title": "GPT Model",
+      "default": "anthropic-claude-opus",
+      "data": [
+        {
+          "title": "OpenAI GPT-3.5 Turbo Instruct",
+          "value": "openai-gpt-3.5-turbo-instruct"
+        },
+        {
+          "title": "OpenAI GPT-3.5 Turbo",
+          "value": "openai-gpt-3.5-turbo"
+        },
+        {
+          "title": "OpenAI GPT-4",
+          "value": "openai-gpt-4"
+        },
+        {
+          "title": "OpenAI GPT-4 Turbo",
+          "value": "openai-gpt-4-turbo"
+        },
+        {
+          "title": "Anthropic Claude Haiku",
+          "value": "anthropic-claude-haiku"
+        },
+        {
+          "title": "Anthropic Claude Opus",
+          "value": "anthropic-claude-opus"
+        },
+        {
+          "title": "Anthropic Claude Sonnet",
+          "value": "anthropic-claude-sonnet"
+        },
+        {
+          "title": "Perplexity Sonar Medium Online",
+          "value": "perplexity-sonar-medium-online"
+        },
+        {
+          "title": "Perplexity Sonar Small Online",
+          "value": "perplexity-sonar-small-online"
+        },
+        {
+          "title": "Llama2 70B",
+          "value": "llama2-70b"
+        },
+        {
+          "title": "Mixtral 8x7B",
+          "value": "mixtral-8x7b"
+        },
+        {
+          "title": "CodeLlama 70B Instruct",
+          "value": "codellama-70b-instruct"
+        }
+      ]
+    },
+    {
+      "name": "projectPath",
+      "description": "Path to the project where the generated component will be saved",
+      "type": "textfield",
+      "required": true,
+      "title": "Repo/Project's Path",
+      "default": "$HOME/code/Ava/ava"
+    },
+    {
+      "name": "componentPath",
+      "description": "Path to the directory where the generated component will be saved (relative to the base project/repo path)",
+      "type": "textfield",
+      "required": true,
+      "title": "Component Path",
+      "default": "/packages/ui/src/codepen"
+    },
+    {
+      "name": "saveAfterConvert",
+      "description": "Automatically Save the React component to a file at the specified Component Path after converting it.",
+      "type": "checkbox",
+      "required": false,
+      "title": "Save to File After Convert",
+      "default": true
+    },
+    {
+      "name": "copyResponseToClipboard",
+      "description": "Automatically Copy the React component to the clipboard after converting it.",
+      "type": "checkbox",
+      "required": false,
+      "title": "Copy to Clipboard After Convert",
+      "default": true
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Codepen to React",
+      "description": "Template for submitting a form",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
+    "dirty-json": "^0.9.2",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
