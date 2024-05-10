@@ -5,6 +5,9 @@
   "description": "Search through JSR, the Open Source Package Registry for Javascript/Typescript",
   "icon": "command-icon.png",
   "author": "j3lte",
+  "contributors": [
+    "litomore"
+  ],
   "categories": [
     "Developer Tools"
   ],
