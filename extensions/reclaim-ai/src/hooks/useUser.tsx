@@ -23,7 +23,7 @@ const useUser = () => {
   const handleGetUser = useCallback(async () => {
     try {
       const currentDate = new Date();
-      if (currentDate.valueOf() - (currentCacheDate?.valueOf() || 0) < 1000 * 1800) { // cache for 30 minutes
+      if (currentDate.valueOf() - (currentCacheDate?.valueOf() || 0) < 1000 * 1800) {
         return;
       }
       setIsLoading(true);
