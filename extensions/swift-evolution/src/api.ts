@@ -41,30 +41,6 @@ export type EvolutionJson = {
   proposals: ProposalJson[];
 };
 
-// export type ProposalJson = {
-//   id: string;
-//   title: string;
-//   summary: string;
-//   status: {
-//     end: string | undefined;
-//     start: string | undefined;
-//     state: string;
-//     version: string | undefined;
-//   };
-//   sha: string;
-//   reviewManager: { link: string; name: string };
-//   link: string;
-//   implementation:
-//     | {
-//         account: string;
-//         id: string;
-//         repository: string;
-//         type: string;
-//       }[]
-//     | null;
-//   authors: { link: string; name: string }[];
-// };
-
 export async function fetchProposals(): Promise<ProposalJson[]> {
   const response = await fetch(SWIFT_EVOLUTION_PROPOSALS_ENDPOINT);
   let evolution = (await response.json()) as EvolutionJson;
