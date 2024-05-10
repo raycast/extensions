@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { closeMainWindow, showHUD, Action, ActionPanel, Icon, List } from '@raycast/api'
-import { runAppleScript } from 'run-applescript'
+import { showHUD, Action, ActionPanel, Icon, List } from '@raycast/api'
+import { runAppleScriptSilently } from './runAppleScriptSilently'
 
 const brands = [
     {
@@ -37,8 +37,8 @@ const brands = [
 ]
 
 export async function setSwitchSet(name: string) {
-    await closeMainWindow()
-    await runAppleScript(`tell application "Klack" to switch ${name}`)
+    await runAppleScriptSilently(`tell application "Klack" to switch ${name}`, false)
+    await showHUD(`Selected ${name}`)
 }
 
 export default function Command() {
@@ -61,17 +61,18 @@ export default function Command() {
 
     useEffect(() => {
         const getCurrentSwitchSet = async () => {
-            const switchSet = await runAppleScript('tell application "Klack" to current switch')
+            const switchSet = await runAppleScriptSilently(
+                'tell application "Klack" to current switch',
+                true
+            )
 
-            setCurrentSwitchSet(switchSet)
+            if (switchSet) setCurrentSwitchSet(switchSet)
         }
 
         getCurrentSwitchSet()
     }, [setCurrentSwitchSet])
 
     async function handleAction(switchSet: string) {
-        await showHUD(`Selected ${switchSet}`)
-
         setSwitchSet(switchSet)
         setCurrentSwitchSet(switchSet.toLowerCase())
     }
@@ -97,7 +98,9 @@ export default function Command() {
                                     <Action
                                         title="Select"
                                         onAction={() => {
-                                            handleAction(switchSet.name)
+                                            currentSwitchSet
+                                                ? handleAction(switchSet.name)
+                                                : undefined
                                         }}
                                     />
                                 </ActionPanel>

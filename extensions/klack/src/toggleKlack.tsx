@@ -1,7 +1,5 @@
-import { closeMainWindow } from '@raycast/api'
-import { runAppleScript } from 'run-applescript'
+import { runAppleScriptSilently } from './runAppleScriptSilently'
 
 export default async function Command() {
-    await closeMainWindow()
-    await runAppleScript('tell application "Klack" to toggle')
+    await runAppleScriptSilently('tell application "Klack" to toggle', false)
 }

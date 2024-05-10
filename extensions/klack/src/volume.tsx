@@ -1,5 +1,5 @@
-import { runAppleScript } from 'run-applescript'
+import { runAppleScriptSilently } from './runAppleScriptSilently'
 
 export async function setVolumePreset(volumePreset: string) {
-    await runAppleScript(`tell application "Klack" to volume preset ${volumePreset}`)
+    await runAppleScriptSilently(`tell application "Klack" to volume preset ${volumePreset}`, false)
 }
