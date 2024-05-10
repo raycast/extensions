@@ -17,12 +17,14 @@
     {
       "name": "searchModels",
       "title": "Search Models",
+      "subtitle": "Hugging Face",
       "description": "Search for models on the Hugging Face platform",
       "mode": "view"
     },
     {
       "name": "searchDatasets",
       "title": "Search Datasets",
+      "subtitle": "Hugging Face",
       "description": "Search for datasets on the Hugging Face platform",
       "mode": "view"
     }
