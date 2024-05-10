@@ -5,41 +5,39 @@ import { useEffect, useState } from "react";
 import { convertBitsToMbps, speedToAvailableActivityQuality } from "./bandwidth.utils";
 
 export const ListBandwidthItem = (props: {
-    speed: Nullish<InternetSpeed>,
-    activity: ActivitySpeedQuality,
-    result: Result;
-    isLoading: boolean;
-    summary: JSX.Element;
-    restart: JSX.Element;
-    title: string;
-    icon: Icon;
-
+  speed: Nullish<InternetSpeed>;
+  activity: ActivitySpeedQuality;
+  result: Result;
+  isLoading: boolean;
+  summary: JSX.Element;
+  restart: JSX.Element;
+  title: string;
+  icon: Icon;
 }): JSX.Element => {
-    const { title, icon, speed, activity, isLoading } = props;
-    const [ qualities, setQualities ] = useState<string>("");
+  const { title, icon, speed, activity, isLoading } = props;
+  const [qualities, setQualities] = useState<string>("");
 
-    useEffect(() => {
-        const speedMbps = {
-            download: convertBitsToMbps(speed.download),
-            upload: convertBitsToMbps(speed.upload)
-        }
+  useEffect(() => {
+    const speedMbps = {
+      download: convertBitsToMbps(speed.download),
+      upload: convertBitsToMbps(speed.upload),
+    };
 
-        const listOfAvailableActivityQuality = speedToAvailableActivityQuality(
-            speedMbps,
-            activity
-        );
+    const listOfAvailableActivityQuality = speedToAvailableActivityQuality(speedMbps, activity);
 
-        setQualities(listOfAvailableActivityQuality.join(" "));
-    }, [isLoading])
+    setQualities(listOfAvailableActivityQuality.join(" "));
+  }, [isLoading]);
 
-    return (
-        <List.Item
-            title={title}
-            icon={{ source: icon, tintColor: "#494949" }}
-            accessories={[{
-                text: isLoading ? "?" : qualities,
-                icon: qualities.length < 1 && !isLoading ? Icon.LivestreamDisabled : null
-            }]}
-        />
-    );
-}
+  return (
+    <List.Item
+      title={title}
+      icon={{ source: icon, tintColor: "#494949" }}
+      accessories={[
+        {
+          text: isLoading ? "?" : qualities,
+          icon: qualities.length < 1 && !isLoading ? Icon.LivestreamDisabled : null,
+        },
+      ]}
+    />
+  );
+};

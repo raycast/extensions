@@ -380,8 +380,8 @@ export default function SpeedtestList() {
             summary={summaryAction}
             restart={restartAction}
           />
-        <ListBandwidthItem
-            speed={{download: result.download, upload: result.upload}}
+          <ListBandwidthItem
+            speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.voiceCall}
             result={result}
             title="Voice Call"
@@ -391,7 +391,7 @@ export default function SpeedtestList() {
             restart={restartAction}
           />
           <ListBandwidthItem
-            speed={{download: result.download, upload: result.upload}}
+            speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.videoCall}
             result={result}
             title="Video Call"
@@ -401,7 +401,7 @@ export default function SpeedtestList() {
             restart={restartAction}
           />
           <ListBandwidthItem
-            speed={{download: result.download, upload: result.upload}}
+            speed={{ download: result.download, upload: result.upload }}
             activity={ActivitySpeedQualityBandwidth.stream}
             result={result}
             title="Streaming"
