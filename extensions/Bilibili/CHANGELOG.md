@@ -2,7 +2,7 @@
 
 ## [New Feature] - 2024-05-10
 
-- Rmove Popular Videos and Weekly Popular Series.
+- Removed the commands `Popular Videos` and `Weekly Popular Series`.
 
 ## [New Feature] - 2023-12-30
 
