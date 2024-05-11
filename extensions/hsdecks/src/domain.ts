@@ -8,7 +8,7 @@ export enum ClassName {
   SHAMAN = "Shaman",
   WARLOCK = "Warlock",
   WARRIOR = "Warrior",
-  DEMONHUNTER = "Demon Hunter",
+  // DEMONHUNTER = "Demon Hunter",
 }
 
 export interface Deck {
