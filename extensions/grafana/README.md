@@ -8,7 +8,7 @@
     Grafana
   </h1>
 
-Raycast extension to search dashboards, create, search and modify annotations, and more to come.
+Raycast extension to search dashboards, go to the explore view, create saved queries and list them, create, search and modify annotations, and more to come.
 
   <p>
     <a href="https://www.raycast.com/francois/grafana">
@@ -28,12 +28,6 @@ Raycast extension to search dashboards, create, search and modify annotations, a
       src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"
       alt="PRs welcome!"  
     />
-    <a href="https://open.vscode.dev/organization/repository">
-      <img
-        src="https://open.vscode.dev/badges/open-in-vscode.svg"
-        alt="Open in Visual Studio Code"
-      />
-    </a>
   </p>
 </div>
 
@@ -41,6 +35,8 @@ Raycast extension to search dashboards, create, search and modify annotations, a
 
 - Quick access & search to your dashboards
 - Search, create, update & delete an annotation
+- Go to the Explore grafana page
+- List, create & open saved queries
 
 ## Getting started
 
@@ -66,13 +62,20 @@ Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
 
 ### Create Annotation
 
-![search-dashboards](./assets/showcase_create_annotation.png)
+![create-annotation](./assets/showcase_create_annotation.png)
 
-## Roadmap
+### Create saved query
 
-- Improve annotation creation with a custom time, and choosing a time range
-- Let the user choose tags from a dropdown for the annotation
+Create a query you often need on Grafana explore via this Raycast extension, to send use it with the "List saved queries" command
+
+![create-saved-query](./assets/showcase_create_saved_query.png)
+
+### List saved queries
+
+Open saved queries directly in your grafana Explore page
+
+![list-saved-queries](./assets/showcase_list_saved_queries.png)
 
 ---
 
-_Extension built & tested for Grafana Cloud v8_
+_Extension built & tested for Grafana Cloud v10_

@@ -63,6 +63,22 @@ function parseMachineReadableDate(query: string): LabeledDate | undefined {
       human: false,
     };
   }
+  const isNanoSecondTimestamp = /^\d{19}$/.test(query);
+  if (isNanoSecondTimestamp) {
+    return {
+      date: new Date(Number(BigInt(query) / 1_000_000n)),
+      label: "Unix Timestamp (ns)",
+      human: false,
+    };
+  }
+  const isMicroSecondTimestamp = /^\d{16}$/.test(query);
+  if (isMicroSecondTimestamp) {
+    return {
+      date: new Date(Number(BigInt(query) / 1_000n)),
+      label: "Unix Timestamp (μs)",
+      human: false,
+    };
+  }
 
   let timestamp = parseInt(query, 10);
 

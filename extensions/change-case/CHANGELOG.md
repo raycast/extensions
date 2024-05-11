@@ -1,5 +1,13 @@
 # Change Case Changelog
 
+## [Fixes] - 2024-5-02
+- Fixed using action style as destructive
+- Fixed `Pascal Snake Case` being incorrectly named as `Pascal Case` in preferences
+
+## [Fixed overlapping keyboard shortcuts and a wrong setting] - 2024-04-26
+- Fixed the issue where some key combinations were mapped to multiple commands at the same time.
+- Fixed the inverted `popToRoot` setting.
+
 ## [Fix to View of Detail] - 2024-03-20
 - Fixed so that line breaks are displayed as new lines
 

@@ -28,12 +28,6 @@
       "mode": "view"
     },
     {
-      "name": "popularVideos",
-      "title": "Popular Videos",
-      "description": "Show popular videos",
-      "mode": "view"
-    },
-    {
       "name": "rcmdVideos",
       "title": "Recommend Videos",
       "description": "Show recommend videos",
@@ -62,12 +56,6 @@
       ],
       "mode": "no-view",
       "interval": "1m"
-    },
-    {
-      "name": "popularSeries",
-      "title": "Weekly Popular Series",
-      "description": "Show weekly popular series",
-      "mode": "view"
     },
     {
       "name": "login",

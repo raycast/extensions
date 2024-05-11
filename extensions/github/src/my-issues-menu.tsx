@@ -35,7 +35,6 @@ function MyIssuesMenu() {
       title={displayTitlePreference() ? `${issuesCount}` : undefined}
       icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
-      tooltip="GitHub My Issues"
     >
       {sections?.map((section) => {
         return (
@@ -67,7 +66,7 @@ function MyIssuesMenu() {
       <MenuBarSection>
         <MenuBarItem
           title="Open My Issues"
-          icon={Icon.Terminal}
+          icon={Icon.AppWindowList}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => launchMyIssuesCommand()}
         />

@@ -21,15 +21,15 @@
     {
       "name": "index",
       "title": "Search Notes",
-      "subtitle": "Notes",
-      "description": "Search notes in the Apple Notes app.",
+      "subtitle": "Apple Notes",
+      "description": "Search through your Apple notes.",
       "mode": "view"
     },
     {
       "name": "new",
       "title": "New Note",
-      "subtitle": "Notes",
-      "description": "Create a new note in the Apple Notes app.",
+      "subtitle": "Apple Notes",
+      "description": "Create a new note in your Apple Notes.",
       "mode": "no-view",
       "keywords": [
         "write note",
@@ -48,8 +48,8 @@
     {
       "name": "ai",
       "title": "AI Note",
-      "subtitle": "Notes",
-      "description": "Create a new note filled with AI in the Apple Notes app.",
+      "subtitle": "Apple Notes",
+      "description": "Create a new note filled with AI in your Apple notes.",
       "mode": "no-view",
       "arguments": [
         {
@@ -68,8 +68,8 @@
     {
       "name": "menu-bar",
       "title": "Menu Bar Notes",
-      "subtitle": "Notes",
-      "description": "View your recent and pinned notes in the menu bar.",
+      "subtitle": "Apple Notes",
+      "description": "View your recent and pinned Apple notes in the menu bar.",
       "mode": "menu-bar",
       "preferences": [
         {
@@ -81,6 +81,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "add-text",
+      "title": "Add Text to Note",
+      "subtitle": "Apple Notes",
+      "description": "Add some text to an Apple note.",
+      "mode": "view"
     }
   ],
   "preferences": [

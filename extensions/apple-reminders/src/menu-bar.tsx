@@ -28,11 +28,16 @@ import { Priority, Reminder, useData } from "./hooks/useData";
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
 export default function Command() {
-  const { titleType, hideMenuBarCountWhenEmpty, view } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, view, countType } = getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
   const list = data?.lists.find((l) => l.id === listId);
+
+  const reminders = useMemo(() => {
+    if (!data) return [];
+    return listId ? data.reminders.filter((reminder: Reminder) => reminder.list?.id === listId) : data.reminders;
+  }, [data, listId]);
 
   const sections = useMemo(() => {
     const overdue: Reminder[] = [];
@@ -41,9 +46,6 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    const reminders = listId
-      ? data?.reminders.filter((reminder: Reminder) => reminder.list?.id === listId)
-      : data?.reminders;
     reminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
@@ -77,7 +79,7 @@ export default function Command() {
     }
 
     return sections.filter((section) => section.items.length > 0);
-  }, [data, view, listId]);
+  }, [reminders, view]);
 
   async function setPriority(reminderId: string, priority: Priority) {
     try {
@@ -130,7 +132,17 @@ export default function Command() {
     }
   }
 
-  const remindersCount = sections.reduce((acc, section) => acc + section.items.length, 0);
+  const remindersCount = useMemo(() => {
+    if (countType === "today") {
+      return reminders.filter(
+        (reminder) => reminder?.dueDate && (isToday(reminder?.dueDate) || isOverdue(reminder?.dueDate)),
+      ).length;
+    } else if (countType === "upcoming") {
+      return reminders.filter((reminder) => reminder.dueDate).length;
+    } else {
+      return reminders.length;
+    }
+  }, [reminders, countType]);
 
   const now = new Date();
 

@@ -1,5 +1,14 @@
 # Jira Changelog
 
+## [Show target status on Change Status submenu] - 2024-04-30
+
+- Show target status next to the action name on Change Status submenu
+
+## [API token bug fixes] - 2024-04-22
+
+- Improved handling of invalid URLs in the jiraWithApiToken function
+- Changed to using hostname instead of full URL in jiraCredentials to avoid potential errors
+
 ## [Add option to authenticate using API token] - 2023-03-27
 
 - Add option to authenticate using token for REST APIs

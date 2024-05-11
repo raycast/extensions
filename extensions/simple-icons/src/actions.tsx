@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Action, Clipboard, Icon, Toast, showHUD, showToast } from "@raycast/api";
+import { Action, Clipboard, Icon, Toast, launchCommand, showHUD, showToast } from "@raycast/api";
 import { titleToSlug } from "simple-icons/sdk";
 import { loadSvg, makeCopyToDownload } from "./utils.js";
-import { IconData } from "./types.js";
+import { IconData, LaunchContext } from "./types.js";
 
 type ActionProps = {
   icon: IconData;
@@ -66,13 +66,23 @@ export const Supports = () => (
   <>
     <Action.OpenInBrowser
       title="Request a New Icon"
-      url="https://github.com/simple-icons/simple-icons/issues/new?assignees=&labels=new+icon&template=icon_request.yml"
+      url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
     />
     <Action.OpenInBrowser
       title="Report an Oudated Icon"
-      url="https://github.com/simple-icons/simple-icons/issues/new?assignees=&labels=icon+outdated&template=icon_update.yml"
+      url="https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml"
     />
   </>
+);
+
+export const LaunchCommand = ({ callbackLaunchOptions, icon }: LaunchContext & ActionProps) => (
+  <Action
+    title="Use This Icon"
+    icon={Icon.Checkmark}
+    onAction={async () => {
+      launchCommand({ ...callbackLaunchOptions, context: { launchFromExtensionName: "simple-icons", icon } });
+    }}
+  />
 );
 
 export const actions = {

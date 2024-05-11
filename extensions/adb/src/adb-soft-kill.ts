@@ -1,6 +1,6 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
-import checkAdbExists, { delay, getAppIdFromParamsOrCache, saveAppIdInCache } from "./utils";
+import { checkAdbExists, delay, getAppIdFromParamsOrCache, saveAppIdInCache } from "./utils";
 import Style = Toast.Style;
 
 export default async function softKill(props: LaunchProps<{ arguments: { appId: string | undefined } }>) {

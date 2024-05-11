@@ -1,19 +1,22 @@
 import { Icon, List } from "@raycast/api";
-import {
-  getBatteryCondition,
-  getBatteryLevel,
-  getBatteryTime,
-  getCycleCount,
-  getIsCharging,
-  getMaxBatteryCapacity,
-  getTimeOnBattery,
-} from "./PowerUtils";
 import { useInterval } from "usehooks-ts";
-import { Actions } from "../components/Actions";
 import { usePromise } from "@raycast/utils";
 
+import { Actions } from "../components/Actions";
+import { BatteryDataInterface } from "../Interfaces";
+import { convertMinutesToHours } from "../utils";
+import { getBatteryData, getTimeOnBattery } from "./PowerUtils";
+
 export default function PowerMonitor() {
-  const { revalidate, data: batteryLevel } = usePromise(getBatteryLevel);
+  const { revalidate, data } = usePromise(async () => {
+    const batteryData = await getBatteryData();
+    const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
+
+    return {
+      batteryData,
+      isOnAC,
+    };
+  });
 
   useInterval(revalidate, 1000);
 
@@ -22,67 +25,41 @@ export default function PowerMonitor() {
       id="power"
       title="Power"
       icon={Icon.Plug}
-      accessories={[{ text: batteryLevel ? `${batteryLevel} %` : "Loading…" }]}
-      detail={<PowerMonitorDetail batteryLevel={batteryLevel || ""} />}
+      accessories={[{ text: data?.batteryData ? `${data?.batteryData?.batteryLevel} %` : "Loading…" }]}
+      detail={<PowerMonitorDetail batteryData={data?.batteryData} isOnAC={data?.isOnAC} />}
       actions={<Actions />}
     />
   );
 }
 
-function PowerMonitorDetail({ batteryLevel }: { batteryLevel: string }) {
-  const {
-    revalidate: revalidateIsCharging,
-    data: isCharging,
-    isLoading: isLoadingCharging,
-  } = usePromise(getIsCharging);
+function PowerMonitorDetail({ batteryData, isOnAC }: { batteryData?: BatteryDataInterface; isOnAC?: boolean }) {
+  const { revalidate, data: timeOnBattery, isLoading: isLoadingTimeOnBattery } = usePromise(getTimeOnBattery);
 
-  useInterval(revalidateIsCharging, 1000);
-
-  const {
-    revalidate: revalidateIsBatteryTime,
-    data: batteryTime,
-    isLoading: isLoadingBatteryTime,
-  } = usePromise(getBatteryTime);
-
-  useInterval(revalidateIsBatteryTime, 1000);
-
-  const {
-    revalidate: revalidateTimeOnBattery,
-    data: timeOnBattery,
-    isLoading: isLoadingTimeOnBattery,
-  } = usePromise(getTimeOnBattery);
-
-  useInterval(revalidateTimeOnBattery, 1000 * 60);
-
-  const { data: cycleCount, isLoading: isLoadingCycleCount } = usePromise(getCycleCount);
-  const { data: batteryCondition, isLoading: isLoadingBatteryCondition } = usePromise(getBatteryCondition);
-  const { data: maxBatteryCapacity, isLoading: isLoadingMaxBatteryCapacity } = usePromise(getMaxBatteryCapacity);
+  useInterval(revalidate, 1000 * 60);
 
   return (
     <List.Item.Detail
-      isLoading={
-        isLoadingCharging ||
-        isLoadingBatteryTime ||
-        isLoadingCycleCount ||
-        isLoadingBatteryCondition ||
-        isLoadingMaxBatteryCapacity ||
-        isLoadingTimeOnBattery
-      }
+      isLoading={!!batteryData || isLoadingTimeOnBattery}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Battery Level" text={`${batteryLevel} %`} />
-          <List.Item.Detail.Metadata.Label title="Charging" text={isCharging ? "Yes" : "No"} />
-          <List.Item.Detail.Metadata.Label title="Cycle Count" text={cycleCount || "Loading…"} />
-          <List.Item.Detail.Metadata.Label title="Condition" text={batteryCondition || "Loading…"} />
-          <List.Item.Detail.Metadata.Label title="Maximum Battery Capacity" text={maxBatteryCapacity || "Loading…"} />
+          <List.Item.Detail.Metadata.Label title="Battery Level" text={`${batteryData?.batteryLevel}%`} />
+          <List.Item.Detail.Metadata.Label title="Charging" text={batteryData?.isCharging ? "Yes" : "No"} />
+          <List.Item.Detail.Metadata.Label title="Cycle Count" text={batteryData?.cycleCount || "Loading…"} />
+          <List.Item.Detail.Metadata.Label title="Battery Condition" text={batteryData?.condition || "Loading…"} />
+          <List.Item.Detail.Metadata.Label title="Battery Temperature" text={batteryData?.temperature || "Loading…"} />
           <List.Item.Detail.Metadata.Label
-            title={isCharging ? "Time to charge" : "Time to discharge"}
-            text={batteryTime || "Loading…"}
+            title="Maximum Battery Capacity"
+            text={batteryData?.maximumCapacity || "Loading…"}
           />
-          <List.Item.Detail.Metadata.Label
-            title={isCharging && batteryLevel === "100" ? "Time on AC" : "Time on battery"}
-            text={timeOnBattery || "Loading…"}
-          />
+          {!isOnAC ? (
+            <>
+              <List.Item.Detail.Metadata.Label
+                title={batteryData?.isCharging ? "Time to charge" : "Time to discharge"}
+                text={batteryData ? convertMinutesToHours(batteryData?.timeRemaining) : "Loading…"}
+              />
+              <List.Item.Detail.Metadata.Label title="Time on battery" text={timeOnBattery || "Loading…"} />
+            </>
+          ) : null}
         </List.Item.Detail.Metadata>
       }
     />

@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionPanel, List, Action, showToast, Toast, popToRoot } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, popToRoot, clearSearchBar } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 function applicationNameFromPath(path: string): string {
@@ -29,7 +29,15 @@ async function getRunningAppsPaths(): Promise<string[]> {
 }
 
 function quitApp(app: string) {
-  return runAppleScript(`tell application "${app}" to quit`);
+  return runAppleScript(`try
+  tell application "${app}" to quit
+  on error error_message number error_number
+      if error_number is equal to -128 then
+      --Keep Calm and Carry On
+      else
+          display dialog error_message
+      end if
+end try`);
 }
 
 function restartApp(app: string) {
@@ -121,9 +129,7 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
 
     getRunningAppsPaths().then((appCandidatePaths) => {
       // filter out all apps that do not end with .app
-      const apps = appCandidatePaths
-        .filter((appPath) => appPath.endsWith(".app"))
-        .map((path) => ({ name: applicationNameFromPath(path), path }));
+      const apps = appCandidatePaths.map((path) => ({ name: applicationNameFromPath(path), path }));
 
       this.setState({ apps, isLoading: false });
     });
@@ -146,6 +152,7 @@ class AppList extends React.Component<Record<string, never>, AppListState> {
                     if (success) {
                       this.setState({ apps: this.state.apps.filter((a) => a.name !== app.name) });
                     }
+                    clearSearchBar();
                   }}
                 />
                 <Action
