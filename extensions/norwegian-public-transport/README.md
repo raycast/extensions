@@ -13,11 +13,11 @@ Data made available by Entur, using the [Journey Planner API](https://developer.
 
 ### Look up any stop in Norway
 
-Whether it's a bus stop, train station, ferry terminal, airport, metro or hurtigrute port, you can search for it and see upcoming departures. The stops you save as favorites using ⌘S will show up at once, meaning you don't have to type a thing the next time you bring up the extension.
+Whether it's a bus stop, train station, ferry terminal, airport, metro or hurtigrute port, you can search for it and see upcoming departures. The stops you save as favorites using ⌘⇧P will show up at once, meaning you don't have to type a thing the next time you bring up the extension.
 
 ### View upcoming departures
 
-By default the next 5 departures for each platform at the stop place will be shown, but you can load more using the ⌘+ keyboard shortcut. If your stop has a lot of platforms, you can filter the list by line, mode of transport or authority by typing in the search bar. You can also add your frequently used lines as favorites using ⌘S.
+By default the next 5 departures for each platform at the stop place will be shown, but you can load more using the ⌘+ keyboard shortcut. If your stop has a lot of platforms, you can filter the list by line, mode of transport or authority by typing in the search bar. You can also add your frequently used lines as favorites using ⌘⇧P.
 
 ### View detailed departure info
 

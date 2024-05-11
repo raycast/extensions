@@ -90,6 +90,9 @@ export default function StopPlacePage({ venue }: { venue: Feature }) {
       filtering={{ keepSectionOrder: true }}
       isShowingDetail={showDetails}
     >
+      {!favoriteDepartures?.length && !departuresWithSortedQuays?.length && (
+        <List.EmptyView description="Looks like there are no departures from this stop in the near future" />
+      )}
       {favoriteDepartures && favoriteDepartures.length > 0 && (
         <List.Section title="Favorites">
           {favoriteDepartures

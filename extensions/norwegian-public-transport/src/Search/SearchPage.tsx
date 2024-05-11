@@ -32,6 +32,9 @@ export default function SearchPage() {
       onSearchTextChange={setQuery}
       isLoading={isLoading}
     >
+      {!favorites.length && !venueResults.length && (
+        <List.EmptyView description="Start typing to search for a stop place. If you add any stops as favorites, they will show up here." />
+      )}
       <List.Section title="Favorites">
         {favorites
           .filter((v) => v.properties.name.toUpperCase().indexOf(query?.toUpperCase() ?? "") >= 0)

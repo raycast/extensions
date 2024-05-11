@@ -1,5 +1,10 @@
 # Raycast Norwegian Public Transport Changelog
 
+## [Tweaks for Store readyness] - 2024-05-04
+
+- Changed the keyboard shortcut to add and remove favorites to ⌘⇧P, to match other Raycast extensions
+- Added custom views for stop place and departure screens when there are no results
+
 ## [Release to Raycast Store] - 2024-05-04
 
 Made the extension publicly available on the Raycast Store 🚀

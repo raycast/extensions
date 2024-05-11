@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, Keyboard } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { EstimatedCall, Feature, QuayLineFavorites } from "../types";
 import { getDomainName } from "../utils";
@@ -36,9 +36,9 @@ export function Actions({
       {isFavorite ? (
         <Action
           // eslint-disable-next-line @raycast/prefer-title-case
-          title={`Remove ${formatLineName(ec)} From Favorites`}
+          title={`Remove ${formatLineName(ec)} from Favorites`}
           icon={Icon.StarDisabled}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          shortcut={Keyboard.Shortcut.Common.Pin}
           onAction={() =>
             removeFavoriteLine(ec.serviceJourney.line.id, ec.quay.id).then((f) => setFavorites(f))
           }
@@ -48,7 +48,7 @@ export function Actions({
           // eslint-disable-next-line @raycast/prefer-title-case
           title={`Add ${formatLineName(ec)} to Favorites`}
           icon={Icon.Star}
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          shortcut={Keyboard.Shortcut.Common.Pin}
           onAction={() =>
             addFavoriteLines(ec.serviceJourney.line.id, ec.quay.id, venue.properties.id).then((f) =>
               setFavorites(f),
