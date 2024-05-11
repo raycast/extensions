@@ -11,7 +11,6 @@ export default function Overview() {
   const {
     isLoading: carInfoIsLoading,
     data: carInfoResponseData,
-    error: responseError,
     revalidate,
   } = useFetch(baseApiConfig.url, {
     method: baseApiConfig.method,

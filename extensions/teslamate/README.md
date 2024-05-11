@@ -1,6 +1,6 @@
 # TeslaMate <img src="https://raw.githubusercontent.com/teslamate-org/teslamate/a15631f2ff18b99023d562897de0f56ee3c38c0b/website/static/img/logo.svg" alt="drawing" width="40"/>
 
-Raycast Extension to retrive info about your Tesla from your TeslaMate instance.
+Raycast Extension to retrieve info about your Tesla from your TeslaMate instance.
 
 ## How to get started?
 

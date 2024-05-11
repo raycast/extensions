@@ -1,34 +1,72 @@
 import { capitalize } from "./capitalize";
 import moment from "moment";
 
-export function handleCarInfoObject(carInfoResponseData: Object) {
-  const vehicleData = (carInfoResponseData as any).results.car_info.frames[0].data.values;
+export function handleCarInfoObject(carInfoResponseData: object) {
+  const carInfoResponseDataTyped = carInfoResponseData as {
+    results: {
+      car_info: {
+        frames: {
+          data: {
+            values: any[][];
+          };
+        }[];
+      };
+      car_version: {
+        frames: {
+          data: {
+            values: string[];
+          };
+        }[];
+      };
+      car_state: {
+        frames: {
+          data: {
+            values: any[][];
+          };
+        }[];
+      };
+      car_units: {
+        frames: {
+          data: {
+            values: any[][];
+          };
+        }[];
+      };
+      car_info_positions_table: {
+        frames: {
+          data: {
+            values: any[][];
+          };
+        }[];
+      };
+    };
+  };
 
-  const versionData = (carInfoResponseData as any).results.car_version.frames[0].data.values[0]
-    .toString()
-    .split(" ")[0];
+  const vehicleData = carInfoResponseDataTyped.results.car_info.frames[0].data.values;
 
-  const stateData = (carInfoResponseData as any).results.car_state.frames[0].data.values;
+  const versionData = carInfoResponseDataTyped.results.car_version.frames[0].data.values[0].toString().split(" ")[0];
 
-  const odometerData = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[0][0];
+  const stateData = carInfoResponseDataTyped.results.car_state.frames[0].data.values;
+
+  const odometerData = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[0][0];
   const formattedOdometer = odometerData.toLocaleString(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
 
-  const battery_level = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[1][0];
-  const rated_battery_range = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[5][0];
+  const battery_level = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[1][0];
+  const rated_battery_range = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[5][0];
 
-  const inside_temp = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[2][0];
-  const outside_temp = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[3][0];
-  const cliate_state = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[4][0];
+  const inside_temp = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[2][0];
+  const outside_temp = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[3][0];
+  const cliate_state = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[4][0];
 
-  const tpms_pressure_rr = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[6][0];
-  const tpms_pressure_rl = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[7][0];
-  const tpms_pressure_fr = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[8][0];
-  const tpms_pressure_fl = (carInfoResponseData as any).results.car_info_positions_table.frames[0].data.values[9][0];
+  const tpms_pressure_rr = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[6][0];
+  const tpms_pressure_rl = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[7][0];
+  const tpms_pressure_fr = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[8][0];
+  const tpms_pressure_fl = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[9][0];
 
-  const carUnits = (carInfoResponseData as any).results.car_units.frames[0].data.values;
+  const carUnits = carInfoResponseDataTyped.results.car_units.frames[0].data.values;
   const [lengthUnit, temperatureUnit] = carUnits;
 
   const carInfo = {

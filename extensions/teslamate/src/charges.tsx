@@ -6,6 +6,7 @@ import { formatDuration } from "./utils/timeFormatter";
 import { coordinatesConverter } from "./utils/coordinatesConverter";
 import { handleChargeSessionObject } from "./utils/chargeSessionObject";
 import { baseGrafanaUrl } from "./utils/constants";
+import { ChargingSession } from "./types/ChargingSession";
 
 export default function Charges() {
   // Retrive charging sessions data
@@ -33,7 +34,7 @@ export default function Charges() {
       {chargingSessionsObject.length === 0 ? (
         <List.EmptyView icon={{ source: "../assets/svg/test.svg" }} title="No charging sessions found" />
       ) : (
-        chargingSessionsObject.map((chargingSession: any, index: any) => (
+        chargingSessionsObject.map((chargingSession: ChargingSession, index: number) => (
           <List.Item
             key={index}
             title={chargingSession.startDate}
