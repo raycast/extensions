@@ -3,7 +3,7 @@
   "name": "teslamate",
   "title": "TeslaMate",
   "description": "View your TeslaMate data in Raycast",
-  "icon": "teslamate-logo.svg",
+  "icon": "teslamate-logo.png",
   "author": "mSarheed",
   "categories": [
     "Data",
