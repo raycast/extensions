@@ -7,7 +7,7 @@ export function handleCarInfoObject(carInfoResponseData: object) {
       car_info: {
         frames: {
           data: {
-            values: any[][];
+            values: object[][];
           };
         }[];
       };
@@ -21,21 +21,21 @@ export function handleCarInfoObject(carInfoResponseData: object) {
       car_state: {
         frames: {
           data: {
-            values: any[][];
+            values: string[][];
           };
         }[];
       };
       car_units: {
         frames: {
           data: {
-            values: any[][];
+            values: object[][];
           };
         }[];
       };
       car_info_positions_table: {
         frames: {
           data: {
-            values: any[][];
+            values: object[][];
           };
         }[];
       };
@@ -49,13 +49,14 @@ export function handleCarInfoObject(carInfoResponseData: object) {
   const stateData = carInfoResponseDataTyped.results.car_state.frames[0].data.values;
 
   const odometerData = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[0][0];
-  const formattedOdometer = odometerData.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
+  const formattedOdometer = odometerData.toLocaleString();
 
-  const battery_level = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[1][0];
-  const rated_battery_range = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[5][0];
+  const battery_level = parseInt(
+    carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[1][0].toString(),
+  );
+  const rated_battery_range = parseFloat(
+    carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[5][0].toString(),
+  );
 
   const inside_temp = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[2][0];
   const outside_temp = carInfoResponseDataTyped.results.car_info_positions_table.frames[0].data.values[3][0];

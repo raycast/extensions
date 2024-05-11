@@ -41,13 +41,17 @@ export default function Charges() {
             subtitle={chargingSession.startBatteryLevel + "%" + " ⇒ " + chargingSession.endBatteryLevel + "%"}
             detail={
               <List.Item.Detail
-                markdown={"![](" + coordinatesConverter(chargingSession.longitude, chargingSession.latitude) + ")"}
+                markdown={
+                  "![](" +
+                  coordinatesConverter(Number(chargingSession.longitude), Number(chargingSession.latitude)) +
+                  ")"
+                }
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Charging session date" text={chargingSession.startDate} />
                     <List.Item.Detail.Metadata.Label
                       title="Duration"
-                      text={formatDuration(chargingSession.durationMin)}
+                      text={formatDuration(Number(chargingSession.durationMin))}
                       icon={{ source: Icon.Clock, tintColor: Color.Blue }}
                     />
                     <List.Item.Detail.Metadata.Separator />
