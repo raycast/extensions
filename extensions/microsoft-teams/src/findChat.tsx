@@ -54,7 +54,7 @@ function chatTitle(chat: Chat) {
 
 function ChatItem({ chat }: { chat: Chat }) {
   const [availability, setAvailability] = useState<string | undefined>(undefined);
-  const { isLoading, data: currentAvailability } = usePromiseWithTimeout<any, Presence>(
+  const { isLoading, data: currentAvailability } = usePromiseWithTimeout<typeof getPresence>(
     getPresence,
     [chat.id],
     3000,
