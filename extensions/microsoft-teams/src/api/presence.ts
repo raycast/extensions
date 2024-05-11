@@ -29,10 +29,14 @@ function readableAvailability(availability: Availability) {
     .trim();
 }
 
-interface Presence {
+export interface Presence {
   id: string;
   availability: string;
   activity: string;
+}
+
+export function defaultPresence(): Presence {
+  return { id: "", availability: "PresenceUnknown", activity: "Available" };
 }
 
 export async function getPresence(entityId?: string) {

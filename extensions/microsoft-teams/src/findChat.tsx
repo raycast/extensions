@@ -5,7 +5,8 @@ import { currentUserId } from "./api/user";
 import { OpenUrlAction } from "./api/util";
 import { CallType, callUser } from "./actions/callAction";
 import { usePromise } from "@raycast/utils";
-import { getPresence } from "./api/presence";
+import { getPresence, Presence, defaultPresence } from "./api/presence";
+import { usePromiseWithTimeout } from "./hooks/usePromiseWithTimeout";
 
 const chatIcon = {
   oneOnOne: Icon.Person,
@@ -14,21 +15,21 @@ const chatIcon = {
 };
 
 const presenceIcon: Record<string, string> = {
-  Available: "presence_available.png",
-  Away: "presence_away.png",
-  BeRightBack: "presence_away.png",
-  Busy: "presence_busy.png",
-  DoNotDisturb: "presence_dnd.png",
-  InACall: "presence_dnd.png",
-  InAConferenceCall: "presence_dnd.png",
-  Inactive: "presence_offline.png",
-  InAMeeting: "presence_dnd.png",
-  Offline: "presence_offline.png",
-  OffWork: "presence_offline.png",
-  OutOfOffice: "presence_oof.png",
+  Available: "presence/presence_available.png",
+  Away: "presence/presence_away.png",
+  BeRightBack: "presence/presence_away.png",
+  Busy: "presence/presence_busy.png",
+  DoNotDisturb: "presence/presence_dnd.png",
+  InACall: "presence/presence_dnd.png",
+  InAConferenceCall: "presence/presence_dnd.png",
+  Inactive: "presence/presence_offline.png",
+  InAMeeting: "presence/presence_dnd.png",
+  Offline: "presence/presence_offline.png",
+  OffWork: "presence/presence_offline.png",
+  OutOfOffice: "presence/presence_oof.png",
   PresenceUnknown: "presence/presence_offline.png",
-  Presenting: "presence_dnd.png",
-  UrgentInterruptionsOnly: "presence_dnd.png",
+  Presenting: "presence/presence_dnd.png",
+  UrgentInterruptionsOnly: "presence/presence_dnd.png",
 };
 
 function chatMemberNames(chat: Chat) {
@@ -53,11 +54,16 @@ function chatTitle(chat: Chat) {
 
 function ChatItem({ chat }: { chat: Chat }) {
   const [availability, setAvailability] = useState<string | undefined>(undefined);
-  const { isLoading, data: currentAvailability } = usePromise(getPresence, [chat.id]);
+  const { isLoading, data: currentAvailability } = usePromiseWithTimeout<any, Presence>(
+    getPresence,
+    [chat.id],
+    3000,
+    defaultPresence()
+  );
 
   useEffect(() => {
     setAvailability(currentAvailability?.activity);
-  }, [currentAvailability]);
+  }, [currentAvailability, isLoading]);
 
   return (
     <List.Item
