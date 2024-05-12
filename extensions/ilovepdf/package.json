@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ilovepdf",
-  "title": "iLovePDF",
+  "title": "ILovePDF",
   "description": "Set of commands to interact with iLovePDF",
   "icon": "command-icon.png",
   "author": "mohamedk1",
@@ -15,6 +15,13 @@
       "title": "Image to PDF",
       "subtitle": "iLovePDF",
       "description": "Converts an image to pdf using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "compress-pdf",
+      "title": "Compress PDF",
+      "subtitle": "iLovePDF",
+      "description": "Compresses pdf using iLovePDF API.",
       "mode": "view"
     }
   ],
