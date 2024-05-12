@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { Player } from "../types/player";
 import { getSignedNumberNotationInString } from "./getSignedNumberNotation";
 import { getRankingColor } from "./getRankingColor";
@@ -29,6 +29,6 @@ export const createAccessories = ({
           },
         ]
       : []),
-    { text: `Points: ${player.points.toString()}` },
+    { icon: Icon.Leaderboard, text: `${player.points.toString()}` },
   ];
 };

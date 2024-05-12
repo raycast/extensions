@@ -1,7 +1,7 @@
 import { LiveRankingList } from "./views/LiveRankingList";
 
-const AtpLiveRankingCommand = () => {
+const AtpLiveRankingsCommand = () => {
   return <LiveRankingList organization="atp" />;
 };
 
-export default AtpLiveRankingCommand;
+export default AtpLiveRankingsCommand;

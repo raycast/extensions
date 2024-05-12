@@ -18,7 +18,7 @@ export const RaceRankingList: FC<RaceRankingListProps> = ({ organization }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>();
 
-  const title = `${organization.toUpperCase()} Race Ranking`;
+  const title = `${organization.toUpperCase()} Race Rankings`;
   return (
     <List
       navigationTitle={title}

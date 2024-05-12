@@ -18,7 +18,7 @@ export const LiveRankingList: FC<LiveRankingListProps> = ({ organization }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>();
 
-  const title = `${organization.toUpperCase()} Live Ranking`;
+  const title = `${organization.toUpperCase()} Live Rankings`;
 
   return (
     <List

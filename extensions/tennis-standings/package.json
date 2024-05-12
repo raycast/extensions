@@ -15,8 +15,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "atp-live-ranking",
-      "title": "ATP Live Ranking",
+      "name": "atp-live-rankings",
+      "title": "ATP Live Rankings",
       "description": "Get the ATP rankings",
       "mode": "view",
       "keywords": [
@@ -24,8 +24,8 @@
       ]
     },
     {
-      "name": "wta-live-ranking",
-      "title": "WTA Live Ranking",
+      "name": "wta-live-rankings",
+      "title": "WTA Live Rankings",
       "description": "Get the WTA rankings",
       "mode": "view",
       "keywords": [
@@ -34,7 +34,7 @@
     },
     {
       "name": "atp-race",
-      "title": "ATP Race Ranking",
+      "title": "ATP Race Rankings",
       "description": "Get the ATP race rankings",
       "mode": "view",
       "keywords": [
@@ -43,7 +43,7 @@
     },
     {
       "name": "wta-race",
-      "title": "WTA Race Ranking",
+      "title": "WTA Race Rankings",
       "description": "Get the WTA race rankings",
       "mode": "view",
       "keywords": [

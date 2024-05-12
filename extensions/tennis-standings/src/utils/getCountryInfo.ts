@@ -10,7 +10,7 @@ export const getCountryInfo = (countryCode: string) => {
   if (isValidCountryCode) {
     return countries[countryCode];
   } else {
-    console.error(`Country code "${countryCode}" not found.`);
+    console.log(`Country code "${countryCode}" not found.`);
     return { emoji: "🏳️", name: "Unknown" };
   }
 };

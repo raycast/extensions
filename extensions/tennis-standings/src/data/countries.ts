@@ -128,6 +128,7 @@ export const countries = {
   MOZ: { emoji: "🇲🇿", name: "Mozambique" },
   MYA: { emoji: "🇲🇲", name: "Myanmar" },
   NAM: { emoji: "🇳🇦", name: "Namibia" },
+  NMI: { emoji: "🇲🇵", name: "Northern Mariana Islands" },
   NRU: { emoji: "🇳🇷", name: "Nauru" },
   NEP: { emoji: "🇳🇵", name: "Nepal" },
   NED: { emoji: "🇳🇱", name: "Netherlands" },

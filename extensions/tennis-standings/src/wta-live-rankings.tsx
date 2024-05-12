@@ -1,7 +1,7 @@
 import { LiveRankingList } from "./views/LiveRankingList";
 
-const WtaLiveRankingCommand = () => {
+const WtaLiveRankingsCommand = () => {
   return <LiveRankingList organization="wta" />;
 };
 
-export default WtaLiveRankingCommand;
+export default WtaLiveRankingsCommand;

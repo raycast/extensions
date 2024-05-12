@@ -22,12 +22,10 @@ export const PlayerListSearchBarAccessory: FC<PlayerListSearchBarAccessoryProps>
         onFilterByCountry(val);
       }}
     >
-      <List.Dropdown.Section title="Filter By country">
-        <List.Dropdown.Item title={`🌍 All countries`} value={"all"} />
-        {Object.entries(playerCountries).map(([key, value]) => (
-          <List.Dropdown.Item key={key} title={`${value.emoji} ${value.name}`} value={key} />
-        ))}
-      </List.Dropdown.Section>
+      <List.Dropdown.Item title={`🌍 All countries`} value={"all"} />
+      {Object.entries(playerCountries).map(([key, value]) => (
+        <List.Dropdown.Item key={key} title={`${value.emoji} ${value.name}`} value={key} />
+      ))}
     </List.Dropdown>
   );
 };
