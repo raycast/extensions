@@ -1,0 +1,296 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nhk-program-search",
+  "title": "NHK Program Search",
+  "description": "Search NHK program guide by NHK API",
+  "icon": "n-logo.png",
+  "author": "sitogi",
+  "categories": [
+    "Media",
+    "Other"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "commands": [
+    {
+      "name": "list-program",
+      "title": "List Program",
+      "description": "Display a program guide",
+      "mode": "view"
+    },
+    {
+      "name": "search-program-by-genre",
+      "title": "Search Program by Genne",
+      "description": "Display a program guide filtered by specific genre",
+      "mode": "view"
+    },
+    {
+      "name": "search-program-by-keyword",
+      "title": "Search Program by Keyword",
+      "description": "Display a program guide filtered by specific keyword",
+      "mode": "view"
+    },
+    {
+      "name": "update-local-cache",
+      "title": "Update Local Cache",
+      "description": "Caches a week's worth of program schedule locally",
+      "mode": "no-view",
+      "interval": "1d"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Enter API Key"
+    },
+    {
+      "name": "area",
+      "type": "dropdown",
+      "required": true,
+      "title": "Area",
+      "description": "Select Area",
+      "data": [
+        {
+          "title": "札幌",
+          "value": "010"
+        },
+        {
+          "title": "函館",
+          "value": "011"
+        },
+        {
+          "title": "旭川",
+          "value": "012"
+        },
+        {
+          "title": "帯広",
+          "value": "013"
+        },
+        {
+          "title": "釧路",
+          "value": "014"
+        },
+        {
+          "title": "北見",
+          "value": "015"
+        },
+        {
+          "title": "室蘭",
+          "value": "016"
+        },
+        {
+          "title": "青森",
+          "value": "020"
+        },
+        {
+          "title": "盛岡",
+          "value": "030"
+        },
+        {
+          "title": "仙台",
+          "value": "040"
+        },
+        {
+          "title": "秋田",
+          "value": "050"
+        },
+        {
+          "title": "山形",
+          "value": "060"
+        },
+        {
+          "title": "福島",
+          "value": "070"
+        },
+        {
+          "title": "水戸",
+          "value": "080"
+        },
+        {
+          "title": "宇都宮",
+          "value": "090"
+        },
+        {
+          "title": "前橋",
+          "value": "100"
+        },
+        {
+          "title": "さいたま",
+          "value": "110"
+        },
+        {
+          "title": "千葉",
+          "value": "120"
+        },
+        {
+          "title": "東京",
+          "value": "130"
+        },
+        {
+          "title": "横浜",
+          "value": "140"
+        },
+        {
+          "title": "新潟",
+          "value": "150"
+        },
+        {
+          "title": "富山",
+          "value": "160"
+        },
+        {
+          "title": "金沢",
+          "value": "170"
+        },
+        {
+          "title": "福井",
+          "value": "180"
+        },
+        {
+          "title": "甲府",
+          "value": "190"
+        },
+        {
+          "title": "長野",
+          "value": "200"
+        },
+        {
+          "title": "岐阜",
+          "value": "210"
+        },
+        {
+          "title": "静岡",
+          "value": "220"
+        },
+        {
+          "title": "名古屋",
+          "value": "230"
+        },
+        {
+          "title": "津",
+          "value": "240"
+        },
+        {
+          "title": "大津",
+          "value": "250"
+        },
+        {
+          "title": "京都",
+          "value": "260"
+        },
+        {
+          "title": "大阪",
+          "value": "270"
+        },
+        {
+          "title": "神戸",
+          "value": "280"
+        },
+        {
+          "title": "奈良",
+          "value": "290"
+        },
+        {
+          "title": "和歌山",
+          "value": "300"
+        },
+        {
+          "title": "鳥取",
+          "value": "310"
+        },
+        {
+          "title": "松江",
+          "value": "320"
+        },
+        {
+          "title": "岡山",
+          "value": "330"
+        },
+        {
+          "title": "広島",
+          "value": "340"
+        },
+        {
+          "title": "山口",
+          "value": "350"
+        },
+        {
+          "title": "徳島",
+          "value": "360"
+        },
+        {
+          "title": "高松",
+          "value": "370"
+        },
+        {
+          "title": "松山",
+          "value": "380"
+        },
+        {
+          "title": "高知",
+          "value": "390"
+        },
+        {
+          "title": "福岡",
+          "value": "400"
+        },
+        {
+          "title": "北九州",
+          "value": "401"
+        },
+        {
+          "title": "佐賀",
+          "value": "410"
+        },
+        {
+          "title": "長崎",
+          "value": "420"
+        },
+        {
+          "title": "熊本",
+          "value": "430"
+        },
+        {
+          "title": "大分",
+          "value": "440"
+        },
+        {
+          "title": "宮崎",
+          "value": "450"
+        },
+        {
+          "title": "鹿児島",
+          "value": "460"
+        },
+        {
+          "title": "沖縄",
+          "value": "470"
+        }
+      ]
+    }
+  ]
+}
