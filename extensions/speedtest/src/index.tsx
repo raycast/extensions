@@ -4,8 +4,8 @@ import { speedtestCLIDirectory } from "./lib/cli";
 import { Result } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
 import { useSpeedtest } from "./lib/hooks";
-import { ListBandwidthItem } from "./lib/bandwidth/bandwidth.component";
-import { ActivitySpeedQualityBandwidth } from "./lib/bandwidth/bandwidthThresholds";
+import { ListBandwidthItem } from "./lib/bandwidth/component";
+import { ActivitySpeedQualityBandwidth } from "./lib/bandwidth/thresholds";
 
 function percentageToString(val: number | undefined): string | undefined {
   if (val === undefined) {

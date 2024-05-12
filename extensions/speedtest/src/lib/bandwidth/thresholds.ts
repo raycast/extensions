@@ -1,4 +1,4 @@
-import { ActivitySpeedQuality } from "./bandwidth.type";
+import { ActivitySpeedQuality } from "./type";
 
 // Unit is MBps
 const voiceCallQuality: ActivitySpeedQuality = {

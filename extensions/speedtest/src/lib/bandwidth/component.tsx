@@ -1,8 +1,8 @@
 import { Icon, List } from "@raycast/api";
 import { Result } from "../speedtest";
-import { ActivitySpeedQuality, InternetSpeed, Nullish } from "./bandwidth.type";
+import { ActivitySpeedQuality, InternetSpeed, Nullish } from "./type";
 import { useEffect, useState } from "react";
-import { convertBitsToMbps, speedToAvailableActivityQuality } from "./bandwidth.utils";
+import { convertBitsToMbps, speedToAvailableActivityQuality } from "./utils";
 
 export const ListBandwidthItem = (props: {
   speed: Nullish<InternetSpeed>;

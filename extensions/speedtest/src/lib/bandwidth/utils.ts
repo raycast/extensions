@@ -1,4 +1,4 @@
-import { ActivitySpeedQuality, InternetSpeed } from "./bandwidth.type";
+import { ActivitySpeedQuality, InternetSpeed } from "./type";
 
 export function convertBitsToMbps(speed: number | undefined): number {
   if (!speed) {
