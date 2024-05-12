@@ -1,3 +1,3 @@
 # pass
 
-An extension to handle the standard unix password manager in a convenient way using raycast
+An extension to handle [the standard unix password manager](https://www.passwordstore.org/) in a convenient way using raycast
