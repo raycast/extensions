@@ -79,7 +79,6 @@
     "moment": "^2.29.4"
   },
   "devDependencies": {
-    "@types/invariant": "^2.2.37",
     "@types/node": "^18.8.3",
     "@types/react": "^18.2.27",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
