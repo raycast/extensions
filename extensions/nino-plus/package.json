@@ -29,6 +29,12 @@
       "mode": "no-view"
     },
     {
+      "name": "join-zoom",
+      "title": "Join Meeting",
+      "description": "定例ミーティングに参加。設定からパスワード入力を省略可能",
+      "mode": "no-view"
+    },
+    {
       "name": "nino-plus",
       "title": "nino+",
       "description": "ドキュメントやサンプルコードにアクセス",
@@ -39,6 +45,15 @@
       "title": "Community | X",
       "description": "X コミュニティにアクセス",
       "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "zoom-password",
+      "title": "Zoom Password",
+      "description": "Zoomのパスワード",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {
