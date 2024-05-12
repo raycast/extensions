@@ -8,7 +8,7 @@
     shadcn/vue
   </h1>
 
-Raycast extension to browse [shadcn/vue](https://ui.shadcn.com/) documentation, components, and commands.
+Raycast extension to browse [shadcn/vue](https://www.shadcn-vue.com/) documentation, components, and commands.
 
   <p>
     <a href="https://www.raycast.com/selemondev/shadcn-vue">
