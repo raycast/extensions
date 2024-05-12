@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stattrak",
+  "title": "stattrak",
+  "description": "Everything you need about esports",
+  "icon": "command-icon.png",
+  "author": "rafaelvicio",
+  "version": "1.0.2",
+  "categories": [
+    "Applications",
+    "Fun",
+    "News"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "esports",
+    "lol",
+    "valorant",
+    "cs"
+  ],
+  "commands": [
+    {
+      "name": "esports-tournaments",
+      "title": "Esports Tournaments",
+      "subtitle": "Current esports tournaments",
+      "description": "search for esports tournaments",
+      "mode": "view"
+    },
+    {
+      "name": "esports-matches",
+      "title": "Esports Matches",
+      "subtitle": "Upcoming esports matches",
+      "description": "search for esports matches",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "@raycast/utils": "^1.15.0",
+    "date-fns": "^3.6.0",
+    "lodash": "^4.17.21",
+    "p-min-delay": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.17.1",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
