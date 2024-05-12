@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nino-plus",
+  "title": "nino+",
+  "description": "nino+の関連リソースにアクセスできます",
+  "icon": "command-icon.png",
+  "author": "dninomiya",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lofi",
+      "title": "Lofi",
+      "description": "Lofi with ポモドーロで作業に集中",
+      "mode": "no-view"
+    },
+    {
+      "name": "discussions",
+      "title": "Discussions | GitHub",
+      "description": "質問やリクエストを行います",
+      "mode": "no-view"
+    },
+    {
+      "name": "youtube",
+      "title": "YouTube",
+      "description": "YouTube無料ライブにアクセス",
+      "mode": "no-view"
+    },
+    {
+      "name": "nino-plus",
+      "title": "nino+",
+      "description": "ドキュメントやサンプルコードにアクセス",
+      "mode": "no-view"
+    },
+    {
+      "name": "x-community",
+      "title": "Community | X",
+      "description": "X コミュニティにアクセス",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "bunx @raycast/api@latest publish"
+  }
+}
