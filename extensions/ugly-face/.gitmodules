@@ -1,0 +1,3 @@
+[submodule "lib/ugly-avatar"]
+	path = lib/ugly-avatar
+	url = https://github.com/txstc55/ugly-avatar.git
