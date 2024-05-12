@@ -1,13 +1,14 @@
 import { loadAllAliases, updateAliasPinnedStatus, deleteAlias, toggleAliasState } from "./api/simplelogin_api";
 import { useEffect, useMemo, useState } from "react";
 import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { AliasResponse } from "./models/alias";
 import moment from "moment";
 
 type Filter = "all" | "" | "pinned" | "others" | "with-description" | "without-description";
 
 export default function Command() {
-  const [aliases, setAliases] = useState<AliasResponse[]>([]);
+  const [aliases, setAliases] = useCachedState<AliasResponse[]>("aliases", []);
   const [filter, setFilter] = useState<Filter>("all");
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -75,7 +76,7 @@ export default function Command() {
         style: Toast.Style.Success,
         title: "Alias deleted",
       });
-      setAliases(aliases && aliases.filter((a) => a.id != alias.id));
+      setAliases(aliases.filter((a) => a.id != alias.id));
     }
   }
 

@@ -1,6 +1,8 @@
 # SimpleLogin Changelog
 
-## [Updates to List Aliases & Create Random Alias commands] - 2024-05-08
+
+## [Updates to List Aliases & Create Random Alias commands] - 2024-05-12
+- Update List Aliases command to cache previously fetched aliases so that aliases can be viewed before refetch
 - Add new search bar filters to support filtering by aliases with and without a description
 - Update Create Random Alias command to support taking in a description for the alias
 
