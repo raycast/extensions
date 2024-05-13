@@ -1,7 +1,8 @@
 # Speedtest Changelog
 
-## [Update]
-Update interface to include streaming quality
+## [Update] - 2024-05-13 
+
+- Update interface to include streaming quality
 
 ## [Optimize] - 2023-08-30
 
