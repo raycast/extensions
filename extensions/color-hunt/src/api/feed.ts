@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { Feed, Tags } from "../type";
 import fetch from "cross-fetch";
 import { Svgs } from "../ui/svg";
@@ -34,7 +34,7 @@ export default function (sort: string, tags: Tags) {
     sort = "popular";
   }
 
-  return useCachedPromise(
+  return usePromise(
     (sort, tags, timeframe) => async (options: { page: number }) => {
       // console.log("fetching", options.page, sort, tags, timeframe);
 

@@ -72,11 +72,10 @@ export class Svgs {
       return cache.get(key);
     }
 
-    /*
-    const {resourceLimits} = await import('node:worker_threads')
-    console.log(resourceLimits)
-    console.log(process.memoryUsage.rss() / 1_048_576)
-    */
+    // const {resourceLimits} = await import('node:worker_threads')
+    // console.log(resourceLimits)
+    // console.log(process.memoryUsage.rss() / 1_048_576)
+
     //  1024 * 1024
     if (process.memoryUsage().heapUsed / 1_048_576 > 50) {
       // console.log("Memory usage is high, trying to free some memory");

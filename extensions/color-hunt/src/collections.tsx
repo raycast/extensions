@@ -14,7 +14,8 @@ export default function Collections() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    read().then(async (data) => {
+    setIsLoading(true);
+    read().then((data) => {
       const result: { code: string; svg: string }[] = [];
       for (const item of data) {
         result.push({
