@@ -16,6 +16,13 @@
       "subtitle": "iLovePDF",
       "description": "Converts an image to pdf using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "compress-pdf",
+      "title": "Compress PDF",
+      "subtitle": "iLovePDF",
+      "description": "Compresses pdf using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
