@@ -37,7 +37,7 @@ You will need to have [Node.js](https://nodejs.org) and [pnpm](https://pnpm.io/)
 
 1. Clone this repo `git clone https://github.com/bxb100/color-hunt.git`
 2. Go to the folder `cd color-hunt`
-3. Install dependencies `pnpm install`
+3. Install dependencies `npm install`
 4. Go to Raycast, run `Import Extension` and select the folder
 
 [^1]: https://raycastcommunity.slack.com/archives/C02HEMAF2SJ/p1715350721316929?thread_ts=1715342564.936389&cid=C02HEMAF2SJ
