@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, ToastStyle, getPreferenceValues, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, getPreferenceValues, Detail } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { useState } from "react";
@@ -9,7 +9,7 @@ interface Preferences {
 
 const preferences = getPreferenceValues<Preferences>();
 const homeDirectory = process.env.HOME || "/";
-let journalPath = preferences.journalFolderPath || path.join(homeDirectory, "Documents", "Quick Journal");
+const journalPath = preferences.journalFolderPath || path.join(homeDirectory, "Documents", "Quick Journal");
 
 export default function ListEntries() {
   let entries;

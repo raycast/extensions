@@ -9,7 +9,7 @@ interface Preferences {
 
 const preferences = getPreferenceValues<Preferences>();
 const homeDirectory = process.env.HOME || "/";
-let journalPath = preferences.journalFolderPath || path.join(homeDirectory, "Documents", "Quick Journal");
+const journalPath = preferences.journalFolderPath || path.join(homeDirectory, "Documents", "Quick Journal");
 
 export default function OpenJournalFolder() {
   fs.mkdir(journalPath, { recursive: true }, (err) => {
