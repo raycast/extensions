@@ -19,7 +19,10 @@ import path from "path";
 const preferences = getPreferenceValues();
 
 export default function AddNewTorrent() {
-  const [downloadDir, setDownloadDir] = useState("");
+  const [downloadDir, setDownloadDir] = useState(
+    preferences.quickPaths.split(",")[0].trim()
+  );
+
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const transmission = useMemo(() => createClient(), []);
@@ -27,7 +30,7 @@ export default function AddNewTorrent() {
   const handleSubmit = useCallback(async (values: { input: string; downloadDir: string }) => {
     setIsLoading(true);
 
-    const resolvedDownloadDir = expandTidle(path.resolve(values.downloadDir));
+    const resolvedDownloadDir = expandTidle(path.resolve(values.downloadDir))
     try {
       if (values.input.startsWith("magnet:")) {
         await transmission.addUrl(values.input, {
