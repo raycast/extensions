@@ -1,7 +1,7 @@
-import { ActionPanel, Action, Color } from "@raycast/api";
+import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { EntityStandardActionSections } from "@components/entity";
+import { Action, ActionPanel, Color } from "@raycast/api";
 
 export function SwitchActionPanel(props: { state: State }) {
   const state = props.state;

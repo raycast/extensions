@@ -1,7 +1,7 @@
-import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { State } from "@lib/haapi";
-import { InputTextForm } from "./form";
 import { EntityStandardActionSections } from "@components/entity";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import { InputTextForm } from "./form";
 
 export function InputTextSetValueAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

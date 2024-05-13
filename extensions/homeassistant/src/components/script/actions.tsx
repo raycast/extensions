@@ -1,8 +1,8 @@
-import { Icon, Color, Action, ActionPanel } from "@raycast/api";
+import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { callScriptRunService } from "./utils";
-import { EntityStandardActionSections } from "@components/entity";
 
 export function ScriptRunAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
