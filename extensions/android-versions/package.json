@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "bruce3x",
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -36,3 +37,4 @@
     "publish": "npx @raycast/api@latest publish"
   }
 }
+
