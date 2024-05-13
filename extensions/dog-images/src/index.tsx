@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { breeds } from "./breeds";
@@ -10,6 +10,7 @@ export interface State {
 
 export default () => {
   const [breed, setBreed] = useState("random");
+  const preferences = getPreferenceValues<Preferences>();
 
   const apiUrl =
     breed && breed !== "random"
@@ -24,6 +25,30 @@ export default () => {
     revalidate();
   };
 
+  const pasteAction = (
+    <Action.Paste
+      title="Paste URL to Active Application"
+      content={data ? data.message : ""}
+      icon={Icon.CopyClipboard}
+    />
+  );
+
+  const copyAction = (
+    <Action.CopyToClipboard
+      title="Copy URL to Clipboard"
+      content={data ? data.message : ""}
+      icon={Icon.CopyClipboard}
+    />
+  );
+
+  const getActions = (revalidate: () => void) => (
+    <ActionPanel>
+      <Action title="New Image" onAction={revalidate} icon={Icon.Image} />
+      {preferences.secondaryAction === "copy" ? copyAction : pasteAction}
+      {preferences.secondaryAction === "copy" ? pasteAction : copyAction}
+    </ActionPanel>
+  );
+
   return (
     <List
       isShowingDetail={true}
@@ -35,16 +60,7 @@ export default () => {
         id="random"
         title="Random"
         detail={<List.Item.Detail markdown={md} />}
-        actions={
-          <ActionPanel>
-            <Action title="New Image" onAction={revalidate} icon={Icon.Image} />
-            <Action.CopyToClipboard
-              title="Copy URL to Clipboard"
-              content={data ? data.message : ""}
-              icon={Icon.CopyClipboard}
-            />
-          </ActionPanel>
-        }
+        actions={getActions(revalidate)}
       />
       {breeds.map(({ id, name }) => (
         <List.Item
@@ -52,11 +68,7 @@ export default () => {
           id={id}
           title={name}
           detail={<List.Item.Detail markdown={md} />}
-          actions={
-            <ActionPanel>
-              <Action title="New Image" onAction={revalidate} />
-            </ActionPanel>
-          }
+          actions={getActions(revalidate)}
         />
       ))}
     </List>
