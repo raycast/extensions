@@ -5,6 +5,9 @@
   "description": "Adds commands to control the Alacritty terminal emulator.",
   "icon": "alacritty-term.png",
   "author": "jose-elias-alvarez",
+  "contributors": [
+    "kiran_koirala"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -13,13 +16,13 @@
   "commands": [
     {
       "name": "edit-file",
-      "title": "Edit File in Alacritty",
+      "title": "Edit File In Alacritty",
       "description": "Edit the selected Finder file(s) in Alacritty using $EDITOR",
       "mode": "no-view"
     },
     {
       "name": "open-folder",
-      "title": "Open Folder in Alacritty",
+      "title": "Open Folder In Alacritty",
       "description": "Open an instance of Alacritty at the currently selected Finder folder(s) (or parent folder of the selected file)",
       "mode": "no-view"
     },
@@ -34,6 +37,12 @@
       "title": "Run Command From Selection",
       "description": "Run the currently selected text as a shell command in Alacritty. Use at your own risk!",
       "mode": "no-view"
+    },
+    {
+      "name": "change-theme",
+      "title": "Change Theme",
+      "description": "Switch to themes available in 'alacritty/alacritty-themes' repo",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -52,15 +61,25 @@
       "description": "Full path to shell executable used to run commands",
       "type": "textfield",
       "default": "/bin/zsh"
+    },
+    {
+      "name": "configFilePath",
+      "required": false,
+      "title": "Config File Path",
+      "description": "Path to 'alacritty.toml' config file. Theme files will be placed in /themes directory of where this file is located.",
+      "type": "textfield",
+      "default": "~/.config/alacritty/alacritty.toml"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.1"
+    "@ltd/j-toml": "^1.38.0",
+    "@raycast/api": "^1.73.2",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "^18.3.2",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
