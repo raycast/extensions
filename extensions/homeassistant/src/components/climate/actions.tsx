@@ -1,8 +1,8 @@
-import { ActionPanel, Color, Action, Icon, popToRoot } from "@raycast/api";
-import { range } from "lodash-es";
+import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { EntityStandardActionSections } from "@components/entity";
+import { Action, ActionPanel, Color, Icon, popToRoot } from "@raycast/api";
+import { range } from "lodash-es";
 import { useState } from "react";
 
 export function ClimateActionPanel(props: { state: State }) {

@@ -335,6 +335,7 @@
 /extensions/docker                                                  @priithaamer @gebeto @BalliAsghar @noblecloud
 /extensions/dockerhub                                               @k8scat @tonka3000 @BalliAsghar
 /extensions/docsearch                                               @Fatpandac @AnishDe12020 @pomdtr
+/extensions/dog-images                                              @BossElijah @pernielsentikaer
 /extensions/dolar-hoy                                               @GustavoCarvallo01
 /extensions/dollar-blue                                             @agusluques
 /extensions/domainr                                                 @Rawnly
@@ -552,7 +553,7 @@
 /extensions/himalaya                                                @jesse-c
 /extensions/holodex                                                 @uetchy @hcy1251
 /extensions/holopin                                                 @timoransky @pernielsentikaer
-/extensions/homeassistant                                           @tonka3000 @altrdev @rspeicher @amuelli
+/extensions/homeassistant                                           @tonka3000 @altrdev @rspeicher @amuelli @xilopaint
 /extensions/homey                                                   @DominicVonk
 /extensions/hoogle                                                  @waj
 /extensions/host-switch                                             @ewgenius
@@ -966,7 +967,7 @@
 /extensions/pipe-commands                                           @pomdtr @gasolin @pernielsentikaer
 /extensions/pipedrive                                               @ahpatel
 /extensions/pitchfork                                               @koayon
-/extensions/pixabay                                                 @tonka3000 @mjherich
+/extensions/pixabay                                                 @tonka3000 @mjherich @j3lte
 /extensions/placeholder                                             @koinzhang
 /extensions/planetscale                                             @vimtor
 /extensions/plausible-analytics                                     @thebrokenfinger
@@ -1224,7 +1225,7 @@
 /extensions/spatie-documentation                                    @danyelkeddah
 /extensions/specify                                                 @AllanMichay
 /extensions/speed-dial                                              @osamaaamer95
-/extensions/speedtest                                               @tonka3000 @koayon @pernielsentikaer @stevensd2m
+/extensions/speedtest                                               @tonka3000 @koayon @pernielsentikaer @stevensd2m @aliaksandrZh
 /extensions/spell                                                   @Vincenzo160
 /extensions/splatoon                                                @marcbouchenoire
 /extensions/splix                                                   @cwooldridge1
