@@ -143,6 +143,8 @@ export function Svg() {
     mouthPoints = mouthShape.generateMouthShape2(computedFacePoints, faceHeight, faceWidth);
   }
 
+  const rangeTen = [...Array(10).keys()];
+
   return (
     <svg viewBox="-100 -100 200 200" xmlns="http://www.w3.org/2000/svg" width="500" height="500" id="face-svg">
       <defs>
@@ -248,7 +250,7 @@ export function Svg() {
           strokeLinejoin="round"
           filter="url(#fuzzy)"
         />
-        {[...Array(10).keys()].map((i) => (
+        {rangeTen.map((i) => (
           <circle
             key={i}
             r={Math.random() * 2 + 3.0}
@@ -283,7 +285,7 @@ export function Svg() {
           strokeLinejoin="round"
           filter="url(#fuzzy)"
         />
-        {[...Array(10).keys()].map((i) => (
+        {rangeTen.map((i) => (
           <circle
             key={i}
             r={Math.random() * 2 + 3.0}
@@ -315,7 +317,7 @@ export function Svg() {
       {Math.random() > 0.5 ? (
         <g id="pointNose">
           <g id="rightNose">
-            {[...Array(10).keys()].map((i) => (
+            {rangeTen.map((i) => (
               <circle
                 key={i}
                 r={Math.random() * 2 + 1.0}
@@ -329,7 +331,7 @@ export function Svg() {
             ))}
           </g>
           <g id="leftNose">
-            {[...Array(10).keys()].map((i) => (
+            {rangeTen.map((i) => (
               <circle
                 key={i}
                 r={Math.random() * 2 + 1.0}
