@@ -18,6 +18,31 @@ type NoteListItemProps = {
 export default function NoteListItem({ note, noteTitles, isDeleted, mutate }: NoteListItemProps) {
   const accessories = [];
 
+  if (preferences.tags && note.tags.length > 0) {
+    accessories.push({
+      text: `${note.tags.length}`,
+      icon: Icon.Hashtag,
+      // Display all tags inline and remove the leading # from the tag text
+      tooltip: `${note.tags.map((tag) => tag.text.slice(1)).join(", ")}`,
+    });
+  }
+
+  if (preferences.links && note.links.length > 0) {
+    accessories.push({
+      text: `${note.links.length}`,
+      icon: Icon.Link,
+      tooltip: `${note.links.length} link${note.links.length > 1 ? "s" : ""}`,
+    });
+  }
+
+  if (preferences.backlinks && note.backlinks.length > 0) {
+    accessories.push({
+      text: `${note.backlinks.length}`,
+      icon: Icon.ArrowNe,
+      tooltip: `${note.backlinks.length} backlink${note.backlinks.length > 1 ? "s" : ""}`,
+    });
+  }
+
   if (preferences.shared && note.invitationLink) {
     accessories.push({
       icon: Icon.Person,
@@ -68,6 +93,10 @@ export default function NoteListItem({ note, noteTitles, isDeleted, mutate }: No
 
   if (note.snippet) {
     keywords.push(...note.snippet.split(" "));
+  }
+
+  if (note.tags) {
+    keywords.push(...note.tags.map((tag) => tag.text.slice(1)));
   }
 
   if (note.checklist) {
