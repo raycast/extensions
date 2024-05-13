@@ -4,7 +4,9 @@
   "title": "UploadThing",
   "description": "Upload files in a single click",
   "icon": "icon.png",
-  "author": "pingdotgg",
+  "access": "public",
+  "author": "juliusmarminge",
+  "owner": "pingdotgg",
   "categories": [
     "Developer Tools"
   ],
