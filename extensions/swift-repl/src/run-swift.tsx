@@ -31,7 +31,6 @@ export default function Command() {
 
   useEffect(() => {
     if (pendingCode && data && (data.stdout || data.stderr)) {
-      console.log("got here", { runningCode, pendingCode, data });
       data.id = results.length;
       data.command = pendingCode;
       setResults([data, ...results]);
@@ -84,9 +83,6 @@ export default function Command() {
       (result.stderr || result.stdout || "No output.") +
       "\n```";
 
-    console.log(result);
-    console.log(string);
-
     return string;
   }
 
@@ -125,7 +121,6 @@ export default function Command() {
             return (
               <List.Section key="Past Results" title="Past Results">
                 {results.map((result) => {
-                  console.log("result id", result.id);
                   return (
                     <List.Item
                       id={String(result.id)}
