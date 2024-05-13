@@ -1,5 +1,9 @@
 # Speedtest Changelog
 
+## [Update] - 2024-05-13 
+
+- Update interface to include streaming quality
+
 ## [Optimize] - 2023-08-30
 
 - Catch possible crash in speedtest
