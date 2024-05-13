@@ -1,4 +1,4 @@
-import { Cache, showToast, Toast, updateCommandMetadata } from "@raycast/api";
+import { Cache, environment, showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import fetch from "node-fetch";
 import { preferences } from "./preferences";
 import { ErrorResponseBody, Program, serviceIds, TVSchedule } from "./types";
@@ -13,16 +13,20 @@ export default async function Command() {
   try {
     await storeWeeklyProgramsCache();
     await updateCommandMetadata({ subtitle: `Last Update: ${getFormattedDate(new Date(), "YYYY-MM-DD HH:mm")}` });
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Successfully fetched data",
-    });
+    if (environment.launchType === "userInitiated") {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Successfully fetched data",
+      });
+    }
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to fetch data",
-      message: error instanceof Error ? error.message : "An error occurred while fetching data.",
-    });
+    if (environment.launchType === "userInitiated") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch data",
+        message: error instanceof Error ? error.message : "An error occurred while fetching data.",
+      });
+    }
 
     // restore prev data
     serviceIds.forEach((sid) => {
