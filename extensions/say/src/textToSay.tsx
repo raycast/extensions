@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { execaSync } from "execa";
+import { say } from "mac-say";
 import { ConfigureSpokenContent } from "./components/actions.js";
 
 export default function TextToSay() {
@@ -9,8 +9,8 @@ export default function TextToSay() {
         <ActionPanel>
           <Action.SubmitForm
             title="Say"
-            onSubmit={(values) => {
-              execaSync("say", [values.content]);
+            onSubmit={async (values) => {
+              await say(values.content);
             }}
           />
           <ConfigureSpokenContent />

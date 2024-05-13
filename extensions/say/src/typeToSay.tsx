@@ -1,6 +1,6 @@
 import { LaunchProps } from "@raycast/api";
-import { execaSync } from "execa";
+import { say } from "mac-say";
 
-export default function TypeToSay({ arguments: args }: LaunchProps<{ arguments: Arguments.TypeToSay }>) {
-  execaSync("say", [args.content]);
+export default async function TypeToSay({ arguments: args }: LaunchProps<{ arguments: Arguments.TypeToSay }>) {
+  await say(args.content);
 }
