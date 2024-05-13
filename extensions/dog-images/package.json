@@ -5,6 +5,9 @@
   "description": "Get a random photo of a dog.",
   "icon": "logo.png",
   "author": "BossElijah",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Fun"
   ],
@@ -13,10 +16,29 @@
     {
       "name": "index",
       "title": "Get Random Dog Photo",
-      "description": "Get a random photo of a dog.",
+      "description": "Get a random photo of a dog.", 
       "mode": "view"
     }
   ],
+  "preferences": [{
+      "name": "secondaryAction",
+      "description": "Secondary Action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Secondary Action",
+      "default": "copy",
+      "placeholder": "Secondary Action",
+          "data": [
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            },
+            {
+              "title": "Paste to Active Application",
+              "value": "paste"
+            }
+          ]
+        }],
   "dependencies": {
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.15.0"
