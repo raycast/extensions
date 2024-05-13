@@ -20,7 +20,8 @@
       "mode": "view"
     }
   ],
-  "preferences": [{
+  "preferences": [
+    {
       "name": "secondaryAction",
       "description": "Secondary Action",
       "type": "dropdown",
@@ -28,17 +29,18 @@
       "title": "Secondary Action",
       "default": "copy",
       "placeholder": "Secondary Action",
-          "data": [
-            {
-              "title": "Copy to Clipboard",
-              "value": "copy"
-            },
-            {
-              "title": "Paste to Active Application",
-              "value": "paste"
-            }
-          ]
-        }],
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Active Application",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.72.1",
     "@raycast/utils": "^1.15.0"
