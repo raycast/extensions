@@ -1,16 +1,18 @@
 import { Icon, List } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { ArtCrime, SuccessResponse } from "./types";
-import { API_HEADERS, PAGE_SIZE } from "./constants";
-import { Fragment } from "react";
+import { API_HEADERS, BASE_API_URL, PAGE_SIZE } from "./constants";
 import { ItemWithTextOrIcon, generateMarkdown } from "./utils";
+import ImagesMetadata from "./components/ImagesMetadata";
+import { useState } from "react";
 
 export default function ArtCrimes() {
+    const [searchTitle, setSearchTitle] = useState("");
     const [total, setTotal] = useCachedState<number>("total-artcrimes");
     const { isLoading, data: artcrimes, pagination } = useFetch(
         (options) =>
-        "https://api.fbi.gov/artcrimes?" +
-          new URLSearchParams({ page: String(options.page + 1), pageSize: PAGE_SIZE.toString() }).toString(),
+        BASE_API_URL + "@artcrimes?" +
+          new URLSearchParams({ page: String(options.page + 1), pageSize: PAGE_SIZE.toString(), title: searchTitle }).toString(),
         {
         headers: API_HEADERS,
           mapResult(result: SuccessResponse<ArtCrime>) {
@@ -26,7 +28,7 @@ export default function ArtCrimes() {
         },
     );
 
-    return <List isLoading={isLoading} pagination={pagination} isShowingDetail>
+    return <List isLoading={isLoading} pagination={pagination} isShowingDetail searchBarPlaceholder="Search title" onSearchTextChange={setSearchTitle}>
         <List.Section title={`${artcrimes.length} of ${total} Art Crimes`}>
         {artcrimes.map(artcrime => <List.Item key={artcrime.uid} title={artcrime.title} detail={<List.Item.Detail markdown={generateMarkdown(artcrime)} metadata={<List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Crime Category" text={artcrime.crimeCategory} />
@@ -44,13 +46,7 @@ export default function ArtCrimes() {
         <ItemWithTextOrIcon title="Reference Number" text={artcrime.referenceNumber} />
         <ItemWithTextOrIcon title="Crime Category" text={artcrime.crimeCategory} />
         <List.Item.Detail.Metadata.Label title="Descriptions" text={artcrime.description} />
-        <List.Item.Detail.Metadata.Separator />
-        {artcrime.images.map((image, imageIndex) => <Fragment key={imageIndex}>
-            <List.Item.Detail.Metadata.Link title="Original" text={image.original} target={image.original} />
-            <List.Item.Detail.Metadata.Link title="Thumb" text={image.thumb} target={image.original} />
-            <List.Item.Detail.Metadata.Label title="Caption" text={image.caption} />
-            <List.Item.Detail.Metadata.Link title="Large" text={image.large} target={image.original} />
-        </Fragment>)}
+        <ImagesMetadata images={artcrime.images} />
         </List.Item.Detail.Metadata>} />} />)}
         </List.Section>
     </List>

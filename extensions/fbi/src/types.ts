@@ -1,4 +1,4 @@
-type Image = {
+export type Image = {
     original: string;
     thumb: string;
     caption: string;

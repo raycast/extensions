@@ -1,10 +1,22 @@
 import { Icon, List } from "@raycast/api";
 import { ArtCrime, WantedPerson } from "./types";
 
-export function ItemWithTextOrIcon ({ title, text: item }: { title: string, text: string | undefined }) {
+export function ItemWithTextOrIcon ({ title, text: item }: { title: string, text: string | null | undefined }) {
     const text = item || undefined;
     const icon = item ? undefined : Icon.Minus;
     return <List.Item.Detail.Metadata.Label title={title} text={text} icon={icon} />
+}
+
+// export function ItemWithTextRangeOrIcon ({ title, min, max }: { title: string, min: number, max: number }) {
+//     const text = (min && max) ? `${min} - ${max}` : undefined;
+//     const  icon = (min && max) ? undefined : Icon.Minus;
+//     return <List.Item.Detail.Metadata.Label title={title} text={text} icon={icon} />
+// }
+
+export function ItemWithTagsOrIcon ({ title, items }: { title: string, items: string[] | undefined }) {
+    return items ? <List.Item.Detail.Metadata.TagList title={title}>
+        {items.map(item => <List.Item.Detail.Metadata.TagList.Item key={item} text={item} />)}
+    </List.Item.Detail.Metadata.TagList> : <List.Item.Detail.Metadata.Label title={title} icon={Icon.Minus} />
 }
 
 export function generateMarkdown(artcrime: ArtCrime | WantedPerson) {
