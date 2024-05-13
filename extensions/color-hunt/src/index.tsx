@@ -26,7 +26,10 @@ export default function Command() {
       await mutate(
         like(code).then(() => write(code, svg)),
         {
-          optimisticUpdate: (data: IndexData[]) => {
+          optimisticUpdate: (data: IndexData[] | undefined) => {
+            if (!data) {
+              return [];
+            }
             return data.map((item) => {
               if (item.data.code === code) {
                 return {
@@ -52,7 +55,10 @@ export default function Command() {
   };
   const unfavorableFunc = async (id: string) => {
     await mutate(remove(id), {
-      optimisticUpdate: (data: IndexData[]) => {
+      optimisticUpdate: (data: IndexData[] | undefined) => {
+        if (!data) {
+          return [];
+        }
         return data.map((item) => {
           if (item.data.code === id) {
             return {
