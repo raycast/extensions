@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-journal",
+  "title": "Quick Journal",
+  "description": "Create and view journal entries directly from Raycast.",
+  "icon": "quick-journal-icon.png",
+  "author": "charlie_deets",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "new-entry",
+      "title": "New Quick Journal Entry",
+      "subtitle": "Compose a new Quick Journal entry",
+      "description": "Compose a new Quick Journal entry",
+      "mode": "view"
+    },
+    {
+      "name": "show-quick-journal",
+      "title": "View Quick Journal Entries",
+      "subtitle": "View and read Quick Journal entries",
+      "description": "Show and read Quick Journal entries",
+      "mode": "view"
+    },
+    {
+      "name": "open-quick-journal-folder",
+      "title": "Open Quick Journal Folder",
+      "subtitle": "Open Quick Journal Folder",
+      "description": "Open Quick Journal Folder",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "directory",
+      "name": "journalFolderPath",
+      "title": "Journal Folder (optional)",
+      "required": false,
+      "description": "You can select a custom folder where your journal entries are stored. If no choice is made, they will be stored in Documents/Quick Journal"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "date-fns": "^3.6.0",
+    "moment": "^2.30.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
