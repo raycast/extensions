@@ -1,7 +1,7 @@
 import load_preferences from "../utils/preferences";
 import axios from "axios";
 import { Options } from "../models/alias_options";
-import { Mailboxes, MailboxesResponse } from "../models/mailboxes";
+import { Mailboxes } from "../models/mailboxes";
 import { showToast, Toast } from "@raycast/api";
 import { ParamNewAlias } from "../models/alias_options";
 import { AliasResponse, LoadAllAliasResponse } from "../models/alias";
@@ -110,7 +110,7 @@ export async function createRandomAlias(note?: string): Promise<AliasResponse> {
         headers: {
           Authentication: api_token,
         },
-      }
+      },
     )
     .then((response) => {
       return response.data as AliasResponse;
@@ -154,7 +154,7 @@ async function loadAliasesPage(page: number): Promise<LoadAllAliasResponse | nul
     .then((response) => {
       return response.data as LoadAllAliasResponse;
     })
-    .catch((error) => {
+    .catch(() => {
       return null;
     });
 }
@@ -171,12 +171,12 @@ export async function updateAliasPinnedStatus(alias_id: number, pinned: boolean)
         headers: {
           Authentication: api_token,
         },
-      }
+      },
     )
-    .then((response) => {
+    .then(() => {
       return true;
     })
-    .catch((error) => {
+    .catch(() => {
       return false;
     });
 }
@@ -191,10 +191,10 @@ export async function deleteAlias(alias_id: number): Promise<boolean> {
         Authentication: api_token,
       },
     })
-    .then((response) => {
+    .then(() => {
       return true;
     })
-    .catch((error) => {
+    .catch(() => {
       return false;
     });
 }
@@ -211,12 +211,12 @@ export async function toggleAliasState(alias_id: number, enabled: boolean): Prom
         headers: {
           Authentication: api_token,
         },
-      }
+      },
     )
-    .then((response) => {
+    .then(() => {
       return true;
     })
-    .catch((error) => {
+    .catch(() => {
       return false;
     });
 }
