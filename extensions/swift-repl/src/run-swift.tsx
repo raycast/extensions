@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, confirmAlert, Alert } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
@@ -41,8 +41,19 @@ export default function Command() {
     }
   }, [data, runningCode]);
 
-  function run() {
+  async function run() {
     if (!code?.trim()) {
+      return;
+    }
+
+    if (
+      !(await confirmAlert({
+        title: "This command runs code.",
+        message: "Running untrusted code can be dangerous. Do you want to continue?",
+        primaryAction: { title: "Continue", style: Alert.ActionStyle.Destructive },
+        rememberUserChoice: true,
+      }))
+    ) {
       return;
     }
 
