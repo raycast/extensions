@@ -1,6 +1,7 @@
-import { environment } from "@raycast/api";
-import path from "path/posix";
 import * as fs from "fs/promises";
+import path from "path/posix";
+
+import { environment } from "@raycast/api";
 
 export function getLargeCacheDirectory(): string {
   const sp = environment.supportPath;
