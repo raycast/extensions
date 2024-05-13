@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "umami",
+  "title": "Umami",
+  "description": "",
+  "icon": "command-icon.png",
+  "author": "xmok",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "UMAMI_API_CLIENT_USER_ID",
+      "title": "UMAMI_API_CLIENT_USER_ID",
+      "placeholder": "UMAMI_API_CLIENT_USER_ID",
+      "description": "The USER_ID of the User performing the API calls. Permission restrictions will apply based on application settings.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "UMAMI_API_CLIENT_SECRET",
+      "title": "UMAMI_API_CLIENT_SECRET",
+      "placeholder": "UMAMI_API_CLIENT_SECRET",
+      "description": "A random string used to generate unique values. This needs to match the APP_SECRET used in the Umami application.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "UMAMI_API_CLIENT_ENDPOINT",
+      "title": "UMAMI ENDPOINT",
+      "placeholder": "UMAMI_API_CLIENT_ENDPOINT",
+      "description": "The endpoint of your Umami API. Example: https://{yourserver}/api/",
+      "default": "https://api.umami.is/v1",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "UMAMI_API_KEY",
+      "title": "UMAMI_API_KEY",
+      "placeholder": "UMAMI_API_KEY",
+      "description": "A unique string provided by Umami Cloud.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "me",
+      "title": "Me",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "users",
+      "title": "Users",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "websites",
+      "title": "Websites",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.73.2",
+    "@raycast/utils": "^1.15.0",
+    "@umami/api-client": "^0.64.0",
+    "isomorphic-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
