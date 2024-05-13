@@ -2,4 +2,4 @@
 
 Run lil swift snippets
 
-![Screenshot](screenshot.png)
+![Screenshot](metadata/screenshot.png)
