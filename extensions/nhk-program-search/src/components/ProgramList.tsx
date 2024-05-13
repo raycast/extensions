@@ -14,7 +14,7 @@ type Props = {
 export function ProgramList({ customFilters = [] }: Props): React.JSX.Element {
   const [serviceId, setServiceId] = useState<ServiceId>("g1");
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     setIsLoading(true);
@@ -27,7 +27,6 @@ export function ProgramList({ customFilters = [] }: Props): React.JSX.Element {
     <List isLoading={isLoading} searchBarAccessory={<SearchBarDropdown onChange={setServiceId} />}>
       {programs.length === 0 ? (
         <List.EmptyView
-          icon={{ source: Icon.XMarkTopRightSquare, tintColor: "#efda6f" }}
           title="There was no cached program data."
           description="Please run the Update Local Cache command."
           actions={
