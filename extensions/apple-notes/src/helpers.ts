@@ -15,6 +15,6 @@ export function truncate(str: string, maxLength = 30): string {
 }
 
 export function getOpenNoteURL(uuid: string) {
-  const isMacOSVenturaOrLater = parseInt(os.release().split(".")[0]) >= 22;
-  return `${isMacOSVenturaOrLater ? "applenotes" : "notes"}://showNote?identifier=${uuid}`;
+  const isSonomaOrLater = parseInt(os.release().split(".")[0]) >= 23;
+  return `${isSonomaOrLater ? "applenotes" : "notes"}://showNote?identifier=${uuid}`;
 }

@@ -9,7 +9,7 @@ This update enhances the Apple Notes extension with several new features:
 - **Tags**: Tags within your notes are now displayed and searchable, making it simpler to find your notes.
 - **Improved Detail View**: The detail view now provides more information about each note, including the folder name, last update time, links, backlinks, tags, and more.
 
-It also fixes a bug where links would not be opened for users with macOS Monterey.
+It also fixes a bug where links would not be opened for users not having macOS Sonoma.
 
 ## [Add text to note] - 2024-04-26
 
