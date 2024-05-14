@@ -76,6 +76,7 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
               title="Close Project"
               icon={Icon.Lock}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              style={Action.Style.Destructive}
               onAction={async () => {
                 if (
                   await confirmAlert({
@@ -93,6 +94,7 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
               title="Reopen Project"
               icon={Icon.LockUnlocked}
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              style={Action.Style.Destructive}
               onAction={async () => {
                 if (
                   await confirmAlert({
