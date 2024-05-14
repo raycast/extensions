@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, Toast, confirmAlert, showToast, openExtensionPreferences } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -35,11 +35,20 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
       const hasProjectScopes = await hasRequiredScopes(["project", "project:write"], octokit);
 
       if (!hasProjectScopes) {
-        await showToast({
+        const toastOptions: Toast.Options = {
           style: Toast.Style.Failure,
           title: `Missing Scopes`,
           message: `You need the "project" or "project:write" scopes to close or reopen a project. Please re-authenticate.`,
-        });
+          primaryAction: {
+            title: "Re-authenticate",
+            onAction: (toast) => {
+              openExtensionPreferences();
+              toast.hide();
+            },
+          },
+        };
+
+        await showToast(toastOptions);
         return;
       }
 
