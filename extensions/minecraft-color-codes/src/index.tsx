@@ -1,5 +1,3 @@
-/// <reference path="../raycast-env.d.ts" />
-
 import { ActionPanel, Action, Icon, List, getPreferenceValues } from "@raycast/api";
 
 const PREFIX = "\u00A7";
@@ -160,9 +158,9 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action.CopyToClipboard content={chatCode} title="Copy chat code" />
-                    <Action.CopyToClipboard content={chatCodeEscaped} title="Copy chat code (escaped)" />
-                    <Action.CopyToClipboard content={hexCode} title="Copy hex code" />
+                    <Action.CopyToClipboard content={chatCode} title="Copy Chat Code" />
+                    <Action.CopyToClipboard content={chatCodeEscaped} title="Copy Escaped Chat Code" />
+                    <Action.CopyToClipboard content={hexCode} title="Copy Hex Code" />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -184,8 +182,8 @@ export default function Command() {
               subtitle={chatCode}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard content={chatCode} title="Copy chat code" />
-                  <Action.CopyToClipboard content={chatCodeEscaped} title="Copy chat code (escaped)" />
+                  <Action.CopyToClipboard content={chatCode} title="Copy Chat Code" />
+                  <Action.CopyToClipboard content={chatCodeEscaped} title="Copy Escaped Chat Code" />
                 </ActionPanel>
               }
             />
