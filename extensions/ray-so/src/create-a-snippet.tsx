@@ -1,5 +1,5 @@
-import { Form, ActionPanel, closeMainWindow, showToast, Action, Toast } from "@raycast/api";
-import { colors, languages } from "./constants";
+import { Form, ActionPanel, closeMainWindow, showToast, Action, Toast, Color } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import open from "open";
 import { encodeURI } from "js-base64";
@@ -13,6 +13,11 @@ interface Values {
   snippet: string;
   color: string;
 }
+interface Data {
+  languages: { id: string; name: string }[];
+  themes: { id: string; name: string }[];
+  padding: number[];
+}
 const defaultSnippet: Values = {
   title: "Untitled%201",
   background: "true",
@@ -25,6 +30,7 @@ const defaultSnippet: Values = {
 
 export default function CreateSnippet() {
   const [code, setCode] = useState<Values>(defaultSnippet);
+  const { data: data } = useFetch<Data>("https://ray.so/api/config");
   const url = `https://ray.so/#theme=${code.color}&background=${code.background}&darkMode=${code.darkMode}&padding=${
     code.padding
   }&title=${code.title || "Untitled%201"}&code=${encodeURI(code.snippet)}&language=${code.language}`;
@@ -63,14 +69,43 @@ export default function CreateSnippet() {
         onChange={(snippet) => setCode({ ...code, snippet })}
       />
       <Form.Separator />
-      <Form.Dropdown id="color" title="Color" storeValue onChange={(color) => setCode({ ...code, color })}>
-        {colors.map((el, idx) => (
-          <Form.Dropdown.Item key={idx} icon={{ source: `${el.value}.png` }} value={el.value} title={el.title} />
-        ))}
+      <Form.Dropdown
+        id="color"
+        title="Color"
+        storeValue
+        defaultValue={defaultSnippet.color}
+        onChange={(color) => setCode({ ...code, color })}
+      >
+        <Form.Dropdown.Section title="Partners">
+          {data?.themes.map(
+            (el: { id: string; name: string; partner?: boolean }, idx: number) =>
+              el.partner && (
+                <Form.Dropdown.Item
+                  key={idx}
+                  icon={{ source: `${el.id}.svg`, tintColor: Color.PrimaryText }}
+                  value={el.id}
+                  title={el.name}
+                />
+              ),
+          )}
+        </Form.Dropdown.Section>
+        {data?.themes.map(
+          (el: { id: string; name: string; partner?: boolean }, idx: number) =>
+            !el.partner && (
+              <Form.Dropdown.Item key={idx} icon={{ source: `${el.id}.png` }} value={el.id} title={el.name} />
+            ),
+        )}
       </Form.Dropdown>
-      <Form.Dropdown id="language" title="Language" storeValue onChange={(language) => setCode({ ...code, language })}>
-        {languages.map((el, idx) => (
-          <Form.Dropdown.Item key={idx} value={el.value} title={el.label} />
+      <Form.Dropdown
+        id="language"
+        title="Language"
+        storeValue
+        defaultValue={defaultSnippet.language}
+        onChange={(language) => setCode({ ...code, language })}
+      >
+        <Form.Dropdown.Item value="auto" title="Auto-Detect" />
+        {data?.languages.map((el: { id: string; name: string }, idx: number) => (
+          <Form.Dropdown.Item key={idx} value={el.id} title={el.name} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown
@@ -87,10 +122,9 @@ export default function CreateSnippet() {
         <Form.Dropdown.Item value="false" title="No" />
       </Form.Dropdown>
       <Form.Dropdown id="padding" title="Padding" storeValue onChange={(padding) => setCode({ ...code, padding })}>
-        <Form.Dropdown.Item value="16" title="16" />
-        <Form.Dropdown.Item value="32" title="32" />
-        <Form.Dropdown.Item value="64" title="64" />
-        <Form.Dropdown.Item value="128" title="128" />
+        {data?.padding.map((el: number, idx: number) => (
+          <Form.Dropdown.Item key={idx} value={el.toString()} title={el.toString()} />
+        ))}
       </Form.Dropdown>
     </Form>
   );

@@ -130,6 +130,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.15.0",
     "js-base64": "^3.7.2",
     "node-fetch": "^3.2.0",
     "open": "^8.4.0",

@@ -3,7 +3,7 @@
 ## [Add new partners themes] - 2024-05-09
 
 - Added Vercel & Evil Rabbit color themes.
-  - With their respective preview images.
+- With their respective preview images.
 
 ## [Add mono preview image] - 2024-03-13
 
