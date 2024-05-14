@@ -164,7 +164,7 @@ export async function getWeather(coords: Coordinates): Promise<Weather> {
     units: us === UnitSystem.Imperial ? "imperial" : "metric",
   });
 
-  const url = `${endpoint}/data/2.5/onecall?${params.toString()}`;
+  const url = `${endpoint}/data/3.0/onecall?${params.toString()}`;
   const w: Weather | undefined = await fetch(url)
     .then((d) => d.json())
     .then((d) => {
