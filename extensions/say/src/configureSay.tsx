@@ -73,7 +73,7 @@ export default function ConfigureSay() {
       </Form.Dropdown>
       <Form.Description
         title="Advanced"
-        text="For more configurations please go to System Settings -> Accessibility -> Spoken Content"
+        text="This configuration page does not alter you system settings. For more advanced configurations please go to System Settings -> Accessibility -> Spoken Content."
       />
     </Form>
   );

@@ -9,6 +9,9 @@ This extension uses the macOS built-in [Spoken Content](https://www.youtube.com/
 
 ## Configurations
 
+Currently, the `Configure Say` command we provided does not alter you system settings.
+You can go to your macOS System Settings to download new voices and get more advanced configurations.
+
 See https://support.apple.com/en-us/guide/mac-help/spch638/mac.
 
 ## API
