@@ -15,7 +15,7 @@ interface Values {
 }
 interface Data {
   languages: { id: string; name: string }[];
-  themes: { id: string; name: string }[];
+  themes: { id: string; name: string; iconUrl?: string; partner?: boolean }[];
   padding: number[];
 }
 const defaultSnippet: Values = {
@@ -78,11 +78,11 @@ export default function CreateSnippet() {
       >
         <Form.Dropdown.Section title="Partners">
           {data?.themes.map(
-            (el: { id: string; name: string; partner?: boolean }, idx: number) =>
+            (el: { id: string; name: string; iconUrl?: string; partner?: boolean }, idx: number) =>
               el.partner && (
                 <Form.Dropdown.Item
                   key={idx}
-                  icon={{ source: `${el.id}.svg`, tintColor: Color.PrimaryText }}
+                  icon={{ source: `${el.iconUrl}`, tintColor: Color.PrimaryText }}
                   value={el.id}
                   title={el.name}
                 />
