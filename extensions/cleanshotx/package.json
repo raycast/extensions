@@ -22,6 +22,14 @@
       "mode": "no-view"
     },
     {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "CleanShot X",
+      "description": "Open Settings",
+      "icon": "open-settings.png",
+      "mode": "no-view"
+    },
+    {
       "name": "all-in-one",
       "title": "All in One",
       "subtitle": "CleanShot X",
