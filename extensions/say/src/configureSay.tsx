@@ -23,6 +23,12 @@ export default function ConfigureSay() {
   return (
     <Form
       isLoading={isLoading}
+      searchBarAccessory={
+        <Form.LinkAccessory
+          target="x-apple.systempreferences:com.apple.preference.universalaccess"
+          text="Open System Preferences"
+        />
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -56,6 +62,10 @@ export default function ConfigureSay() {
           />
         ))}
       </Form.Dropdown>
+      <Form.Description
+        title="Advanced"
+        text="For more configurations please go to System Settings -> Accessibility -> Spoken Content"
+      />
     </Form>
   );
 }
