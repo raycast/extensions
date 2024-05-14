@@ -1,5 +1,6 @@
 # Transmission Changelog
-## [Usability improvements]
+
+## [Usability improvements] - 2024-05-14
 
 - Set the first quickpath as default download dir
 
