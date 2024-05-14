@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, LaunchProps } from "@raycast/api";
+import { ActionPanel, List, Action, LaunchProps, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import Lyrics from "./Lyrics";
@@ -35,7 +35,12 @@ export default function Command(props: LaunchProps<{ arguments: { query: string 
           title={item.result.full_title}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" target={<Lyrics url={item.result.url} />} />
+              <Action.Push
+                title="Show Lyrics"
+                icon={Icon.Paragraph}
+                target={<Lyrics url={item.result.url} title={item.result.full_title} />}
+              />
+              <Action.OpenInBrowser title="Open in Browser" url={item.result.url} />
             </ActionPanel>
           }
         />
