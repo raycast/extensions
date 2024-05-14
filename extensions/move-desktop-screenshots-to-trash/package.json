@@ -20,6 +20,23 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "fileNameString",
+      "title": "Custom Prefix (optional)",
+      "required": false,
+      "description": "You can optionally add a custom prefix for the screenshot filenames.",
+      "placeholder": "Screenshot, CleanShot, etc."
+    },
+    {
+      "type": "directory",
+      "name": "customDirectory",
+      "title": "Custom Directory (optional)",
+      "required": false,
+      "description": "You can optionally add a custom custom directory to clean up screenshots."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.73.2",
     "trash": "^8.1.1"

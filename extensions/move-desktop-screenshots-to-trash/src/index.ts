@@ -2,9 +2,16 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { exec } from "child_process";
-import { showHUD } from "@raycast/api";
+import { showHUD, getPreferenceValues } from "@raycast/api";
 
-const desktopDir = path.join(os.homedir(), "Desktop");
+const preferences = getPreferenceValues();
+const fileNameString = preferences.fileNameString;
+let desktopDir = path.join(os.homedir(), "Desktop");
+const customDirectory = preferences.customDirectory;
+
+if (customDirectory) {
+  desktopDir = customDirectory;
+}
 
 const moveFileToTrash = (filePath: string) => {
   exec(`osascript -e 'tell application "Finder" to delete POSIX file "${filePath}"'`, (error, stdout, stderr) => {
@@ -29,7 +36,12 @@ fs.readdir(desktopDir, (err, files) => {
   let movedFilesCount = 0;
 
   files.forEach((filename) => {
-    if ((filename.startsWith("CleanShot ") || filename.startsWith("Screenshot ")) && filename.endsWith(".png")) {
+    if (
+      (filename.startsWith("CleanShot ") ||
+        filename.startsWith("Screenshot ") ||
+        filename.startsWith(fileNameString)) &&
+      filename.endsWith(".png")
+    ) {
       const fullPath = path.join(desktopDir, filename);
       moveFileToTrash(fullPath);
       movedFilesCount++;
