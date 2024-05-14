@@ -43,6 +43,7 @@ export function AddWork(props: {
     const workItem: WorkItem = {
       text: values.comment,
       date: values.date.valueOf(),
+      type: workTypes.find((type) => type.id === values.workTypeId),
       duration: {
         presentation: values.time,
       },
