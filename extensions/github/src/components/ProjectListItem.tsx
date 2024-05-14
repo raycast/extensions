@@ -44,7 +44,7 @@ export default function ProjectListItem({ project, mutateList }: ProjectListItem
       accessories={accessories}
       actions={
         <ProjectActions project={project} mutateList={mutateList}>
-          <Action.Push title="Show Details" icon={Icon.MagnifyingGlass} target={<ProjectDetail project={project} />} />
+          <Action.Push title="Show Details" icon={Icon.Sidebar} target={<ProjectDetail project={project} />} />
         </ProjectActions>
       }
     />
