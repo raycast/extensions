@@ -36,11 +36,20 @@ export default function Command() {
     await showToast(Toast.Style.Success, "Image Generated");
   }, 250);
 
-  const download = async (filename: string) => {
+  const download = async (filename: string, suffix?: number): Promise<void> => {
     try {
       await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
       const data = fs.readFileSync(environment.supportPath + `/${filename}`);
-      fs.writeFileSync(DOWNLOADS_DIR + `/${filename}`, data);
+
+      const ext = path.extname(filename);
+      const newFilename = filename.replace(ext, suffix ? `_${suffix}${ext}` : ext);
+      const savePath = `${DOWNLOADS_DIR}/${newFilename}`;
+
+      if (fs.existsSync(savePath)) {
+        return await download(filename, (suffix || 0) + 1);
+      }
+
+      fs.writeFileSync(savePath, data);
       await showToast(Toast.Style.Success, "Image Downloaded!", DOWNLOADS_DIR);
     } catch (error) {
       await showFailureToast(error, { title: "Failed to download image" });
