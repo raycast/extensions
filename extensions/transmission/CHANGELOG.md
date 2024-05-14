@@ -1,4 +1,7 @@
 # Transmission Changelog
+## [Usability improvements]
+
+- Set the first quickpath as default download dir
 
 ## [ETA] - 2024-04-24
 
