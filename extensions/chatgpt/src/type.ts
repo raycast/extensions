@@ -8,6 +8,7 @@ export type Message = ChatCompletionMessageParam;
 export interface Question {
   id: string;
   question: string;
+  images: string[];
   created_at: string;
 }
 
@@ -37,11 +38,13 @@ export interface Model {
   option: "gpt-3.5-turbo" | "gpt-3.5-turbo-0301" | "gpt-4" | "gpt-4-0314" | "gpt-4-32k" | "gpt-4-32k-0314" | string;
   temperature: string;
   pinned: boolean;
+  vision?: boolean;
 }
 
 type PromiseFunctionNoArg = () => Promise<void>;
 type PromiseFunctionWithOneArg<T> = (arg: T) => Promise<void>;
-type PromiseFunctionWithTwoArg<T, V> = (arg_1: T, arg_2: V) => Promise<void>;
+// type PromiseFunctionWithTwoArg<T, V> = (arg_1: T, arg_2: V) => Promise<void>;
+type PromiseFunctionWithThreeArg<T, V, W> = (arg_1: T, arg_2: V, arg_3: W) => Promise<void>;
 
 interface BaseFunctionHook<T> {
   add: PromiseFunctionWithOneArg<T>;
@@ -77,7 +80,7 @@ export interface ChatHook {
   setLoading: Set<boolean>;
   selectedChatId: string | null;
   setSelectedChatId: Set<string | null>;
-  ask: PromiseFunctionWithTwoArg<string, Model>;
+  ask: PromiseFunctionWithThreeArg<string, string[], Model>;
   clear: PromiseFunctionNoArg;
   streamData: Chat | undefined;
 }
@@ -90,7 +93,7 @@ export interface ChangeModelProp {
 
 export interface QuestionFormProps extends ChangeModelProp {
   initialQuestion: string;
-  onSubmit: (question: string) => void;
+  onSubmit: (question: string, files: string[]) => void;
 }
 
 export interface ChatViewProps extends ChangeModelProp {
