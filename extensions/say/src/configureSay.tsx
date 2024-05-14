@@ -36,7 +36,9 @@ export default function ConfigureSay() {
             title="Say Example"
             onSubmit={async () => {
               const foundVoice = voices.find((v) => v.name === voice);
-              await say("This is Raycast Say extension test.", { voice: foundVoice ? voice : undefined });
+              await say(foundVoice ? foundVoice.example : "This is system default voice.", {
+                voice: foundVoice ? voice : undefined,
+              });
             }}
           />
         </ActionPanel>
