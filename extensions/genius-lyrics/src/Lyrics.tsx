@@ -11,9 +11,16 @@ export default function Lyrics({ url, title }: { url: string; title: string }) {
   $("br").text("\n\n");
   const text = $("[data-lyrics-container=true]").text();
 
-  return <Detail isLoading={isLoading} markdown={text} navigationTitle={title} actions={
-    <ActionPanel>
-      <Action.OpenInBrowser title="Open in Browser" url={url} />
-    </ActionPanel>
-  } />;
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={text}
+      navigationTitle={title}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser title="Open in Browser" url={url} />
+        </ActionPanel>
+      }
+    />
+  );
 }
