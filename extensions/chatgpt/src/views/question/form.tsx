@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, getSelectedFinderItems, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
@@ -35,10 +35,10 @@ export const QuestionForm = ({
     <Form
       actions={
         <ActionPanel>
-          <Action
+          <Action.SubmitForm
             title="Submit"
             icon={Icon.Checkmark}
-            onAction={() => {
+            onSubmit={() => {
               // check file is validate
               try {
                 for (const file of files) {
@@ -51,6 +51,28 @@ export const QuestionForm = ({
               }
             }}
           />
+          {enableVision && (
+            <Action
+              title="Upload Selected Files"
+              shortcut={{
+                modifiers: ["cmd"],
+                key: ".",
+              }}
+              icon={Icon.Plus}
+              onAction={async () => {
+                try {
+                  const fileSystemItems = await getSelectedFinderItems();
+                  setFiles(fileSystemItems.map((item) => item.path));
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Cannot copy file path",
+                    message: String(error),
+                  });
+                }
+              }}
+            />
+          )}
         </ActionPanel>
       }
     >
