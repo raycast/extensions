@@ -51,10 +51,12 @@
   "dependencies": {
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.15.0",
+    "lodash": "^4.17.21",
     "mac-say": "^0.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
+    "@types/lodash": "^4.17.1",
     "@types/node": "^20.12.5",
     "@types/react": "^18.2.75",
     "eslint": "^8.57.0",

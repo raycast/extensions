@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Form, Action, showToast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import { groupBy } from "lodash";
 import { Voice, say } from "mac-say";
 import { defaultVoice } from "./constants.js";
 import { getSortedVoices, languageCodeToEmojiFlag } from "./utils.js";
@@ -53,13 +54,19 @@ export default function ConfigureSay() {
         }}
       >
         <Form.Dropdown.Item value="System Default" title="System Default" />
-        {voices.map((voice) => (
-          <Form.Dropdown.Item
-            key={`${voice.name}-${voice.languageCode}`}
-            value={voice.name}
-            title={voice.name}
-            icon={languageCodeToEmojiFlag(voice.languageCode)}
-          />
+        {Object.entries(
+          groupBy(voices, (v) => new Intl.DisplayNames(["en"], { type: "language" }).of(v.languageCode.slice(0, 2))),
+        ).map(([language, voices]) => (
+          <Form.Dropdown.Section key={language} title={language}>
+            {voices.map((v) => (
+              <Form.Dropdown.Item
+                key={`${v.name}-${v.languageCode}`}
+                value={v.name}
+                title={v.name}
+                icon={languageCodeToEmojiFlag(v.languageCode)}
+              />
+            ))}
+          </Form.Dropdown.Section>
         ))}
       </Form.Dropdown>
       <Form.Description
