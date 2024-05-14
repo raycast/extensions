@@ -1,8 +1,12 @@
 # Toothpick Changelog
 
+## [Hotfix]
+
+- Fixed device not disconnecting sometimes on AppleScript backend.
+
 ## [QoL Improvements] - 2024-05-06
 
-- Added so it's possible to toggle devices
+- Extended favorite devices functionality to toggle specific devices
 
 ## [Update] - 2024-05-02
 
