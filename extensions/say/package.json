@@ -22,6 +22,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "configureSay",
+      "title": "Configure Say",
+      "description": "Configure the Say extension.",
+      "mode": "view"
+    },
+    {
       "name": "textToSay",
       "title": "Text to Say",
       "description": "Input your text or paragraph and say.",
@@ -45,7 +51,7 @@
   "dependencies": {
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.15.0",
-    "mac-say": "^0.2.0"
+    "mac-say": "^0.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
