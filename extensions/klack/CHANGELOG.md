@@ -1,3 +1,3 @@
 # Klack Changelog
 
-## [Initial Version] - 2024-05-09
+## [Initial Version] - {PR_MERGE_DATE}
