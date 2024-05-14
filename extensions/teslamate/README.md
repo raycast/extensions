@@ -8,6 +8,7 @@ You need the following to get started
 
 - A running <a href="https://github.com/teslamate-org/teslamate">TeslaMate</a> instace
 - Service Account Token for your Grafana instance
+- UID of datasource in Grafana
 
 ### How to create Service Account Token for Grafana
 
@@ -22,6 +23,14 @@ You need the following to get started
 9. Choose any <b>Display name</b> for your service account token
 10. Set <b>Expiration</b> to <b>No expiration</b>
 11. Copy your token to the TeslaMate Raycast Extension 🎉
+
+### How to get the UID of the datasource
+
+1. Go to your Grafana instance
+2. In the left menubar click on <b>Connections -> Data sources</b>
+3. Click on the DB <b>TeslaMate PostgreSQL</b>
+4. The URL should now show something like <your-domain>/connections/edit/<b>Pxxxxxxxxx</b>
+5. The <b>Pxxxxxxxxx</b> is the UID of your data source - copy it to the TeslaMate Raycast Extension 🎉
 
 ## Todo
 
