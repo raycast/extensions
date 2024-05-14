@@ -22,6 +22,18 @@
       "title": "My Recent Work Items",
       "description": "Show a list of my recent working items",
       "mode": "view"
+    },
+    {
+      "name": "repositories",
+      "title": "Git Repositories",
+      "description": "Show a list of the team repositories",
+      "mode": "view"
+    },
+    {
+      "name": "pull-requests",
+      "title": "Active Pull Requests",
+      "description": "Show a list of the team pull requests",
+      "mode": "view"
     }
   ],
   "preferences": [

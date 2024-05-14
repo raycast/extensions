@@ -98,7 +98,7 @@ export default function WorkItemList(props: { recentItems: RecentWorkItems }) {
             <ActionPanel title="Quick actions">
               <ActionPanel.Section>
                 <Action.OpenInBrowser url={`${orgUrl}/${selectedProject?.id}/_workitems/edit/${item.id}`} />
-                <Action.Push title="View Item Details" target={<WorkItemDetails itemId={item.id} />} icon={Icon.Eye} />
+                <Action.Push title="Item Details" target={<WorkItemDetails itemId={item.id} />} icon={Icon.Eye} />
                 <Action.CopyToClipboard
                   title="Copy Branch Name"
                   shortcut={{ modifiers: ["cmd"], key: "." }}
