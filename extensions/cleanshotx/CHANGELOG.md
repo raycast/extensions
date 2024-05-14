@@ -1,5 +1,9 @@
 # Cleanshot X Changelog
 
+## [Add new commands] - 2024-05-14
+- Add open settings command
+- Add open all uploads command to open https://cleanshot.cloud/ in browser
+
 ## [Update] - 2024-04-06
 
 - Added support for selected Finder files to `Annotate`, `Pin` and `Add Quick Acess Overlay` commands
