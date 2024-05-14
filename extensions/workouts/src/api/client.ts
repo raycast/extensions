@@ -1,5 +1,12 @@
 import fetch from "node-fetch";
-import { StravaActivity, StravaActivitySummary, StravaAthlete, StravaStats } from "./types";
+import {
+  StravaActivity,
+  StravaActivitySummary,
+  StravaAthlete,
+  StravaClubActivity,
+  StravaStats,
+  StravaSummaryClub,
+} from "./types";
 import { OAuth } from "@raycast/api";
 import { getAccessToken, OAuthService } from "@raycast/utils";
 
@@ -136,6 +143,54 @@ export const getStats = async () => {
   } catch (err) {
     const error = err instanceof Error ? err.message : "An error occurred";
     console.error("getStats Error:", err);
+    throw new Error(error);
+  }
+};
+
+export const getClubs = async (page = 1, pageSize = PAGE_SIZE) => {
+  try {
+    const { token } = await getAccessToken();
+    const response = await fetch(
+      `https://www.strava.com/api/v3/athlete/clubs?page=${page}&per_page=${pageSize}&access_token=${token}`,
+    );
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error("Rate limit exceeded");
+      }
+      throw new Error("HTTP error " + response.status);
+    }
+    const json = await response.json();
+    if ((json as Error).message) {
+      throw new Error((json as Error).message);
+    }
+    return json as StravaSummaryClub[];
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "An error occurred";
+    console.error("getClubs Error:", err);
+    throw new Error(error);
+  }
+};
+
+export const getClubActivities = async (clubId: string, page = 1, pageSize = PAGE_SIZE, after?: number) => {
+  try {
+    const { token } = await getAccessToken();
+    const response = await fetch(
+      `https://www.strava.com/api/v3/clubs/${clubId}/activities?page=${page}&per_page=${pageSize}&after=${after}&access_token=${token}`,
+    );
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error("Rate limit exceeded");
+      }
+      throw new Error("HTTP error " + response.status);
+    }
+    const json = await response.json();
+    if ((json as Error).message) {
+      throw new Error((json as Error).message);
+    }
+    return json as StravaClubActivity[];
+  } catch (err) {
+    const error = err instanceof Error ? err.message : "An error occurred";
+    console.error("getClubActivities Error:", err);
     throw new Error(error);
   }
 };

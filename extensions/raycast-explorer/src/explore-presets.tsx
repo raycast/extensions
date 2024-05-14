@@ -1,14 +1,16 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { getAvatarIcon, useFetch } from "@raycast/utils";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { getAvatarIcon, useCachedPromise, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-import { Preset, PresetCategory, modelNames } from "./data/presets";
-import { raycastProtocol } from "./helpers";
+import { getAvailableAiModels } from "./api";
+import { Preset, PresetCategory } from "./data/presets";
+import { getIcon, raycastProtocol } from "./helpers";
 
 const CONTRIBUTE_URL = "https://github.com/raycast/preset-explorer/blob/main/data/presets.ts";
 const baseUrl = "https://presets.ray.so";
 
 export default function ExplorePresets() {
+  const { data: aiModels, isLoading: isAiModelsLoading } = useCachedPromise(getAvailableAiModels);
   const { data: categories, isLoading } = useFetch<PresetCategory[]>(`${baseUrl}/api/presets`);
   const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -29,9 +31,7 @@ export default function ExplorePresets() {
         <List.Dropdown tooltip="Select Category" onChange={setSelectedCategory} value={selectedCategory}>
           <List.Dropdown.Item icon={Icon.BulletPoints} title="All Categories" value="" />
           {categories?.map((category) => {
-            const icon = category.icon
-              .replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-              .replace(/^./, (str) => str.toUpperCase()) as keyof typeof Icon;
+            const icon = getIcon(category.icon || "");
             return (
               <List.Dropdown.Item
                 key={category.slug}
@@ -48,9 +48,13 @@ export default function ExplorePresets() {
         <List.Section key={category.name} title={category.name}>
           {category.presets.map((preset) => {
             const addToRaycastUrl = `${raycastProtocol}presets/import?${makeQueryString(preset)}`;
-            const icon = preset.icon
-              .replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-              .replace(/^./, (str) => str.toUpperCase()) as keyof typeof Icon;
+            const icon = getIcon(preset.icon || "");
+
+            const aiModel = aiModels?.find((model) => model.id === preset.model);
+            const modelName =
+              isAiModelsLoading && !aiModels
+                ? "Loading…"
+                : `${aiModel?.provider_name || ""} ${aiModel?.name || ""}`.trim();
             return (
               <List.Item
                 key={preset.id}
@@ -63,7 +67,7 @@ export default function ExplorePresets() {
                     metadata={
                       <List.Item.Detail.Metadata>
                         <List.Item.Detail.Metadata.Label title="Name" text={preset.name} />
-                        <List.Item.Detail.Metadata.Label title="Model" text={modelNames[preset.model]} />
+                        <List.Item.Detail.Metadata.Label title="Model" text={modelName} />
                         <List.Item.Detail.Metadata.Label
                           title="Creativity"
                           text={preset.creativity.charAt(0).toUpperCase() + preset.creativity.slice(1)}

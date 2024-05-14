@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ilovepdf",
+  "title": "iLovePDF",
+  "description": "Set of commands to interact with iLovePDF",
+  "icon": "command-icon.png",
+  "author": "mohamedk1",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "image-to-pdf",
+      "title": "Image to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Converts an image to pdf using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "compress-pdf",
+      "title": "Compress PDF",
+      "subtitle": "iLovePDF",
+      "description": "Compresses pdf using iLovePDF API.",
+      "mode": "view"
+    },
+    {
+      "name": "pdf-to-image",
+      "title": "PDF to Image",
+      "subtitle": "iLovePDF",
+      "description": "Converts a PDF to Image using iLovePDF API.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "APIPublicKey",
+      "title": "API Public Key",
+      "description": "Get the API keys at https://developer.ilovepdf.com/",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "APISecretKey",
+      "title": "API Secret Key",
+      "description": "Get the API keys at https://developer.ilovepdf.com/",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "OpenNow",
+      "title": "Open the PDF immediately after conversion",
+      "description": "Open the PDF file after conversion",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Open PDF immediately"
+    }
+  ],
+  "dependencies": {
+    "@ilovepdf/ilovepdf-nodejs": "^0.2.5",
+    "@raycast/api": "^1.72.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

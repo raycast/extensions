@@ -12,6 +12,9 @@
   ],
   "icon": "icon.png",
   "author": "samuelkraft",
+  "contributors": [
+    "yvysunu"
+  ],
   "categories": [
     "Data"
   ],
@@ -22,6 +25,13 @@
       "title": "Search Workouts",
       "description": "See your recent workouts from Strava",
       "mode": "view"
+    },
+    {
+      "name": "leaderboard",
+      "title": "Weekly Leaderboard",
+      "description": "See your club's weekly leaderboard",
+      "mode": "view",
+      "icon": "leaderboard-icon.png"
     },
     {
       "name": "ask",
@@ -45,7 +55,7 @@
       "title": "Workouts Totals",
       "description": "See your total distance and time for your workouts",
       "mode": "menu-bar",
-      "interval": "1d",
+      "interval": "12h",
       "icon": "stats-icon.png",
       "preferences": [
         {

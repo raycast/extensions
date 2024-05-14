@@ -4,7 +4,7 @@ import { PAGE_SIZE, getActivities, getActivity, provider } from "./api/client";
 import { useEffect } from "react";
 import { StravaActivitySummary } from "./api/types";
 import { sportIcons, sportNames } from "./constants";
-import { formatDistance, formatSpeedForSportType, generateMapboxImage } from "./utils";
+import { formatDistance, formatElevationGain, formatSpeedForSportType, generateMapboxImage } from "./utils";
 
 export function Splits({ activityId }: { activityId: StravaActivitySummary["id"] }) {
   const { data: activity, isLoading } = usePromise(() => getActivity(activityId), []);
@@ -48,10 +48,8 @@ ${
   );
 }
 
-function Activity({ activity, isLoading }: { activity: StravaActivitySummary; isLoading: boolean }) {
-  const preferences = getPreferenceValues<Preferences>();
-
-  const sportType = sportNames[activity.type] ?? "Workout";
+export function Activity({ activity, isLoading }: { activity: StravaActivitySummary; isLoading: boolean }) {
+  const sportType = sportNames[activity.sport_type] ?? "Workout";
   const date = new Date(activity.start_date_local).toLocaleDateString("en-US", { month: "long", day: "numeric" });
   const formattedDuration = new Date(activity.elapsed_time * 1000).toISOString().substring(11, 19);
   const formattedMovingTime = new Date(activity.moving_time * 1000).toISOString().substring(11, 19);
@@ -61,11 +59,7 @@ function Activity({ activity, isLoading }: { activity: StravaActivitySummary; is
   const formattedSpeed = formatSpeedForSportType(activity.type, activity.average_speed);
   const formattedDistance = formatDistance(activity.distance);
   const mapboxImage = generateMapboxImage(activity.map.summary_polyline);
-
-  let elevationGain = `${activity.total_elevation_gain}m`;
-  if (preferences.distance_unit === "mi") {
-    elevationGain = `${(activity.total_elevation_gain * 3.28084).toFixed(0)}ft`;
-  }
+  const elevationGain = formatElevationGain(activity.total_elevation_gain);
 
   const stravaLink = `https://www.strava.com/activities/${activity.id}/`;
 

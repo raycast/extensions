@@ -15,6 +15,85 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 - View brand aliases, aka-names, and localizations
 - View brand guidelines, sources, and licenses
 - Keep updating every week
+- Expose launch API for other extensions
+
+## API
+
+You can use `launchCommand` to use this extension search result.
+
+### Launch Context Options
+
+#### `launchFromExtensionTitle`
+
+Type: `string`\
+Default: `undefined`
+
+You can specify the `navigationTitle` when launching this extension.
+
+#### `showCopyActions`
+
+Type: `boolean`\
+Default: `false`
+
+Copy actions are disabled by default. Set it to `true` to enable copy actions.
+
+#### `callbackLaunchOptions`
+
+Type: `LaunchOptions`\
+Default: `undefined`
+
+Use this option to let this extension know what kind of callback needs to be performed when `launchCommand`.
+
+### Callback Context Options
+
+#### `launchFromExtensionName`
+
+Type: `string`
+
+It returns `simple-icons`.
+
+#### `icon`
+
+Type: `IconData`
+
+It returns the icon data.
+
+### Launch Example
+
+```jsx
+launchCommand({
+  name: "index",
+  type: LaunchType.UserInitiated,
+  extensionName: "simple-icons",
+  ownerOrAuthorName: "litomore",
+  context: {
+    launchFromExtensionTitle: "Badges - shields.io",
+    showCopyActions: true,
+    callbackLaunchOptions: {
+      name: "createStaticBadge",
+      type: LaunchType.UserInitiated,
+      extensionName: "badges",
+      ownerOrAuthorName: "litomore",
+    },
+  },
+});
+```
+
+### Receive Callback Example
+
+```jsx
+import {LaunchProps} from '@raycast/api';
+
+type LaunchContext = {
+  launchFromExtensionName: string;
+  icon: IconData,
+}
+
+export default function Command({launchContext = {}}: LaunchProps<{launchContext?: LaunchContext}>) {
+  const {launchFromExtensionName, icon} = launchContext;
+  // ...
+}
+```
 
 ## Links
 

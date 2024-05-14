@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { Action, ActionPanel, Grid, Icon, showInFinder } from "@raycast/api";
-import { fileName, unique } from "./utils";
+import { useEffect, useState } from "react";
 import { getHistoryFromStorage, saveHistoryToStorage } from "./storage";
+import { fileName, unique } from "./utils";
 
 export function Videos(props: { files: string[] }) {
   const [history, setHistory] = useState<string[] | null>(null);
@@ -55,7 +55,7 @@ export function Videos(props: { files: string[] }) {
               <Action.OpenWith path={file} />
               <Action title="Open in Finder" onAction={() => showInFinder(file)} icon={{ source: Icon.Finder }} />
               <Action
-                title="Remove from History"
+                title="Remove From History"
                 style={Action.Style.Destructive}
                 onAction={() => removeFromHistory(file)}
                 icon={{ source: Icon.Trash }}

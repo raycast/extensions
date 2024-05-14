@@ -30,6 +30,14 @@
       "description": "Background service to notify the user through a system notification when a reminder date is right up",
       "mode": "no-view",
       "interval": "1m"
+    },
+    {
+      "name": "reminderMenuBar",
+      "title": "Reminder Menu Bar",
+      "subtitle": "Simple Reminder",
+      "description": "See your simple reminders in your macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -54,7 +62,8 @@
     "@raycast/api": "^1.69.3",
     "@raycast/utils": "^1.13.3",
     "chrono-node": "^2.6.3",
-    "natural": "^6.2.0"
+    "natural": "^6.2.0",
+    "date-fns": "^3.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

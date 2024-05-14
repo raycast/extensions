@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Icon, List, Action } from '@raycast/api';
-import { usePromise } from '@raycast/utils';
+import { getFavicon, usePromise } from '@raycast/utils';
 import { useState } from 'react';
 
 import api from './utils/api';
@@ -64,6 +64,7 @@ export default function Command() {
         {sites.map((site) => (
           <List.Item
             key={site.id}
+            icon={getFavicon(site.ssl_url, { fallback: Icon.Link })}
             title={site.name}
             subtitle={site.account_name}
             accessories={

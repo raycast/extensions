@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Update] - 2024-04-06
+
+- Sort `StatesList` in alphabetical order
+
 ## [Update] - 2024-01-27
 
 - Add three Single Entity Menu Commands, two disabled by default
