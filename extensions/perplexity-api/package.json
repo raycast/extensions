@@ -814,7 +814,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
+    "@raycast/api": "^1.50.5",
     "openai": "^4.27.0",
     "@nem035/gpt-3-encoder": "^1.1.7"
   },
