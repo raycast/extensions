@@ -43,11 +43,16 @@ export function AddWork(props: {
     const workItem: WorkItem = {
       text: values.comment,
       date: values.date.valueOf(),
-      type: workTypes.find((type) => type.id === values.workTypeId),
       duration: {
         presentation: values.time,
       },
     };
+
+    const workType = workTypes.find((type) => type.id === values.workTypeId);
+    if (workType?.id) {
+      workItem.type = workType;
+    }
+
     try {
       await props.createWorkItemCb(workItem);
       toast.style = Toast.Style.Success;
