@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Step Functions] - 2024-05-14
+
+- Fix resource names for Step Function Command Actions
+
 ## [ECR] - 2024-04-14
 
 - Added support for navigating AWS ECR repositories
