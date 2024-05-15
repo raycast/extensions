@@ -73,26 +73,35 @@ export default function CreateSnippet() {
         id="color"
         title="Color"
         storeValue
-        defaultValue={defaultSnippet.color}
+        defaultValue={data ? defaultSnippet.color : undefined}
         onChange={(color) => setCode({ ...code, color })}
+        isLoading={!data}
       >
         <Form.Dropdown.Section title="Partners">
           {data?.themes.map(
-            (el: { id: string; name: string; iconUrl?: string; partner?: boolean }, idx: number) =>
-              el.partner && (
+            (theme) =>
+              theme.partner && (
                 <Form.Dropdown.Item
-                  key={idx}
-                  icon={{ source: `${el.iconUrl}`, tintColor: Color.PrimaryText }}
-                  value={el.id}
-                  title={el.name}
+                  key={theme.id}
+                  icon={{
+                    source: `${theme.iconUrl}`,
+                    tintColor: ["vercel", "rabbit"].includes(theme.id) ? Color.PrimaryText : undefined,
+                  }}
+                  value={theme.id}
+                  title={theme.name}
                 />
               ),
           )}
         </Form.Dropdown.Section>
         {data?.themes.map(
-          (el: { id: string; name: string; partner?: boolean }, idx: number) =>
-            !el.partner && (
-              <Form.Dropdown.Item key={idx} icon={{ source: `${el.id}.png` }} value={el.id} title={el.name} />
+          (theme) =>
+            !theme.partner && (
+              <Form.Dropdown.Item
+                key={theme.id}
+                icon={{ source: `${theme.id}.png` }}
+                value={theme.id}
+                title={theme.name}
+              />
             ),
         )}
       </Form.Dropdown>
@@ -102,6 +111,7 @@ export default function CreateSnippet() {
         storeValue
         defaultValue={defaultSnippet.language}
         onChange={(language) => setCode({ ...code, language })}
+        isLoading={!data}
       >
         <Form.Dropdown.Item value="auto" title="Auto-Detect" />
         {data?.languages.map((el: { id: string; name: string }, idx: number) => (
@@ -121,7 +131,7 @@ export default function CreateSnippet() {
         <Form.Dropdown.Item value="true" title="Yes" />
         <Form.Dropdown.Item value="false" title="No" />
       </Form.Dropdown>
-      <Form.Dropdown id="padding" title="Padding" storeValue onChange={(padding) => setCode({ ...code, padding })}>
+      <Form.Dropdown id="padding" title="Padding" storeValue onChange={(padding) => setCode({ ...code, padding })} isLoading={!data}>
         {data?.padding.map((el: number, idx: number) => (
           <Form.Dropdown.Item key={idx} value={el.toString()} title={el.toString()} />
         ))}
