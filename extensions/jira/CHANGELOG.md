@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Add command to see assigned issues] - 2024-05-15
+
+- Add a new command to see the assigned issues
+
 ## [Show target status on Change Status submenu] - 2024-04-30
 
 - Show target status next to the action name on Change Status submenu
