@@ -1,5 +1,9 @@
 # Clockify Changelog
 
- ## [Update] - 2023-02-10
+## [Update] - 2023-02-10
 
- - Billable is now following the project instead of alwaus being on
+- add the action to open clockify in the browser
+
+## [Update] - 2023-02-10
+
+- Billable is now following the project instead of alwaus being on
