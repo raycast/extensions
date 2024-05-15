@@ -114,14 +114,18 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
 
         {note.links.length > 0 ? (
           <ActionPanel.Submenu title="Open Links" icon={Icon.Link} shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}>
-            {note.links.map((link) => (
-              <Action.Open
-                key={link.id}
-                title={link.text}
-                target={link.url}
-                icon={isDeleted ? { source: Icon.Trash, tintColor: Color.SecondaryText } : "notes-icon.png"}
-              />
-            ))}
+            {note.links.map((link) => {
+              if (link.url) {
+                return (
+                  <Action.Open
+                    key={link.id}
+                    title={link.text}
+                    target={link.url}
+                    icon={isDeleted ? { source: Icon.Trash, tintColor: Color.SecondaryText } : "notes-icon.png"}
+                  />
+                );
+              }
+            })}
           </ActionPanel.Submenu>
         ) : null}
 
