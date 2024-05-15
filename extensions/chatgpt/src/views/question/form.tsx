@@ -129,7 +129,10 @@ export const QuestionForm = ({
           title="Attachments"
           value={files}
           error={error.attachments.length > 0 ? error.attachments : undefined}
-          onChange={setFiles}
+          onChange={(files) => {
+            setError({ ...error, attachments: "" });
+            setFiles(files);
+          }}
           info="Currently support PNG (.png), JPEG (.jpeg and .jpg), WEBP (.webp), and non-animated GIF (.gif)."
         />
       )}
