@@ -2,7 +2,7 @@ import { Color as Colour, Detail, Icon, LaunchType, launchCommand, open } from "
 import { useCachedState } from "@raycast/utils";
 import { badgeSizes, badgeStyles, dynamicBadgeTypes } from "../constants.js";
 import { Badge } from "../types.js";
-import { ellipsis, getTagColor } from "../utils.js";
+import { ellipsis, getTagColor, pickColor } from "../utils.js";
 
 export type ParameterProps = {
   badge: Badge;
@@ -67,6 +67,8 @@ export const Message = ({ badge, onChange, onInput }: ParameterProps) => {
 };
 
 export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
+  const [launchCommandName] = useCachedState("launchCommandName");
+
   return (
     <Detail.Metadata.TagList title="color">
       <Detail.Metadata.TagList.Item text={badge.color} color={badge.color} />
@@ -80,6 +82,14 @@ export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
         />
       )}
       <Detail.Metadata.TagList.Item
+        icon={Icon.EyeDropper}
+        text="pick"
+        color={Colour.SecondaryText}
+        onAction={async () => {
+          await pickColor({ launchCommandName, field: "color" });
+        }}
+      />
+      <Detail.Metadata.TagList.Item
         icon={Icon.Pencil}
         text="edit"
         color={Colour.SecondaryText}
@@ -92,6 +102,8 @@ export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
 };
 
 export const LabelColor = ({ badge, onChange, onInput }: ParameterProps) => {
+  const [launchCommandName] = useCachedState("launchCommandName");
+
   return (
     <>
       {badge.label && (
@@ -111,6 +123,14 @@ export const LabelColor = ({ badge, onChange, onInput }: ParameterProps) => {
             />
           )}
           <Detail.Metadata.TagList.Item text={badge.labelColor} color={badge.labelColor} />
+          <Detail.Metadata.TagList.Item
+            icon={Icon.EyeDropper}
+            text="pick"
+            color={Colour.SecondaryText}
+            onAction={async () => {
+              await pickColor({ launchCommandName, field: "labelColor" });
+            }}
+          />
           <Detail.Metadata.TagList.Item
             icon={Icon.Pencil}
             text="edit"
@@ -175,6 +195,14 @@ export const Logo = ({ badge, onChange, onInput }: ParameterProps) => {
             {badge.logoColor !== undefined && logoColor !== $icon.hex && (
               <Detail.Metadata.TagList.Item text={ellipsis(logoColor)} color={logoColor} />
             )}
+            <Detail.Metadata.TagList.Item
+              icon={Icon.EyeDropper}
+              text="pick"
+              color={Colour.SecondaryText}
+              onAction={async () => {
+                await pickColor({ launchCommandName, field: "logoColor" });
+              }}
+            />
             <Detail.Metadata.TagList.Item
               icon={Icon.Pencil}
               text="edit"

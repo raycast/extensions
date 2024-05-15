@@ -1,4 +1,4 @@
-import { LaunchProps } from "@raycast/api";
+import { launchCommand, LaunchProps } from "@raycast/api";
 
 export type Color = {
   alpha: number;
@@ -21,8 +21,12 @@ export type HistoryItem = {
   title?: string;
 };
 
+export type LaunchOptions = Parameters<typeof launchCommand>[0];
+
 export type PickColorCommandLaunchProps = LaunchProps<{
   launchContext: {
     source?: "menu-bar" | "organize-colors";
+    copyToClipboard?: boolean;
+    callbackLaunchOptions?: LaunchOptions;
   };
 }>;

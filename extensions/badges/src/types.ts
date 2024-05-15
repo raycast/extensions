@@ -72,3 +72,9 @@ export type LaunchFromSimpleIconsContext = {
   launchFromExtensionName: string;
   icon: IconData;
 };
+
+export type LaunchFromColorPickerContext = {
+  launchFromExtensionName: string;
+  field: keyof Badge;
+  hex: string;
+};

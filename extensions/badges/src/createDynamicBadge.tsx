@@ -5,7 +5,7 @@ import { omitBy } from "lodash";
 import { Documentation } from "./components/actions.js";
 import { Input } from "./components/input.js";
 import { FieldType, fields } from "./components/parameters.js";
-import { Badge, LaunchFromSimpleIconsContext } from "./types.js";
+import { Badge, LaunchFromSimpleIconsContext, LaunchFromColorPickerContext } from "./types.js";
 import { codeBlock } from "./utils.js";
 
 const cache = new Cache();
@@ -32,7 +32,9 @@ const parameterIds: FieldType[] = [
 ];
 const validationFields = ["url", "query"];
 
-export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchFromSimpleIconsContext }>) {
+export default function Command({
+  launchContext,
+}: LaunchProps<{ launchContext?: LaunchFromSimpleIconsContext & LaunchFromColorPickerContext }>) {
   const [badge, setBadge] = useCachedState<Badge>("dynamic-badge", defaultBadge);
   const [input, setInput] = useState<{ title: string; value?: string }>({ title: "", value: undefined });
   const [inputValid, setInputValid] = useState(true);
@@ -52,6 +54,11 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   useEffect(() => {
     if (launchContext?.launchFromExtensionName === "simple-icons" && launchContext?.icon) {
       setBadge({ ...badge, $icon: launchContext.icon, logo: launchContext.icon.slug, logoColor: undefined });
+    }
+
+    if (launchContext?.launchFromExtensionName === "color-picker" && launchContext?.hex && launchContext?.field) {
+      console.log(launchContext);
+      setBadge({ ...badge, [launchContext.field]: launchContext.hex.slice(1) });
     }
   }, []);
 

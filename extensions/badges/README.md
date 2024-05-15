@@ -13,7 +13,9 @@ Concise, consistent, and legible badges with [shields.io](https://github.com/bad
 
 ## Cross-Extension
 
-The logo feature follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link] and requries [Brand Icons](https://www.raycast.com/litomore/simple-icons) extension.
+This extensions follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].
+
+The logo feature requries [Brand Icons](https://www.raycast.com/litomore/simple-icons) extension, and the color picker feature requires [Color Picker](https://www.raycast.com/thomas/color-picker).
 
 ## License
 

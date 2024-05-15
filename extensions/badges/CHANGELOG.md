@@ -6,6 +6,7 @@
 - Add `Create Dynamic Badge` command
 - Add `Create Endpoint Badge` command
 - Polish extension icon with gradient overlay
+- Add Color Picker support
 
 ## [Initial Version] - 2024-04-30
 
