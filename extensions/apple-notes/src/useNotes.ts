@@ -9,7 +9,7 @@ import { getOpenNoteURL } from "./helpers";
 type Link = {
   id: string;
   text: string;
-  url: string;
+  url: string | null;
   notePk: number;
 };
 
@@ -153,7 +153,7 @@ export const useNotes = () => {
 
     const noteBacklinks: Backlink[] = [];
     links?.forEach((link) => {
-      if (link.url.includes(note.UUID.toLowerCase())) {
+      if (link.url?.includes(note.UUID.toLowerCase())) {
         const originalNote = notes.find((n) => n.pk === link.notePk);
         if (!originalNote) return;
 
