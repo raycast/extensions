@@ -131,7 +131,13 @@ export default function CreateSnippet() {
         <Form.Dropdown.Item value="true" title="Yes" />
         <Form.Dropdown.Item value="false" title="No" />
       </Form.Dropdown>
-      <Form.Dropdown id="padding" title="Padding" storeValue onChange={(padding) => setCode({ ...code, padding })} isLoading={!data}>
+      <Form.Dropdown
+        id="padding"
+        title="Padding"
+        storeValue
+        onChange={(padding) => setCode({ ...code, padding })}
+        isLoading={!data}
+      >
         {data?.padding.map((el: number, idx: number) => (
           <Form.Dropdown.Item key={idx} value={el.toString()} title={el.toString()} />
         ))}
