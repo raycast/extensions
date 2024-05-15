@@ -2,6 +2,8 @@
 
 This extension uses the macOS built-in [Spoken Content](https://www.youtube.com/watch?v=yiZzm24uSsE) feature to say the text you provide. No network connection is needed.
 
+[![raycast-cross-extension-badge]][raycast-cross-extension-link]
+
 ## Features
 
 - **Type to Say** - Quick type your text and say.
@@ -41,3 +43,6 @@ It's the macOS built-in `say` interface for JavaScript. You can use this if want
 ## License
 
 MIT
+
+[raycast-cross-extension-badge]: https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
+[raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions
