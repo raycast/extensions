@@ -153,7 +153,7 @@ export default function Main() {
                     </ActionPanel>
                   }
                 />
-              )
+              ),
             )}
           </List.Section>
         </>
@@ -228,7 +228,7 @@ async function getTimeEntries({ onError }: { onError?: (state: boolean) => void 
   const userId = await getLocalStorageItem("userId");
 
   const { data, error } = await fetcher(
-    `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`
+    `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`,
   );
 
   if (error === "Unauthorized") {
@@ -239,7 +239,7 @@ async function getTimeEntries({ onError }: { onError?: (state: boolean) => void 
   if (data?.length) {
     const filteredEntries: TimeEntry[] = uniqWith(
       data,
-      (a: TimeEntry, b: TimeEntry) => a.projectId === b.projectId && a.description === b.description
+      (a: TimeEntry, b: TimeEntry) => a.projectId === b.projectId && a.description === b.description,
     );
 
     return filteredEntries;
