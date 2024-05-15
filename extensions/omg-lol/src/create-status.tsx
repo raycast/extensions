@@ -21,8 +21,8 @@ interface FormValues {
 }
 
 const getCategoryEmojis = (category: string): Emoji[] => {
-    return emojis[category as keyof Emojis];
-}
+  return emojis[category as keyof Emojis];
+};
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +31,7 @@ export default function Command() {
     setIsLoading(true);
 
     const response: StatusCreateResponse = await POST("statuses", {
-      emoji: values.emoji === '' ? null : values.emoji,
+      emoji: values.emoji === "" ? null : values.emoji,
       content: values.content,
       skip_mastodon_post: !values.skip,
     });
@@ -67,11 +67,18 @@ export default function Command() {
       <Form.Dropdown id="emoji" title="Emoji">
         <Form.Dropdown.Item value="" title="Default Emoji" icon="✨" />
         {Object.keys(emojis).map((category: string) => (
-            <Form.Dropdown.Section title={category} key={category}>
-              {(getCategoryEmojis(category)).map((emoji: { emoji: string, name: string }) => (
-                  <Form.Dropdown.Item key={`${emoji.name}-${emoji.emoji}`} value={emoji.emoji} title={emoji.name} icon={emoji.emoji} />
-              ))}
-            </Form.Dropdown.Section>
+          <Form.Dropdown.Section title={category} key={category}>
+            {getCategoryEmojis(category).map(
+              (emoji: { emoji: string; name: string }) => (
+                <Form.Dropdown.Item
+                  key={`${emoji.name}-${emoji.emoji}`}
+                  value={emoji.emoji}
+                  title={emoji.name}
+                  icon={emoji.emoji}
+                />
+              ),
+            )}
+          </Form.Dropdown.Section>
         ))}
       </Form.Dropdown>
       <Form.TextField
@@ -83,9 +90,7 @@ export default function Command() {
       <Form.Checkbox
         id="skip"
         label="Post to Mastodon"
-        info={
-          "Whether this status should be posted to Mastodon or not."
-        }
+        info={"Whether this status should be posted to Mastodon or not."}
         defaultValue={true}
       />
     </Form>

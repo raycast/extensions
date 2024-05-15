@@ -32,12 +32,13 @@ export default function Command() {
   async function deleteStatus(id: string): Promise<void> {
     setIsDeleting(true);
     await DELETE(`statuses/${id}`);
-    await showToast({ title: 'Deleted status' });
+    await showToast({ title: "Deleted status" });
     revalidate();
     setIsDeleting(false);
   }
 
-  const isShowingEmpty = !isLoading && !isDeleting && data?.statuses.length === 0;
+  const isShowingEmpty =
+    !isLoading && !isDeleting && data?.statuses.length === 0;
 
   return (
     <List isLoading={isLoading || isDeleting}>
@@ -45,12 +46,14 @@ export default function Command() {
         <List.EmptyView icon={Icon.ArrowRightCircle} title="No statuses!" />
       ) : (
         data?.statuses.map((status) => (
-          <List.Item 
-            key={status.id} 
-            title={`${status.emoji} ${status.content}`} 
+          <List.Item
+            key={status.id}
+            title={`${status.emoji} ${status.content}`}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={`${status.emoji} ${status.content}`} />
+                <Action.CopyToClipboard
+                  content={`${status.emoji} ${status.content}`}
+                />
                 <Action.OpenInBrowser url={getStatusUrl(status.id)} />
                 <Action
                   title="Delete"
