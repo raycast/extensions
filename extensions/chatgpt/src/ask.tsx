@@ -64,7 +64,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       return;
     }
     // fix https://github.com/raycast/extensions/issues/11420
-    if (isAutoLoadText && question.data.length === 0) {
+    if (models.data.length == 0 || (isAutoLoadText && question.data.length === 0)) {
       setLoading(false);
       return;
     }
@@ -75,6 +75,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
         <QuestionForm
           initialQuestion={questionText}
           onSubmit={(question, files) => {
+            // console.debug("onSubmit", question, files, conversation.model.option);
             chats.ask(question, files, conversation.model);
             pop();
           }}
@@ -86,7 +87,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     }
 
     setLoading(false);
-  }, [models.data, question.data]);
+  }, [models.data, question.data, conversation.model]);
 
   useEffect(() => {
     if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
@@ -112,7 +113,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 
   useEffect(() => {
     const selectedModel = models.data.find((x) => x.id === selectedModelId);
-    //console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
+    // console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
       ...conversation,
       model: selectedModel ?? { ...conversation.model },

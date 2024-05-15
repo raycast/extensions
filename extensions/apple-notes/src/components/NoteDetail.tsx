@@ -48,13 +48,14 @@ export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps)
           ) : null}
           {note.links.length > 0 ? (
             <Detail.Metadata.TagList title="Links">
-              {note.links.map((link) => (
-                <Detail.Metadata.TagList.Item
-                  key={link.id}
-                  text={truncate(link.text)}
-                  onAction={() => open(link.url)}
-                />
-              ))}
+              {note.links.map((link) => {
+                const url = link.url;
+                if (url) {
+                  return (
+                    <Detail.Metadata.TagList.Item key={link.id} text={truncate(link.text)} onAction={() => open(url)} />
+                  );
+                }
+              })}
             </Detail.Metadata.TagList>
           ) : null}
           {note.backlinks.length > 0 ? (

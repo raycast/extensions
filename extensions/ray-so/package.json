@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "create-a-snippet",
-      "title": "Create Image From Code",
+      "title": "Create Image from Code",
       "subtitle": "ray.so",
       "description": "Use Ray.so to create beautiful images of your code",
       "mode": "view"
@@ -48,6 +48,10 @@
               "value": "crimson"
             },
             {
+              "title": "Evil Rabbit",
+              "value": "rabbit"
+            },
+            {
               "title": "Falcon",
               "value": "falcon"
             },
@@ -70,6 +74,10 @@
             {
               "title": "Sunset",
               "value": "sunset"
+            },
+            {
+              "title": "Vercel",
+              "value": "vercel"
             }
           ]
         },
@@ -121,7 +129,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.3",
+    "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.15.0",
     "js-base64": "^3.7.2",
     "node-fetch": "^3.2.0",
     "open": "^8.4.0",
@@ -131,12 +140,11 @@
     "url-safe-base64": "^1.1.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
+    "react": "^18.2.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
