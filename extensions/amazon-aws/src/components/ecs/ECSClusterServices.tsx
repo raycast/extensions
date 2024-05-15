@@ -42,8 +42,9 @@ function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
                         service.networkConfiguration?.awsvpcConfiguration?.assignPublicIp === "ENABLED"
                           ? "Public"
                           : "Private"
-                      } | Subnets: ${service.networkConfiguration?.awsvpcConfiguration?.subnets?.length} | SG: ${service
-                        .networkConfiguration?.awsvpcConfiguration?.securityGroups?.length}`}
+                      } | Subnets: ${service.networkConfiguration?.awsvpcConfiguration?.subnets?.length} | SG: ${
+                        service.networkConfiguration?.awsvpcConfiguration?.securityGroups?.length
+                      }`}
                     />
                     <List.Item.Detail.Metadata.Label title="Creation Date" text={service.createdAt?.toLocaleString()} />
                     <List.Item.Detail.Metadata.Label
