@@ -41,12 +41,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       title: "Getting your answer...",
       style: Toast.Style.Animated,
     });
-    // Format images to base64
-    const base64Images = files.map((f) => imgFormat(f));
     let chat: Chat = {
       id: uuidv4(),
       question,
-      images: base64Images,
+      files,
       answer: "",
       created_at: new Date().toISOString(),
     };
@@ -77,7 +75,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           temperature: Number(model.temperature),
           messages: [
             ...chatTransformer(data.reverse(), model.prompt),
-            { role: "user", content: [...buildUserMessage(question, base64Images)] },
+            { role: "user", content: [...buildUserMessage(question, files)] },
           ],
           stream: useStream,
         },

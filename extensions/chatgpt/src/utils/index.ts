@@ -79,7 +79,7 @@ export const imgFormat = (file: string) => {
   return `data:${type};base64,${fs.readFileSync(file).toString("base64")}`;
 };
 
-export const buildUserMessage = (question: string, base64Images: string[]) => {
+export const buildUserMessage = (question: string, files: string[]) => {
   const content: ChatCompletionContentPart[] = [
     {
       type: "text",
@@ -87,11 +87,12 @@ export const buildUserMessage = (question: string, base64Images: string[]) => {
     },
   ];
 
-  base64Images.forEach((img) => {
+  files.forEach((img) => {
     content.push({
       type: "image_url",
       image_url: {
-        url: img,
+        // Format images to base64
+        url: imgFormat(img),
       },
     });
   });

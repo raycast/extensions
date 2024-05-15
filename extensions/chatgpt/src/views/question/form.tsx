@@ -1,5 +1,15 @@
-import { Action, ActionPanel, Form, getSelectedFinderItems, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getPreferenceValues,
+  getSelectedFinderItems,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
 import { checkFileValidity } from "../../utils";
@@ -15,8 +25,9 @@ export const QuestionForm = ({
   const { pop } = useNavigation();
 
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
-  const [error, setError] = useState<{ question: string }>({
+  const [error, setError] = useState<{ question: string; attachments: string }>({
     question: "",
+    attachments: "",
   });
 
   const separateDefaultModel = models.filter((x) => x.id !== "default");
@@ -31,6 +42,22 @@ export const QuestionForm = ({
   const [files, setFiles] = useState<string[]>([]);
   const [enableVision, setEnableVision] = useState(visionMap.get(selectedModel) || false);
 
+  const addFiles = useCallback(
+    (errCallback?: (reason: unknown) => void | Promise<void>) => {
+      getSelectedFinderItems()
+        .then((items) => items.map((item) => item.path))
+        .then((p) => setFiles(p))
+        .catch(errCallback);
+    },
+    [setFiles]
+  );
+
+  useEffect(() => {
+    if (getPreferenceValues<Preferences>().isAutoFullInput) {
+      addFiles(() => {});
+    }
+  }, []);
+
   return (
     <Form
       actions={
@@ -38,17 +65,21 @@ export const QuestionForm = ({
           <Action.SubmitForm
             title="Submit"
             icon={Icon.Checkmark}
-            onSubmit={() => {
-              // check file is validate
-              try {
-                for (const file of files) {
-                  checkFileValidity(file);
+            onSubmit={async () => {
+              let searchFiles: string[] = [];
+              if (enableVision) {
+                // If the model not enable vision, don't pass files to API
+                try {
+                  files.forEach((file) => checkFileValidity(file));
+                  searchFiles = files;
+                } catch (err) {
+                  setError({ ...error, attachments: "Contain Invalid File" });
+                  await showFailureToast(err, { title: "Invalid file" });
+                  return;
                 }
-                onSubmit(question, files);
-                pop();
-              } catch (err) {
-                showFailureToast(err, { title: "Invalid file" });
               }
+              onSubmit(question, searchFiles);
+              pop();
             }}
           />
           {enableVision && (
@@ -59,18 +90,15 @@ export const QuestionForm = ({
                 key: ".",
               }}
               icon={Icon.Plus}
-              onAction={async () => {
-                try {
-                  const fileSystemItems = await getSelectedFinderItems();
-                  setFiles(fileSystemItems.map((item) => item.path));
-                } catch (error) {
+              onAction={() =>
+                addFiles(async (error) => {
                   await showToast({
                     style: Toast.Style.Failure,
                     title: "Cannot copy file path",
                     message: String(error),
                   });
-                }
-              }}
+                })
+              }
             />
           )}
         </ActionPanel>
@@ -116,6 +144,7 @@ export const QuestionForm = ({
           id="attachments"
           title="Attachments"
           value={files}
+          error={error.attachments.length > 0 ? error.attachments : undefined}
           onChange={setFiles}
           info="Currently support PNG (.png), JPEG (.jpeg and .jpg), WEBP (.webp), and non-animated GIF (.gif)."
         />
