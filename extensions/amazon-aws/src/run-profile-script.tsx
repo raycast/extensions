@@ -41,7 +41,7 @@ function Profile({ profile }: { profile: Record<string, string | undefined> }) {
           <Action
             title="Run Script"
             onAction={async () => {
-              const { script } = getPreferenceValues();
+              const { script } = getPreferenceValues<Preferences.RunProfileScript>();
               const regex = /<profile>/i;
 
               if (script) {

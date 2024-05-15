@@ -1,7 +1,7 @@
 import { Repository } from "@aws-sdk/client-ecr";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchImages, getImageUrl, getRepositoryUrl } from "../../actions/ecr";
+import { fetchImages, getImageUrl } from "../../actions/ecr";
 import { getFilterPlaceholder } from "../../util";
 
 function ECRImage({ repository }: { repository: Repository }) {
