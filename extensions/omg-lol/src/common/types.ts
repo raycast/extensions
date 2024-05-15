@@ -46,3 +46,17 @@ export interface PURLDeleteResponse extends WithMessage {}
 export interface PURLListResponse extends WithMessage {
   purls: PURL[];
 }
+
+export interface StatusCreateResponse extends WithMessage {
+  id: string;
+  url: string;
+}
+
+export interface StatusListResponse extends WithMessage {
+  statuses: {
+    id: string;
+    content: string;
+    emoji: string;
+    url: string;
+  }[];
+}
