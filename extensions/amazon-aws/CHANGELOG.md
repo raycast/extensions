@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Step Functions] - 2024-05-14
+
+- Fix resource names for Step Function Command Actions ([#12355](https://github.com/raycast/extensions/pull/12355))
+
 ## [ECR] - 2024-04-14
 
 - Added support for navigating AWS ECR repositories
