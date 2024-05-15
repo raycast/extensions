@@ -26,7 +26,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   useEffect(() => {
     // only work on `Summarize -> Ask` flow
     if (props.initialQuestion) {
-      chats.ask(props.initialQuestion, props.conversation!.model);
+      chats.ask(props.initialQuestion, [], props.conversation!.model);
     }
   }, []);
 
@@ -74,8 +74,8 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       push(
         <QuestionForm
           initialQuestion={questionText}
-          onSubmit={(question) => {
-            chats.ask(question, conversation.model);
+          onSubmit={(question, files) => {
+            chats.ask(question, files, conversation.model);
             pop();
           }}
           models={models.data}
@@ -122,10 +122,10 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>
-      <PrimaryAction title="Get Answer" onAction={() => chats.ask(question, model)} />
+      <PrimaryAction title="Get Answer" onAction={() => chats.ask(question, [], model)} />
       <FormInputActionSection
         initialQuestion={question}
-        onSubmit={(question) => chats.ask(question, model)}
+        onSubmit={(question, files) => chats.ask(question, files, model)}
         models={models.data}
         selectedModel={selectedModelId}
         onModelChange={setSelectedModelId}
@@ -148,7 +148,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
           <ActionPanel>
             <FormInputActionSection
               initialQuestion={question.data}
-              onSubmit={(question) => chats.ask(question, conversation.model)}
+              onSubmit={(question, files) => chats.ask(question, files, conversation.model)}
               models={models.data}
               selectedModel={selectedModelId}
               onModelChange={setSelectedModelId}

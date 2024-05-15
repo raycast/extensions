@@ -1,5 +1,9 @@
 # Changelog
 
+## [Feature] - 2024-05-14
+
+- Feature: support GPT vision input
+
 ## [Feature] - 2024-04-30
 
 - Feature: add `Summarize` command to summarize website and YouTube video
