@@ -1,15 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  getSelectedFinderItems,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Form, getSelectedFinderItems, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { useCallback, useMemo, useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
 import { checkFileValidity } from "../../utils";
@@ -51,12 +41,6 @@ export const QuestionForm = ({
     },
     [setFiles]
   );
-
-  useEffect(() => {
-    if (getPreferenceValues<Preferences>().isAutoFullInput) {
-      addFiles(() => {});
-    }
-  }, []);
 
   return (
     <Form
