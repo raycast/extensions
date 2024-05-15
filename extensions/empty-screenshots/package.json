@@ -5,6 +5,9 @@
   "description": "Empties your screenshot folder within a configurable time period.",
   "icon": "empty-screenshot-folder.png",
   "author": "chanceaclark",
+  "contributors": [
+    "charlie_deets"
+  ],
   "license": "MIT",
   "categories": [
     "System",
@@ -14,25 +17,47 @@
     {
       "name": "index",
       "title": "Empty Screenshots",
-      "description": "Empties your screenshot folder older than the configured days.",
+      "description": "Choose to delete screenshots or move them to the trash. Prevents screenshots from being deleted if they are older than the configured days.",
       "mode": "no-view",
       "preferences": [
         {
-          "name": "screenshotFolder",
-          "description": "Location where you save your screenshots",
-          "type": "textfield",
+          "name": "screenshotBehavior",
+          "description": "Choose how you want to clean up your screenshots.",
+          "type": "dropdown",
           "required": true,
+          "title": "Delete or move to trash",
+          "default": "0",
+          "data": [
+            {
+              "title": "Delete",
+              "value": "0"
+            },
+            {
+              "title": "Move to Trash",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "screenshotFolder",
           "title": "Screenshot folder",
+          "required": true,
+          "description": "Location where you save your screenshots.",
           "default": "~/Desktop"
         },
         {
           "name": "daysToKeep",
-          "description": "Number of days to keep screenshots for",
+          "description": "Prevent screenshots from being deleted if they are older than the configured days.",
           "type": "dropdown",
           "required": true,
-          "title": "Keep history for",
+          "title": "Protect recent screenshots for",
           "default": "30",
           "data": [
+            {
+              "title": "No prevention",
+              "value": "0"
+            },
             {
               "title": "24 hours",
               "value": "1"
@@ -50,12 +75,21 @@
               "value": "90"
             }
           ]
+        },
+        {
+          "name": "prefixString",
+          "type": "textfield",
+          "title": "Custom prefix (optional)",
+          "required": false,
+          "description": "You can optionally add a custom prefix for the screenshot filenames.",
+          "placeholder": "Screenshot, CleanShot, etc."
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.3"
+    "@raycast/api": "^1.73.2",
+    "trash-cli": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^16.10.0",
@@ -70,6 +104,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
