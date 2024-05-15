@@ -1,6 +1,6 @@
 # Toothpick Changelog
 
-## [Hotfix]
+## [Hotfix] - 2024-05-15
 
 - Fixed device not disconnecting sometimes on AppleScript backend.
 
