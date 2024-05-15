@@ -1,7 +1,7 @@
 import {
   DescribeParametersCommand,
   GetParameterCommand,
-  Parameter,
+  Parameter as SSMParameter,
   ParameterMetadata,
   SSMClient,
 } from "@aws-sdk/client-ssm";
@@ -94,7 +94,7 @@ async function fetchParameters(
   return combinedLogGroups;
 }
 
-async function fetchParameter(name?: string): Promise<Parameter | undefined> {
+async function fetchParameter(name?: string): Promise<SSMParameter | undefined> {
   if (!name) return;
   const { Parameter } = await new SSMClient({}).send(new GetParameterCommand({ Name: name, WithDecryption: true }));
 
