@@ -1,4 +1,5 @@
 import {
+  OpenInBrowserAction,
   ActionPanel,
   ActionPanelItem,
   Form,
@@ -17,6 +18,10 @@ import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
 import { fetcher, isInProgress, showElapsedTime } from "./utils";
 import { TimeEntry, Project } from "./types";
+
+function OpenWebPage() {
+  return <OpenInBrowserAction title="Open Website" url="https://app.clockify.me" />;
+}
 
 function useClock(entry: TimeEntry) {
   const [time, setTime] = useState(showElapsedTime(entry));
@@ -44,6 +49,7 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       actions={
         <ActionPanel>
           <ActionPanelItem title="Stop Timer" onAction={() => stopCurrentTimer().then(() => updateTimeEntries())} />
+          <OpenWebPage />
         </ActionPanel>
       }
     />
@@ -116,6 +122,7 @@ export default function Main() {
                     title="Start New Timer"
                     onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
                   />
+                  <OpenWebPage />
                 </ActionPanel>
               }
             />
@@ -142,6 +149,7 @@ export default function Main() {
                           addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
                         }}
                       />
+                      <OpenWebPage />
                     </ActionPanel>
                   }
                 />
