@@ -17,7 +17,8 @@
     "DorukAkinci",
     "frese",
     "nagauta",
-    "vineus"
+    "vineus",
+    "stelo"
   ],
   "categories": [
     "Developer Tools",
@@ -133,7 +134,7 @@
     {
       "name": "step-functions",
       "title": "Step Functions",
-      "description": "Find and open a Step Function",
+      "description": "Find and open a State Machine",
       "mode": "view"
     }
   ],
