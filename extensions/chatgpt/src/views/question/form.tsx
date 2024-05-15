@@ -1,7 +1,9 @@
-import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Form, getSelectedFinderItems, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { useMemo, useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
+import { checkFileValidity } from "../../utils";
+import { showFailureToast } from "@raycast/utils";
 
 export const QuestionForm = ({
   initialQuestion,
@@ -20,18 +22,57 @@ export const QuestionForm = ({
   const separateDefaultModel = models.filter((x) => x.id !== "default");
   const defaultModel = models.find((x) => x.id === "default") ?? DEFAULT_MODEL;
 
+  const visionMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    models.forEach((m) => map.set(m.id, m.vision || false));
+    return map;
+  }, [models]);
+
+  const [files, setFiles] = useState<string[]>([]);
+  const [enableVision, setEnableVision] = useState(visionMap.get(selectedModel) || false);
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action
+          <Action.SubmitForm
             title="Submit"
             icon={Icon.Checkmark}
-            onAction={() => {
-              onSubmit(question);
-              pop();
+            onSubmit={() => {
+              // check file is validate
+              try {
+                for (const file of files) {
+                  checkFileValidity(file);
+                }
+                onSubmit(question, files);
+                pop();
+              } catch (err) {
+                showFailureToast(err, { title: "Invalid file" });
+              }
             }}
           />
+          {enableVision && (
+            <Action
+              title="Upload Selected Files"
+              shortcut={{
+                modifiers: ["cmd"],
+                key: ".",
+              }}
+              icon={Icon.Plus}
+              onAction={async () => {
+                try {
+                  const fileSystemItems = await getSelectedFinderItems();
+                  setFiles(fileSystemItems.map((item) => item.path));
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Cannot copy file path",
+                    message: String(error),
+                  });
+                }
+              }}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -58,6 +99,7 @@ export const QuestionForm = ({
         placeholder="Choose model"
         defaultValue={selectedModel}
         onChange={(id) => {
+          setEnableVision(visionMap.get(id) || false);
           onModelChange(id);
         }}
       >
@@ -68,6 +110,16 @@ export const QuestionForm = ({
           ))}
         </Form.Dropdown.Section>
       </Form.Dropdown>
+
+      {enableVision && (
+        <Form.FilePicker
+          id="attachments"
+          title="Attachments"
+          value={files}
+          onChange={setFiles}
+          info="Currently support PNG (.png), JPEG (.jpeg and .jpg), WEBP (.webp), and non-animated GIF (.gif)."
+        />
+      )}
     </Form>
   );
 };
