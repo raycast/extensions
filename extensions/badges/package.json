@@ -6,6 +6,10 @@
   "description": "Concise, consistent, and legible badges.",
   "icon": "badges-icon.png",
   "author": "litomore",
+  "crossExtensions": [
+    "litomore/simple-icons",
+    "thomas/color-picker"
+  ],
   "categories": [
     "Documentation",
     "Design Tools",
