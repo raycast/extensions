@@ -1,15 +1,10 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
-import React, { useState } from "react";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import React from "react";
 import { ProgramList } from "./components/ProgramList";
 import { genreLabels } from "./types";
 
 export default function Command() {
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [submitted, setSubmitted] = useState<boolean>(false);
-
-  if (submitted) {
-    return <ProgramList customFilters={[(p) => p.genres.some((g) => selectedGenres.includes(g))]} />;
-  }
+  const { push } = useNavigation();
 
   return (
     <Form
@@ -18,8 +13,7 @@ export default function Command() {
           <Action.SubmitForm
             title="Search Programs"
             onSubmit={async (input) => {
-              setSelectedGenres(input.genres);
-              setSubmitted(true);
+              push(<ProgramList customFilters={[(p) => p.genres.some((g) => input.genres.includes(g))]} />);
             }}
           />
         </ActionPanel>

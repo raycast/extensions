@@ -1,20 +1,21 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
 import { ProgramList } from "./components/ProgramList";
 
 export default function Command() {
   const [keywords, setKeywords] = useState<string[]>([]);
-  const [submitted, setSubmitted] = useState<boolean>(false);
-
-  if (submitted) {
-    return <ProgramList customFilters={[(p) => keywords.some((w) => p.title.includes(w))]} />;
-  }
+  const { push } = useNavigation();
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Search Programs" onSubmit={() => setSubmitted(true)} />
+          <Action.SubmitForm
+            title="Search Programs"
+            onSubmit={() => {
+              push(<ProgramList customFilters={[(p) => keywords.some((w) => p.title.includes(w))]} />);
+            }}
+          />
         </ActionPanel>
       }
     >
