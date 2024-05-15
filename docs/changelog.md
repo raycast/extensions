@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.74.0 - 2024-05-15
+
+### ✨ New
+
+- **AI:** The models available in the API now matches the ones available in the app (eg. GPt-4o, Llama-3, etc.). As part of this, the models are now part of an enum `AI.Model` which will make it easier to add and deprecate them as time goes on.
+- **Utils:** we’ve added a new React hook called `useLocalStorage`. This hook simplifies managing a value in `LocalStorage`. Take a look at the [developer docs](https://developers.raycast.com/utilities/react-hooks/uselocalstorage) to learn more.
+
+### 💎 Improvements
+
+- **DX**: Improved the precision of warning messages when trying to add children to a react component that can’t accept them.
+
 ## 1.72.0 - 2024-04-24
 
 ### ✨ New
