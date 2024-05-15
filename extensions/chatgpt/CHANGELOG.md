@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix] - 2024-05-15
+
+- Fix: `List.Item.Detail.Markdown` display big image caused Heap out of memory
+- Feature: auto paste the selected file path to the input field when enable `Use full text input`
+
 ## [Feature] - 2024-05-14
 
 - Feature: support GPT vision input

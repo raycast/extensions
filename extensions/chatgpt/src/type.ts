@@ -8,7 +8,7 @@ export type Message = ChatCompletionMessageParam;
 export interface Question {
   id: string;
   question: string;
-  images: string[];
+  files: string[];
   created_at: string;
 }
 
