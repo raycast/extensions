@@ -14,7 +14,8 @@
     "lusit",
     "literallyjustroy",
     "mheidinger",
-    "mikybars"
+    "mikybars",
+    "maedu"
   ],
   "pastContributors": [
     "igor9silva"
@@ -52,6 +53,13 @@
       "title": "Watched Issues",
       "subtitle": "Jira",
       "description": "View and modify issues that you are watching.",
+      "mode": "view"
+    },
+    {
+      "name": "assigned-issues",
+      "title": "Assigned Issues",
+      "subtitle": "Jira",
+      "description": "View and modify issues that are assigned to you.",
       "mode": "view"
     },
     {
