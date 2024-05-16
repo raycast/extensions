@@ -1,4 +1,13 @@
-import { Action, ActionPanel, List, Icon, confirmAlert, Alert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  confirmAlert,
+  Alert,
+  getPreferenceValues,
+  clearSearchBar,
+} from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
@@ -11,15 +20,21 @@ type CommandResult = {
 
 export default function Command() {
   const [results, setResults] = useState<CommandResult[]>([]);
+  const [clearSearchAfterExecution, setClearSearchAfterExecution] = useState<boolean>(false);
   const [code, setCode] = useState<string | undefined>();
   const [runningCode, setRunningCode] = useState<string | undefined>();
   const [pendingCode, setPendingCode] = useState<string | undefined>();
   const [selectedID, setSelectedID] = useState<string | undefined>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   const { isLoading, data } = useExec<CommandResult, undefined>("swift", ["repl"], {
     execute: !!runningCode?.trim(),
     input: runningCode,
     parseOutput: ({ stdout, stderr }) => {
+      if (clearSearchAfterExecution) {
+        clearSearchBar();
+      }
+
       return {
         id: results.length,
         command: code,
@@ -40,7 +55,8 @@ export default function Command() {
     }
   }, [data, runningCode]);
 
-  async function run() {
+  async function run(clear: boolean = false) {
+    setClearSearchAfterExecution(clear);
     if (!code?.trim()) {
       return;
     }
@@ -86,17 +102,23 @@ export default function Command() {
     return string;
   }
 
+  const runAction = <Action title="Run" icon={Icon.Wand} onAction={() => run()} />;
+  const runAndClearAction = <Action title="Run and Clear Searchbar" icon={Icon.Wand} onAction={() => run(true)} />;
+
+  const getActions = (
+    <ActionPanel title="Run">
+      {preferences.defaultAction === "run" ? runAction : runAndClearAction}
+      {preferences.defaultAction === "run" ? runAndClearAction : runAction}
+    </ActionPanel>
+  );
+
   return (
     <List
       onSearchTextChange={setCode}
       searchBarPlaceholder="Enter some Swift…"
       isShowingDetail
       selectedItemId={selectedID}
-      actions={
-        <ActionPanel title="Run">
-          <Action title="Run" onAction={run} />
-        </ActionPanel>
-      }
+      actions={getActions}
     >
       {isLoading ? (
         <List.EmptyView key="running" icon={Icon.Hourglass} description={"Running…"} />
@@ -105,18 +127,7 @@ export default function Command() {
       ) : (
         ["Run", results].map((result) => {
           if (result === "Run") {
-            return (
-              <List.Item
-                id="run"
-                key="run"
-                title="Run"
-                actions={
-                  <ActionPanel title="Run">
-                    <Action title="Run" onAction={run} />
-                  </ActionPanel>
-                }
-              />
-            );
+            return <List.Item id="run" key="run" title="Run" actions={getActions} />;
           } else if (result) {
             return (
               <List.Section key="Past Results" title="Past Results">
@@ -128,6 +139,7 @@ export default function Command() {
                       title={result.command || ""}
                       subtitle={result.stdout || "(No Output)"}
                       detail={<List.Item.Detail markdown={markdownFor(result)} />}
+                      actions={getActions}
                     />
                   );
                 })}
