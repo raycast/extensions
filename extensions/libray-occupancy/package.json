@@ -4,7 +4,7 @@
   "title": "Main Library in University of St Andrews",
   "description": "How busy is the main library now?",
   "icon": "command-icon.png",
-  "author": "HarryHuang",
+  "author": "Harry",
   "license": "MIT",
   "commands": [
     {
