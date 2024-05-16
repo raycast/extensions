@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gpt-snippets",
+  "title": "GPT Snippets",
+  "description": "Run your own ChatGPT snippets from Raycast",
+  "icon": "logo.png",
+  "author": "olegkron",
+  "categories": [
+    "Developer Tools", "Productivity", "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List GPT Actions",
+      "description": "Lists actions to execute with ChatGPT",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+{
+  "name": "apiToken",
+  "type": "password",
+  "title": "OpenAI API Token",
+  "description": "Enter your API token",
+  "placeholder": "Enter your API token",
+  "required": true
+}
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.0",
+    "axios": "^1.6.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "format": "prettier --write ."
+  }
+}
