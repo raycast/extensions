@@ -1,6 +1,6 @@
 import { promisify } from "util";
 import { parseString } from "xml2js";
-import { FeedItemInterface } from "./responseTypes";
+import { Feed, FeedItemInterface } from "./responseTypes";
 
 const parseXml = promisify(parseString) as (xml: string) => Promise<any>;
 
@@ -17,7 +17,7 @@ const parseRSSObject = <T>(rssObject: RSSObject<T>): T =>
     };
   }, {} as T);
 
-export const buildFeed = async (xml: string) => {
+export const buildFeed = async (xml: string): Promise<Feed<FeedItemInterface>> => {
   const {
     rss: {
       channel: [data],
