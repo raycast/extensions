@@ -1,6 +1,11 @@
 import "./web-polyfill";
 
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import {
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { UTApi, UTFile } from "uploadthing/server";
@@ -39,6 +44,13 @@ export const useUpload = () => {
       toast.current!.style = Toast.Style.Failure;
       toast.current!.title = "Failed to upload files";
       toast.current!.message = err.message;
+      toast.current!.primaryAction = {
+        title: "Open Extension Preferences",
+        onAction: (toast) => {
+          openExtensionPreferences;
+          toast.hide();
+        },
+      };
     },
   });
 
