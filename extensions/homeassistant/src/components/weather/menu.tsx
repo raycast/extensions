@@ -1,9 +1,10 @@
-import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 import { State } from "@lib/haapi";
+import { Color, LaunchType, MenuBarExtra, Toast, launchCommand, showToast } from "@raycast/api";
 
-import { ReactElement } from "react";
 import { MenuBarSubmenu } from "@components/menu";
 import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { ReactElement } from "react";
+import { getIcon } from "../state/utils";
 import {
   Forecast,
   getHumidityFromState,
@@ -14,7 +15,6 @@ import {
   weatherConditionToIcon,
   weatherConditionToText,
 } from "./utils";
-import { getIcon } from "../state/utils";
 
 async function launchWeatherCommand() {
   try {

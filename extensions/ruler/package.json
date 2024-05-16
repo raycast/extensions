@@ -2,19 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ruler",
   "title": "Ruler",
-  "description": "Calculate Distance Between Two Points",
+  "description": "Measure Distance Between Two Points",
   "icon": "icon.png",
   "author": "anwarulislam",
   "categories": [
-    "Applications"
+    "Applications",
+    "Design Tools"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "ruler",
       "title": "Ruler",
-      "subtitle": "Calculate Distance",
-      "description": "Calculate Distance Between Two Points",
+      "subtitle": "Measure Distance",
+      "description": "Measure Distance Between Two Points",
       "mode": "no-view"
     }
   ],

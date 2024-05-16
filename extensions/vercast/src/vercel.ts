@@ -79,7 +79,7 @@ export async function deleteProjectById(projectId: Project["id"], teamId?: Team[
 
 export async function deleteEnvironmentVariableById(
   projectId: Project["id"],
-  envId: Environment["id"]
+  envId: Environment["id"],
 ): Promise<Environment> {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}/env/${envId}`, {
@@ -145,7 +145,7 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
 export function getFetchDeploymentBuildsURL(
   deploymentId: Deployment["uid"] | string,
   teamId?: Team["id"],
-  limit = 100
+  limit = 100,
 ) {
   return apiURL + `v11/deployments/${deploymentId}/builds?limit=${limit}&teamId=${teamId ?? ""}`;
 }
@@ -202,7 +202,7 @@ async function _rawFetchProjectEnvironmentVariables(projectId: string, teamId?: 
 export async function updateEnvironmentVariable(
   projectId: Project["id"],
   envId: Environment["id"],
-  envVar: Partial<Environment>
+  envVar: Partial<Environment>,
 ): Promise<Environment> {
   const environmentVariable: Environment = await _rawUpdateProjectEnvironmentVariable(projectId, envId, envVar);
   return environmentVariable;
@@ -212,7 +212,7 @@ export async function updateEnvironmentVariable(
 export async function createEnvironmentVariable(
   projectId: Project["id"],
   envVar: CreateEnvironment,
-  teamId?: Team["id"]
+  teamId?: Team["id"],
 ): Promise<CreateEnvironmentVariableResponse> {
   envVar["type"] = "encrypted";
 
@@ -237,7 +237,7 @@ export async function createEnvironmentVariable(
 async function _rawUpdateProjectEnvironmentVariable(
   projectId: Project["id"],
   envId: Environment["id"],
-  envVar: Partial<Environment>
+  envVar: Partial<Environment>,
 ): Promise<Environment> {
   try {
     const response = await fetch(apiURL + `v8/projects/${projectId}/env/${envId}`, {
@@ -273,7 +273,7 @@ export async function getScreenshotImageURL(deploymentId: Deployment["uid"]) {
     {
       method: "get",
       headers: headers,
-    }
+    },
   );
 
   const arrayBuffer = await image.arrayBuffer();

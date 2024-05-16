@@ -309,6 +309,7 @@ export function useTodoList() {
     const urlMatch = preferences?.properties?.url
       ? text.match(/(?:https?):\/\/[\n\S]+/g)
       : null
+    const statusMatch = text.match(/ \/(\w+)/)
 
     if (projectMatch) {
       const pFound = autocomplete(projectMatch[1], projects, {
@@ -361,7 +362,16 @@ export function useTodoList() {
       contentUrl = urlMatch[0]
     }
 
-    if (filterTodo.status) {
+    if (statusMatch) {
+      const sFound = autocomplete(statusMatch[1], statuses, {
+        keys: ['name'],
+      })
+      if (sFound.length > 0) {
+        status = sFound[0].item
+      } else {
+        status = null
+      }
+    } else if (filterTodo.status) {
       status = filterTodo.status
     }
 
@@ -371,6 +381,7 @@ export function useTodoList() {
       .replace(userMatch ? userMatch[0] : '', '')
       .replace(tagMatch ? tagMatch[0] : '', '')
       .replace(urlMatch ? urlMatch[0] : '', '')
+      .replace(statusMatch ? statusMatch[0] : '', '')
       .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : '', '')
       .replace(/\s+/g, ' ')
       .trim()

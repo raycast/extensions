@@ -4,6 +4,8 @@ import { speedtestCLIDirectory } from "./lib/cli";
 import { Result } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
 import { useSpeedtest } from "./lib/hooks";
+import { ListBandwidthItem } from "./lib/bandwidth/component";
+import { ActivitySpeedQualityBandwidth } from "./lib/bandwidth/thresholds";
 
 function percentageToString(val: number | undefined): string | undefined {
   if (val === undefined) {
@@ -375,6 +377,36 @@ export default function SpeedtestList() {
             isLoading={isLoading}
             upload={result.upload}
             progress={resultProgress.upload}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <ListBandwidthItem
+            speed={{ download: result.download, upload: result.upload }}
+            activity={ActivitySpeedQualityBandwidth.voiceCall}
+            result={result}
+            title="Voice Call"
+            icon={Icon.Phone}
+            isLoading={isLoading}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <ListBandwidthItem
+            speed={{ download: result.download, upload: result.upload }}
+            activity={ActivitySpeedQualityBandwidth.videoCall}
+            result={result}
+            title="Video Call"
+            icon={Icon.Video}
+            isLoading={isLoading}
+            summary={summaryAction}
+            restart={restartAction}
+          />
+          <ListBandwidthItem
+            speed={{ download: result.download, upload: result.upload }}
+            activity={ActivitySpeedQualityBandwidth.stream}
+            result={result}
+            title="Streaming"
+            icon={Icon.GameController}
+            isLoading={isLoading}
             summary={summaryAction}
             restart={restartAction}
           />

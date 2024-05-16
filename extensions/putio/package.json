@@ -5,6 +5,9 @@
   "description": "Raycast extension for managing files, transfers, and history events in your put.io account.",
   "icon": "putio.png",
   "author": "altaywtf",
+  "contributors": [
+    "kud"
+  ],
   "owner": "putio",
   "access": "public",
   "categories": [

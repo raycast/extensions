@@ -1,6 +1,6 @@
-import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
 import { State } from "@lib/haapi";
+import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { useHAStates } from "./hooks";
 
 export function StatesAttributesList(): JSX.Element {

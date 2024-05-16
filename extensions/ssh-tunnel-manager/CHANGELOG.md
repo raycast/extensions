@@ -1,5 +1,9 @@
 # SSH-Tunnel-Manager Changelog
 
+## [Fix] - 2024-05-04
+
+- Fixed validation for username
+
 ## [Fix] - 2024-03-22
 
 - Fixed validation for host

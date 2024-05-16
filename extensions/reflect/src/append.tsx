@@ -1,17 +1,17 @@
 import { appendToDailyNote, getGraphs, Graph, ReflectApiError } from "./helpers/api";
+import { prependNote } from "./helpers/dates";
 import { authorize } from "./helpers/oauth";
-import { prependTimestampIfSelected } from "./helpers/dates";
 
 import {
   Action,
   ActionPanel,
   closeMainWindow,
   Form,
+  getPreferenceValues,
+  LocalStorage,
   popToRoot,
   showToast,
   Toast,
-  LocalStorage,
-  getPreferenceValues,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
@@ -22,6 +22,7 @@ interface FormValues {
   parentList: string;
   graphId: string;
   timestampFormat?: string;
+  isTask: boolean;
 }
 
 export default function Command() {
@@ -34,7 +35,8 @@ export default function Command() {
 
       try {
         const authorizationToken = await authorize();
-        const text = prependTimestampIfSelected(values.note, {
+        const text = prependNote(values.note, {
+          isTask: values.isTask,
           prependTimestamp: values.prependTimestamp,
           timestampFormat: values.timestampFormat as "12" | "24" | undefined,
         });
@@ -91,6 +93,7 @@ export default function Command() {
       }
     >
       <Form.TextArea {...itemProps.note} title="Note" />
+      <Form.Checkbox {...itemProps.isTask} label="Task" storeValue={true} />
       <Form.Checkbox {...itemProps.prependTimestamp} label="Prepend Timestamp" storeValue={true} />
       {showTimestampFormat ? (
         <Form.Dropdown {...itemProps.timestampFormat} storeValue={true}>

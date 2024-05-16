@@ -21,11 +21,17 @@ const ItemDetails = ({
 }) => {
   const icons = compatIcons(item);
   const { data, isLoading } = useJSRAPI(item);
+
   return (
     <List.Item.Detail
       isLoading={isLoading}
-      markdown={`## ${item.id}
-${item.description}`}
+      markdown={[
+        `## ${item.id}`,
+        item.description,
+        "",
+        !isLoading && data?.latestVersion ? `![](https://jsr.io/badges/${item.id})` : "",
+        !isLoading && item.score ? `![](https://jsr.io/badges/${item.id}/score)` : "",
+      ].join("\n")}
       metadata={
         <Detail.Metadata>
           {data ? (

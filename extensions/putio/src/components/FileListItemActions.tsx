@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { ActionPanel, Action, Icon, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import type { IFile } from "@putdotio/api-client";
@@ -5,6 +6,7 @@ import { getPutioAccountInfo, getPutioClient } from "../api/withPutioClient";
 import { Files } from "../files";
 import { RenameFile } from "../rename-file";
 import { deleteFile } from "../api/files";
+import { useIsVlcInstalled } from "../utils";
 
 const fetchFileDownloadURL = async (file: IFile) => {
   try {
@@ -35,6 +37,7 @@ const fetchFileURLs = async (file: IFile) => {
 };
 
 export const FileListItemNavigationActions = ({ file }: { file: IFile }) => {
+  const isVlcInstalled = useIsVlcInstalled();
   const { data: urls } = useCachedPromise(fetchFileURLs, [file]);
 
   return (
@@ -63,7 +66,28 @@ export const FileListItemNavigationActions = ({ file }: { file: IFile }) => {
       )}
 
       {urls?.stream && <Action.CopyToClipboard title="Copy Stream URL" content={urls.stream} />}
+
       {urls?.mp4Stream && <Action.CopyToClipboard title="Copy MP4 Stream URL" content={urls.mp4Stream} />}
+
+      {isVlcInstalled && urls?.stream && (
+        <Action
+          icon={Icon.AppWindow}
+          onAction={() => {
+            exec(`vlc "${urls.stream}"`);
+          }}
+          title="Open in VLC"
+        />
+      )}
+
+      {isVlcInstalled && urls?.mp4Stream && (
+        <Action
+          icon={Icon.AppWindow}
+          onAction={() => {
+            exec(`vlc "${urls.mp4Stream}"`);
+          }}
+          title="Open MP4 in VLC"
+        />
+      )}
     </>
   );
 };

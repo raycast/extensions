@@ -24,7 +24,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search notes by title, folder, description, or accessories"
+      searchBarPlaceholder="Search notes by title, folder, description, tags, or accessories"
       filtering={{ keepSectionOrder: true }}
     >
       <List.Section title="Pinned">
