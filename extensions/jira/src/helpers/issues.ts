@@ -1,4 +1,5 @@
 import { Color } from "@raycast/api";
+import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
 import markdownToAdf from "md-to-adf";
@@ -224,10 +225,10 @@ export function getCustomFieldsForCreateIssue(issueType: IssueTypeWithCustomFiel
     };
   }, {});
 
-  const validation = customFields.reduce((acc, { key, fieldSchema }) => {
+  const validation = customFields.reduce((acc, { key, fieldSchema, required }) => {
     return {
       ...acc,
-      [key]: getCustomFieldValidation(fieldSchema),
+      [key]: getCustomFieldValidation(fieldSchema, required),
     };
   }, {});
 
@@ -249,18 +250,25 @@ export function getCustomFieldInitialValue(fieldSchema: CustomFieldSchema) {
   }
 }
 
-export function getCustomFieldValidation(fieldSchema: CustomFieldSchema) {
-  switch (fieldSchema) {
-    case CustomFieldSchema.float:
-    case CustomFieldSchema.storyPointEstimate:
-      return (value: string) => {
+export function getCustomFieldValidation(fieldSchema: CustomFieldSchema, required: boolean) {
+  return (value: string) => {
+    if (required && !value) {
+      return FormValidation.Required;
+    }
+
+    switch (fieldSchema) {
+      case CustomFieldSchema.float:
+      case CustomFieldSchema.storyPointEstimate:
         if (value && isNaN(Number(value))) {
           return "Please enter a valid number";
         }
-      };
-    default:
-      return "";
-  }
+        break;
+      default:
+        break;
+    }
+
+    return "";
+  };
 }
 
 export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unknown) {
