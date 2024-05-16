@@ -4,31 +4,45 @@ import {
   Action,
   getPreferenceValues,
   Toast,
-  Icon,
   showToast,
+  Icon,
   Form,
   useNavigation,
   confirmAlert,
   LocalStorage,
+  Alert,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { allModels as changeModels } from "./hook/utils";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
-const model_override = getPreferenceValues().model_chat;
+
+interface ChatData {
+  currentChat: string;
+  chats: Chat[];
+}
+
+interface Chat {
+  name: string;
+  creationDate: Date;
+  modelName?: string;
+  messages: Message[];
+}
+
+interface Message {
+  prompt: string;
+  answer: string;
+  creationDate: string;
+  finished: boolean;
+  modelName: string;
+}
+
+const model_override = getPreferenceValues<{ model_chat: string }>().model_chat;
 const APIprovider = "Groq";
 
-export default function Chat({ launchContext }) {
-  const model = model_override == "global" ? global_model : model_override;
+export default function Chat({ launchContext }: { launchContext?: { query?: string; response?: string } }) {
+  const model = model_override === "global" ? global_model : model_override;
+  const [chatData, setChatData] = useState<ChatData | null>(null);
 
-  let toast = async (style, title, message) => {
-    await showToast({
-      style,
-      title,
-      message,
-    });
-  };
-
-  let CreateChat = () => {
+  const CreateChat = () => {
     const { pop } = useNavigation();
 
     return (
@@ -37,15 +51,16 @@ export default function Chat({ launchContext }) {
           <ActionPanel>
             <Action.SubmitForm
               title="Create Chat"
-              onSubmit={(values) => {
+              onSubmit={(values: { chatName: string }) => {
                 if (values.chatName === "") {
-                  toast(Toast.Style.Failure, "Chat must have a name.");
-                } else if (chatData.chats.map((x) => x.name).includes(values.chatName)) {
-                  toast(Toast.Style.Failure, "Chat with that name already exists.");
+                  showToast({ style: Toast.Style.Failure, title: "Chat must have a name." });
+                } else if (chatData?.chats.map((x) => x.name).includes(values.chatName)) {
+                  showToast({ style: Toast.Style.Failure, title: "Chat with that name already exists." });
                 } else {
                   pop();
                   setChatData((oldData) => {
-                    let newChatData = structuredClone(oldData);
+                    if (!oldData) return oldData;
+                    const newChatData = structuredClone(oldData);
                     newChatData.chats.push({
                       name: values.chatName,
                       creationDate: new Date(),
@@ -71,7 +86,7 @@ export default function Chat({ launchContext }) {
     );
   };
 
-  let OpenAIActionPanel = () => {
+  const OpenAIActionPanel = () => {
     return (
       <ActionPanel>
         <Action
@@ -79,20 +94,22 @@ export default function Chat({ launchContext }) {
           title={`Send to ${APIprovider}`}
           onAction={() => {
             if (searchText === "") {
-              toast(Toast.Style.Failure, "Please Enter a Query");
+              showToast({ style: Toast.Style.Failure, title: "Please Enter a Query" });
               return;
             }
 
             const query = searchText;
             setSearchText("");
             if (
-              getChat(chatData.currentChat).messages.length == 0 ||
-              getChat(chatData.currentChat).messages[0].finished
+              chatData &&
+              (getChat(chatData.currentChat).messages.length === 0 ||
+                getChat(chatData.currentChat).messages[0].finished)
             ) {
-              toast(Toast.Style.Animated, "Response Loading", "Please Wait");
+              showToast({ style: Toast.Style.Animated, title: "Response Loading" });
               setChatData((x) => {
-                let newChatData = structuredClone(x);
-                let currentChat = getChat(chatData.currentChat, newChatData.chats);
+                if (!x) return x;
+                const newChatData = structuredClone(x);
+                const currentChat = getChat(chatData.currentChat, newChatData.chats);
 
                 currentChat.messages.unshift({
                   prompt: query,
@@ -104,11 +121,14 @@ export default function Chat({ launchContext }) {
 
                 (async () => {
                   try {
-                    let currentChat = getChat(chatData.currentChat);
-                    const messages = currentChat.messages.map((x) => ({
-                      role: "user",
-                      content: x.prompt,
-                    }));
+                    const currentChat = getChat(chatData.currentChat);
+                    const messages = [];
+                    currentChat.messages.map((x) => {
+                      messages.push({ role: "assistant", content: x.answer });
+                      messages.push({ role: "user", content: x.prompt });
+                    });
+                    messages.push({ role: "system", content: "Be a concise and helpful" });
+                    messages.reverse();
 
                     const response = await openai.chat.completions.create({
                       model: model,
@@ -120,33 +140,40 @@ export default function Chat({ launchContext }) {
                     for await (const message of response) {
                       answer += message.choices[0].delta.content || "";
                       setChatData((oldData) => {
-                        let newChatData = structuredClone(oldData);
+                        if (!oldData) return oldData;
+                        const newChatData = structuredClone(oldData);
                         getChat(chatData.currentChat, newChatData.chats).messages[0].answer = answer;
                         return newChatData;
                       });
                     }
 
                     setChatData((oldData) => {
-                      let newChatData = structuredClone(oldData);
+                      if (!oldData) return oldData;
+                      const newChatData = structuredClone(oldData);
                       getChat(chatData.currentChat, newChatData.chats).messages[0].finished = true;
                       return newChatData;
                     });
 
-                    toast(Toast.Style.Success, "Response Loaded");
+                    showToast({ style: Toast.Style.Success, title: "Response Loaded" });
                   } catch (error) {
                     console.error(`Error processing message with ${APIprovider}:`, error);
                     setChatData((oldData) => {
-                      let newChatData = structuredClone(oldData);
+                      if (!oldData) return oldData;
+                      const newChatData = structuredClone(oldData);
                       getChat(chatData.currentChat, newChatData.chats).messages.shift();
                       return newChatData;
                     });
-                    toast(Toast.Style.Failure, `${APIprovider} cannot process this message`, error.message);
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: `${APIprovider} cannot process this message`,
+                      message: error as string,
+                    });
                   }
                 })();
                 return newChatData;
               });
             } else {
-              toast(Toast.Style.Failure, "Please Wait", "Only one message at a time.");
+              showToast({ style: Toast.Style.Failure, title: "Please Wait", message: "Only one message at a time." });
             }
           }}
         />
@@ -161,6 +188,7 @@ export default function Chat({ launchContext }) {
             icon={Icon.ArrowDown}
             title="Next Chat"
             onAction={() => {
+              if (!chatData) return;
               let chatIdx = 0;
               for (let i = 0; i < chatData.chats.length; i++) {
                 if (chatData.chats[i].name === chatData.currentChat) {
@@ -168,10 +196,11 @@ export default function Chat({ launchContext }) {
                   break;
                 }
               }
-              if (chatIdx === chatData.chats.length - 1) toast(Toast.Style.Failure, "No Chats After Current");
-              else {
+              if (chatIdx === chatData.chats.length - 1) {
+                showToast({ style: Toast.Style.Failure, title: "No Chats After Current" });
+              } else {
                 setChatData((oldData) => ({
-                  ...oldData,
+                  ...oldData!,
                   currentChat: chatData.chats[chatIdx + 1].name,
                 }));
               }
@@ -182,6 +211,7 @@ export default function Chat({ launchContext }) {
             icon={Icon.ArrowUp}
             title="Previous Chat"
             onAction={() => {
+              if (!chatData) return;
               let chatIdx = 0;
               for (let i = 0; i < chatData.chats.length; i++) {
                 if (chatData.chats[i].name === chatData.currentChat) {
@@ -189,10 +219,11 @@ export default function Chat({ launchContext }) {
                   break;
                 }
               }
-              if (chatIdx === 0) toast(Toast.Style.Failure, "No Chats Before Current");
-              else {
+              if (chatIdx === 0) {
+                showToast({ style: Toast.Style.Failure, title: "No Chats Before Current" });
+              } else {
                 setChatData((oldData) => ({
-                  ...oldData,
+                  ...oldData!,
                   currentChat: chatData.chats[chatIdx - 1].name,
                 }));
               }
@@ -210,9 +241,10 @@ export default function Chat({ launchContext }) {
                 message: "You cannot recover this chat.",
                 icon: Icon.Trash,
                 primaryAction: {
-                  title: "Delete Chat Forever",
-                  style: Action.Style.Destructive,
+                  title: "Delete Chat",
+                  style: Alert.ActionStyle.Destructive,
                   onAction: () => {
+                    if (!chatData) return;
                     let chatIdx = 0;
                     for (let i = 0; i < chatData.chats.length; i++) {
                       if (chatData.chats[i].name === chatData.currentChat) {
@@ -221,19 +253,21 @@ export default function Chat({ launchContext }) {
                       }
                     }
                     if (chatData.chats.length === 1) {
-                      toast(Toast.Style.Failure, "Cannot delete only chat");
+                      showToast({ style: Toast.Style.Failure, title: "Cannot delete only chat" });
                       return;
                     }
                     if (chatIdx === chatData.chats.length - 1) {
                       setChatData((oldData) => {
-                        let newChatData = structuredClone(oldData);
+                        if (!oldData) return oldData;
+                        const newChatData = structuredClone(oldData);
                         newChatData.chats.splice(chatIdx);
                         newChatData.currentChat = newChatData.chats[chatIdx - 1].name;
                         return newChatData;
                       });
                     } else {
                       setChatData((oldData) => {
-                        let newChatData = structuredClone(oldData);
+                        if (!oldData) return oldData;
+                        const newChatData = structuredClone(oldData);
                         newChatData.chats.splice(chatIdx, 1);
                         newChatData.currentChat = newChatData.chats[chatIdx].name;
                         return newChatData;
@@ -251,25 +285,14 @@ export default function Chat({ launchContext }) {
     );
   };
 
-  let formatDate = (dateToCheckISO) => {
-    const dateToCheck = new Date(dateToCheckISO);
-    if (dateToCheck.toDateString() === new Date().toDateString()) {
-      return `${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, "0")}`;
-    } else {
-      return `${new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "2-digit" })}`;
-    }
-  };
-
-  let [chatData, setChatData] = useState(null);
-
   useEffect(() => {
     (async () => {
       const storedChatData = await LocalStorage.getItem("chatData");
       if (storedChatData) {
-        let newData = JSON.parse(storedChatData);
+        const newData: ChatData = JSON.parse(storedChatData as string);
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
-          let currentChat = getChat(newData.currentChat, newData.chats);
+          const currentChat = getChat(newData.currentChat, newData.chats);
           console.log(currentChat);
           const messages = currentChat.messages.map((x) => ({
             role: "user",
@@ -286,24 +309,26 @@ export default function Chat({ launchContext }) {
           for await (const message of response) {
             answer += message.choices[0].delta.content || "";
             setChatData((oldData) => {
-              let newChatData = structuredClone(oldData);
+              if (!oldData) return oldData;
+              const newChatData = structuredClone(oldData);
               getChat(newData.currentChat, newChatData.chats).messages[0].answer = answer;
               return newChatData;
             });
           }
 
           setChatData((oldData) => {
-            let newChatData = structuredClone(oldData);
+            if (!oldData) return oldData;
+            const newChatData = structuredClone(oldData);
             getChat(newData.currentChat, newChatData.chats).messages[0].finished = true;
             return newChatData;
           });
 
-          toast(Toast.Style.Success, "Response Loaded");
+          showToast({ style: Toast.Style.Success, title: "Response Loaded" });
         }
 
         setChatData(structuredClone(newData));
       } else {
-        const newChatData = {
+        const newChatData: ChatData = {
           currentChat: "New Chat",
           chats: [
             {
@@ -320,7 +345,8 @@ export default function Chat({ launchContext }) {
 
       if (launchContext?.query) {
         setChatData((oldData) => {
-          let newChatData = structuredClone(oldData);
+          if (!oldData) return oldData;
+          const newChatData = structuredClone(oldData);
           newChatData.chats.push({
             name: `From Quick AI at ${new Date().toLocaleString("en-US", {
               month: "2-digit",
@@ -332,8 +358,8 @@ export default function Chat({ launchContext }) {
             creationDate: new Date(),
             messages: [
               {
-                prompt: launchContext.query,
-                answer: launchContext.response,
+                prompt: launchContext.query as string,
+                answer: launchContext.response as string,
                 creationDate: new Date().toISOString(),
                 finished: true,
                 modelName: model,
@@ -363,10 +389,11 @@ export default function Chat({ launchContext }) {
 
   const [searchText, setSearchText] = useState("");
 
-  let getChat = (target, customChat = chatData.chats) => {
+  const getChat = (target: string, customChat: Chat[] = chatData!.chats): Chat => {
     for (const chat of customChat) {
       if (chat.name === target) return chat;
     }
+    throw new Error("Chat not found");
   };
 
   return chatData === null ? (
@@ -384,7 +411,7 @@ export default function Chat({ launchContext }) {
           tooltip="Your Chats"
           onChange={(newValue) => {
             setChatData((oldData) => ({
-              ...oldData,
+              ...oldData!,
               currentChat: newValue,
             }));
           }}
@@ -397,7 +424,7 @@ export default function Chat({ launchContext }) {
       }
     >
       {(() => {
-        let chat = getChat(chatData.currentChat);
+        const chat = getChat(chatData.currentChat);
         if (!chat.messages.length) {
           return (
             <List.EmptyView
@@ -419,7 +446,7 @@ export default function Chat({ launchContext }) {
               ]}
               detail={<List.Item.Detail markdown={`\`\`\`${x.modelName}\`\`\`\n\n${x.answer}`} />}
               key={x.prompt + x.creationDate}
-              actions={<OpenAIActionPanel idx={i} />}
+              actions={<OpenAIActionPanel />}
             />
           );
         });
