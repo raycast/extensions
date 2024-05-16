@@ -15,6 +15,7 @@ import {
 } from "@aws-sdk/client-s3";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
@@ -37,12 +38,13 @@ export default function S3() {
 function S3Bucket({ bucket }: { bucket: Bucket }) {
   return (
     <List.Item
+      key={bucket.Name}
       icon={"aws-icons/s3.png"}
       title={bucket.Name || ""}
       actions={
         <ActionPanel>
           <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" />
-          <Action.OpenInBrowser title="Open in Browser" url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
+          <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
           <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
         </ActionPanel>
       }
@@ -82,10 +84,7 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
               title={object.Key?.replace(prefix, "") || ""}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open in Browser"
-                    url={resourceToConsoleLink(`${bucket.Name}/${object.Key}`, "AWS::S3::Object")}
-                  />
+                  <AwsAction.Console url={resourceToConsoleLink(`${bucket.Name}/${object.Key}`, "AWS::S3::Object")} />
                   <Action
                     title="Download"
                     icon={Icon.Download}

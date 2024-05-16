@@ -3,6 +3,7 @@ import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon } from 
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function SQS() {
   const { data: queues, error, isLoading, revalidate } = useCachedPromise(fetchQueues);
@@ -51,13 +52,12 @@ function SQSQueue({ queue }: { queue: string }) {
 
   return (
     <List.Item
-      id={queue}
       key={queue}
       title={queue.slice(queue.lastIndexOf("/") + 1)}
       icon={"aws-icons/sqs.png"}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={resourceToConsoleLink(queue, "AWS::SQS::Queue")} />
+          <AwsAction.Console url={resourceToConsoleLink(queue, "AWS::SQS::Queue")} />
           <Action.CopyToClipboard title="Copy Queue URL" content={queue} />
           <Action.CopyToClipboard title="Copy Path" content={queue} />
           <Action icon={Icon.Trash} title="Purge Queue" onAction={handlePurgeQueueAction} />

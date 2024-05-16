@@ -1,8 +1,9 @@
 import { ListStateMachinesCommand, SFNClient, StateMachineListItem, StateMachineType } from "@aws-sdk/client-sfn"; // ES Modules import
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function StepFunctions() {
   const { data: stateMachineListItems, error, isLoading, revalidate } = useCachedPromise(fetchStateMachines);
@@ -28,13 +29,10 @@ function StateMachine({ item }: { item: StateMachineListItem }) {
     <List.Item
       icon={"aws-icons/states.png"}
       title={item.name || ""}
-      accessories={[{ tag: { value: item.type || StateMachineType.STANDARD, color: Color.SecondaryText } }]}
+      accessories={[{ tag: item.type || StateMachineType.STANDARD }]}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={resourceToConsoleLink(item.stateMachineArn, "AWS::StepFunctions::StateMachine")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(item.stateMachineArn, "AWS::StepFunctions::StateMachine")} />
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy State Machine ARN" content={item.stateMachineArn || ""} />
             <Action.CopyToClipboard title="Copy State Machine Name" content={item.name || ""} />

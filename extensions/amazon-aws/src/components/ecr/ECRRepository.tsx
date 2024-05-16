@@ -3,6 +3,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchImages, getRepositoryUrl } from "../../actions/ecr";
 import ECRImage from "./ECRImage";
+import { AwsAction } from "../common/action";
 
 function ECRRepository({ repository }: { repository: Repository }) {
   const { data: images, isLoading } = useCachedPromise(
@@ -14,7 +15,6 @@ function ECRRepository({ repository }: { repository: Repository }) {
   );
   return (
     <List.Item
-      id={repository.repositoryArn}
       key={repository.repositoryArn}
       title={repository.repositoryName || ""}
       icon={isLoading ? Icon.CircleProgress : "aws-icons/ecr.png"}
@@ -37,10 +37,7 @@ function ECRRepository({ repository }: { repository: Repository }) {
       actions={
         <ActionPanel>
           <Action.Push title={"View Images"} icon={Icon.Eye} target={<ECRImage repository={repository}></ECRImage>} />
-          <Action.OpenInBrowser
-            title={"Open Repository"}
-            url={getRepositoryUrl(repository.registryId || "", repository.repositoryName || "")}
-          />
+          <AwsAction.Console url={getRepositoryUrl(repository.registryId || "", repository.repositoryName || "")} />
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
               title="Copy Repository URI"

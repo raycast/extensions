@@ -45,7 +45,7 @@ function Profile({ profile }: { profile: Record<string, string | undefined> }) {
               const regex = /<profile>/i;
 
               if (script) {
-                const scriptToExecute = script.replace(regex, profile.name);
+                const scriptToExecute = script.replace(regex, profile.name || "");
                 await promisify(exec)(scriptToExecute);
 
                 showToast(Toast.Style.Success, "Script executed successfully");
