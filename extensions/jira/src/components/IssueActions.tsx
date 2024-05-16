@@ -462,6 +462,9 @@ function ChangeStatusSubmenu({ issue, mutate }: SubmenuProps) {
     if (!transition.to.name) {
       return transition.name;
     }
+    if (transition.name === transition.to.name) {
+      return transition.name;
+    }
     return `${transition.name} -> ${transition.to.name}`;
   }
 
