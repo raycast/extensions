@@ -1,6 +1,6 @@
 import { Icon } from "@raycast/api";
 
-export type Action = {
+export type IAction = {
   id: string;
   title: string;
   description: string;
@@ -10,7 +10,7 @@ export type Action = {
 
 const systemPrompt =
   "Act as an application. You should only output the result of the prompt. Do not include any additional information.";
-const initialActions: Action[] = [
+const initialActions: IAction[] = [
   {
     id: "1",
     title: "Summarize",

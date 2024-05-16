@@ -3,8 +3,14 @@ import handleAction from "../utils/handleAction";
 import AddActionForm from "./AddActionForm";
 import { useConfig } from "../hooks/ConfigContext";
 import DetailsPage from "./DetailsPage";
+import { IAction } from "../constants/initialActions";
 
-export function ActionItem({ item, setSelectedAction, refreshActions }: any) {
+interface ActionItemProps {
+  item: IAction;
+  refreshActions: () => void;
+}
+
+export function ActionItem({ item, refreshActions }: ActionItemProps) {
   const { push } = useNavigation();
   const { addAction, deleteAction } = useConfig();
   return (
@@ -14,22 +20,22 @@ export function ActionItem({ item, setSelectedAction, refreshActions }: any) {
       icon={Icon[item.icon as keyof typeof Icon]}
       actions={
         <ActionPanel>
-          <Action title="Run with GPT" onAction={() => handleAction(item, setSelectedAction, push)} icon={Icon.Play} />
+          <Action title="Run with GPT" onAction={() => handleAction(item, push)} icon={Icon.Play} />
           <Action.Push
-            title="Show Action Details"
+            title="Show IAction Details"
             target={<DetailsPage action={item} />}
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             icon={Icon.Info}
           />
           <Action.Push
-            title="Add New Action"
+            title="Add New IAction"
             target={<AddActionForm onAdd={refreshActions} addAction={addAction} />}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             icon={Icon.Plus}
           />
           <Action
-            title="Delete Action"
-            //@ts-ignore
+            title="Delete IAction"
+            //@ts-expect-error - Issue with ActionPanel type
             style={Alert.ActionStyle.Destructive}
             icon={Icon.Trash}
             onAction={() => {

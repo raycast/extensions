@@ -1,21 +1,20 @@
 import { List } from "@raycast/api";
-import { useState } from "react";
 import { ActionItem } from "./components/ActionItem";
 import { useConfig } from "./hooks/ConfigContext";
+import { IAction } from "./constants/initialActions";
 
-function ActionsList(actionList: any[], setSelectedAction: (action: any) => void, refreshActions: () => void) {
+function ActionsList(actionList: IAction[], refreshActions: () => void) {
   return (
     <List>
       {actionList.map((item) => (
-        <ActionItem key={item.id} item={item} setSelectedAction={setSelectedAction} refreshActions={refreshActions} />
+        <ActionItem key={item.id} item={item}  refreshActions={refreshActions} />
       ))}
     </List>
   );
 }
 
 export default function App() {
-  const [selectedAction, setSelectedAction] = useState<any | null>(null);
   const { actions, fetchActions } = useConfig();
 
-  return ActionsList(actions, setSelectedAction, fetchActions);
+  return ActionsList(actions, fetchActions);
 }

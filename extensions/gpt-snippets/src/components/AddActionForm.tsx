@@ -1,17 +1,23 @@
 import { Action, ActionPanel, Form, Icon, showToast, ToastStyle } from "@raycast/api";
 import React, { useState } from "react";
+import { IAction } from "../constants/initialActions";
 
-export default function AddActionForm({ addAction, onAdd }: { addAction: (action: any) => void; onAdd: () => void }) {
+interface AddActionFormProps {
+  addAction: (action: IAction) => Promise<void>;
+  onAdd: () => void;
+}
+
+export default function AddActionForm({ addAction, onAdd }: AddActionFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [icon, setIcon] = useState("");
+  const [icon, setIcon] = useState<keyof typeof Icon>("Paragraph");
   const [prompt, setPrompt] = useState("");
 
   const handleSave = async () => {
     const id = Date.now().toString();
-    const action = { id, title, description, icon, prompt };
+    const action: IAction = { id, title, description, icon, prompt };
     await addAction(action);
-    showToast(ToastStyle.Success, "Action saved!");
+    showToast(ToastStyle.Success, "IAction saved!");
     onAdd();
   };
 
@@ -21,7 +27,7 @@ export default function AddActionForm({ addAction, onAdd }: { addAction: (action
     <Form
       actions={
         <ActionPanel>
-          <Action title="Save Action" onAction={handleSave} />
+          <Action title="Save IAction" onAction={handleSave} />
         </ActionPanel>
       }
     >
@@ -33,7 +39,7 @@ export default function AddActionForm({ addAction, onAdd }: { addAction: (action
         value={description}
         onChange={setDescription}
       />
-      <Form.Dropdown id="icon" title="Icon" value={icon} onChange={setIcon}>
+      <Form.Dropdown id="icon" title="Icon" value={icon} onChange={(newValue) => setIcon(newValue as keyof typeof Icon)}>
         {iconOptions}
       </Form.Dropdown>
       <Form.TextArea id="prompt" title="Prompt" placeholder="Enter prompt" value={prompt} onChange={setPrompt} />

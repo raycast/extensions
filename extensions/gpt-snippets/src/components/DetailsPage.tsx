@@ -1,7 +1,10 @@
-import { type Action as IAction } from "../constants/initialActions";
+import { type IAction as IAction } from "../constants/initialActions";
 import { Action, ActionPanel, Clipboard, Detail, showToast, Toast } from "@raycast/api";
 
-export default function DetailsPage({ action }: { action: IAction }) {
+interface DetailsPageProps {
+  action: IAction;
+}
+export default function DetailsPage({ action }: DetailsPageProps) {
   const markdown = `
   ## ${action.title}
   **ID:** ${action.id}

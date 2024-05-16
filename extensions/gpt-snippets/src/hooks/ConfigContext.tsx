@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { LocalStorage, showToast, ToastStyle } from "@raycast/api";
-import initialActions, { Action } from "../constants/initialActions";
+import initialActions, { IAction } from "../constants/initialActions";
 import Values = LocalStorage.Values;
 
 type ConfigContextType = {
-  actions: Action[];
-  addAction: (action: Action) => Promise<void>;
+  actions: IAction[];
+  addAction: (action: IAction) => Promise<void>;
   deleteAction: (id: string) => Promise<void>;
   fetchActions: () => Promise<void>;
 };
@@ -13,7 +13,7 @@ type ConfigContextType = {
 export const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
 
 export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [actions, setActions] = useState<Action[]>([]);
+  const [actions, setActions] = useState<IAction[]>([]);
 
   useEffect(() => {
     fetchActions();
@@ -22,7 +22,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const fetchActions = async () => {
     try {
       const items = await LocalStorage.allItems<Values>();
-      const storedActions = Object.values(items).map((item) => JSON.parse(item)) as Action[];
+      const storedActions = Object.values(items).map((item) => JSON.parse(item)) as IAction[];
 
       if (storedActions.length === 0) {
         // Initialize with default actions if no actions are found
@@ -39,11 +39,11 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
-  const addAction = async (action: Action) => {
+  const addAction = async (action: IAction) => {
     try {
       await LocalStorage.setItem(action.id, JSON.stringify(action));
       setActions((prevActions) => [...prevActions, action]);
-      showToast(ToastStyle.Success, "Action added");
+      showToast(ToastStyle.Success, "IAction added");
     } catch (error) {
       showToast(ToastStyle.Failure, "Failed to add action");
       console.error(error);
@@ -54,7 +54,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       await LocalStorage.removeItem(id);
       setActions((prevActions) => prevActions.filter((action) => action.id !== id));
-      showToast(ToastStyle.Success, "Action deleted");
+      showToast(ToastStyle.Success, "IAction deleted");
     } catch (error) {
       showToast(ToastStyle.Failure, "Failed to delete action");
       console.error(error);
