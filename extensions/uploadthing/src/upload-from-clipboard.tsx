@@ -1,7 +1,7 @@
 import { Detail } from "@raycast/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useClipboardFiles, useUpload } from "./lib/hooks";
-import { filePathsToFile } from "./lib/utils";
+import { filePathsToFile, guardInvalidApiKey } from "./lib/utils";
 import { useEffect } from "react";
 import { FileGrid } from "./lib/file-grid";
 
@@ -22,6 +22,9 @@ const Command = () => {
     if (!files) return;
     filePathsToFile(files).then(upload);
   }, [files]);
+
+  const keyCheck = guardInvalidApiKey();
+  if (keyCheck) return keyCheck;
 
   if (!files || readingClipboard) {
     return (

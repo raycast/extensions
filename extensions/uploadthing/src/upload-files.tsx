@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action } from "@raycast/api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUpload } from "./lib/hooks";
-import { filePathsToFile } from "./lib/utils";
+import { filePathsToFile, guardInvalidApiKey } from "./lib/utils";
 import { FileGrid } from "./lib/file-grid";
 
 const queryClient = new QueryClient();
@@ -15,6 +15,9 @@ export default () => {
 
 const Command = () => {
   const { upload, uploadedFiles } = useUpload();
+
+  const keyCheck = guardInvalidApiKey();
+  if (keyCheck) return keyCheck;
 
   const handleSubmit = async (values: { files: string[] }) => {
     const files = await filePathsToFile(values.files);

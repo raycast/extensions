@@ -1,8 +1,15 @@
-import { Clipboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Detail,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
-import { UTFile } from "uploadthing/server";
+import { UTApi, UTFile } from "uploadthing/server";
 
 /**
  * Read history of files from clipboard
@@ -31,4 +38,29 @@ export const filePathsToFile = async (filePaths: string[]) => {
     }),
   );
   return files;
+};
+
+export const guardInvalidApiKey = () => {
+  const { apiKey } = getPreferenceValues<Preferences.UploadFiles>();
+  try {
+    new UTApi({ apiKey });
+  } catch (err) {
+    const markdown =
+      `## ${err instanceof Error ? err.message : "API key incorrect"}` +
+      "\nPlease update it in command preferences and try again.";
+
+    return (
+      <Detail
+        markdown={markdown}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Open Extension Preferences"
+              onAction={openExtensionPreferences}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 };
