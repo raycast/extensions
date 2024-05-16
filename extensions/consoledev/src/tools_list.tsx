@@ -39,18 +39,12 @@ export default function ToolsList() {
       navigationTitle={state.feed?.title}
       searchBarPlaceholder="Filter tools by name..."
     >
-      {state.feed?.items.map((tool) => (
-        <FeedItem item={formatTool(tool)} key={tool.link} icon={Icon.Hammer} />
-      ))}
+      {state.feed?.items.map((tool) => <FeedItem item={formatTool(tool)} key={tool.link} icon={Icon.Hammer} />)}
     </List>
   );
 }
 
 const formatTool = (tool: Tool): Tool => ({
   ...tool,
-  description: pipe(
-    tool.description, 
-    removeTags,
-    s => removeRedundantString(s, 'Description: ')
-  )
+  description: pipe(tool.description, removeTags, (s) => removeRedundantString(s, "Description: ")),
 });

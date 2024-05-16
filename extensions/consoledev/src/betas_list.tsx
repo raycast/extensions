@@ -36,9 +36,7 @@ export default function BetasList() {
       navigationTitle={state.feed?.title}
       searchBarPlaceholder="Filter betas by name..."
     >
-      {state.feed?.items.map((beta) => (
-        <FeedItem item={beta} key={beta.link} icon={Icon.Gear} />
-      ))}
+      {state.feed?.items.map((beta) => <FeedItem item={beta} key={beta.link} icon={Icon.Gear} />)}
     </List>
   );
 }

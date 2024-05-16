@@ -54,7 +54,7 @@ const formatInterview = (interview: Interview): Interview => ({
     S.split(","),
     (a) => a.slice(1).join(", "),
     S.trim,
-    S.replace("&amp;", "&")
+    S.replace("&amp;", "&"),
     // truncate( 40 )
   ),
 });

@@ -9,8 +9,8 @@ import { is } from "./conditional";
 export const length = (str: string): number => str.length;
 export const append =
   (b: string) =>
-    (a: string): string =>
-      a + b;
+  (a: string): string =>
+    a + b;
 export const truncate = (maxLength: number): R.Reader<string, string> =>
   pipe(
     R.ask<string>(),
@@ -22,11 +22,11 @@ export const truncate = (maxLength: number): R.Reader<string, string> =>
         is,
         O.fold(
           () => str,
-          () => pipe(str, S.slice(0, maxLength), S.trim, append("..."))
-        )
-      )
-    )
+          () => pipe(str, S.slice(0, maxLength), S.trim, append("...")),
+        ),
+      ),
+    ),
   );
 
-export const removeTags = (str: string): string => str.replace(/<[^>]*>/g, '');
-export const removeRedundantString = (str: string, pattern: string): string => str.replace(pattern, '');
+export const removeTags = (str: string): string => str.replace(/<[^>]*>/g, "");
+export const removeRedundantString = (str: string, pattern: string): string => str.replace(pattern, "");

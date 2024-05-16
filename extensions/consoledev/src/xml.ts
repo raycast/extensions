@@ -8,15 +8,14 @@ type RSSObject<T> = {
   [key in keyof T]: [T[key]];
 };
 
-const parseRSSObject = <T>(rssObject: RSSObject<T>): T => (Object.keys(rssObject) as Array<keyof T>).reduce(
-  (acc, k) => {
+const parseRSSObject = <T>(rssObject: RSSObject<T>): T =>
+  (Object.keys(rssObject) as Array<keyof T>).reduce((acc, k) => {
     const data = rssObject[k][0];
     return {
       ...acc,
       [k]: data,
     };
-  }, {} as T
-);
+  }, {} as T);
 
 export const buildFeed = async (xml: string) => {
   const {
