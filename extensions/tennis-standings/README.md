@@ -1,6 +1,6 @@
 # Tennis Standings
 
-- Shows the ATP live rankings
-- TODO: Shows player details
-- TODO: Search Player
-- TODO: search H2H
+- Shows the ATP and WTA live rankings
+- Shows the ATP and WTA race
+- Shows player details
+- Filters players by country
