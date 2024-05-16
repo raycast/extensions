@@ -1,9 +1,19 @@
-import { Action, ActionPanel, Form, getSelectedFinderItems, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCallback, useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getSelectedFinderItems,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+  Clipboard,
+} from "@raycast/api";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DEFAULT_MODEL } from "../../hooks/useModel";
 import { QuestionFormProps } from "../../type";
-import { checkFileValidity } from "../../utils";
-import { showFailureToast } from "@raycast/utils";
+import { checkFileValidity, formats } from "../../utils";
+import path from "node:path";
 
 export const QuestionForm = ({
   initialQuestion,
@@ -11,14 +21,13 @@ export const QuestionForm = ({
   models,
   onModelChange,
   onSubmit,
+  isFirstCall,
 }: QuestionFormProps) => {
   const { pop } = useNavigation();
 
   const [question, setQuestion] = useState<string>(initialQuestion ?? "");
-  const [error, setError] = useState<{ question: string; attachments: string }>({
-    question: "",
-    attachments: "",
-  });
+  const [questionError, setQuestionError] = useState<string | undefined>();
+  const [attachmentError, setAttachmentError] = useState<string | undefined>();
 
   const separateDefaultModel = models.filter((x) => x.id !== "default");
   const defaultModel = models.find((x) => x.id === "default") ?? DEFAULT_MODEL;
@@ -32,15 +41,31 @@ export const QuestionForm = ({
   const [files, setFiles] = useState<string[]>([]);
   const [enableVision, setEnableVision] = useState(visionMap.get(selectedModel) || false);
 
-  const addFiles = useCallback(
+  const addFromSelected = useCallback(
     (errCallback?: (reason: unknown) => void | Promise<void>) => {
       getSelectedFinderItems()
         .then((items) => items.map((item) => item.path))
-        .then((p) => setFiles(p))
+        .then((p) => setFiles(p.sort()))
         .catch(errCallback);
     },
     [setFiles]
   );
+
+  const addFromClipboard = useCallback(async () => {
+    const { text, file } = await Clipboard.read();
+    // console.log(`text`, text);
+    // console.log(`file`, file);
+    if (file && (text.startsWith("Image") || Object.keys(formats).includes(path.extname(file)))) {
+      setFiles((files) => [...new Set([...files, file!])].sort());
+    }
+  }, [setFiles]);
+
+  useEffect(() => {
+    if (isFirstCall && enableVision) {
+      addFromSelected(() => {});
+      addFromClipboard();
+    }
+  }, []);
 
   return (
     <Form
@@ -50,40 +75,52 @@ export const QuestionForm = ({
             title="Submit"
             icon={Icon.Checkmark}
             onSubmit={async () => {
+              if (question.length === 0) {
+                setQuestionError("Required");
+                return;
+              }
               let searchFiles: string[] = [];
               if (enableVision) {
                 // If the model not enable vision, don't pass files to API
-                try {
-                  files.forEach((file) => checkFileValidity(file));
-                  searchFiles = files;
-                } catch (err) {
-                  setError({ ...error, attachments: "Contain Invalid File" });
-                  await showFailureToast(err, { title: "Invalid file" });
+                if (!validateAttachments(files)) {
+                  setAttachmentError("Contain Invalid File");
                   return;
                 }
+                searchFiles = files;
               }
               onSubmit(question, searchFiles);
               pop();
             }}
           />
           {enableVision && (
-            <Action
-              title="Upload Selected Files"
-              shortcut={{
-                modifiers: ["cmd"],
-                key: ".",
-              }}
-              icon={Icon.Plus}
-              onAction={() =>
-                addFiles(async (error) => {
-                  await showToast({
-                    style: Toast.Style.Failure,
-                    title: "Cannot copy file path",
-                    message: String(error),
-                  });
-                })
-              }
-            />
+            <>
+              <Action
+                title="Upload Selected Files"
+                shortcut={{
+                  modifiers: ["cmd"],
+                  key: ".",
+                }}
+                icon={Icon.Plus}
+                onAction={() =>
+                  addFromSelected(async (error) => {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Cannot copy file path",
+                      message: String(error),
+                    });
+                  })
+                }
+              />
+              <Action
+                title="Upload Clipboard File"
+                shortcut={{
+                  modifiers: ["shift", "cmd"],
+                  key: ".",
+                }}
+                icon={Icon.Clipboard}
+                onAction={addFromClipboard}
+              />
+            </>
           )}
         </ActionPanel>
       }
@@ -92,16 +129,19 @@ export const QuestionForm = ({
         id="question"
         title="Question"
         placeholder="Type your question here"
-        error={error.question.length > 0 ? error.question : undefined}
-        onChange={setQuestion}
+        error={questionError}
+        onChange={(q) => {
+          if (questionError && questionError.length > 0) {
+            setQuestionError(undefined);
+          }
+          setQuestion(q);
+        }}
         value={question}
-        onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setError({ ...error, question: "Required" });
+        onBlur={(e) => {
+          if (e.target.value && e.target.value.length > 0) {
+            setQuestionError(undefined);
           } else {
-            if (error.question && error.question.length > 0) {
-              setError({ ...error, question: "" });
-            }
+            setQuestionError("Required");
           }
         }}
       />
@@ -128,14 +168,40 @@ export const QuestionForm = ({
           id="attachments"
           title="Attachments"
           value={files}
-          error={error.attachments.length > 0 ? error.attachments : undefined}
+          error={attachmentError}
           onChange={(files) => {
-            setError({ ...error, attachments: "" });
+            if (attachmentError && attachmentError.length > 0) {
+              setAttachmentError(undefined);
+            }
+            if (enableVision && files && files.length > 0) {
+              if (!validateAttachments(files)) {
+                setAttachmentError("Contain Invalid File");
+              }
+            }
             setFiles(files);
+          }}
+          onBlur={() => {
+            if (attachmentError && attachmentError.length > 0) {
+              setAttachmentError(undefined);
+            }
           }}
           info="Currently support PNG (.png), JPEG (.jpeg and .jpg), WEBP (.webp), and non-animated GIF (.gif)."
         />
       )}
     </Form>
   );
+};
+
+const validateAttachments = (files: string[]) => {
+  for (const file of files) {
+    if (path.extname(file) === "") {
+      // this is clipboard image file
+      continue;
+    }
+    if (checkFileValidity(file)) {
+      continue;
+    }
+    return false;
+  }
+  return true;
 };

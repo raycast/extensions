@@ -1,5 +1,13 @@
 # Changelog
 
+## [Fix] - 2024-05-16
+
+- Fix: add `isAutoFullInput` state machine check
+- Fix: `isAutoTTS` not available in stream mode
+- Feat: support detail show img
+- Feat: support clipboard upload file
+- Fix: question onchange not clear error
+
 ## [Fix] - 2024-05-15
 
 - Fix: `List.Item.Detail.Markdown` display big image caused Heap out of memory

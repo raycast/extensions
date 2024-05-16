@@ -113,11 +113,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         } else {
           const completion = res as ChatCompletion;
           chat = { ...chat, answer: completion.choices.map((x) => x.message)[0]?.content ?? "" };
-
-          if (isAutoTTS) {
-            say.stop();
-            say.speak(chat.answer);
-          }
+        }
+        if (isAutoTTS) {
+          say.stop();
+          say.speak(chat.answer);
         }
         setLoading(false);
         toast.title = "Got your answer!";

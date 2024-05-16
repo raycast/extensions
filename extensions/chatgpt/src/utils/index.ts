@@ -51,16 +51,14 @@ export const getConfigUrl = (params: Preferences) => {
   return "https://api.openai.com/v1";
 };
 
-export const checkFileValidity = (file: string) => {
+export const checkFileValidity = (file: string): boolean => {
   const fileExtension = path.extname(file);
   const acceptedFileExtensions = Object.keys(formats);
-  if (!acceptedFileExtensions.includes(fileExtension)) {
-    throw new Error(`${fileExtension} is not a valid file type!`);
-  }
+  return acceptedFileExtensions.includes(fileExtension);
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
-const formats: { [K: string]: string } = {
+export const formats: { [K: string]: string } = {
   ".png": "image/png",
   ".jpeg": "image/jpeg",
   ".jpg": "image/jpeg",
@@ -70,13 +68,15 @@ const formats: { [K: string]: string } = {
 
 export const imgFormat = (file: string) => {
   const fileExtension = path.extname(file);
-  const type = formats[fileExtension];
+  let type = formats[fileExtension];
   if (!type) {
-    // should never happen
-    throw new Error(`Image format not supported for ${file}`);
+    // guess it from the clipboard
+    type = formats[".png"];
   }
+  // file:///var/folders/vx/xs9f3rcj74d2wlp32sz0t0h80000gn/T/Image%20(1772x1172)
+  const replace = file.replace("file://", "").replace("%20", " ");
   // data:image/jpeg;base64,{base64_image}
-  return `data:${type};base64,${fs.readFileSync(file).toString("base64")}`;
+  return `data:${type};base64,${fs.readFileSync(replace).toString("base64")}`;
 };
 
 export const buildUserMessage = (question: string, files: string[]) => {
