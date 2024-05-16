@@ -88,8 +88,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.73.2",
-    "trash-cli": "^5.0.0"
+    "@raycast/api": "^1.73.2"
   },
   "devDependencies": {
     "@types/node": "^16.10.0",
