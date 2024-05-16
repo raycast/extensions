@@ -52,10 +52,12 @@ export default async function main() {
       const stats = await stat(screenshot);
 
       if (stats.birthtimeMs <= priorDate.getTime()) {
-        if (screenshotBehavior === "0") {
-          await rm(screenshot);
-        } else {
-          await moveToTrash(screenshot);
+        switch(screenshotBehavior) {
+          case '1':
+            return await moveToTrash(screenshot);
+          case '0':
+          default:
+            return await rm(screenshot);          
         }
         cleanedCount = cleanedCount + 1;
       }
