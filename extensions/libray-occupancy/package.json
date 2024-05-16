@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "libray-occupancy",
-  "title": "How Busy Is the Library Now",
-  "description": "How busy is the Library?",
+  "title": "Main Library in University of St Andrews",
+  "description": "How busy is the main library now?",
   "icon": "command-icon.png",
-  "author": "Harry",
+  "author": "HarryHuang",
   "license": "MIT",
   "commands": [
     {
