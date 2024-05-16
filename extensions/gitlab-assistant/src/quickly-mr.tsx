@@ -1,4 +1,4 @@
-import { PopToRootType, showHUD } from "@raycast/api";
+import { Clipboard, PopToRootType, showHUD } from "@raycast/api";
 import { createMr, getUserEvent } from "./utils/api";
 
 const getYesterdayDate = () => {
@@ -23,18 +23,16 @@ export default async function Command() {
   if (firstPushEvent) {
     const { push_data, project_id } = firstPushEvent;
     const { commit_title, ref } = push_data;
-    await createMr({
+    const data = await createMr({
       id: project_id,
       data: {
         source_branch: ref,
         target_branch: "dev",
         title: commit_title,
       },
-    })
-      .then(() => showHUD("Success 🎉 : Created!", { popToRootType: PopToRootType.Immediate }))
-      .catch((error) => {
-        console.log(error);
-      });
+    });
+    await Clipboard.copy(data.web_url);
+    showHUD("Merge request created successfully 🎉", { popToRootType: PopToRootType.Immediate });
   } else {
     showHUD("Failed 🥵 : No push event found today!", { popToRootType: PopToRootType.Immediate });
   }
