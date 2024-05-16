@@ -5,6 +5,9 @@
   "description": "Naver search extension for Raycast",
   "icon": "command-icon.png",
   "author": "magneto",
+  "contributors": [
+    "2JS"
+  ],
   "categories": [
     "Web"
   ],
