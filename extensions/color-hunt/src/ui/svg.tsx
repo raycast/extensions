@@ -1,8 +1,8 @@
-import { eachHex, toBase64 } from "../utils/util";
+import { eachHex } from "../utils/util";
 import { usePromise } from "@raycast/utils";
 import satori from "satori";
 import fs from "fs";
-import { Cache, environment } from "@raycast/api";
+import { environment } from "@raycast/api";
 
 export const Svg = ({ id, show }: { show: boolean; id: string }) => {
   const display = show ? "flex" : "none";
@@ -60,16 +60,12 @@ export const Svg = ({ id, show }: { show: boolean; id: string }) => {
 
 const fontData = fs.readFileSync(environment.assetsPath + "/Roboto-Regular.ttf");
 
-const cache = new Cache({
-  namespace: "svgs",
-  capacity: 100,
-});
-
 export class Svgs {
   public static async core(id: string, show: boolean, width: number, height: number) {
-    const key = `${id}-${show}-${width}-${height}`;
-    if (cache.has(key)) {
-      return cache.get(key);
+    const key = `${id}_${show}_${width}_${height}`;
+    const file = environment.supportPath + `/palette/${key}.svg`;
+    if (fs.existsSync(file)) {
+      return file;
     }
 
     // const {resourceLimits} = await import('node:worker_threads')
@@ -94,10 +90,9 @@ export class Svgs {
         },
       ],
     });
-    const base64 = toBase64(graph);
-    const svg = `data:image/svg+xml;base64,${base64}`;
-    cache.set(key, svg);
-    return svg;
+
+    fs.writeFileSync(file, graph, "utf-8");
+    return file;
   }
 
   public static generate(w: number, h: number) {

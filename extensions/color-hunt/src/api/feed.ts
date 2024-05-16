@@ -3,6 +3,7 @@ import { Feed, Tags } from "../type";
 import fetch from "cross-fetch";
 import { Svgs } from "../ui/svg";
 import { readIds } from "../utils/storage";
+import { launchCommand, LaunchType } from "@raycast/api";
 
 /**
  * New
@@ -38,15 +39,6 @@ export default function (sort: string, tags: Tags) {
     (sort, tags, timeframe) => async (options: { page: number }) => {
       // console.log("fetching", options.page, sort, tags, timeframe);
 
-      if (options.page > 11) {
-        // ERR_WORKER_OUT_OF_MEMORY
-        // Worker terminated due to reaching memory limit: JS heap out of memory
-        return {
-          data: [],
-          hasMore: false,
-        };
-      }
-
       const tagsData = [...tags.colors, ...tags.collections].join("-");
       const feeds = await fetch("https://colorhunt.co/php/feed.php", {
         method: "POST",
@@ -59,8 +51,9 @@ export default function (sort: string, tags: Tags) {
       const localLikes = await readIds();
 
       const svgs: string[] = [];
+      const generator = Svgs.default();
       for (const feed of feeds) {
-        svgs.push((await Svgs.default()(feed.code, true)) || "");
+        svgs.push((await generator(feed.code, true)) || "");
       }
 
       return {
@@ -73,5 +66,16 @@ export default function (sort: string, tags: Tags) {
       };
     },
     [sort, tags, timeframe],
+    {
+      onData: async () => {
+        await launchCommand({
+          name: "clear",
+          type: LaunchType.Background,
+          context: {
+            clear: true,
+          },
+        });
+      },
+    },
   );
 }

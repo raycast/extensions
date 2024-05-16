@@ -1,13 +1,14 @@
-import { Action, ActionPanel, Color, Grid, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, environment, Grid, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import feed from "./api/feed";
 import { eachHex } from "./utils/util";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PaletteDetail } from "./components/PaletteDetail";
-import { IndexForm } from "./components/IndexForm";
+import { SearchForm } from "./components/SearchForm";
 import { IndexData, Tags } from "./type";
 import fetch from "cross-fetch";
 import like from "./api/like";
 import { remove, write } from "./utils/storage";
+import fs from "fs";
 
 global.fetch = fetch;
 
@@ -72,6 +73,12 @@ export default function Command() {
     });
   };
 
+  useEffect(() => {
+    if (!fs.existsSync(environment.supportPath + "/palette")) {
+      fs.mkdirSync(environment.supportPath + "/palette");
+    }
+  }, []);
+
   const { pop } = useNavigation();
   return (
     <Grid
@@ -102,7 +109,7 @@ export default function Command() {
                 <Action.Push target={<PaletteDetail id={item.data.code} />} title="View Details" icon={Icon.Bird} />
                 <Action.Push
                   target={
-                    <IndexForm
+                    <SearchForm
                       tags={tags}
                       submitCallback={(values) => {
                         setTags(values);

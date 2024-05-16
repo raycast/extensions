@@ -16,7 +16,7 @@ export const PaletteDetail = ({ id }: { id: string }) => {
   return (
     <Detail
       isLoading={isLoading || svgLoading}
-      markdown={svgData ? `![](${svgData})` : ""}
+      markdown={svgData ? `![](file://${encodeURI(svgData)})` : ""}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Copy with..">

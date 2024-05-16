@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { Tags } from "../type";
 
-export const IndexForm = ({ submitCallback, tags }: { submitCallback: (values: Tags) => void; tags: Tags }) => {
+export const SearchForm = ({ submitCallback, tags }: { submitCallback: (values: Tags) => void; tags: Tags }) => {
   const { reset, handleSubmit, itemProps } = useForm<Tags>({
     onSubmit: submitCallback,
     initialValues: tags,

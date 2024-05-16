@@ -1,20 +1,21 @@
-import { environment, LocalStorage } from "@raycast/api";
-import path from "node:path";
-import fs from "fs";
+import { LocalStorage } from "@raycast/api";
 import { StorageData } from "../type";
-import { promises } from "node:fs";
 
-const file = path.join(environment.supportPath, "likes.json");
+const key = "likesJson";
 
 export async function readIds() {
-  const data = await LocalStorage.getItem<string>("likes");
-  return data ? data.split(",") : [];
+  const likes = await read();
+  return likes.map((like) => like.code);
 }
 
 export async function read(): Promise<StorageData[]> {
   try {
-    const data = await promises.readFile(file, "utf-8");
-    return JSON.parse(data) as unknown as StorageData[];
+    const likesJson = await LocalStorage.getItem<string>(key);
+    if (likesJson) {
+      console.log(likesJson);
+      return JSON.parse(likesJson) as StorageData[];
+    }
+    return [];
   } catch (error) {
     throw new Error("Failed to read storage file");
   }
@@ -24,15 +25,13 @@ export async function write(code: string, svg: string) {
   const storageData = await read();
   const data = storageData.filter((item) => item.code !== code);
   data.push({ code, svg });
-  fs.writeFileSync(file, JSON.stringify(data.sort()));
 
-  await LocalStorage.setItem("likes", data.map((item) => item.code).join(","));
+  await LocalStorage.setItem(key, JSON.stringify(data.sort()));
 }
 
 export async function remove(code: string) {
   const storageData = await read();
   const data = storageData.filter((item) => item.code !== code);
-  fs.writeFileSync(file, JSON.stringify(data.sort()));
 
-  await LocalStorage.setItem("likes", data.map((item) => item.code).join(","));
+  await LocalStorage.setItem(key, JSON.stringify(data.sort()));
 }
