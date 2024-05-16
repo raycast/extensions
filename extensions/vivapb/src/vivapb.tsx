@@ -37,11 +37,7 @@ function showOpenVivaldiErrorToast() {
   showToast(options);
 }
 
-<<<<<<< HEAD
-export default async function openVivaldiIncognitoIfInstalled(): Promise<void> {
-=======
 async function openVivaldiIncognitoIfInstalled() {
->>>>>>> contributions/merge-1715817412472080000
   const vivaldiInstalled = await isVivaldiInstalled();
   if (vivaldiInstalled) {
     await openVivaldiIncognito();
@@ -49,7 +45,3 @@ async function openVivaldiIncognitoIfInstalled() {
     showVivaldiNotInstalledErrorToast();
   }
 }
-<<<<<<< HEAD
-openVivaldiIncognitoIfInstalled();
-=======
->>>>>>> contributions/merge-1715817412472080000
