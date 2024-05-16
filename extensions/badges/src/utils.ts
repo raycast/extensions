@@ -1,4 +1,4 @@
-import { Color, LaunchType } from "@raycast/api";
+import { Color, open, LaunchType } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 
 export const ellipsis = (text: string = "", maxLength: number = 20) =>
