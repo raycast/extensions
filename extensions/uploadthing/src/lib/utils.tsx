@@ -5,6 +5,7 @@ import {
   Detail,
   getPreferenceValues,
   openExtensionPreferences,
+  Icon,
 } from "@raycast/api";
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
@@ -56,6 +57,7 @@ export const guardInvalidApiKey = () => {
           <ActionPanel>
             <Action
               title="Open Extension Preferences"
+              icon={Icon.Gear}
               onAction={openExtensionPreferences}
             />
           </ActionPanel>
