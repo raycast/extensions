@@ -14,10 +14,21 @@ export const isEmpty = (string: string | null | undefined) => {
 };
 
 export const getThumbnailUrl = (url: string) => {
+  // TODO: Hacky way to get the thumbnail URLs for the new wallpapers, replace them for optimized thumbnails
+  const fileName = url.split("wallpapers/")[1];
+  if (fileName.includes("_")) {
+    return url.replace(`.${getFileType(url)}`, "_preview.png");
+  }
+
   return url.replace(`.${getFileType(url)}`, "-thumbnail.webp");
 };
 
 export const getPreviewUrl = (url: string) => {
+  const fileName = url.split("wallpapers/")[1];
+  if (fileName.includes("_")) {
+    return url.replace(`.${getFileType(url)}`, "_preview.png");
+  }
+
   return url.replace(`.${getFileType(url)}`, "-preview.png");
 };
 

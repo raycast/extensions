@@ -1,13 +1,13 @@
-import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
-import { getErrorMessage } from "@lib/utils";
-import { MenuBarItemConfigureCommand } from "@components/menu";
 import { useHAStates } from "@components/hooks";
-import { State } from "@lib/haapi";
-import { HAPersistentNotification } from "@components/persistentnotification/utils";
+import { MenuBarItemConfigureCommand } from "@components/menu";
 import { useHAPersistentNotifications } from "@components/persistentnotification/hooks";
 import { PersistentNotificationsMenubarSection } from "@components/persistentnotification/list";
+import { HAPersistentNotification } from "@components/persistentnotification/utils";
 import { UpdatesMenubarSection } from "@components/update/menu";
 import { getHACSRepositories } from "@components/update/utils";
+import { State } from "@lib/haapi";
+import { getErrorMessage } from "@lib/utils";
+import { getPreferenceValues, MenuBarExtra } from "@raycast/api";
 
 function showCountInMenu(): boolean {
   const prefs = getPreferenceValues();

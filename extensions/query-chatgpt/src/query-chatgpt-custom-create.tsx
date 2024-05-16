@@ -49,7 +49,7 @@ export default function Command() {
       <Form.TextArea
         id="gptUrl"
         title="GPT URL"
-        placeholder="Enter GPT URL, e.g. https://chat.openai.com/?model=text-davinci-002-render-sha"
+        placeholder="Enter GPT URL, e.g. https://chatgpt.com/?model=text-davinci-002-render-sha"
         value={gptUrl}
         onChange={setGptUrl}
       />

@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - 2024-05-10
+- Cache the user object for 30 minute for a small performance benefit.
+
 ## [Fixes] - 2024-02-17
 - Fix task form so that it honors user preferences for the Up Next and Visibility task settings. 
 

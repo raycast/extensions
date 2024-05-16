@@ -55,7 +55,7 @@ export function Videos(props: { files: string[] }) {
               <Action.OpenWith path={file} />
               <Action title="Open in Finder" onAction={() => showInFinder(file)} icon={{ source: Icon.Finder }} />
               <Action
-                title="Remove from History"
+                title="Remove From History"
                 style={Action.Style.Destructive}
                 onAction={() => removeFromHistory(file)}
                 icon={{ source: Icon.Trash }}
