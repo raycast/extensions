@@ -16,25 +16,25 @@
   "commands": [
     {
       "name": "edit-file",
-      "title": "Edit File In Alacritty",
+      "title": "Edit File in Alacritty",
       "description": "Edit the selected Finder file(s) in Alacritty using $EDITOR",
       "mode": "no-view"
     },
     {
       "name": "open-folder",
-      "title": "Open Folder In Alacritty",
+      "title": "Open Folder in Alacritty",
       "description": "Open an instance of Alacritty at the currently selected Finder folder(s) (or parent folder of the selected file)",
       "mode": "no-view"
     },
     {
       "name": "run-from-clipboard",
-      "title": "Run Command From Clipboard",
+      "title": "Run Command from Clipboard",
       "description": "Run the current clipboard content as a shell command in Alacritty. Use at your own risk!",
       "mode": "no-view"
     },
     {
       "name": "run-from-selection",
-      "title": "Run Command From Selection",
+      "title": "Run Command from Selection",
       "description": "Run the currently selected text as a shell command in Alacritty. Use at your own risk!",
       "mode": "no-view"
     },
