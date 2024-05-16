@@ -55,7 +55,7 @@ export default function ConfigureSay() {
           }
         }}
       >
-        <Form.Dropdown.Item value="System Default" title="System Default" />
+        {voices.length > 0 && <Form.Dropdown.Item value={defaultVoice} title={defaultVoice} />}
         {Object.entries(
           groupBy(voices, (v) => new Intl.DisplayNames(["en"], { type: "language" }).of(v.languageCode.slice(0, 2))),
         ).map(([language, voices]) => (
