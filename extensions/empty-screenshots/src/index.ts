@@ -35,7 +35,9 @@ export default async function main() {
 
     const screenshots = files
       .filter((file) => file.endsWith(".png") || file.endsWith(".mov"))
-      .filter((file) => prefixString ? file.startsWith(prefixString) : file.startsWith("CleanShot") || file.startsWith("Screen"))
+      .filter((file) =>
+        prefixString ? file.startsWith(prefixString) : file.startsWith("CleanShot") || file.startsWith("Screen"),
+      )
       .map((file) => join(folder, file));
 
     const today = new Date();
@@ -50,14 +52,15 @@ export default async function main() {
 
     for (const screenshot of screenshots) {
       const stats = await stat(screenshot);
-
       if (stats.birthtimeMs <= priorDate.getTime()) {
-        switch(screenshotBehavior) {
-          case '1':
-            return await moveToTrash(screenshot);
-          case '0':
+        switch (screenshotBehavior) {
+          case "1":
+            await moveToTrash(screenshot);
+            break;
+          case "0":
           default:
-            return await rm(screenshot);          
+            await rm(screenshot);
+            break;
         }
         cleanedCount = cleanedCount + 1;
       }
