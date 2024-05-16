@@ -115,7 +115,7 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
         {note.links.length > 0 ? (
           <ActionPanel.Submenu title="Open Links" icon={Icon.Link} shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}>
             {note.links.map((link) => {
-              if (link.url) {
+              if (link.url && link.text) {
                 return (
                   <Action.Open
                     key={link.id}

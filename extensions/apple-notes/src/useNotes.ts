@@ -8,7 +8,7 @@ import { getOpenNoteURL } from "./helpers";
 
 type Link = {
   id: string;
-  text: string;
+  text: string | null;
   url: string | null;
   notePk: number;
 };
@@ -21,7 +21,7 @@ type Backlink = {
 
 type Tag = {
   id: string;
-  text: string;
+  text: string | null;
   notePk: number;
 };
 
