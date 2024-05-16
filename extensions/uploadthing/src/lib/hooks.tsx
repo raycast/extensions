@@ -47,7 +47,7 @@ export const useUpload = () => {
       toast.current!.primaryAction = {
         title: "Open Extension Preferences",
         onAction: (toast) => {
-          openExtensionPreferences;
+          openExtensionPreferences();
           toast.hide();
         },
       };
