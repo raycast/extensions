@@ -1,4 +1,5 @@
 import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { callbackLaunchCommand } from "raycast-cross-extension";
 import { addToHistory } from "./history";
 import { Color, PickColorCommandLaunchProps } from "./types";
 import { getFormattedColor } from "./utils";
@@ -27,13 +28,7 @@ export default async function command(props: PickColorCommandLaunchProps) {
       }
 
       try {
-        await launchCommand({
-          ...props.launchContext.callbackLaunchOptions,
-          context: {
-            ...props.launchContext.callbackLaunchOptions.context,
-            hex,
-          },
-        });
+        await callbackLaunchCommand(props.launchContext.callbackLaunchOptions, { hex });
       } catch (e) {
         await showFailureToast(e);
       }

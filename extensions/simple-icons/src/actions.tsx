@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Action, Clipboard, Icon, Toast, launchCommand, showHUD, showToast } from "@raycast/api";
+import { Action, Clipboard, Icon, Toast, showHUD, showToast } from "@raycast/api";
 import { titleToSlug } from "simple-icons/sdk";
 import { loadSvg, makeCopyToDownload } from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
+import { callbackLaunchCommand } from "raycast-cross-extension";
 
 type ActionProps = {
   icon: IconData;
@@ -80,7 +81,7 @@ export const LaunchCommand = ({ callbackLaunchOptions, icon }: LaunchContext & A
     title="Use This Icon"
     icon={Icon.Checkmark}
     onAction={async () => {
-      launchCommand({ ...callbackLaunchOptions, context: { launchFromExtensionName: "simple-icons", icon } });
+      callbackLaunchCommand(callbackLaunchOptions, { icon });
     }}
   />
 );

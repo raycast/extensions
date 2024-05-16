@@ -1,5 +1,5 @@
-import { Color as Colour, Detail, Icon, LaunchType, launchCommand, open } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Color as Colour, Detail, Icon, LaunchType, open } from "@raycast/api";
+import { crossLaunchCommand } from "raycast-cross-extension";
 import { badgeSizes, badgeStyles, dynamicBadgeTypes } from "../constants.js";
 import { Badge } from "../types.js";
 import { ellipsis, getTagColor, pickColor } from "../utils.js";
@@ -67,8 +67,6 @@ export const Message = ({ badge, onChange, onInput }: ParameterProps) => {
 };
 
 export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
-  const [launchCommandName] = useCachedState("launchCommandName");
-
   return (
     <Detail.Metadata.TagList title="color">
       <Detail.Metadata.TagList.Item text={badge.color} color={badge.color} />
@@ -86,7 +84,7 @@ export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
         text="pick"
         color={Colour.SecondaryText}
         onAction={async () => {
-          await pickColor({ launchCommandName, field: "color" });
+          await pickColor({ field: "color" });
         }}
       />
       <Detail.Metadata.TagList.Item
@@ -102,8 +100,6 @@ export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
 };
 
 export const LabelColor = ({ badge, onChange, onInput }: ParameterProps) => {
-  const [launchCommandName] = useCachedState("launchCommandName");
-
   return (
     <>
       {badge.label && (
@@ -128,7 +124,7 @@ export const LabelColor = ({ badge, onChange, onInput }: ParameterProps) => {
             text="pick"
             color={Colour.SecondaryText}
             onAction={async () => {
-              await pickColor({ launchCommandName, field: "labelColor" });
+              await pickColor({ field: "labelColor" });
             }}
           />
           <Detail.Metadata.TagList.Item
@@ -144,8 +140,6 @@ export const LabelColor = ({ badge, onChange, onInput }: ParameterProps) => {
 };
 
 export const Logo = ({ badge, onChange, onInput }: ParameterProps) => {
-  const [launchCommandName] = useCachedState("launchCommandName");
-
   const { $icon, logoColor, logoSize } = badge;
 
   return (
@@ -158,21 +152,23 @@ export const Logo = ({ badge, onChange, onInput }: ParameterProps) => {
           color={Colour.SecondaryText}
           onAction={async () => {
             try {
-              await launchCommand({
-                name: "index",
-                type: LaunchType.UserInitiated,
-                extensionName: "simple-icons",
-                ownerOrAuthorName: "litomore",
-                context: {
-                  launchFromExtensionTitle: "Badges - shields.io",
-                  callbackLaunchOptions: {
-                    name: launchCommandName,
-                    type: LaunchType.UserInitiated,
-                    extensionName: "badges",
-                    ownerOrAuthorName: "litomore",
+              await crossLaunchCommand(
+                {
+                  name: "index",
+                  type: LaunchType.UserInitiated,
+                  extensionName: "simple-icons",
+                  ownerOrAuthorName: "litomore",
+                  context: {
+                    launchFromExtensionTitle: "Badges - shields.io",
                   },
                 },
-              });
+                {
+                  ownerOrAuthorName: "litomore",
+                  context: {
+                    launchFromExtensionName: "simple-icons",
+                  },
+                },
+              );
             } catch {
               open("raycast://extensions/litomore/simple-icons");
             }
@@ -200,7 +196,7 @@ export const Logo = ({ badge, onChange, onInput }: ParameterProps) => {
               text="pick"
               color={Colour.SecondaryText}
               onAction={async () => {
-                await pickColor({ launchCommandName, field: "logoColor" });
+                await pickColor({ field: "logoColor" });
               }}
             />
             <Detail.Metadata.TagList.Item

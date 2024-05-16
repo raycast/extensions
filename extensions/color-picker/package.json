@@ -101,7 +101,8 @@
   "dependencies": {
     "@raycast/api": "^1.68.0",
     "@raycast/utils": "^1.10.1",
-    "colorjs.io": "^0.4.5"
+    "colorjs.io": "^0.4.5",
+    "raycast-cross-extension": "^0.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

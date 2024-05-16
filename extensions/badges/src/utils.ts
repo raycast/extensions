@@ -1,4 +1,5 @@
-import { Color, LaunchType, launchCommand } from "@raycast/api";
+import { Color, LaunchType } from "@raycast/api";
+import { crossLaunchCommand } from "raycast-cross-extension";
 
 export const ellipsis = (text: string = "", maxLength: number = 20) =>
   text.length > maxLength ? text.slice(0, maxLength) + "…" : text;
@@ -11,26 +12,23 @@ export const encodeBadgeContentParameters = (params: string[]) =>
 export const getTagColor = (active: boolean, activeColor?: Color.ColorLike) =>
   active ? activeColor ?? Color.Green : Color.SecondaryText;
 
-export const pickColor = async ({ launchCommandName, field }: { launchCommandName?: string; field: string }) => {
+export const pickColor = async ({ field }: { field: string }) => {
   try {
-    await launchCommand({
-      name: "pick-color",
-      type: LaunchType.UserInitiated,
-      extensionName: "color-picker",
-      ownerOrAuthorName: "thomas",
-      context: {
-        callbackLaunchOptions: {
-          name: launchCommandName,
-          type: LaunchType.UserInitiated,
-          extensionName: "badges",
-          ownerOrAuthorName: "litomore",
-          context: {
-            launchFromExtensionName: "color-picker",
-            field,
-          },
+    await crossLaunchCommand(
+      {
+        name: "pick-color",
+        type: LaunchType.UserInitiated,
+        extensionName: "color-picker",
+        ownerOrAuthorName: "thomas",
+      },
+      {
+        ownerOrAuthorName: "litomore",
+        context: {
+          launchFromExtensionName: "color-picker",
+          field,
         },
       },
-    });
+    );
   } catch {
     open("raycast://extensions/thomas/color-picker");
   }

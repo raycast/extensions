@@ -2,6 +2,8 @@
 
 Browse, search, and copy 3100+ free SVG icons for popular brands from [Simple Icons](https://simpleicons.org).
 
+[![raycast-cross-extension-badge]][raycast-cross-extension-link]
+
 ## Disclaimer
 
 We ask that all users read our [legal disclaimer](https://github.com/simple-icons/simple-icons/blob/develop/DISCLAIMER.md) before using icons from Simple Icons.
@@ -18,6 +20,8 @@ We ask that all users read our [legal disclaimer](https://github.com/simple-icon
 - Expose launch API for other extensions
 
 ## API
+
+This extensions follows [Raycast Cross-Extension Conventions][raycast-cross-extension-link].
 
 You can use `launchCommand` to use this extension search result.
 
@@ -46,12 +50,6 @@ Use this option to let this extension know what kind of callback needs to be per
 
 ### Callback Context Options
 
-#### `launchFromExtensionName`
-
-Type: `string`
-
-It returns `simple-icons`.
-
 #### `icon`
 
 Type: `IconData`
@@ -61,36 +59,35 @@ It returns the icon data.
 ### Launch Example
 
 ```jsx
-launchCommand({
-  name: "index",
-  type: LaunchType.UserInitiated,
-  extensionName: "simple-icons",
-  ownerOrAuthorName: "litomore",
-  context: {
-    launchFromExtensionTitle: "Badges - shields.io",
-    showCopyActions: true,
-    callbackLaunchOptions: {
-      name: "createStaticBadge",
-      type: LaunchType.UserInitiated,
-      extensionName: "badges",
-      ownerOrAuthorName: "litomore",
+import { crossLaunchCommand } from "raycast-cross-command";
+
+crossLaunchCommand(
+  {
+    name: "index",
+    type: LaunchType.UserInitiated,
+    extensionName: "simple-icons",
+    ownerOrAuthorName: "litomore",
+    context: {
+      launchFromExtensionTitle: "Badges - shields.io",
     },
   },
-});
+  {
+    ownerOrAuthorName: "your-extension-author-name",
+  },
+);
 ```
 
 ### Receive Callback Example
 
-```jsx
-import {LaunchProps} from '@raycast/api';
+```typescript
+import { LaunchProps } from "@raycast/api";
 
 type LaunchContext = {
-  launchFromExtensionName: string;
-  icon: IconData,
-}
+  icon: IconData;
+};
 
-export default function Command({launchContext = {}}: LaunchProps<{launchContext?: LaunchContext}>) {
-  const {launchFromExtensionName, icon} = launchContext;
+export default function Command({ launchContext = {} }: LaunchProps<{ launchContext?: LaunchContext }>) {
+  const { icon } = launchContext;
   // ...
 }
 ```
@@ -109,3 +106,6 @@ export default function Command({launchContext = {}}: LaunchProps<{launchContext
 ## License
 
 MIT
+
+[raycast-cross-extension-badge]: https://shields.io/badge/Raycast-Cross--Extension-eee?labelColor=FF6363&logo=raycast&logoColor=fff&style=flat-square
+[raycast-cross-extension-link]: https://github.com/LitoMore/raycast-cross-extension-conventions

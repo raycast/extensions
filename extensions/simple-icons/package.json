@@ -69,6 +69,7 @@
   "dependencies": {
     "@raycast/api": "^1.70.3",
     "got": "^14.2.1",
+    "raycast-cross-extension": "^0.1.0",
     "simple-icons": "^11.12.0"
   },
   "devDependencies": {

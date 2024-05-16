@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Cache, Detail, Form, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { omitBy } from "lodash";
 import { Documentation } from "./components/actions.js";
 import { FieldType, fields } from "./components/parameters.js";
 import { Badge, LaunchFromSimpleIconsContext, LaunchFromColorPickerContext } from "./types.js";
 import { codeBlock, encodeBadgeContentParameters } from "./utils.js";
-
-const cache = new Cache();
-cache.set("launchCommandName", JSON.stringify("createStaticBadge"));
 
 const defaultBadge: Badge = {
   label: "label",
@@ -38,14 +35,11 @@ export default function Command({
   };
 
   useEffect(() => {
-    console.log(launchContext);
-
     if (launchContext?.launchFromExtensionName === "simple-icons" && launchContext?.icon) {
       setBadge({ ...badge, $icon: launchContext.icon, logo: launchContext.icon.slug, logoColor: undefined });
     }
 
     if (launchContext?.launchFromExtensionName === "color-picker" && launchContext?.hex && launchContext?.field) {
-      console.log(launchContext);
       setBadge({ ...badge, [launchContext.field]: launchContext.hex.slice(1) });
     }
   }, []);

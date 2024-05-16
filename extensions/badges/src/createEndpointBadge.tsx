@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Cache, Detail, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { omitBy } from "lodash";
 import { Documentation } from "./components/actions.js";
@@ -7,9 +7,6 @@ import { Input } from "./components/input.js";
 import { FieldType, fields } from "./components/parameters.js";
 import { Badge, LaunchFromSimpleIconsContext, LaunchFromColorPickerContext } from "./types.js";
 import { codeBlock } from "./utils.js";
-
-const cache = new Cache();
-cache.set("launchCommandName", JSON.stringify("createEndpointBadge"));
 
 const defaultBadge: Badge = {
   url: "https://gist.githubusercontent.com/LitoMore/aae8985fe6c2b4429db05570247d2a7a/raw/endpoint-badge-example",
@@ -43,7 +40,6 @@ export default function Command({
     }
 
     if (launchContext?.launchFromExtensionName === "color-picker" && launchContext?.hex && launchContext?.field) {
-      console.log(launchContext);
       setBadge({ ...badge, [launchContext.field]: launchContext.hex.slice(1) });
     }
   }, []);
