@@ -27,7 +27,27 @@
       "subtitle": "CleanShot X",
       "description": "Open Settings",
       "icon": "open-settings.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "tab",
+          "type": "dropdown",
+          "placeholder": "Tab",
+          "required": false,
+          "data": [
+            { "title": "General", "value": "general"},
+            { "title": "Wallpaper", "value": "wallpaper"},
+            { "title": "Shortcuts", "value": "shortcuts"},
+            { "title": "Quick Access", "value": "quickaccess"},
+            { "title": "Recording", "value": "recording"},
+            { "title": "Screenshots", "value": "screenshots"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Cloud", "value": "cloud"},
+            { "title": "Advanced", "value": "advanced"},
+            { "title": "About", "value": "about"}
+          ]
+        }
+      ]
     },
     {
       "name": "open-all-uploads",
@@ -51,7 +71,22 @@
       "subtitle": "CleanShot X",
       "description": "Fullscreen Screenshot",
       "icon": "capture-fullscreen.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "capture-area",
@@ -59,7 +94,22 @@
       "subtitle": "CleanShot X",
       "description": "Selection Tool Capture",
       "icon": "capture-area.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "capture-previous-area",
@@ -67,7 +117,22 @@
       "subtitle": "CleanShot X",
       "description": "Previously Selected Area",
       "icon": "capture-previous-area.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "capture-window",
@@ -75,7 +140,22 @@
       "subtitle": "CleanShot X",
       "description": "Window Capture",
       "icon": "capture-window.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "self-timer",
@@ -83,7 +163,22 @@
       "subtitle": "CleanShot X",
       "description": "Timer Based Screen Capture",
       "icon": "self-timer.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "scrolling-capture",
