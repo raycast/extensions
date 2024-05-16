@@ -55,16 +55,21 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   });
 
   const { push, pop } = useNavigation();
+  const [isConversationDone, setIsConversationDone] = useState(false);
 
   useEffect(() => {
+    // `QuestionForm` depend on models data and conversation data
+    // Eventually fixed https://github.com/raycast/extensions/issues/11420
+    if (models.isLoading || !isConversationDone) {
+      return;
+    }
     if (props.initialQuestion || !isAutoFullInput) {
       // `initialQuestion` only set from Summarize.tsx page
       // `isAutoFullInput` is set from preferences
       setLoading(false);
       return;
     }
-    // fix https://github.com/raycast/extensions/issues/11420
-    if (models.data.length == 0 || (isAutoLoadText && question.data.length === 0)) {
+    if (isAutoLoadText && question.data.length === 0) {
       setLoading(false);
       return;
     }
@@ -82,12 +87,13 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
           models={models.data}
           selectedModel={selectedModelId}
           onModelChange={setSelectedModelId}
+          isFirstCall={conversation.chats.length === 0}
         />
       );
     }
 
     setLoading(false);
-  }, [models.data, question.data, conversation.model]);
+  }, [models.isLoading, models.data, question.data, conversation.model]);
 
   useEffect(() => {
     if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
@@ -100,11 +106,14 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   }, [conversation]);
 
   useEffect(() => {
+    if (models.isLoading) {
+      return;
+    }
     if (models.data && conversation.chats.length === 0) {
       const defaultUserModel = models.data.find((x) => x.id === DEFAULT_MODEL.id) ?? conversation.model;
       setConversation({ ...conversation, model: defaultUserModel, updated_at: new Date().toISOString() });
     }
-  }, [models.data]);
+  }, [models.isLoading, models.data]);
 
   useEffect(() => {
     const updatedConversation = { ...conversation, chats: chats.data, updated_at: new Date().toISOString() };
@@ -112,6 +121,11 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   }, [chats.data]);
 
   useEffect(() => {
+    if (models.isLoading) {
+      return;
+    }
+    // as long as this side effect under the bottom stack, we should stick `state` in this position
+    setIsConversationDone(false);
     const selectedModel = models.data.find((x) => x.id === selectedModelId);
     // console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
@@ -119,7 +133,8 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       model: selectedModel ?? { ...conversation.model },
       updated_at: new Date().toISOString(),
     });
-  }, [selectedModelId, models.data]);
+    setIsConversationDone(true);
+  }, [selectedModelId, models.isLoading, models.data]);
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>

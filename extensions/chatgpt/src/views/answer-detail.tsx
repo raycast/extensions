@@ -5,11 +5,12 @@ export const AnswerDetailView = (props: { chat: Chat; streamData?: Chat | undefi
   const { chat, streamData } = props;
   const isStreaming = streamData && streamData.id === chat.id;
 
-  // FIXME: https://github.com/raycast/extensions/issues/12359
-  // Maybe save base64 inner Chat object is also a bad idea, waiting for raycast allow local file access
-  // const images: string = chat.images?.map((image) => `![](${image})`).join("\n") || "";
+  const width = Math.floor(430 / Math.min(Math.max(chat.files.length, 1), 2));
+  const images: string = chat.files?.map((file) => `![](file://${file}?raycast-width=${width})`).join("\n") || "";
 
-  const markdown = `${isStreaming ? streamData?.answer : chat.answer}\n\`\`\`\n${chat.question.trimEnd()}\n\`\`\`\n`;
+  const markdown = `${
+    isStreaming ? streamData?.answer : chat.answer
+  }\n\`\`\`\n${chat.question.trimEnd()}\n\`\`\`\n${images}\n\n`;
 
   return <List.Item.Detail markdown={markdown} />;
 };
