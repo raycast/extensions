@@ -34,18 +34,8 @@ export default async function main() {
     const files = await readdir(folder);
 
     const screenshots = files
-      .filter((file) => {
-        const endsWithValidExtension = file.endsWith(".png") || file.endsWith(".mov");
-        let startsWithValidPrefix = false;
-
-        if (prefixString) {
-          startsWithValidPrefix = file.startsWith(prefixString);
-        } else {
-          startsWithValidPrefix = file.startsWith("CleanShot") || file.startsWith("Screen");
-        }
-
-        return endsWithValidExtension && startsWithValidPrefix;
-      })
+      .filter((file) => file.endsWith(".png") || file.endsWith(".mov"))
+      .filter((file) => prefixString ? file.startsWith(prefixString) : file.startsWith("CleanShot") || file.startsWith("Screen"))
       .map((file) => join(folder, file));
 
     const today = new Date();
