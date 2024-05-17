@@ -7,7 +7,7 @@ function ActionsList(actionList: IAction[], refreshActions: () => void) {
   return (
     <List>
       {actionList.map((item) => (
-        <ActionItem key={item.id} item={item}  refreshActions={refreshActions} />
+        <ActionItem key={item.id} item={item} refreshActions={refreshActions} />
       ))}
     </List>
   );

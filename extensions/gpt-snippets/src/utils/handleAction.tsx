@@ -10,7 +10,6 @@ async function handleAction(action: IAction, push: (element: JSX.Element) => voi
     const clipboardContent = (await Clipboard.readText()) as string;
     const result = await sendOpenAIRequest(action.prompt, clipboardContent);
 
-
     push(<ResultPage action={action} result={result} />);
     showToast(Toast.Style.Success, `${action.title} Executed`);
   } catch (error) {

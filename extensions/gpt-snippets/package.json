@@ -6,7 +6,9 @@
   "icon": "logo.png",
   "author": "olegkron",
   "categories": [
-    "Developer Tools", "Productivity", "Other"
+    "Developer Tools",
+    "Productivity",
+    "Other"
   ],
   "license": "MIT",
   "commands": [
@@ -18,14 +20,14 @@
     }
   ],
   "preferences": [
-{
-  "name": "apiToken",
-  "type": "password",
-  "title": "OpenAI API Token",
-  "description": "Enter your API token",
-  "placeholder": "Enter your API token",
-  "required": true
-}
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "OpenAI API Token",
+      "description": "Enter your API token",
+      "placeholder": "Enter your API token",
+      "required": true
+    }
   ],
   "dependencies": {
     "@raycast/api": "^1.74.0",

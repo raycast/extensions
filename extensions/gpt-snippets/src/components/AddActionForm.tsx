@@ -39,7 +39,12 @@ export default function AddActionForm({ addAction, onAdd }: AddActionFormProps) 
         value={description}
         onChange={setDescription}
       />
-      <Form.Dropdown id="icon" title="Icon" value={icon} onChange={(newValue) => setIcon(newValue as keyof typeof Icon)}>
+      <Form.Dropdown
+        id="icon"
+        title="Icon"
+        value={icon}
+        onChange={(newValue) => setIcon(newValue as keyof typeof Icon)}
+      >
         {iconOptions}
       </Form.Dropdown>
       <Form.TextArea id="prompt" title="Prompt" placeholder="Enter prompt" value={prompt} onChange={setPrompt} />
