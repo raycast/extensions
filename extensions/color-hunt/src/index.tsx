@@ -7,10 +7,11 @@ import { SearchForm } from "./components/SearchForm";
 import { IndexData, Tags } from "./type";
 import fetch from "cross-fetch";
 import like from "./api/like";
-import { remove, write } from "./utils/storage";
 import fs from "fs";
+import { useFavorite } from "./hook/useFavorite";
 
 global.fetch = fetch;
+const initialTitle = "Website";
 
 export default function Command() {
   const [sort, setSort] = useState("new");
@@ -18,14 +19,21 @@ export default function Command() {
     colors: [],
     collections: [],
   });
+  useEffect(() => {
+    if (!fs.existsSync(environment.supportPath + "/palette")) {
+      fs.mkdirSync(environment.supportPath + "/palette");
+    }
+  }, []);
 
   const { isLoading, data, pagination, mutate } = feed(sort, tags);
 
-  const likeFunc = async (code: string, svg: string) => {
+  const { isLoading: favoriteLoading, value, favorite, unFavorite } = useFavorite();
+
+  const favoriteFunc = async (code: string, svg: string) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Liking Palette" });
     try {
       await mutate(
-        like(code).then(() => write(code, svg)),
+        like(code).then(() => favorite(code, svg)),
         {
           optimisticUpdate: (data: IndexData[] | undefined) => {
             if (!data) {
@@ -54,30 +62,24 @@ export default function Command() {
       if (error instanceof Error) toast.message = error.message;
     }
   };
-  const unfavorableFunc = async (id: string) => {
-    await mutate(remove(id), {
-      optimisticUpdate: (data: IndexData[] | undefined) => {
-        if (!data) {
-          return [];
-        }
-        return data.map((item) => {
-          if (item.data.code === id) {
-            return {
-              ...item,
-              liked: false,
-            };
-          }
-          return item;
-        });
-      },
-    });
-  };
+
+  const [title, setTitle] = useState(initialTitle);
 
   useEffect(() => {
-    if (!fs.existsSync(environment.supportPath + "/palette")) {
-      fs.mkdirSync(environment.supportPath + "/palette");
+    let title = initialTitle;
+    if (tags.colors.length > 0) {
+      title = "Search Tags: " + tags.colors.join(", ");
     }
-  }, []);
+    if (tags.collections.length > 0) {
+      if (title === initialTitle) {
+        title = "Search Tags: ";
+      } else {
+        title += ", ";
+      }
+      title += tags.collections.join(", ");
+    }
+    setTitle(title);
+  }, [tags, sort]);
 
   const { pop } = useNavigation();
   return (
@@ -85,7 +87,7 @@ export default function Command() {
       columns={5}
       aspectRatio={"9/16"}
       inset={Grid.Inset.Zero}
-      isLoading={isLoading}
+      isLoading={isLoading || favoriteLoading}
       pagination={pagination}
       searchBarPlaceholder={`Search in ${(data || []).length} palettes`}
       searchBarAccessory={
@@ -101,53 +103,92 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {(data || []).map((item) => {
-        return (
-          <Grid.Item
-            actions={
-              <ActionPanel>
-                <Action.Push target={<PaletteDetail id={item.data.code} />} title="View Details" icon={Icon.Bird} />
-                <Action.Push
-                  target={
-                    <SearchForm
-                      tags={tags}
-                      submitCallback={(values) => {
-                        setTags(values);
-                        pop();
-                      }}
-                    />
-                  }
-                  title="Search Palettes"
-                  icon={Icon.MagnifyingGlass}
-                />
-                <Action
-                  title="Like & Favorite"
-                  onAction={() => likeFunc(item.data.code, item.svg)}
-                  icon={Icon.Star}
-                  shortcut={{
-                    modifiers: ["cmd"],
-                    key: "l",
-                  }}
-                />
-                <Action
-                  title="Unfavorite"
-                  onAction={() => unfavorableFunc(item.data.code)}
-                  icon={Icon.StarDisabled}
-                  shortcut={{
-                    modifiers: ["cmd"],
-                    key: "n",
-                  }}
-                />
-              </ActionPanel>
-            }
-            accessory={item.liked ? { icon: { source: Icon.Star, tintColor: Color.Yellow } } : undefined}
-            key={item.data.code}
-            title={`❤ ${item.data.likes}`}
-            keywords={Array.from(eachHex(item.data.code))}
-            content={item.svg}
-          />
-        );
-      })}
+      <Grid.Section title={"Favorites"}>
+        {(value || []).map((item) => {
+          return (
+            <Grid.Item
+              key={item.code}
+              content={item.svg}
+              actions={
+                <ActionPanel>
+                  <Action.Push target={<PaletteDetail id={item.code} />} title="View Details" icon={Icon.Bird} />
+                  <Action.Push
+                    target={
+                      <SearchForm
+                        tags={tags}
+                        submitCallback={(values) => {
+                          setTags(values);
+                          pop();
+                        }}
+                      />
+                    }
+                    title="Search Palettes"
+                    icon={Icon.MagnifyingGlass}
+                  />
+                  <Action
+                    title="Remove From Favorites"
+                    onAction={() => unFavorite(item.code)}
+                    icon={Icon.StarDisabled}
+                    shortcut={{
+                      modifiers: ["cmd"],
+                      key: "n",
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </Grid.Section>
+      <Grid.Section title={title}>
+        {(data || []).map((item, index) => {
+          return (
+            <Grid.Item
+              actions={
+                <ActionPanel>
+                  <Action.Push target={<PaletteDetail id={item.data.code} />} title="View Details" icon={Icon.Bird} />
+                  <Action.Push
+                    target={
+                      <SearchForm
+                        tags={tags}
+                        submitCallback={(values) => {
+                          setTags(values);
+                          pop();
+                        }}
+                      />
+                    }
+                    title="Search Palettes"
+                    icon={Icon.MagnifyingGlass}
+                  />
+                  <Action
+                    title="Like & Favorite"
+                    onAction={() => favoriteFunc(item.data.code, item.svg)}
+                    icon={Icon.Star}
+                    shortcut={{
+                      modifiers: ["cmd"],
+                      key: "l",
+                    }}
+                  />
+                  <Action
+                    title="Remove From Favorites"
+                    onAction={() => unFavorite(item.data.code)}
+                    icon={Icon.StarDisabled}
+                    shortcut={{
+                      modifiers: ["cmd"],
+                      key: "n",
+                    }}
+                  />
+                </ActionPanel>
+              }
+              accessory={item.liked ? { icon: { source: Icon.Star, tintColor: Color.Yellow } } : undefined}
+              key={sort === "random" ? item.data.code + index : item.data.code}
+              title={`❤ ${item.data.likes}`}
+              keywords={Array.from(eachHex(item.data.code))}
+              content={item.svg}
+            />
+          );
+        })}
+      </Grid.Section>
     </Grid>
   );
 }

@@ -14,12 +14,6 @@
       "mode": "view"
     },
     {
-      "name": "collections",
-      "title": "Favorite Palettes",
-      "description": "Collection of favorite palettes",
-      "mode": "view"
-    },
-    {
       "name": "clear",
       "title": "Clear Cache",
       "subtitle": "0 files, 0 MB",
