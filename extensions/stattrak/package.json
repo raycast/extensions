@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stattrak",
-  "title": "stattrak",
+  "title": "Stattrak",
   "description": "Everything you need about esports",
   "icon": "command-icon.png",
   "author": "rafaelvicio",
