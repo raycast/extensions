@@ -159,7 +159,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
-    const launchContext: LaunchContext = { defaults: values, visiblePropIds: visiblePropIds ?? [] };
+    const launchContext: LaunchContext = { defaults: values, visiblePropIds: visiblePropIds ?? databasePropertyIds };
     let name: string | undefined;
     const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
     if (databaseTitle) name = "Create new page in " + databaseTitle;
