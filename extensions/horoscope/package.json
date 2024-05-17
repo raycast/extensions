@@ -10,6 +10,66 @@
     "Fun"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "default_sign",
+      "title": "Default Sign",
+      "placeholder": "DEFAULT_SIGN",
+      "description": "This sign will be used to get horoscope data by default",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Aries",
+          "value": "aries"
+        },
+        {
+          "title": "Taurus",
+          "value": "taurus"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Cancer",
+          "value": "cancer"
+        },
+        {
+          "title": "Leo",
+          "value": "leo"
+        },
+        {
+          "title": "Virgo",
+          "value": "virgo"
+        },
+        {
+          "title": "Libra",
+          "value": "libra"
+        },
+        {
+          "title": "Scorpio",
+          "value": "scorpio"
+        },
+        {
+          "title": "Sagittarius",
+          "value": "sagittarius"
+        },
+        {
+          "title": "Capricorn",
+          "value": "capricorn"
+        },
+        {
+          "title": "Aquarius",
+          "value": "aquarius"
+        },
+        {
+          "title": "Pisces",
+          "value": "pisces"
+        }
+      ]
+    }
+  ],
   "commands": [
     {
       "name": "daily-horoscope",
@@ -20,21 +80,57 @@
         {
           "name": "sign",
           "type": "dropdown",
-          "placeholder": "SIGN",
-          "required": true,
+          "placeholder": "Use default sign",
+          "required": false,
           "data": [
-            { "title": "Aries", "value": "aries"},
-            { "title": "Taurus", "value": "taurus"},
-            { "title": "Gemini", "value": "gemini"},
-            { "title": "Cancer", "value": "cancer"},
-            { "title": "Leo", "value": "leo"},
-            { "title": "Virgo", "value": "virgo"},
-            { "title": "Libra", "value": "libra"},
-            { "title": "Scorpio", "value": "scorpio"},
-            { "title": "Sagittarius", "value": "sagittarius"},
-            { "title": "Capricorn", "value": "capricorn"},
-            { "title": "Aquarius", "value": "aquarius"},
-            { "title": "Pisces", "value": "pisces"}
+            {
+              "title": "Aries",
+              "value": "aries"
+            },
+            {
+              "title": "Taurus",
+              "value": "taurus"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Cancer",
+              "value": "cancer"
+            },
+            {
+              "title": "Leo",
+              "value": "leo"
+            },
+            {
+              "title": "Virgo",
+              "value": "virgo"
+            },
+            {
+              "title": "Libra",
+              "value": "libra"
+            },
+            {
+              "title": "Scorpio",
+              "value": "scorpio"
+            },
+            {
+              "title": "Sagittarius",
+              "value": "sagittarius"
+            },
+            {
+              "title": "Capricorn",
+              "value": "capricorn"
+            },
+            {
+              "title": "Aquarius",
+              "value": "aquarius"
+            },
+            {
+              "title": "Pisces",
+              "value": "pisces"
+            }
           ]
         },
         {
@@ -43,9 +139,18 @@
           "placeholder": "DAY",
           "required": true,
           "data": [
-            { "title": "Today", "value": "TODAY"},
-            { "title": "Tomorrow", "value": "TOMORROW"},
-            { "title": "Yesterday", "value": "YESTERDAY"}
+            {
+              "title": "Today",
+              "value": "TODAY"
+            },
+            {
+              "title": "Tomorrow",
+              "value": "TOMORROW"
+            },
+            {
+              "title": "Yesterday",
+              "value": "YESTERDAY"
+            }
           ]
         }
       ]
@@ -59,21 +164,57 @@
         {
           "name": "sign",
           "type": "dropdown",
-          "placeholder": "SIGN",
-          "required": true,
+          "placeholder": "Use default sign",
+          "required": false,
           "data": [
-            { "title": "Aries", "value": "aries"},
-            { "title": "Taurus", "value": "taurus"},
-            { "title": "Gemini", "value": "gemini"},
-            { "title": "Cancer", "value": "cancer"},
-            { "title": "Leo", "value": "leo"},
-            { "title": "Virgo", "value": "virgo"},
-            { "title": "Libra", "value": "libra"},
-            { "title": "Scorpio", "value": "scorpio"},
-            { "title": "Sagittarius", "value": "sagittarius"},
-            { "title": "Capricorn", "value": "capricorn"},
-            { "title": "Aquarius", "value": "aquarius"},
-            { "title": "Pisces", "value": "pisces"}
+            {
+              "title": "Aries",
+              "value": "aries"
+            },
+            {
+              "title": "Taurus",
+              "value": "taurus"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Cancer",
+              "value": "cancer"
+            },
+            {
+              "title": "Leo",
+              "value": "leo"
+            },
+            {
+              "title": "Virgo",
+              "value": "virgo"
+            },
+            {
+              "title": "Libra",
+              "value": "libra"
+            },
+            {
+              "title": "Scorpio",
+              "value": "scorpio"
+            },
+            {
+              "title": "Sagittarius",
+              "value": "sagittarius"
+            },
+            {
+              "title": "Capricorn",
+              "value": "capricorn"
+            },
+            {
+              "title": "Aquarius",
+              "value": "aquarius"
+            },
+            {
+              "title": "Pisces",
+              "value": "pisces"
+            }
           ]
         }
       ]
@@ -87,28 +228,64 @@
         {
           "name": "sign",
           "type": "dropdown",
-          "placeholder": "SIGN",
-          "required": true,
+          "placeholder": "Use default sign",
+          "required": false,
           "data": [
-            { "title": "Aries", "value": "aries"},
-            { "title": "Taurus", "value": "taurus"},
-            { "title": "Gemini", "value": "gemini"},
-            { "title": "Cancer", "value": "cancer"},
-            { "title": "Leo", "value": "leo"},
-            { "title": "Virgo", "value": "virgo"},
-            { "title": "Libra", "value": "libra"},
-            { "title": "Scorpio", "value": "scorpio"},
-            { "title": "Sagittarius", "value": "sagittarius"},
-            { "title": "Capricorn", "value": "capricorn"},
-            { "title": "Aquarius", "value": "aquarius"},
-            { "title": "Pisces", "value": "pisces"}
+            {
+              "title": "Aries",
+              "value": "aries"
+            },
+            {
+              "title": "Taurus",
+              "value": "taurus"
+            },
+            {
+              "title": "Gemini",
+              "value": "gemini"
+            },
+            {
+              "title": "Cancer",
+              "value": "cancer"
+            },
+            {
+              "title": "Leo",
+              "value": "leo"
+            },
+            {
+              "title": "Virgo",
+              "value": "virgo"
+            },
+            {
+              "title": "Libra",
+              "value": "libra"
+            },
+            {
+              "title": "Scorpio",
+              "value": "scorpio"
+            },
+            {
+              "title": "Sagittarius",
+              "value": "sagittarius"
+            },
+            {
+              "title": "Capricorn",
+              "value": "capricorn"
+            },
+            {
+              "title": "Aquarius",
+              "value": "aquarius"
+            },
+            {
+              "title": "Pisces",
+              "value": "pisces"
+            }
           ]
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.74.1",
     "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {
