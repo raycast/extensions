@@ -1,4 +1,4 @@
-# nhk-program-search
+# NHK Program Search
 
 NHK Program Search
 
@@ -9,5 +9,5 @@ https://api-portal.nhk.or.jp/service-guide
 
 ## Credit
 
-情報提供:ＮＨＫ  
+Information provided by: NHK (情報提供:ＮＨＫ)  
 https://api-portal.nhk.or.jp/terms
