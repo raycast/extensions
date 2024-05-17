@@ -21,8 +21,8 @@
   "commands": [
     {
       "name": "esports-tournaments",
-      "title": "Esports Tournaments",
-      "subtitle": "Current esports tournaments",
+      "title": "View Esports Tournaments",
+      "subtitle": "Stattrak",
       "description": "search for esports tournaments",
       "mode": "view"
     },
