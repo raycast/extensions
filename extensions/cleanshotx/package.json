@@ -28,6 +28,7 @@
       "description": "Open Settings",
       "icon": "open-settings.png",
       "mode": "no-view",
+      "disabledByDefault": true,
       "arguments": [
         {
           "name": "tab",
@@ -55,7 +56,8 @@
       "subtitle": "CleanShot X",
       "description": "Open Uploads in Cleanshot Cloud",
       "icon": "open-all-uploads.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "all-in-one",
