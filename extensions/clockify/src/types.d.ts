@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface TimeEntry {
   id: string;
   projectId: string;
