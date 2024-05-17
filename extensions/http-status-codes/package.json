@@ -40,5 +40,30 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "typeOfPerson",
+      "description": "Are you a cat or a dog person?",
+      "type": "dropdown",
+      "required": false,
+      "title": "Are you a cat or a dog person?",
+      "placeholder": "placeHolder",
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "🐈 Cat",
+          "value": "cat"
+        },
+        {
+          "title": "🐕 Dog",
+          "value": "dog"
+        }
+      ]
+    }
+  ]
 }
