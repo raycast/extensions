@@ -2,7 +2,7 @@
 
 ## [Update] - {PR_MERGE_DATE}
 
-- add the action to open clockify in the browser
+- Added an action to open clockify in the browser
 
 ## [Update] - 2023-02-10
 
