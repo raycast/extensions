@@ -57,7 +57,7 @@
     },
     {
       "name": "create-status",
-      "title": "Create a new status",
+      "title": "Create a New Status",
       "description": "Create a new status with an emoji and status",
       "subtitle": "omg.lol",
       "mode": "view",
