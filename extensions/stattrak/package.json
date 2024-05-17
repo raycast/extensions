@@ -28,8 +28,8 @@
     },
     {
       "name": "esports-matches",
-      "title": "Esports Matches",
-      "subtitle": "Upcoming esports matches",
+      "title": "View Esports Matches",
+      "subtitle": "Stattrak",
       "description": "search for esports matches",
       "mode": "view"
     }
