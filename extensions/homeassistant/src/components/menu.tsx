@@ -1,20 +1,20 @@
+import { ha } from "@lib/common";
+import { getErrorMessage } from "@lib/utils";
 import {
-  MenuBarExtra,
-  Icon,
-  openCommandPreferences,
   Clipboard,
+  Icon,
+  Image,
+  Keyboard,
+  LaunchType,
+  MenuBarExtra,
+  Toast,
+  launchCommand,
+  open,
+  openCommandPreferences,
   showHUD,
   showToast,
-  Toast,
-  Image,
-  launchCommand,
-  LaunchType,
-  Keyboard,
-  open,
 } from "@raycast/api";
-import { getErrorMessage } from "@lib/utils";
 import { ReactNode } from "react";
-import { ha } from "@lib/common";
 
 export function MenuBarItemConfigureCommand(): JSX.Element {
   return (

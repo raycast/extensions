@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Fix Open in Browser action] - 2024-05-16
+
+- Fixed an issue where users who logged in using an API token were unable to open issues directly in their web browser.
+
 ## [Show target status on Change Status submenu] - 2024-04-30
 
 - Show target status next to the action name on Change Status submenu

@@ -26,7 +26,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
   useEffect(() => {
     // only work on `Summarize -> Ask` flow
     if (props.initialQuestion) {
-      chats.ask(props.initialQuestion, props.conversation!.model);
+      chats.ask(props.initialQuestion, [], props.conversation!.model);
     }
   }, []);
 
@@ -64,7 +64,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       return;
     }
     // fix https://github.com/raycast/extensions/issues/11420
-    if (isAutoLoadText && question.data.length === 0) {
+    if (models.data.length == 0 || (isAutoLoadText && question.data.length === 0)) {
       setLoading(false);
       return;
     }
@@ -74,8 +74,9 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
       push(
         <QuestionForm
           initialQuestion={questionText}
-          onSubmit={(question) => {
-            chats.ask(question, conversation.model);
+          onSubmit={(question, files) => {
+            // console.debug("onSubmit", question, files, conversation.model.option);
+            chats.ask(question, files, conversation.model);
             pop();
           }}
           models={models.data}
@@ -86,7 +87,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
     }
 
     setLoading(false);
-  }, [models.data, question.data]);
+  }, [models.data, question.data, conversation.model]);
 
   useEffect(() => {
     if ((props.conversation?.id !== conversation.id || conversations.data.length === 0) && isAutoSaveConversation) {
@@ -112,7 +113,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 
   useEffect(() => {
     const selectedModel = models.data.find((x) => x.id === selectedModelId);
-    //console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
+    // console.debug("selectedModel: ", selectedModelId, selectedModel?.option);
     setConversation({
       ...conversation,
       model: selectedModel ?? { ...conversation.model },
@@ -122,10 +123,10 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
 
   const getActionPanel = (question: string, model: Model) => (
     <ActionPanel>
-      <PrimaryAction title="Get Answer" onAction={() => chats.ask(question, model)} />
+      <PrimaryAction title="Get Answer" onAction={() => chats.ask(question, [], model)} />
       <FormInputActionSection
         initialQuestion={question}
-        onSubmit={(question) => chats.ask(question, model)}
+        onSubmit={(question, files) => chats.ask(question, files, model)}
         models={models.data}
         selectedModel={selectedModelId}
         onModelChange={setSelectedModelId}
@@ -148,7 +149,7 @@ export default function Ask(props: { conversation?: Conversation; initialQuestio
           <ActionPanel>
             <FormInputActionSection
               initialQuestion={question.data}
-              onSubmit={(question) => chats.ask(question, conversation.model)}
+              onSubmit={(question, files) => chats.ask(question, files, conversation.model)}
               models={models.data}
               selectedModel={selectedModelId}
               onModelChange={setSelectedModelId}

@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "Zalgo_123",
   "contributors": [
-    "xilopaint"
+    "xilopaint",
+    "drillprop"
   ],
   "categories": [
     "Fun"
@@ -14,8 +15,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "atp-rankings",
-      "title": "ATP Rankings",
+      "name": "atp-live-rankings",
+      "title": "ATP Live Rankings",
       "description": "Get the ATP rankings",
       "mode": "view",
       "keywords": [
@@ -23,9 +24,27 @@
       ]
     },
     {
-      "name": "wta-rankings",
-      "title": "WTA Rankings",
+      "name": "wta-live-rankings",
+      "title": "WTA Live Rankings",
       "description": "Get the WTA rankings",
+      "mode": "view",
+      "keywords": [
+        "tennis"
+      ]
+    },
+    {
+      "name": "atp-race",
+      "title": "ATP Race Rankings",
+      "description": "Get the ATP race rankings",
+      "mode": "view",
+      "keywords": [
+        "tennis"
+      ]
+    },
+    {
+      "name": "wta-race",
+      "title": "WTA Race Rankings",
+      "description": "Get the WTA race rankings",
       "mode": "view",
       "keywords": [
         "tennis"
@@ -33,16 +52,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.14.1"
+    "@raycast/api": "^1.73.2",
+    "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

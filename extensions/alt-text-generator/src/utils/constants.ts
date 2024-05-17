@@ -23,3 +23,5 @@ export const chromiumBrowserNames = [
 ];
 
 export const prompt = "Generate brief alt text for this image under 60 characters";
+
+export const SUPPORTED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp"];

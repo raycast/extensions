@@ -34,6 +34,37 @@ fragment AuthorFields on Actor {
   }
 }
 
+fragment ProjectViewerFields on ProjectV2View {
+  id
+  name
+  number
+}
+
+fragment ProjectFields on ProjectV2 {
+  id
+  title
+  public
+  number
+  readme
+  closed
+  shortDescription
+  url
+  createdAt
+  creator {
+    ...AuthorFields
+  }
+  updatedAt
+  views(first: 50) {
+    totalCount
+    nodes {
+      ...ProjectViewerFields
+    }
+  }
+  viewerCanClose
+  viewerCanUpdate
+  viewerCanReopen
+}
+
 query getViewer {
   viewer {
     ...UserFields
@@ -42,6 +73,12 @@ query getViewer {
       nodes {
         avatarUrl
         login
+      }
+    }
+    projectsV2(first: 50) {
+      totalCount
+      nodes {
+        ...ProjectFields
       }
     }
   }
