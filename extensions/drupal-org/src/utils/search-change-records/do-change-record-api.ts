@@ -1,6 +1,6 @@
 import { load as cheerioLoad } from "cheerio";
 import got, { SearchParameters } from "got";
-import { DrupalChangeRecord } from "../types";
+import { DrupalChangeRecord } from "./types";
 
 const drupalCRSearchUrlBase = "https://www.drupal.org/list-changes/drupal";
 
