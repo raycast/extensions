@@ -17,6 +17,7 @@
       "name": "clear",
       "title": "Clear Cache",
       "subtitle": "0 files, 0 MB",
+      "disabledByDefault": true,
       "description": "Clear the cache of the extension",
       "mode": "no-view"
     }
