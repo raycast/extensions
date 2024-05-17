@@ -1,5 +1,9 @@
 # Kimai Changelog
 
+## [Update] - 2024-05-18
+
+Added support for API token in the extension preferences.
+
 ## [Fix] - 2024-03-11
 
 Added validation of request response data to prevent breaking the extension if the data is not valid JSON.
