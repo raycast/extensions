@@ -75,219 +75,219 @@
       "description": "Select Area",
       "data": [
         {
-          "title": "札幌",
+          "title": "Sapporo",
           "value": "010"
         },
         {
-          "title": "函館",
+          "title": "Hakodate",
           "value": "011"
         },
         {
-          "title": "旭川",
+          "title": "Asahikawa",
           "value": "012"
         },
         {
-          "title": "帯広",
+          "title": "Obihiro",
           "value": "013"
         },
         {
-          "title": "釧路",
+          "title": "Kushiro",
           "value": "014"
         },
         {
-          "title": "北見",
+          "title": "Kitami",
           "value": "015"
         },
         {
-          "title": "室蘭",
+          "title": "Muroran",
           "value": "016"
         },
         {
-          "title": "青森",
+          "title": "Aomori",
           "value": "020"
         },
         {
-          "title": "盛岡",
+          "title": "Morioka",
           "value": "030"
         },
         {
-          "title": "仙台",
+          "title": "Sendai",
           "value": "040"
         },
         {
-          "title": "秋田",
+          "title": "Akita",
           "value": "050"
         },
         {
-          "title": "山形",
+          "title": "Yamagata",
           "value": "060"
         },
         {
-          "title": "福島",
+          "title": "Fukushima",
           "value": "070"
         },
         {
-          "title": "水戸",
+          "title": "Mito",
           "value": "080"
         },
         {
-          "title": "宇都宮",
+          "title": "Utsunomiya",
           "value": "090"
         },
         {
-          "title": "前橋",
+          "title": "Maebashi",
           "value": "100"
         },
         {
-          "title": "さいたま",
+          "title": "Saitama",
           "value": "110"
         },
         {
-          "title": "千葉",
+          "title": "Chiba",
           "value": "120"
         },
         {
-          "title": "東京",
+          "title": "Tokyo",
           "value": "130"
         },
         {
-          "title": "横浜",
+          "title": "Yokohama",
           "value": "140"
         },
         {
-          "title": "新潟",
+          "title": "Niigata",
           "value": "150"
         },
         {
-          "title": "富山",
+          "title": "Toyama",
           "value": "160"
         },
         {
-          "title": "金沢",
+          "title": "Kanazawa",
           "value": "170"
         },
         {
-          "title": "福井",
+          "title": "Fukui",
           "value": "180"
         },
         {
-          "title": "甲府",
+          "title": "Kofu",
           "value": "190"
         },
         {
-          "title": "長野",
+          "title": "Nagano",
           "value": "200"
         },
         {
-          "title": "岐阜",
+          "title": "Gifu",
           "value": "210"
         },
         {
-          "title": "静岡",
+          "title": "Shizuoka",
           "value": "220"
         },
         {
-          "title": "名古屋",
+          "title": "Nagoya",
           "value": "230"
         },
         {
-          "title": "津",
+          "title": "Tsu",
           "value": "240"
         },
         {
-          "title": "大津",
+          "title": "Otsu",
           "value": "250"
         },
         {
-          "title": "京都",
+          "title": "Kyoto",
           "value": "260"
         },
         {
-          "title": "大阪",
+          "title": "Osaka",
           "value": "270"
         },
         {
-          "title": "神戸",
+          "title": "Kobe",
           "value": "280"
         },
         {
-          "title": "奈良",
+          "title": "Nara",
           "value": "290"
         },
         {
-          "title": "和歌山",
+          "title": "Wakayama",
           "value": "300"
         },
         {
-          "title": "鳥取",
+          "title": "Tottori",
           "value": "310"
         },
         {
-          "title": "松江",
+          "title": "Matsue",
           "value": "320"
         },
         {
-          "title": "岡山",
+          "title": "Okayama",
           "value": "330"
         },
         {
-          "title": "広島",
+          "title": "Hiroshima",
           "value": "340"
         },
         {
-          "title": "山口",
+          "title": "Yamaguchi",
           "value": "350"
         },
         {
-          "title": "徳島",
+          "title": "Tokushima",
           "value": "360"
         },
         {
-          "title": "高松",
+          "title": "Takamatsu",
           "value": "370"
         },
         {
-          "title": "松山",
+          "title": "Matsuyama",
           "value": "380"
         },
         {
-          "title": "高知",
+          "title": "Kochi",
           "value": "390"
         },
         {
-          "title": "福岡",
+          "title": "Fukuoka",
           "value": "400"
         },
         {
-          "title": "北九州",
+          "title": "Kitakyushu",
           "value": "401"
         },
         {
-          "title": "佐賀",
+          "title": "Saga",
           "value": "410"
         },
         {
-          "title": "長崎",
+          "title": "Nagasaki",
           "value": "420"
         },
         {
-          "title": "熊本",
+          "title": "Kumamoto",
           "value": "430"
         },
         {
-          "title": "大分",
+          "title": "Oita",
           "value": "440"
         },
         {
-          "title": "宮崎",
+          "title": "Miyazaki",
           "value": "450"
         },
         {
-          "title": "鹿児島",
+          "title": "Kagoshima",
           "value": "460"
         },
         {
-          "title": "沖縄",
+          "title": "Okinawa",
           "value": "470"
         }
       ]
