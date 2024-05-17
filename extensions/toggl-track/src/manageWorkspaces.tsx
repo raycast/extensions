@@ -1,8 +1,9 @@
-import { useState, useMemo } from "react";
 import { List, Image, ActionPanel, Action, Icon } from "@raycast/api";
-import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { useOrganizations, useWorkspaces } from "./hooks";
-import { Workspace } from "./api";
+import { useState, useMemo } from "react";
+
+import { Workspace } from "@/api";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { useOrganizations, useWorkspaces } from "@/hooks";
 
 function ManageWorkspaces() {
   const { organizations, isLoadingOrganizations } = useOrganizations();
@@ -12,7 +13,7 @@ function ManageWorkspaces() {
   const [filterId, setFilterId] = useState(-1);
 
   const filteredWorkspaces = useMemo(() => {
-    if (filterId == -1) return workspaces;
+    if (filterId === -1) return workspaces;
     return workspaces.filter((ws) => ws.organization_id === filterId);
   }, [workspaces, filterId]);
 
@@ -35,12 +36,12 @@ function ManageWorkspaces() {
       }
       isShowingDetail={isShoingDetails}
     >
-      {filteredWorkspaces.length == 0 && <List.EmptyView title="No Workspaces Found" />}
+      {filteredWorkspaces.length === 0 && <List.EmptyView title="No Workspaces Found" />}
       {filteredWorkspaces.map((workspace) => {
         const organization = organizations.find((org) => org.id === workspace.organization_id);
         const subscription = workspace.business_ws ? "Premium" : workspace.premium ? "Starter" : "Free";
         const role = formatRoleText(workspace.role);
-        const logoUrl = workspace.logo_url == defaultWorkspaceLogoUrl ? undefined : workspace.logo_url;
+        const logoUrl = workspace.logo_url === defaultWorkspaceLogoUrl ? undefined : workspace.logo_url;
 
         const accessories: List.Item.Accessory[] = [];
         if (!isShoingDetails) {
@@ -54,7 +55,7 @@ function ManageWorkspaces() {
             subtitle={isShoingDetails ? undefined : organization?.name}
             key={workspace.id}
             icon={
-              workspace.logo_url == "https://assets.track.toggl.com/images/workspace.jpg"
+              workspace.logo_url === "https://assets.track.toggl.com/images/workspace.jpg"
                 ? undefined
                 : { source: workspace.logo_url, mask: Image.Mask.RoundedRectangle }
             }
@@ -96,9 +97,9 @@ function ManageWorkspaces() {
 const defaultWorkspaceLogoUrl = "https://assets.track.toggl.com/images/workspace.jpg";
 
 const formatRoleText = (role: Workspace["role"]) =>
-  role == "projectlead"
+  role === "projectlead"
     ? "Project Lead"
-    : role == "teamlead"
+    : role === "teamlead"
       ? "Team Leader"
       : ((role[0].toUpperCase() + role.slice(1)) as Capitalize<typeof role>);
 

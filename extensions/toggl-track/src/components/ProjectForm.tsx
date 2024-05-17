@@ -1,8 +1,9 @@
-import { useState } from "react";
 import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
 import dayjs from "dayjs";
-import { Workspace, Project, Client, updateProject, createProject, ProjectOptions } from "../api";
-import { withToast, Verb } from "../helpers/withToast";
+import { useState } from "react";
+
+import { Workspace, Project, Client, updateProject, createProject, ProjectOptions } from "@/api";
+import { withToast, Verb } from "@/helpers/withToast";
 
 type ProjectFormProps =
   | {
@@ -90,7 +91,7 @@ export default function ProjectForm({
           id="workspaceId"
           title="Workspace"
           value={workspace.id.toString()}
-          onChange={(idStr) => setWorkspace(workspaces.find((ws) => ws.id == parseInt(idStr))!)}
+          onChange={(idStr) => setWorkspace(workspaces.find((ws) => ws.id === parseInt(idStr))!)}
         >
           {workspaces.map((workspace) => (
             <Form.Dropdown.Item key={workspace.id} title={workspace.name} value={workspace.id.toString()} />
@@ -132,7 +133,7 @@ export default function ProjectForm({
       <Form.Dropdown id="clientIdString" title="Client" defaultValue={project?.client_id?.toString()}>
         <Form.Dropdown.Item title="None" value="" />
         {clients
-          .filter((cleint) => cleint.wid == workspace.id && !cleint.archived)
+          .filter((cleint) => cleint.wid === workspace.id && !cleint.archived)
           .map((client) => (
             <Form.Dropdown.Item key={client.id} value={client.id.toString()} title={client.name} />
           ))}

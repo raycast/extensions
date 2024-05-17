@@ -1,12 +1,13 @@
-import { useState } from "react";
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { useWorkspaces, useTags, useGroups } from "./hooks";
-import type { Workspace } from "./api";
-import Shortcut from "./helpers/shortcuts";
-import TagListItem from "./components/TagListItem";
-import TagForm from "./components/TagForm";
-import { canModifyTagsIn } from "./helpers/privileges";
+import { useState } from "react";
+
+import type { Workspace } from "@/api";
+import TagForm from "@/components/TagForm";
+import TagListItem from "@/components/TagListItem";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { canModifyTagsIn } from "@/helpers/privileges";
+import Shortcut from "@/helpers/shortcuts";
+import { useWorkspaces, useTags, useGroups } from "@/hooks";
 
 function ManageTags() {
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -47,7 +48,7 @@ function ManageTags() {
     >
       {searchFilter ? (
         <>
-          {groupedTags[searchFilter.id]?.length == 0 && <List.EmptyView title="No Tags Found" />}
+          {groupedTags[searchFilter.id]?.length === 0 && <List.EmptyView title="No Tags Found" />}
           <List.Section key={searchFilter.id} title={searchFilter.name}>
             {groupedTags[searchFilter.id]?.map((tag) => (
               <TagListItem workspace={searchFilter} key={tag.id} {...{ tag, revalidateTags, SharedActions }} />
@@ -56,7 +57,7 @@ function ManageTags() {
         </>
       ) : (
         <>
-          {tags.length == 0 && <List.EmptyView title="No Tags Found" />}
+          {tags.length === 0 && <List.EmptyView title="No Tags Found" />}
           {workspaces.map((workspace) => (
             <List.Section key={workspace.id} title={workspace.name}>
               {groupedTags[workspace.id]?.map((tag) => (

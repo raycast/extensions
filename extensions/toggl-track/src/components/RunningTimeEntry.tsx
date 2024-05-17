@@ -1,7 +1,8 @@
 import { List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
-import useCurrentTime from "../hooks/useCurrentTime";
-import { stopTimeEntry, TimeEntry, TimeEntryMetaData } from "../api";
+
+import { stopTimeEntry, TimeEntry, TimeEntryMetaData } from "@/api";
+import useCurrentTime from "@/hooks/useCurrentTime";
 
 interface RunningTimeEntryProps {
   runningTimeEntry: TimeEntry & TimeEntryMetaData;

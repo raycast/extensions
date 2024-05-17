@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
-import { togglApiToken } from "../helpers/preferences";
+
+import { togglApiToken } from "@/helpers/preferences";
 
 const base64encode = (str: string) => {
   return Buffer.from(str).toString("base64");
@@ -24,8 +25,9 @@ async function togglFetch<T>(method: string, endpoint: string, body?: unknown): 
     headers,
     body: body ? JSON.stringify(body) : undefined,
   });
+
   if (!res.ok) {
-    if (res.status == 429) {
+    if (res.status === 429) {
       await delay(1000);
       return await togglFetch(method, endpoint, body);
     }

@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useWorkspaces, useClients, useGroups } from "./hooks";
-import { Workspace } from "./api";
-import Shortcut from "./helpers/shortcuts";
-import ClientListItem from "./components/ClientListItem";
-import ClientForm from "./components/ClientForm";
-import { canModifyProjectIn } from "./helpers/privileges";
+import { useMemo, useState } from "react";
+
+import { Workspace } from "@/api";
+import ClientForm from "@/components/ClientForm";
+import ClientListItem from "@/components/ClientListItem";
+import { canModifyProjectIn } from "@/helpers/privileges";
+import Shortcut from "@/helpers/shortcuts";
+import { useWorkspaces, useClients, useGroups } from "@/hooks";
 
 export default function ClientList() {
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -63,7 +64,7 @@ export default function ClientList() {
     >
       {searchFilter ? (
         <>
-          {groupedClients[searchFilter.id]?.length == 0 && <List.EmptyView title="No Clients Found" />}
+          {groupedClients[searchFilter.id]?.length === 0 && <List.EmptyView title="No Clients Found" />}
           <List.Section key={searchFilter.id} title={searchFilter.name}>
             {groupedClients[searchFilter.id]?.map((client) => (
               <ClientListItem
@@ -76,7 +77,7 @@ export default function ClientList() {
         </>
       ) : (
         <>
-          {filteredClients.length == 0 && <List.EmptyView title="No Clients Found" />}
+          {filteredClients.length === 0 && <List.EmptyView title="No Clients Found" />}
           {workspaces.map((workspace) => (
             <List.Section key={workspace.id} title={workspace.name}>
               {groupedClients[workspace.id]?.map((client) => (

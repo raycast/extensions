@@ -1,5 +1,5 @@
-import { useSafeCachedPromise } from "./useSafeCachedPromise";
-import { getMe } from "../api";
+import { getMe } from "@/api";
+import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
 
 export function useMe() {
   const { data, error, isLoading, revalidate } = useSafeCachedPromise(getMe, [], {
