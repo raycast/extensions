@@ -15,6 +15,8 @@ import {
 import { useState, useEffect } from "react";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
 import { ChatData, Message, Chats } from "./hook/AIChat.types";
+import { ChatCompletionMessageParam } from "openai/resources";
+import { Stream } from "openai/streaming";
 
 const model_override = getPreferenceValues<{ model_chat: string }>().model_chat;
 const APIprovider = "Groq";
@@ -108,7 +110,7 @@ export default function Chat() {
       const messages = currentChat.messages.flatMap((x) => [
         { role: "assistant", content: x.answer },
         { role: "user", content: x.prompt },
-      ]);
+      ]) as ChatCompletionMessageParam[];
       messages.push({ role: "system", content: "Be a concise and helpful" });
       messages.reverse();
 
@@ -119,8 +121,16 @@ export default function Chat() {
       });
 
       let answer = "";
-      for await (const message of response) {
-        answer += message.choices[0].delta.content || "";
+      if (response instanceof Stream) {
+        for await (const message of response) {
+          answer += message.choices[0].delta.content || "";
+          updateChatData((data) => {
+            getChat(chatData.currentChat, data.chats).messages[0].answer = answer;
+            return data;
+          });
+        }
+      } else {
+        answer = response.choices[0]?.message?.content ?? "";
         updateChatData((data) => {
           getChat(chatData.currentChat, data.chats).messages[0].answer = answer;
           return data;
@@ -231,7 +241,10 @@ export default function Chat() {
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
           const currentChat = getChat(newData.currentChat, newData.chats);
-          const messages = currentChat.messages.map((x) => ({ role: "user", content: x.prompt }));
+          const messages = currentChat.messages.map((x) => ({
+            role: "user",
+            content: x.prompt,
+          })) as ChatCompletionMessageParam[];
 
           const response = await openai.chat.completions.create({
             model: model,
@@ -240,19 +253,23 @@ export default function Chat() {
           });
 
           let answer = "";
-          for await (const message of response) {
-            answer += message.choices[0].delta.content || "";
-            setChatData((oldData) => {
-              if (!oldData) return oldData;
-              const newChatData = structuredClone(oldData);
+          if (response instanceof Stream) {
+            for await (const message of response) {
+              answer += message.choices[0].delta.content || "";
+              updateChatData((newChatData) => {
+                getChat(newData.currentChat, newChatData.chats).messages[0].answer = answer;
+                return newChatData;
+              });
+            }
+          } else {
+            answer = response.choices[0]?.message?.content ?? "";
+            updateChatData((newChatData) => {
               getChat(newData.currentChat, newChatData.chats).messages[0].answer = answer;
               return newChatData;
             });
           }
 
-          setChatData((oldData) => {
-            if (!oldData) return oldData;
-            const newChatData = structuredClone(oldData);
+          updateChatData((newChatData) => {
             getChat(newData.currentChat, newChatData.chats).messages[0].finished = true;
             return newChatData;
           });
