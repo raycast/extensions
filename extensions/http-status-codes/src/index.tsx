@@ -1,10 +1,7 @@
 import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
+import { Code } from "./types";
 import http from "http";
 
-type Code = {
-  code: string;
-  description?: string;
-};
 
 export default function Command() {
   const codeGroups = Object.entries(http.STATUS_CODES).reduce(
