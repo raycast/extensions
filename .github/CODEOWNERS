@@ -1277,6 +1277,7 @@
 /extensions/svgr                                                    @rickMcGavin
 /extensions/swift-evolution                                         @BProg @dehesa @pernielsentikaer
 /extensions/swift-package-index                                     @maximkrouk @japanese-goblinn
+/extensions/swift-repl                                              @nakajima @pernielsentikaer
 /extensions/switch-game-play-history                                @kvdo2
 /extensions/switchhosts                                             @tiancheng92
 /extensions/syntax-fm                                               @msmps
