@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Bug Fix] - 2024-05-14
+
+- Remove deprecated `--ignore-pinned` upgrade flag.
+
 ## [Bug Fix] - 2024-03-22
 
 - Fixed various crashes that occurred due to missing data.

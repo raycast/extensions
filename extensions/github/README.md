@@ -7,7 +7,7 @@ Work with issues, pull requests, manage workflows, search repositories and stay 
 You can use a personal access token instead of logging in through OAuth to authenticate your GitHub account:
 
 The following link can be used as a shortcut to create your token:
-https://github.com/settings/tokens/new?description=Raycast&scopes=repo,read:org,read:user,read:project,notifications
+https://github.com/settings/tokens/new?description=Raycast&scopes=repo,read:org,read:user,project,notifications
 
 Otherwise, you can manually create it:
 1. Go to https://github.com/settings/tokens
@@ -18,7 +18,7 @@ Otherwise, you can manually create it:
 - `repo`
 - `read:org`
 - `read:user`
-- `read:project`
+- `project`
 - `notifications`
 
 5. Click "Generate token".

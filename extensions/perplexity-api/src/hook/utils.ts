@@ -3,12 +3,11 @@ import { encode } from "@nem035/gpt-3-encoder";
 export const allModels = [
   { name: "Follow global model", id: "global" },
   { name: "Sonar Small 7B 32k", id: "llama-3-sonar-small-32k-chat" },
-  { name: "Sonar Large 8x7B 32k", id: "llama-3-sonar-large-32k-chat" },
+  { name: "Sonar Large 70B 32k", id: "llama-3-sonar-large-32k-chat" },
   { name: "Sonar Small 7B Online", id: "llama-3-sonar-small-32k-online" },
-  { name: "Sonar Large 8x7B Online", id: "llama-3-sonar-large-32k-online" },
+  { name: "Sonar Large 70B Online", id: "llama-3-sonar-large-32k-online" },
   { name: "Llama3 70B 8k", id: "llama-3-70b-instruct" },
   { name: "Llama3 8B 8k", id: "llama-3-8b-instruct" },
-  { name: "Mixtral 8x22B 16k", id: "mixtral-8x22b-instruct" },
   { name: "Mixtral 8x7B 16k", id: "mixtral-8x7b-instruct" },
 ];
 
@@ -35,18 +34,17 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
       price = ((prompt_token * 0.2) / 1_000_000 + (output_token * 0.2) / 1_000_000) * 100;
       break;
     case "mixtral-8x7b-instruct":
-    case "llama-3-sonar-large-32k-chat":
       price = ((prompt_token * 0.6) / 1_000_000 + (output_token * 0.6) / 1_000_000) * 100;
       break;
     case "llama-3-70b-instruct":
-    case "mixtral-8x22b-instruct":
+    case "llama-3-sonar-large-32k-chat":
       price = ((prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;
       break;
     case "llama-3-sonar-small-32k-online":
       price = (5 / 1000 + (output_token * 0.2) / 1_000_000) * 100;
       break;
     case "llama-3-sonar-large-32k-online":
-      price = (5 / 1000 + (output_token * 0.6) / 1_000_000) * 100;
+      price = (5 / 1000 + (output_token * 1) / 1_000_000) * 100;
       break;
   }
   return naiveRound(price, 5);

@@ -13,6 +13,7 @@ export const DEFAULT_MODEL: Model = {
   option: "gpt-3.5-turbo",
   temperature: "1",
   pinned: false,
+  vision: false,
 };
 
 export function useModel(): ModelHook {
