@@ -1,5 +1,10 @@
 # drupal.org Changelog
 
+## [✨ New Feature] - 2024-05-17
+
+- Added command to search for Drupal projects (themes, modules, and distributions)
+- Minor typescript cleanup.
+
 ## [✨ New Feature] - 2024-05-08
 
 - Added command to search Drupal's API (api.drupal.org)

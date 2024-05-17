@@ -1,19 +1,19 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { drupalVersions, getDrupalApiResults } from "./utils/search-api/util";
-import { ApiItem } from "./utils/search-api/types";
-import { CommandState, DrupalVersionMachineCode } from "./utils/general/types";
+import { getProjectResults } from "./utils/search-projects/util";
+import { Project } from "./utils/search-projects/types";
+import { CommandState } from "./utils/general/types";
 
-const SearchApi = () => {
-  const [state, setState] = useState<CommandState<ApiItem[]>>({});
+const SearchProjects = () => {
+  const [state, setState] = useState<CommandState<Project[]>>({});
   const [searchText, setSearchText] = useState<string>("");
-  const [drupalVersion, setDrupalVersion] = useState<DrupalVersionMachineCode>(DrupalVersionMachineCode.Drupal10);
+  const [type, setType] = useState<string>("");
 
   useEffect(() => {
     const fetchRecords = async () => {
       try {
         setState({ records: state.records, loading: true });
-        const feed = await getDrupalApiResults(drupalVersion, searchText);
+        const feed = await getProjectResults(searchText, type);
         setState({ records: feed, loading: false });
       } catch (error) {
         console.error(error);
@@ -24,7 +24,22 @@ const SearchApi = () => {
     };
 
     fetchRecords();
-  }, [searchText, drupalVersion]);
+  }, [searchText, type]);
+
+  const typeFilter = (
+    <List.Dropdown
+      tooltip="Filter by Type"
+      onChange={(newValue) => {
+        setType(newValue);
+      }}
+      defaultValue=""
+    >
+      <List.Dropdown.Item key="all" title="– Show all –" value="" />
+      <List.Dropdown.Item key="modules" title="Modules" value="modules" />
+      <List.Dropdown.Item key="themes" title="Themes" value="themes" />
+      <List.Dropdown.Item key="distributions" title="Distributions" value="distributions" />
+    </List.Dropdown>
+  );
 
   let noResultsText = "No results...";
   let noResultsIcon: Icon | null = Icon.Important;
@@ -43,36 +58,20 @@ const SearchApi = () => {
     }
   }
 
-  const VersionDropdown = () => (
-    <List.Dropdown
-      tooltip="Select Drupal version to search in"
-      storeValue={true}
-      onChange={(newValue) => {
-        setDrupalVersion(newValue as DrupalVersionMachineCode);
-      }}
-    >
-      <List.Dropdown.Section title="Drupal versions">
-        {drupalVersions.map(({ name, code }) => (
-          <List.Dropdown.Item key={code} title={name} value={code} />
-        ))}
-      </List.Dropdown.Section>
-    </List.Dropdown>
-  );
-
   return (
     <List
       isLoading={state.loading || !state.records}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
-      searchBarPlaceholder="Search the Drupal API..."
+      searchBarPlaceholder="Search for Drupal projects..."
       isShowingDetail
-      searchBarAccessory={<VersionDropdown />}
       filtering={false}
+      searchBarAccessory={typeFilter}
     >
       <List.EmptyView title={noResultsText} icon={noResultsIcon} />
       {state.records?.map((item, index) => {
-        const detailsMarkdown = `# ${item.title}\n\n**Type:** ${item.type}\n\n**Description**: ${item.description}\n\n**Location**: ${item.location}\n\n[Go to Drupal.org](${item.url})`;
+        const detailsMarkdown = `# ${item.title}\n\n**Type:** ${item.type}\n\n**Description**: ${item.description}\n\n**Created by**: ${item.createdBy}\n\n[See project on Drupal.org](${item.url})`;
 
         return (
           <List.Item
@@ -85,14 +84,9 @@ const SearchApi = () => {
                 <Action.OpenInBrowser url={item.url} />
                 <Action.CopyToClipboard title="Copy URL to Clipboard" content={item.url} />
                 <Action.CopyToClipboard
-                  title="Copy Drupal Location to Clipboard"
-                  content={item.location}
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "l" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Title to Clipboard"
+                  title="Copy Name to Clipboard"
                   content={item.title}
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "t" }}
+                  shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
                 />
               </ActionPanel>
             }
@@ -103,4 +97,4 @@ const SearchApi = () => {
   );
 };
 
-export default SearchApi;
+export default SearchProjects;
