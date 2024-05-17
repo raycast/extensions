@@ -216,7 +216,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
             {renderSubmitAction("main")}
             {renderSubmitAction("second")}
             <Action.CreateQuicklink
-              title="Create Deeplink to Command as Configured"
+              title="Create Quicklink to Command as Configured"
               quicklink={getQuicklink()}
               icon={Icon.Link}
             />
