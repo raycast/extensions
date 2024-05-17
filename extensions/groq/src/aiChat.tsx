@@ -19,7 +19,6 @@ import { ChatData, Message, Chats } from "./hook/AIChat.types";
 const model_override = getPreferenceValues<{ model_chat: string }>().model_chat;
 const APIprovider = "Groq";
 
-// export default function Chat({ launchContext }: { launchContext?: { query?: string; response?: string } }) {
 export default function Chat() {
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [searchText, setSearchText] = useState("");
@@ -277,40 +276,6 @@ export default function Chat() {
         await LocalStorage.setItem("chatData", JSON.stringify(newChatData));
         setChatData(newChatData);
       }
-
-      // if (launchContext?.query) {
-      //   setChatData((oldData) => {
-      //     if (!oldData) return oldData;
-      //     const newChatData = structuredClone(oldData);
-      //     newChatData.chats.push({
-      //       name: `From Quick AI at ${new Date().toLocaleString("en-US", {
-      //         month: "2-digit",
-      //         day: "2-digit",
-      //         hour: "2-digit",
-      //         minute: "2-digit",
-      //         second: "2-digit",
-      //       })}`,
-      //       creationDate: new Date(),
-      //       messages: [
-      //         {
-      //           prompt: launchContext.query as string,
-      //           answer: launchContext.response as string,
-      //           creationDate: new Date().toISOString(),
-      //           finished: true,
-      //           modelName: model,
-      //         },
-      //       ],
-      //     });
-      //     newChatData.currentChat = `From Quick AI at ${new Date().toLocaleString("en-US", {
-      //       month: "2-digit",
-      //       day: "2-digit",
-      //       hour: "2-digit",
-      //       minute: "2-digit",
-      //       second: "2-digit",
-      //     })}`;
-      //     return newChatData;
-      //   });
-      // }
     })();
   }, []);
 
