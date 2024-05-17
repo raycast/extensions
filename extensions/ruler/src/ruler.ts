@@ -1,18 +1,19 @@
-import { Clipboard, closeMainWindow, showHUD } from "@raycast/api";
-import { runRuler } from "./utils";
+import { Clipboard, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { measureDistance } from "swift:../swift/Ruler";
 
 export default async function command() {
   await closeMainWindow();
 
   try {
-    const getDistance = await runRuler();
-    if (!getDistance) {
+    const distance = (await measureDistance()) as unknown as string | undefined;
+
+    if (!distance) {
       return;
     }
 
-    await Clipboard.copy(getDistance);
-    await showHUD("✅ Copied distance to clipboard");
+    await Clipboard.copy(distance);
+    await showToast({ style: Toast.Style.Success, title: "Copied distance to clipboard" });
   } catch (e) {
-    await showHUD("❌ Failed to calculate distance");
+    await showToast({ style: Toast.Style.Failure, title: "Failed to calculate distance" });
   }
 }

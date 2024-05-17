@@ -1,5 +1,11 @@
 # Ruler Changelog
 
+## [Improvements] - 2024-05-17
+
+- Added coordinates
+- Replaced measurement by dragging
+- Improved overlay styling
+
 ## [Feature] - 2024-05-05
 
 - Added the ability to determine if the line is straight horizontally or vertically.
