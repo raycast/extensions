@@ -51,8 +51,9 @@
   "dependencies": {
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.15.0",
+    "bplist-parser": "^0.3.2",
     "lodash": "^4.17.21",
-    "mac-say": "^0.2.2"
+    "mac-say": "^0.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
