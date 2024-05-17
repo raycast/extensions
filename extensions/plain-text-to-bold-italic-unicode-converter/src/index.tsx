@@ -1,5 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
+import React from "react";
 
 type Values = {
   text: string;
