@@ -3,7 +3,7 @@
   "name": "plain-text-to-bold-italic-unicode-converter",
   "title": "Bold Italic Plain Text Unicode Converter",
   "description": "Convert plain text to bold, italic (serif or sans serif), strikethrough, monospace, or small caps to add formatting on  on plain text sites (Twitter, LinkedIn, etc). \n\nInspired by yaytext.com!",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "ubergraham",
   "categories": [
     "Productivity"
