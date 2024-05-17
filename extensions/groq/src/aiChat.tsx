@@ -12,9 +12,10 @@ import {
   LocalStorage,
   Alert,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
 import { ChatData, Message, Chats } from "./hook/AIChat.types";
+import { currentDate } from "./hook/utils";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { Stream } from "openai/streaming";
 
@@ -24,16 +25,18 @@ const APIprovider = "Groq";
 export default function Chat() {
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [searchText, setSearchText] = useState("");
-  const model = model_override === "global" ? global_model : model_override;
+  const [isLoading, setIsLoading] = useState(true);
+  // const model = model_override === "global" ? global_model : model_override;
+  const model = useMemo(() => (model_override === "global" ? global_model : model_override), [model_override]);
 
-  const updateChatData = (callback: (data: ChatData) => ChatData) => {
+  const updateChatData = useCallback((callback: (data: ChatData) => ChatData) => {
     setChatData((oldData) => {
       if (!oldData) return oldData;
       const newChatData = structuredClone(oldData);
       callback(newChatData);
       return newChatData;
     });
-  };
+  }, []);
 
   const CreateChat = () => {
     const { pop } = useNavigation();
@@ -47,9 +50,9 @@ export default function Chat() {
         pop();
         updateChatData((data) => {
           data.chats.push({
-            name: values.chatName as string,
-            creationDate: new Date() as Date,
-            messages: [] as Message[],
+            name: values.chatName,
+            creationDate: new Date(),
+            messages: [],
           });
           data.currentChat = values.chatName;
           return data;
@@ -106,12 +109,16 @@ export default function Chat() {
     });
 
     try {
+      setIsLoading(true);
       const currentChat = getChat(chatData.currentChat);
       const messages = currentChat.messages.flatMap((x) => [
         { role: "assistant", content: x.answer },
         { role: "user", content: x.prompt },
       ]) as ChatCompletionMessageParam[];
-      messages.push({ role: "system", content: "Be a concise and helpful" });
+      messages.push({
+        role: "system",
+        content: `Be a helpful chatbot that provides clear, concise, and accurate information to users, ensuring that your responses are easy to understand and directly address their questions. Current date is ${currentDate}.`,
+      });
       messages.reverse();
 
       const response = await openai.chat.completions.create({
@@ -143,6 +150,7 @@ export default function Chat() {
       });
 
       showToast({ style: Toast.Style.Success, title: "Response Loaded" });
+      setIsLoading(false);
     } catch (error) {
       console.error(`Error processing message with ${APIprovider}:`, error);
       updateChatData((data) => {
@@ -154,12 +162,14 @@ export default function Chat() {
         title: `${APIprovider} cannot process this message`,
         message: error as string,
       });
+      setIsLoading(false);
     }
   };
 
-  const OpenAIActionPanel = () => (
+  const OpenAIActionPanel = ({ answer }: { answer?: string }) => (
     <ActionPanel>
       <Action icon={Icon.Message} title={`Send to ${APIprovider}`} onAction={() => handleSendMessage(searchText)} />
+      {answer && <Action.CopyToClipboard title="Copy Answer" content={answer || ""} />}
       <ActionPanel.Section title="Manage Chats">
         <Action.Push
           icon={Icon.PlusCircle}
@@ -181,35 +191,73 @@ export default function Chat() {
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger zone">
+        {answer && (
+          <Action
+            icon={Icon.Trash}
+            title="Delete Message"
+            onAction={() => deleteMessage(answer)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+            style={Action.Style.Destructive}
+          />
+        )}
         <Action
           icon={Icon.Trash}
-          title="Delete Chat"
-          onAction={deleteChat}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+          title="Delete Conversation"
+          onAction={deleteConversation}
           style={Action.Style.Destructive}
         />
       </ActionPanel.Section>
     </ActionPanel>
   );
 
-  const navigateChat = (direction: number) => {
-    if (!chatData) return;
-    const chatIdx = chatData.chats.findIndex((chat) => chat.name === chatData.currentChat);
-    const newIdx = chatIdx + direction;
-    if (newIdx < 0 || newIdx >= chatData.chats.length) {
-      showToast({ style: Toast.Style.Failure, title: `No Chats ${direction > 0 ? "After" : "Before"} Current` });
-    } else {
-      setChatData((oldData) => ({
-        ...oldData!,
-        currentChat: chatData.chats[newIdx].name,
-      }));
-    }
-  };
+  const navigateChat = useCallback(
+    (direction: number) => {
+      if (!chatData) return;
+      const chatIdx = chatData.chats.findIndex((chat) => chat.name === chatData.currentChat);
+      const newIdx = chatIdx + direction;
+      if (newIdx < 0 || newIdx >= chatData.chats.length) {
+        showToast({ style: Toast.Style.Failure, title: `No Chats ${direction > 0 ? "After" : "Before"} Current` });
+      } else {
+        setChatData((oldData) => ({
+          ...oldData!,
+          currentChat: chatData.chats[newIdx].name,
+        }));
+      }
+    },
+    [chatData],
+  );
 
-  const deleteChat = async () => {
+  const deleteMessage = useCallback(async (message: string) => {
+    setIsLoading(true);
     await confirmAlert({
       title: "Are you sure?",
-      message: "You cannot recover this chat.",
+      message: "You cannot recover this message.",
+      icon: Icon.Trash,
+      primaryAction: {
+        title: "Delete Message",
+        style: Alert.ActionStyle.Destructive,
+        onAction: () => {
+          setChatData((oldData) => {
+            if (!oldData) return oldData;
+            const newChatData = structuredClone(oldData);
+            const chatIdx = newChatData.chats.findIndex((chat) => chat.name === newChatData.currentChat);
+            const messageIdx = newChatData.chats[chatIdx].messages.findIndex((msg) => msg.answer === message);
+            if (messageIdx !== -1) {
+              newChatData.chats[chatIdx].messages.splice(messageIdx, 1);
+            }
+            return newChatData;
+          });
+        },
+      },
+    });
+    setIsLoading(false);
+  }, []);
+
+  const deleteConversation = useCallback(async () => {
+    setIsLoading(true);
+    await confirmAlert({
+      title: "Are you sure?",
+      message: "You cannot recover this conversation.",
       icon: Icon.Trash,
       primaryAction: {
         title: "Delete Chat",
@@ -218,7 +266,7 @@ export default function Chat() {
           if (!chatData) return;
           const chatIdx = chatData.chats.findIndex((chat) => chat.name === chatData.currentChat);
           if (chatData.chats.length === 1) {
-            showToast({ style: Toast.Style.Failure, title: "Cannot delete only chat" });
+            showToast({ style: Toast.Style.Failure, title: "Cannot delete only conversation" });
             return;
           }
           setChatData((oldData) => {
@@ -231,7 +279,8 @@ export default function Chat() {
         },
       },
     });
-  };
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -294,6 +343,7 @@ export default function Chat() {
         setChatData(newChatData);
       }
     })();
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -304,14 +354,17 @@ export default function Chat() {
     }
   }, [chatData]);
 
-  const getChat = (target: string, customChat: Chats[] = chatData!.chats): Chats => {
-    const chat = customChat.find((chat) => chat.name === target);
-    if (!chat) throw new Error("Chat not found");
-    return chat;
-  };
+  const getChat = useCallback(
+    (target: string, customChat: Chats[] = chatData!.chats): Chats => {
+      const chat = customChat.find((chat) => chat.name === target);
+      if (!chat) throw new Error("Chat not found");
+      return chat;
+    },
+    [chatData],
+  );
 
   return chatData === null ? (
-    <List searchText={searchText} onSearchTextChange={setSearchText}>
+    <List searchText={searchText} onSearchTextChange={setSearchText} isLoading={isLoading}>
       <List.EmptyView icon={Icon.Stars} title={`Send a Message to ${APIprovider} to get started.`} />
     </List>
   ) : (
@@ -320,6 +373,7 @@ export default function Chat() {
       onSearchTextChange={setSearchText}
       isShowingDetail={getChat(chatData.currentChat).messages.length > 0}
       searchBarPlaceholder={`Ask ${APIprovider}...`}
+      isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Your Chats"
@@ -355,7 +409,7 @@ export default function Chat() {
             ]}
             detail={<List.Item.Detail markdown={`\`\`\`${x.modelName}\`\`\`\n\n${x.answer}`} />}
             key={x.prompt + x.creationDate}
-            actions={<OpenAIActionPanel />}
+            actions={<OpenAIActionPanel answer={x.answer} />}
           />
         ))
       )}
