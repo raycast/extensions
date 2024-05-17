@@ -437,9 +437,15 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
-      }>
+      }
+    >
       <Form.Description text="Convert text to bold, italic, serif, or sans-serif." />
-      <Form.TextField id="text" title="Text" placeholder="Enter text" onChange={setText} />
+      <Form.TextField
+        id="text"
+        title="Text"
+        placeholder="Enter text"
+        onChange={setText}
+      />
       <Form.Dropdown id="style" title="Style" onChange={setStyle}>
         <Form.Dropdown.Item value="boldSansSerif" title="𝗦𝗮𝗻𝘀-𝗦𝗲𝗿𝗶𝗳 𝗕𝗼𝗹𝗱" />
         <Form.Dropdown.Item value="italicSansSerif" title="𝘚𝘢𝘯𝘴-𝘚𝘦𝘳𝘪𝘧 𝘐𝘵𝘢𝘭𝘪𝘤" />
