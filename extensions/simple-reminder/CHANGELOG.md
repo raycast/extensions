@@ -1,5 +1,9 @@
 # Simple Reminder Changelog
 
+## [Reminder Menu Bar] - 2024-05-16
+
+- Fix Reminder length not being cut off if topic length is greater than 30
+
 ## [Reminder Menu Bar] - 2024-05-15
 
 - Add empty reminder action in reminder menu bar to show the user that no reminders are set and that they can add a new reminder
