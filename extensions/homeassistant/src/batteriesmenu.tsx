@@ -1,15 +1,15 @@
-import { Color, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
-import { getErrorMessage, getFriendlyName } from "@lib/utils";
-import { useHAStates } from "@components/hooks";
-import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
-import { filterViaPreferencePatterns } from "@components/state/utils";
+import { BatteryMenubarSection } from "@components/battery/menu";
 import {
   filterBatteries,
   getBatteryIconSourceForValue,
   getBatteryStateValue,
   sortBatteries,
 } from "@components/battery/utils";
-import { BatteryMenubarSection } from "@components/battery/menu";
+import { useHAStates } from "@components/hooks";
+import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
+import { filterViaPreferencePatterns } from "@components/state/utils";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { Color, LaunchType, MenuBarExtra, getPreferenceValues } from "@raycast/api";
 
 function excludedBatteriesHigherThenPreference(): number | undefined {
   const prefs = getPreferenceValues();

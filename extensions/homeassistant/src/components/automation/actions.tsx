@@ -1,9 +1,9 @@
-import { Color, Icon, Action, ActionPanel } from "@raycast/api";
+import { HAOpenUrlInAction } from "@components/actions";
+import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { EntityStandardActionSections } from "@components/entity";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { callAutomationTriggerService, callAutomationTurnOffService, callAutomationTurnOnService } from "./utils";
-import { HAOpenUrlInAction } from "@components/actions";
 
 export function AutomationTriggerAction(props: { state: State }): JSX.Element | null {
   const s = props.state;

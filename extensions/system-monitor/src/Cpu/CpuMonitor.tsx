@@ -1,10 +1,11 @@
 import { cpuUsage, sysUptime } from "os-utils";
 import { Icon, List } from "@raycast/api";
 import { loadavg } from "os";
-import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 import { useInterval } from "usehooks-ts";
-import { Actions } from "../components/Actions";
 import { usePromise } from "@raycast/utils";
+
+import { Actions } from "../components/Actions";
+import { getTopCpuProcess, getRelativeTime } from "./CpuUtils";
 
 export default function CpuMonitor() {
   const { revalidate, data: cpu } = usePromise(() => {
@@ -18,16 +19,14 @@ export default function CpuMonitor() {
   useInterval(revalidate, 1000);
 
   return (
-    <>
-      <List.Item
-        id="cpu"
-        title="CPU"
-        icon={Icon.Monitor}
-        accessories={[{ text: !cpu ? "Loading…" : `${cpu} %` }]}
-        detail={<CpuMonitorDetail cpu={cpu || ""} />}
-        actions={<Actions />}
-      />
-    </>
+    <List.Item
+      id="cpu"
+      title="CPU"
+      icon={Icon.Monitor}
+      accessories={[{ text: !cpu ? "Loading…" : `${cpu} %` }]}
+      detail={<CpuMonitorDetail cpu={(cpu as string) || ""} />}
+      actions={<Actions />}
+    />
   );
 }
 
@@ -84,7 +83,7 @@ function CpuMonitorDetail({ cpu }: { cpu: string }) {
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Process Name" />
           {topProcess
-            ? topProcess.map((element, index) => {
+            ? topProcess.map((element, index: number) => {
                 return (
                   <List.Item.Detail.Metadata.Label
                     key={index}

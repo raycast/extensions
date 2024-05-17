@@ -245,7 +245,8 @@ export default function Command(props: LaunchProps) {
                   />
                   <Action
                     title="Clear Pinned Cases"
-                    icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                    style={Action.Style.Destructive}
+                    icon={{ source: Icon.XMarkCircle }}
                     shortcut={Keyboard.Shortcut.Common.RemoveAll}
                     onAction={() => {
                       setPinned([]);
