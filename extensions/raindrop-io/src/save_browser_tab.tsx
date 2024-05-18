@@ -1,9 +1,14 @@
-import { showToast, Toast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { CreateForm } from "./components/CreateForm";
+import { useBrowserLink } from "./hooks/useBrowserLink";
 
-const AddBookmarks = () => {
+const AddBrowserTab = () => {
+  const { isLoading, data: link } = useBrowserLink();
+
   return (
     <CreateForm
+      isLoading={isLoading}
+      defaultLink={link}
       onWillCreate={() => {
         showToast(Toast.Style.Animated, "Adding Link...");
       }}
@@ -17,4 +22,4 @@ const AddBookmarks = () => {
   );
 };
 
-export default AddBookmarks;
+export default AddBrowserTab;
