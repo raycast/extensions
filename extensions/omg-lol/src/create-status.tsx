@@ -7,9 +7,8 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import React, { useState } from "react";
-import emojis from "./common/emoji";
-import { Emojis, Emoji } from "./common/emoji";
+import { useState } from "react";
+import * as unicodeEmoji from "unicode-emoji";
 
 import { POST } from "./common/api";
 import { StatusCreateResponse } from "./common/types";
@@ -20,8 +19,28 @@ interface FormValues {
   skip: boolean;
 }
 
-const getCategoryEmojis = (category: string): Emoji[] => {
-  return emojis[category as keyof Emojis];
+const emojis = unicodeEmoji.getEmojisGroupedBy("category");
+
+const getCategoryName = (category: string): string => {
+  const categoryNames: { [key: string]: string } = {
+    "face-emotion": "Smileys & Emotion",
+    symbols: "Symbols",
+    "person-people": "People & Body",
+    "animals-nature": "Animals & Nature",
+    "food-drink": "Food & Drink",
+    "travel-places": "Travel & Places",
+    objects: "Objects",
+    "activities-events": "Activities",
+    flags: "Flags",
+  };
+
+  return categoryNames[category];
+};
+
+const getEmojis = (
+  category: string,
+): { emoji: string; description: string }[] => {
+  return emojis[category as keyof typeof emojis];
 };
 
 export default function Command() {
@@ -67,13 +86,16 @@ export default function Command() {
       <Form.Dropdown id="emoji" title="Emoji">
         <Form.Dropdown.Item value="" title="Default Emoji" icon="✨" />
         {Object.keys(emojis).map((category: string) => (
-          <Form.Dropdown.Section title={category} key={category}>
-            {getCategoryEmojis(category).map(
-              (emoji: { emoji: string; name: string }) => (
+          <Form.Dropdown.Section
+            title={getCategoryName(category)}
+            key={category}
+          >
+            {getEmojis(category).map(
+              (emoji: { emoji: string; description: string }) => (
                 <Form.Dropdown.Item
-                  key={`${emoji.name}-${emoji.emoji}`}
+                  key={`${emoji.description}-${emoji.emoji}`}
                   value={emoji.emoji}
-                  title={emoji.name}
+                  title={emoji.description}
                   icon={emoji.emoji}
                 />
               ),

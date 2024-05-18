@@ -84,7 +84,8 @@
   "dependencies": {
     "@raycast/api": "^1.64.4",
     "@raycast/utils": "^1.10.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "unicode-emoji": "^2.5.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
