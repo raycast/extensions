@@ -1,0 +1,26 @@
+query GetFollowedTags {
+  me {
+    tagsFollowing {
+      id
+      slug
+    }
+  }
+}
+
+query SearchTagBasedBlogs($tag: String!, $sortBy: TagPostsSort) {
+  tag(slug: $tag) {
+    id
+    name
+    slug
+    postsCount
+    posts(first: 50, filter: { sortBy: $sortBy }) {
+      edges {
+        node {
+          id
+          title
+          subtitle
+        }
+      }
+    }
+  }
+}

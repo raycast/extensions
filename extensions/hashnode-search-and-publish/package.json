@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hashnode-search-and-publish",
+  "title": "Hashnode Search and Publish",
+  "description": "This hashnode raycast extension is a personal hashnode feed and publishing blogs right from raycast ",
+  "icon": "command-icon.png",
+  "author": "agrit",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Recent blogs",
+      "subtitle": "Search blogs from Subscribed Publications",
+      "description": "Raycast extension for Hashnode, a blogging platform on your dock",
+      "mode": "view"
+    },
+    {
+      "name": "publish",
+      "title": "Publish Blog",
+      "subtitle": "Publish Blog you were writing",
+      "description": "Raycast extension for Hashnode, a blogging platform on your dock",
+      "mode": "view"
+    },
+    {
+      "name": "profile",
+      "title": "Check your Hashnode Profile",
+      "subtitle": "Share your hashnode blogs",
+      "description": "Check your hashnode profile right from your dock",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Get or generate a Hashnode PAT (Personal Access Token) and paste it here.",
+      "link": "https://hashnode.com/settings/developer",
+      "placeholder": "Enter your Hashnode token."
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "Get your Hashnode username from: Profile > Profile Identity > Username.",
+      "link": "https://hashnode.com/settings",
+      "placeholder": "Enter your Hashnode username."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.0",
+    "@apollo/client": "^3.8.9",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-apollo-client-helpers": "^2.2.6",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
+    "@graphql-codegen/typescript-react-apollo": "^3.3.7",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "generate": "rm -rf generated && graphql-codegen",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

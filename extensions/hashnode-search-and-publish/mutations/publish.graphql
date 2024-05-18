@@ -1,0 +1,16 @@
+mutation publishBlog(
+  $title: String!
+  $contentMarkdown: String!
+  $tags: [PublishPostTagInput!]!
+  $publicationId: ObjectId!
+) {
+  publishPost(input: { title: $title, contentMarkdown: $contentMarkdown, tags: $tags, publicationId: $publicationId }) {
+    post {
+      id
+      slug
+      url
+      title
+      subtitle
+    }
+  }
+}

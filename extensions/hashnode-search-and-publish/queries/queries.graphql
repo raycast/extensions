@@ -1,0 +1,124 @@
+query GetPersonalFeed {
+  me {
+    follows(page: 1, pageSize: 10) {
+      nodes {
+        id
+        publications(first: 10) {
+          edges {
+            node {
+              id
+              title
+              canonicalURL
+              favicon
+              followersCount
+              headerColor
+              displayTitle
+              posts(first: 20) {
+                edges {
+                  node {
+                    title
+                    slug
+                    subtitle
+                    canonicalUrl
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetMyPublication {
+  me {
+    publications(first: 10) {
+      edges {
+        node {
+          id
+          displayTitle
+          favicon
+        }
+      }
+    }
+  }
+}
+
+query GetAllPostsOfaPublication($publicationId: ObjectId!) {
+  publication(id: $publicationId) {
+    title
+    posts(first: 10) {
+      edges {
+        node {
+          title
+          slug
+          subtitle
+          url
+          ogMetaData {
+            image
+          }
+          brief
+          tags {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetProfileData {
+  me {
+    id
+    username
+    profilePicture
+    tagsFollowing {
+      id
+      tagline
+      info {
+        text
+      }
+      logo
+    }
+    publications(first: 10) {
+      edges {
+        node {
+          id
+          about {
+            text
+          }
+          url
+          drafts(first: 10) {
+            edges {
+              node {
+                title
+              }
+            }
+          }
+        }
+      }
+    }
+    bio {
+      text
+    }
+    followersCount
+
+    posts(page: 1, pageSize: 10) {
+      nodes {
+        id
+        coverImage {
+          url
+        }
+        title
+        subtitle
+        slug
+        series {
+          name
+        }
+        publishedAt
+        url
+      }
+    }
+  }
+}
