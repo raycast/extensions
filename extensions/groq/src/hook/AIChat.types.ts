@@ -3,7 +3,7 @@ export interface ChatData {
   chats: Chats[];
 }
 
-export interface Chats{
+export interface Chats {
   name: string;
   creationDate: Date;
   modelName?: string;
