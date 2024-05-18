@@ -7,7 +7,7 @@ export async function waitUntil<T>(
   const timeout = new Promise<never>((_, reject) => {
     setTimeout(async () => {
       reject(new Error(options?.timeoutMessage ?? "Timed out"));
-    }, options?.timeout ?? 3000);
+    }, options?.timeout ?? 6000);
   });
 
   const unwrappedPromise = promise instanceof Function ? promise() : promise;
