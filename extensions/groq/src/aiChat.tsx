@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { global_model, enable_streaming, openai } from "./hook/configAPI";
-import { ChatData, Message, Chats } from "./hook/AIChat.types";
+import { ChatData, Chats } from "./hook/AIChat.types";
 import { currentDate } from "./hook/utils";
 import { ChatCompletionMessageParam } from "openai/resources";
 import { Stream } from "openai/streaming";
@@ -399,7 +399,7 @@ export default function Chat() {
           actions={<OpenAIActionPanel />}
         />
       ) : (
-        getChat(chatData.currentChat).messages.map((x, index) => (
+        getChat(chatData.currentChat).messages.map((x) => (
           <List.Item
             title={{ tooltip: x.prompt, value: x.prompt }}
             accessories={[
