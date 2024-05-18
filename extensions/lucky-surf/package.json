@@ -27,19 +27,8 @@
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "preferredBrowser",
-      "title": "Preferred Browser",
-      "type": "appPicker",
-      "label": "Preferred Browser",
-      "description": "The browser to use when opening URLs",
-      "default": "Safari",
-      "required": false
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.74.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
