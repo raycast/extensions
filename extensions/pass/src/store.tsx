@@ -1,7 +1,6 @@
 import { ActionPanel, Action, List, Icon } from '@raycast/api';
-import { relative } from 'path';
 import { useEffect, useState } from 'react';
-import { listFiles } from './gpg';
+import { list } from './pass';
 import Content from './content';
 
 interface StoreProps {
@@ -15,7 +14,7 @@ export default function Store({ storepath }: StoreProps) {
   useEffect(() => {
     async function fetchFiles() {
       try {
-        const files = await listFiles(storepath);
+        const files = await list(storepath);
         setRows(files);
       } catch (error) {
         console.error('Failed to fetch file list:', error);
@@ -27,18 +26,16 @@ export default function Store({ storepath }: StoreProps) {
     fetchFiles();
   }, [storepath]);
 
-  const calcName = (filepath: string) => relative(storepath, filepath).replace('.gpg', '');
-
   return (
     <List isLoading={isLoading}>
-      {rows.map((filepath) => (
+      {rows.map((file) => (
         <List.Item
-          key={filepath}
+          key={file}
           icon={Icon.Lock}
-          title={calcName(filepath)}
+          title={file}
           actions={
             <ActionPanel>
-              <Action.Push title={'Show Password Content'} target={<Content path={filepath} />} />
+              <Action.Push title={'Show Password Content'} target={<Content storepath={storepath} file={file} />} />
             </ActionPanel>
           }
         />

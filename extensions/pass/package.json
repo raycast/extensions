@@ -14,7 +14,6 @@
     {
       "name": "index",
       "title": "Pass",
-      "subtitle": "Find password",
       "description": "Handle the standard unix password manager",
       "mode": "view"
     }
@@ -30,6 +29,15 @@
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
+  "preferences": [
+    {
+      "name": "customBrewPath",
+      "type": "textfield",
+      "title": "Homebrew Path",
+      "description": "Custom Homebrew Executable Path",
+      "required": false
+    }
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
