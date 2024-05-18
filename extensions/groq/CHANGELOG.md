@@ -2,7 +2,7 @@
 
 ## [Update] - 2024-05-18
 
-- Added new AI chat command `AI Chat`
+- Added new AI chat command `AI Chat`.
 - Improved system prompt for `Fix Grammar and Spelling` and `Improve Text` commands.
 
 ## [Update] - 2024-04-25
