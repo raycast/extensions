@@ -3,7 +3,7 @@ import { pass } from './pass';
 
 const url = 'passwordstore.org';
 const fullUrl = `https://www.${url}`;
-const toastOpts = {
+const toastOpts: Toast.Options = {
   style: Toast.Style.Failure,
   title: 'pass is not installed.',
   message: `Check ${url} for help.`,
