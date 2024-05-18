@@ -1,6 +1,6 @@
 import fse from "fs-extra";
 import * as XLSX from "xlsx";
-import { getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
+import { environment, getPreferenceValues, open, showHUD, showInFinder } from "@raycast/api";
 import React, { useState } from "react";
 import { isEmpty } from "./utils/common-utils";
 import { FileType, TemplateType } from "./types/file-type";
@@ -10,17 +10,31 @@ import { NewFileHereListLayout } from "./components/new-file-here-list-layout";
 import { NewFileHereGridLayout } from "./components/new-file-here-grid-layout";
 import { rtfPreContent } from "./utils/constants";
 
-export default function NewFileHere() {
+export default function NewFileWithTemplate() {
   const { layout } = getPreferenceValues<Preferences>();
   const [refresh, setRefresh] = useState<number>(0);
+  const launchContext = environment.launchContext;
+  const navigationTitle = launchContext?.navigationTitle || "New File With Template";
 
   //hooks
-  const { templateFiles, isLoading } = getTemplateFile(refresh);
+  const { folder, templateFiles, isLoading } = getTemplateFile(refresh);
 
   return layout === "List" ? (
-    <NewFileHereListLayout isLoading={isLoading} templateFiles={templateFiles} setRefresh={setRefresh} />
+    <NewFileHereListLayout
+      navigationTitle={navigationTitle}
+      isLoading={isLoading}
+      templateFiles={templateFiles}
+      folder={folder}
+      setRefresh={setRefresh}
+    />
   ) : (
-    <NewFileHereGridLayout isLoading={isLoading} templateFiles={templateFiles} setRefresh={setRefresh} />
+    <NewFileHereGridLayout
+      navigationTitle={navigationTitle}
+      isLoading={isLoading}
+      templateFiles={templateFiles}
+      folder={folder}
+      setRefresh={setRefresh}
+    />
   );
 }
 
@@ -79,7 +93,7 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
 }
 
 export const showCreateSuccess = async (fileName: string, filePath: string, folderPath: string) => {
-  switch (getPreferenceValues<Preferences>().createdActions) {
+  switch (getPreferenceValues<Preferences>().createdAction) {
     case "no": {
       break;
     }
