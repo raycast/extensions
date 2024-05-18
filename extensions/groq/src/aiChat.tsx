@@ -26,15 +26,13 @@ export default function Chat() {
   const [chatData, setChatData] = useState<ChatData | null>(null);
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  // const model = model_override === "global" ? global_model : model_override;
   const model = useMemo(() => (model_override === "global" ? global_model : model_override), [model_override]);
 
-  const updateChatData = useCallback((callback: (data: ChatData) => ChatData) => {
+  const updateChatData = useCallback((callback: (data: ChatData) => void) => {
     setChatData((oldData) => {
       if (!oldData) return oldData;
-      const newChatData = structuredClone(oldData);
-      callback(newChatData);
-      return newChatData;
+      callback(oldData);
+      return { ...oldData };
     });
   }, []);
 
@@ -111,8 +109,8 @@ export default function Chat() {
     try {
       setIsLoading(true);
       const currentChat = getChat(chatData.currentChat);
-      const messages = currentChat.messages.flatMap((x) => [
-        { role: "assistant", content: x.answer },
+      const messages = currentChat.messages.slice(0, 12).flatMap((x) => [ // only send the last 12 messages
+        { role: "assistant", content: x.answer.substring(0, 1_000) }, // to avoid exceeding context size limit, only send first 1_000 characters of assistant response
         { role: "user", content: x.prompt },
       ]) as ChatCompletionMessageParam[];
       messages.push({
@@ -120,6 +118,9 @@ export default function Chat() {
         content: `Be a helpful chatbot that provides clear, concise, and accurate information to users, ensuring that your responses are easy to understand and directly address their questions. Current date is ${currentDate}.`,
       });
       messages.reverse();
+      // messages.forEach((x) => {
+      //   console.log(x.content);
+      // });
 
       const response = await openai.chat.completions.create({
         model: model,
@@ -166,7 +167,7 @@ export default function Chat() {
     }
   };
 
-  const OpenAIActionPanel = ({ answer }: { answer?: string }) => (
+  const OpenAIActionPanel = ({ answer, creationDate }: { answer?: string, creationDate?: string }) => (
     <ActionPanel>
       <Action icon={Icon.Message} title={`Send to ${APIprovider}`} onAction={() => handleSendMessage(searchText)} />
       {answer && <Action.CopyToClipboard title="Copy Answer" content={answer || ""} />}
@@ -191,11 +192,11 @@ export default function Chat() {
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Danger zone">
-        {answer && (
+        {creationDate && (
           <Action
             icon={Icon.Trash}
             title="Delete Message"
-            onAction={() => deleteMessage(answer)}
+            onAction={() => deleteMessage(creationDate)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
             style={Action.Style.Destructive}
           />
@@ -241,7 +242,7 @@ export default function Chat() {
             if (!oldData) return oldData;
             const newChatData = structuredClone(oldData);
             const chatIdx = newChatData.chats.findIndex((chat) => chat.name === newChatData.currentChat);
-            const messageIdx = newChatData.chats[chatIdx].messages.findIndex((msg) => msg.answer === message);
+            const messageIdx = newChatData.chats[chatIdx].messages.findIndex((msg) => msg.creationDate === message);
             if (messageIdx !== -1) {
               newChatData.chats[chatIdx].messages.splice(messageIdx, 1);
             }
@@ -253,7 +254,7 @@ export default function Chat() {
     setIsLoading(false);
   }, []);
 
-  const deleteConversation = useCallback(async () => {
+  const deleteConversation = async () => {
     setIsLoading(true);
     await confirmAlert({
       title: "Are you sure?",
@@ -264,11 +265,11 @@ export default function Chat() {
         style: Alert.ActionStyle.Destructive,
         onAction: () => {
           if (!chatData) return;
-          const chatIdx = chatData.chats.findIndex((chat) => chat.name === chatData.currentChat);
           if (chatData.chats.length === 1) {
             showToast({ style: Toast.Style.Failure, title: "Cannot delete only conversation" });
             return;
           }
+          const chatIdx = chatData.chats.findIndex((chat) => chat.name === chatData.currentChat);
           setChatData((oldData) => {
             if (!oldData) return oldData;
             const newChatData = structuredClone(oldData);
@@ -280,7 +281,7 @@ export default function Chat() {
       },
     });
     setIsLoading(false);
-  }, []);
+  };
 
   useEffect(() => {
     (async () => {
@@ -289,6 +290,7 @@ export default function Chat() {
         const newData: ChatData = JSON.parse(storedChatData as string);
 
         if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
+          setIsLoading(true);
           const currentChat = getChat(newData.currentChat, newData.chats);
           const messages = currentChat.messages.map((x) => ({
             role: "user",
@@ -324,9 +326,21 @@ export default function Chat() {
           });
 
           showToast({ style: Toast.Style.Success, title: "Response Loaded" });
+          setIsLoading(false);
         }
 
-        setChatData(structuredClone(newData));
+        // setChatData(structuredClone(newData));
+        // add fake message to newData to test reliability of LocalStorage
+        // newData.chats[0].messages.push({
+        //   prompt: "Test",
+        //   answer: "Spain! A country known for its rich history, stunning landscapes, vibrant culture, and warm hospitality. Located in southwestern Europe, Spain is a treasure trove of experiences waiting to be discovered. From the beautiful beaches of the Costa Brava to the artistic treasures of Madrid, Spain has something for everyone. **History and Architecture** Spain's history is as complex as it is fascinating. The country has been inhabited by various cultures, including the Celts, Romans, Visigoths, and Moors, each leaving their mark on the country's architecture, language, and customs. The Roman Empire's legacy can be seen in the ancient ruins of Tarragona, Mérida, and Segovia, while the Moorish influence is evident in the stunning Alhambra palace in Granada. The Gothic style is another prominent architectural trend in Spain, showcased in magnificent cathedrals like Santiago de Compostela and Burgos. The ornate decorations, intricate stone carvings, and soaring vaults are a testament to the country's rich cultural heritage. **Art and Culture** Spain is renowned for its world-class museums, showcasing the works of some of the greatest artists in history. The Prado Museum in Madrid is a must-visit, with an impressive collection of European art, including works by Velázquez, Goya, and El Greco. The Reina Sofia Museum, also in Madrid, is home to Picasso's iconic Guernica, while the Joan Miró Museum in Barcelona celebrates the life and works of the famous Catalan surrealist. Flamenco music and dance are an integral part of Spanish culture, with its passionate rhythms and graceful movements captivating audiences worldwide. The country is also famous for its vibrant festivals, such as the Tomatina tomato-throwing festival in Buñol and the Fallas celebrations in Valencia. **Cuisine** Spanish cuisine is a sensory delight, with its bold flavors, aromas, and textures. Tapas, those delicious small plates of food, are an integral part of the country's gastronomic culture. From patatas bravas (spicy fried potatoes) to croquetas (deep-fried balls filled with ham, fish, or chicken), tapas offer a taste sensation like no other. Paella, the iconic Spanish dish, is a staple of any visit to the country. This savory rice dish, originating from Valencia, is cooked with a variety of ingredients, including seafood, chorizo, and vegetables. Don't forget to try some gazpacho, a refreshing cold soup made from tomatoes, peppers, and cucumbers. **Regional Diversity** Spain is a country of diverse regions, each with its unique character and attractions. The autonomous communities of Catalonia, the Basque Country, and Galicia offer distinct cultural experiences, including their own languages, cuisines, and traditions. Andalusia, in southern Spain, is famous for its Moorish architecture, flamenco music, and beautiful beaches. The Costa del Sol, which stretches along the Mediterranean coast, is a popular destination for sun-seekers and golf enthusiasts. The Balearic Islands, comprising Ibiza, Mallorca, and Menorca, are a haven for partygoers, beach lovers, and nature enthusiasts. The Canary Islands, located off the northwest coast of Africa, boast stunning landscapes, volcanic peaks, and tropical forests. **Nature and Wildlife** Spain is home to some of the most breathtaking natural landscapes in Europe. The Pyrenees Mountains, which separate Spain from France, offer breathtaking scenery, ski resorts, and trekking opportunities. The Picos de Europa National Park in northern Spain is a haven for nature lovers, with its rugged mountains, valleys, and wildlife. The country is also home to some of the most stunning beaches in the world, such as the Costa Brava in Catalonia and the Costa del Sol in Andalusia. The beautiful islands of Ibiza and Mallorca are famous for their crystal-clear waters, secluded coves, and lively beach parties. **Cities** Madrid, the vibrant capital city, is a must-visit destination in Spain. From the world-class museums to the lively nightlife, Madrid offers something for everyone. The Royal Palace, Plaza Mayor, and the historic center are just a few of the many attractions this amazing city has to offer. Barcelona, the capital of Catalonia, is famous for its modernist architecture, beaches, and cultural attractions. The works of Antoni Gaudí, including the iconic Sagrada Família, are a major drawcard for visitors. The city's Gothic Quarter, La Rambla, and Barceloneta beach are other popular destinations. Seville, the charming capital of Andalusia, is known for its Moorish architecture, flamenco music, and delicious tapas. The Cathedral of Seville, Royal Alcázar Palace, and the Archivo de Indias are all UNESCO World Heritage Sites. **Festivals and Celebrations** Spain is a country that loves to celebrate, with numerous festivals and celebrations throughout the year. The Tomatina festival in Buñol, where participants throw tons of tomatoes at each other, is a world-famous event. The Fallas celebrations in Valencia, featuring giant puppets and fireworks, is another iconic festival. The Feria de Abril in Seville, the Feria de San Isidro in Madrid, and the Diada de Sant Jordi in Barcelona are other popular festivals, showcasing the country's love of music, dance, and fireworks. **Conclusion** Spain is a country that has something for everyone, from its rich history and culture to its stunning landscapes and vibrant cities. Whether you're interested in art, architecture, cuisine, or nature, Spain is a destination that will leave you enchanted and inspired. So come and experience the passion and warmth of this incredible country – you won't be disappointed!",
+        //   creationDate: new Date().toISOString(),
+        //   finished: true,
+        //   modelName: model,
+        // });
+
+        setChatData(newData);
+        
       } else {
         const newChatData: ChatData = {
           currentChat: "New Chat",
@@ -398,18 +412,19 @@ export default function Chat() {
           actions={<OpenAIActionPanel />}
         />
       ) : (
-        getChat(chatData.currentChat).messages.map((x) => (
+        getChat(chatData.currentChat).messages.map((x, index) => (
           <List.Item
-            title={x.prompt}
+            title={{ tooltip: x.prompt, value: x.prompt }}
+            // subtitle={`#${index + 1}`}
             accessories={[
               {
                 date: new Date(x.creationDate),
                 tooltip: `Message sent on: ${new Date(x.creationDate).toLocaleString()}`,
               },
             ]}
-            detail={<List.Item.Detail markdown={`\`\`\`${x.modelName}\`\`\`\n\n${x.answer}`} />}
+            detail={<List.Item.Detail markdown={`\`\`\`${x.modelName}\`\`\`\n\n${x.answer}`} isLoading={isLoading} />}
             key={x.prompt + x.creationDate}
-            actions={<OpenAIActionPanel answer={x.answer} />}
+            actions={<OpenAIActionPanel answer={x.answer} creationDate={x.creationDate}/>}
           />
         ))
       )}
