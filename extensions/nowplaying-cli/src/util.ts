@@ -1,0 +1,17 @@
+import { runAppleScript } from "run-applescript";
+
+export async function checkCli() {
+  let exist = await runAppleScript(`
+  set x to do shell script "
+  if [ -x /opt/homebrew/bin/nowplaying-cli ]; then
+      echo exists
+  else
+      echo does not exist
+  fi"
+  return x
+`);
+  if (exist === "exists") {
+    return true;
+  }
+  return false;
+}
