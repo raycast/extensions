@@ -26,8 +26,8 @@ export function extractCode(original: string) {
     // examples:
     //   "2773 is your Microsoft account verification code"
     code = m[1];
-  } else if ((m = /(code\s*:|is\s*:|码)\s*(\w{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
-    // "code:" OR "is:", optional whitespace, then 4-8 consecutive alphanumeric characters
+  } else if ((m = /(code\s*:|is\s*:|码|use code)\s*(\w{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    // "code:" OR "is:" OR "use code", optional whitespace, then 4-8 consecutive alphanumeric characters
     // examples:
     //   "Your Airbnb verification code is: 1234."
     //   "Your verification code is: 1234, use it to log in"
