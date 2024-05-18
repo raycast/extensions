@@ -5,9 +5,8 @@
   "description": "Interact with your Alpaca trading account",
   "icon": "command-icon.png",
   "author": "stelo",
-  "categories": [
-    "Finance"
-  ],
+  "contributors": ["srikirank"],
+  "categories": ["Finance", "Productivity"],
   "license": "MIT",
   "preferences": [
     {
