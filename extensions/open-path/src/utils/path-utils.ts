@@ -9,7 +9,7 @@ import {
   urlBuilder,
 } from "./common-utils";
 import { Alert, confirmAlert, Icon, open, showInFinder } from "@raycast/api";
-import { runShortcut } from "./script-utils";
+import { checkShortcut, runShortcut } from "./shell-utils";
 import { SHORTCUT_PEEK_IN_SAFARI_NAME, SHORTCUT_PEEK_IN_SAFARI_URL } from "./constants";
 
 export const filePathAction = async (path: string, fileOperation: string) => {
@@ -23,14 +23,14 @@ export const filePathAction = async (path: string, fileOperation: string) => {
   }
 };
 
-const openPeekUrl = async (path: string) => {
+const openPeekUrl = async (input: string) => {
   try {
-    const ret = await runShortcut(SHORTCUT_PEEK_IN_SAFARI_NAME, path);
-    if (ret.includes(SHORTCUT_PEEK_IN_SAFARI_NAME)) {
-      // install shortcut
-      await shortcutNotInstallAlertDialog();
+    // const checkRet = await checkShortcut(SHORTCUT_PEEK_IN_SAFARI_NAME);
+    const checkRet = await checkShortcut(SHORTCUT_PEEK_IN_SAFARI_NAME);
+    if (checkRet) {
+      await runShortcut(SHORTCUT_PEEK_IN_SAFARI_NAME, input);
     } else {
-      console.error(ret);
+      await shortcutNotInstallAlertDialog();
     }
   } catch (e) {
     console.error(e);
