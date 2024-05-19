@@ -47,7 +47,3 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
     await showHUD(hudMessage);
   }
 }
-
-export function isValidInteger(value: string | undefined): boolean {
-  return value !== undefined && /^\d+$/.test(value);
-}

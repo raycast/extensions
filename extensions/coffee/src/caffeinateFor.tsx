@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { isValidInteger, startCaffeinate } from "./utils";
+import { startCaffeinate } from "./utils";
 
 interface Arguments {
   hours?: string;
@@ -17,41 +17,25 @@ export default async function Command(props: { arguments: Arguments }) {
     return;
   }
 
-  let totalSeconds = 0;
-  let caffeinateString = "";
-  let validInput = true;
+  const parsedHours = parseInt(hours || "0", 10);
+  const parsedMinutes = parseInt(minutes || "0", 10);
+  const parsedSeconds = parseInt(seconds || "0", 10);
 
-  if (hours) {
-    if (isValidInteger(hours)) {
-      totalSeconds += parseInt(hours, 10) * 3600;
-      caffeinateString += `${hours}h`;
-    } else {
-      validInput = false;
-    }
-  }
-
-  if (minutes) {
-    if (isValidInteger(minutes)) {
-      totalSeconds += parseInt(minutes, 10) * 60;
-      caffeinateString += `${minutes}m`;
-    } else {
-      validInput = false;
-    }
-  }
-
-  if (seconds) {
-    if (isValidInteger(seconds)) {
-      totalSeconds += parseInt(seconds, 10);
-      caffeinateString += `${seconds}s`;
-    } else {
-      validInput = false;
-    }
-  }
+  const validInput =
+    (!hours || (Number.isInteger(parsedHours) && parsedHours >= 0)) &&
+    (!minutes || (Number.isInteger(parsedMinutes) && parsedMinutes >= 0)) &&
+    (!seconds || (Number.isInteger(parsedSeconds) && parsedSeconds >= 0));
 
   if (!validInput) {
     await showToast(Toast.Style.Failure, "Please ensure all arguments are whole numbers");
     return;
   }
+
+  const totalSeconds = parsedHours * 3600 + parsedMinutes * 60 + parsedSeconds;
+  const caffeinateString =
+    `${parsedHours > 0 ? `${parsedHours}h` : ""}` +
+    `${parsedMinutes > 0 ? `${parsedMinutes}m` : ""}` +
+    `${parsedSeconds > 0 ? `${parsedSeconds}s` : ""}`;
 
   await startCaffeinate(
     { menubar: true, status: true },
