@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hashnode-search-and-publish",
   "title": "Hashnode Search and Publish",
-  "description": "This hashnode raycast extension is a personal hashnode feed and publishing blogs right from raycast ",
+  "description": "This hashnode raycast extension is a personal hashnode feed and publishing blogs right from raycast",
   "icon": "command-icon.png",
   "author": "agrit",
   "categories": [
