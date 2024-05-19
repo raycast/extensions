@@ -3,8 +3,11 @@
   "name": "qbitorrent",
   "title": "QBitorrent",
   "description": "a qBitorrent client",
-  "icon": "qbittorrent.png",
+  "icon": "qbittorrent.svg",
   "author": "J3n5en",
+  "contributors": [
+    "hyousi"
+  ],
   "license": "MIT",
   "commands": [
     {
