@@ -178,8 +178,7 @@ export default function Command() {
   const timeDiff = useMemo(() => {
     const now = new Date();
     return results.length && searchText ? now.getTime() - results[0].date.getTime() : undefined;
-  }, [searchText])
-
+  }, [searchText]);
 
   return (
     <List
