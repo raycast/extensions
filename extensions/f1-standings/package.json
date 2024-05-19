@@ -58,11 +58,19 @@
               "value": "MM/dd/yyyy"
             },
             {
+              "title": "MM.DD.YYYY",
+              "value": "MM.dd.yyyy"
+            },
+            {
               "title": "DD/MM/YYYY",
               "value": "dd/MM/yyyy"
+            },
+            {
+              "title": "DD.MM.YYYY",
+              "value": "dd.MM.yyyy"
             }
           ],
-          "default": "MM:DD:YYYY"
+          "default": "MM/dd/yyyy"
         }
       ]
     }
