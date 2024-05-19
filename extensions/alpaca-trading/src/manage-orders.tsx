@@ -158,7 +158,7 @@ export default function ManageOrders() {
                           onAction: () =>
                             AlpacaApi.Orders.cancelOrder(order)
                               .then(value => {
-                                revalidate();
+                                setTimeout(revalidate, 1000);
                                 return value;
                               })
                               .finally(revalidate),

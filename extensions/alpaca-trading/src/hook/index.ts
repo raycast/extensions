@@ -53,13 +53,13 @@ export namespace AlpacaHook {
               onAction: () =>
                 AlpacaApi.Positions.closePosition(position, { qty: `?qty=${values.quantity}`, pc: `?percentage=${values.percentage}` }[values.kind])
                   .then(value => {
-                    revalidate();
                     pop();
+                    setTimeout(revalidate, 1000);
                     return value;
                   })
                   .finally(() => {
-                    revalidate();
                     pop();
+                    setTimeout(revalidate, 1000);
                   }),
             },
             dismissAction: { title: 'No', style: Alert.ActionStyle.Cancel },
