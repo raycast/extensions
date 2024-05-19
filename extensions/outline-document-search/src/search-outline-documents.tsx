@@ -1,58 +1,71 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
-import path from "path";
-import { readFileSync } from "node:fs";
+import { Action, ActionPanel, launchCommand, LaunchType, List } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
 import DocumentSearch from "./DocumentSearch";
 import { Instance } from "./queryInstances";
 
-interface Preferences {
-  instancesConfigurationPath: string;
-}
-
-const instancesConfigurationPath = path.resolve(getPreferenceValues<Preferences>().instancesConfigurationPath);
-const instancesConfiguration = readFileSync(instancesConfigurationPath, "utf-8");
-const instances: Instance[] = JSON.parse(instancesConfiguration);
-
 const Command = () => {
-  if (instances.length === 0) {
+  const { value: instances } = useLocalStorage<Instance[]>("instances");
+
+  if (!instances || (instances && instances.length === 0)) {
     return (
-      <List>
+      <List
+        actions={
+          <ActionPanel>
+            <Action
+              title="Manage Instances"
+              onAction={() => launchCommand({ name: "manage-outline-instances", type: LaunchType.UserInitiated })}
+            />
+          </ActionPanel>
+        }
+      >
         <List.EmptyView
           icon={{ source: "https://www.getoutline.com/images/logo.svg" }}
-          title="Outline Instances Configuration Missing"
-          description="Please configure at least one Outline instance in the configuration file."
+          title="Start by adding an Outline instance..."
         />
       </List>
     );
-  } else if (instances.length === 1) {
-    return <DocumentSearch instances={instances} />;
   } else {
-    return (
-      <List searchBarPlaceholder="Select an instance to search in or search everywhere">
-        <List.Section subtitle={instances.length.toString()} title="Instances">
-          {instances.map((instance, index) => (
+    if (instances.length === 1) {
+      return <DocumentSearch instances={instances} />;
+    } else {
+      return (
+        <List
+          actions={
+            <ActionPanel>
+              <Action
+                title="Manage Instances"
+                onAction={() => launchCommand({ name: "manage-outline-instances", type: LaunchType.UserInitiated })}
+              />
+            </ActionPanel>
+          }
+          searchBarPlaceholder="Select an instance to search in or search everywhere"
+        >
+          <List.Section subtitle={instances.length.toString()} title="Instances">
+            {instances.map((instance, index) => (
+              <List.Item
+                actions={
+                  <ActionPanel>
+                    <Action.Push title="Search Documents" target={<DocumentSearch instances={[instance]} />} />
+                  </ActionPanel>
+                }
+                key={index}
+                title={`Search in ${instance.name}`}
+              />
+            ))}
+          </List.Section>
+          <List.Section title="All Instances">
             <List.Item
               actions={
                 <ActionPanel>
-                  <Action.Push title="Search Documents" target={<DocumentSearch instances={[instance]} />} />
+                  <Action.Push title="Search Documents" target={<DocumentSearch instances={instances} />} />
                 </ActionPanel>
               }
-              key={index}
-              title={`Search in ${instance.name}`}
+              title="Search everywhere"
             />
-          ))}
-        </List.Section>
-        <List.Section title="All Instances">
-          <List.Item
-            actions={
-              <ActionPanel>
-                <Action.Push title="Search Documents" target={<DocumentSearch instances={instances} />} />
-              </ActionPanel>
-            }
-            title="Search everywhere"
-          />
-        </List.Section>
-      </List>
-    );
+          </List.Section>
+        </List>
+      );
+    }
   }
 };
 

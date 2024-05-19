@@ -1,16 +1,25 @@
-import { useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useAsync } from "react-use";
 import { Instance } from "./queryInstances";
-import queryCollection, { Collection } from "./queryCollection";
 import OutlineDocument from "./OutlineDocument";
+import { useFetch } from "@raycast/utils";
+
+export interface Collection {
+  icon: string;
+  name: string;
+}
+
+export interface CollectionResponse {
+  data: Collection;
+}
 
 const Document = ({ document, instance }: { document: OutlineDocument; instance: Instance }) => {
-  const [collection, setCollection] = useState<Collection | undefined>(undefined);
-
-  useAsync(async () => {
-    setCollection(await queryCollection(instance, document.collectionId));
-  }, [document.collectionId, instance]);
+  const { data: collection } = useFetch<CollectionResponse, never, Collection>(`${instance.url}/api/collections.info`, {
+    body: JSON.stringify({
+      id: document.collectionId,
+    }),
+    headers: { Authorization: `Bearer ${instance.apiKey}`, "Content-Type": "application/json" },
+    method: "POST",
+  });
 
   return (
     <List.Item

@@ -16,15 +16,13 @@
       "subtitle": "Outline",
       "description": "Search documents in multiple instances of Outline.",
       "mode": "view"
-    }
-  ],
-  "preferences": [
+    },
     {
-      "name": "instancesConfigurationPath",
-      "type": "file",
-      "title": "Outline Instances",
-      "required": true,
-      "description": "Enter your Outline instances as objects in a JSON array with a name, URL, and API key."
+      "name": "manage-outline-instances",
+      "title": "Manage Instances",
+      "subtitle": "Outline",
+      "description": "Manage instances of Outline.",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -32,6 +30,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
+    "@raycast/utils": "^1.15.0",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "axios": "^1.6.8",
