@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Detail, openCommandPreferences } from "@raycast/api";
+import { ActionPanel, Action, Detail } from "@raycast/api";
 import { useGetProfileDataQuery } from "../generated/hooks_and_more";
 import { apolloGqlClient } from "../grapqhqlClient";
 import { useState } from "react";
@@ -13,16 +13,11 @@ export function getRandomColor(): string {
 }
 export default function Command() {
   const [mkdown, setMKDown] = useState("");
-  const {
-    data: myProfileData,
-    loading,
-    refetch,
-  } = useGetProfileDataQuery({
+  const { data: myProfileData, loading } = useGetProfileDataQuery({
     client: apolloGqlClient,
     onCompleted(data) {
-      !!data?.me &&
-        setMKDown(
-          `# Hashnode Dashboard  
+      setMKDown(
+        `# Hashnode Dashboard  
 
  >${data?.me?.bio?.text}
         
@@ -32,9 +27,9 @@ export default function Command() {
 
 ### Drafts 
 
-${data?.me?.publications?.edges?.map((p) => p?.node?.drafts?.edges?.map((d) => (!!d?.node?.title ? d?.node?.title : " ")))}
+${data?.me?.publications?.edges?.map((p) => p?.node?.drafts?.edges?.map((d) => d?.node?.title ?? " "))}
         ` ?? "",
-        );
+      );
     },
   });
 

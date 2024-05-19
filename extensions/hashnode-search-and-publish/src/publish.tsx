@@ -1,10 +1,5 @@
 import { Form, ActionPanel, Action, showToast, LaunchProps, popToRoot } from "@raycast/api";
-import {
-  PublishPostInput,
-  PublishPostTagInput,
-  useGetMyPublicationQuery,
-  usePublishBlogMutation,
-} from "../generated/hooks_and_more";
+import { PublishPostInput, useGetMyPublicationQuery, usePublishBlogMutation } from "../generated/hooks_and_more";
 import { apolloGqlClient } from "../grapqhqlClient";
 import { useState } from "react";
 import { getRandomColor } from "./profile";
@@ -81,8 +76,8 @@ export default function Publish(
   const [title, setTitle] = useState(draftValues?.title || "");
   const [tags, setTags] = useState<string[]>(draftValues?.tags || []);
   const [contentMarkdown, setContentMarkdown] = useState(draftValues?.contentMarkdown || "");
-  const [publication, setSelectedPublication] = useState(draftValues?.publicationId || "");
-  const [publish, { data, error }] = usePublishBlogMutation({
+  const [publication] = useState(draftValues?.publicationId || "");
+  const [publish] = usePublishBlogMutation({
     client: apolloGqlClient,
   });
 
@@ -100,7 +95,7 @@ export default function Publish(
         publicationId: publication || draftValues?.publicationId || myData?.me?.publications?.edges?.[0]?.node?.id,
       },
       client: apolloGqlClient,
-      onCompleted(data, clientOptions) {
+      onCompleted(data) {
         showToast({ title: "Blog Published", message: `Live on : ${data?.publishPost?.post?.url}` });
       },
     });
@@ -121,12 +116,12 @@ export default function Publish(
         {myData?.me?.publications?.edges?.map((t) => (
           <Form.Dropdown.Item
             key={t.node?.id}
-            title={!!t?.node?.displayTitle ? t?.node?.displayTitle : ""}
+            title={t?.node?.displayTitle ?? ""}
             value={t?.node?.id}
             icon={{
               source: {
-                dark: !!t?.node?.favicon ? t?.node?.favicon : "",
-                light: !!t?.node?.favicon ? t?.node?.favicon : "",
+                dark: t?.node?.favicon ?? "",
+                light: t?.node?.favicon ?? "",
               },
               tintColor: getRandomColor(),
             }}
