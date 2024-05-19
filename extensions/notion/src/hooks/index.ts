@@ -10,6 +10,7 @@ import {
   search,
   fetchPage,
   fetchDatabase,
+  searchPages,
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
@@ -211,6 +212,12 @@ export function useRecentPages() {
 
 export function useSearchPages(query: string) {
   return useCachedPromise(search, [query], {
+    keepPreviousData: true,
+  });
+}
+
+export function usePages(query: string) {
+  return useCachedPromise(searchPages, [query], {
     keepPreviousData: true,
   });
 }

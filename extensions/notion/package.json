@@ -17,7 +17,8 @@
     "alexs",
     "yakitrak",
     "tleo19",
-    "dariuszpaluch"
+    "dariuszpaluch",
+    "lishoulong"
   ],
   "categories": [
     "Applications",
@@ -74,11 +75,11 @@
       "mode": "view"
     },
     {
-      "description": "Append or prepend text, along with date, to a Notion page.",
+      "description": "Create Sub Page, Append or prepend text, along with date, to a Notion page.",
       "mode": "view",
-      "name": "add-text-to-page",
+      "name": "append-create-page",
       "subtitle": "Notion",
-      "title": "Add Text to Page",
+      "title": "Create Page or Add Text to Page",
       "arguments": [
         {
           "name": "text",

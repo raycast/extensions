@@ -30,7 +30,7 @@ import { ActionSetOrderProperties } from "../actions";
 
 import { createConvertToFieldFunc, FieldProps } from "./PagePropertyField";
 
-export type CreatePageFormValues = {
+export type CreateDataBasePageFormValues = {
   database: string | undefined;
   [K: string]: Form.Value | undefined;
   closeAfterSave?: boolean;
@@ -39,16 +39,16 @@ export type CreatePageFormValues = {
 
 type LaunchContext = {
   visiblePropIds?: string[];
-  defaults?: CreatePageFormValues;
+  defaults?: CreateDataBasePageFormValues;
 };
 
-type CreatePageFormProps = {
+type CreateDataBasePageFormProps = {
   mutate?: () => Promise<void>;
   launchContext?: LaunchContext;
-  defaults?: Partial<CreatePageFormValues>;
+  defaults?: Partial<CreateDataBasePageFormValues>;
 };
 
-type CreatePageFormPreferences = {
+type CreateDataBasePageFormPreferences = {
   closeAfterCreate: boolean;
 };
 
@@ -59,8 +59,8 @@ const createPropertyId = (property: DatabaseProperty) => "property::" + property
 const NON_EDITABLE_PROPETY_TYPES = ["formula"];
 const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPETY_TYPES.includes(dp.type);
 
-export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
-  const preferences = getPreferenceValues<CreatePageFormPreferences>();
+export function CreateDataBasePageForm({ mutate, launchContext, defaults }: CreateDataBasePageFormProps) {
+  const preferences = getPreferenceValues<CreateDataBasePageFormPreferences>();
   const defaultValues = launchContext?.defaults ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
@@ -77,8 +77,8 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   const databasePropertyIds = databaseProperties.map((dp) => dp.id) || [];
 
-  const initialValues: Partial<CreatePageFormValues> = { database: databaseId ?? undefined };
-  const validation: Parameters<typeof useForm<CreatePageFormValues>>[0]["validation"] = {};
+  const initialValues: Partial<CreateDataBasePageFormValues> = { database: databaseId ?? undefined };
+  const validation: Parameters<typeof useForm<CreateDataBasePageFormValues>>[0]["validation"] = {};
   for (const { id, type } of databaseProperties) {
     if (NON_EDITABLE_PROPETY_TYPES.includes(type)) continue;
     const key = "property::" + type + "::" + id;
@@ -88,7 +88,7 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
     initialValues[key] = value;
   }
 
-  const { itemProps, values, handleSubmit, reset, focus } = useForm<CreatePageFormValues>({
+  const { itemProps, values, handleSubmit, reset, focus } = useForm<CreateDataBasePageFormValues>({
     initialValues,
     validation,
     async onSubmit(values) {
@@ -191,13 +191,13 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
       type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
 
     if ((!preferences.closeAfterCreate && type === "main") || (preferences.closeAfterCreate && type === "second")) {
-      return <Action.SubmitForm title="Create Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;
+      return <Action.SubmitForm title="Create Database Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;
     } else {
       return (
         <Action.SubmitForm
           title="Create Page and Close"
           icon={Icon.Plus}
-          onSubmit={async (values: CreatePageFormValues) => {
+          onSubmit={async (values: CreateDataBasePageFormValues) => {
             handleSubmit({ ...values, closeAfterSave: true });
           }}
           shortcut={shortcut}

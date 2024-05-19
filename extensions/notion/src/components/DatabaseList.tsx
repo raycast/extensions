@@ -6,7 +6,7 @@ import { useDatabaseProperties, useDatabasesView } from "../hooks";
 import { queryDatabase, getPageName, Page, User } from "../utils/notion";
 
 import { DatabaseView } from "./DatabaseView";
-import { CreatePageForm } from "./forms";
+import { CreateDataBasePageForm } from "./forms";
 
 type DatabaseListProps = {
   databasePage: Page;
@@ -83,7 +83,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
               title="Create New Page"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={<CreatePageForm defaults={{ database: databaseId }} mutate={mutate} />}
+              target={<CreateDataBasePageForm defaults={{ database: databaseId }} mutate={mutate} />}
             />
           </ActionPanel>
         }

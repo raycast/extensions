@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
+import { BlockObjectRequest, CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
 import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
@@ -48,6 +48,49 @@ export async function deletePage(pageId: string) {
   }
 }
 
+// Create page
+export async function createPage(values: { content: string; pageId: string; title: string }) {
+  try {
+    const notion = getNotionClient();
+
+    const arg: CreatePageParameters = {
+      parent: {
+        page_id: values.pageId,
+        type: "page_id",
+      },
+      properties: {
+        title: [
+          {
+            text: {
+              content: values.title,
+            },
+          },
+        ],
+      },
+      children: [
+        {
+          paragraph: {
+            rich_text: [
+              {
+                text: {
+                  content: values.content,
+                },
+              },
+            ],
+          },
+          type: "paragraph",
+          object: "block",
+        },
+      ],
+    };
+
+    const page = await notion.pages.create(arg);
+
+    return pageMapper(page);
+  } catch (err) {
+    throw new Error("Failed to create page", { cause: err });
+  }
+}
 export async function patchPage(pageId: string, properties: Parameters<Client["pages"]["update"]>[0]["properties"]) {
   try {
     const notion = getNotionClient();
@@ -69,6 +112,22 @@ export async function search(query?: string, nextCursor?: string) {
       direction: "descending",
       timestamp: "last_edited_time",
     },
+    page_size: 25,
+    query,
+    ...(nextCursor && { start_cursor: nextCursor }),
+  });
+
+  return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
+}
+
+export async function searchPages(query?: string, nextCursor?: string) {
+  const notion = getNotionClient();
+  const database = await notion.search({
+    sort: {
+      direction: "descending",
+      timestamp: "last_edited_time",
+    },
+    filter: { property: "object", value: "page" },
     page_size: 25,
     query,
     ...(nextCursor && { start_cursor: nextCursor }),
@@ -173,6 +232,29 @@ export function getPageIcon(page: Page): Image.ImageLike {
 
 export function getPageName(page: Page): string {
   return (page.icon_emoji ? page.icon_emoji + " " : "") + (page.title ? page.title : "Untitled");
+}
+
+export function getPageText(createPageFlag: boolean): Record<string, string> {
+  const pageText = createPageFlag ? "Create Page" : "Add Text to Page";
+  const successPageText = createPageFlag ? "Page Created" : "Added text to page";
+  const failPageText = createPageFlag ? "Page Created Failed" : "Failed adding text to page";
+  return {
+    pageText,
+    successPageText,
+    failPageText,
+  };
+}
+
+export function pageFormValidate(createPageFlag: boolean, type: string, value: string | undefined): string | undefined {
+  if (createPageFlag) {
+    if ((type === "content" || type === "title") && value && value.length === 0) {
+      return "The item is required";
+    }
+  } else {
+    if (type === "textToAppend" && value && value.length === 0) {
+      return "The item is required";
+    }
+  }
 }
 export interface Page {
   object: "page" | "database";

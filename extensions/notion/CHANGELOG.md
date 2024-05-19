@@ -1,4 +1,8 @@
 # Notion Changelog
+## [add feature for create new page] - 2024-05-19
+
+- add create page feature
+- add create page action and new ui
 
 ## [Seperate property managment for quicklinks] - 2024-04-22
 
