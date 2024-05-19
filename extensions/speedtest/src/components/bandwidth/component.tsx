@@ -1,16 +1,13 @@
 import { Icon, List } from "@raycast/api";
-import { Result } from "../speedtest";
-import { ActivitySpeedQuality, InternetSpeed, Nullish } from "./type";
 import { useEffect, useState } from "react";
+import { ListItemMetadata } from "../list-item-metadata";
+import { ActivitySpeedQuality, InternetSpeed } from "./types";
 import { convertBitsToMbps, speedToAvailableActivityQuality } from "./utils";
 
 export const ListBandwidthItem = (props: {
-  speed: Nullish<InternetSpeed>;
+  speed: InternetSpeed;
   activity: ActivitySpeedQuality;
-  result: Result;
   isLoading: boolean;
-  summary: JSX.Element;
-  restart: JSX.Element;
   title: string;
   icon: Icon;
 }): JSX.Element => {
@@ -19,8 +16,8 @@ export const ListBandwidthItem = (props: {
 
   useEffect(() => {
     const speedMbps = {
-      download: convertBitsToMbps(speed.download),
-      upload: convertBitsToMbps(speed.upload),
+      download: convertBitsToMbps(speed.download.bandwidth),
+      upload: convertBitsToMbps(speed.upload.bandwidth),
     };
 
     const listOfAvailableActivityQuality = speedToAvailableActivityQuality(speedMbps, activity);
@@ -38,6 +35,7 @@ export const ListBandwidthItem = (props: {
           icon: qualities.length < 1 && !isLoading ? Icon.LivestreamDisabled : null,
         },
       ]}
+      detail={speed && <ListItemMetadata data={speed} />}
     />
   );
 };

@@ -1,11 +1,11 @@
 import sha256 from "sha256-file";
 
-export function pingToString(ping: number | undefined): string {
-  return ping === undefined ? "?" : ping.toFixed(1) + " ms";
+export function pingToString(ping: number): string {
+  return ping === 0 ? "?" : ping.toFixed(1) + " ms";
 }
 
 export function speedToString(speed: number | undefined): string {
-  if (speed === undefined) {
+  if (speed === undefined || speed === 0) {
     return "?";
   }
   let bits = speed * 8;
@@ -30,3 +30,19 @@ export async function sha256FileHash(filename: string): Promise<string | null> {
     });
   });
 }
+
+export function percentageToString(val: number | undefined): string | undefined {
+  if (val === undefined) {
+    return undefined;
+  }
+  const v = Math.round(val * 100);
+  if (v === 100) {
+    return undefined;
+  }
+  return `${v}%`;
+}
+
+export const isObject = (value: unknown): boolean => {
+  const type = typeof value;
+  return value != null && (type == "object" || type == "function");
+};

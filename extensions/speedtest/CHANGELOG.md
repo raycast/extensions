@@ -1,7 +1,15 @@
 # Speedtest Changelog
 
-## [Update]
-Update interface to include streaming quality
+## [Update] - 2024-05-20
+
+- Add a detailed view.
+- Add an action to copy detailed view data.
+- Increase types coverage.
+- Refactor code to increase to improve maintainability and scalability.
+
+## [Update] - 2024-05-13 
+
+- Update interface to include streaming quality
 
 ## [Optimize] - 2023-08-30
 

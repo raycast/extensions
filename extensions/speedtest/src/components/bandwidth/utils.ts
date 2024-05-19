@@ -1,4 +1,4 @@
-import { ActivitySpeedQuality, InternetSpeed } from "./type";
+import { ActivitySpeedQuality, InternetSpeedLite } from "./types";
 
 export function convertBitsToMbps(speed: number | undefined): number {
   if (!speed) {
@@ -11,7 +11,10 @@ export function convertBitsToMbps(speed: number | undefined): number {
   return (speed * bitInByte) / byteInKb / kbInMb;
 }
 
-export function speedToAvailableActivityQuality({ download, upload }: InternetSpeed, activity: ActivitySpeedQuality) {
+export function speedToAvailableActivityQuality(
+  { download, upload }: InternetSpeedLite,
+  activity: ActivitySpeedQuality,
+) {
   const availableQuality: string[] = [];
 
   if (!download || !upload) {

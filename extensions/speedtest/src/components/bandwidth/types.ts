@@ -1,4 +1,11 @@
+import { Speed } from "../../lib/speedtest.types";
+
 export type InternetSpeed = {
+  download: Speed;
+  upload: Speed;
+};
+
+export type InternetSpeedLite = {
   download: number;
   upload: number;
 };
@@ -8,5 +15,5 @@ export type Nullish<T> = {
 };
 
 export type ActivitySpeedQuality = {
-  [key: string]: InternetSpeed;
+  [key: string]: InternetSpeedLite;
 };
