@@ -77,7 +77,7 @@ export default function AddTorrents() {
       return;
     }
     setLoading(true);
-    const options = Object.fromEntries(Object.entries(opts).filter(([_, value]) => value !== ""));
+    const options = Object.fromEntries(Object.entries(opts).filter(([, value]) => value !== ""));
     await qbit.login(username, password);
     await qbit.api.addTorrent(torrents, options);
     setLoading(false);
