@@ -14,9 +14,9 @@
   "commands": [
     {
       "name": "clean-keyboard",
-      "title": "Clean keyboard",
-      "subtitle": "Lock your keyboard for 30 seconds",
-      "description": "Lock your keyboard to 30 seconds.",
+      "title": "Clean Keyboard",
+      "subtitle": "Lock keyboard to clean it easily",
+      "description": "Lock keyboard to clean it easily",
       "mode": "view",
       "keywords": [
         "keyboard",
