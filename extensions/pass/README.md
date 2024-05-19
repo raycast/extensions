@@ -20,5 +20,5 @@ if you've never used `pass` before.
 
 You can now store a new password `pass insert password-name`.
 
-Optionally you can set up a git repository `pass git init`,
+Optionally you can set up a Git repository `pass git init`,
 and use the `pass git` command to handle changes to the repository.
