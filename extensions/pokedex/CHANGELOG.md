@@ -1,5 +1,8 @@
 # Pokédex Changelog
 
+## [Improvements] - 2024-05-17
+- Fixed Learnsets action
+
 ## [Improvements] - 2024-02-27
 - Added more Gen 9 Pokémons
 

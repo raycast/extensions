@@ -2,23 +2,20 @@ import { encode } from "@nem035/gpt-3-encoder";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
-  { name: "Sonar Small 7B 16k", id: "sonar-small-chat" },
-  { name: "Sonar Medium 8x7B 16k", id: "sonar-medium-chat" },
-  { name: "Sonar Small 7B Online", id: "sonar-small-online" },
-  { name: "Sonar Medium 8x7B Online", id: "sonar-medium-online" },
-  { name: "Llama3 8B 8k", id: "llama-3-8b-instruct" },
+  { name: "Sonar Small 7B 32k", id: "llama-3-sonar-small-32k-chat" },
+  { name: "Sonar Large 8x7B 32k", id: "llama-3-sonar-large-32k-chat" },
+  { name: "Sonar Small 7B Online", id: "llama-3-sonar-small-32k-online" },
+  { name: "Sonar Large 8x7B Online", id: "llama-3-sonar-large-32k-online" },
   { name: "Llama3 70B 8k", id: "llama-3-70b-instruct" },
-  { name: "CodeLlama 70B 16k", id: "codellama-70b-instruct" },
-  { name: "Mistral 7B 16k", id: "mistral-7b-instruct" },
-  { name: "Mixtral 8x7B 16k", id: "mixtral-8x7b-instruct" },
+  { name: "Llama3 8B 8k", id: "llama-3-8b-instruct" },
   { name: "Mixtral 8x22B 16k", id: "mixtral-8x22b-instruct" },
+  { name: "Mixtral 8x7B 16k", id: "mixtral-8x7b-instruct" },
 ];
 
+// format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
 export const currentDate = new Date().toLocaleString("en-US", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
+  timeStyle: "long",
+  dateStyle: "full",
 });
 
 function naiveRound(num: number, decimalPlaces = 0) {
@@ -33,24 +30,22 @@ export function countToken(content: string) {
 export function estimatePrice(prompt_token: number, output_token: number, model: string) {
   let price = 0;
   switch (model) {
-    case "sonar-small-chat":
-    case "mistral-7b-instruct":
+    case "llama-3-sonar-small-32k-chat":
     case "llama-3-8b-instruct":
       price = ((prompt_token * 0.2) / 1_000_000 + (output_token * 0.2) / 1_000_000) * 100;
       break;
     case "mixtral-8x7b-instruct":
-    case "sonar-medium-chat":
+    case "llama-3-sonar-large-32k-chat":
       price = ((prompt_token * 0.6) / 1_000_000 + (output_token * 0.6) / 1_000_000) * 100;
       break;
-    case "codellama-70b-instruct":
     case "llama-3-70b-instruct":
     case "mixtral-8x22b-instruct":
       price = ((prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;
       break;
-    case "sonar-small-online":
+    case "llama-3-sonar-small-32k-online":
       price = (5 / 1000 + (output_token * 0.2) / 1_000_000) * 100;
       break;
-    case "sonar-medium-online":
+    case "llama-3-sonar-large-32k-online":
       price = (5 / 1000 + (output_token * 0.6) / 1_000_000) * 100;
       break;
   }

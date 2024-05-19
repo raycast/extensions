@@ -1,6 +1,7 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { Frequency } from "../types/frequency";
 import { Reminder } from "../types/reminder";
+import Style = Toast.Style;
 
 type SetRecurrenceForReminderProps = {
   reminderId: string;
@@ -14,4 +15,5 @@ export async function setRecurrenceForReminder(props: SetRecurrenceForReminderPr
   reminder.frequency = props.frequency;
   props.setReminders([...props.existingReminders]);
   await LocalStorage.setItem(reminder.id, JSON.stringify(reminder));
+  await showToast(Style.Success, "Recurrence set", `Happening ${props.frequency}`);
 }

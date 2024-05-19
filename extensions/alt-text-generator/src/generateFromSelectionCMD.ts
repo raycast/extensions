@@ -1,33 +1,34 @@
-import { getLocalImagePath } from "@utils/getPath";
-import { generateDescription } from "@utils/generateDescription";
-import { showError } from "@utils/showError";
-import { showSuccess } from "@utils/showSuccess";
 import { Clipboard } from "@raycast/api";
-import { showToast, Toast, closeMainWindow } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { generateDescription } from "@utils/generateDescription";
+import { getLocalImagePath } from "@utils/getPath";
+
+import { showSuccess } from "@utils/showSuccess";
+import { checkForValidFileType } from "@utils/checkForValidFileType";
+import { handleError } from "@utils/handleError";
 
 export default async function generateFromSelectionCMD() {
-  await closeMainWindow({ clearRootSearch: true });
-  await showToast({
-    style: Toast.Style.Animated,
-    title: "Generating alt text for this image...",
-  });
-
   try {
-    const localImagePath = await getLocalImagePath();
+    await closeMainWindow({ clearRootSearch: true });
 
-    if (!localImagePath) {
-      throw new Error("No image found in Finder selection");
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Generating alt text for this image...",
+    });
+    const localImagePath = await getLocalImagePath();
+    console.log(localImagePath);
+
+    const { isValid, fileType } = checkForValidFileType(localImagePath);
+
+    if (!isValid) {
+      throw new Error(`Unsupported file type: ${fileType}`);
     }
 
     const imageDescription = await generateDescription({ isLocalImagePath: true, path: localImagePath });
 
-    if (!imageDescription) {
-      throw new Error("No description generated");
-    }
-
     await Clipboard.copy(imageDescription);
-    await showSuccess(`📋 Alt-text copied to clipboard: ${imageDescription}`);
+    await showSuccess(`Alt-text copied to clipboard: ${imageDescription}`);
   } catch (error) {
-    await showError(error, { title: error as string });
+    handleError(error);
   }
 }

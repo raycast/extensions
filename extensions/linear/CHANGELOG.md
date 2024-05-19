@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Improvements] - 2024-05-14
+
+- Notifications now support Projects (Updates, comments, reactions, added as member), Document Mentions and Bots (GitHub and GitLab)
+- Updated Project Icons
+
 ## [Added two new actions] - 2024-05-10
 
 - Added two new toast actions: `Copy Issue ID as Link` and `Copy Issue Title as Link`
