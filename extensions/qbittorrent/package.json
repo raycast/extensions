@@ -5,6 +5,9 @@
   "description": "a qBitorrent client",
   "icon": "qbittorrent.png",
   "author": "J3n5en",
+  "contributors": [
+    "hyousi"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -58,18 +61,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.0",
+    "@raycast/api": "^1.74.0",
     "qbit.js": "^2.1.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
     "@types/qbittorrent-api-v2": "^1.2.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

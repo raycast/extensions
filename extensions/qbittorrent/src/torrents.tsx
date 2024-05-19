@@ -103,7 +103,7 @@ export default function Torrents() {
   return (
     <List
       isLoading={loading}
-      enableFiltering
+      filtering
       searchBarPlaceholder="Search your torrents"
       searchBarAccessory={
         <List.Dropdown
