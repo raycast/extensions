@@ -1,8 +1,11 @@
-import { Form, ActionPanel, popToRoot, Action } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { Process } from "./interfaces";
 import { startCaffeinate } from "./utils";
+
+interface Process {
+  [key: string]: string;
+}
 
 export default function Command() {
   const [loading, setLoading] = useState(true);
@@ -32,8 +35,12 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm
             title="Caffeinate"
-            onSubmit={async () => {
-              await startCaffeinate({ menubar: true, status: true });
+            onSubmit={async (data) => {
+              await startCaffeinate(
+                { menubar: true, status: true },
+                "Caffeinate process started",
+                `-w ${data.process}`,
+              );
               popToRoot();
             }}
           />
