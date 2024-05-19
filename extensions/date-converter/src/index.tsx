@@ -191,7 +191,7 @@ export default function Command() {
         <List.Item
           key={date.toISOString()}
           title={humanFormatter.format(date)}
-          subtitle={label}
+          subtitle={label +  (timeDiff ? `. Relative: ${prettyMilliseconds(timeDiff)}` : "")}
           actions={
             <ActionPanel>
               {getSortedFormats({ human }).map(({ id, title, format }) => (
@@ -201,13 +201,6 @@ export default function Command() {
           }
         />
       ))}
-      {timeDiff && (
-        <List.Item
-          key="time ago"
-          title={prettyMilliseconds(timeDiff, { secondsDecimalDigits: 0, verbose: true })}
-          subtitle={"ago"}
-        />
-      )}
     </List>
   );
 }
