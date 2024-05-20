@@ -35,7 +35,6 @@ export function useSpeedtest(): {
             }
           },
           (r: SpeedtestResult) => {
-            // console.log(r)
             if (!cancel) {
               setResult({ ...r });
               setIsLoading(false);
