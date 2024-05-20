@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Cache, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { Program, ServiceId } from "../types";
+import { Program, ServiceId, serviceIds } from "../types";
 import { getFormattedDate } from "../utils";
 import { ProgramDetail } from "./ProgramDetail";
 import { SearchBarDropdown } from "./ServiceSelectSearchBar";
@@ -9,22 +9,26 @@ const cache = new Cache();
 
 type Props = {
   customFilters?: ((program: Program) => boolean)[];
+  canSelectAll?: boolean;
 };
 
-export function ProgramList({ customFilters = [] }: Props): React.JSX.Element {
-  const [serviceId, setServiceId] = useState<ServiceId>("g1");
+export function ProgramList({ customFilters = [], canSelectAll = false }: Props): React.JSX.Element {
+  const [serviceId, setServiceId] = useState<ServiceId>(canSelectAll ? "all" : "g1");
   const [programs, setPrograms] = useState<Program[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     setIsLoading(true);
-    const cachedPrograms = (JSON.parse(cache.get(serviceId) ?? "[]") as Program[]) ?? [];
+    const cachedPrograms = getProgramsFromCache(serviceId);
     setPrograms(cachedPrograms);
     setIsLoading(false);
   }, [serviceId]);
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<SearchBarDropdown onChange={setServiceId} />}>
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={<SearchBarDropdown onChange={setServiceId} canSelectAll={canSelectAll} />}
+    >
       {programs.length === 0 ? (
         <List.EmptyView
           title="There was no cached program data."
@@ -44,7 +48,7 @@ export function ProgramList({ customFilters = [] }: Props): React.JSX.Element {
           .filter((p) => customFilters.every((f) => f(p)))
           .map((p) => (
             <List.Item
-              key={p.id}
+              key={`${p.service.id}:${p.id}`} // When "all" is selected, ids might duplicate, so use "service" as a prefix.
               icon={{
                 source: Icon.Document,
               }}
@@ -64,4 +68,13 @@ export function ProgramList({ customFilters = [] }: Props): React.JSX.Element {
       )}
     </List>
   );
+}
+
+function getProgramsFromCache(serviceId: ServiceId): Program[] {
+  if (serviceId === "all") {
+    const allPrograms = serviceIds.flatMap((sid) => JSON.parse(cache.get(sid) ?? "[]")) as Program[];
+    return allPrograms.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  }
+
+  return JSON.parse(cache.get(serviceId) ?? "[]") as Program[];
 }

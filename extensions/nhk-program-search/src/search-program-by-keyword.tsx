@@ -13,7 +13,7 @@ export default function Command() {
           <Action.SubmitForm
             title="Search Programs"
             onSubmit={() => {
-              push(<ProgramList customFilters={[(p) => keywords.some((w) => p.title.includes(w))]} />);
+              push(<ProgramList customFilters={[(p) => keywords.some((w) => p.title.includes(w))]} canSelectAll />);
             }}
           />
         </ActionPanel>

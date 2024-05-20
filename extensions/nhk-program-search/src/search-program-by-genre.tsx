@@ -13,7 +13,9 @@ export default function Command() {
           <Action.SubmitForm
             title="Search Programs"
             onSubmit={async (input) => {
-              push(<ProgramList customFilters={[(p) => p.genres.some((g) => input.genres.includes(g))]} />);
+              push(
+                <ProgramList customFilters={[(p) => p.genres.some((g) => input.genres.includes(g))]} canSelectAll />,
+              );
             }}
           />
         </ActionPanel>

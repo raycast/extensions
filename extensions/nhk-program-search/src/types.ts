@@ -1,4 +1,5 @@
 export const serviceIds = [
+  "all",
   "g1",
   // "g2",
   "e1",
@@ -217,6 +218,7 @@ export const genreLabels = new Map<Genre, string>([
 ]);
 
 export const serviceIdLogos = {
+  all: "",
   g1: "https://www.nhk.or.jp/common/img/media/gtv-100x50.png",
   e1: "https://www.nhk.or.jp/common/img/media/etv-100x50.png",
   s1: "https://www.nhk.or.jp/common/img/media/bs1-100x50.png",
@@ -226,6 +228,7 @@ export const serviceIdLogos = {
 } satisfies { [key in ServiceId]: string };
 
 export const serviceIdLabels = {
+  all: "All Services",
   g1: "ＮＨＫ総合",
   e1: "ＮＨＫＥテレ",
   s1: "ＮＨＫＢＳ",
