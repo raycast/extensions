@@ -23,15 +23,11 @@ export class FsFile implements File {
     const isLastPartDigits = digitsInName.toString() === lastPart && Number.isNaN(digitsInName) === false;
     const baseNameWithoutDigits = splitted.slice(0, -1).join(" ");
     const nextName = (() => {
-      if (counter === 0) {
-        return baseName;
-      }
-
       if (isLastPartDigits) {
-        return `${baseNameWithoutDigits} ${digitsInName + counter}`;
+        return `${baseNameWithoutDigits} (${digitsInName + counter + 1})`;
       }
 
-      return `${baseName} ${counter}`;
+      return `${baseName} (${counter + 1})`;
     })();
     const nextPath = path.join(dirPath, `${nextName}${extension ?? currentExtension}`);
 
