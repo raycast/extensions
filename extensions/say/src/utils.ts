@@ -49,9 +49,14 @@ export const getSpeechPlist = async () => {
     const speechPlistPath = join(homedir(), "Library/Preferences/com.apple.speech.voice.prefs.plist");
     const speechPlistFile = await readFile(speechPlistPath);
     const speechPlistJson = bplist.parseBuffer(speechPlistFile);
+
+    const foundRate = speechPlistJson?.[0]?.VoiceRateDataArray.find(
+      ([, voiceId]: number[]) => voiceId === speechPlistJson?.[0]?.SelectedVoiceID,
+    );
+
     return {
-      voice: speechPlistJson[0].SelectedVoiceName,
-      rate: speechPlistJson[0].VoiceRateDataArray[0][2],
+      voice: speechPlistJson?.[0]?.SelectedVoiceName,
+      rate: foundRate?.[2],
     } as SpeechPlist;
   } catch {
     return undefined;
