@@ -52,6 +52,7 @@ function App(props: quickMsgArguments) {
         if (username) {
           await globalClient.sendMessage(username, { message: props.message });
           setSentTo({ username: username, firstName: users[0].firstName, lastName: users[0].lastName });
+          globalClient.disconnect();
         }
       } catch (e) {
         console.log("Error sending message: ", e);
