@@ -3,7 +3,6 @@
 ## [Update] - 2024-05-19
 
 - 24h time format support.
-- Add the time difference in results.
 
 ## [Update] - 2024-05-10
 

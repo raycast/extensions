@@ -2,7 +2,6 @@ import { Clipboard, ActionPanel, List, Action, getPreferenceValues } from "@rayc
 import * as chrono from "chrono-node";
 import { useMemo, useState } from "react";
 import "@total-typescript/ts-reset";
-import prettyMilliseconds from "pretty-ms";
 
 interface LabeledDate {
   label?: string;
@@ -175,11 +174,6 @@ export default function Command() {
 
   const results = useMemo(() => getResults(searchText), [searchText]);
 
-  const timeDiff = useMemo(() => {
-    const now = new Date();
-    return results.length && searchText ? now.getTime() - results[0].date.getTime() : undefined;
-  }, [searchText]);
-
   return (
     <List
       searchText={searchText}
@@ -191,7 +185,7 @@ export default function Command() {
         <List.Item
           key={date.toISOString()}
           title={humanFormatter.format(date)}
-          subtitle={label + (timeDiff ? `. Relative: ${prettyMilliseconds(timeDiff)}` : "")}
+          subtitle={label}
           actions={
             <ActionPanel>
               {getSortedFormats({ human }).map(({ id, title, format }) => (
