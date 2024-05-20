@@ -18,11 +18,7 @@ const queryInstances = (query: string, instances: Instance[]) =>
     axios
       .post(
         `${instance.url}/api/documents.search`,
-        {
-          includeArchived: true,
-          includeDrafts: true,
-          query,
-        },
+        { query },
         {
           headers: { Authorization: `Bearer ${instance.apiKey}`, "Content-Type": "application/json" },
         },
