@@ -1,5 +1,8 @@
 # Change Case Changelog
 
+## [Clarify Behavior in README]- 2024-05-19
+- Added README.md with more information about the behavior of the extension
+
 ## [Fixed overlapping keyboard shortcuts and a wrong setting] - 2024-04-26
 - Fixed the issue where some key combinations were mapped to multiple commands at the same time.
 - Fixed the inverted `popToRoot` setting.
