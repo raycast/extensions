@@ -41,18 +41,20 @@ export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps)
           ) : null}
           {note.tags.length > 0 ? (
             <Detail.Metadata.TagList title="Tags">
-              {note.tags.map((tag) => (
-                <Detail.Metadata.TagList.Item key={tag.id} text={tag.text} />
-              ))}
+              {note.tags.map((tag) => {
+                if (!tag.text) return null;
+                <Detail.Metadata.TagList.Item key={tag.id} text={tag.text} />;
+              })}
             </Detail.Metadata.TagList>
           ) : null}
           {note.links.length > 0 ? (
             <Detail.Metadata.TagList title="Links">
               {note.links.map((link) => {
                 const url = link.url;
-                if (url) {
+                const text = link.text;
+                if (url && text) {
                   return (
-                    <Detail.Metadata.TagList.Item key={link.id} text={truncate(link.text)} onAction={() => open(url)} />
+                    <Detail.Metadata.TagList.Item key={link.id} text={truncate(text)} onAction={() => open(url)} />
                   );
                 }
               })}

@@ -1,5 +1,9 @@
 # shell Changelog
 
+## [Fix] 2024-05-15
+Fix an [issue](https://github.com/raycast/extensions/issues/12350) where commands aren't send to iTerm2.
+
+
 ## [Add alpha kitty support] 2024-05-05
 This version adds the option to run commands in `kitty` terminal. 
 Checkout the preferences and select your favorite console application in the dropdown to get going.

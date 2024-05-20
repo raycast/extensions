@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - 2024-05-16
+
+Fix crashes caused by empty links or tags.
+
 ## [Links, Backlinks, and Tags] - 2024-05-14
 
 This update enhances the Apple Notes extension with several new features:
