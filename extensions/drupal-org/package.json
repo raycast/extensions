@@ -32,7 +32,7 @@
       "name": "search-projects",
       "title": "Search Projects",
       "subtitle": "Drupal",
-      "description": "Search for Drupal projects",
+      "description": "Search for Drupal projects (modules, themes, etc)",
       "mode": "view"
     }
   ],
