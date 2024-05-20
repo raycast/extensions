@@ -74,8 +74,27 @@ function getCopyToastAction(copyToastAction: Preferences.CreateIssue["copyToastA
     return { title: "Copy Issue URL", onAction: () => Clipboard.copy(issue.url) };
   }
 
+  if (copyToastAction === "id-as-link") {
+    return {
+      title: "Copy Issue ID as Link",
+      onAction: () =>
+        Clipboard.copy({
+          text: `[${issue.identifier}](${issue.url})`,
+          html: `<a href="${issue.url}">${issue.identifier}</a>`,
+        }),
+    };
+  }
+
   if (copyToastAction === "title") {
     return { title: "Copy Issue Title", onAction: () => Clipboard.copy(issue.title) };
+  }
+
+  if (copyToastAction === "title-as-link") {
+    return {
+      title: "Copy Issue Title as Link",
+      onAction: () =>
+        Clipboard.copy({ text: `[${issue.title}](${issue.url})`, html: `<a href="${issue.url}">${issue.title}</a>` }),
+    };
   }
 
   return { title: "Copy Issue ID", onAction: () => Clipboard.copy(issue.identifier) };

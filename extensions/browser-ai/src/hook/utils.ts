@@ -43,7 +43,7 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
     case "mixtral-8x7b-instruct":
     case "llama-3-sonar-large-32k-chat":
       price = ((prompt_token * 0.6) / 1_000_000 + (output_token * 0.6) / 1_000_000) * 100;
-      break;
+      break
     case "llama-3-70b-instruct":
     case "mixtral-8x22b-instruct":
       price = ((prompt_token * 1) / 1_000_000 + (output_token * 1) / 1_000_000) * 100;

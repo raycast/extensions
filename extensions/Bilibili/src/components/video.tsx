@@ -1,7 +1,8 @@
 import { formatUrl } from "../utils";
 
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { ConclusionView } from "./conslusionView";
+import { runAppleScript } from "run-applescript";
 
 export function Video(props: {
   title: string;
@@ -22,12 +23,47 @@ export function Video(props: {
   onOpenCallback?: () => void;
   markAsWatchedCallback?: () => Promise<void>;
 }) {
+  async function addWatchLaterReminder() {
+    try {
+      await runAppleScript(`
+      tell application "Reminders"
+        try
+          get list "Raycast Bilibili"
+          set mylist to list "Raycast Bilibili"
+          tell mylist
+            make new reminder with properties {name:"${props.title} - ${props.uploader.name}", body:"${formatUrl(
+        props.url
+      )}"}
+          end tell
+        on error
+          make new list with properties {name:"Raycast Bilibili"}
+          set mylist to list "Raycast Bilibili"
+          tell mylist
+            make new reminder with properties {name:"${props.title} - ${props.uploader.name}", body:"${formatUrl(
+        props.url
+      )}"}
+          end tell
+        end try
+      end tell
+      `);
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Reminder added",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Reminder failed to add",
+      });
+    }
+  }
   return (
     <List.Item
       title={props.title}
       detail={
         <List.Item.Detail
-          markdown={`![Cover](${formatUrl(props.cover)})`}
+          markdown={`<img src="${formatUrl(props.cover)}" center width="300" />`}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title={props.title} />
@@ -52,7 +88,7 @@ export function Video(props: {
                   <List.Item.Detail.Metadata.TagList.Item text={`Coin: ${props.stat.coin}`} color={Color.Orange} />
                 )}
                 {props.stat.view && (
-                  <List.Item.Detail.Metadata.TagList.Item text={`View: ${props.stat.view}`} color={Color.Brown} />
+                  <List.Item.Detail.Metadata.TagList.Item text={`View: ${props.stat.view}`} color={Color.Purple} />
                 )}
                 {props.stat.danmaku && (
                   <List.Item.Detail.Metadata.TagList.Item text={`Danmaku: ${props.stat.danmaku}`} color={Color.Blue} />
@@ -80,6 +116,12 @@ export function Video(props: {
               }}
             />
           )}
+          <Action
+            title="Add reminder to watch later"
+            onAction={addWatchLaterReminder}
+            icon={Icon.CheckCircle}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
           <Action.OpenInBrowser
             title={`Open ${props.uploader.name} Dynamic`}
             url={`https://space.bilibili.com/${props.uploader.mid}/dynamic`}

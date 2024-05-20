@@ -1,14 +1,14 @@
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import { useState } from "react";
+import { ShowAttributesAction } from "@components/entity";
+import { useHAStates } from "@components/hooks";
+import { useStateSearch } from "@components/state/hooks";
+import { StateListItem } from "@components/state/list";
+import { PrimaryIconColor } from "@components/state/utils";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { useHAStates } from "@components/hooks";
 import { getStateTooltip } from "@lib/utils";
-import { ShowAttributesAction } from "@components/entity";
-import { StateListItem } from "@components/state/list";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import { HACSRepo } from "./utils";
-import { useStateSearch } from "@components/state/hooks";
-import { PrimaryIconColor } from "@components/state/utils";
 
 function HACSUpdateItem(props: { repo: HACSRepo | undefined; state: State }): JSX.Element | null {
   const r = props.repo;

@@ -1,6 +1,10 @@
 # Reflect Changelog
 
-## Multiple List Options - 2023-11-21
+## [QoL Enhancements] - 2024-05-10
+
+- Adding tasks support to reflect using + as defined in Reflect's API
+
+## [Multiple List Options] - 2023-11-21
 - Add support for multiple list options in preferences
 
 ## [OAuth] - 2023-07-20

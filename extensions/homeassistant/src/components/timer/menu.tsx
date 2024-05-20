@@ -1,10 +1,10 @@
-import { Icon, MenuBarExtra } from "@raycast/api";
-import { State } from "@lib/haapi";
-import { getFriendlyName } from "@lib/utils";
 import { MenuBarSubmenu } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
-import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
 import { getIcon } from "@components/state/utils";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { Icon, MenuBarExtra } from "@raycast/api";
+import { callTimerCancelService, callTimerPauseService, callTimerStartService, isTimerEditable } from "./utils";
 
 function TimerStartMenubarItem(props: { state: State }) {
   const s = props.state;

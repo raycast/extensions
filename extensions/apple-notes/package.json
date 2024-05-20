@@ -125,6 +125,30 @@
       "required": false
     },
     {
+      "name": "links",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show links",
+      "description": "Show a link icon next to each note that references other notes.",
+      "required": false
+    },
+    {
+      "name": "backlinks",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show backlinks",
+      "description": "Show a backlink icon next to each note that has been referenced by other notes.",
+      "required": false
+    },
+    {
+      "name": "tags",
+      "type": "checkbox",
+      "default": true,
+      "label": "Show tags",
+      "description": "Show a tag icon next to each note if it has any tags.",
+      "required": false
+    },
+    {
       "name": "locked",
       "type": "checkbox",
       "default": true,
