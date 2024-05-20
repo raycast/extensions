@@ -1,9 +1,8 @@
 import { Action, Color, Icon } from "@raycast/api";
 import * as afs from "fs/promises";
 import { speedtestCLIDirectory } from "../lib/cli";
-import { SpeedtestResult } from "./speedtest";
 import { pingToString, speedToString } from "./utils";
-import { ClipboardData } from "./types";
+import { SpeedtestResult, ClipboardData } from "./speedtest.types";
 
 export const ToggleDetailedViewAction = ({ setDetailedView }: { setDetailedView: () => void }) => {
   return <Action title="Detailed view" onAction={setDetailedView} icon={Icon.Clipboard} />;

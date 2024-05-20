@@ -1,7 +1,7 @@
 import { Color, Icon, List } from "@raycast/api";
-import { Speed } from "../lib/speedtest";
 import { percentageToString, speedToString } from "../lib/utils";
 import { ListItemMetadata } from "./list-item-metadata";
+import { Speed } from "../lib/speedtest.types";
 
 type SpeedListItemProps = {
   speed: number;

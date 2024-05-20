@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ensureCLI } from "./cli";
-import { ResultProgress, SpeedtestResult, SpeedtestResultDefaultValue, runSpeedTest } from "./speedtest";
+import { SpeedtestResultDefaultValue, runSpeedTest } from "./speedtest";
+import { SpeedtestResult, ResultProgress } from "./speedtest.types";
 
 export function useSpeedtest(): {
   result: SpeedtestResult;
