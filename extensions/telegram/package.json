@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "telegram",
+  "title": "Telegram Rayclient",
+  "description": "Send quick messages to your telegram contacts from raycast",
+  "icon": "telegram.png",
+  "author": "psychic_dev",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quickmsg",
+      "title": "Quick Message",
+      "description": "send quick messages to your telegram contacts",
+      "arguments": [
+        {
+          "name": "contact",
+          "type": "text",
+          "placeholder": "contact name",
+          "required": true
+        },
+        {
+          "name": "message",
+          "type": "text",
+          "placeholder": "message",
+          "required": true
+        }
+      ],
+      "mode": "view",
+      "subtitle": "telegram",
+      "keywords": [
+        "telegram",
+        "quick",
+        "msg",
+        "message"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_id",
+      "title": "API ID",
+      "description": "Your telegram bot api Id",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "api_hash",
+      "title": "API Hash",
+      "description": "Your telegram bot api hash",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.8",
+    "telegraf": "^4.12.2",
+    "telegram": "^2.15.15"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.28.4",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
