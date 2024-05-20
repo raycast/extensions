@@ -12,7 +12,9 @@ The purpose of limiting the battery's max charge is to prolong battery health an
  - `Get Battery Threshold` command will check the current battery charging limit.
    ![battery-optimizer-1.png](media/battery-optimizer-1.png)
 
-Configure whether battery optimization settings persist through extension's preferences screen.
+## Preferences
+ - Configure whether battery optimization settings persist through extension's preferences screen.
+ - You can use the built-in BCLM for convenience.
 ![battery-optimizer-3.png](media/battery-optimizer-3.png)
 
 For Apple silicon machines, only the values 80 and 100 are supported and firmware >= 13.0 is required.

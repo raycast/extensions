@@ -1,22 +1,18 @@
-import { environment, showHUD, getPreferenceValues, confirmAlert, openExtensionPreferences } from "@raycast/api";
+import { LocalStorage, showHUD } from "@raycast/api";
 import { execSync } from "node:child_process";
-import { join } from "path";
-
-function add_system_service(): boolean | undefined {
-  const { add_system_service } = getPreferenceValues<Preferences>();
-  return add_system_service;
-}
-console.log(add_system_service());
-
-const bclm = join(environment.assetsPath, "binary/bclm");
-console.log(bclm);
-const setPermissions = async () => {
-  return execSync(`/bin/chmod u+x ${bclm}`);
-};
+import { bclmPath, confirmAlertBrew, setPermissions } from "./utils/initBCLM";
+import { add_system_service } from "./utils/getPreference";
+import { confirmAlertPersist } from "./utils/confirmAlertPersist";
 
 export async function getChargeThreshold(HUDMessage?: string) {
   await setPermissions();
-  const batteryLevel = execSync(`${bclm} read`).toString().trim();
+
+  const detect_brew = await confirmAlertBrew();
+  if (typeof detect_brew === "boolean") {
+    return;
+  }
+
+  const batteryLevel = execSync(`${bclmPath()} read`).toString().trim();
   console.log(HUDMessage + batteryLevel + "%");
   if (HUDMessage) {
     await showHUD(HUDMessage + batteryLevel + "%");
@@ -24,21 +20,19 @@ export async function getChargeThreshold(HUDMessage?: string) {
 }
 
 export async function setBatteryThreshold(threshold: number, HUDMessage?: string) {
-  if (add_system_service() === undefined) {
-    return confirmAlert({
-      title: "Does it take effect after restart?",
-      message: "Add a system service to ensure that the configuration takes effect after each restart.",
-      primaryAction: {
-        title: "Yes",
-        onAction: () => {
-          openExtensionPreferences();
-        },
-      },
-    });
+  console.log("ConfirmedPersist:" + (await LocalStorage.getItem<string>("ConfirmedPersist")));
+  if ((await LocalStorage.getItem<string>("ConfirmedPersist")) !== "true") {
+    await confirmAlertPersist();
   }
   await setPermissions();
-  const shellCommand = `${bclm} write ${threshold} && ${bclm} ${add_system_service() && threshold === 80 ? "persist" : "unpersist"}`;
 
+  const detect_brew = await confirmAlertBrew();
+  console.log("confirmAlertBrew:" + detect_brew);
+  if (typeof detect_brew === "boolean") {
+    return;
+  }
+
+  const shellCommand = `${bclmPath()} write ${threshold} && ${bclmPath()} ${add_system_service() && threshold === 80 ? "persist" : "unpersist"}`;
   await showHUD("Administrator Privileges Required");
   const osaCommand = `osascript -e 'do shell script "${shellCommand}" with prompt "Administrator Privileges Required" with administrator privileges'`;
   console.log(osaCommand);

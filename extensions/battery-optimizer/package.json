@@ -35,7 +35,17 @@
       "description": "Persistence through system services",
       "type": "checkbox",
       "required": false,
+      "title": "Takes effect after restart.",
       "label": "Add system service"
+    },
+    {
+      "name": "use_built_in_BCLM",
+      "description": "Use built-in BCLM",
+      "type": "checkbox",
+      "required": false,
+      "title": "You can use the built-in BCLM for convenience.",
+      "label": "Use built-in BCLM",
+      "default": false
     }
   ],
   "dependencies": {
