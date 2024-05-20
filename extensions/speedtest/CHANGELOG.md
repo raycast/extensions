@@ -5,7 +5,7 @@
 - Add a detailed view.
 - Add an action to copy detailed view data.
 - Increase types coverage.
-- Refactor code to increase to improve maintainability and scalability.
+- Refactor code to improve maintainability and scalability.
 
 ## [Update] - 2024-05-13 
 
