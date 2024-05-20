@@ -1,5 +1,16 @@
 # Simple Reminder Changelog
 
+## [Reminder Menu Bar] - 2024-05-16
+
+- Fix Reminder length not being cut off if topic length is greater than 30
+
+## [Reminder Menu Bar] - 2024-05-15
+
+- Add empty reminder action in reminder menu bar to show the user that no reminders are set and that they can add a new reminder
+- Add a title to the reminder menu bar showing the next reminder coming up
+- Reminder title in the menu bar will be shown as distance when 2 or less are remaining (e.g. daily in 5 minutes) 
+- Change the icon in the menu bar to reflect the system theme preference
+
 ## [Reminder Menu Bar] - 2024-05-07
 
 - Add a menu bar command to check the reminder list in the macOS menu bar

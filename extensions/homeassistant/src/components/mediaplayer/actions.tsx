@@ -1,8 +1,8 @@
-import { ActionPanel, Icon, Color, Action } from "@raycast/api";
+import { EntityStandardActionSections } from "@components/entity";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
 import { getMediaPlayerTitleAndArtist } from "./utils";
-import { EntityStandardActionSections } from "@components/entity";
 
 export function SelectSourceAction(props: { state: State }): JSX.Element | null {
   const state = props.state;

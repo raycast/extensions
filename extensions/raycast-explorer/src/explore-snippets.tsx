@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Color, Icon, LaunchProps, List, environment, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { categories as rawCategories } from "./data/snippets";
-import { CONTRIBUTE_URL, wrapInCodeBlock } from "./helpers";
+import { SnippetCategory } from "./data/snippets";
+import { CONTRIBUTE_URL, getIcon, wrapInCodeBlock } from "./helpers";
 
 type Props = LaunchProps<{ launchContext: string[] }>;
 
@@ -20,24 +21,8 @@ function addModifiersToKeyword({
   return `${start === "none" ? "" : start}${keyword}${end === "none" ? "" : end}`;
 }
 
-function getSnippetMarkdown(snippet: (typeof rawCategories)[number]["snippets"][number]) {
-  if (snippet.type === "code") {
-    return wrapInCodeBlock(snippet.text, snippet.language);
-  }
-
-  if (snippet.type === "template" && snippet.hasMarkdown) {
-    return `## Template\n\n${wrapInCodeBlock(snippet.text)}\n\n## Markdown Output\n\n${snippet.text}`;
-  }
-
-  if (snippet.type === "template") {
-    const text = snippet.text.replace(/\{[^{}]+\}/g, "**$&**");
-    return text;
-  }
-
-  return snippet.text;
-}
-
 export default function ExploreSnippets(props: Props) {
+  const { data: rawCategories, isLoading } = useFetch<SnippetCategory[]>(`https://snippets.ray.so/api/snippets`);
   const [selectedIds, setSelectedIds] = useState<string[]>(props.launchContext ?? []);
   const [selectedCategory, setSelectedCategory] = useState(props.launchContext ? "selected" : "");
   const preferences = getPreferenceValues<Preferences.ExploreSnippets>();
@@ -51,32 +36,51 @@ export default function ExploreSnippets(props: Props) {
   }
 
   const categories = useMemo(() => {
-    return rawCategories.map((category) => {
-      return {
-        ...category,
-        snippets: category.snippets.map((snippet) => {
-          const keyword =
-            snippet.type === "spelling"
-              ? snippet.keyword
-              : addModifiersToKeyword({
-                  keyword: snippet.keyword,
-                  start: preferences.startModifier,
-                  end: preferences.endModifier,
-                });
+    return (
+      rawCategories?.map((category) => {
+        return {
+          ...category,
+          snippets: category.snippets.map((snippet) => {
+            const keyword =
+              snippet.type === "spelling"
+                ? snippet.keyword
+                : addModifiersToKeyword({
+                    keyword: snippet.keyword,
+                    start: preferences.startModifier,
+                    end: preferences.endModifier,
+                  });
 
-          return {
-            ...snippet,
-            keyword,
-            keywords: removeMarkdown(snippet.text)
-              .replace(/\n/gi, " ")
-              .split(" ")
-              .map((k) => k.trim())
-              .filter((k) => k.length > 0),
-          };
-        }),
-      };
-    });
-  }, [preferences]);
+            return {
+              ...snippet,
+              keyword,
+              keywords: removeMarkdown(snippet.text)
+                .replace(/\n/gi, " ")
+                .split(" ")
+                .map((k) => k.trim())
+                .filter((k) => k.length > 0),
+            };
+          }),
+        };
+      }) ?? []
+    );
+  }, [preferences, rawCategories]);
+
+  function getSnippetMarkdown(snippet: SnippetCategory["snippets"][number]) {
+    if (snippet.type === "code") {
+      return wrapInCodeBlock(snippet.text, snippet.language);
+    }
+
+    if (snippet.type === "template" && snippet.hasMarkdown) {
+      return `## Template\n\n${wrapInCodeBlock(snippet.text)}\n\n## Markdown Output\n\n${snippet.text}`;
+    }
+
+    if (snippet.type === "template") {
+      const text = snippet.text.replace(/\{[^{}]+\}/g, "**$&**");
+      return text;
+    }
+
+    return snippet.text;
+  }
 
   const addToRaycastUrl = useMemo(() => {
     const snippets = categories
@@ -122,11 +126,11 @@ export default function ExploreSnippets(props: Props) {
       });
     }
 
-    return categories.filter((category) => category.id === selectedCategory);
+    return categories.filter((category) => category.slug === selectedCategory);
   }, [selectedCategory, categories, selectedIds]);
 
   const selectSnippetsTitle = useMemo(() => {
-    const category = categories.find((category) => category.id === selectedCategory);
+    const category = categories.find((category) => category.slug === selectedCategory);
     if (category) {
       return `All ${category.name} Snippets`;
     }
@@ -142,9 +146,15 @@ export default function ExploreSnippets(props: Props) {
   return (
     <List
       isShowingDetail
+      isLoading={isLoading}
       searchBarPlaceholder="Filter by name, category, or text"
       searchBarAccessory={
-        <List.Dropdown tooltip="Select Category" onChange={setSelectedCategory} value={selectedCategory}>
+        <List.Dropdown
+          tooltip="Select Category"
+          onChange={setSelectedCategory}
+          value={selectedCategory}
+          isLoading={isLoading}
+        >
           <List.Dropdown.Item icon={Icon.BulletPoints} title="All Categories" value="" />
           {hasSelectedSnippets ? (
             <List.Dropdown.Item icon={Icon.CheckCircle} title="Selected Snippets" value="selected" />
@@ -152,8 +162,14 @@ export default function ExploreSnippets(props: Props) {
 
           <List.Dropdown.Section title="Categories">
             {categories.map((category) => {
+              const icon = getIcon(category.icon || "");
               return (
-                <List.Dropdown.Item icon={category.icon} key={category.id} title={category.name} value={category.id} />
+                <List.Dropdown.Item
+                  icon={Icon[icon] ?? Icon.List}
+                  key={category.slug}
+                  title={category.name}
+                  value={category.slug}
+                />
               );
             })}
           </List.Dropdown.Section>

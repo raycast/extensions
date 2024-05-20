@@ -1,5 +1,20 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - 2024-05-16
+
+Fix crashes caused by empty links or tags.
+
+## [Links, Backlinks, and Tags] - 2024-05-14
+
+This update enhances the Apple Notes extension with several new features:
+
+- **Note Links**: You can now see and open links directly in your Apple Notes using the new `Open Links` action.
+- **Backlinks**: The `Open Backlinks` action allows you to easily navigate through related notes and discover how your notes are connected.
+- **Tags**: Tags within your notes are now displayed and searchable, making it simpler to find your notes.
+- **Improved Detail View**: The detail view now provides more information about each note, including the folder name, last update time, links, backlinks, tags, and more.
+
+It also fixes a bug where links would not be opened for users not having macOS Sonoma.
+
 ## [Add text to note] - 2024-04-26
 
 Add a new command called `Add Text to Note` allowing you to quickly append text to your notes for faster note-taking. You can also add text to a note from the `Search Notes command`.

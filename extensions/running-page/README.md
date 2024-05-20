@@ -1,10 +1,21 @@
-# Running Page
+<br>
+<br>
+<p align="center">
+<img src="./assets/running_page_logo.png" width="140" height="140"  />
+</p>
 
-Display data generate by [running_page](https://github.com/yihong0618/running_page), inspired
-by [Workouts](https://www.raycast.com/samuelkraft/workouts)
+<h1 align="center"><sup>Running Page</sup></h1>
 
-![](./metadata/Metadata.png)
-![](./metadata/Metadata-2.png)
+<p align="center">
+Display data generate by <a href="https://github.com/yihong0618/running_page">running_page</a>, inspired
+by <a href="https://www.raycast.com/samuelkraft/workouts">Workouts</a>
+</p>
+
+<p align="center">
+<img width="862" src="./metadata/1.png"  />
+<img width="862" src="./metadata/2.png"  />
+<img width="862" src="./metadata/3.png"  />
+</p>
 
 ## How to use
 
