@@ -57,12 +57,20 @@
               "value": "id"
             },
             {
+              "title": "Copy Issue ID as Link",
+              "value": "id-as-link"
+            },
+            {
               "title": "Copy Issue URL",
               "value": "url"
             },
             {
               "title": "Copy Issue Title",
               "value": "title"
+            },
+            {
+              "title": "Copy Issue Title as Link",
+              "value": "title-as-link"
             }
           ]
         }

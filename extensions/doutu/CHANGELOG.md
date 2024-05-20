@@ -1,5 +1,8 @@
 # DouTu Changelog
 
+## [Fix Debug] - 2024-05-13
+- Add new error message
+
 ## [Fix Debug] - 2024-04-26
 - Fix the issue of ineffective copying of GIFs
 
