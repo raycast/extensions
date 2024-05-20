@@ -6,6 +6,7 @@ import { useAsync } from "react-use";
 import { useState } from "react";
 import { getAvatarIcon } from "@raycast/utils";
 import Shortcut = Keyboard.Shortcut;
+import EmptyList from "./EmptyList";
 
 const httpPrefix = "http";
 const localStorageKey = "instances";
@@ -105,10 +106,7 @@ const InstancesList = () => {
         isLoading={isLoading}
         navigationTitle="Outline Instances"
       >
-        <List.EmptyView
-          icon={{ source: "https://www.getoutline.com/images/logo.svg" }}
-          title="Start by adding an Outline instance..."
-        />
+        <EmptyList message="Start by adding an Outline instance..." />
       </List>
     );
   } else {

@@ -4,6 +4,7 @@ import { List, showToast, Toast } from "@raycast/api";
 import queryInstances, { Instance } from "./queryInstances";
 import Document from "./Document";
 import OutlineDocument from "./OutlineDocument";
+import EmptyList from "./EmptyList";
 
 const DocumentSearch = ({ instances }: { instances: Instance[] }) => {
   const searchEverywhere = instances.length > 1;
@@ -40,12 +41,7 @@ const DocumentSearch = ({ instances }: { instances: Instance[] }) => {
       searchBarPlaceholder={placeholder}
       throttle
     >
-      {matchedDocumentsPerInstance.length === 0 && (
-        <List.EmptyView
-          icon={{ source: "https://www.getoutline.com/images/logo.svg" }}
-          title="Start by typing a query to search for..."
-        />
-      )}
+      {matchedDocumentsPerInstance.length === 0 && <EmptyList />}
       {matchedDocumentsPerInstance.length >= 1 &&
         searchEverywhere &&
         matchedDocumentsPerInstance.map((matches, instanceIndex) => (

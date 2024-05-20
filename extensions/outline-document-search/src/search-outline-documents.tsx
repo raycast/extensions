@@ -2,6 +2,7 @@ import { Action, ActionPanel, launchCommand, LaunchType, List } from "@raycast/a
 import { useLocalStorage } from "@raycast/utils";
 import DocumentSearch from "./DocumentSearch";
 import { Instance } from "./queryInstances";
+import EmptyList from "./EmptyList";
 
 const Command = () => {
   const { value: instances } = useLocalStorage<Instance[]>("instances");
@@ -18,10 +19,7 @@ const Command = () => {
           </ActionPanel>
         }
       >
-        <List.EmptyView
-          icon={{ source: "https://www.getoutline.com/images/logo.svg" }}
-          title="Start by adding an Outline instance..."
-        />
+        <EmptyList />
       </List>
     );
   } else {
