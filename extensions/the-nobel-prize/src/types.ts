@@ -29,7 +29,7 @@ type Entity = Location & {
 type Residence = Location & {
     locationString: TranslationStrings;
 }
-type NobelPrizePerLaureate = {
+export type NobelPrizePerLaureate = {
     awardYear: string;
     category: TranslationStrings;
     categoryFullName: TranslationStrings;
@@ -115,7 +115,7 @@ type LaureateBasic = {
     }[]
 } & ({knownName: TranslationStrings;
     fullName: TranslationStrings;} | {orgName: TranslationStrings})
-type NobelPrize = {
+export type NobelPrize = {
     awardYear: number;
     category: TranslationStrings;
     categoryFullName: TranslationStrings;

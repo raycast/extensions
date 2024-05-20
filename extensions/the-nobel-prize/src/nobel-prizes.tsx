@@ -1,8 +1,9 @@
-import { useFetch } from "@raycast/utils";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { NobelPrizesResult } from "./types";
-import { Detail, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps, List } from "@raycast/api";
 import { Fragment } from "react";
-import { API_BASE_URL, DEAULT_LIMIT, ICONS } from "./constants";
+import { API_BASE_URL, CATEGORIES, DEAULT_LIMIT, ICONS } from "./constants";
+import generateNobelPrizeLink from "./utils/generateNobelPrizeLink";
 
 export default function Laureates(props: LaunchProps<{ arguments: Arguments.NobelPrizes }>) {
     const { year: nobelPrizeYear, category: nobelPrizeCategory } = props.arguments;
@@ -23,7 +24,7 @@ export default function Laureates(props: LaunchProps<{ arguments: Arguments.Nobe
         },
     );
 
-    const navigationTitle = `Nobel Prizes / ${nobelPrizeYear || "All Years"} / ${nobelPrizeCategory || "All Categories"}`;
+    const navigationTitle = `Nobel Prizes / ${nobelPrizeYear || "All Years"} / ${nobelPrizeCategory ? CATEGORIES[nobelPrizeCategory] : "All Categories"}`;
 
     return error ? <Detail navigationTitle="Error" markdown={JSON.stringify(error)} /> : <List navigationTitle={navigationTitle} isLoading={isLoading} isShowingDetail pagination={pagination} searchBarPlaceholder="Filter Nobel Prizes (locally)">
         {data.map((prize, prizeIndex) => <List.Item key={prizeIndex} title={`${prize.awardYear} - ${prize.category.en}`}
@@ -47,7 +48,9 @@ export default function Laureates(props: LaunchProps<{ arguments: Arguments.Nobe
                 <List.Item.Detail.Metadata.Label title="Motivation (en)" text={laureate.motivation.en} />
                 </Fragment>) ||
                 <List.Item.Detail.Metadata.Label title="Laureates" icon={Icon.Minus} /> }
-            </List.Item.Detail.Metadata>} />}
+            </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
+                <Action.OpenInBrowser title="View in nobelprize.org" icon={getFavicon(generateNobelPrizeLink(prize))} url={generateNobelPrizeLink(prize)} />
+            </ActionPanel>}
             />
         )}
     </List>

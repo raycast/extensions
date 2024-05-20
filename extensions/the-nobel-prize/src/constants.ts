@@ -9,6 +9,14 @@ export const ICONS = {
     Literature: Icon.Book,
     Peace: Icon.Globe,
     Physics: Icon.Ruler,
-    Medicine: Icon.Dna,
     "Physiology or Medicine": Icon.Dna,
+}
+
+export const CATEGORIES = {
+    che: "Chemistry",
+    eco: "Economics",
+    lit: "Literature",
+    pea: "Peace",
+    phy: "Physics",
+    med: "Physiology or Medicine"
 }
