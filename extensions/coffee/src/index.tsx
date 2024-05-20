@@ -1,4 +1,4 @@
-import { Color, LaunchProps, MenuBarExtra, getPreferenceValues } from "@raycast/api";
+import { Color, LaunchProps, MenuBarExtra, getPreferenceValues, showHUD } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { startCaffeinate, stopCaffeinate } from "./utils";
@@ -28,6 +28,9 @@ export default function Command(props: LaunchProps) {
       await mutate(stopCaffeinate({ menubar: true, status: true }), {
         optimisticUpdate: () => false,
       });
+      if (preferences.hidenWhenDecaffeinated) {
+        showHUD("Your Mac is now decaffeinated");
+      }
     } else {
       setLocalCaffeinateStatus(true);
       await mutate(startCaffeinate({ menubar: true, status: true }), {
