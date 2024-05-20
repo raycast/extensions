@@ -10,7 +10,7 @@
 
 Customise the extension behaviour to reflect the type of person you are.
 
-![Config View](metadata/config.png)
+![Config View](assets/config.png)
 
 ---
 
