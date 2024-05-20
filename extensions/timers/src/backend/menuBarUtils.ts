@@ -2,13 +2,6 @@ import { Icon } from "@raycast/api";
 import { formatTime } from "./formatUtils";
 import { Preferences, Stopwatch, Timer } from "./types";
 
-const shortCircuitMenuBar = <T>(state: T[] | undefined, prefs: Preferences): boolean => {
-  return (
-    (state == undefined || state.length == 0 || state.length == undefined) &&
-    !["always", "onlyWhenNotRunning"].includes(prefs.showMenuBarIconWhen)
-  );
-};
-
 const formatMenuBarTitle = <T extends Timer | Stopwatch>(
   state: T[] | undefined,
   prefs: Preferences,
@@ -36,4 +29,4 @@ const formatMenuBarIcon = <T>(state: T[] | undefined, prefs: Preferences, icon: 
   }
 };
 
-export { shortCircuitMenuBar, formatMenuBarTitle, formatMenuBarIcon };
+export { formatMenuBarTitle, formatMenuBarIcon };
