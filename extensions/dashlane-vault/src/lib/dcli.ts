@@ -1,7 +1,6 @@
 import { captureException, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execa, execaCommand } from "execa";
-import { existsSync } from "fs";
 import { safeParse } from "valibot";
 
 import {
@@ -15,8 +14,7 @@ import { VaultCredential, VaultCredentialSchema, VaultNote, VaultNoteSchema } fr
 
 const preferences = getPreferenceValues<Preferences>();
 
-const CLI_PATH =
-  preferences.cliPath || ["/usr/local/bin/dcli", "/opt/homebrew/bin/dcli"].find((path) => existsSync(path));
+const CLI_PATH = preferences.cliPath;
 const CLI_VERSION = getCLIVersion();
 
 async function dcli(...args: string[]) {
