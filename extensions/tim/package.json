@@ -6,10 +6,7 @@
   "description": "Manage your timers for Tim from Raycast",
   "icon": "tim-icon.png",
   "author": "tm.wrnr",
-  "categories": [
-    "Applications",
-    "Productivity"
-  ],
+  "categories": ["Applications", "Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -59,6 +56,13 @@
       "title": "Tasks",
       "subtitle": "Tim",
       "description": "Show all tasks.",
+      "mode": "view"
+    },
+    {
+      "name": "dailyOverview",
+      "title": "Daily Overview",
+      "subtitle": "Tim",
+      "description": "Show task grouped by day",
       "mode": "view"
     },
     {
