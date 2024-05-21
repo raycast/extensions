@@ -22,7 +22,7 @@ export function ProgramDetail({ program }: { program: Program }): React.JSX.Elem
           />
           <Detail.Metadata.TagList title="Genres">
             {program.genres.map((genre) => {
-              return <Detail.Metadata.TagList.Item key={genre} text={genreLabels.get(genre)} />;
+              return <Detail.Metadata.TagList.Item key={genre} text={genreLabels[genre]} />;
             })}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
