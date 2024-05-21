@@ -84,7 +84,7 @@ const invitationQuery = `
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS noteId
     FROM
         ziccloudsyncingobject AS note
-    LEFT JOIN zicinvitation AS inv 
+    LEFT JOIN zicinvitatiofn AS inv 
         ON note.zinvitation = inv.z_pk
     LEFT JOIN z_metadata AS zmd ON 1=1
     WHERE
@@ -124,8 +124,8 @@ export const useNotes = () => {
   // Split the query into two to avoid a SQL error if the zcinivitation table doesn't exist
   const { data: invitations } = useSQL<{ invitationLink: string | null; noteId: string }>(NOTES_DB, invitationQuery, {
     execute: data && data.length > 0,
-    onError(error) {
-      showFailureToast(error, { title: "Couldn't get invitations for notes" });
+    onError() {
+      // Filently sail if the table doesn't exist
     },
   });
 
