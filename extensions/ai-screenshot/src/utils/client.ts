@@ -1,18 +1,13 @@
-import { getPreferenceValues } from "@raycast/api";
+import { PreferenceValues, getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
 
 export async function createClient() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<PreferenceValues>();
   let client: OpenAI;
-  if (preferences.client === "openai") {
-    try {
-      client = new OpenAI({ apiKey: preferences.apiKey });
-    } catch (error) {
-      console.error("Client could not be created: ", error);
-      return;
-    }
-  } else {
-    console.error("Client type not recognized or supported.");
+  try {
+    client = new OpenAI({ apiKey: preferences.apiKey });
+  } catch (error) {
+    console.error("Client could not be created: ", error);
     return;
   }
   return client;
