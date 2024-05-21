@@ -1,6 +1,6 @@
 # Datetime formatter Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-05-21
 
 - Optimized the display and functionality of the extension
 
