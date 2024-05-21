@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Peek in Safari] - 2024-05-21
+
+- Web pages can be quickly previewed in Safari (by installing the shortcut [Peek Url](https://www.icloud.com/shortcuts/2364c358fbe7498aa6b18bd229d0f7de) and selecting **Peek in Safari** in Settings)
+
 ## [Fix Deeplink] - 2023-06-12
 
 - Fix the problem that deeplink cannot be opened normally
