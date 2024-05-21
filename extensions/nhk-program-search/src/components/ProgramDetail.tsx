@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import React from "react";
-import { genreLabels, Program } from "../types";
+import { genreLabels, Program, serviceIdLabels } from "../types";
 import { getFormattedDate } from "../utils";
 
 export function ProgramDetail({ program }: { program: Program }): React.JSX.Element {
@@ -13,7 +13,7 @@ export function ProgramDetail({ program }: { program: Program }): React.JSX.Elem
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Service"
-            text={program.service.name}
+            text={serviceIdLabels[program.service.id]}
             icon={`https:${program.service.logo_s.url}`}
           />
           <Detail.Metadata.Label
