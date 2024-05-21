@@ -125,7 +125,7 @@ export const useNotes = () => {
   const { data: invitations } = useSQL<{ invitationLink: string | null; noteId: string }>(NOTES_DB, invitationQuery, {
     execute: data && data.length > 0,
     onError() {
-      // Filently sail if the table doesn't exist
+      // Silently fail if the table doesn't exist
     },
   });
 
