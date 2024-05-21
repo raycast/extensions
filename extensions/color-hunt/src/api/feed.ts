@@ -68,13 +68,17 @@ export default function (sort: string, tags: Tags) {
     [sort, tags, timeframe],
     {
       onData: async () => {
-        await launchCommand({
-          name: "clear",
-          type: LaunchType.Background,
-          context: {
-            clear: true,
-          },
-        });
+        try {
+          await launchCommand({
+            name: "clear",
+            type: LaunchType.Background,
+            context: {
+              clear: true,
+            },
+          });
+        } catch (_err) {
+          // ignore
+        }
       },
     },
   );

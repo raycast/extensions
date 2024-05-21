@@ -17,13 +17,17 @@ export default function (id: string) {
       await showFailureToast(error);
     },
     onData: async () => {
-      await launchCommand({
-        name: "clear",
-        type: LaunchType.Background,
-        context: {
-          clear: true,
-        },
-      });
+      try {
+        await launchCommand({
+          name: "clear",
+          type: LaunchType.Background,
+          context: {
+            clear: true,
+          },
+        });
+      } catch (_err) {
+        // ignore
+      }
     },
   });
 }
