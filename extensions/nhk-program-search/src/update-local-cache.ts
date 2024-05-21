@@ -53,6 +53,9 @@ async function storeWeeklyProgramsCache(): Promise<void> {
     const data = (await response.json()) as TVSchedule;
 
     serviceIds.forEach((sid) => {
+      if (sid === "all") {
+        return;
+      }
       const existed = JSON.parse(cache.get(sid) ?? "[]") as Program[];
       cache.set(sid, JSON.stringify([...existed, ...data.list[sid]]));
     });
