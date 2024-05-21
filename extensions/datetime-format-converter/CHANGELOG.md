@@ -1,8 +1,8 @@
 # Datetime formatter Changelog
 
+## [Update] - {PR_MERGE_DATE}
 
-## [update] - 2024-04-30
--- Optimized the display and operation of the interface
+- Optimized the display and functionality of the extension
 
 ## [Update] - 2023-09-11
 
