@@ -229,12 +229,12 @@ export const serviceIdLogos = {
 
 export const serviceIdLabels = {
   all: "All Services",
-  g1: "ＮＨＫ総合",
-  e1: "ＮＨＫＥテレ",
-  s1: "ＮＨＫＢＳ",
-  s2: "ＮＨＫ ＢＳ(１０２ｃｈ)",
-  s5: "ＮＨＫ ＢＳプレミアム４Ｋ",
-  s6: "ＮＨＫ ＢＳ８Ｋ",
+  g1: "NHK General",
+  e1: "NHK Educational",
+  s1: "NHK BS",
+  s2: "NHK BS (102ch)",
+  s5: "NHK BS Premium 4K",
+  s6: "NHK BS 8K",
 } satisfies { [key in ServiceId]: string };
 
 export type ErrorResponseBody = {
