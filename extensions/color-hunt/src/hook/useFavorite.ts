@@ -2,7 +2,7 @@ import { useLocalStorage } from "@raycast/utils";
 import { StorageData } from "../type";
 
 export const useFavorite = () => {
-  const { isLoading, value, setValue } = useLocalStorage<StorageData[]>("favoritePalettes", []);
+  const { isLoading, value, setValue, removeValue } = useLocalStorage<StorageData[]>("favoritePalettes", []);
 
   const favorite = async (code: string, svg: string) => {
     if (!value) {
@@ -26,5 +26,6 @@ export const useFavorite = () => {
     value,
     favorite,
     unFavorite,
+    removeValue,
   };
 };

@@ -1,6 +1,5 @@
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { Single } from "../type";
-import { launchCommand, LaunchType } from "@raycast/api";
 
 export default function (id: string) {
   return useFetch<string, undefined, Single>("https://colorhunt.co/php/single.php", {
@@ -15,19 +14,6 @@ export default function (id: string) {
     // keepPreviousData: true,
     onError: async (error) => {
       await showFailureToast(error);
-    },
-    onData: async () => {
-      try {
-        await launchCommand({
-          name: "clear",
-          type: LaunchType.Background,
-          context: {
-            clear: true,
-          },
-        });
-      } catch (_err) {
-        // ignore
-      }
     },
   });
 }

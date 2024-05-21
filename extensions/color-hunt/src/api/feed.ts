@@ -2,8 +2,6 @@ import { usePromise } from "@raycast/utils";
 import { Feed, Tags } from "../type";
 import fetch from "cross-fetch";
 import { Svgs } from "../ui/svg";
-import { readIds } from "../utils/storage";
-import { launchCommand, LaunchType } from "@raycast/api";
 
 /**
  * New
@@ -48,8 +46,6 @@ export default function (sort: string, tags: Tags) {
         body: `step=${options.page}&tags=${tagsData}&timeframe=${timeframe}&sort=${sort}`,
       }).then((res) => res.json() as unknown as Feed[]);
 
-      const localLikes = await readIds();
-
       const svgs: string[] = [];
       const generator = Svgs.default();
       for (const feed of feeds) {
@@ -60,26 +56,10 @@ export default function (sort: string, tags: Tags) {
         data: feeds.map((item, index) => ({
           data: item,
           svg: svgs[index],
-          liked: localLikes.includes(item.code),
         })),
         hasMore: feeds.length > 0,
       };
     },
     [sort, tags, timeframe],
-    {
-      onData: async () => {
-        try {
-          await launchCommand({
-            name: "clear",
-            type: LaunchType.Background,
-            context: {
-              clear: true,
-            },
-          });
-        } catch (_err) {
-          // ignore
-        }
-      },
-    },
   );
 }

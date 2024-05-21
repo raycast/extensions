@@ -12,20 +12,13 @@
       "title": "Search Palettes",
       "description": "Discover the newest hand-picked palettes of Color Hunt",
       "mode": "view"
-    },
-    {
-      "name": "clear",
-      "title": "Clear Cache",
-      "subtitle": "0 files, 0 MB",
-      "disabledByDefault": true,
-      "description": "Clear the cache of the extension",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.73.2",
     "@raycast/utils": "^1.15.0",
     "cross-fetch": "^4.0.0",
+    "glob": "^10.3.15",
     "satori": "^0.10.13"
   },
   "devDependencies": {
