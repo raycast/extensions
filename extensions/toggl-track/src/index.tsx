@@ -103,9 +103,8 @@ function ListView() {
                     icon={{ source: Icon.Clock }}
                   />
                   <Action.Push
-                    title="Create Time Entry From This"
+                    title="Create Similar Time Entry"
                     icon={{ source: Icon.Plus }}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
                     target={
                       <ExtensionContextProvider>
                         <TimeEntryForm
