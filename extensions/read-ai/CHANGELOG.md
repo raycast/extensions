@@ -1,3 +1,5 @@
+# Read AI Changelog
+
 ## [Added Speed And DirectRead Preferences] - 2024-04-30
 
 - Allows adjustment of voice speed from 0.25 to 4.0.
