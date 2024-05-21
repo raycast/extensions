@@ -22,7 +22,7 @@
     },
     {
       "name": "read-selected-text-script",
-      "title": "Read Selected Text | With Script",
+      "title": "Read Selected Text | with Script",
       "subtitle": "Read AI - Text to Speech",
       "description": "Read and listen to the seleted text with script and subtitles",
       "mode": "view"
