@@ -1,5 +1,7 @@
 # Fantastical Changelog
 
+## [Added missing contributor] - 2024-03-05
+
 ## [Fixes] - 2024-01-23
 
 * Fix placeholder for the `Quickly Add Fantastical Event` command.

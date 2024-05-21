@@ -80,6 +80,9 @@ function formatDependencies(cask: Cask): string {
   let markdown = "";
   for (const key in cask.depends_on.macos) {
     const values = cask.depends_on.macos[key];
+    if (!values) {
+      continue;
+    }
     markdown += `macOS ${key} ${values.join(", ")}`;
   }
 
@@ -89,7 +92,7 @@ ${markdown}
 }
 
 function formatConflicts(cask: Cask): string {
-  if (!cask.conflicts_with) {
+  if (!cask.conflicts_with || !cask.conflicts_with.cask) {
     return "";
   }
 

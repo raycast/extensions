@@ -8,13 +8,8 @@ GHPic first read the image from the clipboard and upload it to GitHub, then the 
 
 ## Requirements
 
-### 1. Install [pngpasge](https://github.com/jcsalterego/pngpaste)
 
-```
-brew install pngpaste
-```
-
-### 2. Get a GitHub token
+### 1. Get a GitHub token
 
 - Visit: [https://github.com/settings/tokens](https://github.com/settings/tokens)
 
@@ -27,7 +22,7 @@ brew install pngpaste
 
   ![](https://cdn.jsdelivr.net/gh/xiangsanliu/images/img/202208201534422.png)
 
-### 3. Configure the extension
+### 2. Configure the extension
 
   ![](https://cdn.jsdelivr.net/gh/xiangsanliu/images/img/202208201535451.png)
 
@@ -39,11 +34,9 @@ brew install pngpaste
 
 ## Usage
 
-1. Copy a Picture to the clipboard.
+1. Copy a Picture to the clipboard or just copy from the Finder.app.
 2. Upload to GitHub by this extension.
 3. Paste the URL to your article.
-
-> **Note: Due to API restrictions, if you want to upload from a picture file, you need to open the file first and then copy it, instead of copying the file directly in `Finder`.** see [Upload from file](#upload-from-file)
 
 ## Demo
 
@@ -53,7 +46,7 @@ https://user-images.githubusercontent.com/19505695/186912886-ca5c45cf-fec6-4545-
 
 ### Upload from file
 
-https://user-images.githubusercontent.com/19505695/187009128-9fdabc42-11e4-4ab0-a646-3e69c6f5c037.mov
+https://github.com/xiangsanliu/gh-pic/assets/19505695/64840684-a015-41fc-8954-19f88abc0a3d
 
 
 ## Thanks

@@ -1,5 +1,18 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-04-12
+
+- Add unit test for regresion testing of code matching
+- Fix issue where phone numbers are matched as codes
+
+## [Update] - 2024-04-05
+
+- Resolve issue where codes with dash were not correctly matched
+
+## [Update] - 2024-03-18
+
+- Allow alphanumeric codes
+
 ## [Update] - 2024-02-20
 
 - Add temporal unit options for searching iMessage for 2FA codes

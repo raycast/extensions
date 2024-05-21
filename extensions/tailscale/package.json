@@ -11,7 +11,8 @@
     "rosszurowski",
     "kradalby",
     "itsmingjie",
-    "erics118"
+    "erics118",
+    "brandenw"
   ],
   "categories": [
     "Developer Tools",
@@ -63,6 +64,20 @@
       "description": "Show Tailscale's connection status.",
       "mode": "no-view",
       "interval": "30s"
+    },
+    {
+      "name": "connect",
+      "title": "Connect",
+      "subtitle": "Tailscale",
+      "description": "Tailscale up",
+      "mode": "no-view"
+    },
+    {
+      "name": "disconnect",
+      "title": "Disconnect",
+      "subtitle": "Tailscale",
+      "description": "Tailscale down",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -72,6 +87,13 @@
       "required": false,
       "title": "Tailscale CLI Path",
       "description": "Location to the Tailscale CLI (Defaults to `/Applications/Tailscale.app/Contents/MacOS/Tailscale`)"
+    },
+    {
+      "name": "tailscaleExecMaxBuffersMB",
+      "type": "textfield",
+      "required": false,
+      "title": "Buffer size for parsing CLI output (in megabytes)",
+      "description": "Max buffer size (in megabytes, defaults to 10)"
     }
   ],
   "dependencies": {

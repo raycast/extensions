@@ -10,7 +10,7 @@ import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
 import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
-import { runCommandInTerminal } from "./runInTerminal";
+import { runCommandInTerminal, terminalName } from "./runInTerminal";
 
 export function CaskActionPanel(props: {
   cask: Cask;
@@ -44,7 +44,7 @@ export function CaskActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Uninstall In Terminal"
+            title={`Run Uninstall in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewUninstallCommand(cask));
@@ -92,7 +92,7 @@ export function CaskActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Install In Terminal"
+            title={`Run Install in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewInstallCommand(cask));
@@ -148,7 +148,7 @@ export function FormulaActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Uninstall In Terminal"
+            title={`Run Uninstall in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewUninstallCommand(formula));
@@ -188,7 +188,7 @@ export function FormulaActionPanel(props: {
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
           <Action
-            title="Run Install In Terminal"
+            title={`Run Install in ${terminalName()}`}
             icon={Icon.Terminal}
             onAction={() => {
               runCommandInTerminal(brewInstallCommand(formula));
@@ -234,7 +234,7 @@ export function OutdatedActionPanel(props: {
           shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
         />
         <Action
-          title="Run Upgrade In Terminal"
+          title={`Run Upgrade in ${terminalName()}`}
           icon={Icon.Terminal}
           onAction={() => {
             runCommandInTerminal(brewUpgradeCommand(outdated));
@@ -245,7 +245,7 @@ export function OutdatedActionPanel(props: {
         <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
         <Action.CopyToClipboard title="Copy Uninstall Command" content={brewUninstallCommand(outdated)} />
         <Action
-          title="Run Uninstall In Terminal"
+          title={`Run Uninstall in ${terminalName()}`}
           icon={Icon.Terminal}
           onAction={() => {
             runCommandInTerminal(brewUninstallCommand(outdated));

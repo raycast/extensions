@@ -5,6 +5,9 @@
   "description": "Create Fantastical events and reminders using Fantasticals natural language processing.",
   "icon": "fantastical.png",
   "author": "devahschaefers",
+  "contributors": [
+    "xilopaint"
+  ],
   "categories": [
     "Applications",
     "Productivity"

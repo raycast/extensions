@@ -65,7 +65,7 @@ const ProjectListSection = () => {
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           deployment={project.latestDeployments[0] as any}
                           selectedTeam={teams?.find((team) => team.id === selectedTeam)}
-                        />
+                        />,
                       );
                     } else {
                       showToast({

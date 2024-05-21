@@ -51,7 +51,7 @@ function SearchPullRequests() {
       {data ? (
         <List.Section
           title={searchText ? "Search Results" : "Created Recently"}
-          subtitle={pluralize(data.length, "Pull Request", { withNumber: true })}
+          subtitle={pluralize(data.length, "pull request", { withNumber: true })}
         >
           {data.map((pullRequest) => {
             return (

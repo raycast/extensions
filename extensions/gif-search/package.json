@@ -7,7 +7,8 @@
   "author": "josephschmitt",
   "contributors": [
     "tm.wrnr",
-    "j3lte"
+    "j3lte",
+    "samuelkraft"
   ],
   "license": "MIT",
   "categories": [
@@ -78,7 +79,7 @@
       "name": "maxResults",
       "type": "textfield",
       "required": false,
-      "default": "10",
+      "default": "20",
       "title": "Max Results",
       "description": "Max number of results to return for a search"
     },
@@ -123,46 +124,30 @@
           "value": "downloadFile"
         }
       ]
-    },
-    {
-      "name": "giphy-apiKey",
-      "type": "password",
-      "required": false,
-      "title": "Giphy API Key",
-      "placeholder": "Giphy API Key (optional)",
-      "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
-    },
-    {
-      "name": "tenor-apiKey",
-      "type": "password",
-      "required": false,
-      "title": "Tenor API Key",
-      "placeholder": "Tenor API Key (optional)",
-      "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
     }
   ],
   "dependencies": {
-    "@giphy/js-fetch-api": "^4.1.2",
-    "@raycast/api": "^1.55.2",
-    "@raycast/utils": "^1.9.1",
-    "@saekitominaga/file-size-format": "^1.0.2",
-    "date-fns": "^2.28.0",
-    "node-fetch": "^3.2.1",
+    "@giphy/js-fetch-api": "^5.4.0",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.0",
+    "@saekitominaga/file-size-format": "^1.1.3",
+    "date-fns": "^3.6.0",
+    "node-fetch": "^3.3.2",
     "tempy": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "@types/react": "^17.0.28",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

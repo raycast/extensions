@@ -1,39 +1,42 @@
 import { ActionPanel, Action, List, Icon, Color, environment, LaunchProps, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-import { getPrompts, removeUpvote, upvote } from "./api";
-import { Prompt, categories as rawCategories } from "./data/prompts";
-import { CONTRIBUTE_URL, wrapInCodeBlock } from "./helpers";
+import { getPromptUpvotes, removeUpvote, upvote } from "./api";
+import { Prompt, PromptCategory } from "./data/prompts";
+import { CONTRIBUTE_URL, getIcon, raycastProtocol, wrapInCodeBlock } from "./helpers";
 
 type Props = LaunchProps<{ launchContext: string[] }>;
 
 export default function ExplorePrompts(props: Props) {
-  const { data, isLoading, mutate } = useCachedPromise(() => getPrompts());
+  const { data: rawCategories, isLoading } = useFetch<PromptCategory[]>(`https://prompts.ray.so/api/prompts`);
+  const { data: promptUpvotes, isLoading: isLoadingpromptUpvotes, mutate } = useCachedPromise(() => getPromptUpvotes());
 
   const [selectedIds, setSelectedIds] = useState<string[]>(props.launchContext ?? []);
   const [selectedCategory, setSelectedCategory] = useState(props.launchContext ? "selected" : "");
 
   const categories = useMemo(() => {
     const dataNormalizedById =
-      data?.data.reduce<Record<string, { upvoted: boolean; upvote_count: number }>>((acc, { id, ...rest }) => {
+      promptUpvotes?.data.reduce<Record<string, { upvoted: boolean; upvote_count: number }>>((acc, { id, ...rest }) => {
         return { ...acc, [id]: rest };
       }, {}) ?? {};
 
-    return rawCategories.map((category) => {
-      const prompts = category.prompts.map((prompt) => {
-        return {
-          ...prompt,
-          upvoteCount: dataNormalizedById[prompt.id]?.upvote_count ?? 0,
-          upvoted: dataNormalizedById[prompt.id]?.upvoted ?? false,
-        };
-      });
+    return (
+      rawCategories?.map((category) => {
+        const prompts = category.prompts.map((prompt) => {
+          return {
+            ...prompt,
+            upvoteCount: dataNormalizedById[prompt.id]?.upvote_count ?? 0,
+            upvoted: dataNormalizedById[prompt.id]?.upvoted ?? false,
+          };
+        });
 
-      prompts.sort((a, b) => b.upvoteCount - a.upvoteCount);
+        prompts.sort((a, b) => b.upvoteCount - a.upvoteCount);
 
-      return { ...category, prompts };
-    });
-  }, [data]);
+        return { ...category, prompts };
+      }) ?? []
+    );
+  }, [promptUpvotes, rawCategories]);
 
   function toggleSelect(id: string) {
     if (selectedIds.includes(id)) {
@@ -74,19 +77,17 @@ export default function ExplorePrompts(props: Props) {
       .flatMap((category) => category.prompts)
       .filter((prompt) => selectedIds.includes(prompt.id));
 
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
-
     const queryString = prompts
       .map((selectedPrompt) => {
         const { title, prompt, creativity, icon, model } = selectedPrompt;
 
         return `prompts=${encodeURIComponent(
-          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) })
+          JSON.stringify({ title, prompt, creativity, icon, model: prepareModel(model) }),
         )}`;
       })
       .join("&");
 
-    return `${protocol}prompts/import?${queryString}`;
+    return `${raycastProtocol}prompts/import?${queryString}`;
   }, [selectedIds, categories]);
 
   const sharingLink = useMemo(() => {
@@ -155,7 +156,7 @@ export default function ExplorePrompts(props: Props) {
       ];
     }
 
-    return categories.filter((category) => category.id === selectedCategory);
+    return categories.filter((category) => category.slug === selectedCategory);
   }, [selectedCategory, categories, selectedIds]);
 
   const selectPromptsTitle = useMemo(() => {
@@ -167,7 +168,7 @@ export default function ExplorePrompts(props: Props) {
       return "New Prompts";
     }
 
-    const category = categories.find((category) => category.id === selectedCategory);
+    const category = categories.find((category) => category.slug === selectedCategory);
     if (category) {
       return `All ${category.name} Prompts`;
     }
@@ -183,7 +184,7 @@ export default function ExplorePrompts(props: Props) {
   return (
     <List
       isShowingDetail
-      isLoading={isLoading}
+      isLoading={isLoadingpromptUpvotes || isLoading}
       searchBarPlaceholder="Filter by title, category, or creativity"
       searchBarAccessory={
         <List.Dropdown tooltip="Select Category" onChange={setSelectedCategory} value={selectedCategory}>
@@ -196,8 +197,14 @@ export default function ExplorePrompts(props: Props) {
 
           <List.Dropdown.Section title="Categories">
             {categories.map((category) => {
+              const icon = getIcon(category.icon || "");
               return (
-                <List.Dropdown.Item key={category.id} title={category.name} icon={category.icon} value={category.id} />
+                <List.Dropdown.Item
+                  key={category.slug}
+                  title={category.name}
+                  icon={Icon[icon] ?? Icon.List}
+                  value={category.slug}
+                />
               );
             })}
           </List.Dropdown.Section>
@@ -208,11 +215,12 @@ export default function ExplorePrompts(props: Props) {
         <List.Section key={category.name} title={category.name}>
           {category.prompts.map((prompt) => {
             const isSelected = selectedIds.includes(prompt.id);
+            const icon = getIcon(category.icon || "");
             return (
               <List.Item
                 key={prompt.id}
                 title={prompt.title}
-                icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : prompt.icon}
+                icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon[icon] ?? Icon.List}
                 keywords={[category.name, prompt.creativity]}
                 accessories={[
                   { icon: Icon.ArrowUp, text: `${prompt.upvoteCount}`, tooltip: `Upvotes: ${prompt.upvoteCount}` },
@@ -317,10 +325,10 @@ function getPromptMarkdown(prompt: Prompt) {
         prompt.example.argument ? `### Argument\n\n${prompt.example.argument}\n\n` : ""
       }### Selection\n\n${wrapInCodeBlock(
         prompt.example.selection,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh"
+        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
       )}\n\n### Output\n\n${wrapInCodeBlock(
         prompt.example.output,
-        prompt.type === "code" ? prompt.language ?? "sh" : "sh"
+        prompt.type === "code" ? prompt.language ?? "sh" : "sh",
       )}`
     : "";
 
@@ -336,23 +344,23 @@ function getPromptMarkdown(prompt: Prompt) {
 
 function getCreativityIcon(creativity: Prompt["creativity"]) {
   if (creativity === "none") {
-    return Icon.Circle;
+    return Icon.CircleDisabled;
   }
 
   if (creativity === "low") {
-    return Icon.CircleProgress25;
+    return Icon.StackedBars1;
   }
 
   if (creativity === "medium") {
-    return Icon.CircleProgress50;
+    return Icon.StackedBars2;
   }
 
   if (creativity === "high") {
-    return Icon.CircleProgress75;
+    return Icon.StackedBars3;
   }
 
   if (creativity === "maximum") {
-    return Icon.CircleProgress100;
+    return Icon.StackedBars4;
   }
 }
 

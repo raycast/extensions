@@ -1,5 +1,10 @@
 # Unicode Symbols
 
+## [Add Latin Extended Additional] - 2024-03-11
+
+- Added the Latin Extended Additional character set, totalling to 5195 characters
+- Updated dependencies
+
 ## [Add symbol search] - 2024-02-08
 
 - Added the ability to search for the exact symbol. This works with the integer code (e.g. `U+1F600`), the hex code (e.g. `1F600`) or the symbol itself (e.g. `😀`).

@@ -1,4 +1,4 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 
 import { DiscussionFieldsFragment } from "../generated/graphql";
@@ -43,7 +43,7 @@ export function DiscussionListItem(props: { discussion: DiscussionFieldsFragment
           tooltip: d.answer ? "Answered" : undefined,
         },
         {
-          icon: { source: Icon.ArrowUp, tintColor: Color.Purple },
+          icon: Icon.ArrowUp,
           text: `${d.upvoteCount}`,
           tooltip: `${d.upvoteCount} Upvotes`,
         },

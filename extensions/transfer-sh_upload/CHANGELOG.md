@@ -1,5 +1,9 @@
 # Transfer.sh Upload Changelog
 
+## [1.0.3] 2024-03-11
+
+- Clarify in the README regarding the standart instance
+
 ## [1.0.2] 2024-02-12
 
 - Fixed some description and README bugs

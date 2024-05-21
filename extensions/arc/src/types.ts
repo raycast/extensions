@@ -52,6 +52,11 @@ export type Suggestion = {
 
 export type URLArguments = {
   url?: string;
+  space?: string;
+};
+
+export type WindowArguments = {
+  space?: string;
 };
 
 /** Suggestion Parsers */
@@ -68,3 +73,4 @@ interface GoogleSuggestItem {
 
 export type GoogleSuggestionParser = [string, string[], string[], string[], GoogleSuggestItem];
 export type EcosiaSuggestionParser = [string, string[]];
+export type KagiSuggestionParser = [string, string[]];

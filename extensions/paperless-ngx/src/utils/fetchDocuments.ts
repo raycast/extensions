@@ -8,6 +8,9 @@ const { apiToken }: Preferences = getPreferenceValues();
 
 export const fetchDocuments = async (searchTerm = ""): Promise<documentsResponse> => {
   try {
+    if (!searchTerm) {
+      return Promise.resolve({ count: 0, results: [] });
+    }
     const response = await fetch(`${paperlessURL}/api/documents/?query=${searchTerm}`, {
       headers: { Authorization: `Token ${apiToken}` },
     });

@@ -3,30 +3,22 @@ import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
-import {
-  IssueDetailFieldsFragment,
-  IssueFieldsFragment,
-  SearchCreatedIssuesQuery,
-  SearchOpenIssuesQuery,
-  UserFieldsFragment,
-} from "../generated/graphql";
+import { IssueDetailFieldsFragment, IssueFieldsFragment, UserFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 import { getIssueAuthor, getIssueStatus } from "../helpers/issue";
 import { getGitHubUser } from "../helpers/users";
+import { useMyIssues } from "../hooks/useMyIssues";
 import { useViewer } from "../hooks/useViewer";
 
 import IssueActions from "./IssueActions";
 
-type PullRequestDetailProps = {
+type IssueDetailProps = {
   initialIssue: IssueFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList?:
-    | MutatePromise<SearchCreatedIssuesQuery | undefined>
-    | MutatePromise<SearchOpenIssuesQuery | undefined>
-    | MutatePromise<IssueFieldsFragment[] | undefined>;
+  mutateList?: MutatePromise<IssueFieldsFragment[] | undefined> | ReturnType<typeof useMyIssues>["mutate"];
 };
 
-export default function IssueDetail({ initialIssue, mutateList }: PullRequestDetailProps) {
+export default function IssueDetail({ initialIssue, mutateList }: IssueDetailProps) {
   const { github } = getGitHubClient();
 
   const viewer = useViewer();

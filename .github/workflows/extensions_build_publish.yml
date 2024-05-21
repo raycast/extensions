@@ -72,7 +72,7 @@ jobs:
           store_urls: ${{ steps.ray_cli.outputs.store_urls }}
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Reward Contributor
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         if: github.event_name == 'push'
         env:
           PUBLISHING_BOT_TOKEN: ${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}

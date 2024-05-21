@@ -2,12 +2,12 @@ import { Clipboard, showHUD } from "@raycast/api";
 import moment from "moment";
 import { execSync } from "child_process";
 import * as fs from "fs";
-import checkAdbExists from "./utils";
+import { checkAdbDeviceExists } from "./utils";
 
 export default async function takeScreenshot() {
   let adbDir: string;
   try {
-    adbDir = await checkAdbExists();
+    adbDir = await checkAdbDeviceExists();
   } catch (e) {
     await showHUD(`${e}`);
     return;

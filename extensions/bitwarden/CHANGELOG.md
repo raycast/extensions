@@ -1,5 +1,35 @@
 # Bitwarden Changelog
 
+## [New Commands] - 2024-04-10
+
+- Added 3 Send commands (Search, Create and Receive) with delete, edit and remove password actions
+
+## [Fixes and Improvements] - 2024-03-28
+
+- Fixed lock screen bypassing by increasing timeout
+- Lock and Logout commands now still succeed even if the CLI call fails
+- Improved safety and consistency of the lock screen
+
+## [Fix] - 2024-03-25
+
+- Prevent crash when CLI is not installed and display troubleshooting screen instead
+
+## [Fix] - 2024-03-12
+
+- Use downloaded CLI on arm64 devices that have it working
+
+## [Improvement] - 2024-03-12
+
+- Improve CLI not found error message
+
+## [Fix] - 2024-03-11
+
+- Temporarily disable CLI download for arm64 devices until bitwarden releases arm binaries
+
+## [Improvements] - 2024-03-02
+
+- Decreased time to get passwords for large vaults by not waiting for all items to be loaded
+
 ## [Fixes and Improvements] - 2024-02-27
 
 - Added images to README

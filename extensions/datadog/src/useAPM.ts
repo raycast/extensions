@@ -9,7 +9,8 @@ type State = {
   apm: APM[];
 };
 
-const environments: string = getPreferenceValues()["envs"];
+const preferences: Preferences.CommandListApm = getPreferenceValues();
+const environments: string = preferences.envs;
 
 export const useAPM = () => {
   const [{ apm, apmIsLoading }, setState] = useState<State>({ apm: [], apmIsLoading: true });

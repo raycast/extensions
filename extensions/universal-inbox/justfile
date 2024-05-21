@@ -20,3 +20,7 @@ fix:
 # Run extension in development mode
 run:
     npm run dev
+
+# Publish a new version of the extension
+publish:
+    npm run publish

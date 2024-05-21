@@ -40,7 +40,18 @@
       "subtitle": "Coffee",
       "description": "Get the status of the current caffeination in your menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "hidenWhenDecaffeinated",
+          "description": "Hide the icon when decaffeinated",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "When Decaffeinated",
+          "label": "Hide the icon"
+        }
+      ]
     },
     {
       "name": "caffeinateToggle",

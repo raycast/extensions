@@ -13,7 +13,11 @@ export default function Command(props: LaunchProps) {
 
   const caffeinateStatus = hasLaunchContext ? props.launchContext?.caffeinated : data;
   const caffeinateLoader = hasLaunchContext ? false : isLoading;
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Index>();
+
+  if (preferences.hidenWhenDecaffeinated && !caffeinateStatus && !isLoading) {
+    return null;
+  }
 
   return (
     <MenuBarExtra

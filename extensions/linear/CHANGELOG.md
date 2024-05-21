@@ -1,5 +1,36 @@
 # Linear Changelog
 
+## [Improvements] - 2024-05-14
+
+- Notifications now support Projects (Updates, comments, reactions, added as member), Document Mentions and Bots (GitHub and GitLab)
+- Updated Project Icons
+
+## [Added two new actions] - 2024-05-10
+
+- Added two new toast actions: `Copy Issue ID as Link` and `Copy Issue Title as Link`
+
+## [Fix missing icons] - 2024-05-01
+
+- Update missing Linear icons
+
+## [Improvements] - 2024-04-29
+
+- Add pagination when searching issues
+- Rename "Assigned Issues" to "My Issues"
+
+## [New icons] - 2024-04-26
+
+- Use new Linear icons
+
+## [Fix Creating issue with milestone] - 2024-04-23
+
+- Fix defining `milestoneId` in payload.
+
+## [Enhanced Notifications] - 2024-03-12
+
+- Notifications now include links to comments, project updates, and projects, making it easier to navigate directly to the relevant content in Linear.
+- You can now copy the URL of a notification's related item directly from the notification panel.
+
 ## [Improve Notifications search] - 2024-03-01
 
 - It's possible to search your notifications by issue identifiers, issue titles, or usernames.

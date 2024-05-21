@@ -37,7 +37,7 @@ export default function Command() {
           return (
             <MenuBarExtra.Item
               key={formattedColor}
-              icon={getIcon(historyItem.color)}
+              icon={getIcon(formattedColor)}
               title={formattedColor}
               subtitle={historyItem.title}
               shortcut={getShortcut(index)}

@@ -560,13 +560,16 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Event" onSubmit={(values) => {
-            if (Form.DatePicker.isFullDay(values.reminderDate)) {
-              // the event is for a full day
-            } else {
-              // the event is at a specific time
-            }
-          }} />
+          <Action.SubmitForm
+            title="Create Event"
+            onSubmit={(values) => {
+              if (Form.DatePicker.isFullDay(values.reminderDate)) {
+                // the event is for a full day
+              } else {
+                // the event is at a specific time
+              }
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -1183,10 +1186,6 @@ The types of date components the user can pick with a `Form.DatePicker`.
 ## Imperative API
 
 You can use React's [useRef](https://reactjs.org/docs/hooks-reference.html#useref) hook to create variables which have access to imperative APIs (such as `.focus()` or `.reset()`) exposed by the native form items.
-
-{% hint style="info" %}
-The imperative APIs require version 1.33.0 or higher of the `@raycast/api` package.
-{% endhint %}
 
 ```typescript
 import { useRef } from "react";

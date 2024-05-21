@@ -1,8 +1,20 @@
 # 1Password Changelog
 
+## [Moved contributor] - 2024-05-03
+
+## [Enhancements] - 2024-04-08
+
+- Adds Optimistic Updates for items and account.
+- Adds auto renewal of Authorization.
+- Improves performance by removing some unnecessary re-renders.
+- Updates settings screenshot on the guide.
+- Adds HUD messages to when actions are performed. ex: 'Copied password to clipboard'.
+- Raycast window now always closes itself after copying successfully any field from an Item.
+- Fixes issues where 1password-cli is not found when installed via homebrew.
+
 ## [Bug fixes] - 2024-02-04
 
-- Fix the problem of synchronization with the 1password client in v8 verison 
+- Fix the problem of synchronization with the 1password client in v8 verison
 
 ## [Enhancements] - 2023-12-05
 

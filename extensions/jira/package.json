@@ -7,14 +7,17 @@
   "author": "thomaslombart",
   "contributors": [
     "FezVrasta",
-    "igor9silva",
     "jesperorb",
     "teziovsky",
     "rifont",
     "gavinroderick",
     "lusit",
     "literallyjustroy",
-    "mheidinger"
+    "mheidinger",
+    "mikybars"
+  ],
+  "pastContributors": [
+    "igor9silva"
   ],
   "owner": "raycast",
   "access": "public",
@@ -92,7 +95,7 @@
     },
     {
       "name": "open-from-clipboard",
-      "title": "Open Issue From Clipboard",
+      "title": "Open Issue from Clipboard",
       "subtitle": "Jira",
       "description": "Open an issue by its key from the clipboard.",
       "mode": "view",
@@ -105,6 +108,30 @@
           "description": "Optional Base URL for Self-Hosted Jira (e.g. https://jira.acme-inc.com). Defaults to the public Jira."
         }
       ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "title": "Jira Site URL",
+      "description": "Your Jira site URL (e.g foo.atlassian.net)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "foo.atlassian.com"
+    },
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Account Email",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "token",
+      "title": "API Token",
+      "description": "API Token",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {

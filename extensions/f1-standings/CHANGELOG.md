@@ -1,5 +1,9 @@
 # F1 Standings Changelog
 
+## [🕦 Show Weekday with date and time] - 2024-03-05
+
+- Show weekday along with date and time as there are many races which does not start on usual weekend schedule
+
 ## [🕦 Show Fastest Lap] - 2024-02-26
 
 - Fixed an error when displaying DriverStats for not started seasons

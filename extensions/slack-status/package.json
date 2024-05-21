@@ -7,7 +7,8 @@
   "author": "petr",
   "contributors": [
     "jhjr",
-    "thomas"
+    "thomas",
+    "pernielsentikaer"
   ],
   "license": "MIT",
   "commands": [
@@ -35,9 +36,10 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.60.0",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/utils": "^1.14.1",
     "@slack/web-api": "^6.4.0",
     "moment": "^2.29.1",
+    "nanoid": "^5.0.5",
     "node-fetch": "^3.3.2",
     "pluralize": "^8.0.0"
   },
@@ -48,7 +50,6 @@
     "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
     "react": "^18.2.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

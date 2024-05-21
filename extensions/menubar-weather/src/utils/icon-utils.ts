@@ -1,6 +1,5 @@
-import { Icon, Image } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
 import { iconStyle } from "./weather-utils";
-import ImageLike = Image.ImageLike;
 
 enum IconStyle {
   RAYCAST = "raycast",
@@ -74,67 +73,46 @@ const raycastWeatherIcons = new Map([
 ]);
 
 // sf symbols style icons
-const sfSymbolsWeatherIconMap = new Map([
-  [0, "sun-max.png"],
-  [1, "sun-max.png"],
-  [2, "cloud-sun.png"],
-  [3, "cloud.png"],
-  [45, "cloud-fog.png"],
-  [48, "cloud-fog.png"],
-  [51, "cloud-drizzle.png"],
-  [53, "cloud-drizzle.png"],
-  [55, "cloud-drizzle.png"],
-  [56, "cloud-sleet.png"],
-  [57, "cloud-sleet.png"],
-  [61, "cloud-rain.png"],
-  [63, "cloud-heavyrain.png"],
-  [65, "cloud-heavyrain.png"],
-  [66, "cloud-sleet.png"],
-  [67, "cloud-sleet.png"],
-  [71, "cloud-snow.png"],
-  [73, "snowflake.png"],
-  [75, "snowflake.png"],
-  [77, "snowflake.png"],
-  [80, "cloud-rain.png"],
-  [81, "cloud-heavyrain.png"],
-  [82, "cloud-heavyrain.png"],
-  [85, "snowflake.png"],
-  [86, "snowflake.png"],
-  [95, "bolt.png"],
-  [96, "bolt.png"],
-  [99, "cloud-hail.png"],
+const sfSymbolsWeatherIcons = new Map([
+  [0, "sun.max"],
+  [1, "sun.max"],
+  [2, "cloud.sun"],
+  [3, "cloud"],
+  [45, "cloud.fog"],
+  [48, "cloud.fog"],
+  [51, "cloud.drizzle"],
+  [53, "cloud.drizzle"],
+  [55, "cloud.drizzle"],
+  [56, "cloud.sleet"],
+  [57, "cloud.sleet"],
+  [61, "cloud.rain"],
+  [63, "cloud.heavyrain"],
+  [65, "cloud.heavyrain"],
+  [66, "cloud.sleet"],
+  [67, "cloud.sleet"],
+  [71, "cloud.snow"],
+  [73, "cloud.snow"],
+  [75, "cloud.snow"],
+  [77, "cloud.snow"],
+  [80, "cloud.rain"],
+  [81, "cloud.heavyrain"],
+  [82, "cloud.heavyrain"],
+  [85, "cloud.snow"],
+  [86, "cloud.snow"],
+  [95, "cloud.bolt"],
+  [96, "cloud.bolt.rain"],
+  [99, "cloud.bolt.rain"],
 ]);
 
-function getSfSymbolWeatherIconWithTheme(folder: string, folderDark: string, weatherCode: number): ImageLike {
-  return {
-    source: {
-      light: folder + sfSymbolsWeatherIconMap.get(weatherCode),
-      dark: folderDark + sfSymbolsWeatherIconMap.get(weatherCode),
-    },
-  };
-}
-
-function getSfSymbolWeatherIcon(weatherCode: number) {
-  return getSfSymbolWeatherIconWithTheme("sf-weather-icons/", "sf-weather-icons-dark/", weatherCode);
-}
-
-export function getWeatherIcons(weatherCode: number) {
+export function getWeatherIcon(weatherCode: number | undefined, isMenuBarIcon: boolean = false) {
   if (iconStyle === IconStyle.RAYCAST) {
-    return raycastWeatherIcons.get(weatherCode);
-  } else {
-    return getSfSymbolWeatherIcon(weatherCode);
+    return { source: raycastWeatherIcons.get(weatherCode ?? 3) + "", tintColor: Color.PrimaryText };
   }
-}
 
-export function getDefaultWeatherIcons() {
+  const suffix = isMenuBarIcon ? ".fill.svg" : ".svg";
   return {
-    description: "No weather info",
-    icon: {
-      source: {
-        light: "menubar-icon.png",
-        dark: "menubar-icon@dark.png",
-      },
-    },
+    source: "sf-weather-icons/" + sfSymbolsWeatherIcons.get(weatherCode ?? 3) + suffix,
+    tintColor: Color.PrimaryText,
   };
 }
 
@@ -143,74 +121,59 @@ export function getDefaultWeatherIcons() {
 // raycast style icons
 const raycastMenuIcons = new Map([
   ["Temperature", Icon.Temperature],
-  ["Feels-like", Icon.Temperature],
   ["Min/Max", Icon.Temperature],
+  ["Feels Like", Icon.Temperature],
+  ["Humidity", Icon.Humidity],
   ["UVI", Icon.Sun],
   ["Pressure", Icon.CricketBall],
-  ["Humidity", Icon.Raindrop],
   ["Visibility", Icon.Eye],
   ["Speed", Icon.Gauge],
-  ["Direction", Icon.Flag],
+  ["Direction", Icon.Windsock],
   ["1Hour", Icon.Raindrop],
   ["Sunrise", Icon.Sunrise],
-  ["Sunset", Icon.Moon],
-  ["City", Icon.ChessPiece],
-  ["Country", Icon.BankNote],
-  ["Timezone", Icon.CircleProgress50],
-  ["Lon, Lat", Icon.EditShape],
-  ["Lon, Lat", Icon.EditShape],
+  ["Sunset", Icon.Moonrise],
+  ["City", Icon.Building],
+  ["Country", Icon.Map],
+  ["Timezone", Icon.Globe],
+  ["Lon, Lat", Icon.Geopin],
   ["Weather", Icon.Cloud],
-  ["Wind", Icon.Boat],
-  ["Rain", Icon.Raindrop],
+  ["Wind", Icon.Wind],
+  ["Precipitation", Icon.Raindrop],
   ["Source", Icon.BarChart],
-  ["Detect Time", Icon.Download],
+  ["Last Updated", Icon.Download],
   ["Preferences", Icon.Gear],
 ]);
 
 // sf symbols style icons
 const sfSymbolsMenuIcons = new Map([
-  ["Temperature", "temperature.png"],
-  ["Feels-like", "temperature.png"],
-  ["Min/Max", "temperature.png"],
-  ["UVI", "uvi.png"],
-  ["Pressure", "pressure.png"],
-  ["Humidity", "humidity.png"],
-  ["Visibility", "visibility.png"],
-  ["Speed", "speed.png"],
-  ["Direction", "direction.png"],
-  ["1Hour", "rain.png"],
-  ["Sunrise", "sunrise.png"],
-  ["Sunset", "sunset.png"],
-  ["City", "city.png"],
-  ["Country", "country.png"],
-  ["Timezone", "timezone.png"],
-  ["Lon, Lat", "lonlat.png"],
-  ["Lon, Lat", "lonlat.png"],
-  ["Weather", "weather.png"],
-  ["Wind", "wind.png"],
-  ["Rain", "rain.png"],
-  ["Source", "source.png"],
-  ["Detect Time", "detect.png"],
-  ["Preferences", "prefs.png"],
+  ["Temperature", "thermometer.medium"],
+  ["Min/Max", "thermometer.medium"],
+  ["Feels Like", "thermometer.medium"],
+  ["Humidity", "humidity"],
+  ["UVI", "sun.max"],
+  ["Pressure", "barometer"],
+  ["Visibility", "eye"],
+  ["Speed", "gauge.with.dots.needle.67percent"],
+  ["Direction", "flag"],
+  ["1Hour", "drop"],
+  ["Sunrise", "sunrise"],
+  ["Sunset", "sunset"],
+  ["City", "building.2"],
+  ["Country", "map"],
+  ["Timezone", "globe"],
+  ["Lon, Lat", "mappin.and.ellipse"],
+  ["Weather", "cloud"],
+  ["Wind", "wind"],
+  ["Precipitation", "drop"],
+  ["Source", "chart.xyaxis.line"],
+  ["Last Updated", "arrow.down.to.line"],
+  ["Settings", "gear"],
 ]);
-
-function getSfSymbolMenuIconWithTheme(folder: string, folderDark: string, title: string): ImageLike {
-  return {
-    source: {
-      light: folder + sfSymbolsMenuIcons.get(title),
-      dark: folderDark + sfSymbolsMenuIcons.get(title),
-    },
-  };
-}
-
-function getSfSymbolMenuIcon(title: string) {
-  return getSfSymbolMenuIconWithTheme("sf-menu-icons/", "sf-menu-icons-dark/", title);
-}
 
 export function getMenuIcon(title: string) {
   if (iconStyle === IconStyle.RAYCAST) {
-    return raycastMenuIcons.get(title);
-  } else {
-    return getSfSymbolMenuIcon(title);
+    return { source: raycastMenuIcons.get(title) + "", tintColor: Color.PrimaryText };
   }
+
+  return { source: "sf-menu-icons/" + sfSymbolsMenuIcons.get(title) + ".svg", tintColor: Color.PrimaryText };
 }

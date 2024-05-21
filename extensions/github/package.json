@@ -22,7 +22,13 @@
     "marcotf",
     "qeude",
     "nesl247",
-    "xilopaint"
+    "xilopaint",
+    "antonengelhardt",
+    "johanthorell",
+    "dennis_zoma",
+    "litomore",
+    "dmitrii_mitrofanov",
+    "j3lte"
   ],
   "categories": [
     "Developer Tools",
@@ -49,16 +55,14 @@
       "mode": "view"
     },
     {
-      "name": "created-issues",
-      "title": "Created Issues",
-      "description": "List issues created by you.",
-      "mode": "view"
-    },
-    {
-      "name": "open-issues",
-      "title": "Open Issues",
-      "description": "List issues assigned to you or mentioning you.",
-      "mode": "view"
+      "name": "my-issues",
+      "title": "My Issues",
+      "description": "List issues created by you, assigned to you or mentioning you.",
+      "mode": "view",
+      "keywords": [
+        "open issues",
+        "created issues"
+      ]
     },
     {
       "name": "search-issues",
@@ -161,6 +165,14 @@
           "description": "Show the menu bar extra even when you don't have any unread notifications.",
           "default": true,
           "required": false
+        },
+        {
+          "type": "checkbox",
+          "label": "Show unread count",
+          "name": "showUnreadCount",
+          "description": "Show the unread count in the menu bar.",
+          "default": true,
+          "required": false
         }
       ]
     },
@@ -177,10 +189,19 @@
       "mode": "view"
     },
     {
-      "name": "open-issues-menu",
-      "title": "Open Issues Menu Bar",
-      "description": "Display Open Issues in the Menu Bar",
+      "name": "my-projects",
+      "title": "My Projects",
+      "description": "Show your Projects",
+      "mode": "view"
+    },
+    {
+      "name": "my-issues-menu",
+      "title": "My Issues Menu Bar",
+      "description": "Display My Issues in the Menu Bar",
       "mode": "menu-bar",
+      "keywords": [
+        "open issues"
+      ],
       "interval": "15m",
       "preferences": [
         {
@@ -203,9 +224,9 @@
       ]
     },
     {
-      "name": "open-pull-request-menu",
+      "name": "my-pull-requests-menu",
       "title": "My Pull Requests Menu Bar",
-      "description": "Display My Pull Request in the Menu Bar",
+      "description": "Display My Pull Requests in the Menu Bar",
       "mode": "menu-bar",
       "interval": "15m",
       "preferences": [
@@ -333,7 +354,7 @@
       "type": "password",
       "required": false,
       "title": "GitHub Token",
-      "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
     },
@@ -352,6 +373,15 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "type": "checkbox",
+      "title": "Actions",
+      "label": "Open PRs in browser by default",
+      "name": "isOpenInBrowser",
+      "description": "If checked, pull requests will be opened in the browser by default instead of viewing them within Raycast.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
@@ -361,7 +391,7 @@
     "graphql-request": "^5.1.0",
     "lodash": "^4.17.21",
     "node-fetch": "^3.3.2",
-    "octokit": "^2.1.0"
+    "octokit": "^3.1.2"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.2.2",
@@ -383,9 +413,10 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "concurrently \"ray develop\" \"yarn generate --watch\"",
-    "format": "ray lint --fix",
+    "dev": "concurrently \"ray develop\" \"npm run generate -- --watch\"",
+    "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
   }
 }

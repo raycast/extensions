@@ -12,7 +12,8 @@
   ],
   "contributors": [
     "pernielsentikaer",
-    "nagauta"
+    "nagauta",
+    "PWrzesinski"
   ],
   "keywords": [
     "text",
@@ -30,6 +31,15 @@
     }
   ],
   "preferences": [
+    {
+      "name": "popToRoot",
+      "type":"checkbox",
+      "default": false,
+      "title": "Behavior",
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
+      "label": "Pop to Root after Action",
+      "required": true
+    },
     {
       "name": "source",
       "type": "dropdown",
@@ -167,7 +177,7 @@
       "name": "PascalSnakeCase",
       "type": "checkbox",
       "description": "Enable the \"Pascal_Snake_Case\" Transformation",
-      "label": "Pascal Case",
+      "label": "Pascal Snake Case",
       "default": true,
       "required": false
     },
@@ -253,19 +263,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
-    "change-case": "^5.4.2",
+    "@raycast/api": "^1.68.1",
+    "change-case": "^5.4.3",
     "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
     "title-case": "^4.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.14",
-    "@types/react": "18.2.48",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.4",
-    "typescript": "^5.3.3"
+    "@types/node": "20.11.25",
+    "@types/react": "18.2.64",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -257,17 +257,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.0"
+    "@raycast/api": "^1.71.3"
   },
   "devDependencies": {
-    "@types/node": "~20.8.10",
-    "@types/react": "^18.2.34",
-    "@typescript-eslint/eslint-plugin": "^6.9.1",
-    "@typescript-eslint/parser": "^6.9.1",
-    "eslint": "^8.52.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^2.8.8",
-    "typescript": "^5.2.2"
+    "@types/node": "~20.12.7 ",
+    "@types/react": "^18.2.79 ",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

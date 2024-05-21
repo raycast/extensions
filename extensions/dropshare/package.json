@@ -12,6 +12,20 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "shorten-url",
+      "title": "Shorten URL",
+      "subtitle": "Dropshare",
+      "description": "Shorten a URL with Dropshare.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text"
+        }
+      ]
+    },
+    {
       "name": "capture-fullscreen",
       "title": "Capture Fullscreen",
       "subtitle": "Dropshare",
@@ -61,7 +75,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0"
+    "@raycast/api": "^1.68.0",
+    "react-dom": "^18.2.0",
+    "react-query": "^3.39.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

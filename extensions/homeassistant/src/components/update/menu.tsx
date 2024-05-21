@@ -1,11 +1,11 @@
-import { Icon, MenuBarExtra } from "@raycast/api";
-import { State } from "@lib/haapi";
-import { getFriendlyName } from "@lib/utils";
-import { getIcon, getStateValue } from "@components/state/utils";
 import { MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
 import { CopyEntityIDToClipboard } from "@components/state/menu";
-import { HACSRepo, callUpdateInstallService, callUpdateSkipService, getHACSRepositories } from "./utils";
+import { getIcon, getStateValue } from "@components/state/utils";
 import { ha } from "@lib/common";
+import { State } from "@lib/haapi";
+import { getFriendlyName } from "@lib/utils";
+import { Icon, MenuBarExtra } from "@raycast/api";
+import { HACSRepo, callUpdateInstallService, callUpdateSkipService, getHACSRepositories } from "./utils";
 
 function UpdateOpenReleaseUrlMenubarItem(props: { state: State }) {
   const url = props.state.attributes.release_url;

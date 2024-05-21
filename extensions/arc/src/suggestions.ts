@@ -3,7 +3,13 @@ import { useCachedPromise } from "@raycast/utils";
 import { decode } from "iconv-lite";
 import { nanoid } from "nanoid";
 import { fetch } from "cross-fetch";
-import { Suggestion, SearchConfigs, GoogleSuggestionParser, EcosiaSuggestionParser } from "./types";
+import {
+  Suggestion,
+  SearchConfigs,
+  GoogleSuggestionParser,
+  EcosiaSuggestionParser,
+  KagiSuggestionParser,
+} from "./types";
 import { searchArcPreferences } from "./preferences";
 
 const config: SearchConfigs = {
@@ -65,8 +71,17 @@ const config: SearchConfigs = {
   },
   kagi: {
     search: "https://kagi.com/search?q=",
-    suggestions: null, //Note: Unknown
-    suggestionParser: null,
+    suggestions: "https://kagi.com/api/autosuggest?q=",
+    suggestionParser: (json: KagiSuggestionParser, suggestions: Suggestion[]) => {
+      console.log(json);
+      json[1].map((item: string) => {
+        suggestions.push({
+          id: nanoid(),
+          query: item,
+          url: `https://kagi.com/search?q=${encodeURIComponent(item)}`,
+        });
+      });
+    },
   },
 };
 
@@ -77,6 +92,8 @@ async function parseResponse(response: Response) {
 
   const buffer = await response.arrayBuffer();
   const text = decode(Buffer.from(buffer), "iso-8859-1");
+
+  if (!text) return [];
   const json = JSON.parse(text);
 
   const suggestions: Suggestion[] = [];

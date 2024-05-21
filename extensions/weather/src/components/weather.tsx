@@ -1,8 +1,9 @@
-import { ActionPanel, getPreferenceValues, List, Action, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import moment from "moment";
 import React, { ReactElement, useState } from "react";
 import { WeatherIcons, getWeatherCodeIcon } from "../icons";
 import { getTemperatureUnit, getWttrTemperaturePostfix } from "../unit";
+import { convertToRelativeDate } from "../utils";
 import {
   Area,
   Weather,
@@ -25,7 +26,6 @@ import {
 } from "../wttr";
 import { DayList } from "./day";
 import { useWeather } from "./hooks";
-import { convertToRelativeDate, getUVIndexIcon } from "../utils";
 
 export interface WttrDay {
   date: string;
@@ -88,11 +88,11 @@ export function DayListItem(props: { day: WeatherData; title: string }): JSX.Ele
     <List.Item
       key={data.date}
       title={wd}
-      icon={getWeatherCodeIcon(weatherCode || "")}
+      icon={{ source: getWeatherCodeIcon(weatherCode || ""), tintColor: Color.PrimaryText }}
       accessories={[
         {
           text: data.sunHour ? `${data.sunHour} h` : undefined,
-          icon: data.sunHour ? WeatherIcons.Sunrise : undefined,
+          icon: { source: WeatherIcons.Sun, tintColor: Color.SecondaryText },
           tooltip: data.sunHour ? `Sun Hours: ${data.sunHour} h` : undefined,
         },
         {
@@ -163,7 +163,11 @@ function FeelsLikeItem(props: { curcon: WeatherConditions | undefined }) {
     return null;
   }
   return (
-    <List.Item title="Feels Like" icon={WeatherIcons.FeelsLike} accessories={[{ text: feelsLike.valueAndUnit }]} />
+    <List.Item
+      title="Feels Like"
+      icon={{ source: WeatherIcons.FeelsLike, tintColor: Color.PrimaryText }}
+      accessories={[{ text: feelsLike.valueAndUnit }]}
+    />
   );
 }
 
@@ -172,7 +176,13 @@ function UVIndexItem(props: { curcon: WeatherConditions | undefined }) {
   if (!uvIndex) {
     return null;
   }
-  return <List.Item title="UV Index" icon={getUVIndexIcon(uvIndex)} accessories={[{ text: uvIndex }]} />;
+  return (
+    <List.Item
+      title="UV Index"
+      icon={{ source: WeatherIcons.UVIndex, tintColor: Color.PrimaryText }}
+      accessories={[{ text: uvIndex }]}
+    />
+  );
 }
 
 function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
@@ -180,7 +190,13 @@ function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
   if (!vis) {
     return null;
   }
-  return <List.Item title="Visibility" icon={WeatherIcons.Visibility} accessories={[{ text: vis.distanceAndUnit }]} />;
+  return (
+    <List.Item
+      title="Visibility"
+      icon={{ source: WeatherIcons.Visibility, tintColor: Color.PrimaryText }}
+      accessories={[{ text: vis.distanceAndUnit }]}
+    />
+  );
 }
 
 function PressureItem(props: { curcon: WeatherConditions | undefined }) {
@@ -188,7 +204,13 @@ function PressureItem(props: { curcon: WeatherConditions | undefined }) {
   if (!p) {
     return null;
   }
-  return <List.Item title="Pressure" icon={WeatherIcons.Pressure} accessories={[{ text: p.valueAndUnit }]} />;
+  return (
+    <List.Item
+      title="Pressure"
+      icon={{ source: WeatherIcons.Pressure, tintColor: Color.PrimaryText }}
+      accessories={[{ text: p.valueAndUnit }]}
+    />
+  );
 }
 
 function LocationItem(props: { area: Area | undefined }) {
@@ -202,8 +224,8 @@ function LocationItem(props: { area: Area | undefined }) {
   }
   return (
     <List.Item
-      title="Location Coordinates"
-      icon={WeatherIcons.Coordinate}
+      title="Coordinates"
+      icon={{ source: WeatherIcons.Coordinates, tintColor: Color.PrimaryText }}
       accessories={[
         {
           text: coords,
@@ -222,15 +244,15 @@ function SunItem(props: { data: Weather | undefined }) {
   return (
     <List.Item
       title="Sun"
-      icon={WeatherIcons.Sunrise}
+      icon={{ source: WeatherIcons.Sun, tintColor: Color.PrimaryText }}
       accessories={[
         {
-          icon: WeatherIcons.Sunrise,
+          icon: { source: WeatherIcons.Sunrise, tintColor: Color.PrimaryText },
           text: convertToTimeString(s.sunrise),
           tooltip: `Sunrise ${convertToTimeString(s.sunrise)}`,
         },
         {
-          icon: WeatherIcons.Sunset,
+          icon: { source: WeatherIcons.Sunset, tintColor: Color.PrimaryText },
           text: convertToTimeString(s.sunset),
           tooltip: `Sunset ${convertToTimeString(s.sunset)}`,
         },
@@ -248,10 +270,10 @@ function MoonItem(props: { data: Weather | undefined }) {
     <List.Item
       title="Moon"
       subtitle={m.moonPhase}
-      icon={WeatherIcons.Moon}
+      icon={{ source: WeatherIcons.Moon, tintColor: Color.PrimaryText }}
       accessories={[
         {
-          icon: WeatherIcons.Moonrise,
+          icon: { source: WeatherIcons.Moonrise, tintColor: Color.SecondaryText },
           text: convertToTimeString(m.moonrise),
           tooltip: `Moonrise ${convertToTimeString(m.moonrise)}`,
         },
@@ -281,25 +303,25 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
 
   return (
     <>
-      <List.Section title={`Weather Report (${title}) ${observationRelative ? " - " + observationRelative : ""}`}>
+      <List.Section title={`Weather Report • ${title} ${observationRelative ? "• " + observationRelative : ""}`}>
         <List.Item
           title={getCurrentTemperature(curcon) || ""}
           subtitle={weatherDesc}
-          icon={{ value: getWeatherCodeIcon(curcon?.weatherCode), tooltip: weatherDesc || "" }}
+          icon={{ source: getWeatherCodeIcon(curcon?.weatherCode), tintColor: Color.PrimaryText }}
           accessories={[
             {
               text: sun ? sun.valueAndUnit : undefined,
-              icon: sun ? WeatherIcons.Sunrise : undefined,
+              icon: { source: WeatherIcons.Sunrise, tintColor: Color.SecondaryText },
               tooltip: sun ? `Sun Hours: ${sun.valueAndUnit}` : undefined,
             },
             {
               text: cloud ? cloud.valueAndUnit : undefined,
-              icon: cloud ? WeatherIcons.Cloud : undefined,
+              icon: { source: WeatherIcons.Cloud, tintColor: Color.SecondaryText },
               tooltip: cloud ? `Cloud Cover ${cloud.valueAndUnit}` : undefined,
             },
             {
               text: rain && rain.value > 0 ? rain.valueAndUnit : undefined,
-              icon: rain && rain.value > 0 ? WeatherIcons.Rain : undefined,
+              icon: rain && rain.value > 0 ? { source: WeatherIcons.Rain, tintColor: Color.SecondaryText } : "",
             },
             {
               icon: { source: WeatherIcons.Humidity, tintColor: Color.SecondaryText },

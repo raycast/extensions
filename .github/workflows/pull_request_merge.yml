@@ -13,17 +13,18 @@ on:
 
 jobs:
   merge:
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Merge PR
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          token: ${{ env.GITHUB_TOKEN }}
       - name: Setup GIT
         uses: raycast/github-actions/setup-git@master
+      - name: Get changed extensions
+        id: get_changed_extensions
+        uses: raycast/github-actions/get-changed-extensions@master
+        with:
+          pull_request_number: "${{ inputs.pr_number }}"
       - name: Checkout PR
         run: gh pr checkout ${{ github.event.inputs.pr_number }}
       - name: Update CHANGELOG.md
@@ -54,7 +55,9 @@ jobs:
           if [[ -n "$images" ]]; then
             echo "Images: $images"
             while IFS= read -r image; do
-              images_array+=("$image")
+              if [[ -f "$image" ]]; then
+                images_array+=("$image")
+              fi
             done <<< "$images"
           fi
           count=${#images_array[@]}
@@ -62,8 +65,16 @@ jobs:
           if [ $count -gt 0 ]; then
             brew update
             brew install imageoptim
-            brew install imageoptim-cli
-            imageoptim "${images_array[@]}"
+            npm install -g imageoptim-cli
+            batch_size=30
+            batch_number=1
+            total_batches=$(( (count + batch_size - 1) / batch_size ))
+            for ((i = 0; i < count; i += batch_size)); do
+                batch=("${images_array[@]:i:batch_size}")
+                echo "Processing batch: $batch_number / $total_batches"
+                imageoptim "${batch[@]}"
+                ((batch_number++))
+            done
           fi
       - name: Commit changes
         id: commit_changes
@@ -89,10 +100,13 @@ jobs:
 
             git push https://${{ env.GITHUB_TOKEN }}@github.com/$pr_repo_owner/$pr_repo_name.git HEAD:$pr_branch
             echo "Pushed changes."
+            echo "changes_pushed=true" >> $GITHUB_OUTPUT
           else
             echo "No changes."
+            echo "changes_pushed=false" >> $GITHUB_OUTPUT
           fi
       - name: Sleep for 30 seconds
+        if: steps.commit_changes.outputs.changes_pushed == 'true'
         run: sleep 30 # sleep 30s for ubuntu
         shell: bash
       - name: Merge

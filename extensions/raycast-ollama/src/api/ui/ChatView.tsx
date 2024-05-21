@@ -281,17 +281,18 @@ export function ChatView(): JSX.Element {
       case PromptTags.IMAGE:
         images = await InferenceTagImage();
         if (!images) return [stream, images, docs];
+        await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Images." });
         stream = await LLMChain(
           prompt,
           ModelImage?.name as string,
           history,
           images.map((i) => i.base64)
         );
-        await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Images." });
         break;
       case PromptTags.FILE:
         docs = await InferenceTagDocument(prompt, tag);
         if (!docs) return [stream, images, docs];
+        await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Documents." });
         switch (ChainPreferences?.type) {
           case Chains.REFINE:
             stream = await loadQARefineChain(prompt, ModelGenerate?.name as string, docs, history);
@@ -300,11 +301,10 @@ export function ChatView(): JSX.Element {
             stream = await loadQAStuffChain(prompt, ModelGenerate?.name as string, docs, history);
             break;
         }
-        await showToast({ style: Toast.Style.Animated, title: "🧠 Inference with Documents." });
         break;
       default:
-        stream = await LLMChain(prompt, ModelGenerate?.name as string, history);
         await showToast({ style: Toast.Style.Animated, title: "🧠 Inference." });
+        stream = await LLMChain(prompt, ModelGenerate?.name as string, history);
         break;
     }
     return [stream, images, docs];

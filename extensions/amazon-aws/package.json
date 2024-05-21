@@ -16,7 +16,8 @@
     "sidhant92",
     "DorukAkinci",
     "frese",
-    "nagauta"
+    "nagauta",
+    "vineus"
   ],
   "categories": [
     "Developer Tools",
@@ -45,6 +46,12 @@
       "name": "ecs",
       "title": "ECS Clusters",
       "description": "Find and open a cluster",
+      "mode": "view"
+    },
+    {
+      "name": "ecr",
+      "title": "ECR Repositories",
+      "description": "Find and open an image repository",
       "mode": "view"
     },
     {
@@ -138,6 +145,7 @@
     "@aws-sdk/client-dynamodb": "^3.216.0",
     "@aws-sdk/client-ec2": "^3.216.0",
     "@aws-sdk/client-ecs": "^3.216.0",
+    "@aws-sdk/client-ecr": "^3.216.0",
     "@aws-sdk/client-lambda": "^3.216.0",
     "@aws-sdk/client-s3": "^3.216.0",
     "@aws-sdk/client-secrets-manager": "^3.226.0",

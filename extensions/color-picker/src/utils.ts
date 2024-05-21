@@ -6,7 +6,7 @@ const preferences: Preferences = getPreferenceValues();
 
 export function getFormattedColor(
   _color: Color | DeprecatedColor,
-  format?: "hex" | "hex-lower-case" | "rgba" | "rgba-percentage" | "hsla" | "hsva",
+  format?: "hex" | "hex-lower-case" | "hex-no-prefix" | "rgba" | "rgba-percentage" | "hsla" | "hsva",
 ) {
   const color =
     "colorSpace" in _color
@@ -19,6 +19,9 @@ export function getFormattedColor(
     }
     case "hex-lower-case": {
       return color.to("srgb").toString({ format: "hex" }).toLowerCase();
+    }
+    case "hex-no-prefix": {
+      return color.to("srgb").toString({ format: "hex" }).replace("#", "");
     }
     case "rgba": {
       return color.to("srgb").toString({ format: "rgba_number" });

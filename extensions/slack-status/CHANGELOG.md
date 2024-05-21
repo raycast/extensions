@@ -1,5 +1,13 @@
 # Slack Status Change
 
+## [Fix Slack icon] - 2024-04-26
+
+- Make the Slack icon larger on the OAuth screen
+
+## [Set Slack status from Raycast's root search] - 2024-02-23
+
+- You can now create quicklinks from the `Set Status` command making it possible to set your favorite Slack status from Raycast's root search.
+
 ## [Use OAuth utils] - 2024-02-15
 
 - Use new OAuth utils

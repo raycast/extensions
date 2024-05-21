@@ -1,5 +1,7 @@
 # Quick Access Changelog
 
+## [Fixed typos] - 2024-03-06
+
 ## [Add new layout options] - 2022-10-15
 
 - Add new layout options: List or Grid

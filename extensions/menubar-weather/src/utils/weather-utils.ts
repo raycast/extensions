@@ -3,7 +3,7 @@ import { Preferences } from "../types/preferences";
 import { isEmpty } from "./common-utils";
 import { getOpenMeteoLocation, getOpenMeteoWeather } from "./axios-utils";
 import { Daily, GeoLocation } from "../types/types";
-import { getDefaultWeatherIcons, getWeatherIcons, weatherDescriptions } from "./icon-utils";
+import { weatherDescriptions } from "./icon-utils";
 
 export const {
   iconStyle,
@@ -86,9 +86,9 @@ export function isEmptyLonLat() {
  */
 export function getWeatherDescription(weatherCode: number | undefined) {
   if (typeof weatherCode === "undefined") {
-    return getDefaultWeatherIcons();
+    return "No weather info";
   }
-  return { description: weatherDescriptions.get(weatherCode) + "", icon: getWeatherIcons(weatherCode) };
+  return weatherDescriptions.get(weatherCode) + "";
 }
 
 export const windAngle2Direction = (windAngle: number) => {

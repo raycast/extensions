@@ -26,8 +26,8 @@ export default function SendMemoFormCommand(): JSX.Element {
   }
 
   function computedCreatedUrl(data: MemoInfoResponse) {
-    const { id } = data;
-    const url = getRequestUrl(`/m/${id}`);
+    const { name, id } = data;
+    const url = getRequestUrl(`/m/${name || id}`);
 
     setCreatedUrl(url);
   }

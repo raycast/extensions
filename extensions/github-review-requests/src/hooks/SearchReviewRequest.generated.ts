@@ -4,7 +4,7 @@ import { GraphQLClient } from "graphql-request";
 import * as Dom from "graphql-request/dist/types.dom";
 import gql from "graphql-tag";
 export type SearchReviewRequestQueryVariables = Types.Exact<{
-  query: Types.Scalars["String"];
+  query: Types.Scalars["String"]["input"];
 }>;
 
 export type SearchReviewRequestQuery = {
@@ -89,10 +89,11 @@ export const SearchReviewRequestDocument = gql`
 
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
-  operationName: string
+  operationName: string,
+  operationType?: string
 ) => Promise<T>;
 
-const defaultWrapper: SdkFunctionWrapper = (action, _operationName) => action();
+const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationType) => action();
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
@@ -106,7 +107,8 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             ...requestHeaders,
             ...wrappedRequestHeaders,
           }),
-        "SearchReviewRequest"
+        "SearchReviewRequest",
+        "query"
       );
     },
   };

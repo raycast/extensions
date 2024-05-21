@@ -1,5 +1,27 @@
 # Jira Changelog
 
+## [Fix Open in Browser action] - 2024-05-16
+
+- Fixed an issue where users who logged in using an API token were unable to open issues directly in their web browser.
+
+## [Show target status on Change Status submenu] - 2024-04-30
+
+- Show target status next to the action name on Change Status submenu
+
+## [API token bug fixes] - 2024-04-22
+
+- Improved handling of invalid URLs in the jiraWithApiToken function
+- Changed to using hostname instead of full URL in jiraCredentials to avoid potential errors
+
+## [Add option to authenticate using API token] - 2023-03-27
+
+- Add option to authenticate using token for REST APIs
+- Add preferences for the same
+
+## [Improve Assignee and Sprint dropdowns] - 2024-03-14
+
+- Remove the default value in the Assignee and Sprint dropdowns when searching.
+
 ## [Add OAuth utils] - 2024-02-13
 
 - Use new OAuth utils

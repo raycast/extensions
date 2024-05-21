@@ -1,24 +1,23 @@
-import { List, LocalStorage } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useEffect } from "react";
 import { ChangeModelProp } from "../../type";
+import { CacheAdapter } from "../../utils/cache";
 
 export const ModelDropdown = (props: ChangeModelProp) => {
   const { models, onModelChange, selectedModel } = props;
   const separateDefaultModel = models.filter((x) => x.id !== "default");
   const defaultModel = models.find((x) => x.id === "default");
 
+  const cache = new CacheAdapter("select_model");
+
   // it should same as `DropDown.storeValue`
   useEffect(() => {
-    (async () => {
-      const selectModel = await LocalStorage.getItem<string>("select_model");
-      onModelChange(selectModel ?? "default");
-    })();
-  }, [onModelChange]);
+    const selectModel = cache.get();
+    onModelChange(selectModel ?? "default");
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      await LocalStorage.setItem("select_model", selectedModel);
-    })();
+    cache.set(selectedModel);
   }, [selectedModel]);
 
   /**
@@ -27,13 +26,7 @@ export const ModelDropdown = (props: ChangeModelProp) => {
    * we can't use `DropDown.storeValue`, because it will reset `selectedModel` to default when the component rerender.
    */
   return (
-    <List.Dropdown
-      tooltip="Select Model"
-      value={selectedModel}
-      onChange={(id) => {
-        onModelChange(id);
-      }}
-    >
+    <List.Dropdown tooltip="Select Model" value={selectedModel} onChange={onModelChange}>
       {defaultModel && <List.Dropdown.Item key={defaultModel.id} title={defaultModel.name} value={defaultModel.id} />}
       <List.Dropdown.Section title="Pinned">
         {separateDefaultModel

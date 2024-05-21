@@ -50,19 +50,32 @@ const adjustBrightness = async (
   direction: "increase" | "decrease",
 ) => {
   try {
-    const adjustment = direction === "increase" ? 0.1 : -0.1;
+    if (brightness <= 0 && direction === "decrease") {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Brightness is already at 0%",
+      });
 
-    const newBrightness = parseFloat(
-      Math.min(Math.max((brightness || 0) + adjustment, 0), 1).toFixed(2),
-    );
+      return;
+    } else if (brightness >= 1 && direction === "increase") {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Brightness is already at 100%",
+      });
+
+      return;
+    }
+
+    const adjustment = direction === "increase" ? 0.1 : -0.1;
+    const newBrightness = brightness + adjustment;
 
     await setSystemBrightness(newBrightness);
 
     showToast({
-      style: direction === "increase" ? Toast.Style.Success : Toast.Style.Failure,
+      style: Toast.Style.Success,
       title: `Keyboard Brightness ${
         direction === "increase" ? "increased" : "decreased"
-      }!`,
+      } to ${(newBrightness * 100).toFixed(0)}%`,
     });
   } catch (e) {
     showToast({

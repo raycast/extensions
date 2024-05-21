@@ -1,5 +1,17 @@
 # Dashlane Vault Changelog
 
+## [Improvements] - 2024-04-23
+
+- Master password for Dashlane CLI can be saved in the extensions settings to lock your vault by default (Dashlane CLI version 6.2416.0 or newer required)
+- Biometrics for Dashlane CLI can now be used to access your vault (Dashlane CLI version 6.2416.0 or newer required)
+- Improved error handling
+  - Errors are displayed to the user
+  - Show error if user installed a buggy version (6.2415.0)
+
+## [Update] - 2024-03-23
+
+- Update to add compatibility for Dashlane CLI version 6.2412.0
+
 ## [Fixes] - 2024-02-10
 
 - Fix crash if a favorite item id does not exist anymore

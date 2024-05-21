@@ -10,11 +10,14 @@
     "dteare",
     "pernielsentikaer",
     "cb372",
-    "Davidwalser",
     "henrik-dmg",
     "spacedog",
     "JakeMoosey",
-    "superwhys"
+    "superwhys",
+    "lukah"
+  ],
+  "past_contributors": [
+    "Davidwalser"
   ],
   "categories": [
     "Security"
@@ -33,6 +36,20 @@
         "login"
       ],
       "mode": "view"
+    },
+    {
+      "name": "renew-auth",
+      "title": "Auto Renew Authorization",
+      "subtitle": "1Password",
+      "description": "Renews the authorization each 9 minutes. Avoiding the prompt for user's password each use after 10 minutes.",
+      "keywords": [
+        "1p",
+        "1password",
+        "password",
+        "login"
+      ],
+      "interval": "9m",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -122,7 +139,6 @@
       "description": "Close Raycast window after copying a username or password."
     },
     {
-      "default": "/usr/local/bin/op",
       "description": "Enter the CLI binary path",
       "name": "cliPath",
       "placeholder": "e.g., /usr/local/bin/op",

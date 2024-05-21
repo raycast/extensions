@@ -3,6 +3,7 @@ const formatDate = (date: Date) => {
     return "";
   }
   return date.toLocaleString([], {
+    weekday: "short",
     year: "numeric",
     month: "2-digit",
     day: "numeric",

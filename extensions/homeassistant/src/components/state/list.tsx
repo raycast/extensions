@@ -1,34 +1,34 @@
-import { ActionPanel, List, showToast, Image, Toast } from "@raycast/api";
-import { State } from "@lib/haapi";
-import { useState } from "react";
-import { ha, shouldDisplayEntityID } from "@lib/common";
-import { useHAStates } from "@components/hooks";
-import { EntityStandardActionSections } from "@components/entity";
-import { MediaPlayerActionPanel } from "@components/mediaplayer/actions";
-import { FanActionPanel } from "@components/fan/actions";
-import { LightActionPanel } from "@components/light/actions";
 import { AutomationActionPanel } from "@components/automation/actions";
-import { VacuumActionPanel } from "@components/vacuum/actions";
-import { ScriptActionPanel } from "@components/script/actions";
 import { ButtonActionPanel } from "@components/button/actions";
-import { SceneActionPanel } from "@components/scene/actions";
-import { InputBooleanActionPanel } from "@components/input_boolean/actions";
-import { InputNumberActionPanel } from "@components/input_number/actions";
-import { TimerActionPanel } from "@components/timer/actions";
-import { InputSelectActionPanel } from "@components/input_select/actions";
-import { InputButtonActionPanel } from "@components/input_button/actions";
-import { InputTextActionPanel } from "@components/input_text/actions";
-import { InputDateTimeActionPanel } from "@components/input_datetime/actions";
-import { PersonActionPanel } from "@components/person/actions";
-import { getStateTooltip } from "@lib/utils";
-import { getMediaPlayerTitleAndArtist } from "@components/mediaplayer/utils";
 import { CameraActionPanel } from "@components/camera/actions";
-import { UpdateActionPanel } from "@components/update/actions";
-import { ZoneActionPanel } from "@components/zone/actions";
-import { SwitchActionPanel } from "@components/switch/actions";
-import { WeatherActionPanel } from "@components/weather/actions";
 import { ClimateActionPanel } from "@components/climate/actions";
 import { CoverActionPanel } from "@components/cover/actions";
+import { EntityStandardActionSections } from "@components/entity";
+import { FanActionPanel } from "@components/fan/actions";
+import { useHAStates } from "@components/hooks";
+import { InputBooleanActionPanel } from "@components/input_boolean/actions";
+import { InputButtonActionPanel } from "@components/input_button/actions";
+import { InputDateTimeActionPanel } from "@components/input_datetime/actions";
+import { InputNumberActionPanel } from "@components/input_number/actions";
+import { InputSelectActionPanel } from "@components/input_select/actions";
+import { InputTextActionPanel } from "@components/input_text/actions";
+import { LightActionPanel } from "@components/light/actions";
+import { MediaPlayerActionPanel } from "@components/mediaplayer/actions";
+import { getMediaPlayerTitleAndArtist } from "@components/mediaplayer/utils";
+import { PersonActionPanel } from "@components/person/actions";
+import { SceneActionPanel } from "@components/scene/actions";
+import { ScriptActionPanel } from "@components/script/actions";
+import { SwitchActionPanel } from "@components/switch/actions";
+import { TimerActionPanel } from "@components/timer/actions";
+import { UpdateActionPanel } from "@components/update/actions";
+import { VacuumActionPanel } from "@components/vacuum/actions";
+import { WeatherActionPanel } from "@components/weather/actions";
+import { ZoneActionPanel } from "@components/zone/actions";
+import { ha, shouldDisplayEntityID } from "@lib/common";
+import { State } from "@lib/haapi";
+import { getStateTooltip } from "@lib/utils";
+import { ActionPanel, Image, List, Toast, showToast } from "@raycast/api";
+import { useState } from "react";
 import { useStateSearch } from "./hooks";
 import { getIcon, getStateValue } from "./utils";
 
@@ -51,7 +51,11 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
 
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => <StateListItem key={state.entity_id} state={state} />)}
+      {states
+        ?.sort((a, b) =>
+          (a.attributes.friendly_name || a.entity_id).localeCompare(b.attributes.friendly_name || b.entity_id),
+        )
+        .map((state) => <StateListItem key={state.entity_id} state={state} />)}
     </List>
   );
 }

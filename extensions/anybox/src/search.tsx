@@ -1,6 +1,6 @@
 import { List, Grid, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import searchRequest, { SearchQuery, Link, Preferences } from "./utilities/searchRequest";
+import searchRequest, { SearchQuery, Link } from "./utilities/searchRequest";
 import LinkItem from "./components/LinkItem";
 import TagItem from "./components/TagItem";
 import { TagProp, fetchTags as fetchTags, fetchSearchEngines, FolderProp, fetchFolders } from "./utilities/fetch";
@@ -52,7 +52,7 @@ export default function SearchResult() {
     isSearchEngines: false,
   });
   const [searchText, setSearchText] = useState("");
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Search>();
 
   useEffect(() => {
     const searchLinks = async () => {
@@ -166,7 +166,7 @@ export default function SearchResult() {
     return (
       <Grid
         isLoading={state.isLoading}
-        enableFiltering={false}
+        filtering={false}
         throttle={true}
         onSearchTextChange={setSearchText}
         navigationTitle={navigationTitle}

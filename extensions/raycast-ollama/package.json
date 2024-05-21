@@ -60,7 +60,7 @@
   "commands": [
     {
       "name": "ollama-chat",
-      "title": "Chat With Ollama",
+      "title": "Chat with Ollama",
       "subtitle": "Ollama",
       "description": "Chat with Ollama",
       "mode": "view"
@@ -116,7 +116,7 @@
     },
     {
       "name": "ollama-image-to-text",
-      "title": "Get Text From Image",
+      "title": "Get Text from Image",
       "subtitle": "Ollama",
       "description": "Get text from image on the clipboard or selected from finder",
       "mode": "view"

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "notion",
   "title": "Notion",
-  "description": "The fastest way to search and create Notion pages.",
+  "description": "The fastest way to search, create and update Notion pages.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
   "owner": "notion",
@@ -16,7 +16,8 @@
     "bkeys818",
     "alexs",
     "yakitrak",
-    "tleo19"
+    "tleo19",
+    "dariuszpaluch"
   ],
   "categories": [
     "Applications",
@@ -28,7 +29,17 @@
       "title": "Create Database Page",
       "subtitle": "Notion",
       "description": "Create a page in a Notion database.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "closeAfterCreate",
+          "type": "checkbox",
+          "label": "Close Raycast after creating the page",
+          "required": false,
+          "default": false,
+          "description": "This action will be set as the primary action (⌘ + ⏎)."
+        }
+      ]
     },
     {
       "name": "search-page",
@@ -61,6 +72,22 @@
       "title": "Quick Capture",
       "description": "Capture something and put it out in a Notion page.",
       "mode": "view"
+    },
+    {
+      "description": "Append or prepend text, along with date, to a Notion page.",
+      "mode": "view",
+      "name": "add-text-to-page",
+      "subtitle": "Notion",
+      "title": "Add Text to Page",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "title": "Text",
+          "placeholder": "Text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -84,8 +111,8 @@
   "dependencies": {
     "@mozilla/readability": "^0.5.0",
     "@notionhq/client": "^2.2.14",
-    "@raycast/api": "^1.68.1",
-    "@raycast/utils": "^1.12.5",
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
     "@tryfabric/martian": "^1.2.4",
     "date-fns": "^3.3.1",
     "linkedom": "^0.16.8",

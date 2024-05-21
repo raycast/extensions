@@ -1,5 +1,13 @@
 # Trello Changelog
 
+## [Update] - 2024-03-30
+
+Fix scope in auth URL and update dependencies
+
+## [Update] - 2024-03-15
+
+Update dependencies and make it more obvious to add preferences.
+
 ## [Update] - 2023-12-12
 
 Added support to open cards in Trello desktop. Thanks to the Trello support team 🥳!
