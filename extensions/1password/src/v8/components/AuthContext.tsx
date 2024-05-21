@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode, useMemo } from "react";
-import { closeMainWindow, Icon, List, open, PopToRootType, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, Icon, List, open, PopToRootType, showToast, Toast, useNavigation } from "@raycast/api";
 import childProcess from "node:child_process";
 import { capitalizeWords, checkZsh, CLI_PATH, errorRegex, getSignInStatus, ZshMissingError, ZSH_PATH } from "../utils";
 import { Error as ErrorGuide } from "./Error";
+import { AccountForm } from "./AccountForm";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -17,6 +18,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(getSignInStatus());
   const [zshMissing] = useState<boolean>(!checkZsh());
+  const { push } = useNavigation();
 
   useMemo(async () => {
     if (!isAuthenticated && !zshMissing) {
@@ -36,8 +38,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       } catch (err) {
         let errorMessage;
-        toast.style = Toast.Style.Failure;
         if (!(err instanceof Error)) {
+          toast.style = Toast.Style.Failure;
           toast.title = "Error Authenticating.";
           toast.message = String(err);
           return;
@@ -47,9 +49,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (errorMessageMatches && errorMessageMatches[1]) {
           errorMessage = errorMessageMatches[1];
         } else {
+          toast.style = Toast.Style.Failure;
           return (toast.title = err.message);
         }
 
+        if (errorMessage.includes("multiple accounts found")) return push(<AccountForm />);
+
+        toast.style = Toast.Style.Failure;
         return (toast.title = capitalizeWords(errorMessage));
       } finally {
         await open("raycast://"); // Password prompt causes Raycast to close, so we reopen it here
