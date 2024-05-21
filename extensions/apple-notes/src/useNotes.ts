@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { resolve } from "path";
 
-import { showFailureToast, useSQL } from "@raycast/utils";
+import { useSQL } from "@raycast/utils";
 import { partition } from "lodash";
 
 import { getOpenNoteURL } from "./helpers";
