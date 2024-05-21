@@ -6,7 +6,7 @@
 
 ## [Fix] - 2024-02-01
 
- - Fixes "Preview" action description typo.
+- Fixes "Preview" action description typo.
 
 ## [New models] - 2023-06-13
 
@@ -14,7 +14,7 @@
 
 ## [Enhacements] - 2023-06-03
 
- - Allows custom model for each command
- - Improved preferences
+- Allows custom model for each command
+- Improved preferences
 
 ## [Initial Version] - 2023-03-02
