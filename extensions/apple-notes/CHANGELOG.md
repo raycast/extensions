@@ -1,5 +1,11 @@
 # Apple Notes Changelog
 
+## [Change AI model for notes] - 2024-05-23
+
+Now, creating an AI note will use GPT-4o instead of GPT-4. 
+
+This update also fixes a bug for users not able to create a note if the default folder isn't spelled "Notes".
+
 ## [Bug Fix Update] - 2024-05-16
 
 Fix crashes caused by empty links or tags.
