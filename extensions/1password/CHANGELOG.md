@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Fix] - 2024-05-21
+
+-- Fixes account selection
+
 ## [Enhancements] - 2024-05-10
 
 -- Fixes double auth prompts.
