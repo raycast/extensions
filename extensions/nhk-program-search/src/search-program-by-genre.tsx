@@ -34,8 +34,8 @@ export default function Command() {
 function GenreDescriptionAndList({ majorCategory }: { majorCategory: GenreMajorCategory }) {
   return (
     <>
-      <Form.Description text={genreMajorCategoryLabels.get(majorCategory) ?? ""} />
-      {Array.from(genreLabels)
+      <Form.Description text={genreMajorCategoryLabels[majorCategory]} />
+      {Object.entries(genreLabels)
         .filter(([key]) => key.startsWith(majorCategory))
         .map(([key, label]) => (
           <Form.Checkbox key={key} id={key} label={label} defaultValue={false} />
