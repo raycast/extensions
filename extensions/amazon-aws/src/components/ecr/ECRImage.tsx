@@ -1,8 +1,9 @@
 import { Repository } from "@aws-sdk/client-ecr";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchImages, getImageUrl, getRepositoryUrl } from "../../actions/ecr";
+import { fetchImages, getImageUrl } from "../../actions/ecr";
 import { getFilterPlaceholder } from "../../util";
+import { AwsAction } from "../common/action";
 
 function ECRImage({ repository }: { repository: Repository }) {
   const { data: images, isLoading } = useCachedPromise(
@@ -18,7 +19,6 @@ function ECRImage({ repository }: { repository: Repository }) {
       {images ? (
         images.map((image) => (
           <List.Item
-            id={image.imageDigest}
             key={image.imageDigest}
             title={image.imageTag || ""}
             icon={isLoading ? Icon.CircleProgress : "aws-icons/ecr.png"}
@@ -38,7 +38,7 @@ function ECRImage({ repository }: { repository: Repository }) {
             }
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title={"Open Image"} url={getImageUrl(repository, image.imageDigest || "")} />
+                <AwsAction.Console url={getImageUrl(repository, image.imageDigest || "")} />
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
                     title="Copy Image Tag"
