@@ -10,7 +10,7 @@ import { useFavorite } from "./hook/useFavorite";
 import { IndexActionPanel } from "./components/IndexActionPanel";
 
 global.fetch = fetch;
-const initialTitle = "Website";
+const initialTitle = undefined;
 
 export default function Command() {
   const [sort, setSort] = useState("new");
@@ -51,22 +51,15 @@ export default function Command() {
     }
   };
 
-  const [title, setTitle] = useState(initialTitle);
+  const [title, setTitle] = useState<string | undefined>(initialTitle);
 
   useEffect(() => {
-    let title = initialTitle;
-    if (tags.colors.length > 0) {
-      title = "Search Tags: " + tags.colors.join(", ");
+    const choseTags = [...tags.colors, ...tags.collections];
+    if (choseTags.length > 0) {
+      setTitle("Searched tags: " + choseTags.join(", "));
+    } else {
+      setTitle(initialTitle);
     }
-    if (tags.collections.length > 0) {
-      if (title === initialTitle) {
-        title = "Search Tags: ";
-      } else {
-        title += ", ";
-      }
-      title += tags.collections.join(", ");
-    }
-    setTitle(title);
   }, [tags, sort]);
 
   return (
@@ -76,11 +69,12 @@ export default function Command() {
       inset={Grid.Inset.Zero}
       isLoading={isLoading || favoriteLoading}
       pagination={pagination}
-      searchBarPlaceholder={`Search in ${(data || []).length} palettes`}
+      searchBarPlaceholder={`Search in ${((sort === "collection" ? value : data) || []).length} palettes`}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Sort by" storeValue={true} defaultValue="new" onChange={setSort}>
           <Grid.Dropdown.Item value="new" title="New" />
           <Grid.Dropdown.Item value="random" title="Random" />
+          <Grid.Dropdown.Item value="favorite" title="My Favorite" />
 
           <Grid.Dropdown.Section title="Popular">
             <Grid.Dropdown.Item value="popular-month" title="Month" />
@@ -90,26 +84,29 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      <Grid.Section title={"Favorites"}>
-        {(value || []).map((item) => {
-          return (
-            <Grid.Item
-              key={item.code}
-              content={item.svg}
-              actions={
-                <IndexActionPanel
-                  code={item.code}
-                  tags={tags}
-                  setTags={setTags}
-                  favorite={{ isLoading: favoriteLoading, value }}
-                  isFavourite={true}
-                  unFavoriteFunc={() => unFavorite(item.code)}
-                />
-              }
-            />
-          );
-        })}
-      </Grid.Section>
+      {sort === "favorite" && (
+        <Grid.Section>
+          {(value || []).map((item) => {
+            return (
+              <Grid.Item
+                key={item.code}
+                content={item.svg}
+                keywords={Array.from(eachHex(item.code))}
+                actions={
+                  <IndexActionPanel
+                    code={item.code}
+                    tags={tags}
+                    setTags={setTags}
+                    favorite={{ isLoading: favoriteLoading, value }}
+                    isFavourite={true}
+                    unFavoriteFunc={() => unFavorite(item.code)}
+                  />
+                }
+              />
+            );
+          })}
+        </Grid.Section>
+      )}
       <Grid.Section title={title}>
         {(data || []).map((item, index) => {
           return (
