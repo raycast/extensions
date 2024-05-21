@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { drupalVersions, getDrupalApiResults } from "./utils/search-api/util";
-import { DrupalVersionMachineCode, ApiState } from "./utils/search-api/types";
+import { ApiItem } from "./utils/search-api/types";
+import { CommandState, DrupalVersionMachineCode } from "./utils/general/types";
 
 const SearchApi = () => {
-  const [state, setState] = useState<ApiState>({});
+  const [state, setState] = useState<CommandState<ApiItem[]>>({});
   const [searchText, setSearchText] = useState<string>("");
   const [drupalVersion, setDrupalVersion] = useState<DrupalVersionMachineCode>(DrupalVersionMachineCode.Drupal10);
 
