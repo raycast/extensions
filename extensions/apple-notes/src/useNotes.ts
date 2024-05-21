@@ -84,7 +84,7 @@ const invitationQuery = `
         'x-coredata://' || zmd.z_uuid || '/ICNote/p' || note.z_pk AS noteId
     FROM
         ziccloudsyncingobject AS note
-    LEFT JOIN zicinvitatiofn AS inv 
+    LEFT JOIN zicinvitation AS inv 
         ON note.zinvitation = inv.z_pk
     LEFT JOIN z_metadata AS zmd ON 1=1
     WHERE
