@@ -31,11 +31,10 @@ export function ItemActionPanel({
             return CopyOneTimePassword(item);
           case "share-item":
             return CopyShareItem(item);
-          case "switch-account":
-            return SwitchAccount();
         }
       })}
       <ActionPanel.Section>
+        {SwitchAccount()}
         <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
       </ActionPanel.Section>
     </ActionPanel>

@@ -101,6 +101,9 @@ export const checkZsh = () => {
   return true;
 };
 
+export const signIn = (account?: string) =>
+  execSync(`${CLI_PATH} signin ${account ? account : ""}`, { shell: ZSH_PATH });
+
 export const getSignInStatus = () => {
   try {
     execSync(`${CLI_PATH} whoami`);
@@ -143,7 +146,22 @@ export const useCategories = () =>
 
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
 
-export const useAccounts = () => useOp<User[], ExtensionError>(["account", "list"]);
+export const useAccounts = <T = User[], U = ExtensionError>(execute = false) =>
+  useExec<T, U>(CLI_PATH, ["account", "list", "--format=json"], {
+    parseOutput: ({ stdout, stderr, error, exitCode }) => {
+      if (error) handleErrors(error.message);
+      if (stderr) handleErrors(stderr);
+      if (exitCode != 0) handleErrors(stdout);
+      return JSON.parse(stdout);
+    },
+    onError: async (e) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: e.message,
+      });
+    },
+    execute: execute,
+  });
 
 export function getCategoryIcon(category: CategoryName) {
   switch (category) {
