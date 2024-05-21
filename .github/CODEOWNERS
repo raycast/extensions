@@ -21,6 +21,7 @@
 /extensions/ai-gen                                                  @josephschmitt @snilan
 /extensions/ai-git-assistant                                        @Popalay
 /extensions/ai-humanizer                                            @frolvanya
+/extensions/ai-screenshot                                           @jochemloedeman
 /extensions/aimlab                                                  @whitespacecode
 /extensions/air-quality                                             @earthpyy
 /extensions/airplane                                                @pradeepb28
@@ -965,7 +966,7 @@
 /extensions/pia-controls                                            @Yakitrak
 /extensions/pianoman                                                @juhamust
 /extensions/pick-random                                             @MatteoGauthier @hongqn
-/extensions/pick-your-wallpaper                                     @hugomarf
+/extensions/pick-your-wallpaper                                     @hugomarfani
 /extensions/pie-for-pihole                                          @GLaDO8
 /extensions/pika                                                    @rishimohan
 /extensions/pinata                                                  @stevedylandev
