@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { getFinderPath, isImage } from "./utils/common-utils";
-import { createNewFile, createNewFileByTemplate } from "./new-file-here";
+import { createNewFile, createNewFileByTemplate } from "./new-file-with-template";
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./types/file-type";
 import { getFileType } from "./hooks/hooks";
 import { parse } from "path";
@@ -9,9 +9,10 @@ import { ActionOpenCommandPreferences } from "./components/action-open-command-p
 import { Preferences } from "./types/preferences";
 import { homedir } from "os";
 
-export default function NewFileWithName(props: {
+export default function NewFileWithDetails(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
+  folder: string;
 }) {
   const { showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   const templateFiles = props.templateFiles;
@@ -23,11 +24,11 @@ export default function NewFileWithName(props: {
 
   return (
     <Form
-      navigationTitle={"New File with Name"}
+      navigationTitle={"New File With Details"}
       actions={
         <ActionPanel>
           <Action
-            title={"New File Here"}
+            title={`New File in ${props.folder}`}
             icon={Icon.Finder}
             onAction={async () => {
               try {
@@ -38,19 +39,21 @@ export default function NewFileWithName(props: {
               }
             }}
           />
-          <Action
-            title={"New File in Desktop"}
-            icon={Icon.Window}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={async () => {
-              try {
-                const path = `${homedir()}/Desktop/`;
-                await createFileWithName(newFileType, templateFiles, path, fileName, fileContent);
-              } catch (e) {
-                await showToast(Toast.Style.Failure, "Failed to create file", String(e));
-              }
-            }}
-          />
+          {props.folder !== "Desktop" && (
+            <Action
+              title={"New File in Desktop"}
+              icon={Icon.Desktop}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={async () => {
+                try {
+                  const path = `${homedir()}/Desktop/`;
+                  await createFileWithName(newFileType, templateFiles, path, fileName, fileContent);
+                } catch (e) {
+                  await showToast(Toast.Style.Failure, "Failed to create file", String(e));
+                }
+              }}
+            />
+          )}
           <ActionOpenCommandPreferences />
         </ActionPanel>
       }
