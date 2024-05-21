@@ -1,10 +1,11 @@
-import { environment, getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { exec } from "child_process";
 import { randomUUID } from "crypto";
 import { existsSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 import { extname } from "path";
-import { CustomTimer, Preferences, Timer } from "./types";
+import { CustomTimer, Preferences, Timer, TimerLaunchConfig } from "./types";
 import { formatTime, secondsBetweenDates } from "./formatUtils";
+import { showHudOrToast } from "./utils";
 
 const DATAPATH = environment.supportPath + "/customTimers.json";
 const DEFAULT_PRESET_VISIBLES_FILE = environment.supportPath + "/defaultPresetVisibles.json";
@@ -21,19 +22,19 @@ const silentFileDeletion = (fp: string) => {
 const checkForOverlyLoudAlert = (launchedFromMenuBar = false) => {
   const prefs = getPreferenceValues<Preferences>();
   if (parseFloat(prefs.volumeSetting) > 5.0) {
-    const errorMsg = "⚠️ Timer alert volume should not be louder than 5 (it can get quite loud!)";
-    if (launchedFromMenuBar) {
-      showHUD(errorMsg);
-    } else {
-      showToast({ style: Toast.Style.Failure, title: errorMsg });
-    }
+    const errorMsg = "Timer alert volume should not be louder than 5 (it can get quite loud!)";
+    showHudOrToast({ msg: errorMsg, launchedFromMenuBar: launchedFromMenuBar, isErr: true });
     return false;
   }
   return true;
 };
 
-async function startTimer(timeInSeconds: number, timerName = "Untitled", selectedSound = "default") {
-  popToRoot();
+async function startTimer({
+  timeInSeconds,
+  timerName = "Untitled",
+  launchedFromMenuBar = false,
+  selectedSound = "default",
+}: TimerLaunchConfig) {
   const fileName = environment.supportPath + "/" + new Date().toISOString() + "---" + timeInSeconds + ".timer";
   const masterName = fileName.replace(/:/g, "__");
   writeFileSync(masterName, timerName);
@@ -68,7 +69,11 @@ async function startTimer(timeInSeconds: number, timerName = "Untitled", selecte
       return;
     }
   });
-  await showHUD(`Timer "${timerName}" started for ${formatTime(timeInSeconds)}! 🎉`);
+  showHudOrToast({
+    msg: `Timer "${timerName}" started for ${formatTime(timeInSeconds)}!`,
+    launchedFromMenuBar: launchedFromMenuBar,
+    isErr: false,
+  });
 }
 
 function stopTimer(timerFile: string) {

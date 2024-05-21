@@ -9,8 +9,8 @@ import {
   startTimer,
   stopTimer,
   toggleCustomTimerMenubarVisibility,
-} from "../timerUtils";
-import { CustomTimer, Timer } from "../types";
+} from "../backend/timerBackend";
+import { CTLaunchConfig, CustomTimer, Timer, TimerLaunchConfig } from "../backend/types";
 import { Alert, Icon, confirmAlert } from "@raycast/api";
 
 export default function useTimers() {
@@ -27,9 +27,9 @@ export default function useTimers() {
     setIsLoading(false);
   };
 
-  const handleStartTimer = (seconds: number, name: string, launchedFromMenuBar = false) => {
-    if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
-    startTimer(seconds, name);
+  const handleStartTimer = (launchConf: TimerLaunchConfig) => {
+    if (!checkForOverlyLoudAlert(launchConf.launchedFromMenuBar)) return;
+    startTimer(launchConf);
     refreshTimers();
   };
 
@@ -39,9 +39,14 @@ export default function useTimers() {
     refreshTimers();
   };
 
-  const handleStartCT = (customTimer: CustomTimer, launchedFromMenuBar = false) => {
+  const handleStartCT = ({ customTimer, launchedFromMenuBar }: CTLaunchConfig) => {
     if (!checkForOverlyLoudAlert(launchedFromMenuBar)) return;
-    startTimer(customTimer.timeInSeconds, customTimer.name, customTimer.selectedSound);
+    startTimer({
+      timeInSeconds: customTimer.timeInSeconds,
+      launchedFromMenuBar: launchedFromMenuBar,
+      timerName: customTimer.name,
+      selectedSound: customTimer.selectedSound,
+    });
     refreshTimers();
   };
 

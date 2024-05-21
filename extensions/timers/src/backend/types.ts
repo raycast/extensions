@@ -38,8 +38,10 @@ export interface Preferences {
   selectedSound: string;
   ringContinuously: boolean;
   copyOnSwStop: boolean;
+  closeWindowOnTimerStart: boolean;
   volumeSetting: string;
   showTitleInMenuBar: boolean;
+  newTimerInputOrder: string;
 }
 
 export interface CTInlineArgs {
@@ -81,4 +83,21 @@ export interface DefaultTimerPreset {
   key: string;
   title: string;
   seconds: number;
+}
+
+export interface TimerLaunchConfig {
+  timeInSeconds: number;
+  launchedFromMenuBar?: boolean;
+  timerName?: string;
+  selectedSound?: string;
+}
+
+export interface StopwatchLaunchConfig {
+  swName?: string;
+  launchedFromMenuBar?: boolean;
+}
+
+export interface CTLaunchConfig {
+  customTimer: CustomTimer;
+  launchedFromMenuBar?: boolean;
 }
