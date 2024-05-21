@@ -1,3 +1,3 @@
-# ai-screenshot Changelog
+# AI Screenshot Changelog
 
-## [Initial Version] - 2024-05-16
+## [Initial Version] - {PR_MERGE_DATE}
