@@ -27,6 +27,13 @@
       "subtitle": "Drupal",
       "description": "Search Drupal API documentation",
       "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Drupal",
+      "description": "Search for Drupal projects (modules, themes, etc)",
+      "mode": "view"
     }
   ],
   "dependencies": {

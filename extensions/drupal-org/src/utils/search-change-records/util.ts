@@ -1,6 +1,6 @@
 import { load as cheerioLoad } from "cheerio";
 import got, { SearchParameters } from "got";
-import { DrupalChangeRecord } from "./types";
+import { ChangeRecord } from "./types";
 
 const drupalCRSearchUrlBase = "https://www.drupal.org/list-changes/drupal";
 
@@ -22,13 +22,13 @@ export const getDrupalChangeRecords = async (searchContent: string) => {
       const recordLink = $("td:nth-child(3)", el);
       const recordUrl = $("a", recordLink).attr("href");
       if (!recordUrl) {
-        return {} as DrupalChangeRecord;
+        return {} as ChangeRecord;
       }
       const recordNid = recordUrl.split("/").pop();
       if (!recordNid) {
-        return {} as DrupalChangeRecord;
+        return {} as ChangeRecord;
       }
-      const record: DrupalChangeRecord = {
+      const record: ChangeRecord = {
         created: new Date($("td:nth-child(2)", el).text()),
         title: $("a", recordLink).text().trim(),
         changeVersion: $("td:nth-child(1)", el).text().trim(),
