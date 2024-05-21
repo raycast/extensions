@@ -219,7 +219,7 @@
       "type": "textfield",
       "title": "Speed",
       "description": "Input the speed of the voice, varying from 0.25 to 4.0",
-      "required": true,
+      "required": false,
       "default": "1.0",
       "label": "Speed"
     },
