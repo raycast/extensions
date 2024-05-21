@@ -38,7 +38,7 @@ function GenreDescriptionAndList({ majorCategory }: { majorCategory: GenreMajorC
       {Object.entries(genreLabels)
         .filter(([key]) => key.startsWith(majorCategory))
         .map(([key, label]) => (
-          <Form.Checkbox key={key} id={key} label={label} defaultValue={false} />
+          <Form.Checkbox key={key} id={key} label={label} defaultValue={false} storeValue />
         ))}
     </>
   );
