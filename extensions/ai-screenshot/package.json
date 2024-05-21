@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "modify",
-      "title": "Modify",
+      "title": "Modify Screenshot",
       "description": "Template with a plain detail view",
       "mode": "view"
     }
