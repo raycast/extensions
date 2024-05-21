@@ -1,8 +1,8 @@
-import { PreferenceValues, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
 
 export async function createClient() {
-  const preferences = getPreferenceValues<PreferenceValues>();
+  const preferences = getPreferenceValues<Preferences>();
   let client: OpenAI;
   try {
     client = new OpenAI({ apiKey: preferences.apiKey });
