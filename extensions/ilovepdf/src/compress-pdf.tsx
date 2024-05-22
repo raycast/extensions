@@ -15,6 +15,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
+import { getFilePath } from "./common/utils";
 
 type Values = {
   files: string[];
@@ -34,9 +35,9 @@ function getDestinationFile(files: string[]): string {
   const fileName = path.basename(file, fileExtension);
   const directory = path.dirname(file);
   if (files.length == 1) {
-    return path.join(directory, `${fileName}_compressed.pdf`);
+    return getFilePath(directory, `${fileName}_compressed.pdf`);
   }
-  return path.join(directory, `compressed_pdfs.zip`);
+  return getFilePath(directory, `compressed_pdfs.zip`);
 }
 
 function getSavedPercentage(originalFile: string, compressedFile: string) {
