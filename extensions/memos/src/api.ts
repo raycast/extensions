@@ -7,7 +7,7 @@ import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences, ResponseData, ROW_STATUS,  } from "./types";
+import { Preferences, ResponseData, ROW_STATUS } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
 
 const cache = new Cache();
@@ -166,23 +166,22 @@ export const postFile = (filePath: string) => {
 };
 
 export const getAllMemos = (currentUserId?: number) => {
-  let filter = encodeURIComponent(`creator=='users/${currentUserId}'`)
+  let filter = encodeURIComponent(`creator=='users/${currentUserId}'`);
 
-  if(!currentUserId) {
-    filter = ''
+  if (!currentUserId) {
+    filter = "";
   }
 
   const url = getRequestUrl(`/api/v1/memos?filter=${filter}`);
 
   const { isLoading, data, revalidate } = getUseFetch<{
-    memos: MemoInfoResponse[]
+    memos: MemoInfoResponse[];
   }>(url, {
     keepPreviousData: true,
     initialData: {
       memos: [],
     },
   });
-
 
   return { isLoading, data: currentUserId ? data : { memos: [] }, revalidate };
 };
