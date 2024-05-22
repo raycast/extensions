@@ -17,6 +17,13 @@
       "subtitle": "Office2PDF",
       "description": "Convert Office to PDF using CloudConvert API,",
       "mode": "view"
+    },
+    {
+      "name": "finder",
+      "title": "Convert Selected File",
+      "subtitle": "Office2PDF",
+      "description": "Convert the selected file to PDF using CloudConvert API",
+      "mode": "no-view"
     }
   ],
   "preferences": [
