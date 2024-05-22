@@ -5,13 +5,14 @@ import {
   QueueAttributeName,
   SQSClient,
 } from "@aws-sdk/client-sqs";
-import { ActionPanel, List, Action, confirmAlert, Toast, showToast, Icon, Alert, Color } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import { SendMessageForm } from "./components/sqs/send-message-form";
 
-interface Queue {
+export interface Queue {
   queueUrl: string;
   attributes?: Partial<Record<QueueAttributeName, string>>;
 }
@@ -59,6 +60,23 @@ export default function SQS() {
                     target={resourceToConsoleLink(queue.queueUrl, "AWS::SQS::Queue")}
                   />
                   <List.Item.Detail.Metadata.Label title="ARN" text={queue.attributes?.QueueArn} />
+                  {queue.attributes?.FifoQueue && (
+                    <List.Item.Detail.Metadata.TagList title={"FIFO"}>
+                      {queue.attributes?.ContentBasedDeduplication && (
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text="Content Based Deduplication"
+                          icon={queue.attributes?.ContentBasedDeduplication === "true" ? Icon.Checkmark : Icon.Xmark}
+                          color={queue.attributes?.ContentBasedDeduplication === "true" ? Color.Green : Color.Red}
+                        />
+                      )}
+                      {queue.attributes?.DeduplicationScope && (
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={`Scope: ${queue.attributes.DeduplicationScope}`}
+                          color={Color.Orange}
+                        />
+                      )}
+                    </List.Item.Detail.Metadata.TagList>
+                  )}
                   <List.Item.Detail.Metadata.Separator />
                   {queue.attributes?.ApproximateNumberOfMessages && (
                     <List.Item.Detail.Metadata.Label
@@ -117,9 +135,16 @@ export default function SQS() {
               <AwsAction.Console url={resourceToConsoleLink(queue.queueUrl, "AWS::SQS::Queue")} />
               <ActionPanel.Section title={"Queue Actions"}>
                 <Action.CopyToClipboard title="Copy Queue URL" content={queue.queueUrl} />
+                <Action.Push
+                  target={<SendMessageForm queue={queue} revalidate={revalidate} />}
+                  title="Send Message"
+                  icon={Icon.Message}
+                  shortcut={{ modifiers: ["ctrl"], key: "m" }}
+                />
                 <Action
                   icon={Icon.Trash}
                   title="Purge Queue"
+                  shortcut={{ modifiers: ["ctrl"], key: "p" }}
                   onAction={() =>
                     confirmAlert({
                       icon: { source: Icon.Trash, tintColor: Color.Red },
