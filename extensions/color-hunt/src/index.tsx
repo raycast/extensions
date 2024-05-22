@@ -1,7 +1,7 @@
 import { Color, environment, Grid, Icon, showToast, Toast } from "@raycast/api";
 import feed from "./api/feed";
 import { eachHex } from "./utils/util";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Tags } from "./type";
 import fetch from "cross-fetch";
 import like from "./api/like";
@@ -10,7 +10,7 @@ import { useFavorite } from "./hook/useFavorite";
 import { IndexActionPanel } from "./components/IndexActionPanel";
 
 global.fetch = fetch;
-const initialTitle = "Color Hunt";
+const initialTitle = undefined;
 
 export default function Command() {
   const [sort, setSort] = useState("new");
@@ -52,19 +52,15 @@ export default function Command() {
   };
 
   const [title, setTitle] = useState<string | undefined>(initialTitle);
-  const choseTags = useMemo<string[]>(() => {
-    return [...tags.colors, ...tags.collections];
-  }, [tags.collections, tags.colors]);
 
   useEffect(() => {
+    const choseTags = [...tags.colors, ...tags.collections];
     if (choseTags.length > 0) {
       setTitle("Searched tags: " + choseTags.join(", "));
-    } else if (sort !== "new") {
-      setTitle(undefined);
     } else {
       setTitle(initialTitle);
     }
-  }, [choseTags, sort]);
+  }, [tags, sort]);
 
   return (
     <Grid
@@ -78,6 +74,7 @@ export default function Command() {
         <Grid.Dropdown tooltip="Sort by" storeValue={true} defaultValue="new" onChange={setSort}>
           <Grid.Dropdown.Item value="new" title="New" />
           <Grid.Dropdown.Item value="random" title="Random" />
+          <Grid.Dropdown.Item value="favorite" title="My Favorite" />
 
           <Grid.Dropdown.Section title="Popular">
             <Grid.Dropdown.Item value="popular-month" title="Month" />
@@ -87,8 +84,8 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {sort === "new" && choseTags.length == 0 && (
-        <Grid.Section title="Favorites">
+      {sort === "favorite" && (
+        <Grid.Section>
           {(value || []).map((item) => {
             return (
               <Grid.Item

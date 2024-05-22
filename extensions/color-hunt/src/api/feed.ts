@@ -36,6 +36,12 @@ export default function (sort: string, tags: Tags) {
   return usePromise(
     (sort, tags, timeframe) => async (options: { page: number }) => {
       // console.log("fetching", options.page, sort, tags, timeframe);
+      if (sort === "favorite") {
+        return {
+          data: [],
+          hasMore: false,
+        };
+      }
 
       const tagsData = [...tags.colors, ...tags.collections].join("-");
       const feeds = await fetch("https://colorhunt.co/php/feed.php", {
