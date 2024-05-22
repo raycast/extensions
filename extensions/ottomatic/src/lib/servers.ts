@@ -19,10 +19,12 @@ const filemakerServersRowSchema = z
     gemba_id: z.string().nullable(),
     id: z.number(),
     location: z.string(),
-    metadata: z.object({
-      ottoServerTag: z.enum(["dev", "stg", "prod"]).nullable(),
-      ottoThemeColor: z.string().nullable(),
-    }),
+    metadata: z
+      .object({
+        ottoServerTag: z.enum(["dev", "stg", "prod"]).nullable(),
+        ottoThemeColor: z.string().nullable(),
+      })
+      .catch({ ottoServerTag: null, ottoThemeColor: null }),
     name_friendly: z.string().nullable(),
     org_id: z.number(),
     os: osSchema.nullable(),
