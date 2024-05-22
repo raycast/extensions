@@ -15,6 +15,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
+import { getFilePath } from "./common/utils";
 
 type Values = {
   files: string[];
@@ -44,7 +45,7 @@ export default function Command() {
     const fileExtension = path.extname(file);
     const fileName = path.basename(file, fileExtension);
     const directory = path.dirname(file);
-    const destinationFile = path.join(directory, `${fileName}.pdf`);
+    const destinationFile = getFilePath(directory, `${fileName}.pdf`);
     setDestinationFilePath(destinationFile);
 
     const instance = new ILovePDFApi(publicKey, secretKey);
