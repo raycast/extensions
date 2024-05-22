@@ -29,22 +29,28 @@ export default function Command() {
             }}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open in Cloud Console"
-                  url={`${ottomaticBaseUrl}/servers/${currentOrgSlug}/${server.id}`}
-                />
+                {server.org_slug && (
+                  <Action.OpenInBrowser
+                    title="Open in Cloud Console"
+                    url={`${ottomaticBaseUrl}/servers/${server.org_slug}/${server.id}`}
+                  />
+                )}
                 <Action title="Refresh Server Info" />
                 <Action.CopyToClipboard title="Copy Server URL" content={server.url} />
                 <Action.OpenInBrowser title="Launch FMS Admin Console" url={`${server.url}/admin-console`} />
                 <Action.OpenInBrowser title="Launch Otto Web Console" url={`${server.url}/otto/`} />
-                <Action.OpenInBrowser
-                  title="View Hosted Files"
-                  url={`${ottomaticBaseUrl}/servers/${currentOrgSlug}/${server.id}/files`}
-                />
-                <Action.OpenInBrowser
-                  title="View Clients"
-                  url={`${ottomaticBaseUrl}/servers/${currentOrgSlug}/${server.id}/clients`}
-                />
+                {server.org_slug && (
+                  <Action.OpenInBrowser
+                    title="View Hosted Files"
+                    url={`${ottomaticBaseUrl}/servers/${server.org_slug}/${server.id}/files`}
+                  />
+                )}
+                {server.org_slug && (
+                  <Action.OpenInBrowser
+                    title="View Clients"
+                    url={`${ottomaticBaseUrl}/servers/${currentOrgSlug}/${server.id}/clients`}
+                  />
+                )}
               </ActionPanel>
             }
             accessories={[

@@ -3,6 +3,7 @@ import { fetch } from "cross-fetch";
 import { useJWT } from "./ottomatic";
 import { z } from "zod";
 import { apiBaseUrl } from "./constants";
+import { useMemo } from "react";
 
 const fmserverConnectionTypeSchema = z.union([z.literal("privateKey"), z.literal("ottoAdminApiKey")]);
 const osSchema = z.union([z.literal("mac"), z.literal("windows"), z.literal("linux")]);
@@ -54,8 +55,10 @@ const filemakerServersRowSchema = z
 
 type TServer = z.infer<typeof filemakerServersRowSchema>;
 export function useServers() {
-  const { rawJWT } = useJWT();
-  const [servers, setServers] = useCachedState<TServer[]>("servers", []);
+  const { rawJWT, data } = useJWT();
+  const memberships = data?.memberships ?? [];
+
+  const [_servers, setServers] = useCachedState<TServer[]>("servers", []);
   const qr = useCachedPromise(
     async () => {
       const data = await fetch(`${apiBaseUrl}/servers`, {
@@ -75,6 +78,13 @@ export function useServers() {
     [],
     { execute: !!rawJWT, keepPreviousData: true, onData: setServers },
   );
+
+  const servers = useMemo(() => {
+    return _servers.map((server) => {
+      const mem = memberships.find((m) => m.organization.publicMetadata.org_id === server.org_id);
+      return { ...server, org_slug: mem?.organization.slug };
+    });
+  }, [_servers]);
 
   return { ...qr, data: servers };
 }
