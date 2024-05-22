@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Icon, showToast, Toast, open } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
 import { useState } from "react";
 import { lookup } from "mime-types";
