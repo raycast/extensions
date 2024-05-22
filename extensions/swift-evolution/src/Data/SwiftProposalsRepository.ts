@@ -3,18 +3,17 @@ import { ProposalsRepository } from "../Domain/ProposalsRepository";
 import { ProposalJson, fetchProposals as fetchRemoteProposals } from "../Data/api";
 
 export class SwiftProposalsRepository implements ProposalsRepository {
-
   async getAllProposals(): Promise<ProposalDataModel[]> {
     try {
       const json = await fetchRemoteProposals();
-      return this.convertToViewModel(json);
+      return this.convertToDataModels(json);
     } catch (error) {
       console.error(error);
       return Promise.reject(error);
     }
   }
 
-  private convertToViewModel(proposals: ProposalJson[]): ProposalDataModel[] {
+  private convertToDataModels(proposals: ProposalJson[]): ProposalDataModel[] {
     const proposalsViewModel: ProposalDataModel[] = proposals
       .map((json) => {
         const viewModel: ProposalDataModel = {

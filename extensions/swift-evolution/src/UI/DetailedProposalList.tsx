@@ -34,30 +34,38 @@ function MetadataSwiftVersion(props: { proposal: ProposalDataModel }) {
 
 function MetadataAuthors(props: { proposal: ProposalDataModel }) {
   const proposal = props.proposal;
-  return proposal.authors.map((author, index) => {
-    return (
-      <List.Item.Detail.Metadata.Link
-        title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
-        target={author.link}
-        text={author.name}
-        key={author.name}
-      />
-    );
-  });
+  return (
+    <>
+      {proposal.authors.map((author, index) => {
+        return (
+          <List.Item.Detail.Metadata.Link
+            title={index === 0 ? `Author${proposal.authors.length > 1 ? "s" : ""}` : ""}
+            target={author.link}
+            text={author.name}
+            key={author.name}
+          />
+        );
+      })}
+    </>
+  );
 }
 
 function MetadataImplementations(props: { proposal: ProposalDataModel }) {
   const proposal = props.proposal;
-  return proposal.implementations.map((implementation, index) => {
-    return (
-      <List.Item.Detail.Metadata.Link
-        title={index === 0 ? `Implementation${proposal.implementations.length > 1 ? "s" : ""}` : ""}
-        target={implementation.url}
-        text={implementation.title}
-        key={implementation.url}
-      />
-    );
-  });
+  return (
+    <>
+      {proposal.implementations.map((implementation, index) => {
+        return (
+          <List.Item.Detail.Metadata.Link
+            title={index === 0 ? `Implementation${proposal.implementations.length > 1 ? "s" : ""}` : ""}
+            target={implementation.url}
+            text={implementation.title}
+            key={implementation.url}
+          />
+        );
+      })}
+    </>
+  );
 }
 
 function Metadata(props: { proposal: ProposalDataModel }) {

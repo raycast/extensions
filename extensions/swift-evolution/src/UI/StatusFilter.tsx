@@ -6,10 +6,7 @@ export default function StatusFilter(props: { onChange: (selected: string) => vo
   const withAllStatuses = ["All", ...allStatuses];
   const onChange = props.onChange;
   return (
-    <List.Dropdown
-      tooltip="Dropdown With Items"
-      onChange={onChange}
-    >
+    <List.Dropdown tooltip="Dropdown With Items" onChange={onChange}>
       {withAllStatuses.map((status) => (
         <List.Dropdown.Item key={status} title={status} value={status} />
       ))}

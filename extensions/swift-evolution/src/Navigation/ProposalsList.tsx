@@ -12,7 +12,7 @@ type UIState = {
   error: string | null;
 };
 
-export default function ProposalsList(props: {query: ProposalsQueryModel}) {
+export default function ProposalsList(props: { query: ProposalsQueryModel }) {
   const query = props.query;
   const [state, setState] = useState<UIState>({
     proposals: [],

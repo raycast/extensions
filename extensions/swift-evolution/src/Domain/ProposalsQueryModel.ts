@@ -1,4 +1,4 @@
-import { ProposalDataModel, Status } from './ProposalDataModel';
+import { ProposalDataModel, Status } from "./ProposalDataModel";
 import { ProposalsRepository } from "./ProposalsRepository";
 
 export class ProposalsQueryModel {
@@ -14,7 +14,7 @@ export class ProposalsQueryModel {
   }
 
   getModelsByStatus(status: Status): ProposalDataModel[] {
-    return this.models.filter(model => model.status === status);
+    return this.models.filter((model) => model.status === status);
   }
 
   async fetchProposals(): Promise<ProposalDataModel[]> {
