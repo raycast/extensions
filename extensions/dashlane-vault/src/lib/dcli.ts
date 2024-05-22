@@ -5,8 +5,11 @@ import { safeParse } from "valibot";
 
 import {
   CLINotFoundError,
+  CLINotLoggedInError,
   CLIVersionNotSupportedError,
+  MasterPasswordMissingError,
   ParseError,
+  TimeoutError,
   getErrorAction,
   getErrorString,
 } from "@/helper/error";
@@ -27,12 +30,26 @@ async function dcli(...args: string[]) {
   }
 
   const { stdout } = await execa(CLI_PATH, args, {
-    timeout: 30_000,
+    timeout: 15_000,
     ...(preferences.masterPassword && {
       env: {
         DASHLANE_MASTER_PASSWORD: preferences.masterPassword,
       },
     }),
+  }).catch((error) => {
+    if (error.timedOut) {
+      if (error.stderr.includes("Please enter your master password")) {
+        throw new MasterPasswordMissingError(error.stack ?? error.message);
+      }
+
+      if (error.stderr.includes("Please enter your email address")) {
+        throw new CLINotLoggedInError(error.stack ?? error.message);
+      }
+
+      throw new TimeoutError(error.stack ?? error.message);
+    }
+
+    throw error;
   });
 
   if (preferences.biometrics) {
