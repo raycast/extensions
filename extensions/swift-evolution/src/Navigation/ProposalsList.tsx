@@ -1,31 +1,44 @@
-import { Color, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import DetailedProposalList from "../UI/DetailedProposalList";
-import { fetchProposals } from "../Domain/domain";
 import { ProposalDataModel, Status } from "../Domain/ProposalDataModel";
-import SimpleProposalList from "../UI/SimpleProposalList";
+import DetailedProposalList from "../UI/DetailedProposalList";
 import ProposalGithubPage from "../UI/ProposalGithubPage";
+import SimpleProposalList from "../UI/SimpleProposalList";
 import StatusFilter from "../UI/StatusFilter";
+import { ProposalsQueryModel } from "../Domain/ProposalsQueryModel";
 
-export default function ProposalsList() {
-  const [state, setState] = useState<{ proposals: ProposalDataModel[]; filteredProposals: ProposalDataModel[] }>({
+type UIState = {
+  proposals: ProposalDataModel[];
+  error: string | null;
+};
+
+export default function ProposalsList(props: {query: ProposalsQueryModel}) {
+  const query = props.query;
+  const [state, setState] = useState<UIState>({
     proposals: [],
-    filteredProposals: [],
+    error: null,
   });
   const [showsDetails, setShowDetails] = useState<boolean>(true);
   const ListItem = showsDetails ? DetailedProposalList : SimpleProposalList;
   const { push } = useNavigation();
 
   useEffect(() => {
-    async function fetch() {
-      const proposals = await getProposals();
-      setState((oldState) => ({
-        ...oldState,
-        proposals: proposals,
-        filteredProposals: proposals,
-      }));
+    async function fetchData() {
+      try {
+        const proposals = await query.fetchProposals();
+        setState((oldState) => ({
+          ...oldState,
+          proposals: proposals,
+        }));
+      } catch (error) {
+        showToast(Toast.Style.Failure, "Failed", (error as Error).message);
+        setState(() => ({
+          proposals: [],
+          error: (error as Error).message,
+        }));
+      }
     }
-    fetch();
+    fetchData();
   }, []);
 
   return (
@@ -36,16 +49,22 @@ export default function ProposalsList() {
       searchBarAccessory={
         <StatusFilter
           onChange={(status) => {
-            const filteredProposals = state.proposals.filter((proposal) => status === "All" || proposal.status === status);
-            setState((oldState) => ({
-              ...oldState,
-              filteredProposals: filteredProposals,
-            }));
+            if (status === "All") {
+              setState((oldState) => ({
+                ...oldState,
+                proposals: query.getAllModels(),
+              }));
+            } else {
+              setState((oldState) => ({
+                ...oldState,
+                proposals: query.getModelsByStatus(status as Status),
+              }));
+            }
           }}
         />
       }
     >
-      {state.filteredProposals.map((proposal) => {
+      {state.proposals.map((proposal) => {
         const pushMarkdown = () =>
           push(<ProposalGithubPage markdownUrl={proposal.markdownLink} prUrl={proposal.link} />);
         return (
@@ -61,13 +80,4 @@ export default function ProposalsList() {
       })}
     </List>
   );
-}
-
-async function getProposals(): Promise<ProposalDataModel[]> {
-  try {
-    return await fetchProposals();
-  } catch (error) {
-    showToast(Toast.Style.Failure, "Failed", (error as Error).message);
-    return Promise.resolve([]);
-  }
 }

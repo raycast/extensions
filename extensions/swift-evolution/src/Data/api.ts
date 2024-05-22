@@ -43,7 +43,7 @@ export type EvolutionJson = {
 
 export async function fetchProposals(): Promise<ProposalJson[]> {
   const response = await fetch(SWIFT_EVOLUTION_PROPOSALS_ENDPOINT);
-  let evolution = (await response.json()) as EvolutionJson;
+  const evolution = (await response.json()) as EvolutionJson;
   return evolution.proposals;
 }
 
