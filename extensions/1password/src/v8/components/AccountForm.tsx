@@ -2,7 +2,7 @@ import { Action, ActionPanel, Clipboard, Form, Icon, showToast, Toast } from "@r
 
 import { Items } from "./Items";
 import { Guide } from "./Guide";
-import { op, useAccounts } from "../utils";
+import { signIn, useAccounts } from "../utils";
 import { useCachedState } from "@raycast/utils";
 
 export function AccountForm({ reset = false }: { reset?: boolean }) {
@@ -26,7 +26,7 @@ export function AccountForm({ reset = false }: { reset?: boolean }) {
               });
 
               try {
-                op(["signin", "--account", values.account]);
+                signIn(`--account ${values.account}`);
                 setHasAccount(true);
 
                 toast.style = Toast.Style.Success;
