@@ -1,6 +1,6 @@
 # Transmission Changelog
 
-## [ETA] - 2024-05-22
+## [Usability improvements] - 2024-05-22
 
 - Add a dedicated default download directory 
 
