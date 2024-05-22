@@ -1,6 +1,5 @@
-import { Form, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
+import { getSelectedFinderItems, showToast, Toast, open } from "@raycast/api";
 import { getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
 import { lookup } from "mime-types";
 import CloudConvert from "cloudconvert";
 import fs from "fs";
@@ -21,14 +20,11 @@ interface FileResult {
 
 const { APIKey, OpenNow, RemoveOriginal } = getPreferenceValues<Preferences>();
 
-export default function Command() {
-  const [file, setFile] = useState<Array<string>>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+export default async function Command() {
+  let selectedItems = [];
   let successFileCount = 0;
 
   const uploadFile = async (file: string) => {
-    setIsLoading(true);
-
     // file path
     const path: string = file;
 
@@ -38,7 +34,6 @@ export default function Command() {
     // check if file name is valid
     if (!fileName) {
       await showToast(Toast.Style.Failure, `Invalid File: ${fileName}`, "Please select a valid file");
-      setIsLoading(false);
       return;
     }
 
@@ -57,7 +52,6 @@ export default function Command() {
         "Invalid File Type",
         "Please select an word or powerpoint file (.doc, .docx, .ppt, .pptx)",
       );
-      setIsLoading(false);
       return;
     }
 
@@ -125,7 +119,6 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
       toast.message = `Fail to create job: ${fileName}`;
-      setIsLoading(false);
       return;
     }
 
@@ -139,7 +132,6 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
       toast.message = `Fail to upload file: ${fileName}`;
-      setIsLoading(false);
       return;
     }
 
@@ -162,7 +154,6 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Error";
       toast.message = `Fail to convert file: ${fileName}`;
-      setIsLoading(false);
       return;
     }
 
@@ -175,19 +166,17 @@ export default function Command() {
         toast.style = Toast.Style.Failure;
         toast.title = "Error";
         toast.message = "Fail to remove original file";
-        setIsLoading(false);
         return;
       }
     }
 
     successFileCount++;
-    if (successFileCount === file.length) {
+    if (successFileCount === selectedItems.length) {
       toast.style = Toast.Style.Success;
       toast.title = "Success";
       toast.message = `All files converted successfully`;
-      setIsLoading(false);
     } else {
-      toast.message = ` [${successFileCount}/${file.length}] ${fileName} converted successfully`;
+      toast.message = ` [${successFileCount}/${selectedItems.length}] ${fileName} converted successfully`;
     }
 
     if (OpenNow) {
@@ -202,30 +191,24 @@ export default function Command() {
     }
   };
 
-  return (
-    <Form
-      enableDrafts
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Submit"
-            onSubmit={async (values: { files: string[] }) => {
-              const files = values.files.filter((file: string) => fs.existsSync(file) && fs.lstatSync(file).isFile());
-              await Promise.all(files.map((file) => uploadFile(file)));
-            }}
-          />
-        </ActionPanel>
-      }
-      isLoading={isLoading}
-    >
-      <Form.FilePicker
-        id="files"
-        value={file}
-        onChange={setFile}
-        title="File"
-        autoFocus
-        info="Select word or ppt files to upload"
-      />
-    </Form>
-  );
+  try {
+    selectedItems = await getSelectedFinderItems();
+    if (selectedItems.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No files selected",
+        message: "Please select one or more files to copy their path",
+      });
+      return;
+    }
+    await Promise.all(selectedItems.map((file) => uploadFile(file.path)));
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot copy file path",
+      message: String(error),
+    });
+  }
+  // const files = selectedItems.filter((file: string) => fs.existsSync(file) && fs.lstatSync(file).isFile());
+  // await Promise.all(files.map((file) => uploadFile(file)));
 }
