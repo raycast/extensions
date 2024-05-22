@@ -12,6 +12,13 @@ interface Preferences {
   RemoveOriginal: boolean;
 }
 
+interface FileResult {
+  dir?: string;
+  filename: string;
+  url?: string;
+  size?: number;
+}
+
 const { APIKey, OpenNow, RemoveOriginal } = getPreferenceValues<Preferences>();
 
 export default function Command() {
@@ -48,7 +55,7 @@ export default function Command() {
       await showToast(
         Toast.Style.Failure,
         "Invalid File Type",
-        "Please select an word or powerpoint file (.doc, .docx, .ppt, .pptx)"
+        "Please select an word or powerpoint file (.doc, .docx, .ppt, .pptx)",
       );
       setIsLoading(false);
       return;
@@ -85,7 +92,7 @@ export default function Command() {
     const toast = await showToast(Toast.Style.Animated, "Processing", "Creating Job...");
 
     // create job
-    let job: any;
+    let job;
     try {
       job = await cloudConvert.jobs.create({
         tasks: {
@@ -141,9 +148,9 @@ export default function Command() {
     try {
       job = await cloudConvert.jobs.wait(job.id); // Wait for job completion
       toast.message = `Downloading File: ${fileName}`;
-      const file: any = cloudConvert.jobs.getExportUrls(job)[0];
+      const file: FileResult = cloudConvert.jobs.getExportUrls(job)[0];
       const writeStream = fs.createWriteStream(storedFileName);
-      https.get(file.url, function (response) {
+      https.get(file.url as string, function (response) {
         response.pipe(writeStream);
       });
 
@@ -203,7 +210,7 @@ export default function Command() {
           <Action.SubmitForm
             title="Submit"
             onSubmit={async (values: { files: string[] }) => {
-              const files = values.files.filter((file: any) => fs.existsSync(file) && fs.lstatSync(file).isFile());
+              const files = values.files.filter((file: string) => fs.existsSync(file) && fs.lstatSync(file).isFile());
               await Promise.all(files.map((file) => uploadFile(file)));
             }}
           />
