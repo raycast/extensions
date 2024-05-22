@@ -51,16 +51,10 @@ export namespace AlpacaHook {
               title: 'Yes',
               style: Alert.ActionStyle.Destructive,
               onAction: () =>
-                AlpacaApi.Positions.closePosition(position, { qty: `?qty=${values.quantity}`, pc: `?percentage=${values.percentage}` }[values.kind])
-                  .then(value => {
-                    pop();
-                    setTimeout(revalidate, 1000);
-                    return value;
-                  })
-                  .finally(() => {
-                    pop();
-                    setTimeout(revalidate, 1000);
-                  }),
+                AlpacaApi.Positions.closePosition(position, { qty: `?qty=${values.quantity}`, pc: `?percentage=${values.percentage}` }[values.kind]).finally(() => {
+                  pop();
+                  setTimeout(revalidate, 1000);
+                }),
             },
             dismissAction: { title: 'No', style: Alert.ActionStyle.Cancel },
           }),
@@ -68,22 +62,13 @@ export namespace AlpacaHook {
         validation: {
           kind: FormValidation.Required,
           quantity: value => {
-            if (value && Number.isNaN(Number(value))) {
-              return 'quantity should be a number';
-            }
-            if (value && value.split('.')[1]?.length > 9) {
-              return 'quantity can have at most 9 decimal places';
+            if (values.kind === 'qty' && Number.isNaN(Number(value)) && value!.split('.')[1]?.length > 9) {
+              return 'quantity should be a number with at most 9 decimal places';
             }
           },
           percentage: value => {
-            if (value && Number.isNaN(Number(value))) {
-              return 'percentage should be a number';
-            }
-            if (value && value.split('.')[1]?.length > 9) {
-              return 'percentage can have at most 9 decimal places';
-            }
-            if (value && (Number(value) < 0 || Number(value) > 100)) {
-              return 'percentage should be in between 0 to 100';
+            if (values.kind === 'pc' && Number.isNaN(Number(value)) && value!.split('.')[1]?.length > 9 && (Number(value) < 0 || Number(value) > 100)) {
+              return 'percentage should be a number between 0 to 100 with at most 9 decimal places';
             }
           },
         },

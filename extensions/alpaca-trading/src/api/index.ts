@@ -124,7 +124,7 @@ export namespace AlpacaApi {
 
     export const closePosition = async (position: AlpacaApi.Positions.Schema, query?: string) => {
       const { symbol, qty_available } = position;
-      const msg = query ? `with ${query}` : `all ${qty_available} qty available`;
+      const msg = query ? `with ${query.split('?')[1]}` : `all ${qty_available} qty available`;
       await showToast(Toast.Style.Animated, `🛑 Closing position for ${symbol}`, msg);
       const response = await fetch(`${endpoint}/positions/${symbol}${query ?? ''}`, { method: 'DELETE', headers });
       if (!response.ok) {
