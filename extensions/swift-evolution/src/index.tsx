@@ -3,7 +3,7 @@ import { ProposalsQueryModel } from "./Domain/ProposalsQueryModel";
 import ProposalsList from "./Navigation/ProposalsList";
 
 const PRIMITIVE_DI_MAP = {
-  ProposalsQueryModel: new ProposalsQueryModel(new SwiftProposalsRepository())
+  ProposalsQueryModel: new ProposalsQueryModel(new SwiftProposalsRepository()),
 };
 
 export default function Main() {
