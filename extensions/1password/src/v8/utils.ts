@@ -80,7 +80,6 @@ export function op(args: string[]) {
 }
 
 export const handleErrors = (stderr: string) => {
-  console.error(stderr);
   if (stderr.includes("no such host")) {
     throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
   } else if (stderr.includes("could not get item") || stderr.includes("isn't an item")) {
@@ -146,7 +145,7 @@ export const useCategories = () =>
 
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
 
-export const useAccounts = <T = User[], U = ExtensionError>(execute = false) =>
+export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
   useExec<T, U>(CLI_PATH, ["account", "list", "--format=json"], {
     parseOutput: ({ stdout, stderr, error, exitCode }) => {
       if (error) handleErrors(error.message);
