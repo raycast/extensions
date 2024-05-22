@@ -58,7 +58,7 @@ export type TagResponse = string[];
 
 export interface MeResponse {
   id: number;
-  name: string,
+  name: string;
   rowStatus: "ACTIVE";
   createdTime: number;
   updatedTime: number;
