@@ -25,7 +25,7 @@
           "description": "Choose how you want to clean up your screenshots.",
           "type": "dropdown",
           "required": true,
-          "title": "Delete or move to trash",
+          "title": "Delete or Move to Trash",
           "default": "0",
           "data": [
             {
@@ -41,7 +41,7 @@
         {
           "type": "directory",
           "name": "screenshotFolder",
-          "title": "Screenshot folder",
+          "title": "Screenshot Folder",
           "required": true,
           "description": "Location where you save your screenshots.",
           "default": "~/Desktop"
@@ -51,7 +51,7 @@
           "description": "Prevent screenshots from being deleted if they are older than the configured days.",
           "type": "dropdown",
           "required": true,
-          "title": "Protect recent screenshots for",
+          "title": "Protect Recent Screenshots for",
           "default": "30",
           "data": [
             {
