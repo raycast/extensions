@@ -5,6 +5,7 @@
 - Adds update-termination-protection commands for stacks listed in CFN command ([#12497](https://github.com/raycast/extensions/issues/12497))
 - Adds listing exports feature to CFN command
 - Additional metadata for the SQS queues mapped into list item details ([#12498](https://github.com/raycast/extensions/issues/12498))
+- Adds SendMessage action for queues
 
 ## [Improvements] - 2024-05-15
 
