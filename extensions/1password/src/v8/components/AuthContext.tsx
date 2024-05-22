@@ -23,6 +23,7 @@ import {
   useAccounts,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
+import { useCachedState } from "@raycast/utils";
 
 interface AuthContextType {
   isAuthenticated: boolean;
