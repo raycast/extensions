@@ -134,6 +134,14 @@
       "default": "~/Downloads"
     },
     {
+      "name": "defaultDownloadDir",
+      "title": "Default Download Directory",
+      "required": false,
+      "description": "The default download directory",
+      "type": "textfield",
+      "default": ""
+    },
+    {
       "name": "rememberStatusFilter",
       "title": "Status Filter",
       "required": false,
