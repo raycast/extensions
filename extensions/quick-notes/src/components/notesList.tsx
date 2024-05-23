@@ -2,15 +2,63 @@ import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { format } from "date-fns";
-import { notesAtom, Note, tagsAtom } from "../services/atoms";
+import { notesAtom, Note, tagsAtom, Tag, sortAtom, menuAtom } from "../services/atoms";
 import Actions from "./actions";
-import { preferences } from "../services/config";
+import { getTintColor } from "../utils/utils";
 
-const ListItem = ({ note, filterList }: { note: Note; filterList: (str: string) => void }) => {
+const ListItem = ({
+  note,
+  tags = [],
+  filterList,
+  showMenu,
+}: {
+  note: Note;
+  tags?: Tag[];
+  filterList: (str: string) => void;
+  showMenu: boolean;
+}) => {
   return (
     <List.Item
       title={note.title}
-      detail={<List.Item.Detail markdown={note.body} />}
+      detail={
+        <List.Item.Detail
+          markdown={note.body}
+          metadata={
+            showMenu ? (
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label title={note.title} />
+                {note.tags.length > 0 && (
+                  <List.Item.Detail.Metadata.TagList title="Tags">
+                    {note.tags.map((tag, index) => (
+                      <List.Item.Detail.Metadata.TagList.Item
+                        key={index}
+                        text={tag}
+                        color={getTintColor(tags.find((t) => t.name === tag)?.color)}
+                      />
+                    ))}
+                  </List.Item.Detail.Metadata.TagList>
+                )}
+                <List.Item.Detail.Metadata.Label
+                  title="Word Count"
+                  text={`${
+                    note.body.split(" ").filter((n) => {
+                      return n != "";
+                    }).length ?? 0
+                  }`}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Created At"
+                  text={format(note.createdAt, "MMMM d, yyyy '@' HH:mm")}
+                />
+                <List.Item.Detail.Metadata.Label
+                  title="Updated At"
+                  text={format(note.updatedAt, "MMMM d, yyyy '@' HH:mm")}
+                />
+              </List.Item.Detail.Metadata>
+            ) : undefined
+          }
+        />
+      }
       actions={
         <Actions
           noNotes={false}
@@ -35,6 +83,8 @@ const ListItem = ({ note, filterList }: { note: Note; filterList: (str: string) 
 const NotesList = () => {
   const [notes] = useAtom(notesAtom);
   const [tags] = useAtom(tagsAtom);
+  const [sort] = useAtom(sortAtom);
+  const [menu] = useAtom(menuAtom);
 
   const [searchText, setSearchText] = useState("");
   const [filteredNotes, setFilteredNotes] = useState<Note[]>(notes);
@@ -47,7 +97,7 @@ const NotesList = () => {
   const published = filteredNotes.filter((n) => !n.is_draft);
 
   // Sort by tag if user preference is set
-  const isCategories = preferences.sort === "tags";
+  const isCategories = sort === "tags";
   const noTagNotes = published.filter((n) => n.tags.length === 0);
 
   // Custom search
@@ -79,7 +129,7 @@ const NotesList = () => {
           {drafts.length > 0 && (
             <List.Section title="Drafts">
               {drafts.map((note, index) => (
-                <ListItem key={index} note={note} filterList={filterList} />
+                <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
               ))}
             </List.Section>
           )}
@@ -89,14 +139,16 @@ const NotesList = () => {
                 <List.Section key={index} title={tag.name}>
                   {published.map(
                     (note, index) =>
-                      note.tags.includes(tag.name) && <ListItem key={index} note={note} filterList={filterList} />,
+                      note.tags.includes(tag.name) && (
+                        <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
+                      ),
                   )}
                 </List.Section>
               ))}
               {noTagNotes.length > 0 && (
                 <List.Section title="Notes">
                   {noTagNotes.map((note, index) => (
-                    <ListItem key={index} note={note} filterList={filterList} />
+                    <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
                   ))}
                 </List.Section>
               )}
@@ -104,7 +156,7 @@ const NotesList = () => {
           ) : (
             <List.Section title="Notes">
               {published.map((note, index) => (
-                <ListItem key={index} note={note} filterList={filterList} />
+                <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
               ))}
             </List.Section>
           )}

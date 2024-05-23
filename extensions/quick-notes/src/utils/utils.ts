@@ -1,5 +1,5 @@
-import { environment, showToast, trash } from "@raycast/api";
-import { Note, Tag } from "../services/atoms";
+import { LocalStorage, environment, showToast, trash } from "@raycast/api";
+import { Note, Sort, Tag } from "../services/atoms";
 import slugify from "slugify";
 import fs from "fs";
 import { TODO_FILE_PATH } from "../services/config";
@@ -17,6 +17,29 @@ export const getInitialValuesFromFile = (filepath: string): [] => {
   } catch (error) {
     fs.mkdirSync(environment.supportPath, { recursive: true });
     return [];
+  }
+};
+
+export const getInitialSort = async (): Promise<Sort> => {
+  const savedSort = await LocalStorage.getItem<Sort>("sort");
+  return savedSort ?? "updated";
+};
+
+export const getInitialMenuToggle = async (): Promise<boolean> => {
+  const savedToggle = await LocalStorage.getItem("menu");
+  return savedToggle === "true" ?? false;
+};
+
+export const getSortHumanReadable = (sort: Sort): string => {
+  switch (sort) {
+    case "created":
+      return "Created At";
+    case "updated":
+      return "Updated At";
+    case "alphabetical":
+      return "Alphabetical";
+    case "tags":
+      return "Tags";
   }
 };
 
@@ -197,4 +220,9 @@ export const colors = [
 
 export const getRandomColor = () => {
   return colors[Math.floor(Math.random() * colors.length)];
+};
+
+export const getTintColor = (colorName?: string) => {
+  if (!colorName) return undefined;
+  return colors.find((c) => c.name === colorName)?.tintColor;
 };

@@ -7,9 +7,13 @@ import {
   exportNotes,
   getDeletedNote,
   getDeletedTags,
+  getInitialMenuToggle,
+  getInitialSort,
   getInitialValuesFromFile,
   getOldRenamedTitles,
 } from "../utils/utils";
+import { LocalStorage } from "@raycast/api";
+import slugify from "slugify";
 
 export interface Note {
   title: string;
@@ -25,17 +29,62 @@ export interface Tag {
   color: string;
 }
 
+export const sortArr = ["created", "updated", "alphabetical", "tags"] as const;
+
+export type Sort = (typeof sortArr)[number];
+
+const baseSortAtom = atom<Sort>("updated");
+export const sortAtom = atom(
+  async (get) => {
+    const initialSort = await getInitialSort();
+    const currentSort = get(baseSortAtom);
+    return currentSort === "updated" ? initialSort : currentSort;
+  },
+  async (get, set, newSort: Sort) => {
+    const current = get(baseSortAtom);
+    if (current === newSort) {
+      return;
+    }
+    await LocalStorage.setItem("sort", newSort);
+    set(baseSortAtom, newSort);
+  },
+);
+
+const menuToggle = atom(false);
+const internalMenuAtom = atom(
+  async (get) => {
+    const initMenu = await getInitialMenuToggle();
+    const currentMenu = get(menuToggle);
+    return currentMenu === false ? initMenu : currentMenu;
+  },
+  async (get, set, newMenu: boolean) => {
+    await LocalStorage.setItem("menu", newMenu ? "true" : "false");
+    set(menuToggle, newMenu);
+  },
+);
+
+export const menuAtom = atom(
+  async (get) => await get(internalMenuAtom),
+  async (get, set) => {
+    const current = get(menuToggle);
+    const newMenu = !current;
+    await LocalStorage.setItem("menu", newMenu ? "true" : "false");
+    set(menuToggle, newMenu);
+  },
+);
+
 const notes = atom<Note[]>(getInitialValuesFromFile(TODO_FILE_PATH) as Note[]);
 export const notesAtom = atom(
-  (get) => {
+  async (get) => {
     const notesQ = get(notes);
+    const sortQ = get(baseSortAtom);
 
     // Sort based on user preference
     return notesQ.sort((a, b) => {
-      if (preferences.sort === "created") {
+      if (sortQ === "created") {
         return compareDesc(a.createdAt, b.createdAt);
-      } else if (preferences.sort === "alphabetical") {
-        return a.title.localeCompare(b.title);
+      } else if (sortQ === "alphabetical") {
+        return slugify(a.title).localeCompare(slugify(b.title));
       }
       return compareDesc(a.updatedAt, b.updatedAt);
     });

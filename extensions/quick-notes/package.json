@@ -45,32 +45,6 @@
       "type": "directory",
       "required": false,
       "label": "File Location"
-    },
-    {
-      "name": "sort",
-      "title": "Sort Notes By",
-      "description": "Sort notes by created or updated",
-      "type": "dropdown",
-      "required": false,
-      "data": [
-        {
-          "title": "Time Updated",
-          "value": "updated"
-        },
-        {
-          "title": "Time Created",
-          "value": "created"
-        },
-        {
-          "title": "Alphabetical",
-          "value": "alphabetical"
-        },
-        {
-          "title": "Tags",
-          "value": "tags"
-        }
-      ],
-      "defaultValue": "updated"
     }
   ],
   "dependencies": {
