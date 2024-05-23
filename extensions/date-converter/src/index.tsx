@@ -2,6 +2,11 @@ import { Clipboard, ActionPanel, List, Action, getPreferenceValues } from "@rayc
 import * as chrono from "chrono-node";
 import { useMemo, useState } from "react";
 import "@total-typescript/ts-reset";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
+
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-US");
 
 interface LabeledDate {
   label?: string;
@@ -185,7 +190,7 @@ export default function Command() {
         <List.Item
           key={date.toISOString()}
           title={humanFormatter.format(date)}
-          subtitle={label}
+          subtitle={label + "﹣" + timeAgo.format(date)}
           actions={
             <ActionPanel>
               {getSortedFormats({ human }).map(({ id, title, format }) => (

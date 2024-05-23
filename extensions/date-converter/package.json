@@ -98,7 +98,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.53.3",
-    "chrono-node": "^2.6.3"
+    "chrono-node": "^2.6.3",
+    "javascript-time-ago": "^2.5.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
