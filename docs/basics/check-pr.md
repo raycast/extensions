@@ -31,11 +31,15 @@ You can see the branch on the above image, in this example it's `notion-quicklin
 Click the `Files Changed` tab and see which directy files is changed in, in this example it's `extensions/notion`
 
 ```
-git clone -n --depth=1 --filter=tree:0 -b {BRANCH} {FORK_URL}
+BRANCH="" # Example: notion-quicklinks
+FORK_URL="" # Example: https://github.com/bkeys818/raycast-extensions.git
+EXTENSION_PATH="" # Example: extensions/notion
+
+git clone -n --depth=1 --filter=tree:0 -b ${BRANCH} ${FORK_URL}
 cd raycast-extensions
-git sparse-checkout set --no-cone {EXTENSION_PATH}
+git sparse-checkout set --no-cone ${EXTENSION_PATH}
 git checkout
-cd {EXTENSION_PATH}
+cd ${EXTENSION_PATH}
 npm install && npm run dev
 ```
 
