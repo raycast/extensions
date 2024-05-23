@@ -1,5 +1,9 @@
 # Color Picker Changelog
 
+## [Cross-Extension] - 2024-05-15
+
+- Expose extension ability with [Raycast Cross-Extension Conventions](https://github.com/LitoMore/raycast-cross-extension-conventions)
+
 ## [Enhancement] - 2024-03-08
 
 - Added HEX without prefix (#) color format

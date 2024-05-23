@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { omitBy } from "lodash";
 import { Documentation } from "./components/actions.js";
+import { Input } from "./components/input.js";
 import { FieldType, fields } from "./components/parameters.js";
 import { Badge, LaunchFromSimpleIconsContext, LaunchFromColorPickerContext } from "./types.js";
-import { codeBlock, encodeBadgeContentParameters } from "./utils.js";
+import { codeBlock } from "./utils.js";
 
 const defaultBadge: Badge = {
-  label: "label",
-  message: "message",
-  color: "blue",
+  url: "https://gist.githubusercontent.com/LitoMore/aae8985fe6c2b4429db05570247d2a7a/raw/endpoint-badge-example",
 };
 
-const parameterIds: FieldType[] = ["Label", "Message", "Color", "LabelColor", "Logo", "Style"];
+const parameterIds: FieldType[] = ["Url", "Label", "Message", "Color", "LabelColor", "Logo", "Style"];
+const validationFields = ["url"];
 
 export default function Command({
   launchContext,
 }: LaunchProps<{ launchContext?: LaunchFromSimpleIconsContext & LaunchFromColorPickerContext }>) {
-  const [badge, setBadge] = useCachedState<Badge>("static-badge", defaultBadge);
+  const [badge, setBadge] = useCachedState<Badge>("endpoint-badge", defaultBadge);
   const [input, setInput] = useState<{ title: string; value?: string }>({ title: "", value: undefined });
   const [inputValid, setInputValid] = useState(true);
 
@@ -29,7 +29,7 @@ export default function Command({
   };
 
   const validateInput = (value: string) => {
-    if (["label", "color", "labelColor", "logoColor"].includes(input.title)) {
+    if (validationFields.includes(input.title)) {
       setInputValid(Boolean(value));
     }
   };
@@ -50,45 +50,28 @@ export default function Command({
     }
   }, [input]);
 
-  const badgeContent = encodeBadgeContentParameters(
-    [badge.label ?? "", badge.message ?? "", badge.color ?? ""].filter(Boolean),
-  ).join("-");
-
-  const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$") || ["label", "message", "color"].includes(k));
+  const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$"));
   const query = new URLSearchParams(urlParameters as Record<string, string>).toString();
 
   if (input.title) {
     return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title={`Submit ${input.title}`}
-              onSubmit={(values) => {
-                setBadge({ ...badge, [input.title]: values[input.title] });
-                setInput({ title: "", value: undefined });
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id={input.title}
-          title={input.title}
-          defaultValue={input.value}
-          placeholder={`Enter your ${input.title}`}
-          error={inputValid ? undefined : "This field is required"}
-          onChange={(value) => {
-            if (["label", "color", "labelColor", "logoColor"].includes(input.title)) {
-              setInputValid(Boolean(value));
-            }
-          }}
-        />
-      </Form>
+      <Input
+        input={input}
+        inputValid={inputValid}
+        onChange={(value) => {
+          if (validationFields.includes(input.title)) {
+            setInputValid(Boolean(value));
+          }
+        }}
+        onSubmit={(values) => {
+          setBadge({ ...badge, [input.title]: values[input.title] });
+          setInput({ title: "", value: undefined });
+        }}
+      />
     );
   }
 
-  const badgeUrl = new URL(`https://img.shields.io/badge/${badgeContent}`);
+  const badgeUrl = new URL(`https://img.shields.io/badge/endpoint`);
   badgeUrl.search = query;
 
   const parameterFields = parameterIds.map((id) => fields[id]);
@@ -113,7 +96,7 @@ export default function Command({
               onAction={() => reset()}
             />
           </ActionPanel.Section>
-          <Documentation title="API Documentation" url="https://shields.io/badges" />
+          <Documentation title="API Documentation" url="https://shields.io/badges/endpoint-badge" />
         </ActionPanel>
       }
       markdown={`${"# \n\n".repeat(5)}![](${badgeUrl})\n\n${codeBlock("markdown", badgeUrl.toString())}`}

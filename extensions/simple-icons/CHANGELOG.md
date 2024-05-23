@@ -1,5 +1,9 @@
 # Brand Icons Changelog
 
+## [Updates] - 2024-05-16
+
+- Implement Raycast Cross Extension Conventions
+
 ## [Updates] - 2024-04-30
 
 - Expose search function through `launchCommand`

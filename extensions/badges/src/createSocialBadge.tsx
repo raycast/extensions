@@ -1,24 +1,29 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, LaunchProps, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { omitBy } from "lodash";
 import { Documentation } from "./components/actions.js";
-import { FieldType, fields } from "./components/parameters.js";
+import { Color, Label, LabelColor, Logo, Message, Style } from "./components/parameters.js";
+import { Input } from "./components/input.js";
+import { colorsForBackground } from "./vendor/badge-maker-color.js";
 import { Badge, LaunchFromSimpleIconsContext, LaunchFromColorPickerContext } from "./types.js";
 import { codeBlock, encodeBadgeContentParameters } from "./utils.js";
 
 const defaultBadge: Badge = {
-  label: "label",
-  message: "message",
-  color: "blue",
+  $icon: { title: "Raycast", slug: "raycast", hex: "FF6363", source: "" },
+  logo: "raycast",
+  label: "Raycast",
+  color: "FF6363",
+  labelColor: undefined,
+  logoColor: colorsForBackground("#FF6363"),
+  style: "flat-square",
 };
-
-const parameterIds: FieldType[] = ["Label", "Message", "Color", "LabelColor", "Logo", "Style"];
+const validationFields = ["label", "color", "labelColor", "logoColor"];
 
 export default function Command({
   launchContext,
 }: LaunchProps<{ launchContext?: LaunchFromSimpleIconsContext & LaunchFromColorPickerContext }>) {
-  const [badge, setBadge] = useCachedState<Badge>("static-badge", defaultBadge);
+  const [badge, setBadge] = useCachedState<Badge>("social-badge", defaultBadge);
   const [input, setInput] = useState<{ title: string; value?: string }>({ title: "", value: undefined });
   const [inputValid, setInputValid] = useState(true);
 
@@ -28,27 +33,24 @@ export default function Command({
     setBadge(defaultBadge);
   };
 
-  const validateInput = (value: string) => {
-    if (["label", "color", "labelColor", "logoColor"].includes(input.title)) {
-      setInputValid(Boolean(value));
-    }
-  };
-
   useEffect(() => {
     if (launchContext?.launchFromExtensionName === "simple-icons" && launchContext?.icon) {
-      setBadge({ ...badge, $icon: launchContext.icon, logo: launchContext.icon.slug, logoColor: undefined });
+      setBadge({
+        ...badge,
+        $icon: launchContext.icon,
+        label: launchContext.icon.title,
+        message: undefined,
+        color: launchContext.icon.hex,
+        labelColor: undefined,
+        logo: launchContext.icon.slug,
+        logoColor: badge.style === "social" ? undefined : colorsForBackground("#" + launchContext.icon.hex),
+      });
     }
 
     if (launchContext?.launchFromExtensionName === "color-picker" && launchContext?.hex && launchContext?.field) {
       setBadge({ ...badge, [launchContext.field]: launchContext.hex.slice(1) });
     }
   }, []);
-
-  useEffect(() => {
-    if (input.title) {
-      validateInput(input.value ?? "");
-    }
-  }, [input]);
 
   const badgeContent = encodeBadgeContentParameters(
     [badge.label ?? "", badge.message ?? "", badge.color ?? ""].filter(Boolean),
@@ -59,40 +61,24 @@ export default function Command({
 
   if (input.title) {
     return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title={`Submit ${input.title}`}
-              onSubmit={(values) => {
-                setBadge({ ...badge, [input.title]: values[input.title] });
-                setInput({ title: "", value: undefined });
-              }}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField
-          id={input.title}
-          title={input.title}
-          defaultValue={input.value}
-          placeholder={`Enter your ${input.title}`}
-          error={inputValid ? undefined : "This field is required"}
-          onChange={(value) => {
-            if (["label", "color", "labelColor", "logoColor"].includes(input.title)) {
-              setInputValid(Boolean(value));
-            }
-          }}
-        />
-      </Form>
+      <Input
+        input={input}
+        inputValid={inputValid}
+        onChange={(value) => {
+          if (validationFields.includes(input.title)) {
+            setInputValid(Boolean(value));
+          }
+        }}
+        onSubmit={(values) => {
+          setBadge({ ...badge, [input.title]: values[input.title] });
+          setInput({ title: "", value: undefined });
+        }}
+      />
     );
   }
 
   const badgeUrl = new URL(`https://img.shields.io/badge/${badgeContent}`);
   badgeUrl.search = query;
-
-  const parameterFields = parameterIds.map((id) => fields[id]);
-  const parameterProps = { badge, onChange: setBadge, onInput: setInput };
 
   return (
     <Detail
@@ -119,9 +105,23 @@ export default function Command({
       markdown={`${"# \n\n".repeat(5)}![](${badgeUrl})\n\n${codeBlock("markdown", badgeUrl.toString())}`}
       metadata={
         <Detail.Metadata>
-          {parameterFields.map((P, index) => (
-            <P key={`paramter-String(${index})`} {...parameterProps} />
-          ))}
+          <Logo badge={badge} onChange={setBadge} onInput={setInput} />
+          <Style
+            badge={badge}
+            onChange={(badge) => {
+              const badgeMessage = badge.style === "social" ? badge.message ?? "message" : badge.message;
+              setBadge({
+                ...badge,
+                message: badgeMessage,
+                logoColor: badge.style === "social" ? undefined : colorsForBackground("#" + badge.$icon?.hex),
+              });
+            }}
+            onInput={() => {}}
+          />
+          <Label badge={badge} onChange={setBadge} onInput={setInput} />
+          <Message badge={badge} onChange={setBadge} onInput={setInput} />
+          <Color badge={badge} onChange={setBadge} onInput={setInput} />
+          <LabelColor badge={badge} onChange={setBadge} onInput={setInput} />
         </Detail.Metadata>
       }
     />
