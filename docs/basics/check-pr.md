@@ -1,18 +1,18 @@
 ---
-description: Learn how to review a contribution from a PR opened by a contributor.
+description: Learn how to review a contribution from a Pull Request opened by a contributor.
 ---
 
-# Checkout PR
+# Review an extension in a Pull Request
 
-All updates to an extension is made through a [Pull Request](https://github.com/raycast/extensions/pulls) - if you need to review that the PR works as expected, then you can checkout the fork within a few seconds.
+All updates to an extension are made through a [Pull Request](https://github.com/raycast/extensions/pulls) - if you need to review whether the Pull Request works as expected, then you can checkout the fork within a few seconds.
 
 ## Steps
 
 1) Open a terminal window
-2) Navigate to a folder where you want the extension to land
-3) Run the above commands
+2) Navigate to a folder where you want the repository to land
+3) Run the below commands
 
-_There is a few things you'll need to find and insert manually in below snippet_
+_There are a few things you'll need to find and insert manually in the snippet below_
 
 **{FORK_URL}**
 
