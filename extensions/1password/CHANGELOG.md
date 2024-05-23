@@ -6,6 +6,10 @@
 
 ## [Fix] - 2024-05-21
 
+-- Fixes account_uuid is undefined
+
+## [Fix] - 2024-05-21
+
 -- Fixes account selection
 
 ## [Enhancements] - 2024-05-10

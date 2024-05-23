@@ -26,7 +26,7 @@ export function Items({ flags }: { flags?: string[] }) {
     data: items,
     error: itemsError,
     isLoading: itemsIsLoading,
-  } = usePasswords2({ flags, account: account.account_uuid, execute: !accountError && !accountIsLoading });
+  } = usePasswords2({ flags, account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading });
 
   useMemo(() => {
     if (!items) return;
