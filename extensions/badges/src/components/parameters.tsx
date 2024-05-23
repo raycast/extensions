@@ -163,7 +163,6 @@ export const Logo = ({ badge, onChange, onInput }: ParameterProps) => {
                   },
                 },
                 {
-                  ownerOrAuthorName: "litomore",
                   context: {
                     launchFromExtensionName: "simple-icons",
                   },
