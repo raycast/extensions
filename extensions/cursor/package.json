@@ -19,11 +19,11 @@
     "hakob_nersesian",
     "erics118",
     "tm.wrnr",
-    "tleo19",
-    "pedrotmr"
+    "tleo19"
   ],
   "keywords": [
-    "vscode"
+    "vscode",
+    "cursor"
   ],
   "license": "MIT",
   "commands": [
@@ -35,7 +35,7 @@
       "mode": "view"
     },
     {
-      "name": "open-with-vscode",
+      "name": "open-with-cursor",
       "title": "Open With Cursor",
       "subtitle": "Cursor",
       "description": "Opens the currently selected Finder item with Cursor.",
@@ -77,18 +77,6 @@
       "default": "Code",
       "description": "Select which build of Cursor to use when searching for recent projects",
       "data": [
-        {
-          "value": "Code",
-          "title": "Cursor"
-        },
-        {
-          "value": "Code - Insiders",
-          "title": "Cursor - Insiders"
-        },
-        {
-          "value": "VSCodium",
-          "title": "VSCodium"
-        },
         {
           "value": "Cursor",
           "title": "Cursor"

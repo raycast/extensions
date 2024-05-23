@@ -1,3 +1,7 @@
+## [Update] - 2024-05-23
+
+- Make application work for Cursor IDE with proper icons and action names
+
 # Visual Studio Code Search Recent Projects Changelog
 
 ## [Fix] - 2023-12-27
