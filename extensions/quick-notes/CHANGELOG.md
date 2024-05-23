@@ -1,8 +1,8 @@
 # Quick Notes Changelog
 
-## [Info Menu] - 2024-05-23
+## [Metadata Menu and Sort] - 2024-05-23
 
-- New Info Menu to show details and tags for a note using `⌘ + M`
+- New note metadata menu to show tags and other details for a note using `⌘ + M`
 - Sort straight from the notes list instead of preferences using `⌘ + S`'
 - Both these new features save your settings in LocalStorage
 

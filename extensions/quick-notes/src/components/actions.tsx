@@ -26,7 +26,7 @@ const Actions = ({
 }) => {
   const [allTags] = useAtom(tagsAtom);
   const [sort, setSort] = useAtom(sortAtom);
-  const [_, setMenu] = useAtom(menuAtom);
+  const [__, setMenu] = useAtom(menuAtom);
   return (
     <ActionPanel>
       <ActionPanel.Section>
