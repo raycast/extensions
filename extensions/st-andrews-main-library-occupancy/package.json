@@ -10,6 +10,7 @@
     {
       "name": "index",
       "title": "Library Occupancy",
+      "subtitle": "Main Library in University of St Andrews",
       "description": "How busy is the main library now?",
       "mode": "view"
     }
