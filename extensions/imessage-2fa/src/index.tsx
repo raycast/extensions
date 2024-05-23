@@ -31,7 +31,7 @@ export default function Command() {
           const code = extractCode(message.text);
 
           if (!code) {
-            console.debug(`got message, but no code ${message.text}`)
+            console.debug(`got message, but no code ${message.text}`);
             return null;
           }
 

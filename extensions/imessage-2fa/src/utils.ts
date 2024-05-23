@@ -48,7 +48,7 @@ export function extractCode(original: string) {
       "ig"
     );
 
-    const originalMessage = message
+    const originalMessage = message;
     message = message.replaceAll(phoneRegex, "");
 
     if ((m = /(^|\s|\\R|\t|\b|G-|:)(\d{5,8})($|\s|\\R|\t|\b|\.|,)/.exec(message)) !== null) {
@@ -91,7 +91,7 @@ export function extractCode(original: string) {
       //   "Please enter code 548 on Zocdoc."
       code = m[2];
     } else {
-      console.log("no code found in message")
+      console.log("no code found in message");
     }
   }
 
