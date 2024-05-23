@@ -19,6 +19,7 @@
 - [Publish an Extension](basics/publish-an-extension.md)
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
+- [Review an Extension in a Pull Request](basics/review-pullrequest.md)
 
 ## Teams
 
