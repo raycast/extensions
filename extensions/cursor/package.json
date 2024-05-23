@@ -36,7 +36,7 @@
     },
     {
       "name": "open-with-cursor",
-      "title": "Open with Cursor",
+      "title": "Open With Cursor",
       "subtitle": "Cursor",
       "description": "Opens the currently selected Finder item with Cursor.",
       "mode": "no-view"
