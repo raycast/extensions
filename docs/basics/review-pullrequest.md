@@ -14,7 +14,7 @@ All updates to an extension are made through a [Pull Request](https://github.com
 
 _There are a few things you'll need to find and insert manually in the snippet below_
 
-**{FORK_URL}**
+**FORK_URL**
 
 Open the PR and click on the incomming ref as shown below
 
@@ -22,24 +22,24 @@ Open the PR and click on the incomming ref as shown below
 
 Now click the code button and copy the HTTPS path from the dropdown
 
-**{BRANCH}**
+**BRANCH**
 
 You can see the branch on the above image, in this example it's `notion-quicklinks`
 
-**{EXTENSION_PATH}**
+**EXTENSION_NAME**
 
-Click the `Files Changed` tab and see which directy files is changed in, in this example it's `extensions/notion`
+Click the `Files Changed` tab and see which directy files is changed in, in this example it's `notion`
 
 ```
 BRANCH="" # Example: notion-quicklinks
 FORK_URL="" # Example: https://github.com/bkeys818/raycast-extensions.git
-EXTENSION_PATH="" # Example: extensions/notion
+EXTENSION_NAME="" # Example: notion
 
 git clone -n --depth=1 --filter=tree:0 -b ${BRANCH} ${FORK_URL}
 cd raycast-extensions
-git sparse-checkout set --no-cone ${EXTENSION_PATH}
+git sparse-checkout set --no-cone "extensions/${EXTENSION_NAME}"
 git checkout
-cd ${EXTENSION_PATH}
+cd "extensions/${EXTENSION_NAME}"
 npm install && npm run dev
 ```
 
