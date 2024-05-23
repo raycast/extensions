@@ -5,12 +5,6 @@ const preferences = getPreferenceValues<ExtensionPreferences>();
 
 function getBundleIdentifier() {
   switch (preferences.build) {
-    case VSCodeBuild.Code:
-      return "com.microsoft.VSCode";
-    case VSCodeBuild.Insiders:
-      return "com.microsoft.VSCodeInsiders";
-    case VSCodeBuild.VSCodium:
-      return "VSCodium";
     case VSCodeBuild.Cursor:
       return "Cursor";
   }
