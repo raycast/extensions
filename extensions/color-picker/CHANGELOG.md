@@ -1,5 +1,11 @@
 # Color Picker Changelog
 
+## [Generate Colors using AI] - 2024-05-23
+
+- Add a new "Generate Colors" command
+- Group "Copy As..." actions into a single submenu
+- Remember the user's choice when deleting a color from the history
+
 ## [Enhancement] - 2024-03-08
 
 - Added HEX without prefix (#) color format

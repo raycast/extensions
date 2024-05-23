@@ -15,9 +15,12 @@ export type DeprecatedColor = {
   blue: number; // between 0 and 255
 };
 
+// The history color can also be an hex string
+export type HistoryColor = Color | DeprecatedColor | string;
+
 export type HistoryItem = {
   date: string;
-  color: Color | DeprecatedColor;
+  color: HistoryColor;
   title?: string;
 };
 
