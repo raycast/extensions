@@ -26,7 +26,7 @@ Now click the code button and copy the HTTPS path from the dropdown
 
 You can see the branch on the above image, in this example it's `notion-quicklinks`
 
-**[EXTENSION_PATH]**
+**{EXTENSION_PATH}**
 
 Click the `Files Changed` tab and see which directy files is changed in, in this example it's `extensions/notion`
 
