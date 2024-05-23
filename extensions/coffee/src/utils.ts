@@ -1,5 +1,5 @@
 import { getPreferenceValues, launchCommand, LaunchType, showHUD } from "@raycast/api";
-import { execSync } from "node:child_process";
+import { exec, execSync } from "node:child_process";
 
 function generateArgs(additionalArgs?: string) {
   const preferences = getPreferenceValues<Preferences>();
@@ -32,22 +32,18 @@ async function update(updates: Updates, caffeinated: boolean) {
 }
 
 export async function stopCaffeinate(updates: Updates, hudMessage?: string) {
-  update(updates, false);
-
+  execSync("/usr/bin/killall caffeinate || true");
+  await update(updates, false);
   if (hudMessage) {
     await showHUD(hudMessage);
   }
-
-  execSync("/usr/bin/killall caffeinate || true");
 }
 
 export async function startCaffeinate(updates: Updates, hudMessage?: string, additionalArgs?: string) {
   await stopCaffeinate({ menubar: false, status: false });
-  update(updates, true);
-
+  exec(`/usr/bin/caffeinate ${generateArgs(additionalArgs)} || true`);
+  await update(updates, true);
   if (hudMessage) {
     await showHUD(hudMessage);
   }
-
-  execSync(`/usr/bin/caffeinate ${generateArgs(additionalArgs)} || true`);
 }
