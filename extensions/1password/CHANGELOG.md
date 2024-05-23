@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Fix] - 2024-05-23
+
+-- Fixes the infinite loading when trying to switch accounts.
+
 ## [Fix] - 2024-05-21
 
 -- Fixes account selection
