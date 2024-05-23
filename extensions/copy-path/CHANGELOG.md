@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Update Icon] - {PR_MERGE_DATE}
+
+- Update the extension's icon
+
 ## [Optimize Copy URL] - 2024-02-27
 
 - Add multiple setting items
