@@ -18,7 +18,7 @@ _There is a few things you'll need to find and insert manually in below snippet_
 
 Open the PR and click on the incomming ref as shown below
 
-[INSERT IMAGE]
+![](../.gitbook/assets/go-to-ref.png)
 
 Now click the code button and copy the HTTPS path from the dropdown
 
