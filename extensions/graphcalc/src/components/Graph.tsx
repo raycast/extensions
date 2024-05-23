@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Detail, Toast, showToast } from "@raycast/api";
 import { evaluate } from "mathjs";
 import {
@@ -16,7 +16,8 @@ function parseExpression(expression: string, xValues: number[]) {
   return xValues.map((x) => {
     try {
       return evaluate(expression, { x });
-    } catch {
+    } catch (error) {
+      console.error("Evaluation error:", error);
       return NaN;
     }
   });
@@ -26,23 +27,32 @@ function renderGraphToSVG(
   expression: string,
   chartData: { x: number; y: number }[],
 ) {
-  return ReactDOMServer.renderToStaticMarkup(
-    <svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
-      <g transform="translate(40,40)">
-        <rect width="920" height="720" fill="transparent" />
-        <XYPlot width={920} height={720}>
-          <HorizontalGridLines />
-          <VerticalGridLines />
-          <XAxis />
-          <YAxis />
-          <LineSeries
-            data={chartData}
-            style={{ stroke: "blue", strokeWidth: 2, fill: "transparent" }}
+  try {
+    return ReactDOMServer.renderToStaticMarkup(
+      <svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(40,150)">
+          <rect
+            width="920"
+            height="500"
+            style={{ fill: "transparent", stroke: "#000000" }}
           />
-        </XYPlot>
-      </g>
-    </svg>,
-  );
+          <XYPlot width={900} height={500} style={{ color: "#000000" }}>
+            <HorizontalGridLines style={{ stroke: "#e0e0e0" }} />
+            <VerticalGridLines style={{ stroke: "#e0e0e0" }} />
+            <XAxis style={{ stroke: "#777777" }} />
+            <YAxis style={{ stroke: "#777777" }} />
+            <LineSeries
+              data={chartData}
+              style={{ stroke: "#F5B041", strokeWidth: 2, fill: "transparent" }}
+            />
+          </XYPlot>
+        </g>
+      </svg>,
+    );
+  } catch (error) {
+    console.error("SVG rendering error:", error);
+    return "";
+  }
 }
 
 export default function Graph({
@@ -56,6 +66,7 @@ export default function Graph({
 }) {
   const [chartData, setChartData] = useState<{ x: number; y: number }[]>([]);
   const [result, setResult] = useState<string | null>(null);
+  const toastRef = useRef<Toast | null>(null);
 
   useEffect(() => {
     const isSimpleEquation =
@@ -66,7 +77,23 @@ export default function Graph({
     const yValues = parseExpression(expression, xValues);
     const data = xValues.map((x, i) => ({ x, y: yValues[i] }));
 
-    if (isSimpleEquation) {
+    const showGeneratingToast = async () => {
+      const newToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Generating Chart",
+        message: `Rendering graph for the expression: ${expression}`,
+      });
+      toastRef.current = newToast;
+    };
+
+    const closeGeneratingToast = () => {
+      if (toastRef.current) {
+        toastRef.current.hide();
+        toastRef.current = null;
+      }
+    };
+
+    const handleSimpleEquation = () => {
       try {
         const calculatedResult = evaluate(expression);
         setResult(calculatedResult.toString());
@@ -88,16 +115,25 @@ export default function Graph({
             "The expression could not be evaluated. Please check the syntax.",
         });
       }
-    } else {
+    };
+
+    const handleComplexExpression = async () => {
+      await showGeneratingToast();
       setChartData(data);
       setResult(null);
       setHistory((prevHistory) => [...prevHistory, expression]);
-      showToast({
-        style: Toast.Style.Animated,
-        title: "Generating Chart",
-        message: `Rendering graph for the expression: ${expression}`,
-      });
+      closeGeneratingToast();
+    };
+
+    if (isSimpleEquation) {
+      handleSimpleEquation();
+    } else {
+      handleComplexExpression();
     }
+
+    return () => {
+      closeGeneratingToast();
+    };
   }, [expression, setHistory]);
 
   return (
