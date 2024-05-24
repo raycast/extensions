@@ -190,7 +190,7 @@ export default function Command() {
         <List.Item
           key={date.toISOString()}
           title={humanFormatter.format(date)}
-          subtitle={label + "﹣" + timeAgo.format(date)}
+          subtitle={`${label} - ${timeAgo.format(date)}`}
           actions={
             <ActionPanel>
               {getSortedFormats({ human }).map(({ id, title, format }) => (
