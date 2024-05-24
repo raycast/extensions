@@ -1,12 +1,12 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   getPreferenceValues,
   Icon,
   List,
   LocalStorage,
   open,
-  showHUD,
   showInFinder,
   showToast,
   Toast,
@@ -18,7 +18,6 @@ import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/direc
 import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
-import { copyFileByPath } from "./utils/applescript-utils";
 import { ListEmptyView } from "./components/list-empty-view";
 import { Preferences } from "./types/preferences";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
@@ -67,7 +66,7 @@ export default function Command() {
               title={{
                 value: value.name,
                 tooltip: `Type: ${value.type === DirectoryType.FILE ? "File" : "Folder"}, hidden at ${new Date(
-                  value.date
+                  value.date,
                 ).toLocaleString()}`,
               }}
               accessories={[{ text: parse(value.path).dir, tooltip: value.path }]}
@@ -88,7 +87,7 @@ export default function Command() {
                         _localDirectory.splice(index, 1);
                         await LocalStorage.setItem(
                           LocalStorageKey.LOCAL_HIDE_DIRECTORY,
-                          JSON.stringify(_localDirectory)
+                          JSON.stringify(_localDirectory),
                         );
                         setRefresh(refreshNumber());
                         showHiddenFiles(value.path.replaceAll(" ", `" "`));
@@ -131,7 +130,7 @@ export default function Command() {
                             await LocalStorage.clear();
                             setRefresh(refreshNumber());
                             await showToast(Toast.Style.Success, "Success!", "All files have been unhidden.");
-                          }
+                          },
                         );
                       }}
                     />
@@ -143,8 +142,7 @@ export default function Command() {
                       title={"Copy File"}
                       shortcut={{ modifiers: ["cmd"], key: "." }}
                       onAction={async () => {
-                        await showHUD(`${value.name} is copied to clipboard`);
-                        await copyFileByPath(value.path);
+                        await Clipboard.copy({ file: value.path });
                       }}
                     />
                     <Action.CopyToClipboard
@@ -163,7 +161,7 @@ export default function Command() {
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
     </List>
   );
