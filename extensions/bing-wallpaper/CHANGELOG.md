@@ -1,5 +1,9 @@
 # Bing Wallpaper Changelog
 
+## [Fix error] - 2024-05-21
+
+- Fix the problem of not being able to set wallpaper
+
 ## [Fix error] - 2024-02-05
 
 - Fix network request errors

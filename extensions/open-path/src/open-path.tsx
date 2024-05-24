@@ -1,21 +1,22 @@
-import { getPreferenceValues, open } from "@raycast/api";
 import {
+  fileAction,
   getPathFromSelectionOrClipboard,
   isEmail,
   isEmpty,
   isFileOrFolderPath,
   isIPUrlWithoutHttp,
-  Preference,
+  priorityDetection,
   showHud,
+  trimText,
 } from "./utils/common-utils";
 import fse from "fs-extra";
 import { homedir } from "os";
-import { isIP, isIPv4 } from "net";
-import { filePathOperation, OpenURL } from "./utils/path-utils";
+import { isIP } from "net";
+import { filePathAction, urlPathAction } from "./utils/path-utils";
+import { closeMainWindow, open } from "@raycast/api";
 
 export default async () => {
-  const { trimText, fileOperation, priorityDetection, searchEngine } = getPreferenceValues<Preference>();
-
+  await closeMainWindow();
   const _getText = await getPathFromSelectionOrClipboard(priorityDetection);
   const path = trimText ? _getText.trim() : _getText;
 
@@ -26,13 +27,13 @@ export default async () => {
 
   // Open file, folder
   if (fse.pathExistsSync(path)) {
-    await filePathOperation(path, fileOperation);
+    await filePathAction(path, fileAction);
     return;
   }
   // open ~/file, ~/folder
   const homedirPath = path.startsWith("~/") ? path.replace("~", homedir()) : path;
   if (fse.pathExistsSync(homedirPath)) {
-    await filePathOperation(homedirPath, fileOperation);
+    await filePathAction(homedirPath, fileAction);
     return;
   }
   // Re-judge, if path is similar to file path and does not exist then error is reported
@@ -43,31 +44,28 @@ export default async () => {
 
   //Open IP
   if (isIP(path) !== 0 || isIPUrlWithoutHttp(path)) {
+    await showHud("🔗", "Open IP: " + path);
     if (path.startsWith("127.0.0.1")) {
       await open("http://www." + path);
     } else {
       await open("http://" + path);
     }
-    console.info("open: IP " + path);
-    await showHud("🔗", "Open IP: " + path);
     return;
   }
 
   // Open Email
   if (isEmail(path)) {
-    await open("mailto:" + path);
-    console.info("open: email " + path);
     await showHud("📧", "Send Email: " + path);
+    await open("mailto:" + path);
     return;
   }
   // Open Email(mailto:)
   if (path.startsWith("mailto:")) {
-    await open(path);
-    console.info("open: email " + path);
     await showHud("📧", "Send Email: " + path);
+    await open(path);
     return;
   }
 
   // Open Url or Search Text
-  await OpenURL(fileOperation, path, searchEngine);
+  await urlPathAction(path);
 };

@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import {
   CloudFormationClient,
   ListStackResourcesCommand,
@@ -10,6 +10,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function CloudFormation() {
   const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
@@ -32,7 +33,6 @@ export default function CloudFormation() {
 function CloudFormationStack({ stack }: { stack: StackSummary }) {
   return (
     <List.Item
-      id={stack.StackName}
       key={stack.StackId}
       icon={"aws-icons/cfo.png"}
       title={stack.StackName || ""}
@@ -43,10 +43,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
             title="Resources"
             target={<CloudFormationStackResources stackName={stack.StackName || ""} />}
           />
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={resourceToConsoleLink(stack.StackId, "AWS::CloudFormation::Stack")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(stack.StackId, "AWS::CloudFormation::Stack")} />
           <Action.CopyToClipboard title="Copy Stack ID" content={stack.StackId || ""} />
         </ActionPanel>
       }
@@ -65,13 +62,12 @@ function CloudFormationStackResources({ stackName }: { stackName: string }) {
 
         return (
           <List.Item
-            id={r.PhysicalResourceId}
-            key={r.PhysicalResourceId}
+            key={r.LogicalResourceId}
             title={r.PhysicalResourceId || ""}
-            accessories={[{ text: r.ResourceType }, { icon: consoleLink ? Icon.Link : undefined }]}
+            accessories={[{ icon: consoleLink && Icon.Link }, { tag: r.ResourceType }]}
             actions={
               <ActionPanel>
-                {consoleLink && <Action.OpenInBrowser title="Open in Browser" url={consoleLink} />}
+                {consoleLink && <AwsAction.Console url={consoleLink} />}
                 <Action.CopyToClipboard title="Copy Resource ID" content={r.PhysicalResourceId || ""} />
               </ActionPanel>
             }

@@ -14,6 +14,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "content",
+      "title": "Get Browser Content",
+      "description": "Get only the browser content",
+      "mode": "no-view"
+    },
+    {
       "name": "inspect",
       "title": "Inspect Website",
       "description": "Inspect Website.",
@@ -87,7 +93,7 @@
           "title": "Prompt",
           "description": "Enter instructions for rewriting the text in a casual tone.",
           "type": "textfield",
-          "default": "Descrive with simple and concise words. Pay attention to the details and how it is useful. conclude with bullet points of key takeaways",
+          "default": "Create a summary of a YouTube video using its transcript. You will use the following template:  \" ## Summary {Multiple sentences summarising the YouTube video}  ## Notes {Bullet points that summarize the key points or important moments from the video’s transcript with explanations}  ## Quotes {Extract the best sentences from the transcript in a list} \" Transcript:",
           "required": false
         },
         {
@@ -261,9 +267,9 @@
   ],
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.14.1",
-    "openai": "^4.38.5"
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0",
+    "openai": "^4.47.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

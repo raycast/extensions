@@ -62,10 +62,10 @@ export class Ffmpeg {
       const command = this.ffmpegBinary.command(
         [
           "-y",
-          `-i "${sanitizeFileName(input)}"`,
+          `-i ${sanitizeFileName(input)}`,
           ...(params ?? []),
           output ? "-progress pipe:1" : undefined,
-          output ? `"${sanitizeFileName(output)}"` : undefined,
+          output ? sanitizeFileName(output) : undefined,
         ]
           .filter((param) => param != null)
           .join(" "),

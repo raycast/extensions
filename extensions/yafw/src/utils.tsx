@@ -59,7 +59,14 @@ const getFFmpegCommand = (args: string) => {
 };
 
 export function sanitizeFileName(file: string): string {
-  return file.replace(/ /g, "\\ ").replace(/'/g, `\\'\\''`).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+  return file
+    .replace(/\\/g, "\\\\")
+    .replace(/ /g, "\\ ")
+    .replace(/`/g, "\\`")
+    .replace(/"/g, `\\"`)
+    .replace(/\$/g, `\\$`)
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
 }
 
 export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {

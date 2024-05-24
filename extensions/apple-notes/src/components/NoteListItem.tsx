@@ -23,7 +23,12 @@ export default function NoteListItem({ note, noteTitles, isDeleted, mutate }: No
       text: `${note.tags.length}`,
       icon: Icon.Hashtag,
       // Display all tags inline and remove the leading # from the tag text
-      tooltip: `${note.tags.map((tag) => tag.text.slice(1)).join(", ")}`,
+      tooltip: `${note.tags
+        .map((tag) => {
+          if (!tag.text) return "";
+          return tag.text.slice(1);
+        })
+        .join(", ")}`,
     });
   }
 
@@ -96,7 +101,7 @@ export default function NoteListItem({ note, noteTitles, isDeleted, mutate }: No
   }
 
   if (note.tags) {
-    keywords.push(...note.tags.map((tag) => tag.text.slice(1)));
+    keywords.push(...note.tags.map((tag) => tag.text?.slice(1) ?? ""));
   }
 
   if (note.checklist) {

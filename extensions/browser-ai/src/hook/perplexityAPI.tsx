@@ -1,13 +1,9 @@
-import { Action, ActionPanel, BrowserExtension, Detail, Icon, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
 import { Stream } from "openai/streaming";
 import { useEffect, useState } from "react";
 import { ContentFormat, ResultViewProps } from "./ResultView.types";
 import { enable_streaming, global_model, openai } from "./api";
-import { allModels as changeModels, countToken, estimatePrice } from "./utils";
-
-const getBrowserContent = async ({ format = "markdown" }: { format?: ContentFormat }) => {
-  return await BrowserExtension.getContent({ format: format });
-};
+import { allModels as changeModels, countToken, estimatePrice, getBrowserContent } from "./utils";
 
 export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, model_override, toast_title, temperature } = props;

@@ -1,16 +1,20 @@
 import { getPreferenceValues, LocalStorage, showHUD } from "@raycast/api";
-import Values = LocalStorage.Values;
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./input-item";
 import { homedir } from "os";
 import fse from "fs-extra";
+import Values = LocalStorage.Values;
 
 export interface Preference extends Values {
   trimText: boolean;
   isShowHud: boolean;
-  fileOperation: string;
+  fileAction: string;
+  urlAction: string;
   priorityDetection: string;
   searchEngine: string;
 }
+
+export const { trimText, isShowHud, fileAction, urlAction, priorityDetection, searchEngine } =
+  getPreferenceValues<Preference>();
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
@@ -49,7 +53,7 @@ export function isUrl(text: string): boolean {
 
 export function isIPUrl(text: string): boolean {
   return /^(http:\/\/)?(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(
-    text
+    text,
   );
 }
 
@@ -108,7 +112,6 @@ export const searchUrlBuilder = (searchEngine: string, text: string) => {
 };
 
 export const showHud = async (icon: string, content: string) => {
-  const { isShowHud } = getPreferenceValues<Preference>();
   if (isShowHud) {
     await showHUD(icon + " " + content);
   }

@@ -1,15 +1,15 @@
 import { homedir } from "os";
 import { resolve } from "path";
 
-import { showFailureToast, useSQL } from "@raycast/utils";
+import { useSQL } from "@raycast/utils";
 import { partition } from "lodash";
 
 import { getOpenNoteURL } from "./helpers";
 
 type Link = {
   id: string;
-  text: string;
-  url: string;
+  text: string | null;
+  url: string | null;
   notePk: number;
 };
 
@@ -21,7 +21,7 @@ type Backlink = {
 
 type Tag = {
   id: string;
-  text: string;
+  text: string | null;
   notePk: number;
 };
 
@@ -124,8 +124,8 @@ export const useNotes = () => {
   // Split the query into two to avoid a SQL error if the zcinivitation table doesn't exist
   const { data: invitations } = useSQL<{ invitationLink: string | null; noteId: string }>(NOTES_DB, invitationQuery, {
     execute: data && data.length > 0,
-    onError(error) {
-      showFailureToast(error, { title: "Couldn't get invitations for notes" });
+    onError() {
+      // Silently fail if the table doesn't exist
     },
   });
 
@@ -153,7 +153,7 @@ export const useNotes = () => {
 
     const noteBacklinks: Backlink[] = [];
     links?.forEach((link) => {
-      if (link.url.includes(note.UUID.toLowerCase())) {
+      if (link.url?.includes(note.UUID.toLowerCase())) {
         const originalNote = notes.find((n) => n.pk === link.notePk);
         if (!originalNote) return;
 

@@ -51,6 +51,14 @@
             {
               "title": "GPT-4 (32K, 0613)",
               "value": "gpt-4-32k-0613"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o (May 13, 2024)",
+              "value": "gpt-4o-2024-05-13"
             }
           ]
         }
@@ -97,6 +105,14 @@
             {
               "title": "GPT-4 (32K, 0613)",
               "value": "gpt-4-32k-0613"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o (May 13, 2024)",
+              "value": "gpt-4o-2024-05-13"
             }
           ]
         }
@@ -143,6 +159,14 @@
             {
               "title": "GPT-4 (32K, 0613)",
               "value": "gpt-4-32k-0613"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o (May 13, 2024)",
+              "value": "gpt-4o-2024-05-13"
             }
           ]
         }
@@ -189,6 +213,14 @@
             {
               "title": "GPT-4 (32K, 0613)",
               "value": "gpt-4-32k-0613"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o (May 13, 2024)",
+              "value": "gpt-4o-2024-05-13"
             }
           ]
         }
@@ -227,6 +259,14 @@
             {
               "title": "GPT-4 (32K, 0613)",
               "value": "gpt-4-32k-0613"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o (May 13, 2024)",
+              "value": "gpt-4o-2024-05-13"
             }
           ]
         }
@@ -266,6 +306,14 @@
             {
               "title": "GPT-4 (32K, 0613)",
               "value": "gpt-4-32k-0613"
+            },
+            {
+              "title": "GPT-4o",
+              "value": "gpt-4o"
+            },
+            {
+              "title": "GPT-4o (May 13, 2024)",
+              "value": "gpt-4o-2024-05-13"
             }
           ]
         }
@@ -306,6 +354,14 @@
         {
           "title": "GPT-4 (32K, 0613)",
           "value": "gpt-4-32k-0613"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-4o (May 13, 2024)",
+          "value": "gpt-4o-2024-05-13"
         }
       ],
       "required": true,
