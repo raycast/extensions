@@ -23,7 +23,5 @@ export default async function Api({ launchContext = {} }: LaunchProps<{ launchCo
     if (callbackLaunchOptions) {
       await callbackLaunchCommand(callbackLaunchOptions);
     }
-  } else {
-    launchCommand({ name: "main", type: LaunchType.UserInitiated });
   }
 }
