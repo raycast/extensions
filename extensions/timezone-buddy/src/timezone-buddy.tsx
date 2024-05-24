@@ -22,6 +22,7 @@ import { getTooltipForTz } from "./helpers/getTooltipForTz";
 import { TimezoneBuddy } from "./interfaces/TimezoneBuddy";
 import { getColorForTz } from "./helpers/getColorForTz";
 import { getIconForTz } from "./helpers/getIconForTz";
+import { generateGuid } from "./helpers/guid";
 
 const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
 
@@ -198,6 +199,11 @@ export default function Command() {
   const [buddies, setBuddies] = useState<TimezoneBuddy[]>([]);
   const [loading, setLoading] = useState(true);
 
+  async function updateBuddies(newBuddies: TimezoneBuddy[]) {
+    setBuddies(newBuddies);
+    await LocalStorage.setItem("buddies", JSON.stringify(newBuddies));
+  }
+
   useEffect(() => {
     async function getBuddies() {
       const buddies = await LocalStorage.getItem<string>("buddies");
@@ -219,9 +225,9 @@ export default function Command() {
     });
 
     try {
+      buddy.id = generateGuid();
       const newBuddies = [...buddies, buddy];
-      setBuddies(newBuddies);
-      await LocalStorage.setItem("buddies", JSON.stringify(newBuddies));
+      updateBuddies(newBuddies);
 
       toast.style = Toast.Style.Success;
       toast.title = "Buddy added";
@@ -239,12 +245,11 @@ export default function Command() {
       style: Toast.Style.Animated,
       title: "Updating buddy...",
     });
-    console.log(buddy, index);
+
     try {
       const newBuddies = [...buddies];
       newBuddies.splice(index, 1, buddy);
-      setBuddies(newBuddies);
-      await LocalStorage.setItem("buddies", JSON.stringify(newBuddies));
+      updateBuddies(newBuddies);
 
       toast.style = Toast.Style.Success;
       toast.title = "Buddy updated";
@@ -277,8 +282,7 @@ export default function Command() {
       try {
         const newBuddies = [...buddies];
         newBuddies.splice(index, 1);
-        setBuddies(newBuddies);
-        await LocalStorage.setItem("buddies", JSON.stringify(newBuddies));
+        updateBuddies(newBuddies);
 
         toast.style = Toast.Style.Success;
         toast.title = "Buddy deleted";
@@ -289,6 +293,28 @@ export default function Command() {
           toast.message = err.message;
         }
       }
+    }
+  }
+
+  async function moveUp(index: number) {
+    if (index > 0) {
+      const newBuddies = [...buddies];
+      const buddy = newBuddies[index];
+      newBuddies[index] = newBuddies[index - 1];
+      newBuddies[index - 1] = buddy;
+      await updateBuddies(newBuddies);
+    }
+  }
+
+  async function moveDown(index: number) {
+    if (index < buddies.length - 1) {
+      const newBuddies = [...buddies];
+      const buddy = buddies[index];
+      newBuddies[index] = newBuddies[index + 1];
+      newBuddies[index + 1] = buddy;
+      await updateBuddies(newBuddies);
+
+      await updateBuddies(newBuddies);
     }
   }
 
@@ -311,7 +337,7 @@ export default function Command() {
         {buddies &&
           buddies.map((buddy, index) => (
             <List.Item
-              key={index}
+              key={buddy.id}
               title={buddy.name}
               subtitle={getOffsetForTz(buddy.tz)}
               icon={{ source: buddy.avatar, mask: Image.Mask.Circle }}
@@ -333,6 +359,20 @@ export default function Command() {
                   <ActionPanel.Section>
                     <CreateBuddyAction onCreate={handleCreate} />
                     <EditBuddyAction index={index} buddy={buddy} onUpdate={handleUpdate} />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      title="Move Up"
+                      icon={Icon.ArrowUp}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                      onAction={() => moveUp(index)}
+                    />
+                    <Action
+                      title="Move Down"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                      onAction={() => moveDown(index)}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <DeleteBuddyAction onDelete={() => handleDelete(index)} />
