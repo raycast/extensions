@@ -5,8 +5,8 @@ import queryAuthentication from "./queryAuthentication";
 import { useAsync } from "react-use";
 import { useState } from "react";
 import { getAvatarIcon } from "@raycast/utils";
-import Shortcut = Keyboard.Shortcut;
 import EmptyList from "./EmptyList";
+import Shortcut = Keyboard.Shortcut;
 
 const httpPrefix = "http";
 const localStorageKey = "instances";
@@ -85,7 +85,7 @@ const InstancesList = () => {
             await LocalStorage.removeItem(localStorageKey);
             await fetchInstances();
           }}
-          shortcut={{ key: "delete", modifiers: ["ctrl", "shift"] }}
+          shortcut={Shortcut.Common.RemoveAll}
           style={Action.Style.Destructive}
           title="Remove All"
         />
@@ -117,7 +117,7 @@ const InstancesList = () => {
             {...{ fetchInstances, instance }}
             key={index}
             remove={() => removeInstance(instance)}
-            instancesActions={<InstancesActions shortcut={{ key: "a", modifiers: ["cmd", "shift"] }} title="Add" />}
+            instancesActions={<InstancesActions shortcut={Shortcut.Common.New} title="Add" />}
           />
         ))}
       </List>
@@ -170,7 +170,7 @@ const InstanceItem = ({
           <Action
             icon={Icon.Trash}
             onAction={remove}
-            shortcut={{ key: "delete", modifiers: ["ctrl"] }}
+            shortcut={Shortcut.Common.Remove}
             style={Action.Style.Destructive}
             title="Remove"
           />
