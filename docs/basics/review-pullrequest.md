@@ -31,9 +31,9 @@ You can see the branch on the above image, in this example it's `notion-quicklin
 Click the `Files Changed` tab and see which directy files is changed in, in this example it's `notion`
 
 ```
-BRANCH="" # Example: notion-quicklinks
-FORK_URL="" # Example: https://github.com/bkeys818/raycast-extensions.git
-EXTENSION_NAME="" # Example: notion
+BRANCH="ext/soundboard"
+FORK_URL="https://github.com/pernielsentikaer/raycast-extensions.git"
+EXTENSION_NAME="soundboard"
 
 git clone -n --depth=1 --filter=tree:0 -b ${BRANCH} ${FORK_URL}
 cd raycast-extensions
