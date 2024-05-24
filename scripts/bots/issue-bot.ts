@@ -26,6 +26,7 @@ const reopenIssueMatch = /@raycastbot reopen this issue/;
 const renameIssueMatch = /@raycastbot rename this issue to "(.+)"/;
 const assignMeMatch = /@raycastbot assign me/;
 const goodFirstIssueMatch = /@raycastbot good first issue/;
+const keepIssueOpenMatch = /@raycastbot keep this issue open/;
 
 export default async ({ github, context }: API) => {
   const sender = context.payload.sender.login;
@@ -147,6 +148,14 @@ export default async ({ github, context }: API) => {
           owner: context.repo.owner,
           repo: context.repo.repo,
           labels: ["Good first issue"],
+        });
+      } else if (keepIssueOpenMatch.test(context.payload.comment.body)) {
+        console.log(`Adding the "Dont close" label to #${context.payload.issue.number}`);
+        await github.rest.issues.addLabels({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          labels: ["Dont close"],
         });
       } else {
         console.log(`didn't find the right comment`);
