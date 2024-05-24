@@ -1,4 +1,4 @@
-import { LocalStorage, environment, showToast, trash } from "@raycast/api";
+import { environment, showToast, trash } from "@raycast/api";
 import { Note, Sort, Tag } from "../services/atoms";
 import slugify from "slugify";
 import fs from "fs";
@@ -18,16 +18,6 @@ export const getInitialValuesFromFile = (filepath: string): [] => {
     fs.mkdirSync(environment.supportPath, { recursive: true });
     return [];
   }
-};
-
-export const getInitialSort = async (): Promise<Sort> => {
-  const savedSort = await LocalStorage.getItem<Sort>("sort");
-  return savedSort ?? "updated";
-};
-
-export const getInitialMenuToggle = async (): Promise<boolean> => {
-  const savedToggle = await LocalStorage.getItem("menu");
-  return savedToggle === "true" ?? false;
 };
 
 export const getSortHumanReadable = (sort: Sort): string => {

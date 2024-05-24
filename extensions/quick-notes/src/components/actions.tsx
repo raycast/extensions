@@ -3,9 +3,10 @@ import CreateEditNoteForm from "./createEditNoteForm";
 import CreateTag from "./createTag";
 import DeleteNoteAction from "./deleteNoteAction";
 import { getSortHumanReadable, getTintColor } from "../utils/utils";
-import { menuAtom, sortArr, sortAtom, tagsAtom } from "../services/atoms";
+import { Sort, sortArr, tagsAtom } from "../services/atoms";
 import { useAtom } from "jotai";
 import DeleteTags from "./deleteTags";
+import { useCachedState } from "@raycast/utils";
 
 const Actions = ({
   noNotes,
@@ -25,8 +26,9 @@ const Actions = ({
   createdAt?: Date;
 }) => {
   const [allTags] = useAtom(tagsAtom);
-  const [sort, setSort] = useAtom(sortAtom);
-  const [__, setMenu] = useAtom(menuAtom);
+  const [, setMenu] = useCachedState("menu", false);
+  const [sort, setSort] = useCachedState<Sort>("sort", "updated");
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -117,7 +119,7 @@ const Actions = ({
             source: Icon.AppWindowSidebarRight,
             tintColor: getTintColor("indigo"),
           }}
-          onAction={() => setMenu()}
+          onAction={() => setMenu((prev) => !prev)}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
         />
         <ActionPanel.Submenu

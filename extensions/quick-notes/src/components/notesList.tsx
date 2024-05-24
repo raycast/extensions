@@ -2,20 +2,21 @@ import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { format } from "date-fns";
-import { notesAtom, Note, tagsAtom, Tag, sortAtom, menuAtom } from "../services/atoms";
+import { notesAtom, Note, tagsAtom, Tag, Sort } from "../services/atoms";
 import Actions from "./actions";
 import { getTintColor } from "../utils/utils";
+import { useCachedState } from "@raycast/utils";
 
 const ListItem = ({
   note,
   tags = [],
   filterList,
-  showMenu,
+  showMenu = false,
 }: {
   note: Note;
   tags?: Tag[];
   filterList: (str: string) => void;
-  showMenu: boolean;
+  showMenu?: boolean;
 }) => {
   return (
     <List.Item
@@ -83,8 +84,8 @@ const ListItem = ({
 const NotesList = () => {
   const [notes] = useAtom(notesAtom);
   const [tags] = useAtom(tagsAtom);
-  const [sort] = useAtom(sortAtom);
-  const [menu] = useAtom(menuAtom);
+  const [menu] = useCachedState("menu", false);
+  const [sort] = useCachedState<Sort>("sort", "updated");
 
   const [searchText, setSearchText] = useState("");
   const [filteredNotes, setFilteredNotes] = useState<Note[]>(notes);
