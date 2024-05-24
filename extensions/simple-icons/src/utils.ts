@@ -17,7 +17,7 @@ export const downloadAssetPack = async (version: string) => {
     message: "Downloading asset pack",
   });
   return new Promise<void>((resolve) => {
-    const readStream = got.stream(`https://github.com/simple-icons/simple-icons/archive/refs/tags/${version}.zip`);
+    const readStream = got.stream(`https://codeload.github.com/simple-icons/simple-icons/zip/refs/tags/${version}`);
     const destination = join(environment.supportPath, `pack-${version}.zip`);
     readStream.on("response", async () => {
       await streamPipeline(readStream, createWriteStream(destination));
