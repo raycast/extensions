@@ -1,3 +1,3 @@
 # The Nobel Prize Changelog
 
-## [Initial Version] - 2024-04-15
+## [Initial Version] - {PR_MERGE_DATE}
