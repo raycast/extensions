@@ -2,6 +2,11 @@ import { useState } from "react";
 import { ActionPanel, List, Action, showToast, ToastStyle } from "@raycast/api";
 import axios from "axios";
 
+interface ICD10Response {
+  [index: number]: [string, string][];
+  3: [string, string][];
+}
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<{ code: string; desc: string }[]>([]);
@@ -13,11 +18,11 @@ export default function Command() {
     }
 
     try {
-      const response = await axios.get(
+      const response = await axios.get<ICD10Response>(
         `https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search?sf=code,name&terms=${query}&maxList=1000`,
       );
       const data = response.data[3];
-      const codes = data.map((item: any) => ({
+      const codes = data.map((item) => ({
         code: item[0],
         desc: item[1],
       }));
