@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, useNavigation } from "@raycast/api";
 import { useAtom } from "jotai";
 import { tagsAtom } from "../services/atoms";
-import { colors, getRandomColor } from "../utils/utils";
+import { colors, getRandomColor, getTintColor } from "../utils/utils";
 import { useState } from "react";
 import { useForm } from "@raycast/utils";
 
@@ -67,7 +67,7 @@ const CreateTag = () => {
             key={i}
             value={t.name}
             title={t.name}
-            icon={{ source: "dot.png", tintColor: colors.find((c) => c.name === t.color)?.tintColor }}
+            icon={{ source: "dot.png", tintColor: getTintColor(t.color) }}
           />
         ))}
       </Form.Dropdown>
