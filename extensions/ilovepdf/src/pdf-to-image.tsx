@@ -15,6 +15,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
+import { getFilePath } from "./common/utils";
 
 type Values = {
   files: string[];
@@ -44,7 +45,7 @@ export default function Command() {
     const instance = new ILovePDFApi(publicKey, secretKey);
     const task = instance.newTask("pdfjpg") as PdfJpgTask;
     const addedFilesPromises = [];
-    const destinationFile = path.join(path.dirname(values.files[0]), "pdf_images.zip");
+    const destinationFile = getFilePath(path.dirname(values.files[0]), "pdf_images.zip");
     try {
       await task.start();
       for (const file of values.files) {

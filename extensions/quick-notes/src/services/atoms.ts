@@ -1,7 +1,6 @@
 import { atom } from "jotai";
 import { TAGS_FILE_PATH, TODO_FILE_PATH, preferences } from "./config";
 import fs from "fs";
-import { compareDesc } from "date-fns";
 import {
   deleteNotesInFolder,
   exportNotes,
@@ -25,21 +24,13 @@ export interface Tag {
   color: string;
 }
 
+export const sortArr = ["created", "updated", "alphabetical", "tags"] as const;
+
+export type Sort = (typeof sortArr)[number];
+
 const notes = atom<Note[]>(getInitialValuesFromFile(TODO_FILE_PATH) as Note[]);
 export const notesAtom = atom(
-  (get) => {
-    const notesQ = get(notes);
-
-    // Sort based on user preference
-    return notesQ.sort((a, b) => {
-      if (preferences.sort === "created") {
-        return compareDesc(a.createdAt, b.createdAt);
-      } else if (preferences.sort === "alphabetical") {
-        return a.title.localeCompare(b.title);
-      }
-      return compareDesc(a.updatedAt, b.updatedAt);
-    });
-  },
+  async (get) => get(notes),
   async (get, set, newNotes: Note[]) => {
     /**
      * Autosave deletion logic

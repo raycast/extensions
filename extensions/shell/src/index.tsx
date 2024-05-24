@@ -304,7 +304,7 @@ export default function Command(props: { arguments?: ShellArguments }) {
           break;
 
         case "iTerm":
-          runInWarp(props.arguments.command);
+          runInIterm(props.arguments.command);
           break;
 
         case "Warp":

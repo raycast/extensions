@@ -94,6 +94,7 @@ export interface ChangeModelProp {
 export interface QuestionFormProps extends ChangeModelProp {
   initialQuestion: string;
   onSubmit: (question: string, files: string[]) => void;
+  isFirstCall?: boolean;
 }
 
 export interface ChatViewProps extends ChangeModelProp {

@@ -4,6 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -26,14 +27,12 @@ export default function Lambda() {
 function LambdaFunction({ func }: { func: FunctionConfiguration }) {
   return (
     <List.Item
+      key={func.FunctionArn}
       icon={"aws-icons/lam.png"}
       title={func.FunctionName || ""}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={resourceToConsoleLink(func.FunctionName, "AWS::Lambda::Function")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(func.FunctionName, "AWS::Lambda::Function")} />
           <Action.OpenInBrowser
             icon={Icon.Document}
             title="Open CloudWatch Log Group"

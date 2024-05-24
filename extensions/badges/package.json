@@ -6,6 +6,10 @@
   "description": "Concise, consistent, and legible badges.",
   "icon": "badges-icon.png",
   "author": "litomore",
+  "crossExtensions": [
+    "litomore/simple-icons",
+    "thomas/color-picker"
+  ],
   "categories": [
     "Documentation",
     "Design Tools",
@@ -21,6 +25,24 @@
   },
   "license": "MIT",
   "commands": [
+    {
+      "name": "createDynamicBadge",
+      "title": "Create Dynamic Badge",
+      "description": "Create a dynamic badge with shields.io",
+      "mode": "view"
+    },
+    {
+      "name": "createEndpointBadge",
+      "title": "Create Endpoint Badge",
+      "description": "Create a endpoint badge with shields.io",
+      "mode": "view"
+    },
+    {
+      "name": "createSocialBadge",
+      "title": "Create Social Badge",
+      "description": "Create a social badge with shields.io",
+      "mode": "view"
+    },
     {
       "name": "createStaticBadge",
       "title": "Create Static Badge",
@@ -41,7 +63,9 @@
   "dependencies": {
     "@raycast/api": "^1.70.3",
     "@raycast/utils": "^1.14.1",
-    "lodash": "^4.17.21"
+    "css-color-converter": "^2.0.0",
+    "lodash": "^4.17.21",
+    "raycast-cross-extension": "^0.2.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
