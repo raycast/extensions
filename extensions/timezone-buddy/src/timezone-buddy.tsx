@@ -45,6 +45,7 @@ function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }): J
     }
 
     props.onCreate({
+      id: generateGuid(),
       name: values.name,
       twitter_handle: values.twitter_handle || "",
       tz: values.timezone,
@@ -109,6 +110,7 @@ function EditBuddyForm(props: {
 
     props.onUpdate(
       {
+        id: props.buddy.id,
         name: values.name,
         twitter_handle: values.twitter_handle || "",
         tz: values.timezone,
@@ -225,7 +227,6 @@ export default function Command() {
     });
 
     try {
-      buddy.id = generateGuid();
       const newBuddies = [...buddies, buddy];
       updateBuddies(newBuddies);
 
