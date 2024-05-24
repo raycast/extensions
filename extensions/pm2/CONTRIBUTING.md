@@ -11,7 +11,7 @@ See [Contribute to an Extension](https://developers.raycast.com/basics/contribut
 
 The `pm2-wrapper` is placed under the `assets` folder. It's a standalone Node.js application. You don't need to run `npm install` unless you need to modify the package related information.
 
-Please make sure there is no `node_modules` under the `pm2-wrapper` folder. The Raycast will link all assets to `~/.config/raycast/pm2/assets`. You should verify the `node_modules` isntallation behavior there.
+Please make sure there is no `node_modules` under the `pm2-wrapper` folder. The Raycast will build all assets to `~/.config/raycast/pm2/assets`. You should verify the `node_modules` isntallation behavior there.
 
 ## Development
 
