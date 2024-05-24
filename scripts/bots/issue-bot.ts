@@ -221,6 +221,7 @@ The author and contributors of \`${extension}\` can trigger bot actions by comme
 - \`@raycastbot reopen this issue\` Reopens the issue.
 - \`@raycastbot assign me\` Assigns yourself to the issue.
 - \`@raycastbot good first issue\` Adds the "Good first issue" label to the issue.
+- \`@raycastbot keep this issue open\` Make sure the issue won't go stale and will be kept open by the bot.
 
 </details>`,
   });
