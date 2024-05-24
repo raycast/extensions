@@ -1,7 +1,6 @@
 import { atom } from "jotai";
 import { TAGS_FILE_PATH, TODO_FILE_PATH, preferences } from "./config";
 import fs from "fs";
-import { compareDesc } from "date-fns";
 import {
   deleteNotesInFolder,
   exportNotes,
@@ -10,8 +9,6 @@ import {
   getInitialValuesFromFile,
   getOldRenamedTitles,
 } from "../utils/utils";
-import { Cache } from "@raycast/api";
-import slugify from "slugify";
 
 export interface Note {
   title: string;
@@ -33,21 +30,7 @@ export type Sort = (typeof sortArr)[number];
 
 const notes = atom<Note[]>(getInitialValuesFromFile(TODO_FILE_PATH) as Note[]);
 export const notesAtom = atom(
-  async (get) => {
-    const notesQ = get(notes);
-    const cache = new Cache();
-    const sort = cache.get("sort");
-
-    // Sort based on user preference
-    return notesQ.sort((a, b) => {
-      if (sort === "created") {
-        return compareDesc(a.createdAt, b.createdAt);
-      } else if (sort === "alphabetical") {
-        return slugify(a.title).localeCompare(slugify(b.title));
-      }
-      return compareDesc(a.updatedAt, b.updatedAt);
-    });
-  },
+  async (get) => get(notes),
   async (get, set, newNotes: Note[]) => {
     /**
      * Autosave deletion logic

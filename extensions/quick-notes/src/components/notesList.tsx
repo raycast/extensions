@@ -1,11 +1,12 @@
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
-import { format } from "date-fns";
+import { compareDesc, format } from "date-fns";
 import { notesAtom, Note, tagsAtom, Tag, Sort } from "../services/atoms";
 import Actions from "./actions";
 import { getTintColor } from "../utils/utils";
 import { useCachedState } from "@raycast/utils";
+import slugify from "slugify";
 
 const ListItem = ({
   note,
@@ -90,9 +91,20 @@ const NotesList = () => {
   const [searchText, setSearchText] = useState("");
   const [filteredNotes, setFilteredNotes] = useState<Note[]>(notes);
 
+  // Update notes on sort
   useEffect(() => {
-    setFilteredNotes(notes);
-  }, [notes]);
+    setFilteredNotes(
+      notes.sort((a, b) => {
+        if (sort === "created") {
+          return compareDesc(a.createdAt, b.createdAt);
+        } else if (sort === "alphabetical") {
+          console.log(slugify(a.title), slugify(b.title));
+          return slugify(a.title).localeCompare(slugify(b.title));
+        }
+        return compareDesc(a.updatedAt, b.updatedAt);
+      }),
+    );
+  }, [sort, notes]);
 
   const drafts = filteredNotes.filter((n) => n.is_draft);
   const published = filteredNotes.filter((n) => !n.is_draft);
