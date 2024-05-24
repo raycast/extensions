@@ -14,7 +14,7 @@ You can uninstall it from the Preferences'
               onAction={openExtensionPreferences}
               title="Open Extension Preferences"
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
             />
           </ActionPanel>
         }
