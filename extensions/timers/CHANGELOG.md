@@ -1,6 +1,13 @@
 # Timers Changelog
 
+## [Custom notification system] - 2024-05-23
+
+- Send notifications using Swift app bundle for increased stability and access to system APIs
+- Notifications now have a custom icon
+- Notifications now have actions to dismiss ringing timers or open the "Manage Timers" command
+
 ## [Persistent commands, codebase cleanup] - 2024-05-19
+
 - Add preference to keep "Manage Timers" and "Manage Stopwatches" commands open on timer/stopwatch start
 - Various refactors around the codebase
 
