@@ -1,5 +1,10 @@
 # Brand Icons Changelog
 
+## [New Feature] - 2024-05-24
+
+- Add offline support
+- Bump [`raycast-cross-extension`](https://github.com/LitoMore/raycast-cross-extension-conventions)
+
 ## [Updates] - 2024-05-16
 
 - Implement Raycast Cross Extension Conventions
