@@ -1,4 +1,4 @@
-import { LaunchProps, LaunchType, launchCommand } from "@raycast/api";
+import { LaunchProps } from "@raycast/api";
 import { StartOptions } from "pm2";
 import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
 import { checkIfNeedSetup } from "./utils.js";
