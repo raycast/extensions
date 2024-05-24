@@ -93,17 +93,18 @@ const NotesList = () => {
 
   // Update notes on sort
   useEffect(() => {
-    setFilteredNotes(
-      notes.sort((a, b) => {
-        if (sort === "created") {
-          return compareDesc(a.createdAt, b.createdAt);
-        } else if (sort === "alphabetical") {
-          console.log(slugify(a.title), slugify(b.title));
-          return slugify(a.title).localeCompare(slugify(b.title));
-        }
-        return compareDesc(a.updatedAt, b.updatedAt);
-      }),
-    );
+    const sortedNotes = [...notes].sort((a, b) => {
+      if (sort === "created") {
+        return compareDesc(new Date(a.createdAt), new Date(b.createdAt));
+      } else if (sort === "alphabetical") {
+        return slugify(a.title).localeCompare(slugify(b.title));
+      } else if (sort === "updated") {
+        return compareDesc(new Date(a.updatedAt), new Date(b.updatedAt));
+      } else {
+        return 0;
+      }
+    });
+    setFilteredNotes(sortedNotes);
   }, [sort, notes]);
 
   const drafts = filteredNotes.filter((n) => n.is_draft);
