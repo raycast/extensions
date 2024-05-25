@@ -17,9 +17,9 @@ const NotificationSchema = z.object({
   }),
   repository: z.object({
     full_name: z.string(),
-    owner:z.object({
-      avatar_url: z.string().nullable()
-    })
+    owner: z.object({
+      avatar_url: z.string().nullable(),
+    }),
   }),
   url: z.string(),
 });
@@ -54,7 +54,7 @@ export const filter = async (n: Notification[], c: Configuration[]): Promise<Not
   const filteredNotification =
     autoReadMergedPr === true ? n.filter((f) => !target.map((r) => r.id).includes(f.id)) : [];
   // Sort by updated_at
-  filteredNotification.sort((a,b)=>a.updated_at.getTime() - b.updated_at.getTime())
+  filteredNotification.sort((a, b) => a.updated_at.getTime() - b.updated_at.getTime());
   return filteredNotification;
 };
 

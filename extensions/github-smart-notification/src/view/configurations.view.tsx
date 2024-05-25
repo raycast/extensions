@@ -19,18 +19,14 @@ export default function ConfigurationsView() {
                 title="See Detail"
                 target={
                   <Detail
-                    markdown={
-                      `# ${s.description}\n**Repository** = ${s.repository}\n\n**Title** = ${s.title}\n\n**Reason** = ${s.reason}\n\n`
-                    }
+                    markdown={`# ${s.description}\n**Repository** = ${s.repository}\n\n**Title** = ${s.title}\n\n**Reason** = ${s.reason}\n\n`}
                   />
                 }
               />
               <Action.Push
                 title="Create Configuration"
                 shortcut={Keyboard.Shortcut.Common.New}
-                target={
-                  <ConfigurationFormView />
-                }
+                target={<ConfigurationFormView />}
               />
               <Action
                 title="Delete"
