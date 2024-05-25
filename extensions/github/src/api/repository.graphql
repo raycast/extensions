@@ -95,7 +95,7 @@ query commentsForPullRequest($owner: String!, $name: String!, $number: Int!) {
   }
 }
 
-query dataForRepository($owner: String!, $name: String!) {
+query dataForRepository($owner: String!, $name: String!, $refCursor: String) {
   repository(owner: $owner, name: $name) {
     defaultBranchRef {
       id
@@ -104,7 +104,7 @@ query dataForRepository($owner: String!, $name: String!) {
         ...CommitFields
       }
     }
-    refs(refPrefix: "refs/heads/", direction: ASC, first: 50) {
+    refs(refPrefix: "refs/heads/", direction: ASC, first: 100, after: $refCursor) {
       totalCount
       nodes {
         id
@@ -112,6 +112,10 @@ query dataForRepository($owner: String!, $name: String!) {
         target {
           ...CommitFields
         }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
     collaborators(first: 50) {

@@ -124,14 +124,33 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   });
 
   const { data, isLoading } = useCachedPromise(
-    (repository) => {
+    async (repository) => {
       const selectedRepository = repositories?.find((r) => r.id === repository);
 
       if (!selectedRepository) {
         return Promise.resolve(null);
       }
 
-      return github.dataForRepository({ owner: selectedRepository.owner.login, name: selectedRepository.name });
+      const currentPage = await github.dataForRepository({
+        owner: selectedRepository.owner.login,
+        name: selectedRepository.name,
+      });
+      while (currentPage.repository?.refs?.pageInfo?.hasNextPage) {
+        const nextPage = await github.dataForRepository({
+          owner: selectedRepository.owner.login,
+          name: selectedRepository.name,
+          refCursor: currentPage.repository?.refs?.pageInfo?.endCursor,
+        });
+
+        currentPage.repository.refs.nodes = [
+          ...(currentPage?.repository?.refs?.nodes || []),
+          ...(nextPage?.repository?.refs?.nodes || []),
+        ];
+        currentPage.repository.refs.pageInfo.hasNextPage = nextPage?.repository?.refs?.pageInfo?.hasNextPage ?? false;
+        currentPage.repository.refs.pageInfo.endCursor = nextPage?.repository?.refs?.pageInfo?.endCursor;
+      }
+
+      return currentPage;
     },
     [values.repository],
     { execute: !!values.repository },
