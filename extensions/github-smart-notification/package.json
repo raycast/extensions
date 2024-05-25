@@ -28,6 +28,15 @@
       "title": "List Configuration",
       "description": "Configure mute settings",
       "mode": "view"
+    },
+    {
+      "icon":"command-icon.png",
+      "name":"menubar",
+      "title": "Menubar notifactions",
+      "description": "Show notifications",
+      "subtitle": "Show notifications in menu-bar",
+      "mode":"menu-bar",
+      "interval": "5m"
     }
   ],
   "dependencies": {
@@ -61,7 +70,8 @@
       "title": "gh command binary PATH",
       "description": "Installed Path of gh command",
       "type": "textfield",
-      "required": true
+      "required": false,
+      "default": "/opt/homebrew/bin/gh"
     },
     {
       "name": "autoReadMergedPr",

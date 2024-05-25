@@ -1,13 +1,13 @@
-import { Action, ActionPanel, List, environment } from "@raycast/api";
-import { Notification, fetchNotifications } from "../lib/notifications";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Keyboard, List, environment } from "@raycast/api";
+import { Notification, fetchNotifications, markAsRead } from "../lib/notifications";
+import { useEffect, } from "react";
 import { hashColorizer } from "../util";
 import { Configuration } from "../lib/configurations";
 import { useCachedState } from "@raycast/utils";
 import { execAsync } from "../lib/util";
 import { toHtmlUrl } from "../lib/github";
 export default function NotificationsView() {
-  const [state, setState] = useState<Notification[] | undefined>([]);
+  const [state, setState] = useCachedState<Notification[] | undefined>("notifications", [], { cacheNamespace: `${environment.extensionName}` });
   const [configState] = useCachedState<Configuration[]>("config", [], {
     cacheNamespace: `${environment.extensionName}`,
   });
@@ -19,7 +19,7 @@ export default function NotificationsView() {
   }, []);
   return (
     <List>
-      {state?.map((s) => (
+      {state?.map((s, idx) => (
         <List.Item
           title={s.subject.title}
           keywords={[s.subject.title, s.subject.type, s.reason, s.repository.full_name]}
@@ -50,7 +50,17 @@ export default function NotificationsView() {
           ]}
           actions={
             <ActionPanel>
-              <Action title="Open" onAction={() => toHtmlUrl(s).then((url) => execAsync(`open ${url}`))} />
+              <Action title="Open" onAction={() => toHtmlUrl(s).then((url) => execAsync(`open ${url}`))}
+                shortcut={Keyboard.Shortcut.Common.Open}
+              />
+              <Action
+              title="Mark As Read"
+              onAction={() => markAsRead(s).then(() => {
+                // update notifications state
+                setState(state.filter((ele,i)=>i !==idx))
+              })}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              ></Action>
             </ActionPanel>
           }
         ></List.Item>

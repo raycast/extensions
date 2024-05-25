@@ -27,6 +27,7 @@ export default function ConfigurationsView() {
               />
               <Action.Push
                 title="Create Configuration"
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={
                   <ConfigurationFormView />
                 }
