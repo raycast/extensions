@@ -215,9 +215,3 @@ export function useSearchPages(query: string) {
     keepPreviousData: true,
   });
 }
-
-export function usePages(query: string) {
-  return useCachedPromise(searchPages, [query], {
-    keepPreviousData: true,
-  });
-}

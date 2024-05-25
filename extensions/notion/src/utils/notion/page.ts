@@ -112,21 +112,6 @@ export async function search(query?: string, nextCursor?: string) {
       direction: "descending",
       timestamp: "last_edited_time",
     },
-    page_size: 25,
-    query,
-    ...(nextCursor && { start_cursor: nextCursor }),
-  });
-
-  return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
-}
-
-export async function searchPages(query?: string, nextCursor?: string) {
-  const notion = getNotionClient();
-  const database = await notion.search({
-    sort: {
-      direction: "descending",
-      timestamp: "last_edited_time",
-    },
     filter: { property: "object", value: "page" },
     page_size: 25,
     query,
