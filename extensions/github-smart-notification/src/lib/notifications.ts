@@ -75,8 +75,8 @@ export const isRuleMatched = (c: Configuration, n: Notification) => {
   const title = minimatch(n.subject.title, c.title);
   return reason && repository && title;
 };
-// mark as done/read
-const markAsRead = async (n: Notification) => {
+// mark as read
+export const markAsRead = async (n: Notification) => {
   console.log("markAsRead");
   await execAsync(`${ghCommandPath} api --method PATCH /notifications/threads/${n.id}`);
 };
