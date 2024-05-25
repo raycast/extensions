@@ -11,7 +11,10 @@ const c: Configuration = {
 const n: Notification = {
   id: "12345",
   reason: "ci_activity",
-  repository: { full_name: "shoppingjaws/shoppingjaws" },
+  repository: {
+    full_name: "shoppingjaws/shoppingjaws",
+    owner: { "avatar_url": "https://example.com" }
+  },
   subject: {
     latest_comment_url: "https://example.com",
     title: "Bump raycast",
