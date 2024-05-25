@@ -17,11 +17,11 @@ type AddTextToPageValues = {
   title: string;
 };
 
-function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }>) {
+function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AppendCreatePage }>) {
   const [searchText, setSearchText] = useState<string>("");
   const [createPageFlag, setCreatePageFlag] = useState<boolean>(false);
   const { data, isLoading } = useSearchPages(searchText);
-  const { pageText, successPageText, failPageText } = getPageText(createPageFlag)
+  const { pageText, successPageText, failPageText } = getPageText(createPageFlag);
   const { itemProps, handleSubmit } = useForm<AddTextToPageValues>({
     async onSubmit(values) {
       try {
@@ -62,9 +62,9 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
     },
     validation: {
       page: FormValidation.Required,
-      textToAppend: pageFormValidate.bind(globalThis, createPageFlag, 'textToAppend'),
-      content: pageFormValidate.bind(globalThis, createPageFlag, 'content'),
-      title: pageFormValidate.bind(globalThis, createPageFlag, 'title'),
+      textToAppend: pageFormValidate.bind(globalThis, createPageFlag, "textToAppend"),
+      content: pageFormValidate.bind(globalThis, createPageFlag, "content"),
+      title: pageFormValidate.bind(globalThis, createPageFlag, "title"),
     },
   });
 
@@ -89,39 +89,37 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
           <Form.Dropdown.Item key={page.id} title={page.title ?? ""} value={page.id} icon={getPageIcon(page)} />
         ))}
       </Form.Dropdown>
-      <Form.Checkbox 
-        value={createPageFlag} 
-        onChange={setCreatePageFlag} 
-        id="choose" 
-        label="choose create subpage or append text to page" 
+      <Form.Checkbox
+        value={createPageFlag}
+        onChange={setCreatePageFlag}
+        id="choose"
+        label="choose create subpage or append text to page"
         info={pageText}
       />
-      {
-        createPageFlag ? (
-          <>
-            <Form.TextArea enableMarkdown autoFocus={!props.arguments.text} title="Title" {...itemProps.title} />
-            <Form.TextArea enableMarkdown title="Content" {...itemProps.content} />
-          </>
-        ) : (
-          <>
-            <Form.TextArea enableMarkdown autoFocus={!props.arguments.text} title="Content" {...itemProps.textToAppend} />
+      {createPageFlag ? (
+        <>
+          <Form.TextArea enableMarkdown autoFocus={!props.arguments.text} title="Title" {...itemProps.title} />
+          <Form.TextArea enableMarkdown title="Content" {...itemProps.content} />
+        </>
+      ) : (
+        <>
+          <Form.TextArea enableMarkdown autoFocus={!props.arguments.text} title="Content" {...itemProps.textToAppend} />
 
-            <Form.Checkbox
-              {...itemProps.prepend}
-              label="Append at the top"
-              info="Append the content at the top of the page instead of the bottom"
-              storeValue
-            />
+          <Form.Checkbox
+            {...itemProps.prepend}
+            label="Append at the top"
+            info="Append the content at the top of the page instead of the bottom"
+            storeValue
+          />
 
-            <Form.Checkbox
-              {...itemProps.addDateDivider}
-              label="Append with a date divider"
-              info="Add a divider with the current date before the content"
-              storeValue
-            />
-          </>
-        )
-      }
+          <Form.Checkbox
+            {...itemProps.addDateDivider}
+            label="Append with a date divider"
+            info="Add a divider with the current date before the content"
+            storeValue
+          />
+        </>
+      )}
     </Form>
   );
 }

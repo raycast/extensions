@@ -191,7 +191,9 @@ export function CreateDataBasePageForm({ mutate, launchContext, defaults }: Crea
       type === "second" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
 
     if ((!preferences.closeAfterCreate && type === "main") || (preferences.closeAfterCreate && type === "second")) {
-      return <Action.SubmitForm title="Create Database Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />;
+      return (
+        <Action.SubmitForm title="Create Database Page" icon={Icon.Plus} onSubmit={handleSubmit} shortcut={shortcut} />
+      );
     } else {
       return (
         <Action.SubmitForm

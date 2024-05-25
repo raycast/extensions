@@ -10,7 +10,6 @@ import {
   search,
   fetchPage,
   fetchDatabase,
-  searchPages,
   type Page,
   type DatabaseProperty,
 } from "../utils/notion";
