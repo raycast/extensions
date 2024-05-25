@@ -1,5 +1,9 @@
 # Quick Notes Changelog
 
+## [Bugfix] - 2024-05-24
+
+- Remove create button on the sort action, unintended
+
 ## [Metadata Menu and Sort] - 2024-05-23
 
 - New note metadata menu to show tags and other details for a note using `⌘ + M`

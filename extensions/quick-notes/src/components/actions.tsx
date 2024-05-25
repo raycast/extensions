@@ -145,7 +145,6 @@ const Actions = ({
               onAction={() => setSort(s)}
             />
           ))}
-          <Action.Push title="Create" icon={Icon.Plus} target={<CreateTag />} />
         </ActionPanel.Submenu>
       </ActionPanel.Section>
     </ActionPanel>
