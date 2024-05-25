@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { typeColor, typeDescription } from "./utils";
 import { Alias } from "./types";
 
@@ -17,6 +17,11 @@ ${alias.command}
   return (
     <Detail
       markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Alias" content={alias.name} />
+        </ActionPanel>
+      }
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="">

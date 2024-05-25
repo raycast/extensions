@@ -1,7 +1,9 @@
 # Git Commands Changelog
 
-## [Updated aliases] - 2024-05-19
+## [Favorites and Recent feature] - 2024-05-25
 
+- Save favorites.
+- List recent used.
 - Add new aliases from Oh My Zsh.
 
 ## [New detail view] - 2024-02-29
@@ -12,7 +14,6 @@ New detail view to be able to see everything without cutting.
 - Entire command (sometimes it is very long).
 - Complete description.
 - It also indicates a reference of what the type means.
-
 
 ## [Updated aliases] - 2023-10-30
 
