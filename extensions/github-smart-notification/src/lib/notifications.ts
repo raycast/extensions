@@ -17,6 +17,9 @@ const NotificationSchema = z.object({
   }),
   repository: z.object({
     full_name: z.string(),
+    owner:z.object({
+      avatar_url: z.string().nullable()
+    })
   }),
   url: z.string(),
 });

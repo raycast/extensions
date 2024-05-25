@@ -24,6 +24,7 @@ export default function NotificationsView() {
           title={s.subject.title}
           keywords={[s.subject.title, s.subject.type, s.reason, s.repository.full_name]}
           key={s.id}
+          icon={s.repository.owner.avatar_url ?? "command-icon.png"}
           accessories={[
             {
               tag: {
