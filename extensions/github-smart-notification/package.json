@@ -28,14 +28,6 @@
       "title": "List Configuration",
       "description": "Configure mute settings",
       "mode": "view"
-    },
-    {
-      "icon": "command-icon.png",
-      "subtitle": "Configure the auto read rule",
-      "name": "configurationForm",
-      "title": "Create Configuration",
-      "description": "Configure mute settings",
-      "mode": "view"
     }
   ],
   "dependencies": {
