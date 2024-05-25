@@ -12,7 +12,7 @@ import {
   Toast,
 } from "@raycast/api";
 import React, { useState } from "react";
-import { isImage } from "./utils/common-utils";
+import { isImage, timeStampToDateTime } from "./utils/common-utils";
 import { parse } from "path";
 import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
@@ -69,11 +69,14 @@ export default function Command() {
                   value.date,
                 ).toLocaleString()}`,
               }}
-              accessories={[{ text: parse(value.path).dir, tooltip: value.path }]}
+              accessories={[
+                { date: new Date(value.date), tooltip: `Hidden at ${timeStampToDateTime(value.date)}` },
+                { icon: Icon.Folder, tooltip: `${parse(value.path).dir}` },
+              ]}
               actions={
                 <ActionPanel>
                   <Action.Open
-                    title={value.type === DirectoryType.FILE ? "Open with Default App" : "Open in Finder"}
+                    title={value.type === DirectoryType.FILE ? `Open ${value.name}` : "Open in Finder"}
                     target={value.path}
                   />
                   <Action.ShowInFinder path={value.path} />
@@ -148,12 +151,12 @@ export default function Command() {
                     <Action.CopyToClipboard
                       title={"Copy File Name"}
                       content={value.name}
-                      shortcut={{ modifiers: ["shift", "cmd"], key: "." }}
+                      shortcut={{ modifiers: ["ctrl", "cmd"], key: "." }}
                     />
                     <Action.CopyToClipboard
                       title={"Copy File Path"}
                       content={value.path}
-                      shortcut={{ modifiers: ["shift", "cmd"], key: "," }}
+                      shortcut={{ modifiers: ["ctrl", "cmd"], key: "," }}
                     />
                   </ActionPanel.Section>
 
