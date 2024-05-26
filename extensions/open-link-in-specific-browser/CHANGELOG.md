@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Refactoring extension] - {PR_MERGE_DATE}
+## [Refactoring extension] - 2024-05-26
 
 - Non-URL type links are no longer supported
 - Extensions are now easier and faster
