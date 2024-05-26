@@ -344,7 +344,7 @@ export default function Chat({ launchContext }) {
         setChatData((oldData) => {
           let newChatData = structuredClone(oldData);
           newChatData.chats.push({
-            name: `From Quick AI at ${new Date().toLocaleString("en-US", {
+            name: `Quick AI at ${new Date().toLocaleString("en-US", {
               month: "2-digit",
               day: "2-digit",
               hour: "2-digit",
