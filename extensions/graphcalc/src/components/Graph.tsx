@@ -15,7 +15,15 @@ import "react-vis/dist/style.css";
 function parseExpression(expression: string, xValues: number[]) {
   return xValues.map((x) => {
     try {
-      return evaluate(expression, { x });
+      const result = evaluate(expression, { x });
+      // The best solution would be to divide the block rendering into infinite sections.
+      // Current version will show incorrect values.
+      if (result === Infinity) {
+        return Number.MAX_VALUE;
+      } else if (result === -Infinity) {
+        return -Number.MAX_VALUE;
+      }
+      return result;
     } catch (error) {
       console.error("Evaluation error:", error);
       return NaN;
@@ -58,15 +66,19 @@ function renderGraphToSVG(
 export default function Graph({
   expression,
   history,
-  setHistory,
 }: {
   expression: string;
   history: string[];
-  setHistory: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   const [chartData, setChartData] = useState<{ x: number; y: number }[]>([]);
   const [result, setResult] = useState<string | null>(null);
+  const [renderHistory, setRenderHistory] = useState<string[]>([]);
   const toastRef = useRef<Toast | null>(null);
+  useEffect(() => {
+    setRenderHistory(
+      (history || []).filter((exp: string) => exp != expression),
+    );
+  }, [history]);
 
   useEffect(() => {
     const isSimpleEquation =
@@ -97,10 +109,6 @@ export default function Graph({
       try {
         const calculatedResult = evaluate(expression);
         setResult(calculatedResult.toString());
-        setHistory((prevHistory) => [
-          ...prevHistory,
-          `${expression} = ${calculatedResult.toString()}`,
-        ]);
         showToast({
           style: Toast.Style.Success,
           title: "Calculation Successful",
@@ -121,7 +129,6 @@ export default function Graph({
       await showGeneratingToast();
       setChartData(data);
       setResult(null);
-      setHistory((prevHistory) => [...prevHistory, expression]);
       closeGeneratingToast();
     };
 
@@ -134,7 +141,7 @@ export default function Graph({
     return () => {
       closeGeneratingToast();
     };
-  }, [expression, setHistory]);
+  }, [expression]);
 
   return (
     <Detail
@@ -143,9 +150,13 @@ export default function Graph({
           <Detail.Metadata.Label title="Current" text={expression} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="History">
-            {history.map((expr, index) => (
-              <Detail.Metadata.TagList.Item key={index} text={expr} />
-            ))}
+            {renderHistory.length > 0 ? (
+              renderHistory.map((expr, index) => (
+                <Detail.Metadata.TagList.Item key={index} text={expr} />
+              ))
+            ) : (
+              <Detail.Metadata.TagList.Item text="No history" />
+            )}
           </Detail.Metadata.TagList>
         </Detail.Metadata>
       }

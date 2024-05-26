@@ -1,20 +1,50 @@
 import {
   ActionPanel,
-  Form,
   Action,
   showToast,
   useNavigation,
   Toast,
+  List,
+  LaunchProps,
 } from "@raycast/api";
-import React, { useState } from "react";
+import { useLocalStorage } from "@raycast/utils";
+import React, { useEffect, useState } from "react";
 import Graph from "./components/Graph";
 import FeedbackForm from "./components/FeedbackForm";
 
-export default function Command() {
+interface CommandArguments {
+  operation?: string;
+}
+
+export default function Command(
+  props: LaunchProps<{ arguments: CommandArguments }>,
+) {
+  const { operation } = props.arguments;
   const [expression, setExpression] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
+  const {
+    value: history,
+    setValue: setHistory,
+    isLoading: isHistoryLoading,
+  } = useLocalStorage<string[]>("history", []);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false); // Track whether to display the feedback form
+  const [historyInitialized, setHistoryInitialized] = useState(false);
+  const [renderHistorySorted, setRenderHistorySorted] = useState<string[]>([]);
+
+  const renderHistory = history || [];
   const { push } = useNavigation();
+
+  useEffect(() => {
+    setRenderHistorySorted((history || []).sort());
+  }, [history]);
+
+  const updateHistory = (expression: string) => {
+    setHistory([expression, ...renderHistory.slice(0, 100)]);
+  };
+
+  const submit = (expression: string) => {
+    updateHistory(expression);
+    push(<Graph expression={expression} history={history || []} />);
+  };
 
   const handleSubmit = () => {
     if (expression.trim() === "") {
@@ -25,14 +55,12 @@ export default function Command() {
       });
       return;
     }
-    // If validation passes, navigate to the Graph component
-    push(
-      <Graph
-        expression={expression}
-        history={history}
-        setHistory={setHistory}
-      />,
-    );
+    submit(expression);
+  };
+
+  const handleSelect = (selectedExpression: string) => {
+    setExpression(selectedExpression);
+    submit(selectedExpression);
   };
 
   // const handleFeedback = () => {
@@ -45,24 +73,72 @@ export default function Command() {
     setShowFeedbackForm(false);
   };
 
+  const handleClearHistory = () => {
+    setHistory([]);
+    showToast({
+      style: Toast.Style.Success,
+      title: "History Cleared",
+      message: "The history has been successfully cleared.",
+    });
+  };
+
+  useEffect(() => {
+    if (!isHistoryLoading && !historyInitialized) {
+      setHistoryInitialized(true);
+      if (operation) {
+        submit(operation);
+      }
+    }
+  }, [isHistoryLoading, historyInitialized, operation]);
+
+  if (operation && isHistoryLoading) {
+    return <></>;
+  }
+
+  const filteredHistory =
+    expression.trim() !== ""
+      ? renderHistorySorted.filter((expr) => {
+          return expr !== expression && expr.includes(expression);
+        })
+      : renderHistory;
+
   return (
     <>
       {!showFeedbackForm ? (
-        <Form
-          actions={
-            <ActionPanel>
-              <Action.SubmitForm title="Plot Graph" onSubmit={handleSubmit} />
-              {/* <Action title="Provide Feedback" onAction={handleFeedback} /> */}
-            </ActionPanel>
-          }
+        <List
+          searchBarPlaceholder="Enter an equation or expression (e.g., sin(x))"
+          onSearchTextChange={setExpression}
+          searchText={expression}
         >
-          <Form.TextField
-            id="expression"
-            placeholder="Enter an equation or expression (e.g., sin(x))"
-            value={expression}
-            onChange={setExpression}
-          />
-        </Form>
+          {expression.trim() !== "" && (
+            <List.Item
+              key="new"
+              title={expression}
+              actions={
+                <ActionPanel>
+                  <Action title="Plot Graph" onAction={handleSubmit} />
+                  <Action title="Clear History" onAction={handleClearHistory} />
+                </ActionPanel>
+              }
+            />
+          )}
+          {filteredHistory.map((expr, index) => (
+            <List.Item
+              key={index}
+              title={expr}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Plot Graph"
+                    onAction={() => handleSelect(expr)}
+                  />
+                  <Action title="Clear History" onAction={handleClearHistory} />
+                  {/* <Action title="Provide Feedback" onAction={handleFeedback} /> */}
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List>
       ) : (
         <FeedbackForm onClose={handleCloseFeedbackForm} />
       )}
