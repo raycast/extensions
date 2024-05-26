@@ -83,13 +83,23 @@
               "value": "both"
             }
           ]
+        },
+        {
+          "name": "hour24",
+          "title": "Human-readable Time Format",
+          "description": "Use 24-hour time format",
+          "type": "checkbox",
+          "label": "24-hour Time",
+          "default": false,
+          "required": false
         }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.53.3",
-    "chrono-node": "^2.6.3"
+    "chrono-node": "^2.6.3",
+    "javascript-time-ago": "^2.5.10"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.6",
