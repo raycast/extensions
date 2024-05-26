@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-path",
   "title": "Open Path",
-  "description": "Open path from selection or clipboard.\nSupport directory, URL, IP address, URL scheme, mailto, email address.",
+  "description": "Open path and link from selection or clipboard in Finder, browsers, terminal, etc.",
   "icon": "open-path.png",
   "author": "koinzhang",
   "categories": [
@@ -14,9 +14,24 @@
   "commands": [
     {
       "name": "open-path",
-      "title": "Open Path",
-      "description": "Open path from selection or clipboard.\nSupport directory, URL, IP address, URL scheme, mailto, email address.",
-      "mode": "no-view"
+      "title": "Open in",
+      "subtitle": "Finder | Browser",
+      "description": "Open path and link from selection or clipboard in Finder, browsers, terminal, etc.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "openIn",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "Finder | Browser",
+          "data": [
+            {
+              "title": "Terminal",
+              "value": "Terminal"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -36,6 +51,13 @@
       "required": false,
       "default": true,
       "label": "Show HUD"
+    },
+    {
+      "name": "preferredTerminal",
+      "type": "appPicker",
+      "required": false,
+      "title": "Perferred Terminal",
+      "description": "Select which terminal to open the path in."
     },
     {
       "name": "fileAction",
@@ -123,13 +145,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.1",
-    "fs-extra": "^11.2.0"
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0",
+    "fs-extra": "^11.2.0",
+    "validator": "^13.12.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "~20.12.12",
     "@types/react": "^18.3.2",
+    "@types/validator": "^13.11.10",
     "@typescript-eslint/eslint-plugin": "^7.9.0",
     "@typescript-eslint/parser": "^7.9.0",
     "eslint": "^8.57.0",
