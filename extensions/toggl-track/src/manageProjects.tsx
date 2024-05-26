@@ -1,13 +1,12 @@
+import { useMemo, useState } from "react";
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useMemo, useState } from "react";
-
-import { Workspace, Project } from "@/api";
-import ProjectForm from "@/components/ProjectForm";
-import ProjectListItem from "@/components/ProjectListItem";
-import { canModifyProjectIn } from "@/helpers/privileges";
-import Shortcut from "@/helpers/shortcuts";
-import { useOrganizations, useWorkspaces, useProjects, useGroups, useClients } from "@/hooks";
+import { useOrganizations, useWorkspaces, useProjects, useGroups, useClients } from "./hooks";
+import { Workspace, Project } from "./api";
+import Shortcut from "./helpers/shortcuts";
+import ProjectListItem from "./components/ProjectListItem";
+import ProjectForm from "./components/ProjectForm";
+import { canModifyProjectIn } from "./helpers/privileges";
 
 export default function ProjectList() {
   const { organizations, isLoadingOrganizations } = useOrganizations();
@@ -84,7 +83,7 @@ export default function ProjectList() {
     >
       {searchFilter ? (
         <>
-          {groupedProjects[searchFilter.id]?.length === 0 && <List.EmptyView title="No Projects Found" />}
+          {groupedProjects[searchFilter.id]?.length == 0 && <List.EmptyView title="No Projects Found" />}
           <List.Section key={searchFilter.id} title={searchFilter.name}>
             {groupedProjects[searchFilter.id]?.map((project) => (
               <ProjectListItem
@@ -105,7 +104,7 @@ export default function ProjectList() {
         </>
       ) : (
         <>
-          {filteredProjects.length === 0 && <List.EmptyView title="No Projects Found" />}
+          {filteredProjects.length == 0 && <List.EmptyView title="No Projects Found" />}
           {workspaces.map((workspace) => (
             <List.Section key={workspace.id} title={workspace.name}>
               {groupedProjects[workspace.id]?.map((project) => (

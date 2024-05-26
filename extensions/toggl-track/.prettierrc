@@ -1,17 +1,4 @@
 {
   "printWidth": 120,
-  "singleQuote": false,
-  "importOrder": [
-    "<THIRD_PARTY_MODULES>",
-    "^@/(.*)$",
-    "^@core/(.*)$",
-    "^@server/(.*)$",
-    "^@ui/(.*)$",
-    "^[./]"
-  ],
-  "importOrderSeparation": true,
-  "importOrderSpecifiers": true,
-  "plugins": [
-    "@trivago/prettier-plugin-sort-imports"
-  ]
+  "singleQuote": false
 }

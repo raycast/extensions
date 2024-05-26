@@ -1,5 +1,5 @@
-import { get, post, patch } from "@/api/togglClient";
-import type { ToggleItem } from "@/api/types";
+import type { ToggleItem } from "./types";
+import { get, post, patch } from "./togglClient";
 
 export async function getMyTimeEntries<Meta extends boolean = false>({
   startDate,

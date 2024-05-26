@@ -1,5 +1,5 @@
-import { getRunningTimeEntry } from "@/api";
-import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
+import { useSafeCachedPromise } from "./useSafeCachedPromise";
+import { getRunningTimeEntry } from "../api";
 
 export function useRunningTimeEntry() {
   const { data, error, isLoading, revalidate } = useSafeCachedPromise(getRunningTimeEntry, [], { initialData: null });

@@ -13,8 +13,7 @@
   "author": "franzwilhelm",
   "contributors": [
     "bkeys818",
-    "michaelfaisst",
-    "teziovsky"
+    "michaelfaisst"
   ],
   "license": "MIT",
   "commands": [
@@ -61,18 +60,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.74.1",
+    "@raycast/api": "^1.75.1",
     "@raycast/utils": "^1.15.0",
     "dayjs": "^1.11.11",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "~20.12.12",
-    "@types/react": "~18.3.2",
+    "@types/react": "~18.3.3",
     "eslint": "^8.56.0",
-    "react-devtools": "^4.27.2",
+    "react-devtools": "^4.28.4",
     "typescript": "^5.4.5"
   },
   "scripts": {

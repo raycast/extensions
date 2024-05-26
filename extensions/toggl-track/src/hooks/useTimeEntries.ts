@@ -1,8 +1,7 @@
-import dayjs from "dayjs";
 import { useRef } from "react";
-
-import { getMyTimeEntries } from "@/api";
-import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
+import { useSafeCachedPromise } from "./useSafeCachedPromise";
+import dayjs from "dayjs";
+import { getMyTimeEntries } from "../api";
 
 export function useTimeEntries() {
   const startDateRef = useRef(dayjs().subtract(1, "week").toDate());

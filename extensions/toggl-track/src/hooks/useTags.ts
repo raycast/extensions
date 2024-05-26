@@ -1,5 +1,5 @@
-import { getMyTags } from "@/api";
-import { useSafeCachedPromise } from "@/hooks/useSafeCachedPromise";
+import { useSafeCachedPromise } from "./useSafeCachedPromise";
+import { getMyTags } from "../api";
 
 export function useTags() {
   const { data, error, isLoading, revalidate } = useSafeCachedPromise(getMyTags, [], { initialData: [] });

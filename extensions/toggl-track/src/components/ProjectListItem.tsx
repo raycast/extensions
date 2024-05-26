@@ -1,13 +1,12 @@
+import { Dispatch, SetStateAction } from "react";
 import { List, ActionPanel, Action, Icon, Color, confirmAlert, Alert } from "@raycast/api";
 import dayjs from "dayjs";
-import { Dispatch, SetStateAction } from "react";
-
-import { Organization, Workspace, Project, Client, updateProject, deleteProject } from "@/api";
-import ProjectForm from "@/components/ProjectForm";
-import { formatSeconds } from "@/helpers/formatSeconds";
-import { canModifyProjectIn } from "@/helpers/privileges";
-import Shortcut from "@/helpers/shortcuts";
-import { withToast, Verb } from "@/helpers/withToast";
+import { Organization, Workspace, Project, Client, updateProject, deleteProject } from "../api";
+import ProjectForm from "./ProjectForm";
+import { withToast, Verb } from "../helpers/withToast";
+import { formatSeconds } from "../helpers/formatSeconds";
+import Shortcut from "../helpers/shortcuts";
+import { canModifyProjectIn } from "../helpers/privileges";
 
 interface ProjectListProps {
   organization: Organization;

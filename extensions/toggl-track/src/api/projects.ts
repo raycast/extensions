@@ -1,5 +1,5 @@
-import { get, post, put, remove } from "@/api/togglClient";
-import type { ToggleItem } from "@/api/types";
+import type { ToggleItem } from "./types";
+import { get, post, put, remove } from "./togglClient";
 
 export async function getMyProjects(): Promise<Project[]> {
   return get<Project[]>("/me/projects?include_archived=true");

@@ -1,10 +1,9 @@
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert } from "@raycast/api";
-
-import { Workspace, Client, deleteClient, archiveClient, restoreClient } from "@/api";
-import ClientForm from "@/components/ClientForm";
-import { canModifyProjectIn } from "@/helpers/privileges";
-import Shortcut from "@/helpers/shortcuts";
-import { withToast, Verb } from "@/helpers/withToast";
+import { Workspace, Client, deleteClient, archiveClient, restoreClient } from "../api";
+import ClientForm from "./ClientForm";
+import { withToast, Verb } from "../helpers/withToast";
+import Shortcut from "../helpers/shortcuts";
+import { canModifyProjectIn } from "../helpers/privileges";
 
 interface ClientListItemProps {
   workspace: Workspace;

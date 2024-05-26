@@ -1,5 +1,5 @@
-import { List, Icon, ActionPanel, Action, openExtensionPreferences } from "@raycast/api";
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
+import { List, Icon, ActionPanel, Action, openExtensionPreferences } from "@raycast/api";
 
 interface ExtensionContextProps {
   setTokenValidity: (valid: boolean) => void;

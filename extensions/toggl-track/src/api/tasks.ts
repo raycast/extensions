@@ -1,5 +1,5 @@
-import { get } from "@/api/togglClient";
-import type { ToggleItem } from "@/api/types";
+import type { ToggleItem } from "./types";
+import { get } from "./togglClient";
 
 export function getMyTasks() {
   return get<Task[]>("/me/tasks");
