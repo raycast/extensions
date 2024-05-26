@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Update Icon] - {PR_MERGE_DATE}
+## [Update Icon] - 2024-05-26
 
 - Update the extension's icon
 
