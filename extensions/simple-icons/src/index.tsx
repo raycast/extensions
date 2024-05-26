@@ -7,15 +7,16 @@ import {
   Detail,
   Grid,
   Icon,
+  LaunchProps,
   Toast,
   getPreferenceValues,
   showHUD,
   showToast,
 } from "@raycast/api";
 import { titleToSlug } from "simple-icons/sdk";
-import { Supports, actions, defaultActionsOrder } from "./actions.js";
+import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
 import { loadLatestVersion, loadJson, cleanSavedPaths, initSavePath, getAliases } from "./utils.js";
-import { IconJson, IconData } from "./types.js";
+import { IconJson, IconData, LaunchContext } from "./types.js";
 
 const itemDisplayColumns = {
   small: 8,
@@ -23,7 +24,7 @@ const itemDisplayColumns = {
   large: 3,
 } as const;
 
-export default function Command() {
+export default function Command({ launchContext }: LaunchProps<{ launchContext?: LaunchContext }>) {
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
   const [version, setVersion] = useState("latest");
@@ -78,6 +79,9 @@ export default function Command() {
 
   return (
     <Grid
+      navigationTitle={
+        launchContext?.launchFromExtensionTitle ? `Pick icon for ${launchContext.launchFromExtensionTitle}` : undefined
+      }
       columns={itemDisplayColumns[itemSize]}
       inset={Grid.Inset.Small}
       isLoading={isLoading}
@@ -179,14 +183,27 @@ export default function Command() {
                           }
                           actions={
                             <ActionPanel>
-                              <ActionPanel.Section>
-                                <DefaultAction icon={icon} version={version} />
-                              </ActionPanel.Section>
-                              <ActionPanel.Section>
-                                {restActions.map((A, index) => (
-                                  <A key={`action-String(${index})`} icon={icon} version={version} />
-                                ))}
-                              </ActionPanel.Section>
+                              {launchContext && (
+                                <ActionPanel.Section>
+                                  <LaunchCommand
+                                    callbackLaunchOptions={launchContext.callbackLaunchOptions}
+                                    icon={{ ...icon, slug: icon.slug || titleToSlug(icon.title) }}
+                                    version={version}
+                                  />
+                                </ActionPanel.Section>
+                              )}
+                              {(!launchContext || launchContext?.showCopyActions) && (
+                                <>
+                                  <ActionPanel.Section>
+                                    <DefaultAction icon={icon} version={version} />
+                                  </ActionPanel.Section>
+                                  <ActionPanel.Section>
+                                    {restActions.map((A, index) => (
+                                      <A key={`action-String(${index})`} icon={icon} version={version} />
+                                    ))}
+                                  </ActionPanel.Section>
+                                </>
+                              )}
                               <ActionPanel.Section>
                                 <Supports />
                               </ActionPanel.Section>

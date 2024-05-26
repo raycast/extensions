@@ -43,7 +43,7 @@
       "title": "Access Token",
       "description": "Your Raindrop.io Test Access Token.",
       "link": "https://developer.raindrop.io/v1/authentication/token",
-      "placeholder": "Enter your Randrop.io Test Access token."
+      "placeholder": "Enter your Raindrop.io Test Access token."
     },
     {
       "name": "useLastCollection",

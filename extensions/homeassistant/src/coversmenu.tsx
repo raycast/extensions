@@ -1,9 +1,9 @@
-import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
-import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { CoverMenubarItem } from "@components/cover/menu";
 import { useHAStates } from "@components/hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
-import { CoverMenubarItem } from "@components/cover/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 
 export default function CoversMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();

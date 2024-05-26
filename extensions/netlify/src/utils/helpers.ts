@@ -1,7 +1,7 @@
-import { getPreferenceValues, Toast, showToast } from '@raycast/api';
 import { AxiosError } from 'axios';
 
-import { DeployState, Preferences, Role } from './interfaces';
+import { DeployState, Role } from './interfaces';
+import { showFailureToast } from '@raycast/utils';
 
 const VALID_EMAIL = /^[^@]+@[^@]+\.[^@]+$/;
 
@@ -28,10 +28,6 @@ export function getDomainUrl(team: string, name: string) {
   return `https://app.netlify.com/teams/${team}/dns/${name}`;
 }
 
-export function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 export function getStatusText(state: DeployState, errorMessage?: string) {
   if (errorMessage && /cancell?ed/i.test(errorMessage)) {
     state = 'canceled';
@@ -43,16 +39,12 @@ export function handleNetworkError(e: unknown): void {
   const error = e as AxiosError;
   const status = error.response?.status;
   if (!status) {
-    showToast(Toast.Style.Failure, 'Unknown error', 'Please try again.');
+    showFailureToast('Please try again.', { title: 'Unknown error' });
   }
   if (status === 401) {
-    showToast(
-      Toast.Style.Failure,
-      'Failed to authorize',
-      'Check your API key.',
-    );
+    showFailureToast('Check your API key.', { title: 'Failed to authorize' });
   } else {
-    showToast(Toast.Style.Failure, 'Network error', `Error code ${status}`);
+    showFailureToast(`Error code ${status}`, { title: 'Network error' });
   }
 }
 

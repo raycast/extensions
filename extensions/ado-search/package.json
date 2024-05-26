@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ado-search",
-  "title": "Azure DevOps Git Repositories Search",
-  "description": "Search Azure DevOps for Git repositories",
+  "title": "Azure DevOps Repositories Search",
+  "description": "Search trough Azure DevOps git repositories and find open Pull Requests",
   "icon": "Azure-DevOps.png",
   "author": "willem_van_lent",
   "categories": [
@@ -16,6 +16,14 @@
       "title": "Azure DevOps Repositories Search",
       "description": "Search and open Azure DevOps Repositories",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Azure DevOps Open Pull Requests",
+      "description": "Open Azure DevOps Open Pull Requests",
+      "mode": "menu-bar",
+      "subtitle": "Open Pull Requests",
+      "interval": "15m"
     }
   ],
   "preferences": [
@@ -53,6 +61,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "pull": "npx @raycast/api@latest pull-contributions",
+    "publish": "npx @raycast/api@latest publish"    
   }
 }

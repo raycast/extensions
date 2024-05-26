@@ -1,7 +1,8 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { useCachedPromise } from "@raycast/utils";
 import { AWS_URL_BASE } from "./constants";
+import { AwsAction } from "./components/common/action";
 
 export default function Console() {
   const { data: services, isLoading } = useCachedPromise(loadJSON);
@@ -10,14 +11,13 @@ export default function Console() {
     <List isLoading={isLoading} searchBarPlaceholder="Filter services by name...">
       {services?.map((service) => (
         <List.Item
-          id={service.uid}
           key={service.uid}
           title={service.title}
           subtitle={service.subtitle}
           icon={service.icon.path}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url={`${AWS_URL_BASE}${service.arg}`} />
+              <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} />
             </ActionPanel>
           }
         />

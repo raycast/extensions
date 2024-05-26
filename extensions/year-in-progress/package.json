@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
-    "anothertempore"
+    "anothertempore",
+    "akshay_khade"
   ],
   "pastContributors": [
     "danulqua"
@@ -19,21 +20,21 @@
   "commands": [
     {
       "name": "year-in-progress",
-      "title": "Year in Progress",
+      "title": "Progress",
       "description": "Displays the year in progress inline.",
       "mode": "no-view",
       "interval": "4h"
     },
     {
       "name": "index",
-      "title": "Show X In Progress In Menu Bar",
+      "title": "Show X in Progress in Menu Bar",
       "description": "Display X In Progress In Menu Bar",
       "mode": "menu-bar",
       "interval": "2m"
     },
     {
       "name": "x-in-progress",
-      "title": "X In Progress",
+      "title": "X in Progress",
       "description": "Display and manage X In Progress In Command",
       "mode": "view"
     }

@@ -9,6 +9,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function Secrets() {
   const [search, setSearch] = useState<string>("");
@@ -55,7 +56,7 @@ function Secret({
   const { data: secretDetails } = useCachedPromise(fetchSecret, [secret.ARN]);
   return (
     <List.Item
-      id={secret.Name || ""}
+      key={secret.ARN}
       icon={"aws-icons/secretsmanager.png"}
       title={secret.Name || ""}
       detail={
@@ -79,10 +80,7 @@ function Secret({
           <Action title={showValue ? "Hide Value" : "Show Value"} onAction={() => setShowValue()} />
           <Action.CopyToClipboard title="Copy Value" content={secretDetails?.SecretString || ""} />
           <Action.CopyToClipboard title="Copy ARN" content={secret.ARN || ""} />
-          <Action.OpenInBrowser
-            title="Open Secret"
-            url={resourceToConsoleLink(secret.Name, "AWS::SecretsManager::Secret")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(secret.Name, "AWS::SecretsManager::Secret")} />
           <Action.CopyToClipboard title="Copy Name" content={secret.Name || ""} />
         </ActionPanel>
       }

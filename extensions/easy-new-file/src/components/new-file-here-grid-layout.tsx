@@ -9,14 +9,17 @@ import { NewFileHereEmptyView } from "./new-file-here-empty-view";
 import { NewFileHereItem } from "./new-file-here-item";
 
 export function NewFileHereGridLayout(props: {
+  navigationTitle: string;
   isLoading: boolean;
   templateFiles: TemplateType[];
+  folder: string;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { isLoading, templateFiles, setRefresh } = props;
+  const { navigationTitle, isLoading, templateFiles, folder, setRefresh } = props;
   const { layout, columns, itemInset, showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
   return (
     <Grid
+      navigationTitle={navigationTitle}
       inset={isEmpty(itemInset) ? undefined : (itemInset as Grid.Inset)}
       columns={parseInt(columns)}
       aspectRatio={"3/2"}
@@ -48,6 +51,7 @@ export function NewFileHereGridLayout(props: {
                   template={template}
                   index={index}
                   templateFiles={templateFiles}
+                  folder={folder}
                   setRefresh={setRefresh}
                 />
               }
@@ -65,6 +69,7 @@ export function NewFileHereGridLayout(props: {
                 fileType={fileType}
                 newFileType={{ section: "Document", index: index }}
                 templateFiles={templateFiles}
+                folder={folder}
                 setRefresh={setRefresh}
               />
             );
@@ -81,6 +86,7 @@ export function NewFileHereGridLayout(props: {
                 fileType={fileType}
                 newFileType={{ section: "Code", index: index }}
                 templateFiles={templateFiles}
+                folder={folder}
                 setRefresh={setRefresh}
               />
             );
@@ -97,6 +103,7 @@ export function NewFileHereGridLayout(props: {
                 fileType={fileType}
                 newFileType={{ section: "Script", index: index }}
                 templateFiles={templateFiles}
+                folder={folder}
                 setRefresh={setRefresh}
               />
             );

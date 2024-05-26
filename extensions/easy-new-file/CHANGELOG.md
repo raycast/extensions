@@ -1,5 +1,11 @@
 # Easy New File Changelog
 
+## [New File Now] - 2024-05-21
+
+- You can now quickly create new files directly with the New File Now (previously New File With Text) command in the main window.
+- Update the name of the New File Here command to New File With Template to make it clearer
+- Other detail optimisation and bug fixes
+
 ## [Optimize file operations] - 2023-11-13
 
 - Optimize the selection of files and directories

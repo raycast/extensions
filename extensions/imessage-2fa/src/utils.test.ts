@@ -33,6 +33,11 @@ describe("Testing matching logic", () => {
     expect(extractCode("CWGUG8")).toBe("CWGUG8");
     expect(extractCode("CWGUG8 is your code")).toBe("CWGUG8");
     expect(extractCode("7645W453")).toBe("7645W453");
+    expect(
+      extractCode(
+        "Chase: DON'T share. Use code 89050683. Only use this online. Code expires in 10 min. We'll NEVER call to ask for this code. Call us if you didn't request it."
+      )
+    ).toBe("89050683");
   });
 
   test("Codes with dash", () => {
