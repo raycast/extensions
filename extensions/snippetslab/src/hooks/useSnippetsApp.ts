@@ -8,7 +8,10 @@ export default function useSnippetsApp(): [Application | null, boolean] {
     (async () => {
       const applications = await getApplications();
       for (const application of applications) {
-        if (application.bundleId?.startsWith("com.renfei.SnippetsLab")) {
+        if (
+          application.bundleId?.startsWith("com.renfei.SnippetsLab") ||
+          application.bundleId?.startsWith("com.renfei.snippetslab-setapp")
+        ) {
           setIsLoading(false);
           setsnippetsApp(application);
           return;
