@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "random-fart",
   "title": "Random Fart",
-  "description": "Plays a random fart sound.\n\nAn extension nobody asked for and nobody needed.",
+  "description": "Plays a random fart sound. An extension nobody asked for and nobody needed.",
   "icon": "command-icon.png",
   "author": "szy.fr",
   "categories": [
