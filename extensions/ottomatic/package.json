@@ -10,6 +10,7 @@
     {
       "name": "search-servers",
       "title": "Search Servers",
+      "subtitle": "Ottomatic",
       "icon": "list-servers.png",
       "description": "View the servers in your Ottomatic account",
       "mode": "view"
@@ -17,6 +18,7 @@
     {
       "name": "search-favorites",
       "title": "Search Favorites",
+      "subtitle": "Ottomatic",
       "icon": "list-favs.png",
       "description": "View your favorites in your Ottomatic account",
       "mode": "view"
