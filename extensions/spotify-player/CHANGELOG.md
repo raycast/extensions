@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Improvements] - 2024-05-27
+
+- Users can now set their preferred first section for search results.
+- Added a new keyboard shortcut for "Add to queue".
+
 ## [New "Remove Playing Song from Playlist" command] - 2024-05-27
 
 - New command `Remove Playing Song from Playlist` to remove the current song from the playlist it's in.
