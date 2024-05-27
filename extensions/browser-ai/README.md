@@ -1,6 +1,6 @@
 # Browser AI
 
-Combine Perplexity API and Raycast Browser Extension to enhance your browsing with advanced AI models like Mistral and Meta's Llama.
+Use the best models and Raycast Browser Extension to extend your browsing.
 
 ## Features
 
@@ -17,14 +17,14 @@ Combine Perplexity API and Raycast Browser Extension to enhance your browsing wi
 
 ## Getting an API Key
 
-1. Go to [Perplexity API](https://www.perplexity.ai/settings/api)
+1. Go to [Perplexity API](https://www.perplexity.ai/settings/api) or Go to [OpenRouter](https://openrouter.ai/docs#models)
 2. Generate and copy your API key
-3. Input your key on the Extension's setup page
+3. Insert your key on the extension's setup page.
 
 ## API Pricing
 
+Perplexity
 Pricing is based on the number of tokens processed. More details on the [Pricing Page](https://docs.perplexity.ai/docs/pricing).
 
-## Credits
-
-[Perplexity API Extension](https://www.raycast.com/ilian/perplexity-api)
+OpenRouter
+[Pricing Page](https://openrouter.ai/docs#models).

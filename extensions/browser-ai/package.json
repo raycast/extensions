@@ -3,7 +3,7 @@
   "name": "browser-ai",
   "title": "OpenRouter - Browser AI",
   "description": "Use the best models and Raycast Browser Extension to extend your browsing. \n\nPerplexity models: https://docs.perplexity.ai/docs/model-cards. \n\nOpenRouter models: https://openrouter.ai/docs#models",
-  "icon": "perplexity.png",
+  "icon": "logo.png",
   "author": "lin",
   "contributors": [],
   "categories": [
