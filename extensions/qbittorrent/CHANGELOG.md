@@ -4,6 +4,8 @@
 
 - Migrate to the latest Raycast api version (1.74.0)
 
+- Added menubar commands
+
 ## [Update] - 2022-06-30
 
 - Added new command: Add Torrent

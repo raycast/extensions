@@ -23,6 +23,13 @@
       "subtitle": "qBittorrent",
       "description": "add qBitorrent torrents",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Menu Bar Torrents",
+      "subtitle": "qBittorrent",
+      "description": "qBitorrent menubar",
+      "mode": "menu-bar"
     }
   ],
   "preferences": [
