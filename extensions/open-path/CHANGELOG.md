@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Fix Hotkey Error] - {PR_MERGE_DATE}
+
+-  Fix the problem of using hotkeys to invoke commands
+
 ## [Open in Terminal] - 2024-05-27
 
 -  Now supports opening paths in a terminal
