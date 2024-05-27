@@ -12,8 +12,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Fart",
-      "subtitle": "Let It Rip",
+      "title": "Play Random Fart",
       "description": "Plays a random fart sound.",
       "mode": "no-view"
     }
