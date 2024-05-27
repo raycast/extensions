@@ -1,5 +1,8 @@
 # Bitly Changelog
 
+## [Update] - 2024-05-26
+- Fallback to clipboard text when selected text fails with `Unable to get selected text from frontmost application`
+
 ## [Update] - 2024-04-13
 
 - Now by default will grab the currently selected URL to shorten
