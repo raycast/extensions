@@ -1,8 +1,9 @@
-import { useState } from "react";
 import { ActionPanel, Form, Action, useNavigation } from "@raycast/api";
 import dayjs from "dayjs";
-import { Workspace, Project, Client, updateProject, createProject, ProjectOptions } from "../api";
-import { withToast, Verb } from "../helpers/withToast";
+import { useState } from "react";
+
+import { Workspace, Project, Client, updateProject, createProject, ProjectOptions } from "@/api";
+import { withToast, Verb } from "@/helpers/withToast";
 
 type ProjectFormProps =
   | {

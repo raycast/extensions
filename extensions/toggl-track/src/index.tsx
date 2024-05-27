@@ -3,12 +3,12 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { useMemo } from "react";
 
-import { createTimeEntry, TimeEntry } from "./api";
-import TimeEntryForm from "./components/CreateTimeEntryForm";
-import RunningTimeEntry from "./components/RunningTimeEntry";
-import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { formatSeconds } from "./helpers/formatSeconds";
-import { useTimeEntries, useRunningTimeEntry } from "./hooks";
+import { createTimeEntry, TimeEntry } from "@/api";
+import TimeEntryForm from "@/components/CreateTimeEntryForm";
+import RunningTimeEntry from "@/components/RunningTimeEntry";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { formatSeconds } from "@/helpers/formatSeconds";
+import { useTimeEntries, useRunningTimeEntry } from "@/hooks";
 
 dayjs.extend(duration);
 
