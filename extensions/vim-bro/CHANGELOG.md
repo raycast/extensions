@@ -1,5 +1,7 @@
 # Vim-bro Changelog
 
+## [Added screenshot] - 2024-05-27
+
 ## [Added better search with multiple keywords] - 2022-03-30
 
 - Vim-bro can now shows search based on priority defined by number of keyword match.
