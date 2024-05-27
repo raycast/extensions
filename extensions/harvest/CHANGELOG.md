@@ -1,5 +1,8 @@
 # Harvest Changelog
 
+## [Fixes] - 2024-05-27
+- Improved cache for menu bar widget
+
 ## [Fixes] - 2024-04-08
 
 - Improved cache for projects and tasks
