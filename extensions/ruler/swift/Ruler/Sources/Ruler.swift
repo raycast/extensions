@@ -1,9 +1,12 @@
 import Cocoa
+import RaycastSwiftMacros
 
 class RulerWindow: NSWindow {
   private var lineView: NSView?
   private var trackingArea: NSTrackingArea?
   private var isShiftKeyPressed: Bool = false
+  private var coordinatesOverlay: NSView?
+  private var coordinatesLabel: NSTextField?
 
   override var canBecomeKey: Bool {
     return true
@@ -22,7 +25,6 @@ class RulerWindow: NSWindow {
     if event.keyCode == 56 {  // 56 is the key code for Shift
       isShiftKeyPressed = false
     }
-
     super.keyUp(with: event)
   }
 
@@ -34,14 +36,20 @@ class RulerWindow: NSWindow {
     }
   }
 
-  override func mouseDown(with event: NSEvent) {
+  override func mouseDragged(with event: NSEvent) {
     let point = convertToScreenCoordinates(event.locationInWindow)
-    Ruler.shared.handleMouseClick(at: point)
+    Ruler.shared.handleMouseDragged(to: point)
+
+  }
+
+  override func mouseUp(with event: NSEvent) {
+    let point = convertToScreenCoordinates(event.locationInWindow)
+    Ruler.shared.handleMouseUp(at: point)
   }
 
   override func mouseMoved(with event: NSEvent) {
     let point = convertToScreenCoordinates(event.locationInWindow)
-    Ruler.shared.handleMouseMoved(to: point)
+    updateCoordinatesOverlay(at: point)
   }
 
   private func convertToScreenCoordinates(_ point: NSPoint) -> NSPoint {
@@ -55,7 +63,36 @@ class RulerWindow: NSWindow {
     set {}
   }
 
+  func removeCoordinatesOverlay() {
+    coordinatesOverlay?.removeFromSuperview()
+    coordinatesOverlay = nil
+  }
+
   private var distanceOverlay: NSView?
+
+  private func createOverlay(at point: NSPoint, with text: String) -> NSView {
+    let label = NSTextField(labelWithString: text)
+    label.font = NSFont.systemFont(ofSize: 14, weight: .medium)
+    label.textColor = NSColor.white
+    label.sizeToFit()
+
+    let labelWidth = label.frame.width + 20
+    let labelHeight = label.frame.height + 10
+
+    let overlay = NSView(
+      frame: NSRect(x: point.x + 8, y: point.y + 8, width: labelWidth, height: labelHeight))
+    overlay.wantsLayer = true
+    overlay.layer?.cornerRadius = 15
+    overlay.layer?.backgroundColor =
+      NSColor(red: 0.25, green: 0.25, blue: 0.25, alpha: 1.0).cgColor
+
+    label.frame = NSRect(
+      x: 10, y: (labelHeight - label.frame.height) / 2, width: label.frame.width,
+      height: label.frame.height)
+    overlay.addSubview(label)
+
+    return overlay
+  }
 
   func drawStroke(from startPoint: NSPoint, to endPoint: NSPoint) {
     if lineView == nil {
@@ -99,53 +136,12 @@ class RulerWindow: NSWindow {
       lineView?.layer?.backgroundColor = NSColor.red.cgColor
     }
 
-    // Calculate the position of the distance label
-
-    // Get the main screen
-    guard let mainScreen = NSScreen.main else {
-      print("Failed to get the main screen")
-      exit(1)
-    }
-
-    // Get the screen's frame
-    let screenFrame = mainScreen.frame
-
     // Remove previous distance overlay if exists
     distanceOverlay?.removeFromSuperview()
 
-    // Create a transparent box overlay with the same length as the line but keep minimum width
-    let overlayWidth = width > 80 ? width : 80
-    let overlayHeight: CGFloat = 20  // Adjust the height as desired
-    var overlayX = x + width / 2 - overlayWidth / 2
-    let overlayY: CGFloat
-
-    // if there is no space above the line, put the overlay below the line
-    if y + height + overlayHeight < screenFrame.size.height {
-      overlayY = y + height
-    } else {
-      overlayY = y - overlayHeight
-    }
-
-    // if last point is on the left side of the first point, put the overlay on the left side
-    if endPoint.x < startPoint.x {
-      overlayX = x - width / 2 - overlayWidth / 2
-    }
-
-    distanceOverlay = NSView(
-      frame: NSRect(x: overlayX, y: overlayY, width: overlayWidth, height: overlayHeight))
-    distanceOverlay?.wantsLayer = true
-    distanceOverlay?.layer?.backgroundColor = NSColor.clear.cgColor
-
-    // Add the overlay to the window's content view
+    let distanceText = "\(Int(distance)) pixels"
+    distanceOverlay = createOverlay(at: endPoint, with: distanceText)
     contentView?.addSubview(distanceOverlay!)
-
-    // Calculate the distance and update the overlay's contents
-    let distanceLabel = NSTextField(labelWithString: "\(distance.rounded()) pixels")
-    distanceLabel.frame = distanceOverlay?.bounds ?? NSZeroRect
-    distanceLabel.alignment = .center
-    distanceLabel.textColor = NSColor.white
-    distanceLabel.backgroundColor = NSColor.clear
-    distanceOverlay?.addSubview(distanceLabel)
   }
 
   func removeLine() {
@@ -170,6 +166,15 @@ class RulerWindow: NSWindow {
   override func cursorUpdate(with event: NSEvent) {
     NSCursor.crosshair.set()
   }
+
+  private func updateCoordinatesOverlay(at point: NSPoint) {
+    // Remove the previous coordinates overlay if it exists
+    coordinatesOverlay?.removeFromSuperview()
+
+    let coordinatesText = "\(Int(point.x)) × \(Int(point.y))"
+    coordinatesOverlay = createOverlay(at: point, with: coordinatesText)
+    contentView?.addSubview(coordinatesOverlay!)
+  }
 }
 
 class Ruler: NSObject {
@@ -193,10 +198,8 @@ class Ruler: NSObject {
       exit(1)
     }
 
-    // Get the screen's frame
     let screenFrame = mainScreen.frame
 
-    // Retrieve the width and height
     let screenWidth = screenFrame.size.width
     let screenHeight = screenFrame.size.height
 
@@ -207,7 +210,6 @@ class Ruler: NSObject {
     let window = RulerWindow(
       contentRect: contentRect, styleMask: styleMask, backing: .buffered, defer: false)
 
-    // Create a color with full opacity (1.0)
     let bgColor = NSColor.blue
 
     window.backgroundColor = bgColor.withAlphaComponent(0.05)
@@ -237,55 +239,38 @@ class Ruler: NSObject {
     rulerWindow?.setupTrackingArea()
 
     application.run()
-
   }
 
-  func handleMouseClick(at point: NSPoint) {
-    guard let rulerWindow = rulerWindow else {
-      return
-    }
+  func handleMouseDragged(to point: NSPoint) {
+    guard let rulerWindow = rulerWindow else { return }
 
     if startPoint == nil {
       startPoint = point
       rulerWindow.drawStroke(from: point, to: point)
-    } else if endPoint == nil {
-      endPoint = point
-      calculateAndCopyDistance()
-      NSApplication.shared.terminate(nil)
+      rulerWindow.removeCoordinatesOverlay()
+    } else {
+      rulerWindow.drawStroke(from: startPoint!, to: point)
     }
   }
 
-  func handleMouseMoved(to point: NSPoint) {
-    guard let startPoint = startPoint, let rulerWindow = rulerWindow else {
+  func handleMouseUp(at point: NSPoint) {
+    endPoint = point
+    calculateDistance()
+    NSApplication.shared.terminate(nil)
+  }
+
+  private func calculateDistance() {
+    guard let startPoint = startPoint, let endPoint = endPoint else {
       return
     }
 
-    rulerWindow.drawStroke(from: startPoint, to: point)
-  }
-
-  private func copyToClipboard(_ string: String) {
-    let pasteboard = NSPasteboard.general
-    pasteboard.clearContents()
-    pasteboard.setString(string, forType: .string)
-  }
-
-  private func calculateAndCopyDistance() {
-    guard let startPoint = startPoint, let endPoint = endPoint else {
-      print("Invalid points")
-      exit(1)
-    }
-
-    let distance: CGFloat = calculateDistance(from: startPoint, to: endPoint).rounded()
-
-    print(distance)
-  }
-
-  private func calculateDistance(from startPoint: NSPoint, to endPoint: NSPoint) -> CGFloat {
     let distanceX = endPoint.x - startPoint.x
     let distanceY = endPoint.y - startPoint.y
-    return sqrt(pow(distanceX, 2) + pow(distanceY, 2))
+    let distance = sqrt(pow(distanceX, 2) + pow(distanceY, 2)).rounded()
+    print(distance)
   }
 }
 
-let ruler = Ruler.shared
-ruler.measureDistance()
+@raycast func measureDistance() {
+  return Ruler.shared.measureDistance()
+}
