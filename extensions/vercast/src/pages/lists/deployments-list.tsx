@@ -61,11 +61,18 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                       team?.slug || user.username,
                       deployment.name,
                       /* @ts-expect-error Property id does not exist on type Deployment */
-                      deployment.id || deployment.uid
+                      deployment.id || deployment.uid,
                     )}
                     icon={Icon.Link}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
                   />
                 )}
+                <Action.CopyToClipboard
+                  title={`Copy URL`}
+                  content={`https://${deployment.url}`}
+                  icon={Icon.CopyClipboard}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                />
               </ActionPanel>
             }
             accessories={[

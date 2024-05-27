@@ -1,14 +1,13 @@
 import { getPreferenceValues, Cache, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import parse from "url-parse";
-import qs from "qs";
 import FormData from "form-data";
 import fs from "fs";
 import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences, ResponseData, ROW_STATUS, ROW_STATUS_KEY } from "./types";
+import { Preferences, ResponseData, ROW_STATUS } from "./types";
 import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
 
 const cache = new Cache();
@@ -39,7 +38,7 @@ const getHost = () => {
   return host;
 };
 
-const getToken = () => {
+export const getToken = () => {
   const preferences = getPreferenceValues<Preferences>();
 
   const { token } = preferences;
@@ -88,18 +87,6 @@ const getOpenId = () => {
   }
 };
 
-// Adapt to the new API
-const getApiVersion = () => {
-  const openApi = getOpenApi();
-  const token = getToken();
-
-  if (openApi && openApi.includes("v1")) return "/v1";
-
-  if (token) return "/v1";
-
-  return "";
-};
-
 const getUseFetch = <T>(url: string, options: Record<string, any>) => {
   return useFetch<T, T>(url, {
     headers: {
@@ -133,13 +120,15 @@ const getFetch = <T>(options: AxiosRequestConfig) => {
 };
 
 export const getMe = () => {
-  return getUseFetch<ResponseData<MeResponse>>(getRequestUrl(`/api/user/me?openId=${getOpenId()}`), {});
+  return getUseFetch<MeResponse>(getRequestUrl(`/api/v1/auth/status`), {
+    method: "POST",
+  });
 };
 
 export const sendMemo = (data: PostMemoParams) => {
-  const url = getRequestUrl(`/api${getApiVersion()}/memo?openId=${getOpenId()}`);
+  const url = getRequestUrl(`/api/v1/memos`);
 
-  return getFetch<ResponseData<MemoInfoResponse> & MemoInfoResponse>({
+  return getFetch<MemoInfoResponse>({
     url,
     method: "POST",
     data,
@@ -147,7 +136,7 @@ export const sendMemo = (data: PostMemoParams) => {
 };
 
 export const getTags = () => {
-  const url = getRequestUrl(`/api${getApiVersion()}/tag?openId=${getOpenId()}`);
+  const url = getRequestUrl(`/api/v1/tag?openId=${getOpenId()}`);
 
   return getUseFetch<ResponseData<TagResponse> & TagResponse>(url, {
     keepPreviousData: true,
@@ -167,7 +156,7 @@ export const postFile = (filePath: string) => {
   });
 
   return getFetch<ResponseData<PostFileResponse> & PostFileResponse>({
-    url: getRequestUrl(`/api${getApiVersion()}/resource/blob?openId=${getOpenId()}`),
+    url: getRequestUrl(`/api/v1/resource/blob?openId=${getOpenId()}`),
     method: "POST",
     data: formData,
     headers: {
@@ -176,26 +165,29 @@ export const postFile = (filePath: string) => {
   });
 };
 
-export const getAllMemos = (rowStatus: ROW_STATUS_KEY = ROW_STATUS.NORMAL) => {
-  const queryString = qs.stringify({
-    openId: getOpenId(),
-    rowStatus,
-  });
+export const getAllMemos = (currentUserId?: number) => {
+  let filter = encodeURIComponent(`creator=='users/${currentUserId}'`);
 
-  const url = getRequestUrl(`/api${getApiVersion()}/memo?${queryString}`);
+  if (!currentUserId) {
+    filter = "";
+  }
 
-  const { isLoading, data, revalidate } = getUseFetch<ResponseData<MemoInfoResponse[]> & MemoInfoResponse[]>(url, {
+  const url = getRequestUrl(`/api/v1/memos?filter=${filter}`);
+
+  const { isLoading, data, revalidate } = getUseFetch<{
+    memos: MemoInfoResponse[];
+  }>(url, {
     keepPreviousData: true,
     initialData: {
-      data: [],
+      memos: [],
     },
   });
 
-  return { isLoading, data, revalidate };
+  return { isLoading, data: currentUserId ? data : { memos: [] }, revalidate };
 };
 
-export const patchMemo = (memoId: number, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
-  const url = getRequestUrl(`/api${getApiVersion()}/memo/${memoId}?openId=${getOpenId()}`);
+export const patchMemo = (memoId: string, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
+  const url = getRequestUrl(`/api/v1/memo/${memoId}?openId=${getOpenId()}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,
@@ -207,20 +199,20 @@ export const patchMemo = (memoId: number, { rowStatus = ROW_STATUS.NORMAL } = {}
   });
 };
 
-export const archiveMemo = (memoId: number) => {
+export const archiveMemo = (memoId: string) => {
   return patchMemo(memoId, {
     rowStatus: ROW_STATUS.ARCHIVED,
   });
 };
 
-export const restoreMemo = (memoId: number) => {
+export const restoreMemo = (memoId: string) => {
   return patchMemo(memoId, {
     rowStatus: ROW_STATUS.NORMAL,
   });
 };
 
-export const deleteMemo = (memoId: number) => {
-  const url = getRequestUrl(`/api${getApiVersion()}/memo/${memoId}?openId=${getOpenId()}`);
+export const deleteMemo = (memoId: string) => {
+  const url = getRequestUrl(`/api/v1/memo/${memoId}?openId=${getOpenId()}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,

@@ -25,7 +25,10 @@
     "xilopaint",
     "antonengelhardt",
     "johanthorell",
-    "dennis_zoma"
+    "dennis_zoma",
+    "litomore",
+    "dmitrii_mitrofanov",
+    "j3lte"
   ],
   "categories": [
     "Developer Tools",
@@ -162,6 +165,14 @@
           "description": "Show the menu bar extra even when you don't have any unread notifications.",
           "default": true,
           "required": false
+        },
+        {
+          "type": "checkbox",
+          "label": "Show unread count",
+          "name": "showUnreadCount",
+          "description": "Show the unread count in the menu bar.",
+          "default": true,
+          "required": false
         }
       ]
     },
@@ -175,6 +186,12 @@
       "name": "my-discussions",
       "title": "My Discussions",
       "description": "Show your Discussions",
+      "mode": "view"
+    },
+    {
+      "name": "my-projects",
+      "title": "My Projects",
+      "description": "Show your Projects",
       "mode": "view"
     },
     {
@@ -337,7 +354,7 @@
       "type": "password",
       "required": false,
       "title": "GitHub Token",
-      "description": "Your GitHub's personal access token. Required scopes: notifications repo read:org read:user read:project.",
+      "description": "Your GitHub's personal access token. Required scopes: notifications repo project read:org read:user.",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your personal access token"
     },
@@ -356,6 +373,15 @@
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
       "placeholder": "50"
+    },
+    {
+      "type": "checkbox",
+      "title": "Actions",
+      "label": "Open PRs in browser by default",
+      "name": "isOpenInBrowser",
+      "description": "If checked, pull requests will be opened in the browser by default instead of viewing them within Raycast.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

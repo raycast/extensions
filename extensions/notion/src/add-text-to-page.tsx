@@ -53,7 +53,7 @@ function AddTextToPage(props: LaunchProps<{ arguments: Arguments.AddTextToPage }
     },
   });
 
-  const searchPages = data?.filter((page) => page.object === "page");
+  const searchPages = data?.pages.filter((page) => page.object === "page");
 
   return (
     <Form

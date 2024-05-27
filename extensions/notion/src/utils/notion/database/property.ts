@@ -1,5 +1,6 @@
 import type { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
 import { Form } from "@raycast/api";
+import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
 import { _supportedPropTypes } from "..";
@@ -14,7 +15,7 @@ export function formatDatabaseProperty(...[type, value]: FormatDatabasePropertyP
   switch (type) {
     case "title":
     case "rich_text":
-      return formattedProperty(type, [{ text: { content: value } }]);
+      return formattedProperty(type, markdownToRichText(value));
     case "number":
       return formattedProperty(type, parseFloat(value));
     case "date": {

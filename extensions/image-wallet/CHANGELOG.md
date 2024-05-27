@@ -1,5 +1,7 @@
 # Image Wallet Changelog
 
+## [Added a new keyword for improved searchability] - 2024-05-21
+
 ## [Video Previews] - 2023-07-11
 
 - Added 'Generate Video Previews' option

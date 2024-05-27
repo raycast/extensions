@@ -11,11 +11,13 @@
   ],
   "contributors": [
     "FezVrasta",
+    "ickas",
     "metakirby5",
     "AlanHuang",
     "nirtamir2",
     "pernielsentikaer",
-    "rasitayaz"
+    "rasitayaz",
+    "popalay"
   ],
   "license": "MIT",
   "commands": [
@@ -942,6 +944,24 @@
       "required": false,
       "type": "checkbox",
       "default": true
+    },
+    {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "The default action to take when translating.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to App",
+          "value": "paste"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -82,7 +82,7 @@ export default function Command() {
             <Action.Push
               title="Create Reminder"
               icon={Icon.Plus}
-              target={<CreateReminderForm listId={listId !== "all" ? listId : ""} mutate={mutate} />}
+              target={<CreateReminderForm listId={listId} mutate={mutate} />}
             />
 
             <Action

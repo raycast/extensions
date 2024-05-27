@@ -1,26 +1,26 @@
 import { Action, ActionPanel, Icon, open, showHUD } from "@raycast/api";
-import { downloadPicture, setWallpaper } from "../utils/common-utils";
+import { downloadPicture, setOnlineWallpaper } from "../utils/common-utils";
 import { buildBingImageURL, buildCopyrightURL, getPictureName } from "../utils/bing-wallpaper-utils";
 import React from "react";
 import { BingImage, DownloadedBingImage } from "../types/types";
 import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
 import PreviewBingWallpaper from "../preview-bing-wallpaper";
+import { downloadSize } from "../types/preferences";
 
 export function ActionsOnlineBingWallpaper(props: {
   index: number;
   bingImage: BingImage;
   onlineImages: BingImage[];
   downloadedImages: DownloadedBingImage[];
-  downloadSize: string;
 }) {
-  const { index, bingImage, downloadSize, onlineImages, downloadedImages } = props;
+  const { index, bingImage, onlineImages, downloadedImages } = props;
   return (
     <ActionPanel>
       <Action
         icon={Icon.Desktop}
         title={"Set Desktop Wallpaper"}
         onAction={() => {
-          setWallpaper(
+          setOnlineWallpaper(
             getPictureName(bingImage.url) + "-" + bingImage.startdate,
             buildBingImageURL(bingImage.url, "raw"),
           ).then(() => "");
@@ -53,7 +53,7 @@ export function ActionsOnlineBingWallpaper(props: {
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={() => {
             const randomImage = onlineImages[Math.floor(Math.random() * onlineImages.length)];
-            setWallpaper(
+            setOnlineWallpaper(
               getPictureName(randomImage.url) + "-" + randomImage.startdate,
               buildBingImageURL(randomImage.url, "raw"),
             ).then(() => "");

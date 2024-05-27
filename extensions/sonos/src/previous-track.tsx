@@ -9,8 +9,11 @@ export default async function Command() {
   try {
     coordinator = await getActiveCoordinator();
   } catch (error) {
-    await handleCommandError(error);
-    return;
+    const caught = await handleCommandError(error);
+
+    if (caught) {
+      return;
+    }
   }
 
   if (coordinator === undefined) {

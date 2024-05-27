@@ -289,6 +289,15 @@
       "default": false
     },
     {
+      "name": "closeWindowOnTimerStart",
+      "type": "checkbox",
+      "required": false,
+      "title": "Close Window on Timer Start",
+      "description": "Whether or not to close the Raycast window when a timer or stopwatch is started.",
+      "label": "Automatically close window on start",
+      "default": true
+    },
+    {
       "name": "newTimerInputOrder",
       "type": "dropdown",
       "required": false,

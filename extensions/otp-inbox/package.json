@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "otp-inbox",
+  "title": "OTP Inbox",
+  "description": "View your latest email verficiation codes.",
+  "icon": "icon.png",
+  "author": "chroxify",
+  "categories": [
+    "Productivity",
+    "Security",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "otp-inbox",
+      "title": "OTP Inbox",
+      "description": "View your latest email verficiation codes.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "title": "Google Client ID",
+      "type": "password",
+      "description": "Your Google client ID. Click on \"About this extension\" to learn how to get it.",
+      "required": true,
+      "placeholder": "*********.apps.googleusercontent.com"
+    },
+    {
+      "name": "hideVerificationCodes",
+      "title": "Hide Verification Codes",
+      "type": "checkbox",
+      "description": "Hide the verification codes in the list.",
+      "defaultValue": false,
+      "label": "Hide Codes",
+      "required": false
+    },
+    {
+      "name": "emailFilterKeywords",
+      "title": "Custom Email Filter Keywords",
+      "type": "textfield",
+      "description": "Separate multiple keywords with a comma. (This will override the default filter keywords!)",
+      "placeholder": "login,verification,sign up,otp,...",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.71.3",
+    "@raycast/utils": "^1.14.0",
+    "cross-fetch": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

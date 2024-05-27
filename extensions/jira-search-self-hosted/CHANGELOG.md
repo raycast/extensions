@@ -1,5 +1,7 @@
 # Jira Search Self Hosted Changelog
 
+## [Fixed typo] - 2024-04-30
+
 ## [Update] - 2024-02-02
 
 Added new `Open Issues` command that loads only open issues assigned to user owning token added to preferences. 

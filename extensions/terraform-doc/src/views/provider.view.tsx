@@ -35,7 +35,7 @@ export default function ProviderView() {
       }
     }
     updateProviders();
-  }, []);
+  }, [state]);
   return (
     <List isLoading={!(state && state.length > 0)}>
       {state?.map((p) => (
@@ -57,6 +57,11 @@ export default function ProviderView() {
                 icon={Icon.Rocket}
                 title={`Navigate to ${p.attributes["full-name"]}`}
                 target={<ProviderVersionsView provider={p} />}
+              />
+              <Action
+                icon={Icon.Download}
+                title="Refresh Cache"
+                onAction={() => setState(undefined)}
               />
             </ActionPanel>
           }
