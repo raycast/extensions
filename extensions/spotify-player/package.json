@@ -77,7 +77,7 @@
           ],
           "default": "artists",
           "description": "Show a specific view at the top of the results list by default",
-          "name": "Top-View",
+          "name": "topView",
           "required": false,
           "type": "dropdown",
           "placeholder": "Top View"

@@ -1,9 +1,9 @@
 # Spotify Player Changelog
 
-## [Feature] - 2024-04-15
+## [Improvements] - 2024-04-15
 
-- Added preference to allow user to choose first category for Search results
-- Added keyboard shortcut for "Add to queue"
+- Users can now set their preferred first section for search results.
+- Added a new keyboard shortcut for "Add to queue".
 
 ## [Feature] - 2024-02-02
 
