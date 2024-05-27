@@ -1,5 +1,10 @@
 # IP Geolocation Changelog
 
+## [Copy IP] - 2024-05-27
+
+- Copy IP command allows you to choose whether to copy local/public IPv4/IPv6
+- Optimise the style of extension icons
+
 ## [Fix] - 2023-11-22
 
 - Fixing the IPv4 match
