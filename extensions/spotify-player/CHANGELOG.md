@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [New Actions Added] - 2024-05-27
+
+- Added `Like` and `Dislike` actions for tracks.
+
 ## [Improvements] - 2024-05-27
 
 - Users can now set their preferred first section for search results.
