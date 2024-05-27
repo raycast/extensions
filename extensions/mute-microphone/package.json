@@ -32,6 +32,14 @@
           "label": "Hide icon when unmuted",
           "default": false,
           "required": false
+        },
+        {
+          "name": "keepPreviousInputVolume",
+          "description": "Once we turned mic on the previous volume level will be applied",
+          "type": "checkbox",
+          "label": "Keep input volume",
+          "default": false,
+          "required": false
         }
       ]
     },
@@ -39,7 +47,17 @@
       "name": "toggle-mute",
       "title": "Toggle Mute Audio Input",
       "description": "Mute/unmute audio input (microphone)",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "keepPreviousInputVolume",
+          "description": "Once we turned mic on the previous volume level will be applied",
+          "type": "checkbox",
+          "label": "Keep input volume",
+          "default": false,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {

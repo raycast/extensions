@@ -1,6 +1,6 @@
 import { Cache, Color, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { get, toggleSystemAudioInputLevel } from "./utils";
+import { get, toggleFnFactory } from "./utils";
 
 export default function muteMenuBar() {
   const cache = new Cache();
@@ -13,6 +13,8 @@ export default function muteMenuBar() {
   const [currentAudioInputLevel, setCurrentAudioInputLevel] = useState<number>(cachedValueNumber);
   const icon = currentAudioInputLevel == 0 ? disabledIcon : enabledIcon;
   const menuItemText = currentAudioInputLevel == 0 ? "Unmute" : "Mute";
+
+  const toggle = toggleFnFactory(preferences);
 
   useEffect(() => {
     const newValue = Number(get());
@@ -29,7 +31,7 @@ export default function muteMenuBar() {
           <MenuBarExtra.Item
             title={menuItemText}
             onAction={async () => {
-              const newLevel = await toggleSystemAudioInputLevel(currentAudioInputLevel);
+              const newLevel = await toggle(currentAudioInputLevel);
               setCurrentAudioInputLevel(Number(newLevel));
             }}
           />
