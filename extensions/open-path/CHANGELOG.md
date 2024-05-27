@@ -1,5 +1,9 @@
 # Open Path Changelog
 
+## [Open in Terminal] - 2024-05-27
+
+-  Now supports opening paths in a terminal
+
 ## [Peek in Safari] - 2024-05-21
 
 - Web pages can be quickly previewed in Safari (by installing the shortcut [Peek Url](https://www.icloud.com/shortcuts/2364c358fbe7498aa6b18bd229d0f7de) and selecting **Peek in Safari** in Settings)
