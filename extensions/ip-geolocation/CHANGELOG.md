@@ -1,6 +1,6 @@
 # IP Geolocation Changelog
 
-## [Copy IP] - {PR_MERGE_DATE}
+## [Copy IP] - 2024-05-27
 
 - Copy IP command allows you to choose whether to copy local/public IPv4/IPv6
 - Optimise the style of extension icons
