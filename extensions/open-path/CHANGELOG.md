@@ -1,6 +1,6 @@
 # Open Path Changelog
 
-## [Open in Terminal] - {PR_MERGE_DATE}
+## [Open in Terminal] - 2024-05-27
 
 -  Now supports opening paths in a terminal
 
