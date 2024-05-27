@@ -33,7 +33,9 @@ export default function Command({
 }) {
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
-  const { data: projects } = useMyProjects();
+  const [projects, setProjects] = useState<HarvestProjectAssignment[]>([]);
+  useMyProjects().then(({data}) => { setProjects(data) });
+
   const [projectId, setProjectId] = useState<string | undefined>(entry?.project.id.toString());
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
   const [taskId, setTaskId] = useState<string | undefined>(entry?.task.id.toString());
@@ -94,7 +96,7 @@ export default function Command({
     return () => {
       setProjectId(undefined);
     };
-  }, [entry]);
+  }, [entry, projects]);
 
   async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {

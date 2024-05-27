@@ -2,6 +2,7 @@
 
 ## [Fixes] - 2024-05-27
 - Improved cache for menu bar widget
+- Fixed promise that was not awaited when loading project tasks
 
 ## [Fixes] - 2024-04-08
 

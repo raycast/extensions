@@ -107,7 +107,7 @@ async function fetchProjects() {
   }
   return project_assignments;
 }
-export function useMyProjects() {
+export async function useMyProjects() {
   return useCachedPromise(fetchProjects, [], { initialData: [], keepPreviousData: true });
 }
 
