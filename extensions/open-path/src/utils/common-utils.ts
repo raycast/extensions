@@ -1,4 +1,4 @@
-import { showHUD } from "@raycast/api";
+import { Cache, showHUD } from "@raycast/api";
 import { fetchItemInputClipboardFirst, fetchItemInputSelectedFirst } from "./input-item";
 import { homedir } from "os";
 import fse from "fs-extra";
@@ -76,5 +76,22 @@ export const searchUrlBuilder = (searchEngine: string, text: string) => {
 export const showHud = async (icon: string, content: string) => {
   if (isShowHud) {
     await showHUD(icon + " " + content);
+  }
+};
+
+export const getArgument = (arg: string, argKey: string) => {
+  const cache = new Cache({ namespace: "Args" });
+  if (typeof arg !== "undefined") {
+    // call from main window
+    cache.set(argKey, arg);
+    return arg;
+  } else {
+    // call from hotkey
+    const cacheStr = cache.get(argKey);
+    if (typeof cacheStr !== "undefined") {
+      return cacheStr;
+    } else {
+      return "";
+    }
   }
 };

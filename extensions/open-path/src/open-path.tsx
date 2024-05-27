@@ -1,15 +1,21 @@
-import { getPathFromSelectionOrClipboard, isStartWithFileOrFolderStr, showHud } from "./utils/common-utils";
+import {
+  getArgument,
+  getPathFromSelectionOrClipboard,
+  isStartWithFileOrFolderStr,
+  showHud,
+} from "./utils/common-utils";
 import fse from "fs-extra";
 import { homedir } from "os";
 import { filePathAction, openPathInTerminal, urlPathAction } from "./utils/path-utils";
 import { closeMainWindow, getFrontmostApplication, LaunchProps, open, updateCommandMetadata } from "@raycast/api";
-import validator from "validator";
+import validator, { isEmpty } from "validator";
 import { fileAction, OpenIn, OpenInArguments, priorityDetection, trimText } from "./types/preference";
 import { getFinderPath } from "./utils/applescript-utils";
 
 export default async (props: LaunchProps<{ arguments: OpenInArguments }>) => {
   await closeMainWindow();
-  const { openIn } = props.arguments;
+  const openIn_ = getArgument(props.arguments.openIn, `OpenIn`);
+  const openIn = isEmpty(openIn_) ? OpenIn.FINDER : openIn_;
 
   const frontmostApp = await getFrontmostApplication();
   if (openIn === OpenIn.TERMINAL && frontmostApp.name === "Finder") {
