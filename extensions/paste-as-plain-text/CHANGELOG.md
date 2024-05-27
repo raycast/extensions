@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Advanced Paste] - {PR_MERGE_DATE}
+## [Advanced Paste] - 2024-05-27
 
 - Advanced Paste to paste your clipboard content into any format you want
 
