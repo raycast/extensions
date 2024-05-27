@@ -1,6 +1,6 @@
 # Open Path Changelog
 
-## [Fix Hotkey Error] - {PR_MERGE_DATE}
+## [Fix Hotkey Error] - 2024-05-27
 
 -  Fix the problem of using hotkeys to invoke commands
 
