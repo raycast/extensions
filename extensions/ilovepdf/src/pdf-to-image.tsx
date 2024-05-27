@@ -15,7 +15,8 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { getFilePath } from "./common/utils";
+import { getFilePath, MaxInt32 } from "./common/utils";
+import { runAppleScript } from "@raycast/utils";
 
 type Values = {
   files: string[];
@@ -24,7 +25,12 @@ type Values = {
 
 type Status = "init" | "success" | "failure";
 
-const { APIPublicKey: publicKey, APISecretKey: secretKey, OpenNow: openNow } = getPreferenceValues<Preferences>();
+const {
+  APIPublicKey: publicKey,
+  APISecretKey: secretKey,
+  OpenNow: openNow,
+  AskBeforeDownload: askBeforeDownload,
+} = getPreferenceValues<Preferences>();
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -45,7 +51,7 @@ export default function Command() {
     const instance = new ILovePDFApi(publicKey, secretKey);
     const task = instance.newTask("pdfjpg") as PdfJpgTask;
     const addedFilesPromises = [];
-    const destinationFile = getFilePath(path.dirname(values.files[0]), "pdf_images.zip");
+    let destinationFile = getFilePath(path.dirname(values.files[0]), "pdf_images.zip");
     try {
       await task.start();
       for (const file of values.files) {
@@ -62,8 +68,28 @@ export default function Command() {
         const iLovePdfFile = new ILovePDFFile(file);
         addedFilesPromises.push(task.addFile(iLovePdfFile));
       }
-      await Promise.all(addedFilesPromises);
+      if (askBeforeDownload) {
+        try {
+          const script = `set file2save to POSIX path of (choose file name with prompt "Save the images as" default location "${path.dirname(destinationFile)}" default name "${path.basename(destinationFile)}")`;
+          destinationFile = await runAppleScript(script, { timeout: MaxInt32 });
+        } catch (e) {
+          console.log(e);
+          const error = e as { message: string; stderr: string };
+          setIsLoading(false);
+          if (error.stderr.includes("User cancelled")) {
+            toast.hide();
+            setStatus("init");
+            return;
+          }
+          toast.style = Toast.Style.Failure;
+          toast.title = "failure";
+          toast.message = "An error happened during selecting the saving directory";
+          setStatus("failure");
+        }
+      }
       setDestinationFilePath(destinationFile);
+
+      await Promise.all(addedFilesPromises);
       await task.process({ pdfjpg_mode: values.mode });
       const data = await task.download();
       fs.writeFileSync(destinationFile, data);
