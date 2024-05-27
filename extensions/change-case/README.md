@@ -29,10 +29,12 @@ Included case transformations:
 
 ## Caveats
 
-By default, cases such as `Title Case` and `Sentence case` do not automatically pre-lowercase the text. This means that an input of `THIS IS A SENTENCE` does not get modified when transforming into those those cases. This is an intentional design choice by the author of the library that this extension uses internally, [change-case](https://github.com/blakeembrey/change-case).
-
-If you would like to pre-lowercase the text before transforming it, you can enable the `Lowercase Text Before Changing Case` preference in the extension settings. This lowercases all text input before every transformation. Additionally, case-aware transformations, such as converting `thisIsSnakeCase` into `this is snake case` stop working when this preference is enabled.
-
-For more information, please see:
+By default, cases such as `Title Case` and `Sentence case` do not automatically pre-lowercase the text. This means that an input of `THIS IS A SENTENCE` does not get modified when transforming into those those cases. This is an intentional design choice by the author of the library that this extension uses internally, [change-case](https://github.com/blakeembrey/change-case). 
+See:
 - https://github.com/blakeembrey/change-case/issues/308
 - https://github.com/raycast/extensions/issues/10594
+
+If you would like to pre-lowercase the text before transforming it, you can enable the `Lowercase Text Before Changing Case` preference in the extension settings. This lowercases all text input before every transformation. Additionally, context-aware transformations, such as converting `thisIsSnakeCase` into `this is snake case` stop working when this preference is enabled.
+
+For more information, please see:
+- https://github.com/raycast/extensions/issues/11878
