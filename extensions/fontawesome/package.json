@@ -19,6 +19,12 @@
       "title": "Search Font Awesome",
       "description": "Search Font Awesome icons",
       "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Fuzzy Search",
+      "description": "Search Font Awesome icons",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -56,6 +62,7 @@
   "dependencies": {
     "@raycast/api": "^1.48.0",
     "@raycast/utils": "^1.4.8",
+    "mini-svg-data-uri": "^1.4.4",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
