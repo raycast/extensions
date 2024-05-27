@@ -1,4 +1,4 @@
-# Vim-bro Changelog
+# Vim Bro Changelog
 
 ## [Added screenshot] - 2024-05-27
 
