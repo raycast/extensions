@@ -1,4 +1,4 @@
-import { getIPV4Address, getIPV6Address, isEmpty } from "./utils/common-utils";
+import { getArguments, getIPV4Address, getIPV6Address, isEmpty } from "./utils/common-utils";
 import {
   captureException,
   Clipboard,
@@ -13,9 +13,10 @@ import { publicIpv4, publicIpv6 } from "public-ip";
 import { CopyIpArguments, IpType, IpVersion } from "./types/preferences";
 
 export default async (props: LaunchProps<{ arguments: CopyIpArguments }>) => {
-  const { ipType, ipVersion } = props.arguments;
-  const ipTypeString = ipType === IpType.PUBLIC ? IpType.PUBLIC : IpType.LOCAL;
-  const ipVersionString = ipVersion === IpVersion.IPV6 ? IpVersion.IPV6 : IpVersion.IPV4;
+  const { args } = getArguments([props.arguments.ipType, props.arguments.ipVersion], ["ipType", "IpVersion"]);
+  const ipTypeString = args[0] === IpType.PUBLIC ? IpType.PUBLIC : IpType.LOCAL;
+  const ipVersionString = args[1] === IpVersion.IPV6 ? IpVersion.IPV6 : IpVersion.IPV4;
+
   try {
     await closeMainWindow();
     let ip = "";
