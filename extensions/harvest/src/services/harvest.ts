@@ -125,7 +125,7 @@ export function useMyTimeEntries(from = new Date(), to = new Date()) {
   // make sure that reqs within the same second are cached, to prevent rate limits
   from.setMilliseconds(0);
   to.setMilliseconds(0);
-  
+
   const qr = useCachedPromise(getMyTimeEntries, [{ from, to }], { initialData: [], keepPreviousData: true });
   useEffect(() => {
     if (from === new Date() && to === new Date()) {

@@ -34,7 +34,9 @@ export default function Command({
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
   const [projects, setProjects] = useState<HarvestProjectAssignment[]>([]);
-  useMyProjects().then(({data}) => { setProjects(data) });
+  useMyProjects().then(({ data }) => {
+    setProjects(data);
+  });
 
   const [projectId, setProjectId] = useState<string | undefined>(entry?.project.id.toString());
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
