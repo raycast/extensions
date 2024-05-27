@@ -1,13 +1,9 @@
-import { Action, ActionPanel, BrowserExtension, Detail, Icon, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/api";
 import { Stream } from "openai/streaming";
 import { useEffect, useState } from "react";
 import { ContentFormat, ResultViewProps } from "./ResultView.types";
 import { enable_streaming, global_model, openai } from "./api";
-import { allModels as changeModels, countToken, estimatePrice } from "./utils";
-
-const getBrowserContent = async ({ format = "markdown" }: { format?: ContentFormat }) => {
-  return await BrowserExtension.getContent({ format: format });
-};
+import { allModels as changeModels, countToken, estimatePrice, getBrowserContent } from "./utils";
 
 export default function ResultView(props: ResultViewProps) {
   const { sys_prompt, model_override, toast_title, temperature } = props;
@@ -137,7 +133,7 @@ export default function ResultView(props: ResultViewProps) {
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             >
               <Action icon={{ source: Icon.Signal1 }} title="0.2" onAction={() => retry({ newTemp: 0.2 })} />
-              <Action icon={{ source: Icon.Signal2 }} title="0.5" onAction={() => retry({ newTemp: 0.5 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.6" onAction={() => retry({ newTemp: 0.6 })} />
               <Action icon={{ source: Icon.Signal3 }} title="1.0" onAction={() => retry({ newTemp: 1.0 })} />
               <Action icon={{ source: Icon.FullSignal }} title="1.5" onAction={() => retry({ newTemp: 1.5 })} />
             </ActionPanel.Submenu>

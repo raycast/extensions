@@ -12,6 +12,9 @@
   ],
   "icon": "icon.png",
   "author": "samuelkraft",
+  "contributors": [
+    "yvysunu"
+  ],
   "categories": [
     "Data"
   ],
@@ -52,7 +55,7 @@
       "title": "Workouts Totals",
       "description": "See your total distance and time for your workouts",
       "mode": "menu-bar",
-      "interval": "1d",
+      "interval": "12h",
       "icon": "stats-icon.png",
       "preferences": [
         {

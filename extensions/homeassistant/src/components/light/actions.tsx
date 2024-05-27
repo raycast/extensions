@@ -1,15 +1,10 @@
-import { ActionPanel, Color, Icon, Action, Keyboard } from "@raycast/api";
-import { KtoColorLike, miredToK, RGB, RGBtoColorLike } from "@lib/color";
+import { KtoColorLike, RGB, RGBtoColorLike, miredToK } from "@lib/color";
 import { ha } from "@lib/common";
-import { State } from "@lib/haapi";
 import { lightRGBColors } from "@lib/constants";
-import {
-  ceilRound50,
-  getLightBrightnessValues,
-  getLightMinMaxK,
-  hasLightBrightnessSupport as hasLightBrightnessSupport,
-} from "./utils";
+import { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon, Keyboard } from "@raycast/api";
 import { EntityStandardActionSections } from "../entity";
+import { ceilRound50, getLightBrightnessValues, getLightMinMaxK, hasLightBrightnessSupport } from "./utils";
 
 export function BrightnessControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;

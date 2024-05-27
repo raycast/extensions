@@ -31,10 +31,10 @@ jobs:
   extensions_build_publish:
     if: github.repository == 'raycast/extensions'
     name: "${{ github.event_name == 'push' && 'Publish' || (github.event_name == 'pull_request' && 'Check' || github.event_name == 'workflow_dispatch' && inputs.command || github.event_name ) }}"
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Setup Xcode
-        uses: raycast/github-actions/setup-xcode@xcode-15.2.x
+        uses: raycast/github-actions/setup-xcode@xcode-15.4.x
       - uses: actions/checkout@v4
         with:
           path: github_utils

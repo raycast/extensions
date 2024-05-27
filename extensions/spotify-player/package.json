@@ -24,7 +24,8 @@
     "hobhouse",
     "bkeys818",
     "jatindotdev",
-    "devbear"
+    "devbear",
+    "andyburris"
   ],
   "license": "MIT",
   "preferences": [
@@ -44,7 +45,44 @@
       "title": "Search",
       "subtitle": "Spotify",
       "description": "A single unified search command. Search for artists, albums, songs, playlists, podcasts, and episodes. Use the dropdown menu to filter your search to a specific category. Each category offers contextual actions, so you can dive deeper into the search.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Top View",
+          "data": [
+            {
+              "title": "Playlists",
+              "value": "playlists"
+            },
+            {
+              "title": "Albums",
+              "value": "albums"
+            },
+            {
+              "title": "Artists",
+              "value": "artists"
+            },
+            {
+              "title": "Songs",
+              "value": "tracks"
+            },
+            {
+              "title": "Podcasts & Shows",
+              "value": "shows"
+            },
+            {
+              "title": "Episodes",
+              "value": "episodes"
+            }
+          ],
+          "default": "artists",
+          "description": "Show a specific view at the top of the results list by default",
+          "name": "topView",
+          "required": false,
+          "type": "dropdown",
+          "placeholder": "Top View"
+        }
+      ]
     },
     {
       "name": "yourLibrary",
@@ -159,6 +197,14 @@
       "subtitle": "Spotify",
       "description": "Adds the current song to a playlist of your choice.",
       "mode": "view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "removeSongFromPlaylist",
+      "title": "Remove Playing Song from Playlist",
+      "subtitle": "Spotify",
+      "description": "Remove the current song from a playlist of your choice.",
+      "mode": "no-view",
       "disabledByDefault": true
     },
     {

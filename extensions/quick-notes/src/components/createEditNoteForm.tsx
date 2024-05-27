@@ -3,7 +3,7 @@ import { useAtom } from "jotai";
 import { notesAtom, tagsAtom } from "../services/atoms";
 import CreateTag from "./createTag";
 import { useEffect, useRef } from "react";
-import { colors } from "../utils/utils";
+import { getTintColor } from "../utils/utils";
 import { useForm } from "@raycast/utils";
 
 type NoteForm = {
@@ -153,14 +153,14 @@ const CreateEditNoteForm = ({
             title={"Save Note"}
             icon={{
               source: Icon.SaveDocument,
-              tintColor: colors.find((c) => c.name === "green")?.tintColor,
+              tintColor: getTintColor("green"),
             }}
             onSubmit={handleSubmit}
           />
           <Action.Push
             icon={{
               source: Icon.Tag,
-              tintColor: colors.find((c) => c.name === "turquoise")?.tintColor,
+              tintColor: getTintColor("turquoise"),
             }}
             target={<CreateTag />}
             title="Create Tag"
@@ -178,7 +178,7 @@ const CreateEditNoteForm = ({
             key={i}
             value={t.name}
             title={t.name}
-            icon={{ source: "dot.png", tintColor: colors.find((c) => c.name === t.color)?.tintColor }}
+            icon={{ source: "dot.png", tintColor: getTintColor(t.color) }}
           />
         ))}
       </Form.TagPicker>

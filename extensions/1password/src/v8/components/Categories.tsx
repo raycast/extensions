@@ -1,6 +1,6 @@
 import { Icon, List } from "@raycast/api";
 
-import { Guide } from "./Guide";
+import { Error as ErrorGuide } from "./Error";
 import { CategoryName } from "../types";
 import { getCategoryIcon, useCategories } from "../utils";
 
@@ -9,7 +9,7 @@ export const DEFAULT_CATEGORY = "null";
 export function Categories({ onCategoryChange }: { onCategoryChange: (newCategory: string) => void }) {
   const { data, error, isLoading } = useCategories();
 
-  if (error) return <Guide />;
+  if (error) return <ErrorGuide />;
   return (
     <List.Dropdown
       defaultValue={DEFAULT_CATEGORY}

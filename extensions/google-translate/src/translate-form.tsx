@@ -5,7 +5,7 @@ import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hook
 import { LanguageCode, supportedLanguagesByCode, languages, getLanguageFlag } from "./languages";
 import { AUTO_DETECT, simpleTranslate } from "./simple-translate";
 import { LanguagesManagerList } from "./LanguagesManager";
-import { ConfigurableCopyPasteActions } from "./actions";
+import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction } from "./actions";
 
 export default function TranslateForm() {
   const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
@@ -66,19 +66,7 @@ export default function TranslateForm() {
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               content={translated?.pronunciationText ?? ""}
             />
-            <Action.OpenInBrowser
-              title="Open in Google Translate"
-              shortcut={{ modifiers: ["opt"], key: "enter" }}
-              url={
-                "https://translate.google.com/?sl=" +
-                langFrom +
-                "&tl=" +
-                langTo +
-                "&text=" +
-                encodeURIComponent(text) +
-                "&op=translate"
-              }
-            />
+            <OpenOnGoogleTranslateWebsiteAction translationText={text} translation={{ langFrom, langTo }} />
             <Action.Push
               icon={Icon.Pencil}
               title="Manage language sets..."

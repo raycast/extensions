@@ -1,15 +1,24 @@
 # Spotify Player Changelog
 
-## [Feature] - 2024-02-02
+## [Improvements] - 2024-05-27
+
+- Users can now set their preferred first section for search results.
+- Added a new keyboard shortcut for "Add to queue".
+
+## [New "Remove Playing Song from Playlist" command] - 2024-05-27
+
+- New command `Remove Playing Song from Playlist` to remove the current song from the playlist it's in.
+
+## [New "Add Playing Song to Playlist" command] - 2024-02-02
 
 - New command `Add Playing Song to Playlist` to directly add the current song to a playlist of your choice.
 - Removed the condition to filter collaborative playlists from other users, since Spotify doesn't update it correctly.
 
-## [New Command] - 2023-01-31
+## [New "Queue" Command] - 2023-01-31
 
 - New `Queue` command allowing the user to view songs/epsiodes in the queue.
 
-## [Fix] - 2024-01-31
+## [Bug fixes] - 2024-01-31
 
 - Fixed a bug that caused launching the Spotify app to not work properly
 - Modified the device selection preference for playback

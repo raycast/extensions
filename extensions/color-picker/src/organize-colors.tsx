@@ -11,11 +11,12 @@ import {
   LaunchType,
   showToast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useHistory } from "./history";
 import { getFormattedColor } from "./utils";
 import { HistoryItem } from "./types";
-import { EditTitle } from "./components/edit-title";
-import { showFailureToast } from "@raycast/utils";
+import { EditTitle } from "./components/EditTitle";
+import CopyAsSubmenu from "./components/CopyAsSubmenu";
 
 const preferences: Preferences.OrganizeColors = getPreferenceValues();
 
@@ -51,13 +52,12 @@ export default function Command() {
       />
       {history?.map((historyItem) => {
         const formattedColor = getFormattedColor(historyItem.color);
+        const color = { light: formattedColor, dark: formattedColor, adjustContrast: false };
+
         return (
           <Grid.Item
             key={formattedColor}
-            content={{
-              color: { light: formattedColor, dark: formattedColor, adjustContrast: false },
-              tooltip: historyItem.title,
-            }}
+            content={historyItem.title ? { value: { color }, tooltip: historyItem.title } : { color }}
             title={`${formattedColor} ${historyItem.title ?? ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
               dateStyle: "medium",
@@ -90,24 +90,13 @@ function Actions({ historyItem }: { historyItem: HistoryItem }) {
             <Action.CopyToClipboard content={formattedColor} />
           </>
         )}
+        <CopyAsSubmenu color={color} />
         <Action.Push
           target={<EditTitle item={historyItem} onEdit={edit} />}
           title="Edit Title"
           icon={Icon.Pencil}
           shortcut={Keyboard.Shortcut.Common.Edit}
         />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        <Action.CopyToClipboard title={`Copy as HEX`} content={getFormattedColor(color, "hex")} />
-        <Action.CopyToClipboard title={`Copy as lowercased HEX`} content={getFormattedColor(color, "hex-lower-case")} />
-        <Action.CopyToClipboard title={`Copy as HEX Without #`} content={getFormattedColor(color, "hex-no-prefix")} />
-        <Action.CopyToClipboard title={`Copy as RGB`} content={getFormattedColor(color, "rgba")} />
-        <Action.CopyToClipboard
-          title={`Copy as RGB percentage`}
-          content={getFormattedColor(color, "rgba-percentage")}
-        />
-        <Action.CopyToClipboard title={`Copy as HSL`} content={getFormattedColor(color, "hsla")} />
-        <Action.CopyToClipboard title={`Copy as HSV`} content={getFormattedColor(color, "hsva")} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
@@ -119,6 +108,7 @@ function Actions({ historyItem }: { historyItem: HistoryItem }) {
             const confirmed = await confirmAlert({
               title: "Delete Color",
               message: "Do you want to delete the color from your history?",
+              rememberUserChoice: true,
               primaryAction: {
                 title: "Delete",
                 style: Alert.ActionStyle.Destructive,
