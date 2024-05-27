@@ -29,7 +29,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Departures",
+      "title": "Search Departures",
+      "subtitle": "Norwegian Public Transport",
       "description": "Search for public transport departures from any stop place in Norway",
       "mode": "view"
     }
