@@ -1,5 +1,14 @@
 # Google Translate Changelog
 
+## [Feature] - 2024-05-09
+
+ - Added new shortcut for `Toggle Full Text` action - `CMD+F`
+
+## [Default Action preference for translations] - 2024-04-29
+- Add a preference to set the default action for the translations
+
+## [Re-added previously removed contributor] - 2024-04-26
+
 ## [Fix] - 2024-03-08
 
  - Return back `CMD+Enter` shortcut for `Toggle Full Text` action

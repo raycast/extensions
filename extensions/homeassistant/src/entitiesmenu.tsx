@@ -1,9 +1,9 @@
-import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
-import { getErrorMessage } from "@lib/utils";
 import { useHAStates } from "@components/hooks";
 import { LaunchCommandMenubarItem, MenuBarItemConfigureCommand } from "@components/menu";
 import { StateMenubarItem } from "@components/state/menu";
 import { filterViaPreferencePatterns } from "@components/state/utils";
+import { getErrorMessage } from "@lib/utils";
+import { Color, Icon, LaunchType, MenuBarExtra } from "@raycast/api";
 
 export default function EntitiesMenuCommand(): JSX.Element {
   const { states, error, isLoading } = useHAStates();

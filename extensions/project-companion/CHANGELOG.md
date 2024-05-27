@@ -1,5 +1,9 @@
 # Project Companion
 
+## [v1.2.1] - 2024-04-17
+
+- Updated title in `README`
+
 ## [v1.2.0] - 2024-04-12
 
 ### Features

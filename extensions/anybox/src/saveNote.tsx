@@ -12,10 +12,6 @@ interface FolderProp {
   name: string;
 }
 
-interface Preferences {
-  autoFill: boolean;
-}
-
 interface SaveNoteResponse {
   code: number;
   message: string;
@@ -23,7 +19,7 @@ interface SaveNoteResponse {
 }
 
 function NoteForm() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SaveNote>();
   const [note, setNote] = useState<string>();
   const [comment, setComment] = useState<string>();
   const [tags, setTags] = useState<TagProp[]>([]);

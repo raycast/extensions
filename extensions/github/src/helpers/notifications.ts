@@ -67,45 +67,79 @@ export async function getGitHubURL(notification: Notification, userId?: string) 
   return notification.url;
 }
 
-export function getNotificationIcon(notification: Notification) {
+export async function getNotificationIcon(notification: Notification) {
+  if (notification.subject.type === "PullRequest") {
+    const { octokit } = getGitHubClient();
+    const pullRequest = await octokit.rest.pulls.get({
+      owner: notification.repository.owner.login,
+      repo: notification.repository.name,
+      pull_number: parseInt(notification.subject.url.split("/").at(-1)!),
+    });
+
+    if (pullRequest.data.merged) {
+      return { value: { source: "pull-request-merged.svg", tintColor: Color.Purple }, tooltip: "Merged" };
+    } else if (pullRequest.data.state === "closed") {
+      return { value: { source: "pull-request-closed.svg", tintColor: Color.Red }, tooltip: "Closed" };
+    } else if (pullRequest.data.draft) {
+      return { value: { source: "pull-request-draft.svg", tintColor: Color.SecondaryText }, tooltip: "Draft" };
+    } else {
+      return { value: { source: "pull-request-open.svg", tintColor: Color.Green }, tooltip: "Open" };
+    }
+  }
+
+  if (notification.subject.type === "Issue") {
+    const { octokit } = getGitHubClient();
+    const issue = await octokit.rest.issues.get({
+      owner: notification.repository.owner.login,
+      repo: notification.repository.name,
+      issue_number: parseInt(notification.subject.url.split("/").at(-1)!),
+    });
+
+    if (issue.data.state === "closed") {
+      if (issue.data.state_reason === "completed") {
+        return { value: { source: "issue-closed.svg", tintColor: Color.Purple }, tooltip: "Closed as completed" };
+      } else if (issue.data.state_reason === "not_planned") {
+        return { value: { source: "skip.svg", tintColor: Color.SecondaryText }, tooltip: "Closed as not planned" };
+      } else {
+        return { value: { source: "issue-closed.svg", tintColor: Color.Purple }, tooltip: "Closed" };
+      }
+    } else {
+      return { value: { source: "issue-open.svg", tintColor: Color.Green }, tooltip: "Open" };
+    }
+  }
+
   let icon;
 
   switch (notification.subject.type) {
     case "Commit":
-      icon = { value: "commit.svg", tooltip: "Commit" };
-      break;
-    case "Issue":
-      icon = { value: "issue-open.svg", tooltip: "Issue" };
-      break;
-    case "PullRequest":
-      icon = { value: "pull-request-open.svg", tooltip: "Pull Request" };
+      icon = { value: { source: "commit.svg" }, tooltip: "Commit" };
       break;
     case "Release":
-      icon = { value: "tag.svg", tooltip: "Release" };
+      icon = { value: { source: "tag.svg", tintColor: Color.Blue }, tooltip: "Release" };
       break;
     case "CheckSuite":
       icon = {
         value: notification.subject.title.match(/(succeeded)/i)
-          ? Icon.CheckCircle
+          ? { source: Icon.CheckCircle, tintColor: Color.Green }
           : notification.subject.title.match(/(failed)/i)
-            ? Icon.XMarkCircle
+            ? { source: Icon.XMarkCircle, tintColor: Color.Red }
             : notification.subject.title.match(/(skipped|cancelled)/i)
-              ? Icon.MinusCircle
-              : Icon.QuestionMarkCircle,
+              ? { source: "skip.svg", tintColor: Color.SecondaryText }
+              : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText },
         tooltip: "Workflow Run",
       };
       break;
     case "Discussion":
-      icon = { value: "comment-discussion.svg", tooltip: "Comment" };
+      icon = { value: { source: "comment-discussion.svg" }, tooltip: "Comment" };
       break;
     case "RepositoryInvitation":
-      icon = { value: "mail.svg", tooltip: "Repository Invitation" };
+      icon = { value: { source: "mail.svg" }, tooltip: "Repository Invitation" };
       break;
     case "RepositoryVulnerabilityAlert":
-      icon = { value: "alert.svg", tooltip: "Repository} Vulnerability Alert" };
+      icon = { value: { source: "alert.svg" }, tooltip: "Repository} Vulnerability Alert" };
       break;
     default:
-      icon = { value: Icon.Circle, tooltip: "Unknown" };
+      icon = { value: { source: Icon.Circle }, tooltip: "Unknown" };
       break;
   }
 
@@ -179,11 +213,10 @@ export function getNotificationTooltip(date: Date) {
   return `Updated: ${format(date, "EEEE d MMMM yyyy 'at' HH:mm")}`;
 }
 
-export function getGitHubIcon(tinted = false) {
-  const overrideTintColor = tinted ? Color.Blue : undefined;
+export function getGitHubIcon(isUnread = false) {
   return {
-    source: "github.svg",
-    tintColor: overrideTintColor ? overrideTintColor : Color.PrimaryText,
+    source: isUnread ? "github-unread.svg" : "github.svg",
+    tintColor: Color.PrimaryText,
   };
 }
 

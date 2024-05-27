@@ -3,7 +3,7 @@ import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
 import { CSVPrompt, Model, ModelHook } from "../../type";
 import { parse } from "csv-parse/sync";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { getConfiguration } from "../../hooks/useChatGPT";
 
 export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; name?: string }) => {
@@ -14,9 +14,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
       let updatedModel: Model = { ...model, updated_at: new Date().toISOString() };
-      if (typeof updatedModel.temperature === "string") {
-        updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
-      }
+      updatedModel = { ...updatedModel, temperature: updatedModel.temperature };
       if (props.model) {
         const toast = await showToast({
           title: "Update your model...",
@@ -63,8 +61,9 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
       name: model?.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
       option: model?.option ?? "gpt-3.5-turbo",
-      prompt: model?.prompt ?? "",
+      prompt: model?.prompt ?? "You are a helpful assistant.",
       pinned: model?.pinned ?? false,
+      vision: model?.vision ?? false,
     },
   });
 
@@ -92,27 +91,36 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     [setValue]
   );
 
+  const [showAwesomePrompts, setShowAwesomePrompts] = useState(false);
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Submit" icon={Icon.SaveDocument} onSubmit={handleSubmit} />
+          <Action
+            title="Toggle Awesome Prompts"
+            icon={{ source: "🧠" }}
+            onAction={() => setShowAwesomePrompts((s) => !s)}
+          />
         </ActionPanel>
       }
     >
       <Form.TextField title="Name" placeholder="Name your model" {...itemProps.name} />
-      <Form.Dropdown
-        id="template"
-        title="Awesome Prompts"
-        isLoading={isLoading}
-        defaultValue="none"
-        onChange={setPrompt}
-      >
-        <Form.Dropdown.Item value="none" title="Choose an Awesome ChatGPT Prompts" icon={"🧠"} />
-        {(data || []).map((prompt) => (
-          <Form.Dropdown.Item value={prompt.prompt} title={prompt.act} key={prompt.prompt} />
-        ))}
-      </Form.Dropdown>
+      {showAwesomePrompts && (
+        <Form.Dropdown
+          id="template"
+          title="Awesome Prompts"
+          isLoading={isLoading}
+          defaultValue="none"
+          onChange={setPrompt}
+        >
+          <Form.Dropdown.Item value="none" title="Choose an Awesome ChatGPT Prompts" icon={"🧠"} />
+          {(data || []).map((prompt) => (
+            <Form.Dropdown.Item value={prompt.prompt} title={prompt.act} key={prompt.prompt} />
+          ))}
+        </Form.Dropdown>
+      )}
       <Form.TextArea title="Prompt" placeholder="Describe your prompt" {...itemProps.prompt} />
       <Form.TextField
         title="Temperature"
@@ -129,6 +137,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         </Form.Dropdown>
       )}
 
+      <Form.Checkbox title="Vision" label="Enable vision capabilities" {...itemProps.vision} />
       {model?.id !== "default" && <Form.Checkbox title="Pinned" label="Pin model" {...itemProps.pinned} />}
     </Form>
   );

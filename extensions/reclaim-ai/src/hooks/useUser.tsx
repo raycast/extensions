@@ -23,7 +23,7 @@ const useUser = () => {
   const handleGetUser = useCallback(async () => {
     try {
       const currentDate = new Date();
-      if (currentDate.valueOf() - (currentCacheDate?.valueOf() || 0) < 1000 * 10) {
+      if (currentDate.valueOf() - (currentCacheDate?.valueOf() || 0) < 1000 * 1800) {
         return;
       }
       setIsLoading(true);

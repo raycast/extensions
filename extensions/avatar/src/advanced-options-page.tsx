@@ -8,6 +8,7 @@ export default function AdvancedOptionsPage(props: {
   setAvatarOptions: Dispatch<SetStateAction<AvatarOptions>>;
 }) {
   const { avatarOptions, setAvatarOptions } = props;
+  const _avatarOptions = { ...avatarOptions };
   const { pop } = useNavigation();
 
   return (
@@ -26,7 +27,6 @@ export default function AdvancedOptionsPage(props: {
         placeholder={"#FFFFFF"}
         info={"#FFFFFF"}
         onChange={(newValue) => {
-          const _avatarOptions = { ...avatarOptions };
           _avatarOptions.backgroundColor = d3.rgb(newValue.replaceAll(" ", "")).formatHex();
           setAvatarOptions(_avatarOptions);
         }}
@@ -38,7 +38,6 @@ export default function AdvancedOptionsPage(props: {
         placeholder={"0~50"}
         info={"0~50"}
         onChange={(newValue) => {
-          const _avatarOptions = { ...avatarOptions };
           let value = parseInt(newValue);
           if (isNaN(value)) value = 0;
           if (value < 0) value = 0;
@@ -54,7 +53,6 @@ export default function AdvancedOptionsPage(props: {
         placeholder={"0~200"}
         info={"0~200"}
         onChange={(newValue) => {
-          const _avatarOptions = { ...avatarOptions };
           let value = parseInt(newValue);
           if (isNaN(value)) value = 0;
           if (value < 0) value = 0;
@@ -70,7 +68,6 @@ export default function AdvancedOptionsPage(props: {
         placeholder={"0~360"}
         info={"0~360"}
         onChange={(newValue) => {
-          const _avatarOptions = { ...avatarOptions };
           let value = parseInt(newValue);
           if (isNaN(value)) value = 0;
           if (value < 0) value = 0;
@@ -86,8 +83,6 @@ export default function AdvancedOptionsPage(props: {
         placeholder={"-100~100"}
         info={"-100~100"}
         onChange={(newValue) => {
-          const _avatarOptions = { ...avatarOptions };
-
           let value = parseInt(newValue);
           if (isNaN(value)) value = 0;
           if (value < -100) value = -100;
@@ -103,7 +98,6 @@ export default function AdvancedOptionsPage(props: {
         placeholder={"-100~100"}
         info={"-100~100"}
         onChange={(newValue) => {
-          const _avatarOptions = { ...avatarOptions };
           let value = parseInt(newValue);
           if (isNaN(value)) value = 0;
           if (value < -100) value = -100;
@@ -117,7 +111,6 @@ export default function AdvancedOptionsPage(props: {
         title="Flip"
         defaultValue={avatarOptions.flip}
         onChange={(newValue) => {
-          const _avatarOptions = { ...avatarOptions };
           _avatarOptions.flip = newValue;
           setAvatarOptions(_avatarOptions);
         }}

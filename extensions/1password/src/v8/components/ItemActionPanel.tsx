@@ -1,8 +1,10 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { CopyToClipboard } from "./ActionCopyToClipboard";
+import { ShareItem } from "./ActionShareItem";
 import { Item, User } from "../types";
 import { ActionID, hrefToOpenInBrowser } from "../utils";
 import resetCache from "../../reset-cache";
+import { SwitchAccount } from "./ActionSwitchAccount";
 
 export function ItemActionPanel({
   account,
@@ -27,9 +29,12 @@ export function ItemActionPanel({
             return CopyPassword(item);
           case "copy-one-time-password":
             return CopyOneTimePassword(item);
+          case "share-item":
+            return CopyShareItem(item);
         }
       })}
       <ActionPanel.Section>
+        {SwitchAccount()}
         <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
       </ActionPanel.Section>
     </ActionPanel>
@@ -102,5 +107,11 @@ function CopyOneTimePassword(item: Item) {
       attribute="otp"
       shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
     />
+  );
+}
+
+function CopyShareItem(item: Item) {
+  return (
+    <ShareItem id={item.id} key="share-item" title={item.title} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }} />
   );
 }

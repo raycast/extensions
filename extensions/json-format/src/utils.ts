@@ -90,6 +90,19 @@ function parse(input: string) {
   }
 }
 
+export function formatToJSONLines(input: string) {
+  if (!isJson(input) || !isArray(input)) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Please enter a valid JSON/JS Array Object',
+    });
+    return;
+  }
+
+  const jsonVal = JSON.parse(`{"data":${input}}`);
+  return jsonVal.data.map(JSON.stringify).join('\n');
+}
+
 function isJson(str: string) {
   try {
     JSON.parse(str);
@@ -97,4 +110,8 @@ function isJson(str: string) {
     return false;
   }
   return true;
+}
+
+function isArray(str: string) {
+  return str.startsWith('[') && str.endsWith(']');
 }

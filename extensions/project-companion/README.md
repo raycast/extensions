@@ -1,4 +1,4 @@
-# raycast-project-companion
+# project Companion
 
 Create, Update, Delete your projects.
 
