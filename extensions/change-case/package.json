@@ -22,6 +22,15 @@
     "sponge"
   ],
   "license": "MIT",
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
   "commands": [
     {
       "name": "change-case",
@@ -33,7 +42,7 @@
   "preferences": [
     {
       "name": "lowercaseTextBeforeTransform",
-      "type":"checkbox",
+      "type": "checkbox",
       "default": false,
       "title": "Behavior",
       "description": "Input text is not lowercased before transformations, which may result in unexpected behavior at times. See the README.md for more details.",
@@ -42,7 +51,7 @@
     },
     {
       "name": "popToRoot",
-      "type":"checkbox",
+      "type": "checkbox",
       "default": false,
       "title": "Behavior",
       "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
