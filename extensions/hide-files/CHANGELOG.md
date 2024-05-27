@@ -1,6 +1,6 @@
 # Hide Files Changelog
 
-## [Refactor Extension] - {PR_MERGE_DATE}
+## [Refactor Extension] - 2024-05-27
 
 - Refactoring extensions to simplify commands
 - Now you can hide or show files with just one command
