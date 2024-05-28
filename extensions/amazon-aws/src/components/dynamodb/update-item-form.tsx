@@ -30,9 +30,11 @@ export const UpdateItemForm = ({ table }: { table: Table }) => {
             ReturnConsumedCapacity: "TOTAL",
             UpdateExpression: values.updateExpression,
             Key: marshall({
-              [tablePrimaryKey.hashKey.name]: tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
+              [tablePrimaryKey.hashKey.name]:
+                tablePrimaryKey.hashKey.type === "N" ? Number(values.hashKey) : values.hashKey,
               ...(hasRangeKey && {
-                [tablePrimaryKey.rangeKey!.name]: tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
+                [tablePrimaryKey.rangeKey!.name]:
+                  tablePrimaryKey.rangeKey!.type === "N" ? Number(values.rangeKey) : values.rangeKey,
               }),
             }),
             ...(values.useConditionExpression && { ConditionExpression: values.conditionExpression }),

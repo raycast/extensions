@@ -284,56 +284,56 @@ const updateDeletionProtection = async ({ TableName, DeletionProtectionEnabled }
 
 const fetchKeys = (table: TableDescription): Record<string, PrimaryKey> => {
   const keys: Record<string, PrimaryKey> = {};
-  const hashKey = table.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || '';
+  const hashKey = table.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
   let rangeKey = undefined;
   if (table.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-    const rangeKeyName = table.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || '';
+    const rangeKeyName = table.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
     rangeKey = {
       name: rangeKeyName,
-      type: table.AttributeDefinitions?.find((a) => a.AttributeName === rangeKeyName)?.AttributeType || 'S',
+      type: table.AttributeDefinitions?.find((a) => a.AttributeName === rangeKeyName)?.AttributeType || "S",
     };
   }
   keys[`${table.TableName}`] = {
     hashKey: {
       name: hashKey,
-      type: table.AttributeDefinitions?.find((a) => a.AttributeName === hashKey)?.AttributeType || 'S',
+      type: table.AttributeDefinitions?.find((a) => a.AttributeName === hashKey)?.AttributeType || "S",
     },
     rangeKey,
   };
 
   table.GlobalSecondaryIndexes?.forEach((gsi) => {
-    const gsiHashKey = gsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || '';
+    const gsiHashKey = gsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
     let gsiRangeKey = undefined;
     if (gsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-      const gsiRangeKeyName = gsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || '';
+      const gsiRangeKeyName = gsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
       gsiRangeKey = {
         name: gsiRangeKeyName,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiRangeKeyName)?.AttributeType || 'S',
+        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiRangeKeyName)?.AttributeType || "S",
       };
     }
     keys[`gsi.${gsi.IndexName}`] = {
       hashKey: {
         name: gsiHashKey,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiHashKey)?.AttributeType || 'S',
+        type: table.AttributeDefinitions?.find((a) => a.AttributeName === gsiHashKey)?.AttributeType || "S",
       },
       rangeKey: gsiRangeKey,
     };
   });
 
   table.LocalSecondaryIndexes?.forEach((lsi) => {
-    const lsiHashKey = lsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || '';
+    const lsiHashKey = lsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
     let lsiRangeKey = undefined;
     if (lsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {
-      const lsiRangeKeyName = lsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || '';
+      const lsiRangeKeyName = lsi.KeySchema?.find((k) => k.KeyType === "RANGE")?.AttributeName || "";
       lsiRangeKey = {
         name: lsiRangeKeyName,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiRangeKeyName)?.AttributeType || 'S',
+        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiRangeKeyName)?.AttributeType || "S",
       };
     }
     keys[`lsi.${lsi.IndexName}`] = {
       hashKey: {
         name: lsiHashKey,
-        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiHashKey)?.AttributeType || 'S',
+        type: table.AttributeDefinitions?.find((a) => a.AttributeName === lsiHashKey)?.AttributeType || "S",
       },
       rangeKey: lsiRangeKey,
     };

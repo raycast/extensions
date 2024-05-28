@@ -82,7 +82,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
           return "Projection Expression is required (if checked)";
         }
         return undefined;
-      }
+      },
     },
     initialValues: {
       useProjectionExpression: false,
