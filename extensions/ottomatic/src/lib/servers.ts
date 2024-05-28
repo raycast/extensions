@@ -84,8 +84,8 @@ export function useServers() {
   );
 
   const servers = useMemo(() => {
-    if (showSampleData) return sampleData as TServer[];
-    return _servers.map((server) => {
+    const data = showSampleData ? sampleData : _servers;
+    return data.map((server) => {
       const mem = memberships.find((m) => m.organization.publicMetadata.org_id === server.org_id);
       return { ...server, org_slug: mem?.organization.slug };
     });
