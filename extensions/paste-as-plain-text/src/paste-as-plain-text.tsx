@@ -6,7 +6,7 @@ import {
   showHUD,
   updateCommandMetadata,
 } from "@raycast/api";
-import { extractNumber, extractUrl, isEmpty, transform } from "./utils";
+import { extractNumber, extractUrl, getArgument, isEmpty, transform } from "./utils";
 import { PasteFormat, replaceClipboard } from "./types";
 import { isJSON, isURL } from "validator";
 
@@ -16,7 +16,8 @@ interface PasteAsArguments {
 
 export default async (props: LaunchProps<{ arguments: PasteAsArguments }>) => {
   try {
-    const { advancedPasteFormat } = props.arguments;
+    const advancedPasteFormat_ = getArgument(props.arguments.advancedPasteFormat, "PasteAs");
+    const advancedPasteFormat = isEmpty(advancedPasteFormat_) ? PasteFormat.PLAIN_TEXT : advancedPasteFormat_;
     await pasteAs(advancedPasteFormat);
   } catch (e) {
     captureException(e);
