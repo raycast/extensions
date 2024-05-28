@@ -16,7 +16,8 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { getFilePath } from "./common/utils";
+import { getFilePath, MaxInt32 } from "./common/utils";
+import { runAppleScript } from "@raycast/utils";
 
 type Values = {
   files: string[];
@@ -24,7 +25,12 @@ type Values = {
 
 type Status = "init" | "success" | "failure";
 
-const { APIPublicKey: publicKey, APISecretKey: secretKey, OpenNow: openNow } = getPreferenceValues<Preferences>();
+const {
+  APIPublicKey: publicKey,
+  APISecretKey: secretKey,
+  OpenNow: openNow,
+  AskBeforeDownload: askBeforeDownload,
+} = getPreferenceValues<Preferences>();
 
 function getDestinationFile(files: string[]): string {
   if (!files.length) {
@@ -73,8 +79,28 @@ export default function Command() {
       }
       destinationFile = getDestinationFile(values.files);
 
-      await Promise.all(addedFilesPromises);
+      if (askBeforeDownload) {
+        try {
+          const script = `set file2save to POSIX path of (choose file name with prompt "Save The Merged PDF As" default location "${path.dirname(destinationFile)}" default name "${path.basename(destinationFile)}")`;
+          destinationFile = await runAppleScript(script, { timeout: MaxInt32 });
+        } catch (e) {
+          console.log(e);
+          const error = e as { message: string; stderr: string };
+          setIsLoading(false);
+          if (error.stderr.includes("User cancelled")) {
+            toast.hide();
+            setStatus("init");
+            return;
+          }
+          toast.style = Toast.Style.Failure;
+          toast.title = "failure";
+          toast.message = "An error happened during selecting the saving directory";
+          setStatus("failure");
+        }
+      }
       setDestinationFilePath(destinationFile);
+
+      await Promise.all(addedFilesPromises);
       await task.process();
       const data = await task.download();
       fs.writeFileSync(destinationFile, data);
