@@ -2,8 +2,8 @@ import { Action, ActionPanel, Form, Icon, Toast, clearSearchBar, showToast, useN
 import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
-import { Client, Project, Task, TimeEntry, TimeEntryMetaData, createTimeEntry } from "../api";
-import { useClients, useMe, useProjects, useTags, useTasks, useWorkspaces } from "../hooks";
+import { Client, Project, Task, TimeEntry, TimeEntryMetaData, createTimeEntry } from "@/api";
+import { useClients, useMe, useProjects, useTags, useTasks, useWorkspaces } from "@/hooks";
 
 interface CreateTimeEntryFormParams {
   revalidateRunningTimeEntry: () => void;
