@@ -1,9 +1,21 @@
 import { MenuBarExtra, Icon, Keyboard, openExtensionPreferences, launchCommand, LaunchType } from "@raycast/api";
 
 export default function Menubar() {
-  const showTorrents = () => launchCommand({ name: "torrents", type: LaunchType.UserInitiated });
+  const showTorrents = async () => {
+    try {
+      launchCommand({ name: "torrents", type: LaunchType.UserInitiated });
+    } catch (e) {
+      console.error("Failed to launch command", e);
+    }
+  };
 
-  const handleAddTorrent = () => launchCommand({ name: "add-torrents", type: LaunchType.UserInitiated });
+  const handleAddTorrent = async () => {
+    try {
+      await launchCommand({ name: "add-torrents", type: LaunchType.UserInitiated });
+    } catch (e) {
+      console.error("Failed to launch command", e);
+    }
+  };
 
   return (
     <MenuBarExtra icon={{ source: "menubar.svg" }}>
