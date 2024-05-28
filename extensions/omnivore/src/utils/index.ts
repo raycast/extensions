@@ -39,7 +39,7 @@ export async function archiveArticle(articleId: string, toArchive: boolean): Pro
   }
 }
 
-export async function saveUrl(url: string): Promise<{ success: boolean; message: string }> {
+export async function saveUrl(url: string, labels: string): Promise<{ success: boolean; message: string }> {
   try {
     new URL(url)
   } catch (error) {
@@ -53,6 +53,7 @@ export async function saveUrl(url: string): Promise<{ success: boolean; message:
   }
 
   const clientRequestId = uuidv4() // Generate a unique ID for each request
+  const separatorRegex = /[,\s]+/ // Regex to split a string by commas and whitespace
 
   try {
     const response = await fetch(apiUrl, {
@@ -68,6 +69,9 @@ export async function saveUrl(url: string): Promise<{ success: boolean; message:
             clientRequestId,
             source: 'api',
             url: url,
+            labels: labels.split(separatorRegex).map((label) => {
+              return { name: label }
+            }),
           },
         },
       }),

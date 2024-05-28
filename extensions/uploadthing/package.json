@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uploadthing",
+  "title": "UploadThing",
+  "description": "Upload files in a single click",
+  "icon": "icon.png",
+  "author": "juliusmarminge",
+  "owner": "pingdotgg",
+  "access": "public",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload-files",
+      "title": "Upload Files",
+      "description": "Select files to upload to your UploadThing app",
+      "mode": "view"
+    },
+    {
+      "name": "upload-from-clipboard",
+      "title": "Upload from Clipboard",
+      "description": "Upload files from your clipboard to your UploadThing app",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Your API Key for UploadThing",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "placeholder": "sk_live_xxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.3",
+    "@tanstack/react-query": "^5.28.4",
+    "@uploadthing/mime-types": "0.2.6",
+    "@uploadthing/shared": "6.3.4",
+    "undici": "^6.9.0",
+    "uploadthing": "6.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.11.30",
+    "@types/react": "18.2.67",
+    "eslint": "8.57.0",
+    "prettier": "3.2.5",
+    "typescript": "5.4.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@raycast"
+    ]
+  }
+}

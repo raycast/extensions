@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import { createContext, PropsWithChildren, useContext, useMemo, useRef } from "react";
+import { createContext, PropsWithChildren, ReactNode, useContext, useMemo, useRef } from "react";
 import UnlockForm from "~/components/UnlockForm";
 import { VaultLoadingFallback } from "~/components/searchVault/VaultLoadingFallback";
 import { LOCAL_STORAGE_KEY, VAULT_LOCK_MESSAGES } from "~/constants/general";
@@ -25,6 +25,7 @@ export type Session = {
 export const SessionContext = createContext<Session | null>(null);
 
 export type SessionProviderProps = PropsWithChildren<{
+  loadingFallback?: ReactNode;
   unlock?: boolean;
 }>;
 
@@ -33,6 +34,8 @@ export type SessionProviderProps = PropsWithChildren<{
  * @param props.unlock If true, an unlock form will be displayed if the vault is locked or unauthenticated.
  */
 export function SessionProvider(props: SessionProviderProps) {
+  const { children, loadingFallback = <VaultLoadingFallback />, unlock } = props;
+
   const bitwarden = useBitwarden();
   const [state, dispatch] = useSessionReducer();
   const pendingActionRef = useRef<Promise<any>>(Promise.resolve());
@@ -127,14 +130,14 @@ export function SessionProvider(props: SessionProviderProps) {
     [state, confirmMasterPassword]
   );
 
-  if (state.isLoading) return <VaultLoadingFallback />;
+  if (state.isLoading) return loadingFallback;
 
   const showUnlockForm = state.isLocked || !state.isAuthenticated;
-  const children = state.token ? props.children : null;
+  const _children = state.token ? children : null;
 
   return (
     <SessionContext.Provider value={contextValue}>
-      {showUnlockForm && props.unlock ? <UnlockForm pendingAction={pendingActionRef.current} /> : children}
+      {showUnlockForm && unlock ? <UnlockForm pendingAction={pendingActionRef.current} /> : _children}
     </SessionContext.Provider>
   );
 }

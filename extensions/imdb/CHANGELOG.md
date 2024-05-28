@@ -1,6 +1,6 @@
 # IMDb Changelog
 
-## [Update] - 2024-31-21
+## [Update] - 2024-03-21
 
  - Add a new preference to allow users to choose whether to open a result in Raycast or in the browser by default.
 

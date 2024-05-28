@@ -25,7 +25,7 @@ export const SearchTypeDict: { [key: string]: { name: string; searchURL: string;
     },
     KOEN: {
       name: "Naver Korean-English Dictionary",
-      searchURL: `https://ac.dict.naver.com/enendict/ac?q_enc='utf-8'&st=100&r_lt=100&q=`,
+      searchURL: `https://ac-dict.naver.com/enko/ac?q_enc='utf-8'&st=100&r_lt=100&q=`,
       baseURL: `https://en.dict.naver.com/#/search?range=all&query=`,
       isDict: true,
     },

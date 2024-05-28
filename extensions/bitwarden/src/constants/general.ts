@@ -77,6 +77,7 @@ export const CACHE_KEYS = {
   IV: "iv",
   VAULT: "vault",
   CURRENT_FOLDER_ID: "currentFolderId",
+  SEND_TYPE_FILTER: "sendTypeFilter",
 } as const;
 
 export const ITEM_TYPE_TO_ICON_MAP: Record<ItemType, Icon> = {

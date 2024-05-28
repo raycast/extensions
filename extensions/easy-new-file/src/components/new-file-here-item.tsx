@@ -9,9 +9,10 @@ export function NewFileHereItem(props: {
   fileType: FileType;
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
+  folder: string;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { layout, fileType, newFileType, templateFiles, setRefresh } = props;
+  const { layout, fileType, newFileType, templateFiles, folder, setRefresh } = props;
   return layout === "List" ? (
     <List.Item
       keywords={fileType.keywords}
@@ -29,6 +30,7 @@ export function NewFileHereItem(props: {
           fileType={fileType}
           newFileType={newFileType}
           templateFiles={templateFiles}
+          folder={folder}
           setRefresh={setRefresh}
         />
       }
@@ -43,6 +45,7 @@ export function NewFileHereItem(props: {
           fileType={fileType}
           newFileType={newFileType}
           templateFiles={templateFiles}
+          folder={folder}
           setRefresh={setRefresh}
         />
       }

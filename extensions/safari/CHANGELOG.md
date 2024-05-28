@@ -1,5 +1,9 @@
 # Safari Changelog
 
+## [Update] - 2024-04-18
+
+- Adds a preference to skip browsing iCloud tabs
+
 ## [Fix] - 2023-12-20
 
 - Fix the title of ReadingListNonSync may possibly be null

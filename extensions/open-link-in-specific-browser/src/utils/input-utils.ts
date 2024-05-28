@@ -1,5 +1,5 @@
 import { getSelectedText, Clipboard } from "@raycast/api";
-import { isEmailGroup, isEmpty, isMailTo, isUrl, mailtoBuilder, urlIPBuilder } from "./common-utils";
+import { isEmpty, isUrl, urlIPBuilder } from "./common-utils";
 import { isIP } from "net";
 import { ItemSource, ItemType } from "../types/types";
 
@@ -29,13 +29,7 @@ export class ItemInput {
       this.source = ItemSource.NULL;
       this.type = ItemType.NULL;
     } else {
-      if (isMailTo(trimText)) {
-        this.content = mailtoBuilder(trimText.slice(7));
-        this.type = ItemType.EMAIL;
-      } else if (isEmailGroup(trimText)) {
-        this.content = mailtoBuilder(trimText);
-        this.type = ItemType.EMAIL;
-      } else if (isUrl(trimText)) {
+      if (isUrl(trimText)) {
         let url;
         if (isIP(trimText)) {
           if (trimText == "127.0.0.1") {
@@ -62,25 +56,25 @@ const clipboard = async () => {
   return typeof content == "undefined" ? "" : content;
 };
 
-export const fetchItemInput = () => {
+export const fetchItemInput = async () => {
   const itemInput = new ItemInput();
-  return getSelectedText()
+  return await getSelectedText()
     .then(async (text) =>
       !isEmpty(text)
         ? itemInput.setContent(text.substring(0, 9999)).setSource(ItemSource.SELECTED).setType()
         : itemInput
             .setContent(String(await clipboard()))
             .setSource(ItemSource.CLIPBOARD)
-            .setType()
+            .setType(),
     )
     .catch(async () =>
       itemInput
         .setContent(String(await clipboard()))
         .setSource(ItemSource.CLIPBOARD)
-        .setType()
+        .setType(),
     )
     .then((item) =>
-      !isEmpty(item.content) ? itemInput : itemInput.setContent("").setSource(ItemSource.NULL).setType()
+      !isEmpty(item.content) ? itemInput : itemInput.setContent("").setSource(ItemSource.NULL).setType(),
     )
     .catch(() => itemInput.setContent("").setSource(ItemSource.NULL).setType());
 };

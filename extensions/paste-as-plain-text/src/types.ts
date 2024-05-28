@@ -1,6 +1,19 @@
-export type TrimOption = "none" | "leading" | "trailing" | "both";
+import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
+interface Preferences {
+  trimStart: boolean;
+  trimEnd: boolean;
   cleanLineBreaks: boolean;
-  trim: TrimOption;
+  replaceClipboard: boolean;
+}
+
+export const { trimStart, trimEnd, cleanLineBreaks, replaceClipboard } = getPreferenceValues<Preferences>();
+
+export enum PasteFormat {
+  PLAIN_TEXT = "Plain Text",
+  JSON = "JSON",
+  URL = "URL",
+  NUMBER = "Number",
+  MARKDOWN_LINK = "Markdown Link",
+  MARKDOWN_IMAGE = "Markdown Image",
 }

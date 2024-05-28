@@ -16,6 +16,10 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v1.14.0
+
+- Add `useStreamJSON` hook.
+
 ### v1.13.6
 
 - Updated `useFetch`'s `mapResult` type to allow returning `cursor` in addition to `data` and `hasMore`.

@@ -13,14 +13,14 @@ export function useFetch<V, U, T = V>(
   url: RequestInfo,
   options?: RequestInit & {
     parseResponse?: (response: Response) => Promise<V>;
-    mapResult?: (result: V) => { data: T }
+    mapResult?: (result: V) => { data: T };
     initialData?: U;
     keepPreviousData?: boolean;
     execute?: boolean;
     onError?: (error: Error) => void;
     onData?: (data: T) => void;
-    onWillExecute?: (args: [string, RequestInit]) -> void;
-  }
+    onWillExecute?: (args: [string, RequestInit]) => void;
+  },
 ): AsyncState<T> & {
   revalidate: () => void;
   mutate: MutatePromise<T | U | undefined>;

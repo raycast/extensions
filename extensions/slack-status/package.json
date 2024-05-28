@@ -36,7 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.60.0",
-    "@raycast/utils": "^1.12.5",
+    "@raycast/utils": "^1.14.1",
     "@slack/web-api": "^6.4.0",
     "moment": "^2.29.1",
     "nanoid": "^5.0.5",

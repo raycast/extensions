@@ -13,6 +13,9 @@ import {
   InstalledCLINotFoundError,
   ManuallyThrownError,
   NotLoggedInError,
+  PremiumFeatureError,
+  SendInvalidPasswordError,
+  SendNeedsPasswordError,
   tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
@@ -22,6 +25,8 @@ import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAva
 import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
+import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
+import { prepareSendPayload } from "~/api/bitwarden.helpers";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -63,6 +68,11 @@ type LogoutOptions = {
   reason?: string;
   /** The callbacks are called before the operation is finished (optimistic) */
   immediate?: boolean;
+};
+
+type ReceiveSendOptions = {
+  savePath?: string;
+  password?: string;
 };
 
 const { supportPath } = environment;
@@ -425,9 +435,13 @@ export class Bitwarden {
 
   async createFolder(name: string): Promise<MaybeError> {
     try {
-      const folder = await this.getTemplate("folder");
+      const { error, result: folder } = await this.getTemplate("folder");
+      if (error) throw error;
+
       folder.name = name;
-      const encodedFolder = await this.encode(JSON.stringify(folder));
+      const { result: encodedFolder, error: encodeError } = await this.encode(JSON.stringify(folder));
+      if (encodeError) throw encodeError;
+
       await this.exec(["create", "folder", encodedFolder], { resetVaultTimeout: true });
       return { result: undefined };
     } catch (execError) {
@@ -480,10 +494,10 @@ export class Bitwarden {
     }
   }
 
-  async getTemplate(type: string): Promise<any> {
+  async getTemplate<T = any>(type: string): Promise<MaybeError<T>> {
     try {
       const { stdout } = await this.exec(["get", "template", type], { resetVaultTimeout: true });
-      return JSON.parse(stdout);
+      return { result: JSON.parse<T>(stdout) };
     } catch (execError) {
       captureException("Failed to get template", execError);
       const { error } = await this.handleCommonErrors(execError);
@@ -492,15 +506,132 @@ export class Bitwarden {
     }
   }
 
-  async encode(input: any): Promise<string> {
-    const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
-    return stdout;
+  async encode(input: string): Promise<MaybeError<string>> {
+    try {
+      const { stdout } = await this.exec(["encode"], { input, resetVaultTimeout: false });
+      return { result: stdout };
+    } catch (execError) {
+      captureException("Failed to encode", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {
     const args = options ? getPasswordGeneratingArgs(options) : [];
     const { stdout } = await this.exec(["generate", ...args], { abortController, resetVaultTimeout: false });
     return stdout;
+  }
+
+  async listSends(): Promise<MaybeError<Send[]>> {
+    try {
+      const { stdout } = await this.exec(["send", "list"], { resetVaultTimeout: true });
+      return { result: JSON.parse<Send[]>(stdout) };
+    } catch (execError) {
+      captureException("Failed to list sends", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async createSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
+    try {
+      const { error: templateError, result: template } = await this.getTemplate(
+        values.type === SendType.Text ? "send.text" : "send.file"
+      );
+      if (templateError) throw templateError;
+
+      const payload = prepareSendPayload(template, values);
+      const { result: encodedPayload, error: encodeError } = await this.encode(JSON.stringify(payload));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["send", "create", encodedPayload], { resetVaultTimeout: true });
+
+      return { result: JSON.parse<Send>(stdout) };
+    } catch (execError) {
+      captureException("Failed to create send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async editSend(values: SendCreatePayload): Promise<MaybeError<Send>> {
+    try {
+      const { result: encodedPayload, error: encodeError } = await this.encode(JSON.stringify(values));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["send", "edit", encodedPayload], { resetVaultTimeout: true });
+      return { result: JSON.parse<Send>(stdout) };
+    } catch (execError) {
+      captureException("Failed to delete send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async deleteSend(id: string): Promise<MaybeError> {
+    try {
+      await this.exec(["send", "delete", id], { resetVaultTimeout: true });
+      return { result: undefined };
+    } catch (execError) {
+      captureException("Failed to delete send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async removeSendPassword(id: string): Promise<MaybeError> {
+    try {
+      await this.exec(["send", "remove-password", id], { resetVaultTimeout: true });
+      return { result: undefined };
+    } catch (execError) {
+      captureException("Failed to remove send password", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async receiveSendInfo(url: string, options?: ReceiveSendOptions): Promise<MaybeError<ReceivedSend>> {
+    try {
+      const { stdout, stderr } = await this.exec(["send", "receive", url, "--obj"], {
+        resetVaultTimeout: true,
+        input: options?.password,
+      });
+      if (!stdout && /Invalid password/i.test(stderr)) return { error: new SendInvalidPasswordError() };
+      if (!stdout && /Send password/i.test(stderr)) return { error: new SendNeedsPasswordError() };
+
+      return { result: JSON.parse<ReceivedSend>(stdout) };
+    } catch (execError) {
+      const errorMessage = (execError as ExecaError).stderr;
+      if (/Invalid password/gi.test(errorMessage)) return { error: new SendInvalidPasswordError() };
+      if (/Send password/gi.test(errorMessage)) return { error: new SendNeedsPasswordError() };
+
+      captureException("Failed to receive send obj", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async receiveSend(url: string, options?: ReceiveSendOptions): Promise<MaybeError<string>> {
+    try {
+      const { savePath, password } = options ?? {};
+      const args = ["send", "receive", url];
+      if (savePath) args.push("--output", savePath);
+      const { stdout } = await this.exec(args, { resetVaultTimeout: true, input: password });
+      return { result: stdout };
+    } catch (execError) {
+      captureException("Failed to receive send", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
   }
 
   // utils below
@@ -534,6 +665,9 @@ export class Bitwarden {
     if (/not logged in/i.test(errorMessage)) {
       await this.handlePostLogout();
       return { error: new NotLoggedInError("Not logged in") };
+    }
+    if (/Premium status/i.test(errorMessage)) {
+      return { error: new PremiumFeatureError() };
     }
     return {};
   }

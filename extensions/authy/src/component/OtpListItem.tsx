@@ -102,7 +102,8 @@ export default function OtpListItem({ index, item, basis, timeLeft, refresh, set
       accessories={[
         {
           text: `${otp}`,
-
+        },
+        {
           icon: {
             source: {
               light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,

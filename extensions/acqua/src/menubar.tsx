@@ -25,11 +25,13 @@ export default function Command() {
         : `Last was ${lastDrinkFromNowInMinutes} min ago`;
 
   const iconSource =
-    nextDrinkReminder == null || nextDrinkReminder > interval / 2
-      ? "drop-full-v1.png"
-      : nextDrinkReminder > 0
-        ? "drop-half-v1.png"
-        : "drop-empty-v1.png";
+    nextDrinkReminder == null
+      ? "drop-empty-v1.png"
+      : nextDrinkReminder > interval / 2
+        ? "drop-full-v1.png"
+        : nextDrinkReminder > 0
+          ? "drop-half-v1.png"
+          : "drop-empty-v1.png";
 
   return (
     <MenuBarExtra

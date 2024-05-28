@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { format } from "date-fns";
 import { File } from "../api/getFiles";
 import { getFileIconLink, humanFileSize } from "../helpers/files";
@@ -40,7 +40,12 @@ export default function FileListItem({ file, email }: FileListItemProps) {
               email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""
             }`}
           />
-
+          <Action.OpenWith
+            title="Open With"
+            path={`${file.webViewLink}${
+              email && file.mimeType !== "application/vnd.google-apps.folder" ? `&authuser=${email}` : ""
+            }`}
+          />
           {file.parents && file.parents.length > 0 ? (
             <Action.OpenInBrowser
               title="Open File Location in Browser"

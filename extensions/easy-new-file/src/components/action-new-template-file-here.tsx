@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Clipboard, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { getFinderPath } from "../utils/common-utils";
-import NewFileWithName from "../new-file-with-name";
+import NewFileWithDetails from "../new-file-with-details";
 import { homedir } from "os";
 import AddFileTemplate from "../add-file-template";
 import React from "react";
-import { createNewFileByTemplate } from "../new-file-here";
+import { createNewFileByTemplate } from "../new-file-with-template";
 import { TemplateType } from "../types/file-type";
 import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 import { alertDialog } from "../hooks/hooks";
@@ -14,13 +14,14 @@ export function ActionNewTemplateFileHere(props: {
   template: TemplateType;
   index: number;
   templateFiles: TemplateType[];
+  folder: string;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { template, index, templateFiles, setRefresh } = props;
+  const { template, index, templateFiles, folder, setRefresh } = props;
   return (
     <ActionPanel>
       <Action
-        title={"New File Here"}
+        title={`New File in ${folder}`}
         icon={Icon.Finder}
         onAction={async () => {
           try {
@@ -31,25 +32,33 @@ export function ActionNewTemplateFileHere(props: {
         }}
       />
       <Action.Push
-        title="New File with Name"
+        title="New File with Details"
         icon={Icon.NewDocument}
-        target={<NewFileWithName newFileType={{ section: "Template", index: index }} templateFiles={templateFiles} />}
+        target={
+          <NewFileWithDetails
+            newFileType={{ section: "Template", index: index }}
+            templateFiles={templateFiles}
+            folder={folder}
+          />
+        }
       />
-      <Action
-        title={"New File on Desktop"}
-        icon={Icon.Window}
-        shortcut={{ modifiers: ["cmd"], key: "d" }}
-        onAction={async () => {
-          try {
-            await createNewFileByTemplate(template, `${homedir()}/Desktop/`);
-          } catch (e) {
-            await showToast(Toast.Style.Failure, "Create file failure.", String(e));
-          }
-        }}
-      />
+      {folder !== "Desktop" && (
+        <Action
+          title={"New File in Desktop"}
+          icon={Icon.Desktop}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          onAction={async () => {
+            try {
+              await createNewFileByTemplate(template, `${homedir()}/Desktop/`);
+            } catch (e) {
+              await showToast(Toast.Style.Failure, "Create file failure.", String(e));
+            }
+          }}
+        />
+      )}
       <ActionPanel.Section>
         <Action
-          title={"Copy File to Clipboard"}
+          title={"Copy to Clipboard"}
           icon={Icon.Clipboard}
           shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
           onAction={async () => {
@@ -58,7 +67,7 @@ export function ActionNewTemplateFileHere(props: {
           }}
         />
         <Action
-          title={"Paste File to Front App"}
+          title={"Paste to Front App"}
           icon={Icon.AppWindow}
           shortcut={{ modifiers: ["shift", "cmd"], key: "v" }}
           onAction={async () => {
@@ -68,6 +77,8 @@ export function ActionNewTemplateFileHere(props: {
         />
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={template.path} />
+        <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
         <Action.Push
           title={"Add File Template"}
           icon={Icon.Document}
@@ -77,6 +88,7 @@ export function ActionNewTemplateFileHere(props: {
         <Action
           title={"Remove File Template"}
           icon={Icon.Trash}
+          style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
             await alertDialog(
@@ -93,8 +105,6 @@ export function ActionNewTemplateFileHere(props: {
             );
           }}
         />
-        <Action.OpenWith shortcut={{ modifiers: ["cmd"], key: "o" }} path={template.path} />
-        <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
       </ActionPanel.Section>
 
       <ActionOpenCommandPreferences />

@@ -5,6 +5,9 @@
   "description": "ScreenOCR allows you to quickly and easily extract text from screen captures via OCR, perfect for extracting text from any on-screen content. All processing is done locally on device.",
   "icon": "command-icon.png",
   "author": "huzef44",
+  "contributors": [
+    "anwarulislam"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -108,6 +111,15 @@
       "type": "checkbox",
       "label": "Use Language Correction",
       "default": true
+    },
+    {
+      "required": true,
+      "name": "keepImage",
+      "title": "Keep Image in Clipboard",
+      "description": "Keep the image in the clipboard after text recognition",
+      "type": "checkbox",
+      "label": "Keep Image in Clipboard",
+      "default": false
     },
     {
       "required": false,

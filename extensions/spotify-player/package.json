@@ -163,6 +163,14 @@
       "disabledByDefault": true
     },
     {
+      "name": "removeSongFromPlaylist",
+      "title": "Remove Playing Song from Playlist",
+      "subtitle": "Spotify",
+      "description": "Remove the current song from a playlist of your choice.",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "next",
       "title": "Next",
       "subtitle": "Spotify",

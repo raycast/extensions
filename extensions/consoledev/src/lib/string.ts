@@ -22,8 +22,11 @@ export const truncate = (maxLength: number): R.Reader<string, string> =>
         is,
         O.fold(
           () => str,
-          () => pipe(str, S.slice(0, maxLength), S.trim, append("..."))
-        )
-      )
-    )
+          () => pipe(str, S.slice(0, maxLength), S.trim, append("...")),
+        ),
+      ),
+    ),
   );
+
+export const removeTags = (str: string): string => str.replace(/<[^>]*>/g, "");
+export const removeRedundantString = (str: string, pattern: string): string => str.replace(pattern, "");

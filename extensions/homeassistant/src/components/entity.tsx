@@ -1,9 +1,9 @@
-import { Icon, Color, Action, ActionPanel } from "@raycast/api";
-import React from "react";
 import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
-import { EntityAttributesList } from "./attributes";
+import { Action, ActionPanel, Color, Icon } from "@raycast/api";
+import React from "react";
 import { HAOpenUrlInAction } from "./actions";
+import { EntityAttributesList } from "./attributes";
 
 export function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
   const historyUrl = ha.navigateUrl(`history?entity_id=${props.state.entity_id}`);

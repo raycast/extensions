@@ -8,7 +8,8 @@
   "contributors": [
     "thomaslombart",
     "lukaszmtw",
-    "erics118"
+    "erics118",
+    "mlnchk"
   ],
   "license": "MIT",
   "commands": [
@@ -113,7 +114,7 @@
     },
     {
       "name": "open-from-clipboard",
-      "title": "Open From Clipboard",
+      "title": "Open from Clipboard",
       "subtitle": "CleanShot X",
       "description": "Open Image From Clipboard",
       "icon": "clipboard.png",
@@ -163,7 +164,7 @@
           "name": "filepath",
           "placeholder": "File Path",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
