@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import React, { useState } from "react";
-import { downloadPicture, setWallpaper } from "./utils/common-utils";
+import { downloadPicture, getThumbnailUrl } from "./utils/common-utils";
 import { RaycastWallpaperWithInfo } from "./types/types";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
+import { setWallpaper } from "./utils/applescript-utils";
 
 export default function PreviewRaycastWallpaper(props: {
   index: number;
@@ -14,13 +15,12 @@ export default function PreviewRaycastWallpaper(props: {
   return (
     <Detail
       navigationTitle={raycastWallpapers[pageIndex].title}
-      markdown={`<img src="${raycastWallpapers[pageIndex].url.replace(".png", "-preview.png")}" alt="" height="400" />`}
+      markdown={`<img src="${getThumbnailUrl(raycastWallpapers[pageIndex].url)}" alt="" height="400" />`}
       actions={
         <ActionPanel>
           <Action
             icon={Icon.ChevronDown}
             title={"Next"}
-            shortcut={{ modifiers: ["cmd"], key: "pageDown" }}
             onAction={() => {
               if (pageIndex === imagesLength - 1) return;
               setPageIndex(pageIndex + 1);
@@ -29,31 +29,32 @@ export default function PreviewRaycastWallpaper(props: {
           <Action
             icon={Icon.ChevronUp}
             title={"Previous"}
-            shortcut={{ modifiers: ["cmd"], key: "pageUp" }}
             onAction={() => {
               if (pageIndex === 0) return;
               setPageIndex(pageIndex - 1);
             }}
           />
-          <Action
-            icon={Icon.Desktop}
-            title={"Set Desktop Wallpaper"}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={() => {
-              setWallpaper(raycastWallpapers[pageIndex]).then(() => "");
-            }}
-          />
+          <ActionPanel.Section>
+            <Action
+              icon={Icon.Desktop}
+              title={"Set Desktop Wallpaper"}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onAction={() => {
+                setWallpaper(raycastWallpapers[pageIndex]).then(() => "");
+              }}
+            />
 
+            <Action
+              icon={Icon.Download}
+              title={"Download Wallpaper"}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={async () => {
+                await downloadPicture(raycastWallpapers[pageIndex]);
+              }}
+            />
+          </ActionPanel.Section>
           <Action
-            icon={Icon.Download}
-            title={"Download Wallpaper"}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onAction={async () => {
-              await downloadPicture(raycastWallpapers[pageIndex]);
-            }}
-          />
-          <Action
-            icon={Icon.Circle}
+            icon={Icon.ArrowLeft}
             title={"Back"}
             shortcut={{ modifiers: ["cmd"], key: "y" }}
             onAction={useNavigation().pop}
