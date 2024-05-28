@@ -1,5 +1,5 @@
 import * as os from "os";
-import { showToast, Toast } from "@raycast/api";
+import { Cache, showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { IP_GEOLOCATION_API } from "./constants";
 import { IPGeolocation } from "../types/ip-geolocation";
@@ -61,3 +61,32 @@ export function getIPGeolocation(ipv4 = "", language = "en") {
       return { status: "fail" } as IPGeolocation;
     });
 }
+
+export const getArgument = (arg: string, argKey: string) => {
+  const cache = new Cache({ namespace: "Args" });
+  if (typeof arg !== "undefined") {
+    // call from main window
+    cache.set(argKey, arg);
+    return arg;
+  } else {
+    // call from hotkey
+    const cacheStr = cache.get(argKey);
+    if (typeof cacheStr !== "undefined") {
+      return cacheStr;
+    } else {
+      return "";
+    }
+  }
+};
+
+export const getArguments = (args: string[], argKeys: string[]) => {
+  if (args.length !== argKeys.length) {
+    return { args: [] };
+  } else {
+    const argsObj = [];
+    for (let i = 0; i < args.length; i++) {
+      argsObj.push(getArgument(args[i], argKeys[i]));
+    }
+    return { args: argsObj };
+  }
+};

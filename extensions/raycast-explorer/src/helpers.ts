@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { Icon, environment } from "@raycast/api";
 
 export const CONTRIBUTE_URL = "https://github.com/raycast/extensions/edit/main/extensions/raycast-explorer";
 
@@ -8,3 +8,9 @@ export function wrapInCodeBlock(text: string, language = "sh") {
 }
 
 export const raycastProtocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+
+export const getIcon = (icon: string) => {
+  return icon
+    .replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+    .replace(/^./, (str) => str.toUpperCase()) as keyof typeof Icon;
+};

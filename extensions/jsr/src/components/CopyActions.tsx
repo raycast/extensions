@@ -8,7 +8,8 @@ const CopyActions = ({ item }: { item: SearchResultDocument }) => {
       {item.runtimeCompat.node ? (
         <>
           <Action.CopyToClipboard
-            title="Npm (Node.js)"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="npm (Node.js)"
             content={`npx jsr add ${item.id}`}
             icon={{ source: "npm.svg" }}
           />
@@ -18,7 +19,8 @@ const CopyActions = ({ item }: { item: SearchResultDocument }) => {
             icon={{ source: "yarn.svg" }}
           />
           <Action.CopyToClipboard
-            title="Pnpm (Node.js)"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="pnpm (Node.js)"
             content={`pnpm dlx jsr add ${item.id}`}
             icon={{ source: "pnpm.svg" }}
           />

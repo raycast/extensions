@@ -20,10 +20,13 @@ If you’d like, you can export or auto-sync your notes as markdown to a directo
 
 - View and edit your notes
 - Create a new note `⌘ + N`
+- Copy note body `⌘ + ⇧ + C`
 - Delete a note `^ + ⇧ + X`
 - Filter by tag `⌘ + T`
 - Create a new tag `⇧ + ⌘ + T`
 - Delete tags `^ + ⇧ + T`
+- Sort notes `⌘ + S`
+- Toggle note metadata `⌘ + M`
 
 **Export Notes (1-way sync)**
 

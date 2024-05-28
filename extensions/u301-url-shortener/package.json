@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "u301-url-shortener",
+  "title": "U301 URL Shortener",
+  "description": "Shorten URL using u301 service",
+  "icon": "u301.png",
+  "author": "shiny",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Shorten URL",
+      "subtitle": "U301.com",
+      "description": "Shorten selected URL to u301.com",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clipboard",
+      "title": "Shortened URL",
+      "description": "Copy to Clipboard or Paste to Current Window",
+      "type": "dropdown",
+      "required": true,
+      "default": "clipboard",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "clipboard"
+        },
+        {
+          "title": "Paste to Current Window",
+          "value": "paste"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

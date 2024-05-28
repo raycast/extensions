@@ -1,6 +1,6 @@
 ## Paste as Plain Text
 
-Paste text from the clipboard as plain text.
+Paste text from the clipboard as any format you want.
 
 Want more **Productivity** extensions? Try those. [©koinzhang](https://www.raycast.com/koinzhang)
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [New Additions] - 2024-05-03
+
+- Feat: You can now trigger actions from the menu bar.
+- Feat: Added 'Custom Action' command where you can define your instructions on the fly.
+- Improvement: Change the model from `gpt-4-turbo-preview` to `gpt-4-turbo`.
+
 ## [Fixes and New Additions] - 2024-04-17
 
 - Fix: Handling errors during server communication.

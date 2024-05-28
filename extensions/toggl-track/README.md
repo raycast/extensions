@@ -14,7 +14,6 @@ The running time entry is always visible on the top of the list with its duratio
 
 <img width="600" alt="Start/Stop Time Entry Command" src="./assets/stop-entry.png">
 
-
 Select "Create a new time entry" and pressing enter will bring you to the time entry from, allowing you to create one from scratch.
 
 <img width="600" alt="Start/Stop Time Entry Command Form" src="./assets/new-entry.png">

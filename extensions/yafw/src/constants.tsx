@@ -1,3 +1,5 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export type CompressionOptionKey = "best_quality" | "balanced" | "small_file" | "very_small_file";
 export type CompressionOption = { crf: number; bitrate: string; bufsize: string };
 export const COMPRESSION_OPTIONS: Record<CompressionOptionKey, CompressionOption> = {
@@ -7,7 +9,7 @@ export const COMPRESSION_OPTIONS: Record<CompressionOptionKey, CompressionOption
   very_small_file: { crf: 42, bitrate: "500k", bufsize: "1000k" },
 };
 export const DEFAULT_COMPRESSION: CompressionOptionKey = "balanced";
-export const VIDEO_FORMATS = ["mp4", "mov", "avi", "mkv", "webm"];
+export const VIDEO_FORMATS = ["mp4", "mov", "avi", "mkv", "webm", "gif"];
 export const PATH = [
   ".",
   "/bin",
@@ -19,3 +21,4 @@ export const PATH = [
   "/opt/homebrew/sbin",
   "/usr/local/Cellar/ffmpeg",
 ].join(":");
+export const FFMPEG_BINARY_CUSTOM_PATH = getPreferenceValues().ffmpeg_path ?? "/opt/homebrew/bin/ffmpeg";

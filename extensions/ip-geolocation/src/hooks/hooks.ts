@@ -8,11 +8,7 @@ import { WORLD_TIME_API } from "../utils/constants";
 import Style = Toast.Style;
 import net from "net";
 
-export const searchIpGeolocation = (
-  language: string,
-  searchContent: string,
-  coordinatesFormat: "latLon" | "lonLat"
-) => {
+export const useIpGeolocation = (language: string, searchContent: string, coordinatesFormat: "latLon" | "lonLat") => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -90,7 +86,7 @@ export const searchIpGeolocation = (
   return { ipGeolocation: ipGeolocation, loading: loading };
 };
 
-export const searchMyIpGeolocation = (language: string, showIPv6: boolean, coordinatesFormat: "latLon" | "lonLat") => {
+export const useMyIpGeolocation = (language: string, showIPv6: boolean, coordinatesFormat: "latLon" | "lonLat") => {
   const [ipGeolocation, setIpGeolocation] = useState<[string, string][]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 

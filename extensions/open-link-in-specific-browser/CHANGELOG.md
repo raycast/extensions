@@ -1,5 +1,10 @@
 # Open Link in Specific Browser Changelog
 
+## [Refactoring extension] - 2024-05-26
+
+- Non-URL type links are no longer supported
+- Extensions are now easier and faster
+
 ## [Support More Browsers] - 2024-04-17
 
 - Supports beta, dev, canary browsers

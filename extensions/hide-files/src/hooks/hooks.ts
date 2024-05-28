@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { checkDirectoryValid, getLocalStorage, isEmpty } from "../utils/common-utils";
 import { LocalStorageKey } from "../utils/constants";
-import { DirectoryInfo, DirectoryType } from "../utils/directory-info";
+import { DirectoryInfo } from "../utils/directory-info";
 import { Alert, confirmAlert, Icon, LocalStorage } from "@raycast/api";
 
 //for refresh useState
@@ -40,7 +40,7 @@ export const alertDialog = async (
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction?: () => void
+  cancelAction?: () => void,
 ) => {
   const options: Alert.Options = {
     icon: icon,

@@ -1,3 +1,5 @@
+import { launchCommand } from "@raycast/api";
+
 type DuplicateAlias = {
   title: string;
   hex?: string;
@@ -38,4 +40,12 @@ export type JsDelivrNpmResponse = {
     links: Record<string, string>;
   }>;
   links: Record<string, string>;
+};
+
+export type LaunchOptions = Parameters<typeof launchCommand>[0];
+
+export type LaunchContext = {
+  launchFromExtensionTitle?: string;
+  showCopyActions?: boolean;
+  callbackLaunchOptions: LaunchOptions;
 };

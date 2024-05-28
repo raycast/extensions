@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, Icon, popToRoot, showToast, useNavigation, Toast } from "@raycast/api";
-import { colors, exportNotes } from "../utils/utils";
+import { exportNotes, getTintColor } from "../utils/utils";
 import fs from "fs";
 import { useAtom } from "jotai";
 import { notesAtom } from "../services/atoms";
@@ -16,7 +16,7 @@ const ExportForm = () => {
             title={"Export Notes"}
             icon={{
               source: Icon.Download,
-              tintColor: colors.find((c) => c.name === "green")?.tintColor,
+              tintColor: getTintColor("green"),
             }}
             onSubmit={async (values: { folders: string[] }) => {
               if (notes.length === 0) {
