@@ -43,10 +43,10 @@ export default function DynamoDb() {
           icon={{ source: Icon.Warning, tintColor: Color.Red }}
         />
       )}
-      {!isLoading && !error && tables?.length === 0 && (
-        <List.EmptyView title="No stacks found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
+      {!isLoading && !error && (tables || []).length < 1 && (
+        <List.EmptyView title="No tables found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {tables?.map((table) => (
+      {(tables || []).map((table) => (
         <List.Item
           key={table.TableArn}
           title={table.TableName || ""}
@@ -55,7 +55,7 @@ export default function DynamoDb() {
             table.TableId || "",
             table.BillingModeSummary?.BillingMode || "",
             table.TableStatus || "",
-            ...(table.GlobalSecondaryIndexes?.map((gsi) => `${gsi.IndexName}`) || []),
+            ...((table.GlobalSecondaryIndexes || []).map((gsi) => `${gsi.IndexName}`) || []),
           ]}
           accessories={[
             { date: table.CreationDateTime, tooltip: "Creation Time", icon: Icon.Calendar },
@@ -103,7 +103,7 @@ export default function DynamoDb() {
                     />
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.TagList title={"Keys"}>
-                    {table.KeySchema?.map((key) => (
+                    {(table.KeySchema || []).map((key) => (
                       <List.Item.Detail.Metadata.TagList.Item
                         key={`${table.TableName}:${key.AttributeName}`}
                         text={`${key.AttributeName} (${key.KeyType!.toLowerCase()})`}
@@ -125,9 +125,9 @@ export default function DynamoDb() {
                       />
                     </List.Item.Detail.Metadata.TagList>
                   )}
-                  {table.LocalSecondaryIndexes!.length > 0 && (
+                  {(table.LocalSecondaryIndexes || []).length > 0 && (
                     <List.Item.Detail.Metadata.TagList title={"LSI(s)"}>
-                      {table.LocalSecondaryIndexes?.map((lsi) => (
+                      {(table.LocalSecondaryIndexes || []).map((lsi) => (
                         <List.Item.Detail.Metadata.TagList.Item
                           key={`${table.TableName}:${lsi.IndexName}`}
                           text={lsi.IndexName}
@@ -136,9 +136,9 @@ export default function DynamoDb() {
                       ))}
                     </List.Item.Detail.Metadata.TagList>
                   )}
-                  {table.GlobalSecondaryIndexes!.length > 0 && (
+                  {(table.GlobalSecondaryIndexes || []).length > 0 && (
                     <List.Item.Detail.Metadata.TagList title={"GSI(s)"}>
-                      {table.GlobalSecondaryIndexes?.map((gsi) => (
+                      {(table.GlobalSecondaryIndexes || []).map((gsi) => (
                         <List.Item.Detail.Metadata.TagList.Item
                           key={`${table.TableName}:${gsi.IndexName}`}
                           text={gsi.IndexName}
@@ -150,9 +150,9 @@ export default function DynamoDb() {
                   {table.GlobalTableVersion && (
                     <List.Item.Detail.Metadata.Label title={"Global Table Version"} text={table.GlobalTableVersion} />
                   )}
-                  {table.Replicas!.length > 0 && (
+                  {(table.Replicas || []).length > 0 && (
                     <List.Item.Detail.Metadata.TagList title={"Replica(s)"}>
-                      {table.Replicas?.map((replica) => (
+                      {(table.Replicas || []).map((replica) => (
                         <List.Item.Detail.Metadata.TagList.Item
                           key={`${table.TableName}:${replica.RegionName}`}
                           text={replica.RegionName}
@@ -226,7 +226,7 @@ const fetchTables = async (token?: string, accTables?: Table[]): Promise<Table[]
   );
 
   const tables = await Promise.all(
-    (TableNames ?? []).map(async (t) => {
+    (TableNames || []).map(async (t) => {
       const { Table } = await new DynamoDBClient({}).send(new DescribeTableCommand({ TableName: t }));
       return { ...Table, keys: fetchKeys(Table!) };
     }),
@@ -301,7 +301,7 @@ const fetchKeys = (table: TableDescription): Record<string, PrimaryKey> => {
     rangeKey,
   };
 
-  table.GlobalSecondaryIndexes?.forEach((gsi) => {
+  (table.GlobalSecondaryIndexes || []).forEach((gsi) => {
     const gsiHashKey = gsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
     let gsiRangeKey = undefined;
     if (gsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {
@@ -320,7 +320,7 @@ const fetchKeys = (table: TableDescription): Record<string, PrimaryKey> => {
     };
   });
 
-  table.LocalSecondaryIndexes?.forEach((lsi) => {
+  (table.LocalSecondaryIndexes || []).forEach((lsi) => {
     const lsiHashKey = lsi.KeySchema?.find((k) => k.KeyType === "HASH")?.AttributeName || "";
     let lsiRangeKey = undefined;
     if (lsi.KeySchema?.some((k) => k.KeyType === "RANGE")) {

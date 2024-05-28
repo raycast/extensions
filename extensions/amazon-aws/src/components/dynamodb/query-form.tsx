@@ -28,7 +28,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
         TableName: table.TableName,
         KeyConditionExpression: [
           `#${primaryKey.hashKey.name} = :${primaryKey.hashKey.name}`,
-          ...(hasRangeKey && values.rangeKey!.length > 0
+          ...(hasRangeKey && values.rangeKey && values.rangeKey.length > 0
             ? [
                 "and",
                 values.rangeKeyOperator === "between"
@@ -59,7 +59,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
             }),
         }),
         ...(values.useProjectionExpression && { ProjectionExpression: values.projectionExpression }),
-        Limit: 1,
+        Limit: Number(values.pageLimit),
         ...(values.indexName !== table.TableName && { IndexName: values.indexName.split(".")[1] }),
       };
       push(
@@ -74,14 +74,36 @@ export const QueryForm = ({ table }: { table: Table }) => {
       );
     },
     validation: {
-      hashKey: FormValidation.Required,
+      hashKey: (value) => {
+        if (!value || value.length < 1) {
+          return "Hash Key must be provided";
+        }
+        if (table.keys[values.indexName].hashKey.type === "N" && Number.isNaN(Number(value))) {
+          return "Hash Key must be a number";
+        }
+      },
+      rangeKey: (value) => {
+        if (value && value.length > 0) {
+          if (table.keys[values.indexName].rangeKey!.type === "N" && Number.isNaN(Number(value))) {
+            return "Range Key must be a number";
+          }
+        }
+      },
+      rangeKeyEnd: (value) => {
+        if (value && value.length > 0) {
+          if (table.keys[values.indexName].rangeKey!.type === "N" && Number.isNaN(Number(value))) {
+            return "Range Key must be a number";
+          }
+        }
+      },
       indexName: FormValidation.Required,
       pageLimit: FormValidation.Required,
       projectionExpression: (value) => {
-        if (values.useProjectionExpression && value!.length < 1) {
-          return "Projection Expression is required (if checked)";
+        if (values.useProjectionExpression) {
+          if (!value || value.length < 1) {
+            return "Projection Expression must be provided (if checked)";
+          }
         }
-        return undefined;
       },
     },
     initialValues: {
@@ -113,10 +135,10 @@ export const QueryForm = ({ table }: { table: Table }) => {
       />
       <Form.Dropdown {...itemProps.indexName} title={"Table"} info={"Select main table of one of GSI or LSI"}>
         <Form.Dropdown.Item value={`${table.TableName}`} title={`Table: ${table.TableName}`} />
-        {table.GlobalSecondaryIndexes?.map((gsi) => (
+        {(table.GlobalSecondaryIndexes || []).map((gsi) => (
           <Form.Dropdown.Item key={gsi.IndexName} value={`gsi.${gsi.IndexName}`} title={`GSI: ${gsi.IndexName}`} />
         ))}
-        {table.LocalSecondaryIndexes?.map((lsi) => (
+        {(table.LocalSecondaryIndexes || []).map((lsi) => (
           <Form.Dropdown.Item key={lsi.IndexName} value={`lsi.${lsi.IndexName}`} title={`LSI: ${lsi.IndexName}`} />
         ))}
       </Form.Dropdown>
@@ -199,7 +221,7 @@ const QueryResult = ({
       await showToast({ style: Toast.Style.Animated, title: `Querying table ${table.TableName}…` });
       try {
         const output = await client.send(new QueryCommand(input));
-        if (output.Items!.length) {
+        if ((output.Items || []).length > 0) {
           await showToast({
             style: Toast.Style.Success,
             title: `✅ Queried table ${table.TableName}`,
@@ -225,11 +247,11 @@ const QueryResult = ({
   const totalItemsCount = previousItemsCount + (queryOutput?.Count ?? 0);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const output: Record<string, any>[] = queryOutput?.Items?.map((i: any) => sortRecord(unmarshall(i))) ?? [];
+  const output: Record<string, any>[] = (queryOutput?.Items || []).map((i: any) => sortRecord(unmarshall(i))) ?? [];
   const quote =
     "_Use projection attributes to hide attributes which might cause rendering delays after result is loaded._";
   const markdown = `**Table Name:** ${input.TableName}\n\n**Items (${queryOutput?.Count})**\n\n\`\`\`json\n${JSON.stringify(output, undefined, 2)}\n\`\`\``;
-  if (!isLoading && !output.length) {
+  if (!isLoading && (output || []).length < 1) {
     return (
       <List isLoading={isLoading} navigationTitle={"Query Result"}>
         <List.EmptyView

@@ -55,10 +55,10 @@ export const SendMessageForm = ({ queue, revalidate }: { queue: Queue; revalidat
     initialValues: { useDelaySeconds: false, useMsgDeduplicationId: false, useMsgAttributes: false },
     validation: {
       msgDeduplicationId: (value) => {
-        if (queue.attributes?.ContentBasedDeduplication === "false" && value!.length < 1) {
+        if (queue.attributes?.ContentBasedDeduplication === "false" && (!value || value!.length < 1)) {
           return "Message Deduplication ID is required when content based deduplication is disabled";
         }
-        if (values.useMsgDeduplicationId && value!.length < 1) {
+        if (values.useMsgDeduplicationId && (!value || value!.length < 1)) {
           return "Message Deduplication ID is required (if checked)";
         }
       },
@@ -68,16 +68,18 @@ export const SendMessageForm = ({ queue, revalidate }: { queue: Queue; revalidat
           : undefined,
       msgBody: FormValidation.Required,
       delaySeconds: (value) => {
-        if (values.useDelaySeconds && value!.length < 1) {
-          return "Delay Seconds is required (if checked)";
-        }
-        if (values.useDelaySeconds && Number.isNaN(Number(value))) {
-          return "Delay Seconds must be a number";
+        if (values.useDelaySeconds) {
+          if (!value || value.length < 1) {
+            return "Delay Seconds is required (if checked)";
+          }
+          if (Number.isNaN(Number(value))) {
+            return "Delay Seconds must be a number";
+          }
         }
       },
       msgAttributes: (value) => {
         if (values.useMsgAttributes) {
-          if (value!.length < 2) {
+          if (!value || value.length < 2) {
             return "Message Attributes are required (if checked)";
           }
           try {

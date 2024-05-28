@@ -1,4 +1,4 @@
-import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import {
   Action,
   ActionPanel,
@@ -77,17 +77,34 @@ export const DeleteItemForm = ({ table }: { table: Table }) => {
         },
       }),
     validation: {
-      hashKey: FormValidation.Required,
-      rangeKey: (value) => (hasRangeKey && value!.length < 1 ? "Range key is required" : undefined),
-      conditionExpression: (value) => {
-        if (values.useConditionExpression && value!.length < 1) {
-          return "Condition Expression is required (if checked)";
+      hashKey: (value) => {
+        if (!value || value.length < 1) {
+          return "Hash Key must be provided";
         }
-        return undefined;
+        if (tablePrimaryKey.hashKey!.type === "N" && Number.isNaN(Number(value))) {
+          return "Hash Key must be a number";
+        }
+      },
+      rangeKey: (value) => {
+        if (hasRangeKey) {
+          if (!value || value.length < 1) {
+            return "Range Key is required";
+          }
+          if (tablePrimaryKey.rangeKey!.type === "N" && Number.isNaN(Number(value))) {
+            return "Range Key must be a number";
+          }
+        }
+      },
+      conditionExpression: (value) => {
+        if (values.useConditionExpression) {
+          if (!value || value.length < 1) {
+            return "Condition Expression is required (if checked)";
+          }
+        }
       },
       expressionAttributeNames: (value) => {
         if (values.useExpressionAttributeNames) {
-          if (value!.length < 2) {
+          if (!value || value.length < 2) {
             return "Expression Attribute Names are required (if checked)";
           }
           try {
@@ -96,11 +113,10 @@ export const DeleteItemForm = ({ table }: { table: Table }) => {
             return "Expression Attribute Names must be valid JSON";
           }
         }
-        return undefined;
       },
       expressionAttributeValues: (value) => {
         if (values.useExpressionAttributeValues) {
-          if (value!.length < 2) {
+          if (!value || value.length < 2) {
             return "Expression Attribute Values are required (if checked)";
           }
           try {
@@ -110,7 +126,6 @@ export const DeleteItemForm = ({ table }: { table: Table }) => {
             return "Expression Attribute Values must be JSON that can be marshalled to DynamoDB";
           }
         }
-        return undefined;
       },
     },
     initialValues: {
