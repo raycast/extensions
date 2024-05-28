@@ -76,7 +76,6 @@ export const urlPathAction = async (path: string) => {
 };
 
 export const openPathInTerminal = async (path: string) => {
-  console.log(preferredTerminal);
   if (preferredTerminal) {
     await open(path, preferredTerminal);
     await showHud("📟", `Open in ${preferredTerminal.name}`);

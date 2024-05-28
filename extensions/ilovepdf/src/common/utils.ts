@@ -10,3 +10,5 @@ export const getFilePath = (directory: string, filename: string, increment = 0):
 
   return getFilePath(directory, filename, increment + 1);
 };
+
+export const MaxInt32 = 2147483647;

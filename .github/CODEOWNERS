@@ -182,6 +182,7 @@
 /extensions/chinese-character                                       @koinzhang
 /extensions/chinese-numbers                                         @raffeyang
 /extensions/choose-a-license                                        @sandypockets @Aayush9029
+/extensions/chords-and-tabs                                         @BossElijah
 /extensions/chuck-norris-facts                                      @jorgecortesdev
 /extensions/cider                                                   @feyli
 /extensions/cidr                                                    @Yansongsongsong
@@ -596,7 +597,7 @@
 /extensions/imagekit-uploader                                       @ludafa
 /extensions/images-compression                                      @okooo5km
 /extensions/imdb                                                    @ryan-exe @kgrhartlage @bibixx @dnsv
-/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @navtoj @hitolaus
+/extensions/imessage-2fa                                            @yuercl @thomaspaulmann @arronhunt @ronaldheft @hitolaus
 /extensions/imgur                                                   @BalliAsghar @pernielsentikaer @caumeira
 /extensions/improvmx                                                @ImprovMX
 /extensions/incognito-clone                                         @kgrhartlage
@@ -788,6 +789,7 @@
 /extensions/midjourney                                              @CarterMcAlister
 /extensions/migadu                                                  @xmok
 /extensions/mindnode                                                @natsustan
+/extensions/minecraft-color-codes                                   @lafkpages @pernielsentikaer
 /extensions/miniflux                                                @Sevichecc
 /extensions/minion-ipsum                                            @vigosan
 /extensions/minisim                                                 @okwasniewski
@@ -862,6 +864,7 @@
 /extensions/node-release-notes                                      @filipszczepanski
 /extensions/node-version-manager                                    @AndresMorelos @pernielsentikaer @LeOndaz
 /extensions/nodes                                                   @jstnw10
+/extensions/norwegian-public-transport                              @rosvik
 /extensions/nos-news                                                @Joran-Dob
 /extensions/note-in-google-doc                                      @mnttnm
 /extensions/noteplan-3                                              @shakedlokits @lukerandall @pr1mal
@@ -987,6 +990,7 @@
 /extensions/playback-duration-calculator                            @nathanwijaya
 /extensions/playwright-docs                                         @AndrewUsher
 /extensions/ploi                                                    @ploi-deploy
+/extensions/pm2                                                     @LitoMore @pernielsentikaer
 /extensions/pocket                                                  @vimtor
 /extensions/podcasts                                                @ron-myers
 /extensions/podcasts-now                                            @cloudy9101
@@ -1053,6 +1057,7 @@
 /extensions/random-color                                            @srcrip
 /extensions/random-data-generator                                   @loris @Calvein @pernielsentikaer @vimtor @j3lte @stefanmatar
 /extensions/random-email                                            @rkjaer
+/extensions/random-fart                                             @sfratczak
 /extensions/random-password-generator                               @textnav
 /extensions/random-text-picker                                      @ezzylan @pernielsentikaer
 /extensions/random-us-phone-number                                  @yug2005
@@ -1248,7 +1253,7 @@
 /extensions/spoiler-converter                                       @Visual-Studio-Coder @varunsatish2017
 /extensions/spotify-beta                                            @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon
 /extensions/spotify-controls                                        @thomaspaulmann @altrdev @ron-myers @sandypockets @Kenan7 @dmacdermott @pernielsentikaer @yansq
-/extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @bkeys818 @jatindotdev @the-devbear
+/extensions/spotify-player                                          @mattisssa @peduarte @sxn @dillionverma @andreaselia @stuart @tonka3000 @dancannon @pernielsentikaer @stevensd2m @erics118 @hjoelh @hobhouse @bkeys818 @jatindotdev @the-devbear @rfaccio @andyburris
 /extensions/spryker-docs                                            @DinisEsteves
 /extensions/ssh-manager                                             @scopsy @LenoxFro @RtiM0 @shelken @emiara
 /extensions/ssh-tunnel-manager                                      @MinatoHikari
@@ -1326,6 +1331,7 @@
 /extensions/texts                                                   @zavbala
 /extensions/tfl                                                     @haneenmahd
 /extensions/the-matrix-of-destiny                                   @ordinz
+/extensions/the-nobel-prize                                         @xmok @pernielsentikaer
 /extensions/the-noble-quran                                         @BalliAsghar
 /extensions/the-verge                                               @klkvsky @pernielsentikaer
 /extensions/thesaurus                                               @ABukSwienty
@@ -1440,7 +1446,7 @@
 /extensions/vercast                                                 @MaxLeiter @gleich @dgrcode @samuelkraft
 /extensions/verify-number                                           @xmok
 /extensions/viacep                                                  @xilopaint
-/extensions/vim-bro                                                 @ajaypremshankar
+/extensions/vim-bro                                                 @ajaypremshankar @pernielsentikaer
 /extensions/virtualbox-power-switch                                 @DiogoFerrer
 /extensions/vision-directory                                        @marckohlbrugge
 /extensions/visual-studio-code-project-manager                      @MarkusLanger @GastroGeek @4very @theherk @TobiasYin @yossizahn @eduwass @gadenbuie @hsm
