@@ -1,6 +1,6 @@
 # Append Clipboard Changelog
 
-## [Merge Clipboard] - {PR_MERGE_DATE}
+## [Merge Clipboard] - 2024-05-28
 
 - Merge recent clipboard text (requires Clipboard History Extension to be enabled)
 
