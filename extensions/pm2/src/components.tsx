@@ -111,7 +111,7 @@ export const ProcessActions = ({
             }}
           />
         )}
-        {!["errored", "stopping", "stopped"].includes(p.pm2_env?.status || "") && (
+        {!["stopping", "stopped"].includes(p.pm2_env?.status || "") && (
           <Action
             icon={Icon.Stop}
             title="Stop"

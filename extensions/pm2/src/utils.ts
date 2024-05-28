@@ -57,21 +57,32 @@ export async function runPm2Command(
   }
   const toast = await showToast({ title: "", message: `Running ${command} command...` });
   const nodeBinaryPath = getNodeBinaryPath(runtimeOptions);
-  await $({
-    shell: true,
-    cwd: path.dirname(pm2WrapperIndexPath),
-  })`PATH="$PATH:${path.dirname(nodeBinaryPath)}" '${nodeBinaryPath}' '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
-  toast.style = Toast.Style.Success;
-  toast.message = `Operation done`;
+  const commandLine = `PATH="$PATH:${path.dirname(nodeBinaryPath)}" '${nodeBinaryPath}' '${pm2WrapperIndexPath}' ${command} --options=${encodeParameters(options)}`;
+  try {
+    await $({
+      shell: true,
+      cwd: path.dirname(pm2WrapperIndexPath),
+    })(commandLine);
+    toast.style = Toast.Style.Success;
+    toast.message = `Operation done`;
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.message = error?.toString() ?? `Fail to execute '${commandLine}'`;
+  }
 }
 
 export const checkIfNeedSetup = async () => {
   const installed = await hasPm2WrapperInstalled();
   if (!installed) {
     const toast = await showToast({ title: "", message: "Setting up PM2 wrappers for Raycast..." });
-    await setupPm2Wrapeper();
-    toast.style = Toast.Style.Success;
-    toast.message = "PM2 wrappers for Raycast are set up.";
+    try {
+      await setupPm2Wrapeper();
+      toast.style = Toast.Style.Success;
+      toast.message = "PM2 wrappers for Raycast are set up";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.message = error?.toString() ?? "Fail to setup PM2 wrappers for Raycast";
+    }
   }
 };
 
