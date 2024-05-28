@@ -56,7 +56,7 @@
     },
     {
       "name": "OpenNow",
-      "title": "Open the PDF immediately after conversion",
+      "title": "Open the PDF Immediately After Conversion",
       "description": "Open the PDF file after conversion",
       "type": "checkbox",
       "required": false,
@@ -65,7 +65,7 @@
     },
     {
       "name": "AskBeforeDownload",
-      "title": "Ask where to save each file before download",
+      "title": "Ask Where to Save File Before Download",
       "description": "Ask where to save each file before download",
       "type": "checkbox",
       "required": false,
