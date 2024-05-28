@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keyboard-win-mac-switch",
-  "title": "Keyboard Win Mac switch",
+  "title": "Keyboard Win Mac Switch",
   "description": "This extension allow you to switch alt and window keys",
   "icon": "keyboard-icon.png",
   "author": "fab_uleuh",
@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "switch-mac-keyboard",
-      "title": "switch-mac-keyboard",
-      "description": "Allow to switch alt and window keys",
+      "title": "Switch Mac Keyboard",
+      "description": "Switch alt and window keys",
       "mode": "no-view"    },
     {
       "name": "switch-window-keyboard",
-      "title": "switch-window-keyboard",
-      "description": "",
+      "title": "Switch Window Keyboard",
+      "description": "Switch window and alt keys",
       "mode": "no-view"    }
   ],
   "dependencies": {
