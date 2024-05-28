@@ -93,8 +93,8 @@ export default function LoginForm() {
             </ActionPanel>
           }
         >
-          <Form.TextField id="phoneNumber" title="phoneNumber" value={phoneNumber} onChange={setPhoneNumber} />
-          <Form.PasswordField id="password" title="password" value={password} onChange={setPassword} />
+          <Form.TextField id="phoneNumber" title="Phone Number" value={phoneNumber} onChange={setPhoneNumber} />
+          <Form.PasswordField id="password" title="Password" value={password} onChange={setPassword} />
         </Form>
       ) : (
         <Form

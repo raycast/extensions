@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "telegram",
   "title": "Telegram Rayclient",
-  "description": "Send quick messages to your telegram contacts from raycast",
+  "description": "Send quick messages to your telegram contacts from Raycast",
   "icon": "telegram.png",
   "author": "psychic_dev",
   "categories": [
