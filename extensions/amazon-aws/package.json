@@ -57,8 +57,8 @@
     },
     {
       "name": "sqs",
-      "title": "SQS Queues",
-      "description": "Find and open a queue (or purge it)",
+      "title": "Simple Queue Service",
+      "description": "List queues, view details and manage the messages",
       "mode": "view"
     },
     {
@@ -75,8 +75,8 @@
     },
     {
       "name": "cloudformation",
-      "title": "CloudFormation Stacks",
-      "description": "Find and open a stack",
+      "title": "CloudFormation",
+      "description": "List and open stacks, resources and exports",
       "mode": "view"
     },
     {

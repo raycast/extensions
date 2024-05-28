@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Update] – 2024-05-24
+
+- Fixed an issue that caused the extension to crash when the `Caffeinate Status` command was disabled.
+
 ## [Update] – 2024-05-19
 
 - Replaced the form in the `Caffeinate For` command with arguments in the root search.

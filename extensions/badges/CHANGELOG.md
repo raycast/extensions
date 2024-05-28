@@ -1,5 +1,9 @@
 # Badges Changelog
 
+## [Chore] - 2024-05-23
+
+- Bump [`raycast-cross-extension@0.2.1`](https://github.com/LitoMore/raycast-cross-extension-conventions)
+
 ## [New Features] - 2024-05-06
 
 - Add `Create Social Badge` command

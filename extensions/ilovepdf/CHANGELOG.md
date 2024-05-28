@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Add Merge PDF] - 2024-05-27
+
 ## [Avoid Overwriting Files] - 2024-05-18
 
 ## [Add PDF to Image] - 2024-05-11

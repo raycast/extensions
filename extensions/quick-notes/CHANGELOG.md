@@ -1,5 +1,16 @@
 # Quick Notes Changelog
 
+## [Bugfix] - 2024-05-24
+
+- Remove create button on the sort action, unintended
+
+## [Metadata Menu and Sort] - 2024-05-23
+
+- New note metadata menu to show tags and other details for a note using `⌘ + M`
+- Sort straight from the notes list instead of preferences using `⌘ + S`'
+- Both these new features save your settings in Cache
+- Removes sort from preferences
+
 ## [Copy Action] - 2024-05-08
 
 - New `Copy to Clipboard` action on note body using `⌘ + ⇧ + C`

@@ -30,6 +30,13 @@
       "subtitle": "iLovePDF",
       "description": "Converts a PDF to Image using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "merge-pdf",
+      "title": "Merge PDF",
+      "subtitle": "iLovePDF",
+      "description": "Merge Multiple PDFs using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [

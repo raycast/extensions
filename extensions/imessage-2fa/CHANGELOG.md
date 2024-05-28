@@ -2,7 +2,7 @@
 
 ## [Update] - 2024-05-28
 
-- Added chase 2fa code support
+- Add support for Chase 2FA code pattern
 
 ## [Update] - 2024-04-12
 

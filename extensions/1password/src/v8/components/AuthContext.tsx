@@ -23,6 +23,7 @@ import {
   useAccounts,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
+import { useCachedState } from "@raycast/utils";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -70,7 +71,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const authenticate = async () => {
-    console.log({ isAuthenticated });
     await closeMainWindow({ popToRootType: PopToRootType.Suspended });
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -103,7 +103,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return (toast.title = err.message);
       }
 
-      console.log({ errorMessage });
       if (errorMessage.includes("multiple accounts found")) return setAccountSelected(false);
 
       toast.style = Toast.Style.Failure;

@@ -22,7 +22,6 @@ export const pickColor = async ({ field }: { field: string }) => {
         ownerOrAuthorName: "thomas",
       },
       {
-        ownerOrAuthorName: "litomore",
         context: {
           launchFromExtensionName: "color-picker",
           field,
