@@ -1,12 +1,8 @@
 import { LaunchType, closeMainWindow, getPreferenceValues, launchCommand } from "@raycast/api";
 import { get, toggleFnFactory } from "./utils";
 
-type Preferences = {
-  keepPreviousInputVolume: boolean;
-};
-
 export default async function toggleMute() {
-  const preferences: Preferences = getPreferenceValues();
+  const preferences: Preferences.ToggleMute = getPreferenceValues();
   const toggle = toggleFnFactory(preferences);
   const currentAudioInputLevel = await get();
   await closeMainWindow();
