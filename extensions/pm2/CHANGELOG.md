@@ -1,5 +1,11 @@
 # Raycast PM2
 
+## [Enhancement] - 2024-05-28
+
+- Handle installation errors
+- Hanlde PM2 command errors
+- Make errored processes stoppable
+
 ## [Initial Version] - 2024-05-25
 
 - View PM2 process list
