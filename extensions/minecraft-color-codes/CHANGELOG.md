@@ -1,3 +1,3 @@
 # Minecraft Color Codes Changelog
 
-## [Initial Version] - 2024-05-08
+## [Initial Version] - {PR_MERGE_DATE}
