@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Improvements] - 2024-05-28
+
+- Added preference to hide completed issues across all searches
+
 ## [Bug Fixes] - 2024-05-25
 
 - Fixed milestones to be updated with "Create Issue" command
