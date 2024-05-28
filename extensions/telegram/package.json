@@ -43,6 +43,7 @@
     {
       "name": "api_id",
       "title": "API ID",
+      "placeholder": "12345",
       "description": "Your telegram bot api Id",
       "type": "textfield",
       "required": true
@@ -50,6 +51,7 @@
     {
       "name": "api_hash",
       "title": "API Hash",
+      "placeholder": "1ad4aeebcf1e4b1a1a1a1a1a1a1a1a1a",
       "description": "Your telegram bot api hash",
       "type": "textfield",
       "required": true

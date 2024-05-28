@@ -1,16 +1,11 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, PreferenceValues, getPreferenceValues } from "@raycast/api";
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
-
-export interface preferences {
-  api_id: string;
-  api_hash: string;
-}
 
 let SESSION: StringSession;
 
 // TODO: Add a client disconnect function
-const { api_id, api_hash } = getPreferenceValues<preferences>();
+const { api_id, api_hash } = getPreferenceValues<PreferenceValues>();
 export const returnClient = async () => {
   try {
     const session = await getSession();

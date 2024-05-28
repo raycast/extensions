@@ -1,7 +1,7 @@
 import { TelegramClient } from "telegram";
 import { useContext, useEffect, useState } from "react";
-import { Action, ActionPanel, Detail, Form, getPreferenceValues, LocalStorage } from "@raycast/api";
-import { preferences, returnClient } from "../utils/tgClient";
+import { Action, ActionPanel, Detail, Form, getPreferenceValues, LocalStorage, PreferenceValues } from "@raycast/api";
+import { returnClient } from "../utils/tgClient";
 import { ClientContext } from "../contexts/clientContext";
 
 let loginClient: TelegramClient;
@@ -11,7 +11,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const { api_id, api_hash } = getPreferenceValues<preferences>();
+  const { api_id, api_hash } = getPreferenceValues<PreferenceValues>();
   const [isLoading, setIsLoading] = useState(true);
   const { setGlobalClient } = useContext(ClientContext);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -93,8 +93,8 @@ export default function LoginForm() {
             </ActionPanel>
           }
         >
-          <Form.TextField id="phoneNumber" title="Phone Number" value={phoneNumber} onChange={setPhoneNumber} />
-          <Form.PasswordField id="password" title="Password" value={password} onChange={setPassword} />
+          <Form.TextField id="phoneNumber" title="phoneNumber" value={phoneNumber} onChange={setPhoneNumber} />
+          <Form.PasswordField id="password" title="password" value={password} onChange={setPassword} />
         </Form>
       ) : (
         <Form
