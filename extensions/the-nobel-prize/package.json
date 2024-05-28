@@ -5,6 +5,9 @@
   "description": "Information about the Nobel Prizes and the Nobel Prize Laureates",
   "icon": "command-icon.png",
   "author": "xmok",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data",
     "Fun"
@@ -40,7 +43,7 @@
               "value": "che"
             },
             {
-              "title": "Economics",
+              "title": "Economic Sciences",
               "value": "eco"
             },
             {

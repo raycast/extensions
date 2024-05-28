@@ -5,7 +5,7 @@ export const DEAULT_LIMIT = 25;
 
 export const ICONS = {
   Chemistry: Icon.Syringe,
-  Economics: Icon.LineChart,
+  "Economic Sciences": Icon.LineChart,
   Literature: Icon.Book,
   Peace: Icon.Globe,
   Physics: Icon.Ruler,
@@ -14,7 +14,7 @@ export const ICONS = {
 
 export const CATEGORIES = {
   che: "Chemistry",
-  eco: "Economics",
+  eco: "Economic Sciences",
   lit: "Literature",
   pea: "Peace",
   phy: "Physics",
