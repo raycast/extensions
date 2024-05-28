@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Color, Icon, List, confirmAlert } from "@raycast/api";
+import { ActionPanel, Action, Color, Icon, List, confirmAlert, Alert } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { formatDistance } from "date-fns";
 import { get } from "lodash";
@@ -85,38 +85,43 @@ export const ProcessActions = ({
     <>
       <Action icon={Icon.AppWindowSidebarRight} title="Toogle Detail" onAction={onToggleDetail} />
       <ActionPanel.Section>
-        <Action
-          icon={Icon.Play}
-          title="Start"
-          onAction={async () => {
-            if (
-              !isRaycastNodeProcess(p) &&
-              (await confirmAlert({
-                title: "You are starting a non-Raycast process",
-                message:
-                  "Start this process may miss some environment variables. Please consider start this process with PM2 CLI.",
-                primaryAction: { title: "Do Nothing" },
-                dismissAction: { title: "Start Anyway" },
-              }))
-            ) {
-              return;
-            }
-            await runPm2Command("start", {
-              name: get(p, "name"),
-              script: get(p, "pm2_env.pm_exec_path"),
-              pid: get(p, "pm2_env.pm_pid_path"),
-            });
-            onActionComplete();
-          }}
-        />
-        <Action
-          icon={Icon.Stop}
-          title="Stop"
-          onAction={async () => {
-            await runPm2Command("stop", pmId);
-            onActionComplete();
-          }}
-        />
+        {p.pm2_env?.status !== "online" && (
+          <Action
+            icon={Icon.Play}
+            title="Start"
+            onAction={async () => {
+              if (
+                !isRaycastNodeProcess(p) &&
+                (await confirmAlert({
+                  title: "You are starting a non-Raycast process",
+                  message:
+                    "Start this process may miss some environment variables. Please consider start this process with PM2 CLI.",
+                  primaryAction: { title: "Do Nothing" },
+                  dismissAction: { title: "Start Anyway" },
+                }))
+              ) {
+                return;
+              }
+              await runPm2Command("start", {
+                name: get(p, "name"),
+                script: get(p, "pm2_env.pm_exec_path"),
+                pid: get(p, "pm2_env.pm_pid_path"),
+              });
+              onActionComplete();
+            }}
+          />
+        )}
+        {!["errored", "stopping", "stopped"].includes(p.pm2_env?.status || "") && (
+          <Action
+            icon={Icon.Stop}
+            title="Stop"
+            onAction={async () => {
+              await runPm2Command("stop", pmId);
+              onActionComplete();
+            }}
+          />
+        )}
+
         <Action
           icon={Icon.Redo}
           title="Restart"
@@ -136,9 +141,22 @@ export const ProcessActions = ({
         <Action
           icon={Icon.Trash}
           title="Delete"
+          style={Action.Style.Destructive}
           onAction={async () => {
-            await runPm2Command("delete", pmId);
-            onActionComplete();
+            if (
+              await confirmAlert({
+                title: "Delete PM2 instance",
+                message: "Do you want to delete this PM2 instance",
+                rememberUserChoice: true,
+                primaryAction: {
+                  style: Alert.ActionStyle.Destructive,
+                  title: "Yes, delete it",
+                },
+              })
+            ) {
+              await runPm2Command("delete", pmId);
+              onActionComplete();
+            }
           }}
         />
       </ActionPanel.Section>
