@@ -4,5 +4,5 @@
 
 There are 2 commands:
 
-1. `Lauerates` - this allows to fetch Laureates and search based on Motivation and Name.
+1. `Laureates` - this allows to fetch Laureates and search based on Motivation and Name.
 2. `Nobel Prize` - this allows you to fetch Prizes with the option to specify year and/or category.
