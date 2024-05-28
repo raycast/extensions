@@ -6,6 +6,9 @@
   "description": "Advanced, production process manager for Node.js.",
   "icon": "pm2-icon.png",
   "author": "litomore",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity",
