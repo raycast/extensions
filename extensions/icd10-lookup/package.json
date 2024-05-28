@@ -5,6 +5,9 @@
   "description": "Shows matching ICD10 codes based on disease name input. Uses NLM's ICD10 API.",
   "icon": "command-icon.png",
   "author": "ubergraham",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Other"
   ],
@@ -19,7 +22,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.75.1",
-    "axios": "^1.7.2"
+    "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
