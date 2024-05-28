@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Update] - 2024-05-28
+
+- Added chase 2fa code support
+
 ## [Update] - 2024-04-12
 
 - Add unit test for regresion testing of code matching
