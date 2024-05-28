@@ -1,13 +1,22 @@
 import { exec } from "child_process";
 import { env } from "./env";
 
+export interface Session {
+  Src: string; // tmux or zoxide
+  Name: string; // The display name
+  Path: string; // The absolute directory path
+  Score: number; // The score of the session (from Zoxide)
+  Attached: number; // Whether the session is currently attached
+  Windows: number; // The number of windows in the session
+}
+
 export function getSessions() {
-  return new Promise<string[]>((resolve, reject) => {
-    exec(`sesh list`, { env }, (error, stdout, stderr) => {
+  return new Promise<Session[]>((resolve, reject) => {
+    exec(`sesh list --json`, { env }, (error, stdout, stderr) => {
       if (error || stderr) {
-        return reject(error?.message ?? stderr);
+        return reject(`Please upgrade to the latest version of the sesh CLI`);
       }
-      const sessions = stdout.trim().split("\n");
+      const sessions = JSON.parse(stdout);
       return resolve(sessions ?? []);
     });
   });
@@ -15,7 +24,7 @@ export function getSessions() {
 
 export function connectToSession(session: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    exec(`sesh connect --switch ${session}`, { env }, (error, _, stderr) => {
+    exec(`sesh connect --switch "${session}"`, { env }, (error, _, stderr) => {
       if (error || stderr) {
         console.error("error ", error);
         console.error("stderr ", stderr);

@@ -43,7 +43,7 @@ function Command() {
           const account = accounts.find((account) => account.id === accountId);
           const name = account?.name || '';
           return (
-            <List.Section title={name}>
+            <List.Section title={name} key={accountId}>
               {accountMembers.map((member) => (
                 <List.Item
                   key={member.email}

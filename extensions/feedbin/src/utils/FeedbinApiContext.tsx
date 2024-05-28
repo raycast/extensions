@@ -11,7 +11,6 @@ import invariant from "tiny-invariant";
 import {
   Subscription,
   useEntries,
-  useIcons,
   useStarredEntriesIds,
   useSubscriptions,
   useUnreadEntriesIds,
@@ -19,12 +18,10 @@ import {
 
 type FeedbinApiContext = {
   subscriptions: ReturnType<typeof useSubscriptions>;
-  icons: ReturnType<typeof useIcons>;
   starredEntriesIds: ReturnType<typeof useStarredEntriesIds>;
   unreadEntriesIds: ReturnType<typeof useUnreadEntriesIds>;
   unreadEntries: ReturnType<typeof useEntries>;
   entries: ReturnType<typeof useEntries>;
-  iconMap: Record<string, string>;
   subscriptionMap: Record<number, Subscription>;
   starredEntriesIdsSet: Set<number>;
   unreadEntriesSet: Set<number>;
@@ -66,12 +63,10 @@ export const FeedbinApiContextProvider = (props: {
     starred,
   });
 
-  const icons = useIcons();
   const starredEntriesIds = useStarredEntriesIds();
   const unreadEntriesIds = useUnreadEntriesIds();
   const isLoading =
     subscriptions.isLoading ||
-    icons.isLoading ||
     starredEntriesIds.isLoading ||
     unreadEntriesIds.isLoading ||
     unreadEntries.isLoading;
@@ -85,16 +80,6 @@ export const FeedbinApiContextProvider = (props: {
           )
         : {},
     [subscriptions.data],
-  );
-  const iconMap = useMemo(
-    () =>
-      icons.data
-        ? icons.data.reduce<Record<string, string>>(
-            (acc, icon) => ({ ...acc, [icon.host]: icon.url }),
-            {},
-          )
-        : {},
-    [icons.data],
   );
   const starredEntriesIdsSet = useMemo(
     () => new Set(starredEntriesIds.data),
@@ -110,8 +95,6 @@ export const FeedbinApiContextProvider = (props: {
     subscriptions,
     subscriptionMap,
     unreadEntries,
-    icons,
-    iconMap,
     starredEntriesIds,
     starredEntriesIdsSet,
     unreadEntriesIds,

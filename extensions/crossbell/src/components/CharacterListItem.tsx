@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import type { CharacterEntity } from "crossbell.js";
+import type { CharacterEntity } from "crossbell";
 import { extractCharacterInfo } from "../utils/character";
 import CharacterActionPanel from "./CharacterActionPanel";
 

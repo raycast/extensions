@@ -286,7 +286,7 @@ export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortCon
 }
 
 export async function brewUpgradeAll(greedy: boolean, cancel?: AbortController): Promise<void> {
-  let cmd = `upgrade --ignore-pinned ${brewQuarantineOption()}`;
+  let cmd = `upgrade ${brewQuarantineOption()}`;
   if (greedy) {
     cmd += " --greedy";
   }
@@ -350,7 +350,7 @@ export function brewUpgradeCommand(upgradable: Cask | Formula | Nameable): strin
 
 export function brewName(item: Cask | Nameable): string {
   if (isCask(item)) {
-    return item.name ? item.name[0] : "Unknown";
+    return item.name && item.name[0] ? item.name[0] : "Unknown";
   } else {
     return item.name;
   }

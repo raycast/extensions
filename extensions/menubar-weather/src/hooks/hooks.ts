@@ -1,8 +1,8 @@
+import { Cache, LaunchType, environment, updateCommandMetadata } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { getCurWeather } from "../utils/weather-utils";
-import { Cache, environment, LaunchType, updateCommandMetadata } from "@raycast/api";
-import { CacheKey, getMenuItem, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
 import { GeoLocation, OpenMeteoWeather } from "../types/types";
+import { CacheKey, getMenuItem, isEmpty, preferencesChanged, shouldRefresh } from "../utils/common-utils";
+import { getCurWeather } from "../utils/weather-utils";
 
 export const getCurrentWeather = () => {
   const [loading, setLoading] = useState<boolean>(true);

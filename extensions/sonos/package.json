@@ -5,6 +5,10 @@
   "description": "Control your Sonos system",
   "icon": "sonos.png",
   "author": "AntonNiklasson",
+  "contributors": [
+    "pastenes",
+    "krsntn"
+  ],
   "categories": [
     "Applications",
     "Media",
@@ -67,13 +71,37 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "volumeStep",
+      "description": "Adjust the increment change in volume levels.",
+      "type": "dropdown",
+      "required": false,
+      "title": "Volume Step",
+      "default": "2",
+      "data": [
+        {
+          "value": "2",
+          "title": "Small"
+        },
+        {
+          "value": "5",
+          "title": "Medium"
+        },
+        {
+          "value": "10",
+          "title": "Large"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.62.2",
+    "@raycast/api": "^1.71.4",
     "@svrooij/sonos": "^2.5.0",
     "prettier-plugin-organize-imports": "^3.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

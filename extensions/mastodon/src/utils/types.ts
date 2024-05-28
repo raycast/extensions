@@ -187,3 +187,33 @@ export interface UploadAttachResponse {
   description: string | null;
   blurhash: string;
 }
+
+export interface RelationshipSeveranceEvent {
+  id: string;
+  type: "domain_block" | "user_domain_block" | "account_suspension";
+  purged: boolean;
+  target_name: string;
+  relationships_count?: number;
+  created_at: string;
+}
+
+export interface Notification {
+  id: string;
+  type:
+    | "mention"
+    | "status"
+    | "reblog"
+    | "follow"
+    | "follow_request"
+    | "favourite"
+    | "poll"
+    | "update"
+    | "admin.sign_up"
+    | "admin.report"
+    | "severed_relationships";
+  created_at: string;
+  accout: Account;
+  status?: Status;
+  report?: Report;
+  relationship_severance_event?: RelationshipSeveranceEvent;
+}

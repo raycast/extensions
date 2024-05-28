@@ -51,7 +51,7 @@ export default function Command() {
           .map((item) => (
             <MenuBarExtra.Item
               key={item.id}
-              title={item.name}
+              title={`${item.name.slice(0, 40)}${item.name.length > 40 ? "..." : ""}`}
               onAction={() =>
                 open(
                   `https://calendar.google.com/calendar/u/0/r/eventedit?text=${

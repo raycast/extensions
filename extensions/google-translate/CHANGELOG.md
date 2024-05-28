@@ -1,5 +1,27 @@
 # Google Translate Changelog
 
+## [Feature] - 2024-05-09
+
+ - Added new shortcut for `Toggle Full Text` action - `CMD+F`
+
+## [Default Action preference for translations] - 2024-04-29
+- Add a preference to set the default action for the translations
+
+## [Re-added previously removed contributor] - 2024-04-26
+
+## [Fix] - 2024-03-08
+
+ - Return back `CMD+Enter` shortcut for `Toggle Full Text` action
+ - Moved text-to-speech action, to execute it only with `CMD+T` keyboard shortcut
+
+## [Fix] - 2024-02-26
+
+ - Fixed issue when trying play text-to-speech continuously
+
+## [Feature] - 2024-02-23
+
+ - Added new "Play Text-To-Speed" command
+
 ## [Enhancement] - 2024-01-26
 
  - Added "Autofill Input" preference to allow users to disable the autofill selected text feature

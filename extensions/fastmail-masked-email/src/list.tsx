@@ -115,6 +115,7 @@ export default function Command() {
       {maskedEmails.map((email) => {
         const canBlockUnblock = [MaskedEmailState.Enabled, MaskedEmailState.Disabled].includes(email.state);
         const canRestore = email.state === MaskedEmailState.Deleted;
+        const canView = email.state !== MaskedEmailState.Pending;
 
         return (
           <List.Item
@@ -139,6 +140,12 @@ export default function Command() {
                 )}
                 {canRestore && (
                   <Action icon={Icon.Undo} title="Restore Masked Email" onAction={() => restoreMaskedEmail(email)} />
+                )}
+                {canView && (
+                  <Action.OpenInBrowser
+                    title="View in Fastmail"
+                    url={`https://app.fastmail.com/settings/masked/${email.id}`}
+                  />
                 )}
               </ActionPanel>
             }

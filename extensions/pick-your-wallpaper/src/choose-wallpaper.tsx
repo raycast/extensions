@@ -5,29 +5,35 @@ import { Preferences } from "./types/preferences";
 import { applyWallpaperUpdate, isValidFile } from "./utils";
 import { Action, ActionPanel, Grid, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { File } from "./types/file";
+import { promisify } from "util";
+
+const readdir = promisify(fs.readdir);
+const stat = promisify(fs.stat);
 
 const preferences = getPreferenceValues<Preferences>();
 
 const wallpaperDir = preferences.wallpaperFolder;
 
-function getWallpapers(directoryPath: string = wallpaperDir): File[] {
+async function getWallpapers(directoryPath: string = wallpaperDir): Promise<File[]> {
   let result: File[] = [];
 
-  fs.readdirSync(directoryPath).forEach((file) => {
+  const files = await readdir(directoryPath);
+  for (const file of files) {
     const newFile = {
       name: file,
       path: path.join(directoryPath, file),
     };
-    const fileStats = fs.statSync(newFile.path);
+    const fileStats = await stat(newFile.path);
 
     if (fileStats.isDirectory()) {
-      result = result.concat(getWallpapers(newFile.path));
+      const subDirFiles = await getWallpapers(newFile.path);
+      result = result.concat(subDirFiles);
     } else {
       if (isValidFile(newFile)) {
         result.push(newFile);
       }
     }
-  });
+  }
 
   return result;
 }
@@ -36,10 +42,14 @@ const wallpaperFiles = getWallpapers();
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const [filteredList, setFilteredList] = useState(wallpaperFiles);
+  const [filteredList, setFilteredList] = useState<File[]>([]);
 
   useEffect(() => {
-    setFilteredList(wallpaperFiles.filter((file) => file.name.includes(searchText)));
+    getWallpapers().then(setFilteredList);
+  }, []);
+
+  useEffect(() => {
+    setFilteredList((files) => files.filter((file) => file.name.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText]);
 
   const columnCount = {

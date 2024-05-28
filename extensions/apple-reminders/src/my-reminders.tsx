@@ -12,7 +12,7 @@ export default function Command() {
 
   const { data, isLoading, mutate } = useData();
 
-  const { sections, viewProps } = useViewReminders(listId ? listId : "today", { data });
+  const { sections, viewProps } = useViewReminders(listId ?? "today", { data });
 
   const placeholder =
     listId === "all" ? "Filter by title, notes, priority or list" : "Filter by title, notes or priority";
@@ -82,7 +82,7 @@ export default function Command() {
             <Action.Push
               title="Create Reminder"
               icon={Icon.Plus}
-              target={<CreateReminderForm listId={listId !== "all" ? listId : ""} mutate={mutate} />}
+              target={<CreateReminderForm listId={listId} mutate={mutate} />}
             />
 
             <Action

@@ -115,7 +115,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
   }, [migratedHistory]);
 
   function visitRepository(repository: ExtendedRepositoryFieldsFragment) {
-    const nextRepositories = [repository, ...(history?.filter((item) => item !== repository) ?? [])].slice(
+    const nextRepositories = [repository, ...(history?.filter((item) => item.id !== repository.id) ?? [])].slice(
       0,
       VISITED_REPOSITORIES_LENGTH,
     );

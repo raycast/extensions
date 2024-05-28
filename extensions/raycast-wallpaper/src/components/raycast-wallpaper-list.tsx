@@ -4,6 +4,7 @@ import { RaycastWallpaperWithInfo } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { Preferences } from "../types/preferences";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
+import { getPreviewUrl, getThumbnailUrl } from "../utils/common-utils";
 
 export function RaycastWallpaperList(props: {
   raycastWallpapers: RaycastWallpaperWithInfo[];
@@ -24,14 +25,12 @@ export function RaycastWallpaperList(props: {
           <List.Item
             id={index + ""}
             key={index + value.title}
-            icon={{ source: value.url.replace(".png", "-preview.png") }}
+            icon={{ source: getThumbnailUrl(value.url) }}
             title={value.title}
             accessories={
               value.exclude ? [{ icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" }] : []
             }
-            detail={
-              <List.Item.Detail isLoading={false} markdown={`![](${value.url.replace(".png", "-preview.png")})`} />
-            }
+            detail={<List.Item.Detail isLoading={false} markdown={`![](${getPreviewUrl(value.url)})`} />}
             actions={
               <ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} setRefresh={setRefresh} />
             }

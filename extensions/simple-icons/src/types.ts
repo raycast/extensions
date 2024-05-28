@@ -1,13 +1,20 @@
+import { launchCommand } from "@raycast/api";
+
 type DuplicateAlias = {
   title: string;
   hex?: string;
   guidelines?: string;
+  loc?: Localization;
+};
+
+export type Localization = {
+  [languageCode: string]: string;
 };
 
 export type Aliases = {
   aka?: string[];
   dup?: DuplicateAlias[];
-  loc?: { [key: string]: string };
+  loc?: Localization;
 };
 
 export type IconData = {
@@ -33,4 +40,12 @@ export type JsDelivrNpmResponse = {
     links: Record<string, string>;
   }>;
   links: Record<string, string>;
+};
+
+export type LaunchOptions = Parameters<typeof launchCommand>[0];
+
+export type LaunchContext = {
+  launchFromExtensionTitle?: string;
+  showCopyActions?: boolean;
+  callbackLaunchOptions: LaunchOptions;
 };

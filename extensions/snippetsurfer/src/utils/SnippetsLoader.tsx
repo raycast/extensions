@@ -1,12 +1,15 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as crypto from "crypto";
-import { parse } from "yaml";
-import type { Snippet, SnippetContent } from "../types";
+import os from "os";
 
-const supportedExtensions = [".md", ".txt"];
-async function loadAllSnippets(startPath: string): Promise<Snippet[]> {
-  const files: Snippet[] = [];
+import type { Snippet } from "../types";
+import loadMarkdown from "./loaders/MarkdownLoader";
+import loadYaml from "./loaders/YamlLoader";
+
+const supportedExtensions = [".md", ".txt", ".yaml", ".yml"];
+async function loadAllSnippets(startPath: string): Promise<{ snippets: Snippet[]; errors: Error[] }> {
+  const snippets: Snippet[] = [];
+  const errors: Error[] = [];
 
   async function readDirectory(directoryPath: string): Promise<void> {
     const entries = await fs.promises.readdir(directoryPath, { withFileTypes: true });
@@ -18,12 +21,13 @@ async function loadAllSnippets(startPath: string): Promise<Snippet[]> {
       const fullPath = path.join(directoryPath, entry.name);
 
       if (!entry.name.startsWith(".")) {
+        const extension = path.extname(entry.name);
         if (entry.isDirectory()) {
           // Queue directory processing concurrently
           filePromises.push(readDirectory(fullPath));
-        } else if (supportedExtensions.includes(path.extname(entry.name))) {
+        } else if (supportedExtensions.includes(extension)) {
           // Queue file processing concurrently
-          filePromises.push(processFile(fullPath));
+          filePromises.push(processFile(fullPath, extension));
         }
       }
     }
@@ -32,57 +36,31 @@ async function loadAllSnippets(startPath: string): Promise<Snippet[]> {
     await Promise.all(filePromises);
   }
 
-  async function processFile(fullPath: string): Promise<void> {
+  async function processFile(fullPath: string, extension: string): Promise<void> {
     const relativePath = path.relative(startPath, fullPath);
-    const parsedName = path.parse(fullPath).name;
-
-    const hash = crypto.createHash("md5");
-    hash.update(fullPath);
-    const id = hash.digest("hex");
-
-    const content = await readFileContent(fullPath);
-    files.push({
-      id: id,
-      folder: path.dirname(relativePath),
-      name: parsedName,
-      fullPath: fullPath,
-      content: content,
-    });
-  }
-
-  await readDirectory(startPath);
-  return files;
-}
-
-function extractMetadataContent(fileContent: string): SnippetContent {
-  const lines = fileContent.split("\n");
-
-  let metadataEndIndex = 0;
-  let contentStartIndex = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (line === "---" && i != 0) {
-      metadataEndIndex = i;
-      contentStartIndex = i + 1;
-      break;
+    if ([".yml", ".yaml"].includes(extension)) {
+      const res = await loadYaml(relativePath, fullPath);
+      snippets.push(...res.snippets);
+      errors.push(...res.errors);
+    } else {
+      const { snippet, error } = await loadMarkdown(relativePath, fullPath);
+      snippets.push(snippet);
+      if (error) {
+        errors.push(error);
+      }
     }
   }
 
-  const rawMetadata = lines.slice(1, metadataEndIndex).join("\n");
-  const metadata = parse(rawMetadata);
-  const content = lines.slice(contentStartIndex).join("\n").trim();
-
-  return {
-    title: metadata?.["Title"],
-    description: metadata?.["Description"],
-    content: content,
-    rawMetadata: rawMetadata,
-  };
+  await readDirectory(startPath);
+  return { snippets, errors };
 }
 
-async function readFileContent(fullPath: string): Promise<SnippetContent> {
-  const fileContent = await fs.promises.readFile(fullPath, "utf8");
-  return extractMetadataContent(fileContent);
+function expandHomeDirectory(dirPath: string): string {
+  if (dirPath.startsWith("~")) {
+    return path.join(os.homedir(), dirPath.slice(1));
+  } else {
+    return dirPath;
+  }
 }
 
 function getPastableContent(content: string): string {
@@ -99,4 +77,4 @@ function getPastableContent(content: string): string {
   return pastableContent;
 }
 
-export { loadAllSnippets, getPastableContent };
+export { loadAllSnippets, getPastableContent, expandHomeDirectory };

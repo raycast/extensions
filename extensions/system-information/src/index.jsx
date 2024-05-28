@@ -85,6 +85,16 @@ export default function Command() {
                 title="Open in System Settings"
                 icon={Icon.Cog}
               />
+              <Action.CopyToClipboard
+                title="Copy Hostname"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={os.hostname().replace(/\.local/g, "")}
+              />
+              <Action.Paste
+                title="Paste Hostname"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                content={os.hostname().replace(/\.local/g, "")}
+              />
             </ActionPanel>
           }
         />
@@ -98,6 +108,16 @@ export default function Command() {
                 target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
                 title="Open in System Settings"
                 icon={Icon.Cog}
+              />
+              <Action.CopyToClipboard
+                title="Copy Chip"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={os.cpus()[0].model}
+              />
+              <Action.Paste
+                title="Paste Chip"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                content={os.cpus()[0].model}
               />
             </ActionPanel>
           }
@@ -113,6 +133,16 @@ export default function Command() {
                 title="Open in System Settings"
                 icon={Icon.Cog}
               />
+              <Action.CopyToClipboard
+                title="Copy Memory Size"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={os.totalmem() / (1024 * 1024 * 1024) + " GB"}
+              />
+              <Action.Paste
+                title="Paste Memory Size"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                content={os.totalmem() / (1024 * 1024 * 1024) + " GB"}
+              />
             </ActionPanel>
           }
         />
@@ -126,6 +156,16 @@ export default function Command() {
                 target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
                 title="Open in System Settings"
                 icon={Icon.Cog}
+              />
+              <Action.CopyToClipboard
+                title="Copy Serial Number"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={serialNumber || "-"}
+              />
+              <Action.Paste
+                title="Paste Serial Number"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                content={serialNumber || "-"}
               />
             </ActionPanel>
           }
@@ -149,6 +189,16 @@ export default function Command() {
                 title="Open in System Settings"
                 icon={Icon.Cog}
               />
+              <Action.CopyToClipboard
+                title={`Copy macOS ${macosRelease().name}`}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={`Version ${macOSVersion()}`}
+              />
+              <Action.Paste
+                title={`Paste macOS ${macosRelease().name}`}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                content={`Version ${macOSVersion()}`}
+              />
             </ActionPanel>
           }
         />
@@ -171,6 +221,16 @@ export default function Command() {
                 target="x-apple.systempreferences:com.apple.SystemProfiler.AboutExtension"
                 title="Open in System Settings"
                 icon={Icon.Cog}
+              />
+              <Action.CopyToClipboard
+                title="Copy Macintosh HD"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                content={`${storageInfo}`}
+              />
+              <Action.Paste
+                title="Paste Macintosh HD"
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                content={`${storageInfo}`}
               />
             </ActionPanel>
           }

@@ -11,7 +11,7 @@ import Service, { Icon } from './service';
 import { toDataURI, toSvg, toURL } from './utils';
 
 const { primaryAction } =
-  getPreferenceValues<{ primaryAction: 'paste' | 'copy' }>();
+  getPreferenceValues<{ primaryAction: 'paste' | 'copy' | 'pasteName' }>();
 
 const service = new Service();
 
@@ -57,6 +57,10 @@ function Command() {
         const copy = (
           <Action.CopyToClipboard title="Copy SVG" content={svgIcon} />
         );
+
+        const pasteName = setId && (
+          <Action.Paste title="Paste Name" content={`${setId}:${id}`} />
+        );
         return (
           <Grid.Item
             content={{
@@ -70,15 +74,25 @@ function Command() {
             subtitle={setName}
             actions={
               <ActionPanel>
-                {primaryAction === 'paste' ? (
+                {primaryAction === 'paste' && (
                   <>
                     {paste}
                     {copy}
+                    {pasteName}
                   </>
-                ) : (
+                )}
+                {primaryAction === 'copy' && (
                   <>
                     {copy}
                     {paste}
+                    {pasteName}
+                  </>
+                )}
+                {primaryAction === 'pasteName' && (
+                  <>
+                    {pasteName}
+                    {paste}
+                    {copy}
                   </>
                 )}
                 <Action.CopyToClipboard

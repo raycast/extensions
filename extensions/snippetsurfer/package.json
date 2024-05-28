@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snippetsurfer",
   "title": "Snippet Surfer",
-  "description": "SnippetSurfer is a raycast extension designed to swiftly navigate through snippets of information. You can effortlessly skim through text excerpts, code snippets, or any other brief segments of content and copy them to the clipboard. The snippets are read from a folder of markdown files.",
+  "description": "SnippetSurfer is a Raycast extension designed to swiftly navigate through snippets of information. You can effortlessly skim through text excerpts, code snippets, or any other brief segments of content and copy them to the clipboard. The snippets are read from a folder of markdown or yaml files.",
   "icon": "command-icon.png",
   "author": "astronight",
   "categories": [
@@ -19,10 +19,16 @@
   ],
  "preferences": [{
     "name": "folderPath",
-    "description": "Select the folder where snippets are located.",
+    "description": "Select the primary folder where snippets are located.",
     "type": "directory",
     "required": true,
-    "title": "Select Snippet Folder"
+    "title": "Select Primary Snippet Folder"
+  }, {
+    "name": "secondaryFolderPaths",
+    "description": "Comma separated list of additional paths where snippets are located.\nExample: ~/Desktop/snippets,~/Documents/othersnippets",
+    "type": "textfield",
+    "required": false,
+    "title": "Select Secondary Snippet Folders"
   }, {
     "name": "primaryAction",
     "description": "Primary action.",

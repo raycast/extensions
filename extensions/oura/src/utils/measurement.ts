@@ -1,6 +1,7 @@
 import { getPreferenceValues, Color } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-const preferences = getPreferenceValues<Preferences>();
+import { Preference } from "../types";
+const preferences = getPreferenceValues<Preference>();
 
 // Minutes & Hours
 export const minutedFormatted = (minutes: number) => {

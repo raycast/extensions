@@ -48,6 +48,9 @@ Raycast extension to browse and create YouTrack issues.
   - Streamline issue creation by providing a favorite projects list
   - Automatically create drafts for unsubmitted issues
   - Open the created issue in the browser or copy its URL to the clipboard (as plain text or markdown)
+- Add work items to the issue:
+  - Add a work item to an issue from your browsing list or from the issue details view
+  - Create a work item with the same inputs as in YouTrack's UI
 - ... potentially, more – request it [here](https://github.com/raycast/extensions/issues/new?template=extension_feature_request.yml&extension-url=https%3A%2F%2Fraycast.com%2Ftiulpin%2Fyoutrack&title=%5BYouTrack%5D+...)
 
 ## How to get the access token for the YouTrack REST API
@@ -58,8 +61,8 @@ After setting up your token you should be able to browse and create YouTrack iss
 
 ## Showcases
 
-![browse](./metadata/youtrack-browse.png)
-![details](./metadata/youtrack-browse-details.png)
-![create](./metadata/youtrack-create.png)
-![draft](./media/youtrack-draft.png)
-![created-actions](./metadata/youtrack-created-actions.png)
+![browse](media/youtrack-browse.png)
+![details](media/youtrack-browse-details.png)
+![create](media/youtrack-create.png)
+![draft](media/youtrack-draft.png)
+![created-actions](media/youtrack-created-actions.png)

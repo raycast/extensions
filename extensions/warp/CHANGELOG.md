@@ -1,5 +1,9 @@
 # Warp Changelog
 
+## [Moved contributor] - 2024-04-15
+
+- No changes were made in the code.
+
 ## [Improvements] - 2023-09-22
 
 - "Open in Warp" command now supports retrieving path from PathFinder.

@@ -92,26 +92,23 @@ export function useActiveClients() {
   });
 }
 
+async function fetchProjects() {
+  let project_assignments: HarvestProjectAssignment[] = [];
+  let page = 1;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
+      url: "/users/me/project_assignments",
+      params: { page },
+    });
+    project_assignments = project_assignments.concat(resp.data.project_assignments);
+    if (resp.data.total_pages >= resp.data.page) break;
+    page += 1;
+  }
+  return project_assignments;
+}
 export function useMyProjects() {
-  return useCachedPromise(
-    async () => {
-      let project_assignments: HarvestProjectAssignment[] = [];
-      let page = 1;
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
-          url: "/users/me/project_assignments",
-          params: { page },
-        });
-        project_assignments = project_assignments.concat(resp.data.project_assignments);
-        if (resp.data.total_pages >= resp.data.page) break;
-        page += 1;
-      }
-      return project_assignments;
-    },
-    [],
-    { initialData: [] }
-  );
+  return useCachedPromise(fetchProjects, [], { initialData: [], keepPreviousData: true });
 }
 
 export async function getMyId() {

@@ -4,7 +4,7 @@
   "title": "URL Shortener",
   "description": "Experience the joy of shortening URLs to your heart's desire with Raycast's URL Shortener! Enjoy the convenience of free URL shortening, without the need for an API key or any rate limits. The domains you can use are: tinyurl.com, shrtco.de, 9qr.de, and shiny.link",
   "icon": "command-icon.png",
-  "author": "Vaibhav-Satishkumar",
+  "author": "Visual-Studio-Coder",
   "license": "MIT",
   "commands": [
     {

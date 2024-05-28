@@ -1,5 +1,10 @@
 # Dust.tt Changelog
 
+## [bug fixes] - 2024-03-27
+
+* fixed a bug when the favorite agent was no longer available
+* fixed API related crashes (show an error)
+
 ## [Selected text fix] - 2023-12-17
 
 * fix a bug where the selected text was not properly detected in same cases

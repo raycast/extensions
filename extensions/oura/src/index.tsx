@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { List, openExtensionPreferences, Action, ActionPanel } from "@raycast/api";
 import { oura } from "./utils/ouraData";
 import { convertHeight, convertWeight } from "./utils/measurement";
 import Unauthorized from "./unauthorized";
@@ -26,8 +26,24 @@ export default function Command() {
   return (
     <List isLoading={personalInfo.isLoading}>
       <List.Item title={`Age`} subtitle={`${personalInfo?.data?.age}`} />
-      <List.Item title={`Weight`} subtitle={`${convertWeight(personalInfo?.data?.weight)}`} />
-      <List.Item title={`Height`} subtitle={`${convertHeight(personalInfo?.data?.height)}`} />
+      <List.Item
+        title={`Weight`}
+        subtitle={`${convertWeight(personalInfo?.data?.weight)}`}
+        actions={
+          <ActionPanel>
+            <Action title="Change Unit of Measurement" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title={`Height`}
+        subtitle={`${convertHeight(personalInfo?.data?.height)}`}
+        actions={
+          <ActionPanel>
+            <Action title="Change Unit of Measurement" onAction={openExtensionPreferences} />
+          </ActionPanel>
+        }
+      />
       <List.Item title={`Email`} subtitle={`${personalInfo?.data?.email}`} />
     </List>
   );

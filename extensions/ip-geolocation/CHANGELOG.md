@@ -1,5 +1,14 @@
 # IP Geolocation Changelog
 
+## [Fix Hotkey Error] - 2024-05-27
+
+-  Fix the problem of using hotkeys to invoke commands
+
+## [Copy IP] - 2024-05-27
+
+- Copy IP command allows you to choose whether to copy local/public IPv4/IPv6
+- Optimise the style of extension icons
+
 ## [Fix] - 2023-11-22
 
 - Fixing the IPv4 match

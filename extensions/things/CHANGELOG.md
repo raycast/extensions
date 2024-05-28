@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Add Status Icons in Menu Bar] - 2024-04-16
+
+- It's possible to see which to-do is completed, canceled, or to-do in the menu bar command.
+
 ## [Minor improvements] - 2023-10-31
 
 - Use the Things flat icon in the menu bar and actions to make it stand out

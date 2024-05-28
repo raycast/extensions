@@ -4,6 +4,7 @@ import { RaycastWallpaperWithInfo } from "../types/types";
 import { RaycastWallpaperEmptyView } from "./raycast-wallpaper-empty-view";
 import { Preferences } from "../types/preferences";
 import { ActionOnRaycastWallpaper } from "./action-on-raycast-wallpaper";
+import { getThumbnailUrl } from "../utils/common-utils";
 
 export function RaycastWallpaperGrid(props: {
   raycastWallpapers: RaycastWallpaperWithInfo[];
@@ -26,7 +27,7 @@ export function RaycastWallpaperGrid(props: {
           <Grid.Item
             id={index + ""}
             key={index + value.title}
-            content={value.url.replace(".png", "-preview.png")}
+            content={getThumbnailUrl(value.url)}
             title={value.title}
             actions={
               <ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} setRefresh={setRefresh} />

@@ -1,8 +1,9 @@
-import { Form, Action, showHUD, ActionPanel, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { Form, Action, ActionPanel, showToast, Toast, Icon } from "@raycast/api";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { SessionProvider } from "~/context/session";
 import { FormValidation, useForm } from "@raycast/utils";
+import { BugReportCollectDataAction, BugReportOpenAction, CopyRuntimeErrorLog } from "~/components/actions";
 
 const CreateFolderCommand = () => (
   <RootErrorBoundary>
@@ -46,6 +47,11 @@ function CreateFolderComponent() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Folder" onSubmit={handleSubmit} icon={Icon.NewFolder} />
+          <ActionPanel.Section title="Debugging & Bug Reporting">
+            <CopyRuntimeErrorLog />
+            <BugReportOpenAction />
+            <BugReportCollectDataAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >

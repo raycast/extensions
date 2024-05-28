@@ -20,7 +20,8 @@
       "name": "air-quality-menu",
       "title": "Air Quality Menu Bar",
       "description": "Show air quality information in the menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "5m"
     }
   ],
   "preferences": [

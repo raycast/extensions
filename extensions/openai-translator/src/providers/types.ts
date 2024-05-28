@@ -7,9 +7,6 @@ export interface TranslateQuery {
   detectFrom: string;
   detectTo: string;
   mode: TranslateMode;
-  onMessage: (message: { content: string; role: string; isWordMode: boolean; isFullText?: boolean }) => void;
-  onError: (error: string) => void;
-  onFinish: (reason: string) => void;
   signal: AbortSignal;
   agent?: SocksProxyAgent;
 }
@@ -20,4 +17,30 @@ export interface TranslateResult {
   from: string;
   to: string;
   error?: string;
+}
+
+export interface IModel {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface IConfig {
+  requireModel: boolean;
+  defaultModel: IModel | undefined;
+  supportCustomModel: boolean;
+  listModels(apikey: string | undefined): Promise<IModel[]>;
+
+  defaultEntrypoint: string;
+  supportCustomEntrypoint: boolean;
+
+  requireApiKey: boolean;
+  hasApiKey: boolean;
+}
+
+export interface ProviderProps {
+  name: string;
+  apikey: string | undefined;
+  apiModel: string | undefined;
+  entrypoint: string;
 }

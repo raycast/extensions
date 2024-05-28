@@ -3,13 +3,11 @@ import {
   OllamaApiGenerateRequestBody,
   OllamaApiGenerateResponse,
   OllamaApiTagsResponseModel,
+  RaycastImage,
 } from "../types";
 import {
   ErrorOllamaCustomModel,
   ErrorOllamaModelNotInstalled,
-  ErrorRaycastApiNoTextSelectedOrCopied,
-  ErrorRaycastApiNoTextSelected,
-  ErrorRaycastApiNoTextCopied,
   ErrorRaycastModelNotConfiguredOnLocalStorage,
   ErrorOllamaModelNotMultimodal,
 } from "../errors";
@@ -68,10 +66,14 @@ export function AnswerView(props: props): JSX.Element {
       err instanceof ErrorOllamaModelNotMultimodal ||
       err === ErrorRaycastModelNotConfiguredOnLocalStorage
     ) {
-      if (err instanceof ErrorOllamaModelNotInstalled || err instanceof ErrorOllamaModelNotMultimodal)
-        await showToast({ style: Toast.Style.Failure, title: err.message, message: err.suggest });
-      if (err === ErrorRaycastModelNotConfiguredOnLocalStorage)
-        await showToast({ style: Toast.Style.Failure, title: err.message });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: err.message,
+        message:
+          err instanceof ErrorOllamaModelNotInstalled || err instanceof ErrorOllamaModelNotMultimodal
+            ? err.suggest
+            : undefined,
+      });
       if (!props.model) setShowSelectModelForm(true);
       return;
     } else if (err instanceof ErrorOllamaCustomModel) {
@@ -87,14 +89,129 @@ export function AnswerView(props: props): JSX.Element {
   }
 
   /**
+   * Verify required Ollama version based on used tags.
+   *
+   * @returns {Promise<boolean>} Return `false` if installed Ollama Version doesn't meat minimum required version otherwise `true`.
+   */
+  async function InferenceVerifyOllamaVersion(): Promise<boolean> {
+    const OllamaVersionMin = props.image ? "0.1.15" : "0.1.14";
+    if (OllamaVersion && !VerifyOllamaVersion(OllamaVersion, OllamaVersionMin)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Ollama API version is outdated, at least ${OllamaVersionMin} is required.`,
+      });
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Verify required Model capabilities.
+   *
+   * @param {PromptTags | undefined} tag - Tag used on prompt.
+   * @returns {Promise<boolean>} Return `false` if required Model is not installed or configured.
+   */
+  async function InferenceVerifyModel(): Promise<boolean> {
+    switch (props.image) {
+      case true:
+        if (!ModelGenerate || !ModelGenerate.details.families.find((f) => f === "clip")) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Model with Vision capabilities required",
+          });
+          return false;
+        }
+        break;
+      default:
+        if (!ModelGenerate) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Model not configured",
+          });
+          return false;
+        }
+        break;
+    }
+    return true;
+  }
+
+  /**
+   * Get Images from Finder if no file is selected fallback to Clipboard.
+   *
+   * @returns {Promise<RaycastImage[] | undefined>}
+   */
+  async function InferenceTagImage(): Promise<RaycastImage[] | undefined> {
+    return await GetImage().catch(async (err) => {
+      showToast({ style: Toast.Style.Failure, title: err.message });
+      return undefined;
+    });
+  }
+
+  /**
+   * Get Selected Text.
+   *
+   * @param {boolean} fallback - set to `true` for enable fallback to clipboard.
+   * @returns {Promise<string | undefined>}
+   */
+  async function InferenceGetSelectedText(fallback = false): Promise<string | undefined> {
+    return await getSelectedText().catch(async (e) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No selected text found",
+        message: fallback ? "fallback to clipboard" : undefined,
+      });
+      if (fallback) return await InferenceGetClipboardText();
+      return undefined;
+    });
+  }
+
+  /**
+   * Get Clipboard Text.
+   *
+   * @param {boolean} fallback - set to `true` for enable fallback to selected text.
+   * @returns {Promise<string | undefined>}
+   */
+  async function InferenceGetClipboardText(fallback = false): Promise<string | undefined> {
+    let c = await Clipboard.readText().catch(async (e) => {
+      return undefined;
+    });
+    if (!c) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No text found on clipboard",
+        message: fallback ? "fallback to selected text" : undefined,
+      });
+      if (fallback) c = await InferenceGetSelectedText();
+    }
+    return c;
+  }
+
+  /**
+   * Get Query for inference.
+   *
+   * @returns {string | undefined}
+   */
+  async function InferenceGetQuery(): Promise<string | undefined> {
+    let query: string | undefined;
+    switch (preferences.ollamaResultViewInput) {
+      case "SelectedText":
+        query = await InferenceGetSelectedText(preferences.ollamaResultViewInputFallback);
+        break;
+      case "Clipboard":
+        query = await InferenceGetClipboardText(preferences.ollamaResultViewInputFallback);
+        break;
+    }
+    return query;
+  }
+
+  /**
    * Start Inference with Ollama API.
    * @param {string} query - Query.
    * @param {string[]} images - Images.
    * @returns {Promise<void>}
    */
   async function Inference(query: string, images: string[] | undefined = undefined): Promise<void> {
-    await showToast({ style: Toast.Style.Animated, title: "🧠 Performing Inference." });
-    setLoading(true);
+    await showToast({ style: Toast.Style.Animated, title: "🧠 Inference." });
     const body = {
       model: ModelGenerate?.name,
       prompt: query,
@@ -122,90 +239,54 @@ export function AnswerView(props: props): JSX.Element {
    * Run Command
    */
   async function Run() {
-    if (ModelGenerate) {
+    setLoading(true);
+
+    // Check required Ollama Version.
+    if (!(await InferenceVerifyOllamaVersion())) {
+      setLoading(false);
+      return;
+    }
+
+    // Check Model is Configured
+    if (!(await InferenceVerifyModel())) {
+      setLoading(false);
+      if (!props.model) setShowSelectModelForm(true);
+      return;
+    }
+
+    // Loading Images if required
+    let images: RaycastImage[] | undefined;
+    if (props.image) {
+      images = await InferenceTagImage();
+      if (!images) {
+        setLoading(false);
+        return;
+      }
       setImageView("");
-      setAnswer("");
-      switch (props.image) {
-        case true: {
-          if (OllamaVersion && VerifyOllamaVersion(OllamaVersion, "0.1.15")) {
-            const image = await GetImage().catch(async (err) => {
-              showToast({ style: Toast.Style.Failure, title: err });
-              return [];
-            });
-            if (image.length > 0) {
-              image.forEach((i) => {
-                setImageView((prevState) => prevState + i.html);
-              });
-              setImageView((prevState) => prevState + "\n");
-              Inference(
-                " ",
-                image.map((i) => i.base64)
-              );
-            }
-          } else {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Ollama API version is outdated, at least v0.1.15 is required for this feature.",
-            });
-          }
-          break;
-        }
-        default:
-          switch (preferences.ollamaResultViewInput) {
-            case "SelectedText":
-              getSelectedText()
-                .then((text) => {
-                  Inference(text);
-                })
-                .catch(async () => {
-                  if (preferences.ollamaResultViewInputFallback) {
-                    Clipboard.readText()
-                      .then((text) => {
-                        if (text === undefined) throw "Empty Clipboard";
-                        Inference(text);
-                      })
-                      .catch(async () => {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: ErrorRaycastApiNoTextSelectedOrCopied.message,
-                        });
-                      });
-                  } else {
-                    await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextSelected.message });
-                  }
-                });
-              break;
-            case "Clipboard":
-              Clipboard.readText()
-                .then((text) => {
-                  if (text === undefined) throw "Empty Clipboard";
-                  Inference(text);
-                })
-                .catch(async () => {
-                  if (preferences.ollamaResultViewInputFallback) {
-                    getSelectedText()
-                      .then((text) => {
-                        Inference(text);
-                      })
-                      .catch(async () => {
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: ErrorRaycastApiNoTextSelectedOrCopied.message,
-                        });
-                      });
-                  } else {
-                    await showToast({ style: Toast.Style.Failure, title: ErrorRaycastApiNoTextCopied.message });
-                  }
-                });
-              break;
-          }
+      images.forEach((i) => {
+        setImageView((prevState) => prevState + i.html);
+      });
+      setImageView((prevState) => prevState + "\n");
+    }
+
+    // Loading query
+    let query: string | undefined;
+    if (!props.image) {
+      query = await InferenceGetQuery();
+      if (!query) {
+        setLoading(false);
+        return;
       }
     }
+
+    // Start Inference
+    setAnswer("");
+    await Inference(query ? query : " ", images ? images.map((i) => i.base64) : undefined);
   }
 
   React.useEffect(() => {
-    Run();
-  }, [ModelGenerate]);
+    if (ModelGenerate && !IsLoadingModelGenerate) Run();
+  }, [ModelGenerate, IsLoadingModelGenerate]);
 
   const [showSelectModelForm, setShowSelectModelForm]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);

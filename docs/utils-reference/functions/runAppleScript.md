@@ -17,7 +17,7 @@ function runAppleScript<T>(
     signal?: AbortSignal;
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
-  }
+  },
 ): Promise<T>;
 ```
 
@@ -33,7 +33,7 @@ function runAppleScript<T>(
     signal?: AbortSignal;
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
-  }
+  },
 ): Promise<T>;
 ```
 
@@ -67,7 +67,7 @@ on run argv
   return "hello, " & item 1 of argv & "."
 end run
 `,
-    ["world"]
+    ["world"],
   );
   await showHUD(res);
 }

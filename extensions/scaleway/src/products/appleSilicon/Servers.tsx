@@ -1,7 +1,7 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
 import { useReducer } from 'react'
 import { POLLING_INTERVAL } from '../../constants'
+import { getPreferenceUser } from '../../helpers/getPreferenceUser'
 import { ServerAction } from './ServerAction'
 import { ServerDetail } from './ServerDetail'
 import { useAllZoneServersQuery } from './queries'

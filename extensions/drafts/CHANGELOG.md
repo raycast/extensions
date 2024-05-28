@@ -1,5 +1,14 @@
 # Drafts Changelog
 
+## [Add Command] - 2024-04-03
+
+- add command to create open Draft Quicklinks
+
+## [Add Command] - 2024-03-11
+
+- add command to create draft from current selected text
+- update API version
+
 ## [Bugfix] - 2023-05-10
 
 - fixed quicklink creation for Append / Prepend to Draft Command

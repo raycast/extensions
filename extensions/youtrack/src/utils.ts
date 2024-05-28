@@ -5,6 +5,7 @@ import {
   ReducedIssue,
   ReducedProject,
   ReducedUser,
+  WorkItem,
   Youtrack,
 } from "youtrack-rest-client";
 import { Issue, IssueExtended, Project, User } from "./interfaces";
@@ -86,7 +87,7 @@ function formatDate(dateString: number): string {
 }
 
 export async function fetchIssueDetails(issue: Issue, yt: Youtrack): Promise<IssueExtended> {
-  const { reporter, updater, tags, created, updated } = await yt.issues.byId(issue.id);
+  const { reporter, updater, tags, created, updated, project } = await yt.issues.byId(issue.id);
   return {
     ...issue,
     date: formatDate(updated ?? 0),
@@ -94,7 +95,12 @@ export async function fetchIssueDetails(issue: Issue, yt: Youtrack): Promise<Iss
     reporter: reporter && (await reducedUserToUser(reporter, yt)),
     updater: updater && (await reducedUserToUser(updater, yt)),
     tags,
+    workItemTypes: await yt.projects.getWorkItemTypes(project?.id || ""),
   };
+}
+
+export async function createWorkItem(issue: Issue, workItem: WorkItem, yt: Youtrack) {
+  return yt.workItems.create(issue.id, workItem);
 }
 
 export const issueStates = {

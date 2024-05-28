@@ -10,7 +10,7 @@ function showFailureToast(
   options?: {
     title?: string;
     primaryAction?: Toast.ActionOptions;
-  }
+  },
 ): Promise<T>;
 ```
 
@@ -41,7 +41,7 @@ export default async function () {
         return "hello, " & item 1 of argv & "."
       end run
       `,
-      ["world"]
+      ["world"],
     );
     await showHUD(res);
   } catch (error) {

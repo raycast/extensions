@@ -4,7 +4,10 @@
   "title": "Svgl",
   "description": "Search SVG logos via svgl",
   "icon": "command-icon.png",
-  "author": "davidho0403",
+  "author": "1weiho",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Design Tools",
     "Developer Tools"
@@ -16,10 +19,18 @@
       "title": "Search SVG Logos",
       "description": "Search SVG logos via svgl",
       "mode": "view"
+    },
+    {
+      "name": "request",
+      "title": "Request SVG Logo",
+      "description": "Request SVG logo to the svgl repository",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.64.3",
+    "@raycast/utils": "^1.14.0",
+    "dedent": "^1.5.3",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -28,6 +39,7 @@
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
+    "react-devtools": "^4.28.4",
     "typescript": "^5.2.2"
   },
   "scripts": {

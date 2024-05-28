@@ -1,12 +1,17 @@
 import { environment, LaunchType, showToast, Toast, updateCommandMetadata } from "@raycast/api";
 import { Progress } from "./types";
-import { defaultProgress, getSubtitle } from "./utils/progress";
+import { getSubtitle } from "./utils/progress";
+import { getLatestXProgress } from "./hooks/use-local-storage-progress";
 
-export default async function command() {
-  const yearProgress = defaultProgress.find((p) => p.title === "Year In Progress") as Progress;
-  const progressBar = getSubtitle(yearProgress.progressNum);
+export default async function Command() {
+  const storedAllProgress = await getLatestXProgress();
+  let progress = storedAllProgress.allProgress.find((p) => p.showAsCommand) as Progress;
+  if (!progress) {
+    progress = storedAllProgress.allProgress.find((p) => p.title === "Year In Progress") as Progress;
+  }
+  const progressBar = getSubtitle(progress.progressNum);
 
-  updateCommandMetadata({ subtitle: `${progressBar}` });
+  updateCommandMetadata({ subtitle: `${progress.menubar.title} ${progressBar}` });
 
   if (environment.launchType === LaunchType.UserInitiated) {
     await showToast({

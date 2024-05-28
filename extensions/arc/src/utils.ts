@@ -21,6 +21,13 @@ export function getSpaceTitle(space: Space) {
   return space.title || `Space ${space.id}`;
 }
 
+export function findSpaceInSpaces(spaceId: string, spaces: Space[]): string | undefined {
+  const space = spaces.find(
+    (s) => getSpaceTitle(s).toLowerCase() === spaceId.toLowerCase() || s.id.toString() === spaceId
+  );
+  return space && getSpaceTitle(space);
+}
+
 export function getKey(tab: Tab) {
   return `${tab.id}`;
 }

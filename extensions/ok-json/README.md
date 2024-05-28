@@ -6,7 +6,7 @@ View JSON string or file from pasteboard, show History window, run scripts or do
 
 ![screenshot](./metadata/ok-json-3.png)
 
-[View in Raycast Store](https://www.raycast.com/anybox/okjson)
+[View in Raycast Store](https://www.raycast.com/anybox/ok-json)
 
 ## Supported Commands
 

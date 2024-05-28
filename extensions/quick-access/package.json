@@ -38,7 +38,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the pins items. (Only works with Grid layout)",
           "required": false,
-          "title": "Pins Item Coloums",
+          "title": "Pins Item Columns",
           "default": "8",
           "data": [
             {
@@ -105,7 +105,7 @@
           "name": "showOpenFolders",
           "type": "checkbox",
           "required": true,
-          "title": "Advanced Preference",
+          "title": "Advanced Preferences",
           "label": "Show Open Folders",
           "description": "Show Open Folders in Finder.",
           "default": false

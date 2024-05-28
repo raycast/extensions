@@ -15,7 +15,7 @@ export async function connectNgrok() {
     end tell
   `);
 
-  await new Promise((resolve) => setTimeout(resolve, 2500));
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 }
 
 export async function fetchTunnelSessions() {

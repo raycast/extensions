@@ -11,7 +11,8 @@
     "susan_thapa",
     "mikikiv",
     "MartinGonzalez",
-    "nathanjms"
+    "nathanjms",
+    "cchalop1"
   ],
   "keywords": [
     "pomodoro",
@@ -36,6 +37,29 @@
       "subtitle": "Start / Stop Pomodoro Timer",
       "description": "Start, pause, stop or continue pomodoro intervals",
       "mode": "view"
+    },
+    {
+      "name": "stats-pomodoro-timer",
+      "title": "View Pomodoro Stats",
+      "mode": "view",
+      "description": "Shows the stats of the Pomodoro timer"
+    },
+    {
+      "name": "slack-pomodoro-menu-bar",
+      "title": "Slack Pomodoro in Menu Bar",
+      "subtitle": "Control timers from menu-bar and updates Slack status",
+      "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "disabledByDefault": true
+    },
+    {
+      "name": "slack-pomodoro-control-timer",
+      "title": "Slack Control Pomodoro Timer",
+      "subtitle": "Start / Stop Pomodoro Timer and update Slack status",
+      "description": "Start, pause, stop or continue pomodoro intervals and update Slack status",
+      "mode": "view",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -393,7 +417,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/utils": "^1.12.4",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",

@@ -1,7 +1,7 @@
 import { RDB } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { fetchAllRegions } from 'helpers/fetchLocalities'
-import { useAPI } from 'providers'
+import { useAPI } from 'helpers/useAPI'
 
 type DataLoaderOptions<T> = Parameters<typeof useDataLoader<T>>[2]
 

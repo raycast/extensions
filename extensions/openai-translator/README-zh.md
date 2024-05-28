@@ -31,6 +31,10 @@ npm install && npm run dev
 
 ![Intro](doc/configuration.png)
 
+推荐将 Provder 设置为 `Custom...` 然后通过 `Setup Provider` 命令管理你的 Provders。
+
+![Setup Provider](doc/setup-provider.png)
+
 ## 主要功能
 
 - 划词翻译
@@ -56,10 +60,16 @@ npm install && npm run dev
 
 ## 多 LLM 支持
 
+![Multi LLM](doc/multi-llm.png)
+
 - [OpenAI ChatGPT](https://chat.openai.com/)
 - [Raycast AI](https://www.raycast.com/pro)
 - [Azure OpenAI Service](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service)
-- [PaLM 2](https://ai.google/discover/palm2)
+- [Gemini](https://gemini.google.com/)
+- [Claude](https://claude.ai/)
+- [Groq](https://groq.com/)
+- [Moonshot](https://moonshot.cn/)
+- [Ollama](https://ollama.com/)
 
 ### OpenAI ChatGPT
 
@@ -81,13 +91,25 @@ npm install && npm run dev
 - API Key: [Azure](https://portal.azure.com/) -> Azure OpenAI -> Keys and Endpoint
 - API Model: 无需配置
 
-### PaLM 2
+### Gemini
 
-- API Entrypoint: none
-- API Key: [MakerSuite -> API Keys](https://makersuite.google.com/app/apikey)
-- API Model: 无需配置，当前 text-bison
+- API Key: [Google AI Studio -> Get API Key](https://aistudio.google.com/app/apikey)
 
-功能受限，且仅支持美国 IP。
+### Claude
+
+- API Key: [Anthrop Console](https://console.anthropic.com/settings/keys)
+
+### Groq
+
+- API Key: [GroqCloud](https://console.groq.com/keys)
+
+### Moonshot
+
+- API Key: [Moonshot AI](https://platform.moonshot.cn/console/api-keys)
+
+### Ollama
+
+[OpenAI compatibility](https://ollama.com/blog/openai-compatibility)
 
 ## 其他
 

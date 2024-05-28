@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yabai",
+  "title": "Yabai",
+  "description": "Control Yabai using Raycast. Requires yabai to be installed.",
+  "icon": "yabai-icon-512px.png",
+  "author": "krzysztoff1",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "custom-yabai-command",
+      "title": "Run Custom Yabai Command",
+      "description": "Run custom Yabai command",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "command",
+          "placeholder": "Command",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Yabai",
+      "description": "This command will start Yabai using `yabai --start-service` or stop it using `yabai --stop-service`.",
+      "mode": "no-view"
+    },
+    {
+      "name": "rotate",
+      "title": "Rotate",
+      "description": "Rotate the tree 90 degrees clockwise.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-x",
+      "title": "Mirror X",
+      "description": "Mirror the tree on the X axis.",
+      "mode": "no-view"
+    },
+    {
+      "name": "mirror-y",
+      "title": "Mirror Y",
+      "description": "Mirror the tree on the Y axis.",
+      "mode": "no-view"
+    },
+    {
+      "name": "balance",
+      "title": "Balance",
+      "description": "Balance the windows.",
+      "mode": "no-view"
+    },
+    {
+      "name": "create-space-and-focus",
+      "title": "Create & Focus New Space",
+      "subtitle": "yabai",
+      "description": "Creates a new workspace and focuses it.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-space",
+      "title": "Focus Space",
+      "subtitle": "yabai",
+      "description": "Focuses the specified space.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "type": "text",
+          "placeholder": "Space Number",
+          "required": true,
+          "name": "spaceIndex"
+        }
+      ]
+    },
+    {
+      "name": "destroy-space",
+      "title": "Destroy Current Space",
+      "subtitle": "yabai",
+      "description": "Destroys the currently focused space.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "yabaiPath",
+      "title": "Yabai installation path",
+      "required": false,
+      "type": "textfield",
+      "description": "Location to the Yabai installation (Defaults to `/opt/homebrew/bin/yabai` on M1 Macs, and `/usr/local/bin/yabai` otherwise)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.10.1",
+    "execa": "^8.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.10.5",
+    "@types/react": "18.2.45",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

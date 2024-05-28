@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -168,7 +168,6 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   useEffect(() => {
     setValue("from", "");
     setValue("into", "");
-    setValue("title", "");
     setValue("description", "");
     setValue("reviewers", []);
     setValue("assignees", []);

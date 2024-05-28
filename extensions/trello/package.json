@@ -43,26 +43,24 @@
   ],
   "preferences": [
     {
-      "description": "Trello Username",
+      "description": "Add your Trello Username",
       "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
       "name": "username",
-      "placeholder": "Trello username",
       "required": true,
       "title": "Trello Username",
       "type": "textfield"
     },
     {
-      "description": "Trello Access token",
-      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "description": "Trello Access token, open this link to get one",
+      "default": "https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read,write&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1",
       "name": "token",
-      "placeholder": "Trello Access token",
       "required": true,
       "title": "Personal Access Token",
-      "type": "password"
+      "type": "textfield"
     },
     {
       "default": "13f8c59607ba6d82531d3db5f46999c1",
-      "description": "Application Trello API token",
+      "description": "Application Trello API token, leave as is.",
       "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
       "name": "apitoken",
       "placeholder": "13f8c59607ba6d82531d3db5f46999c1",
@@ -81,18 +79,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0"
+    "@raycast/api": "^1.70.3"
   },
   "devDependencies": {
-    "@types/node": "~20.10.4",
-    "@types/react": "^18.2.43",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
-    "eslint": "^8.55.0",
+    "@types/node": "~20.12.2",
+    "@types/react": "^18.2.73",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "node-fetch": "^3.3.2",
-    "prettier": "3.1.1",
-    "typescript": "^5.3.3"
+    "prettier": "3.2.5",
+    "typescript": "^5.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",

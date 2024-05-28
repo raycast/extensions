@@ -1,9 +1,9 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Preferences } from "../lib/types";
 import { getErrorMessage } from "../lib/utils";
 import { getPopularVideos, useRefresher, Video } from "../lib/youtubeapi";
-import { VideoItem } from "./video";
 import { ListOrGrid } from "./listgrid";
-import { Preferences } from "../lib/types";
+import { VideoItem } from "./video";
 
 export function PopularVideoList() {
   const { griditemsize } = getPreferenceValues<Preferences>();

@@ -11,7 +11,7 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
 
 ## Features
 
-1008 Pokémon Species with all alternate forms including Regional forms (Alolan, Galarian, Hisuian, Paldea), Mega Evolution, Gigantamax
+1025 Pokémon Species with all alternate forms including Regional forms (Alolan, Galarian, Hisuian, Paldea), Mega Evolution, Gigantamax
 
 - [x] 🔍 Pokédex
   - Pokémon

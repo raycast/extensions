@@ -1,5 +1,11 @@
 # Porkbun Changelog
 
+## [Fix open in browser command for domain items] - 2024-03-14
+
+### Fixes
+
+- Include HTTPS protocol when opening domains
+
 ## [IPv4 + Retrieve All Domains endpoint] - 2023-11-13
 
 ### Enhancements
