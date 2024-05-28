@@ -1,5 +1,9 @@
 # Mute microphone Changelog
 
+## [Improvements] - 2024-05-28
+
+- Add a preference setting for keeping audio input volume level
+
 ## [Moved contributor] - 2024-04-15
 
 - No changes were made in the code.
