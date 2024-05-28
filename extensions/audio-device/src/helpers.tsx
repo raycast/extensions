@@ -36,8 +36,9 @@ type DeviceListProps = {
 export function DeviceList({ type, deviceId }: DeviceListProps) {
   const { isLoading, data } = useAudioDevices(type);
   const { data: hiddenDevices, revalidate: refetchHiddenDevices } = usePromise(getHiddenDevices, []);
-
-  const [showHidden, setShowHidden] = useState(false);
+  const { data: showHidden, revalidate: refetchShowHidden } = usePromise(async () => {
+    return (await LocalStorage.getItem("showHiddenDevices")) === "true";
+  }, []);
 
   useEffect(() => {
     if (!deviceId || !data?.devices) return;
@@ -77,7 +78,10 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
       />
       <Action.CopyToClipboard title="Copy Device Name" content={device.name} shortcut={Keyboard.Shortcut.Common.Copy} />
       <ToggleDeviceVisibilityAction deviceId={device.uid} onAction={refetchHiddenDevices} />
-      <Action title="Show Hidden Devices" icon={Icon.Eye} onAction={() => setShowHidden(true)} />
+
+      <ActionPanel.Section title="Options">
+        <ToggleShowHiddenDevicesAction onAction={refetchShowHidden} />
+      </ActionPanel.Section>
     </>
   );
 
@@ -188,6 +192,24 @@ function ToggleDeviceVisibilityAction({ deviceId, onAction }: { deviceId: string
       onAction={async () => {
         await toggleDeviceVisibility(deviceId);
         refetchIsHidden();
+        onAction();
+      }}
+    />
+  );
+}
+
+function ToggleShowHiddenDevicesAction({ onAction }: { onAction: () => void }) {
+  const { data: showHidden, revalidate: refetchShowHidden } = usePromise(async () => {
+    return (await LocalStorage.getItem("showHiddenDevices")) === "true";
+  }, []);
+
+  return (
+    <Action
+      title={showHidden ? "Hide Hidden Devices" : "Show Hidden Devices"}
+      icon={showHidden ? Icon.EyeDisabled : Icon.Eye}
+      onAction={async () => {
+        await LocalStorage.setItem("showHiddenDevices", showHidden ? "false" : "true");
+        refetchShowHidden();
         onAction();
       }}
     />
