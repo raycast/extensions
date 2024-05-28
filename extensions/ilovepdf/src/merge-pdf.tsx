@@ -8,6 +8,7 @@ import {
   closeMainWindow,
   open,
   openExtensionPreferences,
+  Icon,
 } from "@raycast/api";
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import MergeTask from "@ilovepdf/ilovepdf-js-core/tasks/MergeTask";
@@ -111,7 +112,7 @@ export default function Command() {
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Merge PDFs" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Merge PDFs" onSubmit={handleSubmit} icon={Icon.Wand} />
           {status == "success" ? <Action.ShowInFinder title="Show in Finder" path={destinationFilePath} /> : null}
           {status == "success" ? (
             <Action.CopyToClipboard title="Copy Path to Clipboard" content={destinationFilePath} />
@@ -125,7 +126,7 @@ export default function Command() {
             />
           ) : null}
           {status == "failure" ? (
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           ) : null}
         </ActionPanel>
       }
