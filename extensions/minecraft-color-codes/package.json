@@ -5,6 +5,9 @@
   "description": "View and copy Minecraft chat color codes.",
   "icon": "extension_icon.png",
   "author": "lafkpages",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Productivity",
     "Fun",
