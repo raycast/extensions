@@ -222,10 +222,11 @@ export function formatHours(hours: string | undefined, company: HarvestCompany |
   const { timeFormat }: Preferences = getPreferenceValues();
 
   if (timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes")) {
-    const time = hours.split(".");
-    const hour = time[0];
-    const minute = parseFloat(`0.${time[1]}`) * 60;
-    return `${hour}:${minute < 10 ? "0" : ""}${minute.toFixed(0)}`;
+    const minutes = parseFloat(hours) * 60;
+    // write the elapsed number of minutes as HH:MM
+    return `${Math.floor(minutes / 60).toString()}:${Math.floor(minutes % 60)
+      .toString()
+      .padStart(2, "0")}`;
   }
   return hours;
 }
