@@ -14,13 +14,15 @@
   "commands": [
     {
       "name": "overview",
-      "title": "Car Overview - TeslaMate",
+      "title": "Car Overview",
+      "subtitle": "TeslaMate",
       "description": "TeslaMate Grafana Overview",
       "mode": "view"
     },
     {
       "name": "charges",
-      "title": "Charges - TeslaMate",
+      "title": "View Charges",
+      "subtitle": "TeslaMate",
       "description": "Show last 50 charging sessions",
       "mode": "view"
     }
