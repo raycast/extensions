@@ -18,7 +18,7 @@ type Playlist = {
 export default function Command(props: LaunchProps<{ arguments: Arguments.AiPlaylist }>) {
   const { data: playlist, isLoading } = usePromise(async () => {
     const data = await AI.ask(
-      `Suggest a playlist based on this prompt: "${props.arguments.description}". Return me only a parsable and minified JSON object with the following structure:
+      `Generate a playlist based on this description: "${props.arguments.description}". Ensure the songs transition smoothly between each other. Return me only a parsable and minified JSON object with the following structure:
 
 {
   "name": <Playlist name>,
