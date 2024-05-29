@@ -233,11 +233,11 @@
       "required": false
     },
     {
-      "name": "shouldHideCompletedIssues",
+      "name": "shouldHideRedundantIssues",
       "type": "checkbox",
       "title": "Advanced",
-      "label": "Hide Completed Issues",
-      "description": "When enabled, the issues that are marked as done will not show up in search results.",
+      "label": "Hide Redundant Issues",
+      "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
       "default": false,
       "required": false
     }

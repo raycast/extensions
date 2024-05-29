@@ -37,13 +37,13 @@ function getCompletedIssuesFilter(
     addComma: true,
   },
 ) {
-  return !preferences.shouldHideCompletedIssues
+  return !preferences.shouldHideRedundantIssues
     ? ""
     : [
         ...(inParentheses ? ["("] : []),
         ...(addComma ? [", "] : []),
         ...(!inFilterBlock ? ["filter: { "] : []),
-        "completedAt: { null: true }",
+        "completedAt: { null: true }, canceledAt: { null: true }",
         ...(!inFilterBlock ? [" }"] : []),
         ...(inParentheses ? [")"] : []),
       ].join("");
