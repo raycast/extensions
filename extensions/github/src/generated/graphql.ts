@@ -33052,7 +33052,6 @@ export type CommentsForPullRequestQuery = {
 export type DataForRepositoryQueryVariables = Exact<{
   owner: Scalars["String"];
   name: Scalars["String"];
-  refCursor?: InputMaybe<Scalars["String"]>;
 }>;
 
 export type DataForRepositoryQuery = {
@@ -33084,7 +33083,6 @@ export type DataForRepositoryQuery = {
           | { __typename?: "Tree" }
           | null;
       } | null> | null;
-      pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; endCursor?: string | null };
     } | null;
     collaborators?: {
       __typename?: "RepositoryCollaboratorConnection";
@@ -33127,6 +33125,33 @@ export type DataForRepositoryQuery = {
       title?: string | null;
       body?: string | null;
     }> | null;
+  } | null;
+};
+
+export type SearchRepositoryBranchesQueryVariables = Exact<{
+  owner: Scalars["String"];
+  name: Scalars["String"];
+  query: Scalars["String"];
+}>;
+
+export type SearchRepositoryBranchesQuery = {
+  __typename?: "Query";
+  repository?: {
+    __typename?: "Repository";
+    refs?: {
+      __typename?: "RefConnection";
+      nodes?: Array<{
+        __typename?: "Ref";
+        id: string;
+        name: string;
+        target?:
+          | { __typename?: "Blob" }
+          | { __typename?: "Commit"; authoredDate: any; oid: any; message: string }
+          | { __typename?: "Tag" }
+          | { __typename?: "Tree" }
+          | null;
+      } | null> | null;
+    } | null;
   } | null;
 };
 
@@ -34288,7 +34313,7 @@ export const CommentsForPullRequestDocument = gql`
   }
 `;
 export const DataForRepositoryDocument = gql`
-  query dataForRepository($owner: String!, $name: String!, $refCursor: String) {
+  query dataForRepository($owner: String!, $name: String!) {
     repository(owner: $owner, name: $name) {
       defaultBranchRef {
         id
@@ -34297,7 +34322,7 @@ export const DataForRepositoryDocument = gql`
           ...CommitFields
         }
       }
-      refs(refPrefix: "refs/heads/", direction: ASC, first: 100, after: $refCursor) {
+      refs(refPrefix: "refs/heads/", direction: ASC, first: 50) {
         totalCount
         nodes {
           id
@@ -34305,10 +34330,6 @@ export const DataForRepositoryDocument = gql`
           target {
             ...CommitFields
           }
-        }
-        pageInfo {
-          hasNextPage
-          endCursor
         }
       }
       collaborators(first: 50) {
@@ -34353,6 +34374,22 @@ export const DataForRepositoryDocument = gql`
   }
   ${CommitFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
+`;
+export const SearchRepositoryBranchesDocument = gql`
+  query searchRepositoryBranches($owner: String!, $name: String!, $query: String!) {
+    repository(owner: $owner, name: $name) {
+      refs(refPrefix: "refs/heads/", direction: ASC, first: 50, query: $query) {
+        nodes {
+          id
+          name
+          target {
+            ...CommitFields
+          }
+        }
+      }
+    }
+  }
+  ${CommitFieldsFragmentDoc}
 `;
 export const RepositoryIssuesDocument = gql`
   query repositoryIssues($owner: String!, $name: String!) {
@@ -34951,6 +34988,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             ...wrappedRequestHeaders,
           }),
         "dataForRepository",
+        "query",
+      );
+    },
+    searchRepositoryBranches(
+      variables: SearchRepositoryBranchesQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"],
+    ): Promise<SearchRepositoryBranchesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchRepositoryBranchesQuery>(SearchRepositoryBranchesDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "searchRepositoryBranches",
         "query",
       );
     },

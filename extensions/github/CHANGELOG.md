@@ -1,8 +1,8 @@
 # GitHub Changelog
 
-## ["Create Pull Request" command] - 2024-05-24
+## ["Create Pull Request" command] - {PR_MERGE_DATE}
 
-- Fix pagination for listing branch names in Create PR command.
+- Added typeahead search for branch selection in Create PR command.
 
 ## [Add "My Projects" command] - 2024-04-25
 
