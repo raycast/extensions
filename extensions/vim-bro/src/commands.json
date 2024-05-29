@@ -444,14 +444,14 @@
         "kbd": "U",
         "text": "change marked text to uppercase"
       },
-     {
+      {
         "kbd": "Ctrl + a",
         "text": "increments the number under the cursor"
       },
       {
         "kbd": "Ctrl + d",
         "text": "decrements the number under the cursor"
-      } 
+      }
     ]
   },
   {
