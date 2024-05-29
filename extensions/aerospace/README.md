@@ -4,9 +4,9 @@ Aerospace is a tiling window management extension for Raycast.
 
 It works with the existing installation of [AeroSpace](https://github.com/nikitabobko/AeroSpace)
 
-![shortcuts](./metadata/shortcuts.png)
+![shortcuts](./media/shortcuts.png)
 
-![menubar](./metadata/menubar.jpg)
+![menubar](./media/menubar.jpg)
 
 ## Features
 

@@ -2,6 +2,11 @@ import { extractCode } from "./utils";
 
 describe("Testing matching logic", () => {
   test("Alphanumeric codes", () => {
+    expect(
+      extractCode(
+        "Chase: DON'T share. Use code 41646271 to complete Extra Security at Sign In. We'll NEVER call to ask for this code. Call us if you didn't request it."
+      )
+    ).toBe("41646271");
     expect(extractCode("2773 is your Microsoft account verification code")).toBe("2773");
     expect(extractCode("Your Airbnb verification code is: 1234.")).toBe("1234");
     expect(extractCode("Your verification code is: 1234, use it to log in")).toBe("1234");

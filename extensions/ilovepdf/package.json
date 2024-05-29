@@ -30,6 +30,13 @@
       "subtitle": "iLovePDF",
       "description": "Converts a PDF to Image using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "merge-pdf",
+      "title": "Merge PDF",
+      "subtitle": "iLovePDF",
+      "description": "Merge Multiple PDFs using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -49,17 +56,27 @@
     },
     {
       "name": "OpenNow",
-      "title": "Open the PDF immediately after conversion",
+      "title": "Open the PDF Immediately After Conversion",
       "description": "Open the PDF file after conversion",
       "type": "checkbox",
       "required": false,
       "default": false,
       "label": "Open PDF immediately"
+    },
+    {
+      "name": "AskBeforeDownload",
+      "title": "Ask Where to Save File Before Download",
+      "description": "Ask where to save each file before download",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Ask before download"
     }
   ],
   "dependencies": {
     "@ilovepdf/ilovepdf-nodejs": "^0.2.5",
-    "@raycast/api": "^1.72.1"
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

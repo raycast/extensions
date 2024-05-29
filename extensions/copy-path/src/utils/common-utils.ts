@@ -5,12 +5,10 @@ import {
   getSelectedFinderItems,
   PopToRootType,
   showHUD,
-  Toast,
   updateCommandMetadata,
 } from "@raycast/api";
 import { chromiumBrowserNames, webkitBrowserNames } from "./constants";
-import { showFailureToast } from "@raycast/utils";
-import { copyUrlContent, multiPathSeparator, showCopyTip, showErrorTip, showLastCopy } from "../types/preferences";
+import { copyUrlContent, multiPathSeparator, showCopyTip, showLastCopy } from "../types/preferences";
 import parseUrl from "parse-url";
 
 export const copyFinderPath = async () => {
@@ -60,7 +58,9 @@ export const copyUrl = async (frontmostApp: Application) => {
   }
 
   if (url === "") {
-    await showErrorHUD("No Path or URL found", { title: `Current app is ${frontmostApp.name}` });
+    const finderPath = await getFocusFinderPath();
+    await Clipboard.copy(finderPath);
+    await showSuccessHUD("🗂️ " + finderPath);
   } else {
     // handle url
     const parsedUrl = parseUrl(url);
@@ -83,7 +83,7 @@ export const copyUrl = async (frontmostApp: Application) => {
       }
     }
     await Clipboard.copy(copyContent);
-    await showSuccessHUD("📋 " + copyContent);
+    await showSuccessHUD("🔗 " + copyContent);
     await customUpdateCommandMetadata(copyContent);
   }
 };
@@ -94,13 +94,5 @@ export const showSuccessHUD = async (
 ) => {
   if (showCopyTip) {
     await showHUD(title, options);
-  }
-};
-export const showErrorHUD = async (
-  error: unknown,
-  options?: { title?: string | undefined; primaryAction?: Toast.ActionOptions | undefined } | undefined,
-) => {
-  if (showErrorTip) {
-    await showFailureToast(error, options);
   }
 };
