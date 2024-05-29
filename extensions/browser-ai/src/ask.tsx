@@ -3,7 +3,7 @@ import { ResultView } from "./hook/ResultView";
 import { getPreferenceValues } from "@raycast/api";
 
 const toast_title = "Generating...";
-const model_override = getPreferenceValues().model_inspect;
+const model_override = getPreferenceValues().model_ask;
 
 export interface AskArguments {
   query: string;
