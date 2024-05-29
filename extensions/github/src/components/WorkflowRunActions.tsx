@@ -126,42 +126,30 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
     <ActionPanel title={commit}>
       <Action.OpenInBrowser url={workflowRun.html_url} />
 
-      <ActionPanel.Section>
-        {workflowRun.status === "completed" ? (
-          <Action
-            title="Re-Run Workflow"
-            icon={Icon.Clock}
-            onAction={rerunWorkflow}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-        ) : null}
+      {workflowRun.status === "completed" ? (
+        <Action title="Re-Run Workflow" icon={Icon.Clock} onAction={rerunWorkflow} />
+      ) : null}
 
-        {workflowRun.status === "completed" && workflowRun.conclusion !== "success" ? (
-          <Action
-            title="Re-Run Workflow Failed Jobs"
-            icon={Icon.Redo}
-            onAction={rerunWorkflowFailedJobs}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          />
-        ) : null}
-
-        {workflowRun.status === "queued" || workflowRun.status === "in_progress" ? (
-          <Action
-            title="Cancel Run"
-            icon={Icon.XMarkCircle}
-            onAction={cancelRun}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-        ) : null}
-
+      {workflowRun.status === "completed" && workflowRun.conclusion !== "success" ? (
         <Action
-          icon={Icon.Trash}
-          title="Delete Run"
-          style={Action.Style.Destructive}
-          onAction={deleteRun}
-          shortcut={{ modifiers: ["cmd"], key: "delete" }}
+          title="Re-Run Workflow Failed Jobs"
+          icon={Icon.Redo}
+          onAction={rerunWorkflowFailedJobs}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
         />
-      </ActionPanel.Section>
+      ) : null}
+
+      {workflowRun.status === "queued" || workflowRun.status === "in_progress" ? (
+        <Action title="Cancel Run" icon={Icon.XMarkCircle} onAction={cancelRun} />
+      ) : null}
+
+      <Action
+        icon={Icon.Trash}
+        title="Delete Run"
+        style={Action.Style.Destructive}
+        onAction={deleteRun}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      />
 
       <ActionPanel.Section>
         <Action

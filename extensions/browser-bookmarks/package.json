@@ -10,10 +10,12 @@
   "contributors": [
     "sasivarnan",
     "ahp",
-    "danulqua",
     "juang970",
     "tleo19",
     "jum8ys"
+  ],
+  "pastContributors": [
+    "danulqua"
   ],
   "categories": [
     "Web"

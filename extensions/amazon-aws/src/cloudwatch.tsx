@@ -4,6 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function CloudWatch() {
   const [search, setSearch] = useState<string>("");
@@ -36,13 +37,11 @@ function LogGroupEntry({ logGroup }: { logGroup: LogGroup }) {
   return (
     <List.Item
       icon={"aws-icons/cw.png"}
+      key={logGroup.logGroupName}
       title={logGroup.logGroupName || ""}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open Log Group"
-            url={resourceToConsoleLink(logGroup.logGroupName, "AWS::Logs::LogGroup")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(logGroup.logGroupName, "AWS::Logs::LogGroup")} />
           <Action.CopyToClipboard title="Copy Log Group Name" content={logGroup.logGroupName || ""} />
         </ActionPanel>
       }

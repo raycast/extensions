@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "johndoe123789",
   "contributors": [
-    "mil3na"
+    "mil3na",
+    "j3lte"
   ],
   "categories": [
     "Developer Tools",
@@ -130,18 +131,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.57.0",
-    "got": "^12.3.1",
+    "@raycast/api": "^1.70.3",
+    "node-fetch": "^3.3.2",
     "title": "^3.5.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^18.8.3",
-    "@types/react": "^17.0.28",
-    "@types/title": "^3.4.1",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.12.6",
+    "@types/react": "^18.2.75",
+    "@types/title": "^3.4.3",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.4"
   },
   "scripts": {
     "build": "ray build -e dist",

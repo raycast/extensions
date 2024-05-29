@@ -1,6 +1,6 @@
 import { Action, ActionPanel, environment, Form, Icon, LaunchProps, open, showToast, Toast } from "@raycast/api";
 import { useForm, runAppleScript, useCachedPromise, FormValidation, getAvatarIcon } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { fetchAllContacts } from "swift:../swift/contacts";
 
 type Contact = {
@@ -11,9 +11,9 @@ type Contact = {
   emailAddresses: string[];
 };
 
-function createDeeplink(contactId: string, text: string) {
+function createDeeplink(contactId: string, address: string, text: string) {
   const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
-  const context = encodeURIComponent(JSON.stringify({ contactId, text }));
+  const context = encodeURIComponent(JSON.stringify({ contactId, address, text }));
   return `${protocol}extensions/thomaslombart/messages/send-message?launchContext=${context}`;
 }
 
@@ -24,12 +24,13 @@ function getName(contact: Contact) {
 type Values = {
   text: string;
   contact: string;
+  address: string;
 };
 
 export default function Command({
   draftValues,
   launchContext,
-}: LaunchProps<{ draftValues: Values; launchContext: { contactId: string; text: string } }>) {
+}: LaunchProps<{ draftValues: Values; launchContext: { contactId: string; address: string; text: string } }>) {
   const { data: contacts, isLoading } = useCachedPromise(async () => {
     const contacts = await fetchAllContacts();
     return contacts as Contact[];
@@ -60,7 +61,7 @@ export default function Command({
           end try
         end run
       `,
-        [correspondingContact.phoneNumbers[0], values.text],
+        [values.address, values.text],
       );
 
       if (result === "Success") {
@@ -73,7 +74,7 @@ export default function Command({
           primaryAction: {
             title: `Open Chat with ${name}`,
             onAction() {
-              open(`imessage://${correspondingContact.phoneNumbers[0].replace(/\s/g, "")}`);
+              open(`imessage://${values.address.replace(/\s/g, "")}`);
             },
           },
         });
@@ -85,13 +86,20 @@ export default function Command({
     },
     initialValues: {
       contact: draftValues?.contact ?? launchContext?.contactId ?? "",
+      address: draftValues?.address ?? launchContext?.address ?? "",
       text: draftValues?.text ?? launchContext?.text ?? "",
     },
     validation: {
       contact: FormValidation.Required,
+      address: FormValidation.Required,
       text: FormValidation.Required,
     },
   });
+
+  const contactAddresses = useMemo(() => {
+    const contact = contacts?.find((c) => c.id === values.contact);
+    return [...(contact?.phoneNumbers ?? []), ...(contact?.emailAddresses ?? [])];
+  }, [values.contact]);
 
   useEffect(() => {
     if (launchContext?.contactId) {
@@ -108,7 +116,7 @@ export default function Command({
           <Action.CreateQuicklink
             title="Create Messages Quicklink"
             quicklink={{
-              link: createDeeplink(values.contact, values.text),
+              link: createDeeplink(values.contact, values.address, values.text),
               name: `Send Message to ${contacts?.find((c) => c.id === values.contact)?.givenName}`,
             }}
           />
@@ -128,6 +136,11 @@ export default function Command({
               value={contact.id}
             />
           );
+        })}
+      </Form.Dropdown>
+      <Form.Dropdown {...itemProps.address} title="Address" storeValue>
+        {contactAddresses?.map((address) => {
+          return <Form.Dropdown.Item key={address} title={address} value={address} />;
         })}
       </Form.Dropdown>
       <Form.TextArea {...itemProps.text} title="Message" />

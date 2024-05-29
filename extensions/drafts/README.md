@@ -56,6 +56,12 @@ This is a helper command to easily create additional Raycast Quicklinks to perfo
 - capture text with Drafts capture window
 - open the dictation window
 
+## Create Open Draft Quicklink
+
+Create a Raycast Quicklink to open a Draft by passing a title and the UUID of the Draft.
+
+Tip: Use it together with the corresponding [Drafts Action](https://directory.getdrafts.com/a/2RC) to easily create Quicklinks for currently open Drafts.
+
 ## Support Development
 
 If this eXtension is valuable for and you'd like to thank me you can support me on

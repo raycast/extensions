@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, popToRoot, Toast } from "@raycast/api";
-import { renameStopwatch } from "./stopwatchUtils";
-import { renameCustomTimer, renameTimer } from "./timerUtils";
+import { renameStopwatch } from "./backend/stopwatchBackend";
+import { renameCustomTimer, renameTimer } from "./backend/timerBackend";
 
 export default function RenameView(props: { currentName: string; originalFile: string; ctID: string | null }) {
   const handleSubmit = (newName: string) => {

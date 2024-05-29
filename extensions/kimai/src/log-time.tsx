@@ -1,8 +1,11 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Form,
+  Icon,
   LaunchType,
+  List,
   PopToRootType,
   Toast,
   launchCommand,
@@ -27,8 +30,9 @@ interface FormValues {
 const DATE_FORMAT = "YYYY-MM-DDTHH:mm:ss";
 
 const LogTimeCommand = () => {
-  const { duration } = getPreferences();
+  const { duration, email, password, token } = getPreferences();
   const initialDuration = parseInt(duration);
+  const validPreferences = Boolean((email && password) || token);
   const { isLoading: isLoadingProjects, projects, visitItem: visitProject } = useProjects();
   const { isLoading: isLoadingActivities, activities, visitItem: visitActivity } = useActivities();
 
@@ -89,6 +93,17 @@ const LogTimeCommand = () => {
       duration: isNaN(initialDuration) ? "0" : String(initialDuration),
     },
   });
+
+  if (!validPreferences) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+          title="Please set your API token or your email and password in the preferences"
+        />
+      </List>
+    );
+  }
 
   return (
     <Form

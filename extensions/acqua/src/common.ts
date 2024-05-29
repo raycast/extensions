@@ -21,14 +21,16 @@ export function useDrinkTimes() {
   const preferences = getPreferenceValues<Preferences>();
   const [lastDrinkedAt] = useLastDrinkedAt();
   const [delay] = useDrinkDelay();
+  const interval = Number(preferences.interval ?? "15");
+
+  if (lastDrinkedAt === null) {
+    return { interval, nextDrinkReminder: null, lastDrinkFromNowInMinutes: null };
+  }
 
   const lastDrinkFromNow = lastDrinkedAt ? new Date().getTime() - delay - lastDrinkedAt.getTime() : 0;
   const lastDrinkFromNowInMinutes = Math.floor(lastDrinkFromNow / 1000 / 60);
 
-  return {
-    nextDrinkReminder: Number(preferences.interval ?? "15") - lastDrinkFromNowInMinutes,
-    lastDrinkFromNowInMinutes,
-  };
+  return { interval, nextDrinkReminder: interval - lastDrinkFromNowInMinutes, lastDrinkFromNowInMinutes };
 }
 
 export function pluralize(value: number, unit: string) {

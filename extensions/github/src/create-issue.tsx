@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -123,7 +123,6 @@ export function IssueForm({ draftValues }: IssueFormProps) {
   const milestones = data?.repository?.milestones?.nodes;
 
   useEffect(() => {
-    setValue("title", "");
     setValue("description", "");
     setValue("assignees", []);
     setValue("labels", []);

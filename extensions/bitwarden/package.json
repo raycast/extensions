@@ -193,6 +193,42 @@
         "log out",
         "account"
       ]
+    },
+    {
+      "name": "create-send",
+      "title": "Create Send",
+      "subtitle": "Bitwarden",
+      "description": "Securely share information directly with anyone.",
+      "icon": "create-send.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-sends",
+      "title": "Search Sends",
+      "subtitle": "Bitwarden",
+      "description": "List and search all the Sends owned by you.",
+      "icon": "search-sends.png",
+      "mode": "view"
+    },
+    {
+      "name": "receive-send",
+      "title": "Receive Send",
+      "subtitle": "Bitwarden",
+      "description": "Receive a send from a URL",
+      "arguments": [
+        { 
+          "type": "text",
+          "name": "url",
+          "placeholder": "url"
+        },
+        {
+          "type": "password",
+          "name": "password",
+          "placeholder": "password"
+        }
+      ],
+      "icon": "receive-send.png",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -328,8 +364,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1",
-    "@raycast/utils": "^1.12.4",
+    "@raycast/api": "^1.70.2",
+    "@raycast/utils": "^1.13.4",
     "execa": "^7.0.0",
     "node-fetch": "^3.3.2",
     "node-stream-zip": "^1.15.0"

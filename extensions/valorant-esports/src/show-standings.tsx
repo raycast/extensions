@@ -13,9 +13,8 @@ export default function ShowStandings() {
       searchBarPlaceholder="Search teams and positions"
       searchBarAccessory={<LeagueDropdown value={leagueId} onChange={setLeagueId} />}
     >
-      {rankings?.map(({ teams, ordinal }) => {
-        const team = teams[0];
-        return (
+      {rankings?.flatMap(({ teams, ordinal }) => {
+        return teams.map((team) => (
           <List.Item
             key={team.id}
             icon={team.image.replace("http://", "https://")}
@@ -28,7 +27,7 @@ export default function ShowStandings() {
               },
             ]}
           />
-        );
+        ));
       })}
     </List>
   );

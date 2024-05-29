@@ -1,10 +1,11 @@
 import React, { ReactElement, useState } from "react";
-import { List, ActionPanel, showToast, Toast, Action, Icon } from "@raycast/api";
+import { List, showToast, Toast, Action, Icon, ActionPanel } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useDebouncedValue, useSelectedLanguagesSet, useTextState } from "./hooks";
 import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, playTTS } from "./simple-translate";
+import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "./actions";
 
 export default function Translate(): ReactElement {
   const [selectedLanguageSet] = useSelectedLanguagesSet();
@@ -42,78 +43,44 @@ export default function Translate(): ReactElement {
         const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
 
         return (
-          <>
+          <React.Fragment key={index}>
             <List.Item
-              key={index}
               title={r.translatedText}
               accessories={[{ text: languages, tooltip: tooltip }]}
               detail={<List.Item.Detail markdown={r.translatedText} />}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action.CopyToClipboard title="Copy" content={r.translatedText} />
-                    <Action
-                      title="Toggle Full Text"
-                      icon={Icon.Text}
-                      onAction={() => setIsShowingDetail(!isShowingDetail)}
-                    />
+                    <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={r.translatedText} />
+                    <ToggleFullTextAction onAction={() => setIsShowingDetail(!isShowingDetail)} />
                     <Action
                       title="Play Text-To-Speech"
                       icon={Icon.Play}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => playTTS(r.translatedText, r.langTo)}
                     />
-                    <Action.OpenInBrowser
-                      title="Open in Google Translate"
-                      shortcut={{ modifiers: ["opt"], key: "enter" }}
-                      url={
-                        "https://translate.google.com/?sl=" +
-                        r.langFrom +
-                        "&tl=" +
-                        r.langTo +
-                        "&text=" +
-                        encodeURIComponent(debouncedValue) +
-                        "&op=translate"
-                      }
-                    />
+                    <OpenOnGoogleTranslateWebsiteAction translationText={debouncedValue} translation={r} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
             />
             {r.pronunciationText && (
               <List.Item
-                key={index}
                 title={r.pronunciationText}
                 accessories={[{ text: languages, tooltip: tooltip }]}
                 detail={<List.Item.Detail markdown={r.pronunciationText} />}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section>
-                      <Action.CopyToClipboard title="Copy" content={r.pronunciationText} />
-                      <Action
-                        title="Toggle Full Text"
-                        icon={Icon.Text}
-                        onAction={() => setIsShowingDetail(!isShowingDetail)}
-                      />
-                      <Action.OpenInBrowser
-                        title="Open in Google Translate"
-                        shortcut={{ modifiers: ["opt"], key: "enter" }}
-                        url={
-                          "https://translate.google.com/?sl=" +
-                          r.langFrom +
-                          "&tl=" +
-                          r.langTo +
-                          "&text=" +
-                          encodeURIComponent(debouncedValue) +
-                          "&op=translate"
-                        }
-                      />
+                      <ConfigurableCopyPasteActions value={r.pronunciationText} />
+                      <ToggleFullTextAction onAction={() => setIsShowingDetail(!isShowingDetail)} />
+                      <OpenOnGoogleTranslateWebsiteAction translationText={debouncedValue} translation={r} />
                     </ActionPanel.Section>
                   </ActionPanel>
                 }
               />
             )}
-          </>
+          </React.Fragment>
         );
       })}
     </List>

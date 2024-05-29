@@ -8,7 +8,7 @@ export const isInProgress = (entry: TimeEntry) => !entry?.timeInterval?.end;
 
 export async function fetcher(
   url: string,
-  { method, body, headers, ...args }: FetcherArgs = {}
+  { method, body, headers, ...args }: FetcherArgs = {},
 ): Promise<FetcherResponse> {
   const preferences: PreferenceValues = getPreferenceValues();
   const token = String(preferences?.token);

@@ -10,13 +10,15 @@ import {
 } from '../data/fetchDetails';
 import { BaseItem } from '../data/fetchList';
 import { usePreferences } from '../hooks/usePreferences';
+import ActionViewDetails from './actions/ActionViewDetails';
+import ActionOpenInBrowserIMDb from './actions/ActionOpenInBrowserIMDb';
 
 interface ListItemProps {
   item: BaseItem;
   showType?: boolean;
 }
 export const ListItem = ({ item: { imdbID }, showType }: ListItemProps) => {
-  const { token } = usePreferences();
+  const { token, openIn } = usePreferences();
   const { data } = useFetch(getDetailsEndpoint(imdbID, token), {
     parseResponse: parseDetailsResponse,
   });
@@ -35,14 +37,17 @@ export const ListItem = ({ item: { imdbID }, showType }: ListItemProps) => {
       accessories={getAccessories(data, showType)}
       actions={
         <ActionPanel>
-          {data && (
-            <Action.Push
-              title="View Details"
-              target={<ItemDetail item={data} />}
-              icon={Icon.AppWindowSidebarRight}
-            />
+          {openIn == 'raycast' ? (
+            <>
+              <ActionViewDetails item={data} />
+              <ActionOpenInBrowserIMDb imdbID={imdbID} />
+            </>
+          ) : (
+            <>
+              <ActionOpenInBrowserIMDb imdbID={imdbID} />
+              <ActionViewDetails item={data} />
+            </>
           )}
-          <Action.OpenInBrowser url={`https://www.imdb.com/title/${imdbID}/`} />
           <Action.OpenInBrowser
             title="YouTube Trailer"
             url={`https://www.youtube.com/results?search_query=${Title.replace(

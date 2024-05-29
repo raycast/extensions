@@ -57,6 +57,58 @@ function RaceList() {
       isShowingDetail={isShowingDetail}
     >
       {season && (
+        <List.Section title="Upcoming Races">
+          {Object.values(upcomingRaces).map((race) => {
+            const raceDates = getRaceDates(race);
+            const accessories = [];
+            if (!isShowingDetail && race.date && race.time) {
+              accessories.push({ text: formatDate(new Date(`${race.date}T${race.time}`)) });
+            }
+            accessories.push({ icon: { source: "flag-checkered.png", tintColor: Color.PrimaryText } });
+            return (
+              <List.Item
+                key={race.round}
+                id={race.round}
+                icon={{ source: `${race.round}.png`, tintColor: Color.PrimaryText }}
+                title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
+                subtitle={`${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`}
+                detail={
+                  raceDates.length ? (
+                    <RaceSessionDetails
+                      title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
+                      raceDates={raceDates}
+                    />
+                  ) : undefined
+                }
+                actions={
+                  <ActionPanel title={race.raceName}>
+                    {raceDates.length ? (
+                      <Action
+                        icon={Icon.Sidebar}
+                        title={isShowingDetail ? "Hide Sessions" : "Show Sessions"}
+                        onAction={() => setIsShowingDetail((previous) => !previous)}
+                      />
+                    ) : null}
+                    <Action
+                      title={"Add to Calendar"}
+                      icon={Icon.Calendar}
+                      onAction={() => push(<AddToCalendar race={race} raceDates={raceDates} />)}
+                    />
+                    <Action.OpenInBrowser
+                      title="View on Wikipedia.org"
+                      url={race.url || race.Circuit.url}
+                      icon="wikipedia.png"
+                    />
+                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="🏎️" />}
+                  </ActionPanel>
+                }
+                accessories={accessories}
+              />
+            );
+          })}
+        </List.Section>
+      )}
+      {season && (
         <List.Section title="Past Races">
           {Object.values(pastRaces).map((race) => {
             const raceDates = getRaceDates(race);
@@ -95,58 +147,6 @@ function RaceList() {
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
                     ) : null}
-                    <Action.OpenInBrowser
-                      title="View on Wikipedia.org"
-                      url={race.url || race.Circuit.url}
-                      icon="wikipedia.png"
-                    />
-                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="🏎️" />}
-                  </ActionPanel>
-                }
-                accessories={accessories}
-              />
-            );
-          })}
-        </List.Section>
-      )}
-      {season && (
-        <List.Section title="Upcoming Races">
-          {Object.values(upcomingRaces).map((race) => {
-            const raceDates = getRaceDates(race);
-            const accessories = [];
-            if (!isShowingDetail && race.date && race.time) {
-              accessories.push({ text: formatDate(new Date(`${race.date}T${race.time}`)) });
-            }
-            accessories.push({ icon: { source: "flag-checkered.png", tintColor: Color.PrimaryText } });
-            return (
-              <List.Item
-                key={race.round}
-                id={race.round}
-                icon={{ source: `${race.round}.png`, tintColor: Color.PrimaryText }}
-                title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
-                subtitle={`${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`}
-                detail={
-                  raceDates.length ? (
-                    <RaceSessionDetails
-                      title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
-                      raceDates={raceDates}
-                    />
-                  ) : undefined
-                }
-                actions={
-                  <ActionPanel title={race.raceName}>
-                    {raceDates.length ? (
-                      <Action
-                        icon={Icon.Sidebar}
-                        title={isShowingDetail ? "Hide Sessions" : "Show Sessions"}
-                        onAction={() => setIsShowingDetail((previous) => !previous)}
-                      />
-                    ) : null}
-                    <Action
-                      title={"Add to Calendar"}
-                      icon={Icon.Calendar}
-                      onAction={() => push(<AddToCalendar race={race} raceDates={raceDates} />)}
-                    />
                     <Action.OpenInBrowser
                       title="View on Wikipedia.org"
                       url={race.url || race.Circuit.url}

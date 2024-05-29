@@ -46,6 +46,14 @@ Use this to like the current song.
 
 Use this to dislike the current song.
 
+### Add Playing Song to Playlist
+
+Use this to add the current song to a playlist of your choice.
+
+### Remove Playing Song from Playlist
+
+Use this to remove the current song from the playlist it's in.
+
 ### Set Volume to 0%
 
 Use this to mute the volume.

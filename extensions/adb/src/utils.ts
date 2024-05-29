@@ -3,7 +3,7 @@ import { execSync } from "child_process";
 import { Cache, getPreferenceValues } from "@raycast/api";
 import expandTilde from "expand-tilde";
 
-export default async function checkAdbExists() {
+export async function checkAdbExists() {
   const sdk = getPreferenceValues().androidSDK;
   const sdkPath = sdk.replace("~", expandTilde("~"));
   const adb = `${sdkPath}/platform-tools/adb`;
@@ -11,12 +11,17 @@ export default async function checkAdbExists() {
   if (!fs.existsSync(adb)) {
     throw new Error(`❗️ADB not found here: ${adb}`);
   } else {
-    const device = execSync(`${adb} devices`).toString().trim().split("\n");
-    if (device.length == 1) {
-      throw new Error(`❗No device seem to be connected.`);
-    }
-    return `${adb} -s ${device[1].split("\t")[0]}`;
+    return adb;
   }
+}
+
+export async function checkAdbDeviceExists() {
+  const adb = await checkAdbExists();
+  const device = execSync(`${adb} devices`).toString().trim().split("\n");
+  if (device.length == 1) {
+    throw new Error(`❗No device seem to be connected.`);
+  }
+  return `${adb} -s ${device[1].split("\t")[0]}`;
 }
 
 export function getAppIdFromParamsOrCache(paramAppId: string | undefined): string | undefined {
