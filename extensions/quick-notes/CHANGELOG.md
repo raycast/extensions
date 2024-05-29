@@ -5,7 +5,7 @@
 - New quick add / remove tags using `⌘ + T`
 - Quick tag sort from dropdown in search
 - Updated new tag shortcut to `⌘ + ⇧ + T`
-- Updated filter tag to `^ + T`
+- Updated filter tag to `⌘ + F`
 - Better word count in metadata to account for MD
 
 ## [Bugfix] - 2024-05-24

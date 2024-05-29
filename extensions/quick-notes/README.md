@@ -26,7 +26,7 @@ If you’d like, you can export or auto-sync your notes as markdown to a directo
 - Delete a note `^ + ⇧ + X`
 - Quick apply / remove tag `⌘ + T`
 - Create a new tag `⌘ + ⇧ + T`
-- Filter by tag `^ + T`
+- Filter by tag `⌘ + F`
 - Delete tags `^ + ⇧ + T`
 - Toggle note metadata `⌘ + M`
 - Sort notes `⌘ + S`

@@ -109,7 +109,7 @@ const Actions = ({
             source: Icon.Filter,
             tintColor: getTintColor("turquoise"),
           }}
-          shortcut={{ modifiers: ["ctrl"], key: "t" }}
+          shortcut={{ modifiers: ["cmd"], key: "f" }}
         >
           {allTags &&
             allTags.length > 0 &&
