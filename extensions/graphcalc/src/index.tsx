@@ -17,16 +17,16 @@ interface CommandArguments {
 }
 
 export default function Command(
-  props: LaunchProps<{ arguments: CommandArguments }>,
+  props: LaunchProps<{ arguments: CommandArguments }>
 ) {
   const { operation } = props.arguments;
-  const [expression, setExpression] = useState("");
+  const [expression, setExpression] = useState<string>(operation || ""); // Initialize with operation if provided
   const {
     value: history,
     setValue: setHistory,
     isLoading: isHistoryLoading,
   } = useLocalStorage<string[]>("history", []);
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false); // Track whether to display the feedback form
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [historyInitialized, setHistoryInitialized] = useState(false);
   const [renderHistorySorted, setRenderHistorySorted] = useState<string[]>([]);
 
@@ -43,7 +43,7 @@ export default function Command(
 
   const submit = (expression: string) => {
     updateHistory(expression);
-    push(<Graph expression={expression} history={history || []} />);
+    push(<Graph expression={expression} />);
   };
 
   const handleSubmit = () => {
@@ -63,13 +63,7 @@ export default function Command(
     submit(selectedExpression);
   };
 
-  // const handleFeedback = () => {
-  //   // Set the state to display the feedback form
-  //   setShowFeedbackForm(true);
-  // };
-
   const handleCloseFeedbackForm = () => {
-    // Set the state to hide the feedback form
     setShowFeedbackForm(false);
   };
 
@@ -91,8 +85,8 @@ export default function Command(
     }
   }, [isHistoryLoading, historyInitialized, operation]);
 
-  if (operation && isHistoryLoading) {
-    return <></>;
+  if (isHistoryLoading || !historyInitialized) {
+    return <List isLoading={true} searchBarPlaceholder="Loading..." searchText={expression} onSearchTextChange={(text) => setExpression(text)} />;
   }
 
   const filteredHistory =
@@ -107,8 +101,8 @@ export default function Command(
       {!showFeedbackForm ? (
         <List
           searchBarPlaceholder="Enter an equation or expression (e.g., sin(x))"
-          onSearchTextChange={setExpression}
-          searchText={expression}
+          onSearchTextChange={(text) => setExpression(text || "")} // Ensure text is always a string
+          searchText={expression} // Ensure searchText is always defined
         >
           {expression.trim() !== "" && (
             <List.Item
@@ -133,7 +127,6 @@ export default function Command(
                     onAction={() => handleSelect(expr)}
                   />
                   <Action title="Clear History" onAction={handleClearHistory} />
-                  {/* <Action title="Provide Feedback" onAction={handleFeedback} /> */}
                 </ActionPanel>
               }
             />

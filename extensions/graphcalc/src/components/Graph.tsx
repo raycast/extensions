@@ -16,8 +16,6 @@ function parseExpression(expression: string, xValues: number[]) {
   return xValues.map((x) => {
     try {
       const result = evaluate(expression, { x });
-      // The best solution would be to divide the block rendering into infinite sections.
-      // Current version will show incorrect values.
       if (result === Infinity) {
         return Number.MAX_VALUE;
       } else if (result === -Infinity) {
@@ -37,14 +35,14 @@ function renderGraphToSVG(
 ) {
   try {
     return ReactDOMServer.renderToStaticMarkup(
-      <svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 920 400" xmlns="http://www.w3.org/2000/svg">
         <g transform="translate(40,150)">
           <rect
             width="920"
-            height="500"
+            height="400"
             style={{ fill: "transparent", stroke: "#000000" }}
           />
-          <XYPlot width={900} height={500} style={{ color: "#000000" }}>
+          <XYPlot width={920} height={400} style={{ color: "#000000" }}>
             <HorizontalGridLines style={{ stroke: "#e0e0e0" }} />
             <VerticalGridLines style={{ stroke: "#e0e0e0" }} />
             <XAxis style={{ stroke: "#777777" }} />
@@ -65,20 +63,12 @@ function renderGraphToSVG(
 
 export default function Graph({
   expression,
-  history,
 }: {
   expression: string;
-  history: string[];
 }) {
   const [chartData, setChartData] = useState<{ x: number; y: number }[]>([]);
   const [result, setResult] = useState<string | null>(null);
-  const [renderHistory, setRenderHistory] = useState<string[]>([]);
   const toastRef = useRef<Toast | null>(null);
-  useEffect(() => {
-    setRenderHistory(
-      (history || []).filter((exp: string) => exp != expression),
-    );
-  }, [history]);
 
   useEffect(() => {
     const isSimpleEquation =
@@ -145,21 +135,6 @@ export default function Graph({
 
   return (
     <Detail
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Current" text={expression} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.TagList title="History">
-            {renderHistory.length > 0 ? (
-              renderHistory.map((expr, index) => (
-                <Detail.Metadata.TagList.Item key={index} text={expr} />
-              ))
-            ) : (
-              <Detail.Metadata.TagList.Item text="No history" />
-            )}
-          </Detail.Metadata.TagList>
-        </Detail.Metadata>
-      }
       markdown={
         result !== null
           ? `## Result\n\n${expression} = ${result}`
