@@ -17,7 +17,6 @@ export default function JournalCommand() {
   }
 
   const submitEntry = async (values: { content: string }) => {
-
     if (!values.content || !values.content.trim()) {
       showToast({ style: Toast.Style.Failure, title: "Content is required" });
       return;
@@ -28,7 +27,7 @@ export default function JournalCommand() {
       await fetch(`https://www.supahabits.com/api/journal`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret, content: values.content})
+        body: JSON.stringify({ secret, content: values.content }),
       });
       showToast({ style: Toast.Style.Success, title: "✅ Entry submitted!" });
 
@@ -48,22 +47,12 @@ export default function JournalCommand() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Entry"
-            onSubmit={submitEntry}
-          />
-          <Action.OpenInBrowser
-            title="View all entries"
-            url="https://www.supahabits.com/dashboard/journal"
-          />
+          <Action.SubmitForm title="Submit Entry" onSubmit={submitEntry} />
+          <Action.OpenInBrowser title="View All Entries" url="https://www.supahabits.com/dashboard/journal" />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="content"
-        title="New Journal Entry"
-        defaultValue=""
-      />
+      <Form.TextArea id="content" title="New Journal Entry" defaultValue="" />
     </Form>
   );
 }

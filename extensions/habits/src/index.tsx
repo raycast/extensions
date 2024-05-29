@@ -28,7 +28,7 @@ export default function Command() {
   const retrieveHabits = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`https://www.supahabits.com/api/habits?secret=${secret}`).then(res => res.json());
+      const res = await fetch(`https://www.supahabits.com/api/habits?secret=${secret}`).then((res) => res.json());
       setHabits(res as Habit[]);
     } catch (e) {
       showToast({ style: Toast.Style.Failure, title: "Failed to retrieve habits" });
@@ -39,9 +39,7 @@ export default function Command() {
 
   const markHabitAsCompleted = async (habitId: number) => {
     const originalHabits = [...(habits ?? [])];
-    const updatedHabits = habits?.map(habit =>
-      habit.id === habitId ? { ...habit, completed: true } : habit
-    );
+    const updatedHabits = habits?.map((habit) => (habit.id === habitId ? { ...habit, completed: true } : habit));
 
     setHabits(updatedHabits);
 
@@ -50,15 +48,13 @@ export default function Command() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${secret}`
+          Authorization: `Bearer ${secret}`,
         },
-        body: JSON.stringify({ secret })
+        body: JSON.stringify({ secret }),
       });
       showToast({ style: Toast.Style.Success, title: "✅ Habit marked as completed" });
     } catch (error) {
-      const notUpdatedHabits = habits?.map(habit =>
-        habit.id === habitId ? { ...habit, completed: false } : habit
-      );
+      const notUpdatedHabits = habits?.map((habit) => (habit.id === habitId ? { ...habit, completed: false } : habit));
       setHabits(notUpdatedHabits);
       showToast({ style: Toast.Style.Failure, title: "🚫 Failed to mark habit as completed" });
       setHabits(originalHabits);
@@ -84,10 +80,7 @@ export default function Command() {
             actions={
               habit.completed === false ? (
                 <ActionPanel>
-                  <Action
-                    title="Mark as Completed"
-                    onAction={() => markHabitAsCompleted(habit.id)}
-                  />
+                  <Action title="Mark as Completed" onAction={() => markHabitAsCompleted(habit.id)} />
                   <Action.OpenInBrowser
                     title="View Habits Details Online"
                     url="https://www.supahabits.com/dashboard"

@@ -22,11 +22,8 @@ export default function SetSecret() {
       searchBarAccessory={<Form.LinkAccessory target="https://www.supahabits.com/profile" text="Generate secret Key" />}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save secret key" onSubmit={saveSecret} />
-          <Action.OpenInBrowser
-            title="Generate secret key"
-            url="https://www.supahabits.com/profile"
-          />
+          <Action.SubmitForm title="Save Secret Key" onSubmit={saveSecret} />
+          <Action.OpenInBrowser title="Generate Secret Key" url="https://www.supahabits.com/profile" />
         </ActionPanel>
       }
     >

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "habits",
   "title": "Habits",
-  "description": "Track habits",
+  "description": "Extension for quickly adding habits to your daily routine, tracking your progress and add journal entries",
   "icon": "command-icon.png",
   "author": "gbarba",
   "categories": [

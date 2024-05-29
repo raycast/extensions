@@ -29,7 +29,7 @@ export default function JournalListCommand() {
   const retrieveJournalEntries = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`https://www.supahabits.com/api/journal?secret=${secret}`).then(res => res.json());
+      const res = await fetch(`https://www.supahabits.com/api/journal?secret=${secret}`).then((res) => res.json());
       setEntries(res as JournalEntry[]);
     } catch (e) {
       showToast({ style: Toast.Style.Failure, title: "Failed to retrieve habits" });
@@ -47,26 +47,19 @@ export default function JournalListCommand() {
   }
 
   return (
-    <List
-      filtering={true}
-      navigationTitle="Search Journal Entries"
-      searchBarPlaceholder="Filter entries by content"
-    >
-      {
-        entries && entries.length === 0
-        && <List.Item title="No entries found" actions={
-          <ActionPanel>
-            <Action title="New entry" onAction={() => navigation.push(<JournalCommand />)} />
-          </ActionPanel>
-        } />
-      }
-
-      {entries && entries.map((item) => (
+    <List filtering={true} navigationTitle="Search Journal Entries" searchBarPlaceholder="Filter entries by content">
+      {entries && entries.length === 0 && (
         <List.Item
-          key={item.id}
-          title={item.content}
+          title="No entries found"
+          actions={
+            <ActionPanel>
+              <Action title="New Entry" onAction={() => navigation.push(<JournalCommand />)} />
+            </ActionPanel>
+          }
         />
-      ))}
+      )}
+
+      {entries && entries.map((item) => <List.Item key={item.id} title={item.content} />)}
     </List>
   );
 }
