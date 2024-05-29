@@ -161,7 +161,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     return github.searchRepositoryBranches({
       owner: selectedRepository.owner.login,
       name: selectedRepository.name,
-      query,
+      query: query.trim(),
     });
   };
 
