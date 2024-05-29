@@ -15,7 +15,7 @@ export default function PreviewRaycastWallpaper(props: {
   return (
     <Detail
       navigationTitle={raycastWallpapers[pageIndex].title}
-      markdown={`<img src="${getThumbnailUrl(raycastWallpapers[pageIndex].url)}" alt="" height="350" />`}
+      markdown={`<img src="${getThumbnailUrl(raycastWallpapers[pageIndex].url)}" alt="" height="355" />`}
       actions={
         <ActionPanel>
           <Action
