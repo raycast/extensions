@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-ai",
   "title": "Browser AI",
-  "description": "Use the best models and Raycast Browser Extension to extend your browsing. \n\nPerplexity models: https://docs.perplexity.ai/docs/model-cards. \n\nOpenRouter models: https://openrouter.ai/docs#models",
+  "description": "Use the best models from Perplexity & OpenRouter and Raycast Browser Extension to extend your browsing.",
   "icon": "logo.png",
   "author": "lin",
   "contributors": [],
