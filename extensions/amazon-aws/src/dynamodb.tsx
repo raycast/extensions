@@ -3,6 +3,7 @@ import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { AwsAction } from "./components/common/action";
 
 export default function DynamoDb() {
   const { data: tables, isLoading, error, revalidate } = useCachedPromise(fetchTables);
@@ -25,14 +26,12 @@ export default function DynamoDb() {
 function DynamoDbTable({ tableName }: { tableName: string }) {
   return (
     <List.Item
+      key={tableName}
       title={tableName || ""}
       icon={"aws-icons/ddb.png"}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Browser"
-            url={resourceToConsoleLink(tableName, "AWS::DynamoDB::Table")}
-          />
+          <AwsAction.Console url={resourceToConsoleLink(tableName, "AWS::DynamoDB::Table")} />
           <Action.CopyToClipboard title="Copy Table Name" content={tableName || ""} />
         </ActionPanel>
       }

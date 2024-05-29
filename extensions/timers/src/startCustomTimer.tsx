@@ -1,8 +1,8 @@
 import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, Toast } from "@raycast/api";
 import { useState } from "react";
-import { soundData } from "./soundData";
-import { checkForOverlyLoudAlert, createCustomTimer, ensureCTFileExists, startTimer } from "./timerUtils";
-import { CTInlineArgs, InputField, RayFormEvent, Values } from "./types";
+import { soundData } from "./backend/soundData";
+import { checkForOverlyLoudAlert, createCustomTimer, ensureCTFileExists, startTimer } from "./backend/timerBackend";
+import { CTInlineArgs, InputField, Preferences, RayFormEvent, Values } from "./backend/types";
 
 export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
   const hasArgs = Object.values(props.arguments).some((x) => x !== "");
@@ -10,7 +10,7 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
   const [minErr, setMinErr] = useState<string | undefined>();
   const [secErr, setSecErr] = useState<string | undefined>();
 
-  const prefs = getPreferenceValues();
+  const prefs: Preferences = getPreferenceValues();
 
   const handleSubmit = (values: Values) => {
     ensureCTFileExists();
@@ -28,7 +28,11 @@ export default function CustomTimerView(props: { arguments: CTInlineArgs }) {
       closeMainWindow();
       const timerName = values.name ? values.name : "Untitled";
       const timeInSeconds = 3600 * Number(values.hours) + 60 * Number(values.minutes) + Number(values.seconds);
-      startTimer(timeInSeconds, timerName, values.selectedSound);
+      startTimer({
+        timeInSeconds: timeInSeconds,
+        timerName: timerName,
+        selectedSound: values.selectedSound,
+      });
       if (values.willBeSaved)
         createCustomTimer({
           name: values.name,

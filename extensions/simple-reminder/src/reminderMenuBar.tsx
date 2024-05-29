@@ -9,6 +9,7 @@ import { Reminder } from "./types/reminder";
 const addReminderDeeplink = `raycast://extensions/comoser/simple-reminder/index`;
 const raycastApplication = { name: "Raycast", path: "/Applications/Raycast.app" };
 const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
+const MAX_TOPIC_LENGTH = 30;
 
 function getDateTimeStringForMenuBarTitle(date: Date): string {
   if (date.getTime() - new Date().getTime() < TWO_HOURS_IN_MS)
@@ -27,7 +28,11 @@ export default function Command() {
   const showNextReminderInMenuBarTitle = () => {
     const nextReminder = getNextReminder(reminders);
     if (!nextReminder) return "No reminders set";
-    return `${nextReminder.topic} ${getDateTimeStringForMenuBarTitle(nextReminder.date)}`;
+    const truncatedTopic =
+      nextReminder.topic.length > MAX_TOPIC_LENGTH
+        ? `${nextReminder.topic.substring(0, MAX_TOPIC_LENGTH)}...`
+        : nextReminder.topic;
+    return `${truncatedTopic} ${getDateTimeStringForMenuBarTitle(nextReminder.date)}`;
   };
 
   const onCopyReminderTopicAction = (reminderTopic: string) => {

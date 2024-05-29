@@ -39,7 +39,7 @@ export class Ffprobe {
 
     // ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 input.mp4
     const command = this.ffprobeBinary.command(
-      [...(params ?? []), `"${sanitizeFileName(input)}"`].filter((param) => param != null).join(" "),
+      [...(params ?? []), sanitizeFileName(input)].filter((param) => param != null).join(" "),
     );
     const result = execSync(command);
     return result.toString();

@@ -1,5 +1,11 @@
 # Change Case Changelog
 
+## [Add preference to lowercase text before changing case] - 2024-05-22
+- Added a preference to lowercase all inputs before changing case
+
+## [Clarify Behavior in README]- 2024-05-19
+- Added README.md with more information about the behavior of the extension
+
 ## [Fixes] - 2024-5-02
 - Fixed using action style as destructive
 - Fixed `Pascal Snake Case` being incorrectly named as `Pascal Case` in preferences

@@ -1,4 +1,4 @@
-import { get } from "./togglClient";
+import { get } from "@/api/togglClient";
 
 export function getMyWorkspaces() {
   return get<Workspace[]>("/me/workspaces");

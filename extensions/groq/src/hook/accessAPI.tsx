@@ -18,7 +18,7 @@ export default function ResultView(props: ResultViewProps) {
 
   async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
     sysPrompt = `Current date: ${currentDate}.\n\n ${sysPrompt}`;
-    const userPrompt = `${user_extra_msg ? `${user_extra_msg}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText}"` : ""}`;
+    const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""}`;
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
@@ -105,10 +105,16 @@ export default function ResultView(props: ResultViewProps) {
     }
   }, [loading]);
 
+  const formatUserMessage = (message: string): string => {
+    return message
+      .split("\n")
+      .map((line) => `>${line}`)
+      .join("\n");
+  };
+
   return (
     <Detail
-      // markdown={(user_extra_msg ? `\`\`\`\n${user_extra_msg}\n\`\`\`\n\n` : "") + response}
-      markdown={(user_extra_msg ? `>${user_extra_msg}\n\n` : "") + response}
+      markdown={`${user_extra_msg ? formatUserMessage(user_extra_msg) + "\n\n" : ""}${response}`}
       isLoading={loading}
       actions={
         !loading && (

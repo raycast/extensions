@@ -1,5 +1,13 @@
 # Paste as Plain text Changelog
 
+## [Fix Hotkey Error] - 2024-05-27
+
+-  Fix the problem of using hotkeys to invoke commands
+
+## [Advanced Paste] - 2024-05-27
+
+- Advanced Paste to paste your clipboard content into any format you want
+
 ## [Update Raycast API] - 2022-11-30
 
 - Update Raycast API version to 1.44.0

@@ -1,5 +1,20 @@
 # Amazon AWS Changelog
 
+## [CFN and SQS] - 2024-05-21
+
+- Adds update-termination-protection commands for stacks listed in CFN command ([#12497](https://github.com/raycast/extensions/issues/12497))
+- Adds listing exports feature to CFN command
+- Additional metadata for the SQS queues mapped into list item details ([#12498](https://github.com/raycast/extensions/issues/12498))
+- Adds SendMessage action for queues
+
+## [Improvements] - 2024-05-15
+
+- Fix resource types for Step Function Command Actions ([#12353](https://github.com/raycast/extensions/issues/12353))
+- Fix S3 Objects console links
+- Fix CodePipeline accessory icon and visual improvements
+- Fix CloudFormation stack resources list item key for disambiguation
+- Added keys to most list items for disambiguation and copy link action for urls ([#11750](https://github.com/raycast/extensions/issues/11750))
+
 ## [ECR] - 2024-04-14
 
 - Added support for navigating AWS ECR repositories

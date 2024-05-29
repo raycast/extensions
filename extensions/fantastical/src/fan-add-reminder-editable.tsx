@@ -1,7 +1,7 @@
-import { showToast, Toast, open } from "@raycast/api";
+import { Toast, open, showToast } from "@raycast/api";
+import defaultBrowserId from "default-browser-id";
 import { runAppleScript } from "run-applescript";
 import { getName } from "./getName";
-import defaultBrowserId from "default-browser-id";
 
 interface Arguments {
   add: string;
@@ -12,10 +12,11 @@ export default async (props: { arguments: Arguments }) => {
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();
   if (name !== undefined) {
-    const text = `tell application "${name}" 
-                        \n parse sentence "Todo ${args.add}" 
-                    \n end tell`;
-    await runAppleScript(text);
+    const escapedAdd = args.add.replace(/"/g, '\\"');
+    await runAppleScript(`
+      tell application "${name}"
+        parse sentence "Todo ${escapedAdd}"
+      end tell`);
   } else {
     await showToast({
       title: "Fantastical is not installed",

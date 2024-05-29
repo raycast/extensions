@@ -16,12 +16,8 @@
     "superwhys",
     "lukah"
   ],
-  "past_contributors": [
-    "Davidwalser"
-  ],
-  "categories": [
-    "Security"
-  ],
+  "past_contributors": ["Davidwalser"],
+  "categories": ["Security"],
   "license": "MIT",
   "commands": [
     {
@@ -29,12 +25,7 @@
       "title": "My Passwords",
       "subtitle": "1Password",
       "description": "List of all your 1Password items. Then open in your default browser, view items in 1Password, or open items in 1Password for editing.",
-      "keywords": [
-        "1p",
-        "1password",
-        "password",
-        "login"
-      ],
+      "keywords": ["1p", "1password", "password", "login"],
       "mode": "view"
     },
     {
@@ -42,14 +33,18 @@
       "title": "Auto Renew Authorization",
       "subtitle": "1Password",
       "description": "Renews the authorization each 9 minutes. Avoiding the prompt for user's password each use after 10 minutes.",
-      "keywords": [
-        "1p",
-        "1password",
-        "password",
-        "login"
-      ],
+      "keywords": ["1p", "1password", "password", "login"],
       "interval": "9m",
-      "mode": "no-view"
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "vault-list",
+      "title": "My Vaults",
+      "subtitle": "1Password",
+      "description": "List of all your 1Password vaults. Then open all items related to each vault.",
+      "keywords": ["1p", "1password", "password", "login"],
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -145,6 +140,15 @@
       "required": false,
       "title": "1Password CLI path",
       "type": "textfield"
+    },
+    {
+      "description": "Enter your ZSH binary path",
+      "name": "zshPath",
+      "placeholder": "e.g., /bin/zsh",
+      "required": false,
+      "title": "1Password SHELL path",
+      "type": "textfield",
+      "default": "/bin/zsh"
     }
   ],
   "dependencies": {
