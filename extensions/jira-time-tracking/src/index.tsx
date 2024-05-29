@@ -74,20 +74,27 @@ export default function Command() {
   }, [userPrefs.isJiraCloud]);
 
   useEffect(() => {
-    let isMounted = true; // Flag to manage async operations on unmounted component
+    let isMounted = true;
 
     const fetchProjects = async () => {
       if (pageGot.current >= pageTotal.current) {
         setLoading(false);
         showToast(Toast.Style.Success, "All projects loaded");
-        return; // Stop if no more data is there to fetch
+        return;
       }
 
       setLoading(true);
       try {
         const result = await getProjects(pageGot.current);
         if (result.data.length > 0 && isMounted) {
-          setProjects((prevProjects) => [...prevProjects, ...result.data]);
+          setProjects((prevProjects) => {
+            const newProjects = [...prevProjects, ...result.data];
+            // Ensure unique keys and filter out undefined
+            const uniqueProjects = Array.from(new Set(newProjects.map((p) => p.key)))
+              .map((key) => newProjects.find((p) => p.key === key))
+              .filter((p): p is Project => !!p);
+            return uniqueProjects;
+          });
 
           pageGot.current += result.data.length;
           if (isJiraCloud) {
@@ -97,12 +104,9 @@ export default function Command() {
           }
 
           showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
-        }
-
-        if (pageGot.current < pageTotal.current) {
-          setTimeout(fetchProjects, 100);
         } else {
           setLoading(false);
+          showToast(Toast.Style.Success, `Projects loaded ${pageGot.current}/${pageTotal.current}`);
         }
       } catch (e) {
         if (isMounted) {
@@ -120,33 +124,42 @@ export default function Command() {
   }, [projects.length, pageGot.current]);
 
   useEffect(() => {
-    let isMounted = true; // Ensure operation only proceeds if the component is still mounted
+    let isMounted = true;
 
     const fetchIssues = async () => {
       if (!selectedProject || pageGot.current >= pageTotal.current) {
         setLoading(false);
-        return; // Stop if no selected project or all data fetched
+        return;
       }
 
       setLoading(true);
       try {
         const result = await getIssues(pageGot.current, selectedProject);
         if (result.data.length > 0 && isMounted) {
-          setIssueCache((prev) =>
-            new Map(prev).set(selectedProject, [...(prev.get(selectedProject) ?? []), ...result.data]),
-          );
-          setIssues((prevIssues) => [...prevIssues, ...result.data]);
+          setIssueCache((prev) => {
+            const updatedIssues = [...(prev.get(selectedProject) || []), ...result.data];
+            // Ensure unique keys and filter out undefined
+            const uniqueIssues = Array.from(new Set(updatedIssues.map((i) => i.key)))
+              .map((key) => updatedIssues.find((i) => i.key === key))
+              .filter((i): i is Issue => !!i);
+            return new Map(prev).set(selectedProject, uniqueIssues);
+          });
+          setIssues((prevIssues) => {
+            const allIssues = [...prevIssues, ...result.data];
+            // Ensure unique keys and filter out undefined
+            const uniqueIssues = Array.from(new Set(allIssues.map((i) => i.key)))
+              .map((key) => allIssues.find((i) => i.key === key))
+              .filter((i): i is Issue => !!i);
+            return uniqueIssues;
+          });
 
           pageTotal.current = result.total;
           pageGot.current += result.data.length;
 
-          showToast(Toast.Style.Success, "Issues loaded");
-        }
-
-        if (pageGot.current < pageTotal.current) {
-          setTimeout(fetchIssues, 100); // Manage calls with timeout
+          showToast(Toast.Style.Success, `Issues loaded ${pageGot.current}/${pageTotal.current}`);
         } else {
           setLoading(false);
+          showToast(Toast.Style.Success, `Issues loaded ${pageGot.current}/${pageTotal.current}`);
         }
       } catch (e) {
         if (isMounted) {
@@ -160,6 +173,7 @@ export default function Command() {
 
     return () => {
       isMounted = false;
+      setLoading(false);
     };
   }, [selectedProject, issues.length, pageGot.current]);
 
