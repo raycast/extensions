@@ -126,6 +126,14 @@ const Actions = ({
                 }}
               />
             ))}
+          <Action
+            title="All Notes"
+            icon={{
+              source: Icon.BulletPoints,
+              tintColor: getTintColor("turquoise"),
+            }}
+            onAction={() => onTagFilter("")}
+          />
           <Action.Push title="Create" icon={Icon.Plus} target={<CreateTag />} />
         </ActionPanel.Submenu>
         <Action.Push
