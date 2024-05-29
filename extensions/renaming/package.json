@@ -3,7 +3,7 @@
   "name": "renaming",
   "title": "Renaming",
   "description": "Renaming is a simple tool to rename files and folders in a batch.",
-  "version": "1.0.1",
+  "version": "1.2.1",
   "keywords": [
     "rename",
     "finder",
@@ -17,7 +17,8 @@
   "icon": "renaming-icon.png",
   "author": "theo_daguier",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "renegade_fox"
   ],
   "categories": [
     "Productivity",
@@ -30,6 +31,12 @@
       "name": "index",
       "title": "Rename File(s)",
       "description": "Rename file(s) in a batch.",
+      "mode": "view"
+    },
+    {
+      "name": "findAndReplace",
+      "title": "Rename file(s) with Find and Replace",
+      "description": "Rename file(s) with Find and Replace in a batch.",
       "mode": "view"
     }
   ],
