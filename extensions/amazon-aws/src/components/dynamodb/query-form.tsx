@@ -134,12 +134,26 @@ export const QueryForm = ({ table }: { table: Table }) => {
         }
       />
       <Form.Dropdown {...itemProps.indexName} title={"Table"} info={"Select main table of one of GSI or LSI"}>
-        <Form.Dropdown.Item value={`${table.TableName}`} title={`Table: ${table.TableName}`} />
+        <Form.Dropdown.Item
+          value={`${table.TableName}`}
+          title={`${table.TableName}`}
+          icon={{ source: Icon.Waveform, tintColor: Color.Blue }}
+        />
         {(table.GlobalSecondaryIndexes || []).map((gsi) => (
-          <Form.Dropdown.Item key={gsi.IndexName} value={`gsi.${gsi.IndexName}`} title={`GSI: ${gsi.IndexName}`} />
+          <Form.Dropdown.Item
+            key={gsi.IndexName}
+            value={`gsi.${gsi.IndexName}`}
+            title={`GSI: ${gsi.IndexName}`}
+            icon={{ source: Icon.Waveform, tintColor: Color.Orange }}
+          />
         ))}
         {(table.LocalSecondaryIndexes || []).map((lsi) => (
-          <Form.Dropdown.Item key={lsi.IndexName} value={`lsi.${lsi.IndexName}`} title={`LSI: ${lsi.IndexName}`} />
+          <Form.Dropdown.Item
+            key={lsi.IndexName}
+            value={`lsi.${lsi.IndexName}`}
+            title={`LSI: ${lsi.IndexName}`}
+            icon={{ source: Icon.Waveform, tintColor: Color.Yellow }}
+          />
         ))}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.pageLimit} title={"Page Limit"} info={"Number of result items per page"}>
@@ -156,13 +170,13 @@ export const QueryForm = ({ table }: { table: Table }) => {
       />
       {table.keys[values.indexName].rangeKey && (
         <Form.Dropdown {...itemProps.rangeKeyOperator} title={"Sort Key"}>
-          <Form.Dropdown.Item value="=" title="Equal To" />
-          <Form.Dropdown.Item value=">" title="Greater Than" />
-          <Form.Dropdown.Item value="<" title="Less Than" />
-          <Form.Dropdown.Item value=">=" title="Greater Than or Equal To" />
-          <Form.Dropdown.Item value="<=" title="Less Than or Equal To" />
-          <Form.Dropdown.Item value="between" title="Between" />
-          <Form.Dropdown.Item value="beginsWith" title="Begins With" />
+          <Form.Dropdown.Item value="=" title="Equal To" icon={Icon.PlusMinusDivideMultiply} />
+          <Form.Dropdown.Item value=">" title="Greater Than" icon={Icon.PlusMinusDivideMultiply} />
+          <Form.Dropdown.Item value="<" title="Less Than" icon={Icon.PlusMinusDivideMultiply} />
+          <Form.Dropdown.Item value=">=" title="Greater Than or Equal To" icon={Icon.PlusMinusDivideMultiply} />
+          <Form.Dropdown.Item value="<=" title="Less Than or Equal To" icon={Icon.PlusMinusDivideMultiply} />
+          <Form.Dropdown.Item value="between" title="Between" icon={Icon.PlusMinusDivideMultiply} />
+          <Form.Dropdown.Item value="beginsWith" title="Begins With" icon={Icon.PlusMinusDivideMultiply} />
         </Form.Dropdown>
       )}
       {table.keys[values.indexName].rangeKey && (
