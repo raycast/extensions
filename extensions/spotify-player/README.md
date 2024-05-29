@@ -102,6 +102,10 @@ Use this to copy the URL of the current song/episode.
 
 Use this to quickly start playing a song based on your query.
 
+### AI Playlist
+
+Use this to get an AI-generated playlist based on a prompt. You can then add this playlist to Spotify or queue all the songs directly.
+
 ---
 
 In order to use this extension, you'll need to authenticate with Spotify. This extension requires the following permissions [scopes](https://developer.spotify.com/documentation/web-api/concepts/scopes):
