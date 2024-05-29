@@ -61,11 +61,7 @@ function renderGraphToSVG(
   }
 }
 
-export default function Graph({
-  expression,
-}: {
-  expression: string;
-}) {
+export default function Graph({ expression }: { expression: string }) {
   const [chartData, setChartData] = useState<{ x: number; y: number }[]>([]);
   const [result, setResult] = useState<string | null>(null);
   const toastRef = useRef<Toast | null>(null);

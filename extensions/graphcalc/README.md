@@ -22,6 +22,7 @@ A simple Raycast graphing calculator extension.
 ![Screenshot1](./metadata/graphcalc-1.png)
 ![Screenshot2](./metadata/graphcalc-2.png)
 ![Screenshot3](./metadata/graphcalc-3.png)
+![Screenshot4](./metadata/graphcalc-4.png)
 
 
 ## Tech Stack

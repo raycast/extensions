@@ -17,7 +17,7 @@ interface CommandArguments {
 }
 
 export default function Command(
-  props: LaunchProps<{ arguments: CommandArguments }>
+  props: LaunchProps<{ arguments: CommandArguments }>,
 ) {
   const { operation } = props.arguments;
   const [expression, setExpression] = useState<string>(operation || ""); // Initialize with operation if provided
@@ -86,7 +86,14 @@ export default function Command(
   }, [isHistoryLoading, historyInitialized, operation]);
 
   if (isHistoryLoading || !historyInitialized) {
-    return <List isLoading={true} searchBarPlaceholder="Loading..." searchText={expression} onSearchTextChange={(text) => setExpression(text)} />;
+    return (
+      <List
+        isLoading={true}
+        searchBarPlaceholder="Loading..."
+        searchText={expression}
+        onSearchTextChange={(text) => setExpression(text)}
+      />
+    );
   }
 
   const filteredHistory =
