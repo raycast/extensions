@@ -21,15 +21,15 @@ If you’d like, you can export or auto-sync your notes as markdown to a directo
 **View Notes**
 
 - View and edit your notes
-- Create a new note `⌘ + N`
-- Copy note body `⌘ + ⇧ + C`
-- Delete a note `^ + ⇧ + X`
-- Quick apply / remove tag `⌘ + T`
-- Create a new tag `⌘ + ⇧ + T`
-- Filter by tag `⌘ + F`
-- Delete tags `^ + ⇧ + T`
-- Toggle note metadata `⌘ + M`
-- Sort notes `⌘ + S`
+- `⌘ + N` - Create a new note
+- `⌘ + ⇧ + C` - Copy note body
+- `^ + ⇧ + X` - Delete a note
+- `⌘ + T` - Quick apply / remove tag
+- `⌘ + ⇧ + T` - Create a new tag
+- `⌘ + F` - Filter by tag
+- `^ + ⇧ + T` - Delete tags
+- `⌘ + M` - Toggle note metadata
+- `⌘ + S` - Sort notes
 
 **Export Notes (1-way sync)**
 
