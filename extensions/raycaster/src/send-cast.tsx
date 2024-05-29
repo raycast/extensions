@@ -76,7 +76,7 @@ Press Enter then update the key on the right side of the prefernce pane
       }
       const uploadRes = (await uploadReq.json()) as FileUploadResult;
 
-      const fileExtension = selectedFile.split('.').pop();
+      const fileExtension = selectedFile.split(".").pop();
 
       const link = `https://${GATEWAY}/ipfs/${uploadRes.IpfsHash}?filename=image.${fileExtension}`;
 
