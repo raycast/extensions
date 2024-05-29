@@ -76,20 +76,7 @@ Press Enter then update the key on the right side of the prefernce pane
       }
       const uploadRes = (await uploadReq.json()) as FileUploadResult;
 
-      const headersReq = await fetch(`https://${GATEWAY}/ipfs/${uploadRes.IpfsHash}`, {
-        method: "HEAD",
-      });
-
-      const fileExtensions: { [key: string]: string } = {
-        "image/jpeg": "jpeg",
-        "image/png": "png",
-        "image/webp": "webp",
-        "image/gif": "gif",
-      };
-
-      const selectedFileType = headersReq.headers.get("content-type");
-      const defaultExtension = "png";
-      const fileExtension = selectedFileType ? fileExtensions[selectedFileType] || defaultExtension : defaultExtension;
+      const fileExtension = selectedFile.split('.').pop();
 
       const link = `https://${GATEWAY}/ipfs/${uploadRes.IpfsHash}?filename=image.${fileExtension}`;
 
