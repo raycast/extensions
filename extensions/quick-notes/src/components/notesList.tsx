@@ -129,6 +129,7 @@ const NotesList = () => {
 
   const filterByTags = (tag: string) => {
     if (tag === "") {
+      setSearchTag("");
       setFilteredNotes(notes);
       return;
     }
