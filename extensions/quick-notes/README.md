@@ -7,9 +7,11 @@ Create simple markdown notes in Raycast stored locally. No integrations required
 - View, create, and delete markdown notes
 - Search by note title, body, or tag
 - Draft and auto-save if you accidentally exit out while creating/editing a new note
+- Quick toggle tags for a note
+- View note metadata & tags
 - Export notes to a folder to use in another application
-- Setup auto-save to a folder of your choice, set in preferences
 - Emoji Support everywhere using `:` 😁
+- Setup auto-save to a folder of your choice, set in preferences
 - Tag manager
 
 If you’d like, you can export or auto-sync your notes as markdown to a directory to use in a 3rd-party app like Obisidian, VS Code, or Notion. This is completely optional though and notes will still save locally.
@@ -22,11 +24,12 @@ If you’d like, you can export or auto-sync your notes as markdown to a directo
 - Create a new note `⌘ + N`
 - Copy note body `⌘ + ⇧ + C`
 - Delete a note `^ + ⇧ + X`
-- Filter by tag `⌘ + T`
-- Create a new tag `⇧ + ⌘ + T`
+- Quick apply / remove tag `⌘ + T`
+- Create a new tag `⌘ + ⇧ + T`
+- Filter by tag `^ + T`
 - Delete tags `^ + ⇧ + T`
-- Sort notes `⌘ + S`
 - Toggle note metadata `⌘ + M`
+- Sort notes `⌘ + S`
 
 **Export Notes (1-way sync)**
 
