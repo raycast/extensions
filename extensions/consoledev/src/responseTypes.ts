@@ -5,7 +5,6 @@ export interface Feed<T> {
   title: string;
   description: string;
   webMaster: string;
-  managingEditor: string;
   link: string;
   language: string;
 }

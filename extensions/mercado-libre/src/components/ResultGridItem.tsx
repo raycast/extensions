@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid } from "@raycast/api";
 import { MercadoLibreItem } from "../types";
-import { formatPrice } from "../utils";
+import { formatPrice, secureThumbnailURL } from "../utils";
 
 interface ResultGridItemProps {
   item: MercadoLibreItem;
@@ -10,12 +10,12 @@ interface ResultGridItemProps {
 export const ResultGridItem = ({ item, handleSearchOpen }: ResultGridItemProps) => (
   <Grid.Item
     key={item.id}
-    content={{ value: item.thumbnail.replace(/^http:/, "https:"), tooltip: item.title }}
+    content={{ value: secureThumbnailURL(item.thumbnail), tooltip: item.title }}
     title={item.title}
     subtitle={formatPrice(item.price, item.currency_id)}
     actions={
       <ActionPanel>
-        <Action.OpenInBrowser title="Open in Browser" url={`${item.permalink}`} onOpen={handleSearchOpen} />
+        <Action.OpenInBrowser url={`${item.permalink}`} onOpen={handleSearchOpen} />
       </ActionPanel>
     }
   />

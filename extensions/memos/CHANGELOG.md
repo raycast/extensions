@@ -1,5 +1,9 @@
 # Send To Memos Changelog
 
+## [Update] - 2024-05-21
+
+- support memos@0.22.0.
+
 ## [Update] - 2024-03-05
 
 - fix open in browser 403.

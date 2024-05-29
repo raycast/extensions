@@ -47,24 +47,24 @@ export async function getManager() {
 export async function getLatestState(): Promise<SonosState | null> {
   const storedState = await storage.getState();
 
-  if (storedState === null) {
-    const coordinator = await getActiveCoordinator();
-
-    if (coordinator === undefined) {
-      await showToast({
-        title: "No explicit group set",
-        style: Toast.Style.Failure,
-      });
-
-      return null;
-    }
-
-    const state = await storage.setState(coordinator);
-
-    return state.sonosState;
+  if (storedState !== null) {
+    return storedState.sonosState;
   }
 
-  return storedState.sonosState;
+  const coordinator = await getActiveCoordinator();
+
+  if (coordinator === undefined) {
+    await showToast({
+      title: "No explicit group set",
+      style: Toast.Style.Failure,
+    });
+
+    return null;
+  }
+
+  const state = await storage.setState(coordinator);
+
+  return state.sonosState;
 }
 
 export async function isPlaying() {
@@ -88,17 +88,31 @@ export async function getActiveCoordinator(): Promise<SonosDevice | undefined> {
 }
 
 export async function getGroupCoordinator(group: string | undefined): Promise<SonosDevice | undefined> {
-  const manager = await getManager();
-  const devices = manager.Devices;
-  const availableGroups = await getAvailableGroups();
-  const fallbackGroup = group === undefined && availableGroups.length === 1 ? availableGroups[0] : null;
+  let coordinator = await getCoordinatorByGroup(group);
 
-  const member = devices.find((device) => device.GroupName === (fallbackGroup ?? group));
-  const coordinator = member?.Coordinator;
+  if (coordinator === undefined) {
+    await storage.setActiveGroup(undefined);
+    coordinator = await getCoordinatorByGroup(await getDefaultGroup());
+  }
 
   if (coordinator === undefined) {
     throw Error("No coordinator found");
   }
+
+  return coordinator;
+}
+
+async function getDefaultGroup() {
+  const groups = await getAvailableGroups();
+  return groups.length > 1 ? undefined : groups[0];
+}
+
+async function getCoordinatorByGroup(group: string | undefined): Promise<SonosDevice | undefined> {
+  if (!group) return undefined;
+
+  const manager = await getManager();
+  const member = manager.Devices.find((device) => device.GroupName === group);
+  const coordinator = member?.Coordinator;
 
   return coordinator;
 }

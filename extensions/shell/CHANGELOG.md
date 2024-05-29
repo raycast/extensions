@@ -1,5 +1,20 @@
 # shell Changelog
 
+## [Fix] 2024-05-15
+Fix an [issue](https://github.com/raycast/extensions/issues/12350) where commands aren't send to iTerm2.
+
+
+## [Add alpha kitty support] 2024-05-05
+This version adds the option to run commands in `kitty` terminal. 
+Checkout the preferences and select your favorite console application in the dropdown to get going.
+
+## [Fix] 2024-04-28
+Allow to run alias commands while running the shell command in raycast.
+
+
+## [Fix] 2024-04-26
+Fix an issue where iTerm opens two windows instead of one when iTerm was not already running.
+
 ## [Fixes] 2023-01-02
 Fix an issue when the use Terminal/iTerm option is turned-on and command run with argument by moving execution logic to useEffect.
 

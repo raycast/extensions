@@ -1,11 +1,11 @@
-import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
-import { State } from "@lib/haapi";
 import { useHAStates } from "@components/hooks";
-import { getErrorMessage, getFriendlyName } from "@lib/utils";
 import { MenuBarItemConfigureCommand } from "@components/menu";
+import { PrimaryIconColor } from "@components/state/utils";
 import { WeatherCurrentMenubarSection, WeatherForecastMenubarSection } from "@components/weather/menu";
 import { getTemperatureFromState, weatherConditionToIcon, weatherConditionToText } from "@components/weather/utils";
-import { PrimaryIconColor } from "@components/state/utils";
+import { State } from "@lib/haapi";
+import { getErrorMessage, getFriendlyName } from "@lib/utils";
+import { Color, getPreferenceValues, Icon, Image, MenuBarExtra, openCommandPreferences } from "@raycast/api";
 
 function WeatherMenuBarExtra(props: {
   children: React.ReactNode;
@@ -58,8 +58,8 @@ export default function WeatherMenuBarCommand(): JSX.Element {
   const error = stateError
     ? getErrorMessage(stateError)
     : weather === undefined
-    ? `Entity '${entity}' not found`
-    : undefined;
+      ? `Entity '${entity}' not found`
+      : undefined;
   return (
     <WeatherMenuBarExtra
       title={temp ? temp.toString() : undefined}

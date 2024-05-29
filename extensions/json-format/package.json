@@ -9,7 +9,8 @@
     "Aayush9029",
     "devlos",
     "lachero",
-    "alexs"
+    "alexs",
+    "duranbe"
   ],
   "categories": [
     "Data",
@@ -27,6 +28,12 @@
       "name": "index",
       "title": "Format JSON",
       "description": "Formats a JSON/JS Object",
+      "mode": "view"
+    },
+    {
+      "name": "formatJsonLines",
+      "title": "Format Array of JSON to JSONLines",
+      "description": "Formats an array of JSON/JS Object to JSONLines",
       "mode": "view"
     }
   ],

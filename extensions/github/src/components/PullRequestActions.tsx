@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -172,11 +172,18 @@ export default function PullRequestActions({
 
   const isAssignedToMe = pullRequest.assignees.nodes?.some((assignee) => assignee?.isViewer);
 
+  const { isOpenInBrowser } = getPreferenceValues<Preferences>();
+
+  const openInBrowserAction = <Action.OpenInBrowser url={pullRequest.permalink} />;
+
+  const [primaryAction, secondaryAction] = isOpenInBrowser
+    ? [openInBrowserAction, children]
+    : [children, openInBrowserAction];
+
   return (
     <ActionPanel title={`#${pullRequest.number} in ${pullRequest.repository.nameWithOwner}`}>
-      {children}
-
-      <Action.OpenInBrowser url={pullRequest.permalink} />
+      {primaryAction}
+      {secondaryAction}
 
       <Action.Push
         icon={Icon.Document}

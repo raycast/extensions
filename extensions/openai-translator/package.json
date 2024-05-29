@@ -5,6 +5,9 @@
   "description": "Translation based on Multiple LLMs.",
   "icon": "extension_icon.png",
   "author": "douo",
+  "contributors": [
+    "JoyG"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -620,6 +623,14 @@
       "description": "Auto start translation if search bar auto-fill. for selected or clipboard prefer using \"Query XXX\" commands.",
       "type": "checkbox",
       "default": false,
+      "required": false
+    },
+    {
+      "name": "isAutoCopy2Clipboard",
+      "label": "Enable auto-copy to clipboard after translation",
+      "description": "Auto copy the response to clipboard after translation",
+      "type": "checkbox",
+      "default": true,
       "required": false
     },
     {

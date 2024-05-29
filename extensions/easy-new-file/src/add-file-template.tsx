@@ -57,7 +57,10 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => {
                 const _path = await fetchFilePath();
-                setName(parse(_path).name);
+                if (!isEmpty(_path)) {
+                  setFilePaths(new Array(_path));
+                  setName(parse(_path).name);
+                }
               }}
             />
           </ActionPanel.Section>
@@ -70,8 +73,8 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         text={`Templates added will automatically be available in the New File Here command.`}
       />
       <Form.FilePicker
-        id={"path"}
-        title={"Path"}
+        id={"file"}
+        title={"File"}
         value={filePaths}
         error={pathError}
         allowMultipleSelection={false}
@@ -93,6 +96,9 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         }}
         info={"If you select a file before opening this command, its filePaths is automatically added."}
       />
+
+      {filePaths.length > 0 && <Form.Description title={""} text={`${filePaths.length > 0 ? filePaths[0] : ""}`} />}
+
       <Form.TextField
         id={"name"}
         title={"Name"}
@@ -134,8 +140,6 @@ const addFileTemplate = async (
         return;
       }
 
-      console.log("filepath " + path);
-      console.log(templateFolderPath);
       fse.ensureDirSync(templateFolderPath);
       fse.copyFileSync(path, desPath);
 

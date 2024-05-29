@@ -24,7 +24,7 @@ on run
     tell application "${browserName}"
         repeat with w in (every window)
             repeat with t in (every tab of w)
-                if URL of t is urlToSearch then
+                if URL of t starts with urlToSearch then
                     set urlExists to true
                     exit repeat
                 end if
@@ -41,14 +41,17 @@ on run
     end tell
 
     tell application "${browserName}"
-        repeat with w in (every window)
-            repeat with t in (every tab whose URL equal urlToUse) of w
-              tell t
-                ${runJS(browserName, tabJavascript)}
-                return urlToUse
-              end tell
-            end repeat
-        end repeat
+      repeat with w in (every window)
+          repeat with t in (every tab of w)
+            if URL of t starts with urlToUse then
+                tell t
+                  ${runJS(browserName, tabJavascript)}
+                  return urlToUse
+                end tell
+                exit repeat
+            end if
+          end repeat
+      end repeat
     end tell
 end run
     `;
