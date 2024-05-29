@@ -2,7 +2,8 @@
 
 ## [Detailed Optimisation] - {PR_MERGE_DATE}
 
-- Some optimisation of details
+- Optimization of details
+- Use smaller thumbnails for improved loading speed in grid/list view
 
 ## [Improve image loading speed] - 2024-03-06
 
