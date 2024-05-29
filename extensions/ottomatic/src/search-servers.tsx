@@ -35,7 +35,7 @@ export default function Command() {
                     url={`${ottomaticBaseUrl}/servers/${server.org_slug}/${server.id}`}
                   />
                 )}
-                <Action title="Refresh Server Info" />
+                {/* <Action title="Refresh Server Info" icon={Icon.RotateClockwise} /> */}
                 <Action.CopyToClipboard title="Copy Server URL" content={server.url} />
                 <Action.OpenInBrowser title="Launch FMS Admin Console" url={`${server.url}/admin-console`} />
                 <Action.OpenInBrowser title="Launch Otto Web Console" url={`${server.url}/otto/`} />
