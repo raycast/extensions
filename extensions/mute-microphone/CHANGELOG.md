@@ -2,7 +2,7 @@
 
 ## [Improvements] - 2024-05-28
 
-- Add a preference setting for keeping audio input volume level
+- Maintain audio input level
 
 ## [Moved contributor] - 2024-04-15
 

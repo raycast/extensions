@@ -25,7 +25,7 @@ export default function muteMenuBar() {
           <MenuBarExtra.Item
             title={menuItemText}
             onAction={async () => {
-              setIsMuted(isMuted => !isMuted);
+              setIsMuted((isMuted) => !isMuted);
               await toggleSystemAudioInputLevel();
             }}
           />
