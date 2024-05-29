@@ -1,6 +1,8 @@
 # Browser AI
 
 Use the best models and Raycast Browser Extension to extend your browsing.
+- Perplexity models: https://docs.perplexity.ai/docs/model-cards.
+- OpenRouter models: https://openrouter.ai/docs#models
 
 ## Features
 
