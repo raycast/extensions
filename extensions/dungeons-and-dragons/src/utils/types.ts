@@ -56,7 +56,7 @@ export interface rule {
   index: string;
   name?: string;
   rule?: string;
-  desc?: string;
+  desc?: string | string[];
   url?: string;
 }
 

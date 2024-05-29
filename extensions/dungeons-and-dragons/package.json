@@ -17,26 +17,6 @@
       "mode": "view"
     },
     {
-      "name": "monstersByChallengeRating",
-      "title": "Monster Lookup by Challenge Rating",
-      "description": "Get all monsters and their stats in DND 5e by challenge rating (CR)",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "challengeLevel",
-          "placeholder": "Level: 0.25-20",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "location",
-          "type": "text",
-          "placeholder": "Location",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "diceRoll",
       "title": "Roll Dice",
       "description": "Select preset or roll Times(d)Sides (ex: 2d6)",

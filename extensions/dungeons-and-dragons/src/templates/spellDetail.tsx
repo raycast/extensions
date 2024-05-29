@@ -1,7 +1,6 @@
-import { Detail, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { getDnd } from "../utils/dndData";
 import { index, spell } from "../utils/types";
-import DiceAction from "../templates/diceAction";
 import Unresponsive from "./unresponsive";
 
 interface spellType {
@@ -9,16 +8,16 @@ interface spellType {
   data: spell;
 }
 
-const renderDamageData = (damageData: { [key: string]: string }) => {
-  if (!damageData || Object.keys(damageData).length === 0) {
+const renderMetaData = (title: string, color: string, data: { [key: string]: string }) => {
+  if (!data || Object.keys(data).length === 0) {
     return null;
   }
 
-  const renderedData = Object.entries(damageData).map(([key, value]) => (
-    <List.Item.Detail.Metadata.TagList.Item key={key+value} text={`${key}: ${value}`} color={"#eed535"} />
+  const renderedData = Object.entries(data).map(([key, value]) => (
+    <List.Item.Detail.Metadata.TagList.Item key={key + value} text={`${key}: ${value}`} color={color} />
   ));
 
-  return <List.Item.Detail.Metadata.TagList title="Damage at Level:">{renderedData}</List.Item.Detail.Metadata.TagList>;
+  return <List.Item.Detail.Metadata.TagList title={title}>{renderedData}</List.Item.Detail.Metadata.TagList>;
 };
 
 const renderSpellComponents = (components: string[]) => {
@@ -49,38 +48,37 @@ const renderSpellComponents = (components: string[]) => {
 };
 
 const damageColor = (damage: string) => {
-    switch (damage.toLowerCase()) {
-        case 'acid':
-            return '#00ff00';
-        case 'bludgeoning':
-            return '#a9a9a9';
-        case 'cold':
-            return '#1e90ff';
-        case 'fire':
-            return '#ff4500';
-        case 'force':
-            return '#800080';
-        case 'lightning':
-            return '#ffd700';
-        case 'necrotic':
-            return '#800000';
-        case 'piercing':
-            return '#8b4513';
-        case 'poison':
-            return '#32cd32';
-        case 'psychic':
-            return '#9932cc';
-        case 'radiant':
-            return '#ffff00';
-        case 'slashing':
-            return '#ff6347';
-        case 'thunder':
-            return '#4682b4';
-        default:
-            return '#333'; // Default color if damage type is not found
-    }
-}
-
+  switch (damage.toLowerCase()) {
+    case "acid":
+      return "#00ff00";
+    case "bludgeoning":
+      return "#a9a9a9";
+    case "cold":
+      return "#1e90ff";
+    case "fire":
+      return "#ff4500";
+    case "force":
+      return "#800080";
+    case "lightning":
+      return "#ffd700";
+    case "necrotic":
+      return "#800000";
+    case "piercing":
+      return "#8b4513";
+    case "poison":
+      return "#32cd32";
+    case "psychic":
+      return "#9932cc";
+    case "radiant":
+      return "#ffff00";
+    case "slashing":
+      return "#ff6347";
+    case "thunder":
+      return "#4682b4";
+    default:
+      return "#333"; // Default color if damage type is not found
+  }
+};
 
 export default function SpellDetail(spell: index) {
   const spellData = getDnd(spell.url) as spellType;
@@ -89,7 +87,7 @@ export default function SpellDetail(spell: index) {
   }
 
   if (spellData.isLoading) {
-    return <List.Item.Detail isLoading={true} />;
+    return <List.Item.Detail isLoading={true} markdown={`# Loading ${spell.name}...`} />;
   } else {
     let spellDesc = `# ${spellData.data?.name} \n\n ${spellData.data.desc.map((str) => `${str}\n\n`).join("")} \n\n`;
     if (spellData.data.higher_level.length > 0) {
@@ -98,19 +96,17 @@ export default function SpellDetail(spell: index) {
         .join("")} \n\n`;
     }
 
-    // Todo list:
-    // - colors for tags
-    // - dc checks
-    //  - action: dc roll
-    // - school of magic
-    // - classes
-    // - action: damage roll
     return (
       <List.Item.Detail
+        key={spellData.data.index}
         markdown={spellDesc}
         metadata={
           <List.Item.Detail.Metadata>
-			<List.Item.Detail.Metadata.Label title="School: "text={spellData.data.school.name} icon={`icons/magic/${spellData.data.school.index}.png`} />
+            <List.Item.Detail.Metadata.Label
+              title="School: "
+              text={spellData.data.school.name}
+              icon={`icons/magic/${spellData.data.school.index}.png`}
+            />
             <List.Item.Detail.Metadata.TagList title="Details: ">
               {spellData.data?.damage?.damage_type.name && (
                 <List.Item.Detail.Metadata.TagList.Item
@@ -129,7 +125,13 @@ export default function SpellDetail(spell: index) {
             <List.Item.Detail.Metadata.TagList title="Components">
               {renderSpellComponents(spellData.data.components)}
             </List.Item.Detail.Metadata.TagList>
-            {renderDamageData(spellData.data?.damage?.damage_at_character_level || {})}
+            {renderMetaData("Damage at slot level:", "#FEC082", spellData.data?.damage?.damage_at_slot_level || {})}
+            {renderMetaData(
+              "Damage at character level:",
+              "#FEC082",
+              spellData.data?.damage?.damage_at_character_level || {},
+            )}
+            {renderMetaData("Heal at slot level:", "#FFFFF9", spellData.data?.heal_at_slot_level || {})}
           </List.Item.Detail.Metadata>
         }
       />

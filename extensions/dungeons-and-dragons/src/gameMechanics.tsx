@@ -1,20 +1,51 @@
-import { List, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action, Detail } from "@raycast/api";
 import { getDnd } from "./utils/dndData";
 import { index, indexCollection } from "./utils/types";
-interface monstersType {
+import MechanicDetail from "./templates/mechanicDetail";
+interface mechanicsType {
   isLoading: boolean;
   data: indexCollection;
 }
 
+const mechanicList = function (mechanics: mechanicsType, title?: string) {
+  return (
+    <List
+      searchBarPlaceholder={`Searching ${mechanics.data.results.length} ${title ?? "items"}...`}
+      throttle={true}
+      filtering={true}
+      isLoading={mechanics.isLoading}
+      isShowingDetail={true}
+    >
+      {mechanics?.data.results?.map((mechanic: index) => (
+        <List.Item
+          key={mechanic.index}
+          title={mechanic.name}
+          detail={<MechanicDetail index={mechanic.index} url={mechanic.url} />}
+        />
+      ))}
+    </List>
+  );
+};
+
 export default function Command() {
-  const rules = getDnd("/api/rule-sections") as monstersType;
+  const conditions = getDnd("/api/conditions") as mechanicsType;
+  const damageTypes = getDnd("/api/damage-types") as mechanicsType;
+  const magicSchools = getDnd("/api/magic-schools") as mechanicsType;
+
+  if (
+    (!conditions?.data && conditions.isLoading) ||
+    (!damageTypes?.data && damageTypes.isLoading) ||
+    (!magicSchools?.data && magicSchools.isLoading)
+  ) {
+    return <Detail isLoading={true} markdown={`# Loading game mechanics...`} />;
+  }
 
   return (
     <List
-      searchBarPlaceholder={`Searching ${rules.data.results.length} rules...`}
+      searchBarPlaceholder={`Look up conditions, damage types, and magic schools`}
       throttle={true}
       filtering={true}
-      isLoading={rules.isLoading}
+      isLoading={conditions.isLoading}
     >
       <List.Item
         key={"conditions"}
@@ -22,29 +53,7 @@ export default function Command() {
         subtitle={`A condition alters a creature's capabilities in a variety of ways and can arise as a result of a spell, a class feature, a monster's attack, or other effect. Most conditions, such as blinded, are impairments, but a few, such as invisible, can be advantageous.`}
         actions={
           <ActionPanel>
-            <Action.Push
-              title={`Show Condition Details`}
-              target={
-                <List
-                  searchBarPlaceholder={`Searching ${rules.data.results.length} rules...`}
-                  throttle={true}
-                  filtering={true}
-                  isLoading={rules.isLoading}
-                >
-                  {rules.data.results.map((rule: index) => (
-                    <List.Item
-                      key={rule.index}
-                      title={rule.name}
-                      actions={
-                        <ActionPanel>
-                          <Action.Push title={`Show ${rule.name} Details`} target={"qow"} />
-                        </ActionPanel>
-                      }
-                    />
-                  ))}
-                </List>
-              }
-            />
+            <Action.Push title={`Show Condition Details`} target={mechanicList(conditions, "Conditions")} />
           </ActionPanel>
         }
       />
@@ -56,19 +65,19 @@ export default function Command() {
         }
         actions={
           <ActionPanel>
-            <Action.Push title={`Show Damage Types Details`} target={`wow`} />
+            <Action.Push title={`Show Damage Types Details`} target={mechanicList(damageTypes, "Damage Types")} />
           </ActionPanel>
         }
       />
       <List.Item
-        key={"magicTypes"}
-        title={"Magic Types"}
+        key={"magicSchools"}
+        title={"Magic Schools"}
         subtitle={
-          "Academies of magic group spells into eight categories called schools of magic. Scholars, particularly wizards, apply these categories to all spells, believing that all magic functions in essentially the same way, whether it derives from rigorous study or is bestowed by a deity.        "
+          "Academies of magic group spells into eight categories called schools of magic. Scholars, particularly wizards, apply these categories to all spells, believing that all magic functions in essentially the same way, whether it derives from rigorous study or is bestowed by a deity."
         }
         actions={
           <ActionPanel>
-            <Action.Push title={`Show Damage Types Details`} target={`wow`} />
+            <Action.Push title={`Show Magic Types Details`} target={mechanicList(magicSchools, "Magic Schools")} />
           </ActionPanel>
         }
       />
