@@ -1,15 +1,12 @@
-import { LaunchType, closeMainWindow, getPreferenceValues, launchCommand } from "@raycast/api";
-import { get, toggleFnFactory } from "./utils";
+import { LaunchType, closeMainWindow, launchCommand } from "@raycast/api";
+import { toggleSystemAudioInputLevel } from "./utils";
 
 export default async function toggleMute() {
-  const preferences: Preferences.ToggleMute = getPreferenceValues();
-  const toggle = toggleFnFactory(preferences);
-  const currentAudioInputLevel = await get();
   await closeMainWindow();
-  await toggle(Number(currentAudioInputLevel));
+  await toggleSystemAudioInputLevel();
 
   try {
-    await launchCommand({ name: "mute-menu-bar", type: LaunchType.Background });
+    await launchCommand({ name: "mute-menu-bar", type: LaunchType.UserInitiated });
   } catch {
     console.log("mute-menu-bar command is not active");
   }
