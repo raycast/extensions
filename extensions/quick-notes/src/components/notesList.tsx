@@ -103,7 +103,10 @@ const NotesList = () => {
       }
     });
     setFilteredNotes(sortedNotes);
-  }, [sort, notes]);
+    if (searchTag) {
+      filterByTags(searchTag);
+    }
+  }, [sort, notes, searchTag]);
 
   const drafts = filteredNotes.filter((n) => n.is_draft);
   const published = filteredNotes.filter((n) => !n.is_draft);
