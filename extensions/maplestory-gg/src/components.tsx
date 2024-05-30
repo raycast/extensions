@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Detail,
+  Icon,
   LaunchType,
   Toast,
   confirmAlert,
@@ -19,6 +20,29 @@ import {
   saveCharacterToFavorites,
 } from "./utils.js";
 import { CharacterData } from "./types.js";
+
+export const RemoveFromFavoritesAction = ({
+  characterData,
+  onRemoveCharacter,
+}: {
+  characterData: CharacterData;
+  onRemoveCharacter?: () => void;
+}) => (
+  <Action
+    icon={Icon.RemovePerson}
+    // eslint-disable-next-line @raycast/prefer-title-case
+    title="Remove from Favorites"
+    onAction={async () => {
+      const confirmed = await confirmAlert({
+        title: "Remove Character",
+        message: `Are you sure you want to remove ${characterData.Name} from your favorites?`,
+      });
+      if (!confirmed) return;
+      await removeCharacterFromFavorites(characterData);
+      onRemoveCharacter?.();
+    }}
+  />
+);
 
 export const SaveCharacterToFavorites = ({
   canBeRemoved,
@@ -51,17 +75,10 @@ export const SaveCharacterToFavorites = ({
         />
       )}
       {canBeRemoved && (
-        <Action
-          // eslint-disable-next-line @raycast/prefer-title-case
-          title="Remove from Favorites"
-          onAction={async () => {
-            const confirmed = await confirmAlert({
-              title: "Remove Character",
-              message: `Are you sure you want to remove ${characterData.Name} from your favorites?`,
-            });
-            if (!confirmed) return;
-            await removeCharacterFromFavorites(characterData);
-            await load();
+        <RemoveFromFavoritesAction
+          characterData={characterData}
+          onRemoveCharacter={() => {
+            load();
             onRemoveCharacter?.();
           }}
         />
@@ -69,6 +86,7 @@ export const SaveCharacterToFavorites = ({
     </>
   ) : (
     <Action
+      icon={Icon.AddPerson}
       title="Save to Favorites"
       onAction={async () => {
         await saveCharacterToFavorites(characterData);

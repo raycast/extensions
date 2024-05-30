@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { HTTPError } from "got";
 import { CharacterDetail } from "./components.js";
 import { getFavoriteCharacter, lookupCharacter } from "./utils.js";
@@ -15,6 +15,7 @@ export default function Index() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
+            icon={Icon.MagnifyingGlass}
             title="Lookup Character"
             onSubmit={async (values) => {
               const { region, characterName } = values;

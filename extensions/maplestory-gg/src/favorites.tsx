@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Grid, useNavigation } from "@raycast/api";
-import { CharacterDetail } from "./components.js";
+import { Action, ActionPanel, Grid, Icon, useNavigation } from "@raycast/api";
+import { CharacterDetail, RemoveFromFavoritesAction } from "./components.js";
 import { getFavoriteCharacters, sortCharacters } from "./utils.js";
 import { CharacterData } from "./types.js";
 
@@ -38,33 +38,44 @@ export default function Favorites() {
         </Grid.Dropdown>
       }
     >
-      {favoriteCharacters?.map((character) => (
-        <Grid.Item
-          id={character.Name}
-          key={character.Name}
-          title={character.Name}
-          subtitle={`Lv.${character.Level}`}
-          content={{ value: character.CharacterImageURL, tooltip: `Lv.${character.Level}` }}
-          actions={
-            <ActionPanel>
-              <Action
-                title="View Character"
-                onAction={() => {
-                  push(
-                    <CharacterDetail
-                      checkLatest
-                      characterData={character}
-                      onRemoveCharacter={() => {
-                        loadFavorites();
-                      }}
-                    />,
-                  );
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {favoriteCharacters?.length ? (
+        favoriteCharacters?.map((character) => (
+          <Grid.Item
+            id={character.Name}
+            key={character.Name}
+            title={character.Name}
+            subtitle={`Lv.${character.Level}`}
+            content={{ value: character.CharacterImageURL, tooltip: `Lv.${character.Level}` }}
+            actions={
+              <ActionPanel>
+                <Action
+                  icon={Icon.PersonLines}
+                  title="View Character"
+                  onAction={() => {
+                    push(
+                      <CharacterDetail
+                        checkLatest
+                        characterData={character}
+                        onRemoveCharacter={() => {
+                          loadFavorites();
+                        }}
+                      />,
+                    );
+                  }}
+                />
+                <RemoveFromFavoritesAction
+                  characterData={character}
+                  onRemoveCharacter={() => {
+                    loadFavorites();
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      ) : (
+        <Grid.EmptyView icon={{ source: "lucid-empty-view.webp" }} title="You haven't favorited any character yet." />
+      )}
     </Grid>
   );
 }
