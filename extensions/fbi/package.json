@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fbi",
   "title": "FBI",
-  "description": "",
-  "icon": "command-icon.png",
+  "description": "Get listing of wanted people and art crimes",
+  "icon": "badge.png",
   "author": "xmok",
   "categories": [
     "Data"
@@ -13,13 +13,13 @@
     {
       "name": "art-crimes",
       "title": "Art Crimes",
-      "description": "",
+      "description": "Get listing of national art theft",
       "mode": "view"
     },
     {
       "name": "wanted-persons",
       "title": "Wanted Persons",
-      "description": "",
+      "description": "Get listing of wanted people",
       "mode": "view"
     }
   ],

@@ -1,3 +1,3 @@
 # FBI Changelog
 
-## [Initial Version] - 2024-05-01
+## [Initial Version] - {PR_MERGE_DATE}
