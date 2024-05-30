@@ -7,8 +7,8 @@ type Dollar = { name: string };
 
 type DollarResponse = {
   blue: { ask: number };
-  mep: { al30: { "48hs": { price: number } } };
-  ccl: { al30: { "48hs": { price: number } } };
+  mep: { al30: { "24hs": { price: number } } };
+  ccl: { al30: { "24hs": { price: number } } };
 };
 
 const useRates = () => {
@@ -59,8 +59,8 @@ export default function Command() {
   }, [selectedCurrency]);
 
   const blueDollarPrice = data?.blue?.ask;
-  const mepDollarPrice = data?.mep?.al30["48hs"]?.price;
-  const cclDollarPrice = data?.ccl?.al30["48hs"]?.price;
+  const mepDollarPrice = data?.mep?.al30["24hs"]?.price;
+  const cclDollarPrice = data?.ccl?.al30["24hs"]?.price;
   const btcPrice = btcData?.USD;
   const ethPrice = ethData?.USD;
 
