@@ -90,21 +90,13 @@ export default function Command() {
   return (
     <MenuBarExtra title={getTitle()} isLoading={isFetching || isBtcFetching || isEthFetching}>
       <MenuBarExtra.Item title="Dólar" />
-      {dollar.map((bookmark) => (
-        <MenuBarExtra.Item
-          key={bookmark.name}
-          title={bookmark.name}
-          onAction={() => setSelectedCurrency(bookmark.name)}
-        />
+      {dollar.map((dollar) => (
+        <MenuBarExtra.Item key={dollar.name} title={dollar.name} onAction={() => setSelectedCurrency(dollar.name)} />
       ))}
 
       <MenuBarExtra.Item title="Criptos" />
-      {crypto.map((bookmark) => (
-        <MenuBarExtra.Item
-          key={bookmark.name}
-          title={bookmark.name}
-          onAction={() => setSelectedCurrency(bookmark.name)}
-        />
+      {crypto.map((crypto) => (
+        <MenuBarExtra.Item key={crypto.name} title={crypto.name} onAction={() => setSelectedCurrency(crypto.name)} />
       ))}
     </MenuBarExtra>
   );

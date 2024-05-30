@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Update Bookmarks",
-      "description": "Template for showing a menu bar extra",
+      "title": "DolarCripto AR",
+      "description": "DolarCripto AR es una extensión para Raycast que te permite visualizar en tiempo real las cotizaciones de los diferentes dólares en Argentina (CCL, MEP y Blue) y de criptomonedas populares (ETH, BTC) directamente en la barra de menú de tu Mac.",
       "mode": "menu-bar",
       "interval": "5m"
     }
