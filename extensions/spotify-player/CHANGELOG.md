@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [New Album Actions] - 2024-05-27
+## [New Album Actions] - 2024-05-30
 
 -  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
 
