@@ -3,7 +3,7 @@ import { getDnd } from "./utils/dndData";
 import { index, indexCollection } from "./utils/types";
 import SpellDetail from "./templates/spellDetail";
 import Unresponsive from "./templates/unresponsive";
-import { useState } from "react";
+// import { useState } from "react";
 
 interface spellsType {
   isLoading: boolean;
@@ -24,7 +24,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Spells
   }
 
   const spells = getDnd(apiUrl) as spellsType;
-  const [selectedSpellId, setSelectedSpellId] = useState<string | null>(null);
+  // const [selectedSpellId, setSelectedSpellId] = useState<string | null>(null); // todo: come back and develop Favorites system
 
   if (!spells?.data && spells.isLoading) {
     return <List isLoading={true} />;

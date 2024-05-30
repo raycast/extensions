@@ -11,12 +11,12 @@ type mechanicType = {
 
 export default function MechanicDetail(rule: rule) {
   const url = rule.url;
-  
-  if(! url) {
+
+  if (!url) {
     return <List.Item.Detail markdown={`No URL provided for ${rule.index}`} />;
   }
-  
-  const mechanicDetails = getDnd(url ?? '') as mechanicType;
+
+  const mechanicDetails = getDnd(url ?? "") as mechanicType;
 
   if (!mechanicDetails?.data && mechanicDetails.isLoading) {
     return <List.Item.Detail isLoading={true} markdown={`Loading ${rule.index}...`} />;
