@@ -1,6 +1,6 @@
 # Raycast Wallpaper Changelog
 
-## [Detailed Optimisation] - {PR_MERGE_DATE}
+## [Detailed Optimisation] - 2024-05-30
 
 - Optimization of details
 - Use smaller thumbnails for improved loading speed in grid/list view
