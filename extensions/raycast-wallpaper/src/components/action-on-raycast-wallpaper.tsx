@@ -71,7 +71,7 @@ export function ActionOnRaycastWallpaper(props: {
           <Action
             icon={Icon.XMarkTopRightSquare}
             title={"Exclude From Auto Switch"}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
               const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
@@ -85,7 +85,7 @@ export function ActionOnRaycastWallpaper(props: {
           <Action
             icon={Icon.PlusTopRightSquare}
             title={"Include in Auto Switch"}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={() => {
               const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
               const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
