@@ -65,6 +65,7 @@ export default function Command() {
         title: "Are you sure?",
         message: "Do you really want to delete this alias? This action cannot be undone.",
         icon: Icon.DeleteDocument,
+        rememberUserChoice: true,
         primaryAction: {
           title: "Delete",
           style: Alert.ActionStyle.Destructive,
