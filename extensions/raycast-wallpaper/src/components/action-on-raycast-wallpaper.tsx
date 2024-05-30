@@ -11,8 +11,9 @@ export function ActionOnRaycastWallpaper(props: {
   index: number;
   raycastWallpapers: RaycastWallpaperWithInfo[];
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const { index, raycastWallpapers, setRefresh } = props;
+  const { index, raycastWallpapers, setRefresh, setSelectedItem } = props;
   const raycastWallpaper = raycastWallpapers[index];
   return (
     <ActionPanel>
@@ -42,10 +43,17 @@ export function ActionOnRaycastWallpaper(props: {
           }}
         />
         <Action.Push
-          icon={Icon.Sidebar}
+          icon={Icon.Maximize}
           title={"Preview Wallpaper"}
           shortcut={{ modifiers: ["cmd"], key: "y" }}
-          target={<PreviewRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} />}
+          target={
+            <PreviewRaycastWallpaper
+              index={index}
+              raycastWallpapers={raycastWallpapers}
+              setSelectedItem={setSelectedItem}
+            />
+          }
+          onPush={() => setSelectedItem(index.toString())}
         />
       </ActionPanel.Section>
 

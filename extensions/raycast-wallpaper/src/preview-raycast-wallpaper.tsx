@@ -8,8 +8,9 @@ import { setWallpaper } from "./utils/applescript-utils";
 export default function PreviewRaycastWallpaper(props: {
   index: number;
   raycastWallpapers: RaycastWallpaperWithInfo[];
+  setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
 }) {
-  const { index, raycastWallpapers } = props;
+  const { index, raycastWallpapers, setSelectedItem } = props;
   const imagesLength = raycastWallpapers.length;
   const [pageIndex, setPageIndex] = useState<number>(index);
   return (
@@ -22,16 +23,26 @@ export default function PreviewRaycastWallpaper(props: {
             icon={Icon.ChevronDown}
             title={"Next"}
             onAction={() => {
-              if (pageIndex === imagesLength - 1) return;
-              setPageIndex(pageIndex + 1);
+              if (pageIndex === imagesLength - 1) {
+                setPageIndex(0);
+                setSelectedItem("0");
+              } else {
+                setPageIndex(pageIndex + 1);
+                setSelectedItem(`${pageIndex + 1}`);
+              }
             }}
           />
           <Action
             icon={Icon.ChevronUp}
             title={"Previous"}
             onAction={() => {
-              if (pageIndex === 0) return;
-              setPageIndex(pageIndex - 1);
+              if (pageIndex === 0) {
+                setPageIndex(imagesLength - 1);
+                setSelectedItem(`${imagesLength - 1}`);
+              } else {
+                setPageIndex(pageIndex - 1);
+                setSelectedItem(`${pageIndex - 1}`);
+              }
             }}
           />
           <ActionPanel.Section>
@@ -54,8 +65,8 @@ export default function PreviewRaycastWallpaper(props: {
             />
           </ActionPanel.Section>
           <Action
-            icon={Icon.ArrowLeft}
-            title={"Back"}
+            icon={Icon.Minimize}
+            title={"Quit Preview"}
             shortcut={{ modifiers: ["cmd"], key: "y" }}
             onAction={useNavigation().pop}
           />
