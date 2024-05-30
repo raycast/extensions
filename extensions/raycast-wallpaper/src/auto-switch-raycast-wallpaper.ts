@@ -1,23 +1,24 @@
-import { autoSetWallpaper, cache } from "./utils/common-utils";
-import { LocalStorageKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
+import { cache } from "./utils/common-utils";
+import { CacheKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
 import { RaycastWallpaper } from "./types/types";
-import { environment, LaunchType, LocalStorage, showHUD } from "@raycast/api";
+import { captureException, closeMainWindow, environment, LaunchType, showHUD } from "@raycast/api";
 import axios from "axios";
+import { autoSetWallpaper } from "./utils/applescript-utils";
 
 export default async () => {
+  await closeMainWindow();
   if (environment.launchType === LaunchType.UserInitiated) {
-    await showHUD("Downloading and setting wallpaper...");
+    await showHUD("🖥️ Setting wallpaper...");
   }
   await getRandomWallpaper();
 };
 
 export const getRandomWallpaper = async () => {
   try {
-    const _localStorage = await LocalStorage.getItem<string>(LocalStorageKey.WALLPAPER_LIST_CACHE);
-    const _wallpaperList =
-      typeof _localStorage === "undefined" ? [] : (JSON.parse(_localStorage) as RaycastWallpaper[]);
+    const cacheString = cache.get(CacheKey.WALLPAPER_LIST_CACHE);
+    const _wallpaperList = typeof cacheString === "undefined" ? [] : (JSON.parse(cacheString) as RaycastWallpaper[]);
 
-    const _excludeCache = cache.get(LocalStorageKey.EXCLUDE_LIST_CACHE);
+    const _excludeCache = cache.get(CacheKey.EXCLUDE_LIST_CACHE);
     const _excludeList = typeof _excludeCache === "undefined" ? [] : (JSON.parse(_excludeCache) as string[]);
 
     const wallpaperList = _wallpaperList.filter((value) => {
@@ -45,13 +46,15 @@ export const getRandomWallpaper = async () => {
           autoSetWallpaper(randomImage);
 
           //cache list
-          LocalStorage.setItem(LocalStorageKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
+          cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
         })
         .catch((error) => {
-          showHUD(String(error));
+          captureException(error);
+          console.error(error);
         });
     }
   } catch (e) {
-    await showHUD(String(e));
+    captureException(e);
+    console.error(e);
   }
 };
