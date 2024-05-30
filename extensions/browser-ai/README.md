@@ -21,7 +21,7 @@ Use the best models and Raycast Browser Extension to extend your browsing.
 
 ## Getting an API Key
 
-1. Go to [Perplexity API](https://www.perplexity.ai/settings/api) or Go to [OpenRouter](https://openrouter.ai/docs#models) or Go to [Groq](https://console.groq.com/docs/models)
+1. Go to [Perplexity API](https://www.perplexity.ai/settings/api), [OpenRouter](https://openrouter.ai/docs#models) or [Groq](https://console.groq.com/docs/models)
 2. Generate and copy your API key and your model name.
 3. Insert your key and model name on the extension's setup page.
 
