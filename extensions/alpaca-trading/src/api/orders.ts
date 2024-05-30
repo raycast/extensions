@@ -46,7 +46,7 @@ export async function cancelOrder(order: Order) {
   if (!response.ok) {
     captureException(new Error(`Failed to cancel order for ${symbol}: ${response.status} ${response.statusText}`));
     toast.style = Toast.Style.Failure;
-    toast.title = `❌ Failed to close position for ${symbol}`;
+    toast.title = `❌ Failed to cancel order for ${symbol}`;
     toast.message = `HTTP error! status: ${response.status}, msg: ${response.statusText}`;
     if (response.status > 499) {
       toast.primaryAction = {

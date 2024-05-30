@@ -40,13 +40,17 @@ export function ClosePositionForm({ position, revalidate, pop }: UseClosePositio
     validation: {
       kind: FormValidation.Required,
       quantity: value => {
-        if (values.kind === 'qty' && Number.isNaN(Number(value)) && value!.split('.')[1]?.length > 9) {
-          return 'quantity should be a number with at most 9 decimal places';
+        if (values.kind === 'qty') {
+          if (!value || value.length === 0 || Number.isNaN(Number(value)) || Number(value) < 0 || value!.split('.')[1]?.length > 9) {
+            return 'quantity should be a positive number with at most 9 decimal places';
+          }
         }
       },
       percentage: value => {
-        if (values.kind === 'pc' && Number.isNaN(Number(value)) && value!.split('.')[1]?.length > 9 && (Number(value) < 0 || Number(value) > 100)) {
-          return 'percentage should be a number between 0 to 100 with at most 9 decimal places';
+        if (values.kind === 'pc') {
+          if (!value || value.length === 0 || Number.isNaN(Number(value)) || Number(value) < 0 || Number(value) > 100 || value!.split('.')[1]?.length > 9) {
+            return 'percentage should be a number between 0 to 100 with at most 9 decimal places';
+          }
         }
       },
     },
