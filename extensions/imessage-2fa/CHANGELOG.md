@@ -1,6 +1,6 @@
 # Messages 2FA Changelog
 
-## [Update] - 2024-05-18
+## [Update] - 2024-05-28
 
 - Add support for Chase 2FA code pattern
 

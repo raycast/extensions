@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, showToast } from "@raycast/api";
 import { useQuran } from "./hooks/useQuran";
-import { getSurah, getAyahs } from "./utils/api";
+import { getSurah, getAyahs, getEdition } from "./utils/api";
 import { Surah, Ayah } from "./types";
 import { useEffect, useState } from "react";
 import { addAyahToFavorites, filterSurahs } from "./utils";
@@ -8,10 +8,9 @@ import { addAyahToFavorites, filterSurahs } from "./utils";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [filteredSurahs, setFilteredSurahs] = useState<Surah[] | undefined>(undefined);
-
   const { data: surahs, isLoading } = useQuran<Surah[]>({
     apiFn: getSurah,
-    cacheKey: "surahs",
+    cacheKey: `surahs-${getEdition()}`,
   });
 
   useEffect(() => {
@@ -55,7 +54,7 @@ export default function Command() {
 const ReadSurah = ({ surah }: { surah: Surah }): JSX.Element => {
   const { data: Ayahs, isLoading } = useQuran<Ayah[]>({
     apiFn: () => getAyahs(surah.number),
-    cacheKey: `surah-${surah.number}`,
+    cacheKey: `surah-${surah.number}-${getEdition()}`,
   });
   return (
     <List isLoading={isLoading} isShowingDetail navigationTitle="Ayahs">

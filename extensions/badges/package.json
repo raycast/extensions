@@ -65,7 +65,7 @@
     "@raycast/utils": "^1.14.1",
     "css-color-converter": "^2.0.0",
     "lodash": "^4.17.21",
-    "raycast-cross-extension": "^0.2.0"
+    "raycast-cross-extension": "^0.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

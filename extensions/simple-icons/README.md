@@ -61,20 +61,15 @@ It returns the icon data.
 ```jsx
 import { crossLaunchCommand } from "raycast-cross-command";
 
-crossLaunchCommand(
-  {
-    name: "index",
-    type: LaunchType.UserInitiated,
-    extensionName: "simple-icons",
-    ownerOrAuthorName: "litomore",
-    context: {
-      launchFromExtensionTitle: "Badges - shields.io",
-    },
+crossLaunchCommand({
+  name: "index",
+  type: LaunchType.UserInitiated,
+  extensionName: "simple-icons",
+  ownerOrAuthorName: "litomore",
+  context: {
+    launchFromExtensionTitle: "Badges - shields.io",
   },
-  {
-    ownerOrAuthorName: "your-extension-author-name",
-  },
-);
+});
 ```
 
 ### Receive Callback Example

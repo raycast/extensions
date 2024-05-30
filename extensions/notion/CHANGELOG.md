@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Seperate property managment for quicklinks] - 2024-04-22
+
+- Manage database properties visibility and order seperatly in quicklinks.
+
 ## [Close Raycast after create new database page] - 2024-04-22
 
 - Add settings to close Raycast after create a new database
