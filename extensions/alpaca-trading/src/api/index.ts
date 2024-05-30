@@ -3,9 +3,11 @@ import { showFailureToast } from '@raycast/utils';
 import fetch from 'node-fetch';
 
 export namespace AlpacaApi {
-  const { apiKey, apiSecret, accountType } = getPreferenceValues<Preferences>();
+  const { paperApiKey, paperApiSecret, liveApiKey, liveApiSecret, accountType } = getPreferenceValues<Preferences>();
   const endpoint = `https://${accountType === 'paper' ? 'paper-api' : 'api'}.alpaca.markets/v2`;
   const { extensionName, commandName } = environment;
+  const apiKey = accountType === 'paper' ? paperApiKey : liveApiKey;
+  const apiSecret = accountType === 'paper' ? paperApiSecret : liveApiSecret;
   const headers = { 'APCA-API-KEY-ID': apiKey, 'APCA-API-SECRET-KEY': apiSecret, Accept: 'application/json', 'User-Agent': `raycast/ext/${extensionName}/${commandName}` };
 
   export namespace Assets {

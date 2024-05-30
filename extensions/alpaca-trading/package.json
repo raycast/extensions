@@ -28,17 +28,33 @@
       "required": true
     },
     {
-      "name": "apiKey",
-      "title": "API Key",
-      "description": "API Key for Alpaca Trading API",
+      "name": "liveApiKey",
+      "title": "Live API Key",
+      "description": "API Key for Alpaca Trading API for Live Account Type",
       "type": "password",
       "placeholder": "Enter your API Key",
       "required": true
     },
     {
-      "name": "apiSecret",
-      "title": "API Secret",
-      "description": "API Secret for Alpaca Trading API",
+      "name": "liveApiSecret",
+      "title": "Live API Secret",
+      "description": "API Secret for Alpaca Trading API for Live Account Type",
+      "type": "password",
+      "placeholder": "Enter your API Secret",
+      "required": true
+    },
+    {
+      "name": "paperApiKey",
+      "title": "Paper API Key",
+      "description": "API Key for Alpaca Trading API for Paper Account Type",
+      "type": "password",
+      "placeholder": "Enter your API Key",
+      "required": true
+    },
+    {
+      "name": "paperApiSecret",
+      "title": "Paper API Secret",
+      "description": "API Secret for Alpaca Trading API for Paper Account Type",
       "type": "password",
       "placeholder": "Enter your API Secret",
       "required": true
