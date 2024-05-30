@@ -11,6 +11,7 @@ import {
   CommandLineMissingError,
   ConnectionError,
   ExtensionError,
+  usePasswords2,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
 import { ItemActionPanel } from "./ItemActionPanel";
@@ -20,8 +21,12 @@ export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
   const [passwords, setPasswords] = useState<Item[]>([]);
 
-  const { data: items, error: itemsError, isLoading: itemsIsLoading } = usePasswords(flags);
   const { data: account, error: accountError, isLoading: accountIsLoading } = useAccount();
+  const {
+    data: items,
+    error: itemsError,
+    isLoading: itemsIsLoading,
+  } = usePasswords2({ flags, account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading });
 
   useMemo(() => {
     if (!items) return;

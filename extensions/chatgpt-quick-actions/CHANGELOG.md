@@ -1,5 +1,9 @@
 # ChatGPT Quick Actions Changelog
 
+## [New models] - 2024-05-24
+
+- Fix for the new model `GPT-4o` to be applied for all commands
+
 ## [New models] - 2024-05-21
 
 - Adds support for the following models: `GPT-4o`, `gpt-4o-2024-05-13`.

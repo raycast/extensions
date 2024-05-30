@@ -80,7 +80,6 @@ export function op(args: string[]) {
 }
 
 export const handleErrors = (stderr: string) => {
-  console.error(stderr);
   if (stderr.includes("no such host")) {
     throw new ConnectionError("No connection to 1Password.", "Verify Your Internet Connection.");
   } else if (stderr.includes("could not get item") || stderr.includes("isn't an item")) {
@@ -100,6 +99,9 @@ export const checkZsh = () => {
   }
   return true;
 };
+
+export const signIn = (account?: string) =>
+  execSync(`${CLI_PATH} signin ${account ? account : ""}`, { shell: ZSH_PATH });
 
 export const getSignInStatus = () => {
   try {
@@ -128,6 +130,44 @@ export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (dat
   });
 };
 
+export const usePasswords2 = ({
+  flags = [],
+  account,
+  execute = true,
+}: {
+  flags?: string[];
+  account: string;
+  execute: boolean;
+}) =>
+  useExec<Item[], ExtensionError>(
+    CLI_PATH,
+    ["--account", account, "items", "list", "--long", "--format=json", ...flags],
+    {
+      parseOutput: ({ stdout, stderr, error, exitCode }) => {
+        if (error) handleErrors(error.message);
+        if (stderr) handleErrors(stderr);
+        if (exitCode != 0) handleErrors(stdout);
+        const items = JSON.parse(stdout) as Item[];
+        return items.sort((a, b) => {
+          if (a.favorite && !b.favorite) {
+            return -1;
+          } else if (!a.favorite && b.favorite) {
+            return 1;
+          } else {
+            return a.title.localeCompare(b.title);
+          }
+        });
+      },
+      execute,
+      onError: async (e) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: e.message,
+        });
+      },
+    }
+  );
+
 export const usePasswords = (flags: string[] = []) =>
   useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
     data.sort((a, b) => a.title.localeCompare(b.title))
@@ -143,7 +183,22 @@ export const useCategories = () =>
 
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
 
-export const useAccounts = () => useOp<User[], ExtensionError>(["account", "list"]);
+export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
+  useExec<T, U>(CLI_PATH, ["account", "list", "--format=json"], {
+    parseOutput: ({ stdout, stderr, error, exitCode }) => {
+      if (error) handleErrors(error.message);
+      if (stderr) handleErrors(stderr);
+      if (exitCode != 0) handleErrors(stdout);
+      return JSON.parse(stdout);
+    },
+    onError: async (e) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: e.message,
+      });
+    },
+    execute: execute,
+  });
 
 export function getCategoryIcon(category: CategoryName) {
   switch (category) {

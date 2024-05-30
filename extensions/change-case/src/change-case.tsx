@@ -20,7 +20,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { CaseFunction, CaseType, functions } from "./types.js";
+import { CaseType, functions } from "./types.js";
 
 class NoTextError extends Error {
   constructor() {
@@ -52,12 +52,19 @@ async function readContent(preferredSource: string) {
   throw new NoTextError();
 }
 
-function modifyCasesWrapper(input: string, case_: CaseFunction) {
+function preLowercaseText(input: string, lowercaseTextBeforeTransform: boolean) {
+  if (lowercaseTextBeforeTransform) {
+    return input.toLowerCase();
+  }
+  return input;
+}
+
+function modifyCasesWrapper(input: string, c: string) {
   const modifiedRawArr: string[] = [];
   const modifiedMarkdownArr: string[] = [];
   const lines = input.split("\n");
   for (const line of lines) {
-    const modified = case_(line);
+    const modified = functions[c](preLowercaseText(line, true));
     modifiedRawArr.push(modified);
     modifiedMarkdownArr.push((modified.length === 0 ? "\u200B" : modified) + "\n");
   }
@@ -88,11 +95,14 @@ export default function Command(props: LaunchProps) {
   const preferences = getPreferenceValues<Preferences>();
   const preferredSource = preferences.source;
   const preferredAction = preferences.action;
+  const lowercaseTextBeforeTransform = preferences.lowercaseTextBeforeTransform;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
     (async () => {
-      const content = await readContent(preferredSource);
+      const content = await readContent(preferredSource).then((input) =>
+        preLowercaseText(input, lowercaseTextBeforeTransform),
+      );
       const converted = functions[immediatelyConvertToCase](content);
 
       if (preferredAction === "paste") {
@@ -297,7 +307,7 @@ export default function Command(props: LaunchProps) {
     <List isShowingDetail={true}>
       <List.Section title="Pinned">
         {pinned?.map((key) => {
-          const modified = modifyCasesWrapper(content, functions[key]);
+          const modified = modifyCasesWrapper(content, key);
           return (
             <CaseItem
               key={key}
@@ -311,7 +321,7 @@ export default function Command(props: LaunchProps) {
       </List.Section>
       <List.Section title="Recent">
         {recent.map((key) => {
-          const modified = modifyCasesWrapper(content, functions[key]);
+          const modified = modifyCasesWrapper(content, key);
           return (
             <CaseItem
               key={key}
@@ -324,15 +334,15 @@ export default function Command(props: LaunchProps) {
         })}
       </List.Section>
       <List.Section title="All Cases">
-        {Object.entries(functions)
+        {Object.keys(functions)
           .filter(
-            ([key]) =>
+            (key) =>
               preferences[key.replace(/ +/g, "") as keyof ExtensionPreferences] &&
               !recent.includes(key as CaseType) &&
               !pinned.includes(key as CaseType),
           )
-          .map(([key, func]) => {
-            const modified = modifyCasesWrapper(content, func);
+          .map((key) => {
+            const modified = modifyCasesWrapper(content, key);
             return <CaseItem key={key} case={key as CaseType} modified={modified.rawText} detail={modified.markdown} />;
           })}
       </List.Section>

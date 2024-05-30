@@ -13,7 +13,8 @@
     "peduarte",
     "pernielsentikaer",
     "mil3na",
-    "clemb8"
+    "clemb8",
+    "stelo"
   ],
   "categories": [
     "Productivity"
@@ -229,6 +230,15 @@
       "description": "The maximum number of issues to fetch from the Linear API at once. Be careful when changing this, as too large a number can cause you to exceed your API rate limit and/or cause heap memory errors.",
       "type": "textfield",
       "default": "50",
+      "required": false
+    },
+    {
+      "name": "shouldHideRedundantIssues",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Hide Redundant Issues",
+      "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
+      "default": false,
       "required": false
     }
   ],

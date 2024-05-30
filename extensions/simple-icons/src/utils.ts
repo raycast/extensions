@@ -1,58 +1,114 @@
-import { access, constants, copyFile, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createWriteStream } from "node:fs";
+import { access, constants, copyFile, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { environment } from "@raycast/api";
-import got from "got";
+import { pipeline as streamPipeline } from "node:stream/promises";
+import { Cache, Toast, environment, showToast } from "@raycast/api";
+import { execa } from "execa";
+import got, { Progress } from "got";
 import { JsDelivrNpmResponse, IconData, IconJson } from "./types.js";
 
+const cache = new Cache();
+
+export const downloadAssetPack = async (version: string) => {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "",
+    message: "Downloading asset pack",
+  });
+  return new Promise<void>((resolve) => {
+    const readStream = got.stream(`https://codeload.github.com/simple-icons/simple-icons/zip/refs/tags/${version}`);
+    const destination = join(environment.supportPath, `pack-${version}.zip`);
+    readStream.on("response", async () => {
+      await streamPipeline(readStream, createWriteStream(destination));
+      resolve();
+    });
+    readStream.on("downloadProgress", (progress: Progress) => {
+      if (progress.percent === 1) return;
+      toast.message = `Downloading asset pack (${(progress.percent * 100).toFixed(0)}%)`;
+    });
+  });
+};
+
+export const extractAssetPack = async (version: string) => {
+  await showToast({
+    style: Toast.Style.Animated,
+    title: "",
+    message: "Extracting asset pack",
+  });
+  const zipPath = join(environment.supportPath, `pack-${version}.zip`);
+  const destination = join(environment.assetsPath, `pack`);
+  await execa("unzip", ["-o", zipPath, "-d", destination]);
+};
+
+export const cacheAssetPack = async (version: string) => {
+  const zipPath = join(environment.supportPath, `pack-${version}.zip`);
+  const destination = join(environment.assetsPath, `pack`);
+  try {
+    await access(zipPath, constants.R_OK | constants.W_OK);
+    await access(destination, constants.R_OK | constants.W_OK);
+  } catch {
+    cache.set("cached-version", "");
+    await cleanDownloadPack();
+    await cleanAssetPack();
+    await downloadAssetPack(version);
+    await extractAssetPack(version);
+    cache.set("cached-version", version);
+  }
+};
+
+export const loadCachedJson = async (version: string) => {
+  const jsonPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "_data", "simple-icons.json");
+  const jsonFile = await readFile(jsonPath, "utf8");
+  return JSON.parse(jsonFile) as IconJson;
+};
+
+export const loadCachedVersion = async () => {
+  return cache.get("cached-version") ?? "";
+};
+
 export const loadLatestVersion = async () => {
+  await showToast({
+    style: Toast.Style.Animated,
+    title: "",
+    message: "Checking latest version",
+  });
   const json = await got.get("https://data.jsdelivr.com/v1/packages/npm/simple-icons").json<JsDelivrNpmResponse>();
   return json.tags.latest;
 };
 
-export const loadJson = async (version: string) => {
-  const json = await got
-    .get(`https://cdn.jsdelivr.net/npm/simple-icons@${version}/_data/simple-icons.json`)
-    .json<IconJson>();
-  return json;
+export const loadVersion = async () => {
+  return loadLatestVersion().catch(async () => {
+    showToast({
+      style: Toast.Style.Animated,
+      title: "",
+      message: "Using local cached version",
+    });
+    return loadCachedVersion();
+  });
 };
 
 export const loadSvg = async (version: string, slug: string) => {
-  const savedPath = await getSavedIconPath(version, slug);
-
-  try {
-    await access(savedPath, constants.R_OK | constants.W_OK);
-    const svg = await readFile(savedPath, "utf8");
-    return { svg, path: savedPath };
-  } catch {
-    const iconUrl = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg`;
-    const svg = await got.get(iconUrl).text();
-    await writeFile(savedPath, svg, "utf8");
-    return { svg, path: savedPath };
-  }
+  const svgPath = join(environment.assetsPath, "pack", `simple-icons-${version}`, "icons", `${slug}.svg`);
+  const svg = await readFile(svgPath, "utf8");
+  return { svg, path: svgPath };
 };
 
-export const getSavedIconPath = async (version: string, slug: string) => {
-  const savePath = `saved-${version}`;
-  const destinationPath = join(environment.supportPath, savePath, `${slug}.svg`);
-  return destinationPath;
-};
-
-export const initSavePath = async (version: string) => {
-  const savePath = join(environment.supportPath, `saved-${version}`);
-  try {
-    await access(savePath, constants.R_OK | constants.W_OK);
-  } catch {
-    await mkdir(savePath);
-  }
-};
-
-export const cleanSavedPaths = async () => {
+export const cleanDownloadPack = async () => {
   const directories = await readdir(environment.supportPath);
   await Promise.all(
     directories
-      .filter((d) => d.startsWith("saved-"))
+      .filter((d) => d.startsWith("pack-"))
       .map((d) => rm(join(environment.supportPath, d), { recursive: true, force: true })),
+  );
+};
+
+export const cleanAssetPack = async () => {
+  const directories = await readdir(environment.assetsPath);
+  await Promise.all(
+    directories
+      .filter((d) => d.startsWith("pack"))
+      .map((d) => rm(join(environment.assetsPath, d), { recursive: true, force: true })),
   );
 };
 

@@ -18,7 +18,7 @@ import { useState } from "react";
 import {
   useDatabaseProperties,
   useDatabases,
-  useDatabasesView,
+  useVisibleDatabasePropIds,
   useRecentPages,
   useRelations,
   useUsers,
@@ -37,9 +37,14 @@ export type CreatePageFormValues = {
   content: string;
 };
 
+type LaunchContext = {
+  visiblePropIds?: string[];
+  defaults?: CreatePageFormValues;
+};
+
 type CreatePageFormProps = {
   mutate?: () => Promise<void>;
-  launchContext?: CreatePageFormValues;
+  launchContext?: LaunchContext;
   defaults?: Partial<CreatePageFormValues>;
 };
 
@@ -56,12 +61,15 @@ const filterNoEditableProperties = (dp: DatabaseProperty) => !NON_EDITABLE_PROPE
 
 export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFormProps) {
   const preferences = getPreferenceValues<CreatePageFormPreferences>();
-  const defaultValues = launchContext ?? defaults;
+  const defaultValues = launchContext?.defaults ?? defaults;
   const initialDatabaseId = defaultValues?.database;
 
   const [databaseId, setDatabaseId] = useState<string | null>(initialDatabaseId ? initialDatabaseId : null);
-  const { data: databaseView, setDatabaseView } = useDatabasesView(databaseId || "__no_id__");
   const { data: databaseProperties } = useDatabaseProperties(databaseId, filterNoEditableProperties);
+  const { visiblePropIds, setVisiblePropIds } = useVisibleDatabasePropIds(
+    databaseId || "__no_id__",
+    launchContext?.visiblePropIds,
+  );
   const { data: users } = useUsers();
   const { data: databases, isLoading: isLoadingDatabases } = useDatabases();
   const { data: relationPages, isLoading: isLoadingRelationPages } = useRelations(databaseProperties);
@@ -132,18 +140,18 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
   });
 
   function filterProperties(dp: DatabaseProperty) {
-    return !databaseView?.create_properties || databaseView.create_properties.includes(dp.id);
+    return !visiblePropIds || visiblePropIds.includes(dp.id);
   }
 
   function sortProperties(a: DatabaseProperty, b: DatabaseProperty) {
-    if (!databaseView?.create_properties) {
+    if (!visiblePropIds) {
       if (a.type == "title") return -1;
       if (b.type == "title") return 1;
       return 0;
     }
 
-    const valueA = databaseView.create_properties.indexOf(a.id);
-    const valueB = databaseView.create_properties.indexOf(b.id);
+    const valueA = visiblePropIds.indexOf(a.id);
+    const valueB = visiblePropIds.indexOf(b.id);
     if (valueA > valueB) return 1;
     if (valueA < valueB) return -1;
     return 0;
@@ -151,11 +159,11 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
 
   function getQuicklink(): Quicklink {
     const url = "raycast://extensions/HenriChabrand/notion/create-database-page";
-    const launchContext = encodeURIComponent(JSON.stringify(values));
+    const launchContext: LaunchContext = { defaults: values, visiblePropIds: visiblePropIds ?? databasePropertyIds };
     let name: string | undefined;
     const databaseTitle = databases.find((d) => d.id == databaseId)?.title;
     if (databaseTitle) name = "Create new page in " + databaseTitle;
-    return { name, link: url + "?launchContext=" + launchContext };
+    return { name, link: url + "?launchContext=" + encodeURIComponent(JSON.stringify(launchContext)) };
   }
 
   if (!isLoadingDatabases && !databases.length) {
@@ -208,42 +216,27 @@ export function CreatePageForm({ mutate, launchContext, defaults }: CreatePageFo
             {renderSubmitAction("main")}
             {renderSubmitAction("second")}
             <Action.CreateQuicklink
-              title="Create Deeplink to Command as Configured"
+              title="Create Quicklink to Command as Configured"
               quicklink={getQuicklink()}
               icon={Icon.Link}
             />
           </ActionPanel.Section>
-          {databaseView && databaseProperties ? (
+          {databaseProperties ? (
             <ActionPanel.Section title="View options">
               <ActionSetVisibleProperties
                 databaseProperties={databaseProperties.filter((dp) => dp.id !== "title")}
-                selectedPropertiesIds={databaseView?.create_properties || databasePropertyIds}
-                onSelect={(propertyId) => {
-                  setDatabaseView({
-                    ...databaseView,
-                    create_properties: databaseView?.create_properties
-                      ? [...databaseView.create_properties, propertyId]
-                      : [propertyId],
-                  });
-                }}
-                onUnselect={(propertyId) => {
-                  setDatabaseView({
-                    ...databaseView,
-                    create_properties: (databaseView?.create_properties || databasePropertyIds).filter(
-                      (pid) => pid !== propertyId,
-                    ),
-                  });
-                }}
+                selectedPropertiesIds={visiblePropIds || databasePropertyIds}
+                onSelect={(propertyId) =>
+                  setVisiblePropIds(visiblePropIds ? [...visiblePropIds, propertyId] : [propertyId])
+                }
+                onUnselect={(propertyId) =>
+                  setVisiblePropIds((visiblePropIds || databasePropertyIds).filter((pid) => pid !== propertyId))
+                }
               />
               <ActionSetOrderProperties
                 databaseProperties={databaseProperties}
-                propertiesOrder={databaseView?.create_properties || databasePropertyIds}
-                onChangeOrder={(propertyIds) => {
-                  setDatabaseView({
-                    ...databaseView,
-                    create_properties: propertyIds,
-                  });
-                }}
+                propertiesOrder={visiblePropIds || databasePropertyIds}
+                onChangeOrder={setVisiblePropIds}
               />
             </ActionPanel.Section>
           ) : null}
