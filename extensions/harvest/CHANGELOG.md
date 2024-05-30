@@ -1,5 +1,12 @@
 # Harvest Changelog
 
+## [Cache Improvements] - 2024-05-28
+
+- Improve caching for projects and time entries throughout the extenstion and menu bar. Thanks @klmz for helping me disagnose this!
+- Better parsing of decimals to hours/minute format
+- Removed callback URLs in the menu bar command (use "Status Folder" feature instaed, see README)
+- Added "Stop Timer" option to menu bar widget
+
 ## [Fixes] - 2024-04-08
 
 - Improved cache for projects and tasks

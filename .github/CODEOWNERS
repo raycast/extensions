@@ -585,6 +585,7 @@
 /extensions/hypersonic                                              @prrrcl
 /extensions/hyrule-compendium-search                                @Macko-pp
 /extensions/iata-code-decoder                                       @timrogers
+/extensions/icd10-lookup                                            @ubergraham @pernielsentikaer
 /extensions/iconify                                                 @Destiner @sxn @robertvanhoesel @kuddl
 /extensions/iconpark                                                @koinzhang
 /extensions/icons8                                                  @yug2005
@@ -662,6 +663,7 @@
 /extensions/keyboard-layout-switcher                                @lucaschultz
 /extensions/keyboard-maestro                                        @eluce2 @suaw3k
 /extensions/keyboard-shortcut-sequences                             @SKaplanOfficial
+/extensions/keyboard-win-mac-switch                                 @fab-uleuh
 /extensions/keychain-password-gen                                   @breadone
 /extensions/kill-process                                            @rolandleth @crazyones110 @zhenpewu @Saafo @erics118
 /extensions/kimai                                                   @marinsokol
@@ -827,7 +829,7 @@
 /extensions/music-timer                                             @JulienLacr0ix
 /extensions/musicthread                                             @ChucKN0risK
 /extensions/must                                                    @eggsy
-/extensions/mute-microphone                                         @quentin23soleil @iamyeizi
+/extensions/mute-microphone                                         @quentin23soleil @iamyeizi @aliaksandrZh
 /extensions/my-daily-log                                            @frugoman
 /extensions/myanimelist-search                                      @luknl
 /extensions/myip                                                    @kkange @iwyvi @j3lte
@@ -931,6 +933,7 @@
 /extensions/ossinsight                                              @k8scat @pernielsentikaer
 /extensions/otp-inbox                                               @chroxify
 /extensions/otter                                                   @mrmartineau
+/extensions/ottomatic                                               @eluce2
 /extensions/oura                                                    @RobErskine
 /extensions/outline-page                                            @praveenjuge
 /extensions/owledge-raycast                                         @RomainPct
@@ -1322,6 +1325,7 @@
 /extensions/terminalfinder                                          @yedongze @Bibabidu
 /extensions/terraform-doc                                           @shoppingjaws @b-per
 /extensions/tesla                                                   @WilliamWelsh
+/extensions/teslamate                                               @mSarheed
 /extensions/text-decorator                                          @koinzhang
 /extensions/text-differ                                             @fishfisher
 /extensions/text-format-improver                                    @mrgeneralgoo
@@ -1331,7 +1335,7 @@
 /extensions/texts                                                   @zavbala
 /extensions/tfl                                                     @haneenmahd
 /extensions/the-matrix-of-destiny                                   @ordinz
-/extensions/the-nobel-prize                                         @xmok @pernielsentikaer
+/extensions/the-nobel-prize                                         @xmok @pernielsentikaer @xilopaint
 /extensions/the-noble-quran                                         @BalliAsghar
 /extensions/the-verge                                               @klkvsky @pernielsentikaer
 /extensions/thesaurus                                               @ABukSwienty

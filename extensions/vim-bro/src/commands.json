@@ -198,7 +198,6 @@
       }
     ]
   },
-
   {
     "key": "insert",
     "commands": [
@@ -272,7 +271,6 @@
       }
     ]
   },
-
   {
     "key": "Insert mode - inserting/appending text",
     "commands": [
@@ -445,6 +443,14 @@
       {
         "kbd": "U",
         "text": "change marked text to uppercase"
+      },
+      {
+        "kbd": "Ctrl + a",
+        "text": "increments the number under the cursor"
+      },
+      {
+        "kbd": "Ctrl + d",
+        "text": "decrements the number under the cursor"
       }
     ]
   },
@@ -525,7 +531,6 @@
       }
     ]
   },
-
   {
     "key": "Indent text",
     "commands": [
@@ -571,7 +576,6 @@
       }
     ]
   },
-
   {
     "key": "Exiting",
     "commands": [
@@ -601,7 +605,6 @@
       }
     ]
   },
-
   {
     "key": "Search and replace",
     "commands": [
@@ -639,7 +642,6 @@
       }
     ]
   },
-
   {
     "key": "Tabs",
     "commands": [

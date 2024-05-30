@@ -1,8 +1,8 @@
-import { getFavicon, useFetch } from "@raycast/utils";
-import { NobelPrizesResult } from "./types";
 import { Action, ActionPanel, Detail, Icon, LaunchProps, List } from "@raycast/api";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { Fragment } from "react";
 import { API_BASE_URL, CATEGORIES, DEAULT_LIMIT, ICONS } from "./constants";
+import { NobelPrizesResult } from "./types";
 import generateNobelPrizeLink from "./utils/generateNobelPrizeLink";
 
 export default function Laureates(props: LaunchProps<{ arguments: Arguments.NobelPrizes }>) {

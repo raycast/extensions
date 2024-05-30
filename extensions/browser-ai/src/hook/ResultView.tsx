@@ -2,10 +2,10 @@ import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/ap
 import { Stream } from "openai/streaming";
 import { useEffect, useState } from "react";
 import { ContentFormat, ResultViewProps } from "./ResultView.types";
-import { enable_streaming, global_model, openai } from "./api";
+import { enable_streaming, global_model, isPerplexityAPI, openai } from "./api";
 import { allModels as changeModels, countToken, estimatePrice, getBrowserContent } from "./utils";
 
-export default function ResultView(props: ResultViewProps) {
+export function ResultView(props: ResultViewProps) {
   const { sys_prompt, model_override, toast_title, temperature } = props;
   const [response_token_count, setResponseTokenCount] = useState(0);
   const [prompt_token_count, setPromptTokenCount] = useState(0);
@@ -111,22 +111,24 @@ export default function ResultView(props: ResultViewProps) {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               icon={Icon.Repeat}
             />
-            <ActionPanel.Submenu
-              title="Retry with Another Model"
-              icon={Icon.ArrowNe}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-            >
-              {changeModels
-                .filter((newModel) => newModel.id !== model && newModel.id !== "global")
-                .map((newModel) => (
-                  <Action
-                    key={newModel.id}
-                    icon={{ source: Icon.ChevronRight }}
-                    title={`${newModel.name}`}
-                    onAction={() => retry({ newModel: newModel.id })}
-                  />
-                ))}
-            </ActionPanel.Submenu>
+            {isPerplexityAPI && (
+              <ActionPanel.Submenu
+                title="Retry with Another Model"
+                icon={Icon.ArrowNe}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              >
+                {changeModels
+                  .filter((newModel) => newModel.id !== model && newModel.id !== "global")
+                  .map((newModel) => (
+                    <Action
+                      key={newModel.id}
+                      icon={{ source: Icon.ChevronRight }}
+                      title={`${newModel.name}`}
+                      onAction={() => retry({ newModel: newModel.id })}
+                    />
+                  ))}
+              </ActionPanel.Submenu>
+            )}
             <ActionPanel.Submenu
               title="Change Temperature"
               icon={Icon.Temperature}
@@ -148,13 +150,17 @@ export default function ResultView(props: ResultViewProps) {
           <Detail.Metadata.Label title="Response Tokens" text={response_token_count.toString()} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Total Tokens" text={(prompt_token_count + response_token_count).toString()} />
-          <Detail.Metadata.Label
-            title="Total Cost"
-            text={estimatePrice(prompt_token_count, response_token_count, model).toString() + " ¢"}
-          />
+          {isPerplexityAPI && (
+            <Detail.Metadata.Label
+              title="Total Cost"
+              text={estimatePrice(prompt_token_count, response_token_count, model).toString() + " ¢"}
+            />
+          )}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Culmulative Tokens" text={cumulative_tokens.toString()} />
-          <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
+          {isPerplexityAPI && (
+            <Detail.Metadata.Label title="Culmulative Cost" text={cumulative_cost.toFixed(4) + " ¢"} />
+          )}
         </Detail.Metadata>
       }
     />
