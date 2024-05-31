@@ -1,22 +1,32 @@
 import { getSelectedText, Clipboard, showToast, Toast, LaunchProps, showHUD } from "@raycast/api";
 import { getFormattedColor } from "./utils";
 
+async function getConvertedColor(text: string) {
+  try {
+    const convertedColor = getFormattedColor(text);
+    return convertedColor;
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Conversion failed",
+      message: `"${text}" is not a valid color.`,
+    });
+  }
+}
+
 export default async function ConvertColor(props: LaunchProps) {
   if (props.arguments.text) {
-    await Clipboard.copy(getFormattedColor(props.arguments.text));
-    await showHUD("Copied color to clipboard");
+    const convertedColor = await getConvertedColor(props.arguments.text);
+    if (convertedColor) {
+      await Clipboard.copy(convertedColor);
+      await showHUD("Copied color to clipboard");
+    }
   } else {
     try {
       const selectedText = await getSelectedText();
-      try {
-        const convertedColor = getFormattedColor(selectedText);
+      const convertedColor = await getConvertedColor(selectedText);
+      if (convertedColor) {
         await Clipboard.paste(convertedColor);
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Conversion failed",
-          message: `"${selectedText}" is not a valid color.`,
-        });
       }
     } catch (error) {
       await showToast({
