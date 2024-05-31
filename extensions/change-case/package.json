@@ -136,14 +136,6 @@
       "required": false
     },
     {
-      "name": "KebabCase",
-      "type": "checkbox",
-      "description": "Enable the \"kebab-case\" Transformation",
-      "label": "Kebab Case",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "LowerCase",
       "type": "checkbox",
       "description": "Enable the \"lower case\" Transformation",
@@ -156,14 +148,6 @@
       "type": "checkbox",
       "description": "Enable the \"lower First\" Transformation",
       "label": "Lower First",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "MacroCase",
-      "type": "checkbox",
-      "description": "Enable the \"MACRO_CASE\" Transformation",
-      "label": "Macro Case",
       "default": true,
       "required": false
     },
@@ -260,22 +244,6 @@
       "type": "checkbox",
       "description": "Enable the \"Upper first\" Transformation",
       "label": "Upper First",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "SpongeCase",
-      "type": "checkbox",
-      "description": "Enable the \"SPonGE CasE\" Transformation",
-      "label": "Sponge Case",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "TrainCase",
-      "type": "checkbox",
-      "description": "Enable the \"Train-Case\" Transformation",
-      "label": "Train Case",
       "default": true,
       "required": false
     }

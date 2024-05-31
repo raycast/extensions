@@ -31,13 +31,11 @@ export const functions: CaseFunctions = {
   "Capital Case": changeCase.capitalCase,
   "Constant Case": changeCase.constantCase,
   "Dot Case": changeCase.dotCase,
-  "Header Case": changeCase.trainCase, // see Train Case
-  "Kebab Case": changeCase.kebabCase,
+  "Header Case": changeCase.trainCase,
   "Lower Case": lowerCase,
   "Lower First": lowerFirst,
-  "Macro Case": changeCase.constantCase, // see Constant Case
   "No Case": changeCase.noCase,
-  "Param Case": changeCase.kebabCase, // see Kebab Case
+  "Param Case": changeCase.kebabCase,
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
@@ -48,8 +46,6 @@ export const functions: CaseFunctions = {
   "Title Case": titleCase,
   "Upper Case": upperCase,
   "Upper First": upperFirst,
-  "Sponge Case": spongeCase, // see Random Case
-  "Train Case": changeCase.trainCase,
 };
 
 export const cases = Object.keys(functions);
