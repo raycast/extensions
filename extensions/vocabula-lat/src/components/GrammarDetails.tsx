@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import React from "react";
 import { Grammar, LexicalData } from "../types";
 
-import Translations from "../texts.json";
+import Translations from "../../assets/texts.json";
 
 interface GrammarMeta {
   grammar: Grammar;
