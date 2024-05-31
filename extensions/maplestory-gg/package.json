@@ -6,6 +6,9 @@
   "description": "MapleStory's Definitive Database.",
   "icon": "maplestory-gg-icon.png",
   "author": "litomore",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "categories": [
     "Data",
     "Fun",
