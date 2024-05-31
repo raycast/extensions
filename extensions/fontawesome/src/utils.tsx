@@ -1,45 +1,30 @@
-import { Icon, IconStyle, Preferences, SearchItem } from './types';
-import { Clipboard, showHUD, getPreferenceValues, LocalStorage } from '@raycast/api';
+import { SearchItem } from './types';
+import { Clipboard, showHUD } from '@raycast/api';
 
 export const copySvgToClipboard = async (icon: SearchItem) => {
-  // Since v6, Font Awesome stopped setting the SVGs fill color to
-  // currentColor, this restores that behavior.
+  // Since v6, Font Awesome stopped setting the SVGs fill color to currentColor, this restores that behavior.
   const svgWithCurrentColor = icon.svgs[0].toString().replace(/<path/g, '<path fill="currentColor"');
-
-  // Copy SVG to clipboard
   await Clipboard.copy(svgWithCurrentColor);
-
-  // Notify the user
   await showHUD('Copied SVG to clipboard!');
 };
 
 export const copyFAGlyphToClipboard = async (icon: SearchItem) => {
   // Convert the unicode to a string and copy it to the clipboard
   await Clipboard.copy(String.fromCharCode(parseInt(icon.unicode, 16)));
-
-  // Notify the user
   await showHUD('Copied Glyph to clipboard!');
 };
-// fa-duotone fa-computer-classic
+
 export const copyFAClassesToClipboard = async (icon: SearchItem) => {
   // Get first style of icon, or use the default iconStyle
   const faClass = `fa-${familyStylesByPrefix[icon.svgs[0].familyStyle.prefix].split(', ')[1].toLowerCase()} fa-${
     icon.id
   }`;
-
-  // Copy icon classes to clipboard
   await Clipboard.copy(faClass);
-
-  // Notify the user
   await showHUD('Copied Classes to clipboard!');
 };
 
-//---
 export const copyFASlugToClipboard = async (icon: SearchItem) => {
-  // Copy icon name to clipboard
   await Clipboard.copy(icon.id);
-
-  // Notify the user
   await showHUD('Copied Slug to clipboard!');
 };
 
