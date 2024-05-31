@@ -1,6 +1,6 @@
 import { encode } from "@nem035/gpt-3-encoder";
 import { BrowserExtension } from "@raycast/api";
-import { ContentFormat } from "./ResultView.types";
+import { ContentFormat } from "../components/ResultView.types";
 
 export const allModels = [
   { name: "Follow global model", id: "global" },
@@ -17,12 +17,6 @@ export const allModels = [
 export const getBrowserContent = async ({ format = "markdown" }: { format?: ContentFormat }) => {
   return await BrowserExtension.getContent({ format: format });
 };
-
-// format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
-export const currentDate = new Date().toLocaleString("en-US", {
-  timeStyle: "long",
-  dateStyle: "full",
-});
 
 function naiveRound(num: number, decimalPlaces = 0) {
   const p = Math.pow(10, decimalPlaces);

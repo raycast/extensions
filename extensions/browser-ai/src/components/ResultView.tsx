@@ -2,8 +2,8 @@ import { Action, ActionPanel, Detail, Icon, Toast, showToast } from "@raycast/ap
 import { Stream } from "openai/streaming";
 import { useEffect, useState } from "react";
 import { ContentFormat, ResultViewProps } from "./ResultView.types";
-import { enable_streaming, global_model, isPerplexityAPI, openai } from "./api";
-import { allModels as changeModels, countToken, estimatePrice, getBrowserContent } from "./utils";
+import { enable_streaming, global_model, isPerplexityAPI, openai } from "../lib/api";
+import { allModels as changeModels, countToken, estimatePrice, getBrowserContent } from "../lib/utils";
 
 export function ResultView(props: ResultViewProps) {
   const { sys_prompt, model_override, toast_title, temperature } = props;

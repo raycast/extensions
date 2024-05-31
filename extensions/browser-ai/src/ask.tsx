@@ -1,5 +1,5 @@
 import { LaunchProps } from "@raycast/api";
-import { ResultView } from "./hook/ResultView";
+import { ResultView } from "./components/ResultView";
 import { getPreferenceValues } from "@raycast/api";
 
 const toast_title = "Generating...";
