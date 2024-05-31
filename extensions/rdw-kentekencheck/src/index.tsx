@@ -96,7 +96,7 @@ export default function Command() {
       searchBarPlaceholder="Search on licence plate, brand or type"
       throttle
     >
-      <List.Section title="Found licences:">
+      <List.Section title="Found licenses:">
         {(data || []).map((item: Car) => (
           <List.Item
             key={item.kenteken}
