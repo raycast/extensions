@@ -6,7 +6,7 @@ export default async function toggleMute() {
   await toggleSystemAudioInputLevel();
 
   try {
-    await launchCommand({ name: "mute-menu-bar", type: LaunchType.UserInitiated });
+    await launchCommand({ name: "mute-menu-bar", type: LaunchType.Background });
   } catch {
     console.log("mute-menu-bar command is not active");
   }

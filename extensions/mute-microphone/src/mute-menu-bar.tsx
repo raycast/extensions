@@ -7,7 +7,7 @@ export default function muteMenuBar() {
   const preferences = getPreferenceValues<Preferences.MuteMenuBar>();
   const currentAudioInputLevelCached = AudioInputLevelCache.curInputLevel;
 
-  if (preferences.hideIconWhenUnmuted && currentAudioInputLevelCached === "0") {
+  if (preferences.hideIconWhenUnmuted && currentAudioInputLevelCached !== "0") {
     return;
   }
 
