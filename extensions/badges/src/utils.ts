@@ -1,5 +1,8 @@
-import { Color, open, LaunchType } from "@raycast/api";
+import { Color, LaunchType, environment, open } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
+import { commandConfig } from "./constants.js";
+
+export const getCommandConfig = () => commandConfig[environment.commandName];
 
 export const ellipsis = (text: string = "", maxLength: number = 20) =>
   text.length > maxLength ? text.slice(0, maxLength) + "…" : text;
