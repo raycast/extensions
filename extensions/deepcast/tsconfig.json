@@ -3,7 +3,7 @@
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "lib": ["ES2023"],
-    "module": "NodeNext",
+    "module": "ES2022",
     "target": "ES2022",
     "strict": true,
     "isolatedModules": true,
@@ -12,6 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Bundler",
   }
 }
