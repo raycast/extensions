@@ -1,5 +1,8 @@
 # Raycast Wallpaper Changelog
 
+- Fix typo in `Set Raycast Wallpaper` command configuration.
+- Fix `npm audit` issue.
+
 ## [Detailed Optimisation] - 2024-05-30
 
 - Optimization of details
