@@ -1,112 +1,161 @@
-import { useEffect, useState } from 'react';
-import { Action, ActionPanel, Color, Grid } from '@raycast/api';
+import { useState, useEffect } from 'react';
+import { Grid, Color, Action, ActionPanel, LocalStorage, getPreferenceValues } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
-import { ApiResponse, Icon } from './types';
+import { SearchResult, TokenData } from './types';
 import {
   copyFAClassesToClipboard,
-  copySvgToClipboard,
   copyFAGlyphToClipboard,
   copyFASlugToClipboard,
-  getSvgUrl,
-  prettyPrintIconStyle,
-  iconStyle,
+  copySvgToClipboard,
+  familyStylesByPrefix,
+  iconForStyle,
 } from './utils';
 
-const iconQuery = `
-query {
-  release(version: "6.2.0") {
-    icons {
+//GraphQL Query to fetch icons for a specific style
+const iconQuery = (squery: string, stype: string) => `query Search {
+  search(query:"${squery}", version: "6.5.2", first: 48) {
       id
       unicode
-      label
-      unicode
-      familyStylesByLicense {
-        free {
-          style
-        }
+      svgs(filter: { familyStyles: [
+        { family: ${stype.split(', ')[0].toUpperCase()}, style: ${stype.split(', ')[1].toUpperCase()} }
+      ] }) {
+          html
+          familyStyle{
+            prefix
+          }
       }
-    }
-  },
+  }
 }
 `;
 
 export default function Command() {
-  const { isLoading, data } = useFetch<ApiResponse>('https://api.fontawesome.com', {
+  const [type, setType] = useState<string>('fass');
+  const [query, setQuery] = useState<string>('');
+  const [accessToken, setAccessToken] = useState<string>('');
+  const [tokenTimeStart, setTokenTimeStart] = useState<number>();
+
+  const { API_TOKEN } = getPreferenceValues();
+  useEffect(() => {
+    const tokenTimerCheck = async () => {
+      const timeStart = await LocalStorage.getItem<number>('token-expiry-start');
+      setTokenTimeStart(timeStart);
+    };
+
+    tokenTimerCheck();
+  }, []);
+
+  // Fetch access token, store expiry info in local storage and state and store access token
+  useFetch<TokenData>('https://api.fontawesome.com/token', {
+    execute: !tokenTimeStart || Date.now() - tokenTimeStart >= 3600000 ? true : false,
+    onData: (data) => {
+      LocalStorage.setItem('token-expiry-start', Date.now());
+      setAccessToken(data.access_token);
+    },
     method: 'POST',
-    body: iconQuery,
+    headers: {
+      Authorization: `Bearer ${API_TOKEN}`,
+    },
   });
 
-  const [icons, setIcons] = useState<Icon[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  //fetch icons
+  const { isLoading, data } = useFetch<SearchResult>('https://api.fontawesome.com', {
+    execute: accessToken ? true : false,
+    keepPreviousData: true,
+    method: 'POST',
+    body: iconQuery(query, familyStylesByPrefix[type]),
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
-  useEffect(() => {
-    // Once the icons have been fetched,
-    // set them to the icons array.
-    if (data !== undefined) {
-      setIcons(data.data.release.icons);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (data === undefined || isLoading) {
-      return;
-    }
-
-    const originalIconSet = data.data.release.icons;
-
-    // If the query is empty, reset the icons
-    if (searchQuery === '') {
-      setIcons(originalIconSet);
-      return;
-    }
-
-    // Filter icons based on the searchQuery
-    const filteredIcons = originalIconSet.filter((icon) =>
-      icon.label.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setIcons(filteredIcons);
-  }, [searchQuery]);
+  console.log(data?.data.search[0].unicode);
 
   return (
     <Grid
-      columns={8}
-      inset={Grid.Inset.Large}
-      enableFiltering={false}
       isLoading={isLoading}
-      onSearchTextChange={setSearchQuery}
-      navigationTitle="Search Font Awesome"
-      searchBarPlaceholder="Search icons"
+      searchText={query}
+      onSearchTextChange={setQuery}
+      inset={Grid.Inset.Large}
+      columns={8}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Select Family & Style" onChange={(newValue) => setType(newValue)}>
+          <Grid.Dropdown.Section title="Sharp Icons">
+            {Object.entries(familyStylesByPrefix)
+              .slice(0, 4)
+              .map(([key, value]) => (
+                <Grid.Dropdown.Item
+                  key={key}
+                  title={value}
+                  value={key}
+                  icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                />
+              ))}
+          </Grid.Dropdown.Section>
+          <Grid.Dropdown.Section title="Duotone Icons">
+            {Object.entries(familyStylesByPrefix)
+              .slice(4, 5)
+              .map(([key, value]) => (
+                <Grid.Dropdown.Item
+                  key={key}
+                  title={value}
+                  value={key}
+                  icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                />
+              ))}
+          </Grid.Dropdown.Section>
+          <Grid.Dropdown.Section title="Classic Icons">
+            {Object.entries(familyStylesByPrefix)
+              .slice(5, 10)
+              .map(([key, value]) => (
+                <Grid.Dropdown.Item
+                  key={key}
+                  title={value}
+                  value={key}
+                  icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                />
+              ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
+      }
     >
-      {icons.map((icon) => (
-        <Grid.Item
-          key={icon.id}
-          title={icon.label}
-          content={{
-            source: getSvgUrl(icon, 'regular'),
-            tintColor: Color.PrimaryText,
-          }}
-          actions={
-            <ActionPanel>
-              <Action
-                title={`Copy SVG (${prettyPrintIconStyle(iconStyle)})`}
-                icon="copy-clipboard-16"
-                onAction={() => copySvgToClipboard(icon, iconStyle)}
-              />
-              <Action title={`Copy FA Slug`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(icon)} />
-              <Action title={`Copy FA Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(icon)} />
-              <Action
-                title={`Copy FA Class`}
-                icon="copy-clipboard-16"
-                onAction={() => copyFAClassesToClipboard(icon)}
-              />
-              <Action.OpenInBrowser
-                title="Open In Browser"
-                url={`https://fontawesome.com/icons/${icon.id}?s=solid&f=classic`}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {data?.data.search
+        .filter((searchItem) => searchItem.svgs.length != 0)
+        .map((searchItem) => (
+          <Grid.Item
+            title={searchItem.id}
+            key={searchItem.id}
+            actions={
+              <ActionPanel>
+                <Action
+                  title={`Copy Icon Slug`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copyFASlugToClipboard(searchItem)}
+                />
+                <Action
+                  title={`Copy Icon Unicode`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copyFAGlyphToClipboard(searchItem)}
+                />
+                <Action
+                  title={`Copy Icon SVG`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copySvgToClipboard(searchItem)}
+                />
+                <Action
+                  title={`Copy Icon Classes`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copyFAClassesToClipboard(searchItem)}
+                />
+              </ActionPanel>
+            }
+            content={{
+              source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString('base64')}`,
+              tintColor: Color.PrimaryText,
+              tooltip: searchItem.id,
+            }}
+          />
+        ))}
     </Grid>
   );
 }

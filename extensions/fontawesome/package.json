@@ -19,12 +19,6 @@
       "title": "Search Font Awesome",
       "description": "Search Font Awesome icons",
       "mode": "view"
-    },
-    {
-      "name": "search",
-      "title": "Fuzzy Search",
-      "description": "Search Font Awesome icons",
-      "mode": "view"
     }
   ],
   "preferences": [
