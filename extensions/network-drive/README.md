@@ -1,3 +1,3 @@
 # network-drive
 
-List the available disk volume of a specified IP address (via SMB), mount and unmount those drives.
+List the available drive of a specified IP address (via SMB), mount and unmount those drives.

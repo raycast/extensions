@@ -1,84 +1,155 @@
-import { ActionPanel, Action, List, showToast, showHUD, Toast } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, showHUD, Toast, Icon, Color, confirmAlert } from "@raycast/api";
 import { exec } from "child_process";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { get_pref_smb_ip } from "./utils-preference";
-import { smbclient_getVolumes } from "./utils-volumes";
+import { delayOperation, getNetworkDrives, getNetworkDrivesMounted } from "./utils-drive";
 
-function delay(milliseconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-function List_SMB_Volumes() {
-  const [volumes, set_volumes] = useState<string[]>([]);
+export default function Command() {
+  const [network_drivess, set_networkDrives] = useState<string[]>([]);
+  const [network_volumes_mounted, set_networkDrivesMounted] = useState<string[]>([]);
+  const [need_update, set_update] = useState<boolean>(false);
   useEffect(() => {
-    smbclient_getVolumes(set_volumes);
-  }, []);
+    getNetworkDrives(set_networkDrives);
+    getNetworkDrivesMounted(set_networkDrivesMounted);
+    set_update(false);
+  }, [need_update]);
+
   return (
-    <List isLoading={volumes.length == 0}>
-      {volumes?.map((volume) => <List_SMB_VolumeItem vol={volume} vols={volumes} key={volume} />)}
+    <List isLoading={network_drivess == undefined || network_volumes_mounted == undefined}>
+      {network_drivess?.map((drive) => (
+        <DriveItem key={drive} vol={drive} mounted_vols={network_volumes_mounted} set_update={set_update} />
+      ))}
     </List>
   );
 }
 
-function List_SMB_VolumeItem(props: { vol: string; vols: string[] }) {
+function DriveItem(props: { vol: string; mounted_vols: string[]; set_update: Dispatch<SetStateAction<boolean>> }) {
+  const mnt = props.mounted_vols.includes(props.vol);
   return (
-    <List.Item title={props.vol} key={props.vol} actions={<List_SMB_ActionPanel vol={props.vol} vols={props.vols} />} />
+    <List.Item
+      title={props.vol}
+      actions={<DriveActions vol={props.vol} mounted_vols={props.mounted_vols} set_update={props.set_update} />}
+      icon={mnt ? { source: Icon.CheckCircle, tintColor: Color.Green } : { source: Icon.Circle }}
+    />
   );
 }
 
-function List_SMB_ActionPanel(props: { vol: string; vols: string[] }) {
+function DriveActions(props: { vol: string; mounted_vols: string[]; set_update: Dispatch<SetStateAction<boolean>> }) {
   return (
     <ActionPanel>
-      <Action
-        title="Mount"
-        onAction={async () => {
-          showToast({ title: "Mounting...", style: Toast.Style.Animated });
-          await delay(1000);
-          exec(`osascript -e 'mount volume "smb://${get_pref_smb_ip()}/${props.vol}"'`, async (err) => {
-            if (err) {
-              showHUD("Action Failed ⚠️");
-            }
-            exec(`open "/Volumes/${props.vol}"`);
-            showHUD(`Mounted  [${props.vol}]  🚀🌖`);
-          });
-        }}
-      ></Action>
-      <Action
-        title="Unmount"
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-        onAction={async () => {
-          showToast({ title: "Un-Mounting...", style: Toast.Style.Animated });
-          await delay(1000);
-          exec(`/usr/sbin/diskutil unmount "/Volumes/${props.vol}"`, async (_err, stdout) => {
-            if (!stdout.includes("Unmount successful")) {
-              showHUD("Action Failed ⚠️");
+      <ActionPanel.Section title="Quick Option">
+        <Action
+          title="Mount/Unmount"
+          onAction={async () => {
+            const mouned = props.mounted_vols.includes(props.vol);
+            if (!mouned) {
+              showToast({ title: "Mounting...", style: Toast.Style.Animated });
+              await delayOperation(1000);
+              exec(`osascript -e 'mount volume "smb://${get_pref_smb_ip()}/${props.vol}"'`, async (err) => {
+                if (err) {
+                  showToast({ title: "Action Failed" });
+                }
+                showToast({ title: `${props.vol}  Mounted` });
+                props.set_update(true);
+              });
             } else {
-              showHUD(`Unmounted  [${props.vol}]  🪂🌍`);
+              showToast({ title: "Unmounting...", style: Toast.Style.Animated });
+              await delayOperation(1000);
+              if (!props.mounted_vols.includes(props.vol)) {
+                showToast({ title: `${props.vol} is Already Unmounted`, style: Toast.Style.Failure });
+              } else {
+                exec(`/usr/sbin/diskutil unmount "/Volumes/${props.vol}"`, async (_err, stdout) => {
+                  if (!stdout.includes("Unmount successful")) {
+                    showToast({ title: "Action Failed", style: Toast.Style.Failure });
+                  } else {
+                    showToast({ title: `${props.vol} Unmounted`, style: Toast.Style.Success });
+                  }
+                  props.set_update(true);
+                });
+              }
             }
-          });
-        }}
-      ></Action>
-      <Action
-        title="Unmount All"
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-        onAction={async () => {
-          showToast({ title: "Un-Mounting All...", style: Toast.Style.Animated });
-          await delay(1000);
-          props.vols.forEach((_vol_) => {
-            exec(`/usr/sbin/diskutil unmount "/Volumes/${_vol_}"`, async (err) => {
+          }}
+        ></Action>
+        <Action
+          title="Mount and Open"
+          onAction={async () => {
+            showToast({ title: "Mounting...", style: Toast.Style.Animated });
+            await delayOperation(1000);
+            exec(`osascript -e 'mount volume "smb://${get_pref_smb_ip()}/${props.vol}"'`, async (err) => {
               if (err) {
                 showHUD("Action Failed ⚠️");
               }
-              showHUD("Unmounted  [ All Drives ]  🪂🌍");
+              exec(`open "/Volumes/${props.vol}"`);
+              showHUD(`Mounted  [${props.vol}]  🚀🌖`);
             });
-          });
-        }}
-      ></Action>
+          }}
+        ></Action>
+        <Action
+          title="Unmount All"
+          shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+          onAction={async () => {
+            if (
+              await confirmAlert({
+                icon: Icon.AlarmRinging,
+                title: `Are you sure you want to \n "Unmount All Drives" ?`,
+              })
+            ) {
+              showToast({ title: "Unmounting All...", style: Toast.Style.Animated });
+              await delayOperation(1000);
+              if (!(props.mounted_vols == undefined || props.mounted_vols.length == 0)) {
+                props.mounted_vols.forEach((_vol_) => {
+                  exec(`/usr/sbin/diskutil unmount "/Volumes/${_vol_}"`, async (err) => {
+                    if (err) {
+                      showToast({ title: "Action Failed", style: Toast.Style.Failure });
+                    }
+                    showHUD("Unmounted All  🪂🌍");
+                    props.set_update(true);
+                  });
+                });
+              } else {
+                showHUD("Unmounted All  🪂🌍");
+              }
+            }
+          }}
+        ></Action>
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Specific Option">
+        <Action
+          title="Mount"
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          onAction={async () => {
+            showToast({ title: "Mounting...", style: Toast.Style.Animated });
+            await delayOperation(1000);
+            exec(`osascript -e 'mount volume "smb://${get_pref_smb_ip()}/${props.vol}"'`, async (err) => {
+              if (err) {
+                showToast({ title: "Action Failed" });
+              }
+              showToast({ title: `${props.vol} Mounted` });
+              props.set_update(true);
+            });
+          }}
+        ></Action>
+        <Action
+          title="Unmount"
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={async () => {
+            showToast({ title: "Unmounting...", style: Toast.Style.Animated });
+            await delayOperation(1000);
+            if (!props.mounted_vols.includes(props.vol)) {
+              showToast({ title: `${props.vol} is Already Unmounted`, style: Toast.Style.Failure });
+            } else {
+              exec(`/usr/sbin/diskutil unmount "/Volumes/${props.vol}"`, async (_err, stdout) => {
+                if (!stdout.includes("Unmount successful")) {
+                  showToast({ title: "Action Failed", style: Toast.Style.Failure });
+                } else {
+                  showToast({ title: `${props.vol} Unmounted`, style: Toast.Style.Success });
+                }
+                props.set_update(true);
+              });
+            }
+          }}
+        ></Action>
+      </ActionPanel.Section>
     </ActionPanel>
   );
-}
-
-// EXPORT DEFAULT FUNCTION
-export default function Command() {
-  return <List_SMB_Volumes />;
 }
