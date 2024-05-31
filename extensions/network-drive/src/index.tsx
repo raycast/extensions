@@ -31,16 +31,15 @@ function List_SMB_ActionPanel(props: { vol: string; vols: string[] }) {
     <ActionPanel>
       <Action
         title="Mount"
-        // shortcut={{ modifiers: [], key: "enter" }}
         onAction={async () => {
           showToast({ title: "Mounting...", style: Toast.Style.Animated });
           await delay(1000);
           exec(`osascript -e 'mount volume "smb://${get_pref_smb_ip()}/${props.vol}"'`, async (err) => {
             if (err) {
-              showHUD("UN-MOUNTED FAILURE !");
+              showHUD("Action Failed ⚠️");
             }
             exec(`open "/Volumes/${props.vol}"`);
-            showHUD("MOUNTED 🚀🌖");
+            showHUD(`Mounted  [${props.vol}]  🚀🌖`);
           });
         }}
       ></Action>
@@ -51,10 +50,10 @@ function List_SMB_ActionPanel(props: { vol: string; vols: string[] }) {
           showToast({ title: "Un-Mounting...", style: Toast.Style.Animated });
           await delay(1000);
           exec(`/usr/sbin/diskutil unmount "/Volumes/${props.vol}"`, async (_err, stdout) => {
-            if (stdout.includes("Unmount successful")) {
-              showHUD("UN-MOUNTED 🪂🌍");
+            if (!stdout.includes("Unmount successful")) {
+              showHUD("Action Failed ⚠️");
             } else {
-              showHUD("UN-MOUNTED FAILURE !");
+              showHUD(`Unmounted  [${props.vol}]  🪂🌍`);
             }
           });
         }}
@@ -68,9 +67,9 @@ function List_SMB_ActionPanel(props: { vol: string; vols: string[] }) {
           props.vols.forEach((_vol_) => {
             exec(`/usr/sbin/diskutil unmount "/Volumes/${_vol_}"`, async (err) => {
               if (err) {
-                showHUD("UN-MOUNTED ALL FAILURE !");
+                showHUD("Action Failed ⚠️");
               }
-              showHUD("UN-MOUNTED 🪂🌍");
+              showHUD("Unmounted  [ All Drives ]  🪂🌍");
             });
           });
         }}
