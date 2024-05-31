@@ -24,8 +24,7 @@ export default function Command() {
     <List
       filtering={false}
       onSearchTextChange={setQuery}
-      navigationTitle="Vocabula.lat"
-      searchBarPlaceholder="Type a Latin word or phrase..."
+      searchBarPlaceholder="Type a Latin abbreviation..."
       isShowingDetail={showingDetail}
       isLoading={isLoadingList}
       throttle={true}
