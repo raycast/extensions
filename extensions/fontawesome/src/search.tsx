@@ -1,51 +1,134 @@
-import { useState } from 'react';
-import { List, Grid, Color } from '@raycast/api';
+import { useState, useEffect } from 'react';
+import { Grid, Color, Action, ActionPanel, LocalStorage, getPreferenceValues } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
-import { SearchResult } from './types';
-import svgToMiniDataURI from 'mini-svg-data-uri';
+import { SearchResult, TokenData } from './types';
+import { copyFASlugToClipboard, familyStylesByPrefix, iconForStyle } from './utils';
 
-const iconQuery = (squery: string) => `
-query Search {
-  search(query:"${squery}", version: "6.5.2", first: 30) {
+//GraphQL Query to fetch icons for a specific style
+const iconQuery = (squery: string, stype: string) => `query Search {
+  search(query:"${squery}", version: "6.5.2", first: 48) {
       id
       label
-      unicode
-      svgs {
-          height
+      svgs(filter: { familyStyles: [
+        { family: ${stype.split(', ')[0].toUpperCase()}, style: ${stype.split(', ')[1].toUpperCase()} }
+      ] }) {
           html
-          iconDefinition
-          pathData
-          width
       }
   }
 }
 `;
 
 export default function Command() {
+  const [type, setType] = useState<string>('fass');
   const [query, setQuery] = useState<string>('');
+  const [accessToken, setAccessToken] = useState<string>('');
+  const [tokenTimeStart, setTokenTimeStart] = useState<number>();
 
+  const { API_TOKEN } = getPreferenceValues();
+  useEffect(() => {
+    const tokenTimerCheck = async () => {
+      const timeStart = await LocalStorage.getItem<number>('token-expiry-start');
+      setTokenTimeStart(timeStart);
+    };
+
+    tokenTimerCheck();
+  }, []);
+
+  // Fetch access token, store expiry info in local storage and state and store access token
+  useFetch<TokenData>('https://api.fontawesome.com/token', {
+    execute: !tokenTimeStart || Date.now() - tokenTimeStart >= 3600000 ? true : false,
+    onData: (data) => {
+      LocalStorage.setItem('token-expiry-start', Date.now());
+      setAccessToken(data.access_token);
+    },
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${API_TOKEN}`,
+    },
+  });
+
+  //fetch icons
   const { isLoading, data } = useFetch<SearchResult>('https://api.fontawesome.com', {
+    execute: accessToken ? true : false,
     keepPreviousData: true,
     method: 'POST',
-    body: iconQuery(query),
-    // onData: saveSVGs,
+    body: iconQuery(query, familyStylesByPrefix[type]),
     headers: {
       Accept: 'application/json',
-      Authorization: `Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJGb250YXdlc29tZSIsImV4cCI6MTcxNjc5NTk4MSwiaWF0IjoxNzE2NzkyMzgxLCJpc3MiOiJGb250YXdlc29tZSIsImp0aSI6ImY2Y2Q0YmZkLWE5ZjctNGRiYi04ZDQ3LTJmM2RhYWQ4YWM0ZSIsIm5iZiI6MTcxNjc5MjM4MCwic3ViIjoiVG9rZW46MjA1Mzc5OSIsInR5cCI6ImFjY2VzcyJ9.l2evogW9GPjD8QMRQkP7EOrLFS_rKRKwkwnbFTRPQzEGt54iLGzLpZXjd74FuRSGk6h65PgF7Kc-REEy8dZ3ew`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 
   return (
-    <Grid isLoading={isLoading} searchText={query} onSearchTextChange={setQuery}>
-      {data?.data.search.map((searchItem) => (
-        <Grid.Item
-          title={searchItem.id}
-          key={searchItem.id}
-          content={{
-            source: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"></svg>`,
-          }}
-        />
-      ))}
+    <Grid
+      isLoading={isLoading}
+      searchText={query}
+      onSearchTextChange={setQuery}
+      inset={Grid.Inset.Large}
+      columns={8}
+      searchBarAccessory={
+        <Grid.Dropdown tooltip="Select Family & Style" onChange={(newValue) => setType(newValue)}>
+          <Grid.Dropdown.Section title="Sharp Icons">
+            {Object.entries(familyStylesByPrefix)
+              .slice(0, 4)
+              .map(([key, value]) => (
+                <Grid.Dropdown.Item
+                  key={key}
+                  title={value}
+                  value={key}
+                  icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                />
+              ))}
+          </Grid.Dropdown.Section>
+          <Grid.Dropdown.Section title="Duotone Icons">
+            {Object.entries(familyStylesByPrefix)
+              .slice(4, 5)
+              .map(([key, value]) => (
+                <Grid.Dropdown.Item
+                  key={key}
+                  title={value}
+                  value={key}
+                  icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                />
+              ))}
+          </Grid.Dropdown.Section>
+          <Grid.Dropdown.Section title="Classic Icons">
+            {Object.entries(familyStylesByPrefix)
+              .slice(5, 10)
+              .map(([key, value]) => (
+                <Grid.Dropdown.Item
+                  key={key}
+                  title={value}
+                  value={key}
+                  icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                />
+              ))}
+          </Grid.Dropdown.Section>
+        </Grid.Dropdown>
+      }
+    >
+      {data?.data.search
+        .filter((searchItem) => searchItem.svgs.length != 0)
+        .map((searchItem) => (
+          <Grid.Item
+            title={searchItem.id}
+            key={searchItem.id}
+            actions={
+              <ActionPanel>
+                <Action
+                  title={`Copy Icon Slug`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copyFASlugToClipboard(searchItem)}
+                />
+              </ActionPanel>
+            }
+            content={{
+              source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString('base64')}`,
+              tintColor: Color.PrimaryText,
+              tooltip: searchItem.id,
+            }}
+          />
+        ))}
     </Grid>
   );
 }

@@ -41,21 +41,22 @@ export interface SearchResult {
 interface Data {
   search: SearchItem[];
 }
-interface SearchItem {
+export interface SearchItem {
   id: string;
   label: string;
   svgs: SvgsItem[];
   unicode: string;
 }
 interface SvgsItem {
-  height: number;
   html: string;
-  iconDefinition: IconDefinition;
-  pathData: string[];
-  width: number;
+  familyStyle: {
+    prefix: string;
+  };
 }
-interface IconDefinition {
-  prefix: string;
-  icon: any[];
-  iconName: string;
+
+export interface TokenData {
+  access_token: string;
+  expires_in: number;
+  scopes: string[];
+  token_type: string;
 }

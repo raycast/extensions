@@ -1,5 +1,5 @@
-import { Icon, IconStyle, Preferences } from './types';
-import { Clipboard, showHUD, getPreferenceValues } from '@raycast/api';
+import { Icon, IconStyle, Preferences, SearchItem } from './types';
+import { Clipboard, showHUD, getPreferenceValues, LocalStorage } from '@raycast/api';
 
 export const { iconStyle } = getPreferenceValues<Preferences>();
 export const getSvgUrl = (icon: Icon, iconStyle: IconStyle): string => {
@@ -45,13 +45,13 @@ export const copySvgToClipboard = async (icon: Icon, iconStyle: IconStyle) => {
   await showHUD('Copied SVG to clipboard!');
 };
 
-export const copyFASlugToClipboard = async (icon: Icon) => {
-  // Copy icon name to clipboard
-  await Clipboard.copy(icon.id);
+// export const copyFASlugToClipboard = async (icon: Icon) => {
+//   // Copy icon name to clipboard
+//   await Clipboard.copy(icon.id);
 
-  // Notify the user
-  await showHUD('Copied Slug to clipboard!');
-};
+//   // Notify the user
+//   await showHUD('Copied Slug to clipboard!');
+// };
 
 export const copyFAGlyphToClipboard = async (icon: Icon) => {
   // Convert the unicode to a string and copy it to the clipboard
@@ -72,3 +72,41 @@ export const copyFAClassesToClipboard = async (icon: Icon) => {
   // Notify the user
   await showHUD('Copied Classes to clipboard!');
 };
+
+//---
+export const copyFASlugToClipboard = async (icon: SearchItem) => {
+  // Copy icon name to clipboard
+  await Clipboard.copy(icon.id);
+
+  // Notify the user
+  await showHUD('Copied Slug to clipboard!');
+};
+
+export const familyStylesByPrefix: { [key: string]: string } = {
+  fass: 'Sharp, Solid',
+  fasr: 'Sharp, Regular',
+  fasl: 'Sharp, Light',
+  fast: 'Sharp, Thin',
+  fad: 'Duotone, Solid',
+  fas: 'Classic, Solid',
+  far: 'Classic, Regular',
+  fal: 'Classic, Light',
+  fat: 'Classic, Thin',
+  fab: 'Classic, Brands',
+};
+
+export function iconForStyle(prefix: string) {
+  if (prefix === 'fast' || prefix === 'fat') {
+    return 'thin.svg';
+  } else if (prefix === 'fasr' || prefix === 'far') {
+    return 'regular.svg';
+  } else if (prefix === 'fasl' || prefix === 'fal') {
+    return 'light.svg';
+  } else if (prefix === 'fass' || prefix === 'fas') {
+    return 'solid.svg';
+  } else if (prefix === 'fad') {
+    return 'duotone.svg';
+  } else {
+    return 'brand.svg';
+  }
+}

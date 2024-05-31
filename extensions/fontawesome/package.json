@@ -29,40 +29,16 @@
   ],
   "preferences": [
     {
-      "name": "iconStyle",
-      "title": "Icon Style",
-      "description": "Which icon style to copy when running \"Copy SVG\"",
-      "default": "regular",
+      "name": "API_TOKEN",
+      "type": "password",
       "required": false,
-      "data": [
-        {
-          "title": "Duotone",
-          "value": "duotone"
-        },
-        {
-          "title": "Light",
-          "value": "light"
-        },
-        {
-          "title": "Regular",
-          "value": "regular"
-        },
-        {
-          "title": "Solid",
-          "value": "solid"
-        },
-        {
-          "title": "Thin",
-          "value": "thin"
-        }
-      ],
-      "type": "dropdown"
+      "title": "API Token (For Font Awesome Pro Accounts)",
+      "description": "Optionally Use Font Awesome Pro icons by providing an API Token, not necessary to access free icons."
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.48.0",
     "@raycast/utils": "^1.4.8",
-    "mini-svg-data-uri": "^1.4.4",
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
