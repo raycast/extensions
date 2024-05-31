@@ -7,6 +7,7 @@ import {
   copyFAGlyphToClipboard,
   copyFASlugToClipboard,
   copySvgToClipboard,
+  copyFAUnicodeClipboard,
   familyStylesByPrefix,
   iconForStyle,
 } from './utils';
@@ -68,8 +69,6 @@ export default function Command() {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-
-  console.log(data?.data.search[0].unicode);
 
   return (
     <Grid
@@ -133,9 +132,14 @@ export default function Command() {
                   onAction={() => copyFASlugToClipboard(searchItem)}
                 />
                 <Action
-                  title={`Copy Icon Unicode`}
+                  title={`Copy Icon Glyph`}
                   icon="copy-clipboard-16"
                   onAction={() => copyFAGlyphToClipboard(searchItem)}
+                />
+                <Action
+                  title={`Copy Icon Unicode`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copyFAUnicodeClipboard(searchItem)}
                 />
                 <Action
                   title={`Copy Icon SVG`}

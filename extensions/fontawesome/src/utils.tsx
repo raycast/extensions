@@ -14,6 +14,12 @@ export const copyFAGlyphToClipboard = async (icon: SearchItem) => {
   await showHUD('Copied Glyph to clipboard!');
 };
 
+export const copyFAUnicodeClipboard = async (icon: SearchItem) => {
+  // Convert the unicode to a string and copy it to the clipboard
+  await Clipboard.copy(icon.unicode);
+  await showHUD('Copied Glyph to clipboard!');
+};
+
 export const copyFAClassesToClipboard = async (icon: SearchItem) => {
   // Get first style of icon, or use the default iconStyle
   const faClass = `fa-${familyStylesByPrefix[icon.svgs[0].familyStyle.prefix].split(', ')[1].toLowerCase()} fa-${
