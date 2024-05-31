@@ -93,7 +93,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       isShowingDetail={true}
-      searchBarPlaceholder="Search on licence plate, brand or type"
+      searchBarPlaceholder="Search on license plate, brand or type"
       throttle
     >
       <List.Section title="Found licenses:">
