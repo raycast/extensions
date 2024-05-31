@@ -4,7 +4,7 @@
   "title": "RDW Kentekencheck",
   "description": "Shows details about Dutch cars by their license plate",
   "icon": "command-icon.png",
-  "author": "JeffreyvanHees",
+  "author": "jeffreyvanhees",
   "categories": [
     "Data"
   ],
