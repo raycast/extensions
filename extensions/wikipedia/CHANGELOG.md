@@ -1,5 +1,7 @@
 # Wikipedia Changelog
 
+## [Add simple english version] - 2024-05-31
+
 ## [Flag update] - 2024-04-19
 
 - Update flag emoji for the `Dutch` language
