@@ -1,5 +1,11 @@
 import { Toast, open, openExtensionPreferences } from "@raycast/api";
 
+export const OpenPreferencesAction: Toast.ActionOptions = {
+  title: "Open Preferences",
+  shortcut: { modifiers: ["opt", "cmd"], key: "." },
+  onAction: () => openExtensionPreferences(),
+};
+
 export class DisplayableError extends Error {
   action?: Toast.ActionOptions;
 
@@ -11,11 +17,7 @@ export class DisplayableError extends Error {
 
 export class CLINotFoundError extends DisplayableError {
   name = "CLINotFoundError";
-  action: Toast.ActionOptions = {
-    title: "Open Preferences",
-    shortcut: { modifiers: ["opt", "cmd"], key: "." },
-    onAction: () => openExtensionPreferences(),
-  };
+  action = OpenPreferencesAction;
 
   constructor(message?: string, stack?: string) {
     super(message ?? "Dashlane CLI not found", stack);
@@ -35,11 +37,41 @@ export class CLIVersionNotSupportedError extends DisplayableError {
   }
 }
 
+export class CLINotLoggedInError extends DisplayableError {
+  name = "CLINotLoggedInError";
+  action: Toast.ActionOptions = {
+    title: "Show documentation",
+    shortcut: { modifiers: ["cmd"], key: "u" },
+    onAction: () => open("https://dashlane.github.io/dashlane-cli/personal/authentication"),
+  };
+
+  constructor(stack?: string) {
+    super("Not logged in to Dashlane CLI", stack);
+  }
+}
+
 export class ParseError extends DisplayableError {
   name = "ParseError";
 
   constructor(message?: string, stack?: string) {
     super(message ?? "Could not parse CLI data", stack);
+  }
+}
+
+export class MasterPasswordMissingError extends DisplayableError {
+  name = "MasterPasswordMissingError";
+  action = OpenPreferencesAction;
+
+  constructor(stack?: string) {
+    super("Master password is missing in preferences", stack);
+  }
+}
+
+export class TimeoutError extends DisplayableError {
+  name = "TimeoutError";
+
+  constructor(stack: string) {
+    super("Timeout", stack);
   }
 }
 

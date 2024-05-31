@@ -148,29 +148,29 @@ If a number is passed, it needs to be in the range 0-2. For larger values, 2 wil
 
 ### AI.Model
 
-The AI model to use to answer to the prompt. Defaults to `"openai-gpt-3.5-turbo-instruct"`.
+The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT3.5-turbo"]`.
 
-```typescript
-type Model =
-  | "anthropic-claude-haiku"
-  | "anthropic-claude-opus"
-  | "anthropic-claude-sonnet"
-  | "openai-gpt-3.5-turbo-instruct"
-  | "openai-gpt-3.5-turbo"
-  | "openai-gpt-4"
-  | "openai-gpt-4-turbo"
-  | "perplexity-sonar-medium-online"
-  | "perplexity-sonar-small-online"
-  | "llama2-70b"
-  | "codellama-70b-instruct"
-  | "mixtral-8x7b";
-```
+#### Enumeration members
+
+| Name                          | Description                                                                                                                                                         |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OpenAI_GPT3.5-turbo           | GPT-3.5 Turbo is OpenAI’s fastest model, making it ideal for tasks that require quick response times with basic language processing capabilities.                   |
+| OpenAI_GPT4                   | GPT-4 is OpenAI’s most capable model with broad general knowledge, allowing it to follow complex instructions and solve difficult problems.                         |
+| OpenAI_GPT4-turbo             | GPT-4 Turbo from OpenAI has a big context window that fits hundreds of pages of text, making it a great choice for workloads that involve longer prompts.           |
+| OpenAI_GPT4o                  | GPT-4o is the most advanced and fastest model from OpenAI, making it a great choice for complex everyday problems and deeper conversations.                         |
+| Anthropic_Claude_Haiku        | Claude 3 Haiku is Anthropic's fastest model, with a large context window that makes it ideal for analyzing code, documents, or large amounts of text.               |
+| Anthropic_Claude_Sonnet       | Claude 3 Sonnet from Anthropic strikes a balance between speed and intelligence, making it an ideal assistant for daily tasks like coding and copywriting.          |
+| Anthropic_Claude_Opus         | Claude 3 Opus is Anthropic's most intelligent model, with best-in-market performance on highly complex tasks. It stands out for remarkable fluency.                 |
+| Perplexity_Llama3_Sonar_Small | Perplexity's Llama 3 Sonar Small is built for speed. It quickly gives you helpful answers using the latest internet knowledge while minimizing hallucinations.      |
+| Perplexity_Llama3_Sonar_Large | Perplexity's most advanced model, Llama 3 Sonar Large, can handle complex questions. It considers current web knowledge to provide well-reasoned, in-depth answers. |
+| Llama3_70B                    | Llama 3 70B from Meta is the most capable openly available LLM which can serve as a tool for various text-related tasks. Powered by Groq.                           |
+| MixtraL_8x7B                  | Mixtral 8x7B from Mistral is an open-source model that demonstrates high performance in generating code and text at an impressive speed. Powered by Groq.           |
 
 If a model isn't available to the user, Raycast will fallback to a similar one:
 
-- `"anthropic-claude-opus"` and `"anthropic-claude-sonnet"` -> `"anthropic-claude-haiku"`
-- `"openai-gpt-4"` and `"openai-gpt-4-turbo"` -> `"openai-gpt-3.5-turbo"`
-- `"perplexity-sonar-medium-online"` -> `"perplexity-sonar-small-online"`
+- `AI.Model.Anthropic_Claude_Opus` and `AI.Model.Anthropic_Claude_Sonnet` -> `AI.Model.Anthropic_Claude_Haiku`
+- `AI.Model.OpenAI_GPT4` and `AI.Model["OpenAI_GPT4-turbo"]` -> `AI.Model["OpenAI_GPT3.5-turbo"]`
+- `AI.Model.Perplexity_Llama3_Sonar_Large` -> `AI.Model.Perplexity_Llama3_Sonar_Small`
 
 ### AI.AskOptions
 

@@ -1,7 +1,7 @@
-import { showToast, Toast, open } from "@raycast/api";
+import { Toast, open, showToast } from "@raycast/api";
+import defaultBrowserId from "default-browser-id";
 import { runAppleScript } from "run-applescript";
 import { getName } from "./getName";
-import defaultBrowserId from "default-browser-id";
 
 interface Arguments {
   add: string;
@@ -12,9 +12,10 @@ export default async (props: { arguments: Arguments }) => {
   const name = await getName();
   const defaultBrowser = await defaultBrowserId();
   if (name !== undefined) {
+    const escapedAdd = args.add.replace(/"/g, '\\"');
     await runAppleScript(`
         tell application "${name}" 
-            \n parse sentence "TODO ${args.add}" with add immediately\n
+          parse sentence "TODO ${escapedAdd}" with add immediately
         end tell`);
     const optionsSuccess: Toast.Options = {
       style: Toast.Style.Success,

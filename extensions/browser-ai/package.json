@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "browser-ai",
   "title": "Browser AI",
-  "description": "Use Perplexity models and Raycast Browser Extension to extend your browsing.",
-  "icon": "perplexity.png",
+  "description": "Use the best models from Perplexity & OpenRouter and Raycast Browser Extension to extend your browsing.",
+  "icon": "logo.png",
   "author": "lin",
   "contributors": [],
   "categories": [
@@ -13,6 +13,36 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "content",
+      "title": "Get Browser Content",
+      "description": "Get only the browser content",
+      "mode": "no-view"
+    },
+    {
+      "name": "ask",
+      "title": "Ask Website",
+      "description": "Ask Website.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": true,
+          "placeholder": "What is it?"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_ask",
+          "description": "Override the global preferred model for this command.",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "default": "global"
+        }
+      ]
+    },
     {
       "name": "inspect",
       "title": "Inspect Website",
@@ -30,48 +60,10 @@
         {
           "name": "model_inspect",
           "description": "Override the global preferred model for this command.",
-          "type": "dropdown",
+          "type": "textfield",
           "required": false,
           "title": "Model Override",
-          "default": "global",
-          "data": [
-            {
-              "value": "global",
-              "title": "Follow global model"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar Small 7B 16k"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar Medium 8×7B 16k"
-            },
-            {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B 16k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
-            },
-            {
-              "value": "mixtral-8x22b-instruct",
-              "title": "Mixtral 8×22B 16k"
-            },
-            {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B 16k"
-            }
-          ]
+          "default": "global"
         }
       ]
     },
@@ -87,54 +79,16 @@
           "title": "Prompt",
           "description": "Enter instructions for rewriting the text in a casual tone.",
           "type": "textfield",
-          "default": "Descrive with simple and concise words. Pay attention to the details and how it is useful. conclude with bullet points of key takeaways",
+          "default": "Create a summary of a YouTube video using its transcript. You will use the following template:  \" ## Summary {Multiple sentences summarising the YouTube video}  ## Notes {Bullet points that summarize the key points or important moments from the video’s transcript with explanations}  ## Quotes {Extract the best sentences from the transcript in a list} \" Transcript:",
           "required": false
         },
         {
           "name": "model_youtube",
           "description": "Override the global preferred model for this command.",
-          "type": "dropdown",
+          "type": "textfield",
           "required": false,
           "title": "Model Override",
-          "default": "global",
-          "data": [
-            {
-              "value": "global",
-              "title": "Follow global model"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar Small 7B 16k"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar Medium 8×7B 16k"
-            },
-            {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B 16k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
-            },
-            {
-              "value": "mixtral-8x22b-instruct",
-              "title": "Mixtral 8×22B 16k"
-            },
-            {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B 16k"
-            }
-          ]
+          "default": "global"
         }
       ]
     },
@@ -156,110 +110,30 @@
         {
           "name": "model_custom",
           "description": "Override the global preferred model for this command.",
-          "type": "dropdown",
+          "type": "textfield",
           "required": false,
           "title": "Model Override",
-          "default": "global",
-          "data": [
-            {
-              "value": "global",
-              "title": "Follow global model"
-            },
-            {
-              "value": "sonar-small-chat",
-              "title": "Sonar Small 7B 16k"
-            },
-            {
-              "value": "sonar-medium-chat",
-              "title": "Sonar Medium 8×7B 16k"
-            },
-            {
-              "value": "sonar-small-online",
-              "title": "Sonar Small 7B Online"
-            },
-            {
-              "value": "sonar-medium-online",
-              "title": "Sonar Medium 8x7B Online"
-            },
-            {
-              "value": "mistral-7b-instruct",
-              "title": "Mistral 7B 16k"
-            },
-            {
-              "value": "mixtral-8x7b-instruct",
-              "title": "Mixtral 8×7B 16k"
-            },
-            {
-              "value": "mixtral-8x22b-instruct",
-              "title": "Mixtral 8×22B 16k"
-            },
-            {
-              "value": "llama-3-8b-instruct",
-              "title": "Llama3 8B 8k"
-            },
-            {
-              "value": "llama-3-70b-instruct",
-              "title": "Llama3 70B 8k"
-            },
-            {
-              "value": "codellama-70b-instruct",
-              "title": "CodeLlama 70B 16k"
-            }
-          ]
+          "default": "global"
         }
       ]
     }
   ],
   "preferences": [
     {
-      "description": "Perplexity API Key",
+      "description": "AI API Key",
       "name": "apikey",
       "required": true,
-      "title": "Perplexity API Key",
+      "title": "Perplexity/OpenRouter/Groq API Key.",
       "type": "password",
-      "placeholder": "pplx-XXX"
+      "placeholder": "pplx-XXX or sk-or-v1 or gsk_"
     },
     {
       "name": "model",
       "title": "Global Model",
       "description": "LLM model to use for all your commands.",
-      "type": "dropdown",
+      "type": "textfield",
       "required": true,
-      "default": "sonar-medium-chat",
-      "data": [
-        {
-          "value": "sonar-small-chat",
-          "title": "Sonar Small 7B 16k"
-        },
-        {
-          "value": "sonar-medium-chat",
-          "title": "Sonar Medium 8×7B 16k"
-        },
-        {
-          "value": "mixtral-8x7b-instruct",
-          "title": "Mixtral 8×7B 16k"
-        },
-        {
-          "value": "mixtral-8x22b-instruct",
-          "title": "Mixtral 8×22B 16k"
-        },
-        {
-          "value": "llama-3-8b-instruct",
-          "title": "Llama3 8B 8k"
-        },
-        {
-          "value": "llama-3-70b-instruct",
-          "title": "Llama3 70B 8k"
-        },
-        {
-          "value": "mistral-7b-instruct",
-          "title": "Mistral 7B 16k"
-        },
-        {
-          "value": "codellama-70b-instruct",
-          "title": "CodeLlama 70B 16k"
-        }
-      ]
+      "default": "meta-llama/llama-3-8b-instruct:free"
     },
     {
       "name": "enableStreaming",
@@ -273,9 +147,10 @@
   ],
   "dependencies": {
     "@nem035/gpt-3-encoder": "^1.1.7",
-    "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.14.1",
-    "openai": "^4.38.5"
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.47.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

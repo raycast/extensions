@@ -2,7 +2,7 @@ import { Toast, showToast } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import fs, { existsSync } from "fs";
 import { promisify } from "util";
-import { COMPRESSION_OPTIONS, CompressionOptionKey, FFMPEG_BINARY_CUSTOM_PATH, PATH } from "./constants";
+import { COMPRESSION_OPTIONS, CompressionOptionKey, FFMPEG_BINARY_CUSTOM_PATH, PATH, VIDEO_FORMATS } from "./constants";
 
 const ffmpegPathExists = (): boolean => {
   try {
@@ -59,7 +59,14 @@ const getFFmpegCommand = (args: string) => {
 };
 
 export function sanitizeFileName(file: string): string {
-  return file.replace(/ /g, "\\ ").replace(/'/g, `\\'\\''`).replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+  return file
+    .replace(/\\/g, "\\\\")
+    .replace(/ /g, "\\ ")
+    .replace(/`/g, "\\`")
+    .replace(/"/g, `\\"`)
+    .replace(/\$/g, `\\$`)
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
 }
 
 export async function compressVideoFiles(files: string[], compression: CompressionOptionKey): Promise<string[]> {
@@ -110,4 +117,9 @@ export function capitalizeSnakeCase(text: string): string {
     .split("_")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export function isFileFormatSupported(_filename: string): boolean {
+  const filename = _filename.toLowerCase();
+  return VIDEO_FORMATS.some((format) => filename.endsWith(format));
 }

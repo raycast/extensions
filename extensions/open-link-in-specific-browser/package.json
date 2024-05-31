@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-link-in-specific-browser",
   "title": "Open Link in Specific Browser",
-  "description": "Open link or search text in specific browsers, email clients, App Store or others.",
+  "description": "Open link or search text in specific browsers.",
   "icon": "open-link.png",
   "author": "koinzhang",
   "categories": [
@@ -15,14 +15,14 @@
     {
       "name": "open-link-in-specific-browser",
       "title": "Open Link in Specific Browser",
-      "description": "Open link or search text in specific browsers, email clients, App Store or others.",
+      "description": "Open link or search text in specific browsers.",
       "mode": "view",
       "preferences": [
         {
           "name": "layout",
           "type": "dropdown",
           "description": "Set the layout of the app items.",
-          "required": true,
+          "required": false,
           "title": "App Layout",
           "default": "Grid",
           "data": [
@@ -109,7 +109,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Search Engine",
-          "description": "Search Engine for SelectedText (default: Google).",
+          "description": "Search Engine for SelectedText.",
           "default": "Google",
           "data": [
             {
@@ -133,36 +133,14 @@
               "value": "DuckDuckGo"
             }
           ]
-        },
-        {
-          "name": "sortBy",
-          "type": "dropdown",
-          "required": false,
-          "title": "Sort by",
-          "description": "Surfboard sorting method (default: Rank).",
-          "default": "Rank",
-          "data": [
-            {
-              "title": "Rank",
-              "value": "Rank"
-            },
-            {
-              "title": "Name ↑",
-              "value": "Name+"
-            },
-            {
-              "title": "Name ↓",
-              "value": "Name-"
-            }
-          ]
         }
       ]
     },
     {
-      "name": "open-link-in-specific-browser-menu-bar",
-      "title": "Open Link in Specific Browser",
-      "icon": "open-link-menu-bar.png",
-      "description": "Open link or search text in specific browsers, email clients, App Store or others.",
+      "name": "open-link-from-menubar",
+      "title": "Open Link From Menubar",
+      "icon": "open-link.png",
+      "description": "Open link or search text in specific browsers from the menubar.",
       "mode": "menu-bar",
       "preferences": [
         {
@@ -170,7 +148,7 @@
           "type": "dropdown",
           "required": false,
           "title": "Search Engine",
-          "description": "Search Engine for SelectedText (default: Google).",
+          "description": "Search Engine for SelectedText.",
           "default": "Google",
           "data": [
             {
@@ -194,70 +172,13 @@
               "value": "DuckDuckGo"
             }
           ]
-        },
-        {
-          "name": "sortBy",
-          "type": "dropdown",
-          "required": false,
-          "title": "Sort by",
-          "description": "Surfboard sorting method (default: Rank).",
-          "default": "Rank",
-          "data": [
-            {
-              "title": "Rank",
-              "value": "Rank"
-            },
-            {
-              "title": "Name ↑",
-              "value": "Name+"
-            },
-            {
-              "title": "Name ↓",
-              "value": "Name-"
-            }
-          ]
         }
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "showBrowser",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "title": "Recommended Apps",
-      "label": "Browser",
-      "description": "Whether to show the browser in the recommended apps"
-    },
-    {
-      "name": "showEmail",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Email Client",
-      "description": "Whether to show the email client in the recommended apps"
-    },
-    {
-      "name": "showOther",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Other Apps",
-      "description": "Whether to show other apps in the recommended apps"
-    },
-    {
-      "name": "showAll",
-      "type": "checkbox",
-      "title": "All Apps",
-      "required": false,
-      "default": false,
-      "label": "All Apps",
-      "description": "Whether to show all apps"
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.71.3"
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {
     "@types/node": "~20.12.7 ",

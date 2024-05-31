@@ -19,7 +19,7 @@ import path from "path";
 const preferences = getPreferenceValues();
 
 export default function AddNewTorrent() {
-  const [downloadDir, setDownloadDir] = useState("");
+  const [downloadDir, setDownloadDir] = useState(preferences.defaultDownloadDir);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const transmission = useMemo(() => createClient(), []);

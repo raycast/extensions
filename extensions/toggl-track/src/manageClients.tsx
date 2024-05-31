@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useWorkspaces, useClients, useGroups } from "./hooks";
-import { Workspace } from "./api";
-import Shortcut from "./helpers/shortcuts";
-import ClientListItem from "./components/ClientListItem";
-import ClientForm from "./components/ClientForm";
-import { canModifyProjectIn } from "./helpers/privileges";
+import { useMemo, useState } from "react";
+
+import { Workspace } from "@/api";
+import ClientForm from "@/components/ClientForm";
+import ClientListItem from "@/components/ClientListItem";
+import { canModifyProjectIn } from "@/helpers/privileges";
+import Shortcut from "@/helpers/shortcuts";
+import { useWorkspaces, useClients, useGroups } from "@/hooks";
 
 export default function ClientList() {
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();

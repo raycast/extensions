@@ -9,6 +9,9 @@
     "Media",
     "Fun"
   ],
+  "keywords": [
+    "gif"
+  ],
   "license": "MIT",
   "commands": [
     {
