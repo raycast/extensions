@@ -3,6 +3,7 @@
 ## [Enhancement] - 2024-05-31
 
 - Add support for rgb, rgb %, oklch, lch and p3 color formats
+- Add "Convert Color" command
 - Update "Generate Colors" command to respect the preferred color format
 
 ## [Generate Colors using AI] - 2024-05-23

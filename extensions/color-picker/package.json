@@ -71,6 +71,20 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "convert-color",
+      "title": "Convert Color",
+      "description": "Convert any color to a different format.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "#FF6363"
+        }
+      ]
     }
   ],
   "preferences": [
