@@ -52,8 +52,8 @@ async function readContent(preferredSource: string) {
   throw new NoTextError();
 }
 
-function preLowercaseText(input: string, lowercaseTextBeforeTransform: boolean) {
-  if (lowercaseTextBeforeTransform) {
+function preLowercaseText(input: string, preserveCase: boolean) {
+  if (!preserveCase) {
     return input.toLowerCase();
   }
   return input;
@@ -95,13 +95,13 @@ export default function Command(props: LaunchProps) {
   const preferences = getPreferenceValues<Preferences>();
   const preferredSource = preferences.source;
   const preferredAction = preferences.action;
-  const lowercaseTextBeforeTransform = preferences.lowercaseTextBeforeTransform;
+  const preserveCase = preferences.preserveCase;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
     (async () => {
       const content = await readContent(preferredSource).then((input) =>
-        preLowercaseText(input, lowercaseTextBeforeTransform),
+        preLowercaseText(input, preserveCase),
       );
       const converted = functions[immediatelyConvertToCase](content);
 

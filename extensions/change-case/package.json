@@ -41,13 +41,13 @@
   ],
   "preferences": [
     {
-      "name": "lowercaseTextBeforeTransform",
+      "name": "preserveCase",
       "type": "checkbox",
-      "default": false,
+      "default": true,
       "title": "Behavior",
-      "description": "Input text is not lowercased before transformations, which may result in unexpected behavior at times. See the README.md for more details.",
-      "label": "Lowercase Text Before Changing Case",
-      "required": false
+      "description": "Input text is lowercased before transformations, which is intended for most but not all use cases. See the README.md for more details.",
+      "label": "Preserve Casing",
+      "required": true
     },
     {
       "name": "popToRoot",
