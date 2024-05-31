@@ -62,11 +62,8 @@ export const generateTotalExpChart = async (graphData: GraphDataItem[]) => {
   return dataUrl;
 };
 
-export const saveCharacterToFavorites = async (character: CharacterData) => {
-  await LocalStorage.setItem(
-    [favoriteCharacterPrefix, character.Region, character.Name].join("-"),
-    JSON.stringify(character),
-  );
+export const hasCharacterInFavorites = async (character: CharacterData) => {
+  return Boolean(await LocalStorage.getItem([favoriteCharacterPrefix, character.Region, character.Name].join("-")));
 };
 
 export const getFavoriteCharacter = async (region: string, characterName: string) => {
@@ -74,12 +71,16 @@ export const getFavoriteCharacter = async (region: string, characterName: string
   return character ? (JSON.parse(character) as CharacterData) : undefined;
 };
 
-export const removeCharacterFromFavorites = async (character: CharacterData) => {
-  await LocalStorage.removeItem([favoriteCharacterPrefix, character.Region, character.Name].join("-"));
+export const saveCharacterToFavorites = async (character: CharacterData, force?: boolean) => {
+  if (!force && (await hasCharacterInFavorites(character))) return;
+  await LocalStorage.setItem(
+    [favoriteCharacterPrefix, character.Region, character.Name].join("-"),
+    JSON.stringify(character),
+  );
 };
 
-export const hasCharacterInFavorites = async (character: CharacterData) => {
-  return Boolean(await LocalStorage.getItem([favoriteCharacterPrefix, character.Region, character.Name].join("-")));
+export const removeCharacterFromFavorites = async (character: CharacterData) => {
+  await LocalStorage.removeItem([favoriteCharacterPrefix, character.Region, character.Name].join("-"));
 };
 
 export const getFavoriteCharacters = async () => {

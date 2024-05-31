@@ -45,11 +45,9 @@ export const RemoveFromFavoritesAction = ({
 );
 
 export const SaveCharacterToFavorites = ({
-  canBeRemoved,
   characterData,
   onRemoveCharacter,
 }: {
-  canBeRemoved?: boolean;
   characterData: CharacterData;
   onRemoveCharacter?: () => void;
 }) => {
@@ -74,22 +72,20 @@ export const SaveCharacterToFavorites = ({
           }}
         />
       )}
-      {canBeRemoved && (
-        <RemoveFromFavoritesAction
-          characterData={characterData}
-          onRemoveCharacter={() => {
-            load();
-            onRemoveCharacter?.();
-          }}
-        />
-      )}
+      <RemoveFromFavoritesAction
+        characterData={characterData}
+        onRemoveCharacter={() => {
+          load();
+          onRemoveCharacter?.();
+        }}
+      />
     </>
   ) : (
     <Action
       icon={Icon.AddPerson}
       title="Save to Favorites"
       onAction={async () => {
-        await saveCharacterToFavorites(characterData);
+        await saveCharacterToFavorites(characterData, true);
         await load();
       }}
     />
@@ -105,7 +101,6 @@ export const CharacterDetail = ({
   characterData: CharacterData;
   onRemoveCharacter?: () => void;
 }) => {
-  const [canBeRemoved, setCanBeRemoved] = useState<boolean>(false);
   const [character, setCharacter] = useState<CharacterData>(characterData);
   const [dailyExpChart, setDailyExpChart] = useState<string>();
   const [totalExpChart, setTotalExpChart] = useState<string>();
@@ -138,9 +133,7 @@ export const CharacterDetail = ({
   };
 
   useEffect(() => {
-    loadLatestCharacterData().then(() => {
-      setCanBeRemoved(true);
-    });
+    loadLatestCharacterData();
   }, []);
 
   useEffect(() => {
@@ -178,11 +171,7 @@ export const CharacterDetail = ({
       }
       actions={
         <ActionPanel>
-          <SaveCharacterToFavorites
-            canBeRemoved={canBeRemoved}
-            characterData={character}
-            onRemoveCharacter={onRemoveCharacter}
-          />
+          <SaveCharacterToFavorites characterData={character} onRemoveCharacter={onRemoveCharacter} />
         </ActionPanel>
       }
     />
