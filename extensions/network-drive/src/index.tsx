@@ -66,7 +66,7 @@ function List_SMB_ActionPanel(props: { vol: string; vols: string[] }) {
           showToast({ title: "Un-Mounting All...", style: Toast.Style.Animated });
           await delay(1000);
           props.vols.forEach((_vol_) => {
-            exec(`/usr/sbin/diskutil unmount unmount "/Volumes/${_vol_}"`, async (err) => {
+            exec(`/usr/sbin/diskutil unmount "/Volumes/${_vol_}"`, async (err) => {
               if (err) {
                 showHUD("UN-MOUNTED ALL FAILURE !");
               }
