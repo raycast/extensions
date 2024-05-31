@@ -1,5 +1,9 @@
 # Readwise Reader Changelog
 
+## [Improve README] - 2023-5-31
+
+- Add link to get the access token.
+
 ## [Add search command] - 2023-4-2
 
 - Add `Search` command
