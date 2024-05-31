@@ -10,7 +10,9 @@ The Font Awesome Plugin let's you search all the free and pro icons in the lates
 
 ## Setup
 
-The Font Awesome Plugin works out of the box for free icons. To use it for pro icons, you can optionally provide your API token that you can generate from your accounts page.
+The Font Awesome Plugin works out of the box for free icons, there is no need for an API Token.
+
+In order to use it for searching pro icons, you can provide your API token that you can generate from your accounts page.
 
 Follow these steps to generate an API Token,
 
