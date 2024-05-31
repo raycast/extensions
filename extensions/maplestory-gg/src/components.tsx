@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Action,
   ActionPanel,
+  Alert,
   Detail,
   Icon,
   LaunchType,
@@ -32,10 +33,17 @@ export const RemoveFromFavoritesAction = ({
     icon={Icon.RemovePerson}
     // eslint-disable-next-line @raycast/prefer-title-case
     title="Remove from Favorites"
+    style={Action.Style.Destructive}
     onAction={async () => {
       const confirmed = await confirmAlert({
         title: "Remove Character",
+        icon: Icon.RemovePerson,
+        rememberUserChoice: true,
         message: `Are you sure you want to remove ${characterData.Name} from your favorites?`,
+        primaryAction: {
+          title: "Confirm",
+          style: Alert.ActionStyle.Destructive,
+        },
       });
       if (!confirmed) return;
       await removeCharacterFromFavorites(characterData);
