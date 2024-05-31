@@ -6,9 +6,11 @@
   "icon": "extension-icon.png",
   "author": "joetannenbaum",
   "contributors": [
-    "danulqua",
     "theRubberDuckiee",
     "hakob_nersesian"
+  ],
+  "pastContributors": [
+    "danulqua"
   ],
   "owner": "warpdotdev",
   "access": "public",

@@ -1,5 +1,9 @@
 # Cleanshot X Changelog
 
+## [Update] - 2024-04-06
+
+- Added support for selected Finder files to `Annotate`, `Pin` and `Add Quick Acess Overlay` commands
+
 ## [Update] - 2023-11-17
 
 - Added documentation

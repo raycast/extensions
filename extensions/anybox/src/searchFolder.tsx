@@ -1,7 +1,6 @@
 import { List, Grid, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import searchRequest, { SearchQuery, Link } from "./utilities/searchRequest";
-import { Preferences } from "./utilities/searchRequest";
 import LinkItem from "./components/LinkItem";
 import { FolderProp, fetchSearchEngines } from "./utilities/fetch";
 
@@ -23,7 +22,7 @@ export default function SearchFolder(props: Props) {
   });
   const folder = props.folder;
   const [searchText, setSearchText] = useState("");
-  const preferences: Preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.Search>();
 
   useEffect(() => {
     const searchLinks = async () => {

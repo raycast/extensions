@@ -7,6 +7,7 @@ import {
   MenuBarSection,
   getBoundedPreferenceNumber,
 } from "./components/Menu";
+import { getIssueStatus } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyIssues } from "./hooks/useMyIssues";
 
@@ -32,9 +33,8 @@ function MyIssuesMenu() {
   return (
     <MenuBarRoot
       title={displayTitlePreference() ? `${issuesCount}` : undefined}
-      icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
-      tooltip="GitHub My Issues"
     >
       {sections?.map((section) => {
         return (
@@ -47,15 +47,18 @@ function MyIssuesMenu() {
             )}
             emptyElement={<MenuBarItem title="No Issues" />}
           >
-            {section.issues?.map((i) => (
-              <MenuBarItem
-                key={i.id}
-                title={`#${i.number} ${i.title}`}
-                icon={{ source: "issue-opened.svg", tintColor: Color.PrimaryText }}
-                tooltip={i.repository.nameWithOwner}
-                onAction={() => open(i.url)}
-              />
-            ))}
+            {section.issues?.map((i) => {
+              const status = getIssueStatus(i);
+
+              return (
+                <MenuBarItem
+                  key={i.id}
+                  title={`#${i.number} ${i.title}`}
+                  icon={{ source: status.icon.source, tintColor: Color.PrimaryText }}
+                  onAction={() => open(i.url)}
+                />
+              );
+            })}
           </MenuBarSection>
         );
       })}
@@ -63,7 +66,7 @@ function MyIssuesMenu() {
       <MenuBarSection>
         <MenuBarItem
           title="Open My Issues"
-          icon={Icon.Terminal}
+          icon={Icon.AppWindowList}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => launchMyIssuesCommand()}
         />

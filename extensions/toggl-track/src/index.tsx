@@ -18,10 +18,14 @@ function ListView() {
   const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
 
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
-    (acc, timeEntry) =>
-      acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
-        ? acc
-        : [...acc, timeEntry],
+    (acc, timeEntry) => {
+      if (
+        timeEntry.id == runningTimeEntry?.id ||
+        acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
+      )
+        return acc;
+      return [...acc, timeEntry];
+    },
     [] as typeof timeEntries,
   );
 

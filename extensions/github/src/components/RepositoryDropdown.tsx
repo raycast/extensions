@@ -1,4 +1,4 @@
-import { List, Image } from "@raycast/api";
+import { Image, List } from "@raycast/api";
 
 import { useMyRepositories } from "../hooks/useRepositories";
 

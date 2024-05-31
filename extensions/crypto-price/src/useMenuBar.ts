@@ -1,33 +1,40 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Perferences, Coin, IsCoinEnabled } from "#/types";
+import type { Perferences, Coin } from "#/types";
 import { useSource } from "#/sources";
-import { formatCurrency, formatNumber, formatPercent } from "./utils";
+import { formatCurrency, formatNumber, formatPercent, processCoinsText } from "./utils";
 
 export function useMenuBar() {
-  const { source, currency, style, ...rest } = getPreferenceValues<Perferences>();
+  const { source, currency, style, coins: coinsText } = getPreferenceValues<Perferences>();
 
-  const coinSymbols = getCoinSymbols(rest);
-  const { isLoading, coins } = useSource(source, currency, coinSymbols);
+  const coinsConfig = processCoinsText(coinsText);
+  const { isLoading, coins } = useSource(source, currency, coinsConfig.symbols);
 
-  if (isLoading || !coins) {
-    return { isLoading, title: "Loading...", coinItems: [], moreItems: [] };
+  let title = "Loading...";
+  let items: string[] = [];
+  let sections: { title: string; items: string[] }[] = [];
+
+  if (!isLoading && coins) {
+    const primarySymbols = coinsConfig.symbols.slice(0, coinsConfig.primaryCount);
+    const secondarySymbols = coinsConfig.symbols.slice(coinsConfig.primaryCount);
+    title = primarySymbols.map((symbol) => genTitle(coins[symbol], style, currency)).join(" | ");
+    items = secondarySymbols.map((symbol) => {
+      const coin = coins[symbol];
+      return `${coin.symbol}: ${coin.priceDisplay}`;
+    });
+    sections = primarySymbols.map((symbol) => {
+      const coin = coins[symbol];
+      return {
+        title: coin.name,
+        items: Object.entries(coin.more).map(([name, value]) => `${name}: ${value}`),
+      };
+    });
   }
 
-  const { BTC, ...restCoins } = coins;
-  const title = genTitle(BTC, style, currency);
-  const moreItems = Object.entries(BTC.more).map(([name, value]) => ({
-    title: `${name}: ${value}`,
-    onAction: () => null,
-  }));
-  const coinItems = Object.values(restCoins).map((coin) => ({
-    title: `${coin.symbol}: ${coin.priceDisplay}`,
-    onAction: () => null,
-  }));
-
   return {
+    isLoading,
     title,
-    coinItems,
-    moreItems,
+    items,
+    sections,
   };
 }
 
@@ -51,13 +58,4 @@ function genTitle(coin: Coin, style: string, currency: string) {
       throw new Error(`Invalid style: ${style}`);
     }
   }
-}
-
-function getCoinSymbols({ isETHEnabled, isBNBEnabled, isSOLEnabled, isXRPEnabled }: IsCoinEnabled): string[] {
-  const symbols = ["BTC"];
-  if (isETHEnabled) symbols.push("ETH");
-  if (isBNBEnabled) symbols.push("BNB");
-  if (isSOLEnabled) symbols.push("SOL");
-  if (isXRPEnabled) symbols.push("XRP");
-  return symbols;
 }

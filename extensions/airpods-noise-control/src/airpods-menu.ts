@@ -1,5 +1,6 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { Prefs } from "./type";
+import { updateCommandMetadata } from "@raycast/api";
 
 export async function execAirPodsMenu(
   { airpodsIndex, soundLoc, ccLoc, optionOne, optionTwo }: Prefs,
@@ -128,7 +129,7 @@ end tell
     }
     case "control-center-not-found": {
       showFailureToast("", {
-        title: "Coltrol Center not found. Check Localization!",
+        title: "Control Center not found. Check Localization!",
       });
       return null;
     }
@@ -137,6 +138,7 @@ end tell
       return null;
     }
     default: {
+      await updateCommandMetadata({ subtitle: `Mode: ${res}` });
       return res;
     }
   }

@@ -3,6 +3,8 @@
 Open path from selection or clipboard.
 Support directory, URL, IP address, URL scheme, mailto, email address, etc.
 
+Web pages can be quickly previewed in Safari (by installing the shortcut [Peek Url](https://www.icloud.com/shortcuts/2364c358fbe7498aa6b18bd229d0f7de) and selecting **Peek in Safari** in Settings)
+
 **The following are supported, try it:**
 
 - Directory: `/Users/Username/Desktop`, `~/Desktop`
@@ -11,13 +13,5 @@ Support directory, URL, IP address, URL scheme, mailto, email address, etc.
 - IP address: `76.76.21.21`
 - mailto: `mailto:hello@raycast.com`
 - Email address: `hello@raycast.com`
-
-**Preference:**
-
-- Trim Text: Automatically remove spaces at both ends of text.
-- Show HUD: After open the path, display the HUD pop-up prompt.
-- File Operation: When the path is a file, should the file be opened or shown in Finder.
-- Priority Detection: Priority detection of selected text or clipboard.
-- Search Engine: Search Engine for selected or clipboard text.
 
 🌟🌟To make it easier and faster to use, it is recommended to set shortcut keys for the extension

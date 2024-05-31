@@ -1,28 +1,29 @@
 import { AI, environment } from "@raycast/api";
-import { Provider } from "../base";
+import { ProviderProps } from "../types";
+import { Provider, Message } from "../base";
 import { Prompt } from "../prompt";
 import { TranslateQuery } from "../types";
-import { getErrorText } from "../utils";
 
 const MODEL_NAME = "gpt-3.5-turbo";
 
 export default class extends Provider {
-  async doTranslate(query: TranslateQuery, prompt: Prompt): Promise<void> {
-    const { onMessage, onFinish, onError, signal: originSignal } = query;
+  constructor(_: ProviderProps) {
+    super(_);
+  }
+
+  protected async *doTranslate(query: TranslateQuery, prompt: Prompt): AsyncGenerator<Message> {
+    const { signal: originSignal } = query;
     const { rolePrompt, assistantPrompts, commandPrompt, contentPrompt, quoteProcessor, meta } = prompt;
     const { isWordMode } = meta;
 
     const timeout = 15 * 1000;
-    let abortByTimeout = false;
-
+    const ctrl = new AbortController();
     try {
-      const ctrl = new AbortController();
       const { signal } = ctrl;
       if (originSignal) {
         originSignal.addEventListener("abort", () => ctrl.abort());
       }
       const timerId = setTimeout(() => {
-        abortByTimeout = true;
         ctrl.abort();
       }, timeout);
 
@@ -45,13 +46,14 @@ export default class extends Provider {
       if (quoteProcessor) {
         targetTxt = quoteProcessor.processText(targetTxt);
       }
-      onMessage({ content: targetTxt, role: "", isWordMode });
-      onFinish("stop");
+      yield { content: targetTxt, role: "", isWordMode };
+      yield "stop";
     } catch (error) {
-      if (abortByTimeout) {
-        onError("Connection Timeout");
+      console.debug(error);
+      if (ctrl.signal.aborted) {
+        throw new Error("Connection Timeout");
       } else {
-        onError(getErrorText(error));
+        throw error;
       }
     }
   }

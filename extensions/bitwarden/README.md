@@ -21,14 +21,18 @@ Before you're able to use this extension, you need to complete the following ste
 >
 > We are working on removing this step and doing it for you 🙂
 >
-> ##### **Option 1** - Using <u>Homebrew</u>
+> ##### **Option 1** (Preferred) - Using <u>Homebrew</u>
 > ```sh
 > brew install bitwarden-cli
 > ```
 > ##### Option 2 - Using <u>npm</u>
 > ```sh
 > npm install -g @bitwarden/cli
+> 
+> which bw # add the result to the Bitwarden CLI Path option in the extension settings¹
 > ```
+> ¹ [How to access the extension settings](https://manual.raycast.com/preferences): Go to Actions (`⌘` `K`) → Configure Extension
+>
 > For more information, please refer to the [official help center](https://bitwarden.com/help/cli/#download-and-install).
 
 #### Step 1 - Set your account's API secrets

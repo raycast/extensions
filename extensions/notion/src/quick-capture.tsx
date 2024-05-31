@@ -46,7 +46,9 @@ function validateUrl(input: string) {
 function QuickCapture() {
   const [searchText, setSearchText] = useState<string>("");
 
-  const { data: searchPages, isLoading } = useSearchPages(searchText);
+  const { data, isLoading } = useSearchPages(searchText);
+
+  const searchPages = data?.pages;
 
   const { itemProps, handleSubmit, setValue } = useForm<{
     url: string;

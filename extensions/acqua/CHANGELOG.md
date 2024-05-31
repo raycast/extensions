@@ -1,5 +1,9 @@
 # Acqua Changelog
 
+## [Bug Fixes] - 2024-04-08
+
+- On first use, the icon will display the empty drop rather than the full drop.
+
 ## [Bug Fixes] - 2024-03-21
 
 - The empty drop icon would be displayed only if the time left was exactly 0, and not if it was a negative number.

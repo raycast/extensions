@@ -5,7 +5,16 @@
   "description": "Creates and shows the most important date which should be remembered.",
   "icon": "countdown.png",
   "author": "pernielsentikaer",
+  "contributors": [
+    "samuelkraft"
+  ],
   "license": "MIT",
+  "keywords": [
+    "date",
+    "remember",
+    "countdown",
+    "important"
+  ],
   "commands": [
     {
       "name": "index",
@@ -20,6 +29,13 @@
       "subtitle": "Remember the Date",
       "description": "List of all dates to remember",
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar Days List",
+      "description": "List of all dates to remember in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1d"
     }
   ],
   "preferences": [
@@ -38,6 +54,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.58.0",
+    "@raycast/utils": "^1.14.0",
     "moment": "^2.29.1",
     "nanoid": "^3.3.1"
   },
@@ -52,6 +69,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { subDays, format, compareDesc } from "date-fns";
+import { compareDesc, format, subDays } from "date-fns";
 import { uniqBy } from "lodash";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -37,7 +37,7 @@ export function useMyIssues(repository: string | null) {
 
   const recentlyClosed = uniqBy(
     [...(createdClosed || []), ...(assignedClosed || []), ...(mentionedClosed || [])],
-    "issue.id",
+    "id",
   );
 
   const sections = [
@@ -50,7 +50,7 @@ export function useMyIssues(repository: string | null) {
     .map((section) => {
       section.issues?.sort((a, b) => compareDesc(new Date(a.updatedAt), new Date(b.updatedAt)));
 
-      const subtitle = pluralize(section.issues?.length ?? 0, "Issue", { withNumber: true });
+      const subtitle = pluralize(section.issues?.length ?? 0, "issue", { withNumber: true });
 
       return { ...section, subtitle };
     });

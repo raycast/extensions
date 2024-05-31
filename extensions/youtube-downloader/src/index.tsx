@@ -71,8 +71,16 @@ export default function DownloadVideo() {
       ytdl
         .getInfo(values.url)
         .then((info) => {
+          const videoDuration = parseInt(info.videoDetails.lengthSeconds);
+          if (info.videoDetails.isLiveContent && videoDuration === 0) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Live streams are not supported",
+            });
+            return;
+          }
           setLoading(false);
-          setDuration(parseInt(info.videoDetails.lengthSeconds));
+          setDuration(videoDuration);
           setTitle(info.videoDetails.title);
           setFormats(info.formats);
         })

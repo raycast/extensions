@@ -13,6 +13,7 @@ export type Progress = {
     shown?: boolean;
     title?: string;
   };
+  showAsCommand?: boolean;
 };
 
 export type ProgressBarOptions = {

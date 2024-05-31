@@ -1,13 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "authy",
-  "title": "Twilio’s Authy",
+  "title": "Authy - Twilio app",
   "description": "Search, sync and use your Twilio’s Authy 2fa tokens with Raycast",
   "icon": "command-icon.png",
   "author": "guga4ka",
   "contributors": [
     "gdsmith",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "litomore"
   ],
   "categories": [
     "Security"
@@ -17,7 +18,7 @@
     {
       "name": "search-otp",
       "title": "Search Token",
-      "subtitle": "Twilio’s Authy",
+      "subtitle": "Authy - Twilio app",
       "description": "Search OTP for synced Twilio’s Authy Apps and 3rd party services",
       "mode": "view"
     }

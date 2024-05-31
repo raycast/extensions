@@ -2,23 +2,18 @@ import { access, constants, copyFile, mkdir, readdir, readFile, rm, writeFile } 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { environment } from "@raycast/api";
-import { JsDelivrNpmResponse, IconJson } from "./types";
-import fetch, { Request } from "node-fetch";
+import got from "got";
+import { JsDelivrNpmResponse, IconData, IconJson } from "./types.js";
 
 export const loadLatestVersion = async () => {
-  const response = await fetch(
-    new Request("https://data.jsdelivr.com/v1/packages/npm/simple-icons", {
-      // @ts-expect-error: Ingnore cache
-      cache: "no-cache",
-    }),
-  );
-  const json = (await response.json()) as JsDelivrNpmResponse;
+  const json = await got.get("https://data.jsdelivr.com/v1/packages/npm/simple-icons").json<JsDelivrNpmResponse>();
   return json.tags.latest;
 };
 
 export const loadJson = async (version: string) => {
-  const response = await fetch(`https://cdn.jsdelivr.net/npm/simple-icons@${version}/_data/simple-icons.json`);
-  const json = (await response.json()) as IconJson;
+  const json = await got
+    .get(`https://cdn.jsdelivr.net/npm/simple-icons@${version}/_data/simple-icons.json`)
+    .json<IconJson>();
   return json;
 };
 
@@ -31,8 +26,7 @@ export const loadSvg = async (version: string, slug: string) => {
     return { svg, path: savedPath };
   } catch {
     const iconUrl = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${slug}.svg`;
-    const response = await fetch(iconUrl);
-    const svg = await response.text();
+    const svg = await got.get(iconUrl).text();
     await writeFile(savedPath, svg, "utf8");
     return { svg, path: savedPath };
   }
@@ -73,4 +67,11 @@ export const makeCopyToDownload = async (version: string, slug: string) => {
   }
 
   return tmpPath;
+};
+
+export const getAliases = (icon: IconData) => {
+  const aka = icon.aliases?.aka ?? [];
+  const dup = icon.aliases?.dup?.map((d) => [d.title, ...Object.values(d.loc ?? {})]).flat() ?? [];
+  const loc = Object.values(icon.aliases?.loc ?? {});
+  return [...new Set([...aka, ...dup, ...loc])];
 };

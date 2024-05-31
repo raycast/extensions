@@ -25,6 +25,6 @@ export function useFetchStoredReminders(
       setReminders(storedReminders);
       setIsLoading(false);
     }
-    fetchRemindersFromLocalStorage();
+    void fetchRemindersFromLocalStorage();
   }, []);
 }

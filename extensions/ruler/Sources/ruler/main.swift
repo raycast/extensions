@@ -61,7 +61,6 @@ class RulerWindow: NSWindow {
     if lineView == nil {
       lineView = NSView(frame: NSZeroRect)
       lineView?.wantsLayer = true
-      lineView?.layer?.backgroundColor = NSColor.green.cgColor
       contentView?.addSubview(lineView!)
     }
 
@@ -88,6 +87,17 @@ class RulerWindow: NSWindow {
     lineView?.layer?.position = CGPoint(x: x, y: y)
     lineView?.layer?.transform = CATransform3DMakeRotation(
       angleInDegrees * CGFloat.pi / 180, 0, 0, 1)
+
+    // Change line color based on whether it's straight or not
+    let isStraight = abs(distanceX) < 2 || abs(distanceY) < 2
+    let isStraightByPressingShift =
+      isShiftKeyPressed && abs(angleInDegrees).truncatingRemainder(dividingBy: 90) == 0
+
+    if isStraight || isStraightByPressingShift {
+      lineView?.layer?.backgroundColor = NSColor.green.cgColor
+    } else {
+      lineView?.layer?.backgroundColor = NSColor.red.cgColor
+    }
 
     // Calculate the position of the distance label
 
@@ -148,7 +158,9 @@ class RulerWindow: NSWindow {
       self.contentView?.removeTrackingArea(trackingArea)
     }
 
-    let options: NSTrackingArea.Options = [.activeAlways, .mouseMoved, .inVisibleRect, .cursorUpdate]
+    let options: NSTrackingArea.Options = [
+      .activeAlways, .mouseMoved, .inVisibleRect, .cursorUpdate,
+    ]
     let trackingArea = NSTrackingArea(
       rect: self.contentView?.bounds ?? NSZeroRect, options: options, owner: self, userInfo: nil)
     self.contentView?.addTrackingArea(trackingArea)
