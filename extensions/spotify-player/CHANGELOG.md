@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [New Album Actions] - 2024-05-30
+
+-  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+
 ## [Automatically Trigger Current Track] - 2024-05-28
 
 - Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous)
