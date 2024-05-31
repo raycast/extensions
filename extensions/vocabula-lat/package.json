@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vocabula-lat",
   "title": "Vocabula.lat",
-  "description": "",
+  "description": "An extension to look for words and abbreviations in the Vocabula.lat dictionary",
   "icon": "command-icon.png",
   "author": "silencesys",
   "categories": [
@@ -12,13 +12,13 @@
   "commands": [
     {
       "name": "index",
-      "title": "Look for a word",
+      "title": "Look for a Word",
       "description": "Look for a word in the Vocabula.lat dictionary",
       "mode": "view"
     },
     {
       "name": "abbreviation",
-      "title": "Look for an abbreviation",
+      "title": "Look for an Abbreviation",
       "description": "Look for an abbreviation in the Vocabula.lat dictionary",
       "mode": "view"
     }
