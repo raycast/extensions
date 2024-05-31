@@ -102,14 +102,22 @@ export async function sendTranslateRequest({
           await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
           break;
         case "view":
-          await launchCommand({
-            name: "index",
-            type: LaunchType.UserInitiated,
-            context: {
-              translation,
-              sourceLanguage: detectedSourceLanguage,
-            },
-          });
+          try {
+            await launchCommand({
+              name: "index",
+              type: LaunchType.UserInitiated,
+              context: {
+                translation,
+                sourceLanguage: detectedSourceLanguage,
+              },
+            });
+          } catch {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to display translated text.",
+              message: "The main Translate command must be enabled.",
+            });
+          }
           break;
         case "paste":
           await closeMainWindow();
