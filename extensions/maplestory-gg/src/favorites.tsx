@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Grid, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, launchCommand, LaunchType, useNavigation } from "@raycast/api";
 import { CharacterDetail, RemoveFromFavoritesAction } from "./components.js";
 import { getFavoriteCharacters, sortCharacters } from "./utils.js";
 import { CharacterData } from "./types.js";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Favorites() {
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +75,24 @@ export default function Favorites() {
           />
         ))
       ) : (
-        <Grid.EmptyView icon={{ source: "lucid-empty-view.webp" }} title="You haven't favorited any character yet." />
+        <Grid.EmptyView
+          icon={{ source: "lucid-empty-view.webp" }}
+          title="You haven't favorited any character yet."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Lookup Characters"
+                onAction={async () => {
+                  try {
+                    launchCommand({ name: "lookup", type: LaunchType.UserInitiated });
+                  } catch {
+                    showFailureToast("Lookup command disabled");
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
       )}
     </Grid>
   );
