@@ -32,7 +32,7 @@
     {
       "icon":"command-icon.png",
       "name":"menubar",
-      "title": "Menubar notifactions",
+      "title": "Menubar Notifactions",
       "description": "Show notifications",
       "subtitle": "Show notifications in menu-bar",
       "mode":"menu-bar",
