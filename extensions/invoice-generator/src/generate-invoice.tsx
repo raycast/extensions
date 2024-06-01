@@ -67,6 +67,10 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
       {includeAddress && <Form.TextArea title="Address" {...itemProps.address} />}
       <Form.TextArea title="To" {...itemProps.to} />
       <Form.DatePicker title="Date" {...itemProps.date} />
+
+      <Form.Separator />
+      <Form.Description text="Invoice Details" />
+
       <Form.TextField title="Currency" {...itemProps.currency} />
       <Form.Checkbox id="includeTax" label="Include Tax" onChange={setIncludeTax} />
       {includeTax && (
