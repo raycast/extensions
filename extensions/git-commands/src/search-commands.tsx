@@ -33,7 +33,7 @@ export default function Command() {
 
     const updated = isFavorited
       ? favorites.filter((favorite) => favorite.name !== alias.name)
-      : [alias, ...favorites].slice(0, preferences.MaxFavoriteAliases);
+      : [alias, ...favorites].slice(0, preferences.MaxFavorites);
     cache.set("favorites", JSON.stringify(updated));
 
     refreshFavs();
@@ -42,7 +42,7 @@ export default function Command() {
   const handleRecent = (alias: Alias, isRecent: boolean, isFavorite: boolean) => {
     if (!recents || isFavorite || isRecent) return;
 
-    const updated = [alias, ...recents].slice(0, preferences.MaxRecentAliases);
+    const updated = [alias, ...recents].slice(0, preferences.MaxRecents);
     cache.set("recents", JSON.stringify(updated));
 
     refreshRecents();
@@ -74,7 +74,14 @@ export default function Command() {
             <Action.Push
               icon={Icon.Eye}
               title="Open Alias"
-              target={<CommandDetail onCopy={() => handleRecent(alias, isRecent, isFavorite)} alias={alias} />}
+              target={
+                <CommandDetail
+                  alias={alias}
+                  isFavorite={isFavorite}
+                  onFavorite={() => handleFavorite(alias, isFavorite)}
+                  onCopy={() => handleRecent(alias, isRecent, isFavorite)}
+                />
+              }
             />
 
             <Action.CopyToClipboard
@@ -85,24 +92,12 @@ export default function Command() {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            {isFavorite || (
-              <Action
-                icon={Icon.Star}
-                title="Save Favorite"
-                onAction={() => handleFavorite(alias, false)}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
-              />
-            )}
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            {isFavorite && (
-              <Action
-                icon={Icon.StarDisabled}
-                title="Remove Favorites"
-                onAction={() => handleFavorite(alias, true)}
-                shortcut={{ modifiers: ["cmd"], key: "x" }}
-              />
-            )}
+            <Action
+              icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+              title={isFavorite ? "Remove Favorite" : "Save Favorite"}
+              onAction={() => handleFavorite(alias, isFavorite)}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+            />
           </ActionPanel.Section>
           {isRecent && (
             <Action

@@ -14,16 +14,21 @@ export function typeColor(type: AliasType) {
   }
 
   return {
-    show: Color.Blue,
-    default: Color.Yellow,
+    show: Color.Green,
+    default: Color.Blue,
     delete: Color.Red,
   }[type];
 }
 
 export function typeDescription(type: AliasType) {
   return {
-    show: "The command only shows information, no changes are made.",
-    default: "The command can edit, move or delete files.",
-    delete: "The command is directly related to the deletion information.",
+    show: "Only shows information.",
+    default: "Can edit, move or delete.",
+    delete: "Related to information deletion.",
   }[type];
+}
+
+export function mainCommand(command: string) {
+  const result = command.split(" ");
+  return result.length > 1 ? result.slice(1, 2) : "git";
 }

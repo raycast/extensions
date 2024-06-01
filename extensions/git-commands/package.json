@@ -21,11 +21,11 @@
   ],
   "preferences": [
     {
-      "name": "MaxRecentAliases",
+      "name": "MaxRecents",
       "description": "Maximum number of recent aliases to remember",
       "type": "textfield",
       "required": false,
-      "title": "Max Recent Aliases",
+      "title": "Total recents to show",
       "placeholder": "3",
       "default": "3",
       "validation": {
@@ -35,11 +35,11 @@
       }
     },
     {
-      "name": "MaxFavoriteAliases",
+      "name": "MaxFavorites",
       "description": "Maximum number of favorites aliases to remember",
       "type": "textfield",
       "required": false,
-      "title": "Max Favorites Aliases",
+      "title": "Total favorites to show",
       "placeholder": "3",
       "default": "3",
       "validation": {
@@ -50,29 +50,11 @@
     },
     {
       "name": "ItemAliasTypeColor",
-      "label": "Show command type color",
-      "description": "Displays colors according to the impact the command produces.",
+      "label": "Show the type tag with colors",
+      "description": "Alias with colors according to the impact the command produces.",
       "required": false,
       "type": "checkbox",
       "default": true
-    },
-    {
-      "name": "SubtlitleOption",
-      "description": "Show description, command or none",
-      "type": "dropdown",
-      "required": false,
-      "title": "Subtitle Option",
-      "data": [
-        {
-          "title": "Description",
-          "value": "description"
-        },
-        {
-          "title": "Command",
-          "value": "command"
-        }
-      ],
-      "default": "description"
     }
   ],
   "dependencies": {
@@ -80,12 +62,12 @@
     "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.13.0",
-    "@types/react": "18.3.3",
-    "eslint": "^9.4.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",
