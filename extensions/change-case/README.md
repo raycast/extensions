@@ -5,27 +5,24 @@ Transform a string between various cases.
 Included case transformations:
 - `camelCase`
 - `Capital Case`
-- `CONSTANT_CASE` (same as `MACRO_CASE`)
+- `CONSTANT_CASE`
 - `dot.case`
-- `Header-Case` (same as `Train-Case`)
-- `kebab-case` (same as `param-case`)
+- `Header-Case`
 - `lower case`
 - `lower First`
-- `MACRO_CASE` (same as `CONSTANT_CASE`)
+- `MACRO_CASE`
 - `no case`
-- `param-case` (same as `kebab-case`)
+- `param-case`
 - `PascalCase`
 - `Pascal_Snake_Case`
 - `path/case`
-- `rAndOm cAsE` (same as `SPonGE CasE`)
+- `rAndOm cAsE`
 - `Sentence case`
 - `snake_case`
 - `sWAP cASE`
 - `Title Case`
 - `UPPER CASE`
 - `Upper first`
-- `SPonGE CasE` (same as `rAndOm cAsE`)
-- `Train-Case` (same as `Header-Case`)
 
 ## Caveats
 
