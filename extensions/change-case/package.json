@@ -24,7 +24,7 @@
     "pascal",
     "random",
     "sentence",
-    "title",
+    "title"
   ],
   "license": "MIT",
   "debug": {
@@ -254,19 +254,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "change-case": "^5.4.3",
+    "@raycast/api": "^1.75.2",
+    "change-case": "^5.4.4",
     "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
     "title-case": "^4.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.25",
-    "@types/react": "18.2.64",
+    "@types/node": "20.13.0",
+    "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.2"
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
