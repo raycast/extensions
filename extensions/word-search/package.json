@@ -50,6 +50,13 @@
       "label": "Use selection as search term",
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "maxResults",
+      "description": "The maximum number of results to display (max 1000). Defaults to 50",
+      "required": false,
+      "title": "Max Results",
+      "type": "textfield"
     }
   ],
   "commands": [
@@ -97,7 +104,7 @@
     },
     {
       "name": "word-sound-like-search",
-      "title": "Search Word that Sounds Like",
+      "title": "Search Word That Sounds Like",
       "subtitle": "Datamuse",
       "description": "Search for word that sounds like the given word",
       "mode": "view"

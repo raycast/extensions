@@ -6,20 +6,22 @@ import { useFetch } from "@raycast/utils";
 
 import type { SearchType, Word } from "@/types";
 
-import { useCapitalizeResults } from "@/hooks/use-settings";
+import { useCapitalizeResults, useMaxResults } from "@/hooks/use-settings";
 
 const useSearchWords = (wordsToSearch: string, type: SearchType) => {
   const capitalizeResults = useCapitalizeResults();
+  const maxResults = useMaxResults();
+
   const url = useMemo(() => {
     const searchParams = new URLSearchParams({
       language: "en",
       md: "d",
-      max: "50",
+      max: maxResults.toString(),
       [type]: wordsToSearch,
     });
 
     return new URL(`/words?${searchParams}`, "https://api.datamuse.com/words").toString();
-  }, [wordsToSearch, type]);
+  }, [wordsToSearch, type, maxResults]);
 
   return useFetch<Word[]>(url, {
     parseResponse: async (response) => {
