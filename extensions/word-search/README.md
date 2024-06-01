@@ -16,6 +16,8 @@ For example, in the picture above, `s??a?t` means search for a word, 6 character
 
 Likewise, if you enter `he??o`, it will show all the combination of five-letter words with `he` in the beginning and `o` at the end.
 
+If you use `*` instead of `?`, it will search for words with any number of missing letters. For example, `*he*o` will show all the words with `he` in the middle and `o` at the end.
+
 *But no cheating in Wordle!*
 
 ## Deeplinks
