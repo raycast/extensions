@@ -2,22 +2,11 @@ import { useMemo } from "react";
 
 import { getPreferenceValues } from "@raycast/api";
 
-export const useClipboardSetting = <
-  T extends {
-    useClipboard: "true" | "false" | "global";
-    useClipboardGlobal: boolean;
-  },
->() => {
-  const useClipboard = useMemo(() => {
-    const settings = getPreferenceValues<T>();
-    if (settings.useClipboard === "true") {
-      return true;
-    }
-    if (settings.useClipboard === "global") {
-      return settings.useClipboardGlobal;
-    }
-    return false;
+export const useDefaultAction = () =>
+  useMemo(() => {
+    return getPreferenceValues<Preferences>().defaultAction || "paste";
   }, []);
 
-  return useClipboard;
-};
+export const useSelectionSetting = () => getPreferenceValues<Preferences>().useSelection;
+
+export const useCapitalizeResults = () => getPreferenceValues<Preferences>().capitalizeResults;

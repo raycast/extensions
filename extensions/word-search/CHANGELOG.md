@@ -4,7 +4,7 @@
 
 - Updated dependencies to latest versions
 - Rewrote API using `useFetch` hook
-- Added option (global and per command) to read word from clipboard [(#11748)](https://github.com/raycast/extensions/issues/11748)
+- Added option to use selection as search text ([#11748](https://github.com/raycast/extensions/issues/11748))
 
 ## [Output capitalized word] - 2023-02-28
 

@@ -43,11 +43,11 @@
       "default": false
     },
     {
-      "name": "useClipboardGlobal",
-      "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
+      "name": "useSelection",
+      "description": "Use selection as the search term.",
       "required": false,
-      "title": "Read from Clipboard",
-      "label": "Read the word from clipboard",
+      "title": "Use Selection",
+      "label": "Use selection as search term",
       "type": "checkbox",
       "default": false
     }
@@ -58,186 +58,42 @@
       "title": "Search Word Synonym",
       "subtitle": "Datamuse",
       "description": "Search for synonyms given a word",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
-          "title": "Read from Clipboard",
-          "type": "dropdown",
-          "default": "global",
-          "data": [
-            {
-              "title": "No",
-              "value": "false"
-            },
-            {
-              "title": "Use Extension Setting",
-              "value": "global"
-            },
-            {
-              "title": "Yes",
-              "value": "true"
-            }
-          ],
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "word-antonym-search",
       "title": "Search Word Antonym",
       "subtitle": "Datamuse",
       "description": "Search for antonyms given a word",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
-          "title": "Read from Clipboard",
-          "type": "dropdown",
-          "default": "global",
-          "data": [
-            {
-              "title": "No",
-              "value": "false"
-            },
-            {
-              "title": "Use Extension Setting",
-              "value": "global"
-            },
-            {
-              "title": "Yes",
-              "value": "true"
-            }
-          ],
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "word-rhyme-search",
       "title": "Search Word Rhyme",
       "subtitle": "Datamuse",
       "description": "Search for rhymes given a word",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
-          "title": "Read from Clipboard",
-          "type": "dropdown",
-          "default": "global",
-          "data": [
-            {
-              "title": "No",
-              "value": "false"
-            },
-            {
-              "title": "Use Extension Setting",
-              "value": "global"
-            },
-            {
-              "title": "Yes",
-              "value": "true"
-            }
-          ],
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "word-spell",
       "title": "Spell a Word",
       "subtitle": "Datamuse",
       "description": "Find the correct spelling for a word that sounds similar to the given word",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
-          "title": "Read from Clipboard",
-          "type": "dropdown",
-          "default": "global",
-          "data": [
-            {
-              "title": "No",
-              "value": "false"
-            },
-            {
-              "title": "Use Extension Setting",
-              "value": "global"
-            },
-            {
-              "title": "Yes",
-              "value": "true"
-            }
-          ],
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "word-adjective-search",
       "title": "Search Word Adjective",
       "subtitle": "Datamuse",
       "description": "Search for adjectives given a word",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
-          "title": "Read from Clipboard",
-          "type": "dropdown",
-          "default": "global",
-          "data": [
-            {
-              "title": "No",
-              "value": "false"
-            },
-            {
-              "title": "Use Extension Setting",
-              "value": "global"
-            },
-            {
-              "title": "Yes",
-              "value": "true"
-            }
-          ],
-          "required": false
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "word-missing-letters-search",
       "title": "Search Word with Missing Letters",
       "subtitle": "Datamuse",
       "description": "Search for word with missing letters",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
-          "title": "Read from Clipboard",
-          "type": "dropdown",
-          "default": "global",
-          "data": [
-            {
-              "title": "No",
-              "value": "false"
-            },
-            {
-              "title": "Use Extension Setting",
-              "value": "global"
-            },
-            {
-              "title": "Yes",
-              "value": "true"
-            }
-          ],
-          "required": false
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {

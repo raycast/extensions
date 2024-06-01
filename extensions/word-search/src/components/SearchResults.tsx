@@ -1,21 +1,21 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 
 import type { SearchType, Word } from "@/types";
 
-import useOptionalClipboard from "@/hooks/use-optional-clipboard";
+import useOptionalSelection from "@/hooks/use-optional-selection";
 import useSearchWords from "@/hooks/use-searchwords";
+import { useDefaultAction } from "@/hooks/use-settings";
 
 export default function SearchResults(
   type: SearchType,
   placeholder: string,
-  useClipboard: boolean,
   helperTitle?: string,
   helperDescription?: string,
 ) {
   const [search, setSearch] = useState<string>("");
-  useOptionalClipboard(setSearch, useClipboard);
+  useOptionalSelection(setSearch);
 
   const { data, isLoading } = useSearchWords(search, type);
 
@@ -49,10 +49,7 @@ export default function SearchResults(
 }
 
 function Actions(props: { word: Word }) {
-  const defaultAction = useMemo(() => {
-    return getPreferenceValues<Preferences>().defaultAction || "paste";
-  }, []);
-
+  const defaultAction = useDefaultAction();
   const pasteAction = <Action.Paste content={props.word.word} title="Paste Word in Active App" />;
   const copyAction = <Action.CopyToClipboard content={props.word.word} title="Copy Word to Clipboard" />;
 

@@ -1,12 +1,15 @@
 import { useMemo } from "react";
 import { URL, URLSearchParams } from "url";
 
-import { Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 import type { SearchType, Word } from "@/types";
 
+import { useCapitalizeResults } from "@/hooks/use-settings";
+
 const useSearchWords = (wordsToSearch: string, type: SearchType) => {
+  const capitalizeResults = useCapitalizeResults();
   const url = useMemo(() => {
     const searchParams = new URLSearchParams({
       language: "en",
@@ -17,8 +20,6 @@ const useSearchWords = (wordsToSearch: string, type: SearchType) => {
 
     return new URL(`/words?${searchParams}`, "https://api.datamuse.com/words").toString();
   }, [wordsToSearch, type]);
-
-  const { capitalizeResults } = getPreferenceValues<Preferences>();
 
   return useFetch<Word[]>(url, {
     parseResponse: async (response) => {
