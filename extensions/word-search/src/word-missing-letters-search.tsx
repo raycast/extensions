@@ -1,7 +1,8 @@
+import type { LaunchProps } from "@raycast/api";
+
 import { SearchType } from "@/types";
 
 import SearchResults from "@/components/SearchResults";
-import {LaunchProps} from '@raycast/api';
 
 export default function SearchWordMissingLetters(props: LaunchProps) {
   return SearchResults(

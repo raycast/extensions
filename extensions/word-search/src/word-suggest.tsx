@@ -3,24 +3,21 @@ import { useState } from "react";
 import type { LaunchProps } from "@raycast/api";
 import { List } from "@raycast/api";
 
-import type { SearchType } from "@/types";
-
 import useOptionalSelection from "@/hooks/use-optional-selection";
-import useSearchWords from "@/hooks/use-searchwords";
+import useSuggestions from "@/hooks/use-suggestions";
 
 import Actions from "@/components/Actions";
+import { Vocabulary } from "./types";
+import VocubalarySwitch from "./components/VocubalarySwitch";
 
-export default function SearchResults(
-  type: SearchType,
-  placeholder: string,
-  launchProps: LaunchProps,
-  helperTitle?: string,
-  helperDescription?: string,
-) {
+export default function SuggestWord(launchProps: LaunchProps) {
+  const placeholder = "Suggest a word";
+
+  const [vocubalary, setVocubalary] = useState<Vocabulary>(Vocabulary.English);
   const [search, setSearch] = useState<string>("");
   useOptionalSelection(setSearch, typeof launchProps.fallbackText !== "undefined" && launchProps.fallbackText !== "");
 
-  const { data, isLoading } = useSearchWords(search, type);
+  const { data, isLoading } = useSuggestions(search, vocubalary);
 
   return (
     <List
@@ -28,23 +25,18 @@ export default function SearchResults(
       isLoading={isLoading}
       throttle={true}
       onSearchTextChange={setSearch}
+      searchBarAccessory={<VocubalarySwitch onChange={setVocubalary} />}
       searchText={search}
     >
       {!data || data.length === 0 ? (
         <List.EmptyView
           icon={"command-icon.png"}
-          title={helperTitle ?? placeholder}
-          description={search !== "" ? (isLoading ? "Searching..." : "No Results Found") : helperDescription}
+          title={placeholder}
+          description={search !== "" ? (isLoading ? "Searching..." : "No Results Found") : ""}
         />
       ) : (
         data.map((word) => (
-          <List.Item
-            icon={"command-icon.png"}
-            key={word.word}
-            title={word.word}
-            subtitle={word.defs !== undefined ? word.defs[0] : ""}
-            actions={<Actions word={word} />}
-          />
+          <List.Item icon={"command-icon.png"} key={word.word} title={word.word} actions={<Actions word={word} />} />
         ))
       )}
     </List>

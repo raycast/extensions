@@ -1,8 +1,11 @@
-export interface Word {
+export type SimpleWord = {
   word: string;
   score: number;
+};
+
+export type Word = SimpleWord & {
   defs: string[];
-}
+};
 
 export enum SearchType {
   ADJECTIVE = "rel_jjb",

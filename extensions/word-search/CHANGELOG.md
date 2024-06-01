@@ -7,6 +7,7 @@
 - Added option to use selection as search text ([#11748](https://github.com/raycast/extensions/issues/11748))
 - Added option to set the max results
 - Added search for words that sound like the search text
+- Added Word Suggestion command, including vocabulary switch (`English`, `Spanish` and `Wikipedia (English)`)
 
 ## [Output capitalized word] - 2023-02-28
 
