@@ -52,6 +52,9 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
     },
   });
 
+  console.log("includePaymentTerms:", includePaymentTerms);
+  console.log("includeAmountPaid:", includeAmountPaid);
+
   return (
     <Form
       enableDrafts
@@ -120,7 +123,6 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
         <Form.Dropdown.Item title="Turkish Lira" value="TRY" />
         <Form.Dropdown.Item title="US Dollars" value="USD" />
       </Form.Dropdown>
-      {includePaymentTerms && <Form.TextField title="Payment Terms" {...itemProps.payment_terms} />}
       <Form.Checkbox id="includeTax" label="Include Tax" value={includeTax} onChange={setIncludeTax} />
       {includeTax && (
         <>
@@ -137,9 +139,6 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
           <Form.TextArea title="Shipping Address" {...itemProps.ship_to} />
         </>
       )}
-      {includeAmountPaid && <Form.TextField title="Amount Paid" {...itemProps.amount_paid} />}
-      <Form.TextArea title="Notes" {...itemProps.notes} />
-      {termsAndConditions && <Form.TextField title="Terms" {...itemProps.terms} />}
 
       <Form.Separator />
       <Form.Description text="Items" />
@@ -166,6 +165,21 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
           />
         </Fragment>
       ))}
+
+      <Form.Separator />
+      <Form.Description text="Additional Content" />
+
+      {includePaymentTerms && <Form.TextField title="Payment Terms" {...itemProps.payment_terms} />}
+      {includeAmountPaid && <Form.TextField title="Amount Paid" {...itemProps.amount_paid} />}
+      <Form.TextArea title="Notes" {...itemProps.notes} />
+      {termsAndConditions && <Form.TextField title="Terms" {...itemProps.terms} />}
+      <Form.Dropdown title="Localisation" {...itemProps.locale}>
+        <Form.Dropdown.Item title="English" value="en-US" />
+        <Form.Dropdown.Item title="French" value="fr-FR" />
+        <Form.Dropdown.Item title="German" value="de-DE" />
+        <Form.Dropdown.Item title="Spanish" value="es-ES" />
+        <Form.Dropdown.Item title="Thai" value="th-TH" />
+      </Form.Dropdown>
 
       <Form.Separator />
       <Form.Description text="Custom Fields" />

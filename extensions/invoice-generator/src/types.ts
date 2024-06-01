@@ -14,6 +14,7 @@ export type InvoiceFormStaticValues = {
   amount_paid?: string;
   notes?: string;
   terms?: string;
+  locale?: string;
 };
 
 export type InvoiceItemKeys = {
@@ -72,6 +73,12 @@ export type InvoiceRequestContent = {
   amount_paid?: number;
   notes?: string;
   terms?: string;
+  locale?: string;
   items: InvoiceRequestItemValues[];
   custom_fields: InvoiceRequestCustomFieldValues;
+};
+
+export type InvoiceRequestWithLocale = {
+  content: InvoiceRequestContent;
+  locale: string;
 };

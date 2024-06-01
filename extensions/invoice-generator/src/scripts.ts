@@ -6,9 +6,15 @@ import { homedir } from "os";
 import { join } from "path";
 
 import { invoiceDateFormat, logoUrl } from "./utils";
-import { InvoiceFormValues, InvoiceFormStaticValues, InvoiceRequestContent, InvoiceRequestItemValues } from "./types";
+import {
+  InvoiceFormValues,
+  InvoiceFormStaticValues,
+  InvoiceRequestContent,
+  InvoiceRequestItemValues,
+  InvoiceRequestWithLocale,
+} from "./types";
 
-function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean): InvoiceRequestContent {
+function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean): InvoiceRequestWithLocale {
   const items: Partial<InvoiceRequestItemValues>[] = [];
   const customFields: Record<number, { name?: string; value?: string }> = {};
   const staticValues: Partial<InvoiceFormStaticValues> = {};
@@ -68,7 +74,7 @@ function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean)
   const shippingNum = shipping ? parseFloat(shipping) : undefined;
 
   // Construct the invoice request content dynamically
-  const invoiceRequestContent: InvoiceRequestContent = {
+  const content: InvoiceRequestContent = {
     ...(logoUrl && { logo: logoUrl }),
     number: number as string,
     from: from as string,
@@ -86,15 +92,16 @@ function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean)
     ...(staticValues.terms && { terms: staticValues.terms }),
   };
 
-  return invoiceRequestContent;
+  return { content, locale: staticValues.locale as string } as InvoiceRequestWithLocale;
 }
 
-async function requestInvoice(content: InvoiceRequestContent, toast: Toast) {
+async function requestInvoice(content: InvoiceRequestContent, locale: string, toast: Toast) {
   try {
     const response = await (
       await axios.post("https://invoice-generator.com/", content, {
         headers: {
           "Content-Type": "application/json",
+          "Accept-Language": locale,
         },
         responseType: "arraybuffer",
       })
@@ -127,9 +134,12 @@ async function requestInvoice(content: InvoiceRequestContent, toast: Toast) {
 export async function generateInvoice(values: InvoiceFormValues, includeAddress: boolean) {
   const toast = await showToast(Toast.Style.Animated, "Generating invoice...");
 
-  let content: InvoiceRequestContent;
+  let requestContent: InvoiceRequestContent;
+  let requestLocale: string;
   try {
-    content = extractDynamicItems(values, includeAddress);
+    const { content, locale } = extractDynamicItems(values, includeAddress);
+    requestContent = content;
+    requestLocale = locale;
   } catch (error: unknown) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to generate invoice";
@@ -137,5 +147,5 @@ export async function generateInvoice(values: InvoiceFormValues, includeAddress:
     return;
   }
 
-  await requestInvoice(content, toast);
+  await requestInvoice(requestContent, requestLocale, toast);
 }

@@ -165,6 +165,36 @@
       ]
     },
     {
+      "name": "defaultLocale",
+      "title": "Default Locale",
+      "description": "The default locale for your invoices.",
+      "type": "dropdown",
+      "required": false,
+      "default": "en-US",
+      "data": [
+        {
+          "title": "English",
+          "value": "en-US"
+        },
+        {
+          "title": "French",
+          "value": "fr-FR"
+        },
+        {
+          "title": "German",
+          "value": "de-DE"
+        },
+        {
+          "title": "Spanish",
+          "value": "es-ES"
+        },
+        {
+          "title": "Thai",
+          "value": "th-TH"
+        }
+      ]
+    },
+    {
       "name": "termsAndConditions",
       "title": "Terms and Conditions",
       "description": "Terms and conditions for your invoices.",
