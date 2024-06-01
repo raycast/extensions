@@ -42,8 +42,12 @@ export type InvoiceRequestContent = {
   to: string;
   date: string;
   currency?: string;
-  amount_paid?: number;
+  shipping?: number;
   tax?: number;
+  fields?: {
+    tax: string | boolean;
+  };
+  amount_paid?: number;
   notes?: string;
   items: InvoiceRequestItemValues[];
 };
