@@ -64,6 +64,15 @@
       "required": true
     },
     {
+      "name": "smallWords",
+      "type": "textfield",
+      "placeholder": "separated,by,commas",
+      "title": "Small Words",
+      "description": "A list of words to prevent from being modified, separated by commas",
+      "label": "label",
+      "required": false
+    },
+    {
       "name": "source",
       "type": "dropdown",
       "title": "Preferred Source",

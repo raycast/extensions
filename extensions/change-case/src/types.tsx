@@ -1,7 +1,8 @@
+import { getPreferenceValues } from "@raycast/api";
 import * as changeCase from "change-case";
 import { spongeCase } from "sponge-case";
 import { swapCase } from "swap-case";
-import { titleCase } from "title-case";
+import { SMALL_WORDS, titleCase as titleCaseLib } from "title-case";
 
 export type CaseFunction = (input: string) => string;
 export type CaseFunctions = Record<string, CaseFunction>;
@@ -15,7 +16,17 @@ const lowerFirst = (input: string) => {
   return input[0].toLowerCase() + input.slice(1);
 };
 
-const sentenceCase = (input: string) => titleCase(input, { sentenceCase: true });
+const sentenceCase = (input: string) => {
+  const smallWordsPrefs = getPreferenceValues<ExtensionPreferences>().smallWords?.split(',') ?? [];
+  const smallWords = new Set<string>([...smallWordsPrefs, ...SMALL_WORDS]);
+  return titleCaseLib(input, { sentenceCase: true, smallWords });
+}
+
+const titleCase = (input: string) => {
+  const smallWordsPrefs = getPreferenceValues<ExtensionPreferences>().smallWords?.split(',') ?? [];
+  const smallWords = new Set<string>([...smallWordsPrefs, ...SMALL_WORDS]);
+  return titleCaseLib(input, { smallWords });
+}
 
 const upperCase = (input: string) => input.toUpperCase();
 
