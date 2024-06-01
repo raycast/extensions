@@ -6,8 +6,8 @@ import { usePromise } from "@raycast/utils";
 
 import { useSelectionSetting } from "@/hooks/use-settings";
 
-const useOptionalSelection = (setContent: Dispatch<SetStateAction<string>>) => {
-  const enabled = useSelectionSetting();
+const useOptionalSelection = (setContent: Dispatch<SetStateAction<string>>, disabled: boolean) => {
+  const enabled = useSelectionSetting() && !disabled;
   const dataIsAlreadySet = useRef(false);
   const { isLoading, data } = usePromise(async () => {
     try {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, LaunchProps, List } from "@raycast/api";
 
 import type { SearchType, Word } from "@/types";
 
@@ -11,11 +11,12 @@ import { useDefaultAction } from "@/hooks/use-settings";
 export default function SearchResults(
   type: SearchType,
   placeholder: string,
+  launchProps: LaunchProps,
   helperTitle?: string,
   helperDescription?: string,
 ) {
   const [search, setSearch] = useState<string>("");
-  useOptionalSelection(setSearch);
+  useOptionalSelection(setSearch, typeof launchProps.fallbackText !== "undefined" && launchProps.fallbackText !== "");
 
   const { data, isLoading } = useSearchWords(search, type);
 
