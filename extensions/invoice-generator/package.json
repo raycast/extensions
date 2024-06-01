@@ -50,6 +50,14 @@
       "type": "checkbox",
       "default": true,
       "required": false
+    },
+    {
+      "name": "includePaymentTerms",
+      "label": "Include Payment Terms",
+      "description": "Include payment terms field in invoice form.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     }
   ],
   "dependencies": {

@@ -4,6 +4,7 @@ import { Fragment, useState } from "react";
 
 import { generateInvoice } from "./scripts";
 import {
+  includePaymentTerms,
   includeShipping,
   initialCustomFields,
   initialInvoiceFormValues,
@@ -89,7 +90,7 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
       <Form.Description text="Invoice Details" />
 
       <Form.TextField title="Currency" {...itemProps.currency} />
-      <Form.TextField title="Payment Terms" {...itemProps.payment_terms} />
+      {includePaymentTerms && <Form.TextField title="Payment Terms" {...itemProps.payment_terms} />}
       <Form.Checkbox id="includeTax" label="Include Tax" onChange={setIncludeTax} />
       {includeTax && (
         <>

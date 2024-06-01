@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { InvoiceFormValues } from "./types";
 
 export const preferences = getPreferenceValues();
-export const { name, address, logoUrl, includeShipping, termsAndConditions } = preferences;
+export const { name, address, logoUrl, includeShipping, termsAndConditions, includePaymentTerms } = preferences;
 
 export const initialInvoiceFormValues: InvoiceFormValues = {
   from: name,
