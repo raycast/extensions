@@ -44,7 +44,7 @@
     },
     {
       "name": "useClipboardGlobal",
-      "description": "Read the word from the clipboard when opening the command. If the clipboard contains a word, it will be used as the search term. If the clipboard contains a sentence, the first word will be used as the search term.",
+      "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
       "required": false,
       "title": "Read from Clipboard",
       "label": "Read the word from clipboard",
@@ -62,7 +62,7 @@
       "preferences": [
         {
           "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains a word, it will be used as the search term. If the clipboard contains a sentence, the first word will be used as the search term.",
+          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
           "title": "Read from Clipboard",
           "type": "dropdown",
           "default": "global",
@@ -93,7 +93,7 @@
       "preferences": [
         {
           "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains a word, it will be used as the search term. If the clipboard contains a sentence, the first word will be used as the search term.",
+          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
           "title": "Read from Clipboard",
           "type": "dropdown",
           "default": "global",
@@ -124,7 +124,7 @@
       "preferences": [
         {
           "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains a word, it will be used as the search term. If the clipboard contains a sentence, the first word will be used as the search term.",
+          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
           "title": "Read from Clipboard",
           "type": "dropdown",
           "default": "global",
@@ -155,7 +155,7 @@
       "preferences": [
         {
           "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains a word, it will be used as the search term. If the clipboard contains a sentence, the first word will be used as the search term.",
+          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
           "title": "Read from Clipboard",
           "type": "dropdown",
           "default": "global",
@@ -186,7 +186,7 @@
       "preferences": [
         {
           "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains a word, it will be used as the search term. If the clipboard contains a sentence, the first word will be used as the search term.",
+          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
           "title": "Read from Clipboard",
           "type": "dropdown",
           "default": "global",
@@ -217,7 +217,7 @@
       "preferences": [
         {
           "name": "useClipboard",
-          "description": "Read the word from the clipboard when opening the command. If the clipboard contains a word, it will be used as the search term. If the clipboard contains a sentence, the first word will be used as the search term.",
+          "description": "Read the word from the clipboard when opening the command. If the clipboard contains text, it will be used as the search term.",
           "title": "Read from Clipboard",
           "type": "dropdown",
           "default": "global",
