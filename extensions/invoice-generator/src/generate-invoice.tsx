@@ -52,9 +52,6 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
     },
   });
 
-  console.log("includePaymentTerms:", includePaymentTerms);
-  console.log("includeAmountPaid:", includeAmountPaid);
-
   return (
     <Form
       enableDrafts
