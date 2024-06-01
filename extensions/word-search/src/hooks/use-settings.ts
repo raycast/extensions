@@ -7,7 +7,22 @@ export const useDefaultAction = () =>
     return getPreferenceValues<Preferences>().defaultAction || "paste";
   }, []);
 
-export const useSelectionSetting = () => getPreferenceValues<Preferences>().useSelection;
+export const useSelectionSetting = () =>
+  useMemo(() => {
+    const globalSetting = getPreferenceValues<Preferences>().useSelection;
+    const commandSetting = getPreferenceValues<
+      | Preferences.WordSynonymSearch
+      | Preferences.WordAntonymSearch
+      | Preferences.WordRhymeSearch
+      | Preferences.WordSpell
+      | Preferences.WordAdjectiveSearch
+      | Preferences.WordMissingLettersSearch
+      | Preferences.WordSoundLikeSearch
+      | Preferences.WordSuggest
+    >().useSelectionHere;
+
+    return commandSetting === "global" ? globalSetting : commandSetting === "true";
+  }, []);
 
 export const useCapitalizeResults = () => getPreferenceValues<Preferences>().capitalizeResults;
 
