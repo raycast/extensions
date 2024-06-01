@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Action, ActionPanel, LaunchProps, List } from "@raycast/api";
 
-import type { SearchType, Word } from "@/types";
+import { Vocabulary, type SearchType, type Word } from "@/types";
 
 import useOptionalSelection from "@/hooks/use-optional-selection";
 import useSearchWords from "@/hooks/use-searchwords";

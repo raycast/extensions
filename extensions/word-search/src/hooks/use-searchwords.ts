@@ -4,24 +4,28 @@ import { URL, URLSearchParams } from "url";
 import { Toast, showToast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import type { SearchType, Word } from "@/types";
+import { SearchType, Vocabulary, Word } from "@/types";
 
 import { useCapitalizeResults, useMaxResults } from "@/hooks/use-settings";
 
-const useSearchWords = (wordsToSearch: string, type: SearchType) => {
+const useSearchWords = (wordsToSearch: string, type: SearchType, vocabulary?: Vocabulary) => {
   const capitalizeResults = useCapitalizeResults();
   const maxResults = useMaxResults();
 
   const url = useMemo(() => {
     const searchParams = new URLSearchParams({
-      language: "en",
       md: "d",
       max: maxResults.toString(),
       [type]: wordsToSearch,
     });
 
+    // TODO: Make sure to remove this for the wrong types (See https://www.datamuse.com/api/#vocabs, this only worls for ml, sl, sp)
+    if (vocabulary && vocabulary !== Vocabulary.English) {
+      searchParams.set("v", vocabulary);
+    }
+
     return new URL(`/words?${searchParams}`, "https://api.datamuse.com/words").toString();
-  }, [wordsToSearch, type, maxResults]);
+  }, [wordsToSearch, type, maxResults, vocabulary]);
 
   return useFetch<Word[]>(url, {
     parseResponse: async (response) => {

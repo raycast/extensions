@@ -23,3 +23,9 @@ export enum WordType {
   "v" = "verb",
   "adj" = "adjective",
 }
+
+export enum Vocabulary {
+  English = "en",
+  Spanish = "es",
+  Wikipedia = "enwiki",
+}
