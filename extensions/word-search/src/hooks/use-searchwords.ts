@@ -20,7 +20,6 @@ const useSearchWords = (wordsToSearch: string, type: SearchType, vocabulary?: Vo
       [type]: wordsToSearch,
     });
 
-    // TODO: Make sure to remove this for the wrong types (See https://www.datamuse.com/api/#vocabs, this only worls for ml, sl, sp)
     if (vocabulary && vocabulary !== Vocabulary.English) {
       searchParams.set("v", vocabulary);
     }

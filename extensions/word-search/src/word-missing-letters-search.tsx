@@ -9,7 +9,9 @@ export default function SearchWordMissingLetters(props: LaunchProps) {
     SearchType.MISSING_LETTERS,
     "Search for words with missing letters",
     props,
-    "Search for words by placing '?' between unknown letters",
-    "Ex. 'sp??e' will search for words that start with 'sp' and end in 'e' with two unknown letters.",
+    {
+      helperTitle: "Search for words by placing '?' between unknown letters",
+      helperDescription: "Ex. 'sp??e' will search for words that start with 'sp' and end in 'e' with two unknown letters.",
+    }
   );
 }
