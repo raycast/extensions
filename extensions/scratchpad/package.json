@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "scratchpad",
-  "title": "Scratchpad",
+  "title": "Create Scratchpad",
   "description": "Creates a scratchpad file and opens it in an editor",
   "icon": "scratchpad-icon.png",
   "author": "asnimansari",
