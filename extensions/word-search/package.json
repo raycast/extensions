@@ -94,6 +94,13 @@
       "subtitle": "Datamuse",
       "description": "Search for word with missing letters",
       "mode": "view"
+    },
+    {
+      "name": "word-sound-like-search",
+      "title": "Search Word that Sounds Like",
+      "subtitle": "Datamuse",
+      "description": "Search for word that sounds like the given word",
+      "mode": "view"
     }
   ],
   "dependencies": {

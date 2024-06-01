@@ -10,6 +10,7 @@ export enum SearchType {
   MISSING_LETTERS = "sp",
   RHYME = "rel_rhy",
   SYNONYM = "ml",
+  SOUND_LIKE = "sl",
 }
 
 export interface Definition {
