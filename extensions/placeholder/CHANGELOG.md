@@ -1,5 +1,9 @@
 # Placeholder Changelog
 
+## [Simplify Command] - {PR_MERGE_DATE}
+
+- Simplifying the Random Placeholder Image Command
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0
