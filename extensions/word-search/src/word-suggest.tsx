@@ -7,8 +7,9 @@ import useOptionalSelection from "@/hooks/use-optional-selection";
 import useSuggestions from "@/hooks/use-suggestions";
 
 import Actions from "@/components/Actions";
-import { Vocabulary } from "./types";
+
 import VocubalarySwitch from "./components/VocubalarySwitch";
+import { Vocabulary } from "./types";
 
 export default function SuggestWord(launchProps: LaunchProps) {
   const placeholder = "Suggest a word";

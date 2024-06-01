@@ -3,13 +3,14 @@ import { useState } from "react";
 import type { LaunchProps } from "@raycast/api";
 import { List } from "@raycast/api";
 
-import {SearchType, Vocabulary} from '@/types';
+import type { SearchType } from "@/types";
+import { Vocabulary } from "@/types";
 
 import useOptionalSelection from "@/hooks/use-optional-selection";
 import useSearchWords from "@/hooks/use-searchwords";
 
 import Actions from "@/components/Actions";
-import VocubalarySwitch from '@/components/VocubalarySwitch';
+import VocubalarySwitch from "@/components/VocubalarySwitch";
 
 export interface extraOptions {
   useVocabulary?: boolean;
@@ -21,7 +22,7 @@ export default function SearchResults(
   type: SearchType,
   placeholder: string,
   launchProps: LaunchProps,
-  { helperTitle, helperDescription, useVocabulary }: extraOptions = {}
+  { helperTitle, helperDescription, useVocabulary }: extraOptions = {},
 ) {
   const [search, setSearch] = useState<string>("");
   const [vocubalary, setVocubalary] = useState<Vocabulary>(Vocabulary.English);
