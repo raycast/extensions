@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openai-vision",
+  "title": "OpenAI Vision",
+  "description": "Use openai vision to get info from images",
+  "icon": "icon.png",
+  "author": "lin",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-selected-image",
+      "title": "Ask Selected Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
+    },
+    {
+      "name": "ask-clipboard-image",
+      "title": "Ask Clipboard Image",
+      "description": "Template with a plain detail view",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": false,
+          "placeholder": "What is it?"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "description": "AI API Key",
+      "name": "apikey",
+      "required": true,
+      "title": "Openai API Key.",
+      "type": "password"
+    },
+    {
+      "name": "sys_prompt",
+      "description": "System Prompt",
+      "type": "textfield",
+      "required": false,
+      "title": "System Prompt"
+    },
+    {
+      "name": "model",
+      "description": "LLM model to use for all your commands.",
+      "type": "textfield",
+      "required": false,
+      "title": "Model",
+      "default": "gpt-4o"
+    },
+    {
+      "name": "enableStreaming",
+      "title": "Response Streaming",
+      "label": "Enabled",
+      "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@nem035/gpt-3-encoder": "^1.1.7",
+    "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.15.0",
+    "image-meta": "^0.2.0",
+    "image-type": "^5.2.0",
+    "openai": "^4.47.3",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "pull": "npx @raycast/api@latest pull-contributions"
+  }
+}
