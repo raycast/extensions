@@ -10,13 +10,15 @@ import { InvoiceFormValues, InvoiceFormStaticValues, InvoiceRequestContent, Invo
 
 function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean): InvoiceRequestContent {
   const items: Partial<InvoiceRequestItemValues>[] = [];
+  const customFields: Record<number, { name?: string; value?: string }> = {};
   const staticValues: Partial<InvoiceFormStaticValues> = {};
 
   for (const key in values) {
-    const match = key.match(/^(name|quantity|unit_cost)-(\d+)$/);
+    const itemMatch = key.match(/^(name|quantity|unit_cost)-(\d+)$/);
+    const customFieldMatch = key.match(/^cf-(name|value)-(\d+)$/);
 
-    if (match) {
-      const [, itemType, indexStr] = match;
+    if (itemMatch) {
+      const [, itemType, indexStr] = itemMatch;
       const index = parseInt(indexStr, 10);
 
       items[index] = items[index] || {};
@@ -28,6 +30,16 @@ function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean)
       }
 
       delete values[key]; // Remove the dynamic item from the original values object
+    } else if (customFieldMatch) {
+      const [, fieldType, indexStr] = customFieldMatch;
+      const index = parseInt(indexStr, 10);
+
+      customFields[index] = customFields[index] || {};
+      if (fieldType === "name" || fieldType === "value") {
+        customFields[index][fieldType] = values[key] as string; // Ensure proper typing
+      }
+
+      delete values[key]; // Clean up processed custom field
     } else {
       if (values[key] instanceof Date) {
         staticValues[key as keyof InvoiceFormStaticValues] = moment(values[key] as Date).format("MMMM D, YYYY");
@@ -64,11 +76,14 @@ function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean)
     date: dateStr,
     currency: staticValues.currency as string,
     items: items.filter((item) => item.name && item.quantity && item.unit_cost) as InvoiceRequestItemValues[],
+    custom_fields: Object.values(customFields),
     ...(taxNum !== undefined && { tax: taxNum }),
     ...(staticValues.taxType && { fields: { tax: staticValues.taxType === "%" ? "%" : true } }),
     ...(shippingNum !== undefined && { shipping: shippingNum }),
+    ...(staticValues.ship_to && { ship_to: staticValues.ship_to }),
     ...(amountPaid !== undefined && { amount_paid: amountPaid }),
     ...(staticValues.notes && { notes: staticValues.notes }),
+    ...(staticValues.terms && { terms: staticValues.terms }),
   };
 
   return invoiceRequestContent;

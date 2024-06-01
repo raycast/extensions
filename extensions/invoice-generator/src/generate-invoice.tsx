@@ -2,15 +2,22 @@ import { Action, ActionPanel, Form, LaunchProps } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { Fragment, useState } from "react";
 
-import { includeShipping, initialInvoiceFormValues, initialInvoiceItemValues } from "./utils";
-import { InvoiceFormValues, InvoiceFormItemValues } from "./types";
 import { generateInvoice } from "./scripts";
+import {
+  includeShipping,
+  initialCustomFields,
+  initialInvoiceFormValues,
+  initialInvoiceItemValues,
+  termsAndConditions,
+} from "./utils";
+import { InvoiceFormValues, InvoiceFormItemValues, InvoiceFormCustomFieldValues } from "./types";
 
 export default function GenerateInvoice(props: LaunchProps<{ draftValues: InvoiceFormValues }>) {
   const { draftValues } = props;
   const [includeAddress, setIncludeAddress] = useState<boolean>(false);
   const [includeTax, setIncludeTax] = useState<boolean>(false);
   const [items, setItems] = useState<InvoiceFormItemValues>(initialInvoiceItemValues);
+  const [customFields, setCustomFields] = useState<InvoiceFormCustomFieldValues>(initialCustomFields);
 
   const handleItemUpdate = (index: number, key: string, value: string) => {
     setItems((prevItems) => {
@@ -57,6 +64,16 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
             shortcut={{ modifiers: ["cmd"], key: "d" }}
             onAction={() => setItems((prevItems) => prevItems.slice(0, prevItems.length - 1))}
           />
+          <Action
+            title="Add Custom Field"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            onAction={() => setCustomFields((prevFields) => [...prevFields, ...initialCustomFields])}
+          />
+          <Action
+            title="Remove Custom Field"
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            onAction={() => setCustomFields((prevFields) => prevFields.slice(0, prevFields.length - 1))}
+          />
           <Action title="Reset Form" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={() => reset()} />
         </ActionPanel>
       }
@@ -72,6 +89,7 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
       <Form.Description text="Invoice Details" />
 
       <Form.TextField title="Currency" {...itemProps.currency} />
+      <Form.TextField title="Payment Terms" {...itemProps.payment_terms} />
       <Form.Checkbox id="includeTax" label="Include Tax" onChange={setIncludeTax} />
       {includeTax && (
         <>
@@ -82,9 +100,15 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
           <Form.TextField title="Tax" {...itemProps.tax} />
         </>
       )}
-      {includeShipping && <Form.TextField title="Shipping" {...itemProps.shipping} />}
+      {includeShipping && (
+        <>
+          <Form.TextField title="Shipping" {...itemProps.shipping} />
+          <Form.TextArea title="Shipping Address" {...itemProps.ship_to} />
+        </>
+      )}
       <Form.TextField title="Amount Paid" {...itemProps.amount_paid} />
       <Form.TextArea title="Notes" {...itemProps.notes} />
+      {termsAndConditions && <Form.TextField title="Terms" {...itemProps.terms} />}
 
       <Form.Separator />
       <Form.Description text="Items" />
@@ -108,6 +132,30 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
             title={`Unit Cost ${index}`}
             value={item.unit_cost}
             onChange={(value) => handleItemUpdate(index, "unit_cost", value)}
+          />
+        </Fragment>
+      ))}
+
+      <Form.Separator />
+      <Form.Description text="Custom Fields" />
+
+      {customFields.map((field, index) => (
+        <Fragment key={`field-${index}`}>
+          <Form.TextField
+            id={`cf-name-${index}`}
+            title={`Name ${index}`}
+            value={field.name}
+            onChange={(value) =>
+              setCustomFields((prevFields) => prevFields.map((f, i) => (i === index ? { ...f, name: value } : f)))
+            }
+          />
+          <Form.TextField
+            id={`cf-value-${index}`}
+            title={`Value ${index}`}
+            value={field.value}
+            onChange={(value) =>
+              setCustomFields((prevFields) => prevFields.map((f, i) => (i === index ? { ...f, value: value } : f)))
+            }
           />
         </Fragment>
       ))}

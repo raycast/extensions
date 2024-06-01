@@ -37,6 +37,13 @@
       "required": false
     },
     {
+      "name": "termsAndConditions",
+      "title": "Terms and Conditions",
+      "description": "Terms and conditions for the invoice.",
+      "type": "textfield",
+      "required": false
+    },
+    {
       "name": "includeShipping",
       "label": "Include Shipping",
       "description": "Include shipping field in invoice form.",
