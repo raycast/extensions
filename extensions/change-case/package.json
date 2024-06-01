@@ -18,8 +18,13 @@
   "keywords": [
     "text",
     "transform",
-    "string",
-    "sponge"
+    "capital",
+    "header",
+    "lower",
+    "pascal",
+    "random",
+    "sentence",
+    "title",
   ],
   "license": "MIT",
   "debug": {
