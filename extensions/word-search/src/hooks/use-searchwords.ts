@@ -15,7 +15,7 @@ const useSearchWords = (wordsToSearch: string, type: SearchType, vocabulary?: Vo
 
   const url = useMemo(() => {
     const searchParams = new URLSearchParams({
-      md: "d",
+      md: "dp",
       max: maxResults.toString(),
       [type]: wordsToSearch,
     });

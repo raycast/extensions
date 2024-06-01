@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { LaunchProps } from "@raycast/api";
-import { List } from "@raycast/api";
+import { Action, List } from "@raycast/api";
 
 import type { SearchType } from "@/types";
 import { Vocabulary } from "@/types";
@@ -25,6 +25,7 @@ export default function SearchResults(
   { helperTitle, helperDescription, useVocabulary }: extraOptions = {},
 ) {
   const [search, setSearch] = useState<string>("");
+  const [showDetails, setShowDetails] = useState<boolean>(false);
   const [vocubalary, setVocubalary] = useState<Vocabulary>(Vocabulary.English);
 
   useOptionalSelection(setSearch, typeof launchProps.fallbackText !== "undefined" && launchProps.fallbackText !== "");
@@ -37,6 +38,7 @@ export default function SearchResults(
       isLoading={isLoading}
       throttle={true}
       onSearchTextChange={setSearch}
+      isShowingDetail={search !== "" && showDetails}
       searchBarAccessory={useVocabulary ? <VocubalarySwitch onChange={setVocubalary} /> : null}
       searchText={search}
     >
@@ -53,7 +55,34 @@ export default function SearchResults(
             key={word.word}
             title={word.word}
             subtitle={word.defs !== undefined ? word.defs[0] : ""}
-            actions={<Actions word={word} />}
+            actions={
+              <Actions word={word}>
+                <Action
+                  title="Toggle Details"
+                  onAction={() => setShowDetails((d) => !d)}
+                  shortcut={{ key: "d", modifiers: ["cmd"] }}
+                />
+              </Actions>
+            }
+            detail={
+              <List.Item.Detail
+                markdown={
+                  word.defs !== undefined
+                    ? "```\n" + word.defs.map((d) => d.replaceAll("n\t", "")).join("\n\n") + "```"
+                    : "No definitions found."
+                }
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.TagList title="Tags">
+                      {word.tags?.includes("n") ? <List.Item.Detail.Metadata.TagList.Item text="Noun" /> : null}
+                      {word.tags?.includes("v") ? <List.Item.Detail.Metadata.TagList.Item text="Verb" /> : null}
+                      {word.tags?.includes("adj") ? <List.Item.Detail.Metadata.TagList.Item text="Adjective" /> : null}
+                      {word.tags?.includes("adv") ? <List.Item.Detail.Metadata.TagList.Item text="Adverb" /> : null}
+                    </List.Item.Detail.Metadata.TagList>
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
           />
         ))
       )}

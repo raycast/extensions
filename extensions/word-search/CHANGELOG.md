@@ -8,6 +8,7 @@
 - Added option to set the max results
 - Added search for words that sound like the search text
 - Added Word Suggestion command, including vocabulary switch (`English`, `Spanish` and `Wikipedia (English)`)
+- Added Details option for words
 
 ## [Output capitalized word] - 2023-02-28
 

@@ -4,7 +4,8 @@ export type SimpleWord = {
 };
 
 export type Word = SimpleWord & {
-  defs: string[];
+  defs?: string[];
+  tags?: string[];
 };
 
 export enum SearchType {
