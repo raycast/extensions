@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "video-call-reactions",
+  "title": "Video Call Reactions",
+  "description": "This extension triggers video call reactions such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers on macOS.",
+  "icon": "video-call-reactions-icon.png",
+  "author": "yazan_zaid",
+  "categories": [
+    "Communication",
+    "Applications",
+    "Fun",
+    "Media",
+    "Other",
+    "Productivity",
+    "System",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Trigger Video Reaction",
+      "subtitle": "Choose and trigger video call reactions with ease.",
+      "description": "The script allows users to select and trigger reactions like confetti and fireworks during a video call.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultReaction",
+      "type": "dropdown",
+      "title": "Default Reaction",
+      "description": "Choose the default reaction for video calls.",
+      "required": true,
+      "data": [
+        {
+          "title": "Hearts ❤️",
+          "value": "Hearts ❤️"
+        },
+        {
+          "title": "Thumbs Up 👍",
+          "value": "Thumbs Up 👍"
+        },
+        {
+          "title": "Thumbs Down 👎",
+          "value": "Thumbs Down 👎"
+        },
+        {
+          "title": "Balloons 🎈",
+          "value": "Balloons 🎈"
+        },
+        {
+          "title": "Rain 🌧️",
+          "value": "Rain 🌧️"
+        },
+        {
+          "title": "Confetti 🎉",
+          "value": "Confetti 🎉"
+        },
+        {
+          "title": "Lasers 🔆",
+          "value": "Lasers 🔆"
+        },
+        {
+          "title": "Fireworks 🎆",
+          "value": "Fireworks 🎆"
+        }
+      ],
+      "default": "Confetti 🎉"
+    },
+    {
+      "name": "showConfetti",
+      "type": "checkbox",
+      "title": "Show Confetti 🎉",
+      "description": "Confetti in Raycast to celebrate after you choose the Confetti 🎉 reaction, regardless of whether it activates during the video call.",
+      "default": false,
+      "required": false,
+      "label": "Show Confetti"
+    },
+    {
+      "name": "playSound",
+      "type": "checkbox",
+      "title": "Play Sound on Confetti",
+      "description": "Play a sound effect when confetti is shown.",
+      "default": false,
+      "required": false,
+      "label": "Play Sound"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "screenshots": [
+    "assets/balloons.png",
+    "assets/confetti.png",
+    "assets/hearts.png",
+    "assets/rain.png",
+    "assets/thumbs-up.png",
+    "assets/confetti-2.png",
+    "assets/fireworks.png",
+    "assets/lasers.png",
+    "assets/thumbs-down.png"
+  ]
+}
