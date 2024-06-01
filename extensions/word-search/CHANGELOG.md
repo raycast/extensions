@@ -1,5 +1,11 @@
 # Word Search Changelog
 
+## [Upgrades] - 2024-06-01
+
+- Updated dependencies to latest versions
+- Rewrote API using `useFetch` hook
+- Added option (global and per command) to read word from clipboard [(#11748)](https://github.com/raycast/extensions/issues/11748)
+
 ## [Output capitalized word] - 2023-02-28
 
 - Output will be capitalized when search text is capitalized

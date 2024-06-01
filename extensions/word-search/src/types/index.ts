@@ -22,8 +22,3 @@ export enum WordType {
   "v" = "verb",
   "adj" = "adjective",
 }
-
-export interface Preferences {
-  defaultAction: string;
-  capitalizeResults: boolean;
-}
