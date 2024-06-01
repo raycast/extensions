@@ -44,6 +44,14 @@
       "required": false
     },
     {
+      "name": "invoiceDateFormat",
+      "title": "Invoice Date Format",
+      "description": "The format for the invoice date. Uses moment.js format.",
+      "type": "textfield",
+      "required": true,
+      "default": "MMMM D, YYYY"
+    },
+    {
       "name": "defaultCurrency",
       "title": "Default Currency",
       "description": "The default currency for your invoices.",

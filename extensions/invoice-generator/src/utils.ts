@@ -10,6 +10,7 @@ export const {
   includeAmountPaid,
   includePaymentTerms,
   includeShipping,
+  invoiceDateFormat,
   invoiceNumberPrefix,
   logoUrl,
   name,

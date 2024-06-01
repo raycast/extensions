@@ -5,7 +5,7 @@ import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 
-import { logoUrl } from "./utils";
+import { invoiceDateFormat, logoUrl } from "./utils";
 import { InvoiceFormValues, InvoiceFormStaticValues, InvoiceRequestContent, InvoiceRequestItemValues } from "./types";
 
 function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean): InvoiceRequestContent {
@@ -42,7 +42,7 @@ function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean)
       delete values[key]; // Clean up processed custom field
     } else {
       if (values[key] instanceof Date) {
-        staticValues[key as keyof InvoiceFormStaticValues] = moment(values[key] as Date).format("MMMM D, YYYY");
+        staticValues[key as keyof InvoiceFormStaticValues] = moment(values[key] as Date).format(invoiceDateFormat);
       } else if (values[key] !== null && values[key] !== undefined) {
         if (key === "from" && includeAddress && values["address"]) {
           staticValues["from"] = `${values["from"]}\n${values["address"].split(",").join("\n")}`;
