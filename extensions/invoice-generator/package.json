@@ -37,16 +37,152 @@
       "required": false
     },
     {
-      "name": "termsAndConditions",
-      "title": "Terms and Conditions",
-      "description": "Terms and conditions for the invoice.",
+      "name": "invoiceNumberPrefix",
+      "title": "Invoice Number Prefix",
+      "description": "The prefix for the invoice number.",
       "type": "textfield",
       "required": false
     },
     {
-      "name": "includeShipping",
-      "label": "Include Shipping",
-      "description": "Include shipping field in invoice form.",
+      "name": "defaultCurrency",
+      "title": "Default Currency",
+      "description": "The default currency for your invoices.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "Australian Dollars",
+          "value": "AUD"
+        },
+        {
+          "title": "Brazilian Reais",
+          "value": "BRL"
+        },
+        {
+          "title": "Canadian Dollars",
+          "value": "CAD"
+        },
+        {
+          "title": "Chinese Yuan",
+          "value": "CNY"
+        },
+        {
+          "title": "Czech Koruna",
+          "value": "CZK"
+        },
+        {
+          "title": "Euros",
+          "value": "EUR"
+        },
+        {
+          "title": "Hong Kong Dollars",
+          "value": "HKD"
+        },
+        {
+          "title": "Hungarian Forint",
+          "value": "HUF"
+        },
+        {
+          "title": "Icelandic Krona",
+          "value": "ISK"
+        },
+        {
+          "title": "Indian Rupees",
+          "value": "INR"
+        },
+        {
+          "title": "Indonesian Rupiah",
+          "value": "IDR"
+        },
+        {
+          "title": "Japanese Yen",
+          "value": "JPY"
+        },
+        {
+          "title": "Malaysian Ringgit",
+          "value": "MYR"
+        },
+        {
+          "title": "Mexican Pesos",
+          "value": "MXN"
+        },
+        {
+          "title": "New Zealand Dollars",
+          "value": "NZD"
+        },
+        {
+          "title": "Norwegian Krone",
+          "value": "NOK"
+        },
+        {
+          "title": "Philippine Pesos",
+          "value": "PHP"
+        },
+        {
+          "title": "Pounds Sterling",
+          "value": "GBP"
+        },
+        {
+          "title": "Russian Rubles",
+          "value": "RUB"
+        },
+        {
+          "title": "Singapore Dollars",
+          "value": "SGD"
+        },
+        {
+          "title": "South African Rand",
+          "value": "ZAR"
+        },
+        {
+          "title": "South Korean Won",
+          "value": "KRW"
+        },
+        {
+          "title": "Swedish Krona",
+          "value": "SEK"
+        },
+        {
+          "title": "Swiss Francs",
+          "value": "CHF"
+        },
+        {
+          "title": "Turkish Lira",
+          "value": "TRY"
+        },
+        {
+          "title": "US Dollars",
+          "value": "USD"
+        }
+      ]
+    },
+    {
+      "name": "termsAndConditions",
+      "title": "Terms and Conditions",
+      "description": "Terms and conditions for your invoices.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "defaultIncludeAddress",
+      "label": "Default Include Address",
+      "description": "Include address in the invoice form by default.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "defaultIncludeTax",
+      "label": "Default Include Tax",
+      "description": "Include tax in the invoice form by default.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "includeAmountPaid",
+      "label": "Include Amount Paid",
+      "description": "Include amount paid field in invoice form.",
       "type": "checkbox",
       "default": true,
       "required": false
@@ -55,6 +191,14 @@
       "name": "includePaymentTerms",
       "label": "Include Payment Terms",
       "description": "Include payment terms field in invoice form.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "includeShipping",
+      "label": "Include Shipping",
+      "description": "Include shipping field in invoice form.",
       "type": "checkbox",
       "default": true,
       "required": false

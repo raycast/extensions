@@ -4,6 +4,9 @@ import { Fragment, useState } from "react";
 
 import { generateInvoice } from "./scripts";
 import {
+  defaultIncludeAddress,
+  defaultIncludeTax,
+  includeAmountPaid,
   includePaymentTerms,
   includeShipping,
   initialCustomFields,
@@ -15,8 +18,8 @@ import { InvoiceFormValues, InvoiceFormItemValues, InvoiceFormCustomFieldValues 
 
 export default function GenerateInvoice(props: LaunchProps<{ draftValues: InvoiceFormValues }>) {
   const { draftValues } = props;
-  const [includeAddress, setIncludeAddress] = useState<boolean>(false);
-  const [includeTax, setIncludeTax] = useState<boolean>(false);
+  const [includeAddress, setIncludeAddress] = useState<boolean>(defaultIncludeAddress);
+  const [includeTax, setIncludeTax] = useState<boolean>(defaultIncludeTax);
   const [items, setItems] = useState<InvoiceFormItemValues>(initialInvoiceItemValues);
   const [customFields, setCustomFields] = useState<InvoiceFormCustomFieldValues>(initialCustomFields);
 
@@ -89,9 +92,36 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
       <Form.Separator />
       <Form.Description text="Invoice Details" />
 
-      <Form.TextField title="Currency" {...itemProps.currency} />
+      <Form.Dropdown title="Currency" {...itemProps.currency}>
+        <Form.Dropdown.Item title="Australian Dollars" value="AUD" />
+        <Form.Dropdown.Item title="Brazilian Reais" value="BRL" />
+        <Form.Dropdown.Item title="Canadian Dollars" value="CAD" />
+        <Form.Dropdown.Item title="Chinese Yuan" value="CNY" />
+        <Form.Dropdown.Item title="Czech Koruna" value="CZK" />
+        <Form.Dropdown.Item title="Euros" value="EUR" />
+        <Form.Dropdown.Item title="Hong Kong Dollars" value="HKD" />
+        <Form.Dropdown.Item title="Hungarian Forint" value="HUF" />
+        <Form.Dropdown.Item title="Icelandic Krona" value="ISK" />
+        <Form.Dropdown.Item title="Indian Rupees" value="INR" />
+        <Form.Dropdown.Item title="Indonesian Rupiah" value="IDR" />
+        <Form.Dropdown.Item title="Japanese Yen" value="JPY" />
+        <Form.Dropdown.Item title="Malaysian Ringgit" value="MYR" />
+        <Form.Dropdown.Item title="Mexican Pesos" value="MXN" />
+        <Form.Dropdown.Item title="New Zealand Dollars" value="NZD" />
+        <Form.Dropdown.Item title="Norwegian Krone" value="NOK" />
+        <Form.Dropdown.Item title="Philippine Pesos" value="PHP" />
+        <Form.Dropdown.Item title="Pounds Sterling" value="GBP" />
+        <Form.Dropdown.Item title="Russian Rubles" value="RUB" />
+        <Form.Dropdown.Item title="Singapore Dollars" value="SGD" />
+        <Form.Dropdown.Item title="South African Rand" value="ZAR" />
+        <Form.Dropdown.Item title="South Korean Won" value="KRW" />
+        <Form.Dropdown.Item title="Swedish Krona" value="SEK" />
+        <Form.Dropdown.Item title="Swiss Francs" value="CHF" />
+        <Form.Dropdown.Item title="Turkish Lira" value="TRY" />
+        <Form.Dropdown.Item title="US Dollars" value="USD" />
+      </Form.Dropdown>
       {includePaymentTerms && <Form.TextField title="Payment Terms" {...itemProps.payment_terms} />}
-      <Form.Checkbox id="includeTax" label="Include Tax" onChange={setIncludeTax} />
+      <Form.Checkbox id="includeTax" label="Include Tax" value={includeTax} onChange={setIncludeTax} />
       {includeTax && (
         <>
           <Form.Dropdown id="taxType" title="Tax Type">
@@ -107,7 +137,7 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
           <Form.TextArea title="Shipping Address" {...itemProps.ship_to} />
         </>
       )}
-      <Form.TextField title="Amount Paid" {...itemProps.amount_paid} />
+      {includeAmountPaid && <Form.TextField title="Amount Paid" {...itemProps.amount_paid} />}
       <Form.TextArea title="Notes" {...itemProps.notes} />
       {termsAndConditions && <Form.TextField title="Terms" {...itemProps.terms} />}
 
