@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail } from "@raycast/api";
 import { typeColor, typeDescription } from "./utils";
 import { Alias } from "./types";
 
-export default function CommandDetail({ alias }: { alias: Alias }) {
+export default function CommandDetail({ alias, onCopy }: { alias: Alias; onCopy: () => void }) {
   const markdown = `
 # ${alias.name}
 ###
@@ -10,32 +10,28 @@ export default function CommandDetail({ alias }: { alias: Alias }) {
 ${alias.command}
 \`\`\`
 
-## ${alias.description}
+### ${alias.description}
+
+${typeDescription(alias.type)}
+
+[Search command on the Git Documentation ↗](https://git-scm.com/search/results?search=${encodeURIComponent(alias.command)})
 ###
-\`${alias.type}\` ${typeDescription(alias.type)}
 `;
   return (
     <Detail
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Alias" content={alias.name} />
+          <Action.CopyToClipboard title="Copy Alias" content={alias.name} onCopy={onCopy} />
+          <Action.OpenInBrowser title="Search on Git Documentation" url={`https://git-scm.com/search/results?search=${encodeURIComponent(alias.command)}`} />
         </ActionPanel>
       }
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title="">
-            <Detail.Metadata.TagList.Item text={alias.name} color={typeColor(alias.type)} />
-          </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Type">
             <Detail.Metadata.TagList.Item text={alias.type} color={typeColor(alias.type)} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link
-            title="Reference"
-            target="https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/README.md"
-            text="Ohmyzsh Plugin Readme"
-          />
         </Detail.Metadata>
       }
     />
