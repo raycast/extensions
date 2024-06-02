@@ -1,5 +1,9 @@
 # Wikipedia Changelog
 
+## [Add Simple English] - 2024-06-02
+
+- Added `Simple English` language that is used for simple.wikipedia.org (simplied articles using simplified english)
+
 ## [Flag update] - 2024-04-19
 
 - Update flag emoji for the `Dutch` language

@@ -23,7 +23,8 @@ export type Locale =
   | "zh-sg"
   | "zh-tw"
   | "zh-cn"
-  | "uk";
+  | "uk"
+  | "simple-en"; // for simple.wikipedia.org
 
 export function useLanguage() {
   return useCachedState<Locale>("language", "en");
@@ -37,6 +38,7 @@ export async function getStoredLanguage() {
 
 export const languages: { icon: string; title: string; value: Locale }[] = [
   { icon: "🇺🇸", title: "English", value: "en" },
+  { icon: "🇺🇸", title: "Simple English", value: "simple-en" }, 
   { icon: "🇪🇸", title: "Spanish", value: "es" },
   { icon: "🇩🇪", title: "German", value: "de" },
   { icon: "🇫🇷", title: "French", value: "fr" },
