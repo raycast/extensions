@@ -141,6 +141,16 @@ export default function Command() {
                   onAction={() => copyFASlugToClipboard(searchItem)}
                 />
                 <Action
+                  title={`Copy Icon Classes`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copyFAClassesToClipboard(searchItem)}
+                />
+                <Action
+                  title={`Copy as SVG`}
+                  icon="copy-clipboard-16"
+                  onAction={() => copySvgToClipboard(searchItem)}
+                />
+                <Action
                   title={`Copy Icon Glyph`}
                   icon="copy-clipboard-16"
                   onAction={() => copyFAGlyphToClipboard(searchItem)}
@@ -149,16 +159,6 @@ export default function Command() {
                   title={`Copy Icon Unicode`}
                   icon="copy-clipboard-16"
                   onAction={() => copyFAUnicodeClipboard(searchItem)}
-                />
-                <Action
-                  title={`Copy Icon SVG`}
-                  icon="copy-clipboard-16"
-                  onAction={() => copySvgToClipboard(searchItem)}
-                />
-                <Action
-                  title={`Copy Icon Classes`}
-                  icon="copy-clipboard-16"
-                  onAction={() => copyFAClassesToClipboard(searchItem)}
                 />
               </ActionPanel>
             }

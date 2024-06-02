@@ -11,13 +11,13 @@ export const copySvgToClipboard = async (icon: SearchItem) => {
 export const copyFAGlyphToClipboard = async (icon: SearchItem) => {
   // Convert the unicode to a string and copy it to the clipboard
   await Clipboard.copy(String.fromCharCode(parseInt(icon.unicode, 16)));
-  await showHUD('Copied Glyph to clipboard!');
+  await showHUD('Copied glyph to clipboard!');
 };
 
 export const copyFAUnicodeClipboard = async (icon: SearchItem) => {
   // Convert the unicode to a string and copy it to the clipboard
   await Clipboard.copy(icon.unicode);
-  await showHUD('Copied Glyph to clipboard!');
+  await showHUD('Copied unicode to clipboard!');
 };
 
 export const copyFAClassesToClipboard = async (icon: SearchItem) => {
@@ -26,12 +26,12 @@ export const copyFAClassesToClipboard = async (icon: SearchItem) => {
     icon.id
   }`;
   await Clipboard.copy(faClass);
-  await showHUD('Copied Classes to clipboard!');
+  await showHUD('Copied classes to clipboard!');
 };
 
 export const copyFASlugToClipboard = async (icon: SearchItem) => {
   await Clipboard.copy(icon.id);
-  await showHUD('Copied Slug to clipboard!');
+  await showHUD('Copied slug to clipboard!');
 };
 
 export const familyStylesByPrefix: { [key: string]: string } = {
@@ -57,7 +57,7 @@ export function iconForStyle(prefix: string) {
   } else if (prefix === 'fass' || prefix === 'fas') {
     return 'solid.svg';
   } else if (prefix === 'fad') {
-    return 'duotone.svg';
+    return 'duotone-new.svg';
   } else {
     return 'brand.svg';
   }
