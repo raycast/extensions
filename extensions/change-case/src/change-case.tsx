@@ -100,9 +100,7 @@ export default function Command(props: LaunchProps) {
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
     (async () => {
-      const content = await readContent(preferredSource).then((input) =>
-        preLowercaseText(input, preserveCase),
-      );
+      const content = await readContent(preferredSource).then((input) => preLowercaseText(input, preserveCase));
       const converted = functions[immediatelyConvertToCase](content);
 
       if (preferredAction === "paste") {
