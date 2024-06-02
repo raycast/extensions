@@ -51,7 +51,15 @@ Automatically save all the question and answer so you can go back digging for th
 
 ### GPT-4
 
-GPT-4 model availability depends on your developer account. You need access to the GPT-4 API key through OpenAI's waitlist from [here](https://openai.com/waitlist/gpt-4-api) to see the GPT-4 model option.
+- `gpt-4`
+- `gpt-4-32k`
+- `gpt-4o`
+
+GPT-4o model supports vision capabilities, which can be enabled in the Models Command when creating or editing a model.
+
+### Custom Models
+
+Modify the preferences properties to configure the API Endpoint and use custom models.
 
 # How to use
 
