@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, LaunchProps } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { useForm, FormValidation, usePromise } from "@raycast/utils";
 import { Fragment, useState } from "react";
 
 import { generateInvoice } from "./scripts";
@@ -15,13 +15,29 @@ import {
   termsAndConditions,
 } from "./utils";
 import { InvoiceFormValues, InvoiceFormItemValues, InvoiceFormCustomFieldValues } from "./types";
+import { fetchTransactionDetails } from "./handlers";
 
 export default function GenerateInvoice(props: LaunchProps<{ draftValues: InvoiceFormValues }>) {
   const { draftValues } = props;
   const [includeAddress, setIncludeAddress] = useState<boolean>(defaultIncludeAddress);
   const [includeTax, setIncludeTax] = useState<boolean>(defaultIncludeTax);
+  const [transactionType, setTransactionType] = useState<string>("payment-link" as string);
+  const [transactionRef, setTransactionRef] = useState<string>("");
   const [items, setItems] = useState<InvoiceFormItemValues>(initialInvoiceItemValues);
   const [customFields, setCustomFields] = useState<InvoiceFormCustomFieldValues>(initialCustomFields);
+
+  const { isLoading, data, revalidate, error } = usePromise(
+    async (transactionType: string, transactionRef: string) => {
+      return await fetchTransactionDetails(transactionType, transactionRef);
+    },
+    [transactionType, transactionRef],
+    {
+      execute: !!transactionType && !!transactionRef,
+      onError: (error) => {
+        console.error("Failed to fetch transaction details:", error);
+      },
+    },
+  );
 
   const handleItemUpdate = (index: number, key: string, value: string) => {
     setItems((prevItems) => {
@@ -52,8 +68,16 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
     },
   });
 
+  const handleTxnRefChange = (value: string | undefined) => {
+    console.log("Transaction Reference:", value);
+    if (value) {
+      setTransactionRef(value);
+    } else setTransactionRef("");
+  };
+
   return (
     <Form
+      isLoading={isLoading}
       enableDrafts
       actions={
         <ActionPanel>
@@ -82,6 +106,25 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
         </ActionPanel>
       }
     >
+      <Form.Dropdown
+        id="transactionType"
+        title="Transaction Type"
+        value={transactionType}
+        onChange={setTransactionType}
+      >
+        <Form.Dropdown.Item title="Payment Link" value="payment-link" />
+        <Form.Dropdown.Item title="Custom Invoice" value="custom-invoice" />
+      </Form.Dropdown>
+
+      <Form.TextField
+        id="transactionRef"
+        title="Transaction Reference"
+        onBlur={(event) => handleTxnRefChange(event.target.value)}
+      />
+
+      <Form.Separator />
+      <Form.Description text="Invoice Information" />
+
       <Form.TextField title="Invoice Number" {...itemProps.number} />
       <Form.TextField title="From" {...itemProps.from} />
       <Form.Checkbox id="includeAddress" label="Include Address" value={includeAddress} onChange={setIncludeAddress} />
