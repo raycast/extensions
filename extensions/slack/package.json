@@ -6,7 +6,8 @@
   "icon": "slack-icon-rounded.png",
   "author": "mommertf",
   "contributors": [
-    "Elliot67"
+    "Elliot67",
+    "stelo"
   ],
   "categories": [
     "Communication",
@@ -67,6 +68,14 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "label": "Open in Browser",
+      "description": "Opens Slack in browser instead of native application",
+      "name": "openInBrowser",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

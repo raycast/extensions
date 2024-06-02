@@ -33,14 +33,14 @@ function SlackList() {
   return (
     <List isLoading={isValidatingUsers || isValidatingGroups || isValidatingChannels}>
       <List.Section title="Users">
-        {users?.map(({ name, id, teamId, icon }) => (
+        {users?.map(({ name, id, teamId, icon, conversationId }) => (
           <List.Item
             key={id}
             title={name}
             icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChat(teamId, id)} />
+                <Action title="Open in Slack" onAction={() => openChat(teamId, id, conversationId!)} />
               </ActionPanel>
             }
           />
