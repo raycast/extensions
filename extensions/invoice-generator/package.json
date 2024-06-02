@@ -202,13 +202,6 @@
       "required": false
     },
     {
-      "name": "stripeApiKey",
-      "title": "Stripe API Key",
-      "description": "Your Stripe API key.",
-      "type": "password",
-      "required": true
-    },
-    {
       "name": "defaultIncludeAddress",
       "label": "Default Include Address",
       "description": "Include address in the invoice form by default.",
@@ -256,8 +249,7 @@
     "fs": "^0.0.1-security",
     "moment": "^2.30.1",
     "os": "^0.1.2",
-    "path": "^0.12.7",
-    "stripe": "^15.8.0"
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

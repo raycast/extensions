@@ -29,7 +29,7 @@ function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean)
 
       items[index] = items[index] || {};
       if (itemType === "name") {
-        items[index][itemType] = values[key] as string; // Ensuring string type
+        items[index][itemType] = values[key] as string;
       } else if (itemType === "quantity" || itemType === "unit_cost") {
         // Convert to number while extracting
         items[index][itemType] = parseFloat(values[key] as string);
@@ -40,9 +40,9 @@ function extractDynamicItems(values: InvoiceFormValues, includeAddress: boolean)
       const [, fieldType, indexStr] = customFieldMatch;
       const index = parseInt(indexStr, 10);
 
-      customFields[index] = customFields[index] || {};
-      if (fieldType === "name" || fieldType === "value") {
-        customFields[index][fieldType] = values[key] as string; // Ensure proper typing
+      if ((fieldType === "name" || fieldType === "value") && values[key]) {
+        customFields[index] = customFields[index] || {};
+        customFields[index][fieldType] = values[key] as string;
       }
 
       delete values[key]; // Clean up processed custom field

@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { InvoiceFormValues } from "../types";
+import { InvoiceFormValues } from "./types";
 
 export const preferences = getPreferenceValues();
 export const {
@@ -15,7 +15,6 @@ export const {
   logoUrl,
   name,
   termsAndConditions,
-  stripeApiKey,
 } = preferences;
 
 export const initialInvoiceFormValues: InvoiceFormValues = {
