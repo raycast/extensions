@@ -64,11 +64,11 @@
       "required": true
     },
     {
-      "name": "smallWords",
+      "name": "exceptions",
       "type": "textfield",
       "placeholder": "separated,by,commas",
-      "title": "Small Words",
-      "description": "A list of words to prevent from being modified, separated by commas",
+      "title": "Exceptions",
+      "description": "A list of words to prevent from being modified, separated by commas. This only applies to title case and sentence case.",
       "label": "label",
       "required": false
     },
