@@ -71,7 +71,7 @@
     },
     {
       "label": "Open in Browser",
-      "description": "Opens Slack in browser instead of native application",
+      "description": "Opens Slack links in browser instead of native application",
       "name": "openInBrowser",
       "type": "checkbox",
       "required": false,

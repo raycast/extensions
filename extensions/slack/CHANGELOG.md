@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Improvements] - 2024-06-01
+
+- Adds preference to open slack links in the browser
+
 ## [Improve Search command UX] - 2023-04-16
 
 - Automatically close Slack right sidebar after navigating to a user chat
