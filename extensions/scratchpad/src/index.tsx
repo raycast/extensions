@@ -30,6 +30,16 @@ export default function Command() {
         </ActionPanel>
       }
     >
+      <Form.Dropdown id="fileType" title="FileType">
+        {fileTypes.map((entry) => (
+          <Form.Dropdown.Item
+            value={entry.extension}
+            title={entry.name + "(" + entry.extension + ")"}
+            key={entry.extension}
+          />
+        ))}
+      </Form.Dropdown>
+
       <Form.TextField
         id="folder"
         title="Folder"
@@ -58,15 +68,7 @@ export default function Command() {
         }}
         defaultValue="scratch_"
       />
-      <Form.Dropdown id="fileType" title="FileType">
-        {fileTypes.map((entry) => (
-          <Form.Dropdown.Item
-            value={entry.extension}
-            title={entry.name + "(" + entry.extension + ")"}
-            key={entry.extension}
-          />
-        ))}
-      </Form.Dropdown>
+
       <Form.Dropdown id="applicationBundleId" title="Application">
         {applicationsList.map((entry) => (
           <Form.Dropdown.Item value={entry.bundleId!} title={entry.name} key={entry.bundleId} />
