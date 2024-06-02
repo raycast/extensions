@@ -2,7 +2,7 @@
 
 ## [Improvements] - 2024-05-31
 
-- Adds sort descending functionality to DDB queries
+- Adds sort descending and consistent read functionalities to DDB queries
 - Saves the query projection expression in between form renders
 - Improved toast error handling for SQS, DDB and CFN command actions
 

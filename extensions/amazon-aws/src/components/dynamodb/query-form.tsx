@@ -28,13 +28,14 @@ interface QueryFormValues {
   useProjectionExpression: boolean;
   projectionExpression: string;
   isDescending: boolean;
+  isStronglyConsistent: boolean;
 }
 
 export const QueryForm = ({ table }: { table: Table }) => {
   const [lastProjectionExpression, setLastProjectionExpression] = useCachedState<string>(
-    "last-projection-expression",
+    "ddb-query-last-projection-expression",
     "",
-    { cacheNamespace: table.TableName },
+    { cacheNamespace: table.TableArn },
   );
   const { push, pop } = useNavigation();
   const { values, handleSubmit, itemProps } = useForm<QueryFormValues>({
@@ -42,7 +43,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
       const client = new DynamoDBClient({});
       const hasRangeKey = table.keys[values.indexName].rangeKey !== undefined;
       const primaryKey = table.keys[values.indexName];
-      const input = {
+      const input: QueryCommandInput = {
         TableName: table.TableName,
         KeyConditionExpression: [
           `#${primaryKey.hashKey.name} = :${primaryKey.hashKey.name}`,
@@ -80,6 +81,8 @@ export const QueryForm = ({ table }: { table: Table }) => {
         Limit: Number(values.pageLimit),
         ...(values.indexName !== table.TableName && { IndexName: values.indexName.split(".")[1] }),
         ScanIndexForward: !values.isDescending,
+        ConsistentRead: values.isStronglyConsistent,
+        ReturnConsumedCapacity: "TOTAL",
       };
       setLastProjectionExpression(values.projectionExpression || "");
       push(
@@ -134,6 +137,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
       pageLimit: "20",
       rangeKeyOperator: "=",
       isDescending: false,
+      isStronglyConsistent: false,
     },
   });
 
@@ -231,6 +235,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
         />
       )}
       <Form.Checkbox {...itemProps.isDescending} label="Descending Order" />
+      <Form.Checkbox {...itemProps.isStronglyConsistent} label="Consistent Read" />
     </Form>
   );
 };
