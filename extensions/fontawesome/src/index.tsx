@@ -163,8 +163,10 @@ export default function Command() {
               </ActionPanel>
             }
             content={{
-              source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString('base64')}`,
-              tintColor: Color.PrimaryText,
+              value: {
+                source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString('base64')}`,
+                tintColor: Color.PrimaryText,
+              },
               tooltip: searchItem.id,
             }}
           />
