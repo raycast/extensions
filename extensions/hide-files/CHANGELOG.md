@@ -1,5 +1,9 @@
 # Hide Files Changelog
 
+## [Toggle Widgets Visibility] - {PR_MERGE_DATE}
+
+- Toggle Desktop Visibility command adds setting to allow hiding desktop widgets
+
 ## [Refactor Extension] - 2024-05-27
 
 - Refactoring extensions to simplify commands
