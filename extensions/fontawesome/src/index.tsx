@@ -86,6 +86,7 @@ export default function Command() {
       onSearchTextChange={setQuery}
       inset={Grid.Inset.Large}
       columns={8}
+      searchBarPlaceholder="Search icons..."
       searchBarAccessory={
         <Grid.Dropdown tooltip="Select Family & Style" onChange={(newValue) => setType(newValue)}>
           <Grid.Dropdown.Section title="Sharp Icons">
