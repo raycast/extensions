@@ -36,7 +36,12 @@ export default function Command() {
   const [tokenTimeStart, setTokenTimeStart] = useState<number>();
   const [iconData, setIconData] = useCachedState<SearchResult>('iconData');
 
-  const { API_TOKEN } = getPreferenceValues();
+  let { API_TOKEN } = getPreferenceValues();
+
+  if (!API_TOKEN) {
+    API_TOKEN = 'D7A31EA9-20D8-434E-A6C6-8ADC890ADCB8';
+  }
+
   useEffect(() => {
     const tokenTimerCheck = async () => {
       const timeStart = await LocalStorage.getItem<number>('token-expiry-start');
