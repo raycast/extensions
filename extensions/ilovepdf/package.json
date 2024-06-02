@@ -37,6 +37,13 @@
       "subtitle": "iLovePDF",
       "description": "Merge Multiple PDFs using iLovePDF API.",
       "mode": "view"
+    },
+    {
+      "name": "word-to-pdf",
+      "title": "Word to PDF",
+      "subtitle": "iLovePDF",
+      "description": "Converts Word File to PDF using iLovePDF API.",
+      "mode": "view"
     }
   ],
   "preferences": [
