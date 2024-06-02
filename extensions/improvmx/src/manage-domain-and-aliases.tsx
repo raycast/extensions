@@ -1,7 +1,5 @@
 import {
-  openExtensionPreferences,
   showToast,
-  Detail,
   Toast,
   getPreferenceValues,
   List,
@@ -11,99 +9,57 @@ import {
   Icon,
   launchCommand,
   LaunchType,
+  useNavigation,
 } from "@raycast/api";
 
-import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { fetchAccont, domainIcon } from "./utils";
-
-interface Preferences {
-  api_token: string;
-}
-
-interface Alias {
-  forward: string;
-  alias: string;
-  id: number;
-}
-
-interface Domain {
-  display: string;
-  banned?: boolean;
-  active?: boolean;
-  aliases: Alias[];
-}
-
-interface Alias {
-  forward: string;
-  alias: string;
-  id: number;
-}
+import { fetchAccont, domainIcon, useImprovMX, parseImprovMXResponse } from "./utils";
+import { Alias, Domain, DomainLog } from "./types";
+import { API_HEADERS, API_URL } from "./constants";
+import { showFailureToast, useFetch } from "@raycast/utils";
+import ErrorComponent from "./components/ErrorComponent";
 
 interface State {
-  domains?: Domain[];
   error?: string;
   forwardingEmail?: string;
   isRequireUpgrade: boolean;
   aliasView: boolean;
   aliases: Alias[];
   selectedDomain: string;
-  isDomainsLoading: boolean;
 }
 
-export default function CreateMaskedEmail() {
+export default function ManageDomainsAndAliases() {
   const [state, setState] = useState<State>({
-      domains: undefined,
       error: "",
       forwardingEmail: "",
       isRequireUpgrade: false,
       aliasView: false,
       aliases: [],
       selectedDomain: "",
-      isDomainsLoading: true,
     }),
     API_TOKEN = getPreferenceValues<Preferences>().api_token,
     API_URL = "https://api.improvmx.com/v3/";
 
   const auth = Buffer.from("api:" + API_TOKEN).toString("base64");
 
-  useEffect(() => {
-    async function getDomains() {
-      state.isDomainsLoading = true;
-
-      try {
-        const apiResponse = await fetch(API_URL + "domains?=", {
-          headers: {
-            Authorization: "Basic " + auth,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!apiResponse.ok) {
-          if (apiResponse.status === 401) {
-            setState((prevState) => {
-              return { ...prevState, error: "Invalid API Token" };
-            });
-
-            return;
-          }
-        }
-
-        const response = (await apiResponse.json()) as unknown;
-        const domains = response as { domains: Array<Domain> };
-
-        setState((prevState) => {
-          return { ...prevState, domains: domains.domains, error: "", isDomainsLoading: false };
-        });
-      } catch (error) {
-        (state.error =
-          "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com"),
-          (state.isDomainsLoading = false);
-        await showToast(Toast.Style.Failure, "ImprovMX Error", "Failed to fetch domains. Please try again later.");
-        return;
+  const { isLoading, error, data: domains, pagination } = useFetch(
+    (options) =>
+      API_URL + "domains?" +
+      new URLSearchParams({ page: String(options.page + 1) }).toString(), {
+    headers: API_HEADERS,
+    async parseResponse(response) {
+      return await parseImprovMXResponse<{ domains: Array<Domain> }>(response);
+    },
+    mapResult(result) {
+      return {
+        data: result.data.domains,
+        hasMore: result.hasMore
       }
-    }
+    },
+    initialData: []
+  })
 
+  useEffect(() => {
     async function forwardingEmailFn() {
       const email = await fetchAccont(auth, API_URL);
       setState({ ...state, forwardingEmail: email });
@@ -112,68 +68,25 @@ export default function CreateMaskedEmail() {
       });
     }
 
-    getDomains();
     forwardingEmailFn();
   }, []);
 
-  const showError = async () => {
-    if (state.error) {
-      await showToast(Toast.Style.Failure, "ImprovMX Error", state.error);
-    }
-  };
-
+  const { push } = useNavigation();
   const showAliases = async (domain: Domain) => {
-    if (domain.banned || domain.active == false) {
-      showToast(Toast.Style.Failure, "Domain not configured properly. Please configure your DNS settings");
+    if (domain.banned || !domain.active) {
+      showFailureToast("", { title: "Domain not configured properly. Please configure your DNS settings" })
       return;
     }
-
-    setState((prevState) => {
-      return { ...prevState, aliasView: true, selectedDomain: domain.display };
-    });
-
-    try {
-      const apiResponse = await fetch(API_URL + "domains/" + domain.display + "/aliases/", {
-        headers: {
-          Authorization: "Basic " + auth,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!apiResponse.ok) {
-        setState((prevState) => {
-          return { ...prevState, error: "Failed to fetch aliases. Please try again later." };
-        });
-        return;
-      }
-
-      const response = (await apiResponse.json()) as unknown;
-      const aliases = response as { aliases: Array<Alias> };
-
-      setState((prevState) => {
-        return { ...prevState, aliases: aliases.aliases, error: "" };
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    push(<ViewAliases domain={domain.display} />);
   };
 
-  showError();
-
-  return state.error ? (
-    <Detail
-      markdown={state.error}
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
-  ) : !state.aliasView ? (
-    <List isLoading={state.isDomainsLoading === true} searchBarPlaceholder="Search for domain...">
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
+    <List isLoading={isLoading} searchBarPlaceholder="Search for domain..." pagination={pagination}>
       <List.Section title="Active Domains">
-        {state.domains
-          ?.filter((domain) => domain.active)
+        {domains
+          .filter((domain) => domain.active)
           .map((domain: Domain) => (
             <List.Item
               key={domain.display}
@@ -183,18 +96,19 @@ export default function CreateMaskedEmail() {
               actions={
                 <ActionPanel>
                   <Action title="Show Aliases" onAction={() => showAliases(domain)} />
+                  <Action.Push title="View Domain Logs" target={<ViewDomainLogs domain={domain.display} />} />
                 </ActionPanel>
               }
             />
           ))}
-        {state.domains && (
+        {domains && (
           <List.Item
             title="Add New Domain"
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
                 <Action
-                  title="Add new domain"
+                  title="Add New Domain"
                   onAction={async () => {
                     await launchCommand({ name: "add-domain", type: LaunchType.UserInitiated });
                   }}
@@ -205,7 +119,7 @@ export default function CreateMaskedEmail() {
         )}
       </List.Section>
       <List.Section title="Inactive Domains">
-        {state.domains
+        {domains
           ?.filter((domain) => !domain.active)
           .map((domain: Domain) => (
             <List.Item
@@ -216,26 +130,51 @@ export default function CreateMaskedEmail() {
               actions={
                 <ActionPanel>
                   <Action title="Show Aliases" onAction={() => showAliases(domain)} />
+                  <Action.Push title="View Domain Logs" target={<ViewDomainLogs domain={domain.display} />} />
                 </ActionPanel>
               }
             />
           ))}
       </List.Section>
     </List>
-  ) : (
-    <List isLoading={state.aliases.length === 0} searchBarPlaceholder="Search for alias...">
+  )
+}
+
+type ViewAliasesProps = {
+  domain: string;
+}
+function ViewAliases({ domain }: ViewAliasesProps) {
+  const { isLoading, data: aliases, error, pagination } = useFetch(
+    (options) =>
+      API_URL + `domains/${domain}/aliases` +
+      new URLSearchParams({ page: String(options.page + 1) }).toString(), {
+    headers: API_HEADERS,
+    async parseResponse(response) {
+      return await parseImprovMXResponse<{ aliases: Array<Alias> }>(response);
+    },
+    mapResult(result) {
+      return {
+        data: result.data.aliases,
+        hasMore: result.hasMore
+      }
+    },
+    initialData: []
+  })
+
+  return error ? <ErrorComponent error={error} /> : (
+    <List isLoading={isLoading} searchBarPlaceholder="Search for alias..." pagination={pagination}>
       <List.Section title="Aliases">
-        {state.aliases?.map((alias: Alias) => (
+        {aliases.map((alias) => (
           <List.Item
             key={alias.alias}
-            title={alias.alias + "@" + state.selectedDomain}
+            title={alias.alias + "@" + domain}
             accessories={[{ text: { value: alias.forward } }]}
             actions={
               <ActionPanel>
                 <Action
-                  title="Copy alias"
+                  title="Copy Alias"
                   onAction={async () => {
-                    await Clipboard.copy(alias.alias + "@" + state.selectedDomain);
+                    await Clipboard.copy(alias.alias + "@" + domain);
                     await showToast(Toast.Style.Success, "Copied", "Alias copied to clipboard");
                   }}
                 />
@@ -243,7 +182,7 @@ export default function CreateMaskedEmail() {
             }
           />
         ))}
-        {state.aliases.length !== 0 && (
+        {!isLoading && (
           <>
             <List.Item
               title="Create New Alias"
@@ -251,13 +190,13 @@ export default function CreateMaskedEmail() {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Create new alias"
+                    title="Create New Alias"
                     onAction={async () => {
                       await launchCommand({
                         name: "create-alias",
                         type: LaunchType.UserInitiated,
                         arguments: {
-                          domain: state.selectedDomain,
+                          domain,
                         },
                       });
                     }}
@@ -271,12 +210,12 @@ export default function CreateMaskedEmail() {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Create masked email address"
+                    title="Create Masked Email Address"
                     onAction={async () => {
                       await launchCommand({
                         name: "create-masked-email-address",
                         type: LaunchType.UserInitiated,
-                        arguments: { domain: state.selectedDomain },
+                        arguments: { domain },
                       });
                     }}
                   />
@@ -287,5 +226,25 @@ export default function CreateMaskedEmail() {
         )}
       </List.Section>
     </List>
-  );
+  )
+}
+
+type ViewDomainLogsProps = {
+  domain: string;
+}
+function ViewDomainLogs({ domain }: ViewDomainLogsProps) {
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const { isLoading, data } = useImprovMX<{ logs: DomainLog[] }>(`domains/${domain}/logs`);
+ 
+  return <List navigationTitle={`Domain / ${domain} / Logs`} isLoading={isLoading} isShowingDetail={isShowingDetail}>
+    {data?.logs.map(log => <List.Section key={log.id} title={log.subject}>
+      {log.events.map(event => <List.Item key={event.id} title={event.status} subtitle={event.message} accessories={[
+        { date: new Date(event.created) }
+      ]} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label title="Code" text={event.code.toString()} />
+      </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
+        <Action title="Toggle Details" onAction={() => setIsShowingDetail(prev => !prev)} />
+      </ActionPanel>} />)}
+    </List.Section>)}
+  </List>
 }

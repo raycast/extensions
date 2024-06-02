@@ -1,6 +1,9 @@
 import { Color, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { showFailureToast, useFetch } from "@raycast/utils";
 import fetch from "node-fetch";
 import { randomInt } from "node:crypto";
+import { API_HEADERS, API_URL } from "./constants";
+import { ErrorResponse } from "./types";
 
 interface Domain {
   display: string;
@@ -85,4 +88,58 @@ const generatePassword = () => {
     .join("");
 };
 
-export { fetchAccont, domainIcon, generatePassword, fetchAccountAPI };
+const useImprovMX = <T>(endpoint: string) => {
+  const { isLoading, data } = useFetch(API_URL + endpoint, {
+    headers: API_HEADERS,
+    // parseResponse(response) {
+    //   const result = await response.json();
+    //   if (!response.ok) {
+    //     throw new Error(`${response.status} ${response.statusText}`, {
+    //       cause: result.
+    //     })
+    //   }
+    // },
+    async parseResponse(response) {
+      if (!response.ok) {
+        const result = await response.json() as ErrorResponse;
+        if (result.code===401) throw new Error("Invalid API Token");
+        throw new Error("There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com");
+      }
+      const result = await response.json() as T;
+      return result;
+    },
+    async onError() {
+      // await showFailureToast("Failed to fetch domains. Please try again later.", { title: "ImprovMX Error" })
+      await showFailureToast("Please try again later.", { title: "ImprovMX Error" })
+    },
+  });
+  return { isLoading, data };
+}
+
+export async function parseImprovMXResponse<T>(response: Response) {
+  type SuccessResponse = {
+      total: number;
+      limit: number;
+      page: number;
+      success: true;
+  } & T;
+
+  if (!response.ok) {
+    const result = await response.json() as ErrorResponse;
+    if (result.code===401) throw new Error("Invalid API Token");
+    // if (Object.hasOwn(result, "error")) throw new Error(result.error);
+    throw new Error(result.error || result.errors?.[0] || "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com");
+    // throw new Error("There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com");
+  }
+  const result = await response.json() as SuccessResponse;
+  return {
+    data: result,
+    hasMore: (result.page * result.limit) >= result.total
+  };
+}
+export async function onError() {
+  // await showFailureToast("Failed to fetch domains. Please try again later.", { title: "ImprovMX Error" })
+  await showFailureToast("Please try again later.", { title: "ImprovMX Error" })
+}
+
+export { fetchAccont, domainIcon, generatePassword, fetchAccountAPI, useImprovMX };
