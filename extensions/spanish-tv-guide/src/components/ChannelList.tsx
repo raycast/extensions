@@ -33,10 +33,10 @@ export const ChannelList = ({ state, setState }: { state: State; setState: React
   );
 };
 
-const Channel = ({ tvSchedule, channelSchedule }: { tvSchedule: TvScheduleDto; channelSchedule: ChannelScheduleDto }) => {
+const Channel = (props: { tvSchedule: TvScheduleDto; channelSchedule: ChannelScheduleDto }) => {
   const { push } = useNavigation();
-  const { icon, name, schedule } = channelSchedule;
-  const selectedChannel = tvSchedule.find((channel) => channel.name === name);
+  const { icon, name, schedule } = props.channelSchedule;
+  const selectedChannel = props.tvSchedule.find((channel) => channel.name === name);
 
   const Actions = () => (
     <ActionPanel>

@@ -23,6 +23,6 @@ export const upToDateChannelSchedule = (schedule: ProgramDto[]) => {
   const currentProgram = schedule.findIndex((program) => program.isCurrentlyLive);
   const previousProgram = Math.max(0, currentProgram - 2);
   return schedule.slice(previousProgram, schedule.length);
-}
+};
 
 export type TvScheduleDto = ChannelScheduleDto[];

@@ -25,14 +25,14 @@ const getAll = async (): Promise<TvScheduleDto> => {
 
 const getProgramDetails = async (program: ProgramDto): Promise<ProgramDetailsDto> => {
   return fetch(program.url)
-      .then((response: { text: () => Promise<string> }) => response.text())
-      .then((html: string) => {
-        const document = parse(html);
-        const image = document.querySelector("div.cover > img")?.getAttribute("src");
-        const description = document.querySelector("div.show-content > div")?.innerText?.trim();
-        return { ...program, image: toString(image), description: toString(description) };
-      });
-}
+    .then((response: { text: () => Promise<string> }) => response.text())
+    .then((html: string) => {
+      const document = parse(html);
+      const image = document.querySelector("div.cover > img")?.getAttribute("src");
+      const description = document.querySelector("div.show-content > div")?.innerText?.trim();
+      return { ...program, image: toString(image), description: toString(description) };
+    });
+};
 
 const mapToChannel = (channel: ChannelResponse): ChannelScheduleDto => {
   return {

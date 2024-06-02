@@ -13,7 +13,8 @@ export const SelectedProgram = ({ channel, program }: { channel: ChannelSchedule
 
   return (
     programDetails && (
-      <Detail navigationTitle={channel.name}
+      <Detail
+        navigationTitle={channel.name}
         markdown={formattedProgramDetails(programDetails)}
         isLoading={!programDetails}
         metadata={

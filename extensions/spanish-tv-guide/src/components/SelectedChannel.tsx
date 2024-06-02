@@ -9,8 +9,8 @@ import { SelectedProgram } from "./SelectedProgram";
 type ProgramProps = {
   channel: ChannelScheduleDto;
   program: ProgramDto;
-  index: number,
-  onSelect: (index: number) => void
+  index: number;
+  onSelect: (index: number) => void;
 };
 
 const SELECT_PROGRAM_ACTION = "Select Program";
