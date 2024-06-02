@@ -65,6 +65,7 @@ export default function Command() {
     },
   });
 
+  // Fetch icons for a specific family and style based on query
   const { isLoading, data } = useFetch<SearchResult>('https://api.fontawesome.com', {
     execute: accessToken ? true : false,
     keepPreviousData: true,
