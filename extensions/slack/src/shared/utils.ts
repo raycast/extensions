@@ -4,9 +4,14 @@ import { runAppleScript } from "run-applescript";
 
 // https://api.slack.com/reference/deep-linking
 const openChat = (workspaceId: string, userId: string, conversationId: string) => {
-  const { closeRightSidebar, openInBrowser } = getPreferenceValues<{ closeRightSidebar: boolean, openInBrowser: boolean }>();
+  const { closeRightSidebar, openInBrowser } =
+    getPreferenceValues<{ closeRightSidebar: boolean; openInBrowser: boolean }>();
 
-  open(openInBrowser ? `https://app.slack.com/client/${workspaceId}/${conversationId}` : `slack://user?team=${workspaceId}&id=${userId}`);
+  open(
+    openInBrowser
+      ? `https://app.slack.com/client/${workspaceId}/${conversationId}`
+      : `slack://user?team=${workspaceId}&id=${userId}`
+  );
   closeMainWindow();
   if (closeRightSidebar) {
     runAppleScript(
@@ -20,7 +25,11 @@ const openChat = (workspaceId: string, userId: string, conversationId: string) =
 const openChannel = (workspaceId: string, channelId: string) => {
   const { openInBrowser } = getPreferenceValues<{ openInBrowser: boolean }>();
 
-  open(openInBrowser ? `https://app.slack.com/client/${workspaceId}/${channelId}` : `slack://channel?team=${workspaceId}&id=${channelId}`);
+  open(
+    openInBrowser
+      ? `https://app.slack.com/client/${workspaceId}/${channelId}`
+      : `slack://channel?team=${workspaceId}&id=${channelId}`
+  );
   closeMainWindow();
 };
 
