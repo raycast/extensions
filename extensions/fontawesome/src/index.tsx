@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Grid, Color, Action, ActionPanel, LocalStorage, getPreferenceValues } from '@raycast/api';
-import { useFetch } from '@raycast/utils';
+import { useCachedState, useFetch } from '@raycast/utils';
 import { SearchResult, TokenData } from './types';
 import {
   copyFAClassesToClipboard,
@@ -34,6 +34,7 @@ export default function Command() {
   const [query, setQuery] = useState<string>('');
   const [accessToken, setAccessToken] = useState<string>('');
   const [tokenTimeStart, setTokenTimeStart] = useState<number>();
+  const [iconData, setIconData] = useCachedState<SearchResult>('iconData');
 
   const { API_TOKEN } = getPreferenceValues();
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function Command() {
 
   // Fetch access token, store expiry info in local storage and state and store access token
   useFetch<TokenData>('https://api.fontawesome.com/token', {
-    execute: !tokenTimeStart || Date.now() - tokenTimeStart >= 3600000 ? true : false,
+    execute: !tokenTimeStart || Date.now() - (tokenTimeStart || 0) >= 3600000 ? true : false,
     onData: (data) => {
       LocalStorage.setItem('token-expiry-start', Date.now());
       setAccessToken(data.access_token);
@@ -58,12 +59,14 @@ export default function Command() {
     },
   });
 
-  //fetch icons
   const { isLoading, data } = useFetch<SearchResult>('https://api.fontawesome.com', {
     execute: accessToken ? true : false,
     keepPreviousData: true,
     method: 'POST',
     body: iconQuery(query, familyStylesByPrefix[type]),
+    onData: (data) => {
+      setIconData(data);
+    },
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${accessToken}`,
@@ -118,7 +121,7 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {data?.data.search
+      {(iconData || data)?.data.search
         .filter((searchItem) => searchItem.svgs.length != 0)
         .map((searchItem) => (
           <Grid.Item

@@ -6,7 +6,6 @@ interface Data {
 }
 export interface SearchItem {
   id: string;
-  label: string;
   svgs: SvgsItem[];
   unicode: string;
 }
