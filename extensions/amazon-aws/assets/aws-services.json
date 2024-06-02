@@ -270,7 +270,7 @@
       "arg": "/cloudformation/home",
       "autocomplete": "CloudFormation",
       "icon": {
-        "path": "./aws-icons/cfo.png"
+        "path": "./aws-icons/cfn.png"
       }
     },
     {

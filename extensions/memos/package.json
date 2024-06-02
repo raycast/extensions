@@ -31,14 +31,6 @@
       "icon": "logo.png"
     },
     {
-      "name": "sendMemoForm",
-      "title": "Send Memo Form",
-      "description": "Edit memo Detail",
-      "mode": "view",
-      "subtitle": "Memos",
-      "icon": "logo.png"
-    },
-    {
       "name": "memosList",
       "title": "Memos List",
       "description": "Show Memos List",

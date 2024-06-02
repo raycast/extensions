@@ -55,7 +55,7 @@ export function useClientInfo() {
           lastUpdated: now,
         });
       } else {
-        const jars = clientInfo.jars.map(transformJar);
+        const jars = clientInfo.jars?.map(transformJar) ?? [];
 
         const accounts = clientInfo.accounts.map(transformAccount);
         const updatedAccounts = accounts.map((account) => {

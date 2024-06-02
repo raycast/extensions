@@ -66,7 +66,15 @@ jobs:
             brew update
             brew install imageoptim
             npm install -g imageoptim-cli
-            imageoptim "${images_array[@]}"
+            batch_size=30
+            batch_number=1
+            total_batches=$(( (count + batch_size - 1) / batch_size ))
+            for ((i = 0; i < count; i += batch_size)); do
+                batch=("${images_array[@]:i:batch_size}")
+                echo "Processing batch: $batch_number / $total_batches"
+                imageoptim "${batch[@]}"
+                ((batch_number++))
+            done
           fi
       - name: Commit changes
         id: commit_changes

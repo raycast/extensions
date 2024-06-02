@@ -65,6 +65,13 @@
           "required": false
         },
         {
+          "label": "Is Task (Optional)",
+          "name": "isTask",
+          "description": "Mark the note as a task",
+          "type": "checkbox",
+          "required": false
+        },
+        {
           "name": "prependTimestamp",
           "label": "Prepend Timestamp (Optional)",
           "description": "Prepend a timestamp to your note",

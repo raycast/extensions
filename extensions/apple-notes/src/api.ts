@@ -8,7 +8,7 @@ export async function createNote(text?: string) {
   return runAppleScript(`
     tell application "Notes"
       activate
-      set newNote to make new note at folder "Notes"
+      set newNote to make new note
       if ("${escapedText}" is not "") then
         set body of newNote to "${escapedText}"
       end if

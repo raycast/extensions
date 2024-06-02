@@ -66,7 +66,7 @@ Add categories and screenshots for the store
 - Fix page open issues caused by unescaped page title characters
 - Use native `open` Raycast utility
 
-## [Simplified Extension] - 2022-20-01
+## [Simplified Extension] - 2022-01-20
 
 Remove page preview from the extension
 

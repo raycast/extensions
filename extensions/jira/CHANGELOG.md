@@ -1,5 +1,17 @@
 # Jira Changelog
 
+## [The custom fields can be render as required] - 2024-05-16
+
+- Fixed an issue where the custom fields were not recognized as required, even though the API suggested they were.
+
+## [Fix Open in Browser action] - 2024-05-16
+
+- Fixed an issue where users who logged in using an API token were unable to open issues directly in their web browser.
+
+## [Show target status on Change Status submenu] - 2024-04-30
+
+- Show target status next to the action name on Change Status submenu
+
 ## [API token bug fixes] - 2024-04-22
 
 - Improved handling of invalid URLs in the jiraWithApiToken function

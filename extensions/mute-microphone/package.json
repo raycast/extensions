@@ -1,12 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mute-microphone",
-  "title": "Toggle Audio Input (microphone)",
-  "description": "Extension to mute/unmute audio input (microphone)",
+  "title": "Toggle Audio Input (Microphone)",
+  "description": "Extension to mute/unmute audio input (Microphone)",
   "icon": "mute-command-icon.png",
   "author": "Quentin23Soleil",
   "contributors": [
-    "iamyeizi"
+    "iamyeizi",
+    "aliaksandr_zhebit"
   ],
   "pastContributors": [
     "danulqua"

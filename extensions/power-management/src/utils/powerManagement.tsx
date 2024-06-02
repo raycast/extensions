@@ -1,51 +1,65 @@
-import { runAppleScript, showFailureToast } from "@raycast/utils";
-import { showHUD } from "@raycast/api";
-import { exec, execSync } from "child_process";
-import { sudoSupportsTouchId } from "./sudoSupport";
+import { execSync } from "child_process";
+import { runWithPrivileges } from "./sudoSupport";
 
-const NORMAL_POWER_MODE = "0";
-const LOW_POWER_MODE = "1";
-// const HIGH_POWER_MODE = "2"; // unused for now
-
-async function runWithPrivileges(command: string): Promise<void> {
-  if (sudoSupportsTouchId()) {
-    await exec(`sudo ${command}`);
-  } else {
-    await runAppleScript(
-      `on run argv
-        do shell script item 1 of argv with administrator privileges
-      end`,
-      [command],
-      { timeout: 60000 },
-    );
-  }
+interface PowerModeDetail {
+  battery: boolean;
+  ac: boolean;
 }
 
-export function isLowPowerModeEnabled(): boolean | undefined {
-  try {
-    const result = execSync(`pmset -g | grep powermode`);
-    const lowPowerModeValue = result.toString().trim().at(-1);
-
-    return lowPowerModeValue === LOW_POWER_MODE;
-  } catch (error) {
-    showFailureToast(error, { title: "Could not determine the Low Power Mode state" });
-  }
+export enum PowerMode {
+  Normal = "0",
+  Low = "1",
+  // High = "2",
 }
 
-async function setLowPowerMode(enable: boolean): Promise<void> {
-  try {
-    const value = enable ? LOW_POWER_MODE : NORMAL_POWER_MODE;
-    await showHUD("Administrator Privileges Required");
-    // setting the value of `powermode` works just fine even on computers
-    // where the key is `lowpowermode`
-    await runWithPrivileges(`/usr/bin/pmset -a powermode ${value}`);
-    await showHUD(`✅ Low Power Mode is turned ${enable ? "on" : "off"}`);
-  } catch (error) {
-    showFailureToast(error, { title: "Could not set Low Power Mode" });
-  }
+export enum PowerModeTarget {
+  All = "a",
+  Battery = "b",
+  AC = "c",
 }
 
-export async function toggleLowPowerMode(): Promise<void> {
+function parsePowerSettings(output: string, key: string): boolean {
+  const start = output.search(new RegExp(`\\b${key} power:$`, "m"));
+
+  if (start === -1) {
+    throw new Error(`Could not find power settings for mode ${key}`);
+  }
+
+  const match = /powermode\s+(\d)$/m.exec(output.substring(start));
+
+  if (!match || !match[1]) {
+    throw new Error(`Could not parse power settings for mode ${key}`);
+  }
+
+  return match[1] === PowerMode.Low;
+}
+
+export function isLowPowerModeEnabled(): boolean {
+  const stdout = execSync("pmset -g | grep powermode");
+  const lowPowerModeValue = stdout.toString().trim().at(-1);
+
+  return lowPowerModeValue === PowerMode.Low;
+}
+
+export async function setPowerMode(setting: PowerMode, target = PowerModeTarget.All): Promise<void> {
+  // setting the value of `powermode` works just fine even on computers
+  // where the key is `lowpowermode`
+  await runWithPrivileges(`/usr/bin/pmset -${target} powermode ${setting}`);
+}
+
+export function getPowerModeDetails(): PowerModeDetail {
+  const stdout = execSync("pmset -g custom").toString().toLowerCase();
+
+  return {
+    battery: parsePowerSettings(stdout, "battery"),
+    ac: parsePowerSettings(stdout, "ac"),
+  };
+}
+
+export async function toggleLowPowerMode(): Promise<boolean> {
   const lowPowerModeState = isLowPowerModeEnabled();
-  await setLowPowerMode(!lowPowerModeState);
+
+  await setPowerMode(lowPowerModeState ? PowerMode.Normal : PowerMode.Low);
+
+  return !lowPowerModeState;
 }

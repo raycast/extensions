@@ -98,7 +98,7 @@
     },
     {
       "name": "backwardToBeginning",
-      "title": "Backward To The Beginning",
+      "title": "Backward to The Beginning",
       "subtitle": "Spotify",
       "description": "Plays current track from the beginning in Spotify.",
       "mode": "no-view"
@@ -156,6 +156,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "muteVolume",
+      "title": "Mute Volume",
+      "subtitle": "Spotify",
+      "description": "Mute volume in Spotify.",
+      "mode": "no-view"
     },
     {
       "name": "quarterVolume",

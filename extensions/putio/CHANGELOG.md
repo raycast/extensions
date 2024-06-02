@@ -1,5 +1,9 @@
 # put.io Changelog
 
+## [Enhancement] - 2024-05-05
+
+- Add VLC streaming support for both regular and MP4 streams
+
 ## [Initial Version] - 2023-06-04
 
 ### Files

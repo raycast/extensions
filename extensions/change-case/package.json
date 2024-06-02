@@ -12,7 +12,8 @@
   ],
   "contributors": [
     "pernielsentikaer",
-    "nagauta"
+    "nagauta",
+    "PWrzesinski"
   ],
   "keywords": [
     "text",
@@ -21,6 +22,15 @@
     "sponge"
   ],
   "license": "MIT",
+  "debug": {
+    "reloadShortcut": {
+      "key": "r",
+      "modifiers": [
+        "command",
+        "shift"
+      ]
+    }
+  },
   "commands": [
     {
       "name": "change-case",
@@ -31,11 +41,20 @@
   ],
   "preferences": [
     {
-      "name": "popToRoot",
-      "type":"checkbox",
+      "name": "lowercaseTextBeforeTransform",
+      "type": "checkbox",
       "default": false,
       "title": "Behavior",
-      "description": "Allow pasting multiple different case without re-selecting text. Usually, you only need to change the case once, so you can pop to root",
+      "description": "Input text is not lowercased before transformations, which may result in unexpected behavior at times. See the README.md for more details.",
+      "label": "Lowercase Text Before Changing Case",
+      "required": false
+    },
+    {
+      "name": "popToRoot",
+      "type": "checkbox",
+      "default": false,
+      "title": "Behavior",
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
       "label": "Pop to Root after Action",
       "required": true
     },
@@ -176,7 +195,7 @@
       "name": "PascalSnakeCase",
       "type": "checkbox",
       "description": "Enable the \"Pascal_Snake_Case\" Transformation",
-      "label": "Pascal Case",
+      "label": "Pascal Snake Case",
       "default": true,
       "required": false
     },

@@ -8,11 +8,10 @@ export const allModels = [
   { name: "Gemma 7B 8k", id: "gemma-7b-it" },
 ];
 
+// format: Wednesday, April 24, 2024 at 5:14:26 PM GMT+2.
 export const currentDate = new Date().toLocaleString("en-US", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
+  timeStyle: "long",
+  dateStyle: "full",
 });
 
 function naiveRound(num: number, decimalPlaces = 0) {
