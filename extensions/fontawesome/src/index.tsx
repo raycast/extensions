@@ -38,6 +38,7 @@ export default function Command() {
 
   let { API_TOKEN } = getPreferenceValues();
 
+  //if pro API Token not provided, use free API Token
   if (!API_TOKEN) {
     API_TOKEN = 'D7A31EA9-20D8-434E-A6C6-8ADC890ADCB8';
   }
