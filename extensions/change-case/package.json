@@ -58,9 +58,8 @@
       "name": "popToRoot",
       "type": "checkbox",
       "default": false,
-      "title": "Behavior",
-      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
-      "label": "Pop to Root after Action",
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root transforming the text.",
+      "label": "Pop to Root After Action",
       "required": true
     },
     {
