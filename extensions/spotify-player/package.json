@@ -43,21 +43,6 @@
   ],
   "commands": [
     {
-      "name": "ai-playlist",
-      "title": "AI Playlist",
-      "subtitle": "Spotify",
-      "description": "Generate a Spotify playlist using AI.",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "description",
-          "placeholder": "Playlist description",
-          "type": "text",
-          "required": true
-        }
-      ]
-    },
-    {
       "name": "search",
       "title": "Search",
       "subtitle": "Spotify",
@@ -404,6 +389,21 @@
       "description": "See your queue.",
       "mode": "view",
       "disabledByDefault": true
+    },
+    {
+      "name": "aiPlaylist",
+      "title": "AI Playlist",
+      "subtitle": "Spotify",
+      "description": "Generate a Spotify playlist using AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Playlist description",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
