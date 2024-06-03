@@ -1,6 +1,6 @@
 # Maven Central Repository Changelog
 
-## [Fix Hotkey Error] - {PR_MERGE_DATE}
+## [Fix Hotkey Error] - 2024-05-28
 
 -  Fix the problem of using hotkeys to invoke commands
 

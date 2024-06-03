@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [DynamoDB command] - {PR_MERGE_DATE}
+## [DynamoDB command] - 2024-05-30
 
 - Adds UpdateItem, DeleteItem and Query functionalities for the tables
 - Adds metadata for the tables in the List view

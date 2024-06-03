@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-05-30
 
 - Added preference to hide redundant (Done, Canceled, Duplicate) issues across all searches
 
