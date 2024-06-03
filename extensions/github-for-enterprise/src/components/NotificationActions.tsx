@@ -45,7 +45,6 @@ export default function NotificationActions({ notification, userId, mutateList }
 
   async function openNotification(isUnreadNotification: boolean) {
     try {
-      console.log(`openNotification: ${url}`);
       if (url) {
         await open(url);
       }

@@ -19,9 +19,9 @@ export function useMyRepositories() {
   });
 }
 
-export function useReleases(repository: ExtendedRepositoryFieldsFragment) {
-  const { github } = getGitHubClient();
+// export function useReleases(repository: ExtendedRepositoryFieldsFragment) {
+//   const { github } = getGitHubClient();
 
-  const [owner, name] = repository.nameWithOwner.split("/");
-  return useCachedPromise((owner, name) => github.repositoryReleases({ owner, name }), [owner, name]);
-}
+//   const [owner, name] = repository.nameWithOwner.split("/");
+//   return useCachedPromise((owner, name) => github.repositoryReleases({ owner, name }), [owner, name]);
+// }

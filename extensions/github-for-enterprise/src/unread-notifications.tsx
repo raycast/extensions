@@ -103,8 +103,9 @@ function UnreadNotifications() {
   if (!preferences.alwaysShow && !isLoading && data && data.length === 0) {
     return null;
   }
-  
-  const notificationsUrl = preferences.restApiEndpoint || preferences.graphqlEndpoint.replace("/api/graphql", "/notifications");
+
+  const notificationsUrl =
+    preferences.restApiEndpoint || preferences.graphqlEndpoint.replace("/api/graphql", "/notifications");
 
   return (
     <MenuBarExtra

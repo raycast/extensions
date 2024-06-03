@@ -1,8 +1,9 @@
 import { Endpoints } from "@octokit/types";
-import { Color, Icon, getPreferenceValues } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
 import { format } from "date-fns";
 
 import { getGitHubClient } from "../api/githubClient";
+import { Discussion } from "../generated/graphql";
 
 type Notification = Endpoints["GET /notifications"]["response"]["data"][0];
 
@@ -27,18 +28,15 @@ export function generateGitHubUrl(url: string, notificationId: string, userId?: 
   if (userId) {
     const notificationReferrerId = generateNotificationReferrerId(notificationId, userId);
 
-    console.log(`generateGitHubUrl: converted from ${url} to ${newUrl}`);
     return `${newUrl}?${notificationReferrerId}${comment}`;
   }
 
-  console.log(`generateGitHubUrl: converted from ${url} to ${newUrl}`);
   return newUrl;
 }
 
 const getCommentId = (url?: string) => (url ? /comments\/(?<id>\d+)/g.exec(url)?.groups?.id : undefined);
 
 export async function getGitHubURL(notification: Notification, userId?: string) {
-  console.log({ function: "getGitHubURL", notification: notification });
   if (notification.subject.url) {
     const latestCommentId = getCommentId(notification.subject.latest_comment_url);
     return generateGitHubUrl(
@@ -49,29 +47,8 @@ export async function getGitHubURL(notification: Notification, userId?: string) 
     );
   } else if (notification.subject.type === "CheckSuite") {
     return generateGitHubUrl(`${notification.repository.html_url}/actions`, notification.id, userId);
-  } else if (notification.subject.type === "Discussion") {
-    // Get the discussion number via GraphQL
-    // See: https://github.com/orgs/community/discussions/62728#discussioncomment-9034908
-    let discussionNumber: number | null = null;
-    try {
-      discussionNumber = await getGitHubDiscussionNumber(notification);
-    } catch (error) {
-      console.error("Failed to get discussion number", error);
-    }
-
-    return generateGitHubUrl(
-      `${notification.repository.html_url}/discussions/${discussionNumber ?? ""}`,
-      notification.id,
-      userId,
-    );
-  } else if (notification.subject.type === "WorkflowRun") {
-    console.log({"where": "getGitHubURL/WorkflowRun", "notification": notification});
-    // get the run id from GraphQL
-
-    return notification.url;
   }
 
-  console.log(`getGitHubURL: ${notification.url}`);
   return notification.url;
 }
 
@@ -81,7 +58,7 @@ export async function getNotificationIcon(notification: Notification) {
     const pullRequest = await octokit.rest.pulls.get({
       owner: notification.repository.owner.login,
       repo: notification.repository.name,
-      pull_number: parseInt(notification.subject.url.split("/").at(-1)!),
+      pull_number: parseInt(notification.subject.url.split("/").at(-1) ?? ""),
     });
 
     if (pullRequest.data.merged) {
@@ -100,7 +77,7 @@ export async function getNotificationIcon(notification: Notification) {
     const issue = await octokit.rest.issues.get({
       owner: notification.repository.owner.login,
       repo: notification.repository.name,
-      issue_number: parseInt(notification.subject.url.split("/").at(-1)!),
+      issue_number: parseInt(notification.subject.url.split("/").at(-1) ?? ""),
     });
 
     if (issue.data.state === "closed") {
@@ -130,10 +107,10 @@ export async function getNotificationIcon(notification: Notification) {
         value: notification.subject.title.match(/(succeeded)/i)
           ? { source: Icon.CheckCircle, tintColor: Color.Green }
           : notification.subject.title.match(/(failed)/i)
-            ? { source: Icon.XMarkCircle, tintColor: Color.Red }
-            : notification.subject.title.match(/(skipped|cancelled)/i)
-              ? { source: "skip.svg", tintColor: Color.SecondaryText }
-              : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText },
+          ? { source: Icon.XMarkCircle, tintColor: Color.Red }
+          : notification.subject.title.match(/(skipped|cancelled)/i)
+          ? { source: "skip.svg", tintColor: Color.SecondaryText }
+          : { source: Icon.QuestionMarkCircle, tintColor: Color.SecondaryText },
         tooltip: "Workflow Run",
       };
       break;

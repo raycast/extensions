@@ -18,8 +18,9 @@ function onAuthorize({ token, type }: { token: string; type: string }) {
   github = getSdk(new GraphQLClient(preferences.graphqlEndpoint, { headers: { authorization } }));
   octokit = new Octokit({
     baseUrl: restApiEndpoint,
-    auth: token, 
-    request: { fetch } });
+    auth: token,
+    request: { fetch },
+  });
 }
 
 export const githubOAuthService = OAuthService.github({
