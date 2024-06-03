@@ -94,7 +94,7 @@ export default function Command() {
           }
           toast.style = Toast.Style.Failure;
           toast.title = "failure";
-          toast.message = "An error happened during selecting the saving directory.";
+          toast.message = `An error happened during selecting the saving directory. Reason ${error.message}`;
           setStatus("failure");
         }
       }
@@ -113,7 +113,7 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = "Error happened during merging the files.";
+      toast.message = `Error happened during merging the files. Reason ${error}`;
       setStatus("failure");
       setIsLoading(false);
       console.log(error);
