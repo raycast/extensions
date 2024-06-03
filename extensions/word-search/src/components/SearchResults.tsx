@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { LaunchProps } from "@raycast/api";
 import { Action, List } from "@raycast/api";
 
-import type { SearchType } from "@/types";
+import type { SearchType, Word } from "@/types";
 import { Vocabulary } from "@/types";
 
 import useOptionalSelection from "@/hooks/use-optional-selection";
@@ -17,6 +17,24 @@ export interface extraOptions {
   helperTitle?: string;
   helperDescription?: string;
 }
+
+const getWordMarkdown = (word: Word) => {
+  const defs =
+    word.defs !== undefined
+      ? word.defs.map((d) => "```\n" + d.replaceAll("n\t", "") + "\n```").join("\n\n")
+      : "No definitions found.";
+
+  const tags = [
+    word.tags?.includes("n") ? "Noun" : null,
+    word.tags?.includes("v") ? "Verb" : null,
+    word.tags?.includes("adj") ? "Adjective" : null,
+    word.tags?.includes("adv") ? "Adverb" : null,
+  ].filter((t) => t !== null);
+
+  const tagsText = tags.length > 0 ? `\n\n> _${tags.join(", ")}_` : "";
+
+  return `## ${word.word}${tagsText}\n\n${defs}`;
+};
 
 export default function SearchResults(
   type: SearchType,
@@ -64,25 +82,7 @@ export default function SearchResults(
                 />
               </Actions>
             }
-            detail={
-              <List.Item.Detail
-                markdown={
-                  word.defs !== undefined
-                    ? word.defs.map((d) => "```\n" + d.replaceAll("n\t", "") + "\n```").join("\n\n")
-                    : "No definitions found."
-                }
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.TagList title="Tags">
-                      {word.tags?.includes("n") ? <List.Item.Detail.Metadata.TagList.Item text="Noun" /> : null}
-                      {word.tags?.includes("v") ? <List.Item.Detail.Metadata.TagList.Item text="Verb" /> : null}
-                      {word.tags?.includes("adj") ? <List.Item.Detail.Metadata.TagList.Item text="Adjective" /> : null}
-                      {word.tags?.includes("adv") ? <List.Item.Detail.Metadata.TagList.Item text="Adverb" /> : null}
-                    </List.Item.Detail.Metadata.TagList>
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
+            detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
           />
         ))
       )}
