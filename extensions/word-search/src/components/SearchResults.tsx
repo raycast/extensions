@@ -10,7 +10,7 @@ import useOptionalSelection from "@/hooks/use-optional-selection";
 import useSearchWords from "@/hooks/use-searchwords";
 
 import Actions from "@/components/Actions";
-import VocubalarySwitch from "@/components/VocubalarySwitch";
+import VocabularySwitch from "@/components/VocabularySwitch";
 
 export interface extraOptions {
   useVocabulary?: boolean;
@@ -39,7 +39,7 @@ export default function SearchResults(
       throttle={true}
       onSearchTextChange={setSearch}
       isShowingDetail={search !== "" && showDetails}
-      searchBarAccessory={useVocabulary ? <VocubalarySwitch onChange={setVocabulary} /> : null}
+      searchBarAccessory={useVocabulary ? <VocabularySwitch onChange={setVocabulary} /> : null}
       searchText={search}
     >
       {!data || data.length === 0 ? (

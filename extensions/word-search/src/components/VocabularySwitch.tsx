@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 
 import { Vocabulary } from "@/types";
 
-const VocubalarySwitch = ({ onChange }: { onChange: (value: Vocabulary) => void }) => {
+const VocabularySwitch = ({ onChange }: { onChange: (value: Vocabulary) => void }) => {
   return (
     <List.Dropdown
       tooltip="Select a vocabulary"
@@ -17,4 +17,4 @@ const VocubalarySwitch = ({ onChange }: { onChange: (value: Vocabulary) => void 
   );
 };
 
-export default VocubalarySwitch;
+export default VocabularySwitch;

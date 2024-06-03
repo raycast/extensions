@@ -3,22 +3,22 @@ import { useState } from "react";
 import type { LaunchProps } from "@raycast/api";
 import { List } from "@raycast/api";
 
+import { Vocabulary } from "@/types";
+
 import useOptionalSelection from "@/hooks/use-optional-selection";
 import useSuggestions from "@/hooks/use-suggestions";
 
 import Actions from "@/components/Actions";
-
-import VocubalarySwitch from "./components/VocubalarySwitch";
-import { Vocabulary } from "./types";
+import VocabularySwitch from "@/components/VocabularySwitch";
 
 export default function SuggestWord(launchProps: LaunchProps) {
   const placeholder = "Suggest a word";
 
-  const [vocubalary, setVocubalary] = useState<Vocabulary>(Vocabulary.English);
+  const [vocabulary, setVocabulary] = useState<Vocabulary>(Vocabulary.English);
   const [search, setSearch] = useState<string>("");
   useOptionalSelection(setSearch, typeof launchProps.fallbackText !== "undefined" && launchProps.fallbackText !== "");
 
-  const { data, isLoading } = useSuggestions(search, vocubalary);
+  const { data, isLoading } = useSuggestions(search, vocabulary);
 
   return (
     <List
@@ -26,7 +26,7 @@ export default function SuggestWord(launchProps: LaunchProps) {
       isLoading={isLoading}
       throttle={true}
       onSearchTextChange={setSearch}
-      searchBarAccessory={<VocubalarySwitch onChange={setVocubalary} />}
+      searchBarAccessory={<VocabularySwitch onChange={setVocabulary} />}
       searchText={search}
     >
       {!data || data.length === 0 ? (
