@@ -68,7 +68,7 @@ export default function SearchResults(
               <List.Item.Detail
                 markdown={
                   word.defs !== undefined
-                    ? "```\n" + word.defs.map((d) => d.replaceAll("n\t", "")).join("\n\n") + "```"
+                    ? word.defs.map((d) => "```\n" + d.replaceAll("n\t", "") + "\n```").join("\n\n")
                     : "No definitions found."
                 }
                 metadata={
