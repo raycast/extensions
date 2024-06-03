@@ -1,8 +1,7 @@
 # Change Case Changelog
 
 ## [Add `preserve casing` preference] - 2024-06-01
-- Removed the redundant cases: kebab (same as param), macro (same as constant), sponge (same as random), train (same as header)
-- Added a preference to preserve casing for specific words
+- Removed the redundant cases: param (same as kebab), macro (same as constant), sponge (same as random), train (same as header)
 - Added a preference to add exceptions to the list of words that should not be modified when transforming the text to title case or sentence case
 
 ## [Add preference to lowercase text before changing case] - 2024-05-22

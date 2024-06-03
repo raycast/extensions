@@ -174,10 +174,10 @@
       "required": false
     },
     {
-      "name": "ParamCase",
+      "name": "KebabCase",
       "type": "checkbox",
-      "description": "Enable the \"param-case\" Transformation",
-      "label": "Param Case",
+      "description": "Enable the \"kebab-case\" Transformation",
+      "label": "Kebab Case",
       "default": true,
       "required": false
     },

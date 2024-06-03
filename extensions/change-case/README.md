@@ -10,9 +10,8 @@ Included case transformations:
 - `Header-Case`
 - `lower case`
 - `lower First`
-- `MACRO_CASE`
 - `no case`
-- `param-case`
+- `kebab-case`
 - `PascalCase`
 - `Pascal_Snake_Case`
 - `path/case`

@@ -19,8 +19,8 @@ const lowerFirst = (input: string) => {
 const handleSmallWordsTitleCase = (input: string, sentenceCase: boolean) => {
   const exceptions =
     getPreferenceValues<ExtensionPreferences>()
-      .exceptions?.split(",")
-      .forEach((e) => e.trim()) ?? [];
+      .exceptions.split(",")
+      .map((e) => e.trim()) ?? [];
 
   const smallWords = new Set<string>([...exceptions, ...SMALL_WORDS]);
 
@@ -49,7 +49,7 @@ export const functions: CaseFunctions = {
   "Lower Case": lowerCase,
   "Lower First": lowerFirst,
   "No Case": changeCase.noCase,
-  "Param Case": changeCase.kebabCase,
+  "Kebab Case": changeCase.kebabCase,
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
@@ -64,3 +64,12 @@ export const functions: CaseFunctions = {
 
 export const cases = Object.keys(functions);
 export type CaseType = (typeof cases)[number];
+
+export const aliases: Record<CaseType, string[]> = {
+  "Header Case": ["train", "dash"],
+  "No Case": ["none"],
+  "Kebab Case": ["dash", "slug", "param"],
+  "Random Case": ["sponge"],
+  "Swap Case": ["reverse"],
+  "Constant Case": ["macro"],
+};

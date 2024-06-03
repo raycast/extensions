@@ -20,7 +20,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { CaseType, functions } from "./types.js";
+import { CaseType, aliases, functions } from "./types.js";
 
 class NoTextError extends Error {
   constructor() {
@@ -221,6 +221,7 @@ export default function Command(props: LaunchProps) {
         title={props.case}
         accessories={[{ text: props.modified }]}
         detail={<List.Item.Detail markdown={props.detail} />}
+        keywords={aliases[props.case]}
         actions={
           <ActionPanel>
             <ActionPanel.Section>
