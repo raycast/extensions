@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Refactoring for better performance and readability] - 2024-06-03
+
 ## [Allow the Selection of Download Directory] - 2024-05-27
 
 ## [Add Merge PDF] - 2024-05-27
