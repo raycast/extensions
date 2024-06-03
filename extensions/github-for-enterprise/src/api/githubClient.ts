@@ -10,7 +10,7 @@ let github: ReturnType<typeof getSdk> | null = null;
 let octokit: Octokit | null = null;
 
 const preferences = getPreferenceValues<Preferences>();
-const restApiEndpoint = preferences.restApiEndpoint ?? preferences.graphqlEndpoint.replace("/api/graphql", "/api/v3");
+const restApiEndpoint = preferences.restApiEndpoint || preferences.graphqlEndpoint.replace("/api/graphql", "/api/v3");
 
 function onAuthorize({ token, type }: { token: string; type: string }) {
   const authorization = type === "personal" ? `token ${token}` : `bearer ${token}`;
