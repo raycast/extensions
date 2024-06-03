@@ -26,11 +26,11 @@ export default function SearchResults(
 ) {
   const [search, setSearch] = useState<string>("");
   const [showDetails, setShowDetails] = useState<boolean>(false);
-  const [vocubalary, setVocubalary] = useState<Vocabulary>(Vocabulary.English);
+  const [vocabulary, setVocabulary] = useState<Vocabulary>(Vocabulary.English);
 
   useOptionalSelection(setSearch, typeof launchProps.fallbackText !== "undefined" && launchProps.fallbackText !== "");
 
-  const { data, isLoading } = useSearchWords(search, type, useVocabulary ? vocubalary : undefined);
+  const { data, isLoading } = useSearchWords(search, type, useVocabulary ? vocabulary : undefined);
 
   return (
     <List
@@ -39,7 +39,7 @@ export default function SearchResults(
       throttle={true}
       onSearchTextChange={setSearch}
       isShowingDetail={search !== "" && showDetails}
-      searchBarAccessory={useVocabulary ? <VocubalarySwitch onChange={setVocubalary} /> : null}
+      searchBarAccessory={useVocabulary ? <VocubalarySwitch onChange={setVocabulary} /> : null}
       searchText={search}
     >
       {!data || data.length === 0 ? (
