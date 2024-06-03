@@ -16,17 +16,20 @@ const lowerFirst = (input: string) => {
   return input[0].toLowerCase() + input.slice(1);
 };
 
-const sentenceCase = (input: string) => {
-  const exceptions = getPreferenceValues<ExtensionPreferences>().exceptions?.split(",") ?? [];
+const handleSmallWordsTitleCase = (input: string, sentenceCase: boolean) => {
+  const exceptions =
+    getPreferenceValues<ExtensionPreferences>()
+      .exceptions?.split(",")
+      .forEach((e) => e.trim()) ?? [];
+
   const smallWords = new Set<string>([...exceptions, ...SMALL_WORDS]);
-  return titleCaseLib(input, { sentenceCase: true, smallWords });
+
+  return titleCaseLib(input, { sentenceCase, smallWords });
 };
 
-const titleCase = (input: string) => {
-  const exceptions = getPreferenceValues<ExtensionPreferences>().exceptions?.split(",") ?? [];
-  const smallWords = new Set<string>([...exceptions, ...SMALL_WORDS]);
-  return titleCaseLib(input, { smallWords });
-};
+const sentenceCase = (input: string) => handleSmallWordsTitleCase(input, true);
+
+const titleCase = (input: string) => handleSmallWordsTitleCase(input, false);
 
 const upperCase = (input: string) => input.toUpperCase();
 
