@@ -18,10 +18,3 @@ export function useMyRepositories() {
     return result.search.nodes as ExtendedRepositoryFieldsFragment[];
   });
 }
-
-// export function useReleases(repository: ExtendedRepositoryFieldsFragment) {
-//   const { github } = getGitHubClient();
-
-//   const [owner, name] = repository.nameWithOwner.split("/");
-//   return useCachedPromise((owner, name) => github.repositoryReleases({ owner, name }), [owner, name]);
-// }

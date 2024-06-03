@@ -1,5 +1,0 @@
-mutation changeProjectStatus($projectId: ID!, $closed: Boolean!) {
-  updateProjectV2(input: { projectId: $projectId, closed: $closed }) {
-    clientMutationId # Placeholder
-  }
-}

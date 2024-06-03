@@ -24567,39 +24567,6 @@ export enum WorkflowState {
   DisabledManually = "DISABLED_MANUALLY",
 }
 
-export type ChangeProjectStatusMutationVariables = Exact<{
-  projectId: Scalars["ID"];
-  closed: Scalars["Boolean"];
-}>;
-
-export type ChangeProjectStatusMutation = {
-  __typename?: "Mutation";
-  updateProjectV2?: { __typename?: "UpdateProjectV2Payload"; clientMutationId?: string | null } | null;
-};
-
-export type ShortRepositoryFieldsFragment = {
-  __typename?: "Repository";
-  id: string;
-  nameWithOwner: string;
-  name: string;
-  url: any;
-  mergeCommitAllowed: boolean;
-  squashMergeAllowed: boolean;
-  rebaseMergeAllowed: boolean;
-  defaultBranchRef?: {
-    __typename?: "Ref";
-    target?:
-      | { __typename?: "Blob"; oid: any }
-      | { __typename?: "Commit"; oid: any }
-      | { __typename?: "Tag"; oid: any }
-      | { __typename?: "Tree"; oid: any }
-      | null;
-  } | null;
-  owner:
-    | { __typename?: "Organization"; login: string; avatarUrl: any }
-    | { __typename?: "User"; login: string; avatarUrl: any };
-};
-
 export type ExtendedRepositoryFieldsFragment = {
   __typename?: "Repository";
   id: string;
@@ -24885,26 +24852,6 @@ export type GetViewerQuery = {
   };
 };
 
-export const ShortRepositoryFieldsFragmentDoc = gql`
-  fragment ShortRepositoryFields on Repository {
-    id
-    defaultBranchRef {
-      target {
-        oid
-      }
-    }
-    nameWithOwner
-    name
-    owner {
-      login
-      avatarUrl(size: 64)
-    }
-    url
-    mergeCommitAllowed
-    squashMergeAllowed
-    rebaseMergeAllowed
-  }
-`;
 export const ExtendedRepositoryFieldsFragmentDoc = gql`
   fragment ExtendedRepositoryFields on Repository {
     id
@@ -25012,13 +24959,6 @@ export const ProjectFieldsFragmentDoc = gql`
   ${AuthorFieldsFragmentDoc}
   ${ProjectViewerFieldsFragmentDoc}
 `;
-export const ChangeProjectStatusDocument = gql`
-  mutation changeProjectStatus($projectId: ID!, $closed: Boolean!) {
-    updateProjectV2(input: { projectId: $projectId, closed: $closed }) {
-      clientMutationId
-    }
-  }
-`;
 export const SearchRepositoriesDocument = gql`
   query searchRepositories($query: String!, $numberOfItems: Int!) {
     search(query: $query, first: $numberOfItems, type: REPOSITORY) {
@@ -25105,21 +25045,6 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName, _operationTy
 
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
-    changeProjectStatus(
-      variables: ChangeProjectStatusMutationVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
-    ): Promise<ChangeProjectStatusMutation> {
-      return withWrapper(
-        (wrappedRequestHeaders) =>
-          client.request<ChangeProjectStatusMutation>(ChangeProjectStatusDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
-          }),
-        "changeProjectStatus",
-        "mutation",
-        variables,
-      );
-    },
     searchRepositories(
       variables: SearchRepositoriesQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,

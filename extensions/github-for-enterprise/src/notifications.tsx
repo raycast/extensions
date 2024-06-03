@@ -1,5 +1,5 @@
 import { Endpoints } from "@octokit/types";
-import { List, getPreferenceValues } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { partition } from "lodash";
 import { useMemo, useState } from "react";
@@ -8,14 +8,14 @@ import { getGitHubClient } from "./api/githubClient";
 import NotificationListItem from "./components/NotificationListItem";
 import RepositoriesDropdown from "./components/RepositoryDropdown";
 import { withGitHubClient } from "./helpers/withGithubClient";
-// import { useViewer } from "./hooks/useViewer";
+import { useViewer } from "./hooks/useViewer";
 
 export type NotificationsResponse = Endpoints["GET /notifications"]["response"];
 
 function Notifications() {
   const { octokit } = getGitHubClient();
 
-  // const viewer = useViewer();
+  const viewer = useViewer();
 
   const [selectedRepository, setSelectedRepository] = useState<string | null>(null);
 
@@ -38,8 +38,6 @@ function Notifications() {
 
   const [unreadNotifications, readNotifications] = partition(notifications, (notification) => notification.unread);
 
-  const preferences = getPreferenceValues();
-  const userId = preferences.username;
   return (
     <List
       isLoading={isLoading}
@@ -52,7 +50,7 @@ function Notifications() {
             <NotificationListItem
               key={notification.id}
               notification={notification}
-              userId={userId}
+              userId={viewer?.id}
               mutateList={mutateList}
             />
           ))}
@@ -65,7 +63,7 @@ function Notifications() {
             <NotificationListItem
               key={notification.id}
               notification={notification}
-              userId={userId}
+              userId={viewer?.id}
               mutateList={mutateList}
             />
           ))}

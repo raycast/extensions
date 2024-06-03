@@ -1,22 +1,3 @@
-fragment ShortRepositoryFields on Repository {
-  id
-  defaultBranchRef {
-    target {
-      oid
-    }
-  }
-  nameWithOwner
-  name
-  owner {
-    login
-    avatarUrl(size: 64)
-  }
-  url
-  mergeCommitAllowed
-  squashMergeAllowed
-  rebaseMergeAllowed
-}
-
 fragment ExtendedRepositoryFields on Repository {
   id
   nameWithOwner
