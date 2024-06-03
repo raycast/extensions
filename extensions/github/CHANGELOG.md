@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## ["Create Pull Request" command] - {PR_MERGE_DATE}
+## ["Create Pull Request" command] - 2024-06-03
 
 - Added typeahead search for branch selection in Create PR command.
 
