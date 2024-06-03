@@ -15,7 +15,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { getFilePath, MaxInt32 } from "./common/utils";
+import { getFilePath, MaxInt32, validateFileType } from "./common/utils";
 import { runAppleScript } from "@raycast/utils";
 
 type Values = {
@@ -75,14 +75,13 @@ export default function Command() {
     try {
       await task.start();
       for (const file of values.files) {
-        const fileExtension = path.extname(file);
-        if (fileExtension != ".pdf") {
+        if (!validateFileType(file, "pdf")) {
           toast.style = Toast.Style.Failure;
           toast.title = "failure";
           toast.message = "You must select a PDF file.";
           setStatus("failure");
           setIsLoading(false);
-          console.log(`file is not a PDF received extension is ${fileExtension}`);
+          console.log(`file is not a PDF.`);
           return;
         }
         const iLovePdfFile = new ILovePDFFile(file);
