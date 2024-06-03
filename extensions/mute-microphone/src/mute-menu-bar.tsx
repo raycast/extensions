@@ -1,26 +1,22 @@
-import { Cache, Color, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { get, toggleSystemAudioInputLevel } from "./utils";
+import { Color, Icon, MenuBarExtra, getPreferenceValues, openCommandPreferences } from "@raycast/api";
+import { useState } from "react";
+import { toggleSystemAudioInputLevel } from "./utils";
+import { AudioInputLevelCache } from "./audio-input-level-cache";
 
 export default function muteMenuBar() {
-  const cache = new Cache();
-  const cachedValue = cache.get("currentAudioInputLevel");
-  const cachedValueNumber = cachedValue == undefined ? 1 : Number(cachedValue);
+  const preferences = getPreferenceValues<Preferences.MuteMenuBar>();
+  const currentAudioInputLevelCached = AudioInputLevelCache.curInputLevel;
+
+  if (preferences.hideIconWhenUnmuted && currentAudioInputLevelCached !== "0") {
+    return;
+  }
+
   const disabledIcon = { source: Icon.MicrophoneDisabled, tintColor: Color.Red };
   const enabledIcon = { source: Icon.Microphone };
-  const preferences = getPreferenceValues<Preferences.MuteMenuBar>();
 
-  const [currentAudioInputLevel, setCurrentAudioInputLevel] = useState<number>(cachedValueNumber);
-  const icon = currentAudioInputLevel == 0 ? disabledIcon : enabledIcon;
-  const menuItemText = currentAudioInputLevel == 0 ? "Unmute" : "Mute";
-
-  useEffect(() => {
-    const newValue = Number(get());
-    if (!isNaN(newValue)) {
-      setCurrentAudioInputLevel(newValue);
-      cache.set("currentAudioInputLevel", newValue.toString());
-    }
-  }, []);
+  const [isMuted, setIsMuted] = useState<boolean>(currentAudioInputLevelCached === "0");
+  const icon = isMuted ? disabledIcon : enabledIcon;
+  const menuItemText = isMuted ? "Unmute" : "Mute";
 
   function CommonMenuItems() {
     return (
@@ -29,8 +25,8 @@ export default function muteMenuBar() {
           <MenuBarExtra.Item
             title={menuItemText}
             onAction={async () => {
-              const newLevel = await toggleSystemAudioInputLevel(currentAudioInputLevel);
-              setCurrentAudioInputLevel(Number(newLevel));
+              setIsMuted((isMuted) => !isMuted);
+              await toggleSystemAudioInputLevel();
             }}
           />
         </MenuBarExtra.Section>
@@ -41,11 +37,5 @@ export default function muteMenuBar() {
     );
   }
 
-  return preferences.hideIconWhenUnmuted ? (
-    currentAudioInputLevel == 0 ? (
-      <CommonMenuItems />
-    ) : null
-  ) : (
-    <CommonMenuItems />
-  );
+  return <CommonMenuItems />;
 }

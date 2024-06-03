@@ -54,6 +54,8 @@ export function estimatePrice(prompt_token: number, output_token: number, model:
     case "llama-3-sonar-large-32k-online":
       price = (5 / 1000 + (output_token * 0.6) / 1_000_000) * 100;
       break;
+    default:
+      break;
   }
   return naiveRound(price, 5);
 }

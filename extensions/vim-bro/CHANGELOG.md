@@ -1,6 +1,10 @@
 # Vim Bro Changelog
 
-## [Updated screenshot] - 2024-05-27
+## [Added missing commands] - 2024-05-29
+
+- Added in- and decrements the number under the cursor
+
+## [Added screenshot] - 2024-05-27
 
 ## [Added better search with multiple keywords] - 2022-03-30
 

@@ -1,5 +1,11 @@
 # Amazon AWS Changelog
 
+## [DynamoDB command] - {PR_MERGE_DATE}
+
+- Adds UpdateItem, DeleteItem and Query functionalities for the tables
+- Adds metadata for the tables in the List view
+- Adds Deletion Protection Enablement capability for tables
+
 ## [CFN and SQS] - 2024-05-21
 
 - Adds update-termination-protection commands for stacks listed in CFN command ([#12497](https://github.com/raycast/extensions/issues/12497))
