@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
 import { typeColor, typeDescription, mainCommand } from "./utils";
 import { useState } from "react";
 import { Alias } from "./types";
