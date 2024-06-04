@@ -1,5 +1,3 @@
-import axios from 'axios';
-import https from 'https';
 import { debugableAxios } from "./httpclient";
 import { generateToken } from "./jwt";
 import { AxiosResponse } from "axios/index";
@@ -7,12 +5,8 @@ import { ChatGlmOptions, ChatGlmResponse } from "../type";
 import { ZHIPU } from "./keys";
 import { Readable } from "stream";
 
-// Create an axios instance that ignores self-signed certificate errors
-const instance = axios.create({
-  httpsAgent: new https.Agent({  
-    rejectUnauthorized: false
-  })
-});
+// 使用配置忽略自签名证书错误的 axios 实例
+const axiosInstance = debugableAxios();
 
 export async function chatCompletion(
   messages: Array<{ role: string; content: string }>,
@@ -20,7 +14,7 @@ export async function chatCompletion(
 ): Promise<string> {
   const url = opt.useStream ? ZHIPU.API_SSE_URL : ZHIPU.API_URL;
 
-  return instance
+  return axiosInstance
     .post(
       url,
       {
@@ -39,9 +33,16 @@ export async function chatCompletion(
     .then((response: AxiosResponse<ChatGlmResponse>) => {
       if (opt.useStream) {
         let output = "";
-        (response.data as Readable).on("data", (chunk: string) => {
-          chunk = chunk.toString();
-          chunk.split("\n").forEach((line: string) => {
+        let buffer = "";  // Buffer to store partial JSON strings
+
+        (response.data as Readable).on("data", (chunk: Buffer) => {
+          const chunkStr = chunk.toString();
+          buffer += chunkStr;
+
+          let lines = buffer.split("\n");
+          buffer = lines.pop() || "";  // Keep the last partial line in buffer
+
+          lines.forEach((line: string) => {
             if (line.startsWith("data:")) {
               let data = line.replace(/^data:/, "").trim();
               if (data && data !== "[DONE]") {
@@ -56,10 +57,14 @@ export async function chatCompletion(
               }
             }
           });
-          let isFinish = chunk.includes("[DONE]");
+
+          let isFinish = chunkStr.includes("[DONE]");
           opt.streamListener && opt.streamListener(output, isFinish);
         });
-        return "Loading...";
+
+        return new Promise((resolve) => {
+          (response.data as Readable).on("end", () => resolve(output));
+        });
       } else {
         return response.data.choices[0].message.content;
       }
