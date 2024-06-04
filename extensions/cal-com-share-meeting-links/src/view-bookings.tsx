@@ -138,7 +138,7 @@ function CancelBooking({ bookingId, revalidate }: CancelBookingProps) {
       navigationTitle="Cancel Booking"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Cancel Booking" onSubmit={handleCancelBooking} style={Action.Style.Destructive} />
+          <Action.SubmitForm title="Cancel Booking" onSubmit={handleCancelBooking} />
         </ActionPanel>
       }
     >
