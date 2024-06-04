@@ -52,7 +52,7 @@
     },
     {
       "description": "Trello Access token, open this link to get one",
-      "default": "https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read,write&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1",
+      "default": "https://trello.com/1/authorize?expiration=never&name=RayCastTrelloExtension&scope=read&response_type=token&key=13f8c59607ba6d82531d3db5f46999c1",
       "name": "token",
       "required": true,
       "title": "Personal Access Token",
@@ -84,9 +84,9 @@
   "devDependencies": {
     "@types/node": "~20.14.1",
     "@types/react": "^18.3.3",
-    "@typescript-eslint/eslint-plugin": "^7.12.0",
-    "@typescript-eslint/parser": "^7.12.0",
-    "eslint": "^9.4.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "node-fetch": "^3.3.2",
     "prettier": "3.3.0",
