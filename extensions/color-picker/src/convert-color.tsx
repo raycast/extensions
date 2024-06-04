@@ -1,5 +1,5 @@
-import { getSelectedText, Clipboard, showToast, Toast, LaunchProps, showHUD } from "@raycast/api";
 import { getFormattedColor } from "./utils";
+import { getSelectedText, Clipboard, showToast, Toast, LaunchProps, showHUD } from "@raycast/api";
 
 async function getConvertedColor(text: string) {
   try {
