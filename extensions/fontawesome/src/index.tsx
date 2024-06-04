@@ -137,16 +137,20 @@ export default function Command() {
               </Grid.Dropdown.Section>
             </>
           ) : (
-            Object.entries(familyStylesByPrefix)
-              .slice(5, 6)
-              .map(([key, value]) => (
-                <Grid.Dropdown.Item
-                  key={key}
-                  title={value}
-                  value={key}
-                  icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
-                />
-              ))
+            <>
+              <Grid.Dropdown.Item
+                key="fas"
+                title="Classic, Solid"
+                value="fas"
+                icon={{ source: iconForStyle('fas'), tintColor: Color.SecondaryText }}
+              />
+              <Grid.Dropdown.Item
+                key="fab"
+                title="Classic, Brands"
+                value="fab"
+                icon={{ source: iconForStyle('fab'), tintColor: Color.SecondaryText }}
+              />
+            </>
           )}
         </Grid.Dropdown>
       }
