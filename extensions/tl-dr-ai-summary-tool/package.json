@@ -17,8 +17,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Article Summarizer",
-      "description": "Use AI to summarize articles.",
+      "title": "Summarizer",
+      "description": "Use AI to summarize website or articles.",
       "mode": "view"
     }
   ],
