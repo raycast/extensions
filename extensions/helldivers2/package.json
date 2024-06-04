@@ -12,6 +12,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "major-orders",
+      "title": "View Major Order",
+      "description": "Shows current major order if any",
+      "mode": "view"
+    },
+    {
       "name": "active-planets",
       "title": "View Active Planets",
       "description": "Lists active campaigns",
