@@ -139,7 +139,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title={`Copy Icon Slug`}
+                  title={`Copy Icon Name`}
                   icon="copy-clipboard-16"
                   onAction={() => copyFASlugToClipboard(searchItem)}
                 />
