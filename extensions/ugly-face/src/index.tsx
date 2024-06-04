@@ -44,7 +44,7 @@ function Command() {
     // Persist PNG to disk
     fs.writeFileSync(environment.supportPath + "/face.png", pngBuffer);
 
-    const markdownImg = `![SVG](data:image/png;base64,${Buffer.from(pngBuffer).toString("base64")})`;
+    const markdownImg = `![SVG](data:image/png;base64,${Buffer.from(pngBuffer).toString("base64")}?raycast-height=355)`;
 
     setImg(markdownImg);
     setLoading(false);
