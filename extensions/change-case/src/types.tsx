@@ -16,6 +16,11 @@ const lowerFirst = (input: string) => {
   return input[0].toLowerCase() + input.slice(1);
 };
 
+const kebabUpperCase = (input: string) => {
+  const words = changeCase.split(input);
+  return words.map(word => word.toUpperCase()).join("-");
+};
+
 const handleSmallWordsTitleCase = (input: string, sentenceCase: boolean) => {
   const exceptions =
     getPreferenceValues<ExtensionPreferences>()
@@ -50,6 +55,7 @@ export const functions: CaseFunctions = {
   "Lower First": lowerFirst,
   "No Case": changeCase.noCase,
   "Kebab Case": changeCase.kebabCase,
+  "Kebab Upper Case": kebabUpperCase,
   "Pascal Case": changeCase.pascalCase,
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
