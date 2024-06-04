@@ -9,16 +9,20 @@ export async function chatCompletion(
   messages: Array<{ role: string; content: string }>,
   opt: ChatGlmOptions = { useStream: false },
 ): Promise<string> {
+  const url = opt.useStream ? ZHIPU.API_SSE_URL : ZHIPU.API_URL;
+
   return debugableAxios()
     .post(
-      opt.useStream ? ZHIPU.API_SSE_URL : ZHIPU.API_URL,
+      url,
       {
-        prompt: messages,
-        return_type: "text",
+        model: "glm-4",
+        messages: messages,
+        stream: opt.useStream,
       },
       {
         headers: {
-          Authorization: `${generateToken()}`,
+          Authorization: `Bearer ${generateToken()}`,
+          'Content-Type': 'application/json'
         },
         responseType: opt.useStream ? "stream" : "json",
       },
@@ -30,27 +34,21 @@ export async function chatCompletion(
           chunk = chunk.toString();
           chunk.split("\n").forEach((line: string) => {
             if (line.startsWith("data:")) {
-              let data = line.replace(/^data:/, "");
-              if (data.trim() == "") {
-                data = "\n";
+              let data = line.replace(/^data:/, "").trim();
+              if (data && data !== "[DONE]") {
+                let jsonData = JSON.parse(data);
+                if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
+                  output += jsonData.choices[0].delta.content;
+                }
               }
-              output += data;
             }
           });
-          let isFinish = false;
-          if (chunk.startsWith("event:finish")) {
-            isFinish = true;
-          }
-          // console.info(chunk.toString());
-          if (isFinish) {
-            // end
-            // console.info(output)
-          }
+          let isFinish = chunk.includes("[DONE]");
           opt.streamListener && opt.streamListener(output, isFinish);
         });
         return "Loading...";
       } else {
-        return response.data.data.choices[0].content;
+        return response.data.choices[0].message.content;
       }
     })
     .catch((error) => {
