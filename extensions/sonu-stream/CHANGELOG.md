@@ -1,5 +1,9 @@
 # sonu.stream Changelog
 
+## [Deprecated extension] - 2024-06-03
+
+The API used in this extension is no longer available. You can uninstall from Preferences
+
 ## [Launch] - 2024-03-06
 
 ### News

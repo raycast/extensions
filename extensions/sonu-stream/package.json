@@ -12,24 +12,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-artists",
-      "title": "Search Sonu Artists",
+      "name": "index",
+      "title": "Sonu Stream",
       "subtitle": "sonu.stream",
-      "description": "Search sonu.stream artists",
-      "mode": "view"
-    },
-    {
-      "name": "search-tracks",
-      "title": "Search Sonu Songs",
-      "subtitle": "sonu.stream",
-      "description": "Search the sonu.stream song catalog",
-      "mode": "view"
-    },
-    {
-      "name": "vibe-search",
-      "title": "Search Sonu Vibes",
-      "subtitle": "sonu.stream",
-      "description": "AI based prompt recommendations from sonu.stream",
+      "description": "Search sonu.stream",
       "mode": "view"
     }
   ],
