@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recent-excel",
-  "title": "Recent Excel - Show recent excel files",
+  "title": "Recent Excel - Show Recent Excel Files",
   "description": "shows recent excel files",
   "icon": "command-icon.png",
   "author": "aradbm",
@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "search-recent-excel-sheets",
-      "title": "Search recent excel sheets",
+      "title": "Search Recent Excel Sheets",
       "description": "shows recent excel files",
       "mode": "view"
     }

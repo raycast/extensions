@@ -2,7 +2,7 @@
 
 Finds your recent Excel sheets in your chosen folders for easy access.
 
-![](./assets/recent-excel.gif)
+![](./metadata/recent-excel.gif)
 
 ## Configuring Directories
 

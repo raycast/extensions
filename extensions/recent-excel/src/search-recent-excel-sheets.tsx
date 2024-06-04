@@ -31,8 +31,8 @@ const getExcelFilesInUsers = (directory: string): ExcelFile[] => {
           ) {
             excelFiles.push({ path: filePath, lastModified: stats.mtime });
           }
-        } catch (error: any) {
-          if (error.code === "ENOENT") {
+        } catch (error) {
+          if (error instanceof Error && error.message.includes("ENOENT")) {
             // File or directory does not exist, skip it silently
           } else {
             console.error(`Error accessing file: ${filePath}`, error);
@@ -40,8 +40,8 @@ const getExcelFilesInUsers = (directory: string): ExcelFile[] => {
           // Continue to the next file
         }
       }
-    } catch (error: any) {
-      if (error.code === "ENOENT") {
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("ENOENT")) {
         // Directory does not exist, skip it silently
       } else {
         console.error(`Error accessing directory: ${currentDir}`, error);
@@ -59,17 +59,11 @@ export default function Command() {
   const { directories } = getPreferences();
 
   useEffect(() => {
-    const folders = directories
-      ? directories.split(",").map((dir) => dir.trim())
-      : [];
+    const folders = directories ? directories.split(",").map((dir) => dir.trim()) : [];
 
-    const excelFilesInUsers = folders.flatMap((folder) =>
-      getExcelFilesInUsers(folder)
-    );
+    const excelFilesInUsers = folders.flatMap((folder) => getExcelFilesInUsers(folder));
 
-    const sortedExcelFiles = excelFilesInUsers.sort(
-      (a, b) => b.lastModified.getTime() - a.lastModified.getTime()
-    );
+    const sortedExcelFiles = excelFilesInUsers.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
     setList(sortedExcelFiles);
   }, [directories]);
 
@@ -87,10 +81,7 @@ export default function Command() {
           accessories={[{ text: excelFile.lastModified.toLocaleString() }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Excel File"
-                onAction={() => handleOpenFile(excelFile.path)}
-              />
+              <Action title="Open Excel File" onAction={() => handleOpenFile(excelFile.path)} />
             </ActionPanel>
           }
         />
