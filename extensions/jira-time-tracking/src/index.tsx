@@ -23,8 +23,11 @@ export default function Command() {
   const [timeInput, setTimeInput] = useState<string>("");
   const isValidTimeInput = (newTime: string) => /^[0-9hms ]*$/.test(newTime);
 
-  const pageGot = useRef(0);
-  const pageTotal = useRef(1);
+  const projectsPageGot = useRef(0);
+  const projectsPageTotal = useRef(1);
+
+  const issuesPageGot = useRef(0);
+  const issuesPageTotal = useRef(1);
 
   const handleTimeInput = (newTime: string) => {
     if (isValidTimeInput(newTime)) {
@@ -77,7 +80,7 @@ export default function Command() {
     let isMounted = true;
 
     const fetchProjects = async () => {
-      if (pageGot.current >= pageTotal.current) {
+      if (projectsPageGot.current >= projectsPageTotal.current) {
         setLoading(false);
         showToast(Toast.Style.Success, "All projects loaded");
         return;
@@ -85,7 +88,7 @@ export default function Command() {
 
       setLoading(true);
       try {
-        const result = await getProjects(pageGot.current);
+        const result = await getProjects(projectsPageGot.current);
         if (result.data.length > 0 && isMounted) {
           setProjects((prevProjects) => {
             const newProjects = [...prevProjects, ...result.data];
@@ -96,17 +99,17 @@ export default function Command() {
             return uniqueProjects;
           });
 
-          pageGot.current += result.data.length;
+          projectsPageGot.current += result.data.length;
           if (isJiraCloud) {
-            pageTotal.current = result.total;
+            projectsPageTotal.current = result.total;
           } else {
-            pageTotal.current = Math.max(pageTotal.current, pageGot.current + 100);
+            projectsPageTotal.current = Math.max(projectsPageTotal.current, projectsPageGot.current + 100);
           }
 
-          showToast(Toast.Style.Animated, `Loading projects ${pageGot.current}/${pageTotal.current}`);
+          showToast(Toast.Style.Animated, `Loading projects ${projectsPageGot.current}/${projectsPageTotal.current}`);
         } else {
           setLoading(false);
-          showToast(Toast.Style.Success, `Projects loaded ${pageGot.current}/${pageTotal.current}`);
+          showToast(Toast.Style.Success, `Projects loaded ${projectsPageGot.current}/${projectsPageTotal.current}`);
         }
       } catch (e) {
         if (isMounted) {
@@ -121,20 +124,20 @@ export default function Command() {
     return () => {
       isMounted = false;
     };
-  }, [projects.length, pageGot.current]);
+  }, [projects.length]);
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchIssues = async () => {
-      if (!selectedProject || pageGot.current >= pageTotal.current) {
+      if (!selectedProject || issuesPageGot.current >= issuesPageTotal.current) {
         setLoading(false);
         return;
       }
 
       setLoading(true);
       try {
-        const result = await getIssues(pageGot.current, selectedProject);
+        const result = await getIssues(issuesPageGot.current, selectedProject);
         if (result.data.length > 0 && isMounted) {
           setIssueCache((prev) => {
             const updatedIssues = [...(prev.get(selectedProject) || []), ...result.data];
@@ -153,13 +156,13 @@ export default function Command() {
             return uniqueIssues;
           });
 
-          pageTotal.current = result.total;
-          pageGot.current += result.data.length;
+          issuesPageTotal.current = result.total;
+          issuesPageGot.current += result.data.length;
 
-          showToast(Toast.Style.Success, `Issues loaded ${pageGot.current}/${pageTotal.current}`);
+          showToast(Toast.Style.Success, `Issues loaded ${issuesPageGot.current}/${issuesPageTotal.current}`);
         } else {
           setLoading(false);
-          showToast(Toast.Style.Success, `Issues loaded ${pageGot.current}/${pageTotal.current}`);
+          showToast(Toast.Style.Success, `Issues loaded ${issuesPageGot.current}/${issuesPageTotal.current}`);
         }
       } catch (e) {
         if (isMounted) {
@@ -175,15 +178,15 @@ export default function Command() {
       isMounted = false;
       setLoading(false);
     };
-  }, [selectedProject, issues.length, pageGot.current]);
+  }, [selectedProject, issues.length]);
 
   const resetIssue = (resetLength: boolean) => {
     const list = issueCache.get(selectedProject) ?? [];
     setIssues(list);
     setSelectedIssue(list.length > 0 ? list[0] : null);
-    pageGot.current = list.length;
+    issuesPageGot.current = list.length;
     if (resetLength) {
-      pageTotal.current = Math.max(pageTotal.current, list.length + 1);
+      issuesPageTotal.current = Math.max(issuesPageTotal.current, list.length + 1);
     }
   };
 
@@ -213,11 +216,11 @@ No Jira projects were found using your credentials.
 
 This could happen because:
 
-- The provided Jira domain has no associated projects.
-- The provided Jira instance is a Jira Server instance, not a Jira Cloud instance.
-- The email credential provided is not authorized to access any projects on the provided jira domain.
-- The email credential provided is incorrect.
-- The API token credential provided is incorrect.
+-  The provided Jira domain has no associated projects.
+-  The provided Jira instance is a Jira Server instance, not a Jira Cloud instance.
+-  The email credential provided is not authorized to access any projects on the provided jira domain.
+-  The email credential provided is incorrect.
+-  The API token credential provided is incorrect.
 
 Please check your permissions, jira account, or credentials and try again.
   `;
