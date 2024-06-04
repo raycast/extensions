@@ -18,6 +18,7 @@ export type Scalars = {
   Date: any;
   DateTime: any;
   GitObjectID: any;
+  GitRefname: any;
   GitSSHRemote: any;
   GitTimestamp: any;
   HTML: any;
@@ -656,12 +657,20 @@ export type AddedToProjectEvent = Node & {
   databaseId?: Maybe<Scalars["Int"]>;
   /** The Node ID of the AddedToProjectEvent object */
   id: Scalars["ID"];
+  /** Project referenced by event. */
+  project?: Maybe<Project>;
+  /** Project card referenced by this project event. */
+  projectCard?: Maybe<ProjectCard>;
+  /** Column name referenced by this project event. */
+  projectColumnName: Scalars["String"];
 };
 
 /** Represents an announcement banner. */
 export type AnnouncementBanner = {
   /** The text of the announcement */
   announcement?: Maybe<Scalars["String"]>;
+  /** The date the announcement was created */
+  announcementCreatedAt?: Maybe<Scalars["DateTime"]>;
   /** The expiration date of the announcement, if any */
   announcementExpiresAt?: Maybe<Scalars["DateTime"]>;
   /** Whether the announcement can be dismissed by the user */
@@ -2165,7 +2174,7 @@ export type ClosedEvent = Node &
   };
 
 /** The object which triggered a `ClosedEvent`. */
-export type Closer = Commit | PullRequest;
+export type Closer = Commit | ProjectV2 | PullRequest;
 
 /** The Code of Conduct for a repository */
 export type CodeOfConduct = Node & {
@@ -2182,6 +2191,40 @@ export type CodeOfConduct = Node & {
   resourcePath?: Maybe<Scalars["URI"]>;
   /** The HTTP URL for this Code of Conduct */
   url?: Maybe<Scalars["URI"]>;
+};
+
+/** Choose which tools must provide code scanning results before the reference is updated. When configured, code scanning must be enabled and have results for both the commit and the reference being updated. */
+export type CodeScanningParameters = {
+  __typename?: "CodeScanningParameters";
+  /** Tools that must provide code scanning results for this rule to pass. */
+  codeScanningTools: Array<CodeScanningTool>;
+};
+
+/** Choose which tools must provide code scanning results before the reference is updated. When configured, code scanning must be enabled and have results for both the commit and the reference being updated. */
+export type CodeScanningParametersInput = {
+  /** Tools that must provide code scanning results for this rule to pass. */
+  codeScanningTools: Array<CodeScanningToolInput>;
+};
+
+/** A tool that must provide code scanning results for this rule to pass. */
+export type CodeScanningTool = {
+  __typename?: "CodeScanningTool";
+  /** The severity level at which code scanning results that raise alerts block a reference update. For more information on alert severity levels, see "[About code scanning alerts](${externalDocsUrl}/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts#about-alert-severity-and-security-severity-levels)." */
+  alertsThreshold: Scalars["String"];
+  /** The severity level at which code scanning results that raise security alerts block a reference update. For more information on security severity levels, see "[About code scanning alerts](${externalDocsUrl}/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts#about-alert-severity-and-security-severity-levels)." */
+  securityAlertsThreshold: Scalars["String"];
+  /** The name of a code scanning tool */
+  tool: Scalars["String"];
+};
+
+/** A tool that must provide code scanning results for this rule to pass. */
+export type CodeScanningToolInput = {
+  /** The severity level at which code scanning results that raise alerts block a reference update. For more information on alert severity levels, see "[About code scanning alerts](${externalDocsUrl}/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts#about-alert-severity-and-security-severity-levels)." */
+  alertsThreshold: Scalars["String"];
+  /** The severity level at which code scanning results that raise security alerts block a reference update. For more information on security severity levels, see "[About code scanning alerts](${externalDocsUrl}/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts#about-alert-severity-and-security-severity-levels)." */
+  securityAlertsThreshold: Scalars["String"];
+  /** The name of a code scanning tool */
+  tool: Scalars["String"];
 };
 
 /** Collaborators affiliation level with a subject. */
@@ -3266,6 +3309,12 @@ export type ConvertedNoteToIssueEvent = Node & {
   databaseId?: Maybe<Scalars["Int"]>;
   /** The Node ID of the ConvertedNoteToIssueEvent object */
   id: Scalars["ID"];
+  /** Project referenced by event. */
+  project?: Maybe<Project>;
+  /** Project card referenced by this project event. */
+  projectCard?: Maybe<ProjectCard>;
+  /** Column name referenced by this project event. */
+  projectColumnName: Scalars["String"];
 };
 
 /** Represents a 'converted_to_discussion' event on a given issue. */
@@ -3279,6 +3328,19 @@ export type ConvertedToDiscussionEvent = Node & {
   discussion?: Maybe<Discussion>;
   /** The Node ID of the ConvertedToDiscussionEvent object */
   id: Scalars["ID"];
+};
+
+/** Copilot endpoint information */
+export type CopilotEndpoints = {
+  __typename?: "CopilotEndpoints";
+  /** Copilot API endpoint */
+  api: Scalars["String"];
+  /** Copilot origin tracker endpoint */
+  originTracker: Scalars["String"];
+  /** Copilot proxy endpoint */
+  proxy: Scalars["String"];
+  /** Copilot telemetry endpoint */
+  telemetry: Scalars["String"];
 };
 
 /** Autogenerated input type of CopyProjectV2 */
@@ -3481,6 +3543,68 @@ export type CreateCommitOnBranchPayload = {
   ref?: Maybe<Ref>;
 };
 
+/** Autogenerated input type of CreateDeployment */
+export type CreateDeploymentInput = {
+  /** Attempt to automatically merge the default branch into the requested ref, defaults to true. */
+  autoMerge?: InputMaybe<Scalars["Boolean"]>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** Short description of the deployment. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** Name for the target deployment environment. */
+  environment?: InputMaybe<Scalars["String"]>;
+  /** JSON payload with extra information about the deployment. */
+  payload?: InputMaybe<Scalars["String"]>;
+  /** The node ID of the ref to be deployed. */
+  refId: Scalars["ID"];
+  /** The node ID of the repository. */
+  repositoryId: Scalars["ID"];
+  /** The status contexts to verify against commit status checks. To bypass required contexts, pass an empty array. Defaults to all unique contexts. */
+  requiredContexts?: InputMaybe<Array<Scalars["String"]>>;
+  /** Specifies a task to execute. */
+  task?: InputMaybe<Scalars["String"]>;
+};
+
+/** Autogenerated return type of CreateDeployment */
+export type CreateDeploymentPayload = {
+  __typename?: "CreateDeploymentPayload";
+  /** True if the default branch has been auto-merged into the deployment ref. */
+  autoMerged?: Maybe<Scalars["Boolean"]>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The new deployment. */
+  deployment?: Maybe<Deployment>;
+};
+
+/** Autogenerated input type of CreateDeploymentStatus */
+export type CreateDeploymentStatusInput = {
+  /** Adds a new inactive status to all non-transient, non-production environment deployments with the same repository and environment name as the created status's deployment. */
+  autoInactive?: InputMaybe<Scalars["Boolean"]>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The node ID of the deployment. */
+  deploymentId: Scalars["ID"];
+  /** A short description of the status. Maximum length of 140 characters. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** If provided, updates the environment of the deploy. Otherwise, does not modify the environment. */
+  environment?: InputMaybe<Scalars["String"]>;
+  /** Sets the URL for accessing your environment. */
+  environmentUrl?: InputMaybe<Scalars["String"]>;
+  /** The log URL to associate with this status.       This URL should contain output to keep the user updated while the task is running       or serve as historical information for what happened in the deployment. */
+  logUrl?: InputMaybe<Scalars["String"]>;
+  /** The state of the deployment. */
+  state: DeploymentStatusState;
+};
+
+/** Autogenerated return type of CreateDeploymentStatus */
+export type CreateDeploymentStatusPayload = {
+  __typename?: "CreateDeploymentStatusPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The new deployment status. */
+  deploymentStatus?: Maybe<DeploymentStatus>;
+};
+
 /** Autogenerated input type of CreateDiscussion */
 export type CreateDiscussionInput = {
   /** The body of the discussion. */
@@ -3602,6 +3726,29 @@ export type CreateIssuePayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The new issue. */
   issue?: Maybe<Issue>;
+};
+
+/** Autogenerated input type of CreateLabel */
+export type CreateLabelInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** A 6 character hex code, without the leading #, identifying the color of the label. */
+  color: Scalars["String"];
+  /** A brief description of the label, such as its purpose. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** The name of the label. */
+  name: Scalars["String"];
+  /** The Node ID of the repository. */
+  repositoryId: Scalars["ID"];
+};
+
+/** Autogenerated return type of CreateLabel */
+export type CreateLabelPayload = {
+  __typename?: "CreateLabelPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The new label. */
+  label?: Maybe<Label>;
 };
 
 /** Autogenerated input type of CreateLinkedBranch */
@@ -4555,6 +4702,21 @@ export type DeleteIssuePayload = {
   repository?: Maybe<Repository>;
 };
 
+/** Autogenerated input type of DeleteLabel */
+export type DeleteLabelInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The Node ID of the label to be deleted. */
+  id: Scalars["ID"];
+};
+
+/** Autogenerated return type of DeleteLabel */
+export type DeleteLabelPayload = {
+  __typename?: "DeleteLabelPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+};
+
 /** Autogenerated input type of DeleteLinkedBranch */
 export type DeleteLinkedBranchInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -4570,6 +4732,23 @@ export type DeleteLinkedBranchPayload = {
   clientMutationId?: Maybe<Scalars["String"]>;
   /** The issue the linked branch was unlinked from. */
   issue?: Maybe<Issue>;
+};
+
+/** Autogenerated input type of DeletePackageVersion */
+export type DeletePackageVersionInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the package version to be deleted. */
+  packageVersionId: Scalars["ID"];
+};
+
+/** Autogenerated return type of DeletePackageVersion */
+export type DeletePackageVersionPayload = {
+  __typename?: "DeletePackageVersionPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** Whether or not the operation succeeded. */
+  success?: Maybe<Scalars["Boolean"]>;
 };
 
 /** Autogenerated input type of DeleteProjectCard */
@@ -4866,6 +5045,48 @@ export type DependabotUpdateError = {
   title: Scalars["String"];
 };
 
+/** A dependency manifest entry */
+export type DependencyGraphDependency = {
+  __typename?: "DependencyGraphDependency";
+  /** Does the dependency itself have dependencies? */
+  hasDependencies: Scalars["Boolean"];
+  /**
+   * The original name of the package, as it appears in the manifest.
+   * @deprecated `packageLabel` will be removed. Use normalized `packageName` field instead. Removal on 2022-10-01 UTC.
+   */
+  packageLabel: Scalars["String"];
+  /** The dependency package manager */
+  packageManager?: Maybe<Scalars["String"]>;
+  /** The name of the package in the canonical form used by the package manager. */
+  packageName: Scalars["String"];
+  /** The repository containing the package */
+  repository?: Maybe<Repository>;
+  /** The dependency version requirements */
+  requirements: Scalars["String"];
+};
+
+/** The connection type for DependencyGraphDependency. */
+export type DependencyGraphDependencyConnection = {
+  __typename?: "DependencyGraphDependencyConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<DependencyGraphDependencyEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<DependencyGraphDependency>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type DependencyGraphDependencyEdge = {
+  __typename?: "DependencyGraphDependencyEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<DependencyGraphDependency>;
+};
+
 /** The possible ecosystems of a dependency graph package. */
 export enum DependencyGraphEcosystem {
   /** GitHub Actions */
@@ -4891,6 +5112,57 @@ export enum DependencyGraphEcosystem {
   /** Swift packages */
   Swift = "SWIFT",
 }
+
+/** Dependency manifest for a repository */
+export type DependencyGraphManifest = Node & {
+  __typename?: "DependencyGraphManifest";
+  /** Path to view the manifest file blob */
+  blobPath: Scalars["String"];
+  /** A list of manifest dependencies */
+  dependencies?: Maybe<DependencyGraphDependencyConnection>;
+  /** The number of dependencies listed in the manifest */
+  dependenciesCount?: Maybe<Scalars["Int"]>;
+  /** Is the manifest too big to parse? */
+  exceedsMaxSize: Scalars["Boolean"];
+  /** Fully qualified manifest filename */
+  filename: Scalars["String"];
+  /** The Node ID of the DependencyGraphManifest object */
+  id: Scalars["ID"];
+  /** Were we able to parse the manifest? */
+  parseable: Scalars["Boolean"];
+  /** The repository containing the manifest */
+  repository: Repository;
+};
+
+/** Dependency manifest for a repository */
+export type DependencyGraphManifestDependenciesArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+};
+
+/** The connection type for DependencyGraphManifest. */
+export type DependencyGraphManifestConnection = {
+  __typename?: "DependencyGraphManifestConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<DependencyGraphManifestEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<DependencyGraphManifest>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type DependencyGraphManifestEdge = {
+  __typename?: "DependencyGraphManifestEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<DependencyGraphManifest>;
+};
 
 /** A repository deploy key. */
 export type DeployKey = Node & {
@@ -5097,6 +5369,8 @@ export type DeploymentProtectionRuleEdge = {
 
 /** The possible protection rule types. */
 export enum DeploymentProtectionRuleType {
+  /** Branch policy */
+  BranchPolicy = "BRANCH_POLICY",
   /** Required reviewers */
   RequiredReviewers = "REQUIRED_REVIEWERS",
   /** Wait timer */
@@ -5265,6 +5539,8 @@ export type DeploymentStatus = Node & {
   deployment: Deployment;
   /** Identifies the description of the deployment. */
   description?: Maybe<Scalars["String"]>;
+  /** Identifies the environment of the deployment at the time of this deployment status */
+  environment?: Maybe<Scalars["String"]>;
   /** Identifies the environment URL of the deployment. */
   environmentUrl?: Maybe<Scalars["URI"]>;
   /** The Node ID of the DeploymentStatus object */
@@ -6038,6 +6314,8 @@ export type Enterprise = AnnouncementBanner &
     __typename?: "Enterprise";
     /** The text of the announcement */
     announcement?: Maybe<Scalars["String"]>;
+    /** The date the announcement was created */
+    announcementCreatedAt?: Maybe<Scalars["DateTime"]>;
     /** The expiration date of the announcement, if any */
     announcementExpiresAt?: Maybe<Scalars["DateTime"]>;
     /** Whether the announcement can be dismissed by the user */
@@ -7302,8 +7580,14 @@ export type Environment = Node & {
   databaseId?: Maybe<Scalars["Int"]>;
   /** The Node ID of the Environment object */
   id: Scalars["ID"];
+  /** Indicates whether or not this environment is currently pinned to the repository */
+  isPinned?: Maybe<Scalars["Boolean"]>;
+  /** The latest completed deployment with status success, failure, or error if it exists */
+  latestCompletedDeployment?: Maybe<Deployment>;
   /** The name of the environment */
   name: Scalars["String"];
+  /** The position of the environment if it is pinned, null if it is not pinned */
+  pinnedPosition?: Maybe<Scalars["Int"]>;
   /** The protection rules defined for this environment */
   protectionRules: DeploymentProtectionRuleConnection;
 };
@@ -7342,6 +7626,16 @@ export type EnvironmentEdge = {
 export enum EnvironmentOrderField {
   /** Order environments by name. */
   Name = "NAME",
+}
+
+/** Properties by which environments connections can be ordered */
+export enum EnvironmentPinnedFilterField {
+  /** All environments will be returned. */
+  All = "ALL",
+  /** Environments exclude pinned will be returned */
+  None = "NONE",
+  /** Only pinned environment will be returned */
+  Only = "ONLY",
 }
 
 /** Ordering options for environments */
@@ -7571,6 +7865,32 @@ export type FileChanges = {
 export type FileDeletion = {
   /** The path to delete */
   path: Scalars["String"];
+};
+
+/** Prevent commits that include files with specified file extensions from being pushed to the commit graph. NOTE: This rule is in beta and subject to change */
+export type FileExtensionRestrictionParameters = {
+  __typename?: "FileExtensionRestrictionParameters";
+  /** The file extensions that are restricted from being pushed to the commit graph. */
+  restrictedFileExtensions: Array<Scalars["String"]>;
+};
+
+/** Prevent commits that include files with specified file extensions from being pushed to the commit graph. NOTE: This rule is in beta and subject to change */
+export type FileExtensionRestrictionParametersInput = {
+  /** The file extensions that are restricted from being pushed to the commit graph. */
+  restrictedFileExtensions: Array<Scalars["String"]>;
+};
+
+/** Prevent commits that include changes in specified file paths from being pushed to the commit graph. NOTE: This rule is in beta and subject to change */
+export type FilePathRestrictionParameters = {
+  __typename?: "FilePathRestrictionParameters";
+  /** The file paths that are restricted from being pushed to the commit graph. */
+  restrictedFilePaths: Array<Scalars["String"]>;
+};
+
+/** Prevent commits that include changes in specified file paths from being pushed to the commit graph. NOTE: This rule is in beta and subject to change */
+export type FilePathRestrictionParametersInput = {
+  /** The file paths that are restricted from being pushed to the commit graph. */
+  restrictedFilePaths: Array<Scalars["String"]>;
 };
 
 /** The possible viewed states of a file . */
@@ -8204,6 +8524,31 @@ export enum IdentityProviderConfigurationState {
   /** Authentication with an identity provider is not configured. */
   Unconfigured = "UNCONFIGURED",
 }
+
+/** Autogenerated input type of ImportProject */
+export type ImportProjectInput = {
+  /** The description of Project. */
+  body?: InputMaybe<Scalars["String"]>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** A list of columns containing issues and pull requests. */
+  columnImports: Array<ProjectColumnImport>;
+  /** The name of Project. */
+  name: Scalars["String"];
+  /** The name of the Organization or User to create the Project under. */
+  ownerName: Scalars["String"];
+  /** Whether the Project is public or not. */
+  public?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** Autogenerated return type of ImportProject */
+export type ImportProjectPayload = {
+  __typename?: "ImportProjectPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The new Project! */
+  project?: Maybe<Project>;
+};
 
 /** Autogenerated input type of InviteEnterpriseAdmin */
 export type InviteEnterpriseAdminInput = {
@@ -9791,10 +10136,36 @@ export type MarketplaceListingEdge = {
   node?: Maybe<MarketplaceListing>;
 };
 
+/** Prevent commits that include file paths that exceed a specified character limit from being pushed to the commit graph. NOTE: This rule is in beta and subject to change */
+export type MaxFilePathLengthParameters = {
+  __typename?: "MaxFilePathLengthParameters";
+  /** The maximum amount of characters allowed in file paths */
+  maxFilePathLength: Scalars["Int"];
+};
+
+/** Prevent commits that include file paths that exceed a specified character limit from being pushed to the commit graph. NOTE: This rule is in beta and subject to change */
+export type MaxFilePathLengthParametersInput = {
+  /** The maximum amount of characters allowed in file paths */
+  maxFilePathLength: Scalars["Int"];
+};
+
+/** Prevent commits that exceed a specified file size limit from being pushed to the commit. NOTE: This rule is in beta and subject to change */
+export type MaxFileSizeParameters = {
+  __typename?: "MaxFileSizeParameters";
+  /** The maximum file size allowed in megabytes. This limit does not apply to Git Large File Storage (Git LFS). */
+  maxFileSize: Scalars["Int"];
+};
+
+/** Prevent commits that exceed a specified file size limit from being pushed to the commit. NOTE: This rule is in beta and subject to change */
+export type MaxFileSizeParametersInput = {
+  /** The maximum file size allowed in megabytes. This limit does not apply to Git Large File Storage (Git LFS). */
+  maxFileSize: Scalars["Int"];
+};
+
 /** Represents a member feature request notification */
 export type MemberFeatureRequestNotification = Node & {
   __typename?: "MemberFeatureRequestNotification";
-  /** Represents member feature request body containing organization name and the number of feature requests */
+  /** Represents member feature request body containing entity name and the number of feature requests */
   body: Scalars["String"];
   /** The Node ID of the MemberFeatureRequestNotification object */
   id: Scalars["ID"];
@@ -10173,6 +10544,29 @@ export enum MergeQueueMergingStrategy {
   Headgreen = "HEADGREEN",
 }
 
+/** Detailed status information about a pull request merge. */
+export enum MergeStateStatus {
+  /** The head ref is out of date. */
+  Behind = "BEHIND",
+  /** The merge is blocked. */
+  Blocked = "BLOCKED",
+  /** Mergeable and passing commit status. */
+  Clean = "CLEAN",
+  /** The merge commit cannot be cleanly created. */
+  Dirty = "DIRTY",
+  /**
+   * The merge is blocked due to the pull request being a draft.
+   * @deprecated DRAFT state will be removed from this enum and `isDraft` should be used instead Use PullRequest.isDraft instead. Removal on 2021-01-01 UTC.
+   */
+  Draft = "DRAFT",
+  /** Mergeable with passing commit status and pre-receive hooks. */
+  HasHooks = "HAS_HOOKS",
+  /** The state cannot currently be determined. */
+  Unknown = "UNKNOWN",
+  /** Mergeable with non-passing commit status. */
+  Unstable = "UNSTABLE",
+}
+
 /** Whether or not a PullRequest can be merged. */
 export enum MergeableState {
   /** The pull request cannot be merged due to merge conflicts. */
@@ -10492,6 +10886,14 @@ export type MovedColumnsInProjectEvent = Node & {
   databaseId?: Maybe<Scalars["Int"]>;
   /** The Node ID of the MovedColumnsInProjectEvent object */
   id: Scalars["ID"];
+  /** Column name the issue or pull request was moved from. */
+  previousProjectColumnName: Scalars["String"];
+  /** Project referenced by event. */
+  project?: Maybe<Project>;
+  /** Project card referenced by this project event. */
+  projectCard?: Maybe<ProjectCard>;
+  /** Column name the issue or pull request was moved to. */
+  projectColumnName: Scalars["String"];
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -10631,6 +11033,10 @@ export type Mutation = {
    *
    */
   createCommitOnBranch?: Maybe<CreateCommitOnBranchPayload>;
+  /** Creates a new deployment event. */
+  createDeployment?: Maybe<CreateDeploymentPayload>;
+  /** Create a deployment status. */
+  createDeploymentStatus?: Maybe<CreateDeploymentStatusPayload>;
   /** Create a discussion. */
   createDiscussion?: Maybe<CreateDiscussionPayload>;
   /** Creates an organization as part of an enterprise account. A personal access token used to create an organization is implicitly permitted to update the organization it created, if the organization is part of an enterprise that has SAML enabled or uses Enterprise Managed Users. If the organization is not part of such an enterprise, and instead has SAML enabled for it individually, the token will then require SAML authorization to continue working against that organization. */
@@ -10641,6 +11047,8 @@ export type Mutation = {
   createIpAllowListEntry?: Maybe<CreateIpAllowListEntryPayload>;
   /** Creates a new issue. */
   createIssue?: Maybe<CreateIssuePayload>;
+  /** Creates a new label. */
+  createLabel?: Maybe<CreateLabelPayload>;
   /** Create a branch linked to an issue. */
   createLinkedBranch?: Maybe<CreateLinkedBranchPayload>;
   /** Creates a GitHub Enterprise Importer (GEI) migration source. */
@@ -10691,8 +11099,12 @@ export type Mutation = {
   deleteIssue?: Maybe<DeleteIssuePayload>;
   /** Deletes an IssueComment object. */
   deleteIssueComment?: Maybe<DeleteIssueCommentPayload>;
+  /** Deletes a label. */
+  deleteLabel?: Maybe<DeleteLabelPayload>;
   /** Unlink a branch from an issue. */
   deleteLinkedBranch?: Maybe<DeleteLinkedBranchPayload>;
+  /** Delete a package version. */
+  deletePackageVersion?: Maybe<DeletePackageVersionPayload>;
   /** Deletes a project. */
   deleteProject?: Maybe<DeleteProjectPayload>;
   /** Deletes a project card. */
@@ -10743,6 +11155,8 @@ export type Mutation = {
   grantEnterpriseOrganizationsMigratorRole?: Maybe<GrantEnterpriseOrganizationsMigratorRolePayload>;
   /** Grant the migrator role to a user or a team. */
   grantMigratorRole?: Maybe<GrantMigratorRolePayload>;
+  /** Creates a new project by importing columns and a list of issues/PRs. */
+  importProject?: Maybe<ImportProjectPayload>;
   /** Invite someone to become an administrator of the enterprise. */
   inviteEnterpriseAdmin?: Maybe<InviteEnterpriseAdminPayload>;
   /** Links a project to a repository. */
@@ -10773,6 +11187,8 @@ export type Mutation = {
   moveProjectCard?: Maybe<MoveProjectCardPayload>;
   /** Moves a project column to another place. */
   moveProjectColumn?: Maybe<MoveProjectColumnPayload>;
+  /** Pin an environment to a repository */
+  pinEnvironment?: Maybe<PinEnvironmentPayload>;
   /** Pin an issue to a repository */
   pinIssue?: Maybe<PinIssuePayload>;
   /** Publish an existing sponsorship tier that is currently still a draft to a GitHub Sponsors profile. */
@@ -10787,7 +11203,7 @@ export type Mutation = {
   removeAssigneesFromAssignable?: Maybe<RemoveAssigneesFromAssignablePayload>;
   /** Removes an administrator from the enterprise. */
   removeEnterpriseAdmin?: Maybe<RemoveEnterpriseAdminPayload>;
-  /** Removes the identity provider from an enterprise */
+  /** Removes the identity provider from an enterprise. Owners of enterprises both with and without Enterprise Managed Users may use this mutation. */
   removeEnterpriseIdentityProvider?: Maybe<RemoveEnterpriseIdentityProviderPayload>;
   /** Removes a user from all organizations within the enterprise */
   removeEnterpriseMember?: Maybe<RemoveEnterpriseMemberPayload>;
@@ -10811,6 +11227,8 @@ export type Mutation = {
   reopenIssue?: Maybe<ReopenIssuePayload>;
   /** Reopen a pull request. */
   reopenPullRequest?: Maybe<ReopenPullRequestPayload>;
+  /** Reorder a pinned repository environment */
+  reorderEnvironment?: Maybe<ReorderEnvironmentPayload>;
   /** Set review requests on a pull request. */
   requestReviews?: Maybe<RequestReviewsPayload>;
   /** Rerequests an existing check suite. */
@@ -10931,6 +11349,8 @@ export type Mutation = {
   updateIssue?: Maybe<UpdateIssuePayload>;
   /** Updates an IssueComment object. */
   updateIssueComment?: Maybe<UpdateIssueCommentPayload>;
+  /** Updates an existing label. */
+  updateLabel?: Maybe<UpdateLabelPayload>;
   /** Update the setting to restrict notifications to only verified or approved domains available to an owner. */
   updateNotificationRestrictionSetting?: Maybe<UpdateNotificationRestrictionSettingPayload>;
   /** Sets whether private repository forks are enabled for an organization. */
@@ -10965,6 +11385,28 @@ export type Mutation = {
   updatePullRequestReviewComment?: Maybe<UpdatePullRequestReviewCommentPayload>;
   /** Update a Git Ref. */
   updateRef?: Maybe<UpdateRefPayload>;
+  /**
+   * Creates, updates and/or deletes multiple refs in a repository.
+   *
+   * This mutation takes a list of `RefUpdate`s and performs these updates
+   * on the repository. All updates are performed atomically, meaning that
+   * if one of them is rejected, no other ref will be modified.
+   *
+   * `RefUpdate.beforeOid` specifies that the given reference needs to point
+   * to the given value before performing any updates. A value of
+   * `0000000000000000000000000000000000000000` can be used to verify that
+   * the references should not exist.
+   *
+   * `RefUpdate.afterOid` specifies the value that the given reference
+   * will point to after performing all updates. A value of
+   * `0000000000000000000000000000000000000000` can be used to delete a
+   * reference.
+   *
+   * If `RefUpdate.force` is set to `true`, a non-fast-forward updates
+   * for the given reference will be allowed.
+   *
+   */
+  updateRefs?: Maybe<UpdateRefsPayload>;
   /** Update information about a repository. */
   updateRepository?: Maybe<UpdateRepositoryPayload>;
   /** Update a repository ruleset */
@@ -10979,6 +11421,8 @@ export type Mutation = {
   updateTeamDiscussion?: Maybe<UpdateTeamDiscussionPayload>;
   /** Updates a discussion comment. */
   updateTeamDiscussionComment?: Maybe<UpdateTeamDiscussionCommentPayload>;
+  /** Updates team review assignment. */
+  updateTeamReviewAssignment?: Maybe<UpdateTeamReviewAssignmentPayload>;
   /** Update team repository. */
   updateTeamsRepository?: Maybe<UpdateTeamsRepositoryPayload>;
   /** Replaces the repository's topics with the given topics. */
@@ -11217,6 +11661,16 @@ export type MutationCreateCommitOnBranchArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationCreateDeploymentArgs = {
+  input: CreateDeploymentInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationCreateDeploymentStatusArgs = {
+  input: CreateDeploymentStatusInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationCreateDiscussionArgs = {
   input: CreateDiscussionInput;
 };
@@ -11239,6 +11693,11 @@ export type MutationCreateIpAllowListEntryArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationCreateIssueArgs = {
   input: CreateIssueInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationCreateLabelArgs = {
+  input: CreateLabelInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -11367,8 +11826,18 @@ export type MutationDeleteIssueCommentArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationDeleteLabelArgs = {
+  input: DeleteLabelInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationDeleteLinkedBranchArgs = {
   input: DeleteLinkedBranchInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationDeletePackageVersionArgs = {
+  input: DeletePackageVersionInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -11497,6 +11966,11 @@ export type MutationGrantMigratorRoleArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationImportProjectArgs = {
+  input: ImportProjectInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationInviteEnterpriseAdminArgs = {
   input: InviteEnterpriseAdminInput;
 };
@@ -11569,6 +12043,11 @@ export type MutationMoveProjectCardArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationMoveProjectColumnArgs = {
   input: MoveProjectColumnInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationPinEnvironmentArgs = {
+  input: PinEnvironmentInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -11664,6 +12143,11 @@ export type MutationReopenIssueArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationReopenPullRequestArgs = {
   input: ReopenPullRequestInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationReorderEnvironmentArgs = {
+  input: ReorderEnvironmentInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -11967,6 +12451,11 @@ export type MutationUpdateIssueCommentArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationUpdateLabelArgs = {
+  input: UpdateLabelInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationUpdateNotificationRestrictionSettingArgs = {
   input: UpdateNotificationRestrictionSettingInput;
 };
@@ -12052,6 +12541,11 @@ export type MutationUpdateRefArgs = {
 };
 
 /** The root query for implementing GraphQL mutations. */
+export type MutationUpdateRefsArgs = {
+  input: UpdateRefsInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
 export type MutationUpdateRepositoryArgs = {
   input: UpdateRepositoryInput;
 };
@@ -12084,6 +12578,11 @@ export type MutationUpdateTeamDiscussionArgs = {
 /** The root query for implementing GraphQL mutations. */
 export type MutationUpdateTeamDiscussionCommentArgs = {
   input: UpdateTeamDiscussionCommentInput;
+};
+
+/** The root query for implementing GraphQL mutations. */
+export type MutationUpdateTeamReviewAssignmentArgs = {
+  input: UpdateTeamReviewAssignmentInput;
 };
 
 /** The root query for implementing GraphQL mutations. */
@@ -13784,6 +14283,8 @@ export type Organization = Actor &
     __typename?: "Organization";
     /** The text of the announcement */
     announcement?: Maybe<Scalars["String"]>;
+    /** The date the announcement was created */
+    announcementCreatedAt?: Maybe<Scalars["DateTime"]>;
     /** The expiration date of the announcement, if any */
     announcementExpiresAt?: Maybe<Scalars["DateTime"]>;
     /** Whether the announcement can be dismissed by the user */
@@ -15041,6 +15542,27 @@ export type PermissionSource = {
   source: PermissionGranter;
 };
 
+/** Autogenerated input type of PinEnvironment */
+export type PinEnvironmentInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the environment to modify */
+  environmentId: Scalars["ID"];
+  /** The desired state of the environment. If true, environment will be pinned. If false, it will be unpinned. */
+  pinned: Scalars["Boolean"];
+};
+
+/** Autogenerated return type of PinEnvironment */
+export type PinEnvironmentPayload = {
+  __typename?: "PinEnvironmentPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The environment that was pinned */
+  environment?: Maybe<Environment>;
+  /** The pinned environment if we pinned */
+  pinnedEnvironment?: Maybe<PinnedEnvironment>;
+};
+
 /** Autogenerated input type of PinIssue */
 export type PinIssueInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -15179,6 +15701,59 @@ export enum PinnedDiscussionPattern {
   Plus = "PLUS",
   /** A lightning bolt pattern */
   Zap = "ZAP",
+}
+
+/** Represents a pinned environment on a given repository */
+export type PinnedEnvironment = Node & {
+  __typename?: "PinnedEnvironment";
+  /** Identifies the date and time when the pinned environment was created */
+  createdAt: Scalars["DateTime"];
+  /** Identifies the primary key from the database. */
+  databaseId?: Maybe<Scalars["Int"]>;
+  /** Identifies the environment associated. */
+  environment: Environment;
+  /** The Node ID of the PinnedEnvironment object */
+  id: Scalars["ID"];
+  /** Identifies the position of the pinned environment. */
+  position: Scalars["Int"];
+  /** The repository that this environment was pinned to. */
+  repository: Repository;
+};
+
+/** The connection type for PinnedEnvironment. */
+export type PinnedEnvironmentConnection = {
+  __typename?: "PinnedEnvironmentConnection";
+  /** A list of edges. */
+  edges?: Maybe<Array<Maybe<PinnedEnvironmentEdge>>>;
+  /** A list of nodes. */
+  nodes?: Maybe<Array<Maybe<PinnedEnvironment>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  /** Identifies the total count of items in the connection. */
+  totalCount: Scalars["Int"];
+};
+
+/** An edge in a connection. */
+export type PinnedEnvironmentEdge = {
+  __typename?: "PinnedEnvironmentEdge";
+  /** A cursor for use in pagination. */
+  cursor: Scalars["String"];
+  /** The item at the end of the edge. */
+  node?: Maybe<PinnedEnvironment>;
+};
+
+/** Ordering options for pinned environments */
+export type PinnedEnvironmentOrder = {
+  /** The direction in which to order pinned environments by the specified field. */
+  direction: OrderDirection;
+  /** The field to order pinned environments by. */
+  field: PinnedEnvironmentOrderField;
+};
+
+/** Properties by which pinned environments connections can be ordered */
+export enum PinnedEnvironmentOrderField {
+  /** Order pinned environments by position */
+  Position = "POSITION",
 }
 
 /** Represents a 'pinned' event on a given issue or pull request. */
@@ -15552,6 +16127,14 @@ export type ProjectCardEdge = {
   node?: Maybe<ProjectCard>;
 };
 
+/** An issue or PR and its owning repository to be used in a project card. */
+export type ProjectCardImport = {
+  /** The issue or pull request number. */
+  number: Scalars["Int"];
+  /** Repository name with owner (owner/repository). */
+  repository: Scalars["String"];
+};
+
 /** Types that can be inside Project Cards. */
 export type ProjectCardItem = Issue | PullRequest;
 
@@ -15619,6 +16202,16 @@ export type ProjectColumnEdge = {
   cursor: Scalars["String"];
   /** The item at the end of the edge. */
   node?: Maybe<ProjectColumn>;
+};
+
+/** A project column and a list of its issues and PRs. */
+export type ProjectColumnImport = {
+  /** The name of the column. */
+  columnName: Scalars["String"];
+  /** A list of issues and pull requests in the column. */
+  issues?: InputMaybe<Array<ProjectCardImport>>;
+  /** The position of the column, starting from 0. */
+  position: Scalars["Int"];
 };
 
 /** The semantic purpose of the column - todo, in progress, or done. */
@@ -17090,6 +17683,8 @@ export type PullRequest = Assignable &
     bodyHTML: Scalars["HTML"];
     /** The body rendered to text. */
     bodyText: Scalars["String"];
+    /** Whether or not the pull request is rebaseable. */
+    canBeRebased: Scalars["Boolean"];
     /** The number of changed files in this pull request. */
     changedFiles: Scalars["Int"];
     /** The HTTP path for the checks of this pull request. */
@@ -17167,6 +17762,8 @@ export type PullRequest = Assignable &
     mergeQueue?: Maybe<MergeQueue>;
     /** The merge queue entry of the pull request in the base branch's merge queue */
     mergeQueueEntry?: Maybe<MergeQueueEntry>;
+    /** Detailed information about the current pull request merge state status. */
+    mergeStateStatus: MergeStateStatus;
     /** Whether or not the pull request can be merged based on the existence of merge conflicts. */
     mergeable: MergeableState;
     /** Whether or not the pull request was merged. */
@@ -17217,6 +17814,8 @@ export type PullRequest = Assignable &
     reviews?: Maybe<PullRequestReviewConnection>;
     /** Identifies the state of the pull request. */
     state: PullRequestState;
+    /** Check and Status rollup information for the PR's head ref. */
+    statusCheckRollup?: Maybe<StatusCheckRollup>;
     /** A list of reviewer suggestions based on commit history and past review comments. */
     suggestedReviewers: Array<Maybe<SuggestedReviewer>>;
     /**
@@ -19077,6 +19676,18 @@ export enum RefOrderField {
   TagCommitDate = "TAG_COMMIT_DATE",
 }
 
+/** A ref update */
+export type RefUpdate = {
+  /** The value this ref should be updated to. */
+  afterOid: Scalars["GitObjectID"];
+  /** The value this ref needs to point to before the update. */
+  beforeOid?: InputMaybe<Scalars["GitObjectID"]>;
+  /** Force a non fast-forward update. */
+  force?: InputMaybe<Scalars["Boolean"]>;
+  /** The fully qualified name of the ref to be update. For example `refs/heads/branch-name` */
+  name: Scalars["GitRefname"];
+};
+
 /** Branch protection rules that are enforced on the viewer. */
 export type RefUpdateRule = {
   __typename?: "RefUpdateRule";
@@ -19612,6 +20223,10 @@ export type RemovedFromProjectEvent = Node & {
   databaseId?: Maybe<Scalars["Int"]>;
   /** The Node ID of the RemovedFromProjectEvent object */
   id: Scalars["ID"];
+  /** Project referenced by event. */
+  project?: Maybe<Project>;
+  /** Column name referenced by this project event. */
+  projectColumnName: Scalars["String"];
 };
 
 /** Represents a 'renamed' event on a given issue or pull request */
@@ -19698,6 +20313,25 @@ export type ReopenedEvent = Node & {
   id: Scalars["ID"];
   /** The reason the issue state was changed to open. */
   stateReason?: Maybe<IssueStateReason>;
+};
+
+/** Autogenerated input type of ReorderEnvironment */
+export type ReorderEnvironmentInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** The ID of the environment to modify */
+  environmentId: Scalars["ID"];
+  /** The desired position of the environment */
+  position: Scalars["Int"];
+};
+
+/** Autogenerated return type of ReorderEnvironment */
+export type ReorderEnvironmentPayload = {
+  __typename?: "ReorderEnvironmentPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The environment that was reordered */
+  environment?: Maybe<Environment>;
 };
 
 /** Audit log entry for a repo.access event. */
@@ -20844,6 +21478,8 @@ export type Repository = Node &
     defaultBranchRef?: Maybe<Ref>;
     /** Whether or not branches are automatically deleted when merged in this repository. */
     deleteBranchOnMerge: Scalars["Boolean"];
+    /** A list of dependency manifests contained in the repository */
+    dependencyGraphManifests?: Maybe<DependencyGraphManifestConnection>;
     /** A list of deploy keys that are on this repository. */
     deployKeys: DeployKeyConnection;
     /** Deployments associated with the repository */
@@ -20968,8 +21604,12 @@ export type Repository = Node &
     parent?: Maybe<Repository>;
     /** A list of discussions that have been pinned in this repository. */
     pinnedDiscussions: PinnedDiscussionConnection;
+    /** A list of pinned environments for this repository. */
+    pinnedEnvironments?: Maybe<PinnedEnvironmentConnection>;
     /** A list of pinned issues for this repository. */
     pinnedIssues?: Maybe<PinnedIssueConnection>;
+    /** Returns information about the availability of certain features and limits based on the repository's billing plan. */
+    planFeatures: RepositoryPlanFeatures;
     /** The primary language of the repository's code. */
     primaryLanguage?: Maybe<Language>;
     /** Find project by number. */
@@ -21122,6 +21762,17 @@ export type RepositoryCommitCommentsArgs = {
 };
 
 /** A repository contains the content for a project. */
+export type RepositoryDependencyGraphManifestsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  dependenciesAfter?: InputMaybe<Scalars["String"]>;
+  dependenciesFirst?: InputMaybe<Scalars["Int"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  withDependencies?: InputMaybe<Scalars["Boolean"]>;
+};
+
+/** A repository contains the content for a project. */
 export type RepositoryDeployKeysArgs = {
   after?: InputMaybe<Scalars["String"]>;
   before?: InputMaybe<Scalars["String"]>;
@@ -21183,6 +21834,7 @@ export type RepositoryEnvironmentsArgs = {
   last?: InputMaybe<Scalars["Int"]>;
   names?: InputMaybe<Array<Scalars["String"]>>;
   orderBy?: InputMaybe<Environments>;
+  pinnedEnvironmentFilter?: InputMaybe<EnvironmentPinnedFilterField>;
 };
 
 /** A repository contains the content for a project. */
@@ -21300,6 +21952,15 @@ export type RepositoryPinnedDiscussionsArgs = {
   before?: InputMaybe<Scalars["String"]>;
   first?: InputMaybe<Scalars["Int"]>;
   last?: InputMaybe<Scalars["Int"]>;
+};
+
+/** A repository contains the content for a project. */
+export type RepositoryPinnedEnvironmentsArgs = {
+  after?: InputMaybe<Scalars["String"]>;
+  before?: InputMaybe<Scalars["String"]>;
+  first?: InputMaybe<Scalars["Int"]>;
+  last?: InputMaybe<Scalars["Int"]>;
+  orderBy?: InputMaybe<PinnedEnvironmentOrder>;
 };
 
 /** A repository contains the content for a project. */
@@ -22007,6 +22668,21 @@ export enum RepositoryPermission {
   Write = "WRITE",
 }
 
+/** Information about the availability of features and limits for a repository based on its billing plan. */
+export type RepositoryPlanFeatures = {
+  __typename?: "RepositoryPlanFeatures";
+  /** Whether reviews can be automatically requested and enforced with a CODEOWNERS file */
+  codeowners: Scalars["Boolean"];
+  /** Whether pull requests can be created as or converted to draft */
+  draftPullRequests: Scalars["Boolean"];
+  /** Maximum number of users that can be assigned to an issue or pull request */
+  maximumAssignees: Scalars["Int"];
+  /** Maximum number of manually-requested reviews on a pull request */
+  maximumManualReviewRequests: Scalars["Int"];
+  /** Whether teams can be requested to review pull requests */
+  teamReviewRequests: Scalars["Boolean"];
+};
+
 /** The privacy of a repository */
 export enum RepositoryPrivacy {
   /** Private */
@@ -22126,6 +22802,8 @@ export enum RepositoryRuleType {
   Authorization = "AUTHORIZATION",
   /** Branch name pattern */
   BranchNamePattern = "BRANCH_NAME_PATTERN",
+  /** Choose which tools must provide code scanning results before the reference is updated. When configured, code scanning must be enabled and have results for both the commit and the reference being updated. */
+  CodeScanning = "CODE_SCANNING",
   /** Committer email pattern */
   CommitterEmailPattern = "COMMITTER_EMAIL_PATTERN",
   /** Commit author email pattern */
@@ -22136,8 +22814,16 @@ export enum RepositoryRuleType {
   Creation = "CREATION",
   /** Only allow users with bypass permissions to delete matching refs. */
   Deletion = "DELETION",
+  /** Prevent commits that include files with specified file extensions from being pushed to the commit graph. NOTE: Thie rule is in beta and subject to change */
+  FileExtensionRestriction = "FILE_EXTENSION_RESTRICTION",
+  /** Prevent commits that include changes in specified file paths from being pushed to the commit graph. NOTE: Thie rule is in beta and subject to change */
+  FilePathRestriction = "FILE_PATH_RESTRICTION",
   /** Branch is read-only. Users cannot push to the branch. */
   LockBranch = "LOCK_BRANCH",
+  /** Prevent commits that include file paths that exceed a specified character limit from being pushed to the commit graph. NOTE: Thie rule is in beta and subject to change */
+  MaxFilePathLength = "MAX_FILE_PATH_LENGTH",
+  /** Prevent commits that exceed a specified file size limit from being pushed to the commit. NOTE: Thie rule is in beta and subject to change */
+  MaxFileSize = "MAX_FILE_SIZE",
   /** Max ref updates */
   MaxRefUpdates = "MAX_REF_UPDATES",
   /** Merges must be performed via a merge queue. */
@@ -22225,6 +22911,8 @@ export type RepositoryRulesetBypassActor = Node & {
   actor?: Maybe<BypassActor>;
   /** The mode for the bypass actor */
   bypassMode?: Maybe<RepositoryRulesetBypassActorBypassMode>;
+  /** This actor represents the ability for a deploy key to bypass */
+  deployKey: Scalars["Boolean"];
   /** The Node ID of the RepositoryRulesetBypassActor object */
   id: Scalars["ID"];
   /** This actor represents the ability for an organization owner to bypass */
@@ -22267,12 +22955,14 @@ export type RepositoryRulesetBypassActorEdge = {
   node?: Maybe<RepositoryRulesetBypassActor>;
 };
 
-/** Specifies the attributes for a new or updated ruleset bypass actor. Only one of `actor_id`, `repository_role_database_id`, or `organization_admin` should be specified. */
+/** Specifies the attributes for a new or updated ruleset bypass actor. Only one of `actor_id`, `repository_role_database_id`, `organization_admin`, or `deploy_key` should be specified. */
 export type RepositoryRulesetBypassActorInput = {
   /** For Team and Integration bypasses, the Team or Integration ID */
   actorId?: InputMaybe<Scalars["ID"]>;
   /** The bypass mode for this actor. */
   bypassMode: RepositoryRulesetBypassActorBypassMode;
+  /** For deploy key bypasses, true. Can only use ALWAYS as the bypass mode */
+  deployKey?: InputMaybe<Scalars["Boolean"]>;
   /** For organization owner bypasses, true */
   organizationAdmin?: InputMaybe<Scalars["Boolean"]>;
   /** For role bypasses, the role database ID */
@@ -22301,10 +22991,12 @@ export type RepositoryRulesetEdge = {
   node?: Maybe<RepositoryRuleset>;
 };
 
-/** The targets supported for rulesets */
+/** The targets supported for rulesets. NOTE: The push target is in beta and subject to change. */
 export enum RepositoryRulesetTarget {
   /** Branch */
   Branch = "BRANCH",
+  /** Push */
+  Push = "PUSH",
   /** Tag */
   Tag = "TAG",
 }
@@ -22984,9 +23676,14 @@ export enum RuleEnforcement {
 /** Types which can be parameters for `RepositoryRule` objects. */
 export type RuleParameters =
   | BranchNamePatternParameters
+  | CodeScanningParameters
   | CommitAuthorEmailPatternParameters
   | CommitMessagePatternParameters
   | CommitterEmailPatternParameters
+  | FileExtensionRestrictionParameters
+  | FilePathRestrictionParameters
+  | MaxFilePathLengthParameters
+  | MaxFileSizeParameters
   | PullRequestParameters
   | RequiredDeploymentsParameters
   | RequiredStatusChecksParameters
@@ -22998,12 +23695,22 @@ export type RuleParameters =
 export type RuleParametersInput = {
   /** Parameters used for the `branch_name_pattern` rule type */
   branchNamePattern?: InputMaybe<BranchNamePatternParametersInput>;
+  /** Parameters used for the `code_scanning` rule type */
+  codeScanning?: InputMaybe<CodeScanningParametersInput>;
   /** Parameters used for the `commit_author_email_pattern` rule type */
   commitAuthorEmailPattern?: InputMaybe<CommitAuthorEmailPatternParametersInput>;
   /** Parameters used for the `commit_message_pattern` rule type */
   commitMessagePattern?: InputMaybe<CommitMessagePatternParametersInput>;
   /** Parameters used for the `committer_email_pattern` rule type */
   committerEmailPattern?: InputMaybe<CommitterEmailPatternParametersInput>;
+  /** Parameters used for the `file_extension_restriction` rule type */
+  fileExtensionRestriction?: InputMaybe<FileExtensionRestrictionParametersInput>;
+  /** Parameters used for the `file_path_restriction` rule type */
+  filePathRestriction?: InputMaybe<FilePathRestrictionParametersInput>;
+  /** Parameters used for the `max_file_path_length` rule type */
+  maxFilePathLength?: InputMaybe<MaxFilePathLengthParametersInput>;
+  /** Parameters used for the `max_file_size` rule type */
+  maxFileSize?: InputMaybe<MaxFileSizeParametersInput>;
   /** Parameters used for the `pull_request` rule type */
   pullRequest?: InputMaybe<PullRequestParametersInput>;
   /** Parameters used for the `required_deployments` rule type */
@@ -24967,7 +25674,7 @@ export type StartRepositoryMigrationInput = {
   /** The ID of the migration source. */
   sourceId: Scalars["ID"];
   /** The URL of the source repository. */
-  sourceRepositoryUrl?: InputMaybe<Scalars["URI"]>;
+  sourceRepositoryUrl: Scalars["URI"];
   /** The visibility of the imported repository. */
   targetRepoVisibility?: InputMaybe<Scalars["String"]>;
 };
@@ -25397,6 +26104,14 @@ export type Team = MemberStatusable &
     repositoriesUrl: Scalars["URI"];
     /** The HTTP path for this team */
     resourcePath: Scalars["URI"];
+    /** What algorithm is used for review assignment for this team */
+    reviewRequestDelegationAlgorithm?: Maybe<TeamReviewAssignmentAlgorithm>;
+    /** True if review assignment is enabled for this team */
+    reviewRequestDelegationEnabled: Scalars["Boolean"];
+    /** How many team members are required for review assignment for this team */
+    reviewRequestDelegationMemberCount?: Maybe<Scalars["Int"]>;
+    /** When assigning team members via delegation, whether the entire team should be notified as well. */
+    reviewRequestDelegationNotifyTeam: Scalars["Boolean"];
     /** The slug corresponding to the team. */
     slug: Scalars["String"];
     /** The HTTP path for this team's teams */
@@ -26307,6 +27022,14 @@ export enum TeamRepositoryOrderField {
   Stargazers = "STARGAZERS",
   /** Order repositories by update time */
   UpdatedAt = "UPDATED_AT",
+}
+
+/** The possible team review assignment algorithms */
+export enum TeamReviewAssignmentAlgorithm {
+  /** Balance review load across the entire team */
+  LoadBalance = "LOAD_BALANCE",
+  /** Alternate reviews between each team member */
+  RoundRobin = "ROUND_ROBIN",
 }
 
 /** The role of a user on a team. */
@@ -27674,6 +28397,29 @@ export type UpdateIssuePayload = {
   issue?: Maybe<Issue>;
 };
 
+/** Autogenerated input type of UpdateLabel */
+export type UpdateLabelInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** A 6 character hex code, without the leading #, identifying the updated color of the label. */
+  color?: InputMaybe<Scalars["String"]>;
+  /** A brief description of the label, such as its purpose. */
+  description?: InputMaybe<Scalars["String"]>;
+  /** The Node ID of the label to be updated. */
+  id: Scalars["ID"];
+  /** The updated name of the label. */
+  name?: InputMaybe<Scalars["String"]>;
+};
+
+/** Autogenerated return type of UpdateLabel */
+export type UpdateLabelPayload = {
+  __typename?: "UpdateLabelPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The updated label. */
+  label?: Maybe<Label>;
+};
+
 /** Autogenerated input type of UpdateNotificationRestrictionSetting */
 export type UpdateNotificationRestrictionSettingInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -28082,6 +28828,23 @@ export type UpdateRefPayload = {
   ref?: Maybe<Ref>;
 };
 
+/** Autogenerated input type of UpdateRefs */
+export type UpdateRefsInput = {
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** A list of ref updates. */
+  refUpdates: Array<RefUpdate>;
+  /** The Node ID of the repository. */
+  repositoryId: Scalars["ID"];
+};
+
+/** Autogenerated return type of UpdateRefs */
+export type UpdateRefsPayload = {
+  __typename?: "UpdateRefsPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+};
+
 /** Autogenerated input type of UpdateRepository */
 export type UpdateRepositoryInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -28259,6 +29022,39 @@ export type UpdateTeamDiscussionPayload = {
   teamDiscussion?: Maybe<TeamDiscussion>;
 };
 
+/** Autogenerated input type of UpdateTeamReviewAssignment */
+export type UpdateTeamReviewAssignmentInput = {
+  /** The algorithm to use for review assignment */
+  algorithm?: InputMaybe<TeamReviewAssignmentAlgorithm>;
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: InputMaybe<Scalars["String"]>;
+  /** Count any members whose review has already been requested against the required number of members assigned to review */
+  countMembersAlreadyRequested?: InputMaybe<Scalars["Boolean"]>;
+  /** Turn on or off review assignment */
+  enabled: Scalars["Boolean"];
+  /** An array of team member IDs to exclude */
+  excludedTeamMemberIds?: InputMaybe<Array<Scalars["ID"]>>;
+  /** The Node ID of the team to update review assignments of */
+  id: Scalars["ID"];
+  /** Include the members of any child teams when assigning */
+  includeChildTeamMembers?: InputMaybe<Scalars["Boolean"]>;
+  /** Notify the entire team of the PR if it is delegated */
+  notifyTeam?: InputMaybe<Scalars["Boolean"]>;
+  /** Remove the team review request when assigning */
+  removeTeamRequest?: InputMaybe<Scalars["Boolean"]>;
+  /** The number of team members to assign */
+  teamMemberCount?: InputMaybe<Scalars["Int"]>;
+};
+
+/** Autogenerated return type of UpdateTeamReviewAssignment */
+export type UpdateTeamReviewAssignmentPayload = {
+  __typename?: "UpdateTeamReviewAssignmentPayload";
+  /** A unique identifier for the client performing the mutation. */
+  clientMutationId?: Maybe<Scalars["String"]>;
+  /** The team that was modified */
+  team?: Maybe<Team>;
+};
+
 /** Autogenerated input type of UpdateTeamsRepository */
 export type UpdateTeamsRepositoryInput = {
   /** A unique identifier for the client performing the mutation. */
@@ -28383,6 +29179,8 @@ export type User = Actor &
     companyHTML: Scalars["HTML"];
     /** The collection of contributions this user has made to different repositories. */
     contributionsCollection: ContributionsCollection;
+    /** The user's Copilot endpoint information */
+    copilotEndpoints?: Maybe<CopilotEndpoints>;
     /** Identifies the date and time when the object was created. */
     createdAt: Scalars["DateTime"];
     /** Identifies the primary key from the database. */
@@ -29744,6 +30542,28 @@ export type SearchDiscussionsQuery = {
   };
 };
 
+export type GetGitHubDiscussionNumberQueryVariables = Exact<{
+  filter: Scalars["String"];
+}>;
+
+export type GetGitHubDiscussionNumberQuery = {
+  __typename?: "Query";
+  search: {
+    __typename?: "SearchResultItemConnection";
+    nodes?: Array<
+      | { __typename?: "App" }
+      | { __typename?: "Discussion"; number: number; url: any }
+      | { __typename?: "Issue" }
+      | { __typename?: "MarketplaceListing" }
+      | { __typename?: "Organization" }
+      | { __typename?: "PullRequest" }
+      | { __typename?: "Repository" }
+      | { __typename?: "User" }
+      | null
+    > | null;
+  };
+};
+
 export type IssueFieldsFragment = {
   __typename?: "Issue";
   id: string;
@@ -29805,183 +30625,6 @@ export type IssueFieldsFragment = {
       login: string;
       isViewer: boolean;
     } | null> | null;
-  };
-};
-
-export type SearchCreatedIssuesQueryVariables = Exact<{
-  createdOpenQuery: Scalars["String"];
-  createdClosedQuery: Scalars["String"];
-  numberOfOpenItems: Scalars["Int"];
-  numberOfClosedItems: Scalars["Int"];
-}>;
-
-export type SearchCreatedIssuesQuery = {
-  __typename?: "Query";
-  createdOpen: {
-    __typename?: "SearchResultItemConnection";
-    nodes?: Array<
-      | { __typename?: "App" }
-      | { __typename?: "Discussion" }
-      | {
-          __typename?: "Issue";
-          id: string;
-          url: any;
-          title: string;
-          number: number;
-          closed: boolean;
-          state: IssueState;
-          stateReason?: IssueStateReason | null;
-          updatedAt: any;
-          author?:
-            | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | {
-                __typename?: "User";
-                id: string;
-                avatarUrl: any;
-                name?: string | null;
-                login: string;
-                isViewer: boolean;
-              }
-            | null;
-          linkedBranches: {
-            __typename?: "LinkedBranchConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "LinkedBranch";
-              id: string;
-              ref?: { __typename?: "Ref"; id: string; name: string } | null;
-            } | null> | null;
-          };
-          milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
-          repository: {
-            __typename?: "Repository";
-            id: string;
-            nameWithOwner: string;
-            name: string;
-            url: any;
-            mergeCommitAllowed: boolean;
-            squashMergeAllowed: boolean;
-            rebaseMergeAllowed: boolean;
-            defaultBranchRef?: {
-              __typename?: "Ref";
-              target?:
-                | { __typename?: "Blob"; oid: any }
-                | { __typename?: "Commit"; oid: any }
-                | { __typename?: "Tag"; oid: any }
-                | { __typename?: "Tree"; oid: any }
-                | null;
-            } | null;
-            owner:
-              | { __typename?: "Organization"; login: string; avatarUrl: any }
-              | { __typename?: "User"; login: string; avatarUrl: any };
-          };
-          comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-          assignees: {
-            __typename?: "UserConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "User";
-              id: string;
-              avatarUrl: any;
-              name?: string | null;
-              login: string;
-              isViewer: boolean;
-            } | null> | null;
-          };
-        }
-      | { __typename?: "MarketplaceListing" }
-      | { __typename?: "Organization" }
-      | { __typename?: "PullRequest" }
-      | { __typename?: "Repository" }
-      | { __typename?: "User" }
-      | null
-    > | null;
-  };
-  createdClosed: {
-    __typename?: "SearchResultItemConnection";
-    nodes?: Array<
-      | { __typename?: "App" }
-      | { __typename?: "Discussion" }
-      | {
-          __typename?: "Issue";
-          id: string;
-          url: any;
-          title: string;
-          number: number;
-          closed: boolean;
-          state: IssueState;
-          stateReason?: IssueStateReason | null;
-          updatedAt: any;
-          author?:
-            | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
-            | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
-            | {
-                __typename?: "User";
-                id: string;
-                avatarUrl: any;
-                name?: string | null;
-                login: string;
-                isViewer: boolean;
-              }
-            | null;
-          linkedBranches: {
-            __typename?: "LinkedBranchConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "LinkedBranch";
-              id: string;
-              ref?: { __typename?: "Ref"; id: string; name: string } | null;
-            } | null> | null;
-          };
-          milestone?: { __typename?: "Milestone"; id: string; title: string } | null;
-          repository: {
-            __typename?: "Repository";
-            id: string;
-            nameWithOwner: string;
-            name: string;
-            url: any;
-            mergeCommitAllowed: boolean;
-            squashMergeAllowed: boolean;
-            rebaseMergeAllowed: boolean;
-            defaultBranchRef?: {
-              __typename?: "Ref";
-              target?:
-                | { __typename?: "Blob"; oid: any }
-                | { __typename?: "Commit"; oid: any }
-                | { __typename?: "Tag"; oid: any }
-                | { __typename?: "Tree"; oid: any }
-                | null;
-            } | null;
-            owner:
-              | { __typename?: "Organization"; login: string; avatarUrl: any }
-              | { __typename?: "User"; login: string; avatarUrl: any };
-          };
-          comments: { __typename?: "IssueCommentConnection"; totalCount: number };
-          assignees: {
-            __typename?: "UserConnection";
-            totalCount: number;
-            nodes?: Array<{
-              __typename?: "User";
-              id: string;
-              avatarUrl: any;
-              name?: string | null;
-              login: string;
-              isViewer: boolean;
-            } | null> | null;
-          };
-        }
-      | { __typename?: "MarketplaceListing" }
-      | { __typename?: "Organization" }
-      | { __typename?: "PullRequest" }
-      | { __typename?: "Repository" }
-      | { __typename?: "User" }
-      | null
-    > | null;
   };
 };
 
@@ -30159,6 +30802,7 @@ export type IssueDetailsQuery = {
     | { __typename?: "ConvertedToDiscussionEvent" }
     | { __typename?: "CrossReferencedEvent" }
     | { __typename?: "DemilestonedEvent" }
+    | { __typename?: "DependencyGraphManifest" }
     | { __typename?: "DeployKey" }
     | { __typename?: "DeployedEvent" }
     | { __typename?: "Deployment" }
@@ -30330,6 +30974,7 @@ export type IssueDetailsQuery = {
     | { __typename?: "PackageTag" }
     | { __typename?: "PackageVersion" }
     | { __typename?: "PinnedDiscussion" }
+    | { __typename?: "PinnedEnvironment" }
     | { __typename?: "PinnedEvent" }
     | { __typename?: "PinnedIssue" }
     | { __typename?: "PrivateRepositoryForkingDisableAuditEntry" }
@@ -30663,6 +31308,323 @@ export type CreateIssueMutation = {
       };
     } | null;
   } | null;
+};
+
+export type ChangeProjectStatusMutationVariables = Exact<{
+  projectId: Scalars["ID"];
+  closed: Scalars["Boolean"];
+}>;
+
+export type ChangeProjectStatusMutation = {
+  __typename?: "Mutation";
+  updateProjectV2?: { __typename?: "UpdateProjectV2Payload"; clientMutationId?: string | null } | null;
+};
+
+export type ProjectFieldsFragment = {
+  __typename?: "ProjectV2";
+  id: string;
+  title: string;
+  public: boolean;
+  number: number;
+  readme?: string | null;
+  closed: boolean;
+  shortDescription?: string | null;
+  url: any;
+  createdAt: any;
+  updatedAt: any;
+  viewerCanClose: boolean;
+  viewerCanUpdate: boolean;
+  viewerCanReopen: boolean;
+  creator?:
+    | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+    | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+    | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+    | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+    | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+    | null;
+  views: {
+    __typename?: "ProjectV2ViewConnection";
+    totalCount: number;
+    nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+  };
+};
+
+export type ProjectDetailsQueryVariables = Exact<{
+  nodeId: Scalars["ID"];
+}>;
+
+export type ProjectDetailsQuery = {
+  __typename?: "Query";
+  node?:
+    | { __typename?: "AddedToMergeQueueEvent" }
+    | { __typename?: "AddedToProjectEvent" }
+    | { __typename?: "App" }
+    | { __typename?: "AssignedEvent" }
+    | { __typename?: "AutoMergeDisabledEvent" }
+    | { __typename?: "AutoMergeEnabledEvent" }
+    | { __typename?: "AutoRebaseEnabledEvent" }
+    | { __typename?: "AutoSquashEnabledEvent" }
+    | { __typename?: "AutomaticBaseChangeFailedEvent" }
+    | { __typename?: "AutomaticBaseChangeSucceededEvent" }
+    | { __typename?: "BaseRefChangedEvent" }
+    | { __typename?: "BaseRefDeletedEvent" }
+    | { __typename?: "BaseRefForcePushedEvent" }
+    | { __typename?: "Blob" }
+    | { __typename?: "Bot" }
+    | { __typename?: "BranchProtectionRule" }
+    | { __typename?: "BypassForcePushAllowance" }
+    | { __typename?: "BypassPullRequestAllowance" }
+    | { __typename?: "CWE" }
+    | { __typename?: "CheckRun" }
+    | { __typename?: "CheckSuite" }
+    | { __typename?: "ClosedEvent" }
+    | { __typename?: "CodeOfConduct" }
+    | { __typename?: "CommentDeletedEvent" }
+    | { __typename?: "Commit" }
+    | { __typename?: "CommitComment" }
+    | { __typename?: "CommitCommentThread" }
+    | { __typename?: "Comparison" }
+    | { __typename?: "ConnectedEvent" }
+    | { __typename?: "ConvertToDraftEvent" }
+    | { __typename?: "ConvertedNoteToIssueEvent" }
+    | { __typename?: "ConvertedToDiscussionEvent" }
+    | { __typename?: "CrossReferencedEvent" }
+    | { __typename?: "DemilestonedEvent" }
+    | { __typename?: "DependencyGraphManifest" }
+    | { __typename?: "DeployKey" }
+    | { __typename?: "DeployedEvent" }
+    | { __typename?: "Deployment" }
+    | { __typename?: "DeploymentEnvironmentChangedEvent" }
+    | { __typename?: "DeploymentReview" }
+    | { __typename?: "DeploymentStatus" }
+    | { __typename?: "DisconnectedEvent" }
+    | { __typename?: "Discussion" }
+    | { __typename?: "DiscussionCategory" }
+    | { __typename?: "DiscussionComment" }
+    | { __typename?: "DiscussionPoll" }
+    | { __typename?: "DiscussionPollOption" }
+    | { __typename?: "DraftIssue" }
+    | { __typename?: "Enterprise" }
+    | { __typename?: "EnterpriseAdministratorInvitation" }
+    | { __typename?: "EnterpriseIdentityProvider" }
+    | { __typename?: "EnterpriseRepositoryInfo" }
+    | { __typename?: "EnterpriseServerInstallation" }
+    | { __typename?: "EnterpriseServerUserAccount" }
+    | { __typename?: "EnterpriseServerUserAccountEmail" }
+    | { __typename?: "EnterpriseServerUserAccountsUpload" }
+    | { __typename?: "EnterpriseUserAccount" }
+    | { __typename?: "Environment" }
+    | { __typename?: "ExternalIdentity" }
+    | { __typename?: "Gist" }
+    | { __typename?: "GistComment" }
+    | { __typename?: "HeadRefDeletedEvent" }
+    | { __typename?: "HeadRefForcePushedEvent" }
+    | { __typename?: "HeadRefRestoredEvent" }
+    | { __typename?: "IpAllowListEntry" }
+    | { __typename?: "Issue" }
+    | { __typename?: "IssueComment" }
+    | { __typename?: "Label" }
+    | { __typename?: "LabeledEvent" }
+    | { __typename?: "Language" }
+    | { __typename?: "License" }
+    | { __typename?: "LinkedBranch" }
+    | { __typename?: "LockedEvent" }
+    | { __typename?: "Mannequin" }
+    | { __typename?: "MarkedAsDuplicateEvent" }
+    | { __typename?: "MarketplaceCategory" }
+    | { __typename?: "MarketplaceListing" }
+    | { __typename?: "MemberFeatureRequestNotification" }
+    | { __typename?: "MembersCanDeleteReposClearAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposDisableAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposEnableAuditEntry" }
+    | { __typename?: "MentionedEvent" }
+    | { __typename?: "MergeQueue" }
+    | { __typename?: "MergeQueueEntry" }
+    | { __typename?: "MergedEvent" }
+    | { __typename?: "MigrationSource" }
+    | { __typename?: "Milestone" }
+    | { __typename?: "MilestonedEvent" }
+    | { __typename?: "MovedColumnsInProjectEvent" }
+    | { __typename?: "OIDCProvider" }
+    | { __typename?: "OauthApplicationCreateAuditEntry" }
+    | { __typename?: "OrgAddBillingManagerAuditEntry" }
+    | { __typename?: "OrgAddMemberAuditEntry" }
+    | { __typename?: "OrgBlockUserAuditEntry" }
+    | { __typename?: "OrgConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgCreateAuditEntry" }
+    | { __typename?: "OrgDisableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgDisableSamlAuditEntry" }
+    | { __typename?: "OrgDisableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgEnableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgEnableSamlAuditEntry" }
+    | { __typename?: "OrgEnableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgInviteMemberAuditEntry" }
+    | { __typename?: "OrgInviteToBusinessAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessApprovedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessBlockedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessDeniedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessRequestedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessUnblockedAuditEntry" }
+    | { __typename?: "OrgRemoveBillingManagerAuditEntry" }
+    | { __typename?: "OrgRemoveMemberAuditEntry" }
+    | { __typename?: "OrgRemoveOutsideCollaboratorAuditEntry" }
+    | { __typename?: "OrgRestoreMemberAuditEntry" }
+    | { __typename?: "OrgUnblockUserAuditEntry" }
+    | { __typename?: "OrgUpdateDefaultRepositoryPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry" }
+    | { __typename?: "Organization" }
+    | { __typename?: "OrganizationIdentityProvider" }
+    | { __typename?: "OrganizationInvitation" }
+    | { __typename?: "OrganizationMigration" }
+    | { __typename?: "Package" }
+    | { __typename?: "PackageFile" }
+    | { __typename?: "PackageTag" }
+    | { __typename?: "PackageVersion" }
+    | { __typename?: "PinnedDiscussion" }
+    | { __typename?: "PinnedEnvironment" }
+    | { __typename?: "PinnedEvent" }
+    | { __typename?: "PinnedIssue" }
+    | { __typename?: "PrivateRepositoryForkingDisableAuditEntry" }
+    | { __typename?: "PrivateRepositoryForkingEnableAuditEntry" }
+    | { __typename?: "Project" }
+    | { __typename?: "ProjectCard" }
+    | { __typename?: "ProjectColumn" }
+    | {
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+        public: boolean;
+        number: number;
+        readme?: string | null;
+        closed: boolean;
+        shortDescription?: string | null;
+        url: any;
+        createdAt: any;
+        updatedAt: any;
+        viewerCanClose: boolean;
+        viewerCanUpdate: boolean;
+        viewerCanReopen: boolean;
+        creator?:
+          | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | null;
+        views: {
+          __typename?: "ProjectV2ViewConnection";
+          totalCount: number;
+          nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+        };
+      }
+    | { __typename?: "ProjectV2Field" }
+    | { __typename?: "ProjectV2Item" }
+    | { __typename?: "ProjectV2ItemFieldDateValue" }
+    | { __typename?: "ProjectV2ItemFieldIterationValue" }
+    | { __typename?: "ProjectV2ItemFieldNumberValue" }
+    | { __typename?: "ProjectV2ItemFieldSingleSelectValue" }
+    | { __typename?: "ProjectV2ItemFieldTextValue" }
+    | { __typename?: "ProjectV2IterationField" }
+    | { __typename?: "ProjectV2SingleSelectField" }
+    | { __typename?: "ProjectV2View" }
+    | { __typename?: "ProjectV2Workflow" }
+    | { __typename?: "PublicKey" }
+    | { __typename?: "PullRequest" }
+    | { __typename?: "PullRequestCommit" }
+    | { __typename?: "PullRequestCommitCommentThread" }
+    | { __typename?: "PullRequestReview" }
+    | { __typename?: "PullRequestReviewComment" }
+    | { __typename?: "PullRequestReviewThread" }
+    | { __typename?: "PullRequestThread" }
+    | { __typename?: "Push" }
+    | { __typename?: "PushAllowance" }
+    | { __typename?: "Reaction" }
+    | { __typename?: "ReadyForReviewEvent" }
+    | { __typename?: "Ref" }
+    | { __typename?: "ReferencedEvent" }
+    | { __typename?: "Release" }
+    | { __typename?: "ReleaseAsset" }
+    | { __typename?: "RemovedFromMergeQueueEvent" }
+    | { __typename?: "RemovedFromProjectEvent" }
+    | { __typename?: "RenamedTitleEvent" }
+    | { __typename?: "ReopenedEvent" }
+    | { __typename?: "RepoAccessAuditEntry" }
+    | { __typename?: "RepoAddMemberAuditEntry" }
+    | { __typename?: "RepoAddTopicAuditEntry" }
+    | { __typename?: "RepoArchivedAuditEntry" }
+    | { __typename?: "RepoChangeMergeSettingAuditEntry" }
+    | { __typename?: "RepoConfigDisableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigEnableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigLockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigUnlockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoCreateAuditEntry" }
+    | { __typename?: "RepoDestroyAuditEntry" }
+    | { __typename?: "RepoRemoveMemberAuditEntry" }
+    | { __typename?: "RepoRemoveTopicAuditEntry" }
+    | { __typename?: "Repository" }
+    | { __typename?: "RepositoryInvitation" }
+    | { __typename?: "RepositoryMigration" }
+    | { __typename?: "RepositoryRule" }
+    | { __typename?: "RepositoryRuleset" }
+    | { __typename?: "RepositoryRulesetBypassActor" }
+    | { __typename?: "RepositoryTopic" }
+    | { __typename?: "RepositoryVisibilityChangeDisableAuditEntry" }
+    | { __typename?: "RepositoryVisibilityChangeEnableAuditEntry" }
+    | { __typename?: "RepositoryVulnerabilityAlert" }
+    | { __typename?: "ReviewDismissalAllowance" }
+    | { __typename?: "ReviewDismissedEvent" }
+    | { __typename?: "ReviewRequest" }
+    | { __typename?: "ReviewRequestRemovedEvent" }
+    | { __typename?: "ReviewRequestedEvent" }
+    | { __typename?: "SavedReply" }
+    | { __typename?: "SecurityAdvisory" }
+    | { __typename?: "SponsorsActivity" }
+    | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
+    | { __typename?: "SponsorsTier" }
+    | { __typename?: "Sponsorship" }
+    | { __typename?: "SponsorshipNewsletter" }
+    | { __typename?: "Status" }
+    | { __typename?: "StatusCheckRollup" }
+    | { __typename?: "StatusContext" }
+    | { __typename?: "SubscribedEvent" }
+    | { __typename?: "Tag" }
+    | { __typename?: "Team" }
+    | { __typename?: "TeamAddMemberAuditEntry" }
+    | { __typename?: "TeamAddRepositoryAuditEntry" }
+    | { __typename?: "TeamChangeParentTeamAuditEntry" }
+    | { __typename?: "TeamDiscussion" }
+    | { __typename?: "TeamDiscussionComment" }
+    | { __typename?: "TeamRemoveMemberAuditEntry" }
+    | { __typename?: "TeamRemoveRepositoryAuditEntry" }
+    | { __typename?: "Topic" }
+    | { __typename?: "TransferredEvent" }
+    | { __typename?: "Tree" }
+    | { __typename?: "UnassignedEvent" }
+    | { __typename?: "UnlabeledEvent" }
+    | { __typename?: "UnlockedEvent" }
+    | { __typename?: "UnmarkedAsDuplicateEvent" }
+    | { __typename?: "UnpinnedEvent" }
+    | { __typename?: "UnsubscribedEvent" }
+    | { __typename?: "User" }
+    | { __typename?: "UserBlockedEvent" }
+    | { __typename?: "UserContentEdit" }
+    | { __typename?: "UserList" }
+    | { __typename?: "UserStatus" }
+    | { __typename?: "VerifiableDomain" }
+    | { __typename?: "Workflow" }
+    | { __typename?: "WorkflowRun" }
+    | { __typename?: "WorkflowRunFile" }
+    | null;
 };
 
 export type PullRequestFieldsFragment = {
@@ -31008,6 +31970,7 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "ConvertedToDiscussionEvent" }
     | { __typename?: "CrossReferencedEvent" }
     | { __typename?: "DemilestonedEvent" }
+    | { __typename?: "DependencyGraphManifest" }
     | { __typename?: "DeployKey" }
     | { __typename?: "DeployedEvent" }
     | { __typename?: "Deployment" }
@@ -31101,6 +32064,7 @@ export type PullRequestDetailsQuery = {
     | { __typename?: "PackageTag" }
     | { __typename?: "PackageVersion" }
     | { __typename?: "PinnedDiscussion" }
+    | { __typename?: "PinnedEnvironment" }
     | { __typename?: "PinnedEvent" }
     | { __typename?: "PinnedIssue" }
     | { __typename?: "PrivateRepositoryForkingDisableAuditEntry" }
@@ -31458,6 +32422,7 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "ConvertedToDiscussionEvent" }
     | { __typename?: "CrossReferencedEvent" }
     | { __typename?: "DemilestonedEvent" }
+    | { __typename?: "DependencyGraphManifest" }
     | { __typename?: "DeployKey" }
     | { __typename?: "DeployedEvent" }
     | { __typename?: "Deployment" }
@@ -31551,6 +32516,7 @@ export type PullRequestCommitsQuery = {
     | { __typename?: "PackageTag" }
     | { __typename?: "PackageVersion" }
     | { __typename?: "PinnedDiscussion" }
+    | { __typename?: "PinnedEnvironment" }
     | { __typename?: "PinnedEvent" }
     | { __typename?: "PinnedIssue" }
     | { __typename?: "PrivateRepositoryForkingDisableAuditEntry" }
@@ -32162,6 +33128,33 @@ export type DataForRepositoryQuery = {
   } | null;
 };
 
+export type SearchRepositoryBranchesQueryVariables = Exact<{
+  owner: Scalars["String"];
+  name: Scalars["String"];
+  query: Scalars["String"];
+}>;
+
+export type SearchRepositoryBranchesQuery = {
+  __typename?: "Query";
+  repository?: {
+    __typename?: "Repository";
+    refs?: {
+      __typename?: "RefConnection";
+      nodes?: Array<{
+        __typename?: "Ref";
+        id: string;
+        name: string;
+        target?:
+          | { __typename?: "Blob" }
+          | { __typename?: "Commit"; authoredDate: any; oid: any; message: string }
+          | { __typename?: "Tag" }
+          | { __typename?: "Tree" }
+          | null;
+      } | null> | null;
+    } | null;
+  } | null;
+};
+
 export type RepositoryIssuesQueryVariables = Exact<{
   owner: Scalars["String"];
   name: Scalars["String"];
@@ -32351,6 +33344,8 @@ export type AuthorFieldsFragment =
   | AuthorFields_Organization_Fragment
   | AuthorFields_User_Fragment;
 
+export type ProjectViewerFieldsFragment = { __typename?: "ProjectV2View"; id: string; name: string; number: number };
+
 export type GetViewerQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetViewerQuery = {
@@ -32366,6 +33361,38 @@ export type GetViewerQuery = {
       __typename?: "OrganizationConnection";
       totalCount: number;
       nodes?: Array<{ __typename?: "Organization"; avatarUrl: any; login: string } | null> | null;
+    };
+    projectsV2: {
+      __typename?: "ProjectV2Connection";
+      totalCount: number;
+      nodes?: Array<{
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+        public: boolean;
+        number: number;
+        readme?: string | null;
+        closed: boolean;
+        shortDescription?: string | null;
+        url: any;
+        createdAt: any;
+        updatedAt: any;
+        viewerCanClose: boolean;
+        viewerCanUpdate: boolean;
+        viewerCanReopen: boolean;
+        creator?:
+          | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "EnterpriseUserAccount"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+          | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+          | { __typename?: "User"; id: string; avatarUrl: any; name?: string | null; login: string; isViewer: boolean }
+          | null;
+        views: {
+          __typename?: "ProjectV2ViewConnection";
+          totalCount: number;
+          nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+        };
+      } | null> | null;
     };
   };
 };
@@ -32566,6 +33593,41 @@ export const IssueDetailFieldsFragmentDoc = gql`
   ${AuthorFieldsFragmentDoc}
   ${ShortRepositoryFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
+`;
+export const ProjectViewerFieldsFragmentDoc = gql`
+  fragment ProjectViewerFields on ProjectV2View {
+    id
+    name
+    number
+  }
+`;
+export const ProjectFieldsFragmentDoc = gql`
+  fragment ProjectFields on ProjectV2 {
+    id
+    title
+    public
+    number
+    readme
+    closed
+    shortDescription
+    url
+    createdAt
+    creator {
+      ...AuthorFields
+    }
+    updatedAt
+    views(first: 50) {
+      totalCount
+      nodes {
+        ...ProjectViewerFields
+      }
+    }
+    viewerCanClose
+    viewerCanUpdate
+    viewerCanReopen
+  }
+  ${AuthorFieldsFragmentDoc}
+  ${ProjectViewerFieldsFragmentDoc}
 `;
 export const PullRequestFieldsFragmentDoc = gql`
   fragment PullRequestFields on PullRequest {
@@ -32850,25 +33912,17 @@ export const SearchDiscussionsDocument = gql`
   }
   ${DiscussionFieldsFragmentDoc}
 `;
-export const SearchCreatedIssuesDocument = gql`
-  query searchCreatedIssues(
-    $createdOpenQuery: String!
-    $createdClosedQuery: String!
-    $numberOfOpenItems: Int!
-    $numberOfClosedItems: Int!
-  ) {
-    createdOpen: search(query: $createdOpenQuery, type: ISSUE, first: $numberOfOpenItems) {
+export const GetGitHubDiscussionNumberDocument = gql`
+  query getGitHubDiscussionNumber($filter: String!) {
+    search(query: $filter, type: DISCUSSION, first: 1) {
       nodes {
-        ...IssueFields
-      }
-    }
-    createdClosed: search(query: $createdClosedQuery, type: ISSUE, first: $numberOfClosedItems) {
-      nodes {
-        ...IssueFields
+        ... on Discussion {
+          number
+          url
+        }
       }
     }
   }
-  ${IssueFieldsFragmentDoc}
 `;
 export const RepositoryCollaboratorsForIssuesDocument = gql`
   query repositoryCollaboratorsForIssues($owner: String!, $name: String!, $issueNumber: Int!) {
@@ -32997,6 +34051,21 @@ export const CreateIssueDocument = gql`
     }
   }
   ${IssueFieldsFragmentDoc}
+`;
+export const ChangeProjectStatusDocument = gql`
+  mutation changeProjectStatus($projectId: ID!, $closed: Boolean!) {
+    updateProjectV2(input: { projectId: $projectId, closed: $closed }) {
+      clientMutationId
+    }
+  }
+`;
+export const ProjectDetailsDocument = gql`
+  query projectDetails($nodeId: ID!) {
+    node(id: $nodeId) {
+      ...ProjectFields
+    }
+  }
+  ${ProjectFieldsFragmentDoc}
 `;
 export const SearchPullRequestsDocument = gql`
   query searchPullRequests($query: String!, $numberOfItems: Int!) {
@@ -33306,6 +34375,22 @@ export const DataForRepositoryDocument = gql`
   ${CommitFieldsFragmentDoc}
   ${UserFieldsFragmentDoc}
 `;
+export const SearchRepositoryBranchesDocument = gql`
+  query searchRepositoryBranches($owner: String!, $name: String!, $query: String!) {
+    repository(owner: $owner, name: $name) {
+      refs(refPrefix: "refs/heads/", direction: ASC, first: 50, query: $query) {
+        nodes {
+          id
+          name
+          target {
+            ...CommitFields
+          }
+        }
+      }
+    }
+  }
+  ${CommitFieldsFragmentDoc}
+`;
 export const RepositoryIssuesDocument = gql`
   query repositoryIssues($owner: String!, $name: String!) {
     repository(owner: $owner, name: $name) {
@@ -33365,9 +34450,16 @@ export const GetViewerDocument = gql`
           login
         }
       }
+      projectsV2(first: 50) {
+        totalCount
+        nodes {
+          ...ProjectFields
+        }
+      }
     }
   }
   ${UserFieldsFragmentDoc}
+  ${ProjectFieldsFragmentDoc}
 `;
 
 export type SdkFunctionWrapper = <T>(
@@ -33436,17 +34528,17 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
         "query",
       );
     },
-    searchCreatedIssues(
-      variables: SearchCreatedIssuesQueryVariables,
+    getGitHubDiscussionNumber(
+      variables: GetGitHubDiscussionNumberQueryVariables,
       requestHeaders?: Dom.RequestInit["headers"],
-    ): Promise<SearchCreatedIssuesQuery> {
+    ): Promise<GetGitHubDiscussionNumberQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<SearchCreatedIssuesQuery>(SearchCreatedIssuesDocument, variables, {
+          client.request<GetGitHubDiscussionNumberQuery>(GetGitHubDiscussionNumberDocument, variables, {
             ...requestHeaders,
             ...wrappedRequestHeaders,
           }),
-        "searchCreatedIssues",
+        "getGitHubDiscussionNumber",
         "query",
       );
     },
@@ -33588,6 +34680,34 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
           }),
         "createIssue",
         "mutation",
+      );
+    },
+    changeProjectStatus(
+      variables: ChangeProjectStatusMutationVariables,
+      requestHeaders?: Dom.RequestInit["headers"],
+    ): Promise<ChangeProjectStatusMutation> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ChangeProjectStatusMutation>(ChangeProjectStatusDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "changeProjectStatus",
+        "mutation",
+      );
+    },
+    projectDetails(
+      variables: ProjectDetailsQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"],
+    ): Promise<ProjectDetailsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProjectDetailsQuery>(ProjectDetailsDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "projectDetails",
+        "query",
       );
     },
     searchPullRequests(
@@ -33868,6 +34988,20 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             ...wrappedRequestHeaders,
           }),
         "dataForRepository",
+        "query",
+      );
+    },
+    searchRepositoryBranches(
+      variables: SearchRepositoryBranchesQueryVariables,
+      requestHeaders?: Dom.RequestInit["headers"],
+    ): Promise<SearchRepositoryBranchesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SearchRepositoryBranchesQuery>(SearchRepositoryBranchesDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        "searchRepositoryBranches",
         "query",
       );
     },

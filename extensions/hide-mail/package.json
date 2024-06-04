@@ -16,10 +16,17 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create Random Email Alias",
+      "title": "Quick Create Random Email Alias",
       "subtitle": "HideMail",
       "description": "Generate and copy a random private email alias to clipboard",
       "mode": "no-view"
+    },
+    {
+      "name": "create",
+      "title": "Create Random Email Alias",
+      "subtitle": "HideMail",
+      "description": "Create a random private email alias with note and copy to clipboard",
+      "mode": "view"
     },
     {
       "name": "list-emails",
@@ -42,7 +49,7 @@
     "eslint": "^8.48.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.28.0",
+    "react-devtools": "^4.27.2",
     "typescript": "^5.2.2"
   },
   "scripts": {

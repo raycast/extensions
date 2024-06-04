@@ -5,6 +5,9 @@
   "description": "Get favicon from website URL",
   "icon": "icon.png",
   "author": "vimtor",
+    "contributors": [
+      "charlie_deets"
+    ],
   "license": "MIT",
   "commands": [
     {
@@ -16,7 +19,7 @@
       "arguments": [
         {
           "required": true,
-          "placeholder": "https://raycast.com",
+          "placeholder": "raycast.com",
           "name": "url",
           "type": "text"
         }
@@ -31,7 +34,7 @@
       "arguments": [
         {
           "required": true,
-          "placeholder": "https://raycast.com",
+          "placeholder": "raycast.com",
           "name": "url",
           "type": "text"
         }

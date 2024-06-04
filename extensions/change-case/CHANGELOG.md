@@ -1,5 +1,23 @@
 # Change Case Changelog
 
+## [Add `preserve casing` preference] - 2024-06-01
+- Removed the redundant cases: param (same as kebab), macro (same as constant), sponge (same as random), train (same as header)
+- Added a preference to add exceptions to the list of words that should not be modified when transforming the text to title case or sentence case
+
+## [Add preference to lowercase text before changing case] - 2024-05-22
+- Added a preference to lowercase all inputs before changing case
+
+## [Clarify Behavior in README]- 2024-05-19
+- Added README.md with more information about the behavior of the extension
+
+## [Fixes] - 2024-5-02
+- Fixed using action style as destructive
+- Fixed `Pascal Snake Case` being incorrectly named as `Pascal Case` in preferences
+
+## [Fixed overlapping keyboard shortcuts and a wrong setting] - 2024-04-26
+- Fixed the issue where some key combinations were mapped to multiple commands at the same time.
+- Fixed the inverted `popToRoot` setting.
+
 ## [Fix to View of Detail] - 2024-03-20
 - Fixed so that line breaks are displayed as new lines
 

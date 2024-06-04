@@ -5,6 +5,9 @@
   "description": "Mange your SimpleLogin Account, view and create aliases",
   "icon": "simplelogin_logo.png",
   "author": "adrian-schnell",
+  "contributors": [
+    "marcelruhf"
+  ],
   "categories": [
     "Productivity"
   ],

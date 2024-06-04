@@ -73,6 +73,27 @@
       "subtitle": "Drafts",
       "description": "easily create Raycast Quicklinks for Drafts",
       "mode": "view"
+    },
+    {
+      "name": "quicklink-open-draft-creator",
+      "title": "Create Open Draft Quicklink",
+      "subtitle": "Drafts",
+      "description": "create a Raycast Quicklinks to open a Draft",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Open Draft Title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "uuid",
+          "placeholder": "UUID",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {

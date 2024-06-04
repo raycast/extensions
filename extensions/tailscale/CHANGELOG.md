@@ -1,5 +1,17 @@
 # Tailscale Changelog
 
+## [Improvement] - 2024-05-23
+
+- Remove trailing `.` from the end of MagicDNS addresses ([#12451](https://github.com/raycast/extensions/issues/12451))
+
+## [Fixes] - 2024-04-09
+
+- Increase default max buffers for `execSync` ([#10698](https://github.com/raycast/extensions/issues/10698))
+
+## [Fixes] - 2024-04-08
+
+- Fix buffer issue on large tailnets ([#10698](https://github.com/raycast/extensions/issues/10698))
+
 ## [Add new features] 2024-03-14
 
 - Add connect (tailscale up)

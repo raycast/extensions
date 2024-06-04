@@ -1,4 +1,4 @@
-import type { Blob, Project, Remote } from "./types";
+import type { Blob, Project } from "./types";
 
 import { Action, ActionPanel, showToast, Detail, getPreferenceValues, Toast, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
@@ -14,9 +14,8 @@ export function Project(props: { project: Project }) {
   const httpdUrl = new URL(preferences.httpdAddress);
   const node = httpdUrl.port ? `${httpdUrl.hostname}:${httpdUrl.port}` : httpdUrl.hostname;
   const readme = useFetch<Blob>(`${preferences.httpdAddress}/api/v1/projects/${id}/readme/${head}`);
-  const remotes = useFetch<Remote[]>(`${preferences.httpdAddress}/api/v1/projects/${id}/remotes`);
 
-  if (readme.error || remotes.error) {
+  if (readme.error) {
     showToast({
       style: Toast.Style.Failure,
       title: "Not able to update info",
@@ -27,7 +26,7 @@ export function Project(props: { project: Project }) {
   return (
     <Detail
       navigationTitle="Show a project"
-      isLoading={readme.isLoading || remotes.isLoading}
+      isLoading={readme.isLoading}
       markdown={readme.data?.content || ""}
       actions={
         <ActionPanel title={name}>
@@ -38,12 +37,11 @@ export function Project(props: { project: Project }) {
             title="Update Information"
             onAction={() => {
               readme.revalidate();
-              remotes.revalidate();
             }}
           />
         </ActionPanel>
       }
-      metadata={<ProjectDetail project={props.project} remotes={remotes.data || []} />}
+      metadata={<ProjectDetail project={props.project} />}
     />
   );
 }

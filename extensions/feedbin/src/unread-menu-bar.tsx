@@ -58,12 +58,16 @@ export default function MenuCommand(): JSX.Element {
           title="Manage Subscriptions"
           icon={Icon.Network}
           shortcut={{ modifiers: ["cmd"], key: "s" }}
-          onAction={() =>
-            launchCommand({
-              name: "subscriptions",
-              type: LaunchType.UserInitiated,
-            })
-          }
+          onAction={async () => {
+            try {
+              launchCommand({
+                name: "subscriptions",
+                type: LaunchType.UserInitiated,
+              });
+            } catch (e) {
+              () => {};
+            }
+          }}
         />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
@@ -109,11 +113,15 @@ export default function MenuCommand(): JSX.Element {
           title="View More"
           icon={Icon.List}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
-          onAction={() => {
-            launchCommand({
-              name: "view-feeds",
-              type: LaunchType.UserInitiated,
-            });
+          onAction={async () => {
+            try {
+              launchCommand({
+                name: "all-feeds",
+                type: LaunchType.UserInitiated,
+              });
+            } catch (e) {
+              () => {};
+            }
           }}
         />
         <MenuBarExtra.Item

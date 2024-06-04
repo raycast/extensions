@@ -1,10 +1,10 @@
 import fetch, { AbortError } from "node-fetch";
 import { buildBingWallpapersURL } from "../utils/bing-wallpaper-utils";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { BingImage, BingResponseData, DownloadedBingImage } from "../types/types";
 import { autoDownloadPictures, getDownloadedBingWallpapers } from "../utils/common-utils";
-import { Preferences } from "../types/preferences";
+import { autoDownload, downloadSize } from "../types/preferences";
 
 export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
   const [bingWallpaperHD, setBingWallpaperHD] = useState<BingImage[]>([]);
@@ -56,7 +56,6 @@ export const getBingWallpapers = (showDownloadedWallpapers: boolean) => {
 };
 
 export const autoDownloadWallpapers = (bingWallpapers: BingImage[]) => {
-  const { autoDownload, downloadSize } = getPreferenceValues<Preferences>();
   const fetchData = useCallback(async () => {
     try {
       //auto download wallpaper

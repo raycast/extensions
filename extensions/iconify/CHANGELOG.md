@@ -1,5 +1,9 @@
 # Changelog
 
+## [Improvements] - 2024-03-27
+
+- Add "Paste Name" to actions and primaryActions
+
 ## [Fix] - 2023-03-30
 
 - Fix searching when viewing large icon sets that are paginated.

@@ -63,8 +63,8 @@ export default function PokemonMoves(props: {
           method === "Machine"
             ? methodMoves.sort(
                 (a, b) =>
-                  a.pokemon_v2_move.pokemon_v2_machines[0].machine_number -
-                  b.pokemon_v2_move.pokemon_v2_machines[0].machine_number,
+                  a.pokemon_v2_move.pokemon_v2_machines[0]?.machine_number -
+                  b.pokemon_v2_move.pokemon_v2_machines[0]?.machine_number,
               )
             : methodMoves;
 
@@ -77,9 +77,11 @@ export default function PokemonMoves(props: {
                   text = move.level.toString();
                   break;
                 case 4:
-                  text = `TM${move.pokemon_v2_move.pokemon_v2_machines[0].machine_number
-                    .toString()
-                    .padStart(2, "0")}`;
+                  text = move.pokemon_v2_move.pokemon_v2_machines[0]
+                    ? `TM${move.pokemon_v2_move.pokemon_v2_machines[0]?.machine_number
+                        .toString()
+                        .padStart(2, "0")}`
+                    : "";
                 // eslint-disable-next-line no-fallthrough
                 default:
                   break;
@@ -110,8 +112,8 @@ export default function PokemonMoves(props: {
                         },
                         {
                           p: move.pokemon_v2_move.pokemon_v2_moveeffect
-                            .pokemon_v2_moveeffecteffecttexts[0]
-                            ? move.pokemon_v2_move.pokemon_v2_moveeffect.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(
+                            ?.pokemon_v2_moveeffecteffecttexts[0]
+                            ? move.pokemon_v2_move.pokemon_v2_moveeffect?.pokemon_v2_moveeffecteffecttexts[0].short_effect.replace(
                                 "$effect_chance",
                                 move.pokemon_v2_move.move_effect_chance?.toString() ??
                                   "",

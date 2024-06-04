@@ -15,6 +15,12 @@
       "title": "Collections",
       "description": "View list of document collections.",
       "mode": "view"
+    },
+    {
+      "name": "open",
+      "title": "View Outline",
+      "description": "View outline for a single PDF file.",
+      "mode": "view"
     }
   ],
   "dependencies": {
@@ -33,7 +39,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && cp .build/apple/Products/Release/SearchDocument assets && cp .build/apple/Products/Release/DrawImage assets",
+    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && cp .build/apple/Products/Release/GetOutline assets && cp .build/apple/Products/Release/SearchDocument assets && cp .build/apple/Products/Release/DrawImage assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

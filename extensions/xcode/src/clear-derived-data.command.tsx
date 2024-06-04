@@ -1,7 +1,6 @@
 import { operationWithUserFeedback } from "./shared/operation-with-user-feedback";
 import { XcodeCleanupService } from "./services/xcode-cleanup.service";
 import { Alert, confirmAlert, Icon } from "@raycast/api";
-import ActionStyle = Alert.ActionStyle;
 
 export default async () => {
   const alertOptions: Alert.Options = {
@@ -10,7 +9,7 @@ export default async () => {
     message: "Are you sure you want to clear the derived data directory?",
     primaryAction: {
       title: "Clear",
-      style: ActionStyle.Destructive,
+      style: Alert.ActionStyle.Destructive,
     },
   };
   if (!(await confirmAlert(alertOptions))) {

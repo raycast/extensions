@@ -31,21 +31,30 @@ async function answerQuestion({
     setDustAnswer("**Dust API error**");
   } else {
     setConversationId(conversation.sId);
-    await dustApi.streamAnswer({
-      conversation: conversation,
-      message: message,
-      setDustAnswer: setDustAnswer,
-      onDone: async (answer) => {
-        await addDustHistory({
-          conversationId: conversation.sId,
-          question: question,
-          answer: answer,
-          date: new Date(),
-          agent: agent.name,
-        });
-      },
-      setDustDocuments,
-    });
+    try {
+      await dustApi.streamAnswer({
+        conversation: conversation,
+        message: message,
+        setDustAnswer: setDustAnswer,
+        onDone: async (answer) => {
+          await addDustHistory({
+            conversationId: conversation.sId,
+            question: question,
+            answer: answer,
+            date: new Date(),
+            agent: agent.name,
+          });
+        },
+        setDustDocuments,
+      });
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Dust API error",
+        message: String(error),
+      });
+      setDustAnswer("**Dust API error**");
+    }
   }
 }
 

@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-04-23
+
+Add recap page to displays information about your prev pomodoro sessions like (total time, total sessions number, back to back sessions,..)
+
 ## [Enhancement] - 2024-02-27
 
 Added support for slack to change status during interval, the two new commands are disabled by default
@@ -42,6 +46,6 @@ Added preference textbox for a markdown image link to render after interval comp
 
 ## [Fix] - 2023-01-03
 
-Fixed so menubar icons works with both light and dark background 
+Fixed so menubar icons works with both light and dark background
 
 ## [Initial Version] - 2022-12-19

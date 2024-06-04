@@ -31,8 +31,8 @@ export type Data = {
   lists: List[];
 };
 
-export function useData(listId?: string) {
+export function useData() {
   return useCachedPromise(() => {
-    return getData(listId) as Promise<Data>;
+    return getData() as Promise<Data>;
   });
 }

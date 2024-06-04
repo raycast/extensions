@@ -1,39 +1,36 @@
-import { Icon, List, showToast, Toast, PreferenceValues, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
-import fetch from "node-fetch";
-import { SingleSeries } from "./calendarItem";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
+import { showFailureToast, useFetch } from "@raycast/utils";
+import { addDays } from "date-fns";
+
+import type { SingleSeries } from "./types/calendarItem";
 
 const prefrences = getPreferenceValues();
 
 export default function Command() {
-  const [series, setSeries] = useState<SingleSeries[]>([]);
-  const [loading, setLoading] = useState(false);
+  const currentDate = new Date().toDateString();
+  const nextWeek = addDays(new Date(), parseInt(prefrences.futureDays)).toDateString();
 
-  useEffect(() => {
-    setLoading(true);
-    const currentDate = new Date().toDateString();
+  const url = `${prefrences.http}://${prefrences.host}:${prefrences.port}${prefrences.base}/api/v3/calendar?apikey=${prefrences.apiKey}&start=${currentDate}&end=${nextWeek}&includeSeries=true&includeEpisodeFile=true&includeEpisodeImages=true`;
 
-    const nextWeek = new Date(
-      new Date().getTime() + Math.floor(prefrences.futureDays) * 24 * 60 * 60 * 1000
-    ).toDateString();
-    const url = `${prefrences.http}://${prefrences.host}:${prefrences.port}${prefrences.base}/api/calendar?apikey=${prefrences.apiKey}&start=${currentDate}&end=${nextWeek}`;
-    console.log(url);
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        setSeries(data as SingleSeries[]);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
-        showToast({ title: "Error", message: err.message, style: Toast.Style.Failure });
+  const { data, isLoading } = useFetch<SingleSeries[]>(url, {
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch calendar: ${response.status} - ${response.statusText}`);
+      }
+      const json = await response.json();
+      return json;
+    },
+    onError: (error) => {
+      showFailureToast(error, {
+        title: "Failed to fetch calendar",
       });
-  }, []);
+    },
+  });
 
   return (
-    <List searchBarPlaceholder="Sonarr Calendar" isLoading={loading}>
-      <List.Section title="Results" subtitle={series.length + ""}>
-        {series.map((singleSeries) => (
+    <List searchBarPlaceholder="Sonarr Calendar" isLoading={isLoading}>
+      <List.Section title="Results" subtitle={(data || []).length + ""}>
+        {(data || []).map((singleSeries) => (
           <SearchListItem
             key={`${singleSeries.title}+${singleSeries.airDate || "1"}+${singleSeries.episodeNumber || "1"}`}
             singleSeries={singleSeries}
@@ -47,7 +44,6 @@ export default function Command() {
 function SearchListItem({ singleSeries }: { singleSeries: SingleSeries }) {
   return (
     <List.Item
-      icon={singleSeries.series.images[1].url}
       title={singleSeries.title}
       subtitle={`S${singleSeries.seasonNumber.toString()}E${singleSeries.episodeNumber.toString()}`}
       accessories={[

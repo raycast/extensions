@@ -12,7 +12,7 @@ import {
 import { useCachedPromise } from '@raycast/utils';
 
 import { Todo, getListTodos, getLists, setTodoProperty, updateTodo } from './api';
-import { listItems } from './helpers';
+import { listItems, menuBarStatusIcons } from './helpers';
 
 const TASK_NAME_LENGTH_LIMIT = 30;
 
@@ -61,7 +61,7 @@ export default function ShowTodayInMenuBar() {
           <MenuBarExtra.Section>
             <MenuBarExtra.Item title="Today" />
             {todos.map((todo) => (
-              <MenuBarExtra.Submenu title={todo.name} key={todo.id}>
+              <MenuBarExtra.Submenu title={todo.name} key={todo.id} icon={menuBarStatusIcons[todo.status]}>
                 <MenuBarExtra.Item title="Complete" icon={Icon.CheckCircle} onAction={() => completeTodo(todo)} />
 
                 <MenuBarExtra.Item

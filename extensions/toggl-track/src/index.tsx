@@ -1,13 +1,14 @@
-import { useMemo } from "react";
+import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import RunningTimeEntry from "./components/RunningTimeEntry";
-import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
-import { createTimeEntry, TimeEntry } from "./api";
-import TimeEntryForm from "./components/CreateTimeEntryForm";
-import { ExtensionContextProvider } from "./context/ExtensionContext";
-import { useTimeEntries, useRunningTimeEntry } from "./hooks";
-import { formatSeconds } from "./helpers/formatSeconds";
+import { useMemo } from "react";
+
+import { createTimeEntry, TimeEntry } from "@/api";
+import TimeEntryForm from "@/components/CreateTimeEntryForm";
+import RunningTimeEntry from "@/components/RunningTimeEntry";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { formatSeconds } from "@/helpers/formatSeconds";
+import { useTimeEntries, useRunningTimeEntry } from "@/hooks";
 
 dayjs.extend(duration);
 
@@ -17,13 +18,14 @@ function ListView() {
 
   const isLoading = isLoadingTimeEntries || isLoadingRunningTimeEntry;
 
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce(
-    (acc, timeEntry) =>
+  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce<typeof timeEntries>((acc, timeEntry) => {
+    if (
+      timeEntry.id === runningTimeEntry?.id ||
       acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
-        ? acc
-        : [...acc, timeEntry],
-    [] as typeof timeEntries,
-  );
+    )
+      return acc;
+    return [...acc, timeEntry];
+  }, []);
 
   const totalDurationToday = useMemo(() => {
     let seconds = timeEntries
@@ -99,6 +101,19 @@ function ListView() {
                     title="Resume Time Entry"
                     onSubmit={() => resumeTimeEntry(timeEntry)}
                     icon={{ source: Icon.Clock }}
+                  />
+                  <Action.Push
+                    title="Create Similar Time Entry"
+                    icon={{ source: Icon.Plus }}
+                    target={
+                      <ExtensionContextProvider>
+                        <TimeEntryForm
+                          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                          revalidateTimeEntries={revalidateTimeEntries}
+                          initialValues={timeEntry}
+                        />
+                      </ExtensionContextProvider>
+                    }
                   />
                 </ActionPanel>
               }

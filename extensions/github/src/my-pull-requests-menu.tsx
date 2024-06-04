@@ -25,18 +25,18 @@ function getMaxPullRequestsPreference(): number {
   return getBoundedPreferenceNumber({ name: "maxitems" });
 }
 
-function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): { source: Icon | string } {
+function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string {
   const pullRequestStatus = pr.commits.nodes ? pr.commits.nodes[0]?.commit.statusCheckRollup?.state : null;
   switch (pullRequestStatus) {
     case "SUCCESS":
-      return { source: Icon.Check };
+      return Icon.Check;
     case "ERROR":
     case "FAILURE":
-      return { source: Icon.Xmark };
+      return Icon.Xmark;
     case "PENDING":
-      return { source: Icon.Clock };
+      return Icon.Clock;
     default:
-      return { source: "pull-request.svg" };
+      return "pull-request-open.svg";
   }
 }
 
@@ -91,9 +91,8 @@ function MyPullRequestsMenu() {
   return (
     <MenuBarRoot
       title={displayTitle()}
-      icon={{ source: "pull-request.svg", tintColor: Color.PrimaryText }}
+      icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
-      tooltip="GitHub My Open Pull Requests"
     >
       {filteredSections().map((section) => {
         return (
@@ -114,7 +113,7 @@ function MyPullRequestsMenu() {
                 <MenuBarItem
                   key={i.id}
                   title={`#${i.number} ${i.title}`}
-                  icon={getPullRequestStatusIcon(i)}
+                  icon={{ source: getPullRequestStatusIcon(i), tintColor: Color.PrimaryText }}
                   tooltip={i.repository.nameWithOwner}
                   onAction={() => open(i.permalink)}
                 />
@@ -127,7 +126,7 @@ function MyPullRequestsMenu() {
       <MenuBarSection>
         <MenuBarItem
           title="Open My Pull Requests"
-          icon={Icon.Terminal}
+          icon={Icon.AppWindowList}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
           onAction={() => launchMyPullRequestsCommand()}
         />

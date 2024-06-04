@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Update Icon] - 2024-05-26
+
+- Update the extension's icon
+
 ## [Optimize Copy URL] - 2024-02-27
 
 - Add multiple setting items

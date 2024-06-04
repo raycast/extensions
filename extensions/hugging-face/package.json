@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hugging-face",
+  "title": "Hugging Face",
+  "description": "Search and explore the Hugging Face platform",
+  "subtitle": "Hugging Face",
+  "icon": "logo.png",
+  "author": "crisboarna",
+  "categories": [
+    "Developer Tools",
+    "Documentation",
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchModels",
+      "title": "Search Models",
+      "subtitle": "Hugging Face",
+      "description": "Search for models on the Hugging Face platform",
+      "mode": "view"
+    },
+    {
+      "name": "searchDatasets",
+      "title": "Search Datasets",
+      "subtitle": "Hugging Face",
+      "description": "Search for datasets on the Hugging Face platform",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "modelsResultsCount",
+      "type": "textfield",
+      "title": "Models to retrieve",
+      "description": "How many items to retrieve for a search",
+      "required": false,
+      "default": "30",
+      "value": "30"
+    },
+    {
+      "name": "historyCount",
+      "type": "textfield",
+      "title": "History Count",
+      "description": "How many items to store in your history",
+      "required": false,
+      "default": "30",
+      "value": "30"
+    },
+    {
+      "name": "showLinkToSearchResultsInListView",
+      "type": "checkbox",
+      "label": "Show link in list view",
+      "title": "Show link to huggingface.co results in list view",
+      "description": "Show link to huggingface.co search results in list view",
+      "required": false,
+      "value": true,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0",
+    "dedupe": "^4.0.3",
+    "tiny-relative-date": "^1.3.0",
+    "use-debounce": "^10.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

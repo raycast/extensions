@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "node-release-notes",
+  "title": "Node Release Notes",
+  "description": "Quickly browse and access detailed information of Node.js versions. Find release notes, publication dates, and documentation links for any Node.js version. Ideal for developers and sysadmins to stay informed about Node.js updates and ensure compatibility with their projects.",
+  "icon": "app-icon.png",
+  "version": "1.0.0",
+  "author": "fil",
+  "license": "MIT",
+  "keywords": [
+    "explorer",
+    "javascript",
+    "js",
+    "list",
+    "lts",
+    "node",
+    "release",
+    "version"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Node Versions",
+      "description": "Quickly browse and access detailed information of Node.js versions",
+      "mode": "view",
+      "keywords": [
+        "browse",
+        "current",
+        "detail",
+        "javascript",
+        "js",
+        "latest",
+        "lts",
+        "release",
+        "version"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.68.0",
+    "@raycast/utils": "1.12.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.11.19",
+    "@types/react": "18.2.57",
+    "eslint": "8.56.0",
+    "prettier": "3.2.5",
+    "typescript": "5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublish": "npm run lint && npm run build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

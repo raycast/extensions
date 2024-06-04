@@ -1,17 +1,21 @@
 import { getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
-import { Color, DeprecatedColor, HistoryItem } from "./types";
+import { HistoryColor, HistoryItem } from "./types";
 import ColorJS from "colorjs.io";
 
 const preferences: Preferences = getPreferenceValues();
 
 export function getFormattedColor(
-  _color: Color | DeprecatedColor,
+  _color: HistoryColor,
   format?: "hex" | "hex-lower-case" | "hex-no-prefix" | "rgba" | "rgba-percentage" | "hsla" | "hsva",
 ) {
-  const color =
-    "colorSpace" in _color
-      ? new ColorJS(_color.colorSpace, [_color.red, _color.green, _color.blue], _color.alpha)
-      : new ColorJS("srgb", [_color.red / 255, _color.green / 255, _color.blue / 255], _color.alpha);
+  let color;
+  if (typeof _color === "string") {
+    color = new ColorJS(_color);
+  } else if ("colorSpace" in _color) {
+    color = new ColorJS(_color.colorSpace, [_color.red, _color.green, _color.blue], _color.alpha);
+  } else {
+    color = new ColorJS("srgb", [_color.red / 255, _color.green / 255, _color.blue / 255], _color.alpha);
+  }
 
   switch (format || preferences.colorFormat) {
     case "hex": {
@@ -38,15 +42,6 @@ export function getFormattedColor(
   }
 }
 
-export function getHex(_color: Color | DeprecatedColor) {
-  const color =
-    "colorSpace" in _color
-      ? new ColorJS(_color.colorSpace, [_color.red, _color.green, _color.blue], _color.alpha)
-      : new ColorJS("srgb", [_color.red / 255, _color.green / 255, _color.blue / 255], _color.alpha);
-
-  return color.toString({ format: "hex" }).toUpperCase();
-}
-
 export function getShortcut(index: number) {
   const key = index + 1;
 
@@ -58,8 +53,8 @@ export function getShortcut(index: number) {
   return shortcut;
 }
 
-export function getIcon(color: string | Color | DeprecatedColor) {
-  const hex = typeof color === "string" ? color : getHex(color);
+export function getIcon(color: HistoryColor) {
+  const hex = typeof color === "string" ? color : getFormattedColor(color, "hex");
   if (!hex) {
     return undefined;
   }
