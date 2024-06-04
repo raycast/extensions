@@ -7,6 +7,7 @@ import {
   Icon,
   List,
   Toast,
+  confirmAlert,
   openCommandPreferences,
   showToast,
   useNavigation,
@@ -66,6 +67,7 @@ export default function viewBookings() {
             <ActionPanel>
               <Action
                 title={!isShowingDetail ? "Show Details" : "Hide Details"}
+                icon={!isShowingDetail ? Icon.Eye : Icon.EyeDisabled}
                 onAction={() => setIsShowingDetail(!isShowingDetail)}
               />
               <Action.OpenInBrowser title="Open in Browser" url={`https://cal.com/${user?.username}/${item.uid}`} />
@@ -103,15 +105,29 @@ function CancelBooking({ bookingId, revalidate }: CancelBookingProps) {
 
   const handleCancelBooking = async (values: CancelBookingForm) => {
     try {
-      await cancelBooking(bookingId, values.reason);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Booking Cancelled",
-        message: "Booking has been successfully cancelled",
-      });
+      await confirmAlert({
+        title: "Cancel Booking",
+        message: "Are you sure you want to cancel this booking?",
+        primaryAction: {
+          title: "Yes",
+          onAction: async () => {
+            await cancelBooking(bookingId, values.reason);
 
-      revalidate();
-      pop();
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Booking Cancelled",
+              message: "Booking has been successfully cancelled",
+            });
+
+            revalidate();
+            pop();
+          },
+        },
+        dismissAction: {
+          title: "No",
+          onAction: () => pop(),
+        },
+      });
     } catch (error) {
       showFailureToast(error, { title: "Failed to cancel booking" });
     }
@@ -122,7 +138,7 @@ function CancelBooking({ bookingId, revalidate }: CancelBookingProps) {
       navigationTitle="Cancel Booking"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Cancel Booking" onSubmit={handleCancelBooking} />
+          <Action.SubmitForm title="Cancel Booking" onSubmit={handleCancelBooking} style={Action.Style.Destructive} />
         </ActionPanel>
       }
     >
