@@ -1,8 +1,8 @@
-import { getFavicon, useFetch } from "@raycast/utils";
-import { LaureatesResult } from "./types";
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { Fragment, useState } from "react";
 import { API_BASE_URL, DEAULT_LIMIT } from "./constants";
+import { LaureatesResult } from "./types";
 import generateNobelPrizeLink from "./utils/generateNobelPrizeLink";
 
 export default function Laureates() {
@@ -164,11 +164,7 @@ export default function Laureates() {
             }
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open in Wikiepedia"
-                  icon="wikipedia.png"
-                  url={laureate.wikipedia.english}
-                />
+                <Action.OpenInBrowser title="Open in Wikipedia" icon="wikipedia.png" url={laureate.wikipedia.english} />
                 <Action.OpenInBrowser title="Open in Wikidata" icon="wikidata.png" url={laureate.wikidata.url} />
                 <Action.OpenInBrowser
                   title="View in nobelprize.org"
