@@ -87,6 +87,17 @@ export function DeviceList({ type, deviceId }: DeviceListProps) {
 
   return (
     <List isLoading={isLoading}>
+      {hiddenDevices?.length > 0 && (
+        <List.EmptyView
+          title="No devices to show"
+          description="All devices are hidden. Tap Enter to show hidden devices."
+          actions={
+            <ActionPanel>
+              <ToggleShowHiddenDevicesAction onAction={refetchShowHidden} />
+            </ActionPanel>
+          }
+        />
+      )}
       {data &&
         data.devices
           .filter((d) => !hiddenDevices.includes(d.uid))
