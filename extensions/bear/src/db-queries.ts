@@ -53,7 +53,8 @@ SELECT
   notes.ZMODIFICATIONDATE AS modified_at,
   notes.ZCREATIONDATE AS created_at,
   group_concat(tags.ZTITLE) AS tags,
-  notes.ZENCRYPTED AS encrypted
+  notes.ZENCRYPTED AS encrypted,
+  notes.ZPINNED AS pinned
 FROM
   ZSFNOTE AS notes
 LEFT OUTER JOIN
