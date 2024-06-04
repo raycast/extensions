@@ -1,6 +1,8 @@
 # iLovePDF Changelog
 
-## [Refactoring for better performance and readability] - 2024-06-03
+## [Refactoring for better performance and readability] - {PR_MERGE_DATE}
+
+## [Use magic byte for validation] - 2024-06-04
 
 ## [Allow the Selection of Download Directory] - 2024-05-27
 
