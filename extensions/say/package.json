@@ -28,6 +28,12 @@
       "mode": "view"
     },
     {
+      "name": "selectedTextToSay",
+      "title": "Selected Text to Say",
+      "description": "Say the selected text on any application.",
+      "mode": "no-view"
+    },
+    {
       "name": "textToSay",
       "title": "Text to Say",
       "description": "Input your text or paragraph and say.",

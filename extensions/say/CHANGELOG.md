@@ -1,5 +1,10 @@
 # Say - Spoken Content Changelog
 
+## [Accessibility Enhancement]
+
+- Add support for saying the selected text on any application
+- Add Siri Voice tips for best experience
+
 ## [Features] - 2024-05-17
 
 - Read system settings from the plist
