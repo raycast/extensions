@@ -12,7 +12,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "search-artists",
       "title": "Sonu Stream",
       "subtitle": "sonu.stream",
       "description": "Search sonu.stream",
