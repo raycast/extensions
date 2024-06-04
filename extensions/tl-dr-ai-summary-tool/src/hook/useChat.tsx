@@ -28,7 +28,7 @@ export function useChat(saved: ChatBox): ChatHook {
         {
           role: "user",
           content:
-            "Please read the text content and find the summary. Please help me summarize it in the most detailed way possible, with as much content as possible. The output format is \nTitle:{title}\n\n 总结:{content}\n",
+            "Please read the text content and find the summary. Please help me summarize it in the most detailed way possible, with as much content as possible. The output format is \n标题:{title}\n\n 总结:{content}\n",
         },
         { role: "assistant", content: "我会最详尽的方式，内容请足够详细，以中文总结您的内容。" },
         { role: "user", content: content.content },
