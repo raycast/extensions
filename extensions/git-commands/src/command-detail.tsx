@@ -62,7 +62,7 @@ ${typeDescription(type)}
                 icon={Icon.Star}
                 title="Save Favorite"
                 onAction={handleFavorite}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={Keyboard.Shortcut.Common.Pin}
               />
             )}
           </ActionPanel.Section>
