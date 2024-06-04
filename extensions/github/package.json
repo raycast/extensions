@@ -41,7 +41,18 @@
       "name": "my-pull-requests",
       "title": "My Pull Requests",
       "description": "List pull requests you created, participated in, or were mentioned in.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeTeamReviewRequests",
+          "type": "checkbox",
+          "required": false,
+          "title": "Search Results Parameters",
+          "default": true,
+          "label": "Team Review Requets",
+          "description": "Include PRs where your team's review was requested as well as your own."
+        }
+      ]
     },
     {
       "name": "search-pull-requests",
