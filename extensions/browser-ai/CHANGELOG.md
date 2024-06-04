@@ -1,5 +1,14 @@
 # Browser AI Changelog
 
+## [Update] - 2024-05-30
+
+- Added support for Groq API
+- Added new Command `Ask Website`
+
+## [Update] - 2024-05-28
+
+- OpenRouter Integration. Now you can use the best models from OpenRouter.
+
 ## [Update] - 2024-05-20
 
 - Added Command to get raw browser content as markdown

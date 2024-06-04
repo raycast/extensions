@@ -9,9 +9,11 @@ import { getThumbnailUrl } from "../utils/common-utils";
 export function RaycastWallpaperGrid(props: {
   raycastWallpapers: RaycastWallpaperWithInfo[];
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  selectedItem: string;
+  setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
 }) {
   const preferences = getPreferenceValues<Preferences>();
-  const { raycastWallpapers, setRefresh } = props;
+  const { raycastWallpapers, setRefresh, selectedItem, setSelectedItem } = props;
 
   return (
     <Grid
@@ -19,6 +21,12 @@ export function RaycastWallpaperGrid(props: {
       columns={parseInt(preferences.columns)}
       aspectRatio={"16/9"}
       fit={Grid.Fit.Fill}
+      selectedItemId={selectedItem}
+      onSelectionChange={(selected) => {
+        if (selected) {
+          setSelectedItem(selectedItem);
+        }
+      }}
       searchBarPlaceholder={"Search wallpapers..."}
     >
       <RaycastWallpaperEmptyView layout={preferences.layout} />
@@ -30,7 +38,12 @@ export function RaycastWallpaperGrid(props: {
             content={getThumbnailUrl(value.url)}
             title={value.title}
             actions={
-              <ActionOnRaycastWallpaper index={index} raycastWallpapers={raycastWallpapers} setRefresh={setRefresh} />
+              <ActionOnRaycastWallpaper
+                index={index}
+                raycastWallpapers={raycastWallpapers}
+                setRefresh={setRefresh}
+                setSelectedItem={setSelectedItem}
+              />
             }
             accessory={value.exclude ? { icon: Icon.XMarkTopRightSquare, tooltip: "Excluded From Auto Switch" } : {}}
           />

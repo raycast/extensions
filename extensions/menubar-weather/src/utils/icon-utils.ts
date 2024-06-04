@@ -141,7 +141,7 @@ const raycastMenuIcons = new Map([
   ["Precipitation", Icon.Raindrop],
   ["Source", Icon.BarChart],
   ["Last Updated", Icon.Download],
-  ["Preferences", Icon.Gear],
+  ["Settings", Icon.Gear],
 ]);
 
 // sf symbols style icons

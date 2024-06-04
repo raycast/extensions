@@ -76,7 +76,8 @@
   "dependencies": {
     "@ilovepdf/ilovepdf-nodejs": "^0.2.5",
     "@raycast/api": "^1.72.1",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/utils": "^1.15.0",
+    "magic-bytes.js": "^1.10.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
