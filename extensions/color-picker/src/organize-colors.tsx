@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useHistory } from "./history";
-import { getFormattedColor } from "./utils";
+import { getFormattedColor, getPreviewColor } from "./utils";
 import { HistoryItem } from "./types";
 import { EditTitle } from "./components/EditTitle";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
@@ -52,7 +52,8 @@ export default function Command() {
       />
       {history?.map((historyItem) => {
         const formattedColor = getFormattedColor(historyItem.color);
-        const color = { light: formattedColor, dark: formattedColor, adjustContrast: false };
+        const previewColor = getPreviewColor(historyItem.color);
+        const color = { light: previewColor, dark: previewColor, adjustContrast: false };
 
         return (
           <Grid.Item

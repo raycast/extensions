@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "visual-studio-code",
   "title": "Visual Studio Code",
-  "description": "Control Visual Studio Code directly from Raycast - Search and open recent projects, handle extensions and commands.",
+  "description": "Control Visual Studio Code, Cursor & Codium directly from Raycast - Search and open recent projects, handle extensions and commands.",
   "icon": "icon.png",
   "author": "thomas",
   "contributors": [
@@ -19,10 +19,13 @@
     "hakob_nersesian",
     "erics118",
     "tm.wrnr",
-    "tleo19"
+    "tleo19",
+    "lin"
   ],
   "keywords": [
-    "vscode"
+    "vscode",
+    "cursor",
+    "codium"
   ],
   "license": "MIT",
   "commands": [
@@ -161,6 +164,7 @@
     "dev": "ray develop",
     "build": "ray build -e dist",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
