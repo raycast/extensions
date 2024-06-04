@@ -392,10 +392,10 @@
       "disabledByDefault": true
     },
     {
-      "name": "aiPlaylist",
-      "title": "AI Playlist",
+      "name": "generatePlaylist",
+      "title": "Generate Playlist",
       "subtitle": "Spotify",
-      "description": "Generate a Spotify playlist using AI.",
+      "description": "Generate a Spotify playlist using Raycast AI.",
       "mode": "view",
       "arguments": [
         {

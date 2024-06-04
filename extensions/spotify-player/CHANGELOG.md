@@ -1,8 +1,8 @@
 # Spotify Player Changelog
 
-## [AI Playlist] - 2024-06-03
+## [Generate Playlist] - 2024-06-04
 
-- Added a new feature where the AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
+- Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
 
 ## [New Album Actions] - 2024-05-30
 

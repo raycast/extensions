@@ -15,7 +15,7 @@ type Playlist = {
   tracks: { title: string; artist: string }[];
 };
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.AiPlaylist }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.GeneratePlaylist }>) {
   const { data: playlist, isLoading } = usePromise(async () => {
     const data = await AI.ask(
       `Generate a playlist of 20 to 50 songs based on this description: "${props.arguments.description}". Ensure the songs transition smoothly between each other. Return me only a parsable and minified JSON object with the following structure:
