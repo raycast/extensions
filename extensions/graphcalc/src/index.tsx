@@ -18,8 +18,9 @@ export default function Command(
   props: LaunchProps<{ arguments: CommandArguments }>,
 ) {
   const { operation } = props.arguments;
-  const [expression, setExpression] = useState<string>(operation || ""); // Initialize with operation if provided
-  const [graphMode, setGraphMode] = useState<boolean>(false);
+  const [expression, setExpression] = useState<string>("");
+  const [graphMode, setGraphMode] = useState<boolean>(!!operation); // Start in graphMode if operation is provided
+  const [, setLoading] = useState<boolean>(!!operation);
   const {
     value: history,
     setValue: setHistory,
@@ -39,9 +40,19 @@ export default function Command(
     setHistory([expression, ...renderHistory.slice(0, 100)]);
   };
 
-  const submit = (expression: string) => {
+  const submit = async (expression: string) => {
+    setLoading(true);
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Loading",
+      message: "Please wait while the graph is being prepared...",
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     updateHistory(expression);
     setGraphMode(true);
+    setLoading(false);
   };
 
   const handleSubmit = () => {
@@ -77,13 +88,15 @@ export default function Command(
   useEffect(() => {
     if (!isHistoryLoading && !historyInitialized) {
       setHistoryInitialized(true);
-      if (operation) {
+      setLoading(!!operation);
+      if (operation && !expression) {
+        setExpression(operation);
         submit(operation);
       }
     }
-  }, [isHistoryLoading, historyInitialized, operation]);
+  }, [isHistoryLoading, historyInitialized, operation, expression]);
 
-  if (isHistoryLoading || !historyInitialized) {
+  if (!historyInitialized) {
     return (
       <List
         isLoading={true}
@@ -98,9 +111,14 @@ export default function Command(
 
   const filteredHistory = isEmpty
     ? renderHistorySorted.filter((expr) => {
-        return expr !== expression && expr.includes(expression);
+        return (
+          expr.trim() !== "" && expr !== expression && expr.includes(expression)
+        );
       })
-    : renderHistory;
+    : [...renderHistory, expression].filter(
+        (value, index, self) =>
+          value.trim() !== "" && self.indexOf(value) === index,
+      );
 
   return graphMode ? (
     <Graph expression={expression} />

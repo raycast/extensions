@@ -12,6 +12,11 @@ import {
 import ReactDOMServer from "react-dom/server";
 import "react-vis/dist/style.css";
 
+interface GraphProps {
+  expression: string;
+  onGraphLoaded?: () => void; // New prop for handling graph loaded callback
+}
+
 function parseExpression(expression: string, xValues: number[]) {
   return xValues.map((x) => {
     try {
@@ -61,9 +66,10 @@ function renderGraphToSVG(
   }
 }
 
-export default function Graph({ expression }: { expression: string }) {
+const Graph: React.FC<GraphProps> = ({ expression, onGraphLoaded }) => {
   const [chartData, setChartData] = useState<{ x: number; y: number }[]>([]);
   const [result, setResult] = useState<string | null>(null);
+  const [svgRendered, setSvgRendered] = useState<boolean>(false);
   const toastRef = useRef<Toast | null>(null);
 
   useEffect(() => {
@@ -129,17 +135,29 @@ export default function Graph({ expression }: { expression: string }) {
     };
   }, [expression]);
 
+  useEffect(() => {
+    if (chartData.length > 0) {
+      setSvgRendered(true);
+      if (onGraphLoaded) {
+        // Call onGraphLoaded callback when graph is loaded
+        onGraphLoaded();
+      }
+    }
+  }, [chartData, onGraphLoaded]);
+
   return (
     <Detail
       markdown={
         result !== null
           ? `## Result\n\n${expression} = ${result}`
-          : chartData.length > 0
+          : svgRendered
             ? `## Graph of ${expression}\n\n<img src="data:image/svg+xml;utf8,${encodeURIComponent(
                 renderGraphToSVG(expression, chartData),
               )}" alt="Graph" />`
-            : "Generating chart..."
+            : ""
       }
     />
   );
-}
+};
+
+export default Graph;
