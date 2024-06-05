@@ -55,10 +55,10 @@ export default function viewBookings() {
               item.status === "ACCEPTED"
                 ? Color.Green
                 : item.status === "PENDING"
-                  ? Color.Yellow
-                  : item.status === "CANCELLED"
-                    ? Color.Red
-                    : Color.Purple,
+                ? Color.Yellow
+                : item.status === "CANCELLED"
+                ? Color.Red
+                : Color.Purple,
           }}
           title={item.title}
           subtitle={!isShowingDetail ? formatDateTime(item.startTime) + " - " + formatTime(item.endTime) : undefined}
