@@ -529,6 +529,7 @@
 /extensions/grafana                                                 @Lp-Francois
 /extensions/grafbase                                                @mlafeldt @notrab
 /extensions/grammari-x                                              @hakob8956
+/extensions/graphcalc                                               @cluzier @luarmr
 /extensions/graphcdn                                                @mathieudutour
 /extensions/greip                                                   @gre-dev @pernielsentikaer
 /extensions/groq                                                    @maximilianzuern
