@@ -48,8 +48,6 @@ export default function Command(
       message: "Please wait while the graph is being prepared...",
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
     updateHistory(expression);
     setGraphMode(true);
     setLoading(false);
