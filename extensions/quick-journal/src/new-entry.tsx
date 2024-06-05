@@ -1,11 +1,7 @@
-import { Form, ActionPanel, Action, showToast, ToastStyle, popToRoot, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, popToRoot, getPreferenceValues, Toast } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { format } from "date-fns";
-
-interface Preferences {
-  journalFolderPath: string;
-}
 
 interface FormValues {
   entryTitle: string;
@@ -22,10 +18,10 @@ export default function Command() {
       const filePath = path.join(journalPath, `${values.entryTitle}.md`);
       await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
       await fs.promises.writeFile(filePath, values.entry);
-      showToast(ToastStyle.Success, "Journal entry saved successfully!");
+      showToast(Toast.Style.Success, "Journal entry saved successfully!");
       await popToRoot();
     } catch (error) {
-      showToast(ToastStyle.Failure, "Journal entry save failed!");
+      showToast(Toast.Style.Failure, "Journal entry save failed!");
       console.log(error);
     }
   };

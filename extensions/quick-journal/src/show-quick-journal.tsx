@@ -3,10 +3,6 @@ import fs from "fs";
 import path from "path";
 import { useState } from "react";
 
-interface Preferences {
-  journalFolderPath: string;
-}
-
 const preferences = getPreferenceValues<Preferences>();
 const homeDirectory = process.env.HOME || "/";
 const journalPath = preferences.journalFolderPath || path.join(homeDirectory, "Documents", "Quick Journal");
