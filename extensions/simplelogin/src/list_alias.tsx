@@ -1,6 +1,6 @@
 import { loadAllAliases, updateAliasPinnedStatus, deleteAlias, toggleAliasState } from "./api/simplelogin_api";
 import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { AliasResponse } from "./models/alias";
 import moment from "moment";
@@ -167,7 +167,7 @@ export default function Command() {
               style={Action.Style.Destructive}
               onAction={() => deleteAliasPrompt(alias)}
               icon={Icon.DeleteDocument}
-              shortcut={{ modifiers: ["shift"], key: "delete" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel>
         }
