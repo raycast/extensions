@@ -167,7 +167,7 @@ export default function Command() {
               style={Action.Style.Destructive}
               onAction={() => deleteAliasPrompt(alias)}
               icon={Icon.DeleteDocument}
-              shortcut={{ modifiers: ["cmd"], key: "delete" }}
+              shortcut={{ modifiers: ["shift"], key: "delete" }}
             />
           </ActionPanel>
         }
