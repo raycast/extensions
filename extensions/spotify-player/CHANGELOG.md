@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Generate Playlist] - 2024-06-04
+
+- Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
+
 ## [New Album Actions] - 2024-05-30
 
 -  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
