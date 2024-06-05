@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -12,7 +11,7 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useCachedState } from "@raycast/utils";
 import {
   CancelBookingForm,
   CancelBookingProps,
@@ -26,7 +25,7 @@ import {
 export default function viewBookings() {
   const { data: user, error: userError } = useCurrentUser();
   const { data: items, isLoading, error, revalidate } = useBookings();
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details", false);
 
   if (error) {
     showToast({
@@ -56,10 +55,10 @@ export default function viewBookings() {
               item.status === "ACCEPTED"
                 ? Color.Green
                 : item.status === "PENDING"
-                ? Color.Yellow
-                : item.status === "CANCELLED"
-                ? Color.Red
-                : Color.Purple,
+                  ? Color.Yellow
+                  : item.status === "CANCELLED"
+                    ? Color.Red
+                    : Color.Purple,
           }}
           title={item.title}
           subtitle={!isShowingDetail ? formatDateTime(item.startTime) + " - " + formatTime(item.endTime) : undefined}
@@ -108,6 +107,7 @@ function CancelBooking({ bookingId, revalidate }: CancelBookingProps) {
       await confirmAlert({
         title: "Cancel Booking",
         message: "Are you sure you want to cancel this booking?",
+        icon: Icon.XMarkCircle,
         primaryAction: {
           title: "Yes",
           onAction: async () => {
@@ -138,7 +138,7 @@ function CancelBooking({ bookingId, revalidate }: CancelBookingProps) {
       navigationTitle="Cancel Booking"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Cancel Booking" onSubmit={handleCancelBooking} />
+          <Action.SubmitForm title="Cancel Booking" icon={Icon.XMarkCircle} onSubmit={handleCancelBooking} />
         </ActionPanel>
       }
     >
