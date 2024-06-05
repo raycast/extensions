@@ -3,6 +3,8 @@ import { Note, Sort, Tag } from "../services/atoms";
 import slugify from "slugify";
 import fs from "fs";
 import { TODO_FILE_PATH } from "../services/config";
+import { marked } from "marked";
+import striptags from "striptags";
 
 export const getInitialValuesFromFile = (filepath: string): [] => {
   try {
@@ -215,4 +217,15 @@ export const getRandomColor = () => {
 export const getTintColor = (colorName?: string) => {
   if (!colorName) return undefined;
   return colors.find((c) => c.name === colorName)?.tintColor;
+};
+
+export const countWords = (markdownString: string): number => {
+  const htmlString = marked.parse(markdownString, { async: false });
+  const plainText = striptags(htmlString as string);
+  const words = plainText
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter((word) => word !== "");
+  return words.length;
 };
