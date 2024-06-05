@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "checkout-b",
+  "description": "Raycast extension to create a branch name for your `git checkout -b`",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "devjiwonchoi",
+  "title": "Checkout B",
+  "icon": "command-icon.png",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "New Branch Name",
+      "subtitle": "Checkout B",
+      "description": "Create a new branch name for your `git checkout -b`",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Random Branch Name",
+      "subtitle": "Checkout B",
+      "description": "Create a random branch name for your `git checkout -b`",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
