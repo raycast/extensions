@@ -50,7 +50,7 @@
       "type": "checkbox",
       "default": true,
       "title": "Behavior",
-      "description": "Uncheck this option to preserve the original case of text. See README for details.",
+      "description": "Uncheck this option to preserve the original case of text before applying transformation. See README for details.",
       "label": "Lowercase text before transforming Sentence and Title Cases",
       "required": true
     },
