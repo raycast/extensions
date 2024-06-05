@@ -2,7 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "checkout-b",
   "description": "Raycast extension to create a branch name for your `git checkout -b`",
-  "version": "0.0.1",
   "license": "MIT",
   "author": "devjiwonchoi",
   "title": "Checkout B",
@@ -42,6 +41,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "ray publish"
   }
 }
