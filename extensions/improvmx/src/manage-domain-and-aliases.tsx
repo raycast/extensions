@@ -1,7 +1,6 @@
 import {
   showToast,
   Toast,
-  getPreferenceValues,
   List,
   Action,
   ActionPanel,
@@ -12,65 +11,16 @@ import {
   useNavigation,
 } from "@raycast/api";
 
-import { useEffect, useState } from "react";
-import { fetchAccont, domainIcon, useImprovMX, parseImprovMXResponse } from "./utils";
+import { useState } from "react";
+import { domainIcon, useImprovMX } from "./utils";
 import { Alias, Domain, DomainLog } from "./types";
-import { API_HEADERS, API_URL } from "./constants";
-import { showFailureToast, useFetch } from "@raycast/utils";
+import { showFailureToast } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
-
-interface State {
-  error?: string;
-  forwardingEmail?: string;
-  isRequireUpgrade: boolean;
-  aliasView: boolean;
-  aliases: Alias[];
-  selectedDomain: string;
-}
+import { useImprovMXPaginated } from "./hooks/useImprovMXPaginated";
 
 export default function ManageDomainsAndAliases() {
-  const [state, setState] = useState<State>({
-      error: "",
-      forwardingEmail: "",
-      isRequireUpgrade: false,
-      aliasView: false,
-      aliases: [],
-      selectedDomain: "",
-    }),
-    API_TOKEN = getPreferenceValues<Preferences>().api_token,
-    API_URL = "https://api.improvmx.com/v3/";
-
-  const auth = Buffer.from("api:" + API_TOKEN).toString("base64");
-
-  const { isLoading, error, data: domains, pagination } = useFetch(
-    (options) =>
-      API_URL + "domains?" +
-      new URLSearchParams({ page: String(options.page + 1) }).toString(), {
-    headers: API_HEADERS,
-    async parseResponse(response) {
-      return await parseImprovMXResponse<{ domains: Array<Domain> }>(response);
-    },
-    mapResult(result) {
-      return {
-        data: result.data.domains,
-        hasMore: result.hasMore
-      }
-    },
-    initialData: []
-  })
-
-  useEffect(() => {
-    async function forwardingEmailFn() {
-      const email = await fetchAccont(auth, API_URL);
-      setState({ ...state, forwardingEmail: email });
-      setState((prevState) => {
-        return { ...prevState, forwardingEmail: email };
-      });
-    }
-
-    forwardingEmailFn();
-  }, []);
-
+  const { isLoading, error, data: domains, pagination } = useImprovMXPaginated<Domain, "domains">("domains");
+  
   const { push } = useNavigation();
   const showAliases = async (domain: Domain) => {
     if (domain.banned || !domain.active) {
@@ -144,31 +94,19 @@ type ViewAliasesProps = {
   domain: string;
 }
 function ViewAliases({ domain }: ViewAliasesProps) {
-  const { isLoading, data: aliases, error, pagination } = useFetch(
-    (options) =>
-      API_URL + `domains/${domain}/aliases` +
-      new URLSearchParams({ page: String(options.page + 1) }).toString(), {
-    headers: API_HEADERS,
-    async parseResponse(response) {
-      return await parseImprovMXResponse<{ aliases: Array<Alias> }>(response);
-    },
-    mapResult(result) {
-      return {
-        data: result.data.aliases,
-        hasMore: result.hasMore
-      }
-    },
-    initialData: []
-  })
+  const { isLoading, data: aliases, error, pagination } = useImprovMXPaginated<Alias, "aliases">(`domains/${domain}/aliases`);
 
   return error ? <ErrorComponent error={error} /> : (
     <List isLoading={isLoading} searchBarPlaceholder="Search for alias..." pagination={pagination}>
-      <List.Section title="Aliases">
+      <List.Section title={`${domain} Aliases`}>
         {aliases.map((alias) => (
           <List.Item
             key={alias.alias}
             title={alias.alias + "@" + domain}
-            accessories={[{ text: { value: alias.forward } }]}
+            subtitle={`-> ${alias.forward}`}
+            accessories={[
+        { date: new Date(alias.created) }
+            ]}
             actions={
               <ActionPanel>
                 <Action

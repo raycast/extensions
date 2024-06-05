@@ -37,3 +37,34 @@ export default async () => {
     return;
   }
 };
+
+
+// import { popToRoot, open, showToast, Toast } from "@raycast/api";
+// import { parseImprovMXResponse } from "./utils";
+// import { API_HEADERS, API_URL } from "./constants";
+// import { useFetch } from "@raycast/utils";
+
+// export default () => {
+//   useFetch(API_URL + "account/generate-login-link", {
+//     headers: API_HEADERS,
+//     async parseResponse(response) {
+//       return await parseImprovMXResponse<{ account: string }>(response, false);
+//     },
+//     async onWillExecute() {
+//       await showToast(Toast.Style.Animated, "Generating Login Link");
+//     },
+//     mapResult(result) {
+//       return {
+//         data: result.data
+//       }
+//     },
+//     async onData(data) {
+//       const account = "https://app.improvmx.com/auth/" + data.account;
+//       await showToast(Toast.Style.Success, "ImprovMX", "Login link copied to clipboard");
+//       await open(account);
+//       await popToRoot({
+//         clearSearchBar: true,
+//       });
+//     },
+//   })
+// };

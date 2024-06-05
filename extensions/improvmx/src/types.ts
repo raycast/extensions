@@ -1,3 +1,46 @@
+export type Account = {
+  billing_email: string | null;
+  cancels_on: string | null;
+  card_brand: string | null;
+  company_details: string | null;
+  company_name: string | null;
+  company_vat: string | null;
+  country: string | null;
+  created: number;
+  email: string;
+  email_hash?: string;
+  is_otp_enabled: boolean;
+  last4: string | null;
+  limits: {
+      aliases: number;
+      api: number;
+      credentials: number;
+      daily_quota: number;
+      daily_send: number;
+      destinations: number;
+      domains: number;
+      ratelimit: number;
+      redirections: number;
+      subdomains: number;
+  }
+  lock_reason: string | null;
+  locked?: null;
+  password: boolean;
+  plan: {
+      aliases_limit: number;
+      daily_quota: number;
+      display: string;
+      domains_limit: number;
+      kind: string;
+      name: string;
+      price: number;
+      yearly: boolean;
+  } | null;
+  premium: boolean;
+  privacy_level: number;
+  renew_date: number;
+}
+
 export type Alias = {
     alias: string;
     created: number
@@ -62,5 +105,5 @@ export type ErrorResponse = {
     success: false;
 } & (
     | { error: string; errors?: never }
-    | { error?: never; errors: string[] }
+    | { error?: never; errors: {[key: string]: string[]} }
 );
