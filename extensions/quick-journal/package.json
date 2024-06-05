@@ -13,21 +13,21 @@
     {
       "name": "new-entry",
       "title": "New Quick Journal Entry",
-      "subtitle": "Compose a new Quick Journal entry",
+      "subtitle": "Quick Journal",
       "description": "Compose a new Quick Journal entry",
       "mode": "view"
     },
     {
       "name": "show-quick-journal",
       "title": "View Quick Journal Entries",
-      "subtitle": "View and read Quick Journal entries",
+      "subtitle": "Quick Journal",
       "description": "Show and read Quick Journal entries",
       "mode": "view"
     },
     {
       "name": "open-quick-journal-folder",
       "title": "Open Quick Journal Folder",
-      "subtitle": "Open Quick Journal Folder",
+      "subtitle": "Quick Journal",
       "description": "Open Quick Journal Folder",
       "mode": "view"
     }
