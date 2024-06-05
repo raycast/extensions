@@ -31,6 +31,7 @@ export interface CalUser {
   verified: false;
   invitedTo: null;
 }
+
 interface CalUserResp {
   user: CalUser;
 }
