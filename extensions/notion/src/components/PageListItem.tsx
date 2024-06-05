@@ -102,17 +102,14 @@ export function PageListItem({
 
   const title = page.title ? page.title : "Untitled";
 
-  const { primaryAction } = getPreferenceValues<Preferences.SearchPage>();
-
-  const openInRaycastAction = {
-    page: (
+  const OpenInRaycastAction =
+    page.object == "page" ? (
       <Action.Push
         title="Preview Page"
         icon={Icon.BlankDocument}
         target={<PageDetail page={page} setRecentPage={setRecentPage} users={users} />}
       />
-    ),
-    database: (
+    ) : (
       <Action.Push
         title="Navigate to Database"
         icon={Icon.List}
@@ -125,38 +122,35 @@ export function PageListItem({
           />
         }
       />
-    ),
-  };
-
-  const { open_in } = getPreferenceValues<Preferences>();
-
-  const openInNotionAppAction = createOpenInNotionAction("App", "notion-logo.png", () =>
-    handleOnOpenPage(page, setRecentPage),
+    );
+  const OpenInAppAction = (
+    <Action title={`Open in App`} icon={"notion-logo.png"} onAction={() => handleOnOpenPage(page, setRecentPage)} />
   );
-  const openInNotionBrowserAction = createOpenInNotionAction("Browser", Icon.Globe, async () => {
-    if (!page.url) return;
-    if (open_in?.name === "Notion") {
-      open(page.url);
-    } else open(page.url, open_in);
-    await setRecentPage(page);
-    closeMainWindow();
-  });
+  const OpenInBrowserAction = (
+    <Action
+      title={`Open in Browser`}
+      icon={Icon.Globe}
+      onAction={async () => {
+        if (!page.url) return;
+        if (open_in?.name === "Notion") {
+          open(page.url);
+        } else open(page.url, open_in);
+        await setRecentPage(page);
+        closeMainWindow();
+      }}
+    />
+  );
 
-  const isDefaultNotionActionApp = open_in && open_in.name === "Notion";
-  let openInNotionDefaultAction;
-  let openInNotionAlternativeAction;
-  if (!isDefaultNotionActionApp) {
-    openInNotionDefaultAction = openInNotionBrowserAction;
-  } else {
-    openInNotionDefaultAction = isDefaultNotionActionApp ? openInNotionAppAction : openInNotionBrowserAction;
-    openInNotionAlternativeAction = isDefaultNotionActionApp ? openInNotionBrowserAction : openInNotionAppAction;
-  }
+  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
 
-  const actions = {
-    raycast: openInRaycastAction[page.object],
-    notionDefaultOpen: openInNotionDefaultAction,
-    notionAltOpen: openInNotionAlternativeAction,
-  };
+  const OpenPageActions =
+    open_in?.name == "Notion" // Default app is Notion
+      ? primaryAction == "notion"
+        ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
+        : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
+      : primaryAction == "notion"
+        ? [OpenInBrowserAction, OpenInRaycastAction]
+        : [OpenInRaycastAction, OpenInBrowserAction];
 
   const pageWord = capitalize(page.object);
 
@@ -167,9 +161,7 @@ export function PageListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section title={title}>
-            {primaryAction === "notion" ? actions["notionDefaultOpen"] : actions["raycast"]}
-            {primaryAction === "notion" ? actions["raycast"] : actions["notionDefaultOpen"]}
-            {actions["notionAltOpen"]}
+            {...OpenPageActions}
             {customActions?.map((action) => action)}
             {databaseProperties ? (
               <ActionPanel.Submenu
@@ -304,10 +296,6 @@ export function PageListItem({
       accessories={accessories}
     />
   );
-}
-
-function createOpenInNotionAction(title: string, icon: Image.ImageLike | string, action: () => void) {
-  return <ActionPanel.Item title={`Open in ${title}`} icon={icon} onAction={action} />;
 }
 
 function getPropertyAccessory(
