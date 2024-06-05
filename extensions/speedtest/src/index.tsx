@@ -28,7 +28,7 @@ export default function SpeedtestList() {
   const toggleDetailsAction = <ToggleDetailedViewAction setDetailedView={toggleIsDetailedViewEnabled} />;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder={title} isShowingDetail={!isLoading && isDetailedViewEnabled}>
+    <List isLoading={isLoading} searchBarPlaceholder={title} isShowingDetail={isDetailedViewEnabled}>
       {result.error ? (
         <List.EmptyView icon={Icon.LevelMeter} title={result.error} />
       ) : (
