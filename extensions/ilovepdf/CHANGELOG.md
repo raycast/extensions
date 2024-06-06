@@ -1,6 +1,6 @@
 # iLovePDF Changelog
 
-## [Refactoring for better performance and readability] - {PR_MERGE_DATE}
+## [Refactoring for better performance and readability] - 2024-06-06
 
 ## [Use magic byte for validation] - 2024-06-04
 
