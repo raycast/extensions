@@ -26,7 +26,8 @@
           "type": "checkbox",
           "required": false,
           "default": false,
-          "label": "Hide Raycast After Copy"
+          "title": "Options",
+          "label": "Hide Raycast after copy"
         }
       ]
     }
