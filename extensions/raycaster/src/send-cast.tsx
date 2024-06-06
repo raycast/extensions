@@ -20,11 +20,6 @@ import fetch from "node-fetch";
 import fs from "fs";
 import FormData from "form-data";
 
-interface Preferences {
-  PINATA_JWT?: string;
-  GATEWAY?: string;
-}
-
 const preferences = getPreferenceValues<Preferences>();
 
 const JWT = preferences.PINATA_JWT;
