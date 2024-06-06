@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Function Optimisation] - {PR_MERGE_DATE}
+## [Function Optimisation] - 2024-06-06
 
 -  Update Paste as Number: Now all the numbers will be extracted and stitched together for display
 
