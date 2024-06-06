@@ -1,58 +1,19 @@
 import { Color, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
-// import fetch from "node-fetch";
+import { showFailureToast } from "@raycast/utils";
+import fetch from "node-fetch";
 import { randomInt } from "node:crypto";
 import { API_HEADERS, API_URL } from "./constants";
-import { Account, ErrorResponse } from "./types";
-
-interface Domain {
-  display: string;
-  banned?: boolean;
-  active?: boolean;
-}
+import { Account, Domain, ErrorResponse } from "./types";
 
 const fetchAccountAPI = async () => {
-  // const { data } = useImprovMX<{ account: Account }>("account");
-  // const { data } = useFetch("account", {
-  //   headers: API_HEADERS,
-  //   async parseResponse(response) {
-  //     return await parseImprovMXResponse<{ account: Account }>(response, false);
-  //   },
-  //   mapResult(result) {
-  //     return {
-  //       data: result.data
-  //     }
-  //   },
-  //   async onData(data) {
-  //     const { email, plan } = data.account;
-  //     await LocalStorage.setItem("improvmx_email", email);
-  //     await LocalStorage.setItem("improvmx_unix_timestamp", Math.floor(Date.now() / 1000));
-
-  //     if (plan) {
-  //       await LocalStorage.setItem("improvmx_plan", plan.name);
-  //     } else {
-  //       await LocalStorage.setItem("improvmx_plan", "Free");
-  //     }
-  //   }
-  // });
-  // return data?.account.email
   try {
-    const apiResponseAccount = await fetch(API_URL + "account", {
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+    const response = await fetch(API_URL + "account", {
+      headers: API_HEADERS
     });
+    // @ts-expect-error Response type is incompatible
+    const result = await parseImprovMXResponse<{ account: Account }>(response, { pagination: false });
 
-    const apiResponseJSON: any = await apiResponseAccount.json();
-
-    if (apiResponseJSON.success === false) {
-      const errorMessage = apiResponseJSON.error ?? "ImprovMX API Error";
-      await showToast(Toast.Style.Failure, "ImprovMX Error", errorMessage);
-      return;
-    }
-
-    const { email, plan } = apiResponseJSON.account ?? {};
+    const { email, plan } = result.data.account;
 
     if (email) {
       await LocalStorage.setItem("improvmx_email", email);
@@ -76,7 +37,7 @@ const fetchAccountAPI = async () => {
   }
 };
 
-const fetchAccont = async (auth: string, API_URL: string) => {
+const fetchAccount = async () => {
   const improvmx_email = await LocalStorage.getItem("improvmx_email");
   const improvmx_unix_timestamp = (await LocalStorage.getItem("improvmx_unix_timestamp")) as number;
 
@@ -112,37 +73,9 @@ const generatePassword = () => {
     .join("");
 };
 
-const useImprovMX = <T>(endpoint: string) => {
-  // const { isLoading, data, error, revalidate } = useFetch(API_URL + endpoint, {
-  //   method: body ? "POST" : "GET",
-  //   headers: API_HEADERS,
-  //   body: JSON.stringify(body) || undefined,
-  //   execute: body ? false : true,
-  //   async parseResponse(response) {
-  //     return await parseImprovMXResponse<T>(response, false);
-  //   },
-  //   mapResult(result) {
-  //     return {
-  //       data: result.data
-  //     }
-  //   },
-  // });
-  // return { isLoading, data, error, revalidate };
-  const { isLoading, data, error } = useFetch(API_URL + endpoint, {
-    headers: API_HEADERS,
-    async parseResponse(response) {
-      return await parseImprovMXResponse<T>(response, false);
-    },
-    mapResult(result) {
-      return {
-        data: result.data
-      }
-    },
-  });
-  return { isLoading, data, error };
-}
+export async function parseImprovMXResponse<T>(response: Response, options={pagination: true}) {
+  const { pagination } = options;
 
-export async function parseImprovMXResponse<T>(response: Response, pagination=true) {
   type PageMeta = {
     total: number;
     limit: number;
@@ -159,10 +92,6 @@ export async function parseImprovMXResponse<T>(response: Response, pagination=tr
     if ("error" in result) throw new Error(result.error);
     else if ("errors" in result) throw new Error(Object.values(result.errors).flat()[0]);
     throw new Error("There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com");
-    // if (Object.hasOwn(result, "error")) throw new Error(result.error);
-    // if (Object.hasOwn(result, "errors")) throw new Error(Object.values(result.errors).flat()[0]);
-    // console.log(result);
-    // throw new Error(result.error || result.errors?.[0] || "There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com");
   }
   if (pagination) {
     const result = await response.json() as (SuccessResponse & PageMeta);
@@ -182,4 +111,4 @@ export async function onError() {
   await showFailureToast("Please try again later.", { title: "ImprovMX Error" })
 }
 
-export { fetchAccont, domainIcon, generatePassword, fetchAccountAPI, useImprovMX };
+export { fetchAccount, domainIcon, generatePassword, fetchAccountAPI };

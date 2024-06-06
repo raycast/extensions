@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Detail, openExtensionPreferences } from "@raycast/api";
 
-export default function ErrorComponent({error, showUpgradeAction=false}: {error: Error, showUpgradeAction?: boolean}) {
-    return <Detail
+export default function ErrorComponent({error}: {error: Error, showUpgradeAction?: boolean}) {
+  const showUpgradeAction = error.message.startsWith("Your account is limited to");
+  return <Detail
     navigationTitle="Error"
       markdown={"⚠️" + error.message}
       actions={

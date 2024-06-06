@@ -12,11 +12,12 @@ import {
 } from "@raycast/api";
 
 import { useState } from "react";
-import { domainIcon, useImprovMX } from "./utils";
+import { domainIcon } from "./utils";
 import { Alias, Domain, DomainLog } from "./types";
 import { showFailureToast } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
-import { useImprovMXPaginated } from "./hooks/useImprovMXPaginated";
+import { useImprovMX, useImprovMXPaginated } from "./hooks";
+import { DOMAIN_LOG_EVENT_STATUS_COLORS } from "./constants";
 
 export default function ManageDomainsAndAliases() {
   const { isLoading, error, data: domains, pagination } = useImprovMXPaginated<Domain, "domains">("domains");
@@ -51,27 +52,11 @@ export default function ManageDomainsAndAliases() {
               }
             />
           ))}
-        {domains && (
-          <List.Item
-            title="Add New Domain"
-            icon={{ source: Icon.Plus }}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Add New Domain"
-                  onAction={async () => {
-                    await launchCommand({ name: "add-domain", type: LaunchType.UserInitiated });
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        )}
       </List.Section>
       <List.Section title="Inactive Domains">
         {domains
           ?.filter((domain) => !domain.active)
-          .map((domain: Domain) => (
+          .map((domain) => (
             <List.Item
               key={domain.display}
               title={domain.display}
@@ -86,6 +71,22 @@ export default function ManageDomainsAndAliases() {
             />
           ))}
       </List.Section>
+      {!isLoading && <List.Section title="Actions">
+      <List.Item
+            title="Add New Domain"
+            icon={{ source: Icon.Plus }}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Add New Domain"
+                  icon={Icon.Plus}
+                  onAction={async () => {
+                    await launchCommand({ name: "add-domain", type: LaunchType.UserInitiated });
+                  }}
+                />
+              </ActionPanel>
+            }
+          /></List.Section>}
     </List>
   )
 }
@@ -120,8 +121,9 @@ function ViewAliases({ domain }: ViewAliasesProps) {
             }
           />
         ))}
+      </List.Section>
         {!isLoading && (
-          <>
+          <List.Section title="Actions">
             <List.Item
               title="Create New Alias"
               icon={{ source: Icon.Plus }}
@@ -160,9 +162,8 @@ function ViewAliases({ domain }: ViewAliasesProps) {
                 </ActionPanel>
               }
             />
-          </>
+          </List.Section>
         )}
-      </List.Section>
     </List>
   )
 }
@@ -176,10 +177,19 @@ function ViewDomainLogs({ domain }: ViewDomainLogsProps) {
  
   return <List navigationTitle={`Domain / ${domain} / Logs`} isLoading={isLoading} isShowingDetail={isShowingDetail}>
     {data?.logs.map(log => <List.Section key={log.id} title={log.subject}>
-      {log.events.map(event => <List.Item key={event.id} title={event.status} subtitle={event.message} accessories={[
+      {log.events.map(event => <List.Item key={event.id} title={event.status} icon={{ source: Icon.Dot, tintColor: DOMAIN_LOG_EVENT_STATUS_COLORS[event.status] }} subtitle={event.message} accessories={[
         { date: new Date(event.created) }
       ]} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
+        <List.Item.Detail.Metadata.Label title="ID" text={event.id} />
         <List.Item.Detail.Metadata.Label title="Code" text={event.code.toString()} />
+        <List.Item.Detail.Metadata.Label title="Created" text={new Date(event.created).toString()} />
+        <List.Item.Detail.Metadata.Label title="Local" text={event.local} />
+        <List.Item.Detail.Metadata.Label title="Message" text={event.message} />
+        <List.Item.Detail.Metadata.Label title="Recipient" text={`${event.recipient.name}<${event.recipient.email}>`} />
+        <List.Item.Detail.Metadata.Label title="Server" text={event.server} />
+        <List.Item.Detail.Metadata.TagList title="Status">
+          <List.Item.Detail.Metadata.TagList.Item text={event.status} color={DOMAIN_LOG_EVENT_STATUS_COLORS[event.status]} />
+        </List.Item.Detail.Metadata.TagList>
       </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
         <Action title="Toggle Details" onAction={() => setIsShowingDetail(prev => !prev)} />
       </ActionPanel>} />)}

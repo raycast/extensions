@@ -17,108 +17,20 @@ import {
 import fetch, { FormData } from "node-fetch";
 import { useEffect, useState } from "react";
 import { fetchAccont, domainIcon } from "./utils";
-
-interface Preferences {
-  api_token: string;
-  default_domain: string;
-}
-
-interface Alias {
-  forward: string;
-  alias: string;
-  id: number;
-}
-
-interface Domain {
-  display: string;
-  banned?: boolean;
-  active?: boolean;
-  aliases: Alias[];
-}
-
-interface State {
-  domains?: Domain[];
-  error?: string;
-  forwardingEmail?: string;
-  isRequireUpgrade: boolean;
-  isDomainsLoading: boolean;
-  aliasSubmitLoading: boolean;
-}
+import { Account, Domain } from "./types";
+import ErrorComponent from "./components/ErrorComponent";
+import { useImprovMX, useImprovMXPaginated } from "./hooks";
 
 interface DomainArgs {
   domain: Domain;
 }
 
-export default function CreateMaskedEmail(props: LaunchProps<{ arguments: DomainArgs }>) {
-  const [state, setState] = useState<State>({
-      domains: undefined,
-      error: "",
-      forwardingEmail: "",
-      isRequireUpgrade: false,
-      isDomainsLoading: false,
-      aliasSubmitLoading: false,
-    }),
-    domainFromArgs = props.arguments?.domain,
-    API_TOKEN = getPreferenceValues<Preferences>().api_token,
-    DEFAULT_DOMAIN = getPreferenceValues<Preferences>().default_domain || domainFromArgs,
-    API_URL = "https://api.improvmx.com/v3/";
+export default function CreateMaskedEmail(props: LaunchProps<{ arguments?: DomainArgs }>) {
 
-  const auth = Buffer.from("api:" + API_TOKEN).toString("base64");
-
-  useEffect(() => {
-    async function getDomains() {
-      try {
-        setState((prevState) => {
-          return { ...prevState, isDomainsLoading: true };
-        });
-
-        const apiResponse = await fetch(API_URL + "domains?=", {
-          headers: {
-            Authorization: "Basic " + auth,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!apiResponse.ok) {
-          if (apiResponse.status === 401) {
-            setState((prevState) => {
-              return { ...prevState, error: "Invalid API Token" };
-            });
-
-            return;
-          }
-        }
-
-        const response = (await apiResponse.json()) as unknown;
-        const domains = response as { domains: Array<Domain> };
-
-        setState((prevState) => {
-          return { ...prevState, domains: domains.domains, error: "" };
-        });
-      } catch (error) {
-        setState((prevState) => {
-          return { ...prevState, error: "Failed to fetch domains. Please try again later.", isDomainsLoading: false };
-        });
-        return;
-      }
-    }
-
-    async function forwardingEmailFn() {
-      const email = await fetchAccont(auth, API_URL);
-      setState((prevState) => {
-        return { ...prevState, forwardingEmail: email };
-      });
-    }
-
-    getDomains();
-    forwardingEmailFn();
-  }, []);
-
-  const showError = async () => {
-    if (state.error) {
-      await showToast(Toast.Style.Failure, "ImprovMX Error", state.error);
-    }
-  };
+  const propDomain = props.arguments?.domain;
+  const DEFAULT_DOMAIN = getPreferenceValues<Preferences.CreateMaskedEmailAddress>().default_domain || propDomain;
+  const { isLoading: isFetchingDomains, data: domains, error: domainsError } = useImprovMXPaginated<Domain, "domains">("domains");
+  const { isLoading: isFetchingAccount, data: accountData, error: accountError } = useImprovMX<{ account: Account }>("account")
 
   const handleMaskedEmail = async (domain: Domain) => {
     if (domain.banned || domain.active == false) {
@@ -167,7 +79,6 @@ export default function CreateMaskedEmail(props: LaunchProps<{ arguments: Domain
 
           return;
         }
-
         return;
       }
 
@@ -197,9 +108,7 @@ export default function CreateMaskedEmail(props: LaunchProps<{ arguments: Domain
 
   const useDefaultDomain = async () => {
     if (
-      DEFAULT_DOMAIN &&
-      state.domains !== undefined &&
-      state.domains.length > 0 &&
+      DEFAULT_DOMAIN && domains.length > 0 &&
       state.forwardingEmail !== undefined &&
       state.forwardingEmail !== ""
     ) {
@@ -218,32 +127,15 @@ export default function CreateMaskedEmail(props: LaunchProps<{ arguments: Domain
 
   useDefaultDomain();
 
-  const upgradeAction = (
-    <ActionPanel>
-      <Action.OpenInBrowser url="https://app.improvmx.com/account/payment" title="Upgrade Account" />
-    </ActionPanel>
-  );
+  const isLoading = isFetchingDomains || isFetchingAccount || isCreating;
+  const error = domainsError || accountError || createError;
 
-  showError();
-
-  return DEFAULT_DOMAIN ? (
-    <Detail
-      isLoading={state.isDomainsLoading}
-      // markdown={`We are using your domain [${DEFAULT_DOMAIN}](${DEFAULT_DOMAIN}) to create masked email. You can change your default domain in your Extension Preferences.`}
-    />
-  ) : state.error ? (
-    <Detail
-      markdown="There was an error with your request. Make sure you are connected to the internet. Please check that your API Token is correct and up-to-date. You can find your API Token in your [Improvmx Dashboard](https://improvmx.com/dashboard). If you need help, please contact support@improvmx.com."
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
-      }
-    />
+  return error ? (
+    <ErrorComponent error={error} />
   ) : (
-    <List isLoading={state.domains === undefined} searchBarPlaceholder="Search for domain...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search for domain...">
       <List.Section title="Active Domains">
-        {state.domains
+        {domains
           ?.filter((domain) => domain.active)
           .map((domain) => (
             <List.Item
@@ -252,33 +144,26 @@ export default function CreateMaskedEmail(props: LaunchProps<{ arguments: Domain
               icon={domainIcon(domain)}
               accessories={[{ text: { value: domain.aliases.length.toString() + " aliases" } }]}
               actions={
-                state.isRequireUpgrade ? (
-                  upgradeAction
-                ) : (
-                  <ActionPanel>
+                <ActionPanel>
                     <Action title="Create a Masked Email Address" onAction={() => handleMaskedEmail(domain)} />
-                    <Action title="Set default domain" onAction={openCommandPreferences} />
+                    <Action title="Set Default Domain" onAction={openCommandPreferences} />
                   </ActionPanel>
-                )
               }
             />
           ))}
       </List.Section>
       <List.Section title="Inactive Domains">
-        {state.domains
+        {domains
           ?.filter((domain) => !domain.active)
           .map((domain) => (
             <List.Item
               key={domain.display}
               title={domain.display}
               icon={domainIcon(domain)}
-              actions={
-                state.isRequireUpgrade ? (
-                  upgradeAction
-                ) : (
+              actions={(
                   <ActionPanel>
                     <Action title="Create a Masked Email Address" onAction={() => handleMaskedEmail(domain)} />
-                    <Action title="Set default domain" onAction={openCommandPreferences} />
+                    <Action title="Set Default Domain" onAction={openCommandPreferences} />
                   </ActionPanel>
                 )
               }
@@ -288,3 +173,26 @@ export default function CreateMaskedEmail(props: LaunchProps<{ arguments: Domain
     </List>
   );
 }
+
+// type DomainsListSectionProps = {
+//   title: string;
+//   domains: Domain[];
+// }
+// function DomainsListSection({ title, domains }: DomainsListSectionProps) {
+//   return <List.Section title={title}>
+//         {domains.map((domain) => (
+//             <List.Item
+//               key={domain.display}
+//               title={domain.display}
+//               icon={domainIcon(domain)}
+//               actions={(
+//                   <ActionPanel>
+//                     <Action title="Create a Masked Email Address" onAction={() => handleMaskedEmail(domain)} />
+//                     <Action title="Set Default Domain" onAction={openCommandPreferences} />
+//                   </ActionPanel>
+//                 )
+//               }
+//             />
+//           ))}
+//       </List.Section>
+// }

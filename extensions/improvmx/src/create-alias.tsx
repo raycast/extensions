@@ -8,11 +8,12 @@ import {
   LaunchProps,
   popToRoot,
 } from "@raycast/api";
-import { parseImprovMXResponse, useImprovMX } from "./utils";
+import { parseImprovMXResponse } from "./utils";
 import { Account, Alias, Domain } from "./types";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import ErrorComponent from "./components/ErrorComponent";
 import { API_HEADERS, API_URL } from "./constants";
+import { useImprovMX } from "./hooks";
 
 interface DomainArgs {
   domain: string;
@@ -53,7 +54,7 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
     }),
     execute: false,
     async parseResponse(response) {
-      return parseImprovMXResponse<{ alias: Alias }>(response, false);
+      return parseImprovMXResponse<{ alias: Alias }>(response, { pagination: false });
     },
     mapResult(result) {
       return {
@@ -78,7 +79,7 @@ export default function createAlias(props: LaunchProps<{ arguments: DomainArgs }
   const error = domainsError || accountError || createError;
 
   return error ? (
-    <ErrorComponent error={error} showUpgradeAction={error.message.startsWith("Your account is limited to")} />
+    <ErrorComponent error={error} />
   ) : (
     <Form
       isLoading={isLoading}
