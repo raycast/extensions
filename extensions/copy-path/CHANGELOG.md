@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Copy Window Title] - {PR_MERGE_DATE}
+## [Copy Window Title] - 2024-06-06
 
 - Copy the title of the current window when no path or URL is detected
 - Copy tab title of the current browser window when copying the URL of the browser tab
