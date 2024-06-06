@@ -40,7 +40,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Random
     return (
       <Detail
         isLoading={false}
-        markdown={`# Access to AI in Raycast is required\n## Please update to Raycast Pro to unlock AI features to use `}
+        markdown={`# Access to Raycast AI is required\n## Please update to [Raycast Pro](https://www.raycast.com/pro) to unlock AI features in order to use the Random Encounter command.`}
       />
     );
   } else {
