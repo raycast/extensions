@@ -48,10 +48,16 @@ export function extractUrl(text: string) {
 }
 
 export function extractNumber(str: string) {
-  const regex = /-?\d+(\.\d+)?/g;
-  const numbers = str.match(regex);
-  if (numbers) {
-    return numbers.map(Number)[0];
+  const matches = str.match(/-?[0-9.]+/g);
+
+  if (matches) {
+    if (matches[0][0] !== "-") {
+      matches[0] = matches[0].replace("-", "");
+    }
+    for (let i = 1; i < matches.length; i++) {
+      matches[i] = matches[i].replace("-", "");
+    }
+    return matches.join("");
   } else {
     return undefined;
   }

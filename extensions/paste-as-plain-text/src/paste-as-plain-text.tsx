@@ -60,7 +60,7 @@ async function pasteAs(advancedPasteFormat: string) {
     }
     case PasteFormat.NUMBER: {
       const num = extractNumber(pasteStr);
-      if (num && !isNaN(num)) {
+      if (num) {
         pasteStr = num.toString();
         realPasteFormatIcon = "🔢";
         realPasteFormat = PasteFormat.NUMBER;
