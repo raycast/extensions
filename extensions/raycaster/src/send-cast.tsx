@@ -11,6 +11,7 @@ import {
   Detail,
   showHUD,
   PopToRootType,
+  Icon,
 } from "@raycast/api";
 import { Message, NobleEd25519Signer, CastAddBody, makeCastAdd } from "@farcaster/core";
 import { Values, ChannelResult, FileUploadResult } from "./types";
@@ -198,9 +199,10 @@ Press Enter then update the key on the right side of the prefernce pane
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Send Cast" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Send Cast" onSubmit={handleSubmit} icon={Icon.Wand} />
           <Action
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+            icon={Icon.Gear}
             title="Setup Pinata for Images"
             onAction={openExtensionPreferences}
           />
@@ -231,7 +233,7 @@ Press Enter then update the key on the right side of the prefernce pane
         title="Image"
         canChooseDirectories={false}
         allowMultipleSelection={false}
-        info="Requires Pinata API key, run Cmd + Shift + Enter"
+        info="Requires Pinata API key, run Cmd + Shift + comma"
         storeValue={false}
       />
     </Form>
