@@ -5,7 +5,7 @@ import { pingToString, speedToString } from "./utils";
 import { SpeedtestResult, ClipboardData } from "./speedtest.types";
 
 export const ToggleDetailedViewAction = ({ setDetailedView }: { setDetailedView: () => void }) => {
-  return <Action title="View Details" onAction={setDetailedView} icon={Icon.Clipboard} />;
+  return <Action title="Toggle Details" onAction={setDetailedView} icon={Icon.AppWindowSidebarLeft} />;
 };
 
 export function ClearCacheAction(props: { isLoading: boolean }) {
