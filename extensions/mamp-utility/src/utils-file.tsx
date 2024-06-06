@@ -2,7 +2,9 @@ import { readdirSync, statSync } from "fs";
 import { join } from "path";
 import untildify from "untildify";
 
-export function getFiles(_path_: string):{ file: string; path: string; lastModifiedAt: Date; }[]{
+export function getFiles(
+	_path_: string
+): { file: string; path: string; lastModifiedAt: Date }[] {
 	const files = readdirSync(untildify(_path_));
 	return files
 		.filter((file) => !file.startsWith("."))

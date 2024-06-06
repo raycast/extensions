@@ -29,7 +29,9 @@ export function sort_db(db_a: string, db_b: string): number {
 	}
 }
 
-export async function get_databases(set_dbList:Dispatch<SetStateAction<string[]>>): Promise<boolean> {
+export async function get_databases(
+	set_dbList: Dispatch<SetStateAction<string[]>>
+): Promise<boolean> {
 	try {
 		// Configure your MySQL connection settings
 		const connection = mysql.createConnection({
@@ -48,28 +50,32 @@ export async function get_databases(set_dbList:Dispatch<SetStateAction<string[]>
 			}
 		});
 
-		connection.query("SHOW DATABASES;", (err:Error|any, result:{Database: string;}[]) => {
-			if (err instanceof Error) {
-                connection.end();
-				return console.error("[MYSQL] error connecting: " + err.stack);
+		connection.query(
+			"SHOW DATABASES;",
+			(err, result: { Database: string }[]) => {
+				if (err instanceof Error) {
+					connection.end();
+					return console.error(
+						"[MYSQL] error connecting: " + err.stack
+					);
+				} else {
+					const temp_dbs: string[] = [];
+					for (let i: number = 0; i < result.length; i++) {
+						const _RoWDataPacket_: { Database: string } = result[i];
+						const _Database_: string = _RoWDataPacket_["Database"];
+						temp_dbs.push(_Database_);
+					}
+					set_dbList(temp_dbs);
+					connection.end();
+				}
 			}
-            else{
-                const temp_dbs:string[]= [];
-                for (let i:number = 0; i < result.length; i++) {
-                    const _RoWDataPacket_:{Database: string} = result[i];
-                    const _Database_:string = _RoWDataPacket_["Database"];
-                    temp_dbs.push(_Database_);
-                }
-                set_dbList(temp_dbs);
-                connection.end();
-            }
-		});
+		);
 
 		return true;
 	} catch (error) {
-        if(error instanceof Error){
-		    console.error("[ERROR] get_database: ", error.message);
-        }
+		if (error instanceof Error) {
+			console.error("[ERROR] get_database: ", error.message);
+		}
 		return false;
 	}
 }
