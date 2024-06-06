@@ -1,6 +1,6 @@
 # alpaca-trading Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-06-06
 
 - Changed toast functionalities for closing orders and positions
 
