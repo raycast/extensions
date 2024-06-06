@@ -35,7 +35,7 @@
           "type": "checkbox",
           "required": false,
           "default": false,
-          "label": "Store Password Length"
+          "label": "Store password length"
         }
       ]
     }
