@@ -71,11 +71,14 @@ export default function Command() {
       {complete && (
         <List.EmptyView icon={Icon.CheckCircle} title="Raycaster is authorized! Now you can use Send Cast" />
       )}
-      {!complete && !signInError && (
+      {!complete && !signInError && token && (
         <List.EmptyView
           icon={{ source: `https://api.farcasterkeys.com/qr/${token}?filename=image.png` }}
           title="Scan the QR code to authorize Raycaster"
         />
+      )}
+      {!complete && !signInError && !token && (
+        <List.EmptyView icon={Icon.BarCode} title="Retreiving the QR code to authorize Raycaster" />
       )}
       {!complete && signInError && <List.EmptyView icon={Icon.XMarkCircle} title="Timed out trying to sign in" />}
     </List>
