@@ -15,6 +15,7 @@ import {
 } from "./utils-open";
 import { getFiles } from "./utils-file";
 import { get_pref_siteFolder } from "./utils-preference";
+import { ReactElement } from "react";
 
 /**
  * Function to render an action panel for a file item, providing various actions like opening the file, navigating within folders, and performing other file-related tasks.
@@ -23,7 +24,7 @@ import { get_pref_siteFolder } from "./utils-preference";
  * Returns:
  * -  React component representing an ActionPanel with sections for different actions like opening the file, navigating, copying path, revealing in Finder, and opening with other applications.
  */
-function ListFile_Item_Action(props) {
+function ListFile_Item_Action(props:{file:{ file: string; path: string; lastModifiedAt: Date; }}) {
 	const { push, pop } = useNavigation();
 	return (
 		<ActionPanel>
@@ -95,7 +96,7 @@ function ListFile_Item_Action(props) {
  * Returns:
  * -  React component - A list item component displaying file details and actions like opening the file, navigating to folders, copying file path, revealing in Finder, and opening with other applications.
  */
-function ListFile_Item(props) {
+function ListFile_Item(props:{file:{ file: string; path: string; lastModifiedAt: Date; }}) {
 	return (
 		<List.Item
 			key={props.file.path}
@@ -124,7 +125,7 @@ function ListFile_Item(props) {
  * Returns:
  * -  React component - A list of files rendered as a React component.
  */
-function ListFiles(props) {
+function ListFiles(props:{_path_:string}){
 	try {
 		const _listFiles_ = getFiles(untildify(props._path_));
 		const _listFiles_sorted = _listFiles_.sort((file_a, file_b) => {
@@ -141,15 +142,19 @@ function ListFiles(props) {
 			</List>
 		);
 	} catch (error) {
-		if (error.message.includes("not a directory")) {
-			const file_path = props._path_;
-			const folder_path_s = get_FolderPaths(props._path_);
-			const folder_path = "/" + folder_path_s[folder_path_s.length - 1];
-			open_File_InVSCode(file_path, folder_path);
-			return;
-		} else {
-			return <Detail markdown={`**ERROR !!!** \n ${error.message}`} />;
-		}
+        if(error instanceof Error){
+            if (error.message.includes("not a directory")) {
+                const file_path = props._path_;
+                const folder_path_s = get_FolderPaths(props._path_);
+                const folder_path = "/" + folder_path_s[folder_path_s.length - 1];
+                open_File_InVSCode(file_path, folder_path);
+                return <Detail markdown={`**ERROR !!!** \n ${error.message}`}/>;
+            } else {
+                return <Detail markdown={`**ERROR !!!** \n ${error.message}`}/>;
+            }
+        } else {
+            return <Detail markdown={`**ERROR !!!**`}/>;
+        }
 	}
 }
 
