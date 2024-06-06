@@ -5,6 +5,9 @@
   "description": "Generate ugly face",
   "icon": "face.png",
   "author": "Lemon",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "license": "MIT",
   "categories": ["Fun", "Media"],
   "commands": [

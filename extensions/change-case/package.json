@@ -18,8 +18,13 @@
   "keywords": [
     "text",
     "transform",
-    "string",
-    "sponge"
+    "capital",
+    "header",
+    "lower",
+    "pascal",
+    "random",
+    "sentence",
+    "title"
   ],
   "license": "MIT",
   "debug": {
@@ -41,22 +46,31 @@
   ],
   "preferences": [
     {
-      "name": "lowercaseTextBeforeTransform",
+      "name": "preserveCase",
       "type": "checkbox",
-      "default": false,
+      "default": true,
       "title": "Behavior",
-      "description": "Input text is not lowercased before transformations, which may result in unexpected behavior at times. See the README.md for more details.",
-      "label": "Lowercase Text Before Changing Case",
-      "required": false
+      "description": "Input text is lowercased before transformations, which is intended for most but not all use cases. See the README.md for more details.",
+      "label": "Preserve Casing",
+      "required": true
     },
     {
       "name": "popToRoot",
       "type": "checkbox",
       "default": false,
-      "title": "Behavior",
-      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root after Action.",
-      "label": "Pop to Root after Action",
+      "description": "Usually, you only need to change the case for one text at a time - check this to pop back to root transforming the text.",
+      "label": "Pop to Root After Action",
       "required": true
+    },
+    {
+      "name": "exceptions",
+      "type": "textfield",
+      "title": "Title and Sentence Case Exceptions",
+      "description": "A list of words to prevent from being modified, separated by commas. This only applies to title case and sentence case.",
+      "default": "macOS, iOS, iPadOS, iPhone, watchOS, tvOS",
+      "placeholder": "Comma-separated list of words or phrases",
+      "label": "label",
+      "required": false
     },
     {
       "name": "source",
@@ -136,14 +150,6 @@
       "required": false
     },
     {
-      "name": "KebabCase",
-      "type": "checkbox",
-      "description": "Enable the \"kebab-case\" Transformation",
-      "label": "Kebab Case",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "LowerCase",
       "type": "checkbox",
       "description": "Enable the \"lower case\" Transformation",
@@ -160,14 +166,6 @@
       "required": false
     },
     {
-      "name": "MacroCase",
-      "type": "checkbox",
-      "description": "Enable the \"MACRO_CASE\" Transformation",
-      "label": "Macro Case",
-      "default": true,
-      "required": false
-    },
-    {
       "name": "NoCase",
       "type": "checkbox",
       "description": "Enable the \"no case\" Transformation",
@@ -176,10 +174,18 @@
       "required": false
     },
     {
-      "name": "ParamCase",
+      "name": "KebabCase",
       "type": "checkbox",
-      "description": "Enable the \"param-case\" Transformation",
-      "label": "Param Case",
+      "description": "Enable the \"kebab-case\" Transformation",
+      "label": "Kebab Case",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "KebabUpperCase",
+      "type": "checkbox",
+      "description": "Enable the \"KEBAB-UPPER-CASE\" Transformation",
+      "label": "Kebab Upper Case",
       "default": true,
       "required": false
     },
@@ -262,38 +268,22 @@
       "label": "Upper First",
       "default": true,
       "required": false
-    },
-    {
-      "name": "SpongeCase",
-      "type": "checkbox",
-      "description": "Enable the \"SPonGE CasE\" Transformation",
-      "label": "Sponge Case",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "TrainCase",
-      "type": "checkbox",
-      "description": "Enable the \"Train-Case\" Transformation",
-      "label": "Train Case",
-      "default": true,
-      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "change-case": "^5.4.3",
+    "@raycast/api": "^1.75.2",
+    "change-case": "^5.4.4",
     "sponge-case": "^2.0.3",
     "swap-case": "^3.0.3",
     "title-case": "^4.3.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.25",
-    "@types/react": "18.2.64",
+    "@types/node": "20.13.0",
+    "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.2"
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

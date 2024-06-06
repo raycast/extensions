@@ -64,10 +64,11 @@ export default async ({ github, context }: API) => {
         repo: context.repo.repo,
         labels: ["new extension"],
       });
+      // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
         context,
-        comment: `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\nWe have a lower capacity at the moment, and extension reviews might take longer than usually to get the initial review. Once the PR is approved and merged, the extension will be available on our Store.\n\nSorry for the inconvenience`,
       });
       return;
     }

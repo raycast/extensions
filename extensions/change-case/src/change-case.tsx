@@ -20,7 +20,7 @@ import {
   Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { CaseType, functions } from "./types.js";
+import { CaseType, aliases, functions } from "./types.js";
 
 class NoTextError extends Error {
   constructor() {
@@ -52,8 +52,8 @@ async function readContent(preferredSource: string) {
   throw new NoTextError();
 }
 
-function preLowercaseText(input: string, lowercaseTextBeforeTransform: boolean) {
-  if (lowercaseTextBeforeTransform) {
+function preLowercaseText(input: string, preserveCase: boolean) {
+  if (!preserveCase) {
     return input.toLowerCase();
   }
   return input;
@@ -95,14 +95,12 @@ export default function Command(props: LaunchProps) {
   const preferences = getPreferenceValues<Preferences>();
   const preferredSource = preferences.source;
   const preferredAction = preferences.action;
-  const lowercaseTextBeforeTransform = preferences.lowercaseTextBeforeTransform;
+  const preserveCase = preferences.preserveCase;
 
   const immediatelyConvertToCase = props.launchContext?.case;
   if (immediatelyConvertToCase) {
     (async () => {
-      const content = await readContent(preferredSource).then((input) =>
-        preLowercaseText(input, lowercaseTextBeforeTransform),
-      );
+      const content = await readContent(preferredSource).then((input) => preLowercaseText(input, preserveCase));
       const converted = functions[immediatelyConvertToCase](content);
 
       if (preferredAction === "paste") {
@@ -223,6 +221,7 @@ export default function Command(props: LaunchProps) {
         title={props.case}
         accessories={[{ text: props.modified }]}
         detail={<List.Item.Detail markdown={props.detail} />}
+        keywords={aliases[props.case]}
         actions={
           <ActionPanel>
             <ActionPanel.Section>

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Chore] - 2024-06-02
+
+- Chore: Improve README about models and vision capabilities
+
+
 ## [Fix] - 2024-05-16
 
 - Fix: add `isAutoFullInput` state machine check

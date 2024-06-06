@@ -1,6 +1,12 @@
 # Amazon AWS Changelog
 
-## [DynamoDB command] - {PR_MERGE_DATE}
+## [Improvements] - 2024-06-06
+
+- Adds sort descending and consistent read functionalities to DDB queries
+- Saves the query projection expression in between form renders
+- Improved toast error handling for SQS, DDB and CFN command actions
+
+## [DynamoDB command] - 2024-05-30
 
 - Adds UpdateItem, DeleteItem and Query functionalities for the tables
 - Adds metadata for the tables in the List view

@@ -12,7 +12,8 @@
     "arronhunt",
     "kvdo2",
     "thomaslombart",
-    "litomore"
+    "litomore",
+    "samuelkraft"
   ],
   "categories": [
     "Design Tools"
@@ -70,6 +71,20 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "convert-color",
+      "title": "Convert Color",
+      "description": "Convert any color to a different format.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "type": "text",
+          "required": false,
+          "placeholder": "#FF6363"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -88,6 +103,14 @@
           "value": "hex-no-prefix"
         },
         {
+          "title": "RGB - rgb(255 99 99 / 100%)",
+          "value": "rgb"
+        },
+        {
+          "title": "RGB % - rgb(100% 38% 38% / 100%)",
+          "value": "rgb-percentage"
+        },
+        {
           "title": "RGBA - rgba(255, 99, 99, 1)",
           "value": "rgba"
         },
@@ -102,6 +125,18 @@
         {
           "title": "HSVA - color(hsv 43.082 81.145 100)",
           "value": "hsva"
+        },
+        {
+          "title": "OKLCH - oklch(70% 0.19 23.5)",
+          "value": "oklch"
+        },
+        {
+          "title": "LCH - lch(63.123 68.554 28.772)",
+          "value": "lch"
+        },
+        {
+          "title": "P3 - color(display-p3 0.9248 0.428 0.4078)",
+          "value": "p3"
         }
       ],
       "default": "hex",

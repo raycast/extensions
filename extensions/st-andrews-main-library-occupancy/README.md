@@ -2,7 +2,7 @@
 
 > The University of St Andrews
 
-Just use to check how many people in the library now.
+Just use to check how many people are in the library now.
 
 Because it's finals season now, and the library is always crowded.
 

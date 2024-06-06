@@ -6,7 +6,19 @@ const preferences: Preferences = getPreferenceValues();
 
 export function getFormattedColor(
   _color: HistoryColor,
-  format?: "hex" | "hex-lower-case" | "hex-no-prefix" | "rgba" | "rgba-percentage" | "hsla" | "hsva",
+  format?:
+    | "hex"
+    | "hex-lower-case"
+    | "hex-no-prefix"
+    | "rgb"
+    | "rgb-percentage"
+    | "rgba"
+    | "rgba-percentage"
+    | "hsla"
+    | "hsva"
+    | "oklch"
+    | "lch"
+    | "p3",
 ) {
   let color;
   if (typeof _color === "string") {
@@ -18,6 +30,7 @@ export function getFormattedColor(
   }
 
   switch (format || preferences.colorFormat) {
+    default:
     case "hex": {
       return color.to("srgb").toString({ format: "hex" }).toUpperCase();
     }
@@ -26,6 +39,12 @@ export function getFormattedColor(
     }
     case "hex-no-prefix": {
       return color.to("srgb").toString({ format: "hex" }).replace("#", "");
+    }
+    case "rgb": {
+      return color.to("srgb").toString({ format: "rgb_number" });
+    }
+    case "rgb-percentage": {
+      return color.to("srgb").toString({ format: "rgb" });
     }
     case "rgba": {
       return color.to("srgb").toString({ format: "rgba_number" });
@@ -39,7 +58,25 @@ export function getFormattedColor(
     case "hsva": {
       return color.to("hsv").toString({ format: "color" });
     }
+    case "oklch": {
+      return color.to("oklch").toString({ format: "oklch" });
+    }
+    case "lch": {
+      return color.to("lch").toString({ format: "lch" });
+    }
+    case "p3": {
+      return color.to("p3").toString({ format: "p3" });
+    }
   }
+}
+
+const unsupportedPreviewFormats = ["p3", "rgb", "rgb-percentage"];
+export function getPreviewColor(color: HistoryColor) {
+  const formattedColor = getFormattedColor(
+    color,
+    unsupportedPreviewFormats.includes(preferences.colorFormat) ? "oklch" : undefined,
+  );
+  return formattedColor;
 }
 
 export function getShortcut(index: number) {
@@ -54,14 +91,14 @@ export function getShortcut(index: number) {
 }
 
 export function getIcon(color: HistoryColor) {
-  const hex = typeof color === "string" ? color : getFormattedColor(color, "hex");
-  if (!hex) {
+  const previewColor = typeof color === "string" ? color : getFormattedColor(color, "hex");
+  if (!previewColor) {
     return undefined;
   }
 
   const icon: Image.ImageLike = {
     source: Icon.CircleFilled,
-    tintColor: { light: hex, dark: hex, adjustContrast: false },
+    tintColor: { light: previewColor, dark: previewColor, adjustContrast: false },
   };
 
   return icon;
