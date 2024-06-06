@@ -42,7 +42,7 @@ Press Enter then update the key on the right side of the prefernce pane
   }
 
   async function uploadFile(selectedFile: string) {
-    if (!preferences.PINATA_JWT) {
+    if (!JWT) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Files require a Pinata API Key",
