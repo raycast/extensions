@@ -49,6 +49,8 @@ export default function RenameFiles() {
         title: "Error retrieving selected finder items",
         message: String(error),
       });
+
+      setIsLoading(false);
     }
   };
 
