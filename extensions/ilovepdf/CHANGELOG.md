@@ -1,7 +1,6 @@
 # iLovePDF Changelog
 
-## [Add Word to PDF Command] 2024-06-02
-
+## [Add Word to PDF Command] - 2024-06-06
 ## [Allow the Selection of Download Directory] - 2024-05-27
 
 ## [Add Merge PDF] - 2024-05-27
