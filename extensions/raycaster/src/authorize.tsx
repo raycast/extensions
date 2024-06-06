@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { List, showToast, Toast, Icon } from "@raycast/api";
+import { List, showToast, Toast, Icon, ActionPanel, Action, launchCommand, LaunchType } from "@raycast/api";
 import { KeyRequestData, PollRequestData } from "./types";
 import fetch from "node-fetch";
 import { LocalStorage } from "@raycast/api";
@@ -69,7 +69,24 @@ export default function Command() {
   return (
     <List>
       {complete && (
-        <List.EmptyView icon={Icon.CheckCircle} title="Raycaster is authorized! Now you can use Send Cast" />
+        <List.EmptyView
+          icon={Icon.CheckCircle}
+          title="Raycaster is authorized! Now you can use Send Cast"
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Send Cast"
+                onAction={async () => {
+                  try {
+                    launchCommand({ name: "send-cast", type: LaunchType.UserInitiated });
+                  } catch {
+                    /* */
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
       )}
       {!complete && !signInError && token && (
         <List.EmptyView
