@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
-import { List, showToast, Toast, Icon, ActionPanel, Action, launchCommand, LaunchType } from "@raycast/api";
+import {
+  List,
+  showToast,
+  Toast,
+  Icon,
+  ActionPanel,
+  Action,
+  launchCommand,
+  LaunchType,
+  LocalStorage,
+} from "@raycast/api";
 import { KeyRequestData, PollRequestData } from "./types";
 import fetch from "node-fetch";
-import { LocalStorage } from "@raycast/api";
 
 export default function Command() {
   const [token, setToken] = useState<string | undefined>();
@@ -76,11 +85,16 @@ export default function Command() {
             <ActionPanel>
               <Action
                 title="Open Send Cast"
+                icon={Icon.Wand}
                 onAction={async () => {
                   try {
                     launchCommand({ name: "send-cast", type: LaunchType.UserInitiated });
                   } catch {
-                    /* */
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Something went wrong",
+                      message: "Open Send Cast manually",
+                    });
                   }
                 }}
               />
