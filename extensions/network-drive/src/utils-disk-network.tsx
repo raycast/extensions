@@ -3,22 +3,6 @@ import { get_pref_smb_ip, get_pref_smb_pwd, get_pref_smb_usr } from "./utils-pre
 import { confirmAlert } from "@raycast/api";
 import { Dispatch, SetStateAction } from "react";
 
-export function delayOperation(milliseconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-export async function getNetworkDrivesMounted(set_data: Dispatch<SetStateAction<string[]>>) {
-  exec("/sbin/mount", (_err, stdout: string) => {
-    const mounted_networkDrives_strline = stdout.split("\n").filter((line: string) => {
-      return line.includes(get_pref_smb_ip()) && line.includes(get_pref_smb_usr());
-    });
-    const mounted_networkDrives = mounted_networkDrives_strline.map((item: string) => {
-      return item.split("on /Volumes/")[1].split(" (")[0];
-    });
-    set_data(mounted_networkDrives);
-  });
-}
-
 export async function getNetworkDrives(set_data: Dispatch<SetStateAction<string[]>>) {
   const ip: string = get_pref_smb_ip();
   const usr: string = get_pref_smb_usr();
