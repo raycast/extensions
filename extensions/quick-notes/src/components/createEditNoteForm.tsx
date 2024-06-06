@@ -164,7 +164,7 @@ const CreateEditNoteForm = ({
             }}
             target={<CreateTag />}
             title="Create Tag"
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           />
         </ActionPanel>
       }
@@ -172,7 +172,7 @@ const CreateEditNoteForm = ({
       <Form.Description text={createdAt && !isDraft ? "Edit Note" : "Create New Note"} />
       <Form.TextField title="Title" placeholder="Note Title" {...itemProps.title} />
       <Form.TextArea title="Note" placeholder="Enter Markdown" enableMarkdown {...itemProps.note} />
-      <Form.TagPicker title="Tags" info="⌘ + T to create new tag" {...itemProps.tags}>
+      <Form.TagPicker title="Tags" info="⌘+⇧+T = new tag" {...itemProps.tags}>
         {tagStore.map((t, i) => (
           <Form.TagPicker.Item
             key={i}

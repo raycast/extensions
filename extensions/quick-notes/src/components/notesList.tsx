@@ -4,19 +4,22 @@ import { useAtom } from "jotai";
 import { compareDesc, format } from "date-fns";
 import { notesAtom, Note, tagsAtom, Tag, Sort } from "../services/atoms";
 import Actions from "./actions";
-import { getTintColor } from "../utils/utils";
+import { countWords, getTintColor } from "../utils/utils";
 import { useCachedState } from "@raycast/utils";
 import slugify from "slugify";
+import { includes, pull } from "lodash";
 
 const ListItem = ({
   note,
   tags = [],
-  filterList,
+  filterByTags,
+  onApplyTag,
   showMenu = false,
 }: {
   note: Note;
   tags?: Tag[];
-  filterList: (str: string) => void;
+  filterByTags: (str: string) => void;
+  onApplyTag: (tag: string, noteBody?: string) => void;
   showMenu?: boolean;
 }) => {
   return (
@@ -40,14 +43,7 @@ const ListItem = ({
                     ))}
                   </List.Item.Detail.Metadata.TagList>
                 )}
-                <List.Item.Detail.Metadata.Label
-                  title="Word Count"
-                  text={`${
-                    note.body.split(" ").filter((n) => {
-                      return n != "";
-                    }).length ?? 0
-                  }`}
-                />
+                <List.Item.Detail.Metadata.Label title="Word Count" text={`${countWords(note.body) ?? 0}`} />
                 <List.Item.Detail.Metadata.Label
                   title="Created At"
                   text={format(note.createdAt, "MMMM d, yyyy '@' HH:mm")}
@@ -69,7 +65,8 @@ const ListItem = ({
           note={note.body}
           tags={note.tags}
           createdAt={note.createdAt}
-          onTagFilter={filterList}
+          onTagFilter={filterByTags}
+          onApplyTag={onApplyTag}
         />
       }
       accessories={[
@@ -83,12 +80,13 @@ const ListItem = ({
 };
 
 const NotesList = () => {
-  const [notes] = useAtom(notesAtom);
+  const [notes, setNotes] = useAtom(notesAtom);
   const [tags] = useAtom(tagsAtom);
   const [menu] = useCachedState("menu", false);
   const [sort] = useCachedState<Sort>("sort", "updated");
 
   const [searchText, setSearchText] = useState("");
+  const [searchTag, setSearchTag] = useState("");
   const [filteredNotes, setFilteredNotes] = useState<Note[]>(notes);
 
   // Update notes on sort
@@ -105,7 +103,10 @@ const NotesList = () => {
       }
     });
     setFilteredNotes(sortedNotes);
-  }, [sort, notes]);
+    if (searchTag) {
+      filterByTags(searchTag);
+    }
+  }, [sort, notes, searchTag]);
 
   const drafts = filteredNotes.filter((n) => n.is_draft);
   const published = filteredNotes.filter((n) => !n.is_draft);
@@ -118,7 +119,8 @@ const NotesList = () => {
   const filterList = (searchText: string) => {
     setSearchText(searchText);
     const normalizedSearchString = searchText.trim().toLowerCase();
-    const filtered = notes.filter((obj) =>
+    const notesWithTags = notes.filter((obj) => obj.tags.includes(searchTag));
+    const filtered = notesWithTags.filter((obj) =>
       Object.values(obj).some((value) =>
         typeof value === "string"
           ? value.trim().toLowerCase().includes(normalizedSearchString)
@@ -128,6 +130,39 @@ const NotesList = () => {
     setFilteredNotes(filtered);
   };
 
+  const filterByTags = (tag: string) => {
+    if (tag === "") {
+      setSearchTag("");
+      setFilteredNotes(notes);
+      return;
+    }
+    setSearchTag(tag);
+    const filtered = notes.filter((obj) => obj.tags.includes(tag));
+    setFilteredNotes(filtered);
+  };
+
+  const onApplyTag = (tag: string, noteBody: string | undefined) => {
+    if (!noteBody) {
+      return;
+    }
+    const note = notes.find((n) => n.body.includes(noteBody));
+    if (!note) {
+      return;
+    }
+
+    const newTags = [...note.tags];
+
+    if (includes(newTags, tag)) {
+      pull(newTags, tag);
+    } else {
+      newTags.push(tag);
+    }
+
+    const newNote = { ...note, tags: newTags };
+    const updatedNotes = notes.map((n) => (n.createdAt === note.createdAt ? newNote : n));
+    setNotes(updatedNotes);
+  };
+
   return (
     <List
       searchBarPlaceholder="Search for a Note"
@@ -135,15 +170,41 @@ const NotesList = () => {
       isShowingDetail={notes.length > 0}
       onSearchTextChange={filterList}
       searchText={searchText}
+      searchBarAccessory={
+        tags.length > 0 ? (
+          <List.Dropdown
+            onChange={(value) => filterByTags(value)}
+            storeValue={false}
+            value={searchTag}
+            placeholder="Tags"
+            tooltip="Tags"
+          >
+            <List.Dropdown.Item title="All Notes" value="" />
+            {tags.map((tag, index) => (
+              <List.Dropdown.Item key={index} title={tag.name} value={tag.name} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
+      }
     >
       {published.length === 0 && drafts.length === 0 ? (
-        <List.EmptyView title="⌘ + N to create a new note." actions={<Actions noNotes onTagFilter={filterList} />} />
+        <List.EmptyView
+          title="⌘ + N to create a new note."
+          actions={<Actions noNotes onTagFilter={filterByTags} onApplyTag={onApplyTag} />}
+        />
       ) : (
         <>
           {drafts.length > 0 && (
             <List.Section title="Drafts">
               {drafts.map((note, index) => (
-                <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
+                <ListItem
+                  key={index}
+                  note={note}
+                  showMenu={menu}
+                  filterByTags={filterByTags}
+                  onApplyTag={onApplyTag}
+                  tags={tags}
+                />
               ))}
             </List.Section>
           )}
@@ -154,7 +215,14 @@ const NotesList = () => {
                   {published.map(
                     (note, index) =>
                       note.tags.includes(tag.name) && (
-                        <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
+                        <ListItem
+                          key={index}
+                          note={note}
+                          showMenu={menu}
+                          filterByTags={filterByTags}
+                          onApplyTag={onApplyTag}
+                          tags={tags}
+                        />
                       ),
                   )}
                 </List.Section>
@@ -162,7 +230,14 @@ const NotesList = () => {
               {noTagNotes.length > 0 && (
                 <List.Section title="Notes">
                   {noTagNotes.map((note, index) => (
-                    <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
+                    <ListItem
+                      key={index}
+                      note={note}
+                      showMenu={menu}
+                      filterByTags={filterByTags}
+                      onApplyTag={onApplyTag}
+                      tags={tags}
+                    />
                   ))}
                 </List.Section>
               )}
@@ -170,7 +245,14 @@ const NotesList = () => {
           ) : (
             <List.Section title="Notes">
               {published.map((note, index) => (
-                <ListItem key={index} note={note} showMenu={menu} filterList={filterList} tags={tags} />
+                <ListItem
+                  key={index}
+                  note={note}
+                  showMenu={menu}
+                  filterByTags={filterByTags}
+                  tags={tags}
+                  onApplyTag={onApplyTag}
+                />
               ))}
             </List.Section>
           )}

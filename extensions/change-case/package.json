@@ -182,6 +182,14 @@
       "required": false
     },
     {
+      "name": "KebabUpperCase",
+      "type": "checkbox",
+      "description": "Enable the \"KEBAB-UPPER-CASE\" Transformation",
+      "label": "Kebab Upper Case",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "PascalCase",
       "type": "checkbox",
       "description": "Enable the \"PascalCase\" Transformation",

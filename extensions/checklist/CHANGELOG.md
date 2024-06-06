@@ -1,5 +1,9 @@
 # Checklist Changelog
 
+## [🦧 Small improvements] - 2024-05-28
+
+- Preserve `isCompleted` state for tasks when editing a checklist.
+
 ## [🪲 Fix issues] - 2024-02-05
 
 - Fixed a bug where the app would log an error when trying to import a checklist from clipboard.

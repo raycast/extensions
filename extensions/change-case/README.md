@@ -3,6 +3,7 @@
 Transform a string between various cases.
 
 Included case transformations:
+
 - `camelCase`
 - `Capital Case`
 - `CONSTANT_CASE` (aka `MACRO_CASE`)
@@ -12,6 +13,7 @@ Included case transformations:
 - `lower First`
 - `no case`
 - `kebab-case` (aka `param-case`)
+- `KEBAB-UPPER-CASE`
 - `PascalCase`
 - `Pascal_Snake_Case`
 - `path/case`

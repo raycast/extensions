@@ -57,3 +57,18 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sortRecord = (record: Record<string, any>): Record<string, any> =>
   Object.fromEntries(Object.entries(record).sort(([keyA], [keyB]) => keyA.localeCompare(keyB)));
+
+export function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    try {
+      const parsedError = JSON.parse(error.message);
+      if (parsedError.errorMessages && Array.isArray(parsedError.errorMessages)) {
+        return parsedError.errorMessages[0];
+      }
+    } catch (e) {
+      return error.message;
+    }
+  }
+
+  return String(error);
+}
