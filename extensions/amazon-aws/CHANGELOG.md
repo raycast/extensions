@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2024-06-06
 
 - Adds sort descending and consistent read functionalities to DDB queries
 - Saves the query projection expression in between form renders
