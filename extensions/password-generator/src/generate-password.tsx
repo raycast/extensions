@@ -14,6 +14,7 @@ import { generatePassword } from "@/helpers/helpers";
 
 interface Preferences {
   hideAfterCopy: boolean;
+  storePasswordLength: boolean;
 }
 
 interface Form {
@@ -61,6 +62,8 @@ const handleGeneratePassword = (values: Form) => {
 };
 
 export default function Command() {
+  const { storePasswordLength } = getPreferenceValues<Preferences>();
+
   return (
     <Form
       navigationTitle="Password Generator"
@@ -74,6 +77,7 @@ export default function Command() {
         id="length"
         title="Enter password length (number of characters):"
         placeholder="Enter a number between 5 and 64"
+        storeValue={storePasswordLength}
       />
       <Form.Checkbox id="useNumbers" label="Use numbers?" defaultValue={true} />
       <Form.Checkbox id="useChars" label="Use special characters?" defaultValue={true} />
