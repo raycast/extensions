@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useProfiles } from "./hooks/useProfiles";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Profile } from "./types";
 import { useConnectProfileSync } from "./hooks/useConnectProfileSync";
 import { ProfileListItem } from "./components/ProfileListItem";

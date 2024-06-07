@@ -23,7 +23,7 @@ export const ProfileListItem: React.FunctionComponent<ProfileListItem> = ({ prof
   const accessories = useMemo(() => [
     isActivated && { text: status },
     isActivated && { text: client_address },
-  ].filter(truthy), [client_address, status]);
+  ].filter(truthy), [client_address, isActivated, status]);
 
   return (
     <List.Item

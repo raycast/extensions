@@ -3,7 +3,7 @@
   "name": "pritunl-client",
   "title": "pritunl-client",
   "description": "",
-  "icon": "icon.png",
+  "icon": "command-icon.png",
   "author": "LouisBa",
   "categories": [
     "Developer Tools"
@@ -20,7 +20,7 @@
   "preferences": [
     {
       "name": "twoStepKey",
-      "type": "password",
+      "type": "textfield",
       "title": "Two-Step Auth Key",
       "required": true,
       "description": "Two-Step Authentication Key"
