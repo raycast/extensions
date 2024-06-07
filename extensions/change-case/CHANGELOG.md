@@ -1,5 +1,9 @@
 # Change Case Changelog
 
+## [Visual improvements] - 2024-06-07
+
+- Small improvement to some UI copy meant to make the lowercasing behavior for Title and Sentence Case transformations clearer.
+
 ## [Add `preserve casing` preference] - 2024-06-01
 - Removed the redundant cases: param (same as kebab), macro (same as constant), sponge (same as random), train (same as header)
 - Added a preference to add exceptions to the list of words that should not be modified when transforming the text to title case or sentence case
