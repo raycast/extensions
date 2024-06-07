@@ -57,7 +57,6 @@ const getFlatMetadata = (data: MetadataValue): FlatMetadata[] => {
 
 const reorderResult = (data: SpeedtestResult): Partial<SpeedtestResult> => {
   const { interface: isp, server, ping, download, upload, result } = data;
-  console.log(isp, server, ping, download, upload, result);
   return {
     interface: isp,
     server,
@@ -82,7 +81,7 @@ export const ListItemMetadata = ({ data, type }: ListItemMetadataProps) => {
               <List.Item.Detail.Metadata.Separator key={i} />
             ) : (
               <List.Item.Detail.Metadata.Label icon={el.icon} title={el.title} key={i} text={el.value} />
-            ),
+            )
           )}
         </List.Item.Detail.Metadata>
       }
