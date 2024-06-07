@@ -23,14 +23,14 @@ const iconQuery = (squery: string, stype: string) => `query Search {
 `;
 
 export default function Command() {
-  let { API_TOKEN } = getPreferenceValues();
-  const { STYLE_PREFERENCE } = getPreferenceValues();
+  let { API_TOKEN, STYLE_PREFERENCE } = getPreferenceValues();
   let account = 'pro';
 
   //if pro API Token not provided, use free API Token
   if (!API_TOKEN) {
     API_TOKEN = 'D7A31EA9-20D8-434E-A6C6-8ADC890ADCB8';
     account = 'free';
+    STYLE_PREFERENCE = 'fas';
   }
 
   const [type, setType] = useState<string>(STYLE_PREFERENCE);

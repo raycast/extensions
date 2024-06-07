@@ -41,15 +41,15 @@
           "value": "fas"
         },
         {
-          "title": "Classic, Regular",
+          "title": "Classic, Regular (Pro only)",
           "value": "far"
         },
         {
-          "title": "Classic, Light",
+          "title": "Classic, Light (Pro only)",
           "value": "fal"
         },
         {
-          "title": "Classic, Thin",
+          "title": "Classic, Thin (Pro only)",
           "value": "fat"
         },
         {
@@ -57,23 +57,23 @@
           "value": "fab"
         },
         {
-          "title": "Duotone, Solid",
+          "title": "Duotone, Solid (Pro only)",
           "value": "fad"
         },
         {
-          "title": "Sharp, Solid",
+          "title": "Sharp, Solid (Pro only)",
           "value": "fass"
         },
         {
-          "title": "Sharp, Regular",
+          "title": "Sharp, Regular (Pro only)",
           "value": "fasr"
         },
         {
-          "title": "Sharp, Light",
+          "title": "Sharp, Light (Pro only)",
           "value": "fasl"
         },
         {
-          "title": "Sharp, Thin",
+          "title": "Sharp, Thin (Pro only)",
           "value": "fast"
         }
       ],
