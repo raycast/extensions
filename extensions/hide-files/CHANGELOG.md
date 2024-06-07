@@ -1,6 +1,6 @@
 # Hide Files Changelog
 
-## [Toggle Widgets Visibility] - {PR_MERGE_DATE}
+## [Toggle Widgets Visibility] - 2024-06-07
 
 - Toggle Desktop Visibility command adds setting to allow hiding desktop widgets
 
