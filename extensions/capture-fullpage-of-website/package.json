@@ -51,7 +51,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx -y ray publish",
+    "publish": "npx -y @raycast/api@latest publish",
     "postinstall": "npx -y playwright install --with-deps chromium"
   }
 }
