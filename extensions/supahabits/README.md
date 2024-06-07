@@ -1,4 +1,4 @@
-# Habits
+# SupaHabits
 
 Extension for quickly adding habits to your daily routine, tracking your progress and add journal entries.
 Make sure to explore available actions in the action panel (⌘ + K).
