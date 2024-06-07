@@ -155,6 +155,20 @@ query dataForRepository($owner: String!, $name: String!) {
   }
 }
 
+query searchRepositoryBranches($owner: String!, $name: String!, $query: String!) {
+  repository(owner: $owner, name: $name) {
+    refs(refPrefix: "refs/heads/", direction: ASC, first: 50, query: $query) {
+      nodes {
+        id
+        name
+        target {
+          ...CommitFields
+        }
+      }
+    }
+  }
+}
+
 query repositoryIssues($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
     url

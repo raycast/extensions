@@ -1,5 +1,13 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2024-06-03
+
+- **Command 'Manage Models'**: Support for multiple configured Ollama Server, manage and use models from different server.
+- **Command 'Custom Command'**: changed prompt format to the [Raycast Prompt Explorer](https://prompts.ray.so/) one. More details on supported tag on the *README.md*. ***WARNING***: This change combined with allowing multiple Ollama server feature break all configured custom command so all custom commands need to be reconfigured.
+- **Command 'Summarize Website'**: New command that summarize the content of the current web browser tab. For this feature [Raycast Browser Extentision](https://www.raycast.com/browser-extension) is required.
+- **Command 'Chat with Ollama'**: Improved UI, combine models from different Ollama Server and use browser content on prompt with [Raycast Browser Extentision](https://www.raycast.com/browser-extension).
+- Added support for *keep_alive*, you can now chose how many minutes the model must stay on memory.
+
 ## [BugFix] - 2024-03-12
 
 - [@almoce] Fixed missing first word in answer on `Chat with Ollama`.

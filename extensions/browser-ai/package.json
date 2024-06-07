@@ -20,6 +20,30 @@
       "mode": "no-view"
     },
     {
+      "name": "ask",
+      "title": "Ask Website",
+      "description": "Ask Website.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "required": true,
+          "placeholder": "What is it?"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "model_ask",
+          "description": "Override the global preferred model for this command.",
+          "type": "textfield",
+          "required": false,
+          "title": "Model Override",
+          "default": "global"
+        }
+      ]
+    },
+    {
       "name": "inspect",
       "title": "Inspect Website",
       "description": "Inspect Website.",
@@ -99,9 +123,9 @@
       "description": "AI API Key",
       "name": "apikey",
       "required": true,
-      "title": "Perplexity or OpenRouter API Key.",
+      "title": "Perplexity/OpenRouter/Groq API Key.",
       "type": "password",
-      "placeholder": "pplx-XXX or sk-or-v1"
+      "placeholder": "pplx-XXX or sk-or-v1 or gsk_"
     },
     {
       "name": "model",

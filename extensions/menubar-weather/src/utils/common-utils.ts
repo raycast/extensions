@@ -1,25 +1,25 @@
 import { Cache, getPreferenceValues, Icon } from "@raycast/api";
 import { Preferences } from "../types/preferences";
+import { OpenMeteoWeather } from "../types/types";
 import {
   cityName,
+  iconStyle,
   latitude,
   longitude,
-  tempType,
-  menuUVI,
-  menuPressure,
   menuHumidity,
+  menuPressure,
+  menuUVI,
   menuWind,
+  precipitationUnits,
   showForecast,
   showLocation,
   showSun,
   showUVI,
-  windSpeedUnits,
-  precipitationUnits,
+  tempType,
   tempUnits,
   windAngle2Direction,
-  iconStyle,
+  windSpeedUnits,
 } from "./weather-utils";
-import { OpenMeteoWeather } from "../types/types";
 
 export enum CacheKey {
   CURRENT_WEATHER = "Open-Meteo Weather",
@@ -28,8 +28,8 @@ export enum CacheKey {
 
   ICON_STYLE = "Icon Style",
   CITY_NAME = "City Name",
-  LONGITUDE = "Longitude",
   LATITUDE = "Latitude",
+  LONGITUDE = "Longitude",
   TEMP_UNIT = "Temperature unit",
   WIND_SPEED_UNIT = "Wind unit",
   PRECIPITATION_UNIT = "Precipitation Unit",
@@ -106,8 +106,8 @@ const cache = new Cache();
 export function preferencesChanged() {
   const oldIconStyle = getCacheString(CacheKey.ICON_STYLE);
   const oldCityName = getCacheString(CacheKey.CITY_NAME);
-  const oldLon = getCacheString(CacheKey.LONGITUDE);
   const oldLat = getCacheString(CacheKey.LATITUDE);
+  const oldLon = getCacheString(CacheKey.LONGITUDE);
   const oldTempUnits = getCacheString(CacheKey.TEMP_UNIT);
   const oldWindSpeedUnits = getCacheString(CacheKey.WIND_SPEED_UNIT);
   const oldPrecipitationUnits = getCacheString(CacheKey.PRECIPITATION_UNIT);
@@ -122,14 +122,14 @@ export function preferencesChanged() {
   const oldShowForecast = getCacheBoolean(CacheKey.SHOW_FORECAST, true);
 
   const newCityName = typeof cityName === "undefined" ? "" : cityName;
-  const newLon = typeof longitude === "undefined" ? "" : longitude;
   const newLat = typeof latitude === "undefined" ? "" : latitude;
+  const newLon = typeof longitude === "undefined" ? "" : longitude;
 
   cache.set(CacheKey.ICON_STYLE, JSON.stringify(iconStyle));
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
   cache.set(CacheKey.CITY_NAME, JSON.stringify(newCityName));
-  cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.LATITUDE, JSON.stringify(newLat));
+  cache.set(CacheKey.LONGITUDE, JSON.stringify(newLon));
   cache.set(CacheKey.TEMP_UNIT, JSON.stringify(tempUnits));
   cache.set(CacheKey.WIND_SPEED_UNIT, JSON.stringify(windSpeedUnits));
   cache.set(CacheKey.PRECIPITATION_UNIT, JSON.stringify(precipitationUnits));
@@ -146,8 +146,8 @@ export function preferencesChanged() {
   return (
     oldIconStyle !== iconStyle ||
     oldCityName !== newCityName ||
-    oldLon !== newLon ||
     oldLat !== newLat ||
+    oldLon !== newLon ||
     oldTempUnits !== tempUnits ||
     oldWindSpeedUnits !== windSpeedUnits ||
     oldPrecipitationUnits !== precipitationUnits ||

@@ -1,6 +1,6 @@
 # Google Maven Repository Changelog
 
-## [Optimize extension] - {PR_MERGE_DATE}
+## [Optimize extension] - 2022-09-30
 
 - Optimize Show Google Maven Repository command loading speed
 
