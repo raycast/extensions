@@ -123,8 +123,12 @@ const NotesList = () => {
   const filterList = (searchText: string) => {
     setSearchText(searchText);
     const normalizedSearchString = searchText.trim().toLowerCase();
-    const notesWithTags = notes.filter((obj) => obj.tags.includes(searchTag));
-    const filtered = notesWithTags.filter((obj) =>
+    const notesWithTags = searchTag ? notes.filter((obj) => obj.tags.includes(searchTag)) : notes;
+    if (!searchText || !normalizedSearchString) {
+      setFilteredNotes(sortNotes(notesWithTags, sort));
+      return;
+    }
+    const filtered = sortNotes(notesWithTags, sort).filter((obj) =>
       Object.values(obj).some((value) =>
         typeof value === "string"
           ? value.trim().toLowerCase().includes(normalizedSearchString)
