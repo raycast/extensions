@@ -1,8 +1,8 @@
 import {
   Action,
   ActionPanel,
-  Cache,
   Form,
+  getPreferenceValues,
   launchCommand,
   LaunchType,
   List,
@@ -12,17 +12,9 @@ import {
 import { useState } from "react";
 import fetch from "node-fetch";
 
-import SetSecret from "./components/set-secret";
-
-const cache = new Cache();
-
 export default function JournalCommand() {
-  const secret = cache.get("secret");
+  const { secret } = getPreferenceValues<Preferences>();
   const [loading, setLoading] = useState<boolean>(false);
-
-  if (!secret) {
-    return <SetSecret />;
-  }
 
   const submitEntry = async (values: { content: string }) => {
     if (!values.content || !values.content.trim()) {
@@ -39,8 +31,8 @@ export default function JournalCommand() {
       });
       showToast({ style: Toast.Style.Success, title: "✅ Entry submitted!" });
 
-      await launchCommand( {
-        name: 'journal-list',
+      await launchCommand({
+        name: "journal-list",
         type: LaunchType.UserInitiated,
       });
     } catch (error) {

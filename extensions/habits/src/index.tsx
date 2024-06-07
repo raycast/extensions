@@ -1,50 +1,26 @@
-import { useEffect, useState } from "react";
-import { ActionPanel, List, Action, Cache, Icon, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
+import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
+import NodeFetch from "node-fetch";
 
 import CreateHabitForm from "./components/create-habit-form";
 import { Habit } from "./models/habit";
-import SetSecret from "./components/set-secret";
-
-const cache = new Cache();
 
 export default function Command() {
-  const cachedSecret = cache.get("secret");
+  const { secret } = getPreferenceValues<Preferences>();
 
-  const [secret] = useState<string | undefined>(cachedSecret);
-  const [habits, setHabits] = useState<Habit[] | undefined>();
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (secret) {
-      const fetchData = async () => {
-        await retrieveHabits();
-      };
-
-      fetchData();
-    }
-  }, []);
-
-  const retrieveHabits = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`https://www.supahabits.com/api/habits?secret=${secret}`).then((res) => res.json());
-      setHabits(res as Habit[]);
-    } catch (e) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to retrieve habits" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    isLoading,
+    data: habits,
+    revalidate,
+  } = useFetch(`https://www.supahabits.com/api/habits?secret=${secret}`, {
+    parseResponse: async (response) => {
+      return (await response.json()) as Habit[];
+    },
+  });
 
   const markHabitAsCompleted = async (habitId: number) => {
-    const originalHabits = [...(habits ?? [])];
-    const updatedHabits = habits?.map((habit) => (habit.id === habitId ? { ...habit, completed: true } : habit));
-
-    setHabits(updatedHabits);
-
     try {
-      await fetch(`https://www.supahabits.com/api/habits/${habitId}/complete`, {
+      await NodeFetch(`https://www.supahabits.com/api/habits/${habitId}/complete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,25 +28,15 @@ export default function Command() {
         },
         body: JSON.stringify({ secret }),
       });
-      showToast({ style: Toast.Style.Success, title: "✅ Habit marked as completed" });
+      showToast({ style: Toast.Style.Success, title: "Habit marked as completed" });
+      revalidate();
     } catch (error) {
-      const notUpdatedHabits = habits?.map((habit) => (habit.id === habitId ? { ...habit, completed: false } : habit));
-      setHabits(notUpdatedHabits);
-      showToast({ style: Toast.Style.Failure, title: "🚫 Failed to mark habit as completed" });
-      setHabits(originalHabits);
+      showToast({ style: Toast.Style.Failure, title: "Failed to mark habit as completed" });
     }
   };
 
-  if (!secret) {
-    return <SetSecret />;
-  }
-
-  if (loading) {
-    return <List isLoading={true} />;
-  }
-
   return (
-    <List>
+    <List isLoading={isLoading}>
       {habits && habits.length > 0 ? (
         habits.map((habit) => (
           <List.Item
@@ -107,10 +73,7 @@ export default function Command() {
         title="Create Habit"
         actions={
           <ActionPanel>
-            <Action.Push
-              title="Create Habit"
-              target={<CreateHabitForm secret={secret} revalidate={retrieveHabits} />}
-            />
+            <Action.Push title="Create Habit" target={<CreateHabitForm revalidate={revalidate} />} />
           </ActionPanel>
         }
       />

@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 import fetch from "node-fetch";
 
 interface CreateHabitFormProps {
-  secret: string;
-  revalidate: () => Promise<void>;
+  revalidate: () => void;
 }
 
 export default function CreateHabitForm(props: CreateHabitFormProps) {
-  const { secret, revalidate } = props;
+  const { secret } = getPreferenceValues<Preferences>();
+  const { revalidate } = props;
   const { pop } = useNavigation();
 
   const createHabit = async (values: { name: string; description: string; days: number }) => {
@@ -27,7 +27,7 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
         body: JSON.stringify({ secret, name, description, amount: days }),
       });
       showToast({ style: Toast.Style.Success, title: "✅ Habit created successfully" });
-      await revalidate();
+      revalidate();
       pop();
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "🚫 Failed to create habit" });

@@ -1,65 +1,48 @@
-import { Action, ActionPanel, Cache, List, showToast, Toast, useNavigation } from "@raycast/api";
-
-import SetSecret from "./components/set-secret";
-import { useEffect, useState } from "react";
-import fetch from "node-fetch";
+import { Action, ActionPanel, getPreferenceValues, launchCommand, LaunchType, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 import { JournalEntry } from "./models/journal-entry";
-import JournalCommand from "./journal";
-
-const cache = new Cache();
 
 export default function JournalListCommand() {
-  const secret = cache.get("secret");
-  const navigation = useNavigation();
+  const { secret } = getPreferenceValues<Preferences>();
+  const { isLoading, data } = useFetch(`https://www.supahabits.com/api/journal?secret=${secret}`, {
+    parseResponse: async (response) => {
+      return (await response.json()) as JournalEntry[];
+    },
+  });
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [entries, setEntries] = useState<JournalEntry[] | undefined>();
-
-  useEffect(() => {
-    if (secret) {
-      const fetchData = async () => {
-        await retrieveJournalEntries();
-      };
-
-      fetchData();
-    }
-  }, []);
-
-  const retrieveJournalEntries = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`https://www.supahabits.com/api/journal?secret=${secret}`).then((res) => res.json());
-      setEntries(res as JournalEntry[]);
-    } catch (e) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to retrieve habits" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!secret) {
-    return <SetSecret />;
-  }
-
-  if (loading) {
+  if (isLoading) {
     return <List isLoading={true} />;
   }
 
-  return (
-    <List filtering={true} navigationTitle="Search Journal Entries" searchBarPlaceholder="Filter entries by content">
-      {entries && entries.length === 0 && (
+  if (!isLoading && data && data.length === 0) {
+    return (
+      <List>
         <List.Item
-          title="No entries found"
+          title="No entries found - create one!"
           actions={
             <ActionPanel>
-              <Action title="New Entry" onAction={() => navigation.push(<JournalCommand />)} />
+              <Action
+                title="New Entry"
+                onAction={() =>
+                  launchCommand({
+                    name: "journal",
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+              />
             </ActionPanel>
           }
         />
-      )}
+      </List>
+    );
+  }
 
-      {entries && entries.map((item) => <List.Item key={item.id} title={item.content} />)}
+  return (
+    <List isLoading={isLoading}>
+      {(data || []).map((item) => (
+        <List.Item key={item.id} title={item.content} />
+      ))}
     </List>
   );
 }

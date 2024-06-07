@@ -30,6 +30,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "description": "View extension's README for instructions.",
+      "name": "secret",
+      "placeholder": "HK_...",
+      "required": true,
+      "title": "SupaHabits Secret",
+      "type": "password"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.74.1",
     "@raycast/utils": "^1.15.0",
