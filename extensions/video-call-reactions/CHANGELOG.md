@@ -13,8 +13,10 @@ All notable changes to the "Video Call Reactions" extension will be documented i
 ### Changed
 - Resolved an AppleScript execution issue in Full Screen Mode.
 - Changed Confetti messages to handle different cases: confetti only without a video call and different when with a video call.
+- Added the option to play sound when confetti is triggered.
 
 ### Improved
 - Aligned the extension with Raycast guidelines.
 - Enhanced debug information and user messages.
 - Added a loading animation. 
+
