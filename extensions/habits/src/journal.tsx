@@ -1,16 +1,24 @@
-import { Action, ActionPanel, Cache, Form, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Cache,
+  Form,
+  launchCommand,
+  LaunchType,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState } from "react";
 import fetch from "node-fetch";
 
 import SetSecret from "./components/set-secret";
-import JournalListCommand from "./journal-list";
 
 const cache = new Cache();
 
 export default function JournalCommand() {
   const secret = cache.get("secret");
   const [loading, setLoading] = useState<boolean>(false);
-  const navigation = useNavigation();
 
   if (!secret) {
     return <SetSecret />;
@@ -31,7 +39,10 @@ export default function JournalCommand() {
       });
       showToast({ style: Toast.Style.Success, title: "✅ Entry submitted!" });
 
-      navigation.push(<JournalListCommand />);
+      await launchCommand( {
+        name: 'journal-list',
+        type: LaunchType.UserInitiated,
+      });
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Failed to submit entry" });
     } finally {
