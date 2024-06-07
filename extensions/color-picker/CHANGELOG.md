@@ -2,6 +2,10 @@
 
 ## [Enhancement] - 2024-06-07
 
+- Fix bug with OKLCH/LCH conversion
+
+## [Enhancement] - 2024-06-07
+
 - Update OKLCH & LCH color formats to use percentage for lightness
 
 ## [Enhancement] - 2024-05-31
