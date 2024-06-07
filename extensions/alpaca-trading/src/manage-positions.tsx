@@ -1,14 +1,12 @@
+import { ClosePositionForm } from '@components/closePositionForm';
+import { usePositions } from '@hooks/usePositions';
 import { Action, ActionPanel, Color, Icon, Image, List, useNavigation } from '@raycast/api';
 import { useCachedState } from '@raycast/utils';
-
-import { AlpacaApi } from '@/api';
-import { AlpacaNode } from '@/component';
-import { AlpacaHook } from '@/hook';
-import { asDollarAmt, asPercentage } from '@/util';
+import { asDollarAmt, asPercentage, getAssetImage } from '@utils/display';
 
 export default function ManagePositions() {
   const [showingDetails, setShowDetails] = useCachedState('list-positions-show-details', false);
-  const { isLoading, positions, pagination, revalidate, error } = AlpacaHook.Positions.useListPositions();
+  const { isLoading, positions, revalidate, error } = usePositions();
   const { pop } = useNavigation();
 
   return (
@@ -18,7 +16,6 @@ export default function ManagePositions() {
       searchBarPlaceholder="Search by symbol, asset class, side, exchange..."
       filtering
       throttle
-      pagination={pagination}
       actions={
         <ActionPanel>
           <Action title={showingDetails ? 'Hide Details' : 'Show Details'} icon={showingDetails ? Icon.EyeDisabled : Icon.Eye} onAction={() => setShowDetails(x => !x)} />
@@ -28,7 +25,7 @@ export default function ManagePositions() {
       {!isLoading && error && (
         <List.EmptyView title="Error while looking up positions" icon={{ source: 'list-icon.png', mask: Image.Mask.RoundedRectangle }} description={error.message} />
       )}
-      {!isLoading && positions.length === 0 && (
+      {!isLoading && !error && positions.length === 0 && (
         <List.EmptyView title="No positions found" icon={{ source: 'list-icon.png', mask: Image.Mask.RoundedRectangle }} description="Looked up open positions" />
       )}
       {positions.map(position => (
@@ -63,7 +60,7 @@ export default function ManagePositions() {
                   <List.Item.Detail.Metadata.TagList title="Asset Class / Exchange">
                     <List.Item.Detail.Metadata.TagList.Item
                       text={position.asset_class.replaceAll('_', ' ')}
-                      icon={AlpacaApi.Assets.ImageMap[position.asset_class] ?? AlpacaApi.Assets.ImageMap.us_equity}
+                      icon={getAssetImage(position.asset_class) ?? getAssetImage('us_equity')}
                       color={Color.Orange}
                     />
                     <List.Item.Detail.Metadata.TagList.Item text={position.exchange} />
@@ -113,7 +110,7 @@ export default function ManagePositions() {
                 <Action.Push
                   title="Close Position"
                   icon={{ source: Icon.TackDisabled, tintColor: Color.Red }}
-                  target={<AlpacaNode.Positions.ClosePositionForm position={position} pop={pop} revalidate={revalidate} />}
+                  target={<ClosePositionForm position={position} pop={pop} revalidate={revalidate} />}
                   shortcut={{ modifiers: ['ctrl'], key: 'x' }}
                 />
               </ActionPanel.Section>

@@ -1,15 +1,14 @@
+import { cancelOrder } from '@api/orders';
+import { useOrders } from '@hooks/useOrders';
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Image, List } from '@raycast/api';
 import { useCachedState } from '@raycast/utils';
+import { asDollarAmt, getAssetImage, getOrderDisplayPrice, getOrderStatusImage } from '@utils/display';
 import { useState } from 'react';
-
-import { AlpacaApi } from '@/api';
-import { AlpacaHook } from '@/hook';
-import { asDollarAmt } from '@/util';
 
 export default function ManageOrders() {
   const [showingDetails, setShowDetails] = useCachedState('list-orders-show-details', false);
   const [orderStatus, setOrderStatus] = useState('open');
-  const { isLoading, orders, revalidate, pagination, error } = AlpacaHook.Orders.useListOrders(orderStatus);
+  const { isLoading, orders, revalidate, error } = useOrders(orderStatus);
 
   return (
     <List
@@ -18,7 +17,6 @@ export default function ManageOrders() {
       searchBarPlaceholder="Search by symbol, side, status, type, id..."
       filtering
       throttle
-      pagination={pagination}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Order Status"
@@ -42,7 +40,7 @@ export default function ManageOrders() {
       {!isLoading && error && (
         <List.EmptyView title="Error while looking up orders" icon={{ source: 'list-icon.png', mask: Image.Mask.RoundedRectangle }} description={error.message} />
       )}
-      {!isLoading && orders.length === 0 && (
+      {!isLoading && !error && orders.length === 0 && (
         <List.EmptyView
           title="No orders found"
           icon={{ source: 'list-icon.png', mask: Image.Mask.RoundedRectangle }}
@@ -66,13 +64,13 @@ export default function ManageOrders() {
                   { date: new Date(order.updated_at), tooltip: order.updated_at, icon: Icon.Calendar },
                   {
                     text: `${Number(order.filled_qty).toFixed(1)}/${Number(order.qty).toFixed(1)}`,
-                    icon: AlpacaApi.Orders.Status.ImageMap[order.status],
+                    icon: getOrderStatusImage(order.status),
                     tooltip: order.status.replaceAll('_', ' '),
                   },
                   {
-                    tag: AlpacaApi.Orders.getDisplayPrice(order).price,
+                    tag: getOrderDisplayPrice(order).price,
                     icon: Icon.AtSymbol,
-                    tooltip: AlpacaApi.Orders.getDisplayPrice(order).key.replaceAll('_', ' '),
+                    tooltip: getOrderDisplayPrice(order).key.replaceAll('_', ' '),
                   },
                   { tag: order.time_in_force.toUpperCase() },
                   { icon: { source: Icon.CircleFilled, tintColor: order.side === 'buy' ? Color.Green : Color.Red }, tooltip: order.side },
@@ -102,14 +100,14 @@ export default function ManageOrders() {
                   <List.Item.Detail.Metadata.Label
                     title="Status"
                     text={`${Number(order.filled_qty).toFixed(1)} / ${Number(order.qty).toFixed(1)} ${order.status.replaceAll('_', ' ').toUpperCase()}`}
-                    icon={AlpacaApi.Orders.Status.ImageMap[order.status]}
+                    icon={getOrderStatusImage(order.status)}
                   />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Link title="Symbol" text={order.symbol} target={`https://app.alpaca.markets/trade/${order.symbol}`} />
                   <List.Item.Detail.Metadata.TagList title="Asset Class">
                     <List.Item.Detail.Metadata.TagList.Item
                       text={order.asset_class.replaceAll('_', ' ')}
-                      icon={AlpacaApi.Assets.ImageMap[order.asset_class] ?? AlpacaApi.Assets.ImageMap.us_equity}
+                      icon={getAssetImage(order.asset_class) ?? getAssetImage('us_equity')}
                       color={Color.Orange}
                     />
                   </List.Item.Detail.Metadata.TagList>
@@ -150,7 +148,7 @@ export default function ManageOrders() {
                       primaryAction: {
                         title: 'Yes',
                         style: Alert.ActionStyle.Destructive,
-                        onAction: () => AlpacaApi.Orders.cancelOrder(order).finally(() => setTimeout(revalidate, 1000)),
+                        onAction: () => cancelOrder(order).finally(() => setTimeout(revalidate, 1000)),
                       },
                       dismissAction: { title: 'No', style: Alert.ActionStyle.Cancel },
                     })

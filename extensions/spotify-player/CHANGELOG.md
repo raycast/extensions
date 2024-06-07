@@ -1,5 +1,17 @@
 # Spotify Player Changelog
 
+## [Generate Playlist] - 2024-06-04
+
+- Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.
+
+## [New Album Actions] - 2024-05-30
+
+-  Added new actions in the album panel: `Add To Library` and `Remove From Library`.
+
+## [Automatically Trigger Current Track] - 2024-05-28
+
+- Automatically trigger the current track command when commands that modify the current track state are executed. (Like, Unlike, Next, Previous)
+
 ## [New Actions Added] - 2024-05-27
 
 - Added `Like` and `Dislike` actions for tracks.

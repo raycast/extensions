@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.76.0 - 2024-06-05
+
+### 💎 Improvements
+
+- Some companies requires all package.json’s names to be name-spaced (eg. `@foo/bar`). However, Raycast only understands names that *aren’t* name-spaced. This prevented some people from creating internal extensions. In order to workaround this issue, you can now use the `@workaround` namespace in extension names (eg. `@workaround/bar`).
+
+### 🐞 Fixes
+
+- **Clipboard**: Fixed an issue where 2 items were added to the pasteboard when copying a file (one with the file name, and one with the file url). It now correctly adds 1 item with 2 representations.
+
 ## 1.74.0 - 2024-05-15
 
 ### ✨ New

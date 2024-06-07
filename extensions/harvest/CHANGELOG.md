@@ -1,5 +1,6 @@
 # Harvest Changelog
 
+
 ## [Fixes] - 2024-06-07
 
 - Fix: on New timer entry, date will now default to the current date instead of "No Date"
