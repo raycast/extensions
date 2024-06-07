@@ -19,7 +19,7 @@
   ],
   "commands": [
     {
-      "name": "share-meeting-link",
+      "name": "index",
       "title": "Share Meeting Link",
       "subtitle": "Cal.com",
       "description": "Copy Meeting URL",
