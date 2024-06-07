@@ -81,7 +81,7 @@ export const ListItemMetadata = ({ data, type }: ListItemMetadataProps) => {
               <List.Item.Detail.Metadata.Separator key={i} />
             ) : (
               <List.Item.Detail.Metadata.Label icon={el.icon} title={el.title} key={i} text={el.value} />
-            )
+            ),
           )}
         </List.Item.Detail.Metadata>
       }
