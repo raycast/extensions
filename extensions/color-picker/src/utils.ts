@@ -59,15 +59,10 @@ export function getFormattedColor(
       return color.to("hsv").toString({ format: "color" });
     }
     case "oklch": {
-      const oklchColor = color.to("oklch");
-      const [l, c, h] = oklchColor.coords;
-      const lPercentage = (l * 100).toFixed(2);
-      return `oklch(${lPercentage}% ${c} ${h})`;
+      return color.to("oklch").toString({ format: "oklch" });
     }
     case "lch": {
-      const lchColor = color.to("lch");
-      const [l, c, h] = lchColor.coords;
-      return `lch(${l.toFixed(2)}% ${c} ${h})`;
+      return color.to("lch").toString({ format: "lch" });
     }
     case "p3": {
       return color.to("p3").toString({ format: "p3" });
