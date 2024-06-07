@@ -8,3 +8,13 @@ All notable changes to the "Video Call Reactions" extension will be documented i
 - Support for triggering video call reactions such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers.
 - Preferences to set default reaction and toggle confetti and sound effects.
 - Sound effect integration for confetti reaction.
+
+## [1.1.0] - 2024-06-07
+### Changed
+- Resolved an AppleScript execution issue in Full Screen Mode.
+- Changed Confetti messages to handle different cases: confetti only without a video call and different when with a video call.
+
+### Improved
+- Aligned the extension with Raycast guidelines.
+- Enhanced debug information and user messages.
+- Added a loading animation. 

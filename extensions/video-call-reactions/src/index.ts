@@ -1,51 +1,64 @@
 // index.ts
-import { environment, showToast, Toast, getPreferenceValues, closeMainWindow, open } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, closeMainWindow } from "@raycast/api";
 import { executeReaction } from "./executeReaction";
-import { exec } from "child_process";
+import {
+  REACTION_CONFETTI,
+  ERROR_VIDEO_MENU_NOT_VISIBLE,
+  TITLE_REACTION_ERROR,
+  MESSAGE_TOAST_NO_VIDEO_CALL,
+  MAP_REACTION_COMMANDS,
+  TITLE_TOAST_REACTION_MISSING,
+  showConfetti,
+  MESSAGE_UNKNOWN_ERROR,
+  Preferences,
+} from "./constants";
 
-// Add the sound file path and command to play it
-const sound = "mixkit-happy-crowd-cheer-975.wav";
-const playSoundCommand = `afplay "${environment.assetsPath + "/" + sound}"`;
-
-interface Preferences {
-  defaultReaction: string;
-  showConfetti: boolean;
-  playSound: boolean; // Add this to your Preferences interface
+function handleNoVideoCall(preferences: Preferences): void {
+  if (preferences.showConfetti && preferences.defaultReaction === REACTION_CONFETTI) {
+    showConfetti(preferences, true);
+  } else {
+    showToast({
+      style: Toast.Style.Failure,
+      title: MESSAGE_TOAST_NO_VIDEO_CALL,
+      message: MESSAGE_TOAST_NO_VIDEO_CALL,
+    });
+  }
 }
-
-// Mapping from string values with emojis to AppleScript commands
-const reactionCommandMap: { [key: string]: string } = {
-  "Hearts ❤️": "button 1 of group 1",
-  "Thumbs Up 👍": "button 2 of group 1",
-  "Thumbs Down 👎": "button 3 of group 1",
-  "Balloons 🎈": "button 4 of group 1",
-  "Rain 🌧️": "button 1 of group 2",
-  "Confetti 🎉": "button 2 of group 2",
-  "Lasers 🔆": "button 3 of group 2",
-  "Fireworks 🎆": "button 4 of group 2",
-};
 
 export default async function main() {
   await closeMainWindow();
   const preferences = getPreferenceValues<Preferences>();
-  const reactionCommand = reactionCommandMap[preferences.defaultReaction];
+  const reactionCommand = MAP_REACTION_COMMANDS[preferences.defaultReaction];
 
-  if (reactionCommand) {
-    await executeReaction(reactionCommand, preferences.defaultReaction);
-    if (preferences.showConfetti && preferences.defaultReaction === "Confetti 🎉") {
-      open("raycast://confetti");
-      // Check if playSound preference is true and play the sound
-      if (preferences.playSound) {
-        exec(playSoundCommand, (error, stderr) => {
-          if (error || stderr) {
-            const message = error ? error.message : "Unknown error";
-            console.error(`Failed to play sound: ${message}`);
-            showToast(Toast.Style.Failure, "Sound Error", "Failed to play the sound.");
-          }
+  if (!reactionCommand) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: TITLE_REACTION_ERROR,
+      message: TITLE_TOAST_REACTION_MISSING,
+    });
+    return;
+  }
+
+  try {
+    await executeReaction(reactionCommand, preferences);
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === ERROR_VIDEO_MENU_NOT_VISIBLE) {
+        handleNoVideoCall(preferences);
+      } else {
+        showToast({
+          style: Toast.Style.Failure,
+          title: TITLE_REACTION_ERROR,
+          message: error.message,
         });
       }
+    } else {
+      console.error(MESSAGE_UNKNOWN_ERROR, error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: TITLE_REACTION_ERROR,
+        message: MESSAGE_UNKNOWN_ERROR,
+      });
     }
-  } else {
-    await showToast(Toast.Style.Failure, "Error", "Selected reaction not found.");
   }
 }

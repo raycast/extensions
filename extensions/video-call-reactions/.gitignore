@@ -1,13 +1,21 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Ignore everything
+*
 
-# dependencies
-/node_modules
+# But not these directories...
+!/.gitignore
+!/src/
+!/assets/
 
-# Raycast specific files
-raycast-env.d.ts
-.raycast-swift-build
-.swiftpm
-compiled_raycast_swift
+# ...and not these files
+!/CHANGELOG.md
+!/package.json
+!/README.md
 
-# misc
-.DS_Store
+# Explicitly ignore all files in directories
+/src/*
+/assets/*
+
+# Except the ones we want to track
+!/src/constants.ts
+!/src/executeReaction.ts
+!/src/index.ts
