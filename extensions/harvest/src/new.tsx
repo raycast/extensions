@@ -38,7 +38,7 @@ export default function Command({
   const [taskId, setTaskId] = useState<string | null>(entry?.task.id.toString() ?? null);
   const [notes, setNotes] = useState<string>(entry?.notes ?? "");
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
-  const [spentDate, setSpentDate] = useState<Date | null>(viewDate);
+  const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
   const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
 
   useEffect(() => {
