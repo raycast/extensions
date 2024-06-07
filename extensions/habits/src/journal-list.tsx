@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, launchCommand, LaunchType, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, launchCommand, LaunchType, List } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 import { JournalEntry } from "./models/journal-entry";
@@ -18,7 +18,8 @@ export default function JournalListCommand() {
   if (!isLoading && data && data.length === 0) {
     return (
       <List>
-        <List.Item
+        <List.EmptyView
+          icon={Icon.Pencil}
           title="No entries found - create one!"
           actions={
             <ActionPanel>
