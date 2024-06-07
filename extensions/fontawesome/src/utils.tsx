@@ -1,5 +1,5 @@
 import { SearchItem } from './types';
-import { Clipboard, showHUD } from '@raycast/api';
+import { Clipboard, showHUD, ActionPanel, Action } from '@raycast/api';
 
 export const copySvgToClipboard = async (icon: SearchItem) => {
   // Since v6, Font Awesome stopped setting the SVGs fill color to currentColor, this restores that behavior.
@@ -61,4 +61,24 @@ export function iconForStyle(prefix: string) {
   } else {
     return 'brand.svg';
   }
+}
+
+export function iconActions(searchItem: SearchItem) {
+  return (
+    <ActionPanel>
+      <Action title={`Copy Icon Name`} icon="copy-clipboard-16" onAction={() => copyFASlugToClipboard(searchItem)} />
+      <Action
+        title={`Copy Icon Classes`}
+        icon="copy-clipboard-16"
+        onAction={() => copyFAClassesToClipboard(searchItem)}
+      />
+      <Action title={`Copy as SVG`} icon="copy-clipboard-16" onAction={() => copySvgToClipboard(searchItem)} />
+      <Action title={`Copy Icon Glyph`} icon="copy-clipboard-16" onAction={() => copyFAGlyphToClipboard(searchItem)} />
+      <Action
+        title={`Copy Icon Unicode`}
+        icon="copy-clipboard-16"
+        onAction={() => copyFAUnicodeClipboard(searchItem)}
+      />
+    </ActionPanel>
+  );
 }

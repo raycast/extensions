@@ -1,16 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Grid, Color, Action, ActionPanel, LocalStorage, getPreferenceValues } from '@raycast/api';
+import { Grid, Color, LocalStorage, getPreferenceValues } from '@raycast/api';
 import { useCachedState, useFetch } from '@raycast/utils';
 import { SearchResult, TokenData } from './types';
-import {
-  copyFAClassesToClipboard,
-  copyFAGlyphToClipboard,
-  copyFASlugToClipboard,
-  copySvgToClipboard,
-  copyFAUnicodeClipboard,
-  familyStylesByPrefix,
-  iconForStyle,
-} from './utils';
+import { familyStylesByPrefix, iconForStyle, iconActions } from './utils';
 
 //GraphQL Query to fetch icons for a specific style
 const iconQuery = (squery: string, stype: string) => `query Search {
@@ -19,6 +11,7 @@ const iconQuery = (squery: string, stype: string) => `query Search {
       unicode
       svgs(filter: { familyStyles: [
         { family: ${stype.split(', ')[0].toUpperCase()}, style: ${stype.split(', ')[1].toUpperCase()} }
+        { family: CLASSIC, style: BRANDS }
       ] }) {
           html
           familyStyle{
@@ -161,35 +154,7 @@ export default function Command() {
           <Grid.Item
             title={searchItem.id}
             key={searchItem.id}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={`Copy Icon Name`}
-                  icon="copy-clipboard-16"
-                  onAction={() => copyFASlugToClipboard(searchItem)}
-                />
-                <Action
-                  title={`Copy Icon Classes`}
-                  icon="copy-clipboard-16"
-                  onAction={() => copyFAClassesToClipboard(searchItem)}
-                />
-                <Action
-                  title={`Copy as SVG`}
-                  icon="copy-clipboard-16"
-                  onAction={() => copySvgToClipboard(searchItem)}
-                />
-                <Action
-                  title={`Copy Icon Glyph`}
-                  icon="copy-clipboard-16"
-                  onAction={() => copyFAGlyphToClipboard(searchItem)}
-                />
-                <Action
-                  title={`Copy Icon Unicode`}
-                  icon="copy-clipboard-16"
-                  onAction={() => copyFAUnicodeClipboard(searchItem)}
-                />
-              </ActionPanel>
-            }
+            actions={iconActions(searchItem)}
             content={{
               value: {
                 source: `data:image/svg+xml;base64,${Buffer.from(searchItem.svgs[0].html).toString('base64')}`,
