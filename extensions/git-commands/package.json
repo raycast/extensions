@@ -21,7 +21,7 @@
   ],
   "preferences": [
     {
-      "name": "MaxRecents",
+      "name": "MaxRecent",
       "description": "Maximum number of recent aliases to remember",
       "type": "textfield",
       "required": false,

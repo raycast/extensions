@@ -5,24 +5,22 @@ import { Alias } from "./types";
 
 export default function CommandDetail({
   alias,
-  isFavorite: _isFavorite,
   onFavorite,
   onCopy,
 }: {
   alias: Alias;
-  isFavorite: boolean;
   onFavorite: () => void;
   onCopy: () => void;
 }) {
-  const [isFavorite, setIsFavorite] = useState(_isFavorite);
+  const [fav, setFavorite] = useState(alias.fav);
   const { name, command, type, description } = alias;
   const onGitName = `Command "${mainCommand(command)}" documentation`;
   const onGitURL = `https://git-scm.com/docs/git-${mainCommand(command)}`;
   const searchName = "Search for complete command";
   const searchURL = `https://git-scm.com/search/results?search=${encodeURIComponent(command)}`;
 
-  const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const handleFav = () => {
+    setFavorite(!fav);
     onFavorite();
   };
 
@@ -35,8 +33,6 @@ ${command}
 
 ### ${description}
 
-${typeDescription(type)}
-
 ### Git Documentation
 - [${onGitName} ↗](${onGitURL})
 - [${searchName} ↗](${searchURL})
@@ -47,21 +43,26 @@ ${typeDescription(type)}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Alias" content={name} onCopy={onCopy} />
+          <Action.CopyToClipboard
+            title="Copy Alias"
+            content={name}
+            onCopy={onCopy}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
 
           <ActionPanel.Section>
-            {isFavorite ? (
+            {fav ? (
               <Action
                 icon={Icon.StarDisabled}
-                title="Remove Favorites"
-                onAction={handleFavorite}
-                shortcut={{ modifiers: ["cmd"], key: "x" }}
+                title="Remove From Favorites"
+                onAction={handleFav}
+                shortcut={Keyboard.Shortcut.Common.Remove}
               />
             ) : (
               <Action
                 icon={Icon.Star}
-                title="Save Favorite"
-                onAction={handleFavorite}
+                title="Add to Favorites"
+                onAction={handleFav}
                 shortcut={Keyboard.Shortcut.Common.Pin}
               />
             )}
@@ -75,10 +76,10 @@ ${typeDescription(type)}
       }
       metadata={
         <Detail.Metadata>
-          {isFavorite && (
+          {fav && (
             <>
               <Detail.Metadata.TagList title="">
-                <Detail.Metadata.TagList.Item text="Favorite" color={Color.Yellow} />
+                <Detail.Metadata.TagList.Item icon={Icon.Star} text="Favorite" color={Color.Yellow} />
               </Detail.Metadata.TagList>
 
               <Detail.Metadata.Separator />

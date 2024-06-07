@@ -5,6 +5,8 @@ export type Alias = {
   main: string;
   type: AliasType;
   description: string;
+  fav?: boolean;
+  recent?: boolean;
 };
 
 /**
