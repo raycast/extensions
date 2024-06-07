@@ -1,5 +1,9 @@
 # Quick Notes Changelog
 
+## [Bugfix] - 2024-06-07
+
+- Fix to respect sort when filtering by tag
+
 ## [Better Tag Management] - 2024-05-29
 
 - New quick add / remove tags using `⌘ + T`
