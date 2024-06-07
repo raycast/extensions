@@ -79,6 +79,20 @@ const ListItem = ({
   );
 };
 
+const sortNotes = (notes: Note[], sort: Sort) => {
+  return [...notes].sort((a, b) => {
+    if (sort === "created") {
+      return compareDesc(new Date(a.createdAt), new Date(b.createdAt));
+    } else if (sort === "alphabetical") {
+      return slugify(a.title).localeCompare(slugify(b.title));
+    } else if (sort === "updated") {
+      return compareDesc(new Date(a.updatedAt), new Date(b.updatedAt));
+    } else {
+      return 0;
+    }
+  });
+};
+
 const NotesList = () => {
   const [notes, setNotes] = useAtom(notesAtom);
   const [tags] = useAtom(tagsAtom);
@@ -91,17 +105,7 @@ const NotesList = () => {
 
   // Update notes on sort
   useEffect(() => {
-    const sortedNotes = [...notes].sort((a, b) => {
-      if (sort === "created") {
-        return compareDesc(new Date(a.createdAt), new Date(b.createdAt));
-      } else if (sort === "alphabetical") {
-        return slugify(a.title).localeCompare(slugify(b.title));
-      } else if (sort === "updated") {
-        return compareDesc(new Date(a.updatedAt), new Date(b.updatedAt));
-      } else {
-        return 0;
-      }
-    });
+    const sortedNotes = sortNotes(notes, sort);
     setFilteredNotes(sortedNotes);
     if (searchTag) {
       filterByTags(searchTag);
@@ -131,13 +135,14 @@ const NotesList = () => {
   };
 
   const filterByTags = (tag: string) => {
+    const sortedNotes = sortNotes(notes, sort);
     if (tag === "") {
       setSearchTag("");
-      setFilteredNotes(notes);
+      setFilteredNotes(sortedNotes);
       return;
     }
     setSearchTag(tag);
-    const filtered = notes.filter((obj) => obj.tags.includes(tag));
+    const filtered = sortedNotes.filter((obj) => obj.tags.includes(tag));
     setFilteredNotes(filtered);
   };
 
