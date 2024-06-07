@@ -1,4 +1,14 @@
-import { ActionPanel, List, Action, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import NodeFetch from "node-fetch";
 
@@ -15,6 +25,12 @@ export default function Command() {
   } = useFetch(`https://www.supahabits.com/api/habits?secret=${secret}`, {
     parseResponse: async (response) => {
       return (await response.json()) as Habit[];
+    },
+    onError: async (error) => {
+      if (error.message.indexOf("Unauthorized") !== -1) {
+        await showHUD("⛔ Unauthorized, Please set your secret in the extension preferences");
+        await openExtensionPreferences();
+      }
     },
   });
 

@@ -1,4 +1,14 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, launchCommand, LaunchType, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  launchCommand,
+  LaunchType,
+  List,
+  openExtensionPreferences,
+  showHUD,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 import { JournalEntry } from "./models/journal-entry";
@@ -8,6 +18,12 @@ export default function JournalListCommand() {
   const { isLoading, data } = useFetch(`https://www.supahabits.com/api/journal?secret=${secret}`, {
     parseResponse: async (response) => {
       return (await response.json()) as JournalEntry[];
+    },
+    onError: async (error) => {
+      if (error.message.indexOf("Unauthorized") !== -1) {
+        await showHUD("⛔ Unauthorized, Please set your secret in the extension preferences");
+        await openExtensionPreferences();
+      }
     },
   });
 
