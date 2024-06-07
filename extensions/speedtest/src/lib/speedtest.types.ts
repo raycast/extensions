@@ -35,6 +35,7 @@ export type SpeedtestResult = {
     macAddr: string;
     isVpn: false;
     externalIp: string;
+    isp?: string;
   };
   server: {
     id: number;
@@ -51,6 +52,29 @@ export type SpeedtestResult = {
     persisted: boolean;
   };
   error?: string;
+};
+
+export type SpeedtestResultResponse = SpeedtestResult & {
+  timestamp?: string;
+  type?: string;
+};
+
+export type ResultNames<T> = {
+  [key in keyof T]: T[key] extends object ? ResultNames<T[key]> : string;
+};
+
+type AllKeys<T> = T extends object ? { [K in keyof T]: K | AllKeys<T[K]> }[keyof T] : never;
+type AllValuesTypes<T> = T extends object ? { [K in keyof T]: T[K] | AllKeys<T[K]> }[keyof T] : never;
+type AllObjectValueTypes<T> = {
+  [K in keyof T]: T[K] extends object ? T[K] : never;
+}[keyof T];
+
+export type SpeedtestResultKeys = Exclude<AllKeys<SpeedtestResult>, undefined>;
+export type SpeedtestResultValueType = Exclude<AllValuesTypes<SpeedtestResult>, undefined>;
+export type SpeedtestResultObjectValueType = Exclude<AllObjectValueTypes<SpeedtestResult>, undefined>;
+
+export type SpeedTestResultPrettyNames = {
+  [key in SpeedtestResultKeys]: string;
 };
 
 export type ISPInterface = SpeedtestResult["interface"];

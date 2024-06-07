@@ -31,7 +31,7 @@ export function useSpeedtest(): {
         runSpeedTest(
           (r: SpeedtestResult) => {
             if (!cancel) {
-              setResult({ ...r });
+              setResult((sr) => ({ ...sr, ...r }));
             }
           },
           (r: SpeedtestResult) => {

@@ -2,6 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { pingToString } from "../lib/utils";
 import { ListItemMetadata } from "./list-item-metadata";
 import { Ping } from "../lib/speedtest.types";
+import { icons } from "../lib/speedtest-pretty-names";
 
 type PingListItemProps = {
   ping: number;
@@ -13,7 +14,7 @@ export function PingListItem({ ping, fullPingData, children }: PingListItemProps
   return (
     <List.Item
       title="Ping"
-      icon={{ source: Icon.LevelMeter, tintColor: Color.Blue }}
+      icon={icons.ping}
       actions={children}
       accessories={[
         {

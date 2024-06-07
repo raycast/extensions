@@ -1,4 +1,6 @@
 import sha256 from "sha256-file";
+import { SpeedtestResultKeys, SpeedtestResultValueType } from "./speedtest.types";
+import { speedTestResultPrettyNames } from "./speedtest-pretty-names";
 
 export function pingToString(ping: number): string {
   return ping === 0 ? "?" : ping.toFixed(1) + " ms";
@@ -42,7 +44,22 @@ export function percentageToString(val: number | undefined): string | undefined 
   return `${v}%`;
 }
 
-export const isObject = (value: unknown): boolean => {
+export const isObject = (value: unknown): value is object => {
   const type = typeof value;
   return value != null && (type == "object" || type == "function");
+};
+
+export const getPrettyName = (key: SpeedtestResultKeys) => {
+  return speedTestResultPrettyNames[key];
+};
+
+export const getPrettyValue = (value: SpeedtestResultValueType): string => {
+  if (value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+  return value.toString();
 };

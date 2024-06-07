@@ -1,6 +1,7 @@
-import { Color, Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { SpeedtestResult } from "../lib/speedtest.types";
 import { ListItemMetadata } from "./list-item-metadata";
+import { icons } from "../lib/speedtest-pretty-names";
 
 type ResultListItemProps = {
   speedtestResult: SpeedtestResult;
@@ -13,14 +14,14 @@ export function ResultListItem({ speedtestResult, isLoading, children }: ResultL
   return (
     <List.Item
       title="Result Link"
-      icon={{ source: Icon.CheckCircle, tintColor: Color.Blue }}
+      icon={icons.result}
       actions={children}
       accessories={[
         {
           text: isLoading ? "?" : `${url || "?"}`,
         },
       ]}
-      detail={speedtestResult && <ListItemMetadata data={speedtestResult} />}
+      detail={speedtestResult && <ListItemMetadata data={speedtestResult} type="result" />}
     />
   );
 }

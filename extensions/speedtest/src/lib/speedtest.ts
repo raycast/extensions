@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import { speedtestCLIFilepath } from "./cli";
-import { ResultProgress, SpeedtestResult } from "./speedtest.types";
+import { ResultProgress, SpeedtestResult, SpeedtestResultResponse } from "./speedtest.types";
 
 export const SpeedtestResultDefaultValue: SpeedtestResult = {
   isp: "",
@@ -29,6 +29,7 @@ export const SpeedtestResultDefaultValue: SpeedtestResult = {
     },
   },
   interface: {
+    isp: "",
     externalIp: "",
     internalIp: "",
     isVpn: false,
@@ -128,9 +129,9 @@ export function runSpeedTest(
 
   pro.stdout.on("data", (data: string) => {
     try {
-      const speedtestEventData = JSON.parse(data) as SpeedtestResult;
+      const speedtestEventData = JSON.parse(data) as SpeedtestResultResponse;
+      const { type } = speedtestEventData;
 
-      const { type } = speedtestEventData as SpeedtestResult & { type: SpeedtestResultType };
       if (type) {
         if (type === "download" || type === "upload") {
           const speed = speedtestEventData[type];
@@ -139,6 +140,10 @@ export function runSpeedTest(
           sendProgress(type, speed.progress);
           partialUpdateCallback(result);
         } else if (type === "testStart") {
+          result.interface = {
+            isp: speedtestEventData.isp,
+            ...speedtestEventData.interface,
+          };
           result.isp = speedtestEventData.isp;
           result.server = speedtestEventData.server;
 
@@ -149,11 +154,17 @@ export function runSpeedTest(
           partialUpdateCallback(result);
           sendProgress(type, speedtestEventData.ping.progress);
         } else if (type === "result") {
-          result.ping = {
-            ...result.ping,
-            packetLoss: speedtestEventData.packetLoss,
+          result.ping = speedtestEventData.ping;
+          result.download = speedtestEventData.download;
+          result.upload = speedtestEventData.upload;
+          result.interface = {
+            ...speedtestEventData.interface,
+            isp: speedtestEventData.isp,
           };
-          resultCallback(speedtestEventData);
+
+          result.result = speedtestEventData.result;
+
+          resultCallback(result);
           progressCallback({ download: undefined, upload: undefined, ping: undefined });
         }
       }

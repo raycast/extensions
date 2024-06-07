@@ -1,62 +1,87 @@
-import { List } from "@raycast/api";
-import { isObject } from "../lib/utils";
+import { Color, Icon, List } from "@raycast/api";
+import { getPrettyName, getPrettyValue, isObject } from "../lib/utils";
+import {
+  SpeedtestResult,
+  SpeedtestResultKeys,
+  SpeedtestResultObjectValueType,
+  SpeedtestResultValueType,
+} from "../lib/speedtest.types";
+import { ResultViewIconsList, icons } from "../lib/speedtest-pretty-names";
+import { InternetSpeed } from "./bandwidth/types";
 
-type MetadataValue = string | number | boolean | object;
-
-type Metadata = {
-  [key: string]: MetadataValue;
-};
+type MetadataValue = SpeedtestResultObjectValueType | Partial<SpeedtestResult> | InternetSpeed;
 
 type ListItemMetadataProps = {
-  data: Metadata;
+  data: MetadataValue;
+  type?: "result";
 };
 
 type FlatMetadata = {
   title: string;
   value: string;
+  icon?: { source: Icon; tintColor: Color | string };
   isSeparator?: boolean;
 };
 
 const getFlatMetadata = (data: MetadataValue): FlatMetadata[] => {
   const items: FlatMetadata[] = [];
 
-  Object.entries(data).forEach(([key, value]) => {
+  Object.entries(data).forEach((keyValuePair) => {
+    const [key, value] = keyValuePair as [SpeedtestResultKeys, SpeedtestResultValueType];
     if (isObject(value)) {
-      // Separator line
-      items.push({
+      const separatorItem: FlatMetadata = {
         isSeparator: true,
         title: "",
         value: "",
-      });
-      // Section title
-      items.push({
-        title: key.toLocaleUpperCase(),
-        value: "",
-      });
+      };
+      items.push(separatorItem);
+
+      const titleItem: FlatMetadata = { title: getPrettyName(key), value: "" };
+      if (key in icons) {
+        titleItem.icon = icons[key as ResultViewIconsList];
+      }
+      items.push(titleItem);
 
       items.push(...getFlatMetadata(value));
       return;
     }
 
     items.push({
-      title: key,
-      value,
+      title: getPrettyName(key),
+      value: getPrettyValue(value),
     });
   });
 
   return items;
 };
 
-export const ListItemMetadata = ({ data }: ListItemMetadataProps) => {
+const reorderResult = (data: SpeedtestResult): Partial<SpeedtestResult> => {
+  const { interface: isp, server, ping, download, upload, result } = data;
+  console.log(isp, server, ping, download, upload, result);
+  return {
+    interface: isp,
+    server,
+    ping,
+    download,
+    upload,
+    result,
+  };
+};
+
+export const ListItemMetadata = ({ data, type }: ListItemMetadataProps) => {
+  let renderData = data;
+  if (type === "result") {
+    renderData = reorderResult(data as SpeedtestResult);
+  }
   return (
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          {getFlatMetadata(data).map((el, i) =>
+          {getFlatMetadata(renderData).map((el, i) =>
             el.isSeparator ? (
               <List.Item.Detail.Metadata.Separator key={i} />
             ) : (
-              <List.Item.Detail.Metadata.Label title={el.title} key={i} text={"" + el.value} />
+              <List.Item.Detail.Metadata.Label icon={el.icon} title={el.title} key={i} text={el.value} />
             ),
           )}
         </List.Item.Detail.Metadata>

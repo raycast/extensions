@@ -1,6 +1,7 @@
-import { Color, Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { ISPInterface } from "../lib/speedtest.types";
 import { ListItemMetadata } from "./list-item-metadata";
+import { icons } from "../lib/speedtest-pretty-names";
 
 type ISPListItemProps = {
   name: string;
@@ -12,14 +13,14 @@ export function ISPListItem({ name, isp, children }: ISPListItemProps): JSX.Elem
   return (
     <List.Item
       title="Internet Service Provider"
-      icon={{ source: Icon.Globe, tintColor: Color.Green }}
+      icon={icons.isp}
       actions={children}
       accessories={[
         {
           text: `${name || "?"}`,
         },
       ]}
-      detail={isp && <ListItemMetadata data={{ isp: name, ...isp }} />}
+      detail={isp && <ListItemMetadata data={isp} />}
     />
   );
 }

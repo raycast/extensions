@@ -2,6 +2,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { percentageToString, speedToString } from "../lib/utils";
 import { ListItemMetadata } from "./list-item-metadata";
 import { Speed } from "../lib/speedtest.types";
+import { icons } from "../lib/speedtest-pretty-names";
 
 type SpeedListItemProps = {
   speed: number;
@@ -16,10 +17,7 @@ export function SpeedListItem({ progress, fullSpeedInfo, children, speed, type }
     <List.Item
       title={type}
       subtitle={percentageToString(progress)}
-      icon={{
-        source: type === "Upload" ? Icon.ArrowUpCircle : Icon.ArrowDownCircle,
-        tintColor: type === "Upload" ? "#bf71ff" : Color.Blue,
-      }}
+      icon={type === "Download" ? icons.download : icons.upload}
       actions={children}
       accessories={[
         {

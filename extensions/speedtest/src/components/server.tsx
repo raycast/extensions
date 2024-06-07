@@ -1,6 +1,7 @@
-import { Color, Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { ListItemMetadata } from "./list-item-metadata";
 import { Server } from "../lib/speedtest.types";
+import { icons } from "../lib/speedtest-pretty-names";
 
 type ServerListItemProps = {
   serverName: string;
@@ -12,7 +13,7 @@ export function ServerListItem({ children, serverName, server }: ServerListItemP
   return (
     <List.Item
       title="Server"
-      icon={{ source: Icon.HardDrive, tintColor: Color.Green }}
+      icon={icons.server}
       actions={children}
       accessories={[
         {
