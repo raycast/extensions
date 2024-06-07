@@ -51,11 +51,11 @@
       ]
     },
     {
-      "name": "open-all-uploads",
+      "name": "view-all-uploads",
       "title": "Open All Uploads",
       "subtitle": "CleanShot X",
       "description": "Open Uploads in Cleanshot Cloud",
-      "icon": "open-all-uploads.png",
+      "icon": "view-all-uploads.png",
       "mode": "no-view",
       "disabledByDefault": true
     },
