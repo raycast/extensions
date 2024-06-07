@@ -58,7 +58,19 @@ export default function JournalListCommand() {
   return (
     <List isLoading={isLoading}>
       {(data || []).map((item) => (
-        <List.Item key={item.id} title={item.content} />
+        <List.Item
+          key={item.id}
+          title={item.content}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="View/Edit Entry"
+                url={`https://www.supahabits.com/dashboard/journal/${item.id}`}
+                shortcut={{ modifiers: ["cmd"], key: "h" }}
+              />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );

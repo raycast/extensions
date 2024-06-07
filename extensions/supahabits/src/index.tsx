@@ -7,6 +7,7 @@ import {
   Toast,
   getPreferenceValues,
   openExtensionPreferences,
+  Color,
   showHUD,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
@@ -57,7 +58,11 @@ export default function Command() {
         habits.map((habit) => (
           <List.Item
             key={habit.id}
-            icon={habit.completed === true ? Icon.CheckCircle : Icon.Circle}
+            icon={
+              habit.completed === true
+                ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                : { source: Icon.Circle, tintColor: Color.Red }
+            }
             title={habit.name}
             actions={
               habit.completed === false ? (
