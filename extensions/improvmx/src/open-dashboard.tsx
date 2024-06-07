@@ -11,7 +11,7 @@ export default async () => {
       headers: API_HEADERS,
     });
     // @ts-expect-error Response type is incompatible
-    const result = await parseImprovMXResponse<{ account: string }>(response, { pagination: false })
+    const result = await parseImprovMXResponse<{ account: string }>(response, { pagination: false });
 
     const { data } = result;
     const account = "https://app.improvmx.com/auth/" + data.account;
@@ -21,7 +21,7 @@ export default async () => {
       clearSearchBar: true,
     });
   } catch (error) {
-    await showFailureToast(error, { title: "ImprovMX Error" })
+    await showFailureToast(error, { title: "ImprovMX Error" });
     return;
   }
 };

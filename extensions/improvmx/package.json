@@ -45,7 +45,15 @@
       "title": "Add Domain",
       "subtitle": "ImprovMX",
       "description": "Add a new domain to your ImprovMX account",
-      "mode": "view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "DOMAIN",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "create-alias",

@@ -21,11 +21,13 @@ import { DOMAIN_LOG_EVENT_STATUS_COLORS } from "./constants";
 
 export default function ManageDomainsAndAliases() {
   const { isLoading, error, data: domains, pagination } = useImprovMXPaginated<Domain, "domains">("domains");
-  
+
   const { push } = useNavigation();
   const showAliases = async (domain: Domain) => {
     if (domain.banned || !domain.active) {
-      showFailureToast("", { title: "Domain not configured properly. Please configure your DNS settings" })
+      showFailureToast("Domain not configured properly. Please configure your DNS settings", {
+        title: "ImprovMX Error",
+      });
       return;
     }
     push(<ViewAliases domain={domain.display} />);
@@ -38,7 +40,7 @@ export default function ManageDomainsAndAliases() {
       <List.Section title="Active Domains">
         {domains
           .filter((domain) => domain.active)
-          .map((domain: Domain) => (
+          .map((domain) => (
             <List.Item
               key={domain.display}
               title={domain.display}
@@ -46,8 +48,12 @@ export default function ManageDomainsAndAliases() {
               accessories={[{ text: { value: domain.aliases.length.toString() + " aliases" } }]}
               actions={
                 <ActionPanel>
-                  <Action title="Show Aliases" onAction={() => showAliases(domain)} />
-                  <Action.Push title="View Domain Logs" target={<ViewDomainLogs domain={domain.display} />} />
+                  <Action title="Show Aliases" icon={Icon.Envelope} onAction={() => showAliases(domain)} />
+                  <Action.Push
+                    title="View Domain Logs"
+                    icon={Icon.Paragraph}
+                    target={<ViewDomainLogs domain={domain.display} />}
+                  />
                 </ActionPanel>
               }
             />
@@ -64,15 +70,20 @@ export default function ManageDomainsAndAliases() {
               accessories={[{ text: { value: domain.aliases.length.toString() + " aliases" } }]}
               actions={
                 <ActionPanel>
-                  <Action title="Show Aliases" onAction={() => showAliases(domain)} />
-                  <Action.Push title="View Domain Logs" target={<ViewDomainLogs domain={domain.display} />} />
+                  <Action title="Show Aliases" icon={Icon.Envelope} onAction={() => showAliases(domain)} />
+                  <Action.Push
+                    title="View Domain Logs"
+                    icon={Icon.Paragraph}
+                    target={<ViewDomainLogs domain={domain.display} />}
+                  />
                 </ActionPanel>
               }
             />
           ))}
       </List.Section>
-      {!isLoading && <List.Section title="Actions">
-      <List.Item
+      {!isLoading && (
+        <List.Section title="Actions">
+          <List.Item
             title="Add New Domain"
             icon={{ source: Icon.Plus }}
             actions={
@@ -86,18 +97,27 @@ export default function ManageDomainsAndAliases() {
                 />
               </ActionPanel>
             }
-          /></List.Section>}
+          />
+        </List.Section>
+      )}
     </List>
-  )
+  );
 }
 
 type ViewAliasesProps = {
   domain: string;
-}
+};
 function ViewAliases({ domain }: ViewAliasesProps) {
-  const { isLoading, data: aliases, error, pagination } = useImprovMXPaginated<Alias, "aliases">(`domains/${domain}/aliases`);
+  const {
+    isLoading,
+    data: aliases,
+    error,
+    pagination,
+  } = useImprovMXPaginated<Alias, "aliases">(`domains/${domain}/aliases`);
 
-  return error ? <ErrorComponent error={error} /> : (
+  return error ? (
+    <ErrorComponent error={error} />
+  ) : (
     <List isLoading={isLoading} searchBarPlaceholder="Search for alias..." pagination={pagination}>
       <List.Section title={`${domain} Aliases`}>
         {aliases.map((alias) => (
@@ -105,13 +125,12 @@ function ViewAliases({ domain }: ViewAliasesProps) {
             key={alias.alias}
             title={alias.alias + "@" + domain}
             subtitle={`-> ${alias.forward}`}
-            accessories={[
-        { date: new Date(alias.created) }
-            ]}
+            accessories={[{ date: new Date(alias.created) }]}
             actions={
               <ActionPanel>
                 <Action
                   title="Copy Alias"
+                  icon={Icon.CopyClipboard}
                   onAction={async () => {
                     await Clipboard.copy(alias.alias + "@" + domain);
                     await showToast(Toast.Style.Success, "Copied", "Alias copied to clipboard");
@@ -122,77 +141,105 @@ function ViewAliases({ domain }: ViewAliasesProps) {
           />
         ))}
       </List.Section>
-        {!isLoading && (
-          <List.Section title="Actions">
-            <List.Item
-              title="Create New Alias"
-              icon={{ source: Icon.Plus }}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Create New Alias"
-                    onAction={async () => {
-                      await launchCommand({
-                        name: "create-alias",
-                        type: LaunchType.UserInitiated,
-                        arguments: {
-                          domain,
-                        },
-                      });
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-            <List.Item
-              title="Create Masked Email Address"
-              icon={{ source: Icon.Plus }}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Create Masked Email Address"
-                    onAction={async () => {
-                      await launchCommand({
-                        name: "create-masked-email-address",
-                        type: LaunchType.UserInitiated,
-                        arguments: { domain },
-                      });
-                    }}
-                  />
-                </ActionPanel>
-              }
-            />
-          </List.Section>
-        )}
+      {!isLoading && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Create New Alias"
+            icon={Icon.Plus}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Create New Alias"
+                  icon={Icon.Plus}
+                  onAction={async () => {
+                    await launchCommand({
+                      name: "create-alias",
+                      type: LaunchType.UserInitiated,
+                      arguments: {
+                        domain,
+                      },
+                    });
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            title="Create Masked Email Address"
+            icon={Icon.PlusCircle}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Create Masked Email Address"
+                  icon={Icon.PlusCircle}
+                  onAction={async () => {
+                    await launchCommand({
+                      name: "create-masked-email-address",
+                      type: LaunchType.UserInitiated,
+                      arguments: { domain },
+                    });
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
-  )
+  );
 }
 
 type ViewDomainLogsProps = {
   domain: string;
-}
+};
 function ViewDomainLogs({ domain }: ViewDomainLogsProps) {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const { isLoading, data } = useImprovMX<{ logs: DomainLog[] }>(`domains/${domain}/logs`);
- 
-  return <List navigationTitle={`Domain / ${domain} / Logs`} isLoading={isLoading} isShowingDetail={isShowingDetail}>
-    {data?.logs.map(log => <List.Section key={log.id} title={log.subject}>
-      {log.events.map(event => <List.Item key={event.id} title={event.status} icon={{ source: Icon.Dot, tintColor: DOMAIN_LOG_EVENT_STATUS_COLORS[event.status] }} subtitle={event.message} accessories={[
-        { date: new Date(event.created) }
-      ]} detail={<List.Item.Detail metadata={<List.Item.Detail.Metadata>
-        <List.Item.Detail.Metadata.Label title="ID" text={event.id} />
-        <List.Item.Detail.Metadata.Label title="Code" text={event.code.toString()} />
-        <List.Item.Detail.Metadata.Label title="Created" text={new Date(event.created).toString()} />
-        <List.Item.Detail.Metadata.Label title="Local" text={event.local} />
-        <List.Item.Detail.Metadata.Label title="Message" text={event.message} />
-        <List.Item.Detail.Metadata.Label title="Recipient" text={`${event.recipient.name}<${event.recipient.email}>`} />
-        <List.Item.Detail.Metadata.Label title="Server" text={event.server} />
-        <List.Item.Detail.Metadata.TagList title="Status">
-          <List.Item.Detail.Metadata.TagList.Item text={event.status} color={DOMAIN_LOG_EVENT_STATUS_COLORS[event.status]} />
-        </List.Item.Detail.Metadata.TagList>
-      </List.Item.Detail.Metadata>} />} actions={<ActionPanel>
-        <Action title="Toggle Details" onAction={() => setIsShowingDetail(prev => !prev)} />
-      </ActionPanel>} />)}
-    </List.Section>)}
-  </List>
+
+  return (
+    <List navigationTitle={`Domain / ${domain} / Logs`} isLoading={isLoading} isShowingDetail={isShowingDetail}>
+      {data?.logs.map((log) => (
+        <List.Section key={log.id} title={log.subject}>
+          {log.events.map((event) => (
+            <List.Item
+              key={event.id}
+              title={event.status}
+              icon={{ source: Icon.Dot, tintColor: DOMAIN_LOG_EVENT_STATUS_COLORS[event.status] }}
+              subtitle={event.message}
+              accessories={[{ date: new Date(event.created) }]}
+              detail={
+                <List.Item.Detail
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label title="ID" text={event.id} />
+                      <List.Item.Detail.Metadata.Label title="Code" text={event.code.toString()} />
+                      <List.Item.Detail.Metadata.Label title="Created" text={new Date(event.created).toString()} />
+                      <List.Item.Detail.Metadata.Label title="Local" text={event.local} />
+                      <List.Item.Detail.Metadata.Label title="Message" text={event.message} />
+                      <List.Item.Detail.Metadata.Label
+                        title="Recipient"
+                        text={`${event.recipient.name}<${event.recipient.email}>`}
+                      />
+                      <List.Item.Detail.Metadata.Label title="Server" text={event.server} />
+                      <List.Item.Detail.Metadata.TagList title="Status">
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text={event.status}
+                          color={DOMAIN_LOG_EVENT_STATUS_COLORS[event.status]}
+                        />
+                      </List.Item.Detail.Metadata.TagList>
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action title="Toggle Details" onAction={() => setIsShowingDetail((prev) => !prev)} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      ))}
+    </List>
+  );
 }
