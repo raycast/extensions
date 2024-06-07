@@ -29,6 +29,56 @@
       "required": false,
       "title": "API Token (For Font Awesome Pro Accounts)",
       "description": "Optionally Use Font Awesome Pro icons by providing an API Token, not necessary to access free icons."
+    },
+    {
+      "name": "STYLE_PREFERENCE",
+      "type": "dropdown",
+      "default": "fas",
+      "required": false,
+      "data": [
+        {
+          "title": "Classic, Solid",
+          "value": "fas"
+        },
+        {
+          "title": "Classic, Regular",
+          "value": "far"
+        },
+        {
+          "title": "Classic, Light",
+          "value": "fal"
+        },
+        {
+          "title": "Classic, Thin",
+          "value": "fat"
+        },
+        {
+          "title": "Classic, Brands",
+          "value": "fab"
+        },
+        {
+          "title": "Duotone, Solid",
+          "value": "fad"
+        },
+        {
+          "title": "Sharp, Solid",
+          "value": "fass"
+        },
+        {
+          "title": "Sharp, Regular",
+          "value": "fasr"
+        },
+        {
+          "title": "Sharp, Light",
+          "value": "fasl"
+        },
+        {
+          "title": "Sharp, Thin",
+          "value": "fast"
+        }
+      ],
+      "title": "Icon family and style preference",
+      "description": "Choose which icon family and style you prefer."
     }
   ],
   "dependencies": {

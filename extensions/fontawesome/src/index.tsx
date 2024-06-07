@@ -24,15 +24,16 @@ const iconQuery = (squery: string, stype: string) => `query Search {
 
 export default function Command() {
   let { API_TOKEN } = getPreferenceValues();
-  let default_icon = 'fass';
+  const { STYLE_PREFERENCE } = getPreferenceValues();
+  let account = 'pro';
 
   //if pro API Token not provided, use free API Token
   if (!API_TOKEN) {
     API_TOKEN = 'D7A31EA9-20D8-434E-A6C6-8ADC890ADCB8';
-    default_icon = 'fas';
+    account = 'free';
   }
 
-  const [type, setType] = useState<string>(default_icon);
+  const [type, setType] = useState<string>(STYLE_PREFERENCE);
   const [query, setQuery] = useState<string>('');
   const [accessToken, setAccessToken] = useState<string>('');
   const [tokenTimeStart, setTokenTimeStart] = useState<number>();
@@ -88,10 +89,22 @@ export default function Command() {
         <Grid.Dropdown
           tooltip="Select Family & Style"
           onChange={(newValue) => setType(newValue)}
-          defaultValue={default_icon}
+          defaultValue={STYLE_PREFERENCE}
         >
-          {default_icon === 'fass' ? (
+          {account === 'pro' ? (
             <>
+              <Grid.Dropdown.Section title="Classic Icons">
+                {Object.entries(familyStylesByPrefix)
+                  .slice(5, 10)
+                  .map(([key, value]) => (
+                    <Grid.Dropdown.Item
+                      key={key}
+                      title={value}
+                      value={key}
+                      icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
+                    />
+                  ))}
+              </Grid.Dropdown.Section>
               <Grid.Dropdown.Section title="Sharp Icons">
                 {Object.entries(familyStylesByPrefix)
                   .slice(0, 4)
@@ -107,18 +120,6 @@ export default function Command() {
               <Grid.Dropdown.Section title="Duotone Icons">
                 {Object.entries(familyStylesByPrefix)
                   .slice(4, 5)
-                  .map(([key, value]) => (
-                    <Grid.Dropdown.Item
-                      key={key}
-                      title={value}
-                      value={key}
-                      icon={{ source: iconForStyle(key), tintColor: Color.SecondaryText }}
-                    />
-                  ))}
-              </Grid.Dropdown.Section>
-              <Grid.Dropdown.Section title="Classic Icons">
-                {Object.entries(familyStylesByPrefix)
-                  .slice(5, 10)
                   .map(([key, value]) => (
                     <Grid.Dropdown.Item
                       key={key}
