@@ -1,6 +1,6 @@
 # Say - Spoken Content Changelog
 
-## [Accessibility Enhancement]
+## [Accessibility Enhancement] - 2024-06-07
 
 - Add support for saying the selected text on any application
 - Add Siri Voice tips for best experience
