@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "find-nearest-tailwind-color",
-  "title": "Find nearest tailwind color",
+  "title": "Find Nearest Tailwind Color",
   "description": "This extension allows you to bring your custom color and find the closest color from the Tailwind CSS palette.",
   "icon": "command-icon.png",
   "author": "michael_nabil230",
