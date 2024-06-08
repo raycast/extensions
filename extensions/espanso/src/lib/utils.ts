@@ -1,7 +1,7 @@
 import fse from "fs-extra";
 import path from "path";
 import { $ } from "zx";
-import { EspansoMatch, MultiTrigger, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
+import { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import YAML from "yaml";
 $.verbose = false;
 
@@ -23,13 +23,14 @@ export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; 
   return matchFilesTimes.sort((a, b) => b.mtime - a.mtime);
 }
 
-export function formatMatch(espansoMatch: MultiTrigger & Replacement) {
+export function formatMatch(espansoMatch: MultiTrigger & Label & Replacement) {
   const triggerList = espansoMatch.triggers.map((trigger) => `"${trigger}"`).join(", ");
+  const labelLine = espansoMatch.label ? `\n    label: "${espansoMatch.label}"` : "";
 
   return `
-  - triggers: [${triggerList}]
+  - triggers: [${triggerList}]${labelLine}
     replace: "${espansoMatch.replace}"
-    `;
+  `;
 }
 
 export function appendMatchToFile(fileContent: string, fileName: string, espansoMatchDir: string) {

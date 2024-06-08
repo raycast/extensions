@@ -10,6 +10,10 @@ export type RegexTrigger = {
   regex: string;
 };
 
+export type Label = {
+  label?: string;
+};
+
 export type Replacement = {
   replace: string;
 };
