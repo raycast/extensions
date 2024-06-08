@@ -1,8 +1,9 @@
 # Slack Changelog
 
-## [Improvements] - 2024-06-01
+## [Improvements] - {PR_MERGE_DATE}
 
-- Adds preference to open slack links in the browser
+- Adds action to open in browser apart from slack app
+- Only show Open in Slack option in case Slack app is installed on the system
 
 ## [Improve Search command UX] - 2023-04-16
 
