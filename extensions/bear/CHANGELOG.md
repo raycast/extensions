@@ -1,5 +1,10 @@
 # Bear Changelog
 
+## [Connect note pinning form value to API call] - 2024-06-08
+- When creating a new note, checking the option to "pin to top" is now taken into account within the API call
+- When hovering over the preference for "Pin note in notes list", the description is now accurate to the purpose
+- Fixes issue where a note's title, body and tags would show as URL encoded
+
 ## [Create new note configurations and new search feature] - 2023-07-09
 
 - When creating a new note, you can choose default options that you don't have to pick in the form. Options are: opening the note in the main window, in a new window, or don't open it at all.

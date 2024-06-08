@@ -9,7 +9,8 @@
     "lucaschultz",
     "diokhan",
     "ron-myers",
-    "JuanBanchero"
+    "JuanBanchero",
+    "ramsay"
   ],
   "license": "MIT",
   "commands": [
@@ -60,7 +61,7 @@
         },
         {
           "default": false,
-          "description": "When creating a new note, prepend time and date",
+          "description": "When creating a new note, pin the note",
           "label": "Pin note in notes list",
           "name": "pinNote",
           "required": false,
