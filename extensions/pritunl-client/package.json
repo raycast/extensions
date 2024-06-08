@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pritunl-client",
   "title": "pritunl-client",
-  "description": "",
-  "icon": "command-icon.png",
+  "description": "Everything you need to know to get started with Raycast for Teams",
+  "icon": "icon.png",
   "author": "LouisBa",
   "categories": [
     "Developer Tools"
