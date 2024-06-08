@@ -1,6 +1,6 @@
 import sha256 from "sha256-file";
 import { SpeedtestResultKeys, SpeedtestResultValueType } from "./speedtest.types";
-import { speedTestResultPrettyNames } from "./speedtest-pretty-names";
+import { ResultViewIconsListKeys, icons, speedTestResultPrettyNames } from "./speedtest-pretty-names";
 
 export function pingToString(ping: number): string {
   return ping === 0 ? "?" : ping.toFixed(1) + " ms";
@@ -62,4 +62,8 @@ export const getPrettyValue = (value: SpeedtestResultValueType): string => {
     return value ? "Yes" : "No";
   }
   return value.toString();
+};
+
+export const isResultViewIconsListKey = (k: string): k is ResultViewIconsListKeys => {
+  return k in icons;
 };

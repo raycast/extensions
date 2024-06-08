@@ -1,8 +1,8 @@
 import { Color, Icon } from "@raycast/api";
 import { SpeedTestResultPrettyNames } from "./speedtest.types";
 
-export type ResultViewIconsList = "result" | "ping" | "download" | "upload" | "interface" | "server";
-export type HeaderIcon = { [K in ResultViewIconsList]: { source: Icon; tintColor: Color | string } };
+export type ResultViewIconsListKeys = "result" | "ping" | "download" | "upload" | "interface" | "server";
+export type HeaderIcon = { [K in ResultViewIconsListKeys]: { source: Icon; tintColor: Color | string } };
 
 export const icons: HeaderIcon = {
   download: { source: Icon.ArrowDownCircle, tintColor: Color.Blue },

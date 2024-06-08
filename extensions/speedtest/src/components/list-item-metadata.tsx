@@ -1,12 +1,12 @@
 import { Color, Icon, List } from "@raycast/api";
-import { getPrettyName, getPrettyValue, isObject } from "../lib/utils";
+import { getPrettyName, getPrettyValue, isObject, isResultViewIconsListKey } from "../lib/utils";
 import {
   SpeedtestResult,
   SpeedtestResultKeys,
   SpeedtestResultObjectValueType,
   SpeedtestResultValueType,
 } from "../lib/speedtest.types";
-import { ResultViewIconsList, icons } from "../lib/speedtest-pretty-names";
+import { icons } from "../lib/speedtest-pretty-names";
 import { InternetSpeed } from "./bandwidth/types";
 
 type MetadataValue = SpeedtestResultObjectValueType | Partial<SpeedtestResult> | InternetSpeed;
@@ -37,8 +37,8 @@ const getFlatMetadata = (data: MetadataValue): FlatMetadata[] => {
       items.push(separatorItem);
 
       const titleItem: FlatMetadata = { title: getPrettyName(key), value: "" };
-      if (key in icons) {
-        titleItem.icon = icons[key as ResultViewIconsList];
+      if (isResultViewIconsListKey(key)) {
+        titleItem.icon = icons[key];
       }
       items.push(titleItem);
 
