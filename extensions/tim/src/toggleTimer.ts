@@ -1,19 +1,12 @@
-import { showToast, Toast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { installedWrapper, toggleTimer } from "./lib/tim";
 
 export default installedWrapper(async () => {
   try {
     await toggleTimer();
-    await showToast({
-      title: "Success",
-      message: "Timer toggled",
-      style: Toast.Style.Success,
-    });
+    await showHUD("Active task toggled", { clearRootSearch: true });
   } catch (error) {
-    showToast({
-      title: "Error",
-      message: "Could not toggle timer",
-      style: Toast.Style.Failure,
-    });
+    showFailureToast(error);
   }
 });
