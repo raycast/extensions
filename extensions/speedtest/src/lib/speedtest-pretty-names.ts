@@ -1,13 +1,13 @@
 import { Color, Icon } from "@raycast/api";
 import { SpeedTestResultPrettyNames } from "./speedtest.types";
 
-export type ResultViewIconsList = "result" | "ping" | "download" | "upload" | "isp" | "server";
+export type ResultViewIconsList = "result" | "ping" | "download" | "upload" | "interface" | "server";
 export type HeaderIcon = { [K in ResultViewIconsList]: { source: Icon; tintColor: Color | string } };
 
 export const icons: HeaderIcon = {
   download: { source: Icon.ArrowDownCircle, tintColor: Color.Blue },
   upload: { source: Icon.ArrowUpCircle, tintColor: "#bf71ff" },
-  isp: { source: Icon.Globe, tintColor: Color.Green },
+  interface: { source: Icon.Globe, tintColor: Color.Green },
   server: { source: Icon.HardDrive, tintColor: Color.Green },
   ping: { source: Icon.LevelMeter, tintColor: Color.Blue },
   result: { source: Icon.CheckCircle, tintColor: Color.Blue },

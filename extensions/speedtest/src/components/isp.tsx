@@ -13,7 +13,7 @@ export function ISPListItem({ name, isp, children }: ISPListItemProps): JSX.Elem
   return (
     <List.Item
       title="Internet Service Provider"
-      icon={icons.isp}
+      icon={icons.interface}
       actions={children}
       accessories={[
         {
