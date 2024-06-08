@@ -8,6 +8,8 @@ const APPID = "KXECYAMEX8";
 const APIKEY = "01279e9ede105d87a1ade54565b1a2fd";
 const INDEX = "adonisjs_next";
 
+type SearchResults = [string, result[]][];
+
 type result = {
   url: string;
   anchor: string;
@@ -44,10 +46,10 @@ export default function SearchDocumentation() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [searchResults, setSearchResults] = useState<SearchResults | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const search = async (query = "api") => {
+  const search = async (query = "api"): Promise<SearchResults> => {
     setIsLoading(true);
     !query && (query = "api");
 
@@ -56,7 +58,7 @@ export default function SearchDocumentation() {
         hitsPerPage: 15,
       })
       .then((res) => {
-        return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1")) || [];
+        return Object.entries(_.groupBy(res.hits, "hierarchy.lvl1")) as SearchResults;
       })
       .catch((err) => {
         showToast(Toast.Style.Failure, "Error searching AdonisJS documentation", err.message);
@@ -84,31 +86,34 @@ export default function SearchDocumentation() {
       {searchResults?.map(([hitType, hitTypeResults]) => (
         <List.Section title={hitType} key={hitType}>
           {hitTypeResults
-            ?.filter((hit: { hierarchy: { lvl2: null } }) => hit.hierarchy.lvl2 != null)
-            .map((hit: result) => (
-              <List.Item
-                id={hit.objectID}
-                key={hit.objectID}
-                icon="adonis-logo.png"
-                title={(
-                  (hit.hierarchy.lvl2 != null ? hit.hierarchy.lvl2 : "") +
-                  " " +
-                  (hit.hierarchy.lvl3 != null ? hit.hierarchy.lvl3 : "") +
-                  " " +
-                  (hit.hierarchy.lvl4 != null ? hit.hierarchy.lvl4 : "") +
-                  " " +
-                  (hit.hierarchy.lvl5 != null ? hit.hierarchy.lvl5 : "") +
-                  " " +
-                  (hit.hierarchy.lvl6 != null ? hit.hierarchy.lvl6 : "")
-                ).replace("&amp;", "&")}
-                actions={
-                  <ActionPanel title="Actions">
-                    <Action.OpenInBrowser url={hit.url} />
-                    <Action.CopyToClipboard content={hit.url} title="Copy URL" />
-                  </ActionPanel>
-                }
-              />
-            ))}
+            ?.filter((hit) => hit.hierarchy?.lvl2 != null)
+            .map(
+              (hit) =>
+                hit && (
+                  <List.Item
+                    id={hit.objectID}
+                    key={hit.objectID}
+                    icon="adonis-logo.png"
+                    title={(
+                      (hit.hierarchy?.lvl2 != null ? hit.hierarchy.lvl2 : "") +
+                      " " +
+                      (hit.hierarchy?.lvl3 != null ? hit.hierarchy.lvl3 : "") +
+                      " " +
+                      (hit.hierarchy?.lvl4 != null ? hit.hierarchy.lvl4 : "") +
+                      " " +
+                      (hit.hierarchy?.lvl5 != null ? hit.hierarchy.lvl5 : "") +
+                      " " +
+                      (hit.hierarchy?.lvl6 != null ? hit.hierarchy.lvl6 : "")
+                    ).replace("&amp;", "&")}
+                    actions={
+                      <ActionPanel title="Actions">
+                        <Action.OpenInBrowser url={hit.url} />
+                        <Action.CopyToClipboard content={hit.url} title="Copy URL" />
+                      </ActionPanel>
+                    }
+                  />
+                ),
+            )}
         </List.Section>
       ))}
       <List.EmptyView icon="adonis-logo-128.png" title="Whoops! We did not find any matches." />

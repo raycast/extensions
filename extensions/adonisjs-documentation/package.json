@@ -13,13 +13,13 @@
   "commands": [
     {
       "name": "adonis",
-      "title": "adonis",
+      "title": "Adonis",
       "subtitle": "AdonisJS Documentation search",
       "description": "Search the Adonis JS documentation from within Raycast.",
       "mode": "view"
     }
   ],
-  "tools": null,
+  "tools": [],
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "algoliasearch": "^4.23.3",
