@@ -2,19 +2,8 @@ import { writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Form,
-  popToRoot,
-  showInFinder,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
-import { format } from "prettier";
 import { useRef } from "react";
 
 import { existsFile } from "./lib/fs";
@@ -53,19 +42,10 @@ export default function Command() {
         }
 
         const jsonString = await exportData();
-        await writeFile(
-          absolutePath,
-          format(jsonString, {
-            parser: "json-stringify",
-          })
-        );
-        showToast({
-          title: "Success",
-          message: "Data has been exported",
-          style: Toast.Style.Success,
-        });
+
+        await writeFile(absolutePath, jsonString);
+        await showHUD("Data has been exported", { clearRootSearch: true });
         await showInFinder(absolutePath);
-        popToRoot();
       } catch (error) {
         showToast({
           title: "Error",
