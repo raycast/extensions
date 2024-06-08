@@ -1,4 +1,4 @@
-import { Color, getPreferenceValues } from "@raycast/api";
+import { Icon, Color, getPreferenceValues } from "@raycast/api";
 import { default as data } from "./alias.json";
 import { Alias, AliasType } from "./types";
 
@@ -9,15 +9,23 @@ export function getData() {
 }
 
 export function typeColor(type: AliasType) {
-  if (!preferences.ItemAliasTypeColor) {
-    return Color.SecondaryText;
+  if (preferences.colors == "all") {
+    return {
+      show: Color.Green,
+      default: Color.Blue,
+      delete: Color.Red,
+    }[type];
   }
 
-  return {
-    show: Color.Green,
-    default: Color.Blue,
-    delete: Color.Red,
-  }[type];
+  return Color.SecondaryText;
+}
+
+export function iconStar() {
+  if (preferences.colors != "no") {
+    return { source: Icon.Star, tintColor: Color.Yellow };
+  } else {
+    return { source: Icon.Star };
+  }
 }
 
 export function typeDescription(type: AliasType) {

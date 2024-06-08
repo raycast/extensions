@@ -21,40 +21,102 @@
   ],
   "preferences": [
     {
+      "name": "colors",
+      "title": "Colors",
+      "description": "Alias with colors according to the impact the command produces.",
+      "required": false,
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "All colors available",
+          "value": "all"
+        },
+        {
+          "title": "Favorite icon in yellow",
+          "value": "favorite"
+        },
+        {
+          "title": "No colors",
+          "value": "no"
+        }
+      ],
+      "default": "all"
+    },
+    {
       "name": "MaxRecent",
       "description": "Maximum number of recent aliases to remember",
-      "type": "textfield",
+      "type": "dropdown",
       "required": false,
-      "title": "Total recents to show",
-      "placeholder": "3",
-      "default": "3",
-      "validation": {
-        "type": "number",
-        "min": 1,
-        "max": 5
-      }
+      "title": "Total recent to show",
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        }
+      ],
+      "default": "3"
     },
     {
       "name": "MaxFavorites",
       "description": "Maximum number of favorites aliases to remember",
-      "type": "textfield",
+      "type": "dropdown",
       "required": false,
       "title": "Total favorites to show",
-      "placeholder": "3",
-      "default": "3",
-      "validation": {
-        "type": "number",
-        "min": 1,
-        "max": 5
-      }
-    },
-    {
-      "name": "ItemAliasTypeColor",
-      "label": "Show the type tag with colors",
-      "description": "Alias with colors according to the impact the command produces.",
-      "required": false,
-      "type": "checkbox",
-      "default": true
+      "data": [
+        {
+          "title": "1",
+          "value": "1"
+        },
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        }
+      ],
+      "default": "3"
     }
   ],
   "dependencies": {

@@ -14,10 +14,8 @@ export default function CommandDetail({
 }) {
   const [fav, setFavorite] = useState(alias.fav);
   const { name, command, type, description } = alias;
-  const onGitName = `Command "${mainCommand(command)}" documentation`;
+  const onGitName = `Go to "${mainCommand(command)}" documentation`;
   const onGitURL = `https://git-scm.com/docs/git-${mainCommand(command)}`;
-  const searchName = "Search for complete command";
-  const searchURL = `https://git-scm.com/search/results?search=${encodeURIComponent(command)}`;
 
   const handleFav = () => {
     setFavorite(!fav);
@@ -33,9 +31,6 @@ ${command}
 
 ### ${description}
 
-### Git Documentation
-- [${onGitName} ↗](${onGitURL})
-- [${searchName} ↗](${searchURL})
 ###
 `;
   return (
@@ -50,28 +45,23 @@ ${command}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
 
-          <ActionPanel.Section>
-            {fav ? (
-              <Action
-                icon={Icon.StarDisabled}
-                title="Remove From Favorites"
-                onAction={handleFav}
-                shortcut={Keyboard.Shortcut.Common.Remove}
-              />
-            ) : (
-              <Action
-                icon={Icon.Star}
-                title="Add to Favorites"
-                onAction={handleFav}
-                shortcut={Keyboard.Shortcut.Common.Pin}
-              />
-            )}
-          </ActionPanel.Section>
+          {fav ? (
+            <Action
+              icon={Icon.StarDisabled}
+              title="Remove From Favorites"
+              onAction={handleFav}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
+          ) : (
+            <Action
+              icon={Icon.Star}
+              title="Add to Favorites"
+              onAction={handleFav}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+            />
+          )}
 
-          <ActionPanel.Section title="Git Documentation">
-            <Action.OpenInBrowser icon={Icon.Info} title={onGitName} url={onGitURL} />
-            <Action.OpenInBrowser icon={Icon.MagnifyingGlass} title={searchName} url={searchURL} />
-          </ActionPanel.Section>
+          <Action.OpenInBrowser icon={Icon.Globe} title={onGitName} url={onGitURL} />
         </ActionPanel>
       }
       metadata={

@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List, Keyboard, Cache, showToast, Toast, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, List, Keyboard, Cache, showToast, Toast, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getData, typeColor } from "./utils";
+import { getData, typeColor, iconStar } from "./utils";
 import { Alias } from "./types";
 import CommandDetail from "./command-detail";
 
@@ -16,6 +16,7 @@ export default function Command() {
   const aliases: Alias[] = data?.aliases || [];
   const favorites: Alias[] = aliases?.filter((alias: Alias) => alias.fav) || [];
   const recent: Alias[] = aliases?.filter((alias: Alias) => alias.recent) || [];
+  const hasRecent = recent?.length > 0 || false;
 
   const saveCache = async ({ data, title, message }: { data: Alias[] | []; title?: string; message?: string }) => {
     if (!data || !data.length || data.some((a) => typeof a !== "object")) {
@@ -68,11 +69,6 @@ export default function Command() {
     saveCache({ data, title: "Recent removed", message: alias.name + " has been removed from recent" });
   };
 
-  const clearFavs = () => {
-    const data = aliases?.map((alias) => ({ ...alias, fav: false }));
-    saveCache({ data, title: "All favorites removed" });
-  };
-
   const clearRecent = () => {
     const data = aliases?.map((alias) => ({ ...alias, recent: false }));
     saveCache({ data, title: "All recent removed" });
@@ -86,7 +82,7 @@ export default function Command() {
         title={command}
         subtitle={description}
         keywords={[description, command]}
-        accessories={[...(fav ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow } }] : []), tag]}
+        accessories={[...(fav ? [{ icon: iconStar() }] : []), tag]}
         actions={Actions(alias)}
       />
     );
@@ -95,42 +91,38 @@ export default function Command() {
   const Actions = (alias: Alias) => {
     return (
       <ActionPanel>
-        <ActionPanel.Section>
-          <Action.Push
-            icon={Icon.Eye}
-            title="Open Alias"
-            target={<CommandDetail alias={alias} onFavorite={() => handleFav(alias)} onCopy={() => addRecent(alias)} />}
-            shortcut={Keyboard.Shortcut.Common.Open}
-          />
+        <Action.Push
+          icon={Icon.Eye}
+          title="Open Alias"
+          target={<CommandDetail alias={alias} onFavorite={() => handleFav(alias)} onCopy={() => addRecent(alias)} />}
+          shortcut={Keyboard.Shortcut.Common.Open}
+        />
 
-          <Action.CopyToClipboard
-            title="Copy Alias"
-            content={alias.name}
-            shortcut={Keyboard.Shortcut.Common.Copy}
-            onCopy={() => addRecent(alias)}
-          />
-        </ActionPanel.Section>
+        <Action.CopyToClipboard
+          title="Copy Alias"
+          content={alias.name}
+          shortcut={Keyboard.Shortcut.Common.Copy}
+          onCopy={() => addRecent(alias)}
+        />
 
-        <ActionPanel.Section>
-          <>
-            {alias.fav && (
-              <Action
-                icon={Icon.StarDisabled}
-                title="Remove From Favorites"
-                onAction={() => handleFav(alias)}
-                shortcut={Keyboard.Shortcut.Common.Remove}
-              />
-            )}
-            {alias.fav || (
-              <Action
-                icon={Icon.Star}
-                title="Add to Favorites"
-                onAction={() => handleFav(alias)}
-                shortcut={Keyboard.Shortcut.Common.Pin}
-              />
-            )}
-          </>
-        </ActionPanel.Section>
+        <>
+          {alias.fav && (
+            <Action
+              icon={Icon.StarDisabled}
+              title="Remove From Favorites"
+              onAction={() => handleFav(alias)}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+            />
+          )}
+          {alias.fav || (
+            <Action
+              icon={Icon.Star}
+              title="Add to Favorites"
+              onAction={() => handleFav(alias)}
+              shortcut={Keyboard.Shortcut.Common.Pin}
+            />
+          )}
+        </>
 
         {alias.recent && (
           <Action
@@ -140,13 +132,14 @@ export default function Command() {
             shortcut={Keyboard.Shortcut.Common.Remove}
           />
         )}
-        <Action
-          icon={Icon.XMarkCircle}
-          title="Clear All Recent"
-          onAction={clearRecent}
-          shortcut={Keyboard.Shortcut.Common.RemoveAll}
-        />
-        <Action icon={Icon.XMarkCircle} title="Clear All Favorites" onAction={clearFavs} />
+        {hasRecent && (
+          <Action
+            icon={Icon.XMarkCircle}
+            title="Clear All Recent"
+            onAction={clearRecent}
+            shortcut={Keyboard.Shortcut.Common.RemoveAll}
+          />
+        )}
       </ActionPanel>
     );
   };
