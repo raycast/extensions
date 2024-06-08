@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Performance] - 2024-06-08
+
+- Improve performance when fetching users and channels in large workspace
+
 ## [Improve Search command UX] - 2023-04-16
 
 - Automatically close Slack right sidebar after navigating to a user chat
