@@ -7,7 +7,7 @@ import {
   showToast,
   Toast,
   popToRoot,
-  getPreferenceValues
+  getPreferenceValues,
 } from "@raycast/api";
 import open from "open";
 
@@ -27,7 +27,13 @@ function CreateNoteAction() {
       return;
     }
     open(
-      `bear://x-callback-url/create?title=${values.title}&tags=${values.tags}&open_note=${values.openNote !== "no" ? "yes" : "no"}&new_window=${values.openNote === "new" ? "yes" : "no"}&show_window=${values.openNote !== "no" ? "yes" : "no"}&edit=${values.openNote === "no" ? "no" : "yes"}&timestamp=${values.timestamp ? "yes" : "no"}&text=${values.text}&pin=${values.pin ? "yes" : "no"}`,
+      `bear://x-callback-url/create?title=${values.title}&tags=${values.tags}&open_note=${
+        values.openNote !== "no" ? "yes" : "no"
+      }&new_window=${values.openNote === "new" ? "yes" : "no"}&show_window=${
+        values.openNote !== "no" ? "yes" : "no"
+      }&edit=${values.openNote === "no" ? "no" : "yes"}&timestamp=${values.timestamp ? "yes" : "no"}&text=${
+        values.text
+      }&pin=${values.pin ? "yes" : "no"}`,
       { background: values.openNote === "no" }
     );
     await closeMainWindow();
