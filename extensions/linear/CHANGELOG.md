@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Search Projects Command] - {PR_MERGE_DATE}
+
+- Adds Cmd + enter shortcut to Open project in linear
+
 ## [Improvements] - 2024-05-30
 
 - Added preference to hide redundant (Done, Canceled, Duplicate) issues across all searches
