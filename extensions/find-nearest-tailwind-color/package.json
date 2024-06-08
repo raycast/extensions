@@ -21,7 +21,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Find nearest tailwind color",
+      "title": "Find Nearest Tailwind Color",
       "description": "This extension allows you to bring your custom color and find the closest color from the Tailwind CSS palette.",
       "mode": "view"
     }
