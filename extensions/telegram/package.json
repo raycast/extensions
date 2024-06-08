@@ -29,13 +29,25 @@
           "required": true
         }
       ],
-      "mode": "view",
+      "mode": "no-view",
       "subtitle": "telegram",
       "keywords": [
         "telegram",
         "quick",
         "msg",
         "message"
+      ]
+    },
+    {
+      "name": "tglogin",
+      "title": "Telegram Login",
+      "description": "Login to your telegram account",
+      "mode": "view",
+      "subtitle": "telegram",
+      "keywords": [
+        "telegram",
+        "login",
+        "auth"
       ]
     }
   ],
