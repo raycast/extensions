@@ -59,14 +59,6 @@ export async function openTaskManager() {
   await runAppleScriptSilently(script);
 }
 
-export async function openNewTask() {
-  const script = buildScriptEnsuringTimIsRunning(`opennewtask`);
-  await runAppleScriptSilently(script);
-}
-export async function openNavigator() {
-  const script = buildScriptEnsuringTimIsRunning(`opennavigator`);
-  await runAppleScriptSilently(script);
-}
 export async function openActiveRecord() {
   const script = buildScriptEnsuringTimIsRunning(`openactiverecord`);
   await runAppleScriptSilently(script);

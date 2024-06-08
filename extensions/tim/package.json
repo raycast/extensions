@@ -10,13 +10,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "openTaskManager",
-      "title": "Open Task Manager",
-      "subtitle": "Tim",
-      "description": "Open task manager window.",
-      "mode": "no-view"
-    },
-    {
       "name": "toggleTimer",
       "title": "Toggle Timer",
       "subtitle": "Tim",
@@ -29,13 +22,6 @@
       "subtitle": "Tim",
       "description": "Create a new task.",
       "mode": "view"
-    },
-    {
-      "name": "openNavigator",
-      "title": "Open Navigator",
-      "subtitle": "Tim",
-      "description": "Open Navigator menu.",
-      "mode": "no-view"
     },
     {
       "name": "openActiveRecord",
