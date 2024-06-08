@@ -26,7 +26,7 @@ export type Quote = {
 export type Character = {
   _id: string;
   height: string;
-  race: string;
+  race: string | null;
   gender: string;
   birth: string;
   spouse: string;

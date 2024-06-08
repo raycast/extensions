@@ -16,7 +16,9 @@ export default function Characters() {
       onData(data) {
         if (!races.length) {
           const uniqueRaces = new Set(data.map((character) => character.race));
-          const uniqueRacesFiltered = [...uniqueRaces].filter((race) => race && race !== "NaN");
+          const uniqueRacesFiltered: string[] = [...uniqueRaces].filter(
+            (race): race is string => race !== null && race !== "NaN",
+          );
           setRaces(uniqueRacesFiltered);
         }
       },
@@ -45,7 +47,7 @@ export default function Characters() {
       <List.Section title={`${data?.length || 0} of ${totalItems || data?.length} characters`}>
         {data?.map((character) => {
           const icon =
-            CHARACTER_ICONS.find((c) => c.name === character.name || (c.race && character.race.includes(c.race)))
+            CHARACTER_ICONS.find((c) => c.name === character.name || (c.race && character.race?.includes(c.race)))
               ?.icon || DEFAULT_ICON;
 
           return (
@@ -58,7 +60,7 @@ export default function Characters() {
                   icon:
                     character.gender === "Male" ? Icon.Male : character.gender === "Female" ? Icon.Female : undefined,
                 },
-                { tag: character.race },
+                { tag: character.race || "N/A" },
               ]}
               detail={
                 <List.Item.Detail

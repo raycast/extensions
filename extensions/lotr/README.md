@@ -24,6 +24,16 @@ This is a Raycast extension to get LoTR information via [The One API v2](https:/
 
 As of `Initial Version` this extension does NOT incorporate the individual `Quotes` and `Chapters` endpoints.
 
+## 🐛 BUGS
+
+As of `Initial Version`, in `Movies` after viewing `Quotes`, if you navigate back to `Movies` one of three things can happen:
+
+1. Everything works as expected,
+2. Movies are present but you can not view quotes unless you re-run the command
+3. The Movies disappear and you need to re-run the command.
+
+PRs will be appreciated to fix this issue.
+
 ## ©️ ATTRIBUTIONS
 
 <a target="_blank" href="https://icons8.com/icon/20169/one-ring">One Ring</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
