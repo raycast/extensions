@@ -1,37 +1,4 @@
-import { closeMainWindow, getPreferenceValues, open } from "@raycast/api";
 import formatDistance from "date-fns/formatDistance";
-import { runAppleScript } from "run-applescript";
-
-// https://api.slack.com/reference/deep-linking
-const openChat = (workspaceId: string, userId: string, conversationId: string) => {
-  const { closeRightSidebar, openInBrowser } =
-    getPreferenceValues<{ closeRightSidebar: boolean; openInBrowser: boolean }>();
-
-  open(
-    openInBrowser
-      ? `https://app.slack.com/client/${workspaceId}/${conversationId}`
-      : `slack://user?team=${workspaceId}&id=${userId}`
-  );
-  closeMainWindow();
-  if (closeRightSidebar) {
-    runAppleScript(
-      buildScriptEnsuringSlackIsRunning(`
-        tell application "System Events" to tell process "Slack" to key code 47 using {command down}
-      `)
-    );
-  }
-};
-
-const openChannel = (workspaceId: string, channelId: string) => {
-  const { openInBrowser } = getPreferenceValues<{ openInBrowser: boolean }>();
-
-  open(
-    openInBrowser
-      ? `https://app.slack.com/client/${workspaceId}/${channelId}`
-      : `slack://channel?team=${workspaceId}&id=${channelId}`
-  );
-  closeMainWindow();
-};
 
 const timeDifference = (date: Date): string => {
   const now = new Date();
@@ -70,4 +37,4 @@ const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: str
     end tell`;
 };
 
-export { openChat, openChannel, timeDifference, buildScriptEnsuringSlackIsRunning };
+export { timeDifference, buildScriptEnsuringSlackIsRunning };

@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
-import { openChannel, openChat } from "./shared/utils";
+import { OpenChannelInSlack, OpenChatInSlack } from "./shared/OpenInSlack";
 
 export default function Command() {
   return (
@@ -40,7 +40,7 @@ function SlackList() {
             icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChat(teamId, id, conversationId!)} />
+                <OpenChatInSlack workspaceId={teamId} userId={id} conversationId={conversationId} />
               </ActionPanel>
             }
           />
@@ -55,7 +55,7 @@ function SlackList() {
             icon={icon}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
+                <OpenChannelInSlack workspaceId={teamId} channelId={id} />
               </ActionPanel>
             }
           />
@@ -70,7 +70,7 @@ function SlackList() {
             icon={icon}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
+                <OpenChannelInSlack workspaceId={teamId} channelId={id} />
               </ActionPanel>
             }
           />

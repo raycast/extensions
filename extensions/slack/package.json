@@ -68,14 +68,6 @@
       "type": "checkbox",
       "required": false,
       "default": true
-    },
-    {
-      "label": "Open in Browser",
-      "description": "Opens Slack links in browser instead of native application",
-      "name": "openInBrowser",
-      "type": "checkbox",
-      "required": false,
-      "default": false
     }
   ],
   "dependencies": {
