@@ -63,7 +63,7 @@ export const OpenChannelInSlack = ({
 }: {
   workspaceId: string;
   channelId: string;
-  onActionAddon?: () => void;
+  onActionAddon?: () => Promise<void>;
 }) => {
   useEffect(() => {
     checkSlackApp();
@@ -75,9 +75,9 @@ export const OpenChannelInSlack = ({
         <Action.Open
           title={"Open in Slack"}
           target={`slack://channel?team=${workspaceId}&id=${channelId}`}
-          onOpen={() => {
-            onActionAddon?.();
-            closeMainWindow();
+          onOpen={async () => {
+            await onActionAddon?.();
+            await closeMainWindow();
           }}
           icon={Icon.AppWindowSidebarLeft}
           application="Slack"
@@ -86,9 +86,9 @@ export const OpenChannelInSlack = ({
       <Action.OpenInBrowser
         url={`https://app.slack.com/client/${workspaceId}/${channelId}`}
         title={"Open in Browser"}
-        onOpen={() => {
-          onActionAddon?.();
-          closeMainWindow();
+        onOpen={async () => {
+          await onActionAddon?.();
+          await closeMainWindow();
         }}
       />
     </>
