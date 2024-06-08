@@ -125,7 +125,7 @@ export default function Command() {
           const diff = moment.unix(goal.losedate).diff(new Date());
           const timeDiffDuration = moment.duration(diff);
           const dayDifference = moment.unix(goal.losedate).diff(new Date(), "days");
-          const goalRate = goal.rate % 1 === 0 ? goal.rate : goal.rate.toFixed(2);
+          const goalRate = goal.baremin;
 
           let goalIcon;
 
