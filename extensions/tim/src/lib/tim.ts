@@ -1,6 +1,6 @@
 import { getApplications, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { exec } from "child_process";
-import { runAppleScript } from "run-applescript";
 
 import { Data, UUID } from "../types/tim";
 import { buildScriptEnsuringTimIsRunning, runAppleScriptSilently } from "./apple-script";

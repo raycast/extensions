@@ -802,8 +802,7 @@
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.15.0",
     "dayjs": "^1.11.11",
-    "parse-ms": "^4.0.0",
-    "run-applescript": "^7.0.0"
+    "parse-ms": "^4.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
