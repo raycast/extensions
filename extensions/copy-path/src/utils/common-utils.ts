@@ -1,16 +1,19 @@
-import { getChromiumBrowserPath, getFocusFinderPath, getWebkitBrowserPath } from "./applescript-utils";
+import {
+  getChromiumBrowserPath,
+  getFocusFinderPath,
+  getFocusWindowTitle,
+  getWebkitBrowserPath,
+} from "./applescript-utils";
 import {
   Application,
   Clipboard,
   getSelectedFinderItems,
   PopToRootType,
   showHUD,
-  Toast,
   updateCommandMetadata,
 } from "@raycast/api";
 import { chromiumBrowserNames, webkitBrowserNames } from "./constants";
-import { showFailureToast } from "@raycast/utils";
-import { copyUrlContent, multiPathSeparator, showCopyTip, showErrorTip, showLastCopy } from "../types/preferences";
+import { copyUrlContent, multiPathSeparator, showCopyTip, showLastCopy, showTabTitle } from "../types/preferences";
 import parseUrl from "parse-url";
 
 export const copyFinderPath = async () => {
@@ -59,8 +62,10 @@ export const copyUrl = async (frontmostApp: Application) => {
     url = await getChromiumBrowserPath(frontmostApp.name);
   }
 
+  const windowTitle = await getFocusWindowTitle();
   if (url === "") {
-    await showErrorHUD("No Path or URL found", { title: `Current app is ${frontmostApp.name}` });
+    await Clipboard.copy(windowTitle);
+    await showSuccessHUD("🖥️ " + windowTitle);
   } else {
     // handle url
     const parsedUrl = parseUrl(url);
@@ -82,8 +87,11 @@ export const copyUrl = async (frontmostApp: Application) => {
         break;
       }
     }
+    if (showTabTitle) {
+      copyContent = `${windowTitle}\n${copyContent}`;
+    }
     await Clipboard.copy(copyContent);
-    await showSuccessHUD("📋 " + copyContent);
+    await showSuccessHUD("🔗 " + copyContent);
     await customUpdateCommandMetadata(copyContent);
   }
 };
@@ -94,13 +102,5 @@ export const showSuccessHUD = async (
 ) => {
   if (showCopyTip) {
     await showHUD(title, options);
-  }
-};
-export const showErrorHUD = async (
-  error: unknown,
-  options?: { title?: string | undefined; primaryAction?: Toast.ActionOptions | undefined } | undefined,
-) => {
-  if (showErrorTip) {
-    await showFailureToast(error, options);
   }
 };

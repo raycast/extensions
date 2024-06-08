@@ -1,22 +1,7 @@
-import { Action } from "@raycast/api";
 import { AWS_URL_BASE } from "../constants";
-
-export function getActionOpenInBrowser(url: string) {
-  return <Action.OpenInBrowser key={"browser"} title="Open in Browser" url={url} />;
-}
 
 export function getFilterPlaceholder(type: string, searchType?: string) {
   return `Filter ${type} by ${searchType ? searchType : "name"}`;
-}
-
-export function getExportResponse(response: unknown) {
-  return (
-    <Action.CopyToClipboard
-      title="Copy Service Response"
-      content={JSON.stringify(response, null, 2)}
-      shortcut={{ modifiers: ["opt"], key: "e" }}
-    />
-  );
 }
 
 export function isReadyToFetch() {
@@ -52,7 +37,7 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
       return `${AWS_URL_BASE}/codesuite/codepipeline/pipelines/${resourceId}/view?region=${AWS_REGION}`;
     case "AWS::S3::Bucket":
       return `https://s3.console.aws.amazon.com/s3/buckets/${resourceId}`;
-    case "AWS:S3::Object": {
+    case "AWS::S3::Object": {
       const [bucket, ...objectKey] = resourceId.split("/");
       return `https://s3.console.aws.amazon.com/s3/object/${bucket}?&prefix=${objectKey.join("/")}`;
     }
@@ -67,4 +52,23 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
     default:
       return "";
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sortRecord = (record: Record<string, any>): Record<string, any> =>
+  Object.fromEntries(Object.entries(record).sort(([keyA], [keyB]) => keyA.localeCompare(keyB)));
+
+export function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    try {
+      const parsedError = JSON.parse(error.message);
+      if (parsedError.errorMessages && Array.isArray(parsedError.errorMessages)) {
+        return parsedError.errorMessages[0];
+      }
+    } catch (e) {
+      return error.message;
+    }
+  }
+
+  return String(error);
 }

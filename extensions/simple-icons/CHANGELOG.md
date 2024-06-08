@@ -1,5 +1,19 @@
 # Brand Icons Changelog
 
+## [New Feature] - 2024-05-24
+
+- Add offline support
+- Bump [`raycast-cross-extension`](https://github.com/LitoMore/raycast-cross-extension-conventions)
+
+## [Updates] - 2024-05-16
+
+- Implement Raycast Cross Extension Conventions
+
+## [Updates] - 2024-04-30
+
+- Expose search function through `launchCommand`
+- Remove unused cache header
+
 ## [Updates] - 2024-04-15
 
 - Rename extension name to Brand Icons

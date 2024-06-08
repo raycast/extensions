@@ -1,4 +1,4 @@
-import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, showToast, Toast, getSelectedText } from "@raycast/api";
 import fetch, { Headers } from "node-fetch";
 
 function getErrorMessage(error: unknown) {
@@ -12,14 +12,22 @@ async function reportError({ message }: { message: string }) {
 
 export default async function () {
   try {
-    const { accessToken } = getPreferenceValues();
-    const clipboard = await Clipboard.readText();
-    if (!clipboard) {
-      return await reportError(new Error("Clipboard is empty"));
+    const { accessToken, pasteAfterShortening } = getPreferenceValues();
+
+    // If no text is selected, fall back to the clipboard
+    let urlToShorten;
+    try {
+      urlToShorten = await getSelectedText();
+    } catch (error: unknown) {
+      urlToShorten = await Clipboard.readText();
     }
 
-    //validate url or error out early.
-    new URL(clipboard);
+    if (!urlToShorten) {
+      return await reportError(new Error("No text selected and clipboard is empty"));
+    }
+
+    // Validate the URL or error out early
+    new URL(urlToShorten);
 
     const response = await fetch("https://api-ssl.bitly.com/v4/shorten", {
       headers: new Headers({
@@ -28,17 +36,21 @@ export default async function () {
       }),
       method: "post",
       body: JSON.stringify({
-        long_url: clipboard,
+        long_url: urlToShorten,
       }),
     });
 
     const { errors, link } = (await response.json()) as { link: string; errors?: [] };
     if (errors) {
-      return await reportError(new Error(`Bitly API Error - ${JSON.stringify(errors)}, Clipboard Text - ${clipboard}`));
+      return await reportError(new Error(`Bitly API Error - ${JSON.stringify(errors)}, URL - ${urlToShorten}`));
     }
 
     await Clipboard.copy(link);
     await showToast(Toast.Style.Success, "Success", "Copied shortened URL to clipboard");
+
+    if (pasteAfterShortening) {
+      await Clipboard.paste(link);
+    }
   } catch (error: unknown) {
     await reportError({ message: getErrorMessage(error) });
   }

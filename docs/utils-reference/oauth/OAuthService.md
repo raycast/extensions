@@ -18,7 +18,7 @@ const client = new OAuth.PKCEClient({
 const github = new OAuthService({
   client,
   clientId: "7235fe8d42157f1f38c0",
-  scopes: "notifications repo read:org read:user read:project",
+  scope: "notifications repo read:org read:user read:project",
   authorizeUrl: "https://github.oauth.raycast.com/authorize",
   tokenUrl: "https://github.oauth.raycast.com/token",
 });
@@ -97,6 +97,11 @@ const github = OAuthService.github({ scope: "repo user" });
 #### Google
 
 Google has verification processes based on the required scopes for your extension. Therefore, you need to configure your own client for it.
+
+{% hint style="info" %}
+Creating your own Google client ID is more tedious than other processes, so we’ve created a page to assist you: [Getting a Google client ID](./getting-google-client-id.md)
+{% endhint %}
+
 
 ##### Signature
 

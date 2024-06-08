@@ -5,6 +5,9 @@
   "description": "An extension to discover the best tools and beta releases for developers (via console.dev)",
   "icon": "console-icon.png",
   "author": "fedevitaledev",
+  "contributors": [
+    "aliaksandr_zhebit"
+  ],
   "license": "MIT",
   "commands": [
     {

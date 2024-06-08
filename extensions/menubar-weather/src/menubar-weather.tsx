@@ -5,7 +5,7 @@ import { getDateIcon, getMenuItem, getUnits, isoToDateTime, isoToTime, timeHour 
 import { getMenuIcon, getWeatherIcon } from "./utils/icon-utils";
 import {
   getWeatherDescription,
-  isEmptyLonLat,
+  isEmptyLatLon,
   latitude,
   longitude,
   showForecast,
@@ -196,7 +196,7 @@ export default function MenubarWeather() {
               />
             </MenuBarExtra.Section>
           )}
-          {showLocation && typeof weather !== "undefined" && isEmptyLonLat() && typeof location !== "undefined" && (
+          {showLocation && typeof weather !== "undefined" && isEmptyLatLon() && typeof location !== "undefined" && (
             <MenuBarExtra.Section title={"Location"}>
               {typeof location.name !== "undefined" && (
                 <MenuBarExtra.Item
@@ -228,27 +228,27 @@ export default function MenubarWeather() {
                   }}
                 />
               )}
-              {typeof location.longitude !== "undefined" && typeof location.latitude !== "undefined" && (
+              {typeof location.latitude !== "undefined" && typeof location.longitude !== "undefined" && (
                 <MenuBarExtra.Item
-                  title={"Lon, Lat"}
+                  title={"Lat, Lon"}
                   icon={getMenuIcon("Lon, Lat")}
-                  subtitle={` ${location?.longitude?.toFixed(2)}, ${location?.latitude?.toFixed(2)}`}
+                  subtitle={` ${location?.latitude?.toFixed(2)}, ${location?.longitude?.toFixed(2)}`}
                   onAction={async () => {
-                    await Clipboard.copy(`${location?.longitude?.toFixed(2)}, ${location?.latitude?.toFixed(2)}`);
+                    await Clipboard.copy(`${location?.latitude?.toFixed(2)}, ${location?.longitude?.toFixed(2)}`);
                   }}
                 />
               )}
             </MenuBarExtra.Section>
           )}
 
-          {showLocation && !isEmptyLonLat() && (
+          {showLocation && !isEmptyLatLon() && (
             <MenuBarExtra.Section title={"Location"}>
               <MenuBarExtra.Item
-                title={"Lon, Lat"}
-                icon={getMenuIcon("Lon, Lat")}
-                subtitle={` ${parseFloat(longitude)?.toFixed(2)}, ${parseFloat(latitude)?.toFixed(2)}`}
+                title={"Lat, Lon"}
+                icon={getMenuIcon("Lat, Lon")}
+                subtitle={` ${parseFloat(latitude)?.toFixed(2)}, ${parseFloat(longitude)?.toFixed(2)}`}
                 onAction={async () => {
-                  await Clipboard.copy(`${parseFloat(longitude)?.toFixed(2)}, ${parseFloat(latitude)?.toFixed(2)}`);
+                  await Clipboard.copy(`${parseFloat(latitude)?.toFixed(2)}, ${parseFloat(longitude)?.toFixed(2)}`);
                 }}
               />
             </MenuBarExtra.Section>

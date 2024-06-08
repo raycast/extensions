@@ -40,6 +40,12 @@
       "mode": "view"
     },
     {
+      "name": "stats-pomodoro-timer",
+      "title": "View Pomodoro Stats",
+      "mode": "view",
+      "description": "Shows the stats of the Pomodoro timer"
+    },
+    {
       "name": "slack-pomodoro-menu-bar",
       "title": "Slack Pomodoro in Menu Bar",
       "subtitle": "Control timers from menu-bar and updates Slack status",

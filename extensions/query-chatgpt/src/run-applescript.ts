@@ -23,26 +23,32 @@ export function composeUrlWithRandomId(gptUrl: TabOpenerArguments["gptUrl"]): st
   return url.toString();
 }
 
+function replaceOldChatGPTLinkWithNew(oldURL: string): string {
+  const newURL = oldURL.replace("https://chat.openai.com", "https://chatgpt.com");
+  return newURL;
+}
+
 // Reusing the same tab makes sense only if the provided URL is the specific conversation
 // if the provided URL leads to custom GPT, the conversation URL will be automatically created by ChatGPT app and set into the browser URL.
 function getIsUrlEligibleForReusingSameTab(gptUrl: TabOpenerArguments["gptUrl"]): boolean {
-  return gptUrl.startsWith("https://chat.openai.com/c/");
+  return gptUrl.startsWith("https://chatgpt.com/c");
 }
 
 export async function openBrowserTab({ browserName, prompt, gptUrl, query }: TabOpenerArguments): Promise<boolean> {
   try {
     const correctBrowserName = sanitizeInput(browserName);
     const correctPrompt = sanitizeInput(prompt + "\n\n" + query);
-    const correctGptUrl = sanitizeInput(gptUrl);
+    const originalGptUrl = sanitizeInput(gptUrl);
+    const correctGptUrl = replaceOldChatGPTLinkWithNew(originalGptUrl);
     const newUrlToOpen = composeUrlWithRandomId(correctGptUrl);
 
     let urlToSearch = newUrlToOpen;
-    const isUrlEligibleForReusingSameTab = getIsUrlEligibleForReusingSameTab(gptUrl);
-    console.debug({ isUrlEligibleForReusingSameTab, gptUrl });
+    const isUrlEligibleForReusingSameTab = getIsUrlEligibleForReusingSameTab(correctGptUrl);
+    console.debug({ isUrlEligibleForReusingSameTab, originalGptUrl, correctGptUrl });
 
     if (isUrlEligibleForReusingSameTab) {
-      const cachedUrl = cache.get(gptUrl);
-      console.debug("cache retrieved", { gptUrl, cachedUrl });
+      const cachedUrl = cache.get(originalGptUrl);
+      console.debug("cache retrieved", { originalGptUrl, cachedUrl });
       if (cachedUrl) {
         urlToSearch = cachedUrl;
       }
@@ -63,9 +69,11 @@ export async function openBrowserTab({ browserName, prompt, gptUrl, query }: Tab
     console.debug("running applescript");
     const openedUrl = await runAppleScript(appleScript);
 
-    if (isUrlEligibleForReusingSameTab) {
+    console.debug({ openedUrl });
+
+    if (isUrlEligibleForReusingSameTab && openedUrl) {
       console.debug("setting cache", { openedUrl });
-      cache.set(gptUrl, openedUrl);
+      cache.set(originalGptUrl, openedUrl);
     }
 
     toast.style = Toast.Style.Success;

@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, launchCommand, LaunchType, Image, Color } from "@raycast/api";
+import { MenuBarExtra, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import { FocusText, LongBreakText, ShortBreakText } from "../lib/constants";
 import {
@@ -12,6 +12,7 @@ import {
   duration,
   preferences,
   progress,
+  endOfInterval,
 } from "../lib/intervals";
 import { secondsToTime } from "../lib/secondsToTime";
 import { Interval, IntervalType } from "../lib/types";
@@ -26,15 +27,7 @@ export default function TogglePomodoroTimer() {
   const [currentInterval, setCurrentInterval] = useState<Interval | undefined>(getCurrentInterval());
 
   if (currentInterval && progress(currentInterval) >= 100) {
-    try {
-      launchCommand({
-        name: "pomodoro-control-timer",
-        type: LaunchType.UserInitiated,
-        context: { currentInterval },
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    endOfInterval(currentInterval);
   }
 
   function onStart(type: IntervalType) {

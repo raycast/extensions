@@ -15,10 +15,11 @@
     "thanhlongb",
     "k8scat",
     "Nauxscript",
-    "Lemon"
+    "lin"
   ],
   "pastContributors": [
-    "pomdtr"
+    "pomdtr",
+    "Lemon"
   ],
   "categories": [
     "Productivity",
@@ -64,11 +65,35 @@
       "subtitle": "ChatGPT",
       "description": "Collection of your custom and default model",
       "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize Website",
+      "subtitle": "ChatGPT",
+      "description": "Summarize Website and YouTube video",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "promptTemplate",
+          "description": "Template support {{content}} tag, and it will replace with the content",
+          "type": "file",
+          "title": "Prompt template for the website",
+          "required": false
+        },
+        {
+          "name": "promptTemplate2",
+          "description": "Template support {{content}} tag, and it will replace with the video transcript",
+          "type": "file",
+          "title": "Prompt template for the YouTube",
+          "required": false
+        }
+      ]
     }
   ],
   "keywords": [
     "chat",
-    "gpt"
+    "gpt",
+    "openai"
   ],
   "preferences": [
     {
@@ -246,14 +271,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.1",
     "@types/uuid": "^9.0.0",
+    "cross-fetch": "^4.0.0",
     "csv-parse": "^5.5.3",
-    "openai": "^4.24.3",
+    "openai": "^4.40.0",
     "proxy-agent": "^6.3.1",
     "say": "^0.16.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.5",
