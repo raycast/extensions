@@ -33,6 +33,7 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
+    // Only set the note if a default note was generated and the user hasn't started typing
     if (note === "" && defaultNote !== "") {
       setNote(defaultNote);
     }
