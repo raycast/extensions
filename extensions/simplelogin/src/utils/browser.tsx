@@ -23,8 +23,8 @@ export default async (): Promise<string | undefined> => {
 
   try {
     return new URL(url).hostname;
-  } catch (errror) {
-    console.error("Failed to get hostname", errror);
+  } catch (error) {
+    console.error("Failed to get hostname", error);
     return;
   }
 };
