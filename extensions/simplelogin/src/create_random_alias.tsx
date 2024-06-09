@@ -26,7 +26,6 @@ export default function Command() {
   useEffect(() => {
     if (prefill_alias_note) {
       getHostname().then((hostname) => {
-        // Only set the note if the user hasn't started typing
         setDefaultNote(hostname ?? "");
         setIsLoading(false);
       });
