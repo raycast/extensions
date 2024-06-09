@@ -1,10 +1,10 @@
 import { Action, closeMainWindow, getApplications, getPreferenceValues, Icon } from "@raycast/api";
-import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
+import { FunctionComponent, ReactNode, useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { buildScriptEnsuringSlackIsRunning } from "./utils";
 
 export const useSlackApp = () => {
-  const [state, set] = useState<{isAppInstalled: boolean; isLoading: boolean}>({
+  const [state, set] = useState<{ isAppInstalled: boolean; isLoading: boolean }>({
     isAppInstalled: false,
     isLoading: true,
   });
@@ -24,11 +24,11 @@ export const useSlackApp = () => {
 
     return () => {
       isMounted = false;
-    }
+    };
   }, []);
 
   return state;
-}
+};
 
 // https://api.slack.com/reference/deep-linking
 export const OpenChatInSlack = ({

@@ -25,7 +25,7 @@ import {
 } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
 import { timeDifference } from "./shared/utils";
-import { OpenChannelInSlack, useSlackApp } from './shared/OpenInSlack';
+import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 

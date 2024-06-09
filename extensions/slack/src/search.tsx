@@ -2,7 +2,7 @@ import { ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
-import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from './shared/OpenInSlack';
+import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 export default function Command() {
   return (
@@ -41,7 +41,7 @@ function SlackList() {
             icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
-                <OpenChatInSlack {...{workspaceId, userId, isAppInstalled, conversationId}} />
+                <OpenChatInSlack {...{ workspaceId, userId, isAppInstalled, conversationId }} />
               </ActionPanel>
             }
           />
