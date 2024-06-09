@@ -1,6 +1,9 @@
 # Minesweeper
 
-https://github.com/gfdsyjkdyhkfsydkh/minesweeper-raycast/assets/85374170/de340341-9f72-4888-8ee6-5c5fa628fa39
+
+https://github.com/gfdsyjkdyhkfsydkh/minesweeper-raycast/assets/85374170/79eb1414-32eb-4743-8fc4-dddc275debc3
+
+
 
 Play minesweeper right in Raycast!
 
