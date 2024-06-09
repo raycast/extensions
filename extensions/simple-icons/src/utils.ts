@@ -90,15 +90,14 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
     loadLatestVersion().then(async (latestVersion) => {
       if (cachedVersion !== latestVersion) {
         if (cachedVersion) {
-          confirmAlert({
+          cache.set("cached-version", "");
+          const confirmed = await confirmAlert({
             title: "New version available",
             message: "Do you want to reload the command to apply updates?",
-          }).then((confirmed) => {
-            cache.set("cached-version", "");
-            if (confirmed) {
-              open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
-            }
           });
+          if (confirmed) {
+            open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
+          }
         } else {
           setVerion(latestVersion);
         }
