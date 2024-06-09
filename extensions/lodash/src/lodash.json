@@ -4,9 +4,7 @@
     "category": "Math",
     "description": "Adds two numbers.",
     "since": "3.4.0",
-    "examples": [
-      "add(6, 4);\n// => 10"
-    ],
+    "examples": ["add(6, 4);\n// => 10"],
     "params": [
       {
         "name": "augend",
@@ -58,9 +56,7 @@
     "category": "Function",
     "description": "Creates a function that invokes `func`, with up to `n` arguments,\nignoring any additional arguments.",
     "since": "3.0.0",
-    "examples": [
-      "map(['6', '8', '10'], ary(parseInt, 1));\n// => [6, 8, 10]"
-    ],
+    "examples": ["map(['6', '8', '10'], ary(parseInt, 1));\n// => [6, 8, 10]"],
     "params": [
       {
         "name": "func",
@@ -206,9 +202,7 @@
     "category": "Object",
     "description": "Creates an array of values corresponding to `paths` of `object`.",
     "since": "1.0.0",
-    "examples": [
-      "var object = { 'a': [{ 'b': { 'c': 3 } }, 4] };\n\nat(object, ['a[0].b.c', 'a[1]']);\n// => [3, 4]"
-    ],
+    "examples": ["var object = { 'a': [{ 'b': { 'c': 3 } }, 4] };\n\nat(object, ['a[0].b.c', 'a[1]']);\n// => [3, 4]"],
     "params": [
       {
         "name": "object",
@@ -402,9 +396,7 @@
     "category": "String",
     "description": "Converts the first character of `string` to upper case and the remaining\nto lower case.",
     "since": "3.0.0",
-    "examples": [
-      "capitalize('FRED');\n// => 'Fred'"
-    ],
+    "examples": ["capitalize('FRED');\n// => 'Fred'"],
     "params": [
       {
         "name": "string=''",
@@ -445,9 +437,7 @@
     "category": "Math",
     "description": "Computes `number` rounded up to `precision`.",
     "since": "3.10.0",
-    "examples": [
-      "ceil(4.006);\n// => 5\n\nceil(6.004, 2);\n// => 6.01\n\nceil(6040, -2);\n// => 6100"
-    ],
+    "examples": ["ceil(4.006);\n// => 5\n\nceil(6.004, 2);\n// => 6.01\n\nceil(6040, -2);\n// => 6100"],
     "params": [
       {
         "name": "number",
@@ -522,9 +512,7 @@
     "category": "Number",
     "description": "Clamps `number` within the inclusive `lower` and `upper` bounds.",
     "since": "4.0.0",
-    "examples": [
-      "clamp(-10, -5, 5);\n// => -5\n\nclamp(10, -5, 5);\n// => 5"
-    ],
+    "examples": ["clamp(-10, -5, 5);\n// => -5\n\nclamp(10, -5, 5);\n// => 5"],
     "params": [
       {
         "name": "number",
@@ -651,9 +639,7 @@
     "category": "Array",
     "description": "Creates an array with all falsey values removed. The values `false`, `null`,\n`0`, `\"\"`, `undefined`, and `NaN` are falsey.",
     "since": "0.1.0",
-    "examples": [
-      "compact([0, 1, false, 2, '', 3]);\n// => [1, 2, 3]"
-    ],
+    "examples": ["compact([0, 1, false, 2, '', 3]);\n// => [1, 2, 3]"],
     "params": [
       {
         "name": "array",
@@ -955,9 +941,7 @@
     "category": "String",
     "description": "Deburrs `string` by converting\n[Latin-1 Supplement](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)\nand [Latin Extended-A](https://en.wikipedia.org/wiki/Latin_Extended-A)\nletters to basic Latin letters and removing\n[combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).",
     "since": "3.0.0",
-    "examples": [
-      "deburr('déjà vu');\n// => 'deja vu'"
-    ],
+    "examples": ["deburr('déjà vu');\n// => 'deja vu'"],
     "params": [
       {
         "name": "string=''",
@@ -977,9 +961,7 @@
     "category": "Object",
     "description": "Assigns own and inherited enumerable string keyed properties of source\nobjects to the destination object for all destination properties that\nresolve to `undefined`. Source objects are applied from left to right.\nOnce a property is set, additional values of the same property are ignored.\n<br>\n<br>\n**Note:** This method mutates `object`.",
     "since": "0.1.0",
-    "examples": [
-      "defaults({ 'a': 1 }, { 'b': 2 }, { 'a': 3 });\n// => { 'a': 1, 'b': 2 }"
-    ],
+    "examples": ["defaults({ 'a': 1 }, { 'b': 2 }, { 'a': 3 });\n// => { 'a': 1, 'b': 2 }"],
     "params": [
       {
         "name": "object",
@@ -1004,9 +986,7 @@
     "category": "Object",
     "description": "This method is like `defaults` except that it recursively assigns\ndefault properties.\n<br>\n<br>\n**Note:** This method mutates `object`.",
     "since": "3.10.0",
-    "examples": [
-      "defaultsDeep({ 'a': { 'b': 2 } }, { 'a': { 'b': 1, 'c': 3 } });\n// => { 'a': { 'b': 2, 'c': 3 } }"
-    ],
+    "examples": ["defaultsDeep({ 'a': { 'b': 2 } }, { 'a': { 'b': 1, 'c': 3 } });\n// => { 'a': { 'b': 2, 'c': 3 } }"],
     "params": [
       {
         "name": "object",
@@ -1031,9 +1011,7 @@
     "category": "Util",
     "description": "Checks `value` to determine whether a default value should be returned in\nits place. The `defaultValue` is returned if `value` is `NaN`, `null`,\nor `undefined`.",
     "since": "4.14.0",
-    "examples": [
-      "defaultTo(1, 10);\n// => 1\n\ndefaultTo(undefined, 10);\n// => 10"
-    ],
+    "examples": ["defaultTo(1, 10);\n// => 1\n\ndefaultTo(undefined, 10);\n// => 10"],
     "params": [
       {
         "name": "value",
@@ -1118,9 +1096,7 @@
     "category": "Array",
     "description": "Creates an array of `array` values not included in the other given arrays\nusing [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)\nfor equality comparisons. The order and references of result values are\ndetermined by the first array.\n<br>\n<br>\n**Note:** Unlike `pullAll`, this method returns a new array.",
     "since": "0.1.0",
-    "examples": [
-      "difference([2, 1], [2, 3]);\n// => [1]"
-    ],
+    "examples": ["difference([2, 1], [2, 3]);\n// => [1]"],
     "params": [
       {
         "name": "array",
@@ -1212,9 +1188,7 @@
     "category": "Math",
     "description": "Divide two numbers.",
     "since": "4.7.0",
-    "examples": [
-      "divide(6, 4);\n// => 1.5"
-    ],
+    "examples": ["divide(6, 4);\n// => 1.5"],
     "params": [
       {
         "name": "dividend",
@@ -1420,9 +1394,7 @@
     "category": "String",
     "description": "Converts the characters \"&\", \"<\", \">\", '\"', and \"'\" in `string` to their\ncorresponding HTML entities.\n<br>\n<br>\n**Note:** No other characters are escaped. To escape additional\ncharacters use a third-party library like [_he_](https://mths.be/he).\n<br>\n<br>\nThough the \">\" character is escaped for symmetry, characters like\n\">\" and \"/\" don't need escaping in HTML and have no special meaning\nunless they're part of a tag or unquoted attribute value. See\n[Mathias Bynens's article](https://mathiasbynens.be/notes/ambiguous-ampersands)\n*(under \"semi-related fun fact\")* for more details.\n<br>\n<br>\nWhen working with HTML you should always\n[quote attribute values](http://wonko.com/post/html-escaping) to reduce\nXSS vectors.",
     "since": "0.1.0",
-    "examples": [
-      "escape('fred, barney, & pebbles');\n// => 'fred, barney, &amp; pebbles'"
-    ],
+    "examples": ["escape('fred, barney, & pebbles');\n// => 'fred, barney, &amp; pebbles'"],
     "params": [
       {
         "name": "string=''",
@@ -1442,9 +1414,7 @@
     "category": "String",
     "description": "Escapes the `RegExp` special characters \"^\", \"$\", \"\\\", \".\", \"*\", \"+\",\n\"?\", \"(\", \")\", \"[\", \"]\", \"{\", \"}\", and \"|\" in `string`.",
     "since": "3.0.0",
-    "examples": [
-      "escapeRegExp('[lodash](https://lodash.com/)');\n// => '\\[lodash\\]\\(https://lodash\\.com/\\)'"
-    ],
+    "examples": ["escapeRegExp('[lodash](https://lodash.com/)');\n// => '\\[lodash\\]\\(https://lodash\\.com/\\)'"],
     "params": [
       {
         "name": "string=''",
@@ -1666,9 +1636,7 @@
     "category": "Collection",
     "description": "This method is like `find` except that it iterates over elements of\n`collection` from right to left.",
     "since": "2.0.0",
-    "examples": [
-      "findLast([1, 2, 3, 4], function(n) {\n  return n % 2 == 1;\n});\n// => 3"
-    ],
+    "examples": ["findLast([1, 2, 3, 4], function(n) {\n  return n % 2 == 1;\n});\n// => 3"],
     "params": [
       {
         "name": "collection",
@@ -1764,9 +1732,7 @@
     "category": "Collection",
     "description": "Creates a flattened array of values by running each element in `collection`\nthru `iteratee` and flattening the mapped results. The iteratee is invoked\nwith three arguments: *(value, index|key, collection)*.",
     "since": "4.0.0",
-    "examples": [
-      "function duplicate(n) {\n  return [n, n];\n}\n\nflatMap([1, 2], duplicate);\n// => [1, 1, 2, 2]"
-    ],
+    "examples": ["function duplicate(n) {\n  return [n, n];\n}\n\nflatMap([1, 2], duplicate);\n// => [1, 1, 2, 2]"],
     "params": [
       {
         "name": "collection",
@@ -1855,9 +1821,7 @@
     "category": "Array",
     "description": "Flattens `array` a single level deep.",
     "since": "0.1.0",
-    "examples": [
-      "flatten([1, [2, [3, [4]], 5]]);\n// => [1, 2, [3, [4]], 5]"
-    ],
+    "examples": ["flatten([1, [2, [3, [4]], 5]]);\n// => [1, 2, [3, [4]], 5]"],
     "params": [
       {
         "name": "array",
@@ -1876,9 +1840,7 @@
     "category": "Array",
     "description": "Recursively flattens `array`.",
     "since": "3.0.0",
-    "examples": [
-      "flattenDeep([1, [2, [3, [4]], 5]]);\n// => [1, 2, 3, 4, 5]"
-    ],
+    "examples": ["flattenDeep([1, [2, [3, [4]], 5]]);\n// => [1, 2, 3, 4, 5]"],
     "params": [
       {
         "name": "array",
@@ -1946,9 +1908,7 @@
     "category": "Math",
     "description": "Computes `number` rounded down to `precision`.",
     "since": "3.10.0",
-    "examples": [
-      "floor(4.006);\n// => 4\n\nfloor(0.046, 2);\n// => 0.04\n\nfloor(4060, -2);\n// => 4000"
-    ],
+    "examples": ["floor(4.006);\n// => 4\n\nfloor(0.046, 2);\n// => 0.04\n\nfloor(4060, -2);\n// => 4000"],
     "params": [
       {
         "name": "number",
@@ -2044,9 +2004,7 @@
     "category": "Collection",
     "description": "This method is like `forEach` except that it iterates over elements of\n`collection` from right to left.",
     "since": "2.0.0",
-    "examples": [
-      "forEachRight([1, 2], function(value) {\n  console.log(value);\n});\n// => Logs `2` then `1`."
-    ],
+    "examples": ["forEachRight([1, 2], function(value) {\n  console.log(value);\n});\n// => Logs `2` then `1`."],
     "params": [
       {
         "name": "collection",
@@ -2184,9 +2142,7 @@
     "category": "Array",
     "description": "The inverse of `toPairs`; this method returns an object composed\nfrom key-value `pairs`.",
     "since": "4.0.0",
-    "examples": [
-      "fromPairs([['a', 1], ['b', 2]]);\n// => { 'a': 1, 'b': 2 }"
-    ],
+    "examples": ["fromPairs([['a', 1], ['b', 2]]);\n// => { 'a': 1, 'b': 2 }"],
     "params": [
       {
         "name": "pairs",
@@ -2308,9 +2264,7 @@
     "category": "Lang",
     "description": "Checks if `value` is greater than `other`.",
     "since": "3.9.0",
-    "examples": [
-      "gt(3, 1);\n// => true\n\ngt(3, 3);\n// => false\n\ngt(1, 3);\n// => false"
-    ],
+    "examples": ["gt(3, 1);\n// => true\n\ngt(3, 3);\n// => false\n\ngt(1, 3);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -2335,9 +2289,7 @@
     "category": "Lang",
     "description": "Checks if `value` is greater than or equal to `other`.",
     "since": "3.9.0",
-    "examples": [
-      "gte(3, 1);\n// => true\n\ngte(3, 3);\n// => true\n\ngte(1, 3);\n// => false"
-    ],
+    "examples": ["gte(3, 1);\n// => true\n\ngte(3, 3);\n// => true\n\ngte(1, 3);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -2416,9 +2368,7 @@
     "category": "Array",
     "description": "Gets the first element of `array`.",
     "since": "0.1.0",
-    "examples": [
-      "head([1, 2, 3]);\n// => 1\n\nhead([]);\n// => undefined"
-    ],
+    "examples": ["head([1, 2, 3]);\n// => 1\n\nhead([]);\n// => undefined"],
     "params": [
       {
         "name": "array",
@@ -2437,9 +2387,7 @@
     "category": "Util",
     "description": "This method returns the first argument it receives.",
     "since": "0.1.0",
-    "examples": [
-      "var object = { 'a': 1 };\n\nconsole.log(identity(object) === object);\n// => true"
-    ],
+    "examples": ["var object = { 'a': 1 };\n\nconsole.log(identity(object) === object);\n// => true"],
     "params": [
       {
         "name": "value",
@@ -2533,9 +2481,7 @@
     "category": "Array",
     "description": "Gets all but the last element of `array`.",
     "since": "0.1.0",
-    "examples": [
-      "initial([1, 2, 3]);\n// => [1, 2]"
-    ],
+    "examples": ["initial([1, 2, 3]);\n// => [1, 2]"],
     "params": [
       {
         "name": "array",
@@ -2595,9 +2541,7 @@
     "category": "Array",
     "description": "Creates an array of unique values that are included in all given arrays\nusing [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)\nfor equality comparisons. The order and references of result values are\ndetermined by the first array.",
     "since": "0.1.0",
-    "examples": [
-      "intersection([2, 1], [2, 3]);\n// => [2]"
-    ],
+    "examples": ["intersection([2, 1], [2, 3]);\n// => [2]"],
     "params": [
       {
         "name": "arrays",
@@ -2671,9 +2615,7 @@
     "category": "Object",
     "description": "Creates an object composed of the inverted keys and values of `object`.\nIf `object` contains duplicate values, subsequent values overwrite\nproperty assignments of previous values.",
     "since": "0.7.0",
-    "examples": [
-      "var object = { 'a': 1, 'b': 2, 'c': 1 };\n\ninvert(object);\n// => { '1': 'c', '2': 'b' }"
-    ],
+    "examples": ["var object = { 'a': 1, 'b': 2, 'c': 1 };\n\ninvert(object);\n// => { '1': 'c', '2': 'b' }"],
     "params": [
       {
         "name": "object",
@@ -2828,9 +2770,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as an `ArrayBuffer` object.",
     "since": "4.3.0",
-    "examples": [
-      "isArrayBuffer(new ArrayBuffer(2));\n// => true\n\nisArrayBuffer(new Array(2));\n// => false"
-    ],
+    "examples": ["isArrayBuffer(new ArrayBuffer(2));\n// => true\n\nisArrayBuffer(new Array(2));\n// => false"],
     "params": [
       {
         "name": "value",
@@ -2891,9 +2831,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a boolean primitive or object.",
     "since": "0.1.0",
-    "examples": [
-      "isBoolean(false);\n// => true\n\nisBoolean(null);\n// => false"
-    ],
+    "examples": ["isBoolean(false);\n// => true\n\nisBoolean(null);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -2912,9 +2850,7 @@
     "category": "Lang",
     "description": "Checks if `value` is a buffer.",
     "since": "4.3.0",
-    "examples": [
-      "isBuffer(new Buffer(2));\n// => true\n\nisBuffer(new Uint8Array(2));\n// => false"
-    ],
+    "examples": ["isBuffer(new Buffer(2));\n// => true\n\nisBuffer(new Uint8Array(2));\n// => false"],
     "params": [
       {
         "name": "value",
@@ -2933,9 +2869,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `Date` object.",
     "since": "0.1.0",
-    "examples": [
-      "isDate(new Date);\n// => true\n\nisDate('Mon April 23 2012');\n// => false"
-    ],
+    "examples": ["isDate(new Date);\n// => true\n\nisDate('Mon April 23 2012');\n// => false"],
     "params": [
       {
         "name": "value",
@@ -2954,9 +2888,7 @@
     "category": "Lang",
     "description": "Checks if `value` is likely a DOM element.",
     "since": "0.1.0",
-    "examples": [
-      "isElement(document.body);\n// => true\n\nisElement('<body>');\n// => false"
-    ],
+    "examples": ["isElement(document.body);\n// => true\n\nisElement('<body>');\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3056,9 +2988,7 @@
     "category": "Lang",
     "description": "Checks if `value` is an `Error`, `EvalError`, `RangeError`, `ReferenceError`,\n`SyntaxError`, `TypeError`, or `URIError` object.",
     "since": "3.0.0",
-    "examples": [
-      "isError(new Error);\n// => true\n\nisError(Error);\n// => false"
-    ],
+    "examples": ["isError(new Error);\n// => true\n\nisError(Error);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3098,9 +3028,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `Function` object.",
     "since": "0.1.0",
-    "examples": [
-      "isFunction(_);\n// => true\n\nisFunction(/abc/);\n// => false"
-    ],
+    "examples": ["isFunction(_);\n// => true\n\nisFunction(/abc/);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3161,9 +3089,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `Map` object.",
     "since": "4.3.0",
-    "examples": [
-      "isMap(new Map);\n// => true\n\nisMap(new WeakMap);\n// => false"
-    ],
+    "examples": ["isMap(new Map);\n// => true\n\nisMap(new WeakMap);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3263,9 +3189,7 @@
     "category": "Lang",
     "description": "Checks if `value` is a pristine native function.\n<br>\n<br>\n**Note:** This method can't reliably detect native functions in the presence\nof the core-js package because core-js circumvents this kind of detection.\nDespite multiple requests, the core-js maintainer has made it clear: any\nattempt to fix the detection will be obstructed. As a result, we're left\nwith little choice but to throw an error. Unfortunately, this also affects\npackages, like [babel-polyfill](https://www.npmjs.com/package/babel-polyfill),\nwhich rely on core-js.",
     "since": "3.0.0",
-    "examples": [
-      "isNative(Array.prototype.push);\n// => true\n\nisNative(_);\n// => false"
-    ],
+    "examples": ["isNative(Array.prototype.push);\n// => true\n\nisNative(_);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3284,9 +3208,7 @@
     "category": "Lang",
     "description": "Checks if `value` is `null` or `undefined`.",
     "since": "4.0.0",
-    "examples": [
-      "isNil(null);\n// => true\n\nisNil(void 0);\n// => true\n\nisNil(NaN);\n// => false"
-    ],
+    "examples": ["isNil(null);\n// => true\n\nisNil(void 0);\n// => true\n\nisNil(NaN);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3305,9 +3227,7 @@
     "category": "Lang",
     "description": "Checks if `value` is `null`.",
     "since": "0.1.0",
-    "examples": [
-      "isNull(null);\n// => true\n\nisNull(void 0);\n// => false"
-    ],
+    "examples": ["isNull(null);\n// => true\n\nisNull(void 0);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3410,9 +3330,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `RegExp` object.",
     "since": "0.1.0",
-    "examples": [
-      "isRegExp(/abc/);\n// => true\n\nisRegExp('/abc/');\n// => false"
-    ],
+    "examples": ["isRegExp(/abc/);\n// => true\n\nisRegExp('/abc/');\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3452,9 +3370,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `Set` object.",
     "since": "4.3.0",
-    "examples": [
-      "isSet(new Set);\n// => true\n\nisSet(new WeakSet);\n// => false"
-    ],
+    "examples": ["isSet(new Set);\n// => true\n\nisSet(new WeakSet);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3473,9 +3389,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `String` primitive or object.",
     "since": "0.1.0",
-    "examples": [
-      "isString('abc');\n// => true\n\nisString(1);\n// => false"
-    ],
+    "examples": ["isString('abc');\n// => true\n\nisString(1);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3494,9 +3408,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `Symbol` primitive or object.",
     "since": "4.0.0",
-    "examples": [
-      "isSymbol(Symbol.iterator);\n// => true\n\nisSymbol('abc');\n// => false"
-    ],
+    "examples": ["isSymbol(Symbol.iterator);\n// => true\n\nisSymbol('abc');\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3515,9 +3427,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a typed array.",
     "since": "3.0.0",
-    "examples": [
-      "isTypedArray(new Uint8Array);\n// => true\n\nisTypedArray([]);\n// => false"
-    ],
+    "examples": ["isTypedArray(new Uint8Array);\n// => true\n\nisTypedArray([]);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3536,9 +3446,7 @@
     "category": "Lang",
     "description": "Checks if `value` is `undefined`.",
     "since": "0.1.0",
-    "examples": [
-      "isUndefined(void 0);\n// => true\n\nisUndefined(null);\n// => false"
-    ],
+    "examples": ["isUndefined(void 0);\n// => true\n\nisUndefined(null);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3557,9 +3465,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `WeakMap` object.",
     "since": "4.3.0",
-    "examples": [
-      "isWeakMap(new WeakMap);\n// => true\n\nisWeakMap(new Map);\n// => false"
-    ],
+    "examples": ["isWeakMap(new WeakMap);\n// => true\n\nisWeakMap(new Map);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3578,9 +3484,7 @@
     "category": "Lang",
     "description": "Checks if `value` is classified as a `WeakSet` object.",
     "since": "4.3.0",
-    "examples": [
-      "isWeakSet(new WeakSet);\n// => true\n\nisWeakSet(new Set);\n// => false"
-    ],
+    "examples": ["isWeakSet(new WeakSet);\n// => true\n\nisWeakSet(new Set);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3621,9 +3525,7 @@
     "category": "Array",
     "description": "Converts all elements in `array` into a string separated by `separator`.",
     "since": "4.0.0",
-    "examples": [
-      "join(['a', 'b', 'c'], '~');\n// => 'a~b~c'"
-    ],
+    "examples": ["join(['a', 'b', 'c'], '~');\n// => 'a~b~c'"],
     "params": [
       {
         "name": "array",
@@ -3741,9 +3643,7 @@
     "category": "Array",
     "description": "Gets the last element of `array`.",
     "since": "0.1.0",
-    "examples": [
-      "last([1, 2, 3]);\n// => 3"
-    ],
+    "examples": ["last([1, 2, 3]);\n// => 3"],
     "params": [
       {
         "name": "array",
@@ -3818,9 +3718,7 @@
     "category": "String",
     "description": "Converts the first character of `string` to lower case.",
     "since": "4.0.0",
-    "examples": [
-      "lowerFirst('Fred');\n// => 'fred'\n\nlowerFirst('FRED');\n// => 'fRED'"
-    ],
+    "examples": ["lowerFirst('Fred');\n// => 'fred'\n\nlowerFirst('FRED');\n// => 'fRED'"],
     "params": [
       {
         "name": "string=''",
@@ -3840,9 +3738,7 @@
     "category": "Lang",
     "description": "Checks if `value` is less than `other`.",
     "since": "3.9.0",
-    "examples": [
-      "lt(1, 3);\n// => true\n\nlt(3, 3);\n// => false\n\nlt(3, 1);\n// => false"
-    ],
+    "examples": ["lt(1, 3);\n// => true\n\nlt(3, 3);\n// => false\n\nlt(3, 1);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -3867,9 +3763,7 @@
     "category": "Lang",
     "description": "Checks if `value` is less than or equal to `other`.",
     "since": "3.9.0",
-    "examples": [
-      "lte(1, 3);\n// => true\n\nlte(3, 3);\n// => true\n\nlte(3, 1);\n// => false"
-    ],
+    "examples": ["lte(1, 3);\n// => true\n\nlte(3, 3);\n// => true\n\nlte(3, 1);\n// => false"],
     "params": [
       {
         "name": "value",
@@ -4026,9 +3920,7 @@
     "category": "Math",
     "description": "Computes the maximum value of `array`. If `array` is empty or falsey,\n`undefined` is returned.",
     "since": "0.1.0",
-    "examples": [
-      "max([4, 2, 8, 6]);\n// => 8\n\nmax([]);\n// => undefined"
-    ],
+    "examples": ["max([4, 2, 8, 6]);\n// => 8\n\nmax([]);\n// => undefined"],
     "params": [
       {
         "name": "array",
@@ -4075,9 +3967,7 @@
     "category": "Math",
     "description": "Computes the mean of the values in `array`.",
     "since": "4.0.0",
-    "examples": [
-      "mean([4, 2, 8, 6]);\n// => 5"
-    ],
+    "examples": ["mean([4, 2, 8, 6]);\n// => 5"],
     "params": [
       {
         "name": "array",
@@ -4265,9 +4155,7 @@
     "category": "Math",
     "description": "Computes the minimum value of `array`. If `array` is empty or falsey,\n`undefined` is returned.",
     "since": "0.1.0",
-    "examples": [
-      "min([4, 2, 8, 6]);\n// => 2\n\nmin([]);\n// => undefined"
-    ],
+    "examples": ["min([4, 2, 8, 6]);\n// => 2\n\nmin([]);\n// => undefined"],
     "params": [
       {
         "name": "array",
@@ -4356,9 +4244,7 @@
     "category": "Math",
     "description": "Multiply two numbers.",
     "since": "4.7.0",
-    "examples": [
-      "multiply(6, 4);\n// => 24"
-    ],
+    "examples": ["multiply(6, 4);\n// => 24"],
     "params": [
       {
         "name": "multiplier",
@@ -4404,9 +4290,7 @@
     "category": "Util",
     "description": "Reverts the `_` variable to its previous value and returns a reference to\nthe `lodash` function.",
     "since": "0.1.0",
-    "examples": [
-      "var lodash = noConflict();"
-    ],
+    "examples": ["var lodash = noConflict();"],
     "params": [],
     "returns": {
       "type": "Function",
@@ -4418,9 +4302,7 @@
     "category": "Util",
     "description": "This method returns `undefined`.",
     "since": "2.3.0",
-    "examples": [
-      "times(2, noop);\n// => [undefined, undefined]"
-    ],
+    "examples": ["times(2, noop);\n// => [undefined, undefined]"],
     "params": []
   },
   {
@@ -4442,9 +4324,7 @@
     "category": "Array",
     "description": "Gets the element at index `n` of `array`. If `n` is negative, the nth\nelement from the end is returned.",
     "since": "4.11.0",
-    "examples": [
-      "var array = ['a', 'b', 'c', 'd'];\n\nnth(array, 1);\n// => 'b'\n\nnth(array, -2);\n// => 'c';"
-    ],
+    "examples": ["var array = ['a', 'b', 'c', 'd'];\n\nnth(array, 1);\n// => 'b'\n\nnth(array, -2);\n// => 'c';"],
     "params": [
       {
         "name": "array",
@@ -4492,9 +4372,7 @@
     "category": "Object",
     "description": "The opposite of `pick`; this method creates an object composed of the\nown and inherited enumerable property paths of `object` that are not omitted.\n<br>\n<br>\n**Note:** This method is considerably slower than `pick`.",
     "since": "0.1.0",
-    "examples": [
-      "var object = { 'a': 1, 'b': '2', 'c': 3 };\n\nomit(object, ['a', 'c']);\n// => { 'b': '2' }"
-    ],
+    "examples": ["var object = { 'a': 1, 'b': '2', 'c': 3 };\n\nomit(object, ['a', 'c']);\n// => { 'b': '2' }"],
     "params": [
       {
         "name": "object",
@@ -4519,9 +4397,7 @@
     "category": "Object",
     "description": "The opposite of `pickBy`; this method creates an object composed of\nthe own and inherited enumerable string keyed properties of `object` that\n`predicate` doesn't return truthy for. The predicate is invoked with two\narguments: *(value, key)*.",
     "since": "4.0.0",
-    "examples": [
-      "var object = { 'a': 1, 'b': '2', 'c': 3 };\n\nomitBy(object, isNumber);\n// => { 'b': '2' }"
-    ],
+    "examples": ["var object = { 'a': 1, 'b': '2', 'c': 3 };\n\nomitBy(object, isNumber);\n// => { 'b': '2' }"],
     "params": [
       {
         "name": "object",
@@ -4602,9 +4478,7 @@
     "category": "Util",
     "description": "Creates a function that invokes `iteratees` with the arguments it receives\nand returns their results.",
     "since": "4.0.0",
-    "examples": [
-      "var func = over([Math.max, Math.min]);\n\nfunc(1, 2, 3, 4);\n// => [4, 1]"
-    ],
+    "examples": ["var func = over([Math.max, Math.min]);\n\nfunc(1, 2, 3, 4);\n// => [4, 1]"],
     "params": [
       {
         "name": "iteratees=[_.identity]",
@@ -4804,9 +4678,7 @@
     "category": "String",
     "description": "Converts `string` to an integer of the specified radix. If `radix` is\n`undefined` or `0`, a `radix` of `10` is used unless `value` is a\nhexadecimal, in which case a `radix` of `16` is used.\n<br>\n<br>\n**Note:** This method aligns with the\n[ES5 implementation](https://es5.github.io/#x15.1.2.2) of `parseInt`.",
     "since": "1.1.0",
-    "examples": [
-      "parseInt('08');\n// => 8\n\nmap(['6', '08', '10'], parseInt);\n// => [6, 8, 10]"
-    ],
+    "examples": ["parseInt('08');\n// => 8\n\nmap(['6', '08', '10'], parseInt);\n// => [6, 8, 10]"],
     "params": [
       {
         "name": "string",
@@ -4914,9 +4786,7 @@
     "category": "Object",
     "description": "Creates an object composed of the picked `object` properties.",
     "since": "0.1.0",
-    "examples": [
-      "var object = { 'a': 1, 'b': '2', 'c': 3 };\n\npick(object, ['a', 'c']);\n// => { 'a': 1, 'c': 3 }"
-    ],
+    "examples": ["var object = { 'a': 1, 'b': '2', 'c': 3 };\n\npick(object, ['a', 'c']);\n// => { 'a': 1, 'c': 3 }"],
     "params": [
       {
         "name": "object",
@@ -4941,9 +4811,7 @@
     "category": "Object",
     "description": "Creates an object composed of the `object` properties `predicate` returns\ntruthy for. The predicate is invoked with two arguments: *(value, key)*.",
     "since": "4.0.0",
-    "examples": [
-      "var object = { 'a': 1, 'b': '2', 'c': 3 };\n\npickBy(object, isNumber);\n// => { 'a': 1, 'c': 3 }"
-    ],
+    "examples": ["var object = { 'a': 1, 'b': '2', 'c': 3 };\n\npickBy(object, isNumber);\n// => { 'a': 1, 'c': 3 }"],
     "params": [
       {
         "name": "object",
@@ -5123,9 +4991,7 @@
     "category": "Seq",
     "description": "Executes the chain sequence to resolve the unwrapped value.",
     "since": "0.1.0",
-    "examples": [
-      "_([1, 2, 3]).value();\n// => [1, 2, 3]"
-    ],
+    "examples": ["_([1, 2, 3]).value();\n// => [1, 2, 3]"],
     "params": [],
     "returns": {
       "type": "*",
@@ -5541,9 +5407,7 @@
     "category": "String",
     "description": "Repeats the given string `n` times.",
     "since": "3.0.0",
-    "examples": [
-      "repeat('*', 3);\n// => '***'\n\nrepeat('abc', 2);\n// => 'abcabc'\n\nrepeat('abc', 0);\n// => ''"
-    ],
+    "examples": ["repeat('*', 3);\n// => '***'\n\nrepeat('abc', 2);\n// => 'abcabc'\n\nrepeat('abc', 0);\n// => ''"],
     "params": [
       {
         "name": "string=''",
@@ -5570,9 +5434,7 @@
     "category": "String",
     "description": "Replaces matches for `pattern` in `string` with `replacement`.\n<br>\n<br>\n**Note:** This method is based on\n[`String#replace`](https://mdn.io/String/replace).",
     "since": "4.0.0",
-    "examples": [
-      "replace('Hi Fred', 'Fred', 'Barney');\n// => 'Hi Barney'"
-    ],
+    "examples": ["replace('Hi Fred', 'Fred', 'Barney');\n// => 'Hi Barney'"],
     "params": [
       {
         "name": "string=''",
@@ -5665,9 +5527,7 @@
     "category": "Array",
     "description": "Reverses `array` so that the first element becomes the last, the second\nelement becomes the second to last, and so on.\n<br>\n<br>\n**Note:** This method mutates `array` and is based on\n[`Array#reverse`](https://mdn.io/Array/reverse).",
     "since": "4.0.0",
-    "examples": [
-      "var array = [1, 2, 3];\n\nreverse(array);\n// => [3, 2, 1]\n\nconsole.log(array);\n// => [3, 2, 1]"
-    ],
+    "examples": ["var array = [1, 2, 3];\n\nreverse(array);\n// => [3, 2, 1]\n\nconsole.log(array);\n// => [3, 2, 1]"],
     "params": [
       {
         "name": "array",
@@ -5686,9 +5546,7 @@
     "category": "Math",
     "description": "Computes `number` rounded to `precision`.",
     "since": "3.10.0",
-    "examples": [
-      "round(4.006);\n// => 4\n\nround(4.006, 2);\n// => 4.01\n\nround(4060, -2);\n// => 4100"
-    ],
+    "examples": ["round(4.006);\n// => 4\n\nround(4.006, 2);\n// => 4.01\n\nround(4060, -2);\n// => 4100"],
     "params": [
       {
         "name": "number",
@@ -5736,9 +5594,7 @@
     "category": "Collection",
     "description": "Gets a random element from `collection`.",
     "since": "2.0.0",
-    "examples": [
-      "sample([1, 2, 3, 4]);\n// => 2"
-    ],
+    "examples": ["sample([1, 2, 3, 4]);\n// => 2"],
     "params": [
       {
         "name": "collection",
@@ -5757,9 +5613,7 @@
     "category": "Collection",
     "description": "Gets `n` random elements at unique keys from `collection` up to the\nsize of `collection`.",
     "since": "4.0.0",
-    "examples": [
-      "sampleSize([1, 2, 3], 2);\n// => [3, 1]\n\nsampleSize([1, 2, 3], 4);\n// => [2, 3, 1]"
-    ],
+    "examples": ["sampleSize([1, 2, 3], 2);\n// => [3, 1]\n\nsampleSize([1, 2, 3], 4);\n// => [2, 3, 1]"],
     "params": [
       {
         "name": "collection",
@@ -5818,9 +5672,7 @@
     "category": "Object",
     "description": "This method is like `set` except that it accepts `customizer` which is\ninvoked to produce the objects of `path`.  If `customizer` returns `undefined`\npath creation is handled by the method instead. The `customizer` is invoked\nwith three arguments: *(nsValue, key, nsObject)*.\n<br>\n<br>\n**Note:** This method mutates `object`.",
     "since": "4.0.0",
-    "examples": [
-      "var object = {};\n\nsetWith(object, '[0][1]', 'a', Object);\n// => { '0': { '1': 'a' } }"
-    ],
+    "examples": ["var object = {};\n\nsetWith(object, '[0][1]', 'a', Object);\n// => { '0': { '1': 'a' } }"],
     "params": [
       {
         "name": "object",
@@ -5857,9 +5709,7 @@
     "category": "Collection",
     "description": "Creates an array of shuffled values, using a version of the\n[Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher-Yates_shuffle).",
     "since": "0.1.0",
-    "examples": [
-      "shuffle([1, 2, 3, 4]);\n// => [4, 1, 3, 2]"
-    ],
+    "examples": ["shuffle([1, 2, 3, 4]);\n// => [4, 1, 3, 2]"],
     "params": [
       {
         "name": "collection",
@@ -5878,9 +5728,7 @@
     "category": "Collection",
     "description": "Gets the size of `collection` by returning its length for array-like\nvalues or the number of own enumerable string keyed properties for objects.",
     "since": "0.1.0",
-    "examples": [
-      "size([1, 2, 3]);\n// => 3\n\nsize({ 'a': 1, 'b': 2 });\n// => 2\n\nsize('pebbles');\n// => 7"
-    ],
+    "examples": ["size([1, 2, 3]);\n// => 3\n\nsize({ 'a': 1, 'b': 2 });\n// => 2\n\nsize('pebbles');\n// => 7"],
     "params": [
       {
         "name": "collection",
@@ -6010,9 +5858,7 @@
     "category": "Array",
     "description": "Uses a binary search to determine the lowest index at which `value`\nshould be inserted into `array` in order to maintain its sort order.",
     "since": "0.1.0",
-    "examples": [
-      "sortedIndex([30, 50], 40);\n// => 1"
-    ],
+    "examples": ["sortedIndex([30, 50], 40);\n// => 1"],
     "params": [
       {
         "name": "array",
@@ -6071,9 +5917,7 @@
     "category": "Array",
     "description": "This method is like `indexOf` except that it performs a binary\nsearch on a sorted `array`.",
     "since": "4.0.0",
-    "examples": [
-      "sortedIndexOf([4, 5, 5, 5, 6], 5);\n// => 1"
-    ],
+    "examples": ["sortedIndexOf([4, 5, 5, 5, 6], 5);\n// => 1"],
     "params": [
       {
         "name": "array",
@@ -6098,9 +5942,7 @@
     "category": "Array",
     "description": "This method is like `sortedIndex` except that it returns the highest\nindex at which `value` should be inserted into `array` in order to\nmaintain its sort order.",
     "since": "3.0.0",
-    "examples": [
-      "sortedLastIndex([4, 5, 5, 5, 6], 5);\n// => 4"
-    ],
+    "examples": ["sortedLastIndex([4, 5, 5, 5, 6], 5);\n// => 4"],
     "params": [
       {
         "name": "array",
@@ -6159,9 +6001,7 @@
     "category": "Array",
     "description": "This method is like `lastIndexOf` except that it performs a binary\nsearch on a sorted `array`.",
     "since": "4.0.0",
-    "examples": [
-      "sortedLastIndexOf([4, 5, 5, 5, 6], 5);\n// => 3"
-    ],
+    "examples": ["sortedLastIndexOf([4, 5, 5, 5, 6], 5);\n// => 3"],
     "params": [
       {
         "name": "array",
@@ -6186,9 +6026,7 @@
     "category": "Array",
     "description": "This method is like `uniq` except that it's designed and optimized\nfor sorted arrays.",
     "since": "4.0.0",
-    "examples": [
-      "sortedUniq([1, 1, 2]);\n// => [1, 2]"
-    ],
+    "examples": ["sortedUniq([1, 1, 2]);\n// => [1, 2]"],
     "params": [
       {
         "name": "array",
@@ -6207,9 +6045,7 @@
     "category": "Array",
     "description": "This method is like `uniqBy` except that it's designed and optimized\nfor sorted arrays.",
     "since": "4.0.0",
-    "examples": [
-      "sortedUniqBy([1.1, 1.2, 2.3, 2.4], Math.floor);\n// => [1.1, 2.3]"
-    ],
+    "examples": ["sortedUniqBy([1.1, 1.2, 2.3, 2.4], Math.floor);\n// => [1.1, 2.3]"],
     "params": [
       {
         "name": "array",
@@ -6234,9 +6070,7 @@
     "category": "String",
     "description": "Splits `string` by `separator`.\n<br>\n<br>\n**Note:** This method is based on\n[`String#split`](https://mdn.io/String/split).",
     "since": "4.0.0",
-    "examples": [
-      "split('a-b-c', '-', 2);\n// => ['a', 'b']"
-    ],
+    "examples": ["split('a-b-c', '-', 2);\n// => ['a', 'b']"],
     "params": [
       {
         "name": "string=''",
@@ -6367,9 +6201,7 @@
     "category": "Util",
     "description": "This method returns `false`.",
     "since": "4.13.0",
-    "examples": [
-      "times(2, stubFalse);\n// => [false, false]"
-    ],
+    "examples": ["times(2, stubFalse);\n// => [false, false]"],
     "params": [],
     "returns": {
       "type": "boolean",
@@ -6395,9 +6227,7 @@
     "category": "Util",
     "description": "This method returns an empty string.",
     "since": "4.13.0",
-    "examples": [
-      "times(2, stubString);\n// => ['', '']"
-    ],
+    "examples": ["times(2, stubString);\n// => ['', '']"],
     "params": [],
     "returns": {
       "type": "string",
@@ -6409,9 +6239,7 @@
     "category": "Util",
     "description": "This method returns `true`.",
     "since": "4.13.0",
-    "examples": [
-      "times(2, stubTrue);\n// => [true, true]"
-    ],
+    "examples": ["times(2, stubTrue);\n// => [true, true]"],
     "params": [],
     "returns": {
       "type": "boolean",
@@ -6423,9 +6251,7 @@
     "category": "Math",
     "description": "Subtract two numbers.",
     "since": "4.0.0",
-    "examples": [
-      "subtract(6, 4);\n// => 2"
-    ],
+    "examples": ["subtract(6, 4);\n// => 2"],
     "params": [
       {
         "name": "minuend",
@@ -6450,9 +6276,7 @@
     "category": "Math",
     "description": "Computes the sum of the values in `array`.",
     "since": "3.4.0",
-    "examples": [
-      "sum([4, 2, 8, 6]);\n// => 20"
-    ],
+    "examples": ["sum([4, 2, 8, 6]);\n// => 20"],
     "params": [
       {
         "name": "array",
@@ -6499,9 +6323,7 @@
     "category": "Array",
     "description": "Gets all but the first element of `array`.",
     "since": "4.0.0",
-    "examples": [
-      "tail([1, 2, 3]);\n// => [2, 3]"
-    ],
+    "examples": ["tail([1, 2, 3]);\n// => [2, 3]"],
     "params": [
       {
         "name": "array",
@@ -6813,9 +6635,7 @@
     "category": "Util",
     "description": "Invokes the iteratee `n` times, returning an array of the results of\neach invocation. The iteratee is invoked with one argument; *(index)*.",
     "since": "0.1.0",
-    "examples": [
-      "times(3, String);\n// => ['0', '1', '2']\n\n times(4, constant(0));\n// => [0, 0, 0, 0]"
-    ],
+    "examples": ["times(3, String);\n// => ['0', '1', '2']\n\n times(4, constant(0));\n// => [0, 0, 0, 0]"],
     "params": [
       {
         "name": "n",
@@ -7010,9 +6830,7 @@
     "category": "Util",
     "description": "Converts `value` to a property path array.",
     "since": "4.0.0",
-    "examples": [
-      "toPath('a.b.c');\n// => ['a', 'b', 'c']\n\ntoPath('a[0].b.c');\n// => ['a', '0', 'b', 'c']"
-    ],
+    "examples": ["toPath('a.b.c');\n// => ['a', 'b', 'c']\n\ntoPath('a[0].b.c');\n// => ['a', '0', 'b', 'c']"],
     "params": [
       {
         "name": "value",
@@ -7073,9 +6891,7 @@
     "category": "Lang",
     "description": "Converts `value` to a string. An empty string is returned for `null`\nand `undefined` values. The sign of `-0` is preserved.",
     "since": "4.0.0",
-    "examples": [
-      "toString(null);\n// => ''\n\ntoString(-0);\n// => '-0'\n\ntoString([1, 2, 3]);\n// => '1,2,3'"
-    ],
+    "examples": ["toString(null);\n// => ''\n\ntoString(-0);\n// => '-0'\n\ntoString([1, 2, 3]);\n// => '1,2,3'"],
     "params": [
       {
         "name": "value",
@@ -7179,9 +6995,7 @@
     "category": "String",
     "description": "Removes trailing whitespace or specified characters from `string`.",
     "since": "4.0.0",
-    "examples": [
-      "trimEnd('  abc  ');\n// => '  abc'\n\ntrimEnd('-_-abc-_-', '_-');\n// => '-_-abc'"
-    ],
+    "examples": ["trimEnd('  abc  ');\n// => '  abc'\n\ntrimEnd('-_-abc-_-', '_-');\n// => '-_-abc'"],
     "params": [
       {
         "name": "string=''",
@@ -7208,9 +7022,7 @@
     "category": "String",
     "description": "Removes leading whitespace or specified characters from `string`.",
     "since": "4.0.0",
-    "examples": [
-      "trimStart('  abc  ');\n// => 'abc  '\n\ntrimStart('-_-abc-_-', '_-');\n// => 'abc-_-'"
-    ],
+    "examples": ["trimStart('  abc  ');\n// => 'abc  '\n\ntrimStart('-_-abc-_-', '_-');\n// => 'abc-_-'"],
     "params": [
       {
         "name": "string=''",
@@ -7286,9 +7098,7 @@
     "category": "Function",
     "description": "Creates a function that accepts up to one argument, ignoring any\nadditional arguments.",
     "since": "4.0.0",
-    "examples": [
-      "map(['6', '8', '10'], unary(parseInt));\n// => [6, 8, 10]"
-    ],
+    "examples": ["map(['6', '8', '10'], unary(parseInt));\n// => [6, 8, 10]"],
     "params": [
       {
         "name": "func",
@@ -7307,9 +7117,7 @@
     "category": "String",
     "description": "The inverse of `escape`; this method converts the HTML entities\n`&amp;`, `&lt;`, `&gt;`, `&quot;`, and `&#39;` in `string` to\ntheir corresponding characters.\n<br>\n<br>\n**Note:** No other HTML entities are unescaped. To unescape additional\nHTML entities use a third-party library like [_he_](https://mths.be/he).",
     "since": "0.6.0",
-    "examples": [
-      "unescape('fred, barney, &amp; pebbles');\n// => 'fred, barney, & pebbles'"
-    ],
+    "examples": ["unescape('fred, barney, &amp; pebbles');\n// => 'fred, barney, & pebbles'"],
     "params": [
       {
         "name": "string=''",
@@ -7329,9 +7137,7 @@
     "category": "Array",
     "description": "Creates an array of unique values, in order, from all given arrays using\n[`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)\nfor equality comparisons.",
     "since": "0.1.0",
-    "examples": [
-      "union([2], [1, 2]);\n// => [2, 1]"
-    ],
+    "examples": ["union([2], [1, 2]);\n// => [2, 1]"],
     "params": [
       {
         "name": "arrays",
@@ -7405,9 +7211,7 @@
     "category": "Array",
     "description": "Creates a duplicate-free version of an array, using\n[`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)\nfor equality comparisons, in which only the first occurrence of each element\nis kept. The order of result values is determined by the order they occur\nin the array.",
     "since": "0.1.0",
-    "examples": [
-      "uniq([2, 1, 2]);\n// => [2, 1]"
-    ],
+    "examples": ["uniq([2, 1, 2]);\n// => [2, 1]"],
     "params": [
       {
         "name": "array",
@@ -7454,9 +7258,7 @@
     "category": "Util",
     "description": "Generates a unique ID. If `prefix` is given, the ID is appended to it.",
     "since": "0.1.0",
-    "examples": [
-      "uniqueId('contact_');\n// => 'contact_104'\n\nuniqueId();\n// => '105'"
-    ],
+    "examples": ["uniqueId('contact_');\n// => 'contact_104'\n\nuniqueId();\n// => '105'"],
     "params": [
       {
         "name": "prefix=''",
@@ -7673,9 +7475,7 @@
     "category": "String",
     "description": "Converts the first character of `string` to upper case.",
     "since": "4.0.0",
-    "examples": [
-      "upperFirst('fred');\n// => 'Fred'\n\nupperFirst('FRED');\n// => 'FRED'"
-    ],
+    "examples": ["upperFirst('fred');\n// => 'Fred'\n\nupperFirst('FRED');\n// => 'FRED'"],
     "params": [
       {
         "name": "string=''",
@@ -7751,9 +7551,7 @@
     "category": "Array",
     "description": "Creates an array excluding all given values using\n[`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)\nfor equality comparisons.\n<br>\n<br>\n**Note:** Unlike `pull`, this method returns a new array.",
     "since": "0.1.0",
-    "examples": [
-      "without([2, 1, 2, 3], 1, 2);\n// => [3]"
-    ],
+    "examples": ["without([2, 1, 2, 3], 1, 2);\n// => [3]"],
     "params": [
       {
         "name": "array",
@@ -7834,9 +7632,7 @@
     "category": "Array",
     "description": "Creates an array of unique values that is the\n[symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference)\nof the given arrays. The order of result values is determined by the order\nthey occur in the arrays.",
     "since": "2.4.0",
-    "examples": [
-      "xor([2, 1], [2, 3]);\n// => [1, 3]"
-    ],
+    "examples": ["xor([2, 1], [2, 3]);\n// => [1, 3]"],
     "params": [
       {
         "name": "arrays",
@@ -7910,9 +7706,7 @@
     "category": "Array",
     "description": "Creates an array of grouped elements, the first of which contains the\nfirst elements of the given arrays, the second of which contains the\nsecond elements of the given arrays, and so on.",
     "since": "0.1.0",
-    "examples": [
-      "zip(['a', 'b'], [1, 2], [true, false]);\n// => [['a', 1, true], ['b', 2, false]]"
-    ],
+    "examples": ["zip(['a', 'b'], [1, 2], [true, false]);\n// => [['a', 1, true], ['b', 2, false]]"],
     "params": [
       {
         "name": "arrays",
@@ -7931,9 +7725,7 @@
     "category": "Array",
     "description": "This method is like `fromPairs` except that it accepts two arrays,\none of property identifiers and one of corresponding values.",
     "since": "0.4.0",
-    "examples": [
-      "zipObject(['a', 'b'], [1, 2]);\n// => { 'a': 1, 'b': 2 }"
-    ],
+    "examples": ["zipObject(['a', 'b'], [1, 2]);\n// => { 'a': 1, 'b': 2 }"],
     "params": [
       {
         "name": "props=[]",
@@ -7960,9 +7752,7 @@
     "category": "Array",
     "description": "This method is like `zipObject` except that it supports property paths.",
     "since": "4.1.0",
-    "examples": [
-      "zipObjectDeep(['a.b[0].c', 'a.b[1].d'], [1, 2]);\n// => { 'a': { 'b': [{ 'c': 1 }, { 'd': 2 }] } }"
-    ],
+    "examples": ["zipObjectDeep(['a.b[0].c', 'a.b[1].d'], [1, 2]);\n// => { 'a': { 'b': [{ 'c': 1 }, { 'd': 2 }] } }"],
     "params": [
       {
         "name": "props=[]",
