@@ -43,7 +43,7 @@ const DailyOverview = () => {
   const taskIdToGroup =
     data?.nodes.reduce(
       (map, node) => ({ ...map, [node.id]: node.parent ? data.groups[node.parent] : undefined }),
-      {} as Record<string, Group | undefined>
+      {} as Record<string, Group | undefined>,
     ) ?? {};
 
   const getRate = (taskId: string) => data?.tasks[taskId].rate || taskIdToGroup[taskId]?.rate;
@@ -56,13 +56,13 @@ const DailyOverview = () => {
     const days = Object.keys(data.tasks).flatMap((id) =>
       groupRecordsPerDay(data.tasks[id].records, getRate(id))
         .filter(({ date }) => filter === "all" || filterDate.isBefore(date))
-        .map((record) => ({ id, ...record }))
+        .map((record) => ({ id, ...record })),
     );
 
     return sortBy(
       Object.entries(groupBy(days, "date")).map(([date, tasks]) => ({ date, tasks: sortBy(tasks, "id") })),
       "date",
-      "desc"
+      "desc",
     );
   }, [data, filter]);
 
@@ -97,7 +97,7 @@ const DailyOverview = () => {
                         value: data.tags[id].title,
                         color: data.tags[id].color,
                       },
-                    })
+                    }),
                   ),
                   {
                     text: task.value > 0 ? currencyFormatter.format(task.value) : undefined,
