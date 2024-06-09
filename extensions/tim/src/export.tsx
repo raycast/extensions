@@ -2,7 +2,19 @@ import { writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 
-import { Action, ActionPanel, Alert, confirmAlert, Form, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  captureException,
+  confirmAlert,
+  Form,
+  showHUD,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import dayjs from "dayjs";
 import { useRef } from "react";
 
@@ -47,11 +59,8 @@ export default function Command() {
         await showHUD("Data has been exported", { clearRootSearch: true });
         await showInFinder(absolutePath);
       } catch (error) {
-        showToast({
-          title: "Error",
-          message: "Could not export data",
-          style: Toast.Style.Failure,
-        });
+        captureException(error);
+        await showFailureToast(error, { title: "Could not export data" });
       }
     });
   }
