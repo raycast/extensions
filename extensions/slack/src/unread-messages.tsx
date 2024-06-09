@@ -25,7 +25,7 @@ import {
 } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
 import { timeDifference } from "./shared/utils";
-import { OpenChannelInSlack } from "./shared/OpenInSlack";
+import { OpenChannelInSlack, useSlackApp } from './shared/OpenInSlack';
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
@@ -42,6 +42,7 @@ export default function Command() {
 function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
+  const { isAppInstalled, isLoading } = useSlackApp();
   const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
   const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
   const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
@@ -126,7 +127,7 @@ function UnreadMessagesOverview() {
   };
 
   return (
-    <List isLoading={!selectedConversations || isValidatingUnreadConversations}>
+    <List isLoading={!selectedConversations || isValidatingUnreadConversations || isLoading}>
       {selectedConversations && selectedConversations.length === 0 && (
         <List.EmptyView
           icon={Icon.Gear}
@@ -178,7 +179,8 @@ function UnreadMessagesOverview() {
                       <>
                         <OpenChannelInSlack
                           workspaceId={conversation.teamId}
-                          channelId={conversation.id}
+                          channelId={unreadConversation.conversationId}
+                          isAppInstalled={isAppInstalled}
                           onActionAddon={() => markConversationAsRead(unreadConversation.conversationId)}
                         />
                         <Action

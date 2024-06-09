@@ -1,9 +1,10 @@
 # Slack Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements and Fixes] - {PR_MERGE_DATE}
 
 - Adds action to open in browser apart from slack app
 - Only show Open in Slack option in case Slack app is installed on the system
+- Fixed channelId when users are selected for unread messages
 
 ## [Improve Search command UX] - 2023-04-16
 

@@ -1,33 +1,52 @@
 import { Action, closeMainWindow, getApplications, getPreferenceValues, Icon } from "@raycast/api";
-import { useEffect } from "react";
+import { FunctionComponent, ReactNode, useEffect, useState } from 'react';
 import { runAppleScript } from "run-applescript";
 import { buildScriptEnsuringSlackIsRunning } from "./utils";
 
-export let isSlackInstalled = false;
+export const useSlackApp = () => {
+  const [state, set] = useState<{isAppInstalled: boolean; isLoading: boolean}>({
+    isAppInstalled: false,
+    isLoading: true,
+  });
 
-export async function checkSlackApp() {
-  const applications = await getApplications();
-  isSlackInstalled = applications.some((app) => app.name.trim().toLowerCase() === "slack");
+  useEffect(() => {
+    let isMounted = true;
+    const checkIfInstalled = async () => {
+      set({ isAppInstalled: false, isLoading: true });
+      const apps = await getApplications();
+      const isInstalled = apps.find((app) => app.name.toLowerCase() === "slack");
+      if (isMounted) {
+        set({ isAppInstalled: !!isInstalled, isLoading: false });
+      }
+    };
+
+    checkIfInstalled();
+
+    return () => {
+      isMounted = false;
+    }
+  }, []);
+
+  return state;
 }
 
 // https://api.slack.com/reference/deep-linking
 export const OpenChatInSlack = ({
   workspaceId,
   userId,
+  isAppInstalled,
   conversationId,
 }: {
   workspaceId: string;
   userId: string;
+  isAppInstalled: boolean;
   conversationId?: string;
 }) => {
   const { closeRightSidebar } = getPreferenceValues<{ closeRightSidebar: boolean }>();
-  useEffect(() => {
-    checkSlackApp();
-  }, []);
 
   return (
     <>
-      {isSlackInstalled && (
+      {isAppInstalled && (
         <Action.Open
           title={"Open in Slack"}
           target={`slack://user?team=${workspaceId}&id=${userId}`}
@@ -59,19 +78,17 @@ export const OpenChatInSlack = ({
 export const OpenChannelInSlack = ({
   workspaceId,
   channelId,
+  isAppInstalled,
   onActionAddon,
 }: {
   workspaceId: string;
   channelId: string;
+  isAppInstalled: boolean;
   onActionAddon?: () => Promise<void>;
 }) => {
-  useEffect(() => {
-    checkSlackApp();
-  }, []);
-
   return (
     <>
-      {isSlackInstalled && (
+      {isAppInstalled && (
         <Action.Open
           title={"Open in Slack"}
           target={`slack://channel?team=${workspaceId}&id=${channelId}`}
