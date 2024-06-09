@@ -94,10 +94,9 @@ export const useVersion = ({ launchContext }: { launchContext?: LaunchContext })
             title: "New version available",
             message: "Do you want to reload the command to apply updates?",
           }).then((confirmed) => {
+            cache.set("cached-version", "");
             if (confirmed) {
               open("raycast://extensions/litomore/simple-icons/index" + buildDeeplinkParameters(launchContext));
-            } else {
-              cache.set("cached-version", "");
             }
           });
         } else {
