@@ -18,7 +18,7 @@
       "mode": "no-view"
     }
   ],
-  "tools": null,
+  "tools": [],
   "dependencies": {
     "@raycast/api": "^1.76.0"
   },
