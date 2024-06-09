@@ -231,6 +231,15 @@
       "type": "textfield",
       "default": "50",
       "required": false
+    },
+    {
+      "name": "shouldHideRedundantIssues",
+      "type": "checkbox",
+      "title": "Advanced",
+      "label": "Hide Redundant Issues",
+      "description": "When enabled, the issues that are marked as Done, Canceled or Duplicate will not show up in search results.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

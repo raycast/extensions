@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "maplestory-gg",
+  "title": "MapleStory.gg",
+  "type": "module",
+  "description": "MapleStory's Definitive Database.",
+  "icon": "maplestory-gg-icon.png",
+  "author": "litomore",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Data",
+    "Fun",
+    "Productivity"
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "favorites",
+      "title": "Favorite Characters",
+      "description": "Quick access to your favorite characters.",
+      "mode": "view"
+    },
+    {
+      "name": "lookup",
+      "title": "Lookup Character",
+      "description": "Lookup charecter from maplestory.gg.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.15.0",
+    "chartjs-to-image": "^1.2.2",
+    "got": "^14.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.12.5",
+    "@types/react": "^18.2.75",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.4"
+  }
+}

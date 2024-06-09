@@ -39,7 +39,7 @@ export default function Command() {
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     if (!values.files.length) {
-      await showToast(Toast.Style.Failure, "You must select a single file", "Please select a file");
+      await showToast(Toast.Style.Failure, "You must select a single file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
@@ -68,7 +68,7 @@ export default function Command() {
         }
         toast.style = Toast.Style.Failure;
         toast.title = "failure";
-        toast.message = "An error happened during selecting the saving directory";
+        toast.message = `An error happened during selecting the saving directory.  Reason ${error.message}`;
         setStatus("failure");
       }
     }
@@ -86,13 +86,13 @@ export default function Command() {
       fs.writeFileSync(destinationFile, data);
       toast.style = Toast.Style.Success;
       toast.title = "success";
-      toast.message = "File converted successfully";
+      toast.message = "File converted successfully.";
       setStatus("success");
       setIsLoading(false);
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = "Error happened during converting the file.";
+      toast.message = `Error happened during converting the file. Reason ${error}`;
       setStatus("failure");
       setIsLoading(false);
       console.log(error);

@@ -2,6 +2,7 @@ import { AI, Action, ActionPanel, Grid, LaunchProps } from "@raycast/api";
 import { showFailureToast, useAI } from "@raycast/utils";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
 import { addToHistory } from "./history";
+import { getFormattedColor, getPreviewColor } from "./utils";
 
 export default function GenerateColors(props: LaunchProps<{ arguments: Arguments.GenerateColors }>) {
   const { data, isLoading } = useAI(
@@ -33,17 +34,20 @@ JSON colors:`,
 
   return (
     <Grid columns={5} isLoading={isLoading}>
-      {colors.map((color, index) => {
+      {colors.map((c, index) => {
+        const formattedColor = getFormattedColor(c);
+        const previewColor = getPreviewColor(c);
+        const color = { light: previewColor, dark: previewColor, adjustContrast: false };
         return (
           <Grid.Item
             key={index}
             content={{ color }}
-            title={color}
+            title={formattedColor}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={color} onCopy={() => addToHistory(color)} />
-                <Action.Paste content={color} onPaste={() => addToHistory(color)} />
-                <CopyAsSubmenu color={color} onCopy={() => addToHistory(color)} />
+                <Action.CopyToClipboard content={formattedColor} onCopy={() => addToHistory(formattedColor)} />
+                <Action.Paste content={formattedColor} onPaste={() => addToHistory(formattedColor)} />
+                <CopyAsSubmenu color={formattedColor} onCopy={() => addToHistory(formattedColor)} />
               </ActionPanel>
             }
           />

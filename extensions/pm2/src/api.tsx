@@ -1,7 +1,7 @@
 import { LaunchProps } from "@raycast/api";
 import { StartOptions } from "pm2";
 import { LaunchOptions, callbackLaunchCommand } from "raycast-cross-extension";
-import { checkIfNeedSetup } from "./utils.js";
+import { checkIfNeedSetup, runPm2Command } from "./utils.js";
 import { Pm2Command, Pm2Process, RuntimeOptions } from "./types.js";
 
 type LaunchContext = {

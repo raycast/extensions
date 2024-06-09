@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Improve] - {PR_MERGE_DATE}
+## [Improve] - 2024-04-18
 
 - `Add Task` command support create all-day task
 
