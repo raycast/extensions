@@ -1,0 +1,71 @@
+[
+  {
+    "id": "justwatch",
+    "name": "Just Watch",
+    "icon": "justwatch.ico",
+    "url": "https://www.justwatch.com",
+    "search": "https://www.justwatch.com/es/buscar?q={query}",
+    "active": true
+  },
+  {
+    "id": "netflix",
+    "name": "Netflix",
+    "icon": "netflix.ico",
+    "url": "https://www.netflix.com",
+    "search": "https://www.netflix.com/search?q={query}",
+    "active": false
+  },
+  {
+    "id": "disneyplus",
+    "name": "Disney+",
+    "icon": "disneyplus.ico",
+    "url": "https://www.disneyplus.com/es-es/home",
+    "active": false
+  },
+  {
+    "id": "crunchyroll",
+    "name": "Crunchyroll",
+    "icon": "crunchyroll.ico",
+    "url": "https://www.crunchyroll.com/es/",
+    "search": "https://www.crunchyroll.com/es/search?q={query}",
+    "active": false
+  },
+  {
+    "id": "max",
+    "name": "max",
+    "icon": "hbo.ico",
+    "url": "https://play.hbomax.com/page/urn:hbo:page:home",
+    "search": "https://play.max.com/search/result?q={query}",
+    "active": false
+  },
+  {
+    "id": "primevideo",
+    "name": "Prime Video",
+    "icon": "primevideo.ico",
+    "url": "https://www.primevideo.com/",
+    "search": "https://www.primevideo.com/search/?phrase={query}",
+    "active": false
+  },
+  {
+    "id": "appletvplus",
+    "name": "Apple TV+",
+    "icon": "appletv.ico",
+    "url": "https://tv.apple.com/es",
+    "search": "https://tv.apple.com/search?term={query}",
+    "active": false
+  },
+  {
+    "id": "skyshowtime",
+    "name": "SkyShowtime",
+    "icon": "skyshowtime.ico",
+    "url": "https://www.skyshowtime.com",
+    "active": false
+  },
+  {
+    "id": "filmin",
+    "name": "Filmin",
+    "icon": "filmin.webp",
+    "url": "https://www.filmin.es",
+    "active": false
+  }
+]
