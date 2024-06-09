@@ -3,6 +3,7 @@ import { InvoiceFormValues } from "./types";
 
 export const preferences = getPreferenceValues();
 export const {
+  apiKey,
   address,
   defaultIncludeAddress,
   defaultIncludeTax,

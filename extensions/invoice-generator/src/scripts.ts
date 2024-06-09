@@ -5,7 +5,7 @@ import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
 
-import { invoiceDateFormat, logoUrl } from "./utils";
+import { apiKey, invoiceDateFormat, logoUrl } from "./utils";
 import {
   InvoiceFormValues,
   InvoiceFormStaticValues,
@@ -100,6 +100,7 @@ async function requestInvoice(content: InvoiceRequestContent, locale: string, to
     const response = await (
       await axios.post("https://invoice-generator.com/", content, {
         headers: {
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
           "Accept-Language": locale,
         },
@@ -122,8 +123,14 @@ async function requestInvoice(content: InvoiceRequestContent, locale: string, to
 
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
-      console.error("axios error:", axiosError.response?.data);
-      toast.message = axiosError.message;
+      const errorData = axiosError.response?.data;
+      if (Buffer.isBuffer(errorData)) {
+        const errorMessage = errorData.toString("utf8");
+        console.error("axios error:", errorMessage);
+        toast.message = JSON.parse(errorMessage).message;
+      } else {
+        toast.message = axiosError.message;
+      }
     } else {
       console.error("error:", error);
       toast.message = (error as Error).message;

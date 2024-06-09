@@ -16,6 +16,13 @@
   ],
   "preferences": [
     {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key for the Invoice Generator API.",
+      "type": "password",
+      "required": true
+    },
+    {
       "name": "name",
       "title": "Name",
       "description": "The name of the sender.",
