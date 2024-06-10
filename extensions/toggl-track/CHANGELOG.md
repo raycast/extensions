@@ -1,5 +1,14 @@
 # Toggl Track Changelog
 
+## [Enhancements] - 2024-05-27
+
+- Prettier sort imports
+- Absolute paths in imports
+
+## [Enhancements] - 2024-05-17
+
+- Add ability to prefill form of new entry with actual selected entry
+
 ## [Bug Fixes] - 2024-03-25
 
 - Fix time entries refresh

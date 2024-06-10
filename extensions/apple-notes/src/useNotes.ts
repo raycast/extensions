@@ -1,7 +1,7 @@
 import { homedir } from "os";
 import { resolve } from "path";
 
-import { showFailureToast, useSQL } from "@raycast/utils";
+import { useSQL } from "@raycast/utils";
 import { partition } from "lodash";
 
 import { getOpenNoteURL } from "./helpers";
@@ -124,8 +124,8 @@ export const useNotes = () => {
   // Split the query into two to avoid a SQL error if the zcinivitation table doesn't exist
   const { data: invitations } = useSQL<{ invitationLink: string | null; noteId: string }>(NOTES_DB, invitationQuery, {
     execute: data && data.length > 0,
-    onError(error) {
-      showFailureToast(error, { title: "Couldn't get invitations for notes" });
+    onError() {
+      // Silently fail if the table doesn't exist
     },
   });
 

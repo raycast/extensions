@@ -64,10 +64,11 @@ export default async ({ github, context }: API) => {
         repo: context.repo.repo,
         labels: ["new extension"],
       });
+      // `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`
       await comment({
         github,
         context,
-        comment: `Congratulations on your new Raycast extension! :rocket:\n\nWe will aim to make the initial review within five working days. Once the PR is approved and merged, the extension will be available on our Store.`,
+        comment: `Congratulations on your new Raycast extension! :rocket:\n\nWe have a lower capacity at the moment, and extension reviews might take longer than usually to get the initial review. Once the PR is approved and merged, the extension will be available on our Store.\n\nSorry for the inconvenience`,
       });
       return;
     }
@@ -116,7 +117,7 @@ This is especially helpful since there were no maintainers for this extension :p
 
 🔔 ${[...new Set(owners.filter((x) => x !== sender))]
         .map((x) => `@${x}`)
-        .join(" ")} you might want to have a look.`,
+        .join(" ")} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.`,
     });
 
     return;

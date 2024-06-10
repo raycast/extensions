@@ -1,4 +1,5 @@
 import { Clipboard, closeMainWindow, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { callbackLaunchCommand } from "raycast-cross-extension";
 import { addToHistory } from "./history";
 import { Color, PickColorCommandLaunchProps } from "./types";
 import { getFormattedColor } from "./utils";
@@ -21,13 +22,24 @@ export default async function command(props: PickColorCommandLaunchProps) {
       throw new Error("Failed to format color");
     }
 
-    await Clipboard.copy(hex);
+    if (props.launchContext?.callbackLaunchOptions) {
+      if (props.launchContext?.copyToClipboard) {
+        await Clipboard.copy(hex);
+      }
 
-    await showHUD(`Copied color ${hex} to clipboard`);
+      try {
+        await callbackLaunchCommand(props.launchContext.callbackLaunchOptions, { hex });
+      } catch (e) {
+        await showFailureToast(e);
+      }
+    } else {
+      await Clipboard.copy(hex);
+      await showHUD(`Copied color ${hex} to clipboard`);
+    }
+
     try {
       await launchCommand({ name: "menu-bar", type: LaunchType.Background });
     } catch (e) {
-      console.log(e);
       if (!(e instanceof Error && e.message.includes("must be activated"))) {
         await showFailureToast(e);
       }

@@ -2,7 +2,7 @@ import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
 import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 import { IpEmptyView } from "./components/ip-empty-view";
-import { searchIpGeolocation } from "./hooks/hooks";
+import { useIpGeolocation } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { isEmpty } from "./utils/common-utils";
 import { listIcons } from "./utils/constants";
@@ -14,8 +14,8 @@ interface IpArgument {
 export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
   const { ipAddress } = props.arguments;
   const { language, coordinatesFormat } = getPreferenceValues<Preferences>();
-  const [searchContent, setSearchContent] = useState<string>(ipAddress);
-  const { ipGeolocation, loading } = searchIpGeolocation(language, searchContent.trim(), coordinatesFormat);
+  const [searchContent, setSearchContent] = useState<string>(ipAddress ? ipAddress.trim() : "");
+  const { ipGeolocation, loading } = useIpGeolocation(language, searchContent, coordinatesFormat);
 
   const emptyViewTitle = () => {
     if (loading) {
@@ -32,7 +32,9 @@ export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
       isLoading={loading}
       searchBarPlaceholder={"Query geolocation of IP or domain"}
       searchText={searchContent}
-      onSearchTextChange={setSearchContent}
+      onSearchTextChange={(text) => {
+        setSearchContent(text.trim());
+      }}
       throttle={true}
     >
       <IpEmptyView title={emptyViewTitle()} />
@@ -49,7 +51,9 @@ export default function QueryIpGeolocation(props: { arguments: IpArgument }) {
                 title={`Copy All Info`}
                 content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
               />
-              <ActionOpenExtensionPreferences />
+              <ActionPanel.Section>
+                <ActionOpenExtensionPreferences />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

@@ -1,14 +1,15 @@
 import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
 import { IpEmptyView } from "./components/ip-empty-view";
-import { searchMyIpGeolocation } from "./hooks/hooks";
+import { useMyIpGeolocation } from "./hooks/hooks";
 import { Preferences } from "./types/preferences";
 import { isEmpty } from "./utils/common-utils";
 import { myIpListIcons } from "./utils/constants";
+import { ActionOpenExtensionPreferences } from "./components/action-open-extension-preferences";
 
 export default function SearchIpGeolocation() {
   const { language, showIPv6, coordinatesFormat } = getPreferenceValues<Preferences>();
-  const { ipGeolocation, loading } = searchMyIpGeolocation(language, showIPv6, coordinatesFormat);
+  const { ipGeolocation, loading } = useMyIpGeolocation(language, showIPv6, coordinatesFormat);
 
   return (
     <List isLoading={loading} searchBarPlaceholder={"My IP Geolocation"}>
@@ -28,11 +29,14 @@ export default function SearchIpGeolocation() {
                     title={`Copy All Info`}
                     content={JSON.stringify(Object.fromEntries(ipGeolocation), null, 2)}
                   />
-                  <ActionOpenCommandPreferences />
+                  <ActionPanel.Section>
+                    <ActionOpenCommandPreferences />
+                    <ActionOpenExtensionPreferences />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
-          )
+          ),
       )}
     </List>
   );

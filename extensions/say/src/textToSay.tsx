@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Form } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
 import { say } from "mac-say";
 import { ConfigureSpokenContent } from "./components/actions.js";
-import { defaultVoice } from "./constants.js";
+import { systemDefault } from "./constants.js";
+import { useSaySettings } from "./utils.js";
 
 export default function TextToSay() {
-  const [voice] = useCachedState<string>("voice", defaultVoice);
+  const { voice, rate, device } = useSaySettings();
 
   return (
     <Form
@@ -14,7 +14,11 @@ export default function TextToSay() {
           <Action.SubmitForm
             title="Say"
             onSubmit={async (values) => {
-              await say(values.content, { voice: voice === defaultVoice ? undefined : voice });
+              await say(values.content, {
+                voice: voice === systemDefault ? undefined : voice,
+                rate: rate === systemDefault ? undefined : parseInt(rate, 10),
+                audioDevice: device === systemDefault ? undefined : device,
+              });
             }}
           />
           <ConfigureSpokenContent />

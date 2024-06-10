@@ -2,8 +2,8 @@ import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/
 import { useEffect } from "react";
 import useStopwatches from "./hooks/useStopwatches";
 import RenameView from "./RenameView";
-import { formatTime, formatDateTime } from "./formatUtils";
-import { Stopwatch } from "./types";
+import { formatTime, formatDateTime } from "./backend/formatUtils";
+import { Stopwatch } from "./backend/types";
 
 export default function Command() {
   const {
@@ -82,7 +82,7 @@ export default function Command() {
           subtitle={"Press Enter to start a stopwatch"}
           actions={
             <ActionPanel>
-              <Action title="Start Stopwatch" onAction={() => handleStartSW()} />
+              <Action title="Start Stopwatch" onAction={() => handleStartSW({})} />
             </ActionPanel>
           }
         />

@@ -1,6 +1,7 @@
 import { ActionPanel, Icon, List } from "@raycast/api";
 import React from "react";
 import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
+import { ActionOpenCommandPreferences } from "./action-open-command-preferences";
 
 export function IpEmptyView(props: { title: string }) {
   const { title } = props;
@@ -10,7 +11,10 @@ export function IpEmptyView(props: { title: string }) {
       icon={Icon.AirplaneTakeoff}
       actions={
         <ActionPanel>
-          <ActionOpenExtensionPreferences />
+          <ActionPanel.Section>
+            <ActionOpenCommandPreferences />
+            <ActionOpenExtensionPreferences />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

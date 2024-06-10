@@ -5,6 +5,9 @@
   "description": "Measure Distance Between Two Points",
   "icon": "icon.png",
   "author": "anwarulislam",
+  "contributors": [
+    "thomaslombart"
+  ],
   "categories": [
     "Applications",
     "Design Tools"
@@ -20,8 +23,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "execa": "^7.1.1"
+    "@raycast/api": "^1.74.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -33,7 +35,6 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/ruler assets",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

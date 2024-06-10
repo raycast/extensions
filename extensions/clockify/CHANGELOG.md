@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2024-05-17
 
 - Added an action to open clockify in the browser
 

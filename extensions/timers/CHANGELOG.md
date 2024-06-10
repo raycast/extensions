@@ -1,5 +1,9 @@
 # Timers Changelog
 
+## [Persistent commands, codebase cleanup] - 2024-05-19
+- Add preference to keep "Manage Timers" and "Manage Stopwatches" commands open on timer/stopwatch start
+- Various refactors around the codebase
+
 ## [Fix dismissTimerAlert leaving behind residual timer files] - 2024-02-02
 
 ## [Fix sorting and time subtitle in configureMenubarPresets] - 2024-01-23

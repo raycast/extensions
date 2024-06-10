@@ -15,6 +15,8 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
+import { getFilePath, MaxInt32, validateFileType } from "./common/utils";
+import { runAppleScript } from "@raycast/utils";
 
 type Values = {
   files: string[];
@@ -23,7 +25,12 @@ type Values = {
 
 type Status = "init" | "success" | "failure";
 
-const { APIPublicKey: publicKey, APISecretKey: secretKey, OpenNow: openNow } = getPreferenceValues<Preferences>();
+const {
+  APIPublicKey: publicKey,
+  APISecretKey: secretKey,
+  OpenNow: openNow,
+  AskBeforeDownload: askBeforeDownload,
+} = getPreferenceValues<Preferences>();
 
 function getDestinationFile(files: string[]): string {
   if (!files.length) {
@@ -34,9 +41,9 @@ function getDestinationFile(files: string[]): string {
   const fileName = path.basename(file, fileExtension);
   const directory = path.dirname(file);
   if (files.length == 1) {
-    return path.join(directory, `${fileName}_compressed.pdf`);
+    return getFilePath(directory, `${fileName}_compressed.pdf`);
   }
-  return path.join(directory, `compressed_pdfs.zip`);
+  return getFilePath(directory, `compressed_pdfs.zip`);
 }
 
 function getSavedPercentage(originalFile: string, compressedFile: string) {
@@ -53,7 +60,7 @@ export default function Command() {
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     if (!values.files.length) {
-      await showToast(Toast.Style.Failure, "You must select at least a single pdf file", "Please select a file");
+      await showToast(Toast.Style.Failure, "You must select at least a single pdf file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
@@ -68,22 +75,42 @@ export default function Command() {
     try {
       await task.start();
       for (const file of values.files) {
-        const fileExtension = path.extname(file);
-        if (fileExtension != ".pdf") {
+        if (!validateFileType(file, "pdf")) {
           toast.style = Toast.Style.Failure;
           toast.title = "failure";
           toast.message = "You must select a PDF file.";
           setStatus("failure");
           setIsLoading(false);
-          console.log(`file is not a PDF received extension is ${fileExtension}`);
+          console.log(`file is not a PDF.`);
           return;
         }
         const iLovePdfFile = new ILovePDFFile(file);
         addedFilesPromises.push(task.addFile(iLovePdfFile));
       }
-      await Promise.all(addedFilesPromises);
       destinationFile = getDestinationFile(values.files);
+      if (askBeforeDownload) {
+        try {
+          const script = `set file2save to POSIX path of (choose file name with prompt "Save The Compression As" default location "${path.dirname(destinationFile)}" default name "${path.basename(destinationFile)}")`;
+          destinationFile = await runAppleScript(script, { timeout: MaxInt32 });
+        } catch (e) {
+          console.log(e);
+          const error = e as { message: string; stderr: string };
+          setIsLoading(false);
+          if (error.stderr.includes("User cancelled")) {
+            toast.hide();
+            setStatus("init");
+            return;
+          }
+          toast.style = Toast.Style.Failure;
+          toast.title = "failure";
+          toast.message = `An error happened during selecting the saving directory. Reason ${error.message}`;
+          setStatus("failure");
+        }
+      }
+
       setDestinationFilePath(destinationFile);
+
+      await Promise.all(addedFilesPromises);
       await task.process({ compression_level: values.compression_level });
       const data = await task.download();
       fs.writeFileSync(destinationFile, data);
@@ -93,14 +120,14 @@ export default function Command() {
       toast.message =
         "Compressed successfully." +
         (values.files.length == 1
-          ? ` Your PDF is ${getSavedPercentage(values.files[0], destinationFile)}% smaller`
+          ? ` Your PDF is ${getSavedPercentage(values.files[0], destinationFile)}% smaller.`
           : "");
       setStatus("success");
       setIsLoading(false);
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = "Error happened during compressing the file.";
+      toast.message = `Error happened during compressing the file. Reason ${error}`;
       setStatus("failure");
       setIsLoading(false);
       console.log(error);
