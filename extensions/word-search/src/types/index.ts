@@ -1,8 +1,12 @@
-export interface Word {
+export type SimpleWord = {
   word: string;
   score: number;
-  defs: string[];
-}
+};
+
+export type Word = SimpleWord & {
+  defs?: string[];
+  tags?: string[];
+};
 
 export enum SearchType {
   ADJECTIVE = "rel_jjb",
@@ -10,6 +14,7 @@ export enum SearchType {
   MISSING_LETTERS = "sp",
   RHYME = "rel_rhy",
   SYNONYM = "ml",
+  SOUND_LIKE = "sl",
 }
 
 export interface Definition {
@@ -23,7 +28,8 @@ export enum WordType {
   "adj" = "adjective",
 }
 
-export interface Preferences {
-  defaultAction: string;
-  capitalizeResults: boolean;
+export enum Vocabulary {
+  English = "en",
+  Spanish = "es",
+  Wikipedia = "enwiki",
 }
