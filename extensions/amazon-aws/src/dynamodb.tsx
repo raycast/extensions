@@ -41,7 +41,7 @@ export default function DynamoDb() {
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={!isLoading && !error && isDetailsEnabled}
+      isShowingDetail={!isLoading && !error && (tables || []).length > 0 && isDetailsEnabled}
       pagination={pagination}
       filtering
       searchBarPlaceholder="Filter tables by name, id, billing, status, gsi..."

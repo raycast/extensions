@@ -39,7 +39,7 @@ export default function SQS() {
       filtering
       pagination={pagination}
       onSearchTextChange={setPrefixQuery}
-      isShowingDetail={queues && queues.length > 0 && isDetailsEnabled}
+      isShowingDetail={!isLoading && !error && (queues || []).length > 0 && isDetailsEnabled}
       searchBarPlaceholder="Search queues by name prefix (>2 characters)..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >

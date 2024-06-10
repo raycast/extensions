@@ -19,7 +19,7 @@ export default function CloudWatch() {
       searchBarPlaceholder="Search log group by name (case-sensitive)..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
       onSearchTextChange={setSearch}
-      isShowingDetail={isDetailsEnabled}
+      isShowingDetail={!isLoading && !error && (logGroups || []).length > 0 && isDetailsEnabled}
       throttle
       pagination={pagination}
     >
