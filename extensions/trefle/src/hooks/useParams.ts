@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { PlantsApiAxiosParamCreator } from "@/api/trefle";
-import { getConfiguration } from "@/api";
+import { getConfiguration } from "@/lib";
+import { PlantsApiAxiosParamCreator } from "@/api";
 
 const useParams = () => {
   const configuration = useMemo(() => {

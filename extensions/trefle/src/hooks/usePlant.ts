@@ -1,5 +1,5 @@
 import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
-import type { GetPlant200Response, Plant } from "@/api/trefle/api";
+import type { GetPlant200Response, Plant } from "@/api/api";
 import useParams from "@/hooks/useParams";
 
 type PlantExtra = Plant & {

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import type { SpeciesImagesFlowerInner } from "@/api/trefle/api";
+import type { SpeciesImagesFlowerInner } from "@/api/api";
 
 const PlantImage = ({ image }: { image: SpeciesImagesFlowerInner }) => {
   return (

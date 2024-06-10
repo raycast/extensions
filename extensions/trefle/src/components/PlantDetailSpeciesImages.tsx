@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid } from "@raycast/api";
-import type { Species } from "@/api/trefle";
 import { getImageSections } from "@/lib";
+import type { Species } from "@/api";
 import PlantImage from "@/components/PlantImage";
 
 const PlantDetailSpeciesImages = ({ species }: { species?: Species }) => {

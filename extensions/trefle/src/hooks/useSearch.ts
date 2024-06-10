@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { showFailureToast, useFetch, usePromise } from "@raycast/utils";
-import type { FiltersPlants, ListPlants200Response, SpeciesLight } from "@/api/trefle/api";
+import type { FiltersPlants, ListPlants200Response, SpeciesLight } from "@/api/api";
 import useParams from "@/hooks/useParams";
 
 export type SearchResult = {

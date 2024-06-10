@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
-import type { SpeciesLight } from "@/api/trefle";
+import type { SpeciesLight } from "@/api";
 import PlantDetail from "@/components/PlantDetail";
 
 const SearchItem = ({ plant, type }: { plant: SpeciesLight; type: "grid" | "list" }) => {

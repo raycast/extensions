@@ -71,10 +71,10 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "generate": "npm run clean-api && openapi-generator-cli generate --skip-validate-spec -g typescript-axios -i ./schema/swagger.yaml -o ./src/api/trefle && npm run after-generate",
-    "clean-api": "rimraf ./src/api/trefle",
-    "after-generate": "rimraf ./src/api/trefle/.gitignore ./src/api/trefle/.npmignore ./src/api/trefle/.openapi-generator-ignore ./src/api/trefle/.openapi-generator ./src/api/trefle/git_push.sh",
-    "fetch-schema": "curl -o ./schema/swagger.yaml https://docs.trefle.io/swagger.yaml",
+    "generate": "npm run clean-api && openapi-generator-cli generate --skip-validate-spec -g typescript-axios -i ./tmp/swagger.yaml -o ./src/api && npm run after-generate",
+    "clean-api": "rimraf ./src/api",
+    "after-generate": "rimraf ./src/api/.gitignore ./src/api/.npmignore ./src/api/.openapi-generator-ignore ./src/api/.openapi-generator ./src/api/git_push.sh",
+    "fetch-schema": "mkdir -p ./tmp && curl -o ./tmp/swagger.yaml https://docs.trefle.io/swagger.yaml",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   }

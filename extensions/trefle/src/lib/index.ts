@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import type { Species, SpeciesImages, SpeciesImagesFlowerInner } from "@/api/trefle";
+import type { Species, SpeciesImages, SpeciesImagesFlowerInner } from "@/api";
+import { Configuration } from "@/api";
 
 export const getShowAs = (): "grid" | "list" => getPreferenceValues<Preferences>().showAs ?? "grid";
 
@@ -19,4 +20,11 @@ export const getImageSections = (species?: Species) => {
     .filter((section) => section !== null) as { title: string; images: SpeciesImagesFlowerInner[] }[];
 
   return imgSections;
+};
+
+export const getConfiguration = (): Configuration => {
+  const accessToken = getPreferenceValues<Preferences>().accessToken;
+  return new Configuration({
+    apiKey: accessToken,
+  });
 };
