@@ -4,7 +4,7 @@
   "title": "Get SSH Key",
   "description": "Get your local SSH key in a split of a second.",
   "icon": "command-icon.png",
-  "author": "Tang",
+  "author": "Theon",
   "categories": [
     "Developer Tools"
   ],
