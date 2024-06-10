@@ -3,6 +3,7 @@
 ## [Bugfix] - 2024-06-07
 
 - Fix to respect sort when filtering by tag
+- Fix bug where search wasn't working at all
 
 ## [Better Tag Management] - 2024-05-29
 
