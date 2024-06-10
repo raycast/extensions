@@ -23,6 +23,7 @@ export default function Command() {
     isLoading,
     data: habits,
     revalidate,
+    mutate,
   } = useFetch(`https://www.supahabits.com/api/habits?secret=${secret}`, {
     parseResponse: async (response) => {
       return (await response.json()) as Habit[];
@@ -37,14 +38,25 @@ export default function Command() {
 
   const markHabitAsCompleted = async (habitId: number) => {
     try {
-      await NodeFetch(`https://www.supahabits.com/api/habits/${habitId}/complete`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${secret}`,
+      await mutate(
+        NodeFetch(`https://www.supahabits.com/api/habits/${habitId}/complete`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${secret}`,
+          },
+          body: JSON.stringify({ secret }),
+        }),
+        {
+          optimisticUpdate(data: Habit[] | undefined) {
+            if (!data) {
+              return [];
+            }
+
+            return data.map((habit) => (habit.id === habitId ? { ...habit, completed: true } : habit));
+          },
         },
-        body: JSON.stringify({ secret }),
-      });
+      );
       showToast({ style: Toast.Style.Success, title: "Habit marked as completed" });
       revalidate();
     } catch (error) {
