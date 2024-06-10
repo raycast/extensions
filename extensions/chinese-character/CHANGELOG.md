@@ -1,6 +1,6 @@
 # Chinese Character Changelog
 
-## [Command optimisation] - {PR_MERGE_DATE}
+## [Command optimisation] - 2024-06-10
 
 - Now supports direct text input and conversion
 
