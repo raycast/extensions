@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nowplaying-cli",
-  "title": "Nowplaying-cli",
+  "title": "Nowplaying-Cli",
   "description": "It's using nowplaying-cli for macos in order to control playing video or music. It's have pause next and previous features",
   "icon": "play_pause.png",
   "author": "yusuf_akdeniz",
