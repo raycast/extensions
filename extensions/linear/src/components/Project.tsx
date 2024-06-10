@@ -110,14 +110,14 @@ export default function Project({ project, priorities, users, me, mutateProjects
             icon={Icon.List}
           />
 
+          <OpenInLinear title="Open Project" url={project.url} />
+
           <Action.Push
             target={<CreateMilestoneForm projectId={project.id} />}
             title="Create Milestone"
             shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
             icon={{ source: "linear-icons/milestone.svg", tintColor: Color.PrimaryText }}
           />
-
-          <OpenInLinear title="Open Project" url={project.url} />
 
           <ActionPanel.Section>
             <Action.Push
