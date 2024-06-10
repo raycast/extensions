@@ -37,6 +37,7 @@ export default function SQS() {
     <List
       isLoading={isLoading}
       filtering
+      throttle
       pagination={pagination}
       onSearchTextChange={setPrefixQuery}
       isShowingDetail={!isLoading && !error && (queues || []).length > 0 && isDetailsEnabled}
