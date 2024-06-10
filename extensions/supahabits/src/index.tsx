@@ -67,7 +67,11 @@ export default function Command() {
             actions={
               habit.completed === false ? (
                 <ActionPanel>
-                  <Action title="Mark as Completed" onAction={() => markHabitAsCompleted(habit.id)} />
+                  <Action
+                    title="Mark as Done"
+                    icon={Icon.CheckCircle}
+                    onAction={() => markHabitAsCompleted(habit.id)}
+                  />
                   <Action.OpenInBrowser
                     title="View Habits Details Online"
                     url="https://www.supahabits.com/dashboard"
@@ -94,7 +98,7 @@ export default function Command() {
         title="Create Habit"
         actions={
           <ActionPanel>
-            <Action.Push title="Create Habit" target={<CreateHabitForm revalidate={revalidate} />} />
+            <Action.Push title="Create Habit" icon={Icon.Wand} target={<CreateHabitForm revalidate={revalidate} />} />
           </ActionPanel>
         }
       />

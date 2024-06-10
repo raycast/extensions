@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import fetch from "node-fetch";
 
 interface CreateHabitFormProps {
@@ -38,7 +38,7 @@ export default function CreateHabitForm(props: CreateHabitFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Habit" onSubmit={createHabit} />
+          <Action.SubmitForm title="Create Habit" icon={Icon.Wand} onSubmit={createHabit} />
         </ActionPanel>
       }
     >
