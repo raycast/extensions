@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Search Projects Command] - {PR_MERGE_DATE}
+## [Search Projects Command] - 2024-06-10
 
 - Adds Cmd + enter shortcut to Open project in linear
 
