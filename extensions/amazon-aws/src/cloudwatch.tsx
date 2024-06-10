@@ -7,18 +7,18 @@ import { formatBytes, resourceToConsoleLink, uniqBy } from "./util";
 import { useCachedState } from "@raycast/utils";
 
 export default function CloudWatch() {
-  const [search, setSearch] = useState<string>("");
+  const [prefixQuery, setPrefixQuery] = useState<string>("");
   const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
     cacheNamespace: "aws-logs",
   });
-  const { logGroups, error, isLoading, revalidate, pagination } = useLogGroups(search);
+  const { logGroups, error, isLoading, revalidate, pagination } = useLogGroups(prefixQuery);
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search log group by name (case-sensitive)..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
-      onSearchTextChange={setSearch}
+      onSearchTextChange={setPrefixQuery}
       isShowingDetail={!isLoading && !error && (logGroups || []).length > 0 && isDetailsEnabled}
       throttle
       pagination={pagination}
