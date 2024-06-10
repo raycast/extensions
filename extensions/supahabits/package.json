@@ -14,18 +14,21 @@
     {
       "name": "index",
       "title": "My Habits",
+      "subtitle": "SupaHabits",
       "description": "Track habits",
       "mode": "view"
     },
     {
       "name": "journal",
       "title": "New Journal Entry",
+      "subtitle": "SupaHabits",
       "description": "Create a new journal entry",
       "mode": "view"
     },
     {
       "name": "journal-list",
       "title": "Journal Entries",
+      "subtitle": "SupaHabits",
       "description": "List journal entries",
       "mode": "view"
     }
