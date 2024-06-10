@@ -11,7 +11,7 @@ interface UserPreferences {
 
 const prefs = getPreferenceValues<UserPreferences>();
 
-const getHeaders = (): HeadersInit => {
+const getHeaders = () => {
   if (prefs.isJiraCloud === "cloud") {
     return {
       "Content-Type": "application/json",
@@ -19,6 +19,7 @@ const getHeaders = (): HeadersInit => {
       Authorization: `Basic ${Buffer.from(`${prefs.username}:${prefs.token}`).toString("base64")}`,
     };
   } else {
+    // For Jira Server
     return {
       "Content-Type": "application/json",
       Accept: "application/json",
@@ -29,18 +30,13 @@ const getHeaders = (): HeadersInit => {
 
 export const jiraRequest = async (endpoint: string, requestBody?: string, method: "GET" | "POST" = "GET") => {
   const headers = getHeaders();
-  const opts: RequestInit = { headers, method, body: requestBody };
-
-  if (method === "POST" && requestBody) {
-    opts.body = requestBody;
-  }
-
+  const opts = {
+    headers,
+    method,
+    body: requestBody,
+  };
   const res = await fetch(createJiraUrl(endpoint), opts);
   const responseBody = await res.json();
-
-  if (!res.ok) {
-    handleJiraResponseError(res.status, responseBody);
-  }
-
+  if (!res.ok) handleJiraResponseError(res.status, responseBody);
   return responseBody;
 };
