@@ -3,22 +3,44 @@ import { createJiraUrl } from "./utils";
 import { handleJiraResponseError } from "./handlers";
 import fetch from "node-fetch";
 
-const prefs = getPreferenceValues();
+interface UserPreferences {
+  isJiraCloud: string; // "cloud" or "server"
+  username: string;
+  token: string;
+}
 
-const headers = {
-  "Content-Type": "application/json",
-  Accept: "application/json",
-  Authorization: `Basic ${Buffer.from(`${prefs.username}:${prefs.token}`).toString("base64")}`,
+const prefs = getPreferenceValues<UserPreferences>();
+
+const getHeaders = (): HeadersInit => {
+  if (prefs.isJiraCloud === "cloud") {
+    return {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Basic ${Buffer.from(`${prefs.username}:${prefs.token}`).toString("base64")}`,
+    };
+  } else {
+    return {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${prefs.token}`,
+    };
+  }
 };
 
 export const jiraRequest = async (endpoint: string, requestBody?: string, method: "GET" | "POST" = "GET") => {
-  const opts = {
-    headers,
-    method,
-    body: requestBody,
-  };
+  const headers = getHeaders();
+  const opts: RequestInit = { headers, method, body: requestBody };
+
+  if (method === "POST" && requestBody) {
+    opts.body = requestBody;
+  }
+
   const res = await fetch(createJiraUrl(endpoint), opts);
   const responseBody = await res.json();
-  if (!res.ok) handleJiraResponseError(res.status, responseBody);
+
+  if (!res.ok) {
+    handleJiraResponseError(res.status, responseBody);
+  }
+
   return responseBody;
 };
