@@ -1,5 +1,9 @@
 # Text Decorator Changelog
 
+## [Fix Flash] - {PR_MERGE_DATE}
+
+- Fix the bug of flashing when opening the Decorate Text command
+
 ## [Undecorate Text] - 2024-06-11
 
 - Add Undecorate Text command to undecorate text 

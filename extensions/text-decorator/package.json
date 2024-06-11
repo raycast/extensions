@@ -9,6 +9,14 @@
     "Design Tools",
     "Fun"
   ],
+  "keywords": [
+    "yaytext",
+    "text",
+    "decorator",
+    "font",
+    "unicode",
+    "convert"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -211,7 +219,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.2"
+    "@raycast/api": "^1.76.0"
   },
   "devDependencies": {
     "@types/node": "~20.12.13",
