@@ -27,7 +27,8 @@
     "devbear",
     "rfaccio",
     "badta5te",
-    "andyburris"
+    "andyburris",
+    "thomaslombart"
   ],
   "license": "MIT",
   "preferences": [
@@ -389,11 +390,26 @@
       "description": "See your queue.",
       "mode": "view",
       "disabledByDefault": true
+    },
+    {
+      "name": "generatePlaylist",
+      "title": "Generate Playlist",
+      "subtitle": "Spotify",
+      "description": "Generate a Spotify playlist using Raycast AI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "description",
+          "placeholder": "Playlist description",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/api": "^1.75.1",
+    "@raycast/utils": "^1.15.0",
     "node-fetch": "^3.3.2",
     "oazapfts": "^4.10.0"
   },

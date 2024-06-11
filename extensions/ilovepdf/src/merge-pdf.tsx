@@ -49,7 +49,7 @@ export default function Command() {
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     if (!values.files.length) {
-      await showToast(Toast.Style.Failure, "You must select at least a single pdf file", "Please select a file");
+      await showToast(Toast.Style.Failure, "You must select at least a single pdf file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
@@ -93,7 +93,7 @@ export default function Command() {
           }
           toast.style = Toast.Style.Failure;
           toast.title = "failure";
-          toast.message = "An error happened during selecting the saving directory";
+          toast.message = `An error happened during selecting the saving directory. Reason ${error.message}`;
           setStatus("failure");
         }
       }
@@ -112,7 +112,7 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = "Error happened during merging the files.";
+      toast.message = `Error happened during merging the files. Reason ${error}`;
       setStatus("failure");
       setIsLoading(false);
       console.log(error);
