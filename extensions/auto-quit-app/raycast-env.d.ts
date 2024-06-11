@@ -17,7 +17,7 @@ declare namespace Preferences {
   export type SetAutoQuitApp = ExtensionPreferences & {
   /** App Layout - Set the layout of the app items. */
   "layout": "Grid" | "List",
-  /** App Item Coloums - Set the number of columns of the app items. (Only works with Grid layout) */
+  /** App Item Columns - Set the number of columns of the app items. (Only works with Grid layout) */
   "columns": "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8",
   /** App Item Inset - Set the inset of the app items. (Only works with Grid layout) */
   "itemInset": "" | "sm" | "md" | "lg"
@@ -35,4 +35,5 @@ declare namespace Arguments {
   /** Arguments passed to the `auto-quit-app-menubar` command */
   export type AutoQuitAppMenubar = {}
 }
+
 
