@@ -1,15 +1,13 @@
-import { ActionPanel, Form, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Form } from "@raycast/api";
 import React, { useState } from "react";
-import { getSpecifyIdPlaceholderImageURL } from "./hooks/hooks";
+import { useSpecifyIdPlaceholderImageURL } from "./hooks/hooks";
 import { SpecifyIdImageConfig } from "./types/types";
-import { Preferences } from "./types/preferences";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { PicsumImageAction } from "./components/picsum-image-action";
 import { RevealImageAction } from "./components/reveal-image-action";
 
-export default function StylizePlaceholderImage(props: { id: string; width: number; height: number }) {
+export default function StylizePlaceholder(props: { id: string; width: number; height: number }) {
   const { id, width, height } = props;
-  const { primaryAction } = getPreferenceValues<Preferences>();
 
   const [picsumConfig, setPicsumConfig] = useState<SpecifyIdImageConfig>({
     id: id,
@@ -21,7 +19,7 @@ export default function StylizePlaceholderImage(props: { id: string; width: numb
     grayscale: false,
   });
 
-  const { imageURL } = getSpecifyIdPlaceholderImageURL(picsumConfig);
+  const { imageURL } = useSpecifyIdPlaceholderImageURL(picsumConfig);
 
   return (
     <Form
@@ -31,13 +29,11 @@ export default function StylizePlaceholderImage(props: { id: string; width: numb
           <PicsumImageAction
             imageURL={imageURL}
             size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
-            primaryAction={primaryAction}
           />
           <ActionPanel.Section>
             <RevealImageAction
               imageURL={imageURL}
               size={parseInt(picsumConfig.width) + "x" + parseInt(picsumConfig.height)}
-              primaryAction={primaryAction}
             />
           </ActionPanel.Section>
           <ActionOpenPreferences />
