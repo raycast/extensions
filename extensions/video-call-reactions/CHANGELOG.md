@@ -1,5 +1,16 @@
 # Video Call Reactions Changelog
 
+## [1.2.0] - 2024-06-11
+### Added
+- Added a new dropdown argument command to trigger video call reactions based on the chosen option.
+
+### Changed
+- Refactored the code to support the new feature, improve debugging and error handling, and renamed files to accommodate the added functionalities.
+- Renamed the favorite/preset command.
+
+### Improved
+- Enhanced error handling for additional errors and edge cases, resulting in a better user experience.
+
 ## [1.1.0] - 2024-06-07
 ### Changed
 - Resolved an AppleScript execution issue in Full Screen Mode.

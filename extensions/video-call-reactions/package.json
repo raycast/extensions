@@ -18,11 +18,59 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Trigger Video Reaction",
-      "subtitle": "Choose and trigger video call reactions with ease.",
-      "description": "The script allows users to select and trigger reactions like confetti and fireworks during a video call.",
+      "name": "trigger-preset-reaction",
+      "title": "Trigger Preset Reaction",
+      "subtitle": "Use your preset favorite reaction.",
+      "description": "Triggers your preset favorite reaction in video calls.",
       "mode": "no-view"
+    },
+    {
+      "name": "trigger-custom-reaction",
+      "title": "Trigger Custom Reaction",
+      "subtitle": "Choose a reaction on the fly.",
+      "description": "Triggers a custom reaction based on your input.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "reaction",
+          "type": "dropdown",
+          "placeholder": "Select a Reaction",
+          "data": [
+            {
+              "title": "Hearts ❤️",
+              "value": "Hearts ❤️"
+            },
+            {
+              "title": "Thumbs Up 👍",
+              "value": "Thumbs Up 👍"
+            },
+            {
+              "title": "Thumbs Down 👎",
+              "value": "Thumbs Down 👎"
+            },
+            {
+              "title": "Balloons 🎈",
+              "value": "Balloons 🎈"
+            },
+            {
+              "title": "Rain 🌧️",
+              "value": "Rain 🌧️"
+            },
+            {
+              "title": "Confetti 🎉",
+              "value": "Confetti 🎉"
+            },
+            {
+              "title": "Lasers 🔆",
+              "value": "Lasers 🔆"
+            },
+            {
+              "title": "Fireworks 🎆",
+              "value": "Fireworks 🎆"
+            }
+          ]
+        }
+      ]
     }
   ],
   "preferences": [
@@ -105,16 +153,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "screenshots": [
-    "assets/balloons.png",
-    "assets/confetti.png",
-    "assets/hearts.png",
-    "assets/rain.png",
-    "assets/thumbs-up.png",
-    "assets/confetti-2.png",
-    "assets/fireworks.png",
-    "assets/lasers.png",
-    "assets/thumbs-down.png"
-  ]
+  }
 }
