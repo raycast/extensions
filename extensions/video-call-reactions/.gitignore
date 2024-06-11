@@ -1,16 +1,13 @@
 # Ignore everything
 *
 
-# But not these directories...
-!/.gitignore
-!/assets/
-
-# Except the ones we want to track
-!/CHANGELOG.md
-!/package.json
-!/README.md
-!src/common.ts
-!src/executeReaction.ts
-!src/tempCodeRunnerFile.ts
-!src/trigger-custom-reaction.ts
-!src/trigger-preset-reaction.ts
+# But not these files or directories...
+!.gitignore
+!assets/
+!CHANGELOG.md
+!package.json
+!README.md
+!src/
+# Ignore specific files in the src/ directory
+src/*.log
+src/tempCodeRunnerFile.ts
