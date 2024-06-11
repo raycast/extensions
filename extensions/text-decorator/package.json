@@ -113,7 +113,7 @@
     },
     {
       "name": "decorate-text-with-font",
-      "title": "Decorate Text With Font",
+      "title": "Decorate Text with Font",
       "icon": "text-decorator-with-font.png",
       "description": "Decorate text with specific font and set font of Decorate Text command.",
       "mode": "view",
