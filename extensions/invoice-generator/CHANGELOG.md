@@ -1,6 +1,6 @@
 # Invoice Generator Changelog
 
-## [Initial Version] - 2024-06-01
+## [Initial Version] - 2024-06-11
 
 - Generate invoice command
   - Preferences for from name, address and logo
