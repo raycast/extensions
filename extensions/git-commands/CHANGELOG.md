@@ -1,6 +1,6 @@
 # Git Commands Changelog
 
-## [Favorites and Recent feature] - 2024-05-25
+## [Favorites and Recent feature] - {PR_MERGE_DATE}
 
 - Save favorites.
 - List recent used.
