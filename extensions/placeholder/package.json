@@ -13,8 +13,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-placeholders",
-      "title": "Search Placeholders",
+      "name": "search-placeholder-images",
+      "title": "Search Placeholder Images",
       "description": "Search placeholder images, add your desired image size (width & height), and get a stylish placeholder.",
       "mode": "view",
       "preferences": [
@@ -111,8 +111,8 @@
       ]
     },
     {
-      "name": "random-placeholder",
-      "title": "Random Placeholder",
+      "name": "random-placeholder-image",
+      "title": "Random Placeholder Image",
       "description": "Just add your desired image size (width & height), and get a random stylish placeholder.",
       "mode": "no-view",
       "arguments": [
