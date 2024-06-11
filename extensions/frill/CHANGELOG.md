@@ -1,6 +1,6 @@
 # Frill Changelog
 
-## [Fix `Announcements` and `Ideas` not showing] - {PR_MERGE_DATE}
+## [Fix `Announcements` and `Ideas` not showing] - 2024-06-11
 
 The API no longer returns `Slate` markdown so editing and creating markdown is easier 🚀.
 
