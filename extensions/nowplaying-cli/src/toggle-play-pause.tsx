@@ -1,14 +1,11 @@
 import { Toast, closeMainWindow, showToast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { checkCli } from "./util";
 
 export default async () => {
   const exists = await checkCli();
   if (exists) {
-    await runAppleScript(`do shell script "
-    cd /opt/homebrew/bin
-    nowplaying-cli togglePlayPause
-    "`);
+    await runAppleScript(`do shell script "/opt/homebrew/bin/nowplaying-cli togglePlayPause"`);
     await closeMainWindow();
   } else {
     showToast({

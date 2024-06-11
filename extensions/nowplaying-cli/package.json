@@ -34,8 +34,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.74.1",
-    "@types/shelljs": "^0.8.15",
-    "run-applescript": "^7.0.0"
+    "@raycast/utils": "^1.16.0",
+    "@types/shelljs": "^0.8.15"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
