@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ns-nederlandse-spoorwegen",
+  "title": "NS (Nederlandse Spoorwegen)",
+  "description": "Met de Raycast-extensie voor Nederlandse Spoorwegen kunt u eenvoudig treinschema's, routes en real-time updates voor het Nederlandse spoorwegsysteem vinden. Deze extensie vereenvoudigt het proces van het plannen van uw reis door snelle toegang te bieden tot essentiële informatie direct vanuit uw Raycast-interface. Of u nu pendelt of reist, blijf op de hoogte met de laatste treinupdates en zorg voor een soepele reis met slechts een paar klikken.\n\n\nWith the Raycast extension for Nederlandse Spoorwegen, you can easily find train schedules, routes, and real-time updates for the Dutch railway system. This extension simplifies the process of planning your journey by providing quick access to essential information directly from your Raycast interface. Whether you're commuting or traveling, stay informed with the latest train updates and ensure a smooth trip with just a few clicks.",
+  "icon": "ns.png",
+  "author": "flaticols",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ns",
+      "title": "Find a train",
+      "description": "Zoek een trein/Find a train",
+      "mode": "view"
+    },
+    {
+      "name": "station",
+      "title": "Search a station",
+      "description": "Search a station",
+      "mode": "view"
+    },
+    {
+      "name": "user-routes",
+      "title": "Your favorite routes",
+      "description": "List of your favorite routes",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ns-api-key",
+      "required": true,
+      "type": "textfield",
+      "title": "NS API Key",
+      "description": "Your NS API key"
+    },
+    {
+      "name": "result-limit",
+      "default": "7",
+      "type": "textfield",
+      "title": "Search Result Limit",
+      "description": "How many result will shown in search",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
