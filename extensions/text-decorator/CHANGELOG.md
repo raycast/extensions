@@ -1,6 +1,6 @@
 # Text Decorator Changelog
 
-## [Fix Flash] - {PR_MERGE_DATE}
+## [Fix Flash] - 2024-06-11
 
 - Fix the bug of flashing when opening the Decorate Text command
 
