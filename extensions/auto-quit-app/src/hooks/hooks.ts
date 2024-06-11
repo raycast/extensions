@@ -46,7 +46,6 @@ export const useEnabledQuitApps = () => {
     } catch (e) {
       console.error(e);
     }
-    setLoading(false);
 
     // Quit Apps
     if (environment.launchType == LaunchType.Background) {
@@ -71,6 +70,7 @@ export const useEnabledQuitApps = () => {
       await scriptQuitAppsWithoutWindow(enabledQuitApps);
       defaultCache.set(CacheKey.REFRESH_INTERVAL, "5");
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
