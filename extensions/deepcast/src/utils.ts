@@ -8,7 +8,7 @@ import {
   LaunchType,
   closeMainWindow,
 } from "@raycast/api";
-import got from "got";
+import got, { HTTPError, RequestError } from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
 function isPro(key: string) {
@@ -20,7 +20,7 @@ const DEEPL_QUOTA_EXCEEDED = 456;
 function gotErrorToString(error: unknown) {
   console.log(error);
   // response received
-  if (error instanceof got.HTTPError) {
+  if (error instanceof HTTPError) {
     const { statusCode } = error.response;
     if (statusCode === StatusCodes.FORBIDDEN) return "Invalid DeepL API key";
     if (statusCode === StatusCodes.TOO_MANY_REQUESTS) return "Too many requests to DeepL API";
@@ -32,7 +32,7 @@ function gotErrorToString(error: unknown) {
   }
 
   // request failed
-  if (error instanceof got.RequestError) {
+  if (error instanceof RequestError) {
     return `Something went wrong when sending a request to the DeepL API. If you’re having issues, open an issue on GitHub and include following text: ${error.code} ${error.message}`;
   }
   return "Unknown error";
@@ -102,14 +102,22 @@ export async function sendTranslateRequest({
           await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
           break;
         case "view":
-          await launchCommand({
-            name: "index",
-            type: LaunchType.UserInitiated,
-            context: {
-              translation,
-              sourceLanguage: detectedSourceLanguage,
-            },
-          });
+          try {
+            await launchCommand({
+              name: "index",
+              type: LaunchType.UserInitiated,
+              context: {
+                translation,
+                sourceLanguage: detectedSourceLanguage,
+              },
+            });
+          } catch {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to display translated text.",
+              message: "The main Translate command must be enabled.",
+            });
+          }
           break;
         case "paste":
           await closeMainWindow();
