@@ -15,7 +15,6 @@ import { fontFamily } from "./utils/constants";
 import { actionAfterDecoration, fontFallback } from "./types/preferences";
 
 export default async (props: LaunchProps<{ arguments: DecoratorArguments }>) => {
-  await closeMainWindow();
   const font_ = getArgument(props.arguments.font, `Font`);
   if (isEmpty(font_)) {
     await launchCommand({
@@ -24,6 +23,7 @@ export default async (props: LaunchProps<{ arguments: DecoratorArguments }>) => 
     });
     await updateCommandMetadata({ subtitle: "With Font" });
   } else {
+    await closeMainWindow();
     await decorateText(font_);
     await updateCommandMetadata({ subtitle: fontFamily.find((value) => value.value === font_)?.title });
   }

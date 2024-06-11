@@ -1,5 +1,9 @@
 # Text Decorator Changelog
 
+## [Fix Flash] - 2024-06-11
+
+- Fix the bug of flashing when opening the Decorate Text command
+
 ## [Undecorate Text] - 2024-06-11
 
 - Add Undecorate Text command to undecorate text 
