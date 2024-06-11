@@ -1,8 +1,20 @@
-import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
-import { Action, ActionPanel, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  useNavigation,
+  Clipboard,
+  captureException,
+} from "@raycast/api";
 import { MessageAttributeValue, SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { Queue } from "../../sqs";
 import Style = Toast.Style;
+import { getErrorMessage } from "../../util";
 
 interface SendMessageFormValues {
   msgBody: string;
@@ -15,7 +27,15 @@ interface SendMessageFormValues {
   msgAttributes: string;
 }
 
-export const SendMessageForm = ({ queue, revalidate }: { queue: Queue; revalidate: () => void }) => {
+export const SendMessageForm = ({
+  queue,
+  revalidate,
+  retryInitValues,
+}: {
+  queue: Queue;
+  revalidate: () => void;
+  retryInitValues?: SendMessageFormValues;
+}) => {
   const isFifoQueue = queue.attributes?.FifoQueue === "true";
   const { pop } = useNavigation();
   const { handleSubmit, values, itemProps } = useForm<SendMessageFormValues>({
@@ -26,9 +46,9 @@ export const SendMessageForm = ({ queue, revalidate }: { queue: Queue; revalidat
         primaryAction: {
           title: "Send",
           onAction: async () => {
-            await showToast({ style: Style.Animated, title: "🚧 Sending message..." });
-            try {
-              await new SQSClient({}).send(
+            const toast = await showToast({ style: Style.Animated, title: "🚧 Sending message..." });
+            new SQSClient({})
+              .send(
                 new SendMessageCommand({
                   QueueUrl: queue.queueUrl,
                   MessageBody: values.msgBody,
@@ -41,18 +61,31 @@ export const SendMessageForm = ({ queue, revalidate }: { queue: Queue; revalidat
                     MessageAttributes: JSON.parse(values.msgAttributes) as Record<string, MessageAttributeValue>,
                   }),
                 }),
-              );
-              await showToast({ style: Style.Success, title: "✅ Message sent" });
-            } catch (err) {
-              await showFailureToast(err, { title: "❌ Failed to send message" });
-            } finally {
-              pop();
-              revalidate();
-            }
+              )
+              .then(({ MessageId }) => {
+                toast.style = Style.Success;
+                toast.title = "✅ Message sent";
+                toast.message = `Message ID: ${MessageId}`;
+                toast.primaryAction = {
+                  title: "Copy Message ID",
+                  shortcut: { modifiers: ["cmd"], key: "c" },
+                  onAction: () => Clipboard.copy(`${MessageId}`),
+                };
+              })
+              .catch((err) => {
+                captureException(err);
+                toast.style = Style.Failure;
+                toast.title = "❌ Failed to send message";
+                toast.message = getErrorMessage(err);
+              })
+              .finally(() => {
+                pop();
+                revalidate();
+              });
           },
         },
       }),
-    initialValues: { useDelaySeconds: false, useMsgDeduplicationId: false, useMsgAttributes: false },
+    initialValues: retryInitValues || { useDelaySeconds: false, useMsgDeduplicationId: false, useMsgAttributes: false },
     validation: {
       msgDeduplicationId: (value) => {
         if (queue.attributes?.ContentBasedDeduplication === "false" && (!value || value!.length < 1)) {

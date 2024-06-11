@@ -20,7 +20,7 @@
       "name": "trimStart",
       "type": "checkbox",
       "description": "Trim spaces in front of plain text",
-      "default": false,
+      "default": true,
       "required": false
     },
     {
@@ -28,7 +28,7 @@
       "name": "trimEnd",
       "type": "checkbox",
       "description": "Trim spaces at the end of plain text",
-      "default": false,
+      "default": true,
       "required": false
     },
     {

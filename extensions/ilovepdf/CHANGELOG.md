@@ -1,5 +1,11 @@
 # iLovePDF Changelog
 
+## [Add Word to PDF Command] - 2024-06-06
+
+## [Refactoring for better performance and readability] - 2024-06-06
+
+## [Use magic byte for validation] - 2024-06-04
+
 ## [Allow the Selection of Download Directory] - 2024-05-27
 
 ## [Add Merge PDF] - 2024-05-27

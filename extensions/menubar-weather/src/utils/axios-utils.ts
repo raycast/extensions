@@ -6,7 +6,7 @@ export const OPEN_METEO = "https://open-meteo.com/en";
 const OPEN_METEO_WEATHER = "https://api.open-meteo.com/v1/forecast";
 const OPEN_METEO_LOCATION = "https://geocoding-api.open-meteo.com/v1/search";
 
-export async function getOpenMeteoWeather(lon: string, lat: string) {
+export async function getOpenMeteoWeather(lat: string, lon: string) {
   const axiosResponse = await axios({
     method: "GET",
     url: OPEN_METEO_WEATHER,

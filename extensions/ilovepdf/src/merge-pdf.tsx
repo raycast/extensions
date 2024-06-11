@@ -16,7 +16,7 @@ import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
 import { useState } from "react";
 import fs from "fs";
 import path from "path";
-import { getFilePath, MaxInt32 } from "./common/utils";
+import { getFilePath, MaxInt32, validateFileType } from "./common/utils";
 import { runAppleScript } from "@raycast/utils";
 
 type Values = {
@@ -49,7 +49,7 @@ export default function Command() {
   async function handleSubmit(values: Values) {
     setIsLoading(true);
     if (!values.files.length) {
-      await showToast(Toast.Style.Failure, "You must select at least a single pdf file", "Please select a file");
+      await showToast(Toast.Style.Failure, "You must select at least a single pdf file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
@@ -64,14 +64,13 @@ export default function Command() {
     try {
       await task.start();
       for (const file of values.files) {
-        const fileExtension = path.extname(file);
-        if (fileExtension != ".pdf") {
+        if (!validateFileType(file, "pdf")) {
           toast.style = Toast.Style.Failure;
           toast.title = "failure";
           toast.message = "You must select PDF files.";
           setStatus("failure");
           setIsLoading(false);
-          console.log(`file is not a PDF received extension is ${fileExtension}`);
+          console.log(`file is not a PDF.`);
           return;
         }
         const iLovePdfFile = new ILovePDFFile(file);
@@ -94,7 +93,7 @@ export default function Command() {
           }
           toast.style = Toast.Style.Failure;
           toast.title = "failure";
-          toast.message = "An error happened during selecting the saving directory";
+          toast.message = `An error happened during selecting the saving directory. Reason ${error.message}`;
           setStatus("failure");
         }
       }
@@ -113,7 +112,7 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "failure";
-      toast.message = "Error happened during merging the files.";
+      toast.message = `Error happened during merging the files. Reason ${error}`;
       setStatus("failure");
       setIsLoading(false);
       console.log(error);

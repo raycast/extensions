@@ -291,6 +291,50 @@
           "value": "470"
         }
       ]
+    },
+    {
+      "name": "g1",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK General",
+      "description": "Select to include NHK General",
+      "title": "Services"
+    },
+    {
+      "name": "e1",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK Educational",
+      "description": "Select to include NHK Educational"
+    },
+    {
+      "name": "s1",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS",
+      "description": "Select to include NHK BS"
+    },
+    {
+      "name": "s2",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS (102ch)",
+      "description": "Select to include NHK BS (102ch)"
+    },
+    {
+      "name": "s5",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS Premium 4K",
+      "description": "Select to include NHK BS Premium 4K"
+    },
+    {
+      "name": "s6",
+      "type": "checkbox",
+      "required": true,
+      "label": "NHK BS 8K",
+      "description": "Select to include NHK 8K"
     }
+
   ]
 }

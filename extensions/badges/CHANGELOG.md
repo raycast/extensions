@@ -1,5 +1,10 @@
 # Badges Changelog
 
+## [Enhancement] - 2024-05-31
+
+- Refactor text inputs
+- Make the text input back-able
+
 ## [Chore] - 2024-05-23
 
 - Bump [`raycast-cross-extension@0.2.1`](https://github.com/LitoMore/raycast-cross-extension-conventions)

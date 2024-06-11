@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## ["Create Pull Request" command] - 2024-06-03
+
+- Added typeahead search for branch selection in Create PR command.
+
 ## [Add "My Projects" command] - 2024-04-25
 
 - You can now see all of your projects into a single command called `My Projects`. You can also open/close projects. NOTE: This feature requires you to change the scope of your token to include `project` permissions. If you use the OAuth login, you will need to log in again to update the token.

@@ -11,6 +11,7 @@ import { useCachedState } from "@raycast/utils";
 const Actions = ({
   noNotes,
   onTagFilter,
+  onApplyTag,
   isDraft = false,
   title,
   note,
@@ -19,6 +20,7 @@ const Actions = ({
 }: {
   noNotes: boolean;
   onTagFilter: (tag: string) => void;
+  onApplyTag: (tag: string, noteBody?: string) => void;
   isDraft?: boolean;
   title?: string;
   note?: string;
@@ -68,13 +70,46 @@ const Actions = ({
         {!noNotes && <DeleteNoteAction createdAt={createdAt} />}
       </ActionPanel.Section>
       <ActionPanel.Section>
+        {allTags && allTags.length > 0 ? (
+          <ActionPanel.Submenu
+            title="Apply / Remove Tag"
+            icon={{
+              source: Icon.Tag,
+              tintColor: getTintColor("turquoise"),
+            }}
+            shortcut={{ modifiers: ["cmd"], key: "t" }}
+          >
+            {allTags.map((tag, i) => (
+              <Action
+                key={i}
+                icon={{
+                  source: "dot.png",
+                  tintColor: getTintColor(tag.color) ?? "blue",
+                }}
+                title={tag.name}
+                onAction={() => {
+                  onApplyTag(tag.name, note);
+                }}
+              />
+            ))}
+          </ActionPanel.Submenu>
+        ) : undefined}
+        <Action.Push
+          title="New Tag"
+          icon={{
+            source: Icon.PlusSquare,
+            tintColor: getTintColor("turquoise"),
+          }}
+          target={<CreateTag />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+        />
         <ActionPanel.Submenu
           title="Filter Tag"
           icon={{
             source: Icon.Filter,
             tintColor: getTintColor("turquoise"),
           }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+          shortcut={{ modifiers: ["cmd"], key: "f" }}
         >
           {allTags &&
             allTags.length > 0 &&
@@ -91,17 +126,16 @@ const Actions = ({
                 }}
               />
             ))}
+          <Action
+            title="All Notes"
+            icon={{
+              source: Icon.BulletPoints,
+              tintColor: getTintColor("turquoise"),
+            }}
+            onAction={() => onTagFilter("")}
+          />
           <Action.Push title="Create" icon={Icon.Plus} target={<CreateTag />} />
         </ActionPanel.Submenu>
-        <Action.Push
-          title="New Tag"
-          icon={{
-            source: Icon.Tag,
-            tintColor: getTintColor("turquoise"),
-          }}
-          target={<CreateTag />}
-          shortcut={{ modifiers: ["cmd"], key: "t" }}
-        />
         <Action.Push
           title="Delete Tags"
           icon={{

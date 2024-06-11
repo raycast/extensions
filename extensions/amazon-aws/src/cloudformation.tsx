@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  captureException,
   Color,
   confirmAlert,
   Icon,
@@ -9,6 +10,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Clipboard,
 } from "@raycast/api";
 import {
   CloudFormationClient,
@@ -21,9 +23,9 @@ import {
   StackSummary,
   UpdateTerminationProtectionCommand,
 } from "@aws-sdk/client-cloudformation";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { isReadyToFetch, resourceToConsoleLink } from "./util";
+import { getErrorMessage, isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 
 export default function CloudFormation() {
@@ -56,49 +58,53 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
       {!error && stacks?.length === 0 && (
         <List.EmptyView title="No stacks found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {stacks?.map((s) => (
-        <List.Item
-          key={s.StackId}
-          keywords={[s.StackName || "", s.StackStatus || "", s.TemplateDescription || ""]}
-          icon={"aws-icons/cfn/stack.png"}
-          title={s.StackName || ""}
-          subtitle={s.TemplateDescription}
-          actions={
-            <ActionPanel>
-              <AwsAction.Console url={resourceToConsoleLink(s.StackId, "AWS::CloudFormation::Stack")} />
-              <ActionPanel.Section title="Stack Actions">
-                <Action.Push
-                  icon={Icon.Eye}
-                  title="Show Stack Resources"
-                  target={<CloudFormationStackResources stack={s} />}
-                  shortcut={{ modifiers: ["ctrl"], key: "r" }}
-                />
-                <Action
-                  icon={Icon.LockUnlocked}
-                  title="Update Termination Protection"
-                  shortcut={{ modifiers: ["ctrl"], key: "t" }}
-                  onAction={() => updateTerminationProtection(s.StackName || "")}
-                />
-                <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} />
-                <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} />
-              </ActionPanel.Section>
-              <ActionPanel.Section title="Other Resources">
-                <Action.Push
-                  icon={Icon.Eye}
-                  title={"Show Exports"}
-                  target={<CloudFormationExports revalidateStacks={revalidate} setExportsEnabled={setExportsEnabled} />}
-                  onPush={() => setExportsEnabled(true)}
-                  shortcut={{ modifiers: ["ctrl"], key: "e" }}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-          accessories={[
-            { date: s.CreationTime, icon: Icon.Calendar, tooltip: "Creation Time" },
-            { icon: statusToIcon(s.StackStatus || ""), tooltip: s.StackStatus },
-          ]}
-        />
-      ))}
+      {(stacks || [])
+        .sort((a, b) => `${a.StackName}`.localeCompare(`${b.StackName}`))
+        .map((s) => (
+          <List.Item
+            key={s.StackId}
+            keywords={[s.StackName || "", s.StackStatus || "", s.TemplateDescription || ""]}
+            icon={"aws-icons/cfn/stack.png"}
+            title={s.StackName || ""}
+            subtitle={s.TemplateDescription}
+            actions={
+              <ActionPanel>
+                <AwsAction.Console url={resourceToConsoleLink(s.StackId, "AWS::CloudFormation::Stack")} />
+                <ActionPanel.Section title="Stack Actions">
+                  <Action.Push
+                    icon={Icon.Eye}
+                    title="Show Stack Resources"
+                    target={<CloudFormationStackResources stack={s} />}
+                    shortcut={{ modifiers: ["ctrl"], key: "r" }}
+                  />
+                  <Action
+                    icon={Icon.LockUnlocked}
+                    title="Update Termination Protection"
+                    shortcut={{ modifiers: ["ctrl"], key: "t" }}
+                    onAction={() => updateTerminationProtection(s.StackName || "")}
+                  />
+                  <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} />
+                  <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Other Resources">
+                  <Action.Push
+                    icon={Icon.Eye}
+                    title={"Show Exports"}
+                    target={
+                      <CloudFormationExports revalidateStacks={revalidate} setExportsEnabled={setExportsEnabled} />
+                    }
+                    onPush={() => setExportsEnabled(true)}
+                    shortcut={{ modifiers: ["ctrl"], key: "e" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+            accessories={[
+              { date: s.CreationTime, icon: Icon.Calendar, tooltip: "Creation Time" },
+              { icon: statusToIcon(s.StackStatus || ""), tooltip: s.StackStatus },
+            ]}
+          />
+        ))}
     </List>
   );
 };
@@ -175,38 +181,40 @@ const CloudFormationExports = ({
       {!error && exports?.length === 0 && (
         <List.EmptyView title="No exports found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {exports?.map((e) => (
-        <List.Item
-          key={e.Name}
-          icon={{ source: Icon.Hashtag, tintColor: Color.Purple }}
-          title={e.Value || ""}
-          subtitle={e.Name}
-          keywords={[e.Name || "", e.ExportingStackId || "", e.Value || ""]}
-          accessories={[{ tag: e.ExportingStackId?.split("/")[1] }]}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} />
-              <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} />
-              <ActionPanel.Section title="Resource Types">
-                <Action
-                  icon={Icon.Eye}
-                  title="Show Stacks"
-                  onAction={() => {
-                    pop();
-                    if (revalidateStacks) {
-                      revalidateStacks();
-                    } else {
-                      push(<CloudFormationStacks setExportsEnabled={setExportsEnabled} />);
-                    }
-                    setExportsEnabled(false);
-                  }}
-                  shortcut={{ modifiers: ["ctrl"], key: "s" }}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+      {(exports || [])
+        .sort((a, b) => `${a.Name}`.localeCompare(`${b.Name}`))
+        .map((e) => (
+          <List.Item
+            key={e.Name}
+            icon={{ source: Icon.Hashtag, tintColor: Color.Purple }}
+            title={e.Value || ""}
+            subtitle={e.Name}
+            keywords={[e.Name || "", e.ExportingStackId || "", e.Value || ""]}
+            accessories={[{ tag: e.ExportingStackId?.split("/")[1] }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} />
+                <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} />
+                <ActionPanel.Section title="Resource Types">
+                  <Action
+                    icon={Icon.Eye}
+                    title="Show Stacks"
+                    onAction={() => {
+                      pop();
+                      if (revalidateStacks) {
+                        revalidateStacks();
+                      } else {
+                        push(<CloudFormationStacks setExportsEnabled={setExportsEnabled} />);
+                      }
+                      setExportsEnabled(false);
+                    }}
+                    shortcut={{ modifiers: ["ctrl"], key: "s" }}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 };
@@ -253,38 +261,68 @@ const fetchExports = async (token?: string, exports?: Export[]): Promise<Export[
 };
 
 const updateTerminationProtection = async (stackName: string) => {
-  const { Stacks } = await new CloudFormationClient({}).send(new DescribeStacksCommand({ StackName: stackName }));
-  const terminationProtection = !Stacks![0].EnableTerminationProtection;
-
-  await confirmAlert({
-    title: `${terminationProtection ? "Enable" : "Disable"} Termination Protection?`,
-    message: `Are you sure you want to ${terminationProtection ? "enable" : "disable"} termination protection?`,
-    icon: { source: Icon.Exclamationmark3, tintColor: Color.Red },
-    primaryAction: {
-      title: terminationProtection ? "Enable" : "Disable",
-      style: terminationProtection ? Alert.ActionStyle.Default : Alert.ActionStyle.Destructive,
-      onAction: async () => {
-        await showToast({
-          style: Toast.Style.Animated,
-          title: `${terminationProtection ? "Enabling" : "Disabling"} Termination Protection...`,
-        });
-        try {
-          await new CloudFormationClient({}).send(
-            new UpdateTerminationProtectionCommand({
-              EnableTerminationProtection: terminationProtection,
-              StackName: stackName,
-            }),
-          );
-          await showToast({
-            style: Toast.Style.Success,
-            title: `${terminationProtection ? "Enabled" : "Disabled"} Termination Protection`,
-          });
-        } catch (error) {
-          await showFailureToast(error, { title: "Failed to update termination protection" });
-        }
-      },
-    },
-  });
+  const toast = await showToast({ style: Toast.Style.Animated, title: `⏳ Getting stack details for ${stackName}` });
+  new CloudFormationClient({})
+    .send(new DescribeStacksCommand({ StackName: stackName }))
+    .then(async ({ Stacks }) => {
+      const terminationProtection = !Stacks![0].EnableTerminationProtection;
+      await confirmAlert({
+        title: `${terminationProtection ? "Enable" : "Disable"} Termination Protection?`,
+        message: `Are you sure you want to ${terminationProtection ? "enable" : "disable"} termination protection?`,
+        icon: { source: Icon.Exclamationmark3, tintColor: Color.Red },
+        primaryAction: {
+          title: terminationProtection ? "Enable" : "Disable",
+          style: terminationProtection ? Alert.ActionStyle.Default : Alert.ActionStyle.Destructive,
+          onAction: async () => {
+            toast.title = `⏳ ${terminationProtection ? "Enabling" : "Disabling"} Termination Protection`;
+            new CloudFormationClient({})
+              .send(
+                new UpdateTerminationProtectionCommand({
+                  EnableTerminationProtection: terminationProtection,
+                  StackName: stackName,
+                }),
+              )
+              .then(() => {
+                toast.style = Toast.Style.Success;
+                toast.title = `${terminationProtection ? "Enabled" : "Disabled"} Termination Protection`;
+              })
+              .catch((err) => {
+                captureException(err);
+                toast.style = Toast.Style.Failure;
+                toast.title = `❌ Failed to ${terminationProtection ? "enable" : "disable"} termination protection`;
+                toast.message = getErrorMessage(err);
+                toast.primaryAction = {
+                  title: "Retry",
+                  shortcut: { modifiers: ["cmd"], key: "r" },
+                  onAction: () => updateTerminationProtection(stackName),
+                };
+                toast.secondaryAction = {
+                  title: "Copy Error",
+                  shortcut: { modifiers: ["cmd"], key: "c" },
+                  onAction: () => Clipboard.copy(getErrorMessage(err)),
+                };
+              });
+          },
+        },
+        dismissAction: { title: "Cancel", onAction: () => toast.hide() },
+      });
+    })
+    .catch((err) => {
+      captureException(err);
+      toast.style = Toast.Style.Failure;
+      toast.title = `❌ Failed to get stack details for ${stackName}`;
+      toast.message = getErrorMessage(err);
+      toast.primaryAction = {
+        title: "Retry",
+        shortcut: { modifiers: ["cmd"], key: "r" },
+        onAction: () => updateTerminationProtection(stackName),
+      };
+      toast.secondaryAction = {
+        title: "Copy Error",
+        shortcut: { modifiers: ["cmd"], key: "c" },
+        onAction: () => Clipboard.copy(getErrorMessage(err)),
+      };
+    });
 };
 
 const statusToIcon = (status: string) => {
