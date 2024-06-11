@@ -3,11 +3,11 @@ import { getImageSections } from "@/lib";
 import type { Species } from "@/api";
 import PlantImage from "@/components/PlantImage";
 
-const PlantDetailSpeciesImages = ({ species }: { species?: Species }) => {
+const PlantDetailSpeciesImages = ({ species, name }: { species?: Species; name: string }) => {
   const imgSections = getImageSections(species);
 
   return (
-    <Grid>
+    <Grid navigationTitle={`Images for "${name}"`}>
       {imgSections.map((section) => (
         <Grid.Section key={section.title} title={section.title}>
           {section.images.map((image) =>
@@ -18,7 +18,7 @@ const PlantDetailSpeciesImages = ({ species }: { species?: Species }) => {
                 content={{ source: image.image_url }}
                 actions={
                   <ActionPanel>
-                    <Action.Push title="Show Image" target={<PlantImage image={image} />} />
+                    <Action.Push title="Show Image" target={<PlantImage image={image} name={name} />} />
                     <Action.OpenInBrowser title="Open in Browser" url={image.image_url} />
                   </ActionPanel>
                 }

@@ -36,12 +36,13 @@ ${image ? `\n<img alt="${plant.scientific_name}" src="${image}" height="300" />\
   return (
     <Detail
       markdown={markDown}
+      navigationTitle={`Details for "${plant.scientific_name}"`}
       actions={
         <ActionPanel>
           {imageSections.length > 0 ? (
             <Action.Push
               title="Show Images"
-              target={<PlantDetailSpeciesImages species={species} />}
+              target={<PlantDetailSpeciesImages species={species} name={plant.scientific_name} />}
               icon={Icon.Image}
             />
           ) : null}

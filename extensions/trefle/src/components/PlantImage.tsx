@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import type { SpeciesImagesFlowerInner } from "@/api/api";
 
-const PlantImage = ({ image }: { image: SpeciesImagesFlowerInner }) => {
+const PlantImage = ({ image, name }: { image: SpeciesImagesFlowerInner; name: string }) => {
   return (
     <Detail
+      navigationTitle={`Image of "${name}"`}
       markdown={`
 > ${image.copyright!}
 
