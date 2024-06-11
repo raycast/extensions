@@ -1,4 +1,4 @@
-import { ActivitySpeedQuality } from "./type";
+import { ActivitySpeedQuality } from "./types";
 
 // Unit is MBps
 const voiceCallQuality: ActivitySpeedQuality = {
