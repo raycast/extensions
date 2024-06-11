@@ -16,7 +16,6 @@ export default function Books() {
           key={book._id}
           title={book.name}
           content={DEFAULT_ICON}
-          subtitle={book._id}
           actions={
             <ActionPanel>
               <Action.Push title="View Chapters" target={<Chapters book={book} />} icon={Icon.Text} />
@@ -43,7 +42,6 @@ function Chapters({ book }: { book: Book }) {
             <List.Item
               key={chapter._id}
               title={`${chapterIndex + 1} - ${chapter.chapterName}`}
-              subtitle={chapter._id}
               icon={Icon.Text}
               actions={
                 <ActionPanel>
