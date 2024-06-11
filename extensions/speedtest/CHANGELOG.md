@@ -1,6 +1,6 @@
 # Speedtest Changelog
 
-## [Update] - 2024-05-20
+## [Update] - 2024-06-11
 
 - Add a detailed view.
 - Add an action to copy detailed view data.
