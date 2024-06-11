@@ -38,6 +38,12 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "orders",
+      "title": "Orders",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {

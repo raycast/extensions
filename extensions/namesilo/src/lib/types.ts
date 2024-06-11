@@ -30,11 +30,27 @@ export type DomainInfo = {
 }
 export type WhoisInfo = {
     domain: string;
-      registered: string;
-      changed: string;
-      created: string;
-      expires: string;
-      registrar: string;
+    registered: string;
+    changed: string;
+    created: string;
+    expires: string;
+    registrar: string;
+}
+
+export type Order = {
+    order_number: string;
+    order_date: string;
+    method: string;
+    total: string;
+}
+export type OrderDetails = {
+    description: string;
+    years_qty: string;
+    price: string;
+    subtotal: string;
+    status: string;
+    credited_date?: string;
+    credited_amount?: string;
 }
 
 type BaseResponse = {
@@ -56,7 +72,7 @@ export type SuccessResponse<T> = BaseResponse & {
 }
 export type ErrorResponse = BaseResponse & {
     reply: {
-        code: string;
-        detail: string;
+        code: Exclude<number, 300>;
+        detail: Exclude<string, "success">;
     }
 }
