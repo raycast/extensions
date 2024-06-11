@@ -9,3 +9,5 @@ To get an API key:
 3. In the "API Keys" section, click New API Key.
 
 Choose which fields should be included in the form and set default values in the extension's preferences.
+
+![Invoice screenshot](/media/invoice-generator-6.png "Invoice screenshot")
