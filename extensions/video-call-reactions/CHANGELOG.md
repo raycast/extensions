@@ -1,5 +1,9 @@
 # Video Call Reactions Changelog
 
+## [1.2.1] - 2024-06-12
+### Changed
+- Simplified the command structure to a single dropdown with a preset default argument.
+
 ## [1.2.0] - 2024-06-11
 ### Added
 - Added a new dropdown argument command to trigger video call reactions based on the chosen option.

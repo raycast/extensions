@@ -18,23 +18,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "trigger-preset-reaction",
-      "title": "Trigger Preset Reaction",
-      "subtitle": "Use your preset favorite reaction.",
-      "description": "Triggers your preset favorite reaction in video calls.",
-      "mode": "no-view"
-    },
-    {
-      "name": "trigger-custom-reaction",
-      "title": "Trigger Custom Reaction",
-      "subtitle": "Choose a reaction on the fly.",
-      "description": "Triggers a custom reaction based on your input.",
+      "name": "trigger-reaction",
+      "title": "Trigger Reaction",
+      "subtitle": "Use your favorite or a custom reaction.",
+      "description": "Triggers a reaction in video calls.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "reaction",
           "type": "dropdown",
-          "placeholder": "Select a Reaction",
+          "placeholder": "Default Reaction",
           "data": [
             {
               "title": "Hearts ❤️",
@@ -136,15 +129,20 @@
     }
   ],
   "dependencies": {
+    "@eslint/config-array": "^0.15.1",
+    "@eslint/object-schema": "^2.1.3",
     "@raycast/api": "^1.75.2",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/utils": "^1.15.0",
+    "lru-cache": "^10.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
+    "glob": "^10.4.1",
     "prettier": "^3.0.3",
+    "rimraf": "^5.0.7",
     "typescript": "^5.2.2"
   },
   "scripts": {
