@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Clipboard, Toast } from "@raycast/api";
 
-import { fromBech32, toHex, fromHex, toBech32 } from "@cosmjs/encoding";
+import { fromBech32, toBech32 } from "@cosmjs/encoding";
 
 type Values = {
   address: string;
@@ -9,7 +9,7 @@ type Values = {
 
 export default function Command() {
   function handleSubmit(values: Values) {
-    let converted = toBech32(values.prefix, fromBech32(values.address).data);
+    const converted = toBech32(values.prefix, fromBech32(values.address).data);
 
      Clipboard.copy(converted).then(() => {
       showToast({ title: "Converted address copied to clipboard", message: converted });
