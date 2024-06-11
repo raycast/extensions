@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vocabula-lat",
   "title": "Vocabula.lat",
-  "description": "An extension to look for words and abbreviations in the Vocabula.lat dictionary",
+  "description": "An extension to look for words and abbreviations in the Vocabula.lat Latin dictionary",
   "icon": "command-icon.png",
   "author": "silencesys",
   "categories": [
