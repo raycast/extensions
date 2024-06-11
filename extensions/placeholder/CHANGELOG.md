@@ -1,6 +1,6 @@
 # Placeholder Changelog
 
-## [Simplify Command] - {PR_MERGE_DATE}
+## [Simplify Command] - 2024-06-11
 
 - Simplifying the Random Placeholder Image Command
 
