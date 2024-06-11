@@ -4,6 +4,7 @@ import { Fragment, useState } from "react";
 
 import { generateInvoice } from "./scripts";
 import {
+  currencies,
   defaultIncludeAddress,
   defaultIncludeTax,
   includeAmountPaid,
@@ -93,32 +94,9 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
       <Form.Description text="Invoice Details" />
 
       <Form.Dropdown title="Currency" {...itemProps.currency}>
-        <Form.Dropdown.Item title="Australian Dollars" value="AUD" />
-        <Form.Dropdown.Item title="Brazilian Reais" value="BRL" />
-        <Form.Dropdown.Item title="Canadian Dollars" value="CAD" />
-        <Form.Dropdown.Item title="Chinese Yuan" value="CNY" />
-        <Form.Dropdown.Item title="Czech Koruna" value="CZK" />
-        <Form.Dropdown.Item title="Euros" value="EUR" />
-        <Form.Dropdown.Item title="Hong Kong Dollars" value="HKD" />
-        <Form.Dropdown.Item title="Hungarian Forint" value="HUF" />
-        <Form.Dropdown.Item title="Icelandic Krona" value="ISK" />
-        <Form.Dropdown.Item title="Indian Rupees" value="INR" />
-        <Form.Dropdown.Item title="Indonesian Rupiah" value="IDR" />
-        <Form.Dropdown.Item title="Japanese Yen" value="JPY" />
-        <Form.Dropdown.Item title="Malaysian Ringgit" value="MYR" />
-        <Form.Dropdown.Item title="Mexican Pesos" value="MXN" />
-        <Form.Dropdown.Item title="New Zealand Dollars" value="NZD" />
-        <Form.Dropdown.Item title="Norwegian Krone" value="NOK" />
-        <Form.Dropdown.Item title="Philippine Pesos" value="PHP" />
-        <Form.Dropdown.Item title="Pounds Sterling" value="GBP" />
-        <Form.Dropdown.Item title="Russian Rubles" value="RUB" />
-        <Form.Dropdown.Item title="Singapore Dollars" value="SGD" />
-        <Form.Dropdown.Item title="South African Rand" value="ZAR" />
-        <Form.Dropdown.Item title="South Korean Won" value="KRW" />
-        <Form.Dropdown.Item title="Swedish Krona" value="SEK" />
-        <Form.Dropdown.Item title="Swiss Francs" value="CHF" />
-        <Form.Dropdown.Item title="Turkish Lira" value="TRY" />
-        <Form.Dropdown.Item title="US Dollars" value="USD" />
+        {currencies.map((currency) => (
+          <Form.Dropdown.Item key={currency.value} title={currency.title} value={currency.value} />
+        ))}
       </Form.Dropdown>
       <Form.Checkbox id="includeTax" label="Include Tax" value={includeTax} onChange={setIncludeTax} />
       {includeTax && (
