@@ -1,6 +1,6 @@
 # Auto Quit App Changelog
 
-## [Optimise Command] - {PR_MERGE_DATE}
+## [Optimise Command] - 2024-06-11
 
 - Optimise the execution speed of the auto-quit application command
 - Fix the bug of not being able to quit the app automatically
