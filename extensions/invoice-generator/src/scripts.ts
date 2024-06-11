@@ -1,4 +1,4 @@
-import { showInFinder, open, showToast, Toast } from "@raycast/api";
+import { showInFinder, open, showToast, Toast, popToRoot } from "@raycast/api";
 import moment from "moment";
 import axios, { AxiosError } from "axios";
 import { writeFile } from "fs/promises";
@@ -117,6 +117,7 @@ async function requestInvoice(content: InvoiceRequestContent, locale: string, to
 
     await showInFinder(path);
     open(path);
+    popToRoot();
   } catch (error: unknown) {
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to generate invoice";
