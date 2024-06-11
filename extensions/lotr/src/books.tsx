@@ -3,6 +3,8 @@ import { Action, ActionPanel, Grid, Icon, List } from "@raycast/api";
 import ErrorComponent from "./ErrorComponent";
 import { useLOTR } from "./utils/useLOTR";
 import { DEFAULT_ICON } from "./constants";
+import { useCachedState } from "@raycast/utils";
+import { useEffect } from "react";
 
 export default function Books() {
   const { isLoading, data, error } = useLOTR<Book>(`book`, "Books");
@@ -30,14 +32,18 @@ export default function Books() {
 
 function Chapters({ book }: { book: Book }) {
   const title = `Chapters in '${book.name}'`;
+  const [totalChapters, setTotalChapters] = useCachedState(`${book._id}-chapters`, 0);
   const { isLoading, data, error, totalItems } = useLOTR<Chapter>(`book/${book._id}/chapter`, title);
+  useEffect(() => {
+    if (totalItems) setTotalChapters(totalItems);
+  }, [totalItems])
 
   return error ? (
     <ErrorComponent message={error.message} />
   ) : (
     <List navigationTitle={title} isLoading={isLoading}>
       {data && (
-        <List.Section title={`${totalItems} Chapters`}>
+        <List.Section title={`${totalChapters} Chapters`}>
           {data.map((chapter, chapterIndex) => (
             <List.Item
               key={chapter._id}

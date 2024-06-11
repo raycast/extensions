@@ -3,7 +3,7 @@ import { Movie, Quote } from "./types";
 import { DEFAULT_ICON, MOVIES_WITH_QUOTES } from "./constants";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import ErrorComponent from "./ErrorComponent";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLOTR } from "./utils/useLOTR";
 
 export default function Movies() {
@@ -66,11 +66,15 @@ export default function Movies() {
 function Quotes({ movie }: { movie: Movie }) {
   const { _id: movieId, name: movieName } = movie;
   const title = `Quotes in ${movieName}`;
-
+  
   const [savedQuotes, setSavedQuotes] = useCachedState<Quote[]>("saved-quotes", []);
   const [filter, setFilter] = useState("");
-
+  const [totalQuotes, setTotalQuotes] = useCachedState(`${movieId}-quotes`, 0);
+  
   const { isLoading, data, pagination, error, totalItems } = useLOTR<Quote>(`movie/${movieId}/quote`, title);
+    useEffect(() => {
+      if (totalItems) setTotalQuotes(totalItems);
+    }, [totalItems])
 
   function removeFromSavedQuotes(quoteId: string) {
     setSavedQuotes((prev) => prev.filter((q) => q._id !== quoteId));
@@ -100,7 +104,7 @@ function Quotes({ movie }: { movie: Movie }) {
       {!filteredQuotes?.length ? (
         <List.EmptyView icon={DEFAULT_ICON} title="No quotes matching this criteria" />
       ) : (
-        <List.Section title={`${filteredQuotes?.length} of ${totalItems} Quotes`}>
+        <List.Section title={`${filteredQuotes?.length} of ${totalQuotes} Quotes`}>
           {filteredQuotes?.map((quote, quoteIndex) => {
             const isSaved = savedQuotes.some((q) => q._id === quote._id);
 
