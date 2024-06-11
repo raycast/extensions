@@ -1,5 +1,8 @@
 # NS (Nederlandse Spoorwegen)
 
+>[!WARNING]
+> Extension in active development
+
 Met de Raycast-extensie voor Nederlandse Spoorwegen kunt u eenvoudig treinschema's, routes en real-time updates voor het Nederlandse spoorwegsysteem vinden. Deze extensie vereenvoudigt het proces van het plannen van uw reis door snelle toegang te bieden tot essentiële informatie direct vanuit uw Raycast-interface. Of u nu pendelt of reist, blijf op de hoogte met de laatste treinupdates en zorg voor een soepele reis met slechts een paar klikken.
 
 
