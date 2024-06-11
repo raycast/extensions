@@ -27,7 +27,7 @@
         {
           "name": "reaction",
           "type": "dropdown",
-          "placeholder": "Video Call Reaction",
+          "placeholder": "Default Reaction",
           "data": [
             {
               "title": "Hearts ❤️",
