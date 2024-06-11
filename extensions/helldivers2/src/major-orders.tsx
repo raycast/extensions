@@ -1,4 +1,4 @@
-import { Color, Detail } from "@raycast/api";
+import { Color, Detail, List } from "@raycast/api";
 
 import { useAssignments } from "./hooks/useAssignments";
 import { getProgressIcon } from "@raycast/utils";
@@ -32,7 +32,11 @@ const expireFormat = (seconds: number) => {
 export default function Command() {
   const { isLoading, assignments } = useAssignments();
 
-  return (
+  return assignments === undefined || assignments.length == 0 ? (
+    <List isLoading={isLoading}>
+      <List.EmptyView title="Stand by for further orders from Super Earth" />
+    </List>
+  ) : (
     <Detail
       isLoading={isLoading}
       markdown={assignments && `# ${assignments[0].setting.overrideTitle}\n${assignments[0].setting.overrideBrief}`}
