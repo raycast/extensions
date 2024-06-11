@@ -1,6 +1,6 @@
 # Text Decorator Changelog
 
-## [Undecorate Text] - {PR_MERGE_DATE}
+## [Undecorate Text] - 2024-06-11
 
 - Add Undecorate Text command to undecorate text 
 - Optimise the Decorate Text command to make it easier to use.
