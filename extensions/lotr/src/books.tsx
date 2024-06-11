@@ -36,7 +36,7 @@ function Chapters({ book }: { book: Book }) {
   const { isLoading, data, error, totalItems } = useLOTR<Chapter>(`book/${book._id}/chapter`, title);
   useEffect(() => {
     if (totalItems) setTotalChapters(totalItems);
-  }, [totalItems])
+  }, [totalItems]);
 
   return error ? (
     <ErrorComponent message={error.message} />

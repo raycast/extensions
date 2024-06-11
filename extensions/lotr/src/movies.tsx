@@ -66,15 +66,15 @@ export default function Movies() {
 function Quotes({ movie }: { movie: Movie }) {
   const { _id: movieId, name: movieName } = movie;
   const title = `Quotes in ${movieName}`;
-  
+
   const [savedQuotes, setSavedQuotes] = useCachedState<Quote[]>("saved-quotes", []);
   const [filter, setFilter] = useState("");
   const [totalQuotes, setTotalQuotes] = useCachedState(`${movieId}-quotes`, 0);
-  
+
   const { isLoading, data, pagination, error, totalItems } = useLOTR<Quote>(`movie/${movieId}/quote`, title);
-    useEffect(() => {
-      if (totalItems) setTotalQuotes(totalItems);
-    }, [totalItems])
+  useEffect(() => {
+    if (totalItems) setTotalQuotes(totalItems);
+  }, [totalItems]);
 
   function removeFromSavedQuotes(quoteId: string) {
     setSavedQuotes((prev) => prev.filter((q) => q._id !== quoteId));
