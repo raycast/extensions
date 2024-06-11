@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { get_pref_smb_ip, get_pref_smb_pwd, get_pref_smb_usr } from "./utils-preference";
-import { confirmAlert } from "@raycast/api";
+import { confirmAlert, Icon } from "@raycast/api";
 import { Dispatch, SetStateAction } from "react";
 
 export async function getNetworkDrives(set_data: Dispatch<SetStateAction<string[]>>) {
@@ -17,7 +17,8 @@ export async function getNetworkDrives(set_data: Dispatch<SetStateAction<string[
         if (stderr.includes(`/opt/homebrew/bin/smbclient: No such file or directory`)) {
           await confirmAlert({
             title: "You have not installed samba",
-            message: "Please installed it via `brew install samba`.",
+            icon: Icon.Warning,
+            message: "Please install it via `brew install samba`.",
           });
         }
       } else {
