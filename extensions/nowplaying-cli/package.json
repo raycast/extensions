@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nowplaying-cli",
-  "title": "Nowplaying-Cli",
+  "title": "nowplaying-cli",
   "description": "It's using nowplaying-cli for macos in order to control playing video or music. It's have pause next and previous features",
   "icon": "play_pause.png",
   "author": "yusuf_akdeniz",
@@ -13,6 +13,7 @@
     {
       "name": "toggle-play-pause",
       "title": "Toggle Play/Pause",
+      "subtitle": "nowplaying-cli",
       "description": "Toggles down and up music",
       "mode": "no-view",
       "icon": "play_pause.png"
@@ -20,6 +21,7 @@
     {
       "name": "go-next",
       "title": "Go to Next One",
+      "subtitle": "nowplaying-cli",
       "description": "Goes up to the next music",
       "mode": "no-view",
       "icon": "next.png"
@@ -27,6 +29,7 @@
     {
       "name": "go-prev",
       "title": "Go to Previous One",
+      "subtitle": "nowplaying-cli",
       "description": "Goes up to the previous music",
       "mode": "no-view",
       "icon": "previous.png"
