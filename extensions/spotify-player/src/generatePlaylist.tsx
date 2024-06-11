@@ -1,4 +1,4 @@
-import { AI, Action, ActionPanel, Clipboard, Icon, LaunchProps, List, Toast, showToast } from "@raycast/api";
+import { AI, Action, ActionPanel, Icon, LaunchProps, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { searchTracks } from "./api/searchTracks";
 import { View } from "./components/View";
@@ -16,9 +16,10 @@ type Playlist = {
 };
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.GeneratePlaylist }>) {
-  const { data: playlist, isLoading } = usePromise(async () => {
-    const data = await AI.ask(
-      `Generate a playlist of 20 to 50 songs based on this description: "${props.arguments.description}". Ensure the songs transition smoothly between each other. Return me only a parsable and minified JSON object with the following structure:
+  const { data: playlist, isLoading } = usePromise(
+    async () => {
+      const data = await AI.ask(
+        `Generate a playlist of 20 to 50 songs based on this description: "${props.arguments.description}". Ensure the songs transition smoothly between each other. Return me only a parsable and minified JSON object with the following structure:
 
 {
   "name": <Playlist name>,
@@ -31,33 +32,35 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Genera
     ...
   ]
 }`,
-      { model: AI.Model.OpenAI_GPT4o },
-    );
-    const match = data.match(/[{\\[]{1}([,:{}\\[\]0-9.\-+Eaeflnr-u \n\r\t]|".*?")+[}\]]{1}/gis)?.[0];
-    if (!match) {
-      throw new Error("Invalid result returned from AI");
-    }
-    await Clipboard.copy(data);
-    const playlist = JSON.parse(match) as Playlist;
+        { model: AI.Model.OpenAI_GPT4o },
+      );
+      const match = data.match(/[{\\[]{1}([,:{}\\[\]0-9.\-+Eaeflnr-u \n\r\t]|".*?")+[}\]]{1}/gis)?.[0];
+      if (!match) {
+        throw new Error("Invalid result returned from AI");
+      }
+      const playlist = JSON.parse(match) as Playlist;
 
-    const spotifyTracks = await Promise.all(
-      playlist.tracks.map(async (song) => {
-        try {
-          const response = await searchTracks(`track:${song.title} artist:${song.artist}`, 1);
-          const track = response?.items?.[0];
+      const spotifyTracks = await Promise.all(
+        playlist.tracks.map(async (song) => {
+          try {
+            const response = await searchTracks(`track:${song.title} artist:${song.artist}`, 1);
+            const track = response?.items?.[0];
 
-          if (track) {
-            return track;
+            if (track) {
+              return track;
+            }
+          } catch (error) {
+            console.error(error);
+            return null;
           }
-        } catch (error) {
-          console.error(error);
-          return null;
-        }
-      }),
-    );
+        }),
+      );
 
-    return { name: playlist.name, description: playlist.description, tracks: spotifyTracks };
-  });
+      return { name: playlist.name, description: playlist.description, tracks: spotifyTracks };
+    },
+    [],
+    { failureToastOptions: { title: "Could not generate playlist", message: "Please try again." } },
+  );
 
   async function addPlaylistToSpotify() {
     if (!playlist) return;
