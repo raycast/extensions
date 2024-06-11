@@ -1,4 +1,4 @@
-# Browser AI Changelog
+# Browser AI Companion Changelog
 
 ## [Update] - 2024-05-31
 
