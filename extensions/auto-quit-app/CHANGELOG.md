@@ -1,6 +1,10 @@
 # Auto Quit App Changelog
 
-## [Fix crash] - 2024-02-05
+## [Fix Bug] - 2024-06-11
+
+- Fix the bug of not being able to quit the app automatically
+
+## [Fix Crash] - 2024-02-05
 
 - Fix potential crash issues
 
