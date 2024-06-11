@@ -13,6 +13,7 @@ import {
   popToRoot,
   confirmAlert,
   Color,
+  Keyboard,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
@@ -189,7 +190,6 @@ export default () => {
             <Action.Push
               title="Enter a Setup Key"
               icon={Icon.Keyboard}
-              shortcut={{ modifiers: ['cmd'], key: 'enter' }}
               target={<SetupKey onSubmit={handleFormSubmit} />}
             />
             <Action
@@ -197,6 +197,12 @@ export default () => {
               icon={Icon.Camera}
               shortcut={{ modifiers: ['cmd'], key: 'i' }}
               onAction={() => scanQRCode('select')}
+            />
+            <Action.Push
+              title="Enter Setup Keys in Bulk"
+              icon={Icon.Terminal}
+              shortcut={{ modifiers: ['cmd'], key: 'b' }}
+              target={<SetupKeys onSubmit={handleFormSubmit} />}
             />
           </ActionPanel>
         }
@@ -229,7 +235,7 @@ export default () => {
                   title="Remove Account"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => handleRemoveAccount(account)}
                 />
                 <Action
@@ -249,12 +255,15 @@ export default () => {
   );
 };
 
-type SetupKeyProps = {
-  onSubmit: () => void;
+type SetupKey = {
   id?: string;
   name?: string;
   secret?: string;
 };
+
+type SetupKeyProps = {
+  onSubmit: () => void;
+} & SetupKey;
 
 function SetupKey(props: SetupKeyProps) {
   const [name, setName] = useState(props.name ?? '');
@@ -278,6 +287,86 @@ function SetupKey(props: SetupKeyProps) {
     >
       <Form.TextField id="name" title="Name" value={name} onChange={setName} />
       <Form.TextField id="secret" title="Secret" value={secret} onChange={setSecret} />
+    </Form>
+  );
+}
+
+type SetupKeysProps = {
+  onSubmit: () => void;
+};
+function SetupKeys(props: SetupKeysProps) {
+  const [text, setText] = useState('');
+
+  const handleSubmit = async () => {
+    const accounts = text
+      .split('\n')
+      .map((line) => line.trim())
+      .reduce((acc: SetupKey[], line: string) => {
+        if (line.startsWith('Parsing')) return acc;
+        if (line.startsWith('---')) return acc;
+        if (line.length === 0) return acc;
+
+        if (line.startsWith('Issuer:')) return [...acc, { name: line.replace('Issuer:', '').trim() }];
+        if (line.startsWith('Name:'))
+          return [
+            ...acc.slice(0, -1),
+            acc[acc.length - 1].name && acc[acc.length - 1].name !== 'undefined'
+              ? { name: `${acc[acc.length - 1].name} (${line.replace('Name:', '').trim()})`.trim() }
+              : { name: line.replace('Name:', '').trim() },
+          ];
+        if (line.startsWith('Secret:'))
+          return [...acc.slice(0, -1), { ...acc[acc.length - 1], secret: line.replace('Secret:', '').trim() }];
+
+        return acc;
+      }, []);
+    let success = true;
+    for (const account of accounts) {
+      if (!account.name || !account.secret) {
+        success = false;
+        continue;
+      }
+      await store.addAccount({ name: account.name, secret: account.secret });
+    }
+    if (success)
+      showToast({
+        style: Toast.Style.Success,
+        title: `${accounts.length} accounts imported successfully`,
+      });
+    else
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Some accounts were not able to be imported. Please check the input and try again.',
+      });
+    props.onSubmit();
+  };
+
+  return (
+    <Form
+      searchBarAccessory={
+        <Form.LinkAccessory
+          text="Google Auth Export Script"
+          target="https://gist.github.com/mapster/4b8b9f8f6b92cc1ca58ae5506e0508f7"
+        />
+      }
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description
+        title="Bulk Import"
+        text={
+          'Use this when QR Code image detection fails for Google Authenticator export.\n\nFollow the link in the top bar and follow the instructions in the GitHub gist.\n\nPaste the output of the `otp-codes.sh` script in the text area below and submit the form!'
+        }
+      />
+      <Form.TextArea
+        id="text"
+        title="Output of otp-codes.sh"
+        placeholder="Enter the output of `otp-codes.sh` here."
+        value={text}
+        onChange={setText}
+      />
     </Form>
   );
 }
