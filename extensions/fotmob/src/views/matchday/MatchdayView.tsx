@@ -1,13 +1,14 @@
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { useMatchDay } from "../../services/useMatchDay";
-import { MatchDayLeague } from "../../types/match-day";
-import MatchItem from "../../views/common/MatchItem";
-import { useSearch } from "../../services/useSearch";
-import { launchTeamCommand } from "../../utils/launcher/launchTeamDetailCommand";
-import { useFavorite } from "../../services/useFavorite";
-import { LeagueDropDownResult, LeagueDropdown } from "./LeagueDropdown";
-import { buildLeagueDetailUrl, buildMatchDetailUrl, buildPlayerDetailUrl } from "../../utils/url-builder";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import type { MatchDayLeague } from "@/types/match-day";
+import { useFavorite } from "@/hooks/useFavorite";
+import { useMatchDay } from "@/hooks/useMatchDay";
+import { useSearch } from "@/hooks/useSearch";
+import { launchTeamCommand } from "@/utils/launcher/launchTeamDetailCommand";
+import { buildLeagueDetailUrl, buildMatchDetailUrl, buildPlayerDetailUrl } from "@/utils/url-builder";
+import MatchItem from "@/views/common/MatchItem";
+import type { LeagueDropDownResult } from "./LeagueDropdown";
+import { LeagueDropdown } from "./LeagueDropdown";
 
 export default function MatchdayView() {
   const [date, setDate] = useState(new Date());
@@ -29,7 +30,7 @@ export default function MatchdayView() {
     let numberOfMatches = 0;
     const sections: MatchDayLeague[] = [];
 
-    while (numberOfMatches <= 10) {
+    while (numberOfMatches <= 50) {
       const league = leagues.shift();
       if (league == null) {
         break;
@@ -100,10 +101,10 @@ export default function MatchdayView() {
                             item.type === "match"
                               ? buildMatchDetailUrl(item.payload.id)
                               : item.type === "player"
-                              ? buildPlayerDetailUrl(item.payload.id)
-                              : item.type === "league"
-                              ? buildLeagueDetailUrl(item.payload.id)
-                              : ""
+                                ? buildPlayerDetailUrl(item.payload.id)
+                                : item.type === "league"
+                                  ? buildLeagueDetailUrl(item.payload.id)
+                                  : ""
                           }
                         />
                       )}

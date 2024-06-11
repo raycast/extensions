@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { League, Player, Team } from "../storages/types";
-import { getItem, setItem } from "../storages";
+import type { League, Player, Team } from "@/storages/types";
+import { getItem, setItem } from "@/storages";
 
 export function useFavorite() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -17,7 +17,7 @@ export function useFavorite() {
       | {
           type: "league";
           value: League;
-        }
+        },
   ) {
     if (items.type === "team") {
       const newItems = teams.filter((t) => t.id !== items.value.id);
@@ -81,6 +81,6 @@ export function useFavorite() {
       removeItems,
       reloadData,
     }),
-    [teams, players, leagues]
+    [teams, players, leagues],
   );
 }

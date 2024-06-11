@@ -1,10 +1,12 @@
+import fetch from "cross-fetch";
+import { useRef } from "react";
+import type { List } from "@raycast/api";
 import { environment } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useRef } from "react";
-import { SearchResponse, SearchResultItem, SearchResultSection } from "../types/search";
-import { favoriteAccessories } from "../utils/item-accessories/favoriteAccessory";
-import { buildLeagueLogoUrl, buildPlayerImageUrl, buildTeamLogoUrl } from "../utils/url-builder";
-import fetch from "cross-fetch";
+import type { SearchResponse, SearchResultItem, SearchResultSection } from "@/types/search";
+import { prettyDate } from "@/utils/date";
+import { favoriteAccessories } from "@/utils/item-accessories/favoriteAccessory";
+import { buildLeagueLogoUrl, buildPlayerImageUrl, buildTeamLogoUrl } from "@/utils/url-builder";
 
 export function useSearch(searchText: string) {
   const abortable = useRef<AbortController>();
@@ -28,12 +30,12 @@ export function useSearch(searchText: string) {
             type: "team",
             title: option.text.split("|")[0],
             iamgeUrl: buildTeamLogoUrl(option.payload.id),
-            subtitle: `ID: ${option.payload.id}`,
+            subtitle: ``,
             accessories: await favoriteAccessories("team", option.payload.id),
             payload: option.payload,
             raw: option,
-          })
-        ) ?? []
+          }),
+        ) ?? [],
       );
 
       // Parse Player
@@ -43,12 +45,16 @@ export function useSearch(searchText: string) {
             type: "player",
             title: option.text.split("|")[0],
             iamgeUrl: buildPlayerImageUrl(option.payload.id),
-            subtitle: `ID: ${option.payload.id}`,
-            accessories: await favoriteAccessories("player", option.payload.id),
+            subtitle: ``,
+            accessories: (await favoriteAccessories("player", option.payload.id)).concat(
+              typeof option.payload.teamId === "number" && option.payload.teamName
+                ? [{ tag: option.payload.teamName }]
+                : [],
+            ),
             payload: option.payload,
             raw: option,
-          })
-        ) ?? []
+          }),
+        ) ?? [],
       );
 
       // Parse Match
@@ -57,13 +63,30 @@ export function useSearch(searchText: string) {
           async (option): Promise<SearchResultItem> => ({
             type: "match",
             title: option.text.split("|")[0],
-            iamgeUrl: buildTeamLogoUrl(option.payload.homeTeamId),
-            subtitle: `ID: ${option.payload.id}`,
-            accessories: [],
+            iamgeUrl: buildLeagueLogoUrl(option.payload.leagueId, "dark"),
+            subtitle: prettyDate(option.payload.matchDate),
+            accessories: (
+              [
+                {
+                  icon: buildTeamLogoUrl(option.payload.homeTeamId),
+                },
+                {
+                  icon: buildTeamLogoUrl(option.payload.awayTeamId),
+                },
+              ] as List.Item.Accessory[]
+            ).concat(
+              typeof option.payload.homeScore === "number" && typeof option.payload.awayScore === "number"
+                ? [
+                    {
+                      text: `${option.payload.homeScore} - ${option.payload.awayScore}`,
+                    },
+                  ]
+                : [],
+            ),
             payload: option.payload,
             raw: option,
-          })
-        ) ?? []
+          }),
+        ) ?? [],
       );
 
       // Parse League
@@ -73,12 +96,12 @@ export function useSearch(searchText: string) {
             type: "league",
             title: option.text.split("|")[0],
             iamgeUrl: buildLeagueLogoUrl(option.payload.id, environment.appearance),
-            subtitle: `ID: ${option.payload.id}`,
+            subtitle: ``,
             accessories: [],
             payload: option.payload,
             raw: option,
-          })
-        ) ?? []
+          }),
+        ) ?? [],
       );
 
       // Combine all results
@@ -118,7 +141,7 @@ export function useSearch(searchText: string) {
     [searchText],
     {
       abortable,
-    }
+    },
   );
 
   return {
