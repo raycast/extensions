@@ -50,7 +50,7 @@
   {
     "name": "gama",
     "command": "git am --abort",
-    "type": "default",
+    "type": "delete",
     "description": "Abort the git am command and restore the state before applying the patches."
   },
   {
@@ -104,7 +104,7 @@
   {
     "name": "gbsr",
     "command": "git bisect reset",
-    "type": "default",
+    "type": "delete",
     "description": "Exit the bisecting state and return to the original branch."
   },
   {
@@ -212,7 +212,7 @@
   {
     "name": "gcpa",
     "command": "git cherry-pick --abort",
-    "type": "default",
+    "type": "delete",
     "description": "Abort the cherry-pick operation and restore the original branch state."
   },
   {
@@ -224,7 +224,7 @@
   {
     "name": "gclean",
     "command": "git clean -id",
-    "type": "default",
+    "type": "delete",
     "description": "Interactive cleanup of the working directory by removing untracked files and directories."
   },
   {
@@ -602,7 +602,7 @@
   {
     "name": "gma",
     "command": "git merge --abort",
-    "type": "default",
+    "type": "delete",
     "description": "Abort the merge operation and restore the original branch state."
   },
   {
@@ -746,7 +746,7 @@
   {
     "name": "grba",
     "command": "git rebase --abort",
-    "type": "default",
+    "type": "delete",
     "description": "Abort the current rebase operation and restore the original branch state."
   },
   {
@@ -800,7 +800,7 @@
   {
     "name": "grv",
     "command": "git remote -v",
-    "type": "default",
+    "type": "show",
     "description": "List all remote repositories with their URLs."
   },
   {
@@ -812,7 +812,7 @@
   {
     "name": "grrm",
     "command": "git remote remove",
-    "type": "default",
+    "type": "delete",
     "description": "Remove a remote repository."
   },
   {
@@ -836,31 +836,31 @@
   {
     "name": "grh",
     "command": "git reset",
-    "type": "default",
+    "type": "delete",
     "description": "Reset the current HEAD to the specified state."
   },
   {
     "name": "gru",
     "command": "git reset --",
-    "type": "default",
+    "type": "delete",
     "description": "Reset the current HEAD to the specified state, but preserve changes in the working directory."
   },
   {
     "name": "grhh",
     "command": "git reset --hard",
-    "type": "default",
+    "type": "delete",
     "description": "Reset the current HEAD to the specified state, discarding changes in the working directory."
   },
   {
     "name": "gpristine",
     "command": "git reset --hard && git clean -dffx",
-    "type": "default",
+    "type": "delete",
     "description": "Reset the working directory to the last commit and remove untracked files and directories."
   },
   {
     "name": "groh",
     "command": "git reset origin/$(git_current_branch) --hard",
-    "type": "default",
+    "type": "delete",
     "description": "Reset the current branch to match the state of the corresponding branch on the origin remote repository."
   },
   {
@@ -890,13 +890,13 @@
   {
     "name": "grm",
     "command": "git rm",
-    "type": "default",
+    "type": "delete",
     "description": "Remove files from the working tree and from the index."
   },
   {
     "name": "grmc",
     "command": "git rm --cached",
-    "type": "default",
+    "type": "delete",
     "description": "Remove files from the index but keep them in the working tree."
   },
   {
@@ -908,7 +908,7 @@
   {
     "name": "gsh",
     "command": "git show",
-    "type": "default",
+    "type": "show",
     "description": "Show various types of objects (e.g., commits, tags, trees)."
   },
   {
@@ -926,19 +926,19 @@
   {
     "name": "gstc",
     "command": "git stash clear",
-    "type": "default",
+    "type": "delete",
     "description": "Remove all stashes from the stash list."
   },
   {
     "name": "gstd",
     "command": "git stash drop",
-    "type": "default",
+    "type": "delete",
     "description": "Remove the most recently created stash from the stash list."
   },
   {
     "name": "gstl",
     "command": "git stash list",
-    "type": "default",
+    "type": "show",
     "description": "List all stashes in the stash list."
   },
   {
@@ -956,25 +956,25 @@
   {
     "name": "gsts",
     "command": "git stash show --text",
-    "type": "default",
+    "type": "show",
     "description": "Show the changes recorded in the stash as a diff."
   },
   {
     "name": "gst",
     "command": "git status",
-    "type": "default",
+    "type": "show",
     "description": "Show the status of the working tree."
   },
   {
     "name": "gss",
     "command": "git status -s",
-    "type": "default",
+    "type": "show",
     "description": "Show the status of the working tree in short format."
   },
   {
     "name": "gsb",
     "command": "git status -sb",
-    "type": "default",
+    "type": "show",
     "description": "Show the status of the working tree in a compact format."
   },
   {
@@ -1040,7 +1040,7 @@
   {
     "name": "gtv",
     "command": "git tag | sort -V",
-    "type": "default",
+    "type": "show",
     "description": "List tags in version order."
   },
   {
@@ -1070,7 +1070,7 @@
   {
     "name": "gwtls",
     "command": "git worktree list",
-    "type": "default",
+    "type": "show",
     "description": "List all linked working trees."
   },
   {
@@ -1082,7 +1082,7 @@
   {
     "name": "gwtrm",
     "command": "git worktree remove",
-    "type": "default",
+    "type": "delete",
     "description": "Remove a working tree."
   },
   {
@@ -1113,13 +1113,13 @@
     "name": "gfa",
     "command": "git fetch --all --prune --jobs=10",
     "description": "Downloads all branches and the latest changes from the remote repository.",
-    "type": "edit"
+    "type": "default"
   },
   {
     "name": "ggsup",
     "command": "git branch --set-upstream-to=origin/$(git_current_branch)",
     "description": "Sets the current branch to track the corresponding branch on the remote repository.",
-    "type": "edit"
+    "type": "default"
   },
   {
     "name": "gk",
@@ -1179,13 +1179,13 @@
     "name": "gms",
     "command": "git merge --squash",
     "description": "Merges changes from one branch into another without creating a merge commit.",
-    "type": "edit"
+    "type": "default"
   },
   {
     "name": "gmtlvim",
     "command": "git mergetool --no-prompt --tool=vimdiff",
     "description": "Opens the Git merging tool in Vimdiff mode to resolve conflicts.",
-    "type": "edit"
+    "type": "default"
   },
   {
     "name": "gpod",
@@ -1197,7 +1197,7 @@
     "name": "gpsupf",
     "command": "git push --set-upstream origin $(git_current_branch) --force-with-lease --force-if-includes",
     "description": "Sends local changes to the remote repository and sets the corresponding branch to track.",
-    "type": "edit"
+    "type": "default"
   },
   {
     "name": "grep",
@@ -1209,7 +1209,7 @@
     "name": "grt",
     "command": "cd \"$(git rev-parse --show-toplevel || echo .)\"",
     "description": "Navigates to the root directory of the current repository.",
-    "type": "edit"
+    "type": "default"
   },
   {
     "name": "gsps",
@@ -1227,7 +1227,7 @@
     "name": "gupomi",
     "command": "git pull --rebase=interactive origin $(git_main_branch)",
     "description": "Updates the current branch by interactive rebase from the main branch of the remote repository.",
-    "type": "edit"
+    "type": "default"
   },
   {
     "name": "gwch",
@@ -1341,13 +1341,13 @@
     "name": "grhk",
     "command": "git reset --keep",
     "description": "Reset the index preserving working tree changes",
-    "type": "default"
+    "type": "delete"
   },
   {
     "name": "grhs",
     "command": "git reset --soft",
     "description": "Soft reset the index to a commit, keeping changes",
-    "type": "default"
+    "type": "delete"
   },
   {
     "name": "gstu",
@@ -1360,5 +1360,47 @@
     "command": "git tag --annotate",
     "description": "Annotate a tag with the tagger name, email, date, and message",
     "type": "show"
+  },
+  {
+    "name": "gcB",
+    "command": "git checkout -B",
+    "type": "default",
+    "description": "Create or reset a branch to the specified commit, switching to it."
+  },
+  {
+    "name": "gcann!",
+    "command": "git commit --verbose --all --date=now --no-edit --amend",
+    "type": "default",
+    "description": "Amend the last commit with all current changes, using the current date, without editing the message."
+  },
+  {
+    "name": "gmc",
+    "command": "git merge --continue",
+    "type": "default",
+    "description": "Continue merging after resolving conflicts."
+  },
+  {
+    "name": "grf",
+    "command": "git reflog",
+    "type": "show",
+    "description": "Show a log of changes to the local repository's HEAD and branch references."
+  },
+  {
+    "name": "gwipe",
+    "command": "git reset --hard && git clean --force -df",
+    "type": "delete",
+    "description": "Hard reset the working directory and clean it by forcefully removing untracked files and directories."
+  },
+  {
+    "name": "greva",
+    "command": "git revert --abort",
+    "type": "delete",
+    "description": "Abort the revert operation, returning to the previous state before the revert began."
+  },
+  {
+    "name": "grevc",
+    "command": "git revert --continue",
+    "type": "default",
+    "description": "Continue the revert process after a merge conflict has been resolved."
   }
 ]
