@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "recent-excel",
   "title": "Recent Excel - Show Recent Excel Files",
-  "description": "shows recent excel files",
+  "description": "Shows recent excel files",
   "icon": "command-icon.png",
   "author": "aradbm",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "search-recent-excel-sheets",
       "title": "Search Recent Excel Sheets",
-      "description": "shows recent excel files",
+      "description": "Shows recent excel files",
       "mode": "view"
     }
   ],
@@ -23,7 +23,7 @@
       "name": "directories",
       "description": "Comma-separated list of directories to search for Excel files",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "default": ""
     }
   ],
