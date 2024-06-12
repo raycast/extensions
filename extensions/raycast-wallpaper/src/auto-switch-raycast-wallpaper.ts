@@ -6,8 +6,8 @@ import axios from "axios";
 import { autoSetWallpaper } from "./utils/applescript-utils";
 
 export default async () => {
-  await closeMainWindow();
   if (environment.launchType === LaunchType.UserInitiated) {
+    await closeMainWindow();
     await showHUD("🖥️ Setting wallpaper...");
   }
   await getRandomWallpaper();

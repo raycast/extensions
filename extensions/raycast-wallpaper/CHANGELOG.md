@@ -2,7 +2,7 @@
 
 ## [Auto Switch Wallpaper command] - {PR_MERGE_DATE}
 
-- Preference to set different refresh intervals mirroring Apple wallpaper shuffle intervals
+- Preference for refresh intervals mirroring Apple wallpaper shuffle intervals
 
 ## [Fix typo] - 2024-05-31
 

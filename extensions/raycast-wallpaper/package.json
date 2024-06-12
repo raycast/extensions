@@ -119,7 +119,7 @@
       "title": "Auto Switch Raycast Wallpaper",
       "description": "Switch random Raycast wallpapers as desktop wallpaper with specified refresh interval.",
       "mode": "no-view",
-      "interval": "1m",
+      "interval": "5m",
       "preferences": [
         {
           "name": "applyTo",
@@ -147,10 +147,6 @@
           "title": "Refresh Interval",
           "default": "3600",
           "data": [
-            {
-              "title": "Every Minute",
-              "value": "60"
-            },
             {
               "title": "Every 5 Minutes",
               "value": "300"
