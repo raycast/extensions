@@ -48,17 +48,24 @@ export default function Command() {
     <DownloadDirectoryContext.Provider value={downloadDirectory}>
       <List
         isShowingDetail
-        isLoading={isLoading}
+        isLoading={query.length > 0 && isLoading}
         pagination={pagination}
         onSearchTextChange={setQuery}
         searchBarPlaceholder="Search for a slackmoji..."
         throttle
       >
-        <List.Section title="Results" subtitle={data?.length + ""}>
-          {data?.map((searchResult) => {
-            return <SearchListItem key={searchResult.id} searchResult={searchResult} />;
-          })}
-        </List.Section>
+        {query.length > 0 ? (
+          isLoading && data.length === 0 ? (
+            <List.EmptyView title="Searching..." />
+          ) : (
+          <List.Section title="Results" subtitle={data?.length + ""}>
+            {data?.map((searchResult) => {
+              return <SearchListItem key={searchResult.id} searchResult={searchResult} />;
+            })}
+          </List.Section>
+        )) : (
+          <List.EmptyView title="Type something to get started" />
+        )}
       </List>
     </DownloadDirectoryContext.Provider>
   );
@@ -143,7 +150,7 @@ function SearchListItem({ searchResult }: SearchListItemProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title="Save to Downloads" onAction={() => setShouldDownload(true)} icon={Icon.Download} />
+            <Action title="Download" onAction={() => setShouldDownload(true)} icon={Icon.Download} />
             <Action.OpenInBrowser title="Open in Browser" url={searchResult.image_url} icon={Icon.Window} />
             <Action.CopyToClipboard
               title="Copy URL to Clipboard"
