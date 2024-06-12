@@ -9,6 +9,8 @@ import {
   Color,
   confirmAlert,
   PopToRootType,
+  openExtensionPreferences,
+  popToRoot,
 } from "@raycast/api";
 import { exec } from "child_process";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
@@ -25,6 +27,7 @@ export default function Command() {
   const [network_drive_info, set_networkDriveInfo] = useState<DiskInfo[]>([]);
   const [need_update, set_update] = useState<boolean>(false);
   const [isLoading, set_isLoading] = useState<boolean>(true);
+  const [error, set_error] = useState<boolean>(false);
   const drivesRef = useRef(network_drivess);
   drivesRef.current = network_drivess;
 
@@ -41,11 +44,7 @@ export default function Command() {
   setTimeout(() => {
     if (drivesRef.current.length == 0) {
       set_isLoading(false);
-      showHUD("⚠️ Failed to Fetch Disk Information.", {
-        clearRootSearch: true,
-        popToRootType: PopToRootType.Immediate,
-      });
-      // showToast({ title: "Failed to Fetch Disk Information.", style: Toast.Style.Failure });
+      set_error(true);
     } else {
       set_isLoading(false);
     }
@@ -54,6 +53,24 @@ export default function Command() {
   // Render the list based on the data retrived
   return (
     <List isLoading={isLoading && network_drivess.length == 0}>
+      {error && (
+        <List.EmptyView
+          title="Failed to Fetch Disk Information"
+          description="Check settings in preferences"
+          icon={Icon.Warning}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Extension Preferences"
+                onAction={() => {
+                  openExtensionPreferences();
+                  popToRoot();
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       {network_drivess?.map((drive) => (
         <DriveItem
           key={drive}
