@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "week-number",
-      "title": "Week Number",
+      "title": "Week Number Menu Bar",
       "description": "The current week number in your menu bar",
       "mode": "menu-bar",
       "interval": "1h",
