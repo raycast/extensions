@@ -58,12 +58,13 @@ export default function Command() {
           isLoading && data.length === 0 ? (
             <List.EmptyView title="Searching..." />
           ) : (
-          <List.Section title="Results" subtitle={data?.length + ""}>
-            {data?.map((searchResult) => {
-              return <SearchListItem key={searchResult.id} searchResult={searchResult} />;
-            })}
-          </List.Section>
-        )) : (
+            <List.Section title="Results" subtitle={data?.length + ""}>
+              {data?.map((searchResult) => {
+                return <SearchListItem key={searchResult.id} searchResult={searchResult} />;
+              })}
+            </List.Section>
+          )
+        ) : (
           <List.EmptyView title="Type something to get started" />
         )}
       </List>
