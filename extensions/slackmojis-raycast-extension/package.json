@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slackmojis-raycast-extension",
   "title": "Slackmoji Search",
-  "description": "Looks up emojis on Slackmojis.com",
+  "description": "Search for emojis on Slackmojis.com and download them to your computer.",
   "icon": "slackmojis-logo.png",
   "author": "samwalshnz",
   "categories": [
