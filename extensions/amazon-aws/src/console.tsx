@@ -1,14 +1,19 @@
 import { ActionPanel, List } from "@raycast/api";
-import { readFile } from "fs/promises";
 import { useCachedPromise } from "@raycast/utils";
-import { AWS_URL_BASE } from "./constants";
+import { readFile } from "fs/promises";
 import { AwsAction } from "./components/common/action";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { AWS_URL_BASE } from "./constants";
 
 export default function Console() {
-  const { data: services, isLoading } = useCachedPromise(loadJSON);
+  const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter services by name...">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter services by name..."
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
+    >
       {services?.map((service) => (
         <List.Item
           key={service.uid}
@@ -17,7 +22,15 @@ export default function Console() {
           icon={service.icon.path}
           actions={
             <ActionPanel>
-              <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} />
+              <AwsAction.Console
+                url={
+                  typeof process.env.AWS_SSO_ACCOUNT_ID !== "undefined" &&
+                  typeof process.env.AWS_SSO_ROLE_NAME !== "undefined" &&
+                  typeof process.env.AWS_SSO_START_URL !== "undefined"
+                    ? `${process.env.AWS_SSO_START_URL}console/?account_id=${process.env.AWS_SSO_ACCOUNT_ID}&role_name=${process.env.AWS_SSO_ROLE_NAME}&destination=${AWS_URL_BASE}${service.arg}`
+                    : `${AWS_URL_BASE}${service.arg}`
+                }
+              />
             </ActionPanel>
           }
         />

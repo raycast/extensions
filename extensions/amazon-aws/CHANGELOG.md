@@ -1,5 +1,9 @@
 # Amazon AWS Changelog
 
+## [Console command] - 2024-06-13
+
+- Adds shortcut login for SSO profiles
+
 ## [Improvements] - 2024-06-06
 
 - Adds sort descending and consistent read functionalities to DDB queries
