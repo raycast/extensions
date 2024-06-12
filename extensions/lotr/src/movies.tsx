@@ -1,13 +1,31 @@
-import { useCachedState } from "@raycast/utils";
-import { Movie, Quote } from "./types";
-import { DEFAULT_ICON, MOVIES_WITH_QUOTES } from "./constants";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCachedState, useFetch } from "@raycast/utils";
+import { Movie, Quote, SuccessResponse } from "./types";
+import { API_HEADERS, API_URL, DEFAULT_ICON, MOVIES_WITH_QUOTES } from "./constants";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import ErrorComponent from "./ErrorComponent";
-import { useEffect, useState } from "react";
-import { useLOTR } from "./utils/useLOTR";
+import { useState } from "react";
 
 export default function Movies() {
-  const { isLoading, data, error } = useLOTR<Movie>("movie", "Movies");
+  const { isLoading, data, error } = useFetch(API_URL + "movie", {
+    headers: API_HEADERS,
+    async onWillExecute() {
+      await showToast({
+        title: `Fetching Movies`,
+        style: Toast.Style.Animated,
+      });
+    },
+    mapResult(result: SuccessResponse<Movie>) {
+      return {
+        data: result.docs,
+      };
+    },
+    async onData(data) {
+      await showToast({
+        title: `Fetched ${data.length} Movies`,
+        style: Toast.Style.Success,
+      });
+    },
+  });
 
   return error ? (
     <ErrorComponent message={error.message} />
@@ -69,12 +87,37 @@ function Quotes({ movie }: { movie: Movie }) {
 
   const [savedQuotes, setSavedQuotes] = useCachedState<Quote[]>("saved-quotes", []);
   const [filter, setFilter] = useState("");
-  const [totalQuotes, setTotalQuotes] = useCachedState(`${movieId}-quotes`, 0);
+  const [searchText, setSearchText] = useState("");
+  const [totalQuotes, setTotalQuotes] = useCachedState<{
+    [key: string]: number;
+  }>(`total-quotes`, {});
 
-  const { isLoading, data, pagination, error, totalItems } = useLOTR<Quote>(`movie/${movieId}/quote`, title);
-  useEffect(() => {
-    if (totalItems) setTotalQuotes(totalItems);
-  }, [totalItems]);
+  const { isLoading, data, error, pagination } = useFetch(
+    (options) =>
+      API_URL + `movie/${movieId}/quote?` + new URLSearchParams({ page: String(options.page + 1) }).toString(),
+    {
+      headers: API_HEADERS,
+      async onWillExecute() {
+        await showToast({
+          title: `Fetching ${title}`,
+          style: Toast.Style.Animated,
+        });
+      },
+      mapResult(result: SuccessResponse<Quote>) {
+        setTotalQuotes((prev) => ({ ...prev, [movie._id]: result.total }));
+        return {
+          data: result.docs,
+          hasMore: result.page < result.pages,
+        };
+      },
+      async onData(data) {
+        await showToast({
+          title: `Fetched ${data.length} Quotes`,
+          style: Toast.Style.Success,
+        });
+      },
+    },
+  );
 
   function removeFromSavedQuotes(quoteId: string) {
     setSavedQuotes((prev) => prev.filter((q) => q._id !== quoteId));
@@ -84,8 +127,10 @@ function Quotes({ movie }: { movie: Movie }) {
   }
 
   const filteredQuotes = !filter
-    ? data
-    : data?.filter((quote) => (filter === "saved_quotes" ? savedQuotes.some((q) => q._id === quote.id) : true));
+    ? data?.filter((quote) => quote.dialog.includes(searchText))
+    : data
+        ?.filter((quote) => (filter === "saved_quotes" ? savedQuotes.some((q) => q._id === quote.id) : true))
+        .filter((quote) => quote.dialog.includes(searchText));
 
   return error ? (
     <ErrorComponent message={error.message} />
@@ -94,6 +139,7 @@ function Quotes({ movie }: { movie: Movie }) {
       pagination={pagination}
       navigationTitle={title}
       isLoading={isLoading}
+      onSearchTextChange={setSearchText}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
           <List.Dropdown.Item title="All" value="" icon={Icon.Dot} />
@@ -104,7 +150,7 @@ function Quotes({ movie }: { movie: Movie }) {
       {!filteredQuotes?.length ? (
         <List.EmptyView icon={DEFAULT_ICON} title="No quotes matching this criteria" />
       ) : (
-        <List.Section title={`${filteredQuotes?.length} of ${totalQuotes} Quotes`}>
+        <List.Section title={`${filteredQuotes?.length} of ${totalQuotes[movie._id]} Quotes`}>
           {filteredQuotes?.map((quote, quoteIndex) => {
             const isSaved = savedQuotes.some((q) => q._id === quote._id);
 

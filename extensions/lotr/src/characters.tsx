@@ -1,19 +1,42 @@
-import { Character } from "./types";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Character, SuccessResponse } from "./types";
+import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
 import { useState } from "react";
-import { useLOTR } from "./utils/useLOTR";
-import { CHARACTER_ICONS, DEFAULT_ICON, WIKI_ICON } from "./constants";
+import { API_HEADERS, API_URL, CHARACTER_ICONS, DEFAULT_ICON, WIKI_ICON } from "./constants";
+import { useCachedState, useFetch } from "@raycast/utils";
+import ErrorComponent from "./ErrorComponent";
 
 export default function Characters() {
   const [filter, setFilter] = useState("");
   const [races, setRaces] = useState<string[]>([]);
+  const [totalCharacters, setTotalCharacters] = useCachedState("total-characters", 0);
 
-  const { isLoading, data, totalItems } = useLOTR<Character>(
-    "character",
-    "Characters",
-    !filter ? "" : `${filter.split("_")[0]}=${filter.split("_")[1]}`, //e.g. race_Orc -> race=Orc
+  const { isLoading, data, error, pagination } = useFetch(
+    (options) =>
+      API_URL +
+      "character?" +
+      new URLSearchParams({ page: String(options.page + 1) }).toString() +
+      (!filter ? "" : `&${filter.split("_")[0]}=${filter.split("_")[1]}`), //e.g. race_Orc -> race=Orc
     {
-      onData(data) {
+      headers: API_HEADERS,
+      async onWillExecute() {
+        await showToast({
+          title: `Fetching Characters`,
+          style: Toast.Style.Animated,
+        });
+      },
+      mapResult(result: SuccessResponse<Character>) {
+        console.log("total", result.total);
+        setTotalCharacters(result.total);
+        return {
+          data: result.docs,
+          hasMore: result.page < result.pages,
+        };
+      },
+      async onData(data) {
+        await showToast({
+          title: `Fetched ${data.length} Characters`,
+          style: Toast.Style.Success,
+        });
         if (!races.length) {
           const uniqueRaces = new Set(data.map((character) => character.race));
           const uniqueRacesFiltered: string[] = [...uniqueRaces].filter(
@@ -25,10 +48,13 @@ export default function Characters() {
     },
   );
 
-  return (
+  return error ? (
+    <ErrorComponent message={error.message} />
+  ) : (
     <List
       isLoading={isLoading}
       isShowingDetail
+      pagination={pagination}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" onChange={setFilter}>
           <List.Dropdown.Item title="All" value="" icon={Icon.Dot} />
@@ -44,7 +70,7 @@ export default function Characters() {
         </List.Dropdown>
       }
     >
-      <List.Section title={`${data?.length || 0} of ${totalItems || data?.length} characters`}>
+      <List.Section title={`${data?.length || 0} of ${totalCharacters || data?.length} characters`}>
         {data?.map((character) => {
           const icon =
             CHARACTER_ICONS.find((c) => c.name === character.name || (c.race && character.race?.includes(c.race)))

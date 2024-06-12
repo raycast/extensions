@@ -1,13 +1,30 @@
-import { Book, Chapter } from "./types";
-import { Action, ActionPanel, Grid, Icon, List } from "@raycast/api";
+import { Book, Chapter, SuccessResponse } from "./types";
+import { Action, ActionPanel, Grid, Icon, List, Toast, showToast } from "@raycast/api";
 import ErrorComponent from "./ErrorComponent";
-import { useLOTR } from "./utils/useLOTR";
-import { DEFAULT_ICON } from "./constants";
-import { useCachedState } from "@raycast/utils";
-import { useEffect } from "react";
+import { API_HEADERS, API_URL, DEFAULT_ICON } from "./constants";
+import { useFetch } from "@raycast/utils";
 
 export default function Books() {
-  const { isLoading, data, error } = useLOTR<Book>(`book`, "Books");
+  const { isLoading, data, error } = useFetch(API_URL + "book", {
+    headers: API_HEADERS,
+    async onWillExecute() {
+      await showToast({
+        title: `Fetching Books`,
+        style: Toast.Style.Animated,
+      });
+    },
+    mapResult(result: SuccessResponse<Book>) {
+      return {
+        data: result.docs,
+      };
+    },
+    async onData(data) {
+      await showToast({
+        title: `Fetched ${data.length} Books`,
+        style: Toast.Style.Success,
+      });
+    },
+  });
 
   return error ? (
     <ErrorComponent message={error.message} />
@@ -32,18 +49,34 @@ export default function Books() {
 
 function Chapters({ book }: { book: Book }) {
   const title = `Chapters in '${book.name}'`;
-  const [totalChapters, setTotalChapters] = useCachedState(`${book._id}-chapters`, 0);
-  const { isLoading, data, error, totalItems } = useLOTR<Chapter>(`book/${book._id}/chapter`, title);
-  useEffect(() => {
-    if (totalItems) setTotalChapters(totalItems);
-  }, [totalItems]);
+
+  const { isLoading, data, error } = useFetch(API_URL + `book/${book._id}/chapter`, {
+    headers: API_HEADERS,
+    async onWillExecute() {
+      await showToast({
+        title: `Fetching ${title}`,
+        style: Toast.Style.Animated,
+      });
+    },
+    mapResult(result: SuccessResponse<Chapter>) {
+      return {
+        data: result.docs,
+      };
+    },
+    async onData(data) {
+      await showToast({
+        title: `Fetched ${data.length} Chapters`,
+        style: Toast.Style.Success,
+      });
+    },
+  });
 
   return error ? (
     <ErrorComponent message={error.message} />
   ) : (
     <List navigationTitle={title} isLoading={isLoading}>
       {data && (
-        <List.Section title={`${totalChapters} Chapters`}>
+        <List.Section title={`${data.length} Chapters`}>
           {data.map((chapter, chapterIndex) => (
             <List.Item
               key={chapter._id}
