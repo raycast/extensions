@@ -44,6 +44,14 @@
       "type": "checkbox",
       "required": true,
       "default": true
+    },
+    {
+      "name": "suppressFolderReadErrors",
+      "label": "Suppress Folder Read Errors",
+      "description": "Hide the warning when a folder could not be read.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
