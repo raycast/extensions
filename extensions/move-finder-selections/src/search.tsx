@@ -284,11 +284,10 @@ export default function Command() {
   };
 
   const { data: selectedItems = [], isLoading: isLoadingSelection } = usePromise(() =>
-    getSelectedFinderItems()
-      .catch(() => {
-        showHUD(`⚠️  No Finder selection to send.`);
-        popToRoot({ clearSearchBar: true });
-      })
+    getSelectedFinderItems().catch(() => {
+      showHUD(`⚠️  No Finder selection to send.`);
+      popToRoot({ clearSearchBar: true });
+    })
   );
   const placeholder = makeTitle(selectedItems);
 
