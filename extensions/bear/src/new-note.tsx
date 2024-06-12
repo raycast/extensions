@@ -53,8 +53,8 @@ export default function NewNote() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Note Title ..." />
-      <Form.TextArea id="text" title="Text" placeholder="Text to add to note ..." />
+      <Form.TextField id="title" title="Title" placeholder="Note title" />
+      <Form.TextArea id="text" title="Text" placeholder="Text to add to note" />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Separator />
       <Form.Dropdown id="openNote" title="Open Note" defaultValue={newNoteOpenMode}>
