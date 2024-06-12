@@ -1,4 +1,4 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, open } from "@raycast/api";
 import { SearchResult } from "../useSearch";
 import { useCallback } from "react";
 import { messaging } from "../messaging";
