@@ -11,7 +11,12 @@ interface monsterType {
 
 export default function MonsterDetail(monster: index) {
   const foeData = getDnd(monster.url) as monsterType;
-  if (!foeData?.data) {
+
+  if (!foeData?.data && foeData.isLoading === true) {
+    return <Detail isLoading={true} />;
+  }
+
+  if (!foeData?.data && foeData.isLoading === false) {
     return <Unresponsive />;
   }
 
@@ -62,13 +67,13 @@ export default function MonsterDetail(monster: index) {
   if (foe?.condition_immunities.length > 0) {
     foeMarkdown += `## Condition Immunities\n`;
     for (const immunity of foe.condition_immunities) {
-      foeMarkdown += `* ${immunity}\n`;
+      foeMarkdown += `* ${immunity.name}\n`;
     }
   }
 
   // Actions
   if (foe?.actions.length > 0) {
-    foeMarkdown += `## Actions\n`;
+    foeMarkdown += `--- \n ## Actions\n`;
     for (const action of foe.actions) {
       foeMarkdown += `### ${action.name}\n`;
       foeMarkdown += `${action.desc}\n`;
@@ -97,7 +102,6 @@ export default function MonsterDetail(monster: index) {
           <Detail.Metadata.Label title="Size" text={foe.size} />
           <Detail.Metadata.Label title="Type" text={foe.type} />
           <Detail.Metadata.Label title="Alignment" text={foe.alignment} />
-          {/* replace this with a loop? */}
           {foe.armor_class.map((armor) => (
             <Detail.Metadata.Label key={armor.type} title={`Armor (AC): ${armor.type}`} text={armor.value.toString()} />
           ))}

@@ -14,7 +14,7 @@ export default function DiceAction(props: diceProps) {
 
   return (
     <Action
-      title={`${props.title} ${chanceVerb} ${props.roll}`}
+      title={`${props.title ?? ""} ${chanceVerb ?? ""} ${props.roll}`}
       icon={props.icon || Icon.Star}
       onAction={() => {
         rollDiceToast(props);

@@ -81,7 +81,11 @@ export interface monster {
   damage_vulnerabilities: string[];
   damage_resistances: string[];
   damage_immunities: string[];
-  condition_immunities: string[];
+  condition_immunities: {
+    index: string;
+    name: string;
+    url: string;
+  }[];
   senses: { darkvision: string; passive_perception: number };
   languages: string;
   challenge_rating: number;

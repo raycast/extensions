@@ -39,7 +39,47 @@
           "placeholder": "location",
           "type": "text",
           "required": false
-        }
+        },
+        {
+          "name": "tone",
+          "type": "dropdown",
+          "placeholder": "tone",
+          "required": false,
+          "data": [
+            {
+                "title": "Combat-heavy",
+                "value": "combat-heavy"
+            },
+            {
+                "title": "Comedy",
+                "value": "comedy"
+            },
+            {
+                "title": "Easy-going",
+                "value": "easy-going"
+            },
+            {
+                "title": "Exploration",
+                "value": "exploration"
+            },
+            {
+                "title": "Horror",
+                "value": "horror"
+            },
+            {
+                "title": "Lore-heavy",
+                "value": "lore-heavy"
+            },
+            {
+                "title": "Mystery",
+                "value": "mystery"
+            },
+            {
+                "title": "Serious",
+                "value": "serious"
+            }
+          ]
+        }        
       ]
     },
     {

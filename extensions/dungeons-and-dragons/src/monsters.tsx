@@ -2,6 +2,7 @@ import { List, ActionPanel, Action } from "@raycast/api";
 import { getDnd } from "./utils/dndData";
 import { index, indexCollection } from "./utils/types";
 import MonsterDetail from "./templates/monsterDetail";
+import Unresponsive from "./templates/unresponsive";
 interface monstersType {
   isLoading: boolean;
   data: indexCollection;
@@ -9,6 +10,14 @@ interface monstersType {
 
 export default function Command() {
   const monsters = getDnd("/api/monsters") as monstersType;
+
+  if (!monsters?.data && monsters.isLoading === true) {
+    return <List isLoading={true} searchBarPlaceholder="Loading monsters..." />;
+  }
+
+  if (!monsters?.data && !monsters.isLoading === false) {
+    return <Unresponsive />;
+  }
 
   if (monsters?.data) {
     return (
