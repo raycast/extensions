@@ -25,7 +25,6 @@ export default function Characters() {
         });
       },
       mapResult(result: SuccessResponse<Character>) {
-        console.log("total", result.total);
         setTotalCharacters(result.total);
         return {
           data: result.docs,
