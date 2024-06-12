@@ -8,7 +8,6 @@ import {
   Icon,
   Color,
   confirmAlert,
-  PopToRootType,
   openExtensionPreferences,
   popToRoot,
 } from "@raycast/api";
