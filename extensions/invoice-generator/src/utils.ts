@@ -5,9 +5,10 @@ export const preferences = getPreferenceValues();
 export const {
   apiKey,
   address,
+  defaultCurrency,
   defaultIncludeAddress,
   defaultIncludeTax,
-  defaultCurrency,
+  defaultLocale,
   includeAmountPaid,
   includePaymentTerms,
   includeShipping,
@@ -25,6 +26,7 @@ export const initialInvoiceFormValues: InvoiceFormValues = {
   date: new Date(new Date().setHours(0, 0, 0, 1)),
   currency: defaultCurrency,
   terms: termsAndConditions,
+  locale: defaultLocale,
 };
 
 export const initialInvoiceItemValues = [
