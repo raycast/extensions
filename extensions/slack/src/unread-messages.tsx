@@ -48,7 +48,7 @@ function UnreadMessagesOverview() {
         (id: string) =>
           !!users.find((user) => user.conversationId === id) ||
           !!channels.find((channel) => channel.id === id) ||
-          !!groups.find((group) => group.id === id)
+          !!groups.find((group) => group.id === id),
       );
 
       await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
@@ -70,8 +70,8 @@ function UnreadMessagesOverview() {
       !selectedConversations || selectedConversations.length < 5
         ? 500
         : selectedConversations.length < 10
-        ? 10000
-        : 30000
+          ? 10000
+          : 30000,
     );
     return () => clearInterval(interval);
   }, [selectedConversations]);
