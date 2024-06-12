@@ -172,7 +172,7 @@ export function useBookings() {
   }, []);
 }
 
-export function updateBookingStatus(bookingId: number, data: updateBookingContent) {
+export function updateBooking(bookingId: number, data: updateBookingContent) {
   return calAPI({
     method: "PATCH",
     url: `/bookings/${bookingId}`,

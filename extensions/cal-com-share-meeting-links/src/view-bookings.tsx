@@ -18,7 +18,7 @@ import {
   cancelBooking,
   formatDateTime,
   formatTime,
-  updateBookingStatus,
+  updateBooking,
   useBookings,
   useCurrentUser,
 } from "./services/cal.com";
@@ -48,9 +48,8 @@ export default function viewBookings() {
   const handleUpdateBookingStatus = async (bookingId: number, status: string) => {
     const data = { status };
     try {
-      await updateBookingStatus(bookingId, data);
+      await updateBooking(bookingId, data);
       revalidate();
-
       await showToast({
         style: Toast.Style.Success,
         title: "Booking Status Updated",
