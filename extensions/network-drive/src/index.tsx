@@ -1,6 +1,17 @@
-import { ActionPanel, Action, List, showToast, showHUD, Toast, Icon, Color, confirmAlert } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  showToast,
+  showHUD,
+  Toast,
+  Icon,
+  Color,
+  confirmAlert,
+  PopToRootType,
+} from "@raycast/api";
 import { exec } from "child_process";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { get_pref_smb_ip } from "./utils-preference";
 import { delayOperation } from "./utils-other";
 import { checkMountedState, findMountedName, getNetworkDrivesMounted_ } from "./utils-disk-mount";
@@ -13,16 +24,36 @@ export default function Command() {
   const [network_volumes_mounted, set_networkDrivesMounted] = useState<string[]>([]);
   const [network_drive_info, set_networkDriveInfo] = useState<DiskInfo[]>([]);
   const [need_update, set_update] = useState<boolean>(false);
+  const [isLoading, set_isLoading] = useState<boolean>(true);
+  const drivesRef = useRef(network_drivess);
+  drivesRef.current = network_drivess;
+
+  // Fetch disk data from via the async helper functions
   useEffect(() => {
+    set_isLoading(true);
     getNetworkDrives(set_networkDrives);
     getNetworkDrivesMounted_(set_networkDrivesMounted);
     getNetworkDrivesInfo(set_networkDriveInfo);
     set_update(false);
   }, [need_update]);
 
+  // TimeOut to handle case where fetching fails
+  setTimeout(() => {
+    if (drivesRef.current.length == 0) {
+      set_isLoading(false);
+      showHUD("⚠️ Failed to Fetch Disk Information.", {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      });
+      // showToast({ title: "Failed to Fetch Disk Information.", style: Toast.Style.Failure });
+    } else {
+      set_isLoading(false);
+    }
+  }, 5000);
+
   // Render the list based on the data retrived
   return (
-    <List isLoading={network_drivess.length == 0}>
+    <List isLoading={isLoading && network_drivess.length == 0}>
       {network_drivess?.map((drive) => (
         <DriveItem
           key={drive}
