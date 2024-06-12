@@ -6,7 +6,9 @@
   "icon": "slackmojis-logo.png",
   "author": "samwalshnz",
   "categories": [
-    "Fun"
+    "Fun",
+    "Media",
+    "Communication"
   ],
   "license": "MIT",
   "commands": [
