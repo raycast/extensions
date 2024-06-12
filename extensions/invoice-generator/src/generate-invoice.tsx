@@ -13,6 +13,7 @@ import {
   initialCustomFields,
   initialInvoiceFormValues,
   initialInvoiceItemValues,
+  locales,
   termsAndConditions,
 } from "./utils";
 import { InvoiceFormValues, InvoiceFormItemValues, InvoiceFormCustomFieldValues } from "./types";
@@ -149,11 +150,9 @@ export default function GenerateInvoice(props: LaunchProps<{ draftValues: Invoic
       <Form.TextArea title="Notes" {...itemProps.notes} />
       {termsAndConditions && <Form.TextField title="Terms" {...itemProps.terms} />}
       <Form.Dropdown title="Localisation" {...itemProps.locale}>
-        <Form.Dropdown.Item title="English" value="en-US" />
-        <Form.Dropdown.Item title="French" value="fr-FR" />
-        <Form.Dropdown.Item title="German" value="de-DE" />
-        <Form.Dropdown.Item title="Spanish" value="es-ES" />
-        <Form.Dropdown.Item title="Thai" value="th-TH" />
+        {locales.map((locale) => (
+          <Form.Dropdown.Item key={locale.value} title={locale.title} value={locale.value} />
+        ))}
       </Form.Dropdown>
 
       <Form.Separator />

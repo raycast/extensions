@@ -42,6 +42,14 @@ export const initialCustomFields = [
   },
 ];
 
+export const locales = [
+  { title: "English", value: "en-US" },
+  { title: "French", value: "fr-FR" },
+  { title: "German", value: "de-DE" },
+  { title: "Spanish", value: "es-ES" },
+  { title: "Thai", value: "th-TH" },
+];
+
 export const currencies = [
   { title: "ADB Unit of Account", value: "XUA" },
   { title: "Afghani", value: "AFN" },
