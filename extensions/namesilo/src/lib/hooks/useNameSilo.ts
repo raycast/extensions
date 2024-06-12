@@ -3,7 +3,7 @@ import { API_PARAMS, API_URL } from "../constants";
 import { ErrorResponse, SuccessResponse } from "../types";
 
 export default function useNameSilo<T>(operation: string, params?: URLSearchParams) {
-    const { isLoading, data, error } = useFetch(API_URL + operation + "?" + API_PARAMS.toString() + (params ? `&${params}` : ""), {
+    const { isLoading, data, error, revalidate } = useFetch(API_URL + operation + "?" + API_PARAMS.toString() + (params ? `&${params}` : ""), {
         mapResult(result: SuccessResponse<T> | ErrorResponse) {
             if (result.reply.detail!=="success") {
                 throw new Error(result.reply.detail);
@@ -13,5 +13,5 @@ export default function useNameSilo<T>(operation: string, params?: URLSearchPara
             }
         }
     });
-    return { isLoading, data, error };
+    return { isLoading, data, error, revalidate };
 }

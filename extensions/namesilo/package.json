@@ -44,11 +44,30 @@
       "title": "Orders",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "prices",
+      "title": "Prices",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "account-balance",
+      "title": "Account Balance",
+      "description": "",
+      "mode": "no-view"
+    },
+    {
+      "name": "portfolio-manager",
+      "title": "Portfolio Manager",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.76.0",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/utils": "^1.15.0",
+    "cross-fetch": "^4.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

@@ -53,10 +53,30 @@ export type OrderDetails = {
     credited_amount?: string;
 }
 
+export type Price = {
+    renew: string;
+    registration: string;
+    transfer: string;
+}
+
+export type AccountBalance = {
+    balance: string;
+}
+
+export type Portfolio = {
+    name: string;
+}
+
 type BaseResponse = {
     request: {
         operation: string;
         ip: string;
+    }
+}
+export type EmptySuccessResponse = {
+    reply: {
+        code: 300;
+        detail: "success";
     }
 }
 export type SuccessResponse<T> = BaseResponse & {
