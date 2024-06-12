@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "noun-project",
+  "title": "Noun Project",
+  "description": "Search for and download SVG and PNG icons from the Noun Project",
+  "icon": "command-icon.png",
+  "author": "Rob",
+  "categories": [
+    "Design Tools",
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "key": "key",
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "Your API key from the Noun Project: https://thenounproject.com/developers/apps/",
+      "required": true,
+      "type": "textfield",
+      "defaultValue": ""
+    },
+    {
+      "key": "secret",
+      "title": "API Secret",
+      "name": "apiSecret",
+      "description": "Your API secret from the Noun Project: https://thenounproject.com/developers/apps/",
+      "required": true,
+      "type": "password",
+      "defaultValue": ""
+    },
+    {
+      "key": "publicDomain",
+      "title": "Limit to Icons in the Public Domain",
+      "name": "publicDomain",
+      "description": "The maximum number of results to display",
+      "required": false,
+      "type": "dropdown",
+      "defaultValue": 0,
+      "data": [
+        {
+          "title": "No",
+          "value": "0"
+        },
+        {
+          "title": "Yes",
+          "value": "1"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Icons",
+      "description": "Search for an icon by a keyword and see them displayed in a grid",
+      "mode": "view",
+      "required": true,
+      "arguments": [
+        {
+          "name": "keyword",
+          "placeholder": "Search over 5M icons",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.12.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/oauth": "^0.9.5",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "oauth": "github:ciaranj/node-oauth",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
