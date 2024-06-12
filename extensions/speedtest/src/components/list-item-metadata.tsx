@@ -1,12 +1,12 @@
-import { Color, Icon, List } from "@raycast/api";
-import { getPrettyName, getPrettyValue, isObject, isResultViewIconsListKey } from "../lib/utils";
+import { Icon, List } from "@raycast/api";
+import { icons } from "../lib/speedtest-pretty-names";
 import {
   SpeedtestResult,
   SpeedtestResultKeys,
   SpeedtestResultObjectValueType,
   SpeedtestResultValueType,
 } from "../lib/speedtest.types";
-import { icons } from "../lib/speedtest-pretty-names";
+import { getPrettyName, getPrettyValue, isObject, isResultViewIconsListKey } from "../lib/utils";
 import { InternetSpeed } from "./bandwidth/types";
 
 type MetadataValue = SpeedtestResultObjectValueType | Partial<SpeedtestResult> | InternetSpeed;
@@ -19,7 +19,7 @@ type ListItemMetadataProps = {
 type FlatMetadata = {
   title: string;
   value: string;
-  icon?: { source: Icon; tintColor: Color | string };
+  icon?: { source: Icon };
   isSeparator?: boolean;
 };
 

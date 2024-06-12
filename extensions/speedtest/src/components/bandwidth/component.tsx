@@ -28,7 +28,7 @@ export const ListBandwidthItem = (props: {
   return (
     <List.Item
       title={title}
-      icon={{ source: icon, tintColor: "#494949" }}
+      icon={icon}
       accessories={[
         {
           text: isLoading ? "?" : qualities,
