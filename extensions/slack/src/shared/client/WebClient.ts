@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
 import { WebClient } from "@slack/web-api";
 
 export interface SlackConversation {
@@ -29,4 +30,21 @@ export interface SlackMember {
 }
 
 const accessToken = getPreferenceValues<{ accessToken: string }>().accessToken;
-export const slackWebClient: WebClient = new WebClient(accessToken);
+let slackWebClient: WebClient | null = null;
+
+export const slack = OAuthService.slack({
+  scope:
+    "users:read channels:read groups:read im:read mpim:read channels:history groups:history im:history mpim:history channels:write groups:write im:write mpim:write users:write dnd:read dnd:write",
+  personalAccessToken: accessToken,
+  onAuthorize({ token }) {
+    slackWebClient = new WebClient(token);
+  },
+});
+
+export function getSlackWebClient(): WebClient {
+  if (!slackWebClient) {
+    throw new Error("No slack client initialized");
+  }
+
+  return slackWebClient;
+}

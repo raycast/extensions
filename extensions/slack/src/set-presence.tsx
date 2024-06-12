@@ -2,8 +2,9 @@ import { Action, ActionPanel, Detail, Form, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import { PresenceStatus, SlackClient, onApiError } from "./shared/client";
+import { withSlackClient } from "./shared/withSlackClient";
 
-export default function Command() {
+function SetPresence() {
   const [presence, setPresence] = useState<PresenceStatus>();
 
   const updatePresence = () => {
@@ -70,3 +71,5 @@ export default function Command() {
     </Form>
   );
 }
+
+export default withSlackClient(SetPresence);

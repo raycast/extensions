@@ -9,7 +9,7 @@ export function UpdatesModal({ children }: { children: JSX.Element }) {
 
   useEffect(() => {
     LocalStorage.getItem(storageKey).then((item) =>
-      setLastOpened(item ? new Date(parseInt(item as string)) : new Date(0))
+      setLastOpened(item ? new Date(parseInt(item as string)) : new Date(0)),
     );
   }, []);
 
@@ -44,7 +44,7 @@ export function UpdatesModal({ children }: { children: JSX.Element }) {
           </ActionPanel>
         }
         title="Action required"
-        description="Due to extension updates, you need to check your Slack Api permission scopes to validate that all necessary permissions are granted. Please check out the README for the required scopes."
+        description="Due to extension updates, you need to check your Slack API permission scopes to validate that all necessary permissions are granted. Please check out the README for the required scopes."
       />
     </List>
   );

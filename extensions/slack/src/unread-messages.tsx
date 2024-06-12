@@ -3,7 +3,6 @@ import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
 import {
-  CacheProvider,
   Message,
   onApiError,
   SlackClient,
@@ -14,29 +13,28 @@ import {
 } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
 import { openChannel, timeDifference } from "./shared/utils";
+import { withSlackClient } from "./shared/withSlackClient";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
-export default function Command() {
+function UnreadMessages() {
   return (
-    <CacheProvider>
-      <UpdatesModal>
-        <UnreadMessagesOverview />
-      </UpdatesModal>
-    </CacheProvider>
+    <UpdatesModal>
+      <UnreadMessagesOverview />
+    </UpdatesModal>
   );
 }
 
 function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
-  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
+  const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
+  const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
+  const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
   const {
     data: unreadConversations,
     error: unreadConversationsError,
-    isValidating: isValidatingUnreadConversations,
+    isLoading: isLoadingUnreadConversations,
     mutate,
   } = useUnreadConversations(selectedConversations);
 
@@ -78,21 +76,17 @@ function UnreadMessagesOverview() {
     return () => clearInterval(interval);
   }, [selectedConversations]);
 
-  if (
-    (usersError &&
-      channelsError &&
-      groupsError &&
-      !isValidatingUsers &&
-      !isValidatingChannels &&
-      !isValidatingGroups) ||
-    (unreadConversationsError && !isValidatingUnreadConversations)
-  ) {
+  if (usersError && channelsError && groupsError && unreadConversationsError) {
     onApiError({ exitExtension: true });
   }
 
   const markConversationAsRead = async (conversationId: string, actionTriggeredManually?: boolean): Promise<void> => {
     try {
-      await SlackClient.markAsRead(conversationId);
+      await mutate(SlackClient.markAsRead(conversationId), {
+        optimisticUpdate(data) {
+          return data?.filter((c) => c.conversationId !== conversationId);
+        },
+      });
 
       if (actionTriggeredManually) {
         showToast({
@@ -100,12 +94,6 @@ function UnreadMessagesOverview() {
           title: `Marked as read`,
         });
       }
-
-      // optimistic rendering: mark conversation as read
-      mutate(
-        unreadConversations?.filter((c) => c.conversationId !== conversationId),
-        { revalidate: false, populateCache: true }
-      );
     } catch {
       if (actionTriggeredManually) {
         onApiError();
@@ -114,13 +102,17 @@ function UnreadMessagesOverview() {
   };
 
   return (
-    <List isLoading={!selectedConversations || isValidatingUnreadConversations}>
+    <List
+      isLoading={
+        !selectedConversations || isLoadingUnreadConversations || isLoadingUsers || isLoadingChannels || isLoadingGroups
+      }
+    >
       {selectedConversations && selectedConversations.length === 0 && (
         <List.EmptyView
           icon={Icon.Gear}
           actions={
             <ActionPanel>
-              <Action.Push title="Configure" target={<ConfigurationWrapper />} />
+              <Action.Push icon={Icon.Gear} title="Configure" target={<Configuration />} />
             </ActionPanel>
           }
           title="Select Conversations"
@@ -134,7 +126,7 @@ function UnreadMessagesOverview() {
           <List.EmptyView
             actions={
               <ActionPanel>
-                <Action.Push title="Configure" target={<ConfigurationWrapper />} />
+                <Action.Push icon={Icon.Gear} title="Configure" target={<Configuration />} />
               </ActionPanel>
             }
             title="No Unread Messages Found"
@@ -165,6 +157,7 @@ function UnreadMessagesOverview() {
                     {conversation && (
                       <>
                         <Action
+                          icon={{ fileIcon: "/Applications/Slack.app" }}
                           title="Open in Slack"
                           onAction={() => {
                             markConversationAsRead(unreadConversation.conversationId);
@@ -172,27 +165,28 @@ function UnreadMessagesOverview() {
                           }}
                         />
                         <Action
-                          title="Mark as read"
+                          icon={Icon.Check}
+                          title="Mark as Read"
                           onAction={() => markConversationAsRead(unreadConversation.conversationId, true)}
                         />
                       </>
                     )}
                     <Action.Push
-                      title="Show unread messages"
+                      title="Show Unread Messages"
+                      icon={Icon.Sidebar}
                       shortcut={{ modifiers: ["cmd"], key: "m" }}
                       target={
-                        <CacheProvider>
-                          <UnreadMessagesConversation
-                            conversationName={conversation?.name ?? ""}
-                            messageHistory={unreadConversation.messageHistory}
-                          />
-                        </CacheProvider>
+                        <UnreadMessagesConversation
+                          conversationName={conversation?.name ?? ""}
+                          messageHistory={unreadConversation.messageHistory}
+                        />
                       }
                     />
                     <Action.Push
                       title="Configure Command"
+                      icon={Icon.Gear}
                       shortcut={{ modifiers: ["opt"], key: "c" }}
-                      target={<ConfigurationWrapper />}
+                      target={<Configuration />}
                     />
                   </ActionPanel>
                 }
@@ -212,14 +206,14 @@ function UnreadMessagesConversation({
   conversationName: string;
   messageHistory: Message[];
 }) {
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
+  const { data: users, error: usersError, isLoading: isLoadingUsers } = useUsers();
 
-  if (usersError && !isValidatingUsers) {
+  if (usersError) {
     onApiError({ exitExtension: true });
   }
 
   return (
-    <List navigationTitle={`Unread Messages - ${conversationName}`} isLoading={isValidatingUsers} isShowingDetail>
+    <List navigationTitle={`Unread Messages — ${conversationName}`} isLoading={isLoadingUsers} isShowingDetail>
       {messageHistory.map((message, index) => {
         const user = users?.find((u) => u.id === message.senderId);
         return (
@@ -236,19 +230,11 @@ function UnreadMessagesConversation({
   );
 }
 
-function ConfigurationWrapper() {
-  return (
-    <CacheProvider>
-      <Configuration />
-    </CacheProvider>
-  );
-}
-
 function Configuration() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
-  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
+  const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
+  const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
+  const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
 
   useEffect(() => {
     LocalStorage.getItem(conversationsStorageKey).then((item) => {
@@ -278,21 +264,14 @@ function Configuration() {
     }
   };
 
-  if (
-    usersError &&
-    channelsError &&
-    groupsError &&
-    !isValidatingUsers &&
-    !isValidatingChannels &&
-    !isValidatingGroups
-  ) {
+  if (usersError && channelsError && groupsError) {
     onApiError({ exitExtension: true });
   }
 
   return (
     <List
-      navigationTitle="Unread Messages - Configuration"
-      isLoading={!selectedConversations || isValidatingUsers || isValidatingChannels || isValidatingGroups}
+      navigationTitle="Unread Messages — Configuration"
+      isLoading={!selectedConversations || isLoadingUsers || isLoadingChannels || isLoadingGroups}
     >
       <List.Section title="Direct Messages">
         {users
@@ -308,6 +287,7 @@ function Configuration() {
                 actions={
                   <ActionPanel>
                     <Action
+                      icon={Icon.Eye}
                       title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                       onAction={() => toggleConversation(conversationId!)}
                     />
@@ -329,6 +309,7 @@ function Configuration() {
               actions={
                 <ActionPanel>
                   <Action
+                    icon={Icon.Eye}
                     title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                     onAction={() => toggleConversation(id)}
                   />
@@ -350,6 +331,7 @@ function Configuration() {
               actions={
                 <ActionPanel>
                   <Action
+                    icon={Icon.Eye}
                     title={isConversationSelected ? "Unselect" : "Observe Conversation"}
                     onAction={() => toggleConversation(id)}
                   />
@@ -362,3 +344,5 @@ function Configuration() {
     </List>
   );
 }
+
+export default withSlackClient(UnreadMessages);

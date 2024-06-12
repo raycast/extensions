@@ -1,6 +1,6 @@
 import { closeMainWindow, getPreferenceValues, open } from "@raycast/api";
-import formatDistance from "date-fns/formatDistance";
-import { runAppleScript } from "run-applescript";
+import { formatDistance } from "date-fns";
+import { runAppleScript } from "@raycast/utils";
 
 // https://api.slack.com/reference/deep-linking
 const openChat = (workspaceId: string, userId: string) => {
@@ -12,7 +12,7 @@ const openChat = (workspaceId: string, userId: string) => {
     runAppleScript(
       buildScriptEnsuringSlackIsRunning(`
         tell application "System Events" to tell process "Slack" to key code 47 using {command down}
-      `)
+      `),
     );
   }
 };

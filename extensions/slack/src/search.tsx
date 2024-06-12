@@ -1,81 +1,68 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
-import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
+import { onApiError, useChannels, useGroups, useUsers } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
 import { openChannel, openChat } from "./shared/utils";
+import { withSlackClient } from "./shared/withSlackClient";
+import { useFrecencySorting } from "@raycast/utils";
 
-export default function Command() {
+function Search() {
   return (
-    <CacheProvider>
-      <UpdatesModal>
-        <SlackList />
-      </UpdatesModal>
-    </CacheProvider>
+    <UpdatesModal>
+      <SlackList />
+    </UpdatesModal>
   );
 }
 
 function SlackList() {
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
-  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
+  const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
+  const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
+  const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
 
-  if (
-    usersError &&
-    channelsError &&
-    groupsError &&
-    !isValidatingUsers &&
-    !isValidatingChannels &&
-    !isValidatingGroups
-  ) {
+  if (usersError && channelsError && groupsError) {
     onApiError({ exitExtension: true });
   }
 
+  const {
+    data: recents,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting([...(users ?? []), ...(channels ?? []), ...(groups ?? [])], {
+    key: (item) => item.id,
+  });
+
   return (
-    <List isLoading={isValidatingUsers || isValidatingGroups || isValidatingChannels}>
-      <List.Section title="Users">
-        {users?.map(({ name, id, teamId, icon }) => (
-          <List.Item
-            key={id}
-            title={name}
-            icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
-            actions={
-              <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChat(teamId, id)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+    <List isLoading={isLoadingUsers || isLoadingChannels || isLoadingGroups}>
+      {recents.map((item) => {
+        const { id, name, icon, teamId } = item;
+        const isUser = id.startsWith("U");
 
-      <List.Section title="Channels">
-        {channels?.map(({ name, id, teamId, icon }) => (
+        return (
           <List.Item
             key={id}
             title={name}
-            icon={icon}
+            icon={isUser ? (icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person) : icon}
             actions={
               <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+                <Action
+                  icon={{ fileIcon: "/Applications/Slack.app" }}
+                  title="Open in Slack"
+                  onAction={() => {
+                    isUser ? openChat(teamId, id) : openChannel(teamId, id);
+                    visitItem(item);
+                  }}
+                />
 
-      <List.Section title="Groups">
-        {groups?.map(({ name, id, teamId, icon }) => (
-          <List.Item
-            key={id}
-            title={name}
-            icon={icon}
-            actions={
-              <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
+                <ActionPanel.Section>
+                  <Action icon={Icon.ArrowCounterClockwise} title="Reset Ranking" onAction={() => resetRanking(item)} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
-        ))}
-      </List.Section>
+        );
+      })}
     </List>
   );
 }
+
+export default withSlackClient(Search);

@@ -1,10 +1,11 @@
 import { Action, ActionPanel, Detail, Form, showHUD } from "@raycast/api";
-import formatDistance from "date-fns/formatDistance";
+import { formatDistance } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { SlackClient, SnoozeStatus, onApiError } from "./shared/client";
+import { withSlackClient } from "./shared/withSlackClient";
 
-export default function Command() {
+function SetSnooze() {
   const [snoozeStatus, setSnoozeStatus] = useState<SnoozeStatus>();
 
   const updateSnoozeStatus = () => {
@@ -64,3 +65,5 @@ export default function Command() {
     </Form>
   );
 }
+
+export default withSlackClient(SetSnooze);
