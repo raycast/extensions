@@ -21,25 +21,27 @@ function getWalletPath() {
 export function fetchPocketNames(): string[] {
   return readdirSync(walletPath).filter((item) => {
     const filePath = `${walletPath}/${item}`;
-    const fileStats = lstatSync(filePath);
-    const fileExt = extname(filePath);
-    const fileName = basename(filePath, fileExt);
-
-    if (!fileStats.isDirectory()) return;
-    if (fileName.startsWith(".")) return;
+    let fileStats;
 
     try {
       readdirSync(filePath);
+      fileStats = lstatSync(filePath);
     } catch (e) {
       if (getPreferenceValues<Preferences>().suppressFolderReadErrors) return;
       showToast({
         style: Toast.Style.Failure,
-        title: `The "${fileName}" directory could not be read`,
+        title: `${filePath} could not be read`,
         message: "Suppress this error in extension preferences.",
       });
 
       return;
     }
+
+    const fileExt = extname(filePath);
+    const fileName = basename(filePath, fileExt);
+
+    if (!fileStats.isDirectory()) return;
+    if (fileName.startsWith(".")) return;
 
     return item;
   });
@@ -68,7 +70,21 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
   await Promise.all(
     items.map(async (item) => {
       const filePath = `${dir}/${item}`;
-      const fileStats = lstatSync(filePath);
+      let fileStats;
+
+      try {
+        fileStats = lstatSync(filePath);
+      } catch (e) {
+        if (getPreferenceValues<Preferences>().suppressFolderReadErrors) return;
+        showToast({
+          style: Toast.Style.Failure,
+          title: `${filePath} could not be read`,
+          message: "Suppress this error in extension preferences.",
+        });
+    
+        return [];
+      }
+
       const fileExt = extname(filePath).toLowerCase();
       const fileName = basename(filePath, fileExt);
 
