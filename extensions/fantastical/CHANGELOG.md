@@ -1,5 +1,9 @@
 # Fantastical Changelog
 
+## [Added HUD Preference] - 2024-06-13
+
+- Add preference for hiding Raycast when a "Quick Add" command is run. If true, a HUD will be showed instead of a toast
+
 ## [Fix] - 2024-05-25
 
 - Fix syntax errors in AppleScript.
