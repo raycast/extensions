@@ -13,6 +13,7 @@
     {
       "name": "incident",
       "title": "Show All Incidents",
+      "subtitle": "Incident.io",
       "description": "Displays all incidents from Incident.io.",
       "mode": "view",
       "path": "src/incident.tsx"
@@ -20,8 +21,8 @@
     {
       "name": "live-incidents",
       "title": "Active Incidents",
+      "subtitle": "Incident.io",
       "description": "Displays live incidents from Incident.io.",
-      "subtitle": "Show number of active incidents",
       "mode": "menu-bar",
       "path": "src/live-incidents.tsx",
       "interval": "1m"
