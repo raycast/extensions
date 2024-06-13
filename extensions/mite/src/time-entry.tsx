@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, popToRoot } from "@raycast/api";
 import { useMite, fetch_mite } from "./hooks/useMite";
 import { projects_schema, services_schema, time_entry_post_schema } from "./validations";
 import { parse } from "valibot";
@@ -12,25 +12,31 @@ export default function Command() {
       const body = parse(time_entry_post_schema, { time_entry });
       const res = await fetch_mite("/time_entries.json", {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       });
       if (res.ok) {
         showToast({ title: "Entry created", style: Toast.Style.Success });
+        setTimeout(() => {
+          popToRoot({
+            clearSearchBar: false
+          });
+        }, 1000);
         return;
       }
       showToast({
         title: "Error",
         message: "There was an error in the submission",
-        style: Toast.Style.Failure,
+        style: Toast.Style.Failure
       });
     } catch (e) {
       showToast({
         title: "Error",
         message: "There was an error in the values of the form",
-        style: Toast.Style.Failure,
+        style: Toast.Style.Failure
       });
     }
   }
+
   const hrs: Array<{ value: string; title: string }> = [];
 
   for (let minutes = 0; minutes <= 480; minutes += 30) {
@@ -38,7 +44,7 @@ export default function Command() {
     const half = minutes / 60 === Math.floor(minutes / 60) ? "00" : "30";
     hrs.push({
       value: minutes.toString(),
-      title: `${whole.toString().padStart(2, "0")}:${half}`,
+      title: `${whole.toString().padStart(2, "0")}:${half}`
     });
   }
 
@@ -73,6 +79,7 @@ export default function Command() {
             <Form.Dropdown.Item key={service.id} value={service.id.toString()} title={service.name} />
           ))}
       </Form.Dropdown>
+      <Form.TextArea id="note" title={"Note"} storeValue />
     </Form>
   );
 }

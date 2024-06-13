@@ -5,6 +5,9 @@
   "description": "Interact with your mite account via Raycast",
   "icon": "mite.png",
   "author": "paolo_ricciuti",
+  "contributors": [
+    "ramsay"
+  ],
   "categories": [
     "Applications",
     "Productivity"

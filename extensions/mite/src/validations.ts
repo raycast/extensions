@@ -4,18 +4,18 @@ export const projects_schema = v.array(
   v.object({
     project: v.object({
       id: v.number(),
-      name: v.string(),
-    }),
-  }),
+      name: v.string()
+    })
+  })
 );
 
 export const services_schema = v.array(
   v.object({
     service: v.object({
       id: v.number(),
-      name: v.string(),
-    }),
-  }),
+      name: v.string()
+    })
+  })
 );
 
 export const time_entry_post_schema = v.object({
@@ -36,7 +36,8 @@ export const time_entry_post_schema = v.object({
       return value;
     }),
     subtitle: v.optional(v.string()),
-  }),
+    note: v.optional(v.string())
+  })
 });
 
 export const time_entry_schema = v.object({
@@ -45,7 +46,8 @@ export const time_entry_schema = v.object({
     project_id: v.nullable(v.string()),
     service_id: v.nullable(v.string()),
     subtitle: v.optional(v.string()),
-  }),
+    note: v.optional(v.string())
+  })
 });
 
 export type TimeEntryPost = v.Output<typeof time_entry_post_schema>;
