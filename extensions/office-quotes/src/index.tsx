@@ -9,14 +9,14 @@ import rawQuotes from "./data/quotes.json";
 export default function main() {
   const [isLoading, setIsLoading] = useState(false);
   const [quotes, setQuotes] = useCachedState<Quote[]>("quotes", shuffle(rawQuotes));
-  
+
   useEffect(() => {
     function initialShuffle() {
-      setQuotes(shuffle(rawQuotes))
+      setQuotes(shuffle(rawQuotes));
     }
     initialShuffle();
-  }, [])
-  
+  }, []);
+
   return (
     <List isLoading={isLoading}>
       {quotes.map((quote, index) => (
@@ -27,11 +27,11 @@ export default function main() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={quote.quote} shortcut={{ modifiers: ["cmd"], key: "." }} />
-                <Action.Push
-                  title="View Details"
-                  icon={Icon.Text}
-                  target={<DescriptionPane quote={quote} quotes={quotes} index={index} />}
-                />
+              <Action.Push
+                title="View Details"
+                icon={Icon.Text}
+                target={<DescriptionPane quote={quote} quotes={quotes} index={index} />}
+              />
               <ActionPanel.Section>
                 <Action
                   title="Shuffle Quotes"

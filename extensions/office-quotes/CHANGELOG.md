@@ -1,6 +1,6 @@
 # Office Quotes Changelog
 
-## [Extension now works Offline] - {PR_MREGE_DATE}
+## [Extension Now Works Offline] - {PR_MREGE_DATE}
 
 - Quotes are stored in a quotes.json so no Internet Access is required.
 

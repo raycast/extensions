@@ -16,7 +16,7 @@ ${quote.quote}
 
 Season: ${quote.season || "N/A"} / Episode: ${quote.episode || "N/A"}
 
-![Illustration](${avatars.find(avatar => avatar.character===quote.character)?.character_avatar_url})`;
+![Illustration](${avatars.find((avatar) => avatar.character === quote.character)?.character_avatar_url})`;
 
   return (
     <Detail
