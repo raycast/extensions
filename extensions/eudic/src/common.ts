@@ -16,7 +16,11 @@ export const getWordWithDefaultSelect = async (word?: string) => {
   let result = word?.trim();
 
   if (!result) {
-    result = await getSelectedText();
+    try {
+      result = await getSelectedText();
+    } catch (e) {
+      return "";
+    }
   }
 
   return result;
