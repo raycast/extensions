@@ -10,6 +10,7 @@ interface monstersType {
 }
 
 function getMonsterNames(data: index[]): string {
+  if(!data) return "";
   const names: string[] = data.map((monster) => monster.name);
   return names.join(", ");
 }
@@ -36,7 +37,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Random
     # Encounter Title
     ## Description
     Medium-length description of the encounter. Avoid extraneous language, and provide enough information to paint a picture for the GM and players.
-    Provide additional story-driven details for how the players can complete the challenge.
+    Provide additional story-driven details for how the players can complete the above scenario.
     ## Monsters
     List of monsters in the encounter in a bulleted list
     ## Tips
@@ -45,6 +46,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Random
     const { data, isLoading } = useAI(AICommand);
 
     if (monsters.isLoading) return <Detail isLoading={true} markdown="Loading monsters..." />;
+
     if (!monsters.data && monsters.isLoading === false)
       return (
         <Detail
@@ -52,16 +54,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Random
           markdown={`# There was an error loading your random encounter. \n Please try again with a different challenge level.`}
         />
       );
+
     return (
       <Detail
         isLoading={isLoading}
         markdown={
-          data +
+          (data ?? '') +
           `\n ${
             isLoading ? "Generating encounter..." : ""
           }\n --- \n ## Random Encounter parameters: \n - Challenge Level: ${challengeLevel} \n - Location: ${
             location ? location : "Random"
-          } \n - Tone: ${tone ? tone : "Random"}`
+          } \n - Tone: ${tone ? tone : "Combat-heavy"}`
         }
       />
     );
