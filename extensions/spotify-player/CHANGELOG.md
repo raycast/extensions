@@ -1,5 +1,10 @@
 # Spotify Player Changelog
 
+## [Generate Playlist Fixes] - 2024-06-11
+
+- Removed automatic copying to clipboard after AI generates a result.
+- Improved the error message displayed when the playlist generation fails.
+
 ## [Generate Playlist] - 2024-06-04
 
 - Added a new feature where Raycast AI can create a playlist for you. You can then add this playlist to Spotify or queue all the songs directly.

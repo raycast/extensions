@@ -6,8 +6,9 @@ This extension uses the macOS built-in [Spoken Content](https://www.youtube.com/
 
 ## Features
 
-- **Type to Say** - Quick type your text and say.
-- **Text to Say** - Input your text or paragraph and say.
+- **Type to Say** - Quick type your text and say
+- **Text to Say** - Input your text or paragraph and say
+- **Selected Text to Say** - Say the selected text on any application
 
 ## Configurations
 
@@ -15,6 +16,10 @@ Currently, the `Configure Say` command we provided does not alter you system set
 You can go to your macOS System Settings to download new voices and get more advanced configurations.
 
 See https://support.apple.com/en-us/guide/mac-help/spch638/mac.
+
+## Recommended Voices
+
+Siri is the closest thing to a real human voice. You can go to `System Settings -> Accessibility -> Spoken Content`. Pick your favorite Siri voice for the best experience.
 
 ## API
 

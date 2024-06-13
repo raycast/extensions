@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ResultView } from "./hook/ResultView";
+import { ResultView } from "./components/ResultView";
 
 const prompt = getPreferenceValues().prompt_custom;
 const model_override = getPreferenceValues().model_custom;
