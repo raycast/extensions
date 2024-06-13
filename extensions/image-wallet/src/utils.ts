@@ -20,6 +20,8 @@ function getWalletPath() {
 
 export function fetchPocketNames(): string[] {
   return readdirSync(walletPath).filter((item) => {
+    if (item.startsWith(".")) return;
+
     const filePath = `${walletPath}/${item}`;
     let fileStats;
 
@@ -37,11 +39,7 @@ export function fetchPocketNames(): string[] {
       return;
     }
 
-    const fileExt = extname(filePath);
-    const fileName = basename(filePath, fileExt);
-
     if (!fileStats.isDirectory()) return;
-    if (fileName.startsWith(".")) return;
 
     return item;
   });
@@ -69,6 +67,8 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
 
   await Promise.all(
     items.map(async (item) => {
+      if (item.startsWith(".")) return;
+
       const filePath = `${dir}/${item}`;
       let fileStats;
 
@@ -89,7 +89,6 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
       const fileName = basename(filePath, fileExt);
 
       if (fileStats.isDirectory()) return;
-      if (fileName.startsWith(".")) return;
 
       const videoExts = [".mov", ".mp4", ".m4v", ".mts", ".3gp", ".m2ts", ".m2v", ".mpeg", ".mpg", ".mts", ".vob"];
       const imageExts = [
