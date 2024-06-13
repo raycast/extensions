@@ -144,7 +144,6 @@ const useProfileOptions = (): ProfileOption[] => {
   const profileOptions =
     Object.keys(configFile).length > 0 ? Object.entries(configFile) : Object.entries(credentialsFile);
 
-  // console.log(profileOptions);
   return profileOptions.map(([name, config]) => {
     const includeProfile = configFile[name]?.include_profile;
     const region = configFile[name]?.region || (includeProfile && configFile[includeProfile]?.region);
