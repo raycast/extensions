@@ -33,6 +33,10 @@ To utilize the Video Call Reactions extension, ensure you have:
 ## Support
 Encountering issues or have suggestions? Open an issue on our GitHub repository.
 
+## Example
+
+![Confetti Image](./media/0-confetti-2.png)
+
 ## License
 This extension is available under the MIT License. We welcome contributions and forks.
 
