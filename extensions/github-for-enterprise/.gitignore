@@ -19,6 +19,7 @@ tsconfig.tsbuildinfo
 # misc
 .DS_Store
 *.pem
+.env
 
 # debug
 npm-debug.log*
