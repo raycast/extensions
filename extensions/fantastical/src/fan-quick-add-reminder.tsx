@@ -14,7 +14,7 @@ export default async (props: { arguments: Arguments }) => {
   const defaultBrowser = await defaultBrowserId();
   const preferences = getPreferenceValues<Preferences>();
   if (name !== undefined) {
-    const escapedAdd = args.add.replace(/"/g, "\\\"");
+    const escapedAdd = args.add.replace(/"/g, '\\"');
     await runAppleScript(`
         tell application "${name}" 
           parse sentence "TODO ${escapedAdd}" with add immediately
@@ -22,7 +22,7 @@ export default async (props: { arguments: Arguments }) => {
     const optionsSuccess: Toast.Options = {
       style: Toast.Style.Success,
       title: "Reminder added",
-      message: "Your reminder has been added to Fantastical."
+      message: "Your reminder has been added to Fantastical.",
     };
     // Will check if extension's hide preference is set
     // If true, it will show a HUD, else it will show a toast
@@ -40,8 +40,8 @@ export default async (props: { arguments: Arguments }) => {
         title: "Install Fantastical",
         onAction: () => {
           open("https://fantastical.app/", defaultBrowser);
-        }
-      }
+        },
+      },
     };
     showToast(options);
   }
