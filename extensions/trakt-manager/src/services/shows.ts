@@ -179,7 +179,7 @@ const setShowProgress = (showProgress: TraktShowProgress, show: TraktUpNextShowL
   if (showProgress.reset_at && new Date(showProgress.reset_at).getTime() > new Date(show.last_updated_at).getTime()) {
     show.show.progress = undefined;
   } else {
-    show.show.progress = showProgress.aired > showProgress.completed ? show.show.progress : undefined;
+    show.show.progress = showProgress.aired > showProgress.completed ? showProgress : undefined;
   }
 };
 

@@ -114,7 +114,7 @@ export const checkInMovie = async (movieId: number, signal: AbortSignal | undefi
       Authorization: `Bearer ${tokens?.accessToken}`,
     },
     body: JSON.stringify({
-      movies: {
+      movie: {
         ids: {
           trakt: movieId,
         },
@@ -122,6 +122,8 @@ export const checkInMovie = async (movieId: number, signal: AbortSignal | undefi
     }),
     signal,
   });
+
+  console.log(movieId);
 
   if (!response.ok) {
     throw new Error(response.statusText);
