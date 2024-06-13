@@ -2,7 +2,8 @@ import { List, open, ActionPanel, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import path from "path";
-import getPreferences from "./preferences";
+import { getPreferenceValues } from "@raycast/api";
+import os from "os";
 
 interface ExcelFile {
   path: string;
@@ -11,6 +12,13 @@ interface ExcelFile {
 
 const getExcelFilesInUsers = (directory: string): ExcelFile[] => {
   const excelFiles: ExcelFile[] = [];
+
+  const resolveDirectory = (dir: string) => {
+    if (dir.startsWith("~")) {
+      return path.join(os.homedir(), dir.slice(1));
+    }
+    return dir;
+  };
 
   const traverseDirectory = (currentDir: string) => {
     try {
@@ -50,22 +58,29 @@ const getExcelFilesInUsers = (directory: string): ExcelFile[] => {
     }
   };
 
-  traverseDirectory(directory);
+  const resolvedDirectory = resolveDirectory(directory);
+  traverseDirectory(resolvedDirectory);
   return excelFiles;
 };
 
-export default function Command() {
+export default function Command(props: { arguments: { folderPath?: string } }) {
   const [list, setList] = useState<ExcelFile[]>([]);
-  const { directories } = getPreferences();
+  const { directories } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
-    const folders = directories ? directories.split(",").map((dir) => dir.trim()) : [];
+    let folders: string[] = [];
+
+    if (props.arguments.folderPath) {
+      folders = [props.arguments.folderPath];
+    } else {
+      folders = directories ? directories.split(",").map((dir) => dir.trim()) : [];
+    }
 
     const excelFilesInUsers = folders.flatMap((folder) => getExcelFilesInUsers(folder));
 
     const sortedExcelFiles = excelFilesInUsers.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime());
     setList(sortedExcelFiles);
-  }, [directories]);
+  }, [directories, props.arguments.folderPath]);
 
   const handleOpenFile = (filePath: string) => {
     open(filePath);

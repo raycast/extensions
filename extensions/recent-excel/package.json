@@ -14,7 +14,16 @@
       "name": "search-recent-excel-sheets",
       "title": "Search Recent Excel Sheets",
       "description": "Shows recent excel files",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "folderPath",
+          "placeholder": "Folder path",
+          "description": "Specify the folder path to search for Excel files",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
