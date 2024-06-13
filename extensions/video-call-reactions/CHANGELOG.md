@@ -1,11 +1,8 @@
 # Video Call Reactions Changelog
 
-## [1.2.2] - 2024-06-12
+## [1.2.2] - 2024-06-13
 ### Changed
-- The README file to include the latest feature.
-
-### Added
-- The extension gallery with new screenshots.
+- Updated the README with an example
 
 ## [1.2.1] - 2024-06-12
 ### Changed
