@@ -26,19 +26,22 @@
   "commands": [
     {
       "name": "books",
-      "title": "Books",
+      "title": "Search Books",
+      "subtitle": "The Lord of the Rings",
       "description": "List of all 'The Lord of the Rings' books",
       "mode": "view"
     },
     {
       "name": "movies",
-      "title": "Movies",
+      "title": "Search Movies",
+      "subtitle": "The Lord of the Rings",
       "description": "List of all movies, including the 'The Lord of the Rings' and the 'The Hobbit' trilogies",
       "mode": "view"
     },
     {
       "name": "characters",
-      "title": "Characters",
+      "title": "Search Characters",
+      "subtitle": "The Lord of the Rings",
       "description": "List of characters including metadata like name, gender, realm, race and more",
       "mode": "view"
     }
