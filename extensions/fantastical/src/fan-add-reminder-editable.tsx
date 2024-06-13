@@ -1,8 +1,7 @@
-import { Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import { Toast, open, showToast } from "@raycast/api";
 import defaultBrowserId from "default-browser-id";
 import { runAppleScript } from "run-applescript";
 import { getName } from "./getName";
-import { Preferences } from "./helpers";
 
 interface Arguments {
   add: string;
