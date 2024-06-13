@@ -81,7 +81,7 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
           title: `${filePath} could not be read`,
           message: "Suppress this error in extension preferences.",
         });
-    
+
         return [];
       }
 
