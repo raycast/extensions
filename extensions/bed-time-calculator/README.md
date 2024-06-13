@@ -1,7 +1,5 @@
 # Bed Time Calculator
 
-[![X](https://img.shields.io/badge/X-000?style=for-the-badge&logo=x)](https://x.com/khlebobul) [![Telegram](https://img.shields.io/badge/Telegram-000?style=for-the-badge&logo=telegram&logoColor=2CA5E0)](https://t.me/khlebobul)
-
 This is a simple extension for Raycast that will help you calculate the best time to sleep or wake up.
 
 ### How does this work?

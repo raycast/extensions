@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { Form, LaunchProps } from "@raycast/api";
 
 type Values = {
   wakeUpTime: string;
@@ -8,21 +8,29 @@ type Values = {
 const SLEEP_CYCLE_DURATION = 90; // Duration of one sleep cycle in minutes
 const FALL_ASLEEP_BUFFER = 15; // Time in minutes to fall asleep
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Values }>) {
   const [bedtimes, setBedtimes] = useState<
     { time24: string; timeAMPM: string; cycles: number; recommended?: boolean }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(values: Values) {
-    const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/; // Regex for HH:MM format
-    if (!timePattern.test(values.wakeUpTime)) {
+  const { wakeUpTime } = props.arguments;
+
+  useEffect(() => {
+    calculateBedtimes(wakeUpTime);
+  }, [wakeUpTime]);
+
+  function calculateBedtimes(wakeUpTime: string) {
+    const normalizedWakeUpTime = normalizeTime(wakeUpTime);
+    const timePattern = /^([01]?\d|2[0-3]):([0-5]\d)$/; // Regex for H:MM or HH:MM format
+
+    if (!timePattern.test(normalizedWakeUpTime)) {
       setError("Invalid time format. Please enter time in HH:MM format.");
       setBedtimes([]);
       return;
     }
 
-    const [wakeHour, wakeMinute] = values.wakeUpTime.split(":").map(Number);
+    const [wakeHour, wakeMinute] = normalizedWakeUpTime.split(":").map(Number);
     const wakeTimeInMinutes = wakeHour * 60 + wakeMinute;
 
     const calculatedBedtimes: { time24: string; timeAMPM: string; cycles: number; recommended?: boolean }[] = [];
@@ -55,15 +63,14 @@ export default function Command() {
     setBedtimes(calculatedBedtimes);
   }
 
+  function normalizeTime(time: string): string {
+    const [hour, minute] = time.split(":");
+    const normalizedHour = hour.length === 1 ? "0" + hour : hour;
+    return `${normalizedHour}:${minute}`;
+  }
+
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Calculate Bedtimes" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="wakeUpTime" title="Wake Up Time (HH:MM)" placeholder="07:00" />
+    <Form>
       {error && <Form.Description text={error} />}
       <Form.Separator />
       <Form.Description text="Recommended Bedtimes:" />

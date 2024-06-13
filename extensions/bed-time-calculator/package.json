@@ -20,13 +20,29 @@
       "name": "sleep-at",
       "title": "Sleep At",
       "description": "I know when I'll fall asleep and want to know when to wake up",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "bedTime",
+          "placeholder": "Sleep Time (HH:MM)",
+          "type": "text",
+          "required": true
+        }
+      ]
     },
     {
       "name": "wake-up-at",
-      "title": "Wake Up At",
+      "title": "Wake up At",
       "description": "I know when I'll wake up and want to know when I should fall asleep",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "wakeUpTime",
+          "placeholder": "Wake Up Time (HH:MM)",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "dependencies": {
