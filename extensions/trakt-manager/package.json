@@ -77,8 +77,5 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "title": "Trakt Manager",
-  "trustedDependencies": [
-    "@raycast/api"
-  ]
+  "title": "Trakt Manager"
 }
