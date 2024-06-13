@@ -1,35 +1,43 @@
 # Video Call Reactions Extension for Raycast
 
 ## Overview
-The **Video Call Reactions** extension for Raycast allows you to enhance your video calls on macOS with a variety of fun and engaging reactions. With just a few keystrokes, you can trigger visual effects such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers.
+The **Video Call Reactions** extension for Raycast adds a dash of fun to your macOS video calls. With just a few keystrokes, you can trigger visual effects such as hearts, thumbs up/down, balloons, rain, confetti, fireworks, and lasers.
+
+![Confetti](https://github.com/raycast/extensions/assets/139340039/a99ab07e-c761-476d-b010-bee2e7eeadbc)
 
 ## Features
-- **Multiple Reactions**: Choose from a wide range of reactions to express yourself during video calls.
-- **Quick Access**: Trigger reactions quickly and conveniently through Raycast commands.
-- **Customizable**: Set your default reaction and configure settings to personalize your experience.
-- **Sound Effects**: Optionally play a sound when certain reactions are activated for added impact (e.g., confetti with cheering sound).
+- **Instant Access**: Quickly launch reactions with a single Raycast command.
+- **Diverse Reactions**: A broad selection of reactions to express yourself during video calls.
+- **Tailored Experience**: Set your default reaction and configure settings to personalize your experience.
+- **Audiovisual Flair**: Enhance certain reactions with optional sound effects, like the celebratory cheer accompanying confetti, or the Raycast's confetti visual effect.
 
-## Getting Started
-1. Install the extension from the Raycast Store.
-2. Configure your default reactions and preferences in the extension settings.
-3. Use the extension's commands to trigger reactions during a video call.
+## Quick Start
+1. Download from the Raycast Store.
+2. Personalize your settings in the extension preferences.
+3. Effortlessly trigger reactions during video calls.
 
 ## Usage
-To trigger a reaction, simply invoke the Raycast command palette and select the **Video Call Reactions** extension. Choose the reaction you want to use, and it will appear on your video call.
+Open the Raycast command palette, choose the **Trigger Reaction** command, and select the reaction to display in your video call.
 
 ## Preferences
 - **Default Reaction**: Set a default reaction to be triggered when the extension is activated.
-- **Show Confetti**: Enable or disable the confetti effect.
-- **Play Sound**: Choose to play a sound effect when the confetti reaction is triggered.
+- **Confetti Display**: Toggle the Raycast's confetti effect on or off.
+- **Sound Effects**: Opt to play a sound when the Raycast's confetti effect is activated.
 
 ## Requirements
+To utilize the Video Call Reactions extension, ensure you have:
 - macOS with Raycast installed.
-- Video calling application that supports on-screen reactions.
+- macOS Sonoma or later on a Mac with Apple silicon, or macOS Sonoma or later on a Mac using Continuity Camera with iPhone 12 or later. Visit [Apple Support](https://support.apple.com/en-us/105117) for more details.
+- A compatible video calling application that supports on-screen reactions.
 
 ## Support
-If you encounter any issues or have suggestions for improvements, please open an issue on the extension's GitHub repository.
+Encountering issues or have suggestions? Open an issue on our GitHub repository.
+
+## Example
+
+![Confetti Image](./media/0-confetti-2.png)
 
 ## License
-This extension is released under the MIT License. Feel free to contribute to its development or fork it for your personal use.
+This extension is available under the MIT License. We welcome contributions and forks.
 
-Enjoy enhancing your video calls with the **Video Call Reactions** extension for Raycast!
+Animate your video calls with the **Video Call Reactions** extension for Raycast!
