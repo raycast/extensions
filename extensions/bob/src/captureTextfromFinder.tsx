@@ -1,7 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 import { closeMainWindow } from "@raycast/api";
 
-const callBobWithOcr = async () => {
+export default async () => {
   const appleScript = `
     use scripting additions
     use framework "Foundation"
@@ -22,5 +22,3 @@ const callBobWithOcr = async () => {
     console.error("Error running AppleScript or closing Raycast window:", error);
   }
 };
-
-callBobWithOcr();
