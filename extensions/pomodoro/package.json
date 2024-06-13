@@ -12,7 +12,8 @@
     "mikikiv",
     "MartinGonzalez",
     "nathanjms",
-    "cchalop1"
+    "cchalop1",
+    "hayden_barnes"
   ],
   "keywords": [
     "pomodoro",
@@ -416,7 +417,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.12.4",
     "node-fetch": "^3.3.2"
   },
