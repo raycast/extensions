@@ -27,7 +27,7 @@ export function fetchPocketNames(): string[] {
       readdirSync(filePath);
       fileStats = lstatSync(filePath);
     } catch (e) {
-      if (getPreferenceValues<Preferences>().suppressFolderReadErrors) return;
+      if (getPreferenceValues<Preferences>().suppressReadErrors) return;
       showToast({
         style: Toast.Style.Failure,
         title: `${filePath} could not be read`,
@@ -75,7 +75,7 @@ async function loadPocketCards(dir: string): Promise<Card[]> {
       try {
         fileStats = lstatSync(filePath);
       } catch (e) {
-        if (getPreferenceValues<Preferences>().suppressFolderReadErrors) return;
+        if (getPreferenceValues<Preferences>().suppressReadErrors) return;
         showToast({
           style: Toast.Style.Failure,
           title: `${filePath} could not be read`,
