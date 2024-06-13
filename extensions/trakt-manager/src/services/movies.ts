@@ -123,8 +123,6 @@ export const checkInMovie = async (movieId: number, signal: AbortSignal | undefi
     signal,
   });
 
-  console.log(movieId);
-
   if (!response.ok) {
     throw new Error(response.statusText);
   }
