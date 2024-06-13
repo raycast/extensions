@@ -1,6 +1,6 @@
 import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { useEffect } from "react";
-import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
+import { loadSharedConfigFiles, loadSsoSessionData } from "@aws-sdk/shared-ini-file-loader";
 import { useCachedPromise, useCachedState, useExec } from "@raycast/utils";
 
 interface Preferences {
@@ -133,33 +133,28 @@ export type ProfileOption = {
   sso_start_url?: string;
   sso_account_id?: string;
   sso_role_name?: string;
+  sso_session?: string;
 };
 
 const useProfileOptions = (): ProfileOption[] => {
   const { data: configs = { configFile: {}, credentialsFile: {} } } = useCachedPromise(loadSharedConfigFiles);
+  const { data: ssoSessions = {} } = useCachedPromise(loadSsoSessionData);
   const { configFile, credentialsFile } = configs;
 
   const profileOptions =
     Object.keys(configFile).length > 0 ? Object.entries(configFile) : Object.entries(credentialsFile);
 
+  // console.log(profileOptions);
   return profileOptions.map(([name, config]) => {
     const includeProfile = configFile[name]?.include_profile;
-    const region =
-      configFile[name]?.region ||
-      credentialsFile[name]?.region ||
-      (includeProfile && configFile[includeProfile]?.region);
+    const region = configFile[name]?.region || (includeProfile && configFile[includeProfile]?.region);
     const sso_start_url =
       configFile[name]?.sso_start_url ||
-      credentialsFile[name]?.sso_start_url ||
-      (includeProfile && configFile[includeProfile]?.sso_start_url);
+      (configFile[name]?.sso_session && ssoSessions[configFile[name]?.sso_session]?.sso_start_url);
     const sso_account_id =
-      configFile[name]?.sso_account_id ||
-      credentialsFile[name]?.sso_account_id ||
-      (includeProfile && configFile[includeProfile]?.sso_account_id);
+      configFile[name]?.sso_account_id || (includeProfile && configFile[includeProfile]?.sso_account_id);
     const sso_role_name =
-      configFile[name]?.sso_role_name ||
-      credentialsFile[name]?.sso_role_name ||
-      (includeProfile && configFile[includeProfile]?.sso_role_name);
+      configFile[name]?.sso_role_name || (includeProfile && configFile[includeProfile]?.sso_role_name);
     return { ...config, region, name, sso_start_url, sso_account_id, sso_role_name };
   });
 };

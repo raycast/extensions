@@ -20,6 +20,7 @@ export default function Console() {
           title={service.title}
           subtitle={service.subtitle}
           icon={service.icon.path}
+          keywords={service.match.split(" ")}
           actions={
             <ActionPanel>
               <AwsAction.Console
@@ -27,7 +28,7 @@ export default function Console() {
                   typeof process.env.AWS_SSO_ACCOUNT_ID !== "undefined" &&
                   typeof process.env.AWS_SSO_ROLE_NAME !== "undefined" &&
                   typeof process.env.AWS_SSO_START_URL !== "undefined"
-                    ? `${process.env.AWS_SSO_START_URL}console/?account_id=${process.env.AWS_SSO_ACCOUNT_ID}&role_name=${process.env.AWS_SSO_ROLE_NAME}&destination=${AWS_URL_BASE}${service.arg}`
+                    ? `${encodeURI(process.env.AWS_SSO_START_URL)}console/?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=${encodeURI(AWS_URL_BASE)}${encodeURI(service.arg)}`
                     : `${AWS_URL_BASE}${service.arg}`
                 }
               />
@@ -45,6 +46,7 @@ type AWSService = {
   subtitle: string;
   arg: string;
   icon: AWSIcon;
+  match: string;
 };
 
 type AWSIcon = {
