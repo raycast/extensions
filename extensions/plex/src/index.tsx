@@ -1,13 +1,13 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useFetch, Response } from "@raycast/utils";
 import React from "react";
-import { ENDPOINTS, SECTION_ICONS } from "../utils/constants";
+import { ENDPOINTS, SECTION_ICONS, plex_token } from "../utils/constants";
 import { SectionsApiResponse } from "../types/types";
 import { GetSectionItems } from "./sectionItems";
 
 export default function Command() {
   const { data, isLoading } = useFetch(ENDPOINTS.librarySections, {
-    headers: { "X-Plex-Token": "9CkceLKK6oPxNYTEsFgN", Accept: "application/json" },
+    headers: { "X-Plex-Token": plex_token, Accept: "application/json" },
     parseResponse,
     initialData: [],
     keepPreviousData: true,
