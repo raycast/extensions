@@ -21,16 +21,16 @@ To use this extension in **Safari**, you need to turn on Developer Mode and tick
 - Open Safari Settings
 - In Advanced, tick the box in Show features for web developers
 
-  <img src=https://github.com/raycast/extensions/assets/36128970/9f06aab1-6cfa-41d3-8807-137da4bc054c width=40% />
+  ![](https://github.com/raycast/extensions/assets/36128970/9f06aab1-6cfa-41d3-8807-137da4bc054c)
 
 - In Developer, tick the box in Allow JavaScript from Apple Events
 
-  <img src=https://github.com/raycast/extensions/assets/36128970/713f2fa6-f201-4ba3-86de-f22f5eaca6c2 width=40% />
+  ![](https://github.com/raycast/extensions/assets/36128970/713f2fa6-f201-4ba3-86de-f22f5eaca6c2)
 
 To use this extension in **Chrome**, **Arc**, Please go to **View** > **Developer** > **Allow JavaScript from Apple Events** in the menu bar.
 
-<img src=https://github.com/raycast/extensions/assets/36128970/8ca1ff12-2734-437b-869d-292264218f36 width=40% />
+![](https://github.com/raycast/extensions/assets/36128970/8ca1ff12-2734-437b-869d-292264218f36)
 
 To use this extension in **Edge**, Please go to **Tools** > **Developer** > **Allow JavaScript from Apple Events** in the menu bar.
 
-<img src=https://github.com/raycast/extensions/assets/36128970/fbd1881c-9f32-44a6-8946-7d5b7f670859 width=40% />
+![](https://github.com/raycast/extensions/assets/36128970/fbd1881c-9f32-44a6-8946-7d5b7f670859)
