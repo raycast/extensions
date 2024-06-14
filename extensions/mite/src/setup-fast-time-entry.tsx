@@ -8,7 +8,7 @@ import { TimeEntryPost, projects_schema, services_schema, time_entry_post_schema
 export default function Command() {
   const [fast_time_entry, set_fast_time_entry, { loading: ft_loading }] = useStorageState<TimeEntryPost | null>(
     "fast-time-entry",
-    null,
+    null
   );
   const [secondary_fast_time_entry, set_secondary_fast_time_entry, { loading: sft_loading }] =
     useStorageState<TimeEntryPost | null>("secondary-fast-time-entry", null);
@@ -37,7 +37,7 @@ export default function Command() {
     const half = minutes / 60 === Math.floor(minutes / 60) ? "00" : "30";
     hrs.push({
       value: minutes.toString(),
-      title: `${whole.toString().padStart(2, "0")}:${half}`,
+      title: `${whole.toString().padStart(2, "0")}:${half}`
     });
   }
 
@@ -53,19 +53,17 @@ export default function Command() {
       showToast({
         title: "Success",
         message: `${kind === "secondary" ? "Secondary " : ""}Fast Time entry successfully saved`,
-        style: Toast.Style.Success,
+        style: Toast.Style.Success
       });
-      setTimeout(() => {
-        popToRoot({
-          clearSearchBar: false,
-        });
-      }, 1000);
+      popToRoot({
+        clearSearchBar: false
+      });
     } catch (e) {
       console.log(e);
       showToast({
         title: "Error",
         message: "There was an error in the values of the form",
-        style: Toast.Style.Failure,
+        style: Toast.Style.Failure
       });
     }
   }
