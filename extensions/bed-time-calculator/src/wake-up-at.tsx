@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { Form, ActionPanel, Action, LaunchProps } from "@raycast/api";
 
 type Values = {
   wakeUpTime: string;
@@ -8,14 +8,19 @@ type Values = {
 const SLEEP_CYCLE_DURATION = 90; // Duration of one sleep cycle in minutes
 const FALL_ASLEEP_BUFFER = 15; // Time in minutes to fall asleep
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Values }>) {
   const [bedtimes, setBedtimes] = useState<
     { time24: string; timeAMPM: string; cycles: number; recommended?: boolean }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const { wakeUpTime } = props.arguments;
+    handleSubmit({ wakeUpTime });
+  }, [props.arguments]);
+
   function handleSubmit(values: Values) {
-    const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/; // Regex for HH:MM format
+    const timePattern = /^(0?\d|1\d|2[0-3]):([0-5]\d)$/; // Regex for HH:MM format allowing optional leading zero
     if (!timePattern.test(values.wakeUpTime)) {
       setError("Invalid time format. Please enter time in HH:MM format.");
       setBedtimes([]);
@@ -59,11 +64,11 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Calculate Bedtimes" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Recalculate Bedtimes" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="wakeUpTime" title="Wake Up Time (HH:MM)" placeholder="07:00" />
+      <Form.Description text={`Wake Up Time: ${props.arguments.wakeUpTime}`} />
       {error && <Form.Description text={error} />}
       <Form.Separator />
       <Form.Description text="Recommended Bedtimes:" />

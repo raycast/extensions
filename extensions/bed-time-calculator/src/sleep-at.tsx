@@ -1,34 +1,41 @@
-import { useState } from "react";
-import { Form, ActionPanel, Action } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { Form, ActionPanel, Action, LaunchProps } from "@raycast/api";
 
 type Values = {
-  bedtime: string;
+  sleepAtTime: string;
 };
 
 const SLEEP_CYCLE_DURATION = 90; // Duration of one sleep cycle in minutes
 const FALL_ASLEEP_BUFFER = 15; // Time in minutes to fall asleep
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ arguments: Values }>) {
   const [wakeUpTimes, setWakeUpTimes] = useState<
     { time24: string; timeAMPM: string; cycles: number; recommended?: boolean }[]
   >([]);
   const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(values: Values) {
-    const timePattern = /^([01]\d|2[0-3]):([0-5]\d)$/; // Regex for HH:MM format
-    if (!timePattern.test(values.bedtime)) {
+  // Get the sleepAtTime argument from props
+  const { sleepAtTime } = props.arguments;
+
+  useEffect(() => {
+    calculateWakeUpTimes(sleepAtTime);
+  }, [sleepAtTime]);
+
+  function calculateWakeUpTimes(time: string) {
+    const timePattern = /^(0?\d|1\d|2[0-3]):([0-5]\d)$/; // Regex for HH:MM format allowing optional leading zero
+    if (!timePattern.test(time)) {
       setError("Invalid time format. Please enter time in HH:MM format.");
       setWakeUpTimes([]);
       return;
     }
 
-    const [bedHour, bedMinute] = values.bedtime.split(":").map(Number);
-    const bedTimeInMinutes = bedHour * 60 + bedMinute;
+    const [sleepHour, sleepMinute] = time.split(":").map(Number);
+    const sleepTimeInMinutes = sleepHour * 60 + sleepMinute;
 
     const calculatedWakeUpTimes: { time24: string; timeAMPM: string; cycles: number; recommended?: boolean }[] = [];
 
     for (let cycles = 1; cycles <= 6; cycles++) {
-      const wakeUpTimeInMinutes = (bedTimeInMinutes + FALL_ASLEEP_BUFFER + cycles * SLEEP_CYCLE_DURATION) % (24 * 60);
+      const wakeUpTimeInMinutes = (sleepTimeInMinutes + FALL_ASLEEP_BUFFER + cycles * SLEEP_CYCLE_DURATION) % (24 * 60);
       const wakeUpHour = Math.floor(wakeUpTimeInMinutes / 60);
       const wakeUpMinute = wakeUpTimeInMinutes % 60;
 
@@ -55,14 +62,8 @@ export default function Command() {
   }
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Calculate Wake Up Times" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="bedtime" title="Bedtime (HH:MM)" placeholder="22:00" />
+    <Form>
+      <Form.TextField id="sleepAtTime" title="Sleep At Time (HH:MM)" defaultValue={sleepAtTime} />
       {error && <Form.Description text={error} />}
       <Form.Separator />
       <Form.Description text="Recommended Wake Up Times:" />
