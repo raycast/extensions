@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, LocalStorage, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, LocalStorage, open, Toast, showToast } from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 
@@ -13,14 +13,15 @@ type Theme = {
     selection: string;
     loader: string;
   };
-  "ray.so.url": string;
-  "ray.so.add.url": string;
+  "ray.so.light.url": string;
+  "ray.so.add.light.url": string;
+  "ray.so.dark.url": string;
+  "ray.so.add.dark.url": string;
 };
 
 export default function RaycastMonkeyTypeTheme() {
   const [isLoading, setIsLoading] = useState(true);
   const [themes, setThemes] = useState<Theme[]>([]);
-  const [appearanceFilter, setAppearanceFilter] = useState("all");
 
   useEffect(() => {
     setIsLoading(true);
@@ -83,6 +84,12 @@ export default function RaycastMonkeyTypeTheme() {
     };
   }
 
+  function getRandomThemeUrl() {
+    return themes[Math.floor(Math.random() * themes.length)][
+      Math.floor(Math.random() * 2) == 0 ? "ray.so.add.light.url" : "ray.so.add.dark.url"
+    ];
+  }
+
   function getJsonCofiguration(theme: Theme) {
     const themeJsonString = JSON.stringify(theme, null, 2);
     const themeJson = JSON.parse(themeJsonString);
@@ -113,105 +120,127 @@ export default function RaycastMonkeyTypeTheme() {
     <List
       isShowingDetail
       searchBarPlaceholder="Filter by theme name"
-      searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Appearance" onChange={setAppearanceFilter}>
-          <List.Dropdown.Item title="All" value="all" icon={Icon.BulletPoints} />
-          <List.Dropdown.Item title="Light" value="light" icon={Icon.Sun} />
-          <List.Dropdown.Item title="Dark" value="dark" icon={Icon.Moon} />
-        </List.Dropdown>
-      }
+      // searchBarAccessory={
+      //   <List.Dropdown tooltip="Filter by Appearance" onChange={setAppearanceFilter}>
+      //     <List.Dropdown.Item title="All" value="all" icon={Icon.BulletPoints} />
+      //     <List.Dropdown.Item title="Light" value="light" icon={Icon.Sun} />
+      //     <List.Dropdown.Item title="Dark" value="dark" icon={Icon.Moon} />
+      //   </List.Dropdown>
+      // }
     >
-      {themes.map((theme) =>
-        appearanceFilter != "all" && theme.appearance != appearanceFilter ? null : (
-          <List.Item
-            key={theme.name}
-            title={theme.name}
-            keywords={[theme.appearance]}
-            icon={{
-              source: getImageUrl(theme.name),
-            }}
-            // accessories={[
-            //   { icon: getIconColor(theme.colors.background), tooltip: "Background Color" },
-            //   { icon: getIconColor(theme.colors.text), tooltip: "Text Color" },
-            //   { icon: getIconColor(theme.colors.selection), tooltip: "Selection Color" },
-            //   { icon: getIconColor(theme.colors.loader), tooltip: "Loader Color" },
-            // ]}
-            actions={
-              <ActionPanel>
-                <Action.Open
-                  title="Add to Raycast"
-                  icon={Icon.RaycastLogoNeg}
-                  target={theme["ray.so.add.url"]}
-                  onOpen={() => closeMainWindow()}
-                />
-                <Action.OpenInBrowser title="Open Theme in Browser" url={theme["ray.so.url"]} />
+      {themes.map((theme) => (
+        <List.Item
+          key={theme.name}
+          title={theme.name}
+          keywords={[theme.appearance]}
+          icon={{
+            source: getImageUrl(theme.name),
+          }}
+          // accessories={[
+          //   { icon: getIconColor(theme.colors.background), tooltip: "Background Color" },
+          //   { icon: getIconColor(theme.colors.text), tooltip: "Text Color" },
+          //   { icon: getIconColor(theme.colors.selection), tooltip: "Selection Color" },
+          //   { icon: getIconColor(theme.colors.loader), tooltip: "Loader Color" },
+          // ]}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                title="Add Light Appearance to Raycast"
+                icon={Icon.Sun}
+                target={theme["ray.so.add.light.url"]}
+                onOpen={() => closeMainWindow()}
+                shortcut={{ modifiers: ["cmd"], key: "l" }}
+              />
+              <Action.Open
+                title="Add Dark Appearance to Raycast"
+                icon={Icon.Moon}
+                target={theme["ray.so.add.dark.url"]}
+                onOpen={() => closeMainWindow()}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+              />
+              <Action.OpenInBrowser
+                title="Open Light Appearance in Browser"
+                icon={Icon.AppWindow}
+                url={theme["ray.so.light.url"]}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              />
+              <Action.OpenInBrowser
+                title="Open Dark Appearance in Browser"
+                icon={Icon.AppWindow}
+                url={theme["ray.so.dark.url"]}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy Light Theme URL to Share"
+                icon={Icon.Link}
+                content={theme["ray.so.light.url"]}
+              />
+              <Action.CopyToClipboard
+                title="Copy Dark Theme URL to Share"
+                icon={Icon.Link}
+                content={theme["ray.so.dark.url"]}
+              />
+              <Action
+                title="Install Random Theme"
+                icon={Icon.Stars}
+                onAction={() => {
+                  open(getRandomThemeUrl());
+                  closeMainWindow();
+                }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              />
+              <ActionPanel.Section>
                 <Action.CopyToClipboard
-                  title="Copy URL to Share"
-                  icon={Icon.Link}
-                  content={theme["ray.so.url"]}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  title="Copy JSON Configuration"
+                  content={getJsonCofiguration(theme)}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
                 />
-                <Action.Open
-                  title="Install Random Theme"
-                  icon={Icon.Stars}
-                  target={themes[Math.floor(Math.random() * themes.length)]["ray.so.add.url"]}
-                  onOpen={() => closeMainWindow()}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                />
-                <ActionPanel.Section>
-                  <Action.CopyToClipboard
-                    title="Copy JSON Configuration"
-                    content={getJsonCofiguration(theme)}
-                    shortcut={{ modifiers: ["cmd"], key: "." }}
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+          detail={
+            <List.Item.Detail
+              markdown={`![Illustration](https://raw.githubusercontent.com/monkeytype-hub/monkeytype-icon/master/monkeytype-logo/${theme.name.toLowerCase().replaceAll(" ", "_")}.png)`}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label
+                    title={theme.name}
+                    icon={{
+                      source: getImageUrl(theme.name),
+                    }}
                   />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-            detail={
-              <List.Item.Detail
-                markdown={`![Illustration](https://raw.githubusercontent.com/monkeytype-hub/monkeytype-icon/master/monkeytype-logo/${theme.name.toLowerCase().replaceAll(" ", "_")}.png)`}
-                metadata={
-                  <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title={theme.name}
-                      icon={{
-                        source: getImageUrl(theme.name),
-                      }}
-                    />
-                    <List.Item.Detail.Metadata.Label
+                  {/* <List.Item.Detail.Metadata.Label
                       title="Theme Appearance"
                       text={theme.appearance == "light" ? "Light" : "Dark"}
                       icon={theme.appearance == "light" ? Icon.Sun : Icon.Moon}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Background Color"
-                      text={theme.colors.background}
-                      icon={getIconColor(theme.colors.background)}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Text Color"
-                      icon={getIconColor(theme.colors.text)}
-                      text={theme.colors.text}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Selection Color"
-                      icon={getIconColor(theme.colors.selection)}
-                      text={theme.colors.selection}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Loader Color"
-                      icon={getIconColor(theme.colors.loader)}
-                      text={theme.colors.loader}
-                    />
-                    <List.Item.Detail.Metadata.Separator />
-                  </List.Item.Detail.Metadata>
-                }
-              />
-            }
-          />
-        ),
-      )}
+                    /> */}
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.Label
+                    title="Background Color"
+                    icon={getIconColor(theme.colors.background)}
+                    text={theme.colors.background.toUpperCase()}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Text Color"
+                    icon={getIconColor(theme.colors.text)}
+                    text={theme.colors.text.toUpperCase()}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Selection Color"
+                    icon={getIconColor(theme.colors.selection)}
+                    text={theme.colors.selection.toUpperCase()}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Loader Color"
+                    icon={getIconColor(theme.colors.loader)}
+                    text={theme.colors.loader.toUpperCase()}
+                  />
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
+        />
+      ))}
     </List>
   );
 }
