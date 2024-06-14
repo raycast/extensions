@@ -1,5 +1,5 @@
 # Refresh Browsers Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2024-06-14
 
 - Refresh all browser tabs
