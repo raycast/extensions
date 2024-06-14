@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [SQS, CFN, DDB, CW Logs commands] - {PR_MERGE_DATE}
+## [SQS, CFN, DDB, CW Logs commands] - 2024-06-14
 
 - Native raycast pagination support for DDB, SQS, CFN and CW logs commands
 - Typeahead search for SQS and CW logs command
