@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Console command] - 2024-06-14
+## [Console command] - {PR_MERGE_DATE}
 
 - Adds shortcut login for SSO profiles
 
@@ -8,7 +8,7 @@
 
 - Native raycast pagination support for DDB, SQS, CFN and CW logs commands
 - Typeahead search for SQS and CW logs command
-- Extra metadata and new icon for CW logs command 
+- Extra metadata and new icon for CW logs command
 
 ## [Improvements] - 2024-06-06
 
