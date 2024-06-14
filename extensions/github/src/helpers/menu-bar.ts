@@ -24,7 +24,7 @@ export type PullRequestSection = {
 };
 
 export type IssueSection = {
-  title: string;
+  title?: string;
   type: SectionType;
   issues: IssueFieldsFragment[];
   subtitle: string;
