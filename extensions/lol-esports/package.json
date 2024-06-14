@@ -19,7 +19,13 @@
       "subtitle": "LoL Esports",
       "description": "Show LoL esports schedule",
       "mode": "view",
-      "keywords": ["lol", "esports", "league", "legends", "matches"]
+      "keywords": [
+        "lol",
+        "esports",
+        "league",
+        "legends",
+        "matches"
+      ]
     },
     {
       "name": "show-standings",
@@ -27,13 +33,20 @@
       "subtitle": "LoL Esports",
       "description": "Show LoL esports standings",
       "mode": "view",
-      "keywords": ["lol", "esports", "league", "legends", "ranking"]
+      "keywords": [
+        "lol",
+        "esports",
+        "league",
+        "legends",
+        "ranking"
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.66.2",
     "@raycast/utils": "^1.12.0",
-    "date-fns": "^3.3.1"
+    "date-fns": "^3.3.1",
+    "p-min-delay": "^4.0.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

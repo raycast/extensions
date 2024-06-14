@@ -1,5 +1,13 @@
 # TMDB Changelog
 
+## [Add Backdrops and Posters] - 2024-03-14
+
+- Added new "Show Posters" and "Show Backdrops" functions for Movies and TV Shows.
+- Use the dropdown filter to filter by language.
+- Type in the search field within Posters or Backdrops to filter the results by dimensions.
+- Open the image with `⏎`, or copy the image URL with `⌘` + `.`.
+- Added "Open Homepage" action to TV Show and Movie details pages.
+
 ## [Copy Movie/TV Show ID] - 2023-12-01
 
 - Add the ability to copy the TMDB ID of a movie or TV show to the clipboard.

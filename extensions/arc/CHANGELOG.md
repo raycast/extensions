@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Improvements] - 2024-03-15
+
+- Added search suggestions to Kagi search engine.
+
 ## [Improvements] - 2024-03-05
 
 - Added the ability to filter by tab type in the 'Search Tabs' command.

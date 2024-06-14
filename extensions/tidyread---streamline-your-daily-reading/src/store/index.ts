@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { Digest, Source } from "../types";
 import dayjs from "dayjs";
+import { fixSurrogatePairs } from "../utils/util";
 
 export const getSources = async (): Promise<Source[]> => {
   const itemsJson = await LocalStorage.getItem<string>("sources");
@@ -19,7 +20,7 @@ export const addSource = async (item: Omit<Source, "id">): Promise<void> => {
 
 export const getDigests = async (): Promise<Digest[]> => {
   const itemsJson = await LocalStorage.getItem<string>("digests");
-  return itemsJson ? JSON.parse(itemsJson) : [];
+  return itemsJson ? JSON.parse(fixSurrogatePairs(itemsJson)) : [];
 };
 
 export const saveDigests = async (digests: Digest[]) => {
@@ -45,7 +46,7 @@ export const saveDigests = async (digests: Digest[]) => {
 export const getTodaysDigest = async () => {
   const digests = await getDigests();
   const target = digests.find((item) => {
-    return dayjs(item.createAt).get("date") === dayjs().get("date");
+    return dayjs(item.createAt).isSame(dayjs(), "date");
   });
 
   return target ?? null;
@@ -63,13 +64,14 @@ export const addOrUpdateDigest = async (digest: Partial<Digest>): Promise<Digest
 
   let target: Digest;
   const now = Date.now();
+  const content = fixSurrogatePairs(digest.content ?? "");
 
   // 存在则更新，不存在则添加
   if (index > -1) {
-    digests[index] = { ...digests[index], ...digest, createAt: digest.createAt ?? now };
+    digests[index] = { ...digests[index], ...digest, content, createAt: digest.createAt ?? now };
     target = digests[index];
   } else {
-    target = { ...digest, createAt: digest.createAt ?? now, id: now.toString() } as Digest;
+    target = { ...digest, content, createAt: digest.createAt ?? now, id: now.toString() } as Digest;
     digests.push(target);
   }
   await saveDigests(digests);

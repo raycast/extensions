@@ -1,8 +1,10 @@
-import { ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-import { OAuthService, withAccessToken } from "@raycast/utils";
-import { useState } from "react";
+import { ActionPanel, Icon, LaunchProps, List, closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
+import { OAuthService, withAccessToken, showFailureToast } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import {
   ClearStatusAction,
+  CopyDeeplinkPresetAction,
+  CreateQuicklinkPresetAction,
   CreateStatusPresetAction,
   DeleteStatusPresetAction,
   EditStatusPresetAction,
@@ -14,8 +16,9 @@ import {
 import { getTitleForDuration } from "./durations";
 import { getEmojiForCode } from "./emojis";
 import { usePresets } from "./presets";
-import { useSlackProfile } from "./slack";
-import { getStatusIcon, getStatusSubtitle, getStatusTitle } from "./utils";
+import { CommandLinkParams } from "./types";
+import { useSlack, useSlackProfile } from "./slack";
+import { getStatusIcon, getStatusSubtitle, getStatusTitle, setStatusToPreset } from "./utils";
 
 const preferences: Preferences = getPreferenceValues();
 
@@ -24,10 +27,29 @@ const slack = OAuthService.slack({
   personalAccessToken: preferences.accessToken,
 });
 
-function StatusList() {
+function StatusList(props: LaunchProps<{ launchContext: CommandLinkParams }>) {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, data, mutate } = useSlackProfile();
   const [presets, setPresets] = usePresets();
+  const slack = useSlack();
+
+  useEffect(() => {
+    (async () => {
+      if (props.launchContext?.presetId) {
+        const presetId = props.launchContext.presetId;
+        const presetToLaunch = presets.find((p) => p.id === presetId);
+
+        if (!presetToLaunch) {
+          console.error("No preset found with id: ", presetId);
+          showFailureToast(new Error(`Could not find ID: "${presetId}" preset`), { title: "No preset found" });
+        } else {
+          await setStatusToPreset({ preset: presetToLaunch, slack, mutate });
+          popToRoot();
+          closeMainWindow();
+        }
+      }
+    })();
+  }, [slack]);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText} filtering>
@@ -73,6 +95,8 @@ function StatusList() {
                       setPresets(presets.map((p) => (p === preset ? editedPreset : p)));
                     }}
                   />
+                  <CreateQuicklinkPresetAction preset={preset} />
+                  <CopyDeeplinkPresetAction preset={preset} />
                   <DeleteStatusPresetAction onDelete={() => setPresets(presets.filter((p) => p !== preset))} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

@@ -8,7 +8,8 @@
   "contributors": [
     "thomaslombart",
     "lukaszmtw",
-    "erics118"
+    "erics118",
+    "mlnchk"
   ],
   "license": "MIT",
   "commands": [
@@ -19,6 +20,44 @@
       "description": "Show Screenshots History",
       "icon": "open-history.png",
       "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "CleanShot X",
+      "description": "Open Settings",
+      "icon": "open-settings.png",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "tab",
+          "type": "dropdown",
+          "placeholder": "Tab",
+          "required": false,
+          "data": [
+            { "title": "General", "value": "general"},
+            { "title": "Wallpaper", "value": "wallpaper"},
+            { "title": "Shortcuts", "value": "shortcuts"},
+            { "title": "Quick Access", "value": "quickaccess"},
+            { "title": "Recording", "value": "recording"},
+            { "title": "Screenshots", "value": "screenshots"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Cloud", "value": "cloud"},
+            { "title": "Advanced", "value": "advanced"},
+            { "title": "About", "value": "about"}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "view-uploads",
+      "title": "View Uploads",
+      "subtitle": "CleanShot X",
+      "description": "View Uploads in Cleanshot Cloud",
+      "icon": "view-uploads.png",
+      "mode": "no-view",
+      "disabledByDefault": true
     },
     {
       "name": "all-in-one",
@@ -34,7 +73,22 @@
       "subtitle": "CleanShot X",
       "description": "Fullscreen Screenshot",
       "icon": "capture-fullscreen.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "capture-area",
@@ -42,7 +96,22 @@
       "subtitle": "CleanShot X",
       "description": "Selection Tool Capture",
       "icon": "capture-area.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "capture-previous-area",
@@ -50,7 +119,22 @@
       "subtitle": "CleanShot X",
       "description": "Previously Selected Area",
       "icon": "capture-previous-area.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "capture-window",
@@ -58,7 +142,22 @@
       "subtitle": "CleanShot X",
       "description": "Window Capture",
       "icon": "capture-window.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "self-timer",
@@ -66,7 +165,22 @@
       "subtitle": "CleanShot X",
       "description": "Timer Based Screen Capture",
       "icon": "self-timer.png",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "type": "dropdown",
+          "placeholder": "Action",
+          "required": false,
+          "data": [
+            { "title": "Copy", "value": "copy"},
+            { "title": "Save", "value": "save"},
+            { "title": "Annotate", "value": "annotate"},
+            { "title": "Upload", "value": "upload"},
+            { "title": "Pin", "value": "pin"}
+          ]
+        }
+      ]
     },
     {
       "name": "scrolling-capture",
@@ -113,7 +227,7 @@
     },
     {
       "name": "open-from-clipboard",
-      "title": "Open From Clipboard",
+      "title": "Open from Clipboard",
       "subtitle": "CleanShot X",
       "description": "Open Image From Clipboard",
       "icon": "clipboard.png",
@@ -163,7 +277,7 @@
           "name": "filepath",
           "placeholder": "File Path",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -188,16 +302,15 @@
     "Applications"
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0"
+    "@raycast/api": "^1.73.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.6",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^8.49.0",
-    "prettier": "^3.0.3",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.12",
+    "@types/react": "18.3.2",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -560,7 +560,7 @@ export class GitLab {
   }
 
   async getProjectMember(projectId: number): Promise<User[]> {
-    const userItems: User[] = await this.fetch(`projects/${projectId}/users`).then((users) => {
+    const userItems: User[] = await this.fetch(`projects/${projectId}/users`, {}, true).then((users) => {
       return users.map((userdata: any) => ({
         id: userdata.id,
         name: userdata.name,

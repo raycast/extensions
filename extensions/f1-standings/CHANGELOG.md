@@ -1,5 +1,10 @@
 # F1 Standings Changelog
 
+## [📆 Add change date format option] - 2024-05-19
+
+- Add the option to change the date format from `MM:DD:YYYY` to `DD:MM:YYYY`.
+- Move upcoming races to the top and past races to the bottom of the table.
+
 ## [🕦 Show Weekday with date and time] - 2024-03-05
 
 - Show weekday along with date and time as there are many races which does not start on usual weekend schedule

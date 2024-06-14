@@ -1,9 +1,10 @@
 import {
-  getPreferenceValues,
+  Color,
   Icon,
-  launchCommand,
   LaunchType,
   MenuBarExtra,
+  getPreferenceValues,
+  launchCommand,
   open,
   openCommandPreferences,
   openExtensionPreferences,
@@ -35,6 +36,22 @@ function UnreadNotifications() {
     return response.data;
   });
 
+  const { data: iconsData } = useCachedPromise(
+    async (notifications) => {
+      if (!notifications) {
+        return [];
+      }
+      const icons = await Promise.all(
+        notifications.map((notification: Notification) => getNotificationIcon(notification)),
+      );
+      return icons;
+    },
+    [data],
+    {
+      keepPreviousData: true,
+    },
+  );
+
   const hasUnread = data && data.length > 0;
 
   async function markAllNotificationsAsRead() {
@@ -53,8 +70,12 @@ function UnreadNotifications() {
   async function openNotification(notification: Notification) {
     try {
       const openAndMarkNotificationAsRead = async () => {
-        await open(getGitHubURL(notification, viewer?.id));
-        await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        if (notification.subject.type === "RepositoryInvitation") {
+          open(`${notification.repository.html_url}/invitations`);
+        } else {
+          await open(await getGitHubURL(notification, viewer?.id));
+          await octokit.rest.activity.markThreadAsRead({ thread_id: parseInt(notification.id) });
+        }
       };
 
       await mutate(openAndMarkNotificationAsRead(), {
@@ -86,7 +107,7 @@ function UnreadNotifications() {
   return (
     <MenuBarExtra
       icon={getGitHubIcon(hasUnread)}
-      title={hasUnread ? String(data.length) : undefined}
+      title={preferences.showUnreadCount && hasUnread ? String(data.length) : undefined}
       isLoading={isLoading}
     >
       <MenuBarExtra.Item
@@ -98,26 +119,27 @@ function UnreadNotifications() {
 
       <MenuBarExtra.Section>
         {hasUnread ? (
-          data.map((notification) => {
-            const icon = {
-              source: getNotificationIcon(notification).value,
-              tintColor: { light: "#000", dark: "#fff", adjustContrast: false },
-            };
+          data.map((notification, index) => {
+            const icon = iconsData?.[index];
             const title = notification.subject.title;
             const updatedAt = new Date(notification.updated_at);
             const tooltip = getNotificationTooltip(updatedAt);
 
+            if (!icon) {
+              return null;
+            }
+
             return (
               <MenuBarExtra.Item
                 key={notification.id}
-                icon={icon}
+                icon={{ source: icon.value["source"], tintColor: Color.PrimaryText }}
                 title={title}
                 subtitle={getNotificationSubtitle(notification)}
                 tooltip={tooltip}
                 onAction={() => openNotification(notification)}
                 alternate={
                   <MenuBarExtra.Item
-                    icon={icon}
+                    icon={{ source: icon.value["source"], tintColor: Color.PrimaryText }}
                     title={title}
                     subtitle="Mark as Read"
                     tooltip={tooltip}

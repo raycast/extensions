@@ -1,5 +1,13 @@
 # Connect to VPN Changelog
 
+## [New Additions] - 2024-06-06
+
+- Option to hide non-VPN services
+- Ascending/Descending sorting of services by name or type
+- Add Favorites and allow reordering
+- Header by service type
+- Open Network Settings from extension
+
 ## [Bug fix] - 2024-01-15
 
 - Escape network names with quotes

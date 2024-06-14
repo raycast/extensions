@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon } from '@raycast/api'
 import type { Container } from '@scaleway/sdk'
-import { useAPI } from 'providers'
+import { useAPI } from 'helpers/useAPI'
 import { deployContainer } from './actions'
-import { ContainerLogs } from './pages'
+// import { ContainerLogs } from './pages'
 import { getContainerUrl } from './urls'
 
 type ContainerActionProps = {
@@ -24,12 +24,12 @@ export const ContainerActions = ({
       <Action.OpenInBrowser url={getContainerUrl(container)} />
       <Action.CopyToClipboard content={getContainerUrl(container)} />
 
-      <Action.Push
+      {/* <Action.Push
         title="See Logs"
         icon={Icon.Terminal}
         shortcut={{ modifiers: ['cmd'], key: 'l' }}
         target={<ContainerLogs container={container} />}
-      />
+      /> */}
 
       <Action
         title="Deploy Container"

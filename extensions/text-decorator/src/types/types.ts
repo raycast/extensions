@@ -3,3 +3,7 @@ export interface DecorationFont {
   value: string;
   icon: string;
 }
+
+export interface DecoratorArguments {
+  font: string;
+}

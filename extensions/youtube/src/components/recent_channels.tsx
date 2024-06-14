@@ -94,7 +94,7 @@ export const PinnedChannelActions = ({ channelId, refresh }: ChannelActionProps)
       }}
       icon={Icon.XMarkCircle}
       style={Action.Style.Destructive}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={{ modifiers: ["ctrl"], key: "x" }}
     />
     <Action
       title="Clear All Pinned Channels"
@@ -105,7 +105,7 @@ export const PinnedChannelActions = ({ channelId, refresh }: ChannelActionProps)
       }}
       icon={Icon.Trash}
       style={Action.Style.Destructive}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
     />
   </ActionPanel.Section>
 );
@@ -123,14 +123,14 @@ export const RecentChannelActions = ({ channelId, refresh }: ChannelActionProps)
         }}
         icon={Icon.XMarkCircle}
         style={Action.Style.Destructive}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={{ modifiers: ["ctrl"], key: "x" }}
       />
       <Action
         title="Clear All Recent Channels"
         onAction={() => handleClearRecentChannels(refresh)}
         icon={Icon.Trash}
         style={Action.Style.Destructive}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
       />
     </ActionPanel.Section>
   );

@@ -37,7 +37,7 @@ export function Post(props: {
       title={props.desc}
       detail={
         <List.Item.Detail
-          markdown={props.cover ? `![Cover](${props.cover})` : props.desc}
+          markdown={props.cover ? `<img src="${formatUrl(props.cover)}" center width="300" />` : props.desc}
           metadata={
             <List.Item.Detail.Metadata>
               {props.title && <List.Item.Detail.Metadata.Label title={props.title} />}

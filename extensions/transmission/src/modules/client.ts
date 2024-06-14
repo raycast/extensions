@@ -26,9 +26,10 @@ export const useTorrent = ({ id }: { id: number }) => {
     `/torrent/${id}`,
     async () => {
       const { torrents } = await transmission.get(id);
-      return torrents[0];
+      const first = torrents[0] as Torrent;
+      return first;
     },
-    { refreshInterval: 1000 }
+    { refreshInterval: 1000 },
   );
 };
 
@@ -85,7 +86,7 @@ export const useMutateTorrent = () => {
           `/torrent`,
           updated != null
             ? torrents.map((t: Torrent) => (t.id === id ? updated : t))
-            : torrents.filter((t: Torrent) => t.id !== id)
+            : torrents.filter((t: Torrent) => t.id !== id),
         );
       } else {
         mutate(
@@ -93,11 +94,11 @@ export const useMutateTorrent = () => {
           torrents.map((t: Torrent) => ({
             ...t,
             status: action === MutateTorrentAction.StartAll ? TorrentStatus.Downloading : TorrentStatus.Stopped,
-          }))
+          })),
         );
       }
     },
-    []
+    [],
   );
 
   return {
@@ -108,11 +109,11 @@ export const useMutateTorrent = () => {
     remove: useCallback((id: Torrent["id"]) => action({ id, action: MutateTorrentAction.Remove }), [action]),
     removeAndDeleteLocalData: useCallback(
       (id: Torrent["id"]) => action({ id, action: MutateTorrentAction.RemoveAndDeleteLocalData }),
-      [action]
+      [action],
     ),
     update: useCallback(
       (id: Torrent["id"], data: Partial<Torrent>) => action({ id, action: MutateTorrentAction.Update, data }),
-      [action]
+      [action],
     ),
   };
 };
@@ -121,9 +122,15 @@ export const useAllTorrents = ({ refreshInterval }: { refreshInterval: number } 
     "/torrent",
     async () => {
       const { torrents } = await transmission.get(false);
-      return torrents;
+      const limited = torrents.map((torrent: Torrent) => {
+        torrent.fileStats = [];
+        torrent.files = torrent.files.slice(0, 30);
+        torrent.trackers = torrent.trackers.slice(0, 30);
+        return torrent;
+      });
+      return limited;
     },
-    { refreshInterval }
+    { refreshInterval },
   );
 };
 
@@ -133,7 +140,7 @@ export const useSessionStats = ({ refreshInterval = INTERVAL }: { refreshInterva
     async () => {
       return transmission.sessionStats();
     },
-    { refreshInterval }
+    { refreshInterval },
   );
 };
 

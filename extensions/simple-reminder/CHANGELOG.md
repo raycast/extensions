@@ -1,8 +1,37 @@
 # Simple Reminder Changelog
 
+## [Reminder Menu Bar] - 2024-05-16
+
+- Fix Reminder length not being cut off if topic length is greater than 30
+
+## [Reminder Menu Bar] - 2024-05-15
+
+- Add empty reminder action in reminder menu bar to show the user that no reminders are set and that they can add a new reminder
+- Add a title to the reminder menu bar showing the next reminder coming up
+- Reminder title in the menu bar will be shown as distance when 2 or less are remaining (e.g. daily in 5 minutes) 
+- Change the icon in the menu bar to reflect the system theme preference
+
+## [Reminder Menu Bar] - 2024-05-07
+
+- Add a menu bar command to check the reminder list in the macOS menu bar
+- The menu bar list is the same as presented in the list command
+
+## [Recurrent reminders] - 2024-05-06
+
+- Add action to set reminders as recurrent (daily, weekly, bi-weekly, monthly)
+- Visual improvements and reordering of the reminder actions to be more user-friendly
+- Copy reminder and delete reminder actions now have intuitive shortcuts
+
+Notes:
+- This feature addition makes some visual changes (2 sections to separate recurrent from normal reminders), but shouldn't cause any breaking change
+
+## [Fix] - 2024-03-18
+
+- Fix issue with topics having quoted words not triggering notifications
+
 ## [Fix] - 2023-11-24
 
-- Optimized import to reduce build size
+- Optimize import to reduce build size
 
 ## [Improved input parsing] - 2023-10-30
 

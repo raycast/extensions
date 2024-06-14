@@ -16,18 +16,20 @@ export default function ResultView(props: ResultViewProps) {
   const [model, setModel] = useState(model_override == "global" ? global_model : model_override);
   const [temp, setTemperature] = useState(temperature ? temperature : 1);
 
-  async function getChatResponse(prompt: string, selectedText: string, model: string, temp: number) {
+  async function getChatResponse(sysPrompt: string, selectedText: string, model: string, temp: number) {
+    sysPrompt = `Current date: ${currentDate}.\n\n ${sysPrompt}`;
+    const userPrompt = `${user_extra_msg ? `${user_extra_msg.trim()}\n\n` : ""}${selectedText ? `The following is the text:\n"${selectedText.trim()}"` : ""}`;
     try {
       const streamOrCompletion = await openai.chat.completions.create({
         model: model,
         messages: [
-          { role: "system", content: `Current date: ${currentDate}. ${prompt}` },
-          { role: "user", content: selectedText + (user_extra_msg ? `\n\n${user_extra_msg}` : "") },
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userPrompt },
         ],
         temperature: temp,
         stream: enable_streaming,
       });
-      setPromptTokenCount(countToken(prompt + selectedText));
+      setPromptTokenCount(countToken(sysPrompt + selectedText));
       return streamOrCompletion;
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Error" });
@@ -105,7 +107,14 @@ export default function ResultView(props: ResultViewProps) {
 
   return (
     <Detail
-      markdown={response}
+      markdown={
+        (user_extra_msg
+          ? user_extra_msg
+              .split("\n")
+              .map((line) => `>${line}`)
+              .join("\n") + "\n\n"
+          : "") + response
+      }
       isLoading={loading}
       actions={
         !loading && (
@@ -140,7 +149,7 @@ export default function ResultView(props: ResultViewProps) {
               shortcut={{ modifiers: ["cmd"], key: "t" }}
             >
               <Action icon={{ source: Icon.Signal1 }} title="0.2" onAction={() => retry({ newTemp: 0.2 })} />
-              <Action icon={{ source: Icon.Signal2 }} title="0.5" onAction={() => retry({ newTemp: 0.5 })} />
+              <Action icon={{ source: Icon.Signal2 }} title="0.6" onAction={() => retry({ newTemp: 0.6 })} />
               <Action icon={{ source: Icon.Signal3 }} title="1.0" onAction={() => retry({ newTemp: 1.0 })} />
               <Action icon={{ source: Icon.FullSignal }} title="1.5" onAction={() => retry({ newTemp: 1.5 })} />
             </ActionPanel.Submenu>

@@ -49,7 +49,7 @@ const useChatGPTSummary = async ({ transcript, setSummaryIsLoading, setSummary }
         index,
         splitTranscripts.length,
         summaryBlock,
-        CHATGPT_SUMMARY_MAX_CHARS
+        CHATGPT_SUMMARY_MAX_CHARS,
       );
 
       try {

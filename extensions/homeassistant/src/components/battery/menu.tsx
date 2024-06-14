@@ -1,10 +1,10 @@
-import { MenuBarExtra } from "@raycast/api";
+import { CopyEntityIDToClipboard, CopyEntityStateToClipboardMenubarItem } from "@components/state/menu";
+import { getIcon } from "@components/state/utils";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
-import { batteryStateValue, sortBatteries } from "./utils";
+import { MenuBarExtra } from "@raycast/api";
 import { MenuBarSubmenu } from "../menu";
-import { getIcon } from "@components/state/utils";
-import { CopyEntityIDToClipboard, CopyEntityStateToClipboardMenubarItem } from "@components/state/menu";
+import { batteryStateValue } from "./utils";
 
 export function BatteryMenubarItem(props: { state: State }) {
   const s = props.state;

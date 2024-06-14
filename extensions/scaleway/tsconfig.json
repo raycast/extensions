@@ -1,24 +1,25 @@
 {
   "extends": "@scaleway/tsconfig",
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "raycast-env.d.ts", "node_modules/@scaleway/sdk/"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "rootDir": ".",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "listFiles": true,
     "target": "es2022",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx",
     "resolveJsonModule": true,
+    "jsx": "react-jsx",
     "paths": {
       "helpers/*": ["./src/helpers/*"],
-      "providers": ["./src/providers/"]
     }
   }
 }

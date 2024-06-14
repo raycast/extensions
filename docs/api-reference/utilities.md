@@ -6,7 +6,7 @@ This set of utilities exposes some of Raycast's native functionality to allow de
 
 ### getApplications
 
-Returns all applications that can open the file.
+Returns all applications that can open the file or URL.
 
 #### Signature
 
@@ -56,7 +56,7 @@ An array of [Application](#application).
 
 ### getDefaultApplication
 
-Returns the default application that the file would be opened with.
+Returns the default application that the file or URL would be opened with.
 
 #### Signature
 
@@ -81,7 +81,7 @@ export default async function Command() {
 
 #### Return
 
-A Promise that resolves with the default [Application](#application) that would open the file. If no application was found, the promise will be rejected.
+A Promise that resolves with the default [Application](#application) that would open the file or URL. If no application was found, the promise will be rejected.
 
 ### getFrontmostApplication
 
@@ -99,7 +99,7 @@ async function getFrontmostApplication(): Promise<Application>;
 import { getFrontmostApplication } from "@raycast/api";
 
 export default async function Command() => {
-  const defaultApplication = await getFrontmostApplication();
+  const frontmostApplication = await getFrontmostApplication();
   console.log(`The frontmost application is: ${frontmostApplication.name}`);
 };
 ```
@@ -198,6 +198,41 @@ export default async function Command() {
 #### Return
 
 A Promise that resolves when the target has been opened.
+
+### captureException
+
+Report the provided exception to the Developer Hub.
+This helps in handling failures gracefully while staying informed about the occurrence of the failure.
+
+#### Signature
+
+```typescript
+function captureException(exception: unknown): void;
+```
+
+#### Example
+
+```typescript
+import { open, captureException, showToast, Toast } from "@raycast/api";
+
+export default async function Command() {
+  const url = "https://www.raycast.com";
+  const app = "Google Chrome";
+  try {
+    await open(url, app);
+  } catch (e: unknown) {
+    captureException(e);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Could not open ${url} in ${app}.`,
+    });
+  }
+}
+```
+
+#### Parameters
+
+<FunctionParametersTableFromJSDoc name="open" />
 
 ## Types
 

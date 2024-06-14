@@ -9,14 +9,18 @@ import { NewFileHereItem } from "./new-file-here-item";
 import { Preferences } from "../types/preferences";
 
 export function NewFileHereListLayout(props: {
+  navigationTitle: string;
   isLoading: boolean;
   templateFiles: TemplateType[];
+  folder: string;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { isLoading, templateFiles, setRefresh } = props;
+  const { navigationTitle, isLoading, templateFiles, folder, setRefresh } = props;
   const { layout, showDocument, showCode, showScript } = getPreferenceValues<Preferences>();
+
   return (
     <List
+      navigationTitle={navigationTitle}
       isShowingDetail={true}
       isLoading={isLoading}
       searchBarPlaceholder={"Search and create files"}
@@ -46,6 +50,7 @@ export function NewFileHereListLayout(props: {
                     template={template}
                     index={index}
                     templateFiles={templateFiles}
+                    folder={folder}
                     setRefresh={setRefresh}
                   />
                 }
@@ -63,6 +68,7 @@ export function NewFileHereListLayout(props: {
                 fileType={fileType}
                 newFileType={{ section: "Document", index: index }}
                 templateFiles={templateFiles}
+                folder={folder}
                 setRefresh={setRefresh}
               />
             );
@@ -79,13 +85,14 @@ export function NewFileHereListLayout(props: {
                 fileType={fileType}
                 newFileType={{ section: "Code", index: index }}
                 templateFiles={templateFiles}
+                folder={folder}
                 setRefresh={setRefresh}
               />
             );
           })}
         </List.Section>
       )}
-      {showScript && (
+      {!isLoading && showScript && (
         <List.Section title={"Script"}>
           {scriptFileTypes.map((fileType, index) => {
             return (
@@ -95,6 +102,7 @@ export function NewFileHereListLayout(props: {
                 fileType={fileType}
                 newFileType={{ section: "Script", index: index }}
                 templateFiles={templateFiles}
+                folder={folder}
                 setRefresh={setRefresh}
               />
             );

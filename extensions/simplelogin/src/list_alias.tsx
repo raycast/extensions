@@ -1,29 +1,40 @@
 import { loadAllAliases, updateAliasPinnedStatus, deleteAlias, toggleAliasState } from "./api/simplelogin_api";
 import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Alert, Keyboard } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { AliasResponse } from "./models/alias";
 import moment from "moment";
 
-type Filter = "all" | "" | "pinned" | "others";
+type Filter = "all" | "" | "pinned" | "others" | "with-description" | "without-description";
 
 export default function Command() {
-  const [aliases, setAliases] = useState<AliasResponse[]>([]);
+  const [aliases, setAliases] = useCachedState<AliasResponse[]>("aliases", []);
   const [filter, setFilter] = useState<Filter>("all");
+  const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filteredAliases = useMemo(() => {
+    const predicate = (alias: AliasResponse) =>
+      alias.name?.toLowerCase().includes(searchText.toLowerCase()) ||
+      alias.email.toLowerCase().includes(searchText.toLowerCase()) ||
+      alias.note?.toLowerCase().includes(searchText.toLowerCase());
+
     switch (filter) {
       case "all":
-        return aliases;
+        return aliases.filter(predicate);
       case "pinned":
-        return aliases.filter((alias) => alias.pinned);
+        return aliases.filter((alias) => alias.pinned).filter(predicate);
       case "others":
-        return aliases.filter((alias) => !alias.pinned);
+        return aliases.filter((alias) => !alias.pinned).filter(predicate);
+      case "with-description":
+        return aliases.filter((alias) => alias.note != null && alias.note.length > 0).filter(predicate);
+      case "without-description":
+        return aliases.filter((alias) => alias.note == null || alias.note.length == 0).filter(predicate);
       default:
         return [];
     }
-  }, [aliases, filter]);
+  }, [aliases, filter, searchText]);
 
   useEffect(() => {
     loadAllAliases()
@@ -54,6 +65,7 @@ export default function Command() {
         title: "Are you sure?",
         message: "Do you really want to delete this alias? This action cannot be undone.",
         icon: Icon.DeleteDocument,
+        rememberUserChoice: true,
         primaryAction: {
           title: "Delete",
           style: Alert.ActionStyle.Destructive,
@@ -65,7 +77,7 @@ export default function Command() {
         style: Toast.Style.Success,
         title: "Alias deleted",
       });
-      setAliases(aliases && aliases.filter((a) => a.id != alias.id));
+      setAliases(aliases.filter((a) => a.id != alias.id));
     }
   }
 
@@ -93,9 +105,9 @@ export default function Command() {
           <List.Item.Detail
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label title="Name" text={alias.name ?? "n/a"} />
+                <List.Item.Detail.Metadata.Label title="Display Name" text={alias.name ?? "n/a"} />
                 <List.Item.Detail.Metadata.Label
-                  title="Note"
+                  title="Description"
                   text={alias.note != null && alias.note?.length > 0 ? alias.note : "---"}
                 />
                 <List.Item.Detail.Metadata.Separator />
@@ -155,7 +167,7 @@ export default function Command() {
               style={Action.Style.Destructive}
               onAction={() => deleteAliasPrompt(alias)}
               icon={Icon.DeleteDocument}
-              shortcut={{ modifiers: ["cmd"], key: "delete" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
             />
           </ActionPanel>
         }
@@ -166,7 +178,8 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Filter aliases by name..."
+      onSearchTextChange={setSearchText}
+      searchBarPlaceholder="Filter aliases by name, email or description..."
       isShowingDetail={filteredAliases.length >= 0 && selectedId !== null}
       onSelectionChange={(selected) => {
         setSelectedId(selected);
@@ -176,6 +189,8 @@ export default function Command() {
           <List.Dropdown.Item title="Show All" value="all" key="all" icon={Icon.Globe} />
           <List.Dropdown.Item title="Show Pinned" value="pinned" key="pinned" icon={Icon.Pin} />
           <List.Dropdown.Item title="Show Not Pinned" value="others" key="others" icon={Icon.PinDisabled} />
+          <List.Dropdown.Item title="Show with description" value="with-description" icon={Icon.Text} />
+          <List.Dropdown.Item title="Show without description" value="without-description" icon={Icon.StrikeThrough} />
         </List.Dropdown>
       }
     >

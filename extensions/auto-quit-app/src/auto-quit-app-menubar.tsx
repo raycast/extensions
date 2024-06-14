@@ -1,9 +1,9 @@
 import { Icon, launchCommand, LaunchType, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
-import { quitAppsHook } from "./hooks/hooks";
+import { useEnabledQuitApps } from "./hooks/hooks";
 import { scriptQuitApps } from "./utils/applescript-utils";
 
 export default function AutoQuitAppMenubar() {
-  const { quitApps, loading } = quitAppsHook();
+  const { quitApps, loading } = useEnabledQuitApps();
 
   return (
     <MenuBarExtra

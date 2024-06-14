@@ -1,5 +1,17 @@
 # FileMaker Snippets Changelog
 
+## [Fixes] - 2024-04-05
+
+- Fix encoding for launching favorite or recent files that contain special characters
+
+## [Fixes] - 2024-03-28
+
+- Fix deeplinks for hosted snippets. Fetch dependency was not being loaded correctly.
+
+## [Fixes] - 2024-03-20
+
+- Fix snippet creation from clipboard
+
 ## [Fixes] - 2024-03-04
 
 - Improved frecency sorting for recent/favorite files

@@ -1,5 +1,15 @@
 # Menubar Weather Changelog
 
+## [Fix icon] - 2024-06-02
+
+- Fix Settings icon not showing in the menubar when using the Raycast icon style
+- Invert latitude and longitude order in the menubar to match the convention
+
+## [Update icons] - 2024-04-15
+
+- Update icons
+- Improve the implementation of SF Symbols icon style
+
 ## [Fix error] - 2024-02-05
 
 - Fix json parsing errors

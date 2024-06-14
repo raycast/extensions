@@ -65,7 +65,10 @@ export async function authorize() {
       port: port.toString(),
     },
   });
-  await client.authorize(authRequest);
+  await client.authorize({
+    url: `https://api.turso.tech/?type=cli&redirect=true&port=${port}&state=${authRequest.state}`,
+  });
+  // await client.authorize(authRequest);
   server.close();
   return client.getTokens() as unknown as OAuth.TokenSet;
 }

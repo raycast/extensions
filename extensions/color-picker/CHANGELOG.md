@@ -1,5 +1,29 @@
 # Color Picker Changelog
 
+## [Enhancement] - 2024-06-07
+
+- Fix bug with OKLCH/LCH conversion
+
+## [Enhancement] - 2024-06-07
+
+- Update OKLCH & LCH color formats to use percentage for lightness
+
+## [Enhancement] - 2024-05-31
+
+- Add support for rgb, rgb %, oklch, lch and p3 color formats
+- Add "Convert Color" command
+- Update "Generate Colors" command to respect the preferred color format
+
+## [Generate Colors using AI] - 2024-05-23
+
+- Add a new "Generate Colors" command
+- Group "Copy As..." actions into a single submenu
+- Remember the user's choice when deleting a color from the history
+
+## [Cross-Extension] - 2024-05-15
+
+- Expose extension ability with [Raycast Cross-Extension Conventions](https://github.com/LitoMore/raycast-cross-extension-conventions)
+
 ## [Enhancement] - 2024-03-08
 
 - Added HEX without prefix (#) color format

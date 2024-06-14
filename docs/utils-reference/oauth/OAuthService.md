@@ -18,7 +18,7 @@ const client = new OAuth.PKCEClient({
 const github = new OAuthService({
   client,
   clientId: "7235fe8d42157f1f38c0",
-  scopes: "notifications repo read:org read:user read:project",
+  scope: "notifications repo read:org read:user read:project",
   authorizeUrl: "https://github.oauth.raycast.com/authorize",
   tokenUrl: "https://github.oauth.raycast.com/token",
 });
@@ -98,6 +98,11 @@ const github = OAuthService.github({ scope: "repo user" });
 
 Google has verification processes based on the required scopes for your extension. Therefore, you need to configure your own client for it.
 
+{% hint style="info" %}
+Creating your own Google client ID is more tedious than other processes, so we’ve created a page to assist you: [Getting a Google client ID](./getting-google-client-id.md)
+{% endhint %}
+
+
 ##### Signature
 
 ```ts
@@ -109,8 +114,6 @@ OAuthService.google: (options: ProviderOptions) => OAuthService
 ```tsx
 const google = OAuthService.google({
   clientId: "custom-client-id",
-  authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenUrl: "https://oauth2.googleapis.com/token",
   scope: "https://www.googleapis.com/auth/drive.readonly",
 });
 ```
@@ -130,8 +133,6 @@ OAuthService.jira: (options: ProviderOptions) => OAuthService
 ```tsx
 const jira = OAuthService.jira({
   clientId: "custom-client-id",
-  authorizeUrl: "https://auth.atlassian.com/authorize",
-  tokenUrl: "https://api.atlassian.com/oauth/token",
   scope: "read:jira-user read:jira-work offline_access",
 });
 ```
@@ -179,10 +180,7 @@ OAuthService.zoom: (options: ProviderOptions) => OAuthService
 ```tsx
 const zoom = OAuthService.zoom({
   clientId: "custom-client-id",
-  authorizeUrl: "https://zoom.us/oauth/authorize",
-  tokenUrl: "https://zoom.us/oauth/token",
   scope: "meeting:write",
-  personalAccessToken: "personal-access-token",
 });
 ```
 

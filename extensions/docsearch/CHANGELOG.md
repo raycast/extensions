@@ -1,5 +1,9 @@
 # DocSearch Changelog
 
+## [Fix Bugs] - 2024-3-19
+
+- 🐛 Fix icon of docs not found
+
 ## [New feature] - 2024-2-3
 
 - 🌟 Use searchBarAccessory to switch different version of docs

@@ -7,7 +7,8 @@
   "author": "ryan",
   "contributors": [
     "kgrhartlage",
-    "bibixx"
+    "bibixx",
+    "dnsv"
   ],
   "keywords": [
     "imdb",
@@ -103,6 +104,24 @@
       "label": "Include Games",
       "title": "Search Results",
       "description": "Include video games in search results"
+    },
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Where to open the IMDB page by default",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ],
+      "default": "raycast",
+      "required": false
     }
   ],
   "dependencies": {

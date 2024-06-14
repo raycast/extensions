@@ -1,5 +1,19 @@
 # Raycast Wallpaper Changelog
 
+## [Auto Switch Wallpaper command] - 2024-06-12
+
+- Preference for refresh intervals mirroring Apple wallpaper shuffle intervals
+
+## [Fix typo] - 2024-05-31
+
+- Fix typo in `Set Raycast Wallpaper` command configuration.
+- Fix `npm audit` issue.
+
+## [Detailed Optimisation] - 2024-05-30
+
+- Optimization of details
+- Use smaller thumbnails for improved loading speed in grid/list view
+
 ## [Improve image loading speed] - 2024-03-06
 
 - Use smaller thumbnails for improved loading speed in grid/list view
