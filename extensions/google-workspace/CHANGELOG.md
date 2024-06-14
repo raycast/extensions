@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Fix the Download Google Document command to use the authenticated user.] - 2024-06-14
+
+- Fix the Download Google Document command to use the authenticated user. See #5315
+
 ## [Adds support to choose which browser to open a file with from Action Panel] - 2024-04-11
 
 - Adds the ability to select which browser to open a file in from the Action Panel.
