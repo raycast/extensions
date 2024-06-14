@@ -1,6 +1,6 @@
 # Google Maven Repository Changelog
 
-## [Show update date] - {PR_MERGE_DATE}
+## [Show update date] - 2024-06-14
 
 - Show update date in the search results
 - Fix the problem of using hotkeys to invoke commands
