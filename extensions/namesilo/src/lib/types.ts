@@ -65,6 +65,7 @@ export type AccountBalance = {
 
 export type Portfolio = {
     name: string;
+    domains?: string[];
 }
 
 type BaseResponse = {
@@ -96,3 +97,4 @@ export type ErrorResponse = BaseResponse & {
         detail: Exclude<string, "success">;
     }
 }
+export type ArrOrObjOrNull<T> = T[] | T | null;

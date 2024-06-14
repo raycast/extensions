@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import useNameSilo from "./lib/hooks/useNameSilo";
-import { Order, type OrderDetails } from "./lib/types";
+import { ArrOrObjOrNull, Order, type OrderDetails } from "./lib/types";
+import { parseAsArray } from "./lib/utils/parseAsArray";
 
 export default function Orders() {
-    type OrderResponse = {order: Order[] | Order | null};
+    type OrderResponse = {order: ArrOrObjOrNull<Order>};
     const { isLoading, data } = useNameSilo<OrderResponse>("listOrders");
-    const orders = !data?.order ? [] : (data.order instanceof Array ? data.order : [data.order]);
+    const orders = parseAsArray<Order>(data?.order);
     
     return <List isLoading={isLoading}>
         {orders.map(order => <List.Item key={order.order_number} icon={Icon.Document} title={order.order_number} subtitle={order.order_date} accessories={[
@@ -25,7 +26,7 @@ function OrderDetails({ order_number }: { order_number: string }) {
     const orderDetails = !data?.order_details ? [] : (data.order_details instanceof Array ? data.order_details : [data.order_details]);
 
     return <List isLoading={isLoading} navigationTitle={`Orders / ${order_number} / Details`}>
-        {orderDetails.map((order, orderIndex) => <List.Item key={orderIndex} title={order.description} subtitle={`${order.years_qty} years`} accessories={[
+        {orderDetails.map((order, orderIndex) => <List.Item key={orderIndex} icon={Icon.Dot} title={order.description} subtitle={`${order.years_qty} years`} accessories={[
             { text: `price: ${order.price}` },
             { text: `subtotal: ${order.subtotal}` },
             { tag: order.status }
