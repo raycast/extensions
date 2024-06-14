@@ -61,13 +61,7 @@ export default function Command(props: LaunchProps<{ arguments: Values }>) {
   }
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Recalculate Bedtimes" onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
+    <Form>
       <Form.Description text={`Wake Up Time: ${props.arguments.wakeUpTime}`} />
       {error && <Form.Description text={error} />}
       <Form.Separator />
