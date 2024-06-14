@@ -1126,6 +1126,7 @@
   "k8scat/redis": "redis",
   "jwickers/redmine": "redmine",
   "ryon/reflect": "reflect",
+  "koinzhang/refresh-browsers": "refresh-browsers",
   "natterstefan/refresh-wifi": "refresh-wifi",
   "hongkiulam/regex-repl": "regex-repl",
   "allenan/regex-tester": "regex-tester",
