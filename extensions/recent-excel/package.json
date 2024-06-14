@@ -38,11 +38,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.75.2",
-    "exceljs": "^4.3.0",
-    "execa": "^6.1.0",
-    "fs": "^0.0.1-security",
-    "node-powershell": "^5.0.1",
-    "plist": "^3.1.0"
+    "fs": "^0.0.1-security"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
