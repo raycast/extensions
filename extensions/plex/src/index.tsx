@@ -43,10 +43,7 @@ function PlexLibrarySection({ plexLibrary }: { plexLibrary: SectionsApiResponse[
       accessories={[{ icon: Icon.SpeechBubble, text: plexLibrary.language }]}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="View Library Items"
-            target={<GetSectionItems sectionId={plexLibrary.key} sectionName={plexLibrary.title} />}
-          />
+          <Action.Push title="View Library Items" target={<GetSectionItems sectionId={plexLibrary.key} />} />
         </ActionPanel>
       }
     />

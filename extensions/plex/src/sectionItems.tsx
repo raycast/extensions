@@ -5,7 +5,7 @@ import { ENDPOINTS, plex_token } from "../utils/constants";
 import { SectionItemsApiResponse } from "../types/types";
 import calculateTime from "../utils/timeCalculator";
 
-export function GetSectionItems({ sectionId, sectionName }: { sectionId: string; sectionName: string }) {
+export function GetSectionItems({ sectionId }: { sectionId: string }) {
   const endpoint = `${ENDPOINTS.librarySections}${sectionId}/all`;
 
   const { data, isLoading } = useFetch(endpoint, {
