@@ -8,17 +8,12 @@ import {
   getBoundedPreferenceNumber,
 } from "./components/Menu";
 import { PullRequestFieldsFragment } from "./generated/graphql";
+import { displayTitle, filterSections } from "./helpers/menu-bar";
 import { withGitHubClient } from "./helpers/withGithubClient";
-import { SectionType, useMyPullRequests } from "./hooks/useMyPullRequests";
+import { useMyPullRequests } from "./hooks/useMyPullRequests";
 
 async function launchMyPullRequestsCommand(): Promise<void> {
   return launchCommand({ name: "my-pull-requests", type: LaunchType.UserInitiated });
-}
-
-function displayTitlePreference() {
-  const prefs = getPreferenceValues();
-  const val: boolean | undefined = prefs.showtext;
-  return val == undefined ? true : val;
 }
 
 function getMaxPullRequestsPreference(): number {
@@ -41,60 +36,16 @@ function getPullRequestStatusIcon(pr: PullRequestFieldsFragment): Icon | string 
 }
 
 function MyPullRequestsMenu() {
-  const preferences = getPreferenceValues<Preferences.MyPullRequestsMenu>();
   const { data: sections, isLoading } = useMyPullRequests(null);
-
-  function displayTitle() {
-    if (displayTitlePreference() !== true) {
-      return undefined;
-    }
-    const sectionTypeMapping: Record<string, SectionType> = {
-      includeOpenCount: SectionType.Open,
-      includeAssignedCount: SectionType.Assigned,
-      includeMentionedCount: SectionType.Mentioned,
-      includeReviewRequestsCount: SectionType.ReviewRequests,
-      includeReviewedCount: SectionType.Reviewed,
-      includeRecentlyClosedCount: SectionType.RecentlyClosed,
-    };
-
-    const sectionTypesToInclude = Object.entries(preferences)
-      .filter(([, value]) => value === true)
-      .map(([key]) => sectionTypeMapping[key]);
-
-    const count = sections.reduce(
-      (acc, section) =>
-        acc + (sectionTypesToInclude.includes(section.type) && section.pullRequests ? section.pullRequests.length : 0),
-      0,
-    );
-    return `${count}`;
-  }
-
-  function filteredSections() {
-    return sections.filter((section) => {
-      const sectionTypeMapping: Record<string, SectionType> = {
-        includeOpen: SectionType.Open,
-        includeAssigned: SectionType.Assigned,
-        includeMentioned: SectionType.Mentioned,
-        includeReviewRequests: SectionType.ReviewRequests,
-        includeReviewed: SectionType.Reviewed,
-        includeRecentlyClosed: SectionType.RecentlyClosed,
-      };
-
-      const sectionTypesToInclude = Object.entries(preferences)
-        .filter(([, value]) => value === true)
-        .map(([key]) => sectionTypeMapping[key]);
-
-      return sectionTypesToInclude.includes(section.type);
-    });
-  }
+  const preferences = getPreferenceValues<Preferences.MyPullRequestsMenu>();
 
   return (
     <MenuBarRoot
-      title={displayTitle()}
+      title={displayTitle(sections, "pullRequests")}
       icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
       isLoading={isLoading}
     >
-      {filteredSections().map((section) => {
+      {filterSections(sections, preferences, "pullRequests").map((section) => {
         return (
           <MenuBarSection
             key={section.type}

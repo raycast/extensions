@@ -29,7 +29,8 @@
     "litomore",
     "dmitrii_mitrofanov",
     "j3lte",
-    "stelo"
+    "stelo",
+    "ramsay"
   ],
   "categories": [
     "Developer Tools",
@@ -206,11 +207,44 @@
       "interval": "15m",
       "preferences": [
         {
+          "name": "includeOpen",
+          "type": "checkbox",
+          "required": false,
+          "title": "Categories to Display",
+          "default": true,
+          "label": "Opened",
+          "description": "Includes issues you opened in the menu list."
+        },
+        {
+          "name": "includeAssigned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "description": "Includes issues you were assigned to in the menu list."
+        },
+        {
+          "name": "includeMentioned",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes issues you were mentioned in the menu list."
+        },
+        {
+          "name": "includeRecentlyClosed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes pull requests you recently closed in the menu list."
+        },
+        {
           "name": "maxitems",
           "description": "Maximum Issues shown",
           "type": "textfield",
           "required": false,
-          "title": "Max. Issues",
+          "title": "Max. Issues per category",
           "placeholder": "10"
         },
         {
@@ -221,6 +255,39 @@
           "label": "Show Count",
           "title": "Appearance",
           "default": true
+        },
+        {
+          "name": "includeOpenCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Icon Count Categories",
+          "label": "Opened",
+          "description": "Includes issues you opened in the icon counter."
+        },
+        {
+          "name": "includeAssignedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Assigned",
+          "description": "Includes issues you were assigned to in the icon counter."
+        },
+        {
+          "name": "includeMentionedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Mentioned",
+          "description": "Includes issues you were mentioned in the icon counter."
+        },
+        {
+          "name": "includeRecentlyClosedCount",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Recently Closed",
+          "description": "Includes issues you recently closed in the icon counter."
         }
       ]
     },
@@ -238,7 +305,7 @@
           "title": "Categories to Display",
           "default": true,
           "label": "Opened",
-          "description": "Includes pull request you opened in the menu list."
+          "description": "Includes pull requests you opened in the menu list."
         },
         {
           "name": "includeAssigned",
@@ -246,7 +313,7 @@
           "required": false,
           "default": true,
           "label": "Assigned",
-          "description": "Includes pull request you were assigned to in the menu list."
+          "description": "Includes pull requests you were assigned to in the menu list."
         },
         {
           "name": "includeMentioned",
@@ -254,7 +321,7 @@
           "required": false,
           "default": true,
           "label": "Mentioned",
-          "description": "Includes pull request you were mentioned in the menu list."
+          "description": "Includes pull requests you were mentioned in the menu list."
         },
         {
           "name": "includeReviewRequests",
@@ -262,7 +329,7 @@
           "required": false,
           "default": true,
           "label": "Review Requests",
-          "description": "Includes pull request you were requested to review in the menu list."
+          "description": "Includes pull requests you were requested to review in the menu list."
         },
         {
           "name": "includeReviewed",
@@ -270,7 +337,7 @@
           "required": false,
           "default": false,
           "label": "Reviewed",
-          "description": "Includes pull request you reviewed in the menu list."
+          "description": "Includes pull requests you reviewed in the menu list."
         },
         {
           "name": "includeRecentlyClosed",
@@ -278,7 +345,7 @@
           "required": false,
           "default": false,
           "label": "Recently Closed",
-          "description": "Includes pull request you recently closed in the menu list."
+          "description": "Includes pull requests you recently closed in the menu list."
         },
         {
           "name": "maxitems",
@@ -304,7 +371,7 @@
           "default": true,
           "title": "Icon Count Categories",
           "label": "Opened",
-          "description": "Includes pull request you opened in the icon counter."
+          "description": "Includes pull requests you opened in the icon counter."
         },
         {
           "name": "includeAssignedCount",
@@ -312,7 +379,7 @@
           "required": false,
           "default": true,
           "label": "Assigned",
-          "description": "Includes pull request you were assigned to in the icon counter."
+          "description": "Includes pull requests you were assigned to in the icon counter."
         },
         {
           "name": "includeMentionedCount",
@@ -320,7 +387,7 @@
           "required": false,
           "default": true,
           "label": "Mentioned",
-          "description": "Includes pull request you were mentioned in the icon counter."
+          "description": "Includes pull requests you were mentioned in the icon counter."
         },
         {
           "name": "includeReviewRequestsCount",
@@ -328,7 +395,7 @@
           "required": false,
           "default": true,
           "label": "Review Requests",
-          "description": "Includes pull request you were requested to review in the icon counter."
+          "description": "Includes pull requests you were requested to review in the icon counter."
         },
         {
           "name": "includeReviewedCount",
@@ -336,7 +403,7 @@
           "required": false,
           "default": false,
           "label": "Reviewed",
-          "description": "Includes pull request you reviewed in the icon counter."
+          "description": "Includes pull requests you reviewed in the icon counter."
         },
         {
           "name": "includeRecentlyClosedCount",
@@ -344,7 +411,7 @@
           "required": false,
           "default": false,
           "label": "Recently Closed",
-          "description": "Includes pull request you recently closed in the icon counter."
+          "description": "Includes pull requests you recently closed in the icon counter."
         }
       ]
     }
@@ -386,7 +453,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
+    "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.12.4",
     "date-fns": "^2.30.0",
     "graphql-request": "^5.1.0",
@@ -408,7 +475,7 @@
     "eslint": "^8.53.0",
     "eslint-plugin-import": "^2.29.0",
     "graphql": "^16.8.1",
-    "prettier": "^3.1.0",
+    "prettier": "^3.3.2",
     "react": "^18.2.0",
     "typescript": "^5.2.2"
   },

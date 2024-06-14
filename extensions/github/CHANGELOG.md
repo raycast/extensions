@@ -1,12 +1,18 @@
 # GitHub Changelog
 
+## [Add sections to "My Issues Menu Bar" command] - 2024-06-14
+
+- Added filterable sections to issues menu bar, very similar to PR menu bar.
+
 ## ["Create Pull Request" command] - 2024-06-03
 
 - Added typeahead search for branch selection in Create PR command.
 
 ## [Add "My Projects" command] - 2024-04-25
 
-- You can now see all of your projects into a single command called `My Projects`. You can also open/close projects. NOTE: This feature requires you to change the scope of your token to include `project` permissions. If you use the OAuth login, you will need to log in again to update the token.
+- You can now see all of your projects into a single command called `My Projects`. You can also open/close projects.
+  NOTE: This feature requires you to change the scope of your token to include `project` permissions. If you use the
+  OAuth login, you will need to log in again to update the token.
 
 ## [Open in Browser as primary action setting] - 2024-04-22
 
@@ -17,7 +23,8 @@
 - Fixes icons for issues and pull requests in `Notifications` and `Unread Notifications` commands.
 - Standardizes the color for all the accessories in `My Pull Requests`.
 - Fixes an issue where the pull request icon color for the `My Pull Requests Menu Bar` was not adjusted for dark mode.
-- Updates icons for `Open My Pull Requests` and `Open My Issues` menu items in the `My Pull Requests Menu Bar` and `My Issues Menu Bar` commands.
+- Updates icons for `Open My Pull Requests` and `Open My Issues` menu items in the `My Pull Requests Menu Bar`
+  and `My Issues Menu Bar` commands.
 
 ## [Updated metadata images] - 2024-04-22
 
@@ -52,8 +59,10 @@
 
 ## [Add "My Issues" command and improve "My Pull Requests"] - 2024-03-22
 
-- You can now see all of your issues into a single command called `My Issues`. As a result, `Created Issues` and `Open Issues` were removed.
-- The `Open Issues Menu Bar` is now renamed to `My Issues Menu Bar` and shows more issues such as the ones you created or the ones you were mentioned in.
+- You can now see all of your issues into a single command called `My Issues`. As a result, `Created Issues`
+  and `Open Issues` were removed.
+- The `Open Issues Menu Bar` is now renamed to `My Issues Menu Bar` and shows more issues such as the ones you created
+  or the ones you were mentioned in.
 - `My Pull Requests` should also load faster from now on.
 
 ## [Changing repo while creating issue or pull request clears title field] - 2024-03-21
@@ -67,11 +76,14 @@
 
 ## [Remove Section in Action Panel] - 2024-03-21
 
-- The "Mark as Read" action and its shortcut was not rendered and also did not work. This is because this action was considered a primary action. Removing this section makes the action secondary and it is now rendered and works as expected.
+- The "Mark as Read" action and its shortcut was not rendered and also did not work. This is because this action was
+  considered a primary action. Removing this section makes the action secondary and it is now rendered and works as
+  expected.
 
 ## [Accept Repository Invitations] - 2024-03-18
 
-- When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the error by making it possible to accept repo invites or open the repo in the browser.
+- When receiving a repository invite, the "Open in Browser" command failed with an API error. This change fixes the
+  error by making it possible to accept repo invites or open the repo in the browser.
 
 ## [Use buil-in icons for My Pull Requests Menu Bar] - 2024-02-25
 
@@ -100,7 +112,8 @@
 
 ## [Mark notification as read without opening it] - 2023-11-16
 
-- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking the notification.
+- You can now mark notification as read in the menu bar without opening the notification by pressing `⌥` and clicking
+  the notification.
 
 ## [Search Repositories improvements + Fixes] - 2023-11-06
 
@@ -116,7 +129,8 @@
 
 ## [Add Clone and Open command] - 2023-10-11
 
-- Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh repository results.
+- Add a command to clone (unless already cloned) and open in the preferred code editor a repository from the seacrh
+  repository results.
 
 ## [Fix menu colors] - 2023-09-30
 
@@ -190,7 +204,8 @@
 - Add `My Discussions` command.
 - Add actions to show discussions of a repository.
 - Use svg icon in `Unread Notification menu bar` command to be big enough on all screen sizes.
-- Use `UserInitiated` instead of `Background` when marking a notification as readed, otherwise the menubar item don't refresh itself and stay out of sync until the next time tick occur.
+- Use `UserInitiated` instead of `Background` when marking a notification as readed, otherwise the menubar item don't
+  refresh itself and stay out of sync until the next time tick occur.
 
 ## [Search Repositories improvements]
 
