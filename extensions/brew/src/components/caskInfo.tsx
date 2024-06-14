@@ -4,12 +4,15 @@ import { Cask, brewName } from "../brew";
 
 export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => void }): JSX.Element {
   const { pop } = useNavigation();
+  const { cask } = props;
+
   return (
     <Detail
-      markdown={formatInfo(props.cask)}
+      markdown={formatInfo(cask)}
+      navigationTitle={`Cask Info: ${brewName(cask)}`}
       actions={
         <CaskActionPanel
-          cask={props.cask}
+          cask={cask}
           showDetails={false}
           onAction={(result) => {
             pop();

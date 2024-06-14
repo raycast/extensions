@@ -56,6 +56,41 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
 
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
+    const [slackMembers, dmConversations] = await Promise.all([
+      SlackClient.getSlackMembers(),
+      SlackClient.getConversations("im"),
+    ]);
+
+    const users =
+      slackMembers
+        .filter(
+          ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT"
+        )
+        .map(({ id, name: username, profile, team_id }) => {
+          const firstName = profile?.first_name ?? "";
+          const lastName = profile?.last_name ?? "";
+          const name = `${firstName} ${lastName}`;
+
+          const displayName = [name, profile?.display_name, profile?.real_name].find((x): x is string => !!x?.trim());
+
+          const conversation = dmConversations.find((c) => c.user === id);
+
+          return {
+            id,
+            name: displayName,
+            icon: profile?.image_24,
+            teamId: team_id,
+            username,
+            conversationId: conversation?.id,
+          };
+        })
+        .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
+        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
+
+    return users;
+  }
+
+  private static async getSlackMembers(): Promise<SlackMember[]> {
     const slackMembers: SlackMember[] = [];
 
     let cursor: string | undefined;
@@ -72,37 +107,7 @@ export class SlackClient {
       }
     } while (cursor);
 
-    const dmConversations = await SlackClient.getConversations("im");
-
-    const users =
-      slackMembers
-        ?.filter(
-          ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT"
-        )
-        .map(({ id, name: username, profile, team_id }) => {
-          const firstName = profile?.first_name ?? "";
-          const lastName = profile?.last_name ?? "";
-          const name = `${firstName} ${lastName}`;
-
-          const [displayName] = [name, profile?.display_name, profile?.real_name].filter(
-            (x): x is string => !!x?.trim()
-          );
-
-          const conversation = dmConversations.find((c) => c.user === id);
-
-          return {
-            id,
-            name: displayName,
-            icon: profile?.image_24,
-            teamId: team_id,
-            username,
-            conversationId: conversation?.id,
-          };
-        })
-        .filter((i): i is User => !!(i.id?.trim() && i.name?.trim() && i.teamId?.trim()))
-        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
-
-    return users ?? [];
+    return slackMembers;
   }
 
   private static async getConversations(
@@ -130,14 +135,16 @@ export class SlackClient {
   }
 
   public static async getChannels(): Promise<Channel[]> {
-    const publicChannels = await SlackClient.getConversations("public_channel");
-    const privateChannels = await SlackClient.getConversations("private_channel");
+    const [publicChannels, privateChannels] = await Promise.all([
+      SlackClient.getConversations("public_channel"),
+      SlackClient.getConversations("private_channel"),
+    ]);
 
     const publicAndPrivateChannels = [...publicChannels, ...privateChannels];
 
     const channels: Channel[] =
       publicAndPrivateChannels
-        ?.map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
+        .map(({ id, name, shared_team_ids, internal_team_ids, context_team_id, is_private }) => {
           const teamIds = [
             ...(internal_team_ids ?? []),
             ...(shared_team_ids ?? []),
@@ -149,7 +156,7 @@ export class SlackClient {
         .filter((i): i is Channel => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
-    return channels ?? [];
+    return channels;
   }
 
   public static async getGroups(): Promise<Group[]> {
@@ -159,7 +166,7 @@ export class SlackClient {
 
     const groups: Group[] =
       conversations
-        ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
+        .map(({ id, name, shared_team_ids, internal_team_ids }) => {
           const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
 
@@ -174,7 +181,7 @@ export class SlackClient {
         .filter((i): i is Group => !!(i.id?.trim() && i.name?.trim() && i.teamId.trim()))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
-    return groups ?? [];
+    return groups;
   }
 
   public static async getPresence(): Promise<PresenceStatus> {
