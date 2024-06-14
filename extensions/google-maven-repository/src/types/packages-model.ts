@@ -14,7 +14,7 @@ export interface artifactMapModel {
 export interface artifactModel {
   artifact: string;
   content: string;
-  date: object;
+  date: number;
   group: string;
   id: number;
   version: string;
