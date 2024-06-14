@@ -12,26 +12,26 @@ export default function Command() {
       const body = parse(time_entry_post_schema, { time_entry });
       const res = await fetch_mite("/time_entries.json", {
         method: "POST",
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         showToast({ title: "Entry created", style: Toast.Style.Success });
 
         popToRoot({
-          clearSearchBar: false
+          clearSearchBar: false,
         });
         return;
       }
       showToast({
         title: "Error",
         message: "There was an error in the submission",
-        style: Toast.Style.Failure
+        style: Toast.Style.Failure,
       });
     } catch (e) {
       showToast({
         title: "Error",
         message: "There was an error in the values of the form",
-        style: Toast.Style.Failure
+        style: Toast.Style.Failure,
       });
     }
   }
@@ -43,7 +43,7 @@ export default function Command() {
     const half = minutes / 60 === Math.floor(minutes / 60) ? "00" : "30";
     hrs.push({
       value: minutes.toString(),
-      title: `${whole.toString().padStart(2, "0")}:${half}`
+      title: `${whole.toString().padStart(2, "0")}:${half}`,
     });
   }
 
