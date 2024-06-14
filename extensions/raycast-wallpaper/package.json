@@ -8,7 +8,8 @@
   "contributors": [
     "samuelkraft",
     "pernielsentikaer",
-    "xilopaint"
+    "xilopaint",
+    "stelo"
   ],
   "categories": [
     "Media",
@@ -116,9 +117,9 @@
       "name": "auto-switch-raycast-wallpaper",
       "icon": "random-icon.png",
       "title": "Auto Switch Raycast Wallpaper",
-      "description": "Switch random Raycast wallpapers as desktop wallpaper every 1 hour.",
+      "description": "Switch random Raycast wallpapers as desktop wallpaper with specified refresh interval.",
       "mode": "no-view",
-      "interval": "1h",
+      "interval": "5m",
       "preferences": [
         {
           "name": "applyTo",
@@ -137,6 +138,36 @@
           ],
           "required": false,
           "default": "every"
+        },
+        {
+          "name": "refreshIntervalSeconds",
+          "type": "dropdown",
+          "description": "Set the refresh interval for switching wallpapers.",
+          "required": false,
+          "title": "Refresh Interval",
+          "default": "3600",
+          "data": [
+            {
+              "title": "Every 5 Minutes",
+              "value": "300"
+            },
+            {
+              "title": "Every 15 Minutes",
+              "value": "900"
+            },
+            {
+              "title": "Every 30 Minutes",
+              "value": "1800"
+            },
+            {
+              "title": "Every Hour",
+              "value": "3600"
+            },
+            {
+              "title": "Every Day",
+              "value": "86400"
+            }
+          ]
         }
       ]
     }
@@ -144,13 +175,13 @@
   "dependencies": {
     "@raycast/api": "^1.75.1",
     "@raycast/utils": "^1.15.0",
-    "axios": "1.6.0",
+    "axios": "^1.7.2",
     "file-url": "^4.0.0",
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "~20.12.12",
+    "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/shelljs": "^0.8.15",
     "@typescript-eslint/eslint-plugin": "^7.11.0",

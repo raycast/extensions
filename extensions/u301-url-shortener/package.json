@@ -36,6 +36,15 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "name": "accessToken",
+      "title": "API Key",
+      "description": "Create API Key on u301.com, or leave empty to use as an anonymous user",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "Leave empty to use as an anonymous user"
     }
   ],
   "dependencies": {

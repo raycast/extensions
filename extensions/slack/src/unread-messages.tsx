@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  Icon,
+  Image,
+  List,
+  LocalStorage,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
@@ -13,7 +24,8 @@ import {
   useUsers,
 } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
-import { openChannel, timeDifference } from "./shared/utils";
+import { timeDifference } from "./shared/utils";
+import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
@@ -30,6 +42,7 @@ export default function Command() {
 function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
+  const { isAppInstalled, isLoading } = useSlackApp();
   const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
   const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
   const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
@@ -114,7 +127,7 @@ function UnreadMessagesOverview() {
   };
 
   return (
-    <List isLoading={!selectedConversations || isValidatingUnreadConversations}>
+    <List isLoading={!selectedConversations || isValidatingUnreadConversations || isLoading}>
       {selectedConversations && selectedConversations.length === 0 && (
         <List.EmptyView
           icon={Icon.Gear}
@@ -164,15 +177,16 @@ function UnreadMessagesOverview() {
                   <ActionPanel>
                     {conversation && (
                       <>
-                        <Action
-                          title="Open in Slack"
-                          onAction={() => {
-                            markConversationAsRead(unreadConversation.conversationId);
-                            openChannel(conversation.teamId, conversation.id);
-                          }}
+                        <OpenChannelInSlack
+                          workspaceId={conversation.teamId}
+                          channelId={unreadConversation.conversationId}
+                          isAppInstalled={isAppInstalled}
+                          onActionAddon={() => markConversationAsRead(unreadConversation.conversationId)}
                         />
                         <Action
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                           title="Mark as read"
+                          icon={Icon.Checkmark}
                           onAction={() => markConversationAsRead(unreadConversation.conversationId, true)}
                         />
                       </>
@@ -180,6 +194,7 @@ function UnreadMessagesOverview() {
                     <Action.Push
                       title="Show unread messages"
                       shortcut={{ modifiers: ["cmd"], key: "m" }}
+                      icon={Icon.Eye}
                       target={
                         <CacheProvider>
                           <UnreadMessagesConversation
@@ -192,6 +207,7 @@ function UnreadMessagesOverview() {
                     <Action.Push
                       title="Configure Command"
                       shortcut={{ modifiers: ["opt"], key: "c" }}
+                      icon={Icon.Gear}
                       target={<ConfigurationWrapper />}
                     />
                   </ActionPanel>

@@ -4,4 +4,5 @@ export const RAYCAST_WALLPAPER = "https://www.raycast.com/wallpapers";
 export enum CacheKey {
   WALLPAPER_LIST_CACHE = "Raycast_Wallpapers_List_Cache",
   EXCLUDE_LIST_CACHE = "Exclude_Raycast_Wallpapers_List_Cache",
+  LAST_REFRESH_TIME = "Last_Refresh_Time",
 }
