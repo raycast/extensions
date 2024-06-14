@@ -1,66 +1,128 @@
-import { useEffect, useState } from "react";
-import { MenuBarExtra } from "@raycast/api";
-import { LocalStorage } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-
-type Dollar = { name: string };
-
-type DollarResponse = {
-  blue: { ask: number };
-  mep: { al30: { "24hs": { price: number } } };
-  ccl: { al30: { "24hs": { price: number } } };
-};
-
-const useRates = () => {
-  const [state, setState] = useState<{ dollar: Dollar[]; crypto: Dollar[]; isLoading: boolean }>({
-    dollar: [],
-    crypto: [],
-    isLoading: true,
-  });
-
-  useEffect(() => {
-    setState({
-      dollar: [{ name: "Blue" }, { name: "MEP" }, { name: "CCL" }],
-      crypto: [{ name: "BTC" }, { name: "ETH" }],
-      isLoading: false,
-    });
-  }, []);
-
-  return state;
-};
+import { useEffect, useRef } from "react";
+import { MenuBarExtra, showToast, Toast } from "@raycast/api";
+import { useCachedState, useCachedPromise } from "@raycast/utils";
+import useRates from "./hooks/useRates";
+import { fetchDollarRates, fetchBtcPrice, fetchEthPrice } from "./api";
 
 export default function Command() {
-  const [selectedCurrency, setSelectedCurrency] = useState<string | undefined>();
+  const [selectedCurrency, setSelectedCurrency] = useCachedState<string>("selected-currency", "Blue");
   const { dollar, crypto } = useRates();
 
-  const { data, isLoading: isFetching } = useFetch<DollarResponse>("https://criptoya.com/api/dolar");
-  const { data: btcData, isLoading: isBtcFetching } = useFetch<{ USD: number }>(
-    "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD",
-  );
-  const { data: ethData, isLoading: isEthFetching } = useFetch<{ USD: number }>(
-    "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD",
-  );
+  const dollarAbortControllerRef = useRef<AbortController | null>(null);
+  const btcAbortControllerRef = useRef<AbortController | null>(null);
+  const ethAbortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    const fetchInitialCurrency = async () => {
-      const memoryCurrency = await LocalStorage.getItem<string>("selected-currency");
-      setSelectedCurrency(memoryCurrency || "Blue");
-    };
-    fetchInitialCurrency();
-  }, []);
+  const fetchDollarRatesWrapper = async () => {
+    if (dollarAbortControllerRef.current) {
+      dollarAbortControllerRef.current.abort();
+    }
+    dollarAbortControllerRef.current = new AbortController();
 
-  useEffect(() => {
-    const updateCurrencyInMemory = async () => {
-      if (selectedCurrency) {
-        await LocalStorage.setItem("selected-currency", selectedCurrency);
+    try {
+      return await fetchDollarRates(dollarAbortControllerRef.current.signal);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name !== "AbortError") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to fetch dollar rates",
+            message: error.message,
+          });
+        }
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch dollar rates",
+          message: "An unknown error occurred.",
+        });
       }
-    };
-    updateCurrencyInMemory();
-  }, [selectedCurrency]);
+      throw error;
+    }
+  };
 
-  const blueDollarPrice = data?.blue?.ask;
-  const mepDollarPrice = data?.mep?.al30["24hs"]?.price;
-  const cclDollarPrice = data?.ccl?.al30["24hs"]?.price;
+  const fetchBtcPriceWrapper = async () => {
+    if (btcAbortControllerRef.current) {
+      btcAbortControllerRef.current.abort();
+    }
+    btcAbortControllerRef.current = new AbortController();
+
+    try {
+      return await fetchBtcPrice(btcAbortControllerRef.current.signal);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name !== "AbortError") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to fetch BTC price",
+            message: error.message,
+          });
+        }
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch BTC price",
+          message: "An unknown error occurred.",
+        });
+      }
+      throw error;
+    }
+  };
+
+  const fetchEthPriceWrapper = async () => {
+    if (ethAbortControllerRef.current) {
+      ethAbortControllerRef.current.abort();
+    }
+    ethAbortControllerRef.current = new AbortController();
+
+    try {
+      return await fetchEthPrice(ethAbortControllerRef.current.signal);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name !== "AbortError") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to fetch ETH price",
+            message: error.message,
+          });
+        }
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch ETH price",
+          message: "An unknown error occurred.",
+        });
+      }
+      throw error;
+    }
+  };
+
+  const {
+    data: dollarData,
+    isLoading: isDollarFetching,
+    revalidate: revalidateDollar,
+  } = useCachedPromise(fetchDollarRatesWrapper, [], {
+    initialData: null,
+  });
+
+  const {
+    data: btcData,
+    isLoading: isBtcFetching,
+    revalidate: revalidateBtc,
+  } = useCachedPromise(fetchBtcPriceWrapper, [], {
+    initialData: null,
+  });
+
+  const {
+    data: ethData,
+    isLoading: isEthFetching,
+    revalidate: revalidateEth,
+  } = useCachedPromise(fetchEthPriceWrapper, [], {
+    initialData: null,
+  });
+
+  const blueDollarPrice = dollarData?.blue?.ask;
+  const mepDollarPrice = dollarData?.mep?.al30["24hs"]?.price;
+  const cclDollarPrice = dollarData?.ccl?.al30["24hs"]?.price;
   const btcPrice = btcData?.USD;
   const ethPrice = ethData?.USD;
 
@@ -87,8 +149,28 @@ export default function Command() {
     return selectedCurrency;
   };
 
+  useEffect(() => {
+    revalidateDollar();
+    revalidateBtc();
+    revalidateEth();
+  }, [selectedCurrency, revalidateDollar, revalidateBtc, revalidateEth]);
+
+  useEffect(() => {
+    return () => {
+      if (dollarAbortControllerRef.current) {
+        dollarAbortControllerRef.current.abort();
+      }
+      if (btcAbortControllerRef.current) {
+        btcAbortControllerRef.current.abort();
+      }
+      if (ethAbortControllerRef.current) {
+        ethAbortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
   return (
-    <MenuBarExtra title={getTitle()} isLoading={isFetching || isBtcFetching || isEthFetching}>
+    <MenuBarExtra title={getTitle()} isLoading={isDollarFetching || isBtcFetching || isEthFetching}>
       <MenuBarExtra.Item title="Dólar" />
       {dollar.map((dollar) => (
         <MenuBarExtra.Item key={dollar.name} title={dollar.name} onAction={() => setSelectedCurrency(dollar.name)} />
