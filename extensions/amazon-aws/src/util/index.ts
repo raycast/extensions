@@ -58,7 +58,7 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
 export const sortRecord = (record: Record<string, any>): Record<string, any> =>
   Object.fromEntries(Object.entries(record).sort(([keyA], [keyB]) => keyA.localeCompare(keyB)));
 
-export function getErrorMessage(error: unknown) {
+export const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
     try {
       const parsedError = JSON.parse(error.message);
@@ -71,4 +71,29 @@ export function getErrorMessage(error: unknown) {
   }
 
   return String(error);
-}
+};
+
+export const uniqBy = <T>(array: T[], iteratee: (item: T) => string | number): T[] => {
+  const seen = new Set<string | number>();
+  const result: T[] = [];
+
+  for (const item of array) {
+    const criterion = iteratee(item);
+    if (!seen.has(criterion)) {
+      seen.add(criterion);
+      result.push(item);
+    }
+  }
+
+  return result;
+};
+
+export const formatBytes = (bytes: number) => {
+  if (bytes === 0) return "0 Bytes";
+
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
