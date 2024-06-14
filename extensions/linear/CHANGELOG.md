@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Improved Notifications] - 2024-06-14
+
+- Added support for all types of notifications, ensuring that "Unknown Notification" no longer appear.
+
 ## [Project Improvements] - 2024-06-11
 
 - Added support for all the latest Linear icons.
