@@ -28,8 +28,10 @@ export default function Console() {
                   typeof process.env.AWS_SSO_ACCOUNT_ID !== "undefined" &&
                   typeof process.env.AWS_SSO_ROLE_NAME !== "undefined" &&
                   typeof process.env.AWS_SSO_START_URL !== "undefined"
-                    ? `${encodeURI(process.env.AWS_SSO_START_URL)}console/?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=${encodeURI(AWS_URL_BASE)}${encodeURI(service.arg)}`
-                    : `${AWS_URL_BASE}${service.arg}`
+                    ? normalizeUrl(
+                        `${process.env.AWS_SSO_START_URL}console/?account_id=${encodeURI(process.env.AWS_SSO_ACCOUNT_ID)}&role_name=${encodeURI(process.env.AWS_SSO_ROLE_NAME)}&destination=${encodeURI(AWS_URL_BASE + service.arg)}`,
+                      )
+                    : normalizeUrl(`${AWS_URL_BASE}${service.arg}`)
                 }
               />
             </ActionPanel>
@@ -62,4 +64,11 @@ async function loadJSON() {
     .sort((a, b) => (a.title > b.title ? 1 : b.title > a.title ? -1 : 0));
 
   return services;
+}
+
+function normalizeUrl(url: string): string {
+  if (url.endsWith("/")) {
+    return url;
+  }
+  return `${url}/`;
 }

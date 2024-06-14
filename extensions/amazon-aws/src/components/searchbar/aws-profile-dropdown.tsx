@@ -149,7 +149,7 @@ const useProfileOptions = (): ProfileOption[] => {
     const region = configFile[name]?.region || (includeProfile && configFile[includeProfile]?.region);
     const sso_start_url =
       configFile[name]?.sso_start_url ||
-      (configFile[name]?.sso_session && ssoSessions[configFile[name]?.sso_session]?.sso_start_url);
+      (configFile[name]?.sso_session && ssoSessions[configFile[name].sso_session!]?.sso_start_url);
     const sso_account_id =
       configFile[name]?.sso_account_id || (includeProfile && configFile[includeProfile]?.sso_account_id);
     const sso_role_name =
