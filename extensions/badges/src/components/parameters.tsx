@@ -1,30 +1,49 @@
-import { Color as Colour, Detail, Icon, LaunchType, open } from "@raycast/api";
+import { Color as Colour, Detail, Icon, LaunchType, open, useNavigation } from "@raycast/api";
 import { crossLaunchCommand } from "raycast-cross-extension";
 import { badgeSizes, badgeStyles, dynamicBadgeTypes } from "../constants.js";
-import { Badge } from "../types.js";
+import { Input } from "./input.js";
+import { Badge, FieldName, OnBadgeChange, ParameterProps } from "../types.js";
 import { ellipsis, getTagColor, pickColor } from "../utils.js";
 
-export type ParameterProps = {
-  badge: Badge;
-  onChange: (badge: Badge) => void;
-  onInput: (input: { title: string; value?: string }) => void;
-};
-
-export const BaseInput = ({
+export const EditButton = ({
   fieldName,
   badge,
-  onInput,
-}: ParameterProps & { fieldName: keyof Omit<Badge, "$icon"> }) => (
-  <Detail.Metadata.TagList title={fieldName}>
-    <Detail.Metadata.TagList.Item text={ellipsis(badge[fieldName])} color={Colour.Green} />
+  onChange,
+}: {
+  fieldName: FieldName;
+  badge: Badge;
+  onChange: OnBadgeChange;
+}) => {
+  const { pop, push } = useNavigation();
+  return (
     <Detail.Metadata.TagList.Item
       icon={Icon.Pencil}
       text="edit"
       color={Colour.SecondaryText}
-      onAction={() => onInput({ title: fieldName, value: badge[fieldName] })}
+      onAction={() => {
+        push(
+          <Input
+            title={fieldName}
+            value={badge[fieldName]}
+            onSubmit={(values) => {
+              onChange({ ...badge, [fieldName]: values[fieldName] });
+              pop();
+            }}
+          />,
+        );
+      }}
     />
-  </Detail.Metadata.TagList>
-);
+  );
+};
+
+export const BaseInput = ({ fieldName, badge, onChange }: ParameterProps & { fieldName: FieldName }) => {
+  return (
+    <Detail.Metadata.TagList title={fieldName}>
+      <Detail.Metadata.TagList.Item text={ellipsis(badge[fieldName])} color={Colour.Green} />
+      <EditButton fieldName={fieldName} badge={badge} onChange={onChange} />
+    </Detail.Metadata.TagList>
+  );
+};
 
 export const BaseSelect = ({
   fieldName,
@@ -47,7 +66,7 @@ export const BaseSelect = ({
 
 export const Label = (props: ParameterProps) => <BaseInput fieldName="label" {...props} />;
 
-export const Message = ({ badge, onChange, onInput }: ParameterProps) => {
+export const Message = ({ badge, onChange }: ParameterProps) => {
   return (
     <Detail.Metadata.TagList title="message">
       <Detail.Metadata.TagList.Item
@@ -56,17 +75,12 @@ export const Message = ({ badge, onChange, onInput }: ParameterProps) => {
         onAction={() => onChange({ ...badge, message: undefined })}
       />
       <Detail.Metadata.TagList.Item text={ellipsis(badge.message) || ""} color={getTagColor(Boolean(badge.message))} />
-      <Detail.Metadata.TagList.Item
-        icon={Icon.Pencil}
-        text="edit"
-        color={Colour.SecondaryText}
-        onAction={() => onInput({ title: "message", value: badge.message })}
-      />
+      <EditButton fieldName="message" badge={badge} onChange={onChange} />
     </Detail.Metadata.TagList>
   );
 };
 
-export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
+export const Color = ({ badge, onChange }: ParameterProps) => {
   return (
     <Detail.Metadata.TagList title="color">
       <Detail.Metadata.TagList.Item text={badge.color} color={badge.color} />
@@ -87,19 +101,12 @@ export const Color = ({ badge, onChange, onInput }: ParameterProps) => {
           await pickColor({ field: "color" });
         }}
       />
-      <Detail.Metadata.TagList.Item
-        icon={Icon.Pencil}
-        text="edit"
-        color={Colour.SecondaryText}
-        onAction={() => {
-          onInput({ title: "color", value: badge.color });
-        }}
-      />
+      <EditButton fieldName="color" badge={badge} onChange={onChange} />
     </Detail.Metadata.TagList>
   );
 };
 
-export const LabelColor = ({ badge, onChange, onInput }: ParameterProps) => {
+export const LabelColor = ({ badge, onChange }: ParameterProps) => {
   return (
     <>
       {badge.label && (
@@ -127,21 +134,15 @@ export const LabelColor = ({ badge, onChange, onInput }: ParameterProps) => {
               await pickColor({ field: "labelColor" });
             }}
           />
-          <Detail.Metadata.TagList.Item
-            icon={Icon.Pencil}
-            text="edit"
-            color={Colour.SecondaryText}
-            onAction={() => onInput({ title: "labelColor", value: badge.labelColor })}
-          />
+          <EditButton fieldName="labelColor" badge={badge} onChange={onChange} />
         </Detail.Metadata.TagList>
       )}
     </>
   );
 };
 
-export const Logo = ({ badge, onChange, onInput }: ParameterProps) => {
+export const Logo = ({ badge, onChange }: ParameterProps) => {
   const { $icon, logoColor, logoSize } = badge;
-
   return (
     <>
       <Detail.Metadata.TagList title="logo">
@@ -198,12 +199,7 @@ export const Logo = ({ badge, onChange, onInput }: ParameterProps) => {
                 await pickColor({ field: "logoColor" });
               }}
             />
-            <Detail.Metadata.TagList.Item
-              icon={Icon.Pencil}
-              text="edit"
-              color={Colour.SecondaryText}
-              onAction={() => onInput({ title: "logoColor", value: logoColor })}
-            />
+            <EditButton fieldName="logoColor" badge={badge} onChange={onChange} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="logoSize">
             {badgeSizes.map((badgeSize) => (

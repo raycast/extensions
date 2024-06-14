@@ -89,6 +89,10 @@
           "required": true,
           "data": [
             {
+              "value": "week",
+              "title": "This week"
+            },
+            {
               "value": "recent",
               "title": "Last 4 weeks"
             },
@@ -135,7 +139,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.71.0",
-    "@raycast/utils": "^1.14.0",
+    "@raycast/utils": "^1.15.0",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

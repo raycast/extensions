@@ -9,6 +9,10 @@
     "Applications",
     "System"
   ],
+  "keywords": [
+    "quit",
+    "app"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -40,7 +44,7 @@
           "type": "dropdown",
           "description": "Set the number of columns of the app items. (Only works with Grid layout)",
           "required": false,
-          "title": "App Item Coloums",
+          "title": "App Item Columns",
           "default": "8",
           "data": [
             {
@@ -142,18 +146,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.2",
+    "@raycast/api": "^1.76.0",
     "run-applescript": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "20.11.16",
-    "@types/react": "18.2.52",
-    "@typescript-eslint/eslint-plugin": "^6.20.0",
-    "@typescript-eslint/parser": "^6.20.0",
-    "eslint": "^8.56.0",
+    "@types/node": "20.14.2",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

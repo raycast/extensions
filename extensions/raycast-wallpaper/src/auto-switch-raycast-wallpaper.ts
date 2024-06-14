@@ -1,13 +1,13 @@
 import { cache } from "./utils/common-utils";
 import { CacheKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
 import { RaycastWallpaper } from "./types/types";
-import { captureException, closeMainWindow, environment, LaunchType, showHUD } from "@raycast/api";
+import { captureException, closeMainWindow, environment, getPreferenceValues, LaunchType, showHUD } from "@raycast/api";
 import axios from "axios";
 import { autoSetWallpaper } from "./utils/applescript-utils";
 
 export default async () => {
-  await closeMainWindow();
   if (environment.launchType === LaunchType.UserInitiated) {
+    await closeMainWindow();
     await showHUD("🖥️ Setting wallpaper...");
   }
   await getRandomWallpaper();
@@ -15,6 +15,16 @@ export default async () => {
 
 export const getRandomWallpaper = async () => {
   try {
+    const { refreshIntervalSeconds } = getPreferenceValues<Preferences.AutoSwitchRaycastWallpaper>();
+    const lastRefreshTime = cache.get(CacheKey.LAST_REFRESH_TIME);
+    if (
+      environment.launchType === LaunchType.Background &&
+      lastRefreshTime &&
+      Math.floor(Date.now() / 1000) < Number(lastRefreshTime) + Number(refreshIntervalSeconds)
+    ) {
+      return;
+    }
+
     const cacheString = cache.get(CacheKey.WALLPAPER_LIST_CACHE);
     const _wallpaperList = typeof cacheString === "undefined" ? [] : (JSON.parse(cacheString) as RaycastWallpaper[]);
 
@@ -28,6 +38,8 @@ export const getRandomWallpaper = async () => {
     if (_wallpaperList.length !== 0) {
       const randomImage = wallpaperList[Math.floor(Math.random() * wallpaperList.length)];
       await autoSetWallpaper(randomImage);
+      // cache last refresh time
+      cache.set(CacheKey.LAST_REFRESH_TIME, `${Math.floor(Date.now() / 1000)}`);
     } else {
       //cache picture
       await axios({
@@ -47,6 +59,8 @@ export const getRandomWallpaper = async () => {
 
           //cache list
           cache.set(CacheKey.WALLPAPER_LIST_CACHE, JSON.stringify(_raycastWallpaper));
+          // cache last refresh time
+          cache.set(CacheKey.LAST_REFRESH_TIME, `${Math.floor(Date.now() / 1000)}`);
         })
         .catch((error) => {
           captureException(error);

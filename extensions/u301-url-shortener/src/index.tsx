@@ -1,5 +1,5 @@
 import { getSelectedText, Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
+import fetch, { Headers } from "node-fetch";
 
 function isValidURL(string: string) {
   const res = string.match(
@@ -24,7 +24,15 @@ export default async function Command() {
       style: Toast.Style.Animated,
       title: "Shortening",
     });
-    const res = await fetch(`https://api.u301.com/v2/shorten?url=${encodeURIComponent(selectedText)}`);
+    const headers = new Headers({
+      "Content-Type": "application/json",
+    });
+    if (preferences.accessToken) {
+      headers.append("Authorization", `Bearer ${preferences.accessToken}`);
+    }
+    const res = await fetch(`https://api.u301.com/v2/shorten?url=${encodeURIComponent(selectedText)}`, {
+      headers,
+    });
     const { shortened, message = "Failed to shorten" } = (await res.json()) as { shortened: string; message?: string };
     if (!shortened) {
       return reportError({ message });

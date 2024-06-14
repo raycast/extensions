@@ -15,21 +15,19 @@ import {
 import {
   CloudFormationClient,
   DescribeStacksCommand,
-  Export,
-  ListExportsCommand,
-  ListStackResourcesCommand,
-  ListStacksCommand,
-  StackResourceSummary,
   StackSummary,
   UpdateTerminationProtectionCommand,
 } from "@aws-sdk/client-cloudformation";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedState } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { getErrorMessage, isReadyToFetch, resourceToConsoleLink } from "./util";
+import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import { useExports, useStackResources, useStacks } from "./hooks/use-cfn";
 
 export default function CloudFormation() {
-  const [isExportsEnabled, setExportsEnabled] = useCachedState<boolean>("aws-cfn-exports-enabled", false);
+  const [isExportsEnabled, setExportsEnabled] = useCachedState<boolean>("show", false, {
+    cacheNamespace: "aws-cfn-exports",
+  });
 
   if (isExportsEnabled) {
     return <CloudFormationExports setExportsEnabled={setExportsEnabled} />;
@@ -38,13 +36,14 @@ export default function CloudFormation() {
 }
 
 const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value: boolean) => void }) => {
-  const { data: stacks, error, isLoading, revalidate } = useCachedPromise(fetchStacks);
+  const { stacks, error, isLoading, revalidate, pagination } = useStacks();
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter stacks by name, status or description..."
       filtering
+      pagination={pagination}
       navigationTitle="CloudFormation Stacks"
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
@@ -62,7 +61,7 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
         .sort((a, b) => `${a.StackName}`.localeCompare(`${b.StackName}`))
         .map((s) => (
           <List.Item
-            key={s.StackId}
+            key={s.stackKey}
             keywords={[s.StackName || "", s.StackStatus || "", s.TemplateDescription || ""]}
             icon={"aws-icons/cfn/stack.png"}
             title={s.StackName || ""}
@@ -110,13 +109,14 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
 };
 
 const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
-  const { data: resources, error, isLoading } = useCachedPromise(fetchStackResources, [stack.StackName || ""]);
+  const { resources, error, isLoading, pagination } = useStackResources(stack.StackName || "");
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter resource by name, type or status..."
       filtering
+      pagination={pagination}
       navigationTitle="Stack Resources"
     >
       {error && (
@@ -131,7 +131,7 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
 
         return (
           <List.Item
-            key={r.LogicalResourceId}
+            key={r.resourceKey}
             icon={{ source: consoleLink ? Icon.Link : Icon.Tag, tintColor: Color.Blue }}
             title={r.PhysicalResourceId || ""}
             subtitle={r.ResourceType}
@@ -160,13 +160,14 @@ const CloudFormationExports = ({
   revalidateStacks?: () => void;
   setExportsEnabled: (value: boolean) => void;
 }) => {
-  const { data: exports, isLoading, revalidate, error } = useCachedPromise(fetchExports, []);
+  const { exports, isLoading, revalidate, error, pagination } = useExports();
   const { push, pop } = useNavigation();
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter exports by name, value or stack..."
+      pagination={pagination}
       filtering
       navigationTitle="CloudFormation Exports"
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
@@ -185,7 +186,7 @@ const CloudFormationExports = ({
         .sort((a, b) => `${a.Name}`.localeCompare(`${b.Name}`))
         .map((e) => (
           <List.Item
-            key={e.Name}
+            key={e.exportKey}
             icon={{ source: Icon.Hashtag, tintColor: Color.Purple }}
             title={e.Value || ""}
             subtitle={e.Name}
@@ -217,47 +218,6 @@ const CloudFormationExports = ({
         ))}
     </List>
   );
-};
-
-const fetchStacks = async (token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> => {
-  if (!isReadyToFetch()) return [];
-  const { NextToken, StackSummaries } = await new CloudFormationClient({}).send(
-    new ListStacksCommand({ NextToken: token }),
-  );
-
-  const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
-
-  if (NextToken) {
-    return fetchStacks(NextToken, combinedStacks);
-  }
-
-  return combinedStacks.filter((stack) => stack.StackStatus !== "DELETE_COMPLETE");
-};
-
-const fetchStackResources = async (
-  stackName: string,
-  token?: string,
-  stacks?: StackResourceSummary[],
-): Promise<StackResourceSummary[]> => {
-  const { StackResourceSummaries, NextToken } = await new CloudFormationClient({}).send(
-    new ListStackResourcesCommand({ StackName: stackName, NextToken: token }),
-  );
-
-  if (NextToken) {
-    return fetchStackResources(stackName, NextToken, [...(stacks || []), ...(StackResourceSummaries || [])]);
-  }
-
-  return [...(stacks || []), ...(StackResourceSummaries || [])];
-};
-
-const fetchExports = async (token?: string, exports?: Export[]): Promise<Export[]> => {
-  const { Exports, NextToken } = await new CloudFormationClient({}).send(new ListExportsCommand({ NextToken: token }));
-
-  if (NextToken) {
-    return fetchExports(NextToken, [...(exports || []), ...(Exports || [])]);
-  }
-
-  return [...(exports || []), ...(Exports || [])];
 };
 
 const updateTerminationProtection = async (stackName: string) => {

@@ -18,6 +18,7 @@ import {
   cancelBooking,
   formatDateTime,
   formatTime,
+  updateBooking,
   useBookings,
   useCurrentUser,
 } from "./services/cal.com";
@@ -43,6 +44,21 @@ export default function viewBookings() {
       primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
     });
   }
+
+  const handleUpdateBookingStatus = async (bookingId: number, status: string) => {
+    const data = { status };
+    try {
+      await updateBooking(bookingId, data);
+      revalidate();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Booking Status Updated",
+        message: `Booking status has been successfully updated to ${status.toLowerCase()}`,
+      });
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to update booking status" });
+    }
+  };
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
@@ -70,6 +86,32 @@ export default function viewBookings() {
                 onAction={() => setIsShowingDetail(!isShowingDetail)}
               />
               <Action.OpenInBrowser title="Open in Browser" url={`https://cal.com/${user?.username}/${item.uid}`} />
+              <ActionPanel.Submenu title="Update Status" icon={Icon.Pencil} shortcut={{ modifiers: ["cmd"], key: "s" }}>
+                <Action
+                  title="Accept"
+                  icon={Icon.CheckCircle}
+                  onAction={async () => {
+                    handleUpdateBookingStatus(item.id, "ACCEPTED");
+                    revalidate();
+                  }}
+                />
+                <Action
+                  title="Reject"
+                  icon={Icon.XMarkCircle}
+                  onAction={async () => {
+                    handleUpdateBookingStatus(item.id, "REJECTED");
+                    revalidate();
+                  }}
+                />
+                <Action
+                  title="Pending"
+                  icon={Icon.Clock}
+                  onAction={async () => {
+                    handleUpdateBookingStatus(item.id, "PENDING");
+                    revalidate();
+                  }}
+                />
+              </ActionPanel.Submenu>
               <Action.Push
                 title="Cancel Booking"
                 icon={Icon.XMarkCircle}

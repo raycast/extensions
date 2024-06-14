@@ -4,6 +4,12 @@
 
 - Improve performance when fetching users and channels in large workspace
 
+## [Improvements and Fixes] - 2024-06-14
+
+- Adds action to open in browser apart from slack app
+- Only show Open in Slack option in case Slack app is installed on the system
+- Fixed channelId when users are selected for unread messages
+
 ## [Improve Search command UX] - 2023-04-16
 
 - Automatically close Slack right sidebar after navigating to a user chat
