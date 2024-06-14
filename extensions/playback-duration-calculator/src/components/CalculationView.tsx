@@ -6,7 +6,7 @@ import { PlaybackSpeed, CalculationOutput } from "../utils/types";
 import Actions from "./Actions";
 
 export default function CalculationView() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const [hours, setHours] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
