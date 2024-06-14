@@ -6,7 +6,7 @@ import {
   Icon,
   Keyboard,
   Clipboard,
-  showToast
+  showToast,
 } from "@raycast/api";
 import Axios from "axios";
 import { useState } from "react";
@@ -98,7 +98,7 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Download} title="Download Video" onSubmit={handleSubmit} />
           <Action.SubmitForm
-			 	icon={Icon.Finder}
+            icon={Icon.Finder}
             title="Change Download Folder"
             onSubmit={async (values: { downloadFolder: string[] }) => {
               const folder = values.downloadFolder[0];
