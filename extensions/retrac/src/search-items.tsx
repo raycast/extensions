@@ -23,13 +23,13 @@ function SearchItems() {
       isShowingDetail={allItems?.length !== 0 && true}
       searchBarPlaceholder={"Search items"}
     >
-      <ListEmptyView title={"No Items"} icon={Icon.Link} />
+      <ListEmptyView title={"No Items"} icon={Icon.Info} />
       {allItems?.map((value, index) => {
         return (
           <List.Item
             key={index}
             icon={Icon.Info}
-            title={value.sku}
+            title={value.sku + " -- " + value.description}
             detail={
               <List.Item.Detail
                 metadata={
