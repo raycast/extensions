@@ -17,6 +17,7 @@ export const LOCAL_STORAGE_KEY = {
   VAULT_LOCK_REASON: "vaultLockReason",
   VAULT_FAVORITE_ORDER: "vaultFavoriteOrder",
   VAULT_LAST_STATUS: "lastVaultStatus",
+  CLI_VERSION: "cliVersion",
 } as const;
 
 export const VAULT_LOCK_MESSAGES = {
@@ -78,6 +79,7 @@ export const CACHE_KEYS = {
   VAULT: "vault",
   CURRENT_FOLDER_ID: "currentFolderId",
   SEND_TYPE_FILTER: "sendTypeFilter",
+  CLI_VERSION: "cliVersion",
 } as const;
 
 export const ITEM_TYPE_TO_ICON_MAP: Record<ItemType, Icon> = {
