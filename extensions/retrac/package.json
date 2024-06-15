@@ -5,7 +5,6 @@
   "description": "Retrac is an inventory management tool for business owners. This extension allows you to create and retrieve your items directly inside Raycast.",
   "icon": "command-icon.png",
   "author": "adi_amar",
-  "owner": "retrac",
   "access": "public",
   "categories": [
     "Productivity",
