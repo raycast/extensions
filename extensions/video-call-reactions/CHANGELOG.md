@@ -1,6 +1,6 @@
 # Video Call Reactions Changelog
 
-# [1.2.3] - 2024-06- 15
+# [1.2.3] - 2024-06-15
 ## Changed
 - Improved photos in Readme to local media folder
 - Changing my Raycast account to correct one
