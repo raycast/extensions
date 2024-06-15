@@ -8,11 +8,11 @@ import { useCachedPromise } from "@raycast/utils";
 
 import type { MDNResponse } from "@/types";
 
-export const useSearch = (query: string | null, locale: string) => {
+export const useSearch = (query: string, locale: string) => {
   const abortable = useRef<AbortController>();
   const url = new URL("https://developer.mozilla.org/api/v1/search");
 
-  url.searchParams.append("q", query || "");
+  url.searchParams.append("q", query);
   url.searchParams.append("sort", "best");
   url.searchParams.append("locale", locale);
 
