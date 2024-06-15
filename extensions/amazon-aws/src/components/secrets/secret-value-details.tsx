@@ -20,11 +20,13 @@ export const SecretValueDetails = ({ secret }: { secret: SecretListEntry }) => {
           {secret.OwningService && <Detail.Metadata.Label title="Owning Service" text={secret.OwningService} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Creation Date" text={secret.CreatedDate?.toISOString()} icon={Icon.Calendar} />
-          <Detail.Metadata.Label
-            title="Last Accessed"
-            text={secret.LastAccessedDate?.toISOString()}
-            icon={Icon.Calendar}
-          />
+          {secret.LastAccessedDate && (
+            <Detail.Metadata.Label
+              title="Last Accessed"
+              text={secret.LastAccessedDate?.toISOString()}
+              icon={Icon.Calendar}
+            />
+          )}
           {secret.LastRotatedDate && (
             <Detail.Metadata.Label
               title="Last Rotated"

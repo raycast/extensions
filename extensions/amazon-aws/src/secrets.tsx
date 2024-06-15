@@ -64,11 +64,13 @@ export default function Secrets() {
                       text={secret.CreatedDate?.toISOString()}
                       icon={Icon.Calendar}
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="Last Accessed"
-                      text={secret.LastAccessedDate?.toISOString()}
-                      icon={Icon.Calendar}
-                    />
+                    {secret.LastAccessedDate && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Last Accessed"
+                        text={secret.LastAccessedDate?.toISOString()}
+                        icon={Icon.Calendar}
+                      />
+                    )}
                     {secret.LastRotatedDate && (
                       <List.Item.Detail.Metadata.Label
                         title="Last Rotated"
@@ -159,7 +161,11 @@ export default function Secrets() {
               </ActionPanel>
             }
             accessories={[
-              { date: secret.LastAccessedDate, tooltip: "Last Access", icon: Icon.Calendar },
+              {
+                date: secret.LastAccessedDate ?? secret.LastChangedDate,
+                tooltip: secret.LastAccessedDate ? "Last Accessed" : "Last Changed",
+                icon: Icon.Calendar,
+              },
               {
                 icon: secret.RotationEnabled
                   ? { source: Icon.Checkmark, tintColor: Color.Green }
