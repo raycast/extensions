@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Image, Icon, Keyboard, List } from "@raycas
 import { useCachedState } from "@raycast/utils";
 import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
-import { resourceToConsoleLink } from "./util";
+import { resourceToConsoleLink, uniqBy } from './util';
 import { AwsAction } from "./components/common/action";
 import { useSecrets } from "./hooks/use-secrets";
 import { SecretValueDetails } from "./components/secrets/secret-value-details";
@@ -34,7 +34,9 @@ export default function Secrets() {
       {!error && secrets?.length === 0 && (
         <List.EmptyView title="No secrets found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
-      {secrets?.map((secret) => (
+      {uniqBy(secrets || [], (secret) => secret.ARN)
+        .sort((a, b) => a.Name.localeCompare(b.Name))
+        .map((secret) => (
         <List.Item
           key={secret.secretKey}
           icon={{ source: "aws-icons/secretsmanager.png", mask: Image.Mask.RoundedRectangle }}
@@ -92,7 +94,7 @@ export default function Secrets() {
                   {secret.SecretVersionsToStages &&
                     Object.keys(secret.SecretVersionsToStages).map((version) => (
                       <List.Item.Detail.Metadata.TagList title={version} key={version}>
-                        {(secret.SecretVersionsToStages?.[version] ?? []).map((stage) => (
+                        {(secret.SecretVersionsToStages?.[version] ?? []).map((stage: string) => (
                           <List.Item.Detail.Metadata.TagList.Item
                             text={stage}
                             icon={Icon.Tag}
