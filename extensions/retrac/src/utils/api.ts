@@ -5,9 +5,6 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { BASE_API_URL } from "./constants";
 import { apiKey, projectSlug } from "./env";
 import { DomainResponse } from "./types";
-function hasHttps(url: string) {
-  return url.startsWith("https://");
-}
 
 export const useCreateItem = () => {
   return useMutation({
