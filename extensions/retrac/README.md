@@ -1,6 +1,6 @@
 # Retrac
 
-Retrac is an inventory manager for business owner. This extension allows you to create and retrieve your items directly inside Raycast.
+Retrac is an inventory manager for business owners. This extension allows you to create and retrieve your items directly inside Raycast.
 
 ## 🚀 Getting Started
 
@@ -13,4 +13,4 @@ Retrac is an inventory manager for business owner. This extension allows you to 
 
    d. `Copy` the once shown **API Key**
 
-1. **Get your workspace slug**: Your workspace slug is the unique identifier of your workspace. You can find it in the URL of your workspace page. For example, if your workspace URL is `https://app.retrac.co/workspaces/my-workspace`, your workspace slug is `my-workspace`.
+1. **Get your workspace slug**: Your workspace slug is the unique identifier of your workspace. You can find it in the URL of your workspace page. For example, if your workspace URL is `https://app.retrac.co/my-workspace`, your workspace slug is `my-workspace`.
