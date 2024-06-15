@@ -2,9 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "retrac",
   "title": "Retrac",
-  "description": "Retrac is an inventory manager for business owner. This extension allows you to create and retrieve your items directly inside Raycast.",
+  "description": "Retrac is an inventory management tool for business owners. This extension allows you to create and retrieve your items directly inside Raycast.",
   "icon": "command-icon.png",
-  "author": "quuu",
+  "author": "adi_amar",
+  "owner": "retrac",
+  "access": "public",
   "categories": [
     "Productivity",
     "Developer Tools",
