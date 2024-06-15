@@ -9,9 +9,7 @@ import {
   List,
   showToast,
   Toast,
-  useNavigation,
   Clipboard,
-  Navigation,
 } from "@raycast/api";
 import {
   CloudFormationClient,
@@ -35,15 +33,14 @@ export default function CloudFormation() {
   const [resourceType, setResourceType] = useCachedState<ResourceType>("resource-type", ResourceType.Stacks, {
     cacheNamespace: "aws-cfn-exports",
   });
-  const { push, pop } = useNavigation();
 
   if (resourceType === ResourceType.Exports) {
-    return <CloudFormationExports {...{ setResourceType, push, pop }} />;
+    return <CloudFormationExports {...{ setResourceType }} />;
   }
-  return <CloudFormationStacks {...{ setResourceType, push, pop }} />;
+  return <CloudFormationStacks {...{ setResourceType }} />;
 }
 
-const CloudFormationStacks = ({ setResourceType, push, pop }: SetResourceType & Navigation) => {
+const CloudFormationStacks = ({ setResourceType }: SetResourceType) => {
   const { stacks, error, isLoading, revalidate, pagination } = useStacks();
 
   return (
@@ -93,18 +90,9 @@ const CloudFormationStacks = ({ setResourceType, push, pop }: SetResourceType & 
                   <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} />
                   <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} />
                 </ActionPanel.Section>
-                <ActionPanel.Section title="Other Resources">
-                  <Action
-                    icon={Icon.Eye}
-                    title={"Show Exports"}
-                    onAction={() => {
-                      pop();
-                      push(<CloudFormationExports {...{ setResourceType, push, pop }} />);
-                      setResourceType(ResourceType.Exports);
-                    }}
-                    shortcut={{ modifiers: ["ctrl"], key: "e" }}
-                  />
-                </ActionPanel.Section>
+                <AwsAction.SwitchResourceType
+                  {...{ setResourceType, current: ResourceType.Stacks, enumType: ResourceType }}
+                />
               </ActionPanel>
             }
             accessories={[
@@ -162,7 +150,7 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
   );
 };
 
-const CloudFormationExports = ({ setResourceType, push, pop }: SetResourceType & Navigation) => {
+const CloudFormationExports = ({ setResourceType }: SetResourceType) => {
   const { exports, isLoading, revalidate, error, pagination } = useExports();
 
   return (
@@ -198,18 +186,9 @@ const CloudFormationExports = ({ setResourceType, push, pop }: SetResourceType &
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} />
                 <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} />
-                <ActionPanel.Section title="Resource Types">
-                  <Action
-                    icon={Icon.Eye}
-                    title="Show Stacks"
-                    onAction={() => {
-                      pop();
-                      push(<CloudFormationStacks {...{ setResourceType, push, pop }} />);
-                      setResourceType(ResourceType.Stacks);
-                    }}
-                    shortcut={{ modifiers: ["ctrl"], key: "s" }}
-                  />
-                </ActionPanel.Section>
+                <AwsAction.SwitchResourceType
+                  {...{ setResourceType, current: ResourceType.Exports, enumType: ResourceType }}
+                />
               </ActionPanel>
             }
           />
