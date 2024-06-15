@@ -2,15 +2,27 @@
 // @ts-expect-error
 import utd from "unicode-text-decorator";
 import { Calendar } from "calendar";
-import { showWeekNumber, WeekStart, weekStart } from "../types/preferences";
+import { largeCalendar, showWeekNumber, WeekStart, weekStart } from "../types/preferences";
 import { captureException } from "@raycast/api";
 
-const calTitleDivider = replaceWithThinSpace(" ") + replaceWithFourPerEmSpace(" ");
-const calSpaceDivider = replaceWithFourPerEmSpace("  ");
-const calSingleNumber = replaceWithFourPerEmSpace("  ");
 const calThinSpace = replaceWithThinSpace(" ");
-const calTwoThinSpace = replaceWithThinSpace("  ");
-const calSpace = " ";
+const calFourPerEmSpaceDivider = replaceWithFourPerEmSpace(" ");
+const CalSpace = " ";
+
+const CalTitleStartPadding = largeCalendar
+  ? calThinSpace.repeat(7) + calFourPerEmSpaceDivider.repeat(1)
+  : calThinSpace.repeat(5) + calFourPerEmSpaceDivider.repeat(4);
+const CalTitleSpace = largeCalendar
+  ? calThinSpace.repeat(4) + calThinSpace.repeat(5) + calFourPerEmSpaceDivider
+  : calThinSpace.repeat(5) + calFourPerEmSpaceDivider;
+const CalDayStartPadding = calThinSpace.repeat(3) + calFourPerEmSpaceDivider.repeat(2);
+const CalDaySpace = largeCalendar
+  ? calThinSpace.repeat(4) + calThinSpace.repeat(4) + calFourPerEmSpaceDivider.repeat(2)
+  : calThinSpace.repeat(4) + calFourPerEmSpaceDivider.repeat(2);
+
+const zeroReplaceSpace = largeCalendar
+  ? calThinSpace.repeat(8) + calFourPerEmSpaceDivider.repeat(0)
+  : calThinSpace.repeat(6) + calFourPerEmSpaceDivider.repeat(1);
 
 // Current date
 const getCurDate = (date: Date = new Date()) => {
@@ -39,7 +51,7 @@ function macDateFormat() {
   const date = new Date();
   const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
   const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
-  return calSpace + weekDayShort + calSpace + monthShort + calSpace + curDay;
+  return CalSpace + weekDayShort + CalSpace + monthShort + CalSpace + curDay;
 }
 
 // Calendar date title: Sat Jun 15 2024
@@ -54,7 +66,13 @@ function getCalDateTitle(year: number, month: number, day: number = 1): string {
     const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
     const weekDayShort = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(new Date());
     return utd.decorate(
-      weekDayShort + calSpaceDivider + monthShort + calSpaceDivider + curDay + calSpaceDivider + curYear,
+      weekDayShort +
+        calFourPerEmSpaceDivider.repeat(2) +
+        monthShort +
+        calFourPerEmSpaceDivider.repeat(2) +
+        curDay +
+        calFourPerEmSpaceDivider.repeat(2) +
+        curYear,
       "bold_sans_serif",
     );
   } catch (e) {
@@ -71,15 +89,14 @@ export const calTitles = () => {
       ? ["Su", "Mo", "Tu", "We", "Th", "\u2009Fr", "Sa"]
       : ["Mo", "Tu", "We", "Th", "Fr", "\u2009Sa", "Su"];
   if (showWeekNumber) {
-    calTitle.unshift(calTwoThinSpace + calTitleDivider + calTitleDivider + calThinSpace + calSpaceDivider);
+    calTitle.unshift(CalTitleStartPadding);
   }
   return calTitle;
 };
 
-export const calWeekTitle = utd.decorate(
-  calTitles().join(calThinSpace + calThinSpace + calTwoThinSpace + calTitleDivider),
-  "sans_serif",
-);
+export const calWeekTitle = () => {
+  return utd.decorate(calTitles().join(CalTitleSpace), "sans_serif");
+};
 
 // Calendar first column: 1 2 3 4 5 6 7, for calendar week number
 export const calFirstColumn = (year: number = curYear, month: number = curMonth) => {
@@ -93,8 +110,7 @@ export const calData = (year: number = curYear, month: number = curMonth) => {
   try {
     const cal = new Calendar(Number(weekStart));
     const calTable_ = cal.monthDays(year, month);
-    const formattedArray_ = formatArray(calTable_);
-    return joinRows(formattedArray_);
+    return formatArray(calTable_);
   } catch (e) {
     captureException(e);
     console.error(e);
@@ -102,11 +118,12 @@ export const calData = (year: number = curYear, month: number = curMonth) => {
   }
 };
 
-function formatArray(input: number[][]): string[][] {
-  return input.map((row) => {
-    const formattedRow = row.map((item, index) => {
+function formatArray(input: number[][]) {
+  return input.map((row, index) => {
+    const zeroCount = row.filter((item) => item === 0).length;
+    const formattedRow = row.map((item) => {
       if (item === 0) {
-        return calThinSpace + calThinSpace + calTwoThinSpace + calSpaceDivider + calSpaceDivider;
+        return zeroReplaceSpace;
       } else {
         let itemStr = item.toString();
         // format day string
@@ -116,32 +133,32 @@ function formatArray(input: number[][]): string[][] {
           itemStr = replaceWithSansSerif(itemStr);
         }
 
-        // add space between numbers
+        // add space before single digit
         if (item < 10) {
           if (item === 1) {
-            itemStr = calThinSpace + itemStr;
+            itemStr = calFourPerEmSpaceDivider.repeat(1) + itemStr;
           } else {
-            itemStr = calSingleNumber + itemStr;
+            itemStr = calThinSpace.repeat(0) + calFourPerEmSpaceDivider.repeat(2) + itemStr;
           }
         }
-        if (index === 0) {
-          return itemStr;
-        } else {
-          return calTwoThinSpace + calTwoThinSpace + itemStr;
-        }
+        return itemStr;
       }
     });
 
+    // final formatted calendar row
+    let finalRow: string;
     if (showWeekNumber) {
-      formattedRow.unshift(calSingleNumber);
+      finalRow = CalDayStartPadding + formattedRow.join(CalDaySpace);
+    } else {
+      finalRow = formattedRow.join(CalDaySpace);
     }
-
-    return formattedRow;
+    if (zeroCount <= 1 && index === 0) {
+      finalRow = calThinSpace.repeat(1) + finalRow;
+    } else if (zeroCount >= 5 && index === 0) {
+      finalRow = finalRow.replace(calThinSpace.repeat(1), "");
+    }
+    return finalRow;
   });
-}
-
-function joinRows(formattedArray: string[][]): string[] {
-  return formattedArray.map((row) => row.join(calSpaceDivider));
 }
 
 export function replaceWithSansSerif(input: string): string {

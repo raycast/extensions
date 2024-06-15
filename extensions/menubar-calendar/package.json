@@ -107,6 +107,14 @@
         },
         {
           "title": "Calendar Style",
+          "name": "largeCalendar",
+          "label": "Large Calendar",
+          "type": "checkbox",
+          "description": "Large calendar for more visibility",
+          "required": false,
+          "default": false
+        },
+        {
           "name": "highlightCalendar",
           "label": "Highlight Calendar",
           "type": "checkbox",
@@ -115,7 +123,6 @@
           "default": true
         },
         {
-          "title": "Extra Item",
           "name": "showWeekNumber",
           "label": "Show Week Number",
           "type": "checkbox",
@@ -124,6 +131,7 @@
           "default": true
         },
         {
+          "title": "Extra Items",
           "name": "showCalendar",
           "label": "Show Calendar",
           "type": "checkbox",

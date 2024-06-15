@@ -1,3 +1,3 @@
 # Menubar Calendar
 
-Show calendar in the menu bar
+Show calendar in the menu bar.

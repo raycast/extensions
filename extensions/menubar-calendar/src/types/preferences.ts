@@ -5,6 +5,7 @@ interface Preferences {
   menubarStyle: string;
   menubarIconStyle: string;
   menubarItemIconStyle: string;
+  largeCalendar: boolean;
   highlightCalendar: boolean;
   showWeekNumber: boolean;
   showCalendar: boolean;
@@ -17,6 +18,7 @@ export const {
   menubarStyle,
   menubarIconStyle,
   menubarItemIconStyle,
+  largeCalendar,
   highlightCalendar,
   showWeekNumber,
   showCalendar,
