@@ -11,6 +11,7 @@ import {
   Toast,
   useNavigation,
   Clipboard,
+  Navigation,
 } from "@raycast/api";
 import {
   CloudFormationClient,
@@ -24,18 +25,25 @@ import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import { useExports, useStackResources, useStacks } from "./hooks/use-cfn";
 
+enum ResourceType {
+  Stacks = "Stacks",
+  Exports = "Exports",
+}
+type SetResourceType = { setResourceType: (value: ResourceType) => void };
+
 export default function CloudFormation() {
-  const [isExportsEnabled, setExportsEnabled] = useCachedState<boolean>("show", false, {
+  const [resourceType, setResourceType] = useCachedState<ResourceType>("resource-type", ResourceType.Stacks, {
     cacheNamespace: "aws-cfn-exports",
   });
+  const { push, pop } = useNavigation();
 
-  if (isExportsEnabled) {
-    return <CloudFormationExports setExportsEnabled={setExportsEnabled} />;
+  if (resourceType === ResourceType.Exports) {
+    return <CloudFormationExports {...{ setResourceType, push, pop }} />;
   }
-  return <CloudFormationStacks setExportsEnabled={setExportsEnabled} />;
+  return <CloudFormationStacks {...{ setResourceType, push, pop }} />;
 }
 
-const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value: boolean) => void }) => {
+const CloudFormationStacks = ({ setResourceType, push, pop }: SetResourceType & Navigation) => {
   const { stacks, error, isLoading, revalidate, pagination } = useStacks();
 
   return (
@@ -86,13 +94,14 @@ const CloudFormationStacks = ({ setExportsEnabled }: { setExportsEnabled: (value
                   <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Other Resources">
-                  <Action.Push
+                  <Action
                     icon={Icon.Eye}
                     title={"Show Exports"}
-                    target={
-                      <CloudFormationExports revalidateStacks={revalidate} setExportsEnabled={setExportsEnabled} />
-                    }
-                    onPush={() => setExportsEnabled(true)}
+                    onAction={() => {
+                      pop();
+                      push(<CloudFormationExports {...{ setResourceType, push, pop }} />);
+                      setResourceType(ResourceType.Exports);
+                    }}
                     shortcut={{ modifiers: ["ctrl"], key: "e" }}
                   />
                 </ActionPanel.Section>
@@ -153,15 +162,8 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
   );
 };
 
-const CloudFormationExports = ({
-  revalidateStacks,
-  setExportsEnabled,
-}: {
-  revalidateStacks?: () => void;
-  setExportsEnabled: (value: boolean) => void;
-}) => {
+const CloudFormationExports = ({ setResourceType, push, pop }: SetResourceType & Navigation) => {
   const { exports, isLoading, revalidate, error, pagination } = useExports();
-  const { push, pop } = useNavigation();
 
   return (
     <List
@@ -202,12 +204,8 @@ const CloudFormationExports = ({
                     title="Show Stacks"
                     onAction={() => {
                       pop();
-                      if (revalidateStacks) {
-                        revalidateStacks();
-                      } else {
-                        push(<CloudFormationStacks setExportsEnabled={setExportsEnabled} />);
-                      }
-                      setExportsEnabled(false);
+                      push(<CloudFormationStacks {...{ setResourceType, push, pop }} />);
+                      setResourceType(ResourceType.Stacks);
                     }}
                     shortcut={{ modifiers: ["ctrl"], key: "s" }}
                   />

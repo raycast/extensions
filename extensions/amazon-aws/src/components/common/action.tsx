@@ -1,4 +1,4 @@
-import { Action, ActionPanel } from "@raycast/api";
+import { Action, ActionPanel, Keyboard } from "@raycast/api";
 
 export class AwsAction {
   public static Console = ({ url }: { url: string }) => (
@@ -8,7 +8,7 @@ export class AwsAction {
         key="copyConsoleLink"
         title="Copy Link"
         content={url}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
       />
     </ActionPanel.Section>
   );

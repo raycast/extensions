@@ -1,5 +1,10 @@
 # Amazon AWS Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- CodePipeline: Adds action to retry failed stage, stop ongoing execution and toggle stage transition
+- Secrets Manager: Retrieves secret value in a new Detail navigation and adds extra metadata
+
 ## [SQS, CFN, DDB, CW Logs commands] - 2024-06-14
 
 - Native raycast pagination support for DDB, SQS, CFN and CW logs commands

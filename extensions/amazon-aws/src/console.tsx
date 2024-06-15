@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, List, Image } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { useCachedPromise } from "@raycast/utils";
 import { AWS_URL_BASE } from "./constants";
@@ -14,7 +14,7 @@ export default function Console() {
           key={service.uid}
           title={service.title}
           subtitle={service.subtitle}
-          icon={service.icon.path}
+          icon={{ source: service.icon.path, mask: Image.Mask.RoundedRectangle }}
           actions={
             <ActionPanel>
               <AwsAction.Console url={`${AWS_URL_BASE}${service.arg}`} />
