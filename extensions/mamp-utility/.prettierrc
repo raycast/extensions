@@ -1,0 +1,7 @@
+"tabWidth": 4              # How many spaces is used for a single tab
+"useTabs": true            # Use tab instead of space for indentation
+"singleQuote": false       # Convert all single quote into doubel quote if possible
+"insertPragma": false      # Do not insert the relevant @format/@prettier marker at the top of files when formatting
+"requirePragma": false     # Does the file need to have @format/@prettier marker to be formatted ?
+"arrowParens": "always"    # Transform any single parameter function such as x=>x into (x)=>x
+"bracketSpacing": true     # If true: { foo: bar }; If false: {foo: bar}
