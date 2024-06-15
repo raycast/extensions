@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdown-to-rich-text",
+  "title": "Markdown to Rich Text",
+  "description": "Transform Markdown text into richly formatted RTF, enhancing readability and style for pasting into other applications.",
+  "icon": "command-icon.png",
+  "author": "yazanzaid00",
+  "mode": "no-view",
+  "preferences": [
+    {
+      "name": "pandocPath",
+      "type": "textfield",
+      "title": "Pandoc Path",
+      "description": "Specify the file path to your Pandoc installation for Markdown conversion.",
+      "placeholder": "/usr/local/bin/pandoc",
+      "tooltip": "Enter the file path to your Pandoc installation.",
+      "required": true,
+      "default": "/usr/local/bin/pandoc"
+    },
+    {
+      "name": "fontFamily",
+      "type": "textfield",
+      "title": "Font Family",
+      "description": "Specify the font family for the converted text.",
+      "placeholder": "e.g., Arial, Helvetica, sans-serif",
+      "default": "Helvetica, sans-serif",
+      "required": false
+    },
+    {
+      "name": "fontSize",
+      "type": "textfield",
+      "title": "Font Size",
+      "description": "Enter the font size for the converted text (10-36).",
+      "placeholder": "e.g., 14",
+      "default": "14",
+      "required": false
+    },
+    {
+      "name": "textColor",
+      "type": "textfield",
+      "title": "Text Color",
+      "description": "Specify the text color for the converted text.",
+      "placeholder": "e.g., #000000",
+      "default": "#000000",
+      "required": false
+    },
+    {
+      "name": "useExternalCss",
+      "type": "checkbox",
+      "title": "Use External CSS File",
+      "description": "Toggle this if you want to use an external CSS file instead of the specified styles.",
+      "label": "Use External CSS",
+      "required": false
+    },
+    {
+      "name": "cssHtmlPath",
+      "type": "textfield",
+      "title": "CSS HTML Path",
+      "description": "Specify the file path to your custom CSS HTML file that styles the converted Markdown text.",
+      "placeholder": "/path/to/your/markdown.css.html",
+      "tooltip": "Enter the file path to your custom CSS HTML file.",
+      "required": false
+    },
+    {
+      "name": "pasteAfterCopy",
+      "type": "checkbox",
+      "title": "Paste After Copy",
+      "description": "Toggle this if you want to paste the text into the foreground application after copying it to the clipboard.",
+      "label": "Paste After Copy",
+      "required": false,
+      "default": true
+    }
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Convert Markdown to Rich Text",
+      "description": "Easily convert Markdown text to richly formatted RTF, ready for use in your documents and notes.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.49.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
