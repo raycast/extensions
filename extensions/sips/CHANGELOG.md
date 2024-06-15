@@ -1,5 +1,9 @@
 # Image Modification Changelog
 
+## [Webp Image Quality Fix] - 2024-06-15
+
+- Fixed an issue when converting to webp degrades the quality of the image
+
 ## [WebP Hotfix] - 2024-01-29
 
 - Fixed some commands (e.g. convert) looking for WebP binaries in the wrong location
