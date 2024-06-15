@@ -5,7 +5,9 @@ import { useCreateItem } from "./utils/api"; // You will need to implement this 
 
 const queryClient = new QueryClient();
 
-export default function AddItemWrapper(props: LaunchProps<{ arguments: { sku: string; description?: string; quantity?: number; cost?: number } }>) {
+export default function AddItemWrapper(
+  props: LaunchProps<{ arguments: { sku: string; description?: string; quantity?: number; cost?: number } }>,
+) {
   return (
     <QueryClientProvider client={queryClient}>
       <AddItem arguments={props.arguments} launchType={LaunchType.UserInitiated} />
@@ -13,8 +15,15 @@ export default function AddItemWrapper(props: LaunchProps<{ arguments: { sku: st
   );
 }
 
-function AddItem(props: LaunchProps<{ arguments: { sku?: string; description?: string; quantity?: number; cost?: number } }>) {
-  const { sku: argumentSku, description: argumentDescription, quantity: argumentQuantity, cost: argumentCost } = props.arguments;
+function AddItem(
+  props: LaunchProps<{ arguments: { sku?: string; description?: string; quantity?: number; cost?: number } }>,
+) {
+  const {
+    sku: argumentSku,
+    description: argumentDescription,
+    quantity: argumentQuantity,
+    cost: argumentCost,
+  } = props.arguments;
   const [sku, setSku] = useState<string>(argumentSku ?? "");
   const [description, setDescription] = useState<string | undefined>(argumentDescription);
   const [quantity, setQuantity] = useState<number | undefined>(argumentQuantity);

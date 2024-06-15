@@ -1,20 +1,20 @@
 export type DomainResponse = {
+  id: string;
+  sku: string;
+  description: string;
+  quantity: number;
+  cost: number;
+  tagId: string;
+  userId: string;
+  projectId: string;
+  transfers: number;
+  createdAt: string;
+  updatedAt: string;
+  // TODO get accurate user type here
+  user: {
     id: string;
-    sku: string;
-    description: string;
-    quantity: number;
-    cost: number;
-    tagId: string;
-    userId: string;
-    projectId: string;
-    transfers: number;
-    createdAt: string;
-    updatedAt: string;
-    // TODO get accurate user type here
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      image: string;
-    };
+    name: string;
+    email: string;
+    image: string;
   };
+};

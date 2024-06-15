@@ -8,7 +8,17 @@ import { DomainResponse } from "./types";
 
 export const useCreateItem = () => {
   return useMutation({
-    mutationFn: async ({ sku, description, quantity, cost }: { sku: string; description?: string; quantity?: number; cost?: number }) => {
+    mutationFn: async ({
+      sku,
+      description,
+      quantity,
+      cost,
+    }: {
+      sku: string;
+      description?: string;
+      quantity?: number;
+      cost?: number;
+    }) => {
       const response = await createItem(sku, description, quantity, cost);
       return response.data;
     },
