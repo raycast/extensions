@@ -8,8 +8,10 @@ import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
 
-import { DatabaseProperty, DatabasePropertyOption } from "./property";
-export type { DatabaseProperty, DatabasePropertyOption };
+import { DatabaseProperty } from "./property";
+
+export { getPropertyConfig, type PropertyConfig } from "./property";
+export type { DatabaseProperty };
 
 export async function fetchDatabase(pageId: string, silent: boolean = true) {
   try {
@@ -63,41 +65,16 @@ export async function fetchDatabaseProperties(databaseId: string) {
 
     propertyNames.forEach((name) => {
       const property = database.properties[name];
-
-      if (!isWritableProperty(property)) return;
-
-      const databaseProperty = {
-        id: property.id,
-        type: property.type,
-        name: name,
-        options: [],
-      } as DatabaseProperty;
-
-      switch (property.type) {
-        case "select":
-          (databaseProperty.options as DatabasePropertyOption[]).push({
+      if (isWritableProperty(property)) {
+        if (property.type == "select")
+          property.select.options.unshift({
             id: "_select_null_",
             name: "No Selection",
+            color: "default",
           });
-          databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
-            property.select.options,
-          );
-          break;
-        case "multi_select":
-          databaseProperty.options = property.multi_select.options;
-          break;
-        case "relation":
-          databaseProperty.relation_id = property.relation.database_id;
-          break;
-        case "status":
-          databaseProperty.options.push(
-            ...property.status.groups.flatMap(({ option_ids }) =>
-              option_ids.map((id) => property.status.options.find((option) => option.id == id)!),
-            ),
-          );
-      }
 
-      databaseProperties.push(databaseProperty);
+        databaseProperties.push(property);
+      }
     });
 
     return databaseProperties;
