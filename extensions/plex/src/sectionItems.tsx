@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Detail } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { useFetch, Response } from "@raycast/utils";
 import React from "react";
 import { ENDPOINTS, plex_token } from "../utils/constants";
