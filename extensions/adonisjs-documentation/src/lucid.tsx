@@ -5,9 +5,10 @@ import { SearchResults } from "./lib";
 import _ from "lodash";
 import algoliaSearch from "algoliasearch";
 
-const APPID = "KXECYAMEX8";
-const APIKEY = "01279e9ede105d87a1ade54565b1a2fd";
-const INDEX = "adonisjs_next";
+const APPID = "LAX13WQLUB";
+const APIKEY = "2c93ff220c2007473bcf88e4e730199e";
+const INDEX = "lucid-adonisjs";
+
 
 export default function SearchDocumentation() {
   const algoliaClient = useMemo(() => {
@@ -65,7 +66,7 @@ export default function SearchDocumentation() {
                   <List.Item
                     id={hit.objectID}
                     key={hit.objectID}
-                    icon="adonis-logo.png"
+                    icon="lucid-logo.png"
                     title={(
                       (hit.hierarchy?.lvl2 != null ? hit.hierarchy.lvl2 : "") +
                       " " +
@@ -88,7 +89,7 @@ export default function SearchDocumentation() {
             )}
         </List.Section>
       ))}
-      <List.EmptyView icon="adonis-logo-128.png" title="Whoops! We did not find any matches." />
+      <List.EmptyView icon="lucid-logo-128.png" title="Whoops! We did not find any matches." />
     </List>
   );
 }
