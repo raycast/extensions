@@ -7,7 +7,7 @@ import { getDateMention } from "../block";
 import { handleError, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 
-import { PagePropertyType } from "./property";
+import { PageProperty } from "./property";
 
 export * from "./property";
 
@@ -186,7 +186,7 @@ export interface Page {
   icon_file: string | null;
   icon_external: string | null;
   url?: string;
-  properties: Record<string, PagePropertyType>;
+  properties: Record<string, PageProperty>;
 }
 
 export interface PageContent {

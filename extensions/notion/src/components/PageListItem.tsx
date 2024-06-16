@@ -20,7 +20,7 @@ import {
   getPageIcon,
   notionColorToTintColor,
   Page,
-  PagePropertyType,
+  PageProperty,
   User,
 } from "../utils/notion";
 import { handleOnOpenPage } from "../utils/openPage";
@@ -295,7 +295,7 @@ export function PageListItem({
 }
 
 function getPropertyAccessory(
-  property: PagePropertyType | FormulaPropertyItemObjectResponse["formula"],
+  property: PageProperty | FormulaPropertyItemObjectResponse["formula"],
   title: string,
   users?: User[],
 ): List.Item.Accessory | List.Item.Accessory[] | undefined {

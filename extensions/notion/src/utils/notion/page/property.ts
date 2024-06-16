@@ -8,7 +8,7 @@ import type { UnwrapRecord } from "../../types";
 import { getLocalTimezone } from "../global";
 
 type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
-export type PagePropertyType = UnwrapRecord<NotionProperties<NotionObject, "page">>;
+export type PageProperty = UnwrapRecord<NotionProperties<NotionObject, "page">>;
 
 type PagePropertyValue = CreatePageParameters["properties"][string];
 

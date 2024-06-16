@@ -6,7 +6,7 @@ import {
   getPropertyIcon,
   notionColorToTintColor,
   patchPage,
-  PagePropertyType,
+  PageProperty,
   DatabaseProperty,
   PropertyConfig,
   getPropertyConfig,
@@ -27,7 +27,7 @@ export function ActionEditPageProperty({
 }: {
   databaseProperty: DatabaseProperty;
   pageId: string;
-  pageProperty?: PagePropertyType;
+  pageProperty?: PageProperty;
   mutate: () => Promise<void>;
   shortcut?: Keyboard.Shortcut;
   icon?: Image.ImageLike;
