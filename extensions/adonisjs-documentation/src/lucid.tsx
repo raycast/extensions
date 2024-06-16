@@ -9,7 +9,6 @@ const APPID = "LAX13WQLUB";
 const APIKEY = "2c93ff220c2007473bcf88e4e730199e";
 const INDEX = "lucid-adonisjs";
 
-
 export default function SearchDocumentation() {
   const algoliaClient = useMemo(() => {
     return algoliaSearch(APPID, APIKEY);
