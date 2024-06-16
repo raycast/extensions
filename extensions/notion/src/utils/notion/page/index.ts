@@ -6,9 +6,9 @@ import { NotionToMarkdown } from "notion-to-md";
 import { getDateMention } from "../block";
 import { handleError, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
-
 import { PagePropertyType } from "./property";
-export type { PagePropertyType };
+
+export * from "./property";
 
 export async function fetchPage(pageId: string, silent: boolean = true) {
   try {

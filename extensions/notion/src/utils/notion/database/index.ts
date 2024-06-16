@@ -6,10 +6,9 @@ import { markdownToBlocks } from "@tryfabric/martian";
 import { isWritableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
+import { formatDatabaseProperty } from "../page/property";
 
-import { formatDatabaseProperty } from "./property";
 import { DatabaseProperty, DatabasePropertyOption } from "./property";
-
 export type { DatabaseProperty, DatabasePropertyOption };
 
 export async function fetchDatabase(pageId: string, silent: boolean = true) {
