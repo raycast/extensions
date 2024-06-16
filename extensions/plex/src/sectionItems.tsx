@@ -70,7 +70,10 @@ function SectionItem({ sectionItem }: { sectionItem: SectionItemsApiResponse["Me
       }
       actions={
         <ActionPanel>
-          <Action.Push title="Show Movie Details" target={<Detail markdown={"item.type"} />} />
+          <Action.OpenInBrowser
+            title="Open in IMDB"
+            url={"https://www.imdb.com/find/?q=" + sectionItem.title.toString()}
+          />
         </ActionPanel>
       }
     />
