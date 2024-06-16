@@ -3,7 +3,7 @@ import type { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoint
 import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
-import { supportedPropTypes } from "..";
+import { isWritableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 
@@ -65,9 +65,7 @@ export async function fetchDatabaseProperties(databaseId: string) {
     propertyNames.forEach((name) => {
       const property = database.properties[name];
 
-      if (supportedPropTypes.indexOf(property.type) === -1) {
-        return;
-      }
+      if (!isWritableProperty(property)) return;
 
       const databaseProperty = {
         id: property.id,

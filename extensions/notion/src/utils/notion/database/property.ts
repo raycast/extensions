@@ -3,7 +3,7 @@ import { Form } from "@raycast/api";
 import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
-import { _supportedPropTypes } from "..";
+import type { WritablePropertyTypes } from "..";
 import { getLocalTimezone } from "../global";
 
 type FormatDatabasePropertyParams = {
@@ -68,7 +68,7 @@ export type FormValueForDatabaseProperty<T extends DatabaseProperty['type']> =
 
 export interface DatabaseProperty {
   id: string;
-  type: (typeof _supportedPropTypes)[number];
+  type: WritablePropertyTypes;
   name: string;
   options: DatabasePropertyOption[];
   relation_id?: string;

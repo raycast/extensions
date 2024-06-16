@@ -8,28 +8,18 @@ import { PagePropertyType } from "./page";
 
 export * from "./database";
 export * from "./page";
+export * from "./user";
 
 export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
 
-export const _supportedPropTypes = [
-  "title",
-  "number",
-  "rich_text",
-  "url",
-  "email",
-  "phone_number",
-  "date",
-  "checkbox",
-  "select",
-  "multi_select",
-  "formula",
-  "people",
-  "relation",
-  "status",
-] satisfies PagePropertyType["type"][];
-export const supportedPropTypes: PagePropertyType["type"][] = _supportedPropTypes;
-
-export * from "./user";
+// prettier-ignore
+export const writablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const
+export type WritablePropertyTypes = (typeof writablePropertyTypes)[number];
+export function isWritableProperty<T extends { type: PagePropertyType["type"] }>(
+  property: T,
+): property is Extract<T, { type: WritablePropertyTypes }> {
+  return (writablePropertyTypes as readonly string[]).includes(property.type);
+}
 
 export function notionColorToTintColor(notionColor: string | undefined): Color.ColorLike {
   // ordered by appearance in option configuration
