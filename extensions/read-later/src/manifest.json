@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+    "name": "Get Current Tab URL",
+    "version": "1.0",
+    "permissions": [
+      "activeTab",
+      "nativeMessaging"
+    ],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+    "browser_action": {
+      "default_popup": "popup.html",
+      "default_icon": "icon.png"
+    }
+  }
+  
