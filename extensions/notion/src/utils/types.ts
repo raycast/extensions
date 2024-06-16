@@ -21,3 +21,4 @@ export interface KanbanView {
 export type UnwrapRecord<T> = T extends Record<never, infer U> ? U : never;
 export type UnwrapPromise<T> = T extends Promise<infer U> ? U : never;
 export type UnwrapArray<T> = T extends Array<infer U> ? U : never;
+export type ObjectValues<T> = T[keyof T];

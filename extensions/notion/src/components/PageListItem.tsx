@@ -28,9 +28,10 @@ import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
 import { PageDetail } from "./PageDetail";
-import { ActionEditPageProperty, ActionSetVisibleProperties } from "./actions";
+import { ActionSetVisibleProperties } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
 import { AppendToPageForm, CreatePageForm, DatabaseViewForm } from "./forms";
+import { EditPagePropertiesForm } from "./forms/EditPagePropertiesForm";
 
 type PageListItemProps = {
   page: Page;
@@ -88,10 +89,6 @@ export function PageListItem({
       }`,
     });
   }
-
-  const quickEditProperties = databaseProperties?.filter((property) =>
-    ["checkbox", "status", "select", "multi_select", "status", "people"].includes(property.type),
-  );
 
   const visiblePropertiesIds: string[] =
     databaseProperties?.filter((dp: DatabaseProperty) => databaseView?.properties?.[dp.id]).map((dp) => dp.id) || [];
@@ -158,24 +155,15 @@ export function PageListItem({
         <ActionPanel>
           <ActionPanel.Section title={title}>
             {...OpenPageActions}
-            {customActions?.map((action) => action)}
-            {databaseProperties ? (
-              <ActionPanel.Submenu
+            {...customActions || []}
+            {databaseProperties && (
+              <Action.Push
                 title="Edit Property"
-                icon={Icon.BulletPoints}
+                icon={Icon.Pencil}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-              >
-                {quickEditProperties?.map((dp: DatabaseProperty) => (
-                  <ActionEditPageProperty
-                    key={dp.id}
-                    databaseProperty={dp}
-                    pageId={page.id}
-                    pageProperty={page.properties[dp.id]}
-                    mutate={mutate}
-                  />
-                ))}
-              </ActionPanel.Submenu>
-            ) : null}
+                target={<EditPagePropertiesForm page={page} databaseProperties={databaseProperties} mutate={mutate} />}
+              />
+            )}
           </ActionPanel.Section>
 
           <ActionPanel.Section>

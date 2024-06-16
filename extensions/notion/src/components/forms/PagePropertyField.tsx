@@ -9,10 +9,11 @@ import {
   User,
   PropertyConfig,
   getPropertyConfig,
+  WritablePropertyTypes,
 } from "../../utils/notion";
 
 export function createConvertToFieldFunc(
-  itemPropsFor: GetFieldPropsFunc,
+  itemPropsFor: <T extends WritablePropertyTypes>(property: DatabaseProperty) => FieldProps<T>,
   relationPages: Record<string, Page[]> | undefined,
   users: User[],
 ) {
@@ -80,8 +81,6 @@ function createMapOptionsFunc(Tag: typeof Form.Dropdown.Item | typeof Form.TagPi
     return <Tag key={"option::" + option.id} value={option.id} title={title ?? "Untitled"} icon={icon} />;
   };
 }
-
-export type GetFieldPropsFunc = <T extends DatabaseProperty["type"]>(property: DatabaseProperty) => FieldProps<T>;
 
 export type FieldProps<T extends DatabaseProperty["type"]> = ReturnType<
   typeof useForm<{

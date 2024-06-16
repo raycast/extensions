@@ -1,14 +1,15 @@
-import type { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
+import type { CreatePageParameters, RichTextItemResponse } from "@notionhq/client/build/src/api-endpoints";
 import { Form } from "@raycast/api";
 import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
 import type { NotionObject, WritablePropertyTypes } from "..";
-import type { UnwrapRecord } from "../../types";
+import type { UnwrapRecord, ObjectValues } from "../../types";
 import { getLocalTimezone } from "../global";
 
 type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
 export type PageProperty = UnwrapRecord<NotionProperties<NotionObject, "page">>;
+export type WritablePageProperty = Extract<PageProperty, { type: WritablePropertyTypes }>;
 
 type PagePropertyValue = CreatePageParameters["properties"][string];
 
@@ -62,6 +63,57 @@ export function formValueToPropertyValue(
 
 const formattedProperty = <T extends WritablePropertyTypes, V>(type: T, value: V) =>
   ({ [type]: value }) as { [K in T]: V };
+
+export function propertyValueToFormValue<T extends WritablePropertyTypes>(
+  property: WritablePageProperty,
+): FormValueForDatabaseProperty<T> | undefined;
+export function propertyValueToFormValue(
+  property: WritablePageProperty,
+): FormValueForDatabaseProperty<WritablePropertyTypes> | undefined {
+  switch (property.type) {
+    case "title":
+    case "rich_text":
+      return getPropertyValue(property).map(richTextToMarkdown).join("");
+    case "date": {
+      const startDate = getPropertyValue(property)?.start;
+      if (startDate !== undefined) return new Date(startDate);
+      return;
+    }
+    case "select":
+    case "status":
+      return getPropertyValue(property)?.id;
+    case "multi_select":
+    case "relation":
+    case "people":
+      return getPropertyValue(property)?.map((opt) => opt.id);
+    case "formula":
+      return;
+    case "number":
+      return getPropertyValue(property)?.toString();
+    default:
+      return getPropertyValue(property);
+  }
+}
+
+function getPropertyValue<T extends WritablePageProperty>(
+  property: T,
+): {
+  [T in WritablePageProperty as T["type"]]: ObjectValues<Omit<T, keyof WritablePageProperty>>;
+}[T["type"]] {
+  // @ts-expect-error - Unable to a way to make union types and dynamic keys get along.
+  return property[property.type];
+}
+
+function richTextToMarkdown(block: RichTextItemResponse) {
+  if (block.type !== "text") return block.plain_text;
+  let markdown = block.text.content;
+  if (block.annotations.italic) markdown = `_${markdown}_`;
+  if (block.annotations.bold) markdown = `**${markdown}**`;
+  if (block.annotations.code) markdown = `\`${markdown}\``;
+  if (block.annotations.strikethrough) markdown = `~~${markdown}~~`;
+  if (block.text.link?.url) markdown = `[${markdown}](${block.text.link.url})`;
+  return markdown;
+}
 
 // prettier-ignore
 type FormValueForDatabaseProperty<T extends WritablePropertyTypes> =
