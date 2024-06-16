@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-local-commits",
+  "title": "Git Local Commits",
+  "description": "Search local git commits",
+  "icon": "command-icon.png",
+  "author": "patriciomartins",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "git-search-local-commits",
+      "title": "Search Git Commits",
+      "subtitle": "Git Commits Search",
+      "description": "Search local git commits",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "directory",
+          "title": "Directory",
+          "placeholder": "~/Code",
+          "required": true,
+          "label": "Directory",
+          "description": "Directory directory where your git project folders are",
+          "type": "textfield"
+        },
+        {
+          "name": "codeEditor",
+          "title": "Code Editor",
+          "type": "appPicker",
+          "default": "com.microsoft.VSCode",
+          "required": true,
+          "label": "Preferred Code Editor",
+          "description": "Select your preferred code editor"
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "simple-git": "^3.25.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
