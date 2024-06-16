@@ -6,7 +6,7 @@ import { markdownToBlocks } from "@tryfabric/martian";
 import { isWritableProperty } from "..";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
-import { formatDatabaseProperty } from "../page/property";
+import { formValueToPropertyValue } from "../page/property";
 
 import { DatabaseProperty, DatabasePropertyOption } from "./property";
 export type { DatabaseProperty, DatabasePropertyOption };
@@ -168,7 +168,7 @@ export async function createDatabasePage(values: Form.Values) {
       if (value == "_select_null_") return;
       if (!propId || !value) return;
 
-      const formatted = formatDatabaseProperty(type, value);
+      const formatted = formValueToPropertyValue(type, value);
       if (formatted) arg.properties[propId] = formatted;
     });
 

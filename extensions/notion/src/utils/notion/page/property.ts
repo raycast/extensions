@@ -4,20 +4,19 @@ import { markdownToRichText } from "@tryfabric/martian";
 import { subMinutes } from "date-fns";
 
 import type { NotionObject, WritablePropertyTypes } from "..";
-import { getLocalTimezone } from "../global";
 import type { UnwrapRecord } from "../../types";
+import { getLocalTimezone } from "../global";
 
 type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
 export type PagePropertyType = UnwrapRecord<NotionProperties<NotionObject, "page">>;
 
 type PagePropertyValue = CreatePageParameters["properties"][string];
 
-// formValueToPropertyValue
-export function formatDatabaseProperty<T extends WritablePropertyTypes>(
+export function formValueToPropertyValue<T extends WritablePropertyTypes>(
   type: T,
   formValue: FormValueForDatabaseProperty<T>,
 ): PagePropertyValue | undefined;
-export function formatDatabaseProperty(
+export function formValueToPropertyValue(
   ...[type, value]: {
     [T in WritablePropertyTypes]: [type: T, value: FormValueForDatabaseProperty<T>];
   }[WritablePropertyTypes]
