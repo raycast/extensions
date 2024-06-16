@@ -3,13 +3,12 @@ import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
 
-import { UnwrapRecord } from "../types";
+import { getDateMention } from "../block";
+import { handleError, pageMapper } from "../global";
+import { getNotionClient } from "../oauth";
 
-import { getDateMention } from "./block";
-import { handleError, pageMapper } from "./global";
-import { getNotionClient } from "./oauth";
-
-import { NotionObject } from ".";
+import { PagePropertyType } from "./property";
+export type { PagePropertyType };
 
 export async function fetchPage(pageId: string, silent: boolean = true) {
   try {
@@ -192,6 +191,3 @@ export interface Page {
 export interface PageContent {
   markdown: string | undefined;
 }
-
-type NotionProperties<T, TObject> = T extends { object: TObject; properties: infer U } ? U : never;
-export type PagePropertyType = UnwrapRecord<NotionProperties<NotionObject, "page">>;
