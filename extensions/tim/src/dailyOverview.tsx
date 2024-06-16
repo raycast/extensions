@@ -1,16 +1,21 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek";
 import { useMemo } from "react";
 
 import { View } from "./components/View";
+import { OpenInTimAction } from "./components/actions/OpenInTimAction";
+import { StartTaskAction } from "./components/actions/StartTaskAction";
 import { groupBy, sortBy } from "./helpers/array";
-import { getHours, getMinutes, groupRecordsPerDay } from "./helpers/tim";
+import { RecordPerDay, getHours, getMinutes, groupRecordsPerDay } from "./helpers/tim";
 import { useCurrencyFormatter } from "./hooks/useCurrencyFormatter";
 import { useDateFormatter } from "./hooks/useDateFormatter";
 import { useDurationFormatter } from "./hooks/useDurationFormatter";
 import { useData } from "./state/data";
 import { Group, TimColor } from "./types/tim";
+
+dayjs.extend(isoWeek);
 
 const filterItems = [
   {
@@ -48,14 +53,20 @@ const DailyOverview = () => {
 
   const getRate = (taskId: string) => data?.tasks[taskId].rate || taskIdToGroup[taskId]?.rate;
 
+  function getFilterDate(filter?: Filter) {
+    if (filter === "year") return dayjs().startOf("year");
+    if (filter === "month") return dayjs().startOf("month");
+    if (filter === "week") return dayjs().startOf("isoWeek");
+    return dayjs(0);
+  }
+
   const tasksPerDay = useMemo(() => {
     if (!data) return [];
-    const filterDate =
-      filter === "week" ? dayjs().day(1) : filter === "month" ? dayjs().date(1) : dayjs().month(0).date(1);
+    const filterDate = getFilterDate(filter);
 
     const days = Object.keys(data.tasks).flatMap((id) =>
       groupRecordsPerDay(data.tasks[id].records, getRate(id))
-        .filter(({ date }) => filter === "all" || filterDate.isBefore(date))
+        .filter(({ date }) => filter === "all" || filterDate.isBefore(date) || filterDate.isSame(date))
         .map((record) => ({ id, ...record })),
     );
 
@@ -115,32 +126,7 @@ const DailyOverview = () => {
                     tooltip: taskIdToGroup[task.id]?.title,
                   },
                 ]}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section>
-                      <Action.Paste
-                        title="Paste Task Title"
-                        shortcut={{ modifiers: ["cmd"], key: "t" }}
-                        content={data.tasks[task.id].title}
-                      />
-                      <Action.Paste
-                        title="Paste Task Notes"
-                        shortcut={{ modifiers: ["cmd"], key: "n" }}
-                        content={task.notes}
-                      />
-                      <Action.Paste
-                        title="Paste Task Hours"
-                        shortcut={{ modifiers: ["cmd"], key: "h" }}
-                        content={getHours(task.totalTime)}
-                      />
-                      <Action.Paste
-                        title="Paste Task Minutes"
-                        shortcut={{ modifiers: ["cmd"], key: "m" }}
-                        content={getMinutes(task.totalTime)}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
+                actions={<TaskActions {...task} title={data.tasks[task.id].title} />}
               />
             ))}
           </List.Section>
@@ -148,6 +134,60 @@ const DailyOverview = () => {
     </List>
   );
 };
+
+function TaskActions(task: RecordPerDay & { title: string; id: string }) {
+  const actions = [
+    {
+      title: "Title",
+      content: task.title,
+      shortcutKey: "t",
+    },
+    {
+      title: "Notes",
+      content: task.notes,
+      shortcutKey: "n",
+    },
+    {
+      title: "Hours",
+      content: getHours(task.totalTime),
+      shortcutKey: "h",
+    },
+    {
+      title: "Minutes",
+      content: getMinutes(task.totalTime),
+      shortcutKey: "m",
+    },
+  ] as const;
+
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <StartTaskAction task={task} />
+        <OpenInTimAction id={task.id} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        {actions.map((action) => (
+          <Action.Paste
+            key={action.shortcutKey}
+            title={`Paste ${action.title}`}
+            shortcut={{ modifiers: ["cmd"], key: action.shortcutKey }}
+            content={action.content}
+          />
+        ))}
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        {actions.map((action) => (
+          <Action.CopyToClipboard
+            key={action.shortcutKey}
+            title={`Copy ${action.title}`}
+            shortcut={{ modifiers: ["cmd", "shift"], key: action.shortcutKey }}
+            content={action.content}
+          />
+        ))}
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
 
 export default function Command() {
   return (
