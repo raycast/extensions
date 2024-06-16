@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showToast, Toast, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { promises as fs } from "fs"; // Import the 'fs' module
 import { parse } from "./parser"; // Import the 'read-later-parser' module

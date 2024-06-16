@@ -1,4 +1,4 @@
-import { showToast, Toast, BrowserExtension, Clipboard, closeMainWindow, popToRoot, Tab } from "@raycast/api";
+import { showToast, Toast, BrowserExtension, closeMainWindow, popToRoot } from "@raycast/api";
 
 import fs from 'fs';
 import path from 'path';
@@ -6,7 +6,7 @@ import os from 'os';
 export default async function Main() {
  
   try {
-  const tabs: Array<Tab> = await BrowserExtension.getTabs();
+  const tabs: Array<BrowserExtension.Tab> = await BrowserExtension.getTabs();
   console.log('tabs',tabs);
   // 从tabs中找到active为true的tab
     const activeTab = tabs.find(tab => tab.active);
@@ -21,8 +21,12 @@ export default async function Main() {
     
     // 将Markdown数据追加到文件中
     fs.appendFileSync(filePath, markdown);
-  await popToRoot();
+    await popToRoot();
     showToast(Toast.Style.Success, "saved successfully!");
+    // 0.5s 后关闭窗口
+    setTimeout(() => {
+      closeMainWindow();
+    }, 500);
 
   } catch (error) {
     console.log('url', 123);

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "read-later",
-  "title": "read-later",
+  "title": "Read-Later",
   "description": "read your urls later",
   "icon": "command-icon.png",
   "author": "yitiansong4",
@@ -12,18 +12,18 @@
   "commands": [
     {
       "name": "add-current-url",
-      "title": "add current url",
-      "description": "",
+      "title": "Add Current Url",
+      "description": "add the cuurent url to read list",
       "mode": "no-view"
     },
     {
       "name": "read-list",
-      "title": "read list",
-      "description": "",
+      "title": "Read List",
+      "description": "see all the urls in read list",
       "mode": "view"
     }
   ],
-  "tools": null,
+  "tools": [],
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "fs": "^0.0.1-security",
