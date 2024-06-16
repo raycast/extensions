@@ -4,7 +4,7 @@ import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { MovieGrid } from "./components/movie-grid";
 import { View } from "./components/view";
-import { addMovieToWatchlist, checkInMovie, searchMovies } from "./services/movies";
+import { addMovieToHistory, addMovieToWatchlist, checkInMovie, searchMovies } from "./services/movies";
 import { getTMDBMovieDetails } from "./services/tmdb";
 
 function SearchCommand() {
@@ -61,7 +61,7 @@ function SearchCommand() {
     })();
   }, [searchText, page]);
 
-  const onAddToWatchlist = async (movieId: number) => {
+  const onAddMovieToWatchlist = async (movieId: number) => {
     setIsLoading(true);
     try {
       await addMovieToWatchlist(movieId, abortable.current?.signal);
@@ -99,6 +99,25 @@ function SearchCommand() {
     setIsLoading(false);
   };
 
+  const onAddMovieToHistory = async (movieId: number) => {
+    setIsLoading(true);
+    try {
+      await addMovieToHistory(movieId, abortable.current?.signal);
+      showToast({
+        title: "Movie added to history",
+        style: Toast.Style.Success,
+      });
+    } catch (e) {
+      if (!(e instanceof AbortError)) {
+        showToast({
+          title: "Error adding movie to history",
+          style: Toast.Style.Failure,
+        });
+      }
+    }
+    setIsLoading(false);
+  };
+
   const onSearchTextChange = (text: string): void => {
     setSearchText(text);
     setPage(1);
@@ -120,11 +139,12 @@ function SearchCommand() {
         page={page}
         totalPages={totalPages}
         setPage={setPage}
-        checkinAction={onCheckInMovie}
+        checkInAction={onCheckInMovie}
         watchlistActionTitle={"Add to Watchlist"}
-        watchlistAction={onAddToWatchlist}
+        watchlistAction={onAddMovieToWatchlist}
         watchlistIcon={Icon.Bookmark}
         watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
+        addToHistoryAction={onAddMovieToHistory}
       />
     </Grid>
   );

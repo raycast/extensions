@@ -4,7 +4,7 @@ import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { ShowGrid } from "./components/show-grid";
 import { View } from "./components/view";
-import { addShowToWatchlist, searchShows } from "./services/shows";
+import { addShowToHistory, addShowToWatchlist, searchShows } from "./services/shows";
 import { getTMDBShowDetails } from "./services/tmdb";
 
 function SearchCommand() {
@@ -61,7 +61,7 @@ function SearchCommand() {
     })();
   }, [searchText, page]);
 
-  const onAddToWatchlist = async (showId: number) => {
+  const onAddShowToWatchlist = async (showId: number) => {
     setIsLoading(true);
     try {
       await addShowToWatchlist(showId, abortable.current?.signal);
@@ -73,6 +73,25 @@ function SearchCommand() {
       if (!(e instanceof AbortError)) {
         showToast({
           title: "Error adding show to watchlist",
+          style: Toast.Style.Failure,
+        });
+      }
+    }
+    setIsLoading(false);
+  };
+
+  const onAddShowToHistory = async (showId: number) => {
+    setIsLoading(true);
+    try {
+      await addShowToHistory(showId, abortable.current?.signal);
+      showToast({
+        title: "Show added to history",
+        style: Toast.Style.Success,
+      });
+    } catch (e) {
+      if (!(e instanceof AbortError)) {
+        showToast({
+          title: "Error adding show to history",
           style: Toast.Style.Failure,
         });
       }
@@ -102,9 +121,10 @@ function SearchCommand() {
         totalPages={totalPages}
         setPage={setPage}
         watchlistActionTitle="Add to Watchlist"
-        watchlistAction={onAddToWatchlist}
+        watchlistAction={onAddShowToWatchlist}
         watchlistIcon={Icon.Bookmark}
         watchlistActionShortcut={Keyboard.Shortcut.Common.Edit}
+        addToHistoryAction={onAddShowToHistory}
       />
     </Grid>
   );

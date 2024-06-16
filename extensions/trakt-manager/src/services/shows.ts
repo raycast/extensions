@@ -273,3 +273,84 @@ export const updateShowProgress = async (
     }
   }
 };
+
+export const addShowToHistory = async (showId: number, signal: AbortSignal | undefined = undefined) => {
+  const tokens = await oauthClient.getTokens();
+  const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "trakt-api-version": "2",
+      "trakt-api-key": TRAKT_CLIENT_ID,
+      Authorization: `Bearer ${tokens?.accessToken}`,
+    },
+    body: JSON.stringify({
+      shows: [
+        {
+          ids: {
+            trakt: showId,
+          },
+        },
+      ],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+};
+
+export const addSeasonToHistory = async (seasonId: number, signal: AbortSignal | undefined = undefined) => {
+  const tokens = await oauthClient.getTokens();
+  const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "trakt-api-version": "2",
+      "trakt-api-key": TRAKT_CLIENT_ID,
+      Authorization: `Bearer ${tokens?.accessToken}`,
+    },
+    body: JSON.stringify({
+      seasons: [
+        {
+          ids: {
+            trakt: seasonId,
+          },
+        },
+      ],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+};
+
+export const addEpisodeToHistory = async (episodeId: number, signal: AbortSignal | undefined = undefined) => {
+  const tokens = await oauthClient.getTokens();
+  const response = await fetch(`${TRAKT_API_URL}/sync/history`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "trakt-api-version": "2",
+      "trakt-api-key": TRAKT_CLIENT_ID,
+      Authorization: `Bearer ${tokens?.accessToken}`,
+    },
+    body: JSON.stringify({
+      episodes: [
+        {
+          ids: {
+            trakt: episodeId,
+          },
+        },
+      ],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+};

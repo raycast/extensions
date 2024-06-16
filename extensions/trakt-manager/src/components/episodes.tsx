@@ -3,7 +3,7 @@ import { setMaxListeners } from "events";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
-import { checkInEpisode, getEpisodes } from "../services/shows";
+import { addEpisodeToHistory, checkInEpisode, getEpisodes } from "../services/shows";
 import { getTMDBEpisodeDetails } from "../services/tmdb";
 
 const formatter = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" });
@@ -81,6 +81,25 @@ export const Episodes = ({
     setIsLoading(false);
   };
 
+  const onAddEpisodeToHistory = async (episodeId: number) => {
+    setIsLoading(true);
+    try {
+      await addEpisodeToHistory(episodeId, abortable.current?.signal);
+      showToast({
+        title: "Episode added to history",
+        style: Toast.Style.Success,
+      });
+    } catch (e) {
+      if (!(e instanceof AbortError)) {
+        showToast({
+          title: "Error adding episode to history",
+          style: Toast.Style.Failure,
+        });
+      }
+    }
+    setIsLoading(false);
+  };
+
   return (
     <Grid
       isLoading={isLoading}
@@ -112,6 +131,12 @@ export const Episodes = ({
                       title="Check-in Episode"
                       shortcut={Keyboard.Shortcut.Common.Edit}
                       onAction={() => onCheckInEpisode(episode.ids.trakt)}
+                    />
+                    <Action
+                      icon={Icon.Clock}
+                      title="Add to History"
+                      shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                      onAction={() => onAddEpisodeToHistory(episode.ids.trakt)}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, Image, Keyboard, openExtensionPreferences } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { SetStateAction } from "react";
 import { getIMDbUrl, getPosterUrl, getTraktUrl } from "../lib/helper";
 
@@ -8,7 +9,8 @@ export const MovieGrid = ({
   watchlistIcon,
   watchlistActionShortcut,
   watchlistAction,
-  checkinAction,
+  checkInAction,
+  addToHistoryAction,
   page,
   totalPages,
   setPage,
@@ -17,8 +19,9 @@ export const MovieGrid = ({
   watchlistActionTitle: string;
   watchlistIcon: Image.ImageLike;
   watchlistActionShortcut: Keyboard.Shortcut;
-  watchlistAction: (traktId: number) => void;
-  checkinAction: (traktId: number) => void;
+  watchlistAction: (movieId: number) => void;
+  checkInAction: (movieId: number) => void;
+  addToHistoryAction: (movieId: number) => void;
   page: number;
   totalPages: number;
   setPage: (value: SetStateAction<number>) => void;
@@ -36,8 +39,16 @@ export const MovieGrid = ({
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.OpenInBrowser title="Open in Trakt" url={getTraktUrl("movie", movie.movie.ids.slug)} />
-                <Action.OpenInBrowser title="Open in IMDb" url={getIMDbUrl(movie.movie.ids.imdb)} />
+                <Action.OpenInBrowser
+                  icon={getFavicon("https://trakt.tv")}
+                  title="Open in Trakt"
+                  url={getTraktUrl("movie", movie.movie.ids.slug)}
+                />
+                <Action.OpenInBrowser
+                  icon={getFavicon("https://www.imdb.com")}
+                  title="Open in IMDb"
+                  url={getIMDbUrl(movie.movie.ids.imdb)}
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action
@@ -50,7 +61,13 @@ export const MovieGrid = ({
                   icon={Icon.Checkmark}
                   title="Check-in Movie"
                   shortcut={Keyboard.Shortcut.Common.Duplicate}
-                  onAction={() => checkinAction(movie.movie.ids.trakt)}
+                  onAction={() => checkInAction(movie.movie.ids.trakt)}
+                />
+                <Action
+                  icon={Icon.Clock}
+                  title="Add to History"
+                  shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                  onAction={() => addToHistoryAction(movie.movie.ids.trakt)}
                 />
                 <Action
                   icon={Icon.Cog}
