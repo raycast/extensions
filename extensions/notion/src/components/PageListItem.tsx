@@ -32,10 +32,6 @@ import { ActionEditPageProperty, ActionSetVisibleProperties } from "./actions";
 import ActionCreateQuicklink from "./actions/ActionCreateQuicklink";
 import { AppendToPageForm, CreatePageForm, DatabaseViewForm } from "./forms";
 
-function capitalize(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 type PageListItemProps = {
   page: Page;
   databaseView?: DatabaseView;
@@ -152,7 +148,7 @@ export function PageListItem({
         ? [OpenInBrowserAction, OpenInRaycastAction]
         : [OpenInRaycastAction, OpenInBrowserAction];
 
-  const pageWord = capitalize(page.object);
+  const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
 
   return (
     <List.Item

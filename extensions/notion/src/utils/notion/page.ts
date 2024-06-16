@@ -1,5 +1,4 @@
-import { Client } from "@notionhq/client";
-import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
+import { BlockObjectRequest, UpdatePageParameters } from "@notionhq/client/build/src/api-endpoints";
 import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
@@ -48,7 +47,7 @@ export async function deletePage(pageId: string) {
   }
 }
 
-export async function patchPage(pageId: string, properties: Parameters<Client["pages"]["update"]>[0]["properties"]) {
+export async function patchPage(pageId: string, properties: UpdatePageParameters["properties"]) {
   try {
     const notion = getNotionClient();
     const page = await notion.pages.update({
