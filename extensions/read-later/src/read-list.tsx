@@ -37,13 +37,13 @@ export default function Command() {
     const handleDeleteItem = async (itemToDelete: { title: string; url: string }) => {
         try {
     
-          if (true) {
+          
             const updatedItems = state.items?.filter(item => item !== itemToDelete);
             const updatedContent = updatedItems?.map(item => `[${item.title}](${item.url})`).join('\n');
             await fs.writeFile(readLaterFilePath, updatedContent || '');
             setState({ items: updatedItems });
             showToast(Toast.Style.Success, "URL deleted successfully");
-          }
+          
         } catch (error) {
           console.error('Error deleting URL:', error);
           showToast(Toast.Style.Failure, "Failed to delete URL");
