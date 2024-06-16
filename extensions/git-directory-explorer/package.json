@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-directory-explorer",
+  "title": "Git Directory Explorer",
+  "description": "Effortlessly navigate through your Git repositories and view commit history with Git Directory Explorer. Seamlessly open directories in your preferred code editor and streamline your development workflow.",
+  "icon": "command-icon.png",
+  "author": "patriciomartins",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "git-directory-explorer",
+      "title": "Git Directory Explorer",
+      "description": "Effortlessly navigate through your Git repositories and view commit history with Git Directory Explorer. Seamlessly open directories in your preferred code editor and streamline your development workflow.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "directory",
+          "title": "Directory",
+          "required": true,
+          "label": "Directory",
+          "description": "Directory directory where your git project folders are",
+          "type": "directory"
+        },
+        {
+          "name": "codeEditor",
+          "title": "Code Editor",
+          "type": "appPicker",
+          "default": "com.microsoft.VSCode",
+          "required": true,
+          "label": "Preferred Code Editor",
+          "description": "Select your preferred code editor"
+        }
+      ]
+    }
+  ],
+  "tools": [],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "simple-git": "^3.25.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
