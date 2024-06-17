@@ -1,5 +1,7 @@
 # iLovePDF Changelog
 
+## [Add Extract Text from PDF Command] - 2024-06-16
+
 ## [Add Word to PDF Command] - 2024-06-06
 
 ## [Refactoring for better performance and readability] - 2024-06-06
