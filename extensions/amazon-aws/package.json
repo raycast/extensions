@@ -82,6 +82,12 @@
       "mode": "view"
     },
     {
+      "name": "glue-jobs",
+      "title": "Glue Jobs",
+      "description": "Find and open a Glue job run",
+      "mode": "view"
+    },
+    {
       "name": "lambda",
       "title": "Lambda Functions",
       "description": "Find and open a function",
@@ -148,6 +154,7 @@
     "@aws-sdk/client-ec2": "^3.216.0",
     "@aws-sdk/client-ecr": "^3.216.0",
     "@aws-sdk/client-ecs": "^3.216.0",
+    "@aws-sdk/client-glue": "^3.599.0",
     "@aws-sdk/client-lambda": "^3.216.0",
     "@aws-sdk/client-s3": "^3.216.0",
     "@aws-sdk/client-secrets-manager": "^3.226.0",

@@ -31,6 +31,8 @@ export function resourceToConsoleLink(resourceId: string | undefined, resourceTy
       )}`;
     case "AWS::CloudFormation::Stack":
       return `${AWS_URL_BASE}/cloudformation/home?region=${AWS_REGION}#/stacks/stackinfo?stackId=${resourceId}`;
+    case "AWS::Glue::JobRuns":
+      return `${AWS_URL_BASE}/gluestudio/home?region=${AWS_REGION}#/editor/job/${resourceId}/runs`;
     case "AWS::Lambda::Function":
       return `${AWS_URL_BASE}/lambda/home?region=${AWS_REGION}#/functions/${resourceId}?tab=monitoring`;
     case "AWS::CodePipeline::Pipeline":
@@ -97,3 +99,10 @@ export const formatBytes = (bytes: number) => {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
+
+export function normalizeUrl(url: string): string {
+  if (url.endsWith("/")) {
+    return url;
+  }
+  return `${url}/`;
+}
