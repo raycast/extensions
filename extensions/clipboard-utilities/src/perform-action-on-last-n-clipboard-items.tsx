@@ -1,4 +1,4 @@
-import { List, Clipboard, ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
+import { List, Clipboard, ActionPanel, Action, Form, showToast, Toast, Keyboard, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 type AvailableActions = "+" | "*" | "Average" | "custom";
@@ -14,12 +14,14 @@ const ActionView = ({ items }: { items: Clipboard.ReadContent[] }) => {
   const [selectedAction, setSelectedAction] = useState<AvailableActions>("+");
   const [customAction, setCustomAction] = useState<string>("");
   const [isStrings, setIsStrings] = useState<boolean>(false);
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action
             title="Perform Action"
+            icon={Icon.Calculator}
             onAction={async () => {
               let result: number | string | undefined = undefined;
               const first: number | string = isStrings ? items[0].text : Number(items[0].text);
@@ -102,6 +104,7 @@ const ActionView = ({ items }: { items: Clipboard.ReadContent[] }) => {
 
 export default function Command() {
   const [clipboardItems, setClipboardItems] = useState<Clipboard.ReadContent[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchClipboardItems = async () => {
@@ -111,13 +114,14 @@ export default function Command() {
         }),
       );
       setClipboardItems(initialItems);
+      setIsLoading(false);
     };
 
     fetchClipboardItems();
   }, []);
 
   return (
-    <List searchBarPlaceholder="Search Clipboard Items">
+    <List searchBarPlaceholder="Search Clipboard Items" isLoading={isLoading}>
       {clipboardItems.map((item, index) => (
         <List.Item
           key={index}
@@ -126,11 +130,14 @@ export default function Command() {
             <ActionPanel>
               <Action.Push
                 title="Choose Up To This Item"
+                icon={Icon.ArrowUp}
                 target={<ActionView items={clipboardItems.slice(0, index + 1)} />}
               />
               <Action
                 title="Remove From List"
-                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                style={Action.Style.Destructive}
+                icon={Icon.Trash}
                 onAction={async () => {
                   setClipboardItems((items) => items.filter((_, i) => i !== index));
                 }}
