@@ -61,15 +61,6 @@
   },
   "icon": "trakt.png",
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "apiKey",
-      "title": "TMDB API Key",
-      "description": "Your TMDB API Key",
-      "type": "password",
-      "required": false
-    }
-  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",

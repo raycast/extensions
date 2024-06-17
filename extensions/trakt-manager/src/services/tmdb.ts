@@ -1,6 +1,6 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import fetch from "node-fetch";
-import { TMDB_API_URL } from "../lib/constants";
+import { TMDB_API_URL, TMDB_BEARER_TOKEN } from "../lib/constants";
 
 export const getTMDBMovieDetails = async (tmdbId: number, signal: AbortSignal | undefined) => {
   const tmdbMovieCache = await LocalStorage.getItem<string>(`movie_${tmdbId}`);
@@ -9,20 +9,20 @@ export const getTMDBMovieDetails = async (tmdbId: number, signal: AbortSignal | 
     return tmdbMovie;
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  if (preferences.apiKey) {
-    const tmdbResponse = await fetch(`${TMDB_API_URL}/movie/${tmdbId}?api_key=${preferences.apiKey}`, {
-      signal,
-    });
+  const tmdbResponse = await fetch(`${TMDB_API_URL}/movie/${tmdbId}`, {
+    headers: {
+      Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+    },
+    signal,
+  });
 
-    if (!tmdbResponse.ok) {
-      return;
-    }
-
-    const tmdbMovie = (await tmdbResponse.json()) as TMDBMovieDetails;
-    await LocalStorage.setItem(`movie_${tmdbId}`, JSON.stringify(tmdbMovie));
-    return tmdbMovie;
+  if (!tmdbResponse.ok) {
+    return;
   }
+
+  const tmdbMovie = (await tmdbResponse.json()) as TMDBMovieDetails;
+  await LocalStorage.setItem(`movie_${tmdbId}`, JSON.stringify(tmdbMovie));
+  return tmdbMovie;
 };
 
 export const getTMDBShowDetails = async (tmdbId: number, signal: AbortSignal | undefined) => {
@@ -32,20 +32,20 @@ export const getTMDBShowDetails = async (tmdbId: number, signal: AbortSignal | u
     return tmdbMovie;
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  if (preferences.apiKey) {
-    const tmdbResponse = await fetch(`${TMDB_API_URL}/tv/${tmdbId}?api_key=${preferences.apiKey}`, {
-      signal,
-    });
+  const tmdbResponse = await fetch(`${TMDB_API_URL}/tv/${tmdbId}`, {
+    headers: {
+      Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+    },
+    signal,
+  });
 
-    if (!tmdbResponse.ok) {
-      return;
-    }
-
-    const tmdbMovie = (await tmdbResponse.json()) as TMDBShowDetails;
-    await LocalStorage.setItem(`show_${tmdbId}`, JSON.stringify(tmdbMovie));
-    return tmdbMovie;
+  if (!tmdbResponse.ok) {
+    return;
   }
+
+  const tmdbMovie = (await tmdbResponse.json()) as TMDBShowDetails;
+  await LocalStorage.setItem(`show_${tmdbId}`, JSON.stringify(tmdbMovie));
+  return tmdbMovie;
 };
 
 export const getTMDBSeasonDetails = async (tmdbId: number, seasonNumber: number, signal: AbortSignal | undefined) => {
@@ -55,23 +55,20 @@ export const getTMDBSeasonDetails = async (tmdbId: number, seasonNumber: number,
     return tmdbMovie;
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  if (preferences.apiKey) {
-    const tmdbResponse = await fetch(
-      `${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}?api_key=${preferences.apiKey}`,
-      {
-        signal,
-      },
-    );
+  const tmdbResponse = await fetch(`${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}`, {
+    headers: {
+      Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+    },
+    signal,
+  });
 
-    if (!tmdbResponse.ok) {
-      return;
-    }
-
-    const tmdbMovie = (await tmdbResponse.json()) as TMDBSeasonDetails;
-    await LocalStorage.setItem(`season_${tmdbId}_${seasonNumber}`, JSON.stringify(tmdbMovie));
-    return tmdbMovie;
+  if (!tmdbResponse.ok) {
+    return;
   }
+
+  const tmdbMovie = (await tmdbResponse.json()) as TMDBSeasonDetails;
+  await LocalStorage.setItem(`season_${tmdbId}_${seasonNumber}`, JSON.stringify(tmdbMovie));
+  return tmdbMovie;
 };
 
 export const getTMDBEpisodeDetails = async (
@@ -86,21 +83,18 @@ export const getTMDBEpisodeDetails = async (
     return tmdbMovie;
   }
 
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  if (preferences.apiKey) {
-    const tmdbResponse = await fetch(
-      `${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${preferences.apiKey}`,
-      {
-        signal,
-      },
-    );
+  const tmdbResponse = await fetch(`${TMDB_API_URL}/tv/${tmdbId}/season/${seasonNumber}/episode/${episodeNumber}`, {
+    headers: {
+      Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+    },
+    signal,
+  });
 
-    if (!tmdbResponse.ok) {
-      return;
-    }
-
-    const tmdbMovie = (await tmdbResponse.json()) as TMDBEpisodeDetails;
-    await LocalStorage.setItem(`episode_${tmdbId}_${seasonNumber}_${episodeNumber}`, JSON.stringify(tmdbMovie));
-    return tmdbMovie;
+  if (!tmdbResponse.ok) {
+    return;
   }
+
+  const tmdbMovie = (await tmdbResponse.json()) as TMDBEpisodeDetails;
+  await LocalStorage.setItem(`episode_${tmdbId}_${seasonNumber}_${episodeNumber}`, JSON.stringify(tmdbMovie));
+  return tmdbMovie;
 };
