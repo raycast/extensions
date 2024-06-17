@@ -1,6 +1,6 @@
 # Slack Changelog
 
-### [OAuth and Recents in Search] - 2024-06-12
+### [OAuth and Recents in Search] - 2024-06-17
 
 - **Added OAuth Support:** Users can now log in using OAuth for a more secure and streamlined authentication process.
 - **Improved Search Functionality:** Recently opened channels will now appear at the top of the search results, making it easier to find what you need quickly.
