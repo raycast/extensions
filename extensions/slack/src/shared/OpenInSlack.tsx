@@ -1,4 +1,4 @@
-import { Action, closeMainWindow, getApplications, getPreferenceValues, Icon } from "@raycast/api";
+import { Action, closeMainWindow, getApplications, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { buildScriptEnsuringSlackIsRunning } from "./utils";
