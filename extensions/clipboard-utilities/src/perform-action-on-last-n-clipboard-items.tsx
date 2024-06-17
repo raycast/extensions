@@ -134,7 +134,7 @@ export default function Command() {
                 target={<ActionView items={clipboardItems.slice(0, index + 1)} />}
               />
               <Action
-                title="Remove From List"
+                title="Remove from List"
                 shortcut={Keyboard.Shortcut.Common.Remove}
                 style={Action.Style.Destructive}
                 icon={Icon.Trash}
