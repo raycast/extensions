@@ -1,6 +1,6 @@
 # OpenWeatherMap Changelog
 
-## [Updated dependencies] - !date
+## [Updated dependencies] - 2024-06-17
 - Changed to using v3.0 of openweathermap onecall api
 - Updated vulnerable packages
 
