@@ -1,5 +1,10 @@
 # Amazon AWS Changelog
 
+## [GlueJobs command] - {PR_MERGE_DATE}
+
+- Added Glue Jobs command to list Glue Jobs
+- Changed AwsAction.Console component, to create sso shortcut login links, if possible
+
 ## [Console command] - 2024-06-17
 
 - Adds shortcut login for SSO profiles
