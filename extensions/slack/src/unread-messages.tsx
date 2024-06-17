@@ -12,8 +12,9 @@ import {
   useUsers,
 } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
-import { openChannel, timeDifference } from "./shared/utils";
 import { withSlackClient } from "./shared/withSlackClient";
+import { timeDifference } from "./shared/utils";
+import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
@@ -28,6 +29,7 @@ function UnreadMessages() {
 function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
+  const { isAppInstalled, isLoading } = useSlackApp();
   const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
   const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
   const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
@@ -104,7 +106,12 @@ function UnreadMessagesOverview() {
   return (
     <List
       isLoading={
-        !selectedConversations || isLoadingUnreadConversations || isLoadingUsers || isLoadingChannels || isLoadingGroups
+        !selectedConversations ||
+        isLoadingUnreadConversations ||
+        isLoadingUsers ||
+        isLoadingChannels ||
+        isLoadingGroups ||
+        isLoading
       }
     >
       {selectedConversations && selectedConversations.length === 0 && (
@@ -156,17 +163,16 @@ function UnreadMessagesOverview() {
                   <ActionPanel>
                     {conversation && (
                       <>
-                        <Action
-                          icon={{ fileIcon: "/Applications/Slack.app" }}
-                          title="Open in Slack"
-                          onAction={() => {
-                            markConversationAsRead(unreadConversation.conversationId);
-                            openChannel(conversation.teamId, conversation.id);
-                          }}
+                        <OpenChannelInSlack
+                          workspaceId={conversation.teamId}
+                          channelId={unreadConversation.conversationId}
+                          isAppInstalled={isAppInstalled}
+                          onAction={() => markConversationAsRead(unreadConversation.conversationId)}
                         />
                         <Action
-                          icon={Icon.Check}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                           title="Mark as Read"
+                          icon={Icon.Checkmark}
                           onAction={() => markConversationAsRead(unreadConversation.conversationId, true)}
                         />
                       </>

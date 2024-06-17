@@ -1,5 +1,9 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Updated] - 2024-06-12
+
+- Adds submenu to View Bookings command to enable you to update a booking's status
+
 ## [Update] - 2024-06-04
 
 - Adds View Bookings command, which displays the user's bookings

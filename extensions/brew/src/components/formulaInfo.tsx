@@ -4,18 +4,21 @@ import { Formula, brewIsInstalled, brewPrefix } from "../brew";
 
 export function FormulaInfo(props: { formula: Formula; onAction: (result: boolean) => void }): JSX.Element {
   const { pop } = useNavigation();
+  const { formula } = props;
+
   return (
     <Detail
-      markdown={formatInfo(props.formula)}
+      markdown={formatInfo(formula)}
+      navigationTitle={`Formula: ${formula.name}`}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Homepage" text={props.formula.homepage} target={props.formula.homepage} />
-          <Detail.Metadata.Label title="License" text={props.formula.license} />
+          <Detail.Metadata.Link title="Homepage" text={formula.homepage} target={formula.homepage} />
+          <Detail.Metadata.Label title="License" text={formula.license} />
         </Detail.Metadata>
       }
       actions={
         <FormulaActionPanel
-          formula={props.formula}
+          formula={formula}
           showDetails={false}
           onAction={(result) => {
             pop();

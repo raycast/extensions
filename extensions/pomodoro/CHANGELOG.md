@@ -1,5 +1,9 @@
 # Pomodoro Changelog
 
+## [Enhancement] - 2024-06-07
+
+Add option to restart current interval/timer from one click in the menu bar
+
 ## [Enhancement] - 2024-04-23
 
 Add recap page to displays information about your prev pomodoro sessions like (total time, total sessions number, back to back sessions,..)

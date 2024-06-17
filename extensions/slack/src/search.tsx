@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, Image, List } from "@raycast/api";
 
-import { onApiError, useChannels, useGroups, useUsers } from "./shared/client";
+import { User, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
 import { UpdatesModal } from "./shared/UpdatesModal";
-import { openChannel, openChat } from "./shared/utils";
 import { withSlackClient } from "./shared/withSlackClient";
 import { useFrecencySorting } from "@raycast/utils";
+import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 function Search() {
   return (
@@ -15,6 +15,7 @@ function Search() {
 }
 
 function SlackList() {
+  const { isAppInstalled, isLoading } = useSlackApp();
   const { data: users, isLoading: isLoadingUsers, error: usersError } = useUsers();
   const { data: channels, isLoading: isLoadingChannels, error: channelsError } = useChannels();
   const { data: groups, isLoading: isLoadingGroups, error: groupsError } = useGroups();
@@ -32,34 +33,60 @@ function SlackList() {
   });
 
   return (
-    <List isLoading={isLoadingUsers || isLoadingChannels || isLoadingGroups}>
+    <List isLoading={isLoadingUsers || isLoadingChannels || isLoadingGroups || isLoading}>
       {recents.map((item) => {
-        const { id, name, icon, teamId } = item;
-        const isUser = id.startsWith("U");
+        const isUser = item.id.startsWith("U");
 
-        return (
-          <List.Item
-            key={id}
-            title={name}
-            icon={isUser ? (icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person) : icon}
-            actions={
-              <ActionPanel>
-                <Action
-                  icon={{ fileIcon: "/Applications/Slack.app" }}
-                  title="Open in Slack"
-                  onAction={() => {
-                    isUser ? openChat(teamId, id) : openChannel(teamId, id);
-                    visitItem(item);
-                  }}
-                />
+        if (isUser) {
+          const { id: userId, name, icon, teamId: workspaceId, conversationId } = item as User;
+          return (
+            <List.Item
+              key={userId}
+              title={name}
+              icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
+              actions={
+                <ActionPanel>
+                  <OpenChatInSlack
+                    {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
+                  />
 
-                <ActionPanel.Section>
-                  <Action icon={Icon.ArrowCounterClockwise} title="Reset Ranking" onAction={() => resetRanking(item)} />
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        );
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.ArrowCounterClockwise}
+                      title="Reset Ranking"
+                      onAction={() => resetRanking(item)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        } else {
+          const { id: channelId, name, icon, teamId: workspaceId } = item as User;
+
+          return (
+            <List.Item
+              key={channelId}
+              title={name}
+              icon={isUser ? (icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person) : icon}
+              actions={
+                <ActionPanel>
+                  <OpenChannelInSlack
+                    {...{ workspaceId, channelId, isAppInstalled, onAction: () => visitItem(item) }}
+                  />
+
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.ArrowCounterClockwise}
+                      title="Reset Ranking"
+                      onAction={() => resetRanking(item)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        }
       })}
     </List>
   );

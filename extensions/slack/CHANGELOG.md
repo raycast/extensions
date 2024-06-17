@@ -5,6 +5,16 @@
 - **Added OAuth Support:** Users can now log in using OAuth for a more secure and streamlined authentication process.
 - **Improved Search Functionality:** Recently opened channels will now appear at the top of the search results, making it easier to find what you need quickly.
 
+## [Improvements and Fixes] - 2024-06-14
+
+- Adds action to open in browser apart from slack app
+- Only show Open in Slack option in case Slack app is installed on the system
+- Fixed channelId when users are selected for unread messages
+
+## [Performance improvements] - 2024-06-08
+
+- Improve performance when fetching users and channels in large workspace
+
 ## [Improve Search command UX] - 2023-04-16
 
 - Automatically close Slack right sidebar after navigating to a user chat
