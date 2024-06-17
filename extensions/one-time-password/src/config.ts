@@ -2,7 +2,7 @@ const theme = {
   grey: '#909090',
   green: '#288056',
   red: '#802828',
-}
+};
 
 export const config = {
   colors: {
