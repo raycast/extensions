@@ -14,9 +14,7 @@ const commandExists = (command: string): boolean => {
 // Function to check if a custom path is valid
 const pathExists = (path: string): boolean => {
   try {
-    return execSync(`[ -x "${path}" ] && echo exists || echo not_found`)
-      .toString()
-      .trim() === "exists";
+    return execSync(`[ -x "${path}" ] && echo exists || echo not_found`).toString().trim() === "exists";
   } catch (e) {
     return false;
   }
@@ -46,7 +44,6 @@ export async function confirmAlertBrew(): Promise<boolean> {
 
   return true; // Indicate that bclm exists either via command or custom path
 }
-
 
 // Function to get the bclm path
 export const bclmPath = () => {

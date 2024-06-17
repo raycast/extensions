@@ -53,7 +53,8 @@
     "@raycast/api": "^1.74.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8"
+    "@raycast/eslint-config": "^1.0.8",
+    "prettier": "^3.2.5"
   },
   "scripts": {
     "build": "ray build -e dist",
