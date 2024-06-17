@@ -20,7 +20,7 @@
     {
       "name": "shorten-link",
       "title": "Shorten Link",
-      "description": "Shorten links with dub.co and custom domains, tags etc.",
+      "description": "Shorten links from arguments, clipboard or selection with dub.co using workspaces, custom domains, tags etc.",
       "mode": "view",
       "arguments": [
         {
@@ -38,7 +38,7 @@
     {
       "name": "search-links",
       "title": "Search Links",
-      "description": "Search shortened links with dub.co",
+      "description": "Search shortened links with dub.co in different workspaces",
       "mode": "view"
     }
   ],
