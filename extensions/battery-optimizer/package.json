@@ -8,6 +8,9 @@
     "System"
   ],
   "author": "Qetesh",
+  "contributors": [
+    "vatsalsanjay"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -30,6 +33,13 @@
     }
   ],
   "preferences": [
+    {
+      "name": "customBCLMPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom BCLM Executable Path",
+      "description": "Set this if your BCLM executable is in a non-standard location. Find by running `which bclm` in the terminal."
+    },
     {
       "name": "add_system_service",
       "description": "Persistence through system services",
