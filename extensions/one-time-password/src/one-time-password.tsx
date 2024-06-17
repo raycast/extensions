@@ -16,10 +16,19 @@ import {
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
+import { z } from 'zod';
 import * as store from './store';
-import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType, parseUrl } from './utils';
+import {
+  readDataFromQRCodeOnScreen,
+  getCurrentSeconds,
+  splitStrToParts,
+  ScanType,
+  parseUrl,
+  getPrioTag,
+} from './utils';
 import { TOKEN_TIME, generateToken } from './totp';
 import { extractAccountsFromMigrationUrl } from './google-authenticator';
+import { config } from './config';
 
 type Preferences = {
   passwordVisibility?: boolean;
@@ -160,55 +169,16 @@ export default () => {
 
   return (
     <List isLoading={loading}>
-      <List.Item
-        title={'Create new'}
-        subtitle={'Create a new one-time password'}
-        icon={Icon.Plus}
-        accessories={
-          !qrCodeScanType
-            ? [
-                {
-                  icon: Icon.Camera,
-                  tag: {
-                    value: 'Scan QR',
-                    color: '#ded260',
-                  },
-                },
-                {
-                  icon: Icon.Keyboard,
-                  tag: 'Enter Setup Key',
-                },
-              ]
-            : qrCodeScanType === 'scan'
-            ? [{ text: 'Scanning QR Code...' }]
-            : [{ text: 'Select a QR Code' }]
-        }
-        actions={
-          <ActionPanel>
-            <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
-            <Action.Push
-              title="Enter a Setup Key"
-              icon={Icon.Keyboard}
-              shortcut={{ modifiers: ['cmd'], key: 'enter' }}
-              target={<SetupKey onSubmit={handleFormSubmit} />}
-            />
-            <Action
-              title="Select a QR Code"
-              icon={Icon.Camera}
-              shortcut={{ modifiers: ['cmd'], key: 'i' }}
-              onAction={() => scanQRCode('select')}
-            />
-          </ActionPanel>
-        }
-      />
       <List.Section title="Accounts">
         {accounts.map((account, i) => (
           <List.Item
             key={i}
+            icon={{ source: Icon.Key, tintColor: config.colors.key }}
             title={account.name}
             subtitle={displayToken(account.secret)}
             keywords={[account.issuer ?? '', account.name]}
             accessories={[
+              getPrioTag(account.prio),
               account.issuer ? { tag: account.issuer } : {},
               {
                 icon: { source: getProgressIcon(timer / TOKEN_TIME), tintColor: getProgressColor() },
@@ -218,18 +188,26 @@ export default () => {
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
+                <Action.Paste content={getCopyToClipboardContent(account.secret)} />
                 <Action.Push
                   title="Edit Account"
+                  shortcut={{ modifiers: ['cmd'], key: 'e' }}
                   icon={Icon.Pencil}
                   target={
-                    <SetupKey id={account.id} name={account.name} secret={account.secret} onSubmit={handleFormSubmit} />
+                    <SetupKey
+                      id={account.id}
+                      name={account.name}
+                      secret={account.secret}
+                      prio={account.prio?.toString()}
+                      onSubmit={handleFormSubmit}
+                    />
                   }
                 />
                 <Action
                   title="Remove Account"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+                  shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
                   onAction={() => handleRemoveAccount(account)}
                 />
                 <Action
@@ -245,6 +223,50 @@ export default () => {
           />
         ))}
       </List.Section>
+      {!loading && ( // NOTE: defers rendering so accounts are in focus
+        <List.Section title="New">
+          <List.Item
+            title={'Create new'}
+            subtitle={'Create a new one-time password'}
+            icon={Icon.Plus}
+            accessories={
+              !qrCodeScanType
+                ? [
+                    {
+                      icon: Icon.Camera,
+                      tag: {
+                        value: 'Scan QR',
+                        color: '#ded260',
+                      },
+                    },
+                    {
+                      icon: Icon.Keyboard,
+                      tag: 'Enter Setup Key',
+                    },
+                  ]
+                : qrCodeScanType === 'scan'
+                ? [{ text: 'Scanning QR Code...' }]
+                : [{ text: 'Select a QR Code' }]
+            }
+            actions={
+              <ActionPanel>
+                <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
+                <Action.Push
+                  title="Enter a Setup Key"
+                  icon={Icon.Keyboard}
+                  target={<SetupKey onSubmit={handleFormSubmit} />}
+                />
+                <Action
+                  title="Select a QR Code"
+                  icon={Icon.Camera}
+                  shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                  onAction={() => scanQRCode('select')}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
     </List>
   );
 };
@@ -254,20 +276,41 @@ type SetupKeyProps = {
   id?: string;
   name?: string;
   secret?: string;
+  prio?: string;
 };
+
+const Prio = z.coerce
+  .number()
+  .transform((val) => Math.floor(val))
+  .pipe(z.number().int())
+  .optional();
+
+function validatePrio(prev?: string, newPrio?: string) {
+  if (newPrio === undefined || newPrio === '') return undefined;
+
+  const prio = Prio.safeParse(newPrio);
+  if (prio.success) return prio.data?.toString();
+  return prev;
+}
 
 function SetupKey(props: SetupKeyProps) {
   const [name, setName] = useState(props.name ?? '');
   const [secret, setSecret] = useState(props.secret ?? '');
+  const [prioText, setPrio] = useState(props.prio ?? '');
 
   async function handleSubmit() {
-    if (props.id) {
-      await store.updateAccount(props.id, { name, secret });
-    } else {
-      await store.addAccount({ name, secret });
-    }
+    const validPrio = validatePrio(props.prio, prioText);
+    setPrio(validPrio ?? '');
+
+    const prio = Prio.parse(validPrio);
+    if (props.id) await store.updateAccount(props.id, { name, secret, prio });
+    else await store.addAccount({ name, secret, prio });
+
     props.onSubmit();
   }
+
+  const handlePrioBlur = () => setPrio((prev) => validatePrio(props.prio, prev) ?? '');
+
   return (
     <Form
       actions={
@@ -278,6 +321,7 @@ function SetupKey(props: SetupKeyProps) {
     >
       <Form.TextField id="name" title="Name" value={name} onChange={setName} />
       <Form.TextField id="secret" title="Secret" value={secret} onChange={setSecret} />
+      <Form.TextField id="prio" title="Priority" value={prioText} onChange={setPrio} onBlur={handlePrioBlur} />
     </Form>
   );
 }

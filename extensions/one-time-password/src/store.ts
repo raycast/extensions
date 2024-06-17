@@ -1,14 +1,17 @@
 import { LocalStorage } from '@raycast/api';
 import crypto from 'crypto';
-import { parseUrl } from './utils';
+import { z } from 'zod';
+import { parseUrl, sortByPrio } from './utils';
 
-export type Account = {
-  id: string;
-  name: string;
-  issuer?: string;
-  secret: string;
-  token?: string;
-};
+export const Account = z.object({
+  id: z.string(),
+  name: z.string(),
+  issuer: z.string().optional(),
+  secret: z.string(),
+  token: z.string().optional(),
+  prio: z.number().optional(),
+});
+export type Account = z.infer<typeof Account>;
 
 type AccountWithoutId = Omit<Account, 'id'>;
 
@@ -25,9 +28,9 @@ async function save(accounts: Account[]) {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
 }
 
-export async function getAccounts(): Promise<Account[]> {
-  const data = (await LocalStorage.getItem(STORAGE_KEY)) || '[]';
-  return JSON.parse(data as string);
+export async function getAccounts() {
+  const data = (await LocalStorage.getItem<string>(STORAGE_KEY)) || '[]';
+  return z.array(Account).parse(JSON.parse(data)).sort(sortByPrio);
 }
 
 function isOtpUrl(str: string) {
@@ -61,5 +64,6 @@ export async function updateAccount(id: string, account: AccountWithoutId) {
   if (!accountFound) return;
   accountFound.name = account.name;
   accountFound.secret = account.secret;
+  accountFound.prio = account.prio;
   await save(accounts);
 }
