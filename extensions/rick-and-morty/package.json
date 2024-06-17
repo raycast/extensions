@@ -3,7 +3,7 @@
   "name": "rick-and-morty",
   "title": "Rick and Morty",
   "description": "Access characters, images, locations and episodes from the television show \"Rick and Morty\"",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "xmok",
   "categories": [
     "Fun"
@@ -13,23 +13,22 @@
     {
       "name": "characters",
       "title": "Characters",
-      "description": "",
+      "description": "Access Characters from \"Rick and Morty\"",
       "mode": "view"
     },
     {
       "name": "locations",
       "title": "Locations",
-      "description": "",
-      "mode": "view"
+        "description": "Access Locations from \"Rick and Morty\"",
+        "mode": "view"
     },
     {
       "name": "episodes",
       "title": "Episodes",
-      "description": "",
-      "mode": "view"
+        "description": "Access Episodes from \"Rick and Morty\"",
+        "mode": "view"
     }
   ],
-  "tools": null,
   "dependencies": {
     "@raycast/api": "^1.76.0",
     "@raycast/utils": "^1.16.0",
