@@ -9,7 +9,7 @@ interface Preferences {
   directory: string;
   codeEditor: Application;
   terminalApp: Application;
-};
+}
 
 function expandHomeDir(directory: string): string {
   if (directory.startsWith("~")) {
