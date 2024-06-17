@@ -9,13 +9,13 @@ import {
   List,
   showToast,
   Toast,
-} from '@raycast/api';
+} from "@raycast/api";
 import { useShortLinks } from "./hooks/use-short-links";
 import { useWorkspaces } from "./hooks/use-workspaces";
 import { useState } from "react";
 import { DUB_CO_URL } from "./utils/constants";
 import { deleteShortLink } from "./api";
-import { showFailureToast} from '@raycast/utils';
+import { showFailureToast } from "@raycast/utils";
 import { WorkspaceAccessory } from "./components/workspace-accessory";
 
 export default function SearchLinks() {

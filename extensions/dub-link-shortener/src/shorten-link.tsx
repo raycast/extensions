@@ -10,12 +10,13 @@ import {
   Toast,
   open,
   Clipboard,
-  useNavigation, LaunchProps,
-} from '@raycast/api';
+  useNavigation,
+  LaunchProps,
+} from "@raycast/api";
 import { useWorkspaces } from "./hooks/use-workspaces";
-import { FormValidation, showFailureToast, useCachedPromise, useCachedState, useForm } from '@raycast/utils';
+import { FormValidation, showFailureToast, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { createShortLink } from "./api";
-import { fetchLink, isEmpty } from './utils/clipboard';
+import { fetchLink, isEmpty } from "./utils/clipboard";
 
 interface ShortLinkFormValues {
   workspaceId: string;
@@ -28,9 +29,9 @@ interface ShortLinkFormValues {
 
 const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormValues; args: Arguments.ShortenLink }) => {
   const { push, pop } = useNavigation();
-  const {url, key} = args;
-  const [workspaceId, setWorkspaceId] = useCachedState("selected_workspace", "", {cacheNamespace: "shorten-links"});
-  const {data: originalLink, isLoading: isLoadingLink} = useCachedPromise(fetchLink, [], {execute: isEmpty(url)});
+  const { url, key } = args;
+  const [workspaceId, setWorkspaceId] = useCachedState("selected_workspace", "", { cacheNamespace: "shorten-links" });
+  const { data: originalLink, isLoading: isLoadingLink } = useCachedPromise(fetchLink, [], { execute: isEmpty(url) });
   const { workspaces, isLoading } = useWorkspaces();
 
   const { handleSubmit, itemProps, values } = useForm<ShortLinkFormValues>({
@@ -39,7 +40,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
       await showToast({ style: Toast.Style.Animated, title: "Creating link..." });
       createShortLink({ originalUrl: vals.url, ...vals })
         .then(async ({ shortLink }) => {
-          await Clipboard.copy(shortLink)
+          await Clipboard.copy(shortLink);
           await showToast({
             style: Toast.Style.Success,
             title: "✅ Link created",
@@ -52,7 +53,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
               title: "Open Short Links",
               onAction: () => open("raycast://extensions/quuu/dub-link-shortener/search-links"),
             },
-          })
+          });
         })
         .catch(async (err) => {
           captureException(err);
@@ -77,7 +78,7 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
 
   return (
     <Form
-      searchBarAccessory={<Form.LinkAccessory text="Dashboard" target="https://app.dub.co" /> }
+      searchBarAccessory={<Form.LinkAccessory text="Dashboard" target="https://app.dub.co" />}
       isLoading={isLoading || isLoadingLink}
       actions={
         <ActionPanel>
@@ -134,6 +135,6 @@ const ShortenLinkForm = ({ retryValues, args }: { retryValues?: ShortLinkFormVal
   );
 };
 
-export default function ShortenLink(props: LaunchProps<{arguments: Arguments.ShortenLink}>) {
+export default function ShortenLink(props: LaunchProps<{ arguments: Arguments.ShortenLink }>) {
   return <ShortenLinkForm args={props.arguments} />;
 }
