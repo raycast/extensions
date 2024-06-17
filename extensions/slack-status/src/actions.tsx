@@ -10,7 +10,7 @@ import {
   confirmAlert,
   environment,
   showToast,
-  useNavigation
+  useNavigation,
 } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { Profile } from "@slack/web-api/dist/response/UsersProfileGetResponse";
@@ -37,20 +37,20 @@ export function ClearStatusAction(props: { mutate: MutatePromise<Profile | undef
               profile: JSON.stringify({
                 status_text: "",
                 status_expiration: 0,
-                status_emoji: ""
-              })
+                status_emoji: "",
+              }),
             }),
             {
               optimisticUpdate() {
                 return {};
-              }
-            }
+              },
+            },
           ),
           {
             loading: "Clearing status...",
             success: "Cleared status",
-            error: "Failed clearing status"
-          }
+            error: "Failed clearing status",
+          },
         );
       }}
     />
@@ -88,7 +88,7 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               }. 
 
               Your suggested Slack status:`,
-              { creativity: "low" }
+              { creativity: "low" },
             );
 
             const parsedAnswer = JSON.parse(answer);
@@ -103,20 +103,20 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
               status_expiration:
                 parsedAnswer.duration && typeof parsedAnswer.duration === "number"
                   ? new Date().getTime() / 1000 + parsedAnswer.duration
-                  : 0
+                  : 0,
             };
 
             await clearSearchBar();
 
             await props.mutate(
               slack.users.profile.set({
-                profile: JSON.stringify(profile)
+                profile: JSON.stringify(profile),
               }),
               {
                 optimisticUpdate() {
                   return profile;
-                }
-              }
+                },
+              },
             );
 
             return parsedAnswer;
@@ -125,10 +125,10 @@ export function SetStatusWithAIAction(props: { statusText: string; mutate: Mutat
             loading: "Setting status with AI...",
             success: (value) => ({
               title: "Set status with AI",
-              message: `${value.emoji} ${value.text}`
+              message: `${value.emoji} ${value.text}`,
             }),
-            error: "Failed setting status with AI"
-          }
+            error: "Failed setting status with AI",
+          },
         );
       }}
     />
@@ -144,7 +144,7 @@ export function SetStatusAction(props: { preset: SlackStatusPreset; mutate: Muta
       onAction={async () => {
         setStatusToPreset({
           ...props,
-          slack
+          slack,
         });
       }}
     />
@@ -180,25 +180,25 @@ export function SetStatusWithDuration(props: {
                   const profile: Profile = {
                     status_emoji: props.preset.emojiCode,
                     status_text: props.preset.title,
-                    status_expiration: expiration
+                    status_expiration: expiration,
                   };
 
                   await props.mutate(
                     slack.users.profile.set({
-                      profile: JSON.stringify(profile)
+                      profile: JSON.stringify(profile),
                     }),
                     {
                       optimisticUpdate() {
                         return profile;
-                      }
-                    }
+                      },
+                    },
                   );
                 },
                 {
                   loading: "Setting status with duration...",
                   success: "Set status with duration",
-                  error: "Failed setting status with duration"
-                }
+                  error: "Failed setting status with duration",
+                },
               );
             }}
           />
@@ -235,18 +235,18 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
                 const profile: Profile = {
                   status_emoji: values.emoji,
                   status_text: values.statusText,
-                  status_expiration: expiration
+                  status_expiration: expiration,
                 };
 
                 await props.mutate(
                   slack.users.profile.set({
-                    profile: JSON.stringify(profile)
+                    profile: JSON.stringify(profile),
                   }),
                   {
                     optimisticUpdate() {
                       return profile;
-                    }
-                  }
+                    },
+                  },
                 );
 
                 pop();
@@ -254,8 +254,8 @@ export function SetCustomStatusAction(props: { mutate: MutatePromise<Profile | u
               {
                 loading: "Setting custom status...",
                 success: "Set custom status",
-                error: "Failed setting custom status"
-              }
+                error: "Failed setting custom status",
+              },
             );
           }}
         />
@@ -282,7 +282,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
-              id: nanoid()
+              id: nanoid(),
             });
 
             pop();
@@ -290,7 +290,7 @@ export function CreateStatusPresetAction(props: { onCreate: (preset: SlackStatus
             await showToast({
               style: Toast.Style.Success,
               title: "Created preset",
-              message: `${getEmojiForCode(values.emoji)} ${values.statusText}`
+              message: `${getEmojiForCode(values.emoji)} ${values.statusText}`,
             });
           }}
         />
@@ -340,8 +340,8 @@ export function DeleteStatusPresetAction(props: { onDelete: () => void }) {
           rememberUserChoice: true,
           primaryAction: {
             title: "Confirm",
-            style: Alert.ActionStyle.Destructive
-          }
+            style: Alert.ActionStyle.Destructive,
+          },
         });
 
         if (!confirmed) {
@@ -372,14 +372,14 @@ export function EditStatusPresetAction(props: {
           initalValues={{
             emoji: props.preset.emojiCode,
             statusText: props.preset.title,
-            duration: props.preset.defaultDuration.toString()
+            duration: props.preset.defaultDuration.toString(),
           }}
           onSubmit={async (values) => {
             props.onEdit({
               title: values.statusText,
               emojiCode: values.emoji,
               defaultDuration: parseInt(values.duration),
-              id: props.preset.id ?? nanoid()
+              id: props.preset.id ?? nanoid(),
             });
 
             pop();
@@ -387,7 +387,7 @@ export function EditStatusPresetAction(props: {
             await showToast({
               style: Toast.Style.Success,
               title: "Updated preset",
-              message: `${getEmojiForCode(values.emoji)} ${values.statusText}`
+              message: `${getEmojiForCode(values.emoji)} ${values.statusText}`,
             });
           }}
         />
