@@ -47,7 +47,7 @@
     },
     {
       "name": "extract-text",
-      "title": "Extract Text From PDF",
+      "title": "Extract Text from PDF",
       "subtitle": "iLovePDF",
       "description": "Extracts Text from PDF using iLovePDF API.",
       "mode": "view"
