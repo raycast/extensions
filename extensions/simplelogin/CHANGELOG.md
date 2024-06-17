@@ -1,6 +1,6 @@
 # SimpleLogin Changelog
 
-[Enable Alias Description Prefill Based on Active Browser Tab URL] - {PR_MERGE_DATE}
+## [Enable Alias Description Prefill Based on Active Browser Tab URL] - {PR_MERGE_DATE}
 * Added a new preference option: "Prefill Alias Description".
 * When enabled, the default alias description will be automatically populated using the hostname of the active browser tab.
 * (Side Note) Bump Raycast API packag version
