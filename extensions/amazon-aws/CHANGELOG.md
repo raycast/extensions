@@ -1,6 +1,6 @@
 # Amazon AWS Changelog
 
-## [Console command] - {PR_MERGE_DATE}
+## [Console command] - 2024-06-17
 
 - Adds shortcut login for SSO profiles
 
