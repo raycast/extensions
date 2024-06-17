@@ -1,6 +1,6 @@
 # Paste as Plain text Changelog
 
-## [Paste as File] - {PR_MERGE_DATE}
+## [Paste as File] - 2024-06-17
 
 -  Paste as File, extract file path from the clipboard and paste it as file
 -  Auto fetch title from URL when pasting as Markdown Link and Markdown Image
