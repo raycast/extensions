@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { getPref_deleteCSS, getPref_deleteSourceMap, getPref_sassCompilerPath } from "./util_preference";
 import { delayOperation } from "./util_other";
 
@@ -78,6 +78,23 @@ export async function add_LocalConfig_watch(_conf_: CompileConfig): Promise<stri
     });
   });
 }
+export async function update_LocalConfig_watch(_conf_old_: CompileConfig, _conf_new_: CompileConfig) {
+  return new Promise<string>((resolve) => {
+    getAll_LocalConfig_watch().then((configs) => {
+      let msg: string = "";
+      for (let i = 0; i < configs.length; i++) {
+        const config = configs[i];
+        if (config.cssPath == _conf_old_.cssPath && config.scssPath == _conf_old_.scssPath) {
+          configs.splice(i, 1);
+          msg = "updated old_config";
+          configs.push(_conf_new_);
+        }
+      }
+      LocalStorage.setItem("watch_configs", JSON.stringify(configs));
+      resolve(msg);
+    });
+  });
+}
 export async function remove_LocalConfig_watch(_conf_: CompileConfig) {
   return new Promise<void>((resolve, reject) => {
     getAll_LocalConfig_watch().then((configs) => {
@@ -106,6 +123,8 @@ export type CompileResult = {
   success: boolean;
   message: string;
 };
+
+// ████████████
 
 export async function exec_compile(conf: CompileConfig): Promise<CompileResult> {
   const compile_scssPath: string = conf.scssPath.toLowerCase().endsWith(".scss")
@@ -141,7 +160,7 @@ export async function exec_compile(conf: CompileConfig): Promise<CompileResult> 
     exec(
       compile_cmd,
       { shell: "/bin/zsh", env: { ...process.env, PATH: "/opt/homebrew/bin" } },
-      async (error, stderr, stdout) => {
+      async (error, stdout) => {
         if (error == null || error == undefined) {
           resolve({ success: true, message: stdout });
         } else {
@@ -150,6 +169,103 @@ export async function exec_compile(conf: CompileConfig): Promise<CompileResult> 
           } else {
             reject({ success: false, message: "Unknown Error" });
           }
+        }
+      },
+    );
+  });
+}
+
+// ████████████
+
+export async function exec_watch(conf: CompileConfig): Promise<CompileResult> {
+  const compile_scssPath: string = conf.scssPath.toLowerCase().endsWith(".scss")
+    ? conf.scssPath
+    : conf.scssPath + "/style.scss";
+  const compile_cssPath: string = conf.cssPath.toLowerCase().endsWith(".css")
+    ? conf.cssPath
+    : conf.cssPath + "/style.css";
+  const compile_option_outputStyle: string = `--style=${conf.outputStyle}`;
+  const compile_option_sourceMap: string =
+    conf.sourceMap == "auto"
+      ? ""
+      : conf.sourceMap == "none"
+        ? "--no-source-map"
+        : conf.sourceMap == "inline"
+          ? "--embed-source-map"
+          : conf.sourceMap == "file"
+            ? ""
+            : "";
+  const compile_options = compile_option_outputStyle + " " + compile_option_sourceMap;
+  const compile_execPath = getPref_sassCompilerPath();
+  const compile_cmd: string = `${compile_execPath} --watch ${compile_options} "${compile_scssPath}" "${compile_cssPath}"`;
+  if (getPref_deleteCSS()) {
+    exec(`/bin/rm -rf "${compile_cssPath}"`);
+    await delayOperation(100);
+  }
+  if (getPref_deleteSourceMap()) {
+    exec(`/bin/rm -rf "${compile_cssPath}.map"`);
+    await delayOperation(100);
+  }
+
+  return new Promise<CompileResult>((resolve, reject) => {
+    // First check if the scss file exists ?
+    exec(`/bin/ls ${conf.scssPath} &> /dev/null && echo "Exists" || echo "Does not exist"`, async (error, stdout) => {
+      if (stdout == "Does not exist") {
+        reject({ success: true, message: "File Not Found !" });
+      }
+    });
+
+    // Add background process
+    let watch_process_success = false;
+    const watch_process = spawn(compile_cmd, {
+      shell: "/bin/zsh",
+      env: { ...process.env, PATH: "/opt/homebrew/bin" },
+      detached: true,
+    });
+
+    // Resolve when receiving "certain" data stdout
+    watch_process.stdout.on("data", (data) => {
+      if (data.toString().includes("Sass is watching for change")) {
+        watch_process_success = true;
+        resolve({ success: true, message: "" });
+      }
+    });
+
+    // Kill watch process if it did not "resolve" in time
+    setTimeout(() => {
+      if (!watch_process_success) {
+        watch_process.kill("SIGTERM");
+        reject({ success: false, message: "Cannot Watch" });
+      }
+    }, 5000);
+  });
+}
+
+// ████████████
+
+export async function exec_pause(conf: CompileConfig): Promise<CompileResult> {
+  const compile_scssPath: string = conf.scssPath.toLowerCase().endsWith(".scss")
+    ? conf.scssPath
+    : conf.scssPath + "/style.scss";
+  const compile_cssPath: string = conf.cssPath.toLowerCase().endsWith(".css")
+    ? conf.cssPath
+    : conf.cssPath + "/style.css";
+  return new Promise<CompileResult>((resolve, reject) => {
+    let killed_any = false;
+    exec(
+      `/bin/ps aux | /usr/bin/grep "sass --watch" | /usr/bin/grep "${compile_scssPath}" | /usr/bin/grep "${compile_cssPath}" | /usr/bin/grep -v "grep" | /usr/bin/grep -v "awk" | /usr/bin/awk '{printf "%s ","|" ; printf "%s ", $2; printf "%s ","|" ; for (i=11; i<=NF; i++) printf "%s ", $i; print "|"}'`,
+      async (error, stdout) => {
+        stdout.split("\n").forEach((item) => {
+          const pid = item.split("| ")[1];
+          if (pid != undefined && pid.length != 0) {
+            killed_any = true;
+            exec(`kill -9 ${pid}`);
+          }
+        });
+        if (killed_any) {
+          resolve({ success: true, message: "Killed all Process" });
+        } else {
+          reject({ success: false, message: "No Process Found" });
         }
       },
     );

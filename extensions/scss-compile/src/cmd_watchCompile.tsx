@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import {
   CompileConfig,
   CompileResult,
   exec_compile,
+  exec_pause,
+  exec_watch,
   getAll_LocalConfig_watch,
   removeAll_LocalConfigs_watch,
   remove_LocalConfig_watch,
   set_LocalConfig_prev,
+  update_LocalConfig_watch,
 } from "./util_compile";
 import { delayOperation, truncatePath_disp as truncatePath } from "./util_other";
 import { CompilForm } from "./cmp_CompileForm";
@@ -60,7 +63,7 @@ export default function Command() {
             keywords={[...config.scssPath.split("/"), ...config.cssPath.split("/")]}
             title={{ value: "[SCSS] " + truncatePath(config.scssPath), tooltip: config.scssPath }}
             subtitle={{ value: "[CSS] " + truncatePath(config.cssPath), tooltip: config.cssPath }}
-            icon={config.watchCompile ? { source: Icon.CheckCircle } : { source: Icon.Circle }}
+            icon={config.watchCompile ? { source: Icon.CheckCircle, tintColor: Color.Green } : { source: Icon.Circle }}
             accessories={[
               config.outputStyle == "compressed" ? { tag: "Minified" } : {},
               { tag: (config_index + 1).toString() },
@@ -75,15 +78,59 @@ export default function Command() {
                       showToast({ title: `Compiling...`, style: Toast.Style.Animated });
                       exec_compile(config)
                         .then(() => {
-                          delayOperation(1000);
-                          set_LocalConfig_prev(config);
-                          showToast({ title: `Success !`, style: Toast.Style.Success });
+                          delayOperation(500).then(() => {
+                            set_LocalConfig_prev(config);
+                            showToast({ title: `Success !`, style: Toast.Style.Success });
+                          });
                         })
                         .catch((result: CompileResult) => {
                           showToast({ title: `Compile Failed: ${result.message} !`, style: Toast.Style.Failure });
                         });
                     }}
                   />
+                  {!config.watchCompile ? (
+                    <Action
+                      title="Watch"
+                      icon={Icon.CheckCircle}
+                      onAction={() => {
+                        showToast({ title: `Watching...`, style: Toast.Style.Animated });
+                        exec_watch(config).then(() => {
+                          delayOperation(500)
+                            .then(() => {
+                              update_LocalConfig_watch(config, { ...config, watchCompile: true }).then(() => {
+                                set_needReload(true);
+                              });
+                              delayOperation(500).then(() => {
+                                showToast({ title: `Watched !`, style: Toast.Style.Success });
+                              });
+                            })
+                            .catch(() => {
+                              showToast({ title: `Failed !`, style: Toast.Style.Failure });
+                            });
+                        });
+                      }}
+                    />
+                  ) : (
+                    <Action
+                      title="Stop Watch"
+                      icon={Icon.CheckCircle}
+                      onAction={() => {
+                        showToast({ title: `Stopping...`, style: Toast.Style.Animated });
+                        exec_pause(config)
+                          .then(() => {
+                            update_LocalConfig_watch(config, { ...config, watchCompile: false }).then(() => {
+                              set_needReload(true);
+                            });
+                            delayOperation(500).then(() => {
+                              showToast({ title: `Stopped !`, style: Toast.Style.Success });
+                            });
+                          })
+                          .catch(() => {
+                            showToast({ title: `Failed !`, style: Toast.Style.Failure });
+                          });
+                      }}
+                    />
+                  )}
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.Push
