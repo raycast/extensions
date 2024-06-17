@@ -15,6 +15,7 @@ export default function Spells() {
       pagination={pagination}
       searchBarPlaceholder="Search spells by name"
       onSearchTextChange={setSearchName}
+      throttle
     >
       <List.Section title={`${spells?.length} spells`}>
         {spells?.map((spell) => (
@@ -43,7 +44,15 @@ export default function Spells() {
                       text={spell.attributes.hand || ""}
                       icon={spell.attributes.hand ?? Icon.Minus}
                     />
-                    <List.Item.Detail.Metadata.Label title="Image" icon={spell.attributes.image} />
+                    {spell.attributes.image ? (
+                      <List.Item.Detail.Metadata.Link
+                        title="Image"
+                        text={spell.attributes.image}
+                        target={spell.attributes.image}
+                      />
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Image" icon={Icon.Minus} />
+                    )}
                     <List.Item.Detail.Metadata.Label
                       title="Incantation"
                       text={spell.attributes.incantation || ""}

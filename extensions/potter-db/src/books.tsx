@@ -8,7 +8,7 @@ export default function Books() {
   return (
     <List isLoading={isLoading} isShowingDetail>
       <List.Section title="Harry Potter and ...">
-        {books?.map((book) => (
+        {books.map((book) => (
           <List.Item
             key={book.id}
             title={book.attributes.title.replace("Harry Potter and", "...")}
@@ -22,6 +22,10 @@ export default function Books() {
                     <List.Item.Detail.Metadata.Label title="Slug" text={book.attributes.slug} />
                     <List.Item.Detail.Metadata.Label title="Author" text={book.attributes.author} />
                     <List.Item.Detail.Metadata.Label title="Cover" text={book.attributes.cover} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Chapters"
+                      text={book.relationships.chapters.data.length.toString()}
+                    />
                     <List.Item.Detail.Metadata.Label title="Dedication" text={book.attributes.dedication} />
                     <List.Item.Detail.Metadata.Label title="Pages" text={book.attributes.pages.toString()} />
                     <List.Item.Detail.Metadata.Label title="Release Date" text={book.attributes.release_date} />
@@ -58,14 +62,16 @@ function Chapters({ book }: ChapterProps) {
   );
 
   return (
-    <List isLoading={isLoading} navigationTitle="Chapters" isShowingDetail>
-      {chapters?.map((chapter) => (
-        <List.Item
-          key={chapter.id}
-          title={chapter.attributes.order + ". " + chapter.attributes.title}
-          detail={<List.Item.Detail markdown={chapter.attributes.summary || "<NO SUMMARY>"} />}
-        />
-      ))}
+    <List isLoading={isLoading} isShowingDetail>
+      <List.Section title={`Chapters in "${book.attributes.title.replace("Harry Potter and ", "...")}"`}>
+        {chapters.map((chapter) => (
+          <List.Item
+            key={chapter.id}
+            title={chapter.attributes.order + ". " + chapter.attributes.title}
+            detail={<List.Item.Detail markdown={chapter.attributes.summary || "<NO SUMMARY>"} />}
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

@@ -7,18 +7,14 @@ export default function Movies() {
 
   return (
     <List isLoading={isLoading} isShowingDetail pagination={pagination}>
-      {movies && (
-        <>
-          <MoviesSection
-            title="Harry Potter and the"
-            movies={movies.filter((movie) => movie.attributes.title.startsWith("Harry Potter"))}
-          />
-          <MoviesSection
-            title="Fantastic Beasts"
-            movies={movies.filter((movie) => movie.attributes.title.startsWith("Fantastic Beasts"))}
-          />
-        </>
-      )}
+      <MoviesSection
+        title="Harry Potter and the"
+        movies={movies.filter((movie) => movie.attributes.title.startsWith("Harry Potter"))}
+      />
+      <MoviesSection
+        title="Fantastic Beasts"
+        movies={movies.filter((movie) => movie.attributes.title.startsWith("Fantastic Beasts"))}
+      />
     </List>
   );
 }
@@ -55,7 +51,7 @@ function MoviesSection({ title, movies }: { title: string; movies: Movie[] }) {
                       <List.Item.Detail.Metadata.TagList.Item key={distributor} text={distributor} />
                     ))}
                   </List.Item.Detail.Metadata.TagList>
-                  <List.Item.Detail.Metadata.TagList title="editors">
+                  <List.Item.Detail.Metadata.TagList title="Editors">
                     {movie.attributes.editors.map((editor) => (
                       <List.Item.Detail.Metadata.TagList.Item key={editor} text={editor} />
                     ))}
@@ -65,22 +61,28 @@ function MoviesSection({ title, movies }: { title: string; movies: Movie[] }) {
                       <List.Item.Detail.Metadata.TagList.Item key={music_composer} text={music_composer} />
                     ))}
                   </List.Item.Detail.Metadata.TagList>
-                  <List.Item.Detail.Metadata.Label title="Poster" text={movie.attributes.poster} />
+                  <List.Item.Detail.Metadata.Link
+                    title="Poster"
+                    text={movie.attributes.poster}
+                    target={movie.attributes.poster}
+                  />
                   <List.Item.Detail.Metadata.TagList title="Producers">
                     {movie.attributes.producers.map((producer) => (
                       <List.Item.Detail.Metadata.TagList.Item key={producer} text={producer} />
                     ))}
                   </List.Item.Detail.Metadata.TagList>
-                  <List.Item.Detail.Metadata.Label title="Rating" text={movie.attributes.rating} />
+                  <List.Item.Detail.Metadata.TagList title="Rating">
+                    <List.Item.Detail.Metadata.TagList.Item text={movie.attributes.rating} />
+                  </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Label title="Release Date" text={movie.attributes.release_date} />
                   <List.Item.Detail.Metadata.Label title="Running Time" text={movie.attributes.running_time} />
-                  <List.Item.Detail.Metadata.TagList title="screenwriters">
+                  <List.Item.Detail.Metadata.TagList title="Screenwriters">
                     {movie.attributes.screenwriters.map((screenwriter) => (
                       <List.Item.Detail.Metadata.TagList.Item key={screenwriter} text={screenwriter} />
                     ))}
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Label title="Summary" text={movie.attributes.summary} />
-                  <List.Item.Detail.Metadata.Label title="title" text={movie.attributes.title} />
+                  <List.Item.Detail.Metadata.Label title="Title" text={movie.attributes.title} />
                   <List.Item.Detail.Metadata.Link
                     title="Trailer"
                     text={movie.attributes.trailer}

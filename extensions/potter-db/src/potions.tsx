@@ -15,6 +15,7 @@ export default function Potions() {
       pagination={pagination}
       searchBarPlaceholder="Search potions by name"
       onSearchTextChange={setSearchName}
+      throttle
     >
       <List.Section title={`${potions?.length} potions`}>
         {potions?.map((potion) => (
@@ -44,11 +45,15 @@ export default function Potions() {
                       text={potion.attributes.effect || ""}
                       icon={potion.attributes.effect ?? Icon.Minus}
                     />
-                    <List.Item.Detail.Metadata.Label
-                      title="Image"
-                      text={potion.attributes.image || ""}
-                      icon={potion.attributes.image ?? Icon.Minus}
-                    />
+                    {potion.attributes.image ? (
+                      <List.Item.Detail.Metadata.Link
+                        title="Image"
+                        text={potion.attributes.image}
+                        target={potion.attributes.image}
+                      />
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Image" icon={Icon.Minus} />
+                    )}
                     <List.Item.Detail.Metadata.Label
                       title="Inventors"
                       text={potion.attributes.inventors || ""}

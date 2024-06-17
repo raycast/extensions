@@ -3,6 +3,10 @@
   "name": "potter-db",
   "title": "Potter DB",
   "description": "Dive into the magical world of Harry Potter via Potter DB.",
+  "keywords": [
+    "Wizarding World",
+    "Harry Potter"
+  ],
   "icon": "command-icon.png",
   "author": "xmok",
   "categories": [
@@ -14,31 +18,31 @@
     {
       "name": "books",
       "title": "Books",
-      "description": "Retrieve a list of books",
+      "description": "Retrieve books from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "characters",
       "title": "Characters",
-      "description": "Retrieve a list of characters",
+      "description": "Retrieve characters from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "movies",
       "title": "Movies",
-      "description": "Retrieve a list of movies",
+      "description": "Retrieve movies from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "potions",
       "title": "Potions",
-      "description": "Retrieve a list of potions",
+      "description": "Retrieve potions from the \"Wizarding World\"",
       "mode": "view"
     },
     {
       "name": "spells",
       "title": "Spells",
-      "description": "Retrieve a list of spells",
+      "description": "Retrieve spells from the \"Wizarding World\"",
       "mode": "view"
     }
   ],

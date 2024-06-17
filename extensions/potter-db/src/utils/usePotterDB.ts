@@ -28,6 +28,8 @@ export function usePotterDB<T>(endpoint: string, pluralItem = "", filter?: strin
           style: Toast.Style.Success,
         });
       },
+      initialData: [],
+      keepPreviousData: true,
     },
   );
 

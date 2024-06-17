@@ -15,11 +15,13 @@ export default function Characters() {
       pagination={pagination}
       searchBarPlaceholder="Search characters by name"
       onSearchTextChange={setSearchName}
+      throttle
     >
-      <List.Section title={`${characters?.length} characters`}>
-        {characters?.map((character) => (
+      <List.Section title={`${characters.length} characters`}>
+        {characters.map((character) => (
           <List.Item
             key={character.id}
+            keywords={character.attributes.alias_names}
             title={character.attributes.name}
             icon={character.attributes.image || DEFAULT_IMAGE}
             detail={
@@ -95,7 +97,15 @@ export default function Characters() {
                       text={character.attributes.house || ""}
                       icon={character.attributes.house ?? Icon.Minus}
                     />
-                    <List.Item.Detail.Metadata.Label title="Image" icon={character.attributes.image || Icon.Minus} />
+                    {character.attributes.image ? (
+                      <List.Item.Detail.Metadata.Link
+                        title="Image"
+                        text={character.attributes.image}
+                        target={character.attributes.image}
+                      />
+                    ) : (
+                      <List.Item.Detail.Metadata.Label title="Image" icon={Icon.Minus} />
+                    )}
                     {character.attributes.jobs.length ? (
                       <List.Item.Detail.Metadata.TagList title="Jobs">
                         {character.attributes.jobs.map((job) => (
