@@ -5,10 +5,10 @@ import path from "path";
 import os from "os";
 import simpleGit from "simple-git";
 
-type Preferences = {
+interface Preferences {
   directory: string;
   codeEditor: Application;
-  customCommand?: string;
+  terminalApp: Application;
 };
 
 function expandHomeDir(directory: string): string {
@@ -178,6 +178,12 @@ export default function Command() {
                 target={subdir}
                 application={preferences.codeEditor}
                 icon={Icon.Code}
+              />
+              <Action.Open
+                title={"Open with " + preferences.terminalApp.name}
+                target={subdir}
+                application={preferences.terminalApp}
+                icon={Icon.Terminal}
               />
             </ActionPanel>
           }

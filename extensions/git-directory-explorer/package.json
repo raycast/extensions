@@ -32,6 +32,15 @@
           "required": true,
           "label": "Preferred Code Editor",
           "description": "Select your preferred code editor"
+        },
+        {
+          "name": "terminalApp",
+          "title": "Terminal App",
+          "type": "appPicker",
+          "default": "com.apple.terminal",
+          "required": true,
+          "label": "Preferred Terminal App",
+          "description": "Select your preferred terminal app"
         }
       ]
     }
