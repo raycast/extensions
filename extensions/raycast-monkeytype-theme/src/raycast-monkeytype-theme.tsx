@@ -1,4 +1,18 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, LocalStorage, open, Toast, showToast } from "@raycast/api";
+import {
+  Alert,
+  AI,
+  Action,
+  ActionPanel,
+  confirmAlert,
+  closeMainWindow,
+  environment,
+  Icon,
+  List,
+  LocalStorage,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 
@@ -116,6 +130,25 @@ export default function RaycastMonkeyTypeTheme() {
     return <List isLoading={isLoading} searchBarPlaceholder="Loading themes..." />;
   }
 
+  async function validateIdentity(themeName: string) {
+    if (!environment.canAccess(AI)) {
+      const options: Alert.Options = {
+        icon: { source: getImageUrl(themeName) },
+        title: "Install " + themeName + " Theme",
+        message: "Custom Themes require an active Pro subscription",
+        primaryAction: {
+          title: "Upgrade to Pro",
+          onAction: () => {
+            open("https://www.raycast.com/pro");
+          },
+        },
+      };
+      await confirmAlert(options);
+      return false;
+    }
+    return true;
+  }
+
   return (
     <List
       isShowingDetail
@@ -144,18 +177,24 @@ export default function RaycastMonkeyTypeTheme() {
           // ]}
           actions={
             <ActionPanel>
-              <Action.Open
+              <Action
                 title="Add Light Appearance to Raycast"
                 icon={Icon.Sun}
-                target={theme["ray.so.add.light.url"]}
-                onOpen={() => closeMainWindow()}
+                onAction={async () => {
+                  if (!(await validateIdentity(theme.name))) return;
+                  open(theme["ray.so.add.light.url"]);
+                  closeMainWindow();
+                }}
                 shortcut={{ modifiers: ["cmd"], key: "l" }}
               />
-              <Action.Open
+              <Action
                 title="Add Dark Appearance to Raycast"
                 icon={Icon.Moon}
-                target={theme["ray.so.add.dark.url"]}
-                onOpen={() => closeMainWindow()}
+                onAction={async () => {
+                  if (!(await validateIdentity(theme.name))) return;
+                  open(theme["ray.so.add.dark.url"]);
+                  closeMainWindow();
+                }}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
               />
               <Action.OpenInBrowser
